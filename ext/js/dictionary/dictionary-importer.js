@@ -223,7 +223,7 @@ export class DictionaryImporter {
         let summary = this._createSummary(dictionaryTitle, version, index, summaryDetails);
         const dictionarySummaryPrimaryKey = await dictionaryDatabase.addWithResult('dictionaries', summary);
         if (enableBulkImportIndexOptimization) {
-            dictionaryDatabase.startBulkImport();
+            await dictionaryDatabase.startBulkImport();
         }
 
         try {
@@ -402,7 +402,7 @@ export class DictionaryImporter {
                 this._progressNextStep(20);
                 this._progressData.index = 0;
                 this._progress();
-                dictionaryDatabase.finishBulkImport((checkpointIndex, total) => {
+                await dictionaryDatabase.finishBulkImport((checkpointIndex, total) => {
                     this._progressData.index = Math.max(1, Math.floor((checkpointIndex / total) * this._progressData.count));
                     this._progress();
                     this._logImport(`bulk finalization ${checkpointIndex}/${total}`);

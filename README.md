@@ -5,8 +5,6 @@
 [![Get Manabitan for Chrome](<https://img.shields.io/chrome-web-store/v/likgccmbimhjbgkjambclfkhldnlhbnn?logo=Google%20Chrome&style=for-the-badge&logoColor=lightblue&color=lightblue&label=get%20manabitan%20for%20chrome%20(stable)>)](https://chrome.google.com/webstore/detail/yomitan/likgccmbimhjbgkjambclfkhldnlhbnn)
 [![Get Manabitan for Firefox](<https://img.shields.io/amo/v/yomitan?logo=Firefox&style=for-the-badge&color=orange&label=get%20manabitan%20for%20firefox%20(stable)>)](https://addons.mozilla.org/en-US/firefox/addon/yomitan/)
 [![Get Manabitan for Edge](https://img.shields.io/badge/dynamic/json?logo=puzzle&label=get%20manabitan%20for%20edge&style=for-the-badge&query=%24.version&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fidelnfbbmikgfiejhgmddlbkfgiifnnn)](https://microsoftedge.microsoft.com/addons/detail/yomitan/idelnfbbmikgfiejhgmddlbkfgiifnnn)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/yomidevs/yomitan/badge?style=for-the-badge)](https://securityscorecards.dev/viewer/?uri=github.com/yomidevs/yomitan)
-
 [![Discord](https://dcbadge.limes.pink/api/server/YkQrXW6TXF?style=for-the-badge)](https://discord.gg/YkQrXW6TXF)
 
 # Visit [yomitan.wiki](https://yomitan.wiki) to learn more!
@@ -60,7 +58,7 @@ Manabitan provides powerful features not available in other browser-based dictio
 
 Install from the latest GitHub release page:
 
-- [Download for Chrome, Firefox, Edge](https://github.com/ManabiIO/manabitan/releases/latest)
+### [Download for Chrome, Firefox, Edge](https://github.com/ManabiIO/manabitan/releases/latest)
 
 ## Contributing
 
