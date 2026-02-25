@@ -37,7 +37,7 @@ export function buildManabiIndexKernel() {
         '-s', 'MODULARIZE=1',
         '-s', 'EXPORT_ES6=1',
         '-s', 'ALLOW_MEMORY_GROWTH=1',
-        '-s', 'ENVIRONMENT=web,worker,node',
+        '-s', 'ENVIRONMENT=web,worker',
         '-s', 'EXPORTED_FUNCTIONS=["_manabi_index_create","_manabi_index_destroy","_manabi_index_clear","_manabi_index_add","_manabi_index_might_contain","_manabi_index_query_prefix","_manabi_index_result_ptr","_manabi_index_export","_manabi_index_export_ptr","_manabi_index_import","_malloc","_free"]',
         '-s', 'EXPORTED_RUNTIME_METHODS=["ccall","cwrap"]',
         '-o',

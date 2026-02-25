@@ -25,6 +25,7 @@ import {createDictionaryArchiveData, getDictionaryArchiveIndex} from '../dev/dic
 import {parseJson} from '../dev/json.js';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+import {chrome, fetch} from './mocks/common.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 import {setupStubs} from './utilities/database.js';
 
@@ -32,6 +33,8 @@ const dirname = pathDirname(fileURLToPath(import.meta.url));
 
 setupStubs();
 vi.stubGlobal('IDBKeyRange', IDBKeyRange);
+vi.stubGlobal('fetch', fetch);
+vi.stubGlobal('chrome', chrome);
 
 /**
  * @param {string} dictionary

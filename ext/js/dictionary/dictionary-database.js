@@ -13,12 +13,14 @@ import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {stringReverse} from '../core/utilities.js';
+import {deleteOpfsDatabaseFiles, didLastOpenUseFallbackStorage, getSqlite3, openOpfsDatabase} from './sqlite-wasm.js';
 import {WasmPrefixBloomIndex} from './wasm-index-kernel.js';
 
-const STORE_FILE = 'dict-lean-store.json';
-const STORE_META_FILE = 'dict-lean-meta.json';
-const STORE_MEDIA_FILE = 'dict-lean-media.bin';
-const VERSION_FILE = 'dict-lean-version.txt';
+const STORE_TABLE = 'lean_store';
+const STORE_KEY_STATE_META = 'state.meta.json';
+const STORE_KEY_STATE_MEDIA = 'state.media.blob';
+const STORE_KEY_REVISION = 'state.revision';
+const TERM_LOOKUP_VTAB_TABLE = 'lean_term_lookup';
 
 function createEmptyState() {
     return {
@@ -202,33 +204,15 @@ class TrieIndex {
     }
 }
 
-function arrayBufferToBase64(buffer) {
-    const bytes = new Uint8Array(buffer);
-    let binary = '';
-    const chunkSize = 0x8000;
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-        const chunk = bytes.subarray(i, i + chunkSize);
-        binary += String.fromCharCode(...chunk);
-    }
-    return btoa(binary);
-}
-
-function base64ToArrayBuffer(base64) {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; ++i) {
-        bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes.buffer;
-}
-
 export class DictionaryDatabase {
     constructor() {
         this._isOpening = false;
         this._isPrepared = false;
         this._state = createEmptyState();
         this._dirty = false;
-        this._opfsRoot = null;
+        this._db = null;
+        this._sqlite3 = null;
+        this._usesFallbackStorage = false;
         this._revision = 0;
         this._didLoadPersistedIndexes = false;
         this._didLoadPersistedWasmIndexes = false;
@@ -262,6 +246,9 @@ export class DictionaryDatabase {
         this._readingWasmIndex = null;
         this._expressionReverseWasmIndex = null;
         this._readingReverseWasmIndex = null;
+        this._termLookupVtabModule = null;
+        this._termLookupVtabRegistered = false;
+        this._useVirtualTermLookup = true;
 
         this._worker = null;
         this._resvgFontBuffer = null;
@@ -281,7 +268,7 @@ export class DictionaryDatabase {
 
         try {
             this._isOpening = true;
-            this._opfsRoot = await this._getOpfsRoot();
+            await this._openStorageConnection();
             if (this._enableWasmIndexes) {
                 await this._initializeWasmIndexes();
             }
@@ -320,6 +307,14 @@ export class DictionaryDatabase {
         }
         await this._persistIfDirty();
         this._destroyWasmIndexes();
+        if (this._db !== null) {
+            this._db.close();
+            this._db = null;
+        }
+        this._termLookupVtabRegistered = false;
+        this._termLookupVtabModule = null;
+        this._useVirtualTermLookup = true;
+        this._usesFallbackStorage = false;
         this._isBulkImport = false;
         this._isPrepared = false;
     }
@@ -330,6 +325,10 @@ export class DictionaryDatabase {
 
     isOpening() {
         return this._isOpening;
+    }
+
+    usesFallbackStorage() {
+        return this._usesFallbackStorage;
     }
 
     async purge() {
@@ -348,6 +347,12 @@ export class DictionaryDatabase {
         this._didLoadPersistedWasmIndexes = false;
         this._isBulkImport = false;
         this._dirty = false;
+        if (this._db !== null) {
+            this._db.close();
+            this._db = null;
+        }
+        await deleteOpfsDatabaseFiles();
+        await this._openStorageConnection();
         await this._deletePersistedState();
 
         if (!this._isPrepared) {
@@ -418,27 +423,43 @@ export class DictionaryDatabase {
             const forward = matchType !== 'suffix';
             const candidates = forward
                 ? [
-                    [this._termsByExpression, this._expressionBloom, this._expressionTrie, this._expressionWasmIndex, 'term', 'expression'],
-                    [this._termsByReading, this._readingBloom, this._readingTrie, this._readingWasmIndex, 'reading', 'reading'],
+                    ['term', 'expression'],
+                    ['reading', 'reading'],
                 ]
                 : [
-                    [this._termsByExpressionReverse, this._expressionReverseBloom, this._expressionReverseTrie, this._expressionReverseWasmIndex, 'term', 'expressionReverse'],
-                    [this._termsByReadingReverse, this._readingReverseBloom, this._readingReverseTrie, this._readingReverseWasmIndex, 'reading', 'readingReverse'],
+                    ['term', 'expressionReverse'],
+                    ['reading', 'readingReverse'],
                 ];
 
             const queryTerm = matchType === 'suffix' ? stringReverse(term) : term;
+            const lookupMode = matchType === 'exact' ? 'exact' : 'prefix';
 
-            for (const [indexMap, bloom, trie, wasmIndex, matchSource, keyName] of candidates) {
-                let ids = [];
-                if (matchType === 'exact') {
-                    const maybe = wasmIndex !== null ? wasmIndex.mightContain(queryTerm) : bloom.mightContain(queryTerm);
-                    if (!maybe) { continue; }
-                    ids = indexMap.get(queryTerm) ?? [];
-                } else {
-                    ids = wasmIndex !== null ? wasmIndex.search(queryTerm) : trie.search(queryTerm);
+            for (const [matchSource, keyName] of candidates) {
+                const rows = this._queryTermLookupRows(queryTerm, lookupMode, keyName);
+                if (rows !== null && rows.length > 0) {
+                    for (const resultRow of rows) {
+                        const id = this._asNumber(resultRow.id, -1);
+                        if (id < 0) { continue; }
+                        if (visited.has(id)) { continue; }
+                        visited.add(id);
+                        const row = this._termsById.get(id);
+                        if (!row || !dictionaries.has(row.dictionary)) { continue; }
+
+                        let resolvedMatchType = matchType;
+                        const resolvedValue = keyName === 'expressionReverse' || keyName === 'readingReverse'
+                            ? stringReverse(row[keyName])
+                            : row[keyName === 'expression' || keyName === 'expressionReverse' ? 'expression' : 'reading'];
+                        if (resolvedValue === term) {
+                            resolvedMatchType = 'exact';
+                        }
+                        results.push(this._createTerm(matchSource, resolvedMatchType, row, itemIndex));
+                    }
+                    continue;
                 }
 
+                const ids = this._lookupTermIds(queryTerm, lookupMode, keyName);
                 for (const id of ids) {
+                    if (id < 0) { continue; }
                     if (visited.has(id)) { continue; }
                     visited.add(id);
                     const row = this._termsById.get(id);
@@ -465,6 +486,18 @@ export class DictionaryDatabase {
 
         for (let itemIndex = 0; itemIndex < termList.length; ++itemIndex) {
             const item = termList[itemIndex];
+            const lookupRows = this._queryTermLookupRows(item.term, 'exact', 'expression');
+            if (lookupRows !== null && lookupRows.length > 0) {
+                for (const lookupRow of lookupRows) {
+                    const id = this._asNumber(lookupRow.id, -1);
+                    if (id < 0) { continue; }
+                    const row = this._termsById.get(id);
+                    if (!row || row.reading !== item.reading || !dictionaries.has(row.dictionary)) { continue; }
+                    results.push(this._createTerm('term', 'exact', row, itemIndex));
+                }
+                continue;
+            }
+
             const ids = this._termsByExpression.get(item.term) ?? [];
             for (const id of ids) {
                 const row = this._termsById.get(id);
@@ -483,6 +516,18 @@ export class DictionaryDatabase {
         for (let itemIndex = 0; itemIndex < items.length; ++itemIndex) {
             const item = items[itemIndex];
             const key = `${item.dictionary}\u001f${item.query}`;
+            const lookupRows = this._queryTermLookupRows(key, 'exact', 'sequence');
+            if (lookupRows !== null && lookupRows.length > 0) {
+                for (const lookupRow of lookupRows) {
+                    const id = this._asNumber(lookupRow.id, -1);
+                    if (id < 0) { continue; }
+                    const row = this._termsById.get(id);
+                    if (!row) { continue; }
+                    results.push(this._createTerm('sequence', 'exact', row, itemIndex));
+                }
+                continue;
+            }
+
             const ids = this._termsBySequence.get(key) ?? [];
             for (const id of ids) {
                 const row = this._termsById.get(id);
@@ -984,6 +1029,105 @@ export class DictionaryDatabase {
         list.push(value);
     }
 
+    _lookupMatchSource(keyKind) {
+        switch (keyKind) {
+            case 'reading':
+            case 'readingReverse':
+                return 'reading';
+            case 'sequence':
+                return 'sequence';
+            default:
+                return 'term';
+        }
+    }
+
+    _lookupKeyValue(row, keyKind) {
+        switch (keyKind) {
+            case 'reading':
+                return this._asString(row.reading);
+            case 'expressionReverse':
+                return this._asString(row.expressionReverse);
+            case 'readingReverse':
+                return this._asString(row.readingReverse);
+            default:
+                return this._asString(row.expression);
+        }
+    }
+
+    _lookupTermIds(query, lookupMode, keyKind) {
+        if (typeof query !== 'string' || query.length === 0) { return []; }
+        if (keyKind === 'sequence') {
+            return this._termsBySequence.get(query) ?? [];
+        }
+
+        const descriptor = this._lookupIndexDescriptor(keyKind);
+        if (descriptor === null) { return []; }
+        const {map, bloom, trie, wasmIndex} = descriptor;
+        if (lookupMode === 'exact') {
+            const maybe = wasmIndex !== null ? wasmIndex.mightContain(query) : bloom.mightContain(query);
+            if (!maybe) { return []; }
+            return map.get(query) ?? [];
+        }
+        return wasmIndex !== null ? wasmIndex.search(query) : trie.search(query);
+    }
+
+    _lookupIndexDescriptor(keyKind) {
+        switch (keyKind) {
+            case 'expression':
+                return {
+                    map: this._termsByExpression,
+                    bloom: this._expressionBloom,
+                    trie: this._expressionTrie,
+                    wasmIndex: this._expressionWasmIndex,
+                };
+            case 'reading':
+                return {
+                    map: this._termsByReading,
+                    bloom: this._readingBloom,
+                    trie: this._readingTrie,
+                    wasmIndex: this._readingWasmIndex,
+                };
+            case 'expressionReverse':
+                return {
+                    map: this._termsByExpressionReverse,
+                    bloom: this._expressionReverseBloom,
+                    trie: this._expressionReverseTrie,
+                    wasmIndex: this._expressionReverseWasmIndex,
+                };
+            case 'readingReverse':
+                return {
+                    map: this._termsByReadingReverse,
+                    bloom: this._readingReverseBloom,
+                    trie: this._readingReverseTrie,
+                    wasmIndex: this._readingReverseWasmIndex,
+                };
+            default:
+                return null;
+        }
+    }
+
+    _queryTermLookupRows(query, lookupMode, keyKind) {
+        if (!this._useVirtualTermLookup) { return null; }
+        if (typeof query !== 'string' || query.length === 0) { return []; }
+        const db = this._requireDb();
+        try {
+            return db.selectObjects(
+                `
+                    SELECT id, matchSource, keyValue
+                    FROM ${TERM_LOOKUP_VTAB_TABLE}($query, $lookupMode, $keyKind)
+                `,
+                {
+                    $query: query,
+                    $lookupMode: lookupMode,
+                    $keyKind: keyKind,
+                },
+            );
+        } catch (_e) {
+            this._useVirtualTermLookup = false;
+            return null;
+        }
+    }
+
     _createTerm(matchSource, matchType, row, index) {
         const {sequence} = row;
         return {
@@ -1069,64 +1213,215 @@ export class DictionaryDatabase {
         }
     }
 
-    async _getOpfsRoot() {
-        if (typeof navigator === 'undefined' || !navigator?.storage?.getDirectory) {
-            return null;
-        }
-        try {
-            return await navigator.storage.getDirectory();
-        } catch {
-            return null;
-        }
+    async _openStorageConnection() {
+        if (this._db !== null) { return; }
+        this._sqlite3 = await getSqlite3();
+        this._db = await openOpfsDatabase();
+        this._usesFallbackStorage = didLastOpenUseFallbackStorage();
+        this._db.exec('PRAGMA journal_mode = MEMORY');
+        this._db.exec('PRAGMA synchronous = OFF');
+        this._db.exec('PRAGMA temp_store = MEMORY');
+        this._db.exec('PRAGMA foreign_keys = OFF');
+        this._initializeStorageSchema();
+        this._registerLookupVirtualTable();
     }
 
-    async _readTextFile(name) {
-        if (this._opfsRoot === null) { return null; }
-        try {
-            const handle = await this._opfsRoot.getFileHandle(name);
-            const file = await handle.getFile();
-            return await file.text();
-        } catch {
-            return null;
+    _initializeStorageSchema() {
+        const db = this._requireDb();
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS ${STORE_TABLE} (
+                key TEXT PRIMARY KEY,
+                value BLOB NOT NULL
+            )
+        `);
+    }
+
+    _registerLookupVirtualTable() {
+        if (this._termLookupVtabRegistered) { return; }
+        const sqlite3 = this._requireSqlite3();
+        const db = this._requireDb();
+        const {capi, vtab} = sqlite3;
+        const owner = this;
+        const cols = {
+            id: {index: 0, type: 'INTEGER'},
+            matchSource: {index: 1, type: 'TEXT'},
+            keyValue: {index: 2, type: 'TEXT'},
+            query: {index: 3, type: 'TEXT HIDDEN'},
+            lookupMode: {index: 4, type: 'TEXT HIDDEN'},
+            keyKind: {index: 5, type: 'TEXT HIDDEN'},
+        };
+
+        const cursorState = (pCursor, reset = false) => {
+            const cursor = pCursor instanceof capi.sqlite3_vtab_cursor ? pCursor : vtab.xCursor.get(pCursor);
+            if (reset || !cursor.vTabState) {
+                cursor.vTabState = {rowIndex: 0, rows: []};
+            }
+            return cursor.vTabState;
+        };
+
+        const xConnectOrCreate = (pDb, _pAux, _argc, _argv, ppVtab) => {
+            const columns = Object.entries(cols).map(([name, details]) => `${name} ${details.type}`);
+            const rc = capi.sqlite3_declare_vtab(pDb, `CREATE TABLE x(${columns.join(', ')})`);
+            if (rc === 0) {
+                vtab.xVtab.create(ppVtab);
+            }
+            return rc;
+        };
+
+        this._termLookupVtabModule = new capi.sqlite3_module().setupModule({
+            catchExceptions: true,
+            methods: {
+                xConnect: xConnectOrCreate,
+                xCreate: null,
+                xBestIndex: () => {
+                    return 0;
+                },
+                xDisconnect: (pVtab) => {
+                    vtab.xVtab.dispose(pVtab);
+                    return 0;
+                },
+                xDestroy: null,
+                xOpen: (_pVtab, ppCursor) => {
+                    vtab.xCursor.create(ppCursor);
+                    return 0;
+                },
+                xClose: (pCursor) => {
+                    const cursor = vtab.xCursor.unget(pCursor);
+                    delete cursor.vTabState;
+                    cursor.dispose();
+                    return 0;
+                },
+                xFilter: (pCursor, _idxNum, _idxStr, argc, argv) => {
+                    const state = cursorState(pCursor, true);
+                    const args = capi.sqlite3_values_to_js(argc, argv, false);
+                    const query = typeof args[0] === 'string' ? args[0] : '';
+                    const lookupMode = typeof args[1] === 'string' ? args[1] : 'prefix';
+                    const keyKind = typeof args[2] === 'string' ? args[2] : 'expression';
+                    const ids = owner._lookupTermIds(query, lookupMode, keyKind);
+                    state.rows = ids.map((id) => {
+                        const row = owner._termsById.get(id);
+                        return {
+                            id,
+                            matchSource: owner._lookupMatchSource(keyKind),
+                            keyValue: row ? owner._lookupKeyValue(row, keyKind) : '',
+                        };
+                    });
+                    return 0;
+                },
+                xEof: (pCursor) => {
+                    const state = cursorState(pCursor);
+                    return state.rowIndex >= state.rows.length;
+                },
+                xNext: (pCursor) => {
+                    const state = cursorState(pCursor);
+                    state.rowIndex += 1;
+                    return 0;
+                },
+                xColumn: (pCursor, pCtx, iCol) => {
+                    const state = cursorState(pCursor);
+                    const row = state.rows[state.rowIndex];
+                    if (!row) {
+                        capi.sqlite3_result_null(pCtx);
+                        return 0;
+                    }
+                    switch (iCol) {
+                        case cols.id.index:
+                            capi.sqlite3_result_int(pCtx, row.id);
+                            return 0;
+                        case cols.matchSource.index:
+                            capi.sqlite3_result_text(pCtx, row.matchSource, -1, capi.SQLITE_TRANSIENT);
+                            return 0;
+                        case cols.keyValue.index:
+                            capi.sqlite3_result_text(pCtx, row.keyValue, -1, capi.SQLITE_TRANSIENT);
+                            return 0;
+                        case cols.query.index:
+                        case cols.lookupMode.index:
+                        case cols.keyKind.index:
+                            capi.sqlite3_result_null(pCtx);
+                            return 0;
+                        default:
+                            capi.sqlite3_result_error(pCtx, `Invalid column index: ${iCol}`);
+                            return capi.SQLITE_RANGE;
+                    }
+                },
+                xRowid: (pCursor, ppRowId64) => {
+                    const state = cursorState(pCursor);
+                    vtab.xRowid(ppRowId64, state.rowIndex + 1);
+                    return 0;
+                },
+            },
+        });
+
+        const dbPointer = db.pointer;
+        if (typeof dbPointer !== 'number') {
+            throw new Error('sqlite database pointer is unavailable');
         }
-    }
-
-    async _writeTextFile(name, content) {
-        if (this._opfsRoot === null) { return; }
-        const handle = await this._opfsRoot.getFileHandle(name, {create: true});
-        const writable = await handle.createWritable();
-        await writable.write(content);
-        await writable.close();
-    }
-
-    async _readBinaryFile(name) {
-        if (this._opfsRoot === null) { return null; }
-        try {
-            const handle = await this._opfsRoot.getFileHandle(name);
-            const file = await handle.getFile();
-            return new Uint8Array(await file.arrayBuffer());
-        } catch {
-            return null;
+        const createModuleResult = capi.sqlite3_create_module(dbPointer, TERM_LOOKUP_VTAB_TABLE, this._termLookupVtabModule, 0);
+        if (createModuleResult !== capi.SQLITE_OK) {
+            throw new Error(`Failed to register ${TERM_LOOKUP_VTAB_TABLE}: rc=${createModuleResult}`);
         }
+        this._termLookupVtabRegistered = true;
     }
 
-    async _writeBinaryFile(name, content) {
-        if (this._opfsRoot === null) { return; }
-        const handle = await this._opfsRoot.getFileHandle(name, {create: true});
-        const writable = await handle.createWritable();
-        await writable.write(content);
-        await writable.close();
+    _requireSqlite3() {
+        if (this._sqlite3 === null) {
+            throw new Error('sqlite3 module is not initialized');
+        }
+        return this._sqlite3;
+    }
+
+    _requireDb() {
+        if (this._db === null) {
+            throw new Error('Storage database is not open');
+        }
+        return this._db;
+    }
+
+    _readStorageValue(key) {
+        const db = this._requireDb();
+        return db.selectValue(`SELECT value FROM ${STORE_TABLE} WHERE key = $key`, {$key: key});
+    }
+
+    _writeStorageValue(key, value) {
+        const db = this._requireDb();
+        db.exec({
+            sql: `INSERT INTO ${STORE_TABLE} (key, value) VALUES ($key, $value) ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+            bind: {$key: key, $value: value},
+        });
+    }
+
+    _deleteStorageValue(key) {
+        const db = this._requireDb();
+        db.exec({
+            sql: `DELETE FROM ${STORE_TABLE} WHERE key = $key`,
+            bind: {$key: key},
+        });
+    }
+
+    _decodeStorageText(value) {
+        if (typeof value === 'string') { return value; }
+        if (value instanceof Uint8Array) {
+            return new TextDecoder().decode(value);
+        }
+        if (value instanceof ArrayBuffer) {
+            return new TextDecoder().decode(new Uint8Array(value));
+        }
+        return null;
+    }
+
+    _decodeStorageBytes(value) {
+        if (value instanceof Uint8Array) { return value; }
+        if (value instanceof ArrayBuffer) { return new Uint8Array(value); }
+        if (typeof value === 'string') {
+            return new TextEncoder().encode(value);
+        }
+        return null;
     }
 
     async _deletePersistedState() {
-        if (this._opfsRoot === null) {
-            this._revision = 0;
-            return;
-        }
-        try { await this._opfsRoot.removeEntry(STORE_META_FILE); } catch {}
-        try { await this._opfsRoot.removeEntry(STORE_MEDIA_FILE); } catch {}
-        try { await this._opfsRoot.removeEntry(STORE_FILE); } catch {}
-        try { await this._opfsRoot.removeEntry(VERSION_FILE); } catch {}
+        this._deleteStorageValue(STORE_KEY_STATE_META);
+        this._deleteStorageValue(STORE_KEY_STATE_MEDIA);
+        this._deleteStorageValue(STORE_KEY_REVISION);
         this._revision = 0;
     }
 
@@ -1184,25 +1479,6 @@ export class DictionaryDatabase {
             offset += bytes.byteLength;
         }
         return blob;
-    }
-
-    _deserializeStateLegacy(text) {
-        const raw = JSON.parse(text);
-        const state = createEmptyState();
-        state.nextIds = raw.nextIds ?? state.nextIds;
-        state.dictionaries = raw.dictionaries ?? [];
-        state.terms = raw.terms ?? [];
-        state.termMeta = raw.termMeta ?? [];
-        state.kanji = raw.kanji ?? [];
-        state.kanjiMeta = raw.kanjiMeta ?? [];
-        state.tagMeta = raw.tagMeta ?? [];
-        state.media = (raw.media ?? []).map((row) => ({
-            ...row,
-            content: base64ToArrayBuffer(row.contentBase64 ?? ''),
-        }));
-        this._didLoadPersistedIndexes = this._importIndexArtifacts(raw.indexArtifacts, state);
-        this._didLoadPersistedWasmIndexes = this._importWasmIndexArtifacts(raw.wasmIndexArtifacts);
-        return state;
     }
 
     _deserializeStateFromMeta(metaText, mediaBlob) {
@@ -1315,33 +1591,23 @@ export class DictionaryDatabase {
     async _persistIfDirty() {
         if (!this._dirty) { return; }
         if (this._isBulkImport) { return; }
-        if (this._opfsRoot !== null) {
-            await this._writeTextFile(STORE_META_FILE, this._serializeStateMeta(this._state));
-            await this._writeBinaryFile(STORE_MEDIA_FILE, this._serializeStateMediaBlob(this._state));
-            // Remove legacy JSON blob store if present.
-            try { await this._opfsRoot.removeEntry(STORE_FILE); } catch {}
-            this._revision += 1;
-            await this._writeTextFile(VERSION_FILE, `${this._revision}`);
-        }
+        this._writeStorageValue(STORE_KEY_STATE_META, this._serializeStateMeta(this._state));
+        this._writeStorageValue(STORE_KEY_STATE_MEDIA, this._serializeStateMediaBlob(this._state));
+        this._revision += 1;
+        this._writeStorageValue(STORE_KEY_REVISION, `${this._revision}`);
         this._dirty = false;
     }
 
     async _loadStateFromStorage() {
-        if (this._opfsRoot === null) {
-            this._state = createEmptyState();
-            this._revision = 0;
-            return;
-        }
-
-        const [versionText, metaText, mediaBlob, legacyStoreText] = await Promise.all([
-            this._readTextFile(VERSION_FILE),
-            this._readTextFile(STORE_META_FILE),
-            this._readBinaryFile(STORE_MEDIA_FILE),
-            this._readTextFile(STORE_FILE),
-        ]);
+        const versionRaw = this._readStorageValue(STORE_KEY_REVISION);
+        const metaRaw = this._readStorageValue(STORE_KEY_STATE_META);
+        const mediaRaw = this._readStorageValue(STORE_KEY_STATE_MEDIA);
+        const versionText = this._decodeStorageText(versionRaw);
+        const metaText = this._decodeStorageText(metaRaw);
+        const mediaBlob = this._decodeStorageBytes(mediaRaw);
 
         this._revision = versionText === null ? 0 : Number.parseInt(versionText, 10) || 0;
-        if ((metaText === null || metaText.length === 0) && (legacyStoreText === null || legacyStoreText.length === 0)) {
+        if (metaText === null || metaText.length === 0 || mediaBlob === null) {
             this._state = createEmptyState();
             this._didLoadPersistedIndexes = false;
             this._didLoadPersistedWasmIndexes = false;
@@ -1349,15 +1615,7 @@ export class DictionaryDatabase {
         }
 
         try {
-            if (metaText !== null && metaText.length > 0 && mediaBlob !== null) {
-                this._state = this._deserializeStateFromMeta(metaText, mediaBlob);
-            } else if (legacyStoreText !== null && legacyStoreText.length > 0) {
-                this._state = this._deserializeStateLegacy(legacyStoreText);
-            } else {
-                this._state = createEmptyState();
-                this._didLoadPersistedIndexes = false;
-                this._didLoadPersistedWasmIndexes = false;
-            }
+            this._state = this._deserializeStateFromMeta(metaText, mediaBlob);
         } catch {
             this._state = createEmptyState();
             this._didLoadPersistedIndexes = false;
@@ -1369,9 +1627,9 @@ export class DictionaryDatabase {
         if (!this._isPrepared) {
             throw new Error(this._isOpening ? 'Database not ready' : 'Database not open');
         }
-        if (this._dirty || this._opfsRoot === null) { return; }
+        if (this._dirty) { return; }
 
-        const versionText = await this._readTextFile(VERSION_FILE);
+        const versionText = this._decodeStorageText(this._readStorageValue(STORE_KEY_REVISION));
         const externalRevision = versionText === null ? 0 : Number.parseInt(versionText, 10) || 0;
         if (externalRevision === this._revision) { return; }
 
