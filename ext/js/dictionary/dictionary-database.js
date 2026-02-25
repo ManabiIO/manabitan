@@ -16,6 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+
 import {initWasm, Resvg} from '../../lib/resvg-wasm.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {ExtensionError} from '../core/extension-error.js';

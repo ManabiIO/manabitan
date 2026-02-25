@@ -688,7 +688,10 @@ export class DictionaryImportController {
      */
     async _importDictionaryFromZip(file, profilesDictionarySettings, importDetails, onProgress) {
         const archiveContent = await this._readFile(file);
-        const {result, errors, fallbackDatabaseContentBase64} = await new DictionaryWorker().importDictionary(archiveContent, importDetails, onProgress);
+        const importResult = /** @type {import('dictionary-importer').ImportResult & {fallbackDatabaseContentBase64?: string}} */ (
+            await new DictionaryWorker().importDictionary(archiveContent, importDetails, onProgress)
+        );
+        const {result, errors, fallbackDatabaseContentBase64} = importResult;
         if (!result) {
             return errors;
         }
@@ -967,10 +970,12 @@ export class ImportProgressTracker {
     /** @type {import('dictionary-worker').ImportProgressCallback} */
     onProgress(data) {
         const {nextStep, index, count} = data;
-        if (nextStep) {
-            this._stepIndex++;
+        if (nextStep && this._steps.length > 0) {
+            this._stepIndex = Math.min(this._stepIndex + 1, this._steps.length - 1);
         }
-        const labelText = `${this.statusPrefix} - Step ${this._stepIndex + 1} of ${this.stepCount}: ${this.currentStep.label}...`;
+        const currentStep = this.currentStep;
+        const currentLabel = currentStep?.label ?? 'Working';
+        const labelText = `${this.statusPrefix} - Step ${this._stepIndex + 1} of ${this.stepCount}: ${currentLabel}...`;
         for (const label of this._infoLabels) { label.textContent = labelText; }
 
         const percent = count > 0 ? (index / count * 100) : 0;
@@ -979,15 +984,12 @@ export class ImportProgressTracker {
         for (const progressBar of this._progressBars) { progressBar.style.width = cssString; }
         for (const label of this._statusLabels) { label.textContent = statusString; }
 
-        const callback = this.currentStep?.callback;
-        if (typeof callback === 'function') {
-            callback();
+        if (currentStep && typeof currentStep.callback === 'function') {
+            currentStep.callback();
         }
     }
 
-    /**
-     *
-     */
+    /** */
     onNextDictionary() {
         this._dictionaryIndex += 1;
         this._stepIndex = 0;
