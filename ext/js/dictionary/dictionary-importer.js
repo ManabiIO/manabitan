@@ -18,9 +18,9 @@
 
 import * as ajvSchemas0 from '../../lib/validate-schemas.js';
 import {
-    BlobWriter as BlobWriter0,
     TextWriter as TextWriter0,
     Uint8ArrayReader as Uint8ArrayReader0,
+    Uint8ArrayWriter as Uint8ArrayWriter0,
     ZipReader as ZipReader0,
     configure,
 } from '../../lib/zip.js';
@@ -32,9 +32,9 @@ import {getFileExtensionFromImageMediaType, getImageMediaTypeFromFileName} from 
 import {compareRevisions} from './dictionary-data-util.js';
 
 const ajvSchemas = /** @type {import('dictionary-importer').CompiledSchemaValidators} */ (/** @type {unknown} */ (ajvSchemas0));
-const BlobWriter = /** @type {typeof import('@zip.js/zip.js').BlobWriter} */ (/** @type {unknown} */ (BlobWriter0));
 const TextWriter = /** @type {typeof import('@zip.js/zip.js').TextWriter} */ (/** @type {unknown} */ (TextWriter0));
 const Uint8ArrayReader = /** @type {typeof import('@zip.js/zip.js').Uint8ArrayReader} */ (/** @type {unknown} */ (Uint8ArrayReader0));
+const Uint8ArrayWriter = /** @type {typeof import('@zip.js/zip.js').Uint8ArrayWriter} */ (/** @type {unknown} */ (Uint8ArrayWriter0));
 const ZipReader = /** @type {typeof import('@zip.js/zip.js').ZipReader} */ (/** @type {unknown} */ (ZipReader0));
 
 const INDEX_FILE_NAME = 'index.json';
@@ -51,6 +51,10 @@ export class DictionaryImporter {
         this._onProgress = typeof onProgress === 'function' ? onProgress : () => {};
         /** @type {import('dictionary-importer').ProgressData} */
         this._progressData = this._createProgressData();
+        /** @type {number} */
+        this._lastProgressTimestamp = 0;
+        /** @type {boolean} */
+        this._disableProgressEvents = false;
     }
 
     /**
@@ -69,7 +73,11 @@ export class DictionaryImporter {
 
         /** @type {Error[]} */
         const errors = [];
-        const maxTransactionLength = 1000;
+        const skipSchemaValidation = !!details.skipSchemaValidation;
+        const enableBulkImportIndexOptimization = details.enableBulkImportIndexOptimization !== false;
+        const enableWasmIndexes = details.enableWasmIndexes === true;
+        const enableParallelBankParsing = details.enableParallelBankParsing === true;
+        const maxTransactionLength = enableBulkImportIndexOptimization ? 262144 : 65536;
         const bulkAddProgressAllowance = 1000;
 
         /**
@@ -84,7 +92,7 @@ export class DictionaryImporter {
             if (entryCount < maxTransactionLength) { progressIndexIncrease = bulkAddProgressAllowance; }
             if (entryCount === 0) { this._progressData.index += progressIndexIncrease; }
 
-            for (let i = 0; i < entryCount; i += maxTransactionLength) {
+            for (let i = 0, chunkIndex = 0; i < entryCount; i += maxTransactionLength, ++chunkIndex) {
                 const count = Math.min(maxTransactionLength, entryCount - i);
 
                 try {
@@ -94,7 +102,10 @@ export class DictionaryImporter {
                 }
 
                 this._progressData.index += progressIndexIncrease;
-                this._progress();
+                const isLastChunk = ((i + count) >= entryCount);
+                if (isLastChunk || (chunkIndex % 4) === 0) {
+                    this._progress();
+                }
             }
         };
 
@@ -109,7 +120,7 @@ export class DictionaryImporter {
 
         // Read archive
         const fileMap = await this._getFilesFromArchive(archiveContent);
-        const index = await this._readAndValidateIndex(fileMap);
+        const index = await this._readAndValidateIndex(fileMap, skipSchemaValidation);
 
         const dictionaryTitle = index.title;
         const version = /** @type {import('dictionary-data').IndexVersion} */ (index.version);
@@ -122,9 +133,14 @@ export class DictionaryImporter {
             };
         }
 
+        this._disableProgressEvents = !!details.disableProgressEvents;
+        await dictionaryDatabase.configureImportPerformance({
+            enableWasmIndexes,
+        });
+
         // Load schemas
         this._progressNextStep(0);
-        const dataBankSchemas = this._getDataBankSchemas(version);
+        const dataBankSchemas = skipSchemaValidation ? [] : this._getDataBankSchemas(version);
 
         // Files
         /** @type {import('dictionary-importer').QueryDetails} */
@@ -142,11 +158,16 @@ export class DictionaryImporter {
 
         this._progressNextStep(termFiles.length + termMetaFiles.length + kanjiFiles.length + kanjiMetaFiles.length + tagFiles.length);
 
-        for (const termFile of termFiles) { await this._validateFile(termFile, dataBankSchemas[0]); }
-        for (const termMetaFile of termMetaFiles) { await this._validateFile(termMetaFile, dataBankSchemas[1]); }
-        for (const kanjiFile of kanjiFiles) { await this._validateFile(kanjiFile, dataBankSchemas[2]); }
-        for (const kanjiMetaFile of kanjiMetaFiles) { await this._validateFile(kanjiMetaFile, dataBankSchemas[3]); }
-        for (const tagFile of tagFiles) { await this._validateFile(tagFile, dataBankSchemas[4]); }
+        if (!skipSchemaValidation) {
+            for (const termFile of termFiles) { await this._validateFile(termFile, dataBankSchemas[0]); }
+            for (const termMetaFile of termMetaFiles) { await this._validateFile(termMetaFile, dataBankSchemas[1]); }
+            for (const kanjiFile of kanjiFiles) { await this._validateFile(kanjiFile, dataBankSchemas[2]); }
+            for (const kanjiMetaFile of kanjiMetaFiles) { await this._validateFile(kanjiMetaFile, dataBankSchemas[3]); }
+            for (const tagFile of tagFiles) { await this._validateFile(tagFile, dataBankSchemas[4]); }
+        } else {
+            this._progressData.index = this._progressData.count;
+            this._progress();
+        }
 
         // termFiles is doubled due to media importing
         this._progressNextStep((termFiles.length * 2 + termMetaFiles.length + kanjiFiles.length + kanjiMetaFiles.length + tagFiles.length) * bulkAddProgressAllowance);
@@ -174,17 +195,25 @@ export class DictionaryImporter {
             dictionarySummaryAdd.onerror = () => reject(void 0);
             dictionarySummaryAdd.onsuccess = () => resolve(dictionarySummaryAdd.result);
         });
+        if (enableBulkImportIndexOptimization) {
+            dictionaryDatabase.startBulkImport();
+        }
 
         try {
+            const termFileEntryLists = await (
+                version === 1 ?
+                    (enableParallelBankParsing ?
+                        this._readFileSequenceParallel(termFiles, this._convertTermBankEntryV1.bind(this), dictionaryTitle) :
+                        this._readFileSequence(termFiles, this._convertTermBankEntryV1.bind(this), dictionaryTitle).then((v) => [v])) :
+                    (enableParallelBankParsing ?
+                        this._readFileSequenceParallel(termFiles, this._convertTermBankEntryV3.bind(this), dictionaryTitle) :
+                        this._readFileSequence(termFiles, this._convertTermBankEntryV3.bind(this), dictionaryTitle).then((v) => [v]))
+            );
             const uniqueMediaPaths = new Set();
-            for (const termFile of termFiles) {
+            for (const termListRaw of termFileEntryLists) {
             /** @type {import('dictionary-importer').ImportRequirement[]} */
                 const requirements = [];
-                let termList = await (
-                version === 1 ?
-                this._readFileSequence([termFile], this._convertTermBankEntryV1.bind(this), dictionaryTitle) :
-                this._readFileSequence([termFile], this._convertTermBankEntryV3.bind(this), dictionaryTitle)
-                );
+                let termList = termListRaw;
 
                 // Prefix wildcard support
                 if (prefixWildcardsSupported) {
@@ -225,8 +254,9 @@ export class DictionaryImporter {
                 media = [];
             }
 
-            for (const termMetaFile of termMetaFiles) {
-                let termMetaList = await this._readFileSequence([termMetaFile], this._convertTermMetaBankEntry.bind(this), dictionaryTitle);
+            for (let termMetaList of (enableParallelBankParsing ?
+                await this._readFileSequenceParallel(termMetaFiles, this._convertTermMetaBankEntry.bind(this), dictionaryTitle) :
+                [await this._readFileSequence(termMetaFiles, this._convertTermMetaBankEntry.bind(this), dictionaryTitle)])) {
 
                 await bulkAdd('termMeta', termMetaList);
                 for (const [key, value] of Object.entries(this._getMetaCounts(termMetaList))) {
@@ -242,12 +272,16 @@ export class DictionaryImporter {
                 termMetaList = [];
             }
 
-            for (const kanjiFile of kanjiFiles) {
-                let kanjiList = await (
+            const kanjiEntryLists = await (
                 version === 1 ?
-                this._readFileSequence([kanjiFile], this._convertKanjiBankEntryV1.bind(this), dictionaryTitle) :
-                this._readFileSequence([kanjiFile], this._convertKanjiBankEntryV3.bind(this), dictionaryTitle)
-                );
+                    (enableParallelBankParsing ?
+                        this._readFileSequenceParallel(kanjiFiles, this._convertKanjiBankEntryV1.bind(this), dictionaryTitle) :
+                        this._readFileSequence(kanjiFiles, this._convertKanjiBankEntryV1.bind(this), dictionaryTitle).then((v) => [v])) :
+                    (enableParallelBankParsing ?
+                        this._readFileSequenceParallel(kanjiFiles, this._convertKanjiBankEntryV3.bind(this), dictionaryTitle) :
+                        this._readFileSequence(kanjiFiles, this._convertKanjiBankEntryV3.bind(this), dictionaryTitle).then((v) => [v]))
+            );
+            for (let kanjiList of kanjiEntryLists) {
 
                 await bulkAdd('kanji', kanjiList);
                 counts.kanji.total += kanjiList.length;
@@ -257,8 +291,9 @@ export class DictionaryImporter {
                 kanjiList = [];
             }
 
-            for (const kanjiMetaFile of kanjiMetaFiles) {
-                let kanjiMetaList = await this._readFileSequence([kanjiMetaFile], this._convertKanjiMetaBankEntry.bind(this), dictionaryTitle);
+            for (let kanjiMetaList of (enableParallelBankParsing ?
+                await this._readFileSequenceParallel(kanjiMetaFiles, this._convertKanjiMetaBankEntry.bind(this), dictionaryTitle) :
+                [await this._readFileSequence(kanjiMetaFiles, this._convertKanjiMetaBankEntry.bind(this), dictionaryTitle)])) {
 
                 await bulkAdd('kanjiMeta', kanjiMetaList);
                 for (const [key, value] of Object.entries(this._getMetaCounts(kanjiMetaList))) {
@@ -274,8 +309,9 @@ export class DictionaryImporter {
                 kanjiMetaList = [];
             }
 
-            for (const tagFile of tagFiles) {
-                let tagList = await this._readFileSequence([tagFile], this._convertTagBankEntry.bind(this), dictionaryTitle);
+            for (let tagList of (enableParallelBankParsing ?
+                await this._readFileSequenceParallel(tagFiles, this._convertTagBankEntry.bind(this), dictionaryTitle) :
+                [await this._readFileSequence(tagFiles, this._convertTagBankEntry.bind(this), dictionaryTitle)])) {
                 this._addOldIndexTags(index, tagList, dictionaryTitle);
 
                 await bulkAdd('tagMeta', tagList);
@@ -301,6 +337,10 @@ export class DictionaryImporter {
             styles = await this._getData(stylesFile, new TextWriter());
             const cssErrors = this._validateCss(styles);
             if (cssErrors.length > 0) {
+                if (enableBulkImportIndexOptimization) {
+                    dictionaryDatabase.finishBulkImport();
+                }
+                this._disableProgressEvents = false;
                 return {
                     errors: cssErrors,
                     result: null,
@@ -314,6 +354,10 @@ export class DictionaryImporter {
         await dictionaryDatabase.bulkUpdate('dictionaries', [{data: summary, primaryKey}], 0, 1);
 
         this._progress();
+        if (enableBulkImportIndexOptimization) {
+            dictionaryDatabase.finishBulkImport();
+        }
+        this._disableProgressEvents = false;
 
         return {result: summary, errors};
     }
@@ -355,7 +399,7 @@ export class DictionaryImporter {
      * @returns {Promise<import('dictionary-data').Index>}
      * @throws {Error}
      */
-    async _readAndValidateIndex(fileMap) {
+    async _readAndValidateIndex(fileMap, skipSchemaValidation = false) {
         const indexFile = fileMap.get(INDEX_FILE_NAME);
         if (typeof indexFile === 'undefined') {
             const redundantDirectories = this._findRedundantDirectories(fileMap);
@@ -369,7 +413,7 @@ export class DictionaryImporter {
         const indexContent = await this._getData(indexFile2, new TextWriter());
         const index = /** @type {unknown} */ (parseJson(indexContent));
 
-        if (!ajvSchemas.dictionaryIndex(index)) {
+        if (!skipSchemaValidation && !ajvSchemas.dictionaryIndex(index)) {
             throw this._formatAjvSchemaError(ajvSchemas.dictionaryIndex, INDEX_FILE_NAME);
         }
 
@@ -399,6 +443,7 @@ export class DictionaryImporter {
     /** */
     _progressReset() {
         this._progressData = this._createProgressData();
+        this._lastProgressTimestamp = 0;
         this._progress(true);
     }
 
@@ -415,6 +460,12 @@ export class DictionaryImporter {
      * @param {boolean} nextStep
      */
     _progress(nextStep = false) {
+        if (this._disableProgressEvents) { return; }
+        const now = Date.now();
+        if (!nextStep && (now - this._lastProgressTimestamp) < 125) {
+            return;
+        }
+        this._lastProgressTimestamp = now;
         this._onProgress({...this._progressData, nextStep});
     }
 
@@ -775,7 +826,8 @@ export class DictionaryImporter {
         }
 
         // Load file content
-        let content = await (await this._getData(file, new BlobWriter())).arrayBuffer();
+        let contentBytes = await this._getData(file, new Uint8ArrayWriter());
+        let content = contentBytes.buffer;
 
         const mediaType = getImageMediaTypeFromFileName(path);
         if (mediaType === null) {
@@ -785,10 +837,19 @@ export class DictionaryImporter {
         // Load image data
         let width;
         let height;
-        try {
-            ({content, width, height} = await this._mediaLoader.getImageDetails(content, mediaType));
-        } catch (e) {
-            throw createError('Could not load image');
+        const fastDimensions = this._getImageDimensionsFast(contentBytes, mediaType);
+        if (fastDimensions !== null) {
+            ({width, height} = fastDimensions);
+            // Release oversized backing store in case Uint8ArrayWriter provided it.
+            content = contentBytes.byteOffset === 0 && contentBytes.byteLength === contentBytes.buffer.byteLength
+                ? contentBytes.buffer
+                : contentBytes.slice().buffer;
+        } else {
+            try {
+                ({content, width, height} = await this._mediaLoader.getImageDetails(content, mediaType));
+            } catch (_e) {
+                throw createError('Could not load image');
+            }
         }
 
         // Create image data
@@ -998,6 +1059,105 @@ export class DictionaryImporter {
             counts[key] = value;
         }
         return counts;
+    }
+
+    /**
+     * @template TInput
+     * @template TOutput
+     * @param {TInput[]} items
+     * @param {number} limit
+     * @param {(item: TInput, index: number) => Promise<TOutput>} mapper
+     * @returns {Promise<TOutput[]>}
+     */
+    async _mapWithConcurrency(items, limit, mapper) {
+        const output = new Array(items.length);
+        let nextIndex = 0;
+        const workerCount = Math.max(1, Math.min(limit, items.length));
+        const workers = new Array(workerCount).fill(0).map(async () => {
+            while (true) {
+                const index = nextIndex++;
+                if (index >= items.length) { return; }
+                output[index] = await mapper(items[index], index);
+            }
+        });
+        await Promise.all(workers);
+        return output;
+    }
+
+    /**
+     * @template [TEntry=unknown]
+     * @template [TResult=unknown]
+     * @param {import('@zip.js/zip.js').Entry[]} files
+     * @param {(entry: TEntry, dictionaryTitle: string) => TResult} convertEntry
+     * @param {string} dictionaryTitle
+     * @returns {Promise<TResult[][]>}
+     */
+    async _readFileSequenceParallel(files, convertEntry, dictionaryTitle) {
+        const limit = Math.max(1, Math.min(files.length, 4));
+        return await this._mapWithConcurrency(files, limit, async (file) => {
+            const content = await this._getData(file, new TextWriter());
+            let entries;
+            try {
+                entries = parseJson(content);
+            } catch (error) {
+                if (error instanceof Error) {
+                    throw new Error(error.message + ` in '${file.filename}'`);
+                }
+            }
+
+            const results = [];
+            if (Array.isArray(entries)) {
+                for (const entry of /** @type {TEntry[]} */ (entries)) {
+                    results.push(convertEntry(entry, dictionaryTitle));
+                }
+            }
+            return results;
+        });
+    }
+
+    /**
+     * @param {Uint8Array} bytes
+     * @param {string} mediaType
+     * @returns {{width: number, height: number}|null}
+     */
+    _getImageDimensionsFast(bytes, mediaType) {
+        const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        if (mediaType === 'image/png' && bytes.byteLength >= 24) {
+            const isPng = (
+                bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 &&
+                bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a
+            );
+            if (isPng) {
+                return {width: dv.getUint32(16), height: dv.getUint32(20)};
+            }
+        }
+
+        if (mediaType === 'image/gif' && bytes.byteLength >= 10) {
+            const isGif = bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46;
+            if (isGif) {
+                return {width: dv.getUint16(6, true), height: dv.getUint16(8, true)};
+            }
+        }
+
+        if (mediaType === 'image/jpeg' && bytes.byteLength >= 4 && bytes[0] === 0xff && bytes[1] === 0xd8) {
+            let offset = 2;
+            while (offset + 8 < bytes.byteLength) {
+                if (bytes[offset] !== 0xff) { ++offset; continue; }
+                const marker = bytes[offset + 1];
+                const blockLength = (bytes[offset + 2] << 8) + bytes[offset + 3];
+                if (blockLength < 2 || offset + 2 + blockLength > bytes.byteLength) { break; }
+                const isSOF = marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc;
+                if (isSOF) {
+                    return {
+                        height: (bytes[offset + 5] << 8) + bytes[offset + 6],
+                        width: (bytes[offset + 7] << 8) + bytes[offset + 8],
+                    };
+                }
+                offset += 2 + blockLength;
+            }
+        }
+
+        return null;
     }
 
     /**

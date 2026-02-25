@@ -554,9 +554,21 @@ export class DictionaryImportController {
             for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = false; }
 
             const optionsFull = await this._settingsController.getOptionsFull();
+            const {
+                skipSchemaValidation,
+                enableBulkImportIndexOptimization,
+                disableProgressEvents,
+                enableWasmIndexes,
+                enableParallelBankParsing,
+            } = this._getImportPerformanceFlags();
             const importDetails = {
                 prefixWildcardsSupported: optionsFull.global.database.prefixWildcardsSupported,
                 yomitanVersion: chrome.runtime.getManifest().version,
+                skipSchemaValidation,
+                enableBulkImportIndexOptimization,
+                disableProgressEvents,
+                enableWasmIndexes,
+                enableParallelBankParsing,
             };
 
             for (let i = 0; i < importProgressTracker.dictionaryCount; ++i) {
@@ -612,6 +624,29 @@ export class DictionaryImportController {
         const urlImportSteps = this._getFileImportSteps();
         urlImportSteps.splice(2, 0, {label: 'Downloading dictionary'});
         return urlImportSteps;
+    }
+
+    /**
+     * @returns {{skipSchemaValidation: boolean, enableBulkImportIndexOptimization: boolean, disableProgressEvents: boolean, enableWasmIndexes: boolean, enableParallelBankParsing: boolean}}
+     */
+    _getImportPerformanceFlags() {
+        const flags = /** @type {unknown} */ (Reflect.get(globalThis, 'manabitanImportPerformanceFlags'));
+        if (typeof flags !== 'object' || flags === null || Array.isArray(flags)) {
+            return {
+                skipSchemaValidation: true,
+                enableBulkImportIndexOptimization: true,
+                disableProgressEvents: true,
+                enableWasmIndexes: false,
+                enableParallelBankParsing: false,
+            };
+        }
+        return {
+            skipSchemaValidation: flags.skipSchemaValidation !== false,
+            enableBulkImportIndexOptimization: flags.enableBulkImportIndexOptimization !== false,
+            disableProgressEvents: flags.disableProgressEvents !== false,
+            enableWasmIndexes: flags.enableWasmIndexes === true,
+            enableParallelBankParsing: flags.enableParallelBankParsing === true,
+        };
     }
 
     /**

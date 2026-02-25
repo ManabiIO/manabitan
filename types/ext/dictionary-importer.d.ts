@@ -41,6 +41,11 @@ export type ImportResult = {
 export type ImportDetails = {
     prefixWildcardsSupported: boolean;
     yomitanVersion: string;
+    skipSchemaValidation?: boolean;
+    enableBulkImportIndexOptimization?: boolean;
+    disableProgressEvents?: boolean;
+    enableWasmIndexes?: boolean;
+    enableParallelBankParsing?: boolean;
 };
 
 export type Summary = {

@@ -23,6 +23,7 @@ import fs from 'fs';
 import {createRequire} from 'module';
 import path from 'path';
 import {fileURLToPath} from 'url';
+import {buildManabiIndexKernel} from './build-manabi-index-kernel.js';
 import {parseJson} from './json.js';
 
 const require = createRequire(import.meta.url);
@@ -95,4 +96,5 @@ export async function buildLibs() {
     fs.writeFileSync(path.join(extDir, 'lib/validate-schemas.js'), patchedModuleCode);
 
     await copyWasm(path.join(extDir, 'lib'));
+    buildManabiIndexKernel();
 }
