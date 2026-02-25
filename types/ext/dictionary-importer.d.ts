@@ -49,6 +49,7 @@ export type ImportDetails = {
     skipMediaImport?: boolean;
     mediaResolutionConcurrency?: number;
     debugImportLogging?: boolean;
+    structuredContentImportFastPath?: boolean;
 };
 
 export type Summary = {

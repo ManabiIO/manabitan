@@ -58,23 +58,9 @@ Manabitan provides powerful features not available in other browser-based dictio
 
 ## Installation
 
-Manabitan comes in two flavors: _stable_ and _testing_. New changes are initially introduced into the _testing_ version, and after some time spent ensuring that they are relatively bug free, they will be promoted to the _stable_ version. If you are technically savvy and don't mind [submitting issues](https://github.com/ManabiIO/manabitan/issues/new/choose) on GitHub, try the _testing_ version; otherwise, the _stable_ version will be your best bet. Check [contributing](#contributing) for more information on how to help.
+Install from the latest GitHub release page:
 
-- **Google Chrome**
-
-  - [stable](https://chrome.google.com/webstore/detail/yomitan/likgccmbimhjbgkjambclfkhldnlhbnn)
-  - [testing](https://chrome.google.com/webstore/detail/yomitan-development-build/glnaenfapkkecknnmginabpmgkenenml)
-
-- **Mozilla Firefox**
-
-  - [stable](https://addons.mozilla.org/en-US/firefox/addon/yomitan/)
-  - [testing](https://github.com/ManabiIO/manabitan/releases) ※
-
-- **Microsoft Edge**
-  - [stable](https://microsoftedge.microsoft.com/addons/detail/yomitan/idelnfbbmikgfiejhgmddlbkfgiifnnn)
-  - Testing: Coming soon
-
-※ Unlike Chrome, Firefox does not allow extensions meant for testing to be hosted in the marketplace. You will have to download the desired version and side-load it yourself. You only need to do this once, and you will get updates automatically.
+- [Download for Chrome, Firefox, Edge](https://github.com/ManabiIO/manabitan/releases/latest)
 
 ## Contributing
 
