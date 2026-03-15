@@ -472,12 +472,16 @@ export class DisplayAnki {
         for (let entryIndex = 0, entryCount = dictionaryEntryDetails.length; entryIndex < entryCount; ++entryIndex) {
             for (const [cardFormatIndex, {canAdd, isDuplicate, noteIds, noteInfos, ankiError}] of dictionaryEntryDetails[entryIndex].noteMap.entries()) {
                 const button = this._createSaveButtons(entryIndex, cardFormatIndex);
+                const duplicateCheckPending = this._isLazyDuplicateStatePending(isDuplicate, noteIds);
                 if (button !== null) {
-                    button.disabled = !canAdd;
-                    button.hidden = (ankiError !== null);
+                    button.disabled = (duplicateCheckPending || !canAdd);
+                    button.hidden = (duplicateCheckPending || ankiError !== null);
+                    this._setSaveButtonContainerHidden(button, duplicateCheckPending);
                     if (ankiError && ankiError.message !== 'Anki not connected') {
                         log.error(ankiError);
                     }
+
+                    if (duplicateCheckPending) { continue; }
 
                     // If entry has noteIds, show the "add duplicate" button.
                     if (Array.isArray(noteIds) && noteIds.length > 0) {
@@ -993,6 +997,19 @@ export class DisplayAnki {
     }
 
     /**
+     * @param {boolean} isDuplicate
+     * @param {number[]|null} noteIds
+     * @returns {boolean}
+     */
+    _isLazyDuplicateStatePending(isDuplicate, noteIds) {
+        return (
+            isDuplicate &&
+            noteIds === null &&
+            this._shouldFetchDuplicateNoteIdsLazily(this._isAdditionalInfoEnabled())
+        );
+    }
+
+    /**
      * @param {import('dictionary').DictionaryEntry[]} dictionaryEntries
      * @param {boolean} [fetchDuplicateNoteIds]
      * @param {((
@@ -1131,6 +1148,9 @@ export class DisplayAnki {
 
                 const saveButton = this._saveButtonFind(dictionaryEntryIndex, cardFormatIndex);
                 if (saveButton !== null) {
+                    saveButton.disabled = !existingDetails.canAdd;
+                    saveButton.hidden = (existingDetails.ankiError !== null);
+                    this._setSaveButtonContainerHidden(saveButton, false);
                     this._updateSaveButtonForDuplicateBehavior(saveButton, updatedDetails.noteIds);
                 }
                 const validNoteIds = updatedDetails.noteIds.filter((id) => id !== INVALID_NOTE_ID);
@@ -1159,6 +1179,17 @@ export class DisplayAnki {
             results.push({canAdd: (valid ? canAdd : valid), valid, isDuplicate: false, noteIds: null});
         }
         return results;
+    }
+
+    /**
+     * @param {HTMLButtonElement} button
+     * @param {boolean} hidden
+     */
+    _setSaveButtonContainerHidden(button, hidden) {
+        const {parentElement} = button;
+        if (parentElement instanceof HTMLElement) {
+            parentElement.hidden = hidden;
+        }
     }
 
     /**

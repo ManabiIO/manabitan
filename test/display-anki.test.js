@@ -16,6 +16,7 @@
  */
 
 import {describe, expect, vi} from 'vitest';
+import {deferPromise} from '../ext/js/core/utilities.js';
 import {DisplayAnki} from '../ext/js/display/display-anki.js';
 import {createDomTest} from './fixtures/dom-test.js';
 
@@ -433,9 +434,37 @@ describe('DisplayAnki preload and save flow', () => {
         expect(saveButton?.disabled).toBe(true);
     });
 
+    test('new duplicate mode still renders non-duplicate saves as soon as the status check is complete', async ({window}) => {
+        setupDocument(window.document);
+        const dictionaryEntries = [createTermEntry()];
+        const {display} = createDisplay(window.document, dictionaryEntries, {
+            getAnkiNoteInfo: vi.fn(async () => [{
+                canAdd: true,
+                valid: true,
+                isDuplicate: false,
+                noteIds: null,
+                noteInfos: [],
+            }]),
+        });
+        const displayAnki = new DisplayAnki(display, createDisplayAudio());
+        displayAnki._checkForDuplicates = true;
+        displayAnki._duplicateBehavior = 'new';
+        displayAnki._displayTagsAndFlags = 'never';
+        displayAnki._cardFormats = [createFastProbeCardFormat()];
+        displayAnki._dictionaryEntryDetails = null;
+
+        await displayAnki._updateDictionaryEntryDetails();
+
+        const saveButton = display.dictionaryEntryNodes[0].querySelector('.action-button[data-action="save-note"]');
+        expect(saveButton).not.toBeNull();
+        expect(saveButton?.hidden).toBe(false);
+        expect(saveButton?.title).toBe('Add Expression note');
+    });
+
     test('new duplicate mode fetches duplicate note ids lazily after the initial status check', async ({window}) => {
         setupDocument(window.document);
         const dictionaryEntries = [createTermEntry()];
+        const duplicateNoteInfo = /** @type {import('core').DeferredPromiseDetails<import('anki').NoteInfoWrapper[]>} */ (deferPromise());
         const getAnkiNoteInfo = vi.fn()
             .mockResolvedValueOnce([{
                 canAdd: true,
@@ -444,13 +473,7 @@ describe('DisplayAnki preload and save flow', () => {
                 noteIds: null,
                 noteInfos: [],
             }])
-            .mockResolvedValueOnce([{
-                canAdd: true,
-                valid: true,
-                isDuplicate: true,
-                noteIds: [123],
-                noteInfos: [],
-            }]);
+            .mockImplementationOnce(async () => await duplicateNoteInfo.promise);
         const {display} = createDisplay(window.document, dictionaryEntries, {getAnkiNoteInfo});
         const displayAnki = new DisplayAnki(display, createDisplayAudio());
         displayAnki._checkForDuplicates = true;
@@ -460,6 +483,15 @@ describe('DisplayAnki preload and save flow', () => {
         displayAnki._dictionaryEntryDetails = null;
 
         await displayAnki._updateDictionaryEntryDetails();
+
+        const pendingSaveButton = display.dictionaryEntryNodes[0].querySelector('.action-button[data-action="save-note"]');
+        const pendingSaveButtonContainer = pendingSaveButton?.parentElement;
+        const pendingViewNoteButton = display.dictionaryEntryNodes[0].querySelector('.action-button[data-action="view-note"]');
+        expect(pendingSaveButton).not.toBeNull();
+        expect(pendingSaveButton?.hidden).toBe(true);
+        expect(pendingSaveButtonContainer?.hidden).toBe(true);
+        expect(pendingViewNoteButton).toBeNull();
+
         await new Promise((resolve) => {
             setTimeout(resolve, 0);
         });
@@ -495,8 +527,21 @@ describe('DisplayAnki preload and save flow', () => {
             },
         }], false, true);
 
+        duplicateNoteInfo.resolve([{
+            canAdd: true,
+            valid: true,
+            isDuplicate: true,
+            noteIds: [123],
+            noteInfos: [],
+        }]);
+        await new Promise((resolve) => {
+            setTimeout(resolve, 0);
+        });
+
         const saveButton = display.dictionaryEntryNodes[0].querySelector('.action-button[data-action="save-note"]');
         const viewNoteButton = display.dictionaryEntryNodes[0].querySelector('.action-button[data-action="view-note"]');
+        expect(saveButton?.hidden).toBe(false);
+        expect(saveButton?.parentElement?.hidden).toBe(false);
         expect(saveButton?.title).toBe('Add duplicate Expression note');
         expect(viewNoteButton?.dataset.noteIds).toBe('123');
     });
