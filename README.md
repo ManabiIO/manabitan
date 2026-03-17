@@ -3,7 +3,7 @@
 # Manabitan
 
 [Download for Chrome, Firefox, Edge](https://github.com/ManabiIO/manabitan/releases/latest)
-[Firefox Dev Build (auto-updates)](https://github.com/ManabiIO/manabitan/releases/latest/download/manabitan-firefox-dev.xpi)
+[Firefox Dev Builds](https://github.com/ManabiIO/manabitan/releases/latest)
 
 [![Manabi Discord](https://dcbadge.limes.pink/api/server/gvxzS93C3w?style=for-the-badge)](https://discord.gg/gvxzS93C3w)
 [![Discord](https://dcbadge.limes.pink/api/server/YkQrXW6TXF?style=for-the-badge)](https://discord.gg/YkQrXW6TXF)
@@ -117,7 +117,7 @@ Feel free to join us on the [Manabi Discord](https://discord.gg/gvxzS93C3w) or t
 
 ## Building Manabitan
 
-1. Install [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/).
+1. Install [Node.js](https://nodejs.org/) and [npm](https://docs.npmjs.com/).
 
 2. Run `npm ci` to set up the environment.
 
@@ -209,5 +209,5 @@ Manabitan uses several third-party libraries to function.
 
 ## Attribution
 
-MDX import support uses [PyGlossary](https://github.com/ilius/pyglossary), licensed under the [GNU GPLv3](https://github.com/ilius/pyglossary/blob/master/LICENSE).
+MDX import support uses [PyGlossary](https://github.com/ilius/pyglossary), licensed under the [GNU GPLv3](https://raw.githubusercontent.com/ilius/pyglossary/master/LICENSE).
 `fallback-bloop.mp3` is provided by [UNIVERSFIELD](https://pixabay.com/sound-effects/error-8-206492/) and licensed under the [Pixabay Content License](https://pixabay.com/service/license-summary/).
