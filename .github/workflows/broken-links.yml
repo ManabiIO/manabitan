@@ -29,9 +29,11 @@ jobs:
         run: |
           args="--exclude-path node_modules --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst'"
           if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- '*.md' '*.html' '*.rst' > .lychee-files
-            if [[ -s .lychee-files ]]; then
-              args="--exclude-path node_modules --verbose --no-progress --files-from .lychee-files"
+            mapfile -t files < <(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- '*.md' '*.html' '*.rst')
+            if (( ${#files[@]} > 0 )); then
+              printf -v args '%s' "--exclude-path node_modules --verbose --no-progress"
+              printf -v file_args ' %q' "${files[@]}"
+              args+="${file_args}"
             fi
           fi
           printf 'args=%s\n' "${args}" >> "${GITHUB_OUTPUT}"
