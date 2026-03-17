@@ -37,6 +37,11 @@ jobs:
       - name: Run ${{ matrix.name }}
         run: npm run ${{ matrix.test }}
 
+      - name: Generate manifest.json for schema validation
+        if: ${{ matrix.test == 'test:ci:build' }}
+        run: |
+          node --input-type=module -e "import fs from 'node:fs'; import {ManifestUtil} from './dev/manifest-util.js'; const manifestUtil = new ManifestUtil(); fs.writeFileSync('ext/manifest.json', ManifestUtil.createManifestString(manifestUtil.getManifest()).replace('\$YOMITAN_VERSION', '0.0.0.0'));"
+
       - name: Validate manifest.json of the extension
         if: ${{ matrix.test == 'test:ci:build' }}
         uses: cardinalby/schema-validator-action@2166123eb256fa40baef7e22ab1379708425efc7 # v3.1.1
