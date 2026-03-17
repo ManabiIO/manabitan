@@ -39,8 +39,12 @@ describe('Japanese text preprocessors', () => {
         }
 
         const processor = processorWithId.textProcessor;
-        expect(processor.process('瑞々しい', 'off')).toStrictEqual('瑞々しい');
-        expect(processor.process('瑞々しい', 'direct')).toStrictEqual('瑞瑞しい');
-        expect(processor.process('瑞瑞しい', 'inverse')).toStrictEqual('瑞々しい');
+        const forwardVariants = processor.process('瑞々しい');
+        expect(forwardVariants).toContain('瑞々しい');
+        expect(forwardVariants).toContain('瑞瑞しい');
+
+        const inverseVariants = processor.process('瑞瑞しい');
+        expect(inverseVariants).toContain('瑞瑞しい');
+        expect(inverseVariants).toContain('瑞々しい');
     });
 });

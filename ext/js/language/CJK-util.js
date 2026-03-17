@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024-2025  Yomitan Authors
+ * Copyright (C) 2024-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-import {basicTextProcessorOptions} from './text-processors.js';
 
 /** @type {import('CJK-util').CodepointRange} */
 const CJK_UNIFIED_IDEOGRAPHS_RANGE = [0x4e00, 0x9fff];
@@ -129,10 +127,9 @@ export function normalizeRadicals(text) {
     return result;
 }
 
-/** @type {import('language').TextProcessor<boolean>} */
+/** @type {import('language').TextProcessor} */
 export const normalizeRadicalCharacters = {
     name: 'Normalize radical characters',
     description: '⼀ → 一 (U+2F00 → U+4E00)',
-    options: basicTextProcessorOptions,
-    process: (str, setting) => (setting ? normalizeRadicals(str) : str),
+    process: (str) => [str, normalizeRadicals(str)],
 };

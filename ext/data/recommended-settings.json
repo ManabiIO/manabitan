@@ -204,6 +204,14 @@
         {
             "modification": {
                 "action": "set",
+                "path": "scanning.scanResolution",
+                "value": "character"
+            },
+            "description": "Scan text one character at a time."
+        },
+        {
+            "modification": {
+                "action": "set",
                 "path": "parsing.enableScanningParser",
                 "value": false
             },
@@ -236,7 +244,17 @@
             "description": "Turn off Yomitan's internal parser for languages with spaces."
         }
     ],
-    "fi": [
+    "et": [
+        {
+            "modification": {
+                "action": "set",
+                "path": "scanning.scanResolution",
+                "value": "character"
+            },
+            "description": "Scan text one character at a time."
+        }
+    ],
+    "eu": [
         {
             "modification": {
                 "action": "set",
@@ -252,6 +270,24 @@
                 "value": "word"
             },
             "description": "Lookup whole words in the dictionary."
+        },
+        {
+            "modification": {
+                "action": "set",
+                "path": "parsing.enableScanningParser",
+                "value": false
+            },
+            "description": "Turn off Yomitan's internal parser for languages with spaces."
+        }
+    ],
+    "fi": [
+        {
+            "modification": {
+                "action": "set",
+                "path": "scanning.scanResolution",
+                "value": "character"
+            },
+            "description": "Scan text one character at a time."
         },
         {
             "modification": {
@@ -360,17 +396,9 @@
             "modification": {
                 "action": "set",
                 "path": "scanning.scanResolution",
-                "value": "word"
+                "value": "character"
             },
-            "description": "Scan text one word at a time (as opposed to one character)."
-        },
-        {
-            "modification": {
-                "action": "set",
-                "path": "translation.searchResolution",
-                "value": "word"
-            },
-            "description": "Lookup whole words in the dictionary."
+            "description": "Scan text one character at a time."
         },
         {
             "modification": {
@@ -386,17 +414,9 @@
             "modification": {
                 "action": "set",
                 "path": "scanning.scanResolution",
-                "value": "word"
+                "value": "character"
             },
-            "description": "Scan text one word at a time (as opposed to one character)."
-        },
-        {
-            "modification": {
-                "action": "set",
-                "path": "translation.searchResolution",
-                "value": "word"
-            },
-            "description": "Lookup whole words in the dictionary."
+            "description": "Scan text one character at a time."
         },
         {
             "modification": {
@@ -451,6 +471,16 @@
             "description": "Lookup words by letter in the dictionary."
         }
     ],
+    "ka": [
+        {
+            "modification": {
+                "action": "set",
+                "path": "scanning.scanResolution",
+                "value": "character"
+            },
+            "description": "Scan text one character at a time."
+        }
+    ],
     "ko": [
         {
             "modification": {
@@ -496,17 +526,9 @@
             "modification": {
                 "action": "set",
                 "path": "scanning.scanResolution",
-                "value": "word"
+                "value": "character"
             },
-            "description": "Scan text one word at a time (as opposed to one character)."
-        },
-        {
-            "modification": {
-                "action": "set",
-                "path": "translation.searchResolution",
-                "value": "word"
-            },
-            "description": "Lookup whole words in the dictionary."
+            "description": "Scan text one character at a time."
         },
         {
             "modification": {
@@ -766,17 +788,9 @@
             "modification": {
                 "action": "set",
                 "path": "scanning.scanResolution",
-                "value": "word"
+                "value": "character"
             },
-            "description": "Scan text one word at a time (as opposed to one character)."
-        },
-        {
-            "modification": {
-                "action": "set",
-                "path": "translation.searchResolution",
-                "value": "word"
-            },
-            "description": "Lookup whole words in the dictionary."
+            "description": "Scan text one character at a time."
         },
         {
             "modification": {

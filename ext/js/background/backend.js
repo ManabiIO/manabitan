@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2016-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -2258,18 +2258,25 @@ export class Backend {
             /** @type {import('api').ParseTextLine[]} */
             const result = [];
             for (const line of lines) {
-                for (const {term, reading, source} of line) {
+                for (const {term, reading, source, lemma, lemma_reading} of line) {
                     const termParts = [];
+                    let isFirstPart = true;
                     for (const {text: text2, reading: reading2} of distributeFuriganaInflected(
                         term.length > 0 ? term : source,
                         jpConvertKatakanaToHiragana(reading),
                         source,
                     )) {
-                        termParts.push({text: text2, reading: reading2});
+                        /** @type {import('api').ParseTextSegment} */
+                        const termPart = {text: text2, reading: reading2};
+                        if (isFirstPart) {
+                            termPart.lemma = lemma;
+                            termPart.lemmaReading = jpConvertKatakanaToHiragana(lemma_reading);
+                            isFirstPart = false;
+                        }
+                        termParts.push(termPart);
                     }
                     result.push(termParts);
                 }
-                result.push([{text: '\n', reading: ''}]);
             }
             results.push([name, result]);
         }
@@ -2792,6 +2799,7 @@ export class Backend {
         const {windowId} = tab;
 
         let token = null;
+        const errors = [];
         try {
             if (typeof tabId === 'number' && typeof frameId === 'number') {
                 const action = 'frontendSetAllVisibleOverride';
@@ -2799,16 +2807,29 @@ export class Backend {
                 token = await this._sendMessageTabPromise(tabId, {action, params}, {frameId});
             }
 
-            return await new Promise((resolve, reject) => {
-                chrome.tabs.captureVisibleTab(windowId, {format, quality}, (result) => {
-                    const e = chrome.runtime.lastError;
-                    if (e) {
-                        reject(new Error(e.message));
-                    } else {
-                        resolve(result);
-                    }
+            try {
+                return await new Promise((resolve, reject) => {
+                    chrome.tabs.captureVisibleTab(windowId, {format, quality}, (result) => {
+                        const e = chrome.runtime.lastError;
+                        if (e) {
+                            reject(new Error(e.message));
+                        } else {
+                            resolve(result);
+                        }
+                    });
                 });
-            });
+            } catch (e) {
+                errors.push(e);
+            }
+
+            // Fallback for some Firefox. Usually `chrome.tabs.captureVisibleTab` works but occasionally it doesn't
+            try {
+                return await browser.tabs.captureVisibleTab(windowId, {format, quality});
+            } catch (e) {
+                errors.push(e);
+            }
+
+            throw new Error('Failed to screenshot, errors: [' + errors.join(', ') + ']');
         } finally {
             if (token !== null) {
                 const action = 'frontendClearAllVisibleOverride';
