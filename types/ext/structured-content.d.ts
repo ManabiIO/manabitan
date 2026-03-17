@@ -51,6 +51,7 @@ export type Data = {
 };
 
 export type StructuredContentStyle = {
+    fontFamily?: string;
     fontStyle?: FontStyle;
     fontWeight?: FontWeight;
     fontSize?: string;
@@ -229,10 +230,13 @@ export type ImageElement = ImageElementBase & {
 export type LinkElement = {
     tag: 'a';
     content?: Content;
+    data?: Data;
     /**
      * The URL for the link. URLs starting with a ? are treated as internal links to other dictionary content.
      */
     href: string;
+    style?: StructuredContentStyle;
+    title?: string;
     /**
      * Defines the language of an element in the format defined by RFC 5646.
      */

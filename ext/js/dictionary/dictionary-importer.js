@@ -27,7 +27,7 @@ import {
 import {parseJson} from '../core/json.js';
 import {toError} from '../core/to-error.js';
 import {stringReverse} from '../core/utilities.js';
-import {getFileExtensionFromImageMediaType, getImageMediaTypeFromFileName} from '../media/media-util.js';
+import {getFileExtensionFromImageMediaType, getImageMediaTypeFromFileName, getMediaTypeFromFileName} from '../media/media-util.js';
 import {
     decodeRawTermContentBinary,
     encodeRawTermContentBinary,
@@ -70,9 +70,43 @@ const TERM_BANK_PACKED_ARTIFACT_FILE = 'manabitan-term-banks-packed.bin';
 const TERM_BANK_SHARED_GLOSSARY_ARTIFACT_FILE = 'manabitan-term-glossary-shared.bin';
 const TERM_ARTIFACT_PRELOAD_CONCURRENCY = 4;
 const HEX_BYTE_TABLE = Array.from({length: 256}, (_, i) => i.toString(16).padStart(2, '0'));
+const STRUCTURED_CONTENT_MEDIA_LINK_PREFIX = 'media:';
 /** @type {import('dictionary-data').TermGlossary[]} */
 const EMPTY_TERM_GLOSSARY = [];
 Object.freeze(EMPTY_TERM_GLOSSARY);
+
+/**
+ * @param {import('dictionary-importer').ImportRequirement} requirement
+ * @returns {?string}
+ */
+function getImportRequirementMediaPath(requirement) {
+    switch (requirement.type) {
+        case 'image':
+        case 'structured-content-image':
+            return requirement.source.path;
+        case 'structured-content-media-link': {
+            const {href} = requirement.source;
+            if (typeof href !== 'string' || !href.startsWith(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX)) {
+                return null;
+            }
+            return decodeURIComponent(href.substring(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX.length));
+        }
+        default:
+            return null;
+    }
+}
+
+/**
+ * @param {string} path
+ * @param {import('dictionary-database').DatabaseTermEntry} entry
+ * @param {string} message
+ * @returns {Error}
+ */
+function createMediaImportError(path, entry, message) {
+    const {dictionary, expression, reading} = entry;
+    const readingSource = reading.length > 0 ? ` (${reading})` : '';
+    return new Error(`${message} at path ${JSON.stringify(path)} for ${expression}${readingSource} in ${dictionary}`);
+}
 
 /**
  * @param {string} value
@@ -215,6 +249,8 @@ export class DictionaryImporter {
         this._mediaResolutionConcurrency = 8;
         /** @type {Map<string, Promise<import('dictionary-database').MediaDataArrayBufferContent>>} */
         this._pendingImageMediaByPath = new Map();
+        /** @type {Map<string, Promise<import('dictionary-database').MediaDataArrayBufferContent>>} */
+        this._pendingMediaByPath = new Map();
         /** @type {Map<string, {mediaType: string, width: number, height: number}>} */
         this._imageMetadataByPath = new Map();
         /** @type {boolean} */
@@ -607,15 +643,15 @@ export class DictionaryImporter {
                 }
                 sharedGlossaryArtifactAppendMs = Math.max(0, Date.now() - tSharedGlossaryAppendStart);
             }
-            const hasArchiveImageMediaFiles = this._archiveHasImageMediaFiles(fileMap);
+            const hasArchiveImportableMediaFiles = this._archiveHasImportableMediaFiles(fileMap);
             const useMediaPipeline = (
                 !this._skipMediaImport &&
                 !useTermArtifactFiles &&
-                hasArchiveImageMediaFiles
+                hasArchiveImportableMediaFiles
             );
             this._logImport(
                 `media pipeline enabled=${String(useMediaPipeline)} skipMediaImport=${String(this._skipMediaImport)} ` +
-                `hasArchiveImageMediaFiles=${String(hasArchiveImageMediaFiles)}`,
+                `hasArchiveImportableMediaFiles=${String(hasArchiveImportableMediaFiles)}`,
             );
             const uniqueMediaPaths = useMediaPipeline ? new Set() : null;
             const termFileProgressAllowance = bulkAddProgressAllowance * 2;
@@ -675,7 +711,11 @@ export class DictionaryImporter {
                     /** @type {import('dictionary-importer').ImportRequirement[]} */
                     const notAddedRequirements = [];
                     for (const requirement of requirements) {
-                        const mediaPath = requirement.source.path;
+                        const mediaPath = getImportRequirementMediaPath(requirement);
+                        if (mediaPath === null) {
+                            notAddedRequirements.push(requirement);
+                            continue;
+                        }
                         if (uniqueMediaPaths.has(mediaPath)) {
                             alreadyAddedRequirements.push(requirement);
                             continue;
@@ -1115,7 +1155,7 @@ export class DictionaryImporter {
                 step4AccountedMs: Math.max(0, step4AccountedMs),
                 step4OtherMs: Math.max(0, importDataBanksElapsedMs - step4AccountedMs),
                 useMediaPipeline,
-                hasArchiveImageMediaFiles,
+                hasArchiveImportableMediaFiles,
             });
 
             // Finalize dictionary descriptor
@@ -1268,9 +1308,9 @@ export class DictionaryImporter {
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
      * @returns {boolean}
      */
-    _archiveHasImageMediaFiles(fileMap) {
+    _archiveHasImportableMediaFiles(fileMap) {
         for (const fileName of fileMap.keys()) {
-            if (getImageMediaTypeFromFileName(fileName) !== null) {
+            if (getMediaTypeFromFileName(fileName) !== 'application/octet-stream') {
                 return true;
             }
         }
@@ -1493,6 +1533,8 @@ export class DictionaryImporter {
         switch (tag) {
             case 'img':
                 return this._prepareStructuredContentImage(content, entry, requirements);
+            case 'a':
+                return this._prepareStructuredContentLink(content, entry, requirements);
         }
         const childContent = content.content;
         if (typeof childContent !== 'undefined') {
@@ -1517,6 +1559,25 @@ export class DictionaryImporter {
             path: '', // Will be populated during requirement resolution
         };
         requirements.push({type: 'structured-content-image', target, source: content, entry});
+        return target;
+    }
+
+    /**
+     * @param {import('structured-content').LinkElement} content
+     * @param {import('dictionary-database').DatabaseTermEntry} entry
+     * @param {import('dictionary-importer').ImportRequirement[]} requirements
+     * @returns {import('structured-content').LinkElement}
+     */
+    _prepareStructuredContentLink(content, entry, requirements) {
+        const target = {...content};
+        const {href} = content;
+        if (typeof href === 'string' && href.startsWith(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX)) {
+            requirements.push({type: 'structured-content-media-link', target, source: content, entry});
+        }
+        const childContent = content.content;
+        if (typeof childContent !== 'undefined') {
+            target.content = this._prepareStructuredContent(childContent, entry, requirements);
+        }
         return target;
     }
 
@@ -1562,6 +1623,13 @@ export class DictionaryImporter {
                     requirement.entry,
                 );
                 break;
+            case 'structured-content-media-link':
+                await this._resolveStructuredContentMediaLink(
+                    context,
+                    requirement.source,
+                    requirement.entry,
+                );
+                break;
             default:
                 return;
         }
@@ -1572,7 +1640,15 @@ export class DictionaryImporter {
      * @returns {boolean}
      */
     _tryResolveRequirementFromCachedImageMetadata(requirement) {
-        const sourcePath = requirement.source.path;
+        let sourcePath;
+        switch (requirement.type) {
+            case 'image':
+            case 'structured-content-image':
+                sourcePath = requirement.source.path;
+                break;
+            default:
+                return false;
+        }
         const cachedMetadata = this._imageMetadataByPath.get(sourcePath);
         if (typeof cachedMetadata === 'undefined') {
             return false;
@@ -1622,6 +1698,25 @@ export class DictionaryImporter {
         if (typeof border === 'string') { target.border = border; }
         if (typeof borderRadius === 'string') { target.borderRadius = borderRadius; }
         if (typeof sizeUnits === 'string') { target.sizeUnits = sizeUnits; }
+    }
+
+    /**
+     * @param {import('dictionary-importer').ImportRequirementContext} context
+     * @param {import('structured-content').LinkElement} source
+     * @param {import('dictionary-database').DatabaseTermEntry} entry
+     * @returns {Promise<void>}
+     */
+    async _resolveStructuredContentMediaLink(context, source, entry) {
+        const {href} = source;
+        if (typeof href !== 'string' || !href.startsWith(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX)) {
+            return;
+        }
+        const path = decodeURIComponent(href.substring(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX.length));
+        if (getImageMediaTypeFromFileName(path) !== null) {
+            await this._getImageMedia(context, path, entry);
+            return;
+        }
+        await this._getGenericMedia(context, path, entry);
     }
 
     /**
@@ -1685,23 +1780,21 @@ export class DictionaryImporter {
         const {media} = context;
         const {dictionary} = entry;
 
-        /**
-         * @param {string} message
-         * @returns {Error}
-         */
-        const createError = (message) => {
-            const {expression, reading} = entry;
-            const readingSource = reading.length > 0 ? ` (${reading})` : '';
-            return new Error(`${message} at path ${JSON.stringify(path)} for ${expression}${readingSource} in ${dictionary}`);
-        };
-
         // Check if already added
         const mediaData = media.get(path);
         if (typeof mediaData !== 'undefined') {
             if (getFileExtensionFromImageMediaType(mediaData.mediaType) === null) {
-                throw createError('Media file is not a valid image');
+                throw createMediaImportError(path, entry, 'Media file is not a valid image');
             }
             return mediaData;
+        }
+        const pendingGeneric = this._pendingMediaByPath.get(path);
+        if (typeof pendingGeneric !== 'undefined') {
+            const pendingMedia = await pendingGeneric;
+            if (getFileExtensionFromImageMediaType(pendingMedia.mediaType) === null) {
+                throw createMediaImportError(path, entry, 'Media file is not a valid image');
+            }
+            return pendingMedia;
         }
         const pending = this._pendingImageMediaByPath.get(path);
         if (typeof pending !== 'undefined') {
@@ -1722,7 +1815,7 @@ export class DictionaryImporter {
             // Find file in archive
             const file = context.fileMap.get(path);
             if (typeof file === 'undefined') {
-                throw createError('Could not find image');
+                throw createMediaImportError(path, entry, 'Could not find image');
             }
 
             // Load file content
@@ -1730,7 +1823,7 @@ export class DictionaryImporter {
 
             const mediaType = getImageMediaTypeFromFileName(path);
             if (mediaType === null) {
-                throw createError('Could not determine media type for image');
+                throw createMediaImportError(path, entry, 'Could not determine media type for image');
             }
 
             let width = 0;
@@ -1740,7 +1833,7 @@ export class DictionaryImporter {
                 try {
                     ({content, width, height} = await this._mediaLoader.getImageDetails(content, mediaType));
                 } catch (e) {
-                    throw createError('Could not load image');
+                    throw createMediaImportError(path, entry, 'Could not load image');
                 }
             }
 
@@ -1761,6 +1854,51 @@ export class DictionaryImporter {
             return await promise;
         } finally {
             this._pendingImageMediaByPath.delete(path);
+        }
+    }
+
+    /**
+     * @param {import('dictionary-importer').ImportRequirementContext} context
+     * @param {string} path
+     * @param {import('dictionary-database').DatabaseTermEntry} entry
+     * @returns {Promise<import('dictionary-database').MediaDataArrayBufferContent>}
+     */
+    async _getGenericMedia(context, path, entry) {
+        const {media} = context;
+        const {dictionary} = entry;
+
+        const mediaData = media.get(path);
+        if (typeof mediaData !== 'undefined') {
+            return mediaData;
+        }
+        const pending = this._pendingMediaByPath.get(path);
+        if (typeof pending !== 'undefined') {
+            return await pending;
+        }
+
+        const promise = (async () => {
+            const file = context.fileMap.get(path);
+            if (typeof file === 'undefined') {
+                throw createMediaImportError(path, entry, 'Could not find media');
+            }
+
+            const content = await (await this._getData(file, new BlobWriter())).arrayBuffer();
+            const created = {
+                dictionary,
+                path,
+                mediaType: getMediaTypeFromFileName(path),
+                width: 0,
+                height: 0,
+                content,
+            };
+            media.set(path, created);
+            return created;
+        })();
+        this._pendingMediaByPath.set(path, promise);
+        try {
+            return await promise;
+        } finally {
+            this._pendingMediaByPath.delete(path);
         }
     }
 
@@ -2409,14 +2547,16 @@ export class DictionaryImporter {
                             }
                             usePrecomputedTermContent = !useRawBytesDirectContent;
                         } else {
-                            const skipGlossaryParse = (
+                            const rowGlossaryJson = this._getFastRowGlossaryJson(row);
+                            const glossaryLikelyContainsMedia = (
                                 typeof row.glossaryMayContainMedia === 'boolean' ?
-                                    !row.glossaryMayContainMedia :
-                                    !this._glossaryJsonLikelyContainsMedia(this._getFastRowGlossaryJson(row))
+                                    (row.glossaryMayContainMedia || this._glossaryJsonLikelyContainsMedia(rowGlossaryJson)) :
+                                    this._glossaryJsonLikelyContainsMedia(rowGlossaryJson)
                             );
+                            const skipGlossaryParse = !glossaryLikelyContainsMedia;
                             if (skipGlossaryParse) {
                                 if (!this._wasmPassThroughTermContent) {
-                                    entry.glossaryJson = this._getFastRowGlossaryJson(row);
+                                    entry.glossaryJson = rowGlossaryJson;
                                 }
                                 usePrecomputedTermContent = true;
                             } else {
@@ -2428,7 +2568,6 @@ export class DictionaryImporter {
                                     entry.termTags = contentPayload.termTags;
                                     glossaryList = contentPayload.glossary;
                                 } else {
-                                    const rowGlossaryJson = this._getFastRowGlossaryJson(row);
                                     glossaryList = this._parseGlossaryJsonFromFastRow(rowGlossaryJson, termFile.filename);
                                 }
                                 for (let j = 0, jj = glossaryList.length; j < jj; ++j) {
@@ -2781,7 +2920,7 @@ export class DictionaryImporter {
         if (this._glossaryMediaFastScan) {
             return this._glossaryJsonLikelyContainsMediaFast(glossaryJson);
         }
-        return /"type"\s*:\s*"image"|"tag"\s*:\s*"img"/.test(glossaryJson);
+        return /"type"\s*:\s*"image"|"tag"\s*:\s*"img"|"href"\s*:\s*"media:/.test(glossaryJson);
     }
 
     /**
@@ -2791,7 +2930,8 @@ export class DictionaryImporter {
     _glossaryJsonLikelyContainsMediaFast(glossaryJson) {
         const hasTypeImage = glossaryJson.includes('"type"') && glossaryJson.includes('"image"');
         const hasTagImg = glossaryJson.includes('"tag"') && glossaryJson.includes('"img"');
-        return hasTypeImage || hasTagImg;
+        const hasMediaHref = glossaryJson.includes('"href"') && glossaryJson.includes('"media:');
+        return hasTypeImage || hasTagImg || hasMediaHref;
     }
 
     /**

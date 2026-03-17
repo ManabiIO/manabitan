@@ -2573,6 +2573,28 @@ button.hotkey-list-item-enabled-button[data-scope-count='0'] {
     background-color: var(--dictionary-import-border-color-hover);
 }
 
+.dictionary-import-note p {
+    margin: 0.4em 0 0;
+}
+
+.dictionary-import-note-text {
+    margin: 0 0 0.6em;
+}
+
+.dictionary-import-mdx-options {
+    display: grid;
+    gap: 0.75em;
+}
+
+.dictionary-import-mdx-option {
+    display: grid;
+    gap: 0.35em;
+}
+
+.dictionary-import-mdx-option input[type=text] {
+    width: 100%;
+}
+
 #dictionary-drag-drop-text {
     pointer-events: none;
 }

@@ -26,6 +26,15 @@ import {
     test,
     writeToClipboardFromPage,
 } from './playwright-util.js';
+import {
+    mdxDescriptionOverride,
+    mdxDictionaryTitle,
+    mdxListingUrl,
+    mdxLookupGlossary,
+    mdxLookupTerm,
+    mdxRevisionOverride,
+    setupMdxImportHarness,
+} from './mdx-import-harness.js';
 
 const testDictionaryTitle = 'valid-dictionary1';
 const japaneseLookupTerm = '読む';
@@ -561,6 +570,75 @@ test('dictionary db export and restore', async ({page, extensionId}) => {
         expect(info.length).toBe(1);
         expect(info[0].title).toBe(testDictionaryTitle);
     }).toPass({timeout: 10_000});
+});
+
+test('chromium settings URL import routes an MDX listing through the browser flow and supports lookup', async ({page, extensionId}) => {
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+
+    await page.goto(`${extensionBaseUrl}/settings.html`);
+    await waitForSettingsPageReady(page);
+    await invokeRuntimeApi(page, 'purgeDatabase');
+    await page.reload();
+    await waitForSettingsPageReady(page);
+    await page.locator('input#advanced-checkbox').evaluate((/** @type {HTMLInputElement} */ element) => element.click());
+
+    const harness = await setupMdxImportHarness(page);
+
+    await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+    await page.locator('button#dictionary-import-button').click();
+    await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
+    await page.locator('#dictionary-import-mdx-title-override').fill(mdxDictionaryTitle);
+    await page.locator('#dictionary-import-mdx-description-override').fill(mdxDescriptionOverride);
+    await page.locator('#dictionary-import-mdx-revision').fill(mdxRevisionOverride);
+    await page.locator('#dictionary-import-url-text').fill(mdxListingUrl);
+    await page.locator('button#dictionary-import-url-button').click();
+
+    await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 2 * 60 * 1000});
+    await expect(async () => {
+        const info = /** @type {Array<{title?: string, description?: string}>} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
+        expect(info.length).toBe(1);
+        expect(info[0]?.title).toBe(mdxDictionaryTitle);
+        expect(info[0]?.description).toBe(mdxDescriptionOverride);
+    }).toPass({timeout: 60_000});
+
+    expect(harness.requestCounts.listing).toBeGreaterThan(0);
+    expect(harness.requestCounts.mdx).toBeGreaterThan(0);
+    expect(harness.requestCounts.mdd).toBeGreaterThan(0);
+
+    const nativeState = await page.evaluate(() => {
+        return Reflect.get(globalThis, '__manabitanPlaywrightMdxState');
+    });
+    expect(nativeState).toMatchObject({
+        convertCalls: 1,
+        lastConvert: {
+            hostName: 'manabitan_mdx',
+            options: {
+                titleOverride: mdxDictionaryTitle,
+                descriptionOverride: mdxDescriptionOverride,
+                revision: mdxRevisionOverride,
+            },
+        },
+    });
+    expect(Array.isArray(nativeState?.uploads)).toBe(true);
+    const uploadedFileNames = Array.isArray(nativeState?.uploads) ?
+        nativeState.uploads.map((/** @type {{fileName: string}} */ upload) => upload.fileName).sort() :
+        [];
+    expect(uploadedFileNames).toStrictEqual([
+        'Oxford English Dictionary 2nd v4.0.mdd',
+        'Oxford English Dictionary 2nd v4.0.mdx',
+    ]);
+    expect(harness.archiveFileName).toBe(`${mdxDictionaryTitle}.zip`);
+
+    await page.goto(`${extensionBaseUrl}/search.html`);
+    await waitForSearchPageReady(page);
+    await waitForTermsLookupReady(page, mdxLookupTerm);
+    await runSearch(page, mdxLookupTerm);
+    await expect(page.locator('#dictionary-entries .entry')).toBeVisible({timeout: 30_000});
+    await expect(page.locator('#dictionary-entries')).toContainText(mdxLookupGlossary);
+    await expect(async () => {
+        const dictionaryNames = await getResultDictionaryNames(page);
+        expect(dictionaryNames).toContain(mdxDictionaryTitle);
+    }).toPass({timeout: 30_000});
 });
 
 test('chromium happy path covers multi-dictionary import, lookup scroll, and Anki add', async ({page, extensionId}) => {
