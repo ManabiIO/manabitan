@@ -31,10 +31,16 @@ const sharedExclude = [
 
 export default defineConfig({
     plugins: [codspeedPlugin()],
-    setupFiles: [
-        './test/vitest.setup.js',
-    ],
     test: {
+        setupFiles: [
+            './test/vitest.setup.js',
+        ],
+        benchmark: {
+            include: [
+                '**/*.bench.js',
+            ],
+            exclude: sharedExclude,
+        },
         exclude: [
             ...sharedExclude,
             'test/json.test.js',
@@ -45,11 +51,5 @@ export default defineConfig({
                 useAtomics: true,
             },
         },
-    },
-    benchmark: {
-        include: [
-            '**/*.bench.js',
-        ],
-        exclude: sharedExclude,
     },
 });

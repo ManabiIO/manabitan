@@ -1,11 +1,11 @@
 # Experimental MDX Import Helper
 
-Manabitan’s experimental MDX import flow converts `.mdx` and companion `.mdd` files into a normal Yomitan archive before import. The extension-side UI expects a native messaging host named `manabitan_mdx`, and the reference helper lives in [`dev/native/mdx-import/`](/Users/skerraut/Documents/manabitan/dev/native/mdx-import).
+Manabitan’s experimental MDX import flow converts `.mdx` and companion `.mdd` files into a normal Yomitan archive before import. The extension-side UI expects a native messaging host named `manabitan_mdx`, and the reference helper lives in [`dev/native/mdx-import/`](../../dev/native/mdx-import/).
 
 ## What’s included
 
-- [`mdx_to_yomitan.py`](/Users/skerraut/Documents/manabitan/dev/native/mdx-import/mdx_to_yomitan.py): converts `.mdx` plus optional `.mdd` resources into `index.json` + `term_bank_*.json` + extracted assets.
-- [`native_host.py`](/Users/skerraut/Documents/manabitan/dev/native/mdx-import/native_host.py): a chunked native-messaging host that matches the browser-side protocol used by [`mdx.js`](/Users/skerraut/Documents/manabitan/ext/js/comm/mdx.js).
+- [`mdx_to_yomitan.py`](../../dev/native/mdx-import/mdx_to_yomitan.py): converts `.mdx` plus optional `.mdd` resources into `index.json` + `term_bank_*.json` + extracted assets.
+- [`native_host.py`](../../dev/native/mdx-import/native_host.py): a chunked native-messaging host that matches the browser-side protocol used by [`mdx.js`](../../ext/js/comm/mdx.js).
 
 ## Local setup
 

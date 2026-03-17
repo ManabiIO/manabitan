@@ -143,6 +143,11 @@ Scripts can be executed by running `npm run <name>`.
   Repeats the Firefox happy-path lane multiple consecutive times to catch intermittent failures.
   Set `MANABITAN_REPEAT_COUNT` to override the default repeat count of `5`.
 
+- `test:e2e:chromium-freemdict-soak`
+  Runs a manual Chromium-only soak script against the public FreeMdict WebDAV share.
+  The runner enumerates supported import targets (`.zip`, plus `.mdx` with matching `.mdd` companions), imports them one at a time through the real settings page, writes resumable JSON report/state files, purges extension state between cases, and deletes downloaded temp files after each case unless `--keep-failed` is used.
+  This script is intended for external compatibility/soak testing, not routine CI gating.
+
 - `test:e2e:chromium-anki-dedupe`
   Runs the dedicated Chromium Anki deduplication matrix using Playwright and a deterministic local mocked AnkiConnect endpoint.
   Mock-mode behavior:

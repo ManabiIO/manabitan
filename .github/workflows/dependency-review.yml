@@ -16,12 +16,43 @@ jobs:
   dependency-review:
     runs-on: ubuntu-latest
     steps:
+      - name: Check dependency graph availability
+        id: dependency-graph
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --header 'Accept: application/vnd.github+json' \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/repos/${{ github.repository }}/dependency-graph/sbom")"
+
+          case "${status}" in
+            200)
+              echo "available=true" >> "${GITHUB_OUTPUT}"
+              ;;
+            403|404)
+              echo "available=false" >> "${GITHUB_OUTPUT}"
+              ;;
+            *)
+              echo "Unexpected dependency graph probe status: ${status}" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Dependency review unavailable
+        if: steps.dependency-graph.outputs.available != 'true'
+        run: echo "Dependency graph is not available for this repository; skipping dependency review."
+
       - name: Harden Runner
+        if: steps.dependency-graph.outputs.available == 'true'
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
         with:
           egress-policy: audit
 
       - name: 'Checkout Repository'
+        if: steps.dependency-graph.outputs.available == 'true'
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: 'Dependency Review'
+        if: steps.dependency-graph.outputs.available == 'true'
         uses: actions/dependency-review-action@56339e523c0409420f6c2c9a2f4292bbb3c07dd3 # v4.8.0

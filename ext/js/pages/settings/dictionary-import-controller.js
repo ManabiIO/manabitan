@@ -1471,16 +1471,14 @@ export class DictionaryImportController {
             return sources;
         }
 
-        const showDirectoryPicker = /** @type {((options?: {mode?: 'read'|'readwrite'}) => Promise<FileSystemDirectoryHandle>)|undefined} */ (
-            Reflect.get(globalThis, 'showDirectoryPicker')
-        );
+        const showDirectoryPickerValue = /** @type {unknown} */ (Reflect.get(globalThis, 'showDirectoryPicker'));
+        const showDirectoryPicker = typeof showDirectoryPickerValue === 'function' ? /** @type {(options?: {mode?: 'read'|'readwrite'}) => Promise<FileSystemDirectoryHandle>} */ (showDirectoryPickerValue) : null;
         if (typeof showDirectoryPicker !== 'function') {
             return sources;
         }
 
         try {
             // `showDirectoryPicker` is not modeled precisely enough in this lint setup, so cast the result once here.
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const directoryHandle = /** @type {FileSystemDirectoryHandle} */ (
                 /** @type {unknown} */ (await showDirectoryPicker({mode: 'read'}))
             );
@@ -1528,7 +1526,7 @@ export class DictionaryImportController {
             return companionFilesByKey;
         }
 
-        const values = Reflect.get(directoryHandle, 'values');
+        const values = /** @type {unknown} */ (Reflect.get(directoryHandle, 'values'));
         if (typeof values !== 'function') {
             return companionFilesByKey;
         }
