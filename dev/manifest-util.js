@@ -142,6 +142,7 @@ export class ManifestUtil {
                             if (typeof command === 'object' && command !== null) {
                                 value = this._evaluateModificationCommand(command);
                             }
+                            value = structuredClone(value);
 
                             this._setObjectKeyAtIndex(object, key, value, index);
                         }
