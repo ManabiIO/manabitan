@@ -23,14 +23,58 @@ export const mdxDescriptionOverride = 'Playwright-routed MDX import fixture for 
 export const mdxRevisionOverride = 'playwright-mdx-import';
 export const mdxLookupTerm = 'dictionary';
 export const mdxLookupGlossary = 'a reference book that lists words and explains what they mean';
+export const localMdxFixtureFileName = 'playwright-yome.mdx';
+export const localMdxDictionaryTitle = 'Playwright Yome MDX';
+export const localMdxDescription = 'Playwright local drag-and-drop MDX fixture for the Japanese lookup workflow.';
+export const localMdxRevision = 'playwright-mdx-local';
+export const localMdxLookupTerm = '読め';
+export const localMdxLookupGlossary = 'playwright mdx fixture result for 読め';
+export const localEnglishMdxFixtureFileName = 'playwright-read.mdx';
+export const localEnglishMdxDictionaryTitle = 'Playwright Read MDX';
+export const localEnglishMdxDescription = 'Playwright local drag-and-drop MDX fixture for the English lookup workflow.';
+export const localEnglishMdxRevision = 'playwright-mdx-english';
+export const localEnglishMdxLookupTerm = 'Read';
+export const localEnglishMdxLookupGlossary = 'playwright mdx fixture result for Read';
 
 const mdxFileName = 'Oxford English Dictionary 2nd v4.0.mdx';
 const mddFileName = 'Oxford English Dictionary 2nd v4.0.mdd';
 const mdxFileUrl = 'https://mdx.mdict.org/%E5%85%AD%E5%A4%A7%E7%9F%A5%E5%90%8D%E8%AF%8D%E5%85%B8/%E7%89%9B%E6%B4%A5_Oxford/Oxford%20English%20Dictionary%202nd%20v4_%2014-10-9/Oxford%20English%20Dictionary%202nd%20v4.0.mdx';
 const mddFileUrl = 'https://mdx.mdict.org/%E5%85%AD%E5%A4%A7%E7%9F%A5%E5%90%8D%E8%AF%8D%E5%85%B8/%E7%89%9B%E6%B4%A5_Oxford/Oxford%20English%20Dictionary%202nd%20v4_%2014-10-9/Oxford%20English%20Dictionary%202nd%20v4.0.mdd';
+const defaultMdxHarnessOptions = {
+    dictionaryTitle: mdxDictionaryTitle,
+    descriptionOverride: mdxDescriptionOverride,
+    revisionOverride: mdxRevisionOverride,
+    lookupTerm: mdxLookupTerm,
+    lookupGlossary: mdxLookupGlossary,
+    mdxBuffer: Buffer.from('playwright-mdx-fixture-data', 'utf8'),
+    mddBuffer: Buffer.from('playwright-mdd-fixture-data', 'utf8'),
+    listingUrl: mdxListingUrl,
+    mdxUrl: mdxFileUrl,
+    mddUrl: mddFileUrl,
+    mdxFileName,
+    mddFileName,
+};
 
-/** @type {Promise<{archiveBase64: string, archiveFileName: string, mdxBuffer: Buffer, mddBuffer: Buffer}>|null} */
-let mdxFixturePromise = null;
+/**
+ * @typedef {{
+ *   dictionaryTitle: string,
+ *   descriptionOverride: string,
+ *   revisionOverride: string,
+ *   lookupTerm: string,
+ *   lookupGlossary: string,
+ *   archiveFileName?: string,
+ *   mdxBuffer?: Buffer,
+ *   mddBuffer?: Buffer|null,
+ *   listingUrl?: string|null,
+ *   mdxUrl?: string|null,
+ *   mddUrl?: string|null,
+ *   mdxFileName?: string,
+ *   mddFileName?: string,
+ * }} PlaywrightMdxFixtureOptions
+ */
+
+/** @type {Map<string, Promise<{archiveBase64: string, archiveFileName: string, mdxBuffer: Buffer, mddBuffer: Buffer|null}>>} */
+const mdxFixturePromiseMap = new Map();
 
 /**
  * @param {ArrayBuffer} arrayBuffer
@@ -70,44 +114,57 @@ async function createDictionaryArchiveData(details) {
 }
 
 /**
- * @returns {Promise<{archiveBase64: string, archiveFileName: string, mdxBuffer: Buffer, mddBuffer: Buffer}>}
+ * @param {PlaywrightMdxFixtureOptions} options
+ * @returns {Promise<{archiveBase64: string, archiveFileName: string, mdxBuffer: Buffer, mddBuffer: Buffer|null}>}
  */
-async function getMdxFixture() {
-    if (mdxFixturePromise !== null) {
-        return await mdxFixturePromise;
+async function getMdxFixture(options) {
+    const cacheKey = JSON.stringify({
+        dictionaryTitle: options.dictionaryTitle,
+        descriptionOverride: options.descriptionOverride,
+        revisionOverride: options.revisionOverride,
+        lookupTerm: options.lookupTerm,
+        lookupGlossary: options.lookupGlossary,
+        archiveFileName: options.archiveFileName ?? null,
+        mdxBufferBase64: (options.mdxBuffer ?? Buffer.from('playwright-mdx-fixture-data', 'utf8')).toString('base64'),
+        mddBufferBase64: options.mddBuffer instanceof Buffer ? options.mddBuffer.toString('base64') : null,
+    });
+    let promise = mdxFixturePromiseMap.get(cacheKey);
+    if (typeof promise !== 'undefined') {
+        return await promise;
     }
 
-    mdxFixturePromise = (async () => {
-        const archiveFileName = `${mdxDictionaryTitle}.zip`;
+    promise = (async () => {
+        const archiveFileName = options.archiveFileName ?? `${options.dictionaryTitle}.zip`;
         const archiveBuffer = await createDictionaryArchiveData({
-            title: mdxDictionaryTitle,
-            description: mdxDescriptionOverride,
-            revision: mdxRevisionOverride,
-            expression: mdxLookupTerm,
-            glossary: mdxLookupGlossary,
+            title: options.dictionaryTitle,
+            description: options.descriptionOverride,
+            revision: options.revisionOverride,
+            expression: options.lookupTerm,
+            glossary: options.lookupGlossary,
         });
 
         return {
             archiveBase64: arrayBufferToBase64(archiveBuffer),
             archiveFileName,
-            mdxBuffer: Buffer.from('playwright-mdx-fixture-data', 'utf8'),
-            mddBuffer: Buffer.from('playwright-mdd-fixture-data', 'utf8'),
+            mdxBuffer: options.mdxBuffer ?? Buffer.from('playwright-mdx-fixture-data', 'utf8'),
+            mddBuffer: options.mddBuffer ?? null,
         };
     })();
-
-    return await mdxFixturePromise;
+    mdxFixturePromiseMap.set(cacheKey, promise);
+    return await promise;
 }
 
 /**
+ * @param {{mdxFileName: string, mddFileName: string}} details
  * @returns {string}
  */
-function createListingHtml() {
+function createListingHtml({mdxFileName: currentMdxFileName, mddFileName: currentMddFileName}) {
     return [
         '<!doctype html>',
         '<html lang="en">',
         '<body>',
-        `<a href="${encodeURIComponent(mdxFileName)}">${mdxFileName}</a>`,
-        `<a href="${encodeURIComponent(mddFileName)}">${mddFileName}</a>`,
+        `<a href="${encodeURIComponent(currentMdxFileName)}">${currentMdxFileName}</a>`,
+        `<a href="${encodeURIComponent(currentMddFileName)}">${currentMddFileName}</a>`,
         '</body>',
         '</html>',
     ].join('');
@@ -115,40 +172,66 @@ function createListingHtml() {
 
 /**
  * @param {import('@playwright/test').Page} page
+ * @param {PlaywrightMdxFixtureOptions} [options]
  * @returns {Promise<{requestCounts: {listing: number, mdx: number, mdd: number}, archiveFileName: string}>}
  */
-export async function setupMdxImportHarness(page) {
-    const fixture = await getMdxFixture();
+export async function setupMdxImportHarness(page, options = defaultMdxHarnessOptions) {
+    const normalizedOptions = {
+        dictionaryTitle: options.dictionaryTitle,
+        descriptionOverride: options.descriptionOverride,
+        revisionOverride: options.revisionOverride,
+        lookupTerm: options.lookupTerm,
+        lookupGlossary: options.lookupGlossary,
+        archiveFileName: options.archiveFileName,
+        mdxBuffer: options.mdxBuffer,
+        mddBuffer: options.mddBuffer ?? null,
+        listingUrl: options.listingUrl ?? null,
+        mdxUrl: options.mdxUrl ?? null,
+        mddUrl: options.mddUrl ?? null,
+        mdxFileName: options.mdxFileName ?? 'fixture.mdx',
+        mddFileName: options.mddFileName ?? 'fixture.mdd',
+    };
+    const fixture = await getMdxFixture(normalizedOptions);
     const requestCounts = {
         listing: 0,
         mdx: 0,
         mdd: 0,
     };
 
-    await page.route(mdxListingUrl, async (route) => {
-        requestCounts.listing += 1;
-        await route.fulfill({
-            status: 200,
-            contentType: 'text/html; charset=utf-8',
-            body: createListingHtml(),
+    if (typeof normalizedOptions.listingUrl === 'string') {
+        await page.route(normalizedOptions.listingUrl, async (route) => {
+            requestCounts.listing += 1;
+            await route.fulfill({
+                status: 200,
+                contentType: 'text/html; charset=utf-8',
+                body: createListingHtml({
+                    mdxFileName: normalizedOptions.mdxFileName,
+                    mddFileName: normalizedOptions.mddFileName,
+                }),
+            });
         });
-    });
-    await page.route(mdxFileUrl, async (route) => {
-        requestCounts.mdx += 1;
-        await route.fulfill({
-            status: 200,
-            contentType: 'application/octet-stream',
-            body: fixture.mdxBuffer,
+    }
+    if (typeof normalizedOptions.mdxUrl === 'string') {
+        await page.route(normalizedOptions.mdxUrl, async (route) => {
+            requestCounts.mdx += 1;
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/octet-stream',
+                body: fixture.mdxBuffer,
+            });
         });
-    });
-    await page.route(mddFileUrl, async (route) => {
-        requestCounts.mdd += 1;
-        await route.fulfill({
-            status: 200,
-            contentType: 'application/octet-stream',
-            body: fixture.mddBuffer,
+    }
+    if (typeof normalizedOptions.mddUrl === 'string' && fixture.mddBuffer !== null) {
+        const mddBuffer = fixture.mddBuffer;
+        await page.route(normalizedOptions.mddUrl, async (route) => {
+            requestCounts.mdd += 1;
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/octet-stream',
+                body: mddBuffer,
+            });
         });
-    });
+    }
 
     await page.evaluate(({
         archiveBase64,

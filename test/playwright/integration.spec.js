@@ -16,6 +16,7 @@
  */
 
 import path from 'path';
+import {readFileSync} from 'fs';
 import {createDictionaryArchiveData} from '../../dev/dictionary-archive-util.js';
 import {createDictionaryDatabaseBase64} from '../e2e/minimal-dictionary-database.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
@@ -27,6 +28,18 @@ import {
     writeToClipboardFromPage,
 } from './playwright-util.js';
 import {
+    localEnglishMdxDescription,
+    localEnglishMdxDictionaryTitle,
+    localEnglishMdxFixtureFileName,
+    localEnglishMdxLookupGlossary,
+    localEnglishMdxLookupTerm,
+    localEnglishMdxRevision,
+    localMdxDescription,
+    localMdxDictionaryTitle,
+    localMdxFixtureFileName,
+    localMdxLookupGlossary,
+    localMdxLookupTerm,
+    localMdxRevision,
     mdxDescriptionOverride,
     mdxDictionaryTitle,
     mdxListingUrl,
@@ -59,6 +72,8 @@ const happyPathSeedNotes = [{
     findable: true,
 }];
 const dictionaryFixtureDirectory = path.join(root, 'test', 'data', 'dictionaries', 'valid-dictionary1');
+const localMdxFixturePath = path.join(root, 'test', 'data', 'dictionaries', localMdxFixtureFileName);
+const localEnglishMdxFixturePath = path.join(root, 'test', 'data', 'dictionaries', localEnglishMdxFixtureFileName);
 const clipboardMonitorInitialValue = 'い';
 const clipboardMonitorUpdatedValue = 'あ';
 /** @type {Promise<string>|null} */
@@ -256,6 +271,93 @@ async function waitForSearchPageReady(page) {
 
 /**
  * @param {import('@playwright/test').Page} page
+ * @param {Array<{name: string, mimeType: string, buffer: Buffer}>} files
+ * @returns {Promise<void>}
+ */
+async function dragAndDropDictionaryFiles(page, files) {
+    const dropZone = page.locator('#dictionary-drop-file-zone');
+    const serializedFiles = files.map(({name, mimeType, buffer}) => ({
+        name,
+        mimeType,
+        base64: buffer.toString('base64'),
+    }));
+
+    await page.evaluate((fileList) => {
+        /**
+         * @param {string} base64
+         * @returns {Uint8Array}
+         */
+        const base64ToBytes = (base64) => {
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; ++i) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes;
+        };
+
+        /**
+         * @param {string} eventType
+         * @returns {void}
+         */
+        const dispatchDropEvent = (eventType) => {
+            const node = document.querySelector('#dictionary-drop-file-zone');
+            if (!(node instanceof HTMLElement)) {
+                throw new Error('Missing dictionary drop zone');
+            }
+            const event = new Event(eventType, {bubbles: true, cancelable: true});
+            Object.defineProperty(event, 'dataTransfer', {
+                configurable: true,
+                value: Reflect.get(globalThis, '__manabitanPlaywrightDropTransfer'),
+            });
+            node.dispatchEvent(event);
+        };
+
+        const items = fileList.map(({name, mimeType, base64}) => {
+            const file = new File([base64ToBytes(base64)], name, {type: mimeType});
+            const entry = {
+                isFile: true,
+                isDirectory: false,
+                name,
+                /**
+                 * @param {(file: File) => void} resolve
+                 * @param {(reason?: unknown) => void} _reject
+                 */
+                file(resolve, _reject) {
+                    resolve(file);
+                },
+            };
+            return {
+                kind: 'file',
+                type: mimeType,
+                webkitGetAsEntry() {
+                    return entry;
+                },
+            };
+        });
+        Reflect.set(globalThis, '__manabitanPlaywrightDropTransfer', {items});
+        Reflect.set(globalThis, '__manabitanPlaywrightDispatchDropEvent', dispatchDropEvent);
+        dispatchDropEvent('dragenter');
+    }, serializedFiles);
+
+    await expect(dropZone).toHaveClass(/drag-over/, {timeout: 5_000});
+
+    await page.evaluate(() => {
+        const dispatchDropEvent = Reflect.get(globalThis, '__manabitanPlaywrightDispatchDropEvent');
+        if (typeof dispatchDropEvent !== 'function') {
+            throw new Error('Missing synthetic drop event dispatcher');
+        }
+        dispatchDropEvent('dragover');
+        dispatchDropEvent('drop');
+        Reflect.deleteProperty(globalThis, '__manabitanPlaywrightDispatchDropEvent');
+        Reflect.deleteProperty(globalThis, '__manabitanPlaywrightDropTransfer');
+    });
+
+    await expect(dropZone).not.toHaveClass(/drag-over/, {timeout: 5_000});
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
  * @param {string} query
  * @returns {Promise<void>}
  */
@@ -276,6 +378,38 @@ async function waitForTermsLookupReady(page, query) {
         expect(Array.isArray(result?.dictionaryEntries)).toBe(true);
         expect(result?.dictionaryEntries?.length ?? 0).toBeGreaterThan(0);
     }).toPass({timeout: 30_000});
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {string} text
+ * @returns {Promise<void>}
+ */
+async function setSettingsPreviewText(page, text) {
+    await page.evaluate((previewText) => {
+        const frame = document.querySelector('#popup-preview-frame');
+        if (!(frame instanceof HTMLIFrameElement) || frame.contentWindow === null) {
+            throw new Error('Missing popup preview frame');
+        }
+        const targetOrigin = chrome.runtime.getURL('/').replace(/\/$/, '');
+        frame.contentWindow.postMessage({action: 'setText', params: {text: previewText}}, targetOrigin);
+    }, text);
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {string} language
+ * @returns {Promise<void>}
+ */
+async function setCurrentProfileLanguage(page, language) {
+    const optionsFull = /** @type {import('settings').Options} */ (await invokeRuntimeApi(page, 'optionsGetFull'));
+    for (const profile of optionsFull.profiles) {
+        profile.options.general.language = language;
+    }
+    await invokeRuntimeApi(page, 'setAllSettings', {value: optionsFull, source: `playwright-language-${language}`});
+    await page.reload();
+    await waitForSettingsPageReady(page);
+    await expect(page.locator('#language-select')).toHaveValue(language, {timeout: 30_000});
 }
 
 /**
@@ -638,6 +772,170 @@ test('chromium settings URL import routes an MDX listing through the browser flo
     await expect(async () => {
         const dictionaryNames = await getResultDictionaryNames(page);
         expect(dictionaryNames).toContain(mdxDictionaryTitle);
+    }).toPass({timeout: 30_000});
+});
+
+test('chromium settings drag and drop imports a local MDX fixture, updates preview, and supports lookup', async ({page, extensionId}) => {
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const localMdxFixture = {
+        name: localMdxFixtureFileName,
+        mimeType: 'application/octet-stream',
+        buffer: readFileSync(localMdxFixturePath),
+    };
+
+    await page.goto(`${extensionBaseUrl}/settings.html`);
+    await waitForSettingsPageReady(page);
+    await invokeRuntimeApi(page, 'purgeDatabase');
+    await page.reload();
+    await waitForSettingsPageReady(page);
+
+    const harness = await setupMdxImportHarness(page, {
+        dictionaryTitle: localMdxDictionaryTitle,
+        descriptionOverride: localMdxDescription,
+        revisionOverride: localMdxRevision,
+        lookupTerm: localMdxLookupTerm,
+        lookupGlossary: localMdxLookupGlossary,
+        mdxBuffer: localMdxFixture.buffer,
+        mdxFileName: localMdxFixture.name,
+    });
+
+    await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+    await page.locator('button#dictionary-import-button').click();
+    await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
+    await dragAndDropDictionaryFiles(page, [localMdxFixture]);
+
+    await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 2 * 60 * 1000});
+    await expect(async () => {
+        const info = /** @type {Array<{title?: string, description?: string, revision?: string}>} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
+        expect(info.length).toBe(1);
+        expect(info[0]?.title).toBe(localMdxDictionaryTitle);
+        expect(info[0]?.description).toBe(localMdxDescription);
+        expect(info[0]?.revision).toBe(localMdxRevision);
+    }).toPass({timeout: 60_000});
+
+    expect(harness.requestCounts.listing).toBe(0);
+    expect(harness.requestCounts.mdx).toBe(0);
+    expect(harness.requestCounts.mdd).toBe(0);
+
+    const nativeState = await page.evaluate(() => {
+        return Reflect.get(globalThis, '__manabitanPlaywrightMdxState');
+    });
+    expect(nativeState).toMatchObject({
+        convertCalls: 1,
+        lastConvert: {
+            hostName: 'manabitan_mdx',
+            options: {
+                titleOverride: '',
+                descriptionOverride: '',
+                revision: '',
+            },
+        },
+    });
+    expect(Array.isArray(nativeState?.uploads)).toBe(true);
+    const uploadedFileNames = Array.isArray(nativeState?.uploads) ?
+        nativeState.uploads.map((/** @type {{fileName: string}} */ upload) => upload.fileName).sort() :
+        [];
+    expect(uploadedFileNames).toStrictEqual([localMdxFixtureFileName]);
+    expect(harness.archiveFileName).toBe(`${localMdxDictionaryTitle}.zip`);
+
+    await page.locator('#dictionaries-modal button[data-modal-action="hide"]').getByText('Close').click();
+    await setSettingsPreviewText(page, localMdxLookupTerm);
+
+    const preview = page.frameLocator('#popup-preview-frame');
+    await expect(preview.locator('#example-text')).toHaveText(localMdxLookupTerm, {timeout: 30_000});
+    await expect(preview.locator('.placeholder-info')).not.toHaveClass(/placeholder-info-visible/, {timeout: 30_000});
+
+    await page.goto(`${extensionBaseUrl}/search.html`);
+    await waitForSearchPageReady(page);
+    await waitForTermsLookupReady(page, localMdxLookupTerm);
+    await runSearch(page, localMdxLookupTerm);
+    await expect(page.locator('#dictionary-entries .entry')).toBeVisible({timeout: 30_000});
+    await expect(page.locator('#dictionary-entries')).toContainText(localMdxLookupGlossary);
+    await expect(async () => {
+        const dictionaryNames = await getResultDictionaryNames(page);
+        expect(dictionaryNames).toContain(localMdxDictionaryTitle);
+    }).toPass({timeout: 30_000});
+});
+
+test('chromium settings drag and drop imports an English local MDX fixture, updates preview, and supports lookup', async ({page, extensionId}) => {
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const localEnglishMdxFixture = {
+        name: localEnglishMdxFixtureFileName,
+        mimeType: 'application/octet-stream',
+        buffer: readFileSync(localEnglishMdxFixturePath),
+    };
+
+    await page.goto(`${extensionBaseUrl}/settings.html`);
+    await waitForSettingsPageReady(page);
+    await invokeRuntimeApi(page, 'purgeDatabase');
+    await page.reload();
+    await waitForSettingsPageReady(page);
+
+    const harness = await setupMdxImportHarness(page, {
+        dictionaryTitle: localEnglishMdxDictionaryTitle,
+        descriptionOverride: localEnglishMdxDescription,
+        revisionOverride: localEnglishMdxRevision,
+        lookupTerm: localEnglishMdxLookupTerm,
+        lookupGlossary: localEnglishMdxLookupGlossary,
+        mdxBuffer: localEnglishMdxFixture.buffer,
+        mdxFileName: localEnglishMdxFixture.name,
+    });
+
+    await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+    await page.locator('button#dictionary-import-button').click();
+    await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
+    await dragAndDropDictionaryFiles(page, [localEnglishMdxFixture]);
+
+    await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 2 * 60 * 1000});
+    await expect(async () => {
+        const info = /** @type {Array<{title?: string, description?: string, revision?: string}>} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
+        expect(info.length).toBe(1);
+        expect(info[0]?.title).toBe(localEnglishMdxDictionaryTitle);
+        expect(info[0]?.description).toBe(localEnglishMdxDescription);
+        expect(info[0]?.revision).toBe(localEnglishMdxRevision);
+    }).toPass({timeout: 60_000});
+
+    expect(harness.requestCounts.listing).toBe(0);
+    expect(harness.requestCounts.mdx).toBe(0);
+    expect(harness.requestCounts.mdd).toBe(0);
+
+    const nativeState = await page.evaluate(() => {
+        return Reflect.get(globalThis, '__manabitanPlaywrightMdxState');
+    });
+    expect(nativeState).toMatchObject({
+        convertCalls: 1,
+        lastConvert: {
+            hostName: 'manabitan_mdx',
+            options: {
+                titleOverride: '',
+                descriptionOverride: '',
+                revision: '',
+            },
+        },
+    });
+    expect(Array.isArray(nativeState?.uploads)).toBe(true);
+    const uploadedFileNames = Array.isArray(nativeState?.uploads) ?
+        nativeState.uploads.map((/** @type {{fileName: string}} */ upload) => upload.fileName).sort() :
+        [];
+    expect(uploadedFileNames).toStrictEqual([localEnglishMdxFixtureFileName]);
+    expect(harness.archiveFileName).toBe(`${localEnglishMdxDictionaryTitle}.zip`);
+
+    await setCurrentProfileLanguage(page, 'en');
+    await setSettingsPreviewText(page, localEnglishMdxLookupTerm);
+
+    const preview = page.frameLocator('#popup-preview-frame');
+    await expect(preview.locator('#example-text')).toHaveText(localEnglishMdxLookupTerm, {timeout: 30_000});
+    await expect(preview.locator('.placeholder-info')).not.toHaveClass(/placeholder-info-visible/, {timeout: 30_000});
+
+    await page.goto(`${extensionBaseUrl}/search.html`);
+    await waitForSearchPageReady(page);
+    await waitForTermsLookupReady(page, localEnglishMdxLookupTerm);
+    await runSearch(page, localEnglishMdxLookupTerm);
+    await expect(page.locator('#dictionary-entries .entry')).toBeVisible({timeout: 30_000});
+    await expect(page.locator('#dictionary-entries')).toContainText(localEnglishMdxLookupGlossary);
+    await expect(async () => {
+        const dictionaryNames = await getResultDictionaryNames(page);
+        expect(dictionaryNames).toContain(localEnglishMdxDictionaryTitle);
     }).toPass({timeout: 30_000});
 });
 

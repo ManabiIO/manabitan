@@ -75,49 +75,78 @@
     </div></div>
 
     <div id="dictionary-import-modal" class="modal" tabindex="-1" role="dialog" hidden><div class="modal-content modal-content-medium">
-        <div class="modal-header"><div class="modal-title">Import Dictionaries</div></div>
-        <div class="modal-body">
-            <div id="dictionary-drop-file-zone">
-                <div id="dictionary-drag-drop-text">
-                    <span class="icon" data-icon="book"></span>
-                    <h1>Drag and drop dictionaries (.zip, .mdx, .mdd)</h1>
-                    <h5>or click here to upload</h5>
+        <div class="modal-header dictionary-import-modal-header">
+            <div class="dictionary-import-modal-heading">
+                <div class="modal-title">Import Dictionaries</div>
+                <p class="dictionary-import-modal-subtitle">Upload dictionary files directly, then reach for MDX-specific options only when you need them.</p>
+            </div>
+        </div>
+        <div class="modal-body dictionary-import-modal-body">
+            <section class="dictionary-import-hero">
+                <button type="button" id="dictionary-drop-file-zone" aria-describedby="dictionary-import-upload-copy dictionary-import-helper-copy">
+                    <span id="dictionary-drag-drop-text">
+                        <span class="icon" data-icon="book"></span>
+                        <span class="dictionary-import-overline">Upload dictionary files</span>
+                        <span class="dictionary-import-title">Drop <code>.zip</code>, <code>.mdx</code>, and optional <code>.mdd</code> files</span>
+                        <span id="dictionary-import-upload-copy" class="dictionary-import-lead">Import regular Yomitan archives directly, or add an MDX dictionary the same way.</span>
+                        <span class="dictionary-import-format-chips" aria-hidden="true">
+                            <span class="dictionary-import-format-chip">.zip</span>
+                            <span class="dictionary-import-format-chip">.mdx</span>
+                            <span class="dictionary-import-format-chip">.mdd optional</span>
+                        </span>
+                        <span class="dictionary-import-upload-hint">Click anywhere in this panel to choose files</span>
+                    </span>
+                </button>
+            </section>
+
+            <div class="dictionary-import-support-grid">
+                <section class="dictionary-import-card">
+                    <h2>What to expect</h2>
+                    <ul class="dictionary-import-checklist">
+                        <li>Zip dictionaries import immediately.</li>
+                        <li>MDX dictionaries import normally. Matching <code>.mdd</code> files are only needed when the dictionary ships bundled media or images.</li>
+                        <li>You can leave the MDX metadata alone unless you want to override the imported details.</li>
+                    </ul>
+                    <p id="dictionary-import-helper-copy" class="dictionary-import-note-text">Include any companion <code>.mdd</code> files in the same selection when you have them. If you only have the <code>.mdx</code>, import will still continue.</p>
+                </section>
+
+                <section class="dictionary-import-card">
+                    <details class="dictionary-import-advanced-details">
+                        <summary>Advanced MDX options</summary>
+                        <p class="dictionary-import-banner warning-text">MDX conversion still requires the optional native helper and the browser’s <code>nativeMessaging</code> permission.</p>
+                        <p class="dictionary-import-note-text">Optional overrides for unusual dictionaries. Leaving these blank uses the MDX metadata and the helper default revision.</p>
+                        <div class="dictionary-import-mdx-options">
+                            <label class="dictionary-import-mdx-option">
+                                <span>MDX title override</span>
+                                <input type="text" id="dictionary-import-mdx-title-override" placeholder="Use MDX metadata">
+                            </label>
+                            <label class="dictionary-import-mdx-option">
+                                <span>MDX description override</span>
+                                <input type="text" id="dictionary-import-mdx-description-override" placeholder="Use MDX metadata">
+                            </label>
+                            <label class="dictionary-import-mdx-option">
+                                <span>MDX revision override</span>
+                                <input type="text" id="dictionary-import-mdx-revision" placeholder="Use helper default">
+                            </label>
+                            <label class="checkbox-container dictionary-import-mdx-toggle">
+                                <input type="checkbox" id="dictionary-import-mdx-audio-toggle">
+                                <span>Convert <code>sound://</code> links into HTML audio elements during MDX conversion</span>
+                            </label>
+                        </div>
+                    </details>
+                </section>
+            </div>
+
+            <section class="dictionary-import-card dictionary-import-url-card advanced-only">
+                <h2>Import from URLs</h2>
+                <p class="dictionary-import-note-text">Paste a direct dictionary file URL, or a simple directory listing page that links to one <code>.mdx</code> plus any matching <code>.mdd</code> companions.</p>
+                <textarea type="text" id="dictionary-import-url-text"></textarea>
+                <div class="dictionary-import-inline-actions">
+                    <button type="button" data-modal-action="hide" class="low-emphasis dictionary-database-mutating-input" id="dictionary-import-url-button">Import from URLs</button>
                 </div>
-            </div>
-            <div class="dictionary-import-note margin-above">
-                <p>Import Yomitan zip dictionaries directly, or import an <code>.mdx</code> together with any companion <code>.mdd</code> resource files.</p>
-                <p>If you only pick an <code>.mdx</code>, Manabitan can try a follow-up folder picker to look for matching <code>FILE.mdd</code>, <code>FILE.1.mdd</code>, and similar companion resources when the browser supports it.</p>
-                <p class="warning-text">MDX import is experimental and requires the optional native helper plus the browser’s <code>nativeMessaging</code> permission.</p>
-            </div>
-            <div class="dictionary-import-mdx-options margin-above">
-                <label class="dictionary-import-mdx-option">
-                    <span>MDX title override</span>
-                    <input type="text" id="dictionary-import-mdx-title-override" placeholder="Use MDX metadata by default">
-                </label>
-                <label class="dictionary-import-mdx-option">
-                    <span>MDX description override</span>
-                    <input type="text" id="dictionary-import-mdx-description-override" placeholder="Use MDX metadata by default">
-                </label>
-                <label class="dictionary-import-mdx-option">
-                    <span>MDX revision override</span>
-                    <input type="text" id="dictionary-import-mdx-revision" placeholder="mdx import">
-                </label>
-                <label class="checkbox-container">
-                    <input type="checkbox" id="dictionary-import-mdx-audio-toggle">
-                    <span>Convert <code>sound://</code> links into HTML audio elements during MDX conversion</span>
-                </label>
-            </div>
+            </section>
         </div>
         <div class="modal-footer">
-            <button type="button" data-modal-action="hide" class="basic-only">Close</button>
-        </div>
-        <div class="modal-body advanced-only">
-            <p>Import dictionaries from URLs:</p>
-            <p class="dictionary-import-note-text">Paste a direct dictionary file URL, or a simple directory listing page that links to one <code>.mdx</code> plus matching <code>.mdd</code> companions.</p>
-            <textarea type="text" id="dictionary-import-url-text"></textarea>
-        </div>
-        <div class="modal-footer advanced-only">
-            <button type="button" data-modal-action="hide" class="low-emphasis dictionary-database-mutating-input" id="dictionary-import-url-button">Import from URLs</button>
             <button type="button" data-modal-action="hide">Close</button>
         </div>
     </div></div>

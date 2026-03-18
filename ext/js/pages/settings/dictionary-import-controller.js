@@ -1726,6 +1726,12 @@ export class DictionaryImportController {
                     continue;
                 }
 
+
+                const directFileName = getDictionaryFileNameFromUrl(trimmedUrl);
+                if (!mdxImportReady && directFileName !== null && isMdxDictionaryFileName(directFileName)) {
+                    await this._ensureMdxImportReady();
+                    mdxImportReady = true;
+                }
                 const source = await this._createImportSourceFromUrl(trimmedUrl, onProgress);
                 if (source.type === 'mdx' && !mdxImportReady) {
                     await this._ensureMdxImportReady();

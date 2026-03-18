@@ -486,6 +486,7 @@ describe('MDX companion discovery and URL resolution', () => {
 
         expect(results).toHaveLength(2);
         expect(ensureMdxImportReady).toHaveBeenCalledTimes(1);
+        expect(ensureMdxImportReady.mock.invocationCallOrder[0]).toBeLessThan(createImportSource.mock.invocationCallOrder[0]);
     });
 });
 
