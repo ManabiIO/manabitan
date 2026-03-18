@@ -589,6 +589,7 @@ export class OptionsUtil {
             this._updateVersion75,
             this._updateVersion76,
             this._updateVersion77,
+            this._updateVersion78,
         ];
         /* eslint-enable @typescript-eslint/unbound-method */
         if (typeof targetVersion === 'number' && targetVersion < result.length) {
@@ -1857,11 +1858,30 @@ export class OptionsUtil {
     }
 
     /**
+     *  - Added general.popupBlurByFrequencyEnabled
+     *  - Added general.popupBlurByFrequencyDictionary
+     *  - Added general.popupBlurByFrequencyThreshold
+     *  - Added general.popupBlurByFrequencyOrder
+     *  - Added general.popupBlurByFrequencyUnblurDelay
+     *  @type {import('options-util').UpdateFunction}
+     */
+    async _updateVersion77(options) {
+        for (const profile of options.profiles) {
+            const {general} = profile.options;
+            general.popupBlurByFrequencyEnabled = false;
+            general.popupBlurByFrequencyDictionary = null;
+            general.popupBlurByFrequencyThreshold = 10000;
+            general.popupBlurByFrequencyOrder = 'descending';
+            general.popupBlurByFrequencyUnblurDelay = 0;
+        }
+    }
+
+    /**
      *  - Added global.database.autoUpdateDictionariesOnStartup
      *  - Removed global.dictionaryAutoUpdates
      *  @type {import('options-util').UpdateFunction}
      */
-    async _updateVersion77(options) {
+    async _updateVersion78(options) {
         if (!isObjectNotArray(options.global)) {
             options.global = {};
         }

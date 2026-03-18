@@ -312,6 +312,11 @@ function createProfileOptionsUpdatedTestData1() {
             termDisplayMode: 'ruby',
             sortFrequencyDictionary: null,
             sortFrequencyDictionaryOrder: 'descending',
+            popupBlurByFrequencyEnabled: false,
+            popupBlurByFrequencyDictionary: null,
+            popupBlurByFrequencyThreshold: 10000,
+            popupBlurByFrequencyOrder: 'descending',
+            popupBlurByFrequencyUnblurDelay: 0,
             stickySearchHeader: false,
             enableYomitanApi: false,
             yomitanApiServer: 'http://127.0.0.1:19633',
@@ -706,7 +711,7 @@ function createOptionsUpdatedTestData1() {
             },
         ],
         profileCurrent: 0,
-        version: 77,
+        version: 78,
         global: {
             database: {
                 prefixWildcardsSupported: false,
@@ -763,7 +768,22 @@ describe('OptionsUtil', () => {
         expect(partialsUpdated).toStrictEqual(partialsExpected);
     });
 
-    test('Version76And77MigrationsUpdateDictionaryOptions', async () => {
+    test('Version75And76MigrationsAddDictionaryOptions', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+
+        const options = /** @type {import('core').SafeAny} */ (createOptionsUpdatedTestData1());
+        options.version = 74;
+        delete options.global.dictionaryAutoUpdates;
+        delete options.global.database.maxHeadwordLength;
+
+        const optionsUpdated = structuredClone(await optionsUtil.update(options, 76));
+        expect(optionsUpdated.version).toBe(76);
+        expect(optionsUpdated.global.dictionaryAutoUpdates).toStrictEqual([]);
+        expect(optionsUpdated.global.database.maxHeadwordLength).toBe(0);
+    });
+
+    test('Version76And78MigrationsUpdateDictionaryOptions', async () => {
         const optionsUtil = new OptionsUtil();
         await optionsUtil.prepare();
 
@@ -774,10 +794,39 @@ describe('OptionsUtil', () => {
         options.global.dictionaryAutoUpdates = ['https://example.invalid/old-index.json'];
 
         const optionsUpdated = structuredClone(await optionsUtil.update(options));
-        expect(optionsUpdated.version).toBe(77);
+        expect(optionsUpdated.version).toBe(78);
         expect(optionsUpdated.global.database.maxHeadwordLength).toBe(0);
         expect(optionsUpdated.global.database.autoUpdateDictionariesOnStartup).toBe(false);
         expect('dictionaryAutoUpdates' in optionsUpdated.global).toBe(false);
+    });
+
+    test('PopupFrequencyBlurVersion77MigrationUsesDefaultsAndStaysDecoupled', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+
+        const options = /** @type {import('settings').Options} */ (structuredClone(createOptionsUpdatedTestData1()));
+        options.version = 76;
+        const general = /** @type {import('core').SafeAny} */ (options.profiles[0].options.general);
+        general.sortFrequencyDictionary = 'Sort Dictionary';
+        general.sortFrequencyDictionaryOrder = 'ascending';
+        delete general.popupBlurByFrequencyEnabled;
+        delete general.popupBlurByFrequencyDictionary;
+        delete general.popupBlurByFrequencyThreshold;
+        delete general.popupBlurByFrequencyOrder;
+        delete general.popupBlurByFrequencyUnblurDelay;
+
+        const optionsUpdated = structuredClone(await optionsUtil.update(options, 77));
+        const defaultGeneral = optionsUtil.getDefault().profiles[0].options.general;
+        expect(optionsUpdated.version).toBe(77);
+        expect(optionsUpdated.profiles[0].options.general).toMatchObject({
+            popupBlurByFrequencyEnabled: defaultGeneral.popupBlurByFrequencyEnabled,
+            popupBlurByFrequencyDictionary: defaultGeneral.popupBlurByFrequencyDictionary,
+            popupBlurByFrequencyThreshold: defaultGeneral.popupBlurByFrequencyThreshold,
+            popupBlurByFrequencyOrder: defaultGeneral.popupBlurByFrequencyOrder,
+            popupBlurByFrequencyUnblurDelay: defaultGeneral.popupBlurByFrequencyUnblurDelay,
+            sortFrequencyDictionary: 'Sort Dictionary',
+            sortFrequencyDictionaryOrder: 'ascending',
+        });
     });
 
     describe('Default', () => {
