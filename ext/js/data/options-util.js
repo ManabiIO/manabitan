@@ -588,6 +588,7 @@ export class OptionsUtil {
             this._updateVersion74,
             this._updateVersion75,
             this._updateVersion76,
+            this._updateVersion77,
         ];
         /* eslint-enable @typescript-eslint/unbound-method */
         if (typeof targetVersion === 'number' && targetVersion < result.length) {
@@ -1853,6 +1854,25 @@ export class OptionsUtil {
             options.global.database = {};
         }
         options.global.database.maxHeadwordLength = 0;
+    }
+
+    /**
+     *  - Added general.popupBlurByFrequencyEnabled
+     *  - Added general.popupBlurByFrequencyDictionary
+     *  - Added general.popupBlurByFrequencyThreshold
+     *  - Added general.popupBlurByFrequencyOrder
+     *  - Added general.popupBlurByFrequencyUnblurDelay
+     *  @type {import('options-util').UpdateFunction}
+     */
+    async _updateVersion77(options) {
+        for (const profile of options.profiles) {
+            const {general} = profile.options;
+            general.popupBlurByFrequencyEnabled = false;
+            general.popupBlurByFrequencyDictionary = null;
+            general.popupBlurByFrequencyThreshold = 10000;
+            general.popupBlurByFrequencyOrder = 'descending';
+            general.popupBlurByFrequencyUnblurDelay = 0;
+        }
     }
 
     /**

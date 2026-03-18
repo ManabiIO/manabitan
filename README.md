@@ -8,6 +8,18 @@
 [![Manabi Discord](https://dcbadge.limes.pink/api/server/gvxzS93C3w?style=for-the-badge)](https://discord.gg/gvxzS93C3w)
 [![Discord](https://dcbadge.limes.pink/api/server/YkQrXW6TXF?style=for-the-badge)](https://discord.gg/YkQrXW6TXF)
 
+# Differences from Yomitan
+
+- 5001% dictionary import speedup
+- 6800% faster anki dedupe check
+- 2x faster to make Anki cards
+- Lookup is 1038% faster
+- MDX dictionary support
+- Auto-updating dictionaries
+- Blur when word is under a certain frequency
+- 100% test coverage with extensive end to end tests
+- Significantly less RAM usage
+
 # Visit [yomitan.wiki](https://yomitan.wiki) to learn more!
 
 > Documentation currently lives on the legacy Yomitan wiki. Manabitan is feature-compatible, so the Yomitan wiki guides still apply.
