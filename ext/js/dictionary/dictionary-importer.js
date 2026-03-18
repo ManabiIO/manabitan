@@ -467,6 +467,7 @@ export class DictionaryImporter {
         });
         this._logImport(`archive+index ${Date.now() - tArchiveStart}ms files=${fileMap.size}`);
 
+        const metadataOverrideDetails = this._applyMetadataOverrides(index, details);
         const dictionaryTitle = index.title;
         const version = /** @type {import('dictionary-data').IndexVersion} */ (index.version);
 
@@ -631,7 +632,14 @@ export class DictionaryImporter {
 
         const yomitanVersion = details.yomitanVersion;
         /** @type {import('dictionary-importer').SummaryDetails} */
-        let summaryDetails = {prefixWildcardsSupported, counts, styles: '', yomitanVersion, importSuccess};
+        let summaryDetails = {
+            prefixWildcardsSupported,
+            counts,
+            styles: '',
+            yomitanVersion,
+            ...metadataOverrideDetails,
+            importSuccess,
+        };
 
         let summary = this._createSummary(dictionaryTitle, version, index, summaryDetails);
         const dictionarySummaryPrimaryKey = await dictionaryDatabase.addWithResult('dictionaries', summary);
@@ -1236,7 +1244,14 @@ export class DictionaryImporter {
         }
 
         importSuccess = true;
-        summaryDetails = {prefixWildcardsSupported, counts, styles, yomitanVersion, importSuccess};
+        summaryDetails = {
+            prefixWildcardsSupported,
+            counts,
+            styles,
+            yomitanVersion,
+            ...metadataOverrideDetails,
+            importSuccess,
+        };
         summary = this._createSummary(dictionaryTitle, version, index, summaryDetails);
         const tSummaryUpdateStart = Date.now();
         await dictionaryDatabase.bulkUpdate('dictionaries', [{data: summary, primaryKey: dictionarySummaryPrimaryKey}], 0, 1);
@@ -1398,7 +1413,16 @@ export class DictionaryImporter {
      */
     _createSummary(dictionaryTitle, version, index, details) {
         const indexSequenced = index.sequenced;
-        const {prefixWildcardsSupported, counts, styles, importSuccess} = details;
+        const {
+            prefixWildcardsSupported,
+            counts,
+            styles,
+            metadataOverrides,
+            sourceTitle,
+            sourceDescription,
+            sourceRevision,
+            importSuccess,
+        } = details;
         /** @type {import('dictionary-importer').Summary} */
         const summary = {
             title: dictionaryTitle,
@@ -1411,6 +1435,12 @@ export class DictionaryImporter {
             styles,
             importSuccess,
         };
+        if (typeof metadataOverrides === 'object' && metadataOverrides !== null) {
+            summary.metadataOverrides = metadataOverrides;
+            if (typeof sourceTitle === 'string') { summary.sourceTitle = sourceTitle; }
+            if (typeof sourceDescription === 'string') { summary.sourceDescription = sourceDescription; }
+            if (typeof sourceRevision === 'string') { summary.sourceRevision = sourceRevision; }
+        }
 
         const {minimumYomitanVersion, author, url, description, attribution, frequencyMode, isUpdatable, sourceLanguage, targetLanguage} = index;
         if (typeof minimumYomitanVersion === 'string') {
@@ -1438,6 +1468,46 @@ export class DictionaryImporter {
             summary.downloadUrl = downloadUrl;
         }
         return summary;
+    }
+
+    /**
+     * @param {import('dictionary-data').Index} index
+     * @param {import('dictionary-importer').ImportDetails} details
+     * @returns {{metadataOverrides?: import('dictionary-importer').MetadataOverrides, sourceTitle?: string, sourceDescription?: string, sourceRevision?: string}}
+     */
+    _applyMetadataOverrides(index, details) {
+        const metadataOverridesRaw = details.metadataOverrides;
+        if (!(typeof metadataOverridesRaw === 'object' && metadataOverridesRaw !== null)) {
+            return {};
+        }
+
+        /** @type {import('dictionary-importer').MetadataOverrides} */
+        const metadataOverrides = {};
+        const title = typeof metadataOverridesRaw.title === 'string' ? metadataOverridesRaw.title.trim() : '';
+        const description = typeof metadataOverridesRaw.description === 'string' ? metadataOverridesRaw.description.trim() : '';
+        const revision = typeof metadataOverridesRaw.revision === 'string' ? metadataOverridesRaw.revision.trim() : '';
+        if (title.length > 0) { metadataOverrides.title = title; }
+        if (description.length > 0) { metadataOverrides.description = description; }
+        if (revision.length > 0) { metadataOverrides.revision = revision; }
+        if (Object.keys(metadataOverrides).length === 0) {
+            return {};
+        }
+
+        const sourceTitle = index.title;
+        const sourceDescription = typeof index.description === 'string' ? index.description : '';
+        const sourceRevision = index.revision;
+
+        if (typeof metadataOverrides.title === 'string') {
+            index.title = metadataOverrides.title;
+        }
+        if (typeof metadataOverrides.description === 'string') {
+            index.description = metadataOverrides.description;
+        }
+        if (typeof metadataOverrides.revision === 'string') {
+            index.revision = metadataOverrides.revision;
+        }
+
+        return {metadataOverrides, sourceTitle, sourceDescription, sourceRevision};
     }
 
     /**

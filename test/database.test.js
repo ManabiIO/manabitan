@@ -758,6 +758,77 @@ describe('Database', () => {
                 importDictionarySpy.mockRestore();
             }
         });
+
+        test('Uses metadata overrides as the imported dictionary identity while preserving source metadata provenance', async ({expect}) => {
+            const dictionaryDatabase = new DictionaryDatabase();
+            await dictionaryDatabase.prepare();
+
+            const testDictionarySource = await createTestDictionaryArchiveData('valid-dictionary1');
+            const testDictionaryIndex = await getDictionaryArchiveIndex(testDictionarySource);
+            const originalTitle = testDictionaryIndex.title;
+            const originalDescription = typeof testDictionaryIndex.description === 'string' ? testDictionaryIndex.description : '';
+            const originalRevision = testDictionaryIndex.revision;
+            /** @type {import('dictionary-importer').ImportDetails} */
+            const importDetails = {
+                prefixWildcardsSupported: true,
+                yomitanVersion: '0.0.0.0',
+                metadataOverrides: {
+                    title: 'Renamed Dictionary',
+                    description: 'Custom Description',
+                    revision: '2026.03',
+                },
+            };
+
+            try {
+                const {result, errors} = await createDictionaryImporter(expect).importDictionary(
+                    dictionaryDatabase,
+                    testDictionarySource,
+                    importDetails,
+                );
+                expect.soft(errors).toStrictEqual([]);
+                expect.soft(result).not.toBeNull();
+                expect.soft(result?.title).toBe('Renamed Dictionary');
+                expect.soft(result?.description).toBe('Custom Description');
+                expect.soft(result?.revision).toBe('2026.03');
+                expect.soft(result?.metadataOverrides).toStrictEqual({
+                    title: 'Renamed Dictionary',
+                    description: 'Custom Description',
+                    revision: '2026.03',
+                });
+                expect.soft(result?.sourceTitle).toBe(originalTitle);
+                expect.soft(result?.sourceDescription).toBe(originalDescription);
+                expect.soft(result?.sourceRevision).toBe(originalRevision);
+
+                const info = await dictionaryDatabase.getDictionaryInfo();
+                expect.soft(info).toHaveLength(1);
+                expect.soft(info[0]).toMatchObject({
+                    title: 'Renamed Dictionary',
+                    description: 'Custom Description',
+                    revision: '2026.03',
+                    metadataOverrides: {
+                        title: 'Renamed Dictionary',
+                        description: 'Custom Description',
+                        revision: '2026.03',
+                    },
+                    sourceTitle: originalTitle,
+                    sourceDescription: originalDescription,
+                    sourceRevision: originalRevision,
+                });
+
+                const duplicateImportResult = await createDictionaryImporter(expect).importDictionary(
+                    dictionaryDatabase,
+                    testDictionarySource,
+                    importDetails,
+                );
+                expect.soft(duplicateImportResult.result).toBeNull();
+                expect.soft(duplicateImportResult.errors).toStrictEqual([
+                    new Error('Dictionary Renamed Dictionary is already imported, skipped it.'),
+                ]);
+            } finally {
+                await dictionaryDatabase.close();
+            }
+        });
+
         test('Deduplicates shared term entry content', async ({expect}) => {
             const dictionaryDatabase = new DictionaryDatabase();
             await dictionaryDatabase.prepare();

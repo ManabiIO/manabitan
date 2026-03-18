@@ -107,6 +107,37 @@
     <button type="button" class="popup-menu-item" data-menu-action="moveTo">Move to&hellip;</button>
     <button type="button" class="popup-menu-item" data-menu-action="delete">Delete</button>
 </div></div></div></template>
+<template id="dictionary-import-source-template"><div class="settings-item dictionary-import-source">
+    <div class="settings-item-inner">
+        <div class="settings-item-left">
+            <div class="settings-item-label dictionary-import-source-title"></div>
+            <div class="settings-item-description dictionary-import-source-description"></div>
+        </div>
+    </div>
+    <div class="settings-item-children">
+        <details class="dictionary-import-source-details">
+            <summary>Advanced options</summary>
+            <div class="dictionary-import-source-fields">
+                <label class="dictionary-import-source-field">
+                    <span>Title override</span>
+                    <input type="text" class="dictionary-import-source-title-override" placeholder="Use imported title">
+                </label>
+                <label class="dictionary-import-source-field">
+                    <span>Description override</span>
+                    <input type="text" class="dictionary-import-source-description-override" placeholder="Use imported description">
+                </label>
+                <label class="dictionary-import-source-field">
+                    <span>Revision override</span>
+                    <input type="text" class="dictionary-import-source-revision-override" placeholder="Use imported revision">
+                </label>
+                <label class="checkbox-container dictionary-import-source-audio-option" hidden>
+                    <input type="checkbox" class="dictionary-import-source-audio-toggle">
+                    <span>Convert <code>sound://</code> links into HTML audio elements during MDX conversion</span>
+                </label>
+            </div>
+        </details>
+    </div>
+</div></template>
 <template id="secondary-search-dictionary-template"><div class="secondary-search-dictionary-item horizontal-flex">
     <label class="toggle"><input type="checkbox" class="dictionary-allow-secondary-searches"><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
     <span class="horizontal-flex-fill"><strong class="dictionary-title"></strong> <span class="light dictionary-revision"></span></span>

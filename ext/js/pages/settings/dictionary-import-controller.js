@@ -50,6 +50,21 @@ const MDX_CONVERSION_PROGRESS_TOTAL = 1000;
  */
 
 /**
+ * @typedef {object} PendingImportSourceOptions
+ * @property {string} titleOverride
+ * @property {string} descriptionOverride
+ * @property {string} revisionOverride
+ * @property {boolean} enableAudio
+ */
+
+/**
+ * @typedef {object} PendingImportSource
+ * @property {number} id
+ * @property {DictionaryImportSource} source
+ * @property {PendingImportSourceOptions} options
+ */
+
+/**
  * @param {string} fileName
  * @returns {string}
  */
@@ -340,17 +355,17 @@ export class DictionaryImportController {
         /** @type {HTMLInputElement} */
         this._importButton = querySelectorNotNull(document, '#dictionary-import-button');
         /** @type {HTMLInputElement} */
+        this._importConfirmButton = querySelectorNotNull(document, '#dictionary-import-confirm-button');
+        /** @type {HTMLInputElement} */
         this._importURLButton = querySelectorNotNull(document, '#dictionary-import-url-button');
         /** @type {HTMLInputElement} */
         this._importURLText = querySelectorNotNull(document, '#dictionary-import-url-text');
-        /** @type {HTMLInputElement} */
-        this._mdxTitleOverrideInput = querySelectorNotNull(document, '#dictionary-import-mdx-title-override');
-        /** @type {HTMLInputElement} */
-        this._mdxDescriptionOverrideInput = querySelectorNotNull(document, '#dictionary-import-mdx-description-override');
-        /** @type {HTMLInputElement} */
-        this._mdxRevisionInput = querySelectorNotNull(document, '#dictionary-import-mdx-revision');
-        /** @type {HTMLInputElement} */
-        this._mdxAudioToggle = querySelectorNotNull(document, '#dictionary-import-mdx-audio-toggle');
+        /** @type {HTMLElement} */
+        this._importSourceList = querySelectorNotNull(document, '#dictionary-import-source-list');
+        /** @type {HTMLElement} */
+        this._importSourceEmpty = querySelectorNotNull(document, '#dictionary-import-source-empty');
+        /** @type {?import('./modal.js').Modal} */
+        this._importModal = null;
         /** @type {?import('./modal.js').Modal} */
         this._purgeConfirmModal = null;
         /** @type {?import('./modal.js').Modal} */
@@ -398,12 +413,18 @@ export class DictionaryImportController {
         this._recommendedDictionariesRenderPending = false;
         /** @type {boolean} */
         this._recommendedDictionariesPrimed = false;
+        /** @type {PendingImportSource[]} */
+        this._pendingImportSources = [];
+        /** @type {number} */
+        this._nextPendingImportSourceId = 0;
         /** @type {Mdx} */
         this._mdx = new Mdx();
         /** @type {(event: MouseEvent) => void} */
         this._onDocumentClickCaptureBind = this._onDocumentClickCapture.bind(this);
         /** @type {(event: Event) => void} */
         this._onModalVisibilityChangedEventBind = this._onModalVisibilityChangedEvent.bind(this);
+        /** @type {(details: {visible: boolean}) => void} */
+        this._onImportModalVisibilityChangedBind = this._onImportModalVisibilityChanged.bind(this);
         /** @type {(details: {visible: boolean}) => void} */
         this._onRecommendedDictionariesModalVisibilityChangedBind = this._onRecommendedDictionariesModalVisibilityChanged.bind(this);
         /** @type {(event: Event) => void} */
@@ -425,6 +446,7 @@ export class DictionaryImportController {
         this._purgeButton.addEventListener('click', this._onPurgeButtonClick.bind(this), false);
         this._purgeConfirmButton.addEventListener('click', this._onPurgeConfirmButtonClick.bind(this), false);
         this._importButton.addEventListener('click', this._onImportButtonClick.bind(this), false);
+        this._importConfirmButton.addEventListener('click', this._onImportConfirm.bind(this), false);
         this._importURLButton.addEventListener('click', this._onImportFromURL.bind(this), false);
         this._importFileInput.addEventListener('change', this._onImportFileChange.bind(this), false);
 
@@ -438,11 +460,13 @@ export class DictionaryImportController {
 
         document.addEventListener('click', this._onDocumentClickCaptureBind, true);
         globalThis.addEventListener('manabitan:modal-visibility-changed', this._onModalVisibilityChangedEventBind, false);
+        this._importModal?.on('visibilityChanged', this._onImportModalVisibilityChangedBind);
         this._recommendedDictionariesModal?.on('visibilityChanged', this._onRecommendedDictionariesModalVisibilityChangedBind);
         if (this._welcomeLanguageAutoImportEnabled && this._languageSelect instanceof HTMLSelectElement) {
             this._languageSelect.addEventListener('change', this._onWelcomeLanguageSelectChangedBind, false);
         }
         globalThis.addEventListener('beforeunload', this._onBeforeUnload.bind(this), {once: true});
+        this._renderPendingImportSources();
         reportDiagnostics('dictionary-import-controller-prepare-complete', {
             hasRecommendedModal: this._recommendedDictionariesModal !== null,
             href: globalThis.location?.href ?? null,
@@ -484,6 +508,7 @@ export class DictionaryImportController {
     _onBeforeUnload() {
         document.removeEventListener('click', this._onDocumentClickCaptureBind, true);
         globalThis.removeEventListener('manabitan:modal-visibility-changed', this._onModalVisibilityChangedEventBind, false);
+        this._importModal?.off('visibilityChanged', this._onImportModalVisibilityChangedBind);
         this._recommendedDictionariesModal?.off('visibilityChanged', this._onRecommendedDictionariesModalVisibilityChangedBind);
         if (this._welcomeLanguageAutoImportEnabled && this._languageSelect instanceof HTMLSelectElement) {
             this._languageSelect.removeEventListener('change', this._onWelcomeLanguageSelectChangedBind, false);
@@ -510,6 +535,15 @@ export class DictionaryImportController {
         if (!visible || this._recommendedDictionariesRenderPending) { return; }
         this._recommendedDictionariesRenderPending = true;
         void this._onRecommendedDictionariesOpen();
+    }
+
+    /**
+     * @param {{visible: boolean}} details
+     */
+    _onImportModalVisibilityChanged({visible}) {
+        if (visible) { return; }
+        this._importURLText.value = '';
+        this._clearPendingImportSources();
     }
 
     /**
@@ -1207,7 +1241,6 @@ export class DictionaryImportController {
         e.preventDefault();
         this._importFileDrop.classList.remove('drag-over');
         if (e.dataTransfer === null) { return; }
-        /** @type {import('./modal.js').Modal} */ (this._importModal).setVisible(false);
         /** @type {File[]} */
         const fileArray = [];
         for (const fileEntry of await this._getAllFileEntries(e.dataTransfer.items)) {
@@ -1231,14 +1264,7 @@ export class DictionaryImportController {
                 return;
             }
         }
-        const importProgressTracker = new ImportProgressTracker(this._getFileImportSteps(), sources.length);
-        void this._importDictionaries(
-            this._arrayToAsyncGenerator(sources),
-            null,
-            null,
-            importProgressTracker,
-            errors,
-        );
+        this._appendPendingImportSources(sources, errors);
     }
 
     /**
@@ -1307,18 +1333,6 @@ export class DictionaryImportController {
             this._showErrors([new Error(errorText)]);
             throw new Error(errorText);
         }
-    }
-
-    /**
-     * @returns {{titleOverride: string, descriptionOverride: string, revision: string, enableAudio: boolean}}
-     */
-    _getMdxImportOptions() {
-        return {
-            titleOverride: this._mdxTitleOverrideInput.value.trim(),
-            descriptionOverride: this._mdxDescriptionOverrideInput.value.trim(),
-            revision: this._mdxRevisionInput.value.trim(),
-            enableAudio: this._mdxAudioToggle.checked,
-        };
     }
 
     /**
@@ -1429,6 +1443,157 @@ export class DictionaryImportController {
     }
 
     /**
+     * @param {DictionaryImportSource[]} sources
+     * @param {Error[]} [errors]
+     */
+    _appendPendingImportSources(sources, errors = []) {
+        for (const source of sources) {
+            this._pendingImportSources.push({
+                id: this._nextPendingImportSourceId++,
+                source,
+                options: {
+                    titleOverride: '',
+                    descriptionOverride: '',
+                    revisionOverride: '',
+                    enableAudio: false,
+                },
+            });
+        }
+        this._renderPendingImportSources();
+        this._hideErrors();
+        if (errors.length > 0) {
+            this._showErrors(errors);
+        }
+    }
+
+    /** */
+    _clearPendingImportSources() {
+        this._pendingImportSources = [];
+        this._renderPendingImportSources();
+    }
+
+    /** */
+    _renderPendingImportSources() {
+        this._importSourceList.textContent = '';
+        const hasSources = this._pendingImportSources.length > 0;
+        this._importSourceEmpty.hidden = hasSources;
+        this._importConfirmButton.disabled = !hasSources;
+        if (!hasSources) {
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        for (const pendingSource of this._pendingImportSources) {
+            const node = /** @type {HTMLElement} */ (this._settingsController.instantiateTemplate('dictionary-import-source'));
+            const title = querySelectorNotNull(node, '.dictionary-import-source-title');
+            const description = querySelectorNotNull(node, '.dictionary-import-source-description');
+            /** @type {HTMLInputElement} */
+            const titleOverride = querySelectorNotNull(node, '.dictionary-import-source-title-override');
+            /** @type {HTMLInputElement} */
+            const descriptionOverride = querySelectorNotNull(node, '.dictionary-import-source-description-override');
+            /** @type {HTMLInputElement} */
+            const revisionOverride = querySelectorNotNull(node, '.dictionary-import-source-revision-override');
+            /** @type {HTMLElement} */
+            const audioOption = querySelectorNotNull(node, '.dictionary-import-source-audio-option');
+            /** @type {HTMLInputElement} */
+            const audioToggle = querySelectorNotNull(node, '.dictionary-import-source-audio-toggle');
+
+            title.textContent = this._getPendingImportSourceLabel(pendingSource.source);
+            description.textContent = this._getPendingImportSourceDescription(pendingSource.source);
+            titleOverride.value = pendingSource.options.titleOverride;
+            descriptionOverride.value = pendingSource.options.descriptionOverride;
+            revisionOverride.value = pendingSource.options.revisionOverride;
+            audioOption.hidden = pendingSource.source.type !== 'mdx';
+            audioToggle.checked = pendingSource.options.enableAudio;
+
+            titleOverride.addEventListener('input', (event) => {
+                const target = /** @type {HTMLInputElement} */ (event.currentTarget);
+                pendingSource.options.titleOverride = target.value;
+            }, false);
+            descriptionOverride.addEventListener('input', (event) => {
+                const target = /** @type {HTMLInputElement} */ (event.currentTarget);
+                pendingSource.options.descriptionOverride = target.value;
+            }, false);
+            revisionOverride.addEventListener('input', (event) => {
+                const target = /** @type {HTMLInputElement} */ (event.currentTarget);
+                pendingSource.options.revisionOverride = target.value;
+            }, false);
+            audioToggle.addEventListener('change', (event) => {
+                const target = /** @type {HTMLInputElement} */ (event.currentTarget);
+                pendingSource.options.enableAudio = target.checked;
+            }, false);
+
+            fragment.appendChild(node);
+        }
+        this._importSourceList.appendChild(fragment);
+    }
+
+    /**
+     * @param {DictionaryImportSource} source
+     * @returns {string}
+     */
+    _getPendingImportSourceLabel(source) {
+        return source.type === 'zip' ? source.file.name : source.mdxFile.name;
+    }
+
+    /**
+     * @param {DictionaryImportSource} source
+     * @returns {string}
+     */
+    _getPendingImportSourceDescription(source) {
+        if (source.type === 'zip') {
+            return 'ZIP archive';
+        }
+        const mddCount = source.mddFiles.length;
+        return mddCount > 0 ? `MDX dictionary with ${mddCount} matching MDD file${mddCount === 1 ? '' : 's'}` : 'MDX dictionary';
+    }
+
+    /**
+     * @param {PendingImportSource} pendingSource
+     * @returns {import('dictionary-importer').MetadataOverrides|undefined}
+     */
+    _getMetadataOverrides(pendingSource) {
+        /** @type {import('dictionary-importer').MetadataOverrides} */
+        const metadataOverrides = {};
+        const title = pendingSource.options.titleOverride.trim();
+        const description = pendingSource.options.descriptionOverride.trim();
+        const revision = pendingSource.options.revisionOverride.trim();
+        if (title.length > 0) { metadataOverrides.title = title; }
+        if (description.length > 0) { metadataOverrides.description = description; }
+        if (revision.length > 0) { metadataOverrides.revision = revision; }
+        return Object.keys(metadataOverrides).length > 0 ? metadataOverrides : void 0;
+    }
+
+    /**
+     * @param {DictionaryImportSource|PendingImportSource|null} request
+     * @returns {{source: DictionaryImportSource|null, metadataOverrides?: import('dictionary-importer').MetadataOverrides, enableAudio: boolean}}
+     */
+    _normalizeImportRequest(request) {
+        if (!(typeof request === 'object' && request !== null)) {
+            return {source: null, enableAudio: false};
+        }
+        if ('type' in request) {
+            return {source: /** @type {DictionaryImportSource} */ (request), enableAudio: false};
+        }
+        if (
+            'source' in request &&
+            typeof request.source === 'object' &&
+            request.source !== null &&
+            'options' in request &&
+            typeof request.options === 'object' &&
+            request.options !== null
+        ) {
+            const pendingSource = /** @type {PendingImportSource} */ (request);
+            return {
+                source: pendingSource.source,
+                metadataOverrides: this._getMetadataOverrides(pendingSource),
+                enableAudio: pendingSource.options.enableAudio === true,
+            };
+        }
+        return {source: null, enableAudio: false};
+    }
+
+    /**
      * @returns {Promise<void>}
      */
     async _ensureMdxImportReady() {
@@ -1468,6 +1633,22 @@ export class DictionaryImportController {
         /** @type {import('./modal.js').Modal} */ (this._importModal).setVisible(true);
     }
 
+    /** */
+    _onImportConfirm() {
+        if (this._pendingImportSources.length === 0) { return; }
+        const pendingImportSources = this._pendingImportSources.map((pendingSource) => ({
+            ...pendingSource,
+            options: {...pendingSource.options},
+        }));
+        /** @type {import('./modal.js').Modal} */ (this._importModal).setVisible(false);
+        void this._importDictionaries(
+            this._arrayToAsyncGenerator(pendingImportSources),
+            null,
+            null,
+            new ImportProgressTracker(this._getFileImportSteps(), pendingImportSources.length),
+        );
+    }
+
     /**
      * @param {MouseEvent} e
      */
@@ -1489,7 +1670,6 @@ export class DictionaryImportController {
      * @param {Event} e
      */
     async _onImportFileChange(e) {
-        /** @type {import('./modal.js').Modal} */ (this._importModal).setVisible(false);
         const node = /** @type {HTMLInputElement} */ (e.currentTarget);
         const {files} = node;
         if (files === null) { return; }
@@ -1508,20 +1688,31 @@ export class DictionaryImportController {
                 return;
             }
         }
-        void this._importDictionaries(
-            this._arrayToAsyncGenerator(sources),
-            null,
-            null,
-            new ImportProgressTracker(this._getFileImportSteps(), sources.length),
-            errors,
-        );
+        this._appendPendingImportSources(sources, errors);
     }
 
     /** */
     async _onImportFromURL() {
         const text = this._importURLText.value.trim();
         if (!text) { return; }
-        await this.importFilesFromURLs(text, null, null);
+        /** @type {Error[]} */
+        const errors = [];
+        /** @type {DictionaryImportSource[]} */
+        const sources = [];
+        const onProgress = () => {};
+        for await (const source of this._generateFilesFromUrls(text.split('\n'), onProgress, (error) => {
+            errors.push(error);
+        })) {
+            sources.push(source);
+        }
+        if (sources.length === 0) {
+            if (errors.length > 0) {
+                this._showErrors(errors);
+            }
+            return;
+        }
+        this._importURLText.value = '';
+        this._appendPendingImportSources(sources, errors);
     }
 
     /**
@@ -1546,10 +1737,11 @@ export class DictionaryImportController {
     /**
      * @param {string[]} urls
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {(error: Error) => void} [onError]
      * @yields {Promise<DictionaryImportSource>}
      * @returns {AsyncGenerator<DictionaryImportSource, void, void>}
      */
-    async *_generateFilesFromUrls(urls, onProgress) {
+    async *_generateFilesFromUrls(urls, onProgress, onError = void 0) {
         let mdxImportReady = false;
         for (const url of urls) {
             onProgress({nextStep: true, index: 0, count: 0});
@@ -1613,6 +1805,9 @@ export class DictionaryImportController {
                     throw error;
                 }
                 log.error(error);
+                if (typeof onError === 'function') {
+                    onError(toError(error));
+                }
             }
         }
     }
@@ -1902,7 +2097,7 @@ export class DictionaryImportController {
     }
 
     /**
-     * @param {AsyncGenerator<DictionaryImportSource, void, void>} dictionaries
+     * @param {AsyncGenerator<DictionaryImportSource|PendingImportSource, void, void>} dictionaries
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
      * @param {ImportProgressTracker} importProgressTracker
@@ -1972,14 +2167,18 @@ export class DictionaryImportController {
                     finalizeImportSession,
                 });
                 const nextDictionary = await dictionaries.next();
-                const source = nextDictionary.done ? null : nextDictionary.value;
+                const request = nextDictionary.done ? null : nextDictionary.value;
+                const {source, metadataOverrides, enableAudio} = this._normalizeImportRequest(request);
+                const importDetailsForSource = (typeof metadataOverrides === 'object' && metadataOverrides !== null) ?
+                    {...importDetails, metadataOverrides} :
+                    importDetails;
                 if (source && typeof source === 'object' && source.type === 'zip' && source.file instanceof File) {
                     errors = [
                         ...errors,
                         ...(await this._importDictionaryFromZip(
                             source.file,
                             profilesDictionarySettings,
-                            importDetails,
+                            importDetailsForSource,
                             dictionaryWorker,
                             useImportSession,
                             finalizeImportSession,
@@ -1998,11 +2197,12 @@ export class DictionaryImportController {
                         ...(await this._importDictionaryFromMdx(
                             source,
                             profilesDictionarySettings,
-                            importDetails,
+                            importDetailsForSource,
                             dictionaryWorker,
                             useImportSession,
                             finalizeImportSession,
                             onProgress,
+                            enableAudio,
                         ) ?? []),
                     ];
                 } else {
@@ -2168,9 +2368,10 @@ export class DictionaryImportController {
      * @param {boolean} useImportSession
      * @param {boolean} finalizeImportSession
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {boolean} [enableAudio]
      * @returns {Promise<Error[] | undefined>}
      */
-    async _importDictionaryFromMdx(source, profilesDictionarySettings, importDetails, dictionaryWorker, useImportSession, finalizeImportSession, onProgress) {
+    async _importDictionaryFromMdx(source, profilesDictionarySettings, importDetails, dictionaryWorker, useImportSession, finalizeImportSession, onProgress, enableAudio = false) {
         const sourceTitle = source.mdxFile.name || 'unknown-dictionary.mdx';
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
@@ -2198,15 +2399,11 @@ export class DictionaryImportController {
 
         onProgress({nextStep: true, index: 0, count: 0});
         const convertStartTime = safePerformance.now();
-        const mdxImportOptions = this._getMdxImportOptions();
         const {archiveContent, archiveFileName} = await this._mdx.convertDictionary(
             {
                 mdxFile: source.mdxFile,
                 mddFiles: source.mddFiles,
-                titleOverride: mdxImportOptions.titleOverride,
-                descriptionOverride: mdxImportOptions.descriptionOverride,
-                revision: mdxImportOptions.revision,
-                enableAudio: mdxImportOptions.enableAudio,
+                enableAudio,
             },
             this._reportMdxConversionProgress.bind(this, onProgress),
         );

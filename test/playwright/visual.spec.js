@@ -60,7 +60,11 @@ test.describe('settings', () => {
 
         // Load in jmdict_english.zip
         console.log('Load in jmdict_english.zip');
+        await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+        await page.locator('button[id="dictionary-import-button"]').click();
         await page.locator('input[id="dictionary-import-file-input"]').setInputFiles(localJmdictEnglishPath);
+        await expect(page.locator('#dictionary-import-source-list .dictionary-import-source')).toHaveCount(1, {timeout: 30_000});
+        await page.locator('button[id="dictionary-import-confirm-button"]').click();
         await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 5 * 60 * 1000});
 
         // Take a screenshot of the settings page with jmdict loaded
@@ -81,6 +85,8 @@ test.describe('settings', () => {
         await page.locator('button[id="dictionary-import-button"]').click();
         await page.locator('textarea[id="dictionary-import-url-text"]').fill('https://github.com/yomidevs/yomitan/raw/dictionaries/jmdict_swedish.zip');
         await page.locator('button[id="dictionary-import-url-button"]').click();
+        await expect(page.locator('#dictionary-import-source-list .dictionary-import-source')).toHaveCount(1, {timeout: 30_000});
+        await page.locator('button[id="dictionary-import-confirm-button"]').click();
         await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 5 * 60 * 1000});
 
         // Delete the jmdict_swedish dictionary
@@ -123,11 +129,15 @@ test.describe('popup', () => {
 
         // Load in test dictionary
         const dictionary = await createDictionaryArchiveData(path.join(root, 'test/data/dictionaries/valid-dictionary1'), 'valid-dictionary1');
+        await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+        await page.locator('button[id="dictionary-import-button"]').click();
         await page.locator('input[id="dictionary-import-file-input"]').setInputFiles({
             name: 'valid-dictionary1.zip',
             mimeType: 'application/x-zip',
             buffer: Buffer.from(dictionary),
         });
+        await expect(page.locator('#dictionary-import-source-list .dictionary-import-source')).toHaveCount(1, {timeout: 30_000});
+        await page.locator('button[id="dictionary-import-confirm-button"]').click();
         await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 1 * 60 * 1000});
 
         console.log('Open popup-tests.html');

@@ -424,7 +424,12 @@ async function importValidationDictionariesFromSettings(page, dictionaryTitles =
     await invokeRuntimeApi(page, 'purgeDatabase');
     await page.reload();
     await waitForSettingsPageReady(page);
+    await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+    await page.locator('#dictionary-import-button').click();
+    await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
     await page.locator('#dictionary-import-file-input').setInputFiles(dictionaries.map(({file}) => file));
+    await expect(page.locator('#dictionary-import-source-list .dictionary-import-source')).toHaveCount(dictionaries.length, {timeout: 30_000});
+    await page.locator('#dictionary-import-confirm-button').click();
     await expect(async () => {
         const info = /** @type {import('dictionary-importer').Summary[]} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
         const titles = info.map(({title}) => title).sort();
@@ -721,13 +726,15 @@ test('chromium settings URL import routes an MDX listing through the browser flo
     await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
     await page.locator('button#dictionary-import-button').click();
     await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
-    await page.locator('.dictionary-import-advanced-details summary').click();
-    await expect(page.locator('#dictionary-import-mdx-title-override')).toBeVisible();
-    await page.locator('#dictionary-import-mdx-title-override').fill(mdxDictionaryTitle);
-    await page.locator('#dictionary-import-mdx-description-override').fill(mdxDescriptionOverride);
-    await page.locator('#dictionary-import-mdx-revision').fill(mdxRevisionOverride);
     await page.locator('#dictionary-import-url-text').fill(mdxListingUrl);
     await page.locator('button#dictionary-import-url-button').click();
+    const pendingSource = page.locator('#dictionary-import-source-list .dictionary-import-source').first();
+    await expect(pendingSource).toBeVisible({timeout: 30_000});
+    await pendingSource.locator('.dictionary-import-source-details summary').click();
+    await pendingSource.locator('.dictionary-import-source-title-override').fill(mdxDictionaryTitle);
+    await pendingSource.locator('.dictionary-import-source-description-override').fill(mdxDescriptionOverride);
+    await pendingSource.locator('.dictionary-import-source-revision-override').fill(mdxRevisionOverride);
+    await page.locator('button#dictionary-import-confirm-button').click();
 
     await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 2 * 60 * 1000});
     await expect(async () => {
@@ -777,6 +784,8 @@ test('chromium settings drag and drop imports a local MDX fixture, updates previ
     await page.locator('button#dictionary-import-button').click();
     await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
     await dragAndDropDictionaryFiles(page, [localMdxFixture]);
+    await expect(page.locator('#dictionary-import-source-list .dictionary-import-source')).toHaveCount(1, {timeout: 30_000});
+    await page.locator('button#dictionary-import-confirm-button').click();
 
     await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 2 * 60 * 1000});
     await expect(async () => {
@@ -833,6 +842,8 @@ test('chromium settings drag and drop imports an English local MDX fixture, upda
     await page.locator('button#dictionary-import-button').click();
     await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
     await dragAndDropDictionaryFiles(page, [localEnglishMdxFixture]);
+    await expect(page.locator('#dictionary-import-source-list .dictionary-import-source')).toHaveCount(1, {timeout: 30_000});
+    await page.locator('button#dictionary-import-confirm-button').click();
 
     await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 2 * 60 * 1000});
     await expect(async () => {
