@@ -2562,6 +2562,8 @@ button.hotkey-list-item-enabled-button[data-scope-count='0'] {
 }
 
 #dictionary-drop-file-zone {
+    appearance: none;
+    -webkit-appearance: none;
     transition: background-color var(--animation-duration) ease-in-out, border var(--animation-duration) ease-in-out;
     border: 2px dashed var(--dictionary-import-border-color);
     border-radius: 5px;
@@ -2577,6 +2579,7 @@ button.hotkey-list-item-enabled-button[data-scope-count='0'] {
     color: inherit;
     font: inherit;
     box-sizing: border-box;
+    background-color: transparent;
 }
 
 #dictionary-drop-file-zone:hover {
