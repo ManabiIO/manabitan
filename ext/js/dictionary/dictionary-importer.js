@@ -76,6 +76,19 @@ const EMPTY_TERM_GLOSSARY = [];
 Object.freeze(EMPTY_TERM_GLOSSARY);
 
 /**
+ * @param {string} href
+ * @returns {{path: string, hasDecodeError: boolean}}
+ */
+function getStructuredContentMediaLinkPathDetails(href) {
+    const rawPath = href.substring(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX.length);
+    try {
+        return {path: decodeURIComponent(rawPath), hasDecodeError: false};
+    } catch (_error) {
+        return {path: rawPath, hasDecodeError: true};
+    }
+}
+
+/**
  * @param {import('dictionary-importer').ImportRequirement} requirement
  * @returns {?string}
  */
@@ -89,7 +102,7 @@ function getImportRequirementMediaPath(requirement) {
             if (typeof href !== 'string' || !href.startsWith(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX)) {
                 return null;
             }
-            return decodeURIComponent(href.substring(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX.length));
+            return getStructuredContentMediaLinkPathDetails(href).path;
         }
         default:
             return null;
@@ -1711,7 +1724,12 @@ export class DictionaryImporter {
         if (typeof href !== 'string' || !href.startsWith(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX)) {
             return;
         }
-        const path = decodeURIComponent(href.substring(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX.length));
+        const {path, hasDecodeError} = getStructuredContentMediaLinkPathDetails(href);
+        // Keep malformed media hrefs from aborting the entire import when the raw path
+        // does not correspond to an archive entry.
+        if (hasDecodeError && !context.fileMap.has(path)) {
+            return;
+        }
         if (getImageMediaTypeFromFileName(path) !== null) {
             await this._getImageMedia(context, path, entry);
             return;

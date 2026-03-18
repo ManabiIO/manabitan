@@ -256,9 +256,10 @@ async function createStreamedFastParserRegressionArchiveData(dictionaryName = 'F
 
 /**
  * @param {string} [dictionaryName]
+ * @param {string} [mediaHref]
  * @returns {Promise<ArrayBuffer>}
  */
-async function createStructuredContentMediaArchiveData(dictionaryName = 'Structured Content Media') {
+async function createStructuredContentMediaArchiveData(dictionaryName = 'Structured Content Media', mediaHref = 'media:mdict-media/audio/ping.mp3') {
     const zipFileWriter = new BlobWriter();
     const zipWriter = new ZipWriter(zipFileWriter, {level: 0});
     const index = {
@@ -281,7 +282,7 @@ async function createStructuredContentMediaArchiveData(dictionaryName = 'Structu
                     data: {tag: 'div', class: 'mdict-yomitan-content'},
                     content: [{
                         tag: 'a',
-                        href: 'media:mdict-media/audio/ping.mp3',
+                        href: mediaHref,
                         data: {tag: 'a', class: 'sound'},
                         content: ['play'],
                     }],
@@ -953,6 +954,51 @@ describe('Database', () => {
                 expect.soft(media[0]?.width).toBe(0);
                 expect.soft(media[0]?.height).toBe(0);
                 expect.soft([...new Uint8Array(media[0]?.content ?? new ArrayBuffer(0))]).toStrictEqual([77, 80, 51]);
+            } finally {
+                await dictionaryDatabase.close();
+            }
+        });
+
+        test('Ignores malformed structured-content media links without aborting import', async ({expect}) => {
+            const dictionaryName = 'Structured Content Media Malformed';
+            const testDictionarySource = await createStructuredContentMediaArchiveData(
+                dictionaryName,
+                'media:mdict-media/audio/%E0%A4%A.mp3',
+            );
+            const dictionaryDatabase = new DictionaryDatabase();
+            await dictionaryDatabase.prepare();
+            try {
+                const dictionaryImporter = createDictionaryImporter(expect);
+                const {result, errors} = await dictionaryImporter.importDictionary(
+                    dictionaryDatabase,
+                    testDictionarySource,
+                    {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
+                );
+                expect.soft(errors).toStrictEqual([]);
+                expect.soft(result?.title).toBe(dictionaryName);
+
+                const info = await dictionaryDatabase.getDictionaryInfo();
+                expect.soft(info.length).toBe(1);
+                expect.soft(info[0]?.counts?.media.total).toBe(0);
+
+                const titles = new Map([
+                    [dictionaryName, {alias: dictionaryName, allowSecondarySearches: false}],
+                ]);
+                const results = await dictionaryDatabase.findTermsBulk(['ping'], titles, 'exact');
+                expect.soft(results.length).toBe(1);
+                const glossary = results[0]?.definitions[0];
+                if (!(typeof glossary === 'object' && glossary !== null && 'type' in glossary && glossary.type === 'structured-content')) {
+                    throw new Error('Expected structured-content glossary');
+                }
+                const root = glossary.content;
+                if (!(typeof root === 'object' && root !== null && !Array.isArray(root))) {
+                    throw new Error('Expected structured-content root element');
+                }
+                const link = Array.isArray(root.content) ? root.content[0] : null;
+                if (!(typeof link === 'object' && link !== null && !Array.isArray(link) && link.tag === 'a')) {
+                    throw new Error('Expected structured-content media link');
+                }
+                expect.soft(link.href).toBe('media:mdict-media/audio/%E0%A4%A.mp3');
             } finally {
                 await dictionaryDatabase.close();
             }

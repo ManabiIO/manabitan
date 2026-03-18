@@ -20,6 +20,21 @@ import {DisplayContentManager} from '../display/display-content-manager.js';
 import {getLanguageFromText} from '../language/text-utilities.js';
 import {AnkiTemplateRendererContentManager} from '../templates/anki-template-renderer-content-manager.js';
 
+const STRUCTURED_CONTENT_MEDIA_LINK_PREFIX = 'media:';
+
+/**
+ * @param {string} href
+ * @returns {string}
+ */
+function getStructuredContentMediaPath(href) {
+    const rawPath = href.substring(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX.length);
+    try {
+        return decodeURIComponent(rawPath);
+    } catch (_error) {
+        return rawPath;
+    }
+}
+
 export class StructuredContentGenerator {
     /**
      * @param {import('./display-content-manager.js').DisplayContentManager|import('../templates/anki-template-renderer-content-manager.js').AnkiTemplateRendererContentManager} contentManager
@@ -482,7 +497,7 @@ export class StructuredContentGenerator {
      */
     _createLinkElement(content, dictionary, language) {
         let {href} = content;
-        const media = href.startsWith('media:');
+        const media = href.startsWith(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX);
         const internal = !media && href.startsWith('?');
         if (internal) {
             href = `${location.protocol}//${location.host}/search.html${href.length > 1 ? href : ''}`;
@@ -518,7 +533,7 @@ export class StructuredContentGenerator {
         }
 
         if (media) {
-            const mediaPath = decodeURIComponent(href.substring(6));
+            const mediaPath = getStructuredContentMediaPath(href);
             node.href = '#';
             if (this._contentManager instanceof DisplayContentManager) {
                 const contentManager = this._contentManager;

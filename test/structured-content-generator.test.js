@@ -110,4 +110,36 @@ describe('StructuredContentGenerator MDX rendering compatibility', () => {
         expect(link.dataset.scClass).toBe('sound');
         expect(openMediaInTab).toHaveBeenCalledWith('mdict-media/audio/ping.mp3', 'Test Dictionary', /** @type {Window} */ (/** @type {unknown} */ (window)));
     });
+
+    test('malformed media links fall back to the raw path in display mode', async () => {
+        const display = {
+            application: {
+                api: {
+                    getMedia: vi.fn(),
+                },
+            },
+            setContent: vi.fn(),
+        };
+        const contentManager = new DisplayContentManager(/** @type {import('../ext/js/display/display.js').Display} */ (/** @type {unknown} */ (display)));
+        const openMediaInTab = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(contentManager, 'openMediaInTab', openMediaInTab);
+
+        const generator = new StructuredContentGenerator(contentManager, window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
+        const node = generator.createStructuredContent({
+            tag: 'a',
+            href: 'media:mdict-media/audio/%E0%A4%A.mp3',
+            data: {tag: 'a', class: 'sound'},
+            content: ['play'],
+        }, 'Test Dictionary');
+
+        window.document.body.appendChild(node);
+        const link = node.querySelector('[data-sc-class="sound"]');
+        if (!(link instanceof window.HTMLAnchorElement)) {
+            throw new Error('Expected media link anchor');
+        }
+        link.dispatchEvent(new window.MouseEvent('click', {bubbles: true, cancelable: true}));
+
+        expect(link.getAttribute('href')).toBe('#');
+        expect(openMediaInTab).toHaveBeenCalledWith('mdict-media/audio/%E0%A4%A.mp3', 'Test Dictionary', /** @type {Window} */ (/** @type {unknown} */ (window)));
+    });
 });
