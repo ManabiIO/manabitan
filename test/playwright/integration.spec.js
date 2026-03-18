@@ -40,12 +40,9 @@ import {
     localMdxLookupGlossary,
     localMdxLookupTerm,
     localMdxRevision,
-    mdxDescriptionOverride,
-    mdxDictionaryTitle,
     mdxListingUrl,
     mdxLookupGlossary,
     mdxLookupTerm,
-    mdxRevisionOverride,
     setupMdxImportHarness,
 } from './mdx-import-harness.js';
 
@@ -728,20 +725,15 @@ test('chromium settings URL import routes an MDX listing through the browser flo
     await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
     await page.locator('#dictionary-import-url-text').fill(mdxListingUrl);
     await page.locator('button#dictionary-import-url-button').click();
-    const pendingSource = page.locator('#dictionary-import-source-list .dictionary-import-source').first();
-    await expect(pendingSource).toBeVisible({timeout: 30_000});
-    await pendingSource.locator('.dictionary-import-source-details summary').click();
-    await pendingSource.locator('.dictionary-import-source-title-override').fill(mdxDictionaryTitle);
-    await pendingSource.locator('.dictionary-import-source-description-override').fill(mdxDescriptionOverride);
-    await pendingSource.locator('.dictionary-import-source-revision-override').fill(mdxRevisionOverride);
+    await expect(page.locator('#dictionary-import-source-list .dictionary-import-source')).toHaveCount(1, {timeout: 30_000});
     await page.locator('button#dictionary-import-confirm-button').click();
 
     await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 2 * 60 * 1000});
     await expect(async () => {
         const info = /** @type {Array<{title?: string, description?: string}>} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
         expect(info.length).toBe(1);
-        expect(info[0]?.title).toBe(mdxDictionaryTitle);
-        expect(info[0]?.description).toBe(mdxDescriptionOverride);
+        expect(info[0]?.title).toBe(localEnglishMdxDictionaryTitle);
+        expect(info[0]?.description).toBe(localEnglishMdxDescription);
     }).toPass({timeout: 60_000});
 
     expect(harness.requestCounts.listing).toBeGreaterThan(0);
@@ -757,7 +749,7 @@ test('chromium settings URL import routes an MDX listing through the browser flo
     await expect(page.locator('#dictionary-entries')).toContainText(mdxLookupGlossary);
     await expect(async () => {
         const dictionaryNames = await getResultDictionaryNames(page);
-        expect(dictionaryNames).toContain(mdxDictionaryTitle);
+        expect(dictionaryNames).toContain(localEnglishMdxDictionaryTitle);
     }).toPass({timeout: 30_000});
 });
 

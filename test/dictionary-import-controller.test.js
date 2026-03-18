@@ -600,7 +600,7 @@ describe('MDX import flow integration', () => {
     const {window} = testEnv;
     const arrayToAsyncGenerator = /** @type {(this: DictionaryImportController, arr: unknown[]) => AsyncGenerator<unknown, void, void>} */ (getDictionaryImportControllerMethod('_arrayToAsyncGenerator'));
     const importDictionaries = /** @type {(this: DictionaryImportController, dictionaries: AsyncGenerator<unknown, void, void>, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, onImportDone: import('settings-controller').ImportDictionaryDoneCallback, importProgressTracker: ImportProgressTracker, initialErrors?: Error[]) => Promise<void>} */ (getDictionaryImportControllerMethod('_importDictionaries'));
-    const importDictionaryFromMdx = /** @type {(this: DictionaryImportController, source: {type: 'mdx', mdxFile: File, mddFiles: File[]}, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importDetails: import('dictionary-importer').ImportDetails, dictionaryWorker: unknown, useImportSession: boolean, finalizeImportSession: boolean, onProgress: import('dictionary-worker').ImportProgressCallback, enableAudio?: boolean) => Promise<Error[]|undefined>} */ (getDictionaryImportControllerMethod('_importDictionaryFromMdx'));
+    const importDictionaryFromMdx = /** @type {(this: DictionaryImportController, source: {type: 'mdx', mdxFile: File, mddFiles: File[]}, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importDetails: import('dictionary-importer').ImportDetails, dictionaryWorker: unknown, useImportSession: boolean, finalizeImportSession: boolean, onProgress: import('dictionary-worker').ImportProgressCallback) => Promise<Error[]|undefined>} */ (getDictionaryImportControllerMethod('_importDictionaryFromMdx'));
     const importDictionaryArchiveContent = /** @type {(this: DictionaryImportController, dictionaryTitle: string, archiveContent: ArrayBuffer, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importDetails: import('dictionary-importer').ImportDetails, dictionaryWorker: {importDictionary: ReturnType<typeof vi.fn>}, useImportSession: boolean, finalizeImportSession: boolean, onProgress: import('dictionary-worker').ImportProgressCallback, importStartTime: number, localPhaseTimings: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>, recordLocalPhase: (phase: string, startTime: number, endTime: number, details?: Record<string, string|number|boolean|null>) => void) => Promise<Error[]|undefined>} */ (getDictionaryImportControllerMethod('_importDictionaryArchiveContent'));
 
     afterEach(() => {
@@ -661,77 +661,7 @@ describe('MDX import flow integration', () => {
         expect(triggerStorageChanged).toHaveBeenCalledTimes(1);
     });
 
-    test('forwards per-source metadata overrides and MDX audio settings during staged imports', async () => {
-        setupImportFlowDom(window.document);
-        vi.stubGlobal('chrome', {
-            runtime: {
-                getManifest: () => ({version: '1.2.3.4'}),
-            },
-        });
-
-        const controller = createControllerForInternalTests();
-        const dictionaryWorker = {};
-        const importMdxCall = vi.fn().mockResolvedValue([]);
-        const importZipCall = vi.fn().mockResolvedValue([]);
-
-        setupControllerImportHarness(controller);
-        Reflect.set(controller, '_getUseImportSession', vi.fn(() => true));
-        Reflect.set(controller, '_getDictionaryWorker', vi.fn(() => dictionaryWorker));
-        Reflect.set(controller, '_importDictionaryFromMdx', importMdxCall);
-        Reflect.set(controller, '_importDictionaryFromZip', importZipCall);
-
-        const pendingSources = [
-            {
-                id: 0,
-                source: {type: 'mdx', mdxFile: createFile('Alpha.mdx'), mddFiles: [createFile('Alpha.mdd')]},
-                options: {
-                    titleOverride: '  Alpha Override  ',
-                    descriptionOverride: '  Alpha Description  ',
-                    revisionOverride: '  rev-2  ',
-                    enableAudio: true,
-                },
-            },
-            {
-                id: 1,
-                source: {type: 'zip', file: createFile('Beta.zip')},
-                options: {
-                    titleOverride: '  Beta Override  ',
-                    descriptionOverride: '',
-                    revisionOverride: '',
-                    enableAudio: false,
-                },
-            },
-        ];
-        const tracker = new ImportProgressTracker(getFileImportSteps(), pendingSources.length);
-
-        await importDictionaries.call(
-            controller,
-            arrayToAsyncGenerator.call(controller, pendingSources),
-            null,
-            null,
-            tracker,
-            [],
-        );
-
-        expect(importMdxCall).toHaveBeenCalledTimes(1);
-        expect(importMdxCall.mock.calls[0]?.[2]).toMatchObject({
-            metadataOverrides: {
-                title: 'Alpha Override',
-                description: 'Alpha Description',
-                revision: 'rev-2',
-            },
-        });
-        expect(importMdxCall.mock.calls[0]?.[7]).toBe(true);
-
-        expect(importZipCall).toHaveBeenCalledTimes(1);
-        expect(importZipCall.mock.calls[0]?.[2]).toMatchObject({
-            metadataOverrides: {
-                title: 'Beta Override',
-            },
-        });
-    });
-
-    test('converts MDX sources with UI options, reports progress, and hands the archive to the importer', async () => {
+    test('converts MDX sources with default options, reports progress, and hands the archive to the importer', async () => {
         const controller = createControllerForInternalTests();
         const archiveContent = new Uint8Array([1, 2, 3, 4]).buffer;
         const importArchiveContent = vi.fn().mockResolvedValue(void 0);
@@ -750,20 +680,15 @@ describe('MDX import flow integration', () => {
         const importDetails = /** @type {import('dictionary-importer').ImportDetails} */ (/** @type {unknown} */ ({
             prefixWildcardsSupported: true,
             yomitanVersion: '1.2.3.4',
-            metadataOverrides: {
-                title: 'Alpha Override',
-                description: 'Alpha Description',
-                revision: 'rev-2',
-            },
         }));
         const onProgress = vi.fn();
 
-        await importDictionaryFromMdx.call(controller, source, null, importDetails, {importDictionary: vi.fn()}, true, false, onProgress, true);
+        await importDictionaryFromMdx.call(controller, source, null, importDetails, {importDictionary: vi.fn()}, true, false, onProgress);
 
         expect(convertDictionary).toHaveBeenCalledWith({
             mdxFile: source.mdxFile,
             mddFiles: source.mddFiles,
-            enableAudio: true,
+            enableAudio: false,
         }, expect.any(Function));
         expect(onProgress.mock.calls.map(([value]) => value)).toContainEqual({nextStep: true, index: 0, count: 0});
         expect(onProgress.mock.calls.map(([value]) => value)).toContainEqual({nextStep: false, index: 225, count: 1000});
@@ -859,7 +784,6 @@ describe('MDX import flow integration', () => {
             true,
             true,
             vi.fn(),
-            false,
         )).rejects.toThrow('Unsupported MDX variant');
         expect(importArchiveContent).not.toHaveBeenCalled();
     });
@@ -893,7 +817,7 @@ describe('MDX import flow integration', () => {
         Reflect.set(controller, '_importURLText', {value: 'https://example.invalid/alpha.zip'});
         Reflect.set(controller, '_appendPendingImportSources', appendPendingImportSources);
         Reflect.set(controller, '_showErrors', showErrors);
-        Reflect.set(controller, '_generateFilesFromUrls', async function* () {
+        Reflect.set(controller, '_generateFilesFromUrls', async function *generateFilesFromUrls() {
             yield {type: 'zip', file: createFile('Alpha.zip')};
         });
 
@@ -910,35 +834,14 @@ describe('MDX import flow integration', () => {
         const {sourceList, sourceEmpty, importConfirmButton, showErrors} = setupPendingImportDom(window.document);
         const template = window.document.createElement('template');
         template.innerHTML = `
-            <section class="dictionary-import-source">
-                <div class="dictionary-import-source-header">
-                    <div class="dictionary-import-source-heading">
-                        <strong class="dictionary-import-source-title"></strong>
-                        <div class="dictionary-import-source-description"></div>
+            <div class="settings-item dictionary-import-source">
+                <div class="settings-item-inner">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label dictionary-import-source-title"></div>
+                        <div class="settings-item-description dictionary-import-source-description"></div>
                     </div>
                 </div>
-                <details class="dictionary-import-source-details">
-                    <summary>Advanced options</summary>
-                    <div class="dictionary-import-source-fields">
-                        <label class="dictionary-import-source-field">
-                            <span>Title override</span>
-                            <input type="text" class="dictionary-import-source-title-override">
-                        </label>
-                        <label class="dictionary-import-source-field">
-                            <span>Description override</span>
-                            <input type="text" class="dictionary-import-source-description-override">
-                        </label>
-                        <label class="dictionary-import-source-field">
-                            <span>Revision override</span>
-                            <input type="text" class="dictionary-import-source-revision-override">
-                        </label>
-                        <label class="checkbox-container dictionary-import-source-audio-option" hidden>
-                            <input type="checkbox" class="dictionary-import-source-audio-toggle">
-                            <span>Audio</span>
-                        </label>
-                    </div>
-                </details>
-            </section>
+            </div>
         `;
 
         Reflect.set(controller, '_settingsController', {
@@ -954,7 +857,6 @@ describe('MDX import flow integration', () => {
         Reflect.set(controller, '_importSourceEmpty', sourceEmpty);
         Reflect.set(controller, '_importConfirmButton', importConfirmButton);
         Reflect.set(controller, '_pendingImportSources', []);
-        Reflect.set(controller, '_nextPendingImportSourceId', 0);
         Reflect.set(controller, '_hideErrors', vi.fn());
         Reflect.set(controller, '_showErrors', showErrors);
 
@@ -968,5 +870,6 @@ describe('MDX import flow integration', () => {
         expect(importConfirmButton.disabled).toBe(false);
         expect(sourceList.textContent).toContain('Alpha.zip');
         expect(sourceList.textContent).toContain('Beta.mdx');
+        expect(sourceList.querySelector('.dictionary-import-source-details')).toBeNull();
     });
 });

@@ -50,16 +50,9 @@ export type ImportPhaseTiming = {
     details?: Record<string, string | number | boolean | null>;
 };
 
-export type MetadataOverrides = {
-    title?: string;
-    description?: string;
-    revision?: string;
-};
-
 export type ImportDetails = {
     prefixWildcardsSupported: boolean;
     yomitanVersion: string;
-    metadataOverrides?: MetadataOverrides;
     existingDatabaseContentBase64?: string;
     useImportSession?: boolean;
     finalizeImportSession?: boolean;
@@ -92,10 +85,6 @@ export type Summary = {
     sourceLanguage?: string;
     targetLanguage?: string;
     frequencyMode?: 'occurrence-based' | 'rank-based';
-    metadataOverrides?: MetadataOverrides;
-    sourceTitle?: string;
-    sourceDescription?: string;
-    sourceRevision?: string;
     importSuccess?: boolean;
 };
 
@@ -104,10 +93,6 @@ export type SummaryDetails = {
     counts: SummaryCounts;
     styles: string;
     yomitanVersion: string;
-    metadataOverrides?: MetadataOverrides;
-    sourceTitle?: string;
-    sourceDescription?: string;
-    sourceRevision?: string;
     importSuccess: boolean;
 };
 

@@ -445,18 +445,10 @@ describe('Backend dictionary auto-update helpers', () => {
         expect(performDictionaryUpdate).not.toHaveBeenCalled();
     });
 
-    test('Headless import details include persisted metadata overrides for dictionary updates', () => {
+    test('Headless import details include global defaults for dictionary updates', () => {
         vi.stubGlobal('chrome', {
             runtime: {
                 getManifest: () => ({version: '9.9.9.9'}),
-            },
-        });
-
-        const dictionary = createDictionarySummary({
-            metadataOverrides: {
-                title: 'Custom Title',
-                description: 'Custom Description',
-                revision: '2026.03',
             },
         });
         const context = {
@@ -469,34 +461,22 @@ describe('Backend dictionary auto-update helpers', () => {
             },
         };
 
-        const importDetails = getBackendMethod('_createDictionaryImportDetails').call(context, dictionary);
+        const importDetails = getBackendMethod('_createDictionaryImportDetails').call(context);
 
         expect(importDetails).toStrictEqual({
             prefixWildcardsSupported: true,
             yomitanVersion: '9.9.9.9',
-            metadataOverrides: {
-                title: 'Custom Title',
-                description: 'Custom Description',
-                revision: '2026.03',
-            },
         });
     });
 
-    test('Dictionary updates pass persisted metadata overrides into the headless re-import path', async () => {
+    test('Dictionary updates re-import using default headless import details', async () => {
         vi.stubGlobal('chrome', {
             runtime: {
                 getManifest: () => ({version: '9.9.9.9'}),
             },
         });
 
-        const dictionary = createDictionarySummary({
-            title: 'Custom Title',
-            metadataOverrides: {
-                title: 'Custom Title',
-                description: 'Custom Description',
-                revision: '2026.03',
-            },
-        });
+        const dictionary = createDictionarySummary({title: 'Custom Title'});
         const archiveContent = new Uint8Array([1, 2, 3, 4]);
         const context = {
             _options: {
@@ -515,8 +495,6 @@ describe('Backend dictionary auto-update helpers', () => {
                 result: createDictionarySummary({
                     title: 'Custom Title',
                     revision: '2026.03',
-                    description: 'Custom Description',
-                    metadataOverrides: dictionary.metadataOverrides,
                 }),
                 errors: [],
             })),
@@ -538,25 +516,17 @@ describe('Backend dictionary auto-update helpers', () => {
             latestRevision: '2026.03',
             error: null,
         });
-        expect(createDictionaryImportDetails).toHaveBeenCalledWith(dictionary);
+        expect(createDictionaryImportDetails).toHaveBeenCalledWith();
         expect(context._importDictionaryArchiveHeadless).toHaveBeenCalledWith(
             archiveContent.buffer.slice(archiveContent.byteOffset, archiveContent.byteOffset + archiveContent.byteLength),
             {
                 prefixWildcardsSupported: true,
                 yomitanVersion: '9.9.9.9',
-                metadataOverrides: {
-                    title: 'Custom Title',
-                    description: 'Custom Description',
-                    revision: '2026.03',
-                },
             },
         );
         expect(context._applyImportedDictionarySettings).toHaveBeenCalledWith(
             dictionary,
-            expect.objectContaining({
-                title: 'Custom Title',
-                metadataOverrides: dictionary.metadataOverrides,
-            }),
+            expect.objectContaining({title: 'Custom Title'}),
             expect.any(Object),
         );
         expect(context._setDictionaryAutoUpdateError).not.toHaveBeenCalled();

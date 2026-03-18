@@ -318,6 +318,7 @@ function normalizeRelativeAssetPath(path, sourceAssetPath = null) {
         lowered.startsWith('https://') ||
         lowered.startsWith('data:') ||
         lowered.startsWith('javascript:') ||
+        lowered.startsWith('vbscript:') ||
         lowered.startsWith('about:') ||
         lowered.startsWith('#') ||
         value.startsWith('//')
@@ -526,7 +527,7 @@ function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets}) {
         const assetPath = embeddedAssets.registerDataUrl(value);
         return assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
     }
-    if (lowered.startsWith('javascript:') || lowered.startsWith('about:') || value.startsWith('#')) {
+    if (lowered.startsWith('javascript:') || lowered.startsWith('vbscript:') || lowered.startsWith('about:') || value.startsWith('#')) {
         return '#';
     }
     const assetPath = prefixRelativeAssetPath(value, assetPrefix, null);

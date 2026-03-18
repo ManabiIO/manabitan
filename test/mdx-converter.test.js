@@ -254,4 +254,39 @@ describe('convertMdxToArchive', () => {
             revision: '2026.03.18',
         });
     });
+
+    test('blocks vbscript links and asset paths during conversion', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Unsafe Links',
+                Description: '',
+            },
+            entries: [
+                {
+                    keyText: 'Unsafe',
+                    definition: '<div><a href="vbscript:msgbox(1)">bad link</a><img src="vbscript:msgbox(1)" alt="blocked"></div>',
+                },
+            ],
+        });
+
+        const result = await convertMdxToArchive(
+            'unsafe-links.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<unknown>}}} */ (termBank[0][5][0]);
+        const rootEntry = /** @type {{content: Array<unknown>}} */ (glossary.content.content[0]);
+
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({
+            tag: 'a',
+            href: '#',
+        }));
+        expect(rootEntry.content).not.toContainEqual(expect.objectContaining({
+            tag: 'img',
+            alt: 'blocked',
+        }));
+    });
 });

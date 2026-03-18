@@ -3600,7 +3600,7 @@ export class Backend {
 
             const importResult = await this._importDictionaryArchiveHeadless(
                 archiveContent.buffer.slice(archiveContent.byteOffset, archiveContent.byteOffset + archiveContent.byteLength),
-                this._createDictionaryImportDetails(dictionary),
+                this._createDictionaryImportDetails(),
             );
             const importedSummary = importResult.result;
             if (importedSummary === null) {
@@ -3653,18 +3653,13 @@ export class Backend {
     }
 
     /**
-     * @param {import('dictionary-importer').Summary} [dictionary]
      * @returns {import('dictionary-importer').ImportDetails}
      */
-    _createDictionaryImportDetails(dictionary = void 0) {
+    _createDictionaryImportDetails() {
         const options = this._options;
-        const metadataOverrides = (typeof dictionary?.metadataOverrides === 'object' && dictionary.metadataOverrides !== null) ?
-            dictionary.metadataOverrides :
-            void 0;
         return {
             prefixWildcardsSupported: options?.global.database.prefixWildcardsSupported === true,
             yomitanVersion: chrome.runtime.getManifest().version,
-            ...(typeof metadataOverrides === 'object' ? {metadataOverrides} : {}),
         };
     }
 

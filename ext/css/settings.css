@@ -2641,30 +2641,6 @@ button.hotkey-list-item-enabled-button[data-scope-count='0'] {
     overflow-wrap: anywhere;
 }
 
-.dictionary-import-source-details {
-    display: grid;
-    gap: 0.75rem;
-}
-
-.dictionary-import-source-details summary {
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.dictionary-import-source-fields {
-    display: grid;
-    gap: 0.75rem;
-}
-
-.dictionary-import-source-field {
-    display: grid;
-    gap: 0.35rem;
-}
-
-.dictionary-import-source-field input[type=text] {
-    width: 100%;
-}
-
 .dictionary-import-empty-state {
     margin: 0;
     padding: 0 var(--settings-group-inner-horizontal-padding-half) var(--settings-group-inner-vertical-padding) var(--settings-group-inner-horizontal-padding);

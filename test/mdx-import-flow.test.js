@@ -54,24 +54,6 @@ function createControllerForInternalTests() {
  * @typedef {{type: 'mdx', mdxFile: File, mddFiles: File[]}} TestMdxSource
  */
 
-describe('MDX import client defaults', () => {
-    test('pending-source metadata overrides are normalized before import', () => {
-        const controller = createControllerForInternalTests();
-        const getMetadataOverrides = /** @type {(pendingSource: {options: {titleOverride: string, descriptionOverride: string, revisionOverride: string}}) => import('dictionary-importer').MetadataOverrides|undefined} */ (Reflect.get(DictionaryImportController.prototype, '_getMetadataOverrides'));
-        expect(getMetadataOverrides.call(controller, {
-            options: {
-                titleOverride: '  Fixture Override  ',
-                descriptionOverride: '  Fixture Description  ',
-                revisionOverride: '  2026.03  ',
-            },
-        })).toStrictEqual({
-            title: 'Fixture Override',
-            description: 'Fixture Description',
-            revision: '2026.03',
-        });
-    });
-});
-
 describe('MDX import controller handoff', () => {
     test('DictionaryImportController imports converted MDX archives through the zip importer path', async () => {
         const controller = createControllerForInternalTests();
@@ -104,11 +86,6 @@ describe('MDX import controller handoff', () => {
         const importDetails = /** @type {import('dictionary-importer').ImportDetails} */ ({
             prefixWildcardsSupported: true,
             yomitanVersion: '0.0.0',
-            metadataOverrides: {
-                title: 'Fixture Override',
-                description: 'Fixture Description',
-                revision: '2026.03',
-            },
             skipImageMetadata: false,
             skipMediaImport: false,
             mediaResolutionConcurrency: 8,
@@ -127,7 +104,6 @@ describe('MDX import controller handoff', () => {
             (details) => {
                 progressEvents.push(details);
             },
-            true,
         );
 
         expect(errors).toStrictEqual([]);
@@ -136,7 +112,7 @@ describe('MDX import controller handoff', () => {
             {
                 mdxFile: source.mdxFile,
                 mddFiles: source.mddFiles,
-                enableAudio: true,
+                enableAudio: false,
             },
             expect.any(Function),
         );
