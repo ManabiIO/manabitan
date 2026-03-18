@@ -588,6 +588,7 @@ export class OptionsUtil {
             this._updateVersion74,
             this._updateVersion75,
             this._updateVersion76,
+            this._updateVersion77,
         ];
         /* eslint-enable @typescript-eslint/unbound-method */
         if (typeof targetVersion === 'number' && targetVersion < result.length) {
@@ -1853,6 +1854,22 @@ export class OptionsUtil {
             options.global.database = {};
         }
         options.global.database.maxHeadwordLength = 0;
+    }
+
+    /**
+     *  - Added global.database.autoUpdateDictionariesOnStartup
+     *  - Removed global.dictionaryAutoUpdates
+     *  @type {import('options-util').UpdateFunction}
+     */
+    async _updateVersion77(options) {
+        if (!isObjectNotArray(options.global)) {
+            options.global = {};
+        }
+        if (!isObjectNotArray(options.global.database)) {
+            options.global.database = {};
+        }
+        options.global.database.autoUpdateDictionariesOnStartup = false;
+        delete options.global.dictionaryAutoUpdates;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,15 @@ vi.mock('../ext/lib/kanji-processor.js', () => ({
     convertVariants: (text) => text,
 }));
 
-const {Backend} = await import('../ext/js/background/backend.js');
+vi.mock('../ext/js/comm/yomitan-api.js', () => ({
+    YomitanApi: class {},
+}));
 
-const DICTIONARY_AUTO_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
+vi.mock('../ext/js/dictionary/dictionary-database.js', () => ({
+    DictionaryDatabase: class {},
+}));
+
+const {Backend} = await import('../ext/js/background/backend.js');
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -91,7 +97,7 @@ function createCheckResult(overrides = {}) {
     };
 }
 
-describe('Backend dictionary auto-update helpers', () => {
+describe('Backend dictionary update helpers', () => {
     test('setDictionaryImportMode(true) clears the import-mode flag when suspension activation fails', async () => {
         const failure = new Error('suspend failed');
         const setSuspended = vi.fn(async (suspended) => {
@@ -142,57 +148,15 @@ describe('Backend dictionary auto-update helpers', () => {
         expect(context._ensureDictionaryDatabaseReady).not.toHaveBeenCalled();
     });
 
-    test('Prunes stale auto-update settings and runtime state', async () => {
-        const saveOptions = vi.fn(async () => {});
-        const setState = vi.fn(async () => {});
-        const context = {
-            _options: {
-                global: {
-                    dictionaryAutoUpdates: [
-                        'https://example.invalid/keep.json',
-                        'https://example.invalid/remove.json',
-                    ],
-                },
-            },
-            _ensureDictionaryDatabaseReady: async () => {},
-            _dictionaryDatabase: {
-                getDictionaryInfo: async () => [
-                    createDictionarySummary({indexUrl: 'https://example.invalid/keep.json'}),
-                    createDictionarySummary({title: 'Static Dictionary', isUpdatable: false, indexUrl: 'https://example.invalid/static.json'}),
-                ],
-            },
-            _saveOptions: saveOptions,
-            _getDictionaryAutoUpdateState: async () => ({
-                'https://example.invalid/keep.json': {lastAttemptAt: 1},
-                'https://example.invalid/remove.json': {lastAttemptAt: 2},
-            }),
-            _setDictionaryAutoUpdateState: setState,
-        };
-
-        await getBackendMethod('_pruneStaleDictionaryAutoUpdates').call(context);
-
-        expect(context._options.global.dictionaryAutoUpdates).toStrictEqual(['https://example.invalid/keep.json']);
-        expect(saveOptions).toHaveBeenCalledTimes(1);
-        expect(setState).toHaveBeenCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
-            'https://example.invalid/keep.json': {lastAttemptAt: 1},
-        });
-    });
-
-    test('HEAD 304 check updates validators without fetching the index body', async () => {
+    test('GET check reports newer revisions', async () => {
         const dictionary = createDictionarySummary();
-        /** @type {Record<string, {etag?: string, lastModified?: string, lastAttemptAt?: number, lastSuccessfulCheckAt?: number, lastSeenRevision?: string, lastError?: string|null}>} */
-        const state = {
-            'https://example.invalid/index.json': {
-                etag: '"old-etag"',
-                lastModified: 'Mon, 01 Jan 2024 00:00:00 GMT',
-            },
-        };
-        const fetchAnonymous = vi.fn(async () => new Response(null, {
-            status: 304,
+        const fetchAnonymous = vi.fn(async () => new Response(JSON.stringify({
+            revision: '2',
+            downloadUrl: 'https://example.invalid/dictionary-v2.zip',
+        }), {
+            status: 200,
             headers: {
-                ETag: '"new-etag"',
-                'Last-Modified': 'Tue, 02 Jan 2024 00:00:00 GMT',
+                'Content-Type': 'application/json',
             },
         }));
         const context = {
@@ -200,67 +164,13 @@ describe('Backend dictionary auto-update helpers', () => {
             _getDictionaryIndexSchema: async () => ({isValid: () => true}),
         };
 
-        const result = await getBackendMethod('_checkDictionaryUpdate').call(context, dictionary, state);
+        const result = await getBackendMethod('_checkDictionaryUpdate').call(context, dictionary);
 
-        expect(result).toStrictEqual({
-            dictionaryTitle: 'Test Dictionary',
-            hasUpdate: false,
-            currentRevision: '1',
-            latestRevision: null,
-            downloadUrl: 'https://example.invalid/dictionary.zip',
-            error: null,
-        });
         expect(fetchAnonymous).toHaveBeenCalledTimes(1);
         expect(fetchAnonymous).toHaveBeenCalledWith('https://example.invalid/index.json', expect.objectContaining({
-            method: 'HEAD',
-            headers: {
-                'If-None-Match': '"old-etag"',
-                'If-Modified-Since': 'Mon, 01 Jan 2024 00:00:00 GMT',
-            },
+            method: 'GET',
+            cache: 'no-store',
         }));
-        expect(state['https://example.invalid/index.json']).toMatchObject({
-            etag: '"new-etag"',
-            lastModified: 'Tue, 02 Jan 2024 00:00:00 GMT',
-            lastSeenRevision: '1',
-            lastError: null,
-        });
-        expect(state['https://example.invalid/index.json'].lastAttemptAt).toEqual(expect.any(Number));
-        expect(state['https://example.invalid/index.json'].lastSuccessfulCheckAt).toEqual(expect.any(Number));
-    });
-
-    test('HEAD success falls through to GET and reports newer revisions', async () => {
-        const dictionary = createDictionarySummary();
-        /** @type {Record<string, {etag?: string, lastModified?: string|null, lastAttemptAt?: number, lastSuccessfulCheckAt?: number, lastSeenRevision?: string, lastError?: string|null}>} */
-        const state = {'https://example.invalid/index.json': {}};
-        const fetchAnonymous = vi
-            .fn()
-            .mockResolvedValueOnce(new Response(null, {
-                status: 200,
-                headers: {
-                    ETag: '"head-etag"',
-                    'Last-Modified': 'Tue, 02 Jan 2024 00:00:00 GMT',
-                },
-            }))
-            .mockResolvedValueOnce(new Response(JSON.stringify({
-                revision: '2',
-                downloadUrl: 'https://example.invalid/dictionary-v2.zip',
-            }), {
-                status: 200,
-                headers: {
-                    'Content-Type': 'application/json',
-                    ETag: '"get-etag"',
-                },
-            }));
-        const context = {
-            _requestBuilder: {fetchAnonymous},
-            _getDictionaryIndexSchema: async () => ({isValid: () => true}),
-        };
-
-        const result = await getBackendMethod('_checkDictionaryUpdate').call(context, dictionary, state);
-
-        expect(fetchAnonymous).toHaveBeenCalledTimes(2);
-        expect(fetchAnonymous.mock.calls[0][1]).toEqual(expect.objectContaining({method: 'HEAD'}));
-        expect(fetchAnonymous.mock.calls[1][1]).toEqual(expect.objectContaining({method: 'GET', headers: {}}));
         expect(result).toStrictEqual({
             dictionaryTitle: 'Test Dictionary',
             hasUpdate: true,
@@ -269,123 +179,38 @@ describe('Backend dictionary auto-update helpers', () => {
             downloadUrl: 'https://example.invalid/dictionary-v2.zip',
             error: null,
         });
-        expect(state['https://example.invalid/index.json']).toMatchObject({
-            etag: '"get-etag"',
-            lastModified: null,
-            lastSeenRevision: '2',
-            lastError: null,
-        });
     });
 
-    test('GET fallback reuses validators when HEAD fails', async () => {
+    test('checkDictionaryUpdate reports HTTP errors', async () => {
         const dictionary = createDictionarySummary();
-        /** @type {Record<string, {etag?: string, lastModified?: string, lastAttemptAt?: number, lastSuccessfulCheckAt?: number, lastSeenRevision?: string, lastError?: string|null}>} */
-        const state = {
-            'https://example.invalid/index.json': {
-                etag: '"old-etag"',
-                lastModified: 'Mon, 01 Jan 2024 00:00:00 GMT',
-            },
-        };
-        const fetchAnonymous = vi
-            .fn()
-            .mockRejectedValueOnce(new Error('HEAD unsupported'))
-            .mockResolvedValueOnce(new Response(JSON.stringify({revision: '1'}), {
-                status: 200,
-                headers: {
-                    'Content-Type': 'application/json',
-                    ETag: '"get-etag"',
-                },
-            }));
+        const fetchAnonymous = vi.fn(async () => new Response(null, {status: 500}));
         const context = {
             _requestBuilder: {fetchAnonymous},
             _getDictionaryIndexSchema: async () => ({isValid: () => true}),
         };
 
-        const result = await getBackendMethod('_checkDictionaryUpdate').call(context, dictionary, state);
+        const result = await getBackendMethod('_checkDictionaryUpdate').call(context, dictionary);
 
-        expect(fetchAnonymous).toHaveBeenCalledTimes(2);
-        expect(fetchAnonymous.mock.calls[0][1]).toEqual(expect.objectContaining({method: 'HEAD'}));
-        expect(fetchAnonymous.mock.calls[1][1]).toEqual(expect.objectContaining({
-            method: 'GET',
-            headers: {
-                'If-None-Match': '"old-etag"',
-                'If-Modified-Since': 'Mon, 01 Jan 2024 00:00:00 GMT',
-            },
-        }));
         expect(result).toStrictEqual({
             dictionaryTitle: 'Test Dictionary',
             hasUpdate: false,
             currentRevision: '1',
-            latestRevision: '1',
+            latestRevision: null,
             downloadUrl: 'https://example.invalid/dictionary.zip',
-            error: null,
-        });
-        expect(state['https://example.invalid/index.json']).toMatchObject({
-            etag: '"get-etag"',
-            lastSeenRevision: '1',
-            lastError: null,
+            error: 'HTTP 500',
         });
     });
 
-    test('Auto-update pass only checks enabled dictionaries that are due', async () => {
-        vi.spyOn(Date, 'now').mockReturnValue(2 * DICTIONARY_AUTO_UPDATE_INTERVAL_MS);
-        const checkDictionaryUpdates = vi.fn(async () => [createCheckResult()]);
-        const updateDictionaryByTitle = vi.fn(async () => ({status: 'updated'}));
-        const context = {
-            _dictionaryAutoUpdatePassPromise: null,
-            _dictionaryImportModeActive: false,
-            _options: {
-                global: {
-                    dictionaryAutoUpdates: [
-                        'https://example.invalid/due.json',
-                        'https://example.invalid/recent.json',
-                    ],
-                },
-            },
-            _ensureDictionaryDatabaseReady: async () => {},
-            _dictionaryDatabase: {
-                getDictionaryInfo: async () => [
-                    createDictionarySummary({title: 'Recent', indexUrl: 'https://example.invalid/recent.json'}),
-                    createDictionarySummary({title: 'Due', indexUrl: 'https://example.invalid/due.json'}),
-                    createDictionarySummary({title: 'Static', isUpdatable: false, indexUrl: 'https://example.invalid/static.json'}),
-                ],
-            },
-            _getDictionaryAutoUpdateState: async () => ({
-                'https://example.invalid/due.json': {lastAttemptAt: 0},
-                'https://example.invalid/recent.json': {lastAttemptAt: (2 * DICTIONARY_AUTO_UPDATE_INTERVAL_MS) - 1},
-            }),
-            _checkDictionaryUpdates: checkDictionaryUpdates,
-            _updateDictionaryByTitle: updateDictionaryByTitle,
-        };
-
-        await getBackendMethod('_runDictionaryAutoUpdatePass').call(context, 'alarm');
-
-        expect(checkDictionaryUpdates).toHaveBeenCalledTimes(1);
-        expect(checkDictionaryUpdates).toHaveBeenCalledWith(['Due']);
-        expect(updateDictionaryByTitle).toHaveBeenCalledTimes(1);
-        expect(updateDictionaryByTitle).toHaveBeenCalledWith('Due', false, expect.objectContaining({
-            dictionaryTitle: 'Test Dictionary',
-            hasUpdate: true,
-        }));
-        expect(context._dictionaryAutoUpdatePassPromise).toBeNull();
-    });
-
-    test('Auto-update update skips when the mutation lock is busy', async () => {
+    test('updateDictionaryByTitle skips when the mutation lock is busy', async () => {
         const dictionary = createDictionarySummary();
         const fetchAnonymous = vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), {status: 200}));
         const performDictionaryUpdate = vi.fn(async () => ({status: 'updated'}));
         const context = {
-            _options: {
-                global: {
-                    dictionaryAutoUpdates: ['https://example.invalid/index.json'],
-                },
-            },
             _ensureDictionaryDatabaseReady: async () => {},
             _dictionaryDatabase: {
                 getDictionaryInfo: async () => [dictionary],
             },
             _requestBuilder: {fetchAnonymous},
-            _setDictionaryAutoUpdateError: vi.fn(async () => {}),
             _runWithDictionaryMutationLock: vi.fn(async () => void 0),
             _performDictionaryUpdate: performDictionaryUpdate,
         };
@@ -407,44 +232,22 @@ describe('Backend dictionary auto-update helpers', () => {
         expect(performDictionaryUpdate).not.toHaveBeenCalled();
     });
 
-    test('Auto-update update aborts when hourly updates were disabled before commit', async () => {
-        const dictionary = createDictionarySummary();
-        const performDictionaryUpdate = vi.fn(async () => ({status: 'updated'}));
+    test('updateDictionaryOnStartup returns true only when an update is applied', async () => {
+        const updateDictionaryByTitle = vi
+            .fn()
+            .mockResolvedValueOnce({status: 'updated', error: null})
+            .mockResolvedValueOnce({status: 'skipped', error: null});
         const context = {
-            _options: {
-                global: {
-                    dictionaryAutoUpdates: [],
-                },
-            },
-            _ensureDictionaryDatabaseReady: async () => {},
-            _dictionaryDatabase: {
-                getDictionaryInfo: vi.fn(async () => [dictionary]),
-            },
-            _requestBuilder: {
-                fetchAnonymous: vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), {status: 200})),
-            },
-            _setDictionaryAutoUpdateError: vi.fn(async () => {}),
-            _runWithDictionaryMutationLock: vi.fn(async (callback) => await callback()),
-            _performDictionaryUpdate: performDictionaryUpdate,
+            _updateDictionaryByTitle: updateDictionaryByTitle,
         };
 
-        const result = await getBackendMethod('_updateDictionaryByTitle').call(
-            context,
-            'Test Dictionary',
-            false,
-            createCheckResult(),
-        );
-
-        expect(result).toStrictEqual({
-            dictionaryTitle: 'Test Dictionary',
-            status: 'skipped',
-            latestRevision: '2',
-            error: null,
-        });
-        expect(performDictionaryUpdate).not.toHaveBeenCalled();
+        await expect(getBackendMethod('_updateDictionaryOnStartup').call(context, 'Test Dictionary', createCheckResult())).resolves.toBe(true);
+        await expect(getBackendMethod('_updateDictionaryOnStartup').call(context, 'Test Dictionary', createCheckResult())).resolves.toBe(false);
+        expect(updateDictionaryByTitle).toHaveBeenNthCalledWith(1, 'Test Dictionary', false, expect.objectContaining({hasUpdate: true}));
+        expect(updateDictionaryByTitle).toHaveBeenNthCalledWith(2, 'Test Dictionary', false, expect.objectContaining({hasUpdate: true}));
     });
 
-    test('Imported dictionary settings migrate aliases, Anki fields, and auto-update preferences', async () => {
+    test('Imported dictionary settings migrate aliases, Anki fields, and related dictionary references', async () => {
         const saveOptions = vi.fn(async () => {});
         const context = {
             _options: {
@@ -494,19 +297,22 @@ describe('Backend dictionary auto-update helpers', () => {
                     },
                 ],
                 global: {
-                    dictionaryAutoUpdates: ['https://example.invalid/old-index.json'],
+                    database: {
+                        prefixWildcardsSupported: false,
+                        maxHeadwordLength: 0,
+                        autoUpdateDictionariesOnStartup: false,
+                    },
+                    dataTransmissionConsentShown: false,
                 },
             },
             _saveOptions: saveOptions,
         };
         const previousSummary = createDictionarySummary({
             title: 'Old Dictionary',
-            indexUrl: 'https://example.invalid/old-index.json',
             styles: 'old-style',
         });
         const importedSummary = createDictionarySummary({
             title: 'New Dictionary',
-            indexUrl: 'https://example.invalid/new-index.json',
             styles: 'new-style',
         });
         const updateContext = {
@@ -555,7 +361,6 @@ describe('Backend dictionary auto-update helpers', () => {
         expect(profile.options.general.mainDictionary).toBe('New Dictionary');
         expect(profile.options.general.sortFrequencyDictionary).toBe('New Dictionary');
         expect(profile.options.anki.cardFormats[0].fields.expression.value).toBe('new-dictionary-term new-dictionary-reading');
-        expect(context._options.global.dictionaryAutoUpdates).toStrictEqual(['https://example.invalid/new-index.json']);
         expect(saveOptions).toHaveBeenCalledTimes(1);
         expect(saveOptions).toHaveBeenCalledWith('background');
     });

@@ -64,12 +64,12 @@ export type Options = {
 export type GlobalOptions = {
     database: GlobalDatabaseOptions;
     dataTransmissionConsentShown: boolean;
-    dictionaryAutoUpdates: string[];
 };
 
 export type GlobalDatabaseOptions = {
     prefixWildcardsSupported: boolean;
     maxHeadwordLength: number;
+    autoUpdateDictionariesOnStartup: boolean;
 };
 
 export type Profile = {

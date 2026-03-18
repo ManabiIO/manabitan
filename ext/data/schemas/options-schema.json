@@ -1393,15 +1393,15 @@
             "type": "object",
             "required": [
                 "database",
-                "dataTransmissionConsentShown",
-                "dictionaryAutoUpdates"
+                "dataTransmissionConsentShown"
             ],
             "properties": {
                 "database": {
                     "type": "object",
                     "required": [
                         "prefixWildcardsSupported",
-                        "maxHeadwordLength"
+                        "maxHeadwordLength",
+                        "autoUpdateDictionariesOnStartup"
                     ],
                     "properties": {
                         "prefixWildcardsSupported": {
@@ -1412,19 +1412,16 @@
                             "type": "integer",
                             "minimum": 0,
                             "default": 0
+                        },
+                        "autoUpdateDictionariesOnStartup": {
+                            "type": "boolean",
+                            "default": false
                         }
                     }
                 },
                 "dataTransmissionConsentShown": {
                     "type": "boolean",
                     "default": false
-                },
-                "dictionaryAutoUpdates": {
-                    "type": "array",
-                    "default": [],
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         }

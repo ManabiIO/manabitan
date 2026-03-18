@@ -706,14 +706,14 @@ function createOptionsUpdatedTestData1() {
             },
         ],
         profileCurrent: 0,
-        version: 76,
+        version: 77,
         global: {
             database: {
                 prefixWildcardsSupported: false,
                 maxHeadwordLength: 0,
+                autoUpdateDictionariesOnStartup: false,
             },
             dataTransmissionConsentShown: false,
-            dictionaryAutoUpdates: [],
         },
     };
 }
@@ -763,19 +763,21 @@ describe('OptionsUtil', () => {
         expect(partialsUpdated).toStrictEqual(partialsExpected);
     });
 
-    test('Version75And76MigrationsAddDictionaryOptions', async () => {
+    test('Version76And77MigrationsUpdateDictionaryOptions', async () => {
         const optionsUtil = new OptionsUtil();
         await optionsUtil.prepare();
 
         const options = /** @type {import('core').SafeAny} */ (createOptionsUpdatedTestData1());
-        options.version = 74;
-        delete options.global.dictionaryAutoUpdates;
+        options.version = 75;
         delete options.global.database.maxHeadwordLength;
+        delete options.global.database.autoUpdateDictionariesOnStartup;
+        options.global.dictionaryAutoUpdates = ['https://example.invalid/old-index.json'];
 
         const optionsUpdated = structuredClone(await optionsUtil.update(options));
-        expect(optionsUpdated.version).toBe(76);
-        expect(optionsUpdated.global.dictionaryAutoUpdates).toStrictEqual([]);
+        expect(optionsUpdated.version).toBe(77);
         expect(optionsUpdated.global.database.maxHeadwordLength).toBe(0);
+        expect(optionsUpdated.global.database.autoUpdateDictionariesOnStartup).toBe(false);
+        expect('dictionaryAutoUpdates' in optionsUpdated.global).toBe(false);
     });
 
     describe('Default', () => {
