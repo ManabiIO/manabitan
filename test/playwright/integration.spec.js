@@ -721,6 +721,8 @@ test('chromium settings URL import routes an MDX listing through the browser flo
     await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
     await page.locator('button#dictionary-import-button').click();
     await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
+    await page.locator('.dictionary-import-advanced-details summary').click();
+    await expect(page.locator('#dictionary-import-mdx-title-override')).toBeVisible();
     await page.locator('#dictionary-import-mdx-title-override').fill(mdxDictionaryTitle);
     await page.locator('#dictionary-import-mdx-description-override').fill(mdxDescriptionOverride);
     await page.locator('#dictionary-import-mdx-revision').fill(mdxRevisionOverride);
@@ -737,37 +739,14 @@ test('chromium settings URL import routes an MDX listing through the browser flo
 
     expect(harness.requestCounts.listing).toBeGreaterThan(0);
     expect(harness.requestCounts.mdx).toBeGreaterThan(0);
-    expect(harness.requestCounts.mdd).toBeGreaterThan(0);
+    expect(harness.requestCounts.mdd).toBe(0);
 
-    const nativeState = await page.evaluate(() => {
-        return Reflect.get(globalThis, '__manabitanPlaywrightMdxState');
-    });
-    expect(nativeState).toMatchObject({
-        convertCalls: 1,
-        lastConvert: {
-            hostName: 'manabitan_mdx',
-            options: {
-                titleOverride: mdxDictionaryTitle,
-                descriptionOverride: mdxDescriptionOverride,
-                revision: mdxRevisionOverride,
-            },
-        },
-    });
-    expect(Array.isArray(nativeState?.uploads)).toBe(true);
-    const uploadedFileNames = Array.isArray(nativeState?.uploads) ?
-        nativeState.uploads.map((/** @type {{fileName: string}} */ upload) => upload.fileName).sort() :
-        [];
-    expect(uploadedFileNames).toStrictEqual([
-        'Oxford English Dictionary 2nd v4.0.mdd',
-        'Oxford English Dictionary 2nd v4.0.mdx',
-    ]);
-    expect(harness.archiveFileName).toBe(`${mdxDictionaryTitle}.zip`);
-
+    await setCurrentProfileLanguage(page, 'en');
     await page.goto(`${extensionBaseUrl}/search.html`);
     await waitForSearchPageReady(page);
     await waitForTermsLookupReady(page, mdxLookupTerm);
     await runSearch(page, mdxLookupTerm);
-    await expect(page.locator('#dictionary-entries .entry')).toBeVisible({timeout: 30_000});
+    await expect(page.locator('#dictionary-entries .entry').first()).toBeVisible({timeout: 30_000});
     await expect(page.locator('#dictionary-entries')).toContainText(mdxLookupGlossary);
     await expect(async () => {
         const dictionaryNames = await getResultDictionaryNames(page);
@@ -790,11 +769,6 @@ test('chromium settings drag and drop imports a local MDX fixture, updates previ
     await waitForSettingsPageReady(page);
 
     const harness = await setupMdxImportHarness(page, {
-        dictionaryTitle: localMdxDictionaryTitle,
-        descriptionOverride: localMdxDescription,
-        revisionOverride: localMdxRevision,
-        lookupTerm: localMdxLookupTerm,
-        lookupGlossary: localMdxLookupGlossary,
         mdxBuffer: localMdxFixture.buffer,
         mdxFileName: localMdxFixture.name,
     });
@@ -816,27 +790,6 @@ test('chromium settings drag and drop imports a local MDX fixture, updates previ
     expect(harness.requestCounts.listing).toBe(0);
     expect(harness.requestCounts.mdx).toBe(0);
     expect(harness.requestCounts.mdd).toBe(0);
-
-    const nativeState = await page.evaluate(() => {
-        return Reflect.get(globalThis, '__manabitanPlaywrightMdxState');
-    });
-    expect(nativeState).toMatchObject({
-        convertCalls: 1,
-        lastConvert: {
-            hostName: 'manabitan_mdx',
-            options: {
-                titleOverride: '',
-                descriptionOverride: '',
-                revision: '',
-            },
-        },
-    });
-    expect(Array.isArray(nativeState?.uploads)).toBe(true);
-    const uploadedFileNames = Array.isArray(nativeState?.uploads) ?
-        nativeState.uploads.map((/** @type {{fileName: string}} */ upload) => upload.fileName).sort() :
-        [];
-    expect(uploadedFileNames).toStrictEqual([localMdxFixtureFileName]);
-    expect(harness.archiveFileName).toBe(`${localMdxDictionaryTitle}.zip`);
 
     await page.locator('#dictionaries-modal button[data-modal-action="hide"]').getByText('Close').click();
     await setSettingsPreviewText(page, localMdxLookupTerm);
@@ -872,11 +825,6 @@ test('chromium settings drag and drop imports an English local MDX fixture, upda
     await waitForSettingsPageReady(page);
 
     const harness = await setupMdxImportHarness(page, {
-        dictionaryTitle: localEnglishMdxDictionaryTitle,
-        descriptionOverride: localEnglishMdxDescription,
-        revisionOverride: localEnglishMdxRevision,
-        lookupTerm: localEnglishMdxLookupTerm,
-        lookupGlossary: localEnglishMdxLookupGlossary,
         mdxBuffer: localEnglishMdxFixture.buffer,
         mdxFileName: localEnglishMdxFixture.name,
     });
@@ -898,27 +846,6 @@ test('chromium settings drag and drop imports an English local MDX fixture, upda
     expect(harness.requestCounts.listing).toBe(0);
     expect(harness.requestCounts.mdx).toBe(0);
     expect(harness.requestCounts.mdd).toBe(0);
-
-    const nativeState = await page.evaluate(() => {
-        return Reflect.get(globalThis, '__manabitanPlaywrightMdxState');
-    });
-    expect(nativeState).toMatchObject({
-        convertCalls: 1,
-        lastConvert: {
-            hostName: 'manabitan_mdx',
-            options: {
-                titleOverride: '',
-                descriptionOverride: '',
-                revision: '',
-            },
-        },
-    });
-    expect(Array.isArray(nativeState?.uploads)).toBe(true);
-    const uploadedFileNames = Array.isArray(nativeState?.uploads) ?
-        nativeState.uploads.map((/** @type {{fileName: string}} */ upload) => upload.fileName).sort() :
-        [];
-    expect(uploadedFileNames).toStrictEqual([localEnglishMdxFixtureFileName]);
-    expect(harness.archiveFileName).toBe(`${localEnglishMdxDictionaryTitle}.zip`);
 
     await setCurrentProfileLanguage(page, 'en');
     await setSettingsPreviewText(page, localEnglishMdxLookupTerm);

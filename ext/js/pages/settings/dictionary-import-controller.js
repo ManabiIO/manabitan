@@ -23,7 +23,6 @@ import {log} from '../../core/log.js';
 import {safePerformance} from '../../core/safe-performance.js';
 import {toError} from '../../core/to-error.js';
 import {getKebabCase} from '../../data/anki-template-util.js';
-import {hasPermissions, setPermissionsGranted} from '../../data/permissions-util.js';
 import {Mdx} from '../../comm/mdx.js';
 import {DictionaryWorker} from '../../dictionary/dictionary-worker.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
@@ -118,15 +117,6 @@ function getDictionaryFileNameFromUrl(url) {
     } catch (_error) {
         return null;
     }
-}
-
-/**
- * @param {unknown} error
- * @returns {boolean}
- */
-function isAbortError(error) {
-    const {name = ''} = /** @type {{name?: unknown}} */ (toError(error));
-    return typeof name === 'string' && name === 'AbortError';
 }
 
 /**
@@ -1439,143 +1429,10 @@ export class DictionaryImportController {
     }
 
     /**
-     * @param {DictionaryImportSource[]} sources
-     * @returns {MdxImportSource[]}
-     */
-    _getMdxSourcesMissingCompanions(sources) {
-        return /** @type {MdxImportSource[]} */ (sources.filter((source) => source.type === 'mdx' && source.mddFiles.length === 0));
-    }
-
-    /**
-     * @param {MdxImportSource[]} missingSources
-     * @returns {boolean}
-     */
-    _shouldPromptForMdxCompanionFolder(missingSources) {
-        if (missingSources.length === 0) { return false; }
-        if (typeof Reflect.get(globalThis, 'showDirectoryPicker') !== 'function') { return false; }
-        const confirm = Reflect.get(globalThis, 'confirm');
-        if (typeof confirm !== 'function') { return true; }
-        if (missingSources.length === 1) {
-            return confirm(`No matching .mdd files were selected for ${missingSources[0].mdxFile.name}. Pick its folder so Manabitan can look for companion resources?`);
-        }
-        return confirm(`No matching .mdd files were selected for ${missingSources.length} MDX dictionaries. Pick a folder so Manabitan can look for companion resources?`);
-    }
-
-    /**
-     * @param {DictionaryImportSource[]} sources
-     * @returns {Promise<DictionaryImportSource[]>}
-     */
-    async _maybeAttachMdxCompanionFilesFromFolder(sources) {
-        const missingSources = this._getMdxSourcesMissingCompanions(sources);
-        if (!this._shouldPromptForMdxCompanionFolder(missingSources)) {
-            return sources;
-        }
-
-        const showDirectoryPickerValue = /** @type {unknown} */ (Reflect.get(globalThis, 'showDirectoryPicker'));
-        const showDirectoryPicker = typeof showDirectoryPickerValue === 'function' ? /** @type {(options?: {mode?: 'read'|'readwrite'}) => Promise<FileSystemDirectoryHandle>} */ (showDirectoryPickerValue) : null;
-        if (typeof showDirectoryPicker !== 'function') {
-            return sources;
-        }
-
-        try {
-            // `showDirectoryPicker` is not modeled precisely enough in this lint setup, so cast the result once here.
-            const directoryHandle = /** @type {FileSystemDirectoryHandle} */ (
-                /** @type {unknown} */ (await showDirectoryPicker({mode: 'read'}))
-            );
-            const companionFilesByKey = await this._findMdxCompanionFilesInDirectory(
-                directoryHandle,
-                missingSources,
-            );
-            if (companionFilesByKey.size === 0) {
-                return sources;
-            }
-            return sources.map((source) => {
-                if (source.type !== 'mdx' || source.mddFiles.length > 0) { return source; }
-                const sourceKey = this._getMdxImportSourceKey(source.mdxFile);
-                if (sourceKey === null) { return source; }
-                const companionFiles = companionFilesByKey.get(sourceKey);
-                if (!Array.isArray(companionFiles) || companionFiles.length === 0) {
-                    return source;
-                }
-                return {...source, mddFiles: companionFiles};
-            });
-        } catch (error) {
-            const domExceptionName = typeof DOMException !== 'undefined' && error instanceof DOMException ? error.name : '';
-            if (isAbortError(error) || domExceptionName === 'NotAllowedError') {
-                return sources;
-            }
-            log.warn(error);
-            return sources;
-        }
-    }
-
-    /**
-     * @param {FileSystemDirectoryHandle} directoryHandle
-     * @param {MdxImportSource[]} missingSources
-     * @returns {Promise<Map<string, File[]>>}
-     */
-    async _findMdxCompanionFilesInDirectory(directoryHandle, missingSources) {
-        /** @type {Map<string, File[]>} */
-        const companionFilesByKey = new Map();
-        const sourceKeys = new Set(
-            missingSources
-                .map(({mdxFile}) => this._getMdxImportSourceKey(mdxFile))
-                .filter((value) => value !== null),
-        );
-        if (sourceKeys.size === 0) {
-            return companionFilesByKey;
-        }
-
-        const values = /** @type {unknown} */ (Reflect.get(directoryHandle, 'values'));
-        if (typeof values !== 'function') {
-            return companionFilesByKey;
-        }
-
-        for await (const entry of /** @type {AsyncIterable<FileSystemHandle>} */ (values.call(directoryHandle))) {
-            if (!(entry && entry.kind === 'file')) { continue; }
-            const entryName = String(entry.name);
-            const key = this._getMdxImportSourceKeyFromName(entryName);
-            if (key === null || !sourceKeys.has(key) || !isMddDictionaryFileName(entryName)) { continue; }
-            const file = await /** @type {FileSystemFileHandle} */ (entry).getFile();
-            let files = companionFilesByKey.get(key);
-            if (typeof files === 'undefined') {
-                files = [];
-                companionFilesByKey.set(key, files);
-            }
-            files.push(file);
-        }
-
-        for (const files of companionFilesByKey.values()) {
-            files.sort((a, b) => this._getMddSequenceIndex(a) - this._getMddSequenceIndex(b));
-        }
-        return companionFilesByKey;
-    }
-
-    /**
      * @returns {Promise<void>}
      */
     async _ensureMdxImportReady() {
-        let permissionsOkay = false;
-        try {
-            permissionsOkay = await hasPermissions({permissions: ['nativeMessaging']});
-        } catch (_error) {
-            // NOP
-        }
-        if (!permissionsOkay) {
-            const granted = await setPermissionsGranted({permissions: ['nativeMessaging']}, true);
-            if (!granted) {
-                throw new Error('MDX import requires the optional nativeMessaging permission.');
-            }
-        }
-
-        const version = await this._mdx.getVersion();
-        if (version === null) {
-            throw new Error('Could not connect to the MDX native helper. Install the experimental MDX helper before importing .mdx files.');
-        }
-        const localVersion = this._mdx.getLocalVersion();
-        if (version !== localVersion) {
-            throw new Error(`MDX native helper version not supported: ${version}. Manabitan expects version ${localVersion}.`);
-        }
+        await this._mdx.getVersion();
     }
 
     /**
@@ -1638,8 +1495,7 @@ export class DictionaryImportController {
         if (files === null) { return; }
         const files2 = [...files];
         node.value = '';
-        const {sources: initialSources, errors, hasMdx} = this._createImportSourcesFromFiles(files2);
-        const sources = await this._maybeAttachMdxCompanionFilesFromFolder(initialSources);
+        const {sources, errors, hasMdx} = this._createImportSourcesFromFiles(files2);
         if (sources.length === 0) {
             if (errors.length > 0) { this._showErrors(errors); }
             return;
@@ -1725,8 +1581,6 @@ export class DictionaryImportController {
                     yield {type: 'zip', file};
                     continue;
                 }
-
-
                 const directFileName = getDictionaryFileNameFromUrl(trimmedUrl);
                 if (!mdxImportReady && directFileName !== null && isMdxDictionaryFileName(directFileName)) {
                     await this._ensureMdxImportReady();

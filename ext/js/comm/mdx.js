@@ -15,48 +15,111 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {EventListenerCollection} from '../core/event-listener-collection.js';
-import {toError} from '../core/to-error.js';
-import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
+const UNSUPPORTED_VARIANT_ERROR_MESSAGE = 'This MDX file uses an unsupported compression, encryption, or format variant. Convert it externally first or try a different MDX source.';
 
-const HOST_NAME = 'manabitan_mdx';
-const UPLOAD_CHUNK_BYTES = 128 * 1024;
-const DOWNLOAD_CHUNK_BYTES = 128 * 1024;
-const UNSUPPORTED_VARIANT_ERROR_MESSAGE = 'This MDX file uses an unsupported compression, encryption, or format variant. Update the experimental MDX helper or convert the dictionary externally first.';
+/**
+ * @typedef {{stage: 'upload'|'convert'|'download', completed: number, total: number}} MdxProgressDetails
+ */
+
+/**
+ * @typedef {{name: string, bytes: ArrayBuffer}} MdxWorkerInputFile
+ */
+
+/**
+ * @typedef {{titleOverride: string, descriptionOverride: string, revision: string, enableAudio: boolean, includeAssets: boolean, termBankSize: number}} MdxWorkerConvertOptions
+ */
+
+/**
+ * @typedef {{mdxFileName: string, mdxBytes: ArrayBuffer, mddFiles: MdxWorkerInputFile[], options: MdxWorkerConvertOptions}} MdxWorkerConvertParams
+ */
+
+/**
+ * @typedef {{action: 'progress', params: {details: MdxProgressDetails}} | {action: 'complete', params: {result?: {archiveContent?: ArrayBuffer, archiveFileName?: string}, error?: string}}} MdxWorkerMessage
+ */
+
+/**
+ * @param {unknown} value
+ * @returns {value is Record<string, unknown>}
+ */
+function isRecord(value) {
+    return typeof value === 'object' && value !== null;
+}
+
+/**
+ * @param {unknown} value
+ * @returns {MdxWorkerMessage|null}
+ */
+function parseWorkerMessage(value) {
+    if (!isRecord(value)) { return null; }
+    const action = value.action;
+    const params = value.params;
+    if (!isRecord(params)) { return null; }
+    switch (action) {
+        case 'progress': {
+            const details = params.details;
+            if (!isRecord(details)) { return null; }
+            const stage = details.stage;
+            const completed = details.completed;
+            const total = details.total;
+            if (
+                (stage !== 'upload' && stage !== 'convert' && stage !== 'download') ||
+                typeof completed !== 'number' ||
+                typeof total !== 'number'
+            ) {
+                return null;
+            }
+            return {action, params: {details: {stage, completed, total}}};
+        }
+        case 'complete': {
+            const result = params.result;
+            const error = params.error;
+            /** @type {{result?: {archiveContent?: ArrayBuffer, archiveFileName?: string}, error?: string}} */
+            const completeParams = {};
+            if (typeof error === 'string') {
+                completeParams.error = error;
+            }
+            if (isRecord(result)) {
+                /** @type {{archiveContent?: ArrayBuffer, archiveFileName?: string}} */
+                const archiveResult = {};
+                if (result.archiveContent instanceof ArrayBuffer) {
+                    archiveResult.archiveContent = result.archiveContent;
+                }
+                if (typeof result.archiveFileName === 'string') {
+                    archiveResult.archiveFileName = result.archiveFileName;
+                }
+                completeParams.result = archiveResult;
+            }
+            return {action, params: completeParams};
+        }
+        default: {
+            return null;
+        }
+    }
+}
 
 export class Mdx {
     /** */
     constructor() {
-        /** @type {?chrome.runtime.Port} */
-        this._port = null;
+        /** @type {Worker|null} */
+        this._worker = null;
         /** @type {number} */
-        this._sequence = 0;
-        /** @type {Map<number, {resolve: (value: unknown) => void, reject: (reason?: unknown) => void, timer: import('core').Timeout}>} */
-        this._invocations = new Map();
-        /** @type {EventListenerCollection} */
-        this._eventListeners = new EventListenerCollection();
-        /** @type {number} */
-        this._timeout = 10 * 60 * 1000;
-        /** @type {number} */
-        this._version = 1;
-        /** @type {?number} */
-        this._remoteVersion = null;
-        /** @type {?Promise<void>} */
-        this._setupPortPromise = null;
+        this._version = 2;
+        /** @type {boolean} */
+        this._active = false;
     }
 
     /**
      * @returns {boolean}
      */
     isConnected() {
-        return (this._port !== null);
+        return this._worker !== null;
     }
 
     /**
      * @returns {boolean}
      */
     isActive() {
-        return (this._invocations.size > 0);
+        return this._active;
     }
 
     /**
@@ -67,24 +130,19 @@ export class Mdx {
     }
 
     /**
-     * @returns {Promise<?number>}
+     * @returns {Promise<number>}
      */
     async getVersion() {
-        try {
-            await this._setupPortWrapper();
-            const version = await this._invoke('get_version', {});
-            this._remoteVersion = (typeof version === 'number' && Number.isFinite(version)) ? version : null;
-        } catch (_error) {
-            // NOP
-        }
-        return this._remoteVersion;
+        return this._version;
     }
 
     /** */
     disconnect() {
-        if (this._port !== null) {
-            this._clearPort();
+        if (this._worker !== null) {
+            this._worker.terminate();
+            this._worker = null;
         }
+        this._active = false;
     }
 
     /**
@@ -103,285 +161,123 @@ export class Mdx {
             includeAssets = true,
             termBankSize = 10000,
         } = details;
-        await this._setupPortWrapper();
 
         const uploadFiles = [mdxFile, ...mddFiles];
         const totalUploadBytes = uploadFiles.reduce((sum, file) => sum + file.size, 0);
         let uploadedBytes = 0;
-
-        const mdxUploadId = await this._uploadFile(mdxFile, (completed) => {
-            if (typeof onProgress === 'function') {
-                onProgress({stage: 'upload', completed, total: totalUploadBytes});
-            }
-        });
-        uploadedBytes += mdxFile.size;
-
-        /** @type {string[]} */
-        const mddUploadIds = [];
-        for (const file of mddFiles) {
-            const startOffset = uploadedBytes;
-            const uploadId = await this._uploadFile(file, (completed) => {
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'upload', completed: startOffset + completed, total: totalUploadBytes});
-                }
-            });
+        /**
+         * @param {File} file
+         * @returns {Promise<ArrayBuffer>}
+         */
+        const readFileWithProgress = async (file) => {
+            const buffer = await file.arrayBuffer();
             uploadedBytes += file.size;
-            mddUploadIds.push(uploadId);
-        }
-
-        if (typeof onProgress === 'function') {
-            onProgress({stage: 'convert', completed: 1, total: 1});
-        }
-
-        const jobId = /** @type {string} */ (await this._invoke('convert', {
-            mdxUploadId,
-            mddUploadIds,
-            options: {
-                titleOverride,
-                descriptionOverride,
-                revision,
-                enableAudio,
-                includeAssets,
-                termBankSize,
-            },
-        }));
-
-        const downloadInfo = /** @type {{totalBytes?: unknown, archiveFileName?: unknown}} */ (await this._invoke('download_begin', {jobId, chunkBytes: DOWNLOAD_CHUNK_BYTES}));
-        const totalBytes = typeof downloadInfo.totalBytes === 'number' && downloadInfo.totalBytes >= 0 ? downloadInfo.totalBytes : 0;
-        const archiveFileName = typeof downloadInfo.archiveFileName === 'string' && downloadInfo.archiveFileName.length > 0 ? downloadInfo.archiveFileName : `${mdxFile.name.replace(/\.mdx$/i, '') || 'dictionary'}.zip`;
-        const parts = [];
-        let offset = 0;
-        while (offset < totalBytes) {
-            const response = /** @type {{data?: unknown}} */ (await this._invoke('download_chunk', {
-                jobId,
-                offset,
-                chunkBytes: DOWNLOAD_CHUNK_BYTES,
-            }));
-            const data = typeof response.data === 'string' ? response.data : '';
-            const part = new Uint8Array(base64ToArrayBuffer(data));
-            parts.push(part);
-            offset += part.byteLength;
             if (typeof onProgress === 'function') {
-                onProgress({stage: 'download', completed: Math.min(offset, totalBytes), total: totalBytes});
+                onProgress({stage: 'upload', completed: uploadedBytes, total: totalUploadBytes});
             }
-            if (part.byteLength === 0) { break; }
-        }
-        await this._invoke('download_end', {jobId});
-
-        let totalLength = 0;
-        for (const part of parts) {
-            totalLength += part.byteLength;
-        }
-        const combined = new Uint8Array(totalLength);
-        let writeOffset = 0;
-        for (const part of parts) {
-            combined.set(part, writeOffset);
-            writeOffset += part.byteLength;
-        }
-
-        return {
-            archiveContent: combined.buffer,
-            archiveFileName,
+            return buffer;
         };
-    }
 
-    // Private
-
-    /**
-     * @param {unknown} message
-     */
-    _onMessage(message) {
-        if (typeof message !== 'object' || message === null) { return; }
-
-        const {sequence, data} = /** @type {import('core').SerializableObject} */ (message);
-        if (typeof sequence !== 'number') { return; }
-
-        const invocation = this._invocations.get(sequence);
-        if (typeof invocation === 'undefined') { return; }
-
-        const {resolve, reject, timer} = invocation;
-        clearTimeout(timer);
-        const error = this._createNativeError(data);
-        if (error !== null) {
-            reject(error);
-        } else {
-            resolve(data);
-        }
-        this._invocations.delete(sequence);
-    }
-
-    /**
-     * @param {unknown} data
-     * @returns {Error|null}
-     */
-    _createNativeError(data) {
-        if (!(typeof data === 'object' && data !== null)) { return null; }
-
-        const errorValue = /** @type {unknown} */ (Reflect.get(/** @type {Record<string, unknown>} */ (data), 'error'));
-        if (!(typeof errorValue === 'object' && errorValue !== null)) { return null; }
-
-        const errorRecord = /** @type {Record<string, unknown>} */ (errorValue);
-        const message = typeof errorRecord.message === 'string' && errorRecord.message.length > 0 ? errorRecord.message : 'MDX conversion failed';
-        const unsupportedVariant = this._isUnsupportedVariantError(errorRecord, message);
-        if (!unsupportedVariant) {
-            return new Error(message);
-        }
-
-        const details = [];
-        const detailSources = [
-            /** @type {unknown} */ (Reflect.get(errorRecord, 'details')),
-            /** @type {unknown} */ (Reflect.get(errorRecord, 'metadata')),
-        ];
-        for (const detailSource of detailSources) {
-            if (!(typeof detailSource === 'object' && detailSource !== null)) { continue; }
-            const detailRecord = /** @type {Record<string, unknown>} */ (detailSource);
-            for (const key of ['variant', 'compression', 'encryption', 'dictionaryType']) {
-                const value = Reflect.get(detailRecord, key);
-                if (typeof value === 'string' && value.length > 0) {
-                    details.push(`${key}: ${value}`);
-                }
-            }
-        }
-        const detailString = details.length > 0 ? ` (${details.join(', ')})` : '';
-        return new Error(`${UNSUPPORTED_VARIANT_ERROR_MESSAGE}${detailString} Native helper detail: ${message}`);
-    }
-
-    /**
-     * @param {Record<string, unknown>} errorRecord
-     * @param {string} message
-     * @returns {boolean}
-     */
-    _isUnsupportedVariantError(errorRecord, message) {
-        for (const key of ['code', 'kind', 'reason', 'category']) {
-            const value = Reflect.get(errorRecord, key);
-            if (typeof value !== 'string') { continue; }
-            const normalized = value.trim().toLowerCase().replaceAll(/[^a-z0-9]+/g, '-');
-            if (
-                normalized.includes('unsupported-variant') ||
-                normalized.includes('unsupported-compression') ||
-                normalized.includes('unsupported-encryption')
-            ) {
-                return true;
-            }
-        }
-
-        const haystack = [
-            message,
-            typeof errorRecord.type === 'string' ? errorRecord.type : '',
-            typeof errorRecord.code === 'string' ? errorRecord.code : '',
-        ].join(' ').toLowerCase();
-        return (
-            haystack.includes('unsupported variant') ||
-            haystack.includes('unsupported compression') ||
-            haystack.includes('unsupported encryption') ||
-            haystack.includes('xxhash') ||
-            haystack.includes('lzo') ||
-            haystack.includes('encrypted') ||
-            haystack.includes('encryption') ||
-            haystack.includes('decrypt')
-        );
-    }
-
-    /** */
-    _onDisconnect() {
-        if (this._port === null) { return; }
-        const e = chrome.runtime.lastError;
-        const error = new Error(e ? e.message : 'MDX converter disconnected');
-        for (const {reject, timer} of this._invocations.values()) {
-            clearTimeout(timer);
-            reject(error);
-        }
-        this._invocations.clear();
-        this._clearPort();
-    }
-
-    /**
-     * @param {File} file
-     * @param {?(completed: number) => void} onProgress
-     * @returns {Promise<string>}
-     */
-    async _uploadFile(file, onProgress) {
-        const response = /** @type {{uploadId?: unknown}} */ (await this._invoke('begin_upload', {
-            fileName: file.name,
-            totalBytes: file.size,
-        }));
-        const uploadId = typeof response.uploadId === 'string' ? response.uploadId : '';
-        if (uploadId.length === 0) {
-            throw new Error(`Failed to allocate upload for ${file.name}`);
-        }
-
-        let offset = 0;
-        while (offset < file.size) {
-            const nextOffset = Math.min(offset + UPLOAD_CHUNK_BYTES, file.size);
-            const chunk = await file.slice(offset, nextOffset).arrayBuffer();
-            await this._invoke('upload_chunk', {
-                uploadId,
-                offset,
-                data: arrayBufferToBase64(chunk),
+        const mdxBytes = await readFileWithProgress(mdxFile);
+        /** @type {MdxWorkerInputFile[]} */
+        const mddInputs = [];
+        for (const file of mddFiles) {
+            mddInputs.push({
+                name: file.name,
+                bytes: await readFileWithProgress(file),
             });
-            offset = nextOffset;
-            if (typeof onProgress === 'function') {
-                onProgress(offset);
+        }
+
+        this.disconnect();
+        this._active = true;
+
+        return await new Promise((resolve, reject) => {
+            const worker = new Worker('/js/dictionary/mdx-worker-main.js', {type: 'module'});
+            this._worker = worker;
+
+            /**
+             * @param {Error} error
+             */
+            const fail = (error) => {
+                this.disconnect();
+                reject(error);
+            };
+
+            worker.addEventListener('message', (event) => {
+                const message = parseWorkerMessage(event.data);
+                if (message === null) { return; }
+                switch (message.action) {
+                    case 'progress': {
+                        if (typeof onProgress === 'function') {
+                            onProgress(message.params.details);
+                        }
+                        break;
+                    }
+                    case 'complete': {
+                        this._active = false;
+                        const {error = '', result} = message.params;
+                        if (error.length > 0) {
+                            fail(this._normalizeError(error));
+                            return;
+                        }
+                        const archiveContent = result?.archiveContent;
+                        const archiveFileName = typeof result?.archiveFileName === 'string' && result.archiveFileName.length > 0 ? result.archiveFileName : `${mdxFile.name.replace(/\.mdx$/iu, '') || 'dictionary'}.zip`;
+                        if (!(archiveContent instanceof ArrayBuffer)) {
+                            fail(new Error('MDX conversion worker returned invalid archive data'));
+                            return;
+                        }
+                        this.disconnect();
+                        resolve({archiveContent, archiveFileName});
+                        break;
+                    }
+                }
+            });
+            worker.addEventListener('error', /** @param {ErrorEvent} event */ (event) => {
+                fail(new Error(event.message || 'MDX conversion worker failed'));
+            });
+            try {
+                /** @type {MdxWorkerConvertParams} */
+                const params = {
+                    mdxFileName: mdxFile.name,
+                    mdxBytes,
+                    mddFiles: mddInputs,
+                    options: {
+                        titleOverride,
+                        descriptionOverride,
+                        revision,
+                        enableAudio,
+                        includeAssets,
+                        termBankSize,
+                    },
+                };
+                /** @type {Transferable[]} */
+                const transferables = [mdxBytes, ...mddInputs.map(({bytes}) => bytes)];
+                worker.postMessage({
+                    action: 'convertDictionary',
+                    params,
+                }, transferables);
+            } catch (e) {
+                fail(e instanceof Error ? e : new Error(String(e)));
             }
-        }
-        await this._invoke('finish_upload', {uploadId});
-        return uploadId;
-    }
-
-    /**
-     * @returns {Promise<void>}
-     */
-    async _setupPortWrapper() {
-        if (this._setupPortPromise === null) {
-            this._setupPortPromise = this._setupPort();
-        }
-        try {
-            await this._setupPortPromise;
-        } catch (e) {
-            throw toError(e);
-        }
-    }
-
-    /**
-     * @returns {Promise<void>}
-     */
-    async _setupPort() {
-        const port = chrome.runtime.connectNative(HOST_NAME);
-        this._eventListeners.addListener(port.onMessage, this._onMessage.bind(this));
-        this._eventListeners.addListener(port.onDisconnect, this._onDisconnect.bind(this));
-        this._port = port;
-    }
-
-    /** */
-    _clearPort() {
-        if (this._port !== null) {
-            this._port.disconnect();
-            this._port = null;
-        }
-        this._eventListeners.removeAllEventListeners();
-        this._setupPortPromise = null;
-    }
-
-    /**
-     * @param {string} action
-     * @param {import('core').SerializableObject} params
-     * @returns {Promise<unknown>}
-     */
-    _invoke(action, params) {
-        return new Promise((resolve, reject) => {
-            if (this._port === null) {
-                reject(new Error('Port disconnected'));
-                return;
-            }
-
-            const sequence = this._sequence++;
-            const timer = setTimeout(() => {
-                this._invocations.delete(sequence);
-                reject(new Error(`MDX converter invoke timed out after ${this._timeout}ms (${action})`));
-            }, this._timeout);
-
-            this._invocations.set(sequence, {resolve, reject, timer});
-            this._port.postMessage({action, params, sequence});
         });
+    }
+
+    /**
+     * @param {string} message
+     * @returns {Error}
+     */
+    _normalizeError(message) {
+        const lowered = message.toLowerCase();
+        if (
+            lowered.includes('unsupported compression') ||
+            lowered.includes('unsupported encryption') ||
+            lowered.includes('unsupported variant') ||
+            lowered.includes('xxhash') ||
+            lowered.includes('lzo') ||
+            lowered.includes('encrypted')
+        ) {
+            return new Error(`${UNSUPPORTED_VARIANT_ERROR_MESSAGE} Worker detail: ${message}`);
+        }
+        return new Error(message);
     }
 }

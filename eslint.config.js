@@ -86,7 +86,7 @@ async function getDependencies(scriptPaths) {
  */
 export default [
     {
-        ignores: ['.tmp-*', 'ext/lib/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],
+        ignores: ['.tmp-*', 'ext/lib/', 'ext/js/dictionary/mdx/vendor/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],
     },
     ...compat.extends(
         'eslint:recommended',
@@ -806,6 +806,16 @@ export default [
 
         rules: {
             'no-console': 'error',
+        },
+    },
+    {
+        files: [
+            'ext/js/dictionary/mdx/mdx-converter.js',
+        ],
+
+        rules: {
+            '@typescript-eslint/no-unsafe-argument': 'off',
+            '@typescript-eslint/no-unsafe-assignment': 'off',
         },
     },
     {

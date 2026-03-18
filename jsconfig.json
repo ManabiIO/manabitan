@@ -39,6 +39,7 @@
     ],
     "exclude": [
         "node_modules",
-        "ext/lib"
+        "ext/lib",
+        "ext/js/dictionary/mdx/vendor"
     ]
 }

@@ -17,7 +17,6 @@
 
 import {File as NodeFile} from 'node:buffer';
 import {describe, expect, test, vi} from 'vitest';
-import {Mdx} from '../ext/js/comm/mdx.js';
 import {DictionaryImportController} from '../ext/js/pages/settings/dictionary-import-controller.js';
 
 /**
@@ -52,151 +51,23 @@ function createControllerForInternalTests() {
 }
 
 /**
- * @typedef {{stage: 'upload'|'convert'|'download', completed: number, total: number}} MdxProgressEvent
- */
-
-/**
- * @typedef {{action: string, params: Record<string, unknown>}} NativeAction
- */
-
-/**
  * @typedef {{type: 'mdx', mdxFile: File, mddFiles: File[]}} TestMdxSource
  */
 
-describe('MDX import protocol flow', () => {
-    test('Mdx.convertDictionary uploads companions, runs conversion, and downloads the archive', async () => {
-        const mdxFile = createFile('fixture.mdx', createBytes(320_000, 11));
-        const mddFiles = [
-            createFile('fixture.mdd', createBytes(160_000, 47)),
-            createFile('fixture.1.mdd', createBytes(96_000, 89)),
-        ];
-        const archiveBytes = createBytes(290_000, 131);
-        /** @type {MdxProgressEvent[]} */
-        const progressEvents = [];
-        /** @type {NativeAction[]} */
-        const actions = [];
-        /** @type {Map<string, Uint8Array[]>} */
-        const uploadChunks = new Map();
-        /** @type {Map<string, number>} */
-        const uploadSizes = new Map();
+describe('MDX import client defaults', () => {
+    test('controller-facing import options remain worker-compatible by default', () => {
+        const controller = createControllerForInternalTests();
+        Reflect.set(controller, '_mdxTitleOverrideInput', /** @type {HTMLInputElement} */ (/** @type {unknown} */ ({value: ''})));
+        Reflect.set(controller, '_mdxDescriptionOverrideInput', /** @type {HTMLInputElement} */ (/** @type {unknown} */ ({value: ''})));
+        Reflect.set(controller, '_mdxRevisionInput', /** @type {HTMLInputElement} */ (/** @type {unknown} */ ({value: ''})));
+        Reflect.set(controller, '_mdxAudioToggle', /** @type {HTMLInputElement} */ (/** @type {unknown} */ ({checked: false})));
 
-        const mdx = new Mdx();
-        mdx._setupPortWrapper = async () => {};
-        mdx._invoke = async (action, params) => {
-            actions.push({action, params});
-            switch (action) {
-                case 'begin_upload': {
-                    const fileName = typeof params.fileName === 'string' ? params.fileName : 'unknown';
-                    const uploadId = `upload:${fileName}`;
-                    uploadChunks.set(uploadId, []);
-                    uploadSizes.set(uploadId, Number(params.totalBytes));
-                    return {uploadId};
-                }
-                case 'upload_chunk': {
-                    const uploadId = typeof params.uploadId === 'string' ? params.uploadId : '';
-                    const data = typeof params.data === 'string' ? params.data : '';
-                    const chunk = new Uint8Array(Buffer.from(data, 'base64'));
-                    uploadChunks.get(uploadId)?.push(chunk);
-                    return {};
-                }
-                case 'finish_upload':
-                    return {};
-                case 'convert':
-                    return 'job:fixture';
-                case 'download_begin':
-                    return {totalBytes: archiveBytes.byteLength, archiveFileName: 'fixture.zip'};
-                case 'download_chunk': {
-                    const offset = typeof params.offset === 'number' ? params.offset : 0;
-                    const chunkBytes = typeof params.chunkBytes === 'number' ? params.chunkBytes : archiveBytes.byteLength;
-                    const end = Math.min(offset + chunkBytes, archiveBytes.byteLength);
-                    return {data: Buffer.from(archiveBytes.slice(offset, end)).toString('base64')};
-                }
-                case 'download_end':
-                    return {};
-                default:
-                    throw new Error(`Unexpected action: ${action}`);
-            }
-        };
-
-        const result = await mdx.convertDictionary(
-            {
-                mdxFile,
-                mddFiles,
-                titleOverride: 'Fixture Dictionary',
-                descriptionOverride: 'Fixture Description',
-                revision: '2026.03.17',
-                enableAudio: true,
-            },
-            (details) => {
-                progressEvents.push(details);
-            },
-        );
-
-        expect(result.archiveFileName).toBe('fixture.zip');
-        expect(new Uint8Array(result.archiveContent)).toStrictEqual(archiveBytes);
-
-        expect(actions.map(({action}) => action)).toStrictEqual([
-            'begin_upload',
-            'upload_chunk',
-            'upload_chunk',
-            'upload_chunk',
-            'finish_upload',
-            'begin_upload',
-            'upload_chunk',
-            'upload_chunk',
-            'finish_upload',
-            'begin_upload',
-            'upload_chunk',
-            'finish_upload',
-            'convert',
-            'download_begin',
-            'download_chunk',
-            'download_chunk',
-            'download_chunk',
-            'download_end',
-        ]);
-
-        const uploadedMdx = Buffer.concat(uploadChunks.get('upload:fixture.mdx') || []);
-        const uploadedMdd = Buffer.concat(uploadChunks.get('upload:fixture.mdd') || []);
-        const uploadedMdd1 = Buffer.concat(uploadChunks.get('upload:fixture.1.mdd') || []);
-        expect(uploadedMdx.length).toBe(mdxFile.size);
-        expect(uploadedMdd.length).toBe(mddFiles[0].size);
-        expect(uploadedMdd1.length).toBe(mddFiles[1].size);
-        expect(uploadedMdx.equals(Buffer.from(await mdxFile.arrayBuffer()))).toBe(true);
-        expect(uploadedMdd.equals(Buffer.from(await mddFiles[0].arrayBuffer()))).toBe(true);
-        expect(uploadedMdd1.equals(Buffer.from(await mddFiles[1].arrayBuffer()))).toBe(true);
-        expect(uploadSizes).toStrictEqual(new Map([
-            ['upload:fixture.mdx', mdxFile.size],
-            ['upload:fixture.mdd', mddFiles[0].size],
-            ['upload:fixture.1.mdd', mddFiles[1].size],
-        ]));
-
-        const convertCall = actions.find(({action}) => action === 'convert');
-        expect(convertCall).toBeDefined();
-        expect(convertCall?.params).toMatchObject({
-            mdxUploadId: 'upload:fixture.mdx',
-            mddUploadIds: ['upload:fixture.mdd', 'upload:fixture.1.mdd'],
-            options: {
-                titleOverride: 'Fixture Dictionary',
-                descriptionOverride: 'Fixture Description',
-                revision: '2026.03.17',
-                enableAudio: true,
-                includeAssets: true,
-                termBankSize: 10000,
-            },
-        });
-
-        expect(progressEvents.some(({stage}) => stage === 'upload')).toBe(true);
-        expect(progressEvents).toContainEqual({stage: 'convert', completed: 1, total: 1});
-        expect(progressEvents.at(-1)).toStrictEqual({
-            stage: 'download',
-            completed: archiveBytes.byteLength,
-            total: archiveBytes.byteLength,
-        });
-        const totalUploadBytes = mdxFile.size + mddFiles.reduce((sum, file) => sum + file.size, 0);
-        expect(progressEvents.find(({stage}) => stage === 'upload')).toMatchObject({
-            stage: 'upload',
-            total: totalUploadBytes,
+        const getMdxImportOptions = /** @type {() => {titleOverride: string, descriptionOverride: string, revision: string, enableAudio: boolean}} */ (Reflect.get(DictionaryImportController.prototype, '_getMdxImportOptions'));
+        expect(getMdxImportOptions.call(controller)).toStrictEqual({
+            titleOverride: '',
+            descriptionOverride: '',
+            revision: '',
+            enableAudio: false,
         });
     });
 });
@@ -225,7 +96,7 @@ describe('MDX import controller handoff', () => {
             };
         });
         const importDictionaryArchiveContent = vi.fn(async () => []);
-        controller._mdx = /** @type {Mdx} */ (/** @type {unknown} */ ({convertDictionary}));
+        controller._mdx = /** @type {import('../ext/js/comm/mdx.js').Mdx} */ (/** @type {unknown} */ ({convertDictionary}));
         controller._getMdxImportOptions = () => ({
             titleOverride: 'Fixture Override',
             descriptionOverride: 'Fixture Description',

@@ -17,7 +17,6 @@
  */
 
 import {afterAll, afterEach, describe, expect, test, vi} from 'vitest';
-import * as permissionsUtil from '../ext/js/data/permissions-util.js';
 import {DictionaryImportController, ImportProgressTracker} from '../ext/js/pages/settings/dictionary-import-controller.js';
 import {setupDomTest} from './fixtures/dom-test.js';
 
@@ -116,32 +115,6 @@ function createLanguageSelect(document, value) {
  */
 function createFile(name) {
     return new File(['test'], name);
-}
-
-/**
- * @param {File} file
- * @returns {FileSystemFileHandle}
- */
-function createFileSystemFileHandle(file) {
-    return /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
-        kind: 'file',
-        name: file.name,
-        getFile: vi.fn().mockResolvedValue(file),
-    }));
-}
-
-/**
- * @param {FileSystemHandle[]} handles
- * @returns {FileSystemDirectoryHandle}
- */
-function createDirectoryHandle(handles) {
-    return /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
-        async *values() {
-            for (const handle of handles) {
-                yield handle;
-            }
-        },
-    }));
 }
 
 /**
@@ -334,98 +307,38 @@ describe('MDX import readiness', () => {
         vi.restoreAllMocks();
     });
 
-    test('requests nativeMessaging permission when missing and stops if the request is denied', async () => {
+    test('checks MDX converter availability through the browser client', async () => {
         const controller = createControllerForInternalTests();
-        const getVersion = vi.fn();
+        const getVersion = vi.fn().mockResolvedValue(2);
 
-        vi.spyOn(permissionsUtil, 'hasPermissions').mockResolvedValue(false);
-        vi.spyOn(permissionsUtil, 'setPermissionsGranted').mockResolvedValue(false);
         Reflect.set(controller, '_mdx', {
             getVersion,
-            getLocalVersion: () => 1,
-        });
-
-        await expect(ensureMdxImportReady.call(controller)).rejects.toThrow('MDX import requires the optional nativeMessaging permission.');
-        expect(getVersion).not.toHaveBeenCalled();
-    });
-
-    test('surfaces missing native helper after permissions succeed', async () => {
-        const controller = createControllerForInternalTests();
-
-        vi.spyOn(permissionsUtil, 'hasPermissions').mockResolvedValue(true);
-        vi.spyOn(permissionsUtil, 'setPermissionsGranted').mockResolvedValue(true);
-        Reflect.set(controller, '_mdx', {
-            getVersion: vi.fn().mockResolvedValue(null),
-            getLocalVersion: () => 1,
-        });
-
-        await expect(ensureMdxImportReady.call(controller)).rejects.toThrow('Could not connect to the MDX native helper. Install the experimental MDX helper before importing .mdx files.');
-    });
-
-    test('surfaces native helper version mismatch', async () => {
-        const controller = createControllerForInternalTests();
-
-        vi.spyOn(permissionsUtil, 'hasPermissions').mockResolvedValue(true);
-        vi.spyOn(permissionsUtil, 'setPermissionsGranted').mockResolvedValue(true);
-        Reflect.set(controller, '_mdx', {
-            getVersion: vi.fn().mockResolvedValue(9),
-            getLocalVersion: () => 1,
-        });
-
-        await expect(ensureMdxImportReady.call(controller)).rejects.toThrow('MDX native helper version not supported: 9. Manabitan expects version 1.');
-    });
-
-    test('continues after permission probe errors if the explicit request succeeds', async () => {
-        const controller = createControllerForInternalTests();
-        const getVersion = vi.fn().mockResolvedValue(1);
-
-        vi.spyOn(permissionsUtil, 'hasPermissions').mockRejectedValue(new Error('contains failed'));
-        const setPermissionsGranted = vi.spyOn(permissionsUtil, 'setPermissionsGranted').mockResolvedValue(true);
-        Reflect.set(controller, '_mdx', {
-            getVersion,
-            getLocalVersion: () => 1,
         });
 
         await expect(ensureMdxImportReady.call(controller)).resolves.toBeUndefined();
-        expect(setPermissionsGranted).toHaveBeenCalledWith({permissions: ['nativeMessaging']}, true);
+        expect(getVersion).toHaveBeenCalledTimes(1);
+    });
+
+    test('surfaces browser-side converter readiness errors unchanged', async () => {
+        const controller = createControllerForInternalTests();
+        const getVersion = vi.fn().mockRejectedValue(new Error('MDX worker bootstrap failed'));
+
+        Reflect.set(controller, '_mdx', {
+            getVersion,
+        });
+
+        await expect(ensureMdxImportReady.call(controller)).rejects.toThrow('MDX worker bootstrap failed');
         expect(getVersion).toHaveBeenCalledTimes(1);
     });
 });
 
 describe('MDX companion discovery and URL resolution', () => {
-    const maybeAttachMdxCompanionFilesFromFolder = /** @type {(this: DictionaryImportController, sources: Array<{type: string, mdxFile?: File, mddFiles?: File[]}|{type: string, file?: File}>) => Promise<Array<{type: string, mdxFile?: File, mddFiles?: File[]}|{type: string, file?: File}>>} */ (getDictionaryImportControllerMethod('_maybeAttachMdxCompanionFilesFromFolder'));
     const createImportSourceFromUrl = /** @type {(this: DictionaryImportController, url: string, onProgress: import('dictionary-worker').ImportProgressCallback) => Promise<{type: string, file?: File, mdxFile?: File, mddFiles?: File[]}>} */ (getDictionaryImportControllerMethod('_createImportSourceFromUrl'));
     const generateFilesFromUrls = /** @type {(this: DictionaryImportController, urls: string[], onProgress: import('dictionary-worker').ImportProgressCallback) => AsyncGenerator<{type: string, file?: File, mdxFile?: File, mddFiles?: File[]}, void, void>} */ (getDictionaryImportControllerMethod('_generateFilesFromUrls'));
 
     afterEach(() => {
         vi.restoreAllMocks();
         vi.unstubAllGlobals();
-    });
-
-    test('can attach missing MDD companions from a follow-up folder picker', async () => {
-        const controller = createControllerForInternalTests();
-        const source = /** @type {{type: 'mdx', mdxFile: File, mddFiles: File[]}} */ ({
-            type: 'mdx',
-            mdxFile: createFile('Alpha.mdx'),
-            mddFiles: [],
-        });
-        vi.stubGlobal('confirm', vi.fn(() => true));
-        vi.stubGlobal('showDirectoryPicker', vi.fn().mockResolvedValue(createDirectoryHandle([
-            createFileSystemFileHandle(createFile('Alpha.2.mdd')),
-            createFileSystemFileHandle(createFile('Alpha.mdd')),
-            createFileSystemFileHandle(createFile('Beta.mdd')),
-        ])));
-
-        const result = await maybeAttachMdxCompanionFilesFromFolder.call(controller, [source]);
-
-        expect(result).toHaveLength(1);
-        const [resolvedSource] = result;
-        expect(resolvedSource).toMatchObject({type: 'mdx', mdxFile: expect.objectContaining({name: 'Alpha.mdx'})});
-        if (resolvedSource?.type !== 'mdx') {
-            throw new Error('Expected MDX source after folder companion discovery');
-        }
-        const resolvedMdxSource = /** @type {{type: 'mdx', mdxFile: File, mddFiles: File[]}} */ (resolvedSource);
-        expect(resolvedMdxSource.mddFiles.map((file) => file.name)).toStrictEqual(['Alpha.mdd', 'Alpha.2.mdd']);
     });
 
     test('parses a simple MDX directory listing URL into one MDX source with companions', async () => {
@@ -467,7 +380,7 @@ describe('MDX companion discovery and URL resolution', () => {
         }, expect.any(Function));
     });
 
-    test('ensures MDX native helper readiness only once for multiple MDX URL imports', async () => {
+    test('ensures MDX readiness only once for multiple MDX URL imports', async () => {
         const controller = createControllerForInternalTests();
         const ensureMdxImportReady = vi.fn().mockResolvedValue(void 0);
         const createImportSource = vi.fn()
@@ -487,6 +400,65 @@ describe('MDX companion discovery and URL resolution', () => {
         expect(results).toHaveLength(2);
         expect(ensureMdxImportReady).toHaveBeenCalledTimes(1);
         expect(ensureMdxImportReady.mock.invocationCallOrder[0]).toBeLessThan(createImportSource.mock.invocationCallOrder[0]);
+    });
+});
+
+describe('MDX file picker flow', () => {
+    const onImportFileChange = /** @type {(this: DictionaryImportController, e: Event) => Promise<void>} */ (getDictionaryImportControllerMethod('_onImportFileChange'));
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.unstubAllGlobals();
+    });
+
+    test('imports MDX files directly without prompting for missing companions', async () => {
+        const controller = createControllerForInternalTests();
+        const source = /** @type {{type: 'mdx', mdxFile: File, mddFiles: File[]}} */ ({
+            type: 'mdx',
+            mdxFile: createFile('Alpha.mdx'),
+            mddFiles: [],
+        });
+        const importModal = {setVisible: vi.fn()};
+        const createImportSourcesFromFiles = vi.fn().mockReturnValue({sources: [source], errors: [], hasMdx: true});
+        const ensureMdxImportReady = vi.fn().mockResolvedValue(void 0);
+        const arrayToAsyncGenerator = vi.fn().mockReturnValue('generator');
+        const importDictionaries = vi.fn();
+        const confirmSpy = vi.fn();
+
+        vi.stubGlobal('confirm', confirmSpy);
+        vi.stubGlobal('showDirectoryPicker', vi.fn());
+
+        Reflect.set(controller, '_importModal', importModal);
+        Reflect.set(controller, '_createImportSourcesFromFiles', createImportSourcesFromFiles);
+        Reflect.set(controller, '_ensureMdxImportReady', ensureMdxImportReady);
+        Reflect.set(controller, '_arrayToAsyncGenerator', arrayToAsyncGenerator);
+        Reflect.set(controller, '_importDictionaries', importDictionaries);
+        Reflect.set(controller, '_getFileImportSteps', vi.fn().mockReturnValue(getFileImportSteps()));
+        Reflect.set(controller, '_showErrors', vi.fn());
+
+        const input = /** @type {HTMLInputElement} */ (/** @type {unknown} */ ({
+            files: [createFile('Alpha.mdx')],
+            value: 'picked',
+        }));
+
+        await onImportFileChange.call(
+            controller,
+            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: input})),
+        );
+
+        expect(importModal.setVisible).toHaveBeenCalledWith(false);
+        expect(input.value).toBe('');
+        expect(confirmSpy).not.toHaveBeenCalled();
+        expect(createImportSourcesFromFiles).toHaveBeenCalledWith([expect.objectContaining({name: 'Alpha.mdx'})]);
+        expect(ensureMdxImportReady).toHaveBeenCalledOnce();
+        expect(arrayToAsyncGenerator).toHaveBeenCalledWith([source]);
+        expect(importDictionaries).toHaveBeenCalledWith(
+            'generator',
+            null,
+            null,
+            expect.any(ImportProgressTracker),
+            [],
+        );
     });
 });
 
