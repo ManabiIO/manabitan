@@ -4,6 +4,8 @@
 
 [Download for Chrome, Firefox, Edge](https://github.com/ManabiIO/manabitan/releases/latest)
 [Firefox Dev Build (auto-updates)](https://github.com/ManabiIO/manabitan/releases/latest/download/manabitan-firefox-dev.xpi)
+[Privacy Policy](./docs/privacy-policy.md)
+[Chrome Web Store Release Checklist](./docs/operations/chrome-web-store-release.md)
 
 [![Manabi Discord](https://dcbadge.limes.pink/api/server/gvxzS93C3w?style=for-the-badge)](https://discord.gg/gvxzS93C3w)
 [![Discord](https://dcbadge.limes.pink/api/server/YkQrXW6TXF?style=for-the-badge)](https://discord.gg/YkQrXW6TXF)
