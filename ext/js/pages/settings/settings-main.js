@@ -39,6 +39,7 @@ import {ModalController} from './modal-controller.js';
 import {NestedPopupsController} from './nested-popups-controller.js';
 import {PermissionsToggleController} from './permissions-toggle-controller.js';
 import {PersistentStorageController} from './persistent-storage-controller.js';
+import {PopupFrequencyBlurController} from './popup-frequency-blur-controller.js';
 import {PopupPreviewController} from './popup-preview-controller.js';
 import {PopupWindowController} from './popup-window-controller.js';
 import {ProfileController} from './profile-controller.js';
@@ -262,6 +263,13 @@ await Application.main(true, async (application) => {
         const startedAt = getNowMs();
         await nestedPopupsController.prepare();
         recordPhase(startupPhases, 'nestedPopupsController.prepare', startedAt);
+    })());
+
+    const popupFrequencyBlurController = new PopupFrequencyBlurController(settingsController);
+    preparePromises.push((async () => {
+        const startedAt = getNowMs();
+        await popupFrequencyBlurController.prepare();
+        recordPhase(startupPhases, 'popupFrequencyBlurController.prepare', startedAt);
     })());
 
     const permissionsToggleController = new PermissionsToggleController(settingsController);
