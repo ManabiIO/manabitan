@@ -2358,17 +2358,28 @@ export class DictionaryImportController {
             importStartTime,
             localPhaseTimings,
             recordLocalPhase,
-            async () => await dictionaryWorker.importMdxDictionary(
-                source.mdxFile.name,
-                new Uint8Array(mdxBytes).buffer,
-                mddFiles.map(({name, bytes}) => ({name, bytes: new Uint8Array(bytes).buffer})),
-                {
-                    ...importDetails,
-                    ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
-                },
-                onProgress,
-                {enableAudio: false},
-            ),
+            async () => {
+                const mdxBytesView = (mdxBytes instanceof Uint8Array ? mdxBytes : new Uint8Array(mdxBytes));
+                const mdxBytesCopyBuffer = mdxBytesView.slice().buffer;
+
+                const mddFilesCopy = mddFiles.map(({name, bytes}) => {
+                    const bytesView = (bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes));
+                    const bytesCopyBuffer = bytesView.slice().buffer;
+                    return {name, bytes: bytesCopyBuffer};
+                });
+
+                return await dictionaryWorker.importMdxDictionary(
+                    source.mdxFile.name,
+                    mdxBytesCopyBuffer,
+                    mddFilesCopy,
+                    {
+                        ...importDetails,
+                        ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
+                    },
+                    onProgress,
+                    {enableAudio: false},
+                );
+            },
         );
     }
 
