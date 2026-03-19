@@ -159,9 +159,12 @@ export class DictionaryWorkerHandler {
             mddFiles: Array.isArray(mddFiles) ?
                 mddFiles
                     .filter((value) => typeof value === 'object' && value !== null && !Array.isArray(value))
-                    .map((value) => {
+                    .map((value, index) => {
                         const name = typeof value.name === 'string' && value.name.length > 0 ? value.name : 'dictionary.mdd';
-                        const bytes = value.bytes instanceof ArrayBuffer ? new Uint8Array(value.bytes) : new Uint8Array(0);
+                        if (!(value.bytes instanceof ArrayBuffer)) {
+                            throw new Error(`MDX import worker did not receive valid bytes for MDD file at index ${index} (${name})`);
+                        }
+                        const bytes = new Uint8Array(value.bytes);
                         return {name, bytes};
                     }) :
                 [],
