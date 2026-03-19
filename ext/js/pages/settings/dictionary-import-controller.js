@@ -2360,11 +2360,11 @@ export class DictionaryImportController {
             recordLocalPhase,
             async () => {
                 const mdxBytesView = (mdxBytes instanceof Uint8Array ? mdxBytes : new Uint8Array(mdxBytes));
-                const mdxBytesCopyBuffer = mdxBytesView.slice().buffer;
+                const mdxBytesCopyBuffer = new Uint8Array(mdxBytesView).buffer;
 
                 const mddFilesCopy = mddFiles.map(({name, bytes}) => {
                     const bytesView = (bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes));
-                    const bytesCopyBuffer = bytesView.slice().buffer;
+                    const bytesCopyBuffer = new Uint8Array(bytesView).buffer;
                     return {name, bytes: bytesCopyBuffer};
                 });
 
