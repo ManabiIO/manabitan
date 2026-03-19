@@ -119,6 +119,23 @@ function createFile(name) {
 }
 
 /**
+ * @param {File} file
+ * @returns {FileSystemFileEntry}
+ */
+function createFileEntry(file) {
+    /** @type {FileSystemFileEntry['file']} */
+    const fileCallback = (resolve, _reject) => {
+        resolve(file);
+    };
+    return /** @type {FileSystemFileEntry} */ (/** @type {unknown} */ ({
+        isFile: true,
+        isDirectory: false,
+        name: file.name,
+        file: fileCallback,
+    }));
+}
+
+/**
  * @param {Document} document
  * @returns {void}
  */
@@ -961,11 +978,7 @@ describe('MDX import flow integration', () => {
         const file = createFile('Alpha.zip');
 
         Reflect.set(controller, '_importFileDrop', dropZone);
-        Reflect.set(controller, '_getAllFileEntries', vi.fn().mockResolvedValue([{
-            file(resolve) {
-                resolve(file);
-            },
-        }]));
+        Reflect.set(controller, '_getAllFileEntries', vi.fn().mockResolvedValue([createFileEntry(file)]));
         Reflect.set(controller, '_createImportSourcesFromFiles', vi.fn(() => ({
             sources: [{type: 'zip', file}],
             errors: [],
@@ -1001,8 +1014,8 @@ describe('MDX import flow integration', () => {
 
         Reflect.set(controller, '_importFileDrop', dropZone);
         Reflect.set(controller, '_getAllFileEntries', vi.fn().mockResolvedValue([
-            {file(resolve) { resolve(alphaFile); }},
-            {file(resolve) { resolve(betaFile); }},
+            createFileEntry(alphaFile),
+            createFileEntry(betaFile),
         ]));
         Reflect.set(controller, '_createImportSourcesFromFiles', vi.fn(() => ({
             sources,
