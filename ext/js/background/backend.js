@@ -272,6 +272,8 @@ export class Backend {
         this._dictionaryImportModeActive = false;
         /** @type {boolean} */
         this._deferredDictionaryRefreshDuringImport = false;
+        /** @type {null|{type: import('backend').DatabaseUpdateType, cause: import('backend').DatabaseUpdateCause}} */
+        this._deferredDatabaseUpdatedEventDuringImport = null;
         /** @type {Promise<void>|null} */
         this._setDictionaryImportModePromise = null;
     }
@@ -3153,11 +3155,25 @@ export class Backend {
         if (type === 'dictionary') {
             if (this._dictionaryImportModeActive) {
                 this._deferredDictionaryRefreshDuringImport = true;
+                this._deferredDatabaseUpdatedEventDuringImport = {type, cause};
                 reportDiagnostics('dictionary-refresh-deferred-during-import', {cause});
-            } else {
-                void this._refreshDictionaryDatabaseAfterUpdate();
+                return;
             }
+            void this._triggerDictionaryDatabaseUpdated(type, cause);
+            return;
         }
+        this._sendMessageAllTabsIgnoreResponse({action: 'applicationDatabaseUpdated', params: {type, cause}});
+    }
+
+    /**
+     * Reloads dictionary caches and only then notifies listeners that the
+     * dictionary database is ready to query again.
+     * @param {import('backend').DatabaseUpdateType} type
+     * @param {import('backend').DatabaseUpdateCause} cause
+     * @returns {Promise<void>}
+     */
+    async _triggerDictionaryDatabaseUpdated(type, cause) {
+        await this._refreshDictionaryDatabaseAfterUpdate();
         this._sendMessageAllTabsIgnoreResponse({action: 'applicationDatabaseUpdated', params: {type, cause}});
     }
 
@@ -4608,6 +4624,11 @@ export class Backend {
             if (this._deferredDictionaryRefreshDuringImport) {
                 this._deferredDictionaryRefreshDuringImport = false;
                 await this._refreshDictionaryDatabaseAfterUpdate();
+                const deferredDatabaseUpdatedEvent = this._deferredDatabaseUpdatedEventDuringImport;
+                this._deferredDatabaseUpdatedEventDuringImport = null;
+                if (deferredDatabaseUpdatedEvent !== null) {
+                    this._sendMessageAllTabsIgnoreResponse({action: 'applicationDatabaseUpdated', params: deferredDatabaseUpdatedEvent});
+                }
             }
         })();
         try {

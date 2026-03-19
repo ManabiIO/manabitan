@@ -31,6 +31,7 @@ const DICTIONARY_AUTO_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
 afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
 });
 
 /**
@@ -442,6 +443,93 @@ describe('Backend dictionary auto-update helpers', () => {
             error: null,
         });
         expect(performDictionaryUpdate).not.toHaveBeenCalled();
+    });
+
+    test('Headless import details include global defaults for dictionary updates', () => {
+        vi.stubGlobal('chrome', {
+            runtime: {
+                getManifest: () => ({version: '9.9.9.9'}),
+            },
+        });
+        const context = {
+            _options: {
+                global: {
+                    database: {
+                        prefixWildcardsSupported: true,
+                    },
+                },
+            },
+        };
+
+        const importDetails = getBackendMethod('_createDictionaryImportDetails').call(context);
+
+        expect(importDetails).toStrictEqual({
+            prefixWildcardsSupported: true,
+            yomitanVersion: '9.9.9.9',
+        });
+    });
+
+    test('Dictionary updates re-import using default headless import details', async () => {
+        vi.stubGlobal('chrome', {
+            runtime: {
+                getManifest: () => ({version: '9.9.9.9'}),
+            },
+        });
+
+        const dictionary = createDictionarySummary({title: 'Custom Title'});
+        const archiveContent = new Uint8Array([1, 2, 3, 4]);
+        const context = {
+            _options: {
+                global: {
+                    database: {
+                        prefixWildcardsSupported: true,
+                    },
+                },
+            },
+            _captureDictionaryUpdateSettings: vi.fn(() => ({profilesDictionarySettings: {}, mainDictionaryProfileIds: new Set(), sortFrequencyDictionaryProfileIds: new Set()})),
+            _dictionaryDatabase: {
+                deleteDictionary: vi.fn(async () => {}),
+            },
+            _setDictionaryImportMode: vi.fn(async () => {}),
+            _importDictionaryArchiveHeadless: vi.fn(async () => ({
+                result: createDictionarySummary({
+                    title: 'Custom Title',
+                    revision: '2026.03',
+                }),
+                errors: [],
+            })),
+            _applyImportedDictionarySettings: vi.fn(async () => {}),
+            _updateDictionaryAutoUpdateStateAfterSuccess: vi.fn(async () => {}),
+            _setDictionaryAutoUpdateError: vi.fn(async () => {}),
+            _handleDatabaseUpdated: vi.fn(async () => {}),
+            _pruneStaleProfileDictionaryOptions: vi.fn(async () => {}),
+            _pruneStaleDictionaryAutoUpdates: vi.fn(async () => {}),
+        };
+        const createDictionaryImportDetails = vi.fn(getBackendMethod('_createDictionaryImportDetails').bind(context));
+        Reflect.set(context, '_createDictionaryImportDetails', createDictionaryImportDetails);
+
+        const result = await getBackendMethod('_performDictionaryUpdate').call(context, dictionary, archiveContent, '2026.03');
+
+        expect(result).toStrictEqual({
+            dictionaryTitle: 'Custom Title',
+            status: 'updated',
+            latestRevision: '2026.03',
+            error: null,
+        });
+        expect(createDictionaryImportDetails).toHaveBeenCalledWith();
+        expect(context._importDictionaryArchiveHeadless).toHaveBeenCalledWith(
+            archiveContent.buffer.slice(archiveContent.byteOffset, archiveContent.byteOffset + archiveContent.byteLength),
+            {
+                prefixWildcardsSupported: true,
+                yomitanVersion: '9.9.9.9',
+            },
+        );
+        expect(context._applyImportedDictionarySettings).toHaveBeenCalledWith(
+            dictionary,
+            expect.objectContaining({title: 'Custom Title'}),
+            expect.any(Object),
+        );
+        expect(context._setDictionaryAutoUpdateError).not.toHaveBeenCalled();
     });
 
     test('Imported dictionary settings migrate aliases, Anki fields, and auto-update preferences', async () => {

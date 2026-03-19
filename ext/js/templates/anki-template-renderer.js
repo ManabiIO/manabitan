@@ -792,7 +792,6 @@ export class AnkiTemplateRenderer {
             if (Array.isArray(structuredContent)) {
                 extractedContent.push(...this._extractGlossaryStructuredContentRecursive(structuredContent));
             } else if (typeof structuredContent === 'object' && structuredContent) {
-                // @ts-expect-error - Checking if `data` exists
                 if (structuredContent.data?.content === 'glossary') {
                     extractedContent.push(structuredContent);
                     continue;

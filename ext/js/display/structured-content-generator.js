@@ -20,6 +20,21 @@ import {DisplayContentManager} from '../display/display-content-manager.js';
 import {getLanguageFromText} from '../language/text-utilities.js';
 import {AnkiTemplateRendererContentManager} from '../templates/anki-template-renderer-content-manager.js';
 
+const STRUCTURED_CONTENT_MEDIA_LINK_PREFIX = 'media:';
+
+/**
+ * @param {string} href
+ * @returns {string}
+ */
+function getStructuredContentMediaPath(href) {
+    const rawPath = href.substring(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX.length);
+    try {
+        return decodeURIComponent(rawPath);
+    } catch (_error) {
+        return rawPath;
+    }
+}
+
 export class StructuredContentGenerator {
     /**
      * @param {import('./display-content-manager.js').DisplayContentManager|import('../templates/anki-template-renderer-content-manager.js').AnkiTemplateRendererContentManager} contentManager
@@ -63,6 +78,7 @@ export class StructuredContentGenerator {
      */
     createDefinitionImage(data, dictionary) {
         const {
+            data: elementData,
             path,
             width = 100,
             height = 100,
@@ -97,6 +113,9 @@ export class StructuredContentGenerator {
         const node = /** @type {HTMLAnchorElement} */ (this._createElement('a', 'gloss-image-link'));
         node.target = '_blank';
         node.rel = 'noreferrer noopener';
+        if (typeof elementData === 'object' && elementData !== null) {
+            this._setElementDataset(node, elementData);
+        }
 
         const imageContainer = this._createElement('span', 'gloss-image-container');
         node.appendChild(imageContainer);
@@ -389,6 +408,7 @@ export class StructuredContentGenerator {
     _setStructuredContentElementStyle(node, contentStyle) {
         const {style} = node;
         const {
+            fontFamily,
             fontStyle,
             fontWeight,
             fontSize,
@@ -423,6 +443,7 @@ export class StructuredContentGenerator {
             listStyleType,
         } = contentStyle;
         if (typeof fontStyle === 'string') { style.fontStyle = fontStyle; }
+        if (typeof fontFamily === 'string') { style.fontFamily = fontFamily; }
         if (typeof fontWeight === 'string') { style.fontWeight = fontWeight; }
         if (typeof fontSize === 'string') { style.fontSize = fontSize; }
         if (typeof color === 'string') { style.color = color; }
@@ -476,29 +497,52 @@ export class StructuredContentGenerator {
      */
     _createLinkElement(content, dictionary, language) {
         let {href} = content;
-        const internal = href.startsWith('?');
+        const media = href.startsWith(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX);
+        const internal = !media && href.startsWith('?');
         if (internal) {
             href = `${location.protocol}//${location.host}/search.html${href.length > 1 ? href : ''}`;
         }
 
         const node = /** @type {HTMLAnchorElement} */ (this._createElement('a', 'gloss-link'));
-        node.dataset.external = `${!internal}`;
+        node.dataset.external = `${!(internal || media)}`;
 
         const text = this._createElement('span', 'gloss-link-text');
         node.appendChild(text);
 
-        const {lang} = content;
+        const {data, lang, style, title} = content;
+        if (typeof data === 'object' && data !== null) {
+            this._setElementDataset(node, data);
+        }
         if (typeof lang === 'string') {
             node.lang = lang;
             language = lang;
         }
+        if (typeof style === 'object' && style !== null) {
+            this._setStructuredContentElementStyle(node, style);
+        }
+        if (typeof title === 'string') {
+            node.title = title;
+        }
 
         this._appendStructuredContent(text, content.content, dictionary, language);
 
-        if (!internal) {
+        if (!internal && !media) {
             const icon = this._createElement('span', 'gloss-link-external-icon icon');
             icon.dataset.icon = 'external-link';
             node.appendChild(icon);
+        }
+
+        if (media) {
+            const mediaPath = getStructuredContentMediaPath(href);
+            node.href = '#';
+            if (this._contentManager instanceof DisplayContentManager) {
+                const contentManager = this._contentManager;
+                node.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    void contentManager.openMediaInTab(mediaPath, dictionary, this._window);
+                });
+            }
+            return node;
         }
 
         this._contentManager.prepareLink(node, href, internal);

@@ -66,6 +66,8 @@ export const test = base.extend({
         const launchArgs = [
             `--disable-extensions-except=${pathToExtension}`,
             `--load-extension=${pathToExtension}`,
+            '--disable-crash-reporter',
+            '--disable-crashpad',
         ];
         if (!runHeadless && hideWindow) {
             launchArgs.push('--window-position=3000,3000', '--window-size=1280,800', '--start-minimized');

@@ -18,16 +18,31 @@
 import codspeedPlugin from '@codspeed/vitest-plugin';
 import {configDefaults, defineConfig} from 'vitest/config';
 
+const sharedExclude = [
+    ...configDefaults.exclude,
+    '.codex-worktrees/**',
+    '**/.codex-worktrees/**',
+    'builds/**',
+    '**/builds/**',
+    'dev/lib/**',
+    'ext/lib/**',
+    'test/playwright/**',
+];
+
 export default defineConfig({
     plugins: [codspeedPlugin()],
     test: {
+        setupFiles: [
+            './test/vitest.setup.js',
+        ],
+        benchmark: {
+            include: [
+                '**/*.bench.js',
+            ],
+            exclude: sharedExclude,
+        },
         exclude: [
-            ...configDefaults.exclude,
-            'builds/**',
-            '**/builds/**',
-            'dev/lib/**',
-            'ext/lib/**',
-            'test/playwright/**',
+            ...sharedExclude,
             'test/json.test.js',
             '.tmp-*.test.js',
         ],

@@ -4,6 +4,7 @@
         "firefox/**/*.js",
         "../node_modules",
         "../dev/lib",
-        "../ext/lib"
+        "../ext/lib",
+        "../ext/js/dictionary/mdx/vendor"
     ]
 }

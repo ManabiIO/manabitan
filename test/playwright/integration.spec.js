@@ -16,6 +16,7 @@
  */
 
 import path from 'path';
+import {readFileSync} from 'fs';
 import {createDictionaryArchiveData} from '../../dev/dictionary-archive-util.js';
 import {createDictionaryDatabaseBase64} from '../e2e/minimal-dictionary-database.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
@@ -26,6 +27,24 @@ import {
     test,
     writeToClipboardFromPage,
 } from './playwright-util.js';
+import {
+    localEnglishMdxDescription,
+    localEnglishMdxDictionaryTitle,
+    localEnglishMdxFixtureFileName,
+    localEnglishMdxLookupGlossary,
+    localEnglishMdxLookupTerm,
+    localEnglishMdxRevision,
+    localMdxDescription,
+    localMdxDictionaryTitle,
+    localMdxFixtureFileName,
+    localMdxLookupGlossary,
+    localMdxLookupTerm,
+    localMdxRevision,
+    mdxListingUrl,
+    mdxLookupGlossary,
+    mdxLookupTerm,
+    setupMdxImportHarness,
+} from './mdx-import-harness.js';
 
 const testDictionaryTitle = 'valid-dictionary1';
 const japaneseLookupTerm = '読む';
@@ -50,6 +69,8 @@ const happyPathSeedNotes = [{
     findable: true,
 }];
 const dictionaryFixtureDirectory = path.join(root, 'test', 'data', 'dictionaries', 'valid-dictionary1');
+const localMdxFixturePath = path.join(root, 'test', 'data', 'dictionaries', localMdxFixtureFileName);
+const localEnglishMdxFixturePath = path.join(root, 'test', 'data', 'dictionaries', localEnglishMdxFixtureFileName);
 const clipboardMonitorInitialValue = 'い';
 const clipboardMonitorUpdatedValue = 'あ';
 /** @type {Promise<string>|null} */
@@ -247,6 +268,93 @@ async function waitForSearchPageReady(page) {
 
 /**
  * @param {import('@playwright/test').Page} page
+ * @param {Array<{name: string, mimeType: string, buffer: Buffer}>} files
+ * @returns {Promise<void>}
+ */
+async function dragAndDropDictionaryFiles(page, files) {
+    const dropZone = page.locator('#dictionary-drop-file-zone');
+    const serializedFiles = files.map(({name, mimeType, buffer}) => ({
+        name,
+        mimeType,
+        base64: buffer.toString('base64'),
+    }));
+
+    await page.evaluate((fileList) => {
+        /**
+         * @param {string} base64
+         * @returns {Uint8Array}
+         */
+        const base64ToBytes = (base64) => {
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; ++i) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes;
+        };
+
+        /**
+         * @param {string} eventType
+         * @returns {void}
+         */
+        const dispatchDropEvent = (eventType) => {
+            const node = document.querySelector('#dictionary-drop-file-zone');
+            if (!(node instanceof HTMLElement)) {
+                throw new Error('Missing dictionary drop zone');
+            }
+            const event = new Event(eventType, {bubbles: true, cancelable: true});
+            Object.defineProperty(event, 'dataTransfer', {
+                configurable: true,
+                value: Reflect.get(globalThis, '__manabitanPlaywrightDropTransfer'),
+            });
+            node.dispatchEvent(event);
+        };
+
+        const items = fileList.map(({name, mimeType, base64}) => {
+            const file = new File([base64ToBytes(base64)], name, {type: mimeType});
+            const entry = {
+                isFile: true,
+                isDirectory: false,
+                name,
+                /**
+                 * @param {(file: File) => void} resolve
+                 * @param {(reason?: unknown) => void} _reject
+                 */
+                file(resolve, _reject) {
+                    resolve(file);
+                },
+            };
+            return {
+                kind: 'file',
+                type: mimeType,
+                webkitGetAsEntry() {
+                    return entry;
+                },
+            };
+        });
+        Reflect.set(globalThis, '__manabitanPlaywrightDropTransfer', {items});
+        Reflect.set(globalThis, '__manabitanPlaywrightDispatchDropEvent', dispatchDropEvent);
+        dispatchDropEvent('dragenter');
+    }, serializedFiles);
+
+    await expect(dropZone).toHaveClass(/drag-over/, {timeout: 5_000});
+
+    await page.evaluate(() => {
+        const dispatchDropEvent = Reflect.get(globalThis, '__manabitanPlaywrightDispatchDropEvent');
+        if (typeof dispatchDropEvent !== 'function') {
+            throw new Error('Missing synthetic drop event dispatcher');
+        }
+        dispatchDropEvent('dragover');
+        dispatchDropEvent('drop');
+        Reflect.deleteProperty(globalThis, '__manabitanPlaywrightDispatchDropEvent');
+        Reflect.deleteProperty(globalThis, '__manabitanPlaywrightDropTransfer');
+    });
+
+    await expect(dropZone).not.toHaveClass(/drag-over/, {timeout: 5_000});
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
  * @param {string} query
  * @returns {Promise<void>}
  */
@@ -271,6 +379,38 @@ async function waitForTermsLookupReady(page, query) {
 
 /**
  * @param {import('@playwright/test').Page} page
+ * @param {string} text
+ * @returns {Promise<void>}
+ */
+async function setSettingsPreviewText(page, text) {
+    await page.evaluate((previewText) => {
+        const frame = document.querySelector('#popup-preview-frame');
+        if (!(frame instanceof HTMLIFrameElement) || frame.contentWindow === null) {
+            throw new Error('Missing popup preview frame');
+        }
+        const targetOrigin = chrome.runtime.getURL('/').replace(/\/$/, '');
+        frame.contentWindow.postMessage({action: 'setText', params: {text: previewText}}, targetOrigin);
+    }, text);
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {string} language
+ * @returns {Promise<void>}
+ */
+async function setCurrentProfileLanguage(page, language) {
+    const optionsFull = /** @type {import('settings').Options} */ (await invokeRuntimeApi(page, 'optionsGetFull'));
+    for (const profile of optionsFull.profiles) {
+        profile.options.general.language = language;
+    }
+    await invokeRuntimeApi(page, 'setAllSettings', {value: optionsFull, source: `playwright-language-${language}`});
+    await page.reload();
+    await waitForSettingsPageReady(page);
+    await expect(page.locator('#language-select')).toHaveValue(language, {timeout: 30_000});
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
  * @param {string[]} [dictionaryTitles]
  * @returns {Promise<string[]>}
  */
@@ -281,7 +421,11 @@ async function importValidationDictionariesFromSettings(page, dictionaryTitles =
     await invokeRuntimeApi(page, 'purgeDatabase');
     await page.reload();
     await waitForSettingsPageReady(page);
+    await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+    await page.locator('#dictionary-import-button').click();
+    await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
     await page.locator('#dictionary-import-file-input').setInputFiles(dictionaries.map(({file}) => file));
+    await expect(page.locator('#dictionary-import-modal')).toBeHidden({timeout: 30_000});
     await expect(async () => {
         const info = /** @type {import('dictionary-importer').Summary[]} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
         const titles = info.map(({title}) => title).sort();
@@ -561,6 +705,313 @@ test('dictionary db export and restore', async ({page, extensionId}) => {
         expect(info.length).toBe(1);
         expect(info[0].title).toBe(testDictionaryTitle);
     }).toPass({timeout: 10_000});
+});
+
+test('chromium settings URL import routes an MDX listing through the browser flow and supports lookup', async ({page, extensionId}) => {
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+
+    await page.goto(`${extensionBaseUrl}/settings.html`);
+    await waitForSettingsPageReady(page);
+    await invokeRuntimeApi(page, 'purgeDatabase');
+    await page.reload();
+    await waitForSettingsPageReady(page);
+    await page.locator('input#advanced-checkbox').evaluate((/** @type {HTMLInputElement} */ element) => element.click());
+
+    const harness = await setupMdxImportHarness(page);
+
+    await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+    await page.locator('button#dictionary-import-button').click();
+    await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
+    await page.locator('#dictionary-import-url-text').fill(mdxListingUrl);
+    await page.locator('button#dictionary-import-url-button').click();
+    await expect(page.locator('#dictionary-import-source-list .dictionary-import-source')).toHaveCount(1, {timeout: 30_000});
+    await page.locator('button#dictionary-import-confirm-button').click();
+
+    await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 2 * 60 * 1000});
+    await expect(async () => {
+        const info = /** @type {Array<{title?: string, description?: string}>} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
+        expect(info.length).toBe(1);
+        expect(info[0]?.title).toBe(localEnglishMdxDictionaryTitle);
+        expect(info[0]?.description).toBe(localEnglishMdxDescription);
+    }).toPass({timeout: 60_000});
+
+    expect(harness.requestCounts.listing).toBeGreaterThan(0);
+    expect(harness.requestCounts.mdx).toBeGreaterThan(0);
+    expect(harness.requestCounts.mdd).toBe(0);
+
+    await setCurrentProfileLanguage(page, 'en');
+    await page.goto(`${extensionBaseUrl}/search.html`);
+    await waitForSearchPageReady(page);
+    await waitForTermsLookupReady(page, mdxLookupTerm);
+    await runSearch(page, mdxLookupTerm);
+    await expect(page.locator('#dictionary-entries .entry').first()).toBeVisible({timeout: 30_000});
+    await expect(page.locator('#dictionary-entries')).toContainText(mdxLookupGlossary);
+    await expect(async () => {
+        const dictionaryNames = await getResultDictionaryNames(page);
+        expect(dictionaryNames).toContain(localEnglishMdxDictionaryTitle);
+    }).toPass({timeout: 30_000});
+});
+
+test('chromium settings drag and drop imports a local MDX fixture, updates preview, and supports lookup', async ({page, extensionId}) => {
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const localMdxFixture = {
+        name: localMdxFixtureFileName,
+        mimeType: 'application/octet-stream',
+        buffer: readFileSync(localMdxFixturePath),
+    };
+
+    await page.goto(`${extensionBaseUrl}/settings.html`);
+    await waitForSettingsPageReady(page);
+    await invokeRuntimeApi(page, 'purgeDatabase');
+    await page.reload();
+    await waitForSettingsPageReady(page);
+
+    const harness = await setupMdxImportHarness(page, {
+        mdxBuffer: localMdxFixture.buffer,
+        mdxFileName: localMdxFixture.name,
+    });
+
+    await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+    await page.locator('button#dictionary-import-button').click();
+    await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
+    await dragAndDropDictionaryFiles(page, [localMdxFixture]);
+    await expect(page.locator('#dictionary-import-modal')).toBeHidden({timeout: 30_000});
+
+    await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 2 * 60 * 1000});
+    await expect(async () => {
+        const info = /** @type {Array<{title?: string, description?: string, revision?: string}>} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
+        expect(info.length).toBe(1);
+        expect(info[0]?.title).toBe(localMdxDictionaryTitle);
+        expect(info[0]?.description).toBe(localMdxDescription);
+        expect(info[0]?.revision).toBe(localMdxRevision);
+    }).toPass({timeout: 60_000});
+
+    expect(harness.requestCounts.listing).toBe(0);
+    expect(harness.requestCounts.mdx).toBe(0);
+    expect(harness.requestCounts.mdd).toBe(0);
+
+    await page.locator('#dictionaries-modal button[data-modal-action="hide"]').getByText('Close').click();
+    await setSettingsPreviewText(page, localMdxLookupTerm);
+
+    const preview = page.frameLocator('#popup-preview-frame');
+    await expect(preview.locator('#example-text')).toHaveText(localMdxLookupTerm, {timeout: 30_000});
+    await expect(preview.locator('.placeholder-info')).not.toHaveClass(/placeholder-info-visible/, {timeout: 30_000});
+
+    await page.goto(`${extensionBaseUrl}/search.html`);
+    await waitForSearchPageReady(page);
+    await waitForTermsLookupReady(page, localMdxLookupTerm);
+    await runSearch(page, localMdxLookupTerm);
+    await expect(page.locator('#dictionary-entries .entry').first()).toBeVisible({timeout: 30_000});
+    await expect(page.locator('#dictionary-entries')).toContainText(localMdxLookupGlossary);
+    await expect(async () => {
+        const dictionaryNames = await getResultDictionaryNames(page);
+        expect(dictionaryNames).toContain(localMdxDictionaryTitle);
+    }).toPass({timeout: 30_000});
+});
+
+test('chromium settings drag and drop imports an English local MDX fixture, updates preview, and supports lookup', async ({page, extensionId}) => {
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const localEnglishMdxFixture = {
+        name: localEnglishMdxFixtureFileName,
+        mimeType: 'application/octet-stream',
+        buffer: readFileSync(localEnglishMdxFixturePath),
+    };
+
+    await page.goto(`${extensionBaseUrl}/settings.html`);
+    await waitForSettingsPageReady(page);
+    await invokeRuntimeApi(page, 'purgeDatabase');
+    await page.reload();
+    await waitForSettingsPageReady(page);
+
+    const harness = await setupMdxImportHarness(page, {
+        mdxBuffer: localEnglishMdxFixture.buffer,
+        mdxFileName: localEnglishMdxFixture.name,
+    });
+
+    await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+    await page.locator('button#dictionary-import-button').click();
+    await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
+    await dragAndDropDictionaryFiles(page, [localEnglishMdxFixture]);
+    await expect(page.locator('#dictionary-import-modal')).toBeHidden({timeout: 30_000});
+
+    await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 2 * 60 * 1000});
+    await expect(async () => {
+        const info = /** @type {Array<{title?: string, description?: string, revision?: string}>} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
+        expect(info.length).toBe(1);
+        expect(info[0]?.title).toBe(localEnglishMdxDictionaryTitle);
+        expect(info[0]?.description).toBe(localEnglishMdxDescription);
+        expect(info[0]?.revision).toBe(localEnglishMdxRevision);
+    }).toPass({timeout: 60_000});
+
+    expect(harness.requestCounts.listing).toBe(0);
+    expect(harness.requestCounts.mdx).toBe(0);
+    expect(harness.requestCounts.mdd).toBe(0);
+
+    await setCurrentProfileLanguage(page, 'en');
+    await setSettingsPreviewText(page, localEnglishMdxLookupTerm);
+
+    const preview = page.frameLocator('#popup-preview-frame');
+    await expect(preview.locator('#example-text')).toHaveText(localEnglishMdxLookupTerm, {timeout: 30_000});
+    await expect(preview.locator('.placeholder-info')).not.toHaveClass(/placeholder-info-visible/, {timeout: 30_000});
+
+    await page.goto(`${extensionBaseUrl}/search.html`);
+    await waitForSearchPageReady(page);
+    await waitForTermsLookupReady(page, localEnglishMdxLookupTerm);
+    await runSearch(page, localEnglishMdxLookupTerm);
+    await expect(page.locator('#dictionary-entries .entry').first()).toBeVisible({timeout: 30_000});
+    await expect(page.locator('#dictionary-entries')).toContainText(localEnglishMdxLookupGlossary);
+    await expect(async () => {
+        const dictionaryNames = await getResultDictionaryNames(page);
+        expect(dictionaryNames).toContain(localEnglishMdxDictionaryTitle);
+    }).toPass({timeout: 30_000});
+});
+
+test('chromium settings file picker imports both local MDX fixtures in one batch and supports lookup from each', async ({page, extensionId}) => {
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const localFixtures = [
+        {
+            name: localMdxFixtureFileName,
+            mimeType: 'application/octet-stream',
+            buffer: readFileSync(localMdxFixturePath),
+        },
+        {
+            name: localEnglishMdxFixtureFileName,
+            mimeType: 'application/octet-stream',
+            buffer: readFileSync(localEnglishMdxFixturePath),
+        },
+    ];
+
+    await page.goto(`${extensionBaseUrl}/settings.html`);
+    await waitForSettingsPageReady(page);
+    await invokeRuntimeApi(page, 'purgeDatabase');
+    await page.reload();
+    await waitForSettingsPageReady(page);
+
+    await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+    await page.locator('button#dictionary-import-button').click();
+    await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
+    await page.locator('#dictionary-import-file-input').setInputFiles(localFixtures);
+    await expect(page.locator('#dictionary-import-modal')).toBeHidden({timeout: 30_000});
+
+    await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (2 installed, 2 enabled)', {timeout: 2 * 60 * 1000});
+    await expect(async () => {
+        const info = /** @type {Array<{title?: string, description?: string, revision?: string}>} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
+        const dictionaries = info
+            .map(({title, description, revision}) => ({title, description, revision}))
+            .sort((a, b) => String(a.title).localeCompare(String(b.title)));
+        expect(dictionaries).toStrictEqual([
+            {
+                title: localEnglishMdxDictionaryTitle,
+                description: localEnglishMdxDescription,
+                revision: localEnglishMdxRevision,
+            },
+            {
+                title: localMdxDictionaryTitle,
+                description: localMdxDescription,
+                revision: localMdxRevision,
+            },
+        ]);
+    }).toPass({timeout: 60_000});
+
+    await page.goto(`${extensionBaseUrl}/search.html`);
+    await waitForSearchPageReady(page);
+    await waitForTermsLookupReady(page, localMdxLookupTerm);
+    await runSearch(page, localMdxLookupTerm);
+    await expect(page.locator('#dictionary-entries .entry').first()).toBeVisible({timeout: 30_000});
+    await expect(page.locator('#dictionary-entries')).toContainText(localMdxLookupGlossary);
+    await expect(async () => {
+        const dictionaryNames = await getResultDictionaryNames(page);
+        expect(dictionaryNames).toContain(localMdxDictionaryTitle);
+    }).toPass({timeout: 30_000});
+
+    await page.goto(`${extensionBaseUrl}/settings.html`);
+    await waitForSettingsPageReady(page);
+    await setCurrentProfileLanguage(page, 'en');
+
+    await page.goto(`${extensionBaseUrl}/search.html`);
+    await waitForSearchPageReady(page);
+    await waitForTermsLookupReady(page, localEnglishMdxLookupTerm);
+    await runSearch(page, localEnglishMdxLookupTerm);
+    await expect(page.locator('#dictionary-entries .entry').first()).toBeVisible({timeout: 30_000});
+    await expect(page.locator('#dictionary-entries')).toContainText(localEnglishMdxLookupGlossary);
+    await expect(async () => {
+        const dictionaryNames = await getResultDictionaryNames(page);
+        expect(dictionaryNames).toContain(localEnglishMdxDictionaryTitle);
+    }).toPass({timeout: 30_000});
+});
+
+test('chromium settings drag and drop imports both local MDX fixtures in one batch and supports lookup from each', async ({page, extensionId}) => {
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const localFixtures = [
+        {
+            name: localMdxFixtureFileName,
+            mimeType: 'application/octet-stream',
+            buffer: readFileSync(localMdxFixturePath),
+        },
+        {
+            name: localEnglishMdxFixtureFileName,
+            mimeType: 'application/octet-stream',
+            buffer: readFileSync(localEnglishMdxFixturePath),
+        },
+    ];
+
+    await page.goto(`${extensionBaseUrl}/settings.html`);
+    await waitForSettingsPageReady(page);
+    await invokeRuntimeApi(page, 'purgeDatabase');
+    await page.reload();
+    await waitForSettingsPageReady(page);
+
+    await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+    await page.locator('button#dictionary-import-button').click();
+    await expect(page.locator('#dictionary-import-modal')).toBeVisible({timeout: 30_000});
+    await dragAndDropDictionaryFiles(page, localFixtures);
+    await expect(page.locator('#dictionary-import-modal')).toBeHidden({timeout: 30_000});
+
+    await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (2 installed, 2 enabled)', {timeout: 2 * 60 * 1000});
+    await expect(async () => {
+        const info = /** @type {Array<{title?: string, description?: string, revision?: string}>} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
+        const dictionaries = info
+            .map(({title, description, revision}) => ({title, description, revision}))
+            .sort((a, b) => String(a.title).localeCompare(String(b.title)));
+        expect(dictionaries).toStrictEqual([
+            {
+                title: localEnglishMdxDictionaryTitle,
+                description: localEnglishMdxDescription,
+                revision: localEnglishMdxRevision,
+            },
+            {
+                title: localMdxDictionaryTitle,
+                description: localMdxDescription,
+                revision: localMdxRevision,
+            },
+        ]);
+    }).toPass({timeout: 60_000});
+
+    await page.goto(`${extensionBaseUrl}/search.html`);
+    await waitForSearchPageReady(page);
+    await waitForTermsLookupReady(page, localMdxLookupTerm);
+    await runSearch(page, localMdxLookupTerm);
+    await expect(page.locator('#dictionary-entries .entry').first()).toBeVisible({timeout: 30_000});
+    await expect(page.locator('#dictionary-entries')).toContainText(localMdxLookupGlossary);
+    await expect(async () => {
+        const dictionaryNames = await getResultDictionaryNames(page);
+        expect(dictionaryNames).toContain(localMdxDictionaryTitle);
+    }).toPass({timeout: 30_000});
+
+    await page.goto(`${extensionBaseUrl}/settings.html`);
+    await waitForSettingsPageReady(page);
+    await setCurrentProfileLanguage(page, 'en');
+
+    await page.goto(`${extensionBaseUrl}/search.html`);
+    await waitForSearchPageReady(page);
+    await waitForTermsLookupReady(page, localEnglishMdxLookupTerm);
+    await runSearch(page, localEnglishMdxLookupTerm);
+    await expect(page.locator('#dictionary-entries .entry').first()).toBeVisible({timeout: 30_000});
+    await expect(page.locator('#dictionary-entries')).toContainText(localEnglishMdxLookupGlossary);
+    await expect(async () => {
+        const dictionaryNames = await getResultDictionaryNames(page);
+        expect(dictionaryNames).toContain(localEnglishMdxDictionaryTitle);
+    }).toPass({timeout: 30_000});
 });
 
 test('chromium happy path covers multi-dictionary import, lookup scroll, and Anki add', async ({page, extensionId}) => {

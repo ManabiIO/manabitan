@@ -17,12 +17,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - name: Install dependencies
         run: npm ci
       - name: Build Legal
         run: npm run license-report:html
+      - name: Determine link-check inputs
+        id: inputs
+        shell: bash
+        run: |
+          args="--exclude-path node_modules --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst'"
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            mapfile -t files < <(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- '*.md' '*.html' '*.rst')
+            if (( ${#files[@]} > 0 )); then
+              printf -v args '%s' "--exclude-path node_modules --verbose --no-progress"
+              printf -v file_args ' %q' "${files[@]}"
+              args+="${file_args}"
+            fi
+          fi
+          printf 'args=%s\n' "${args}" >> "${GITHUB_OUTPUT}"
       - uses: lycheeverse/lychee-action@v2.6.1
         with:
           fail: true
           jobSummary: false
-          args: --exclude-path 'node_modules' --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst'
+          args: ${{ steps.inputs.outputs.args }}
