@@ -252,6 +252,68 @@ class EmbeddedAssetCollector {
     }
 }
 
+class MddAssetResolver {
+    /**
+     * @param {Array<{name: string, bytes: Uint8Array}>} mddSources
+     */
+    constructor(mddSources) {
+        /** @type {Array<MddDictionaryLike>} */
+        this._dictionaries = [];
+        /** @type {Map<string, {dictionaryIndex: number, item: MdictKeyword}>} */
+        this._records = new Map();
+        /** @type {string[]} */
+        this._cssKeys = [];
+
+        for (const {name, bytes} of mddSources) {
+            const dictionary = /** @type {MddDictionaryLike} */ (new MDD(name, bytes));
+            const dictionaryIndex = this._dictionaries.length;
+            this._dictionaries.push(dictionary);
+            for (const item of dictionary.keywordList) {
+                const key = normalizeAssetKey(item.keyText);
+                if (key.length === 0 || this._records.has(key)) { continue; }
+                this._records.set(key, {dictionaryIndex, item});
+                if (key.toLowerCase().endsWith('.css')) {
+                    this._cssKeys.push(key);
+                }
+            }
+        }
+    }
+
+    /**
+     * @returns {number}
+     */
+    get recordCount() {
+        return this._records.size;
+    }
+
+    /**
+     * @returns {string[]}
+     */
+    get cssKeys() {
+        return this._cssKeys;
+    }
+
+    /**
+     * @param {string} key
+     * @returns {Uint8Array|null}
+     */
+    getBytes(key) {
+        const entry = this._records.get(key);
+        if (typeof entry === 'undefined') { return null; }
+        return this._dictionaries[entry.dictionaryIndex]?.lookupRecordByKeyBlock(entry.item) ?? null;
+    }
+
+    /** */
+    close() {
+        for (const dictionary of this._dictionaries) {
+            dictionary.close();
+        }
+        this._dictionaries = [];
+        this._records.clear();
+        this._cssKeys = [];
+    }
+}
+
 /**
  * @param {string} value
  * @returns {string}
@@ -356,6 +418,18 @@ function prefixRelativeAssetPath(path, assetPrefix, sourceAssetPath = null) {
 }
 
 /**
+ * @param {string} path
+ * @param {string} assetPrefix
+ * @param {string|null} sourceAssetPath
+ * @returns {string|null}
+ */
+function normalizeReferencedAssetKey(path, assetPrefix, sourceAssetPath = null) {
+    const normalizedPath = normalizeRelativeAssetPath(path, sourceAssetPath);
+    if (normalizedPath === null) { return null; }
+    return normalizedPath.startsWith(assetPrefix) ? normalizedPath.slice(assetPrefix.length) : normalizedPath;
+}
+
+/**
  * @param {string} value
  * @returns {{mediaType: string, data: Uint8Array}|null}
  */
@@ -400,56 +474,43 @@ function decodeStylesheetAsset(bytes) {
  * @param {string} stylesheet
  * @param {string} assetPrefix
  * @param {string|null} sourceAssetPath
+ * @param {Set<string>|null} assetReferences
  * @returns {string}
  */
-function rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath) {
+function rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetReferences = null) {
     return stylesheet.replace(/url\(\s*(["']?)(.*?)\1\s*\)/giu, (match, _quote, rawPath) => {
         const path = typeof rawPath === 'string' ? rawPath : '';
-        const prefixedPath = prefixRelativeAssetPath(path, assetPrefix, sourceAssetPath);
+        const normalizedPath = normalizeReferencedAssetKey(path, assetPrefix, sourceAssetPath);
+        if (normalizedPath !== null && assetReferences !== null) {
+            assetReferences.add(normalizedPath);
+        }
+        const prefixedPath = normalizedPath === null ? null : (
+            normalizedPath.startsWith(assetPrefix) ? normalizedPath : `${assetPrefix}${normalizedPath}`
+        );
         return prefixedPath === null ? match : `url("${prefixedPath}")`;
     });
 }
 
 /**
- * @param {Map<string, Uint8Array>} assets
+ * @param {Map<string, Uint8Array>} cssAssets
  * @param {string} assetPrefix
  * @param {Array<[string, string]>} inlineStylesheets
+ * @param {Set<string>|null} assetReferences
  * @returns {string|null}
  */
-function buildRootStylesheet(assets, assetPrefix, inlineStylesheets) {
+function buildRootStylesheet(cssAssets, assetPrefix, inlineStylesheets, assetReferences = null) {
     /** @type {string[]} */
     const sections = [];
-    for (const [archivePath, bytes] of [...assets.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
-        if (!archivePath.toLowerCase().endsWith('.css')) { continue; }
+    for (const [archivePath, bytes] of [...cssAssets.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
         const stylesheet = decodeStylesheetAsset(bytes);
         if (stylesheet === null) { continue; }
         const sourceName = archivePath.startsWith(assetPrefix) ? archivePath.slice(assetPrefix.length) : archivePath;
-        sections.push(`/* Source: ${sourceName} */\n${rewriteCssAssetUrls(stylesheet, assetPrefix, sourceName)}`);
+        sections.push(`/* Source: ${sourceName} */\n${rewriteCssAssetUrls(stylesheet, assetPrefix, sourceName, assetReferences)}`);
     }
     for (const [sourceName, stylesheet] of inlineStylesheets) {
-        sections.push(`/* Source: ${sourceName} */\n${rewriteCssAssetUrls(stylesheet, assetPrefix, null)}`);
+        sections.push(`/* Source: ${sourceName} */\n${rewriteCssAssetUrls(stylesheet, assetPrefix, null, assetReferences)}`);
     }
     return sections.length > 0 ? `${sections.join('\n\n')}\n` : null;
-}
-
-/**
- * @param {Map<string, Uint8Array>} assets
- * @param {Array<{name: string, bytes: Uint8Array}>} mddSources
- */
-function collectAssets(assets, mddSources) {
-    for (const {name, bytes} of mddSources) {
-        const mdd = /** @type {MddDictionaryLike} */ (new MDD(name, bytes));
-        for (const item of mdd.keywordList) {
-            const key = normalizeAssetKey(item.keyText);
-            if (key.length === 0) { continue; }
-            const value = mdd.lookupRecordByKeyBlock(item);
-            if (!(value instanceof Uint8Array)) { continue; }
-            if (!assets.has(key)) {
-                assets.set(key, value);
-            }
-        }
-        mdd.close();
-    }
 }
 
 /**
@@ -477,9 +538,10 @@ function buildStructuredData(attrs) {
 /**
  * @param {string|null|undefined} styleText
  * @param {string} assetPrefix
+ * @param {Set<string>} assetReferences
  * @returns {Record<string, string|string[]>|null}
  */
-function convertInlineStyle(styleText, assetPrefix) {
+function convertInlineStyle(styleText, assetPrefix, assetReferences) {
     if (typeof styleText !== 'string' || styleText.trim().length === 0) { return null; }
     /** @type {Record<string, string|string[]>} */
     const style = {};
@@ -490,7 +552,7 @@ function convertInlineStyle(styleText, assetPrefix) {
         let value = declaration.slice(separator + 1).trim();
         if (propertyName.length === 0 || value.length === 0) { continue; }
         if (value.includes('url(')) {
-            value = rewriteCssAssetUrls(value, assetPrefix, null);
+            value = rewriteCssAssetUrls(value, assetPrefix, null, assetReferences);
         }
         if (propertyName === 'text-decoration' || propertyName === 'text-decoration-line') {
             const parts = value.split(/\s+/u).filter((part) => ['underline', 'overline', 'line-through', 'none'].includes(part));
@@ -507,17 +569,23 @@ function convertInlineStyle(styleText, assetPrefix) {
 
 /**
  * @param {string} href
- * @param {{assetPrefix: string, enableAudio: boolean, embeddedAssets: EmbeddedAssetCollector}} details
+ * @param {{assetPrefix: string, enableAudio: boolean, embeddedAssets: EmbeddedAssetCollector, assetReferences: Set<string>}} details
  * @returns {string}
  */
-function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets}) {
+function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetReferences}) {
     const value = href.trim();
     const lowered = value.toLowerCase();
     if (lowered.startsWith('entry://')) { return `?query=${value.slice(8)}`; }
     if (lowered.startsWith('bword://')) { return `?query=${value.slice(8)}`; }
     if (lowered.startsWith('d:') || lowered.startsWith('x:')) { return `?query=${value.slice(2)}`; }
     if (lowered.startsWith('sound://')) {
-        const assetPath = prefixRelativeAssetPath(value.slice(8), assetPrefix, null);
+        const normalizedPath = normalizeReferencedAssetKey(value.slice(8), assetPrefix, null);
+        if (normalizedPath !== null) {
+            assetReferences.add(normalizedPath);
+        }
+        const assetPath = normalizedPath === null ? null : (
+            normalizedPath.startsWith(assetPrefix) ? normalizedPath : `${assetPrefix}${normalizedPath}`
+        );
         return enableAudio && assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
     }
     if (lowered.startsWith('http://') || lowered.startsWith('https://') || lowered.startsWith('mailto:') || lowered.startsWith('tel:')) {
@@ -530,19 +598,36 @@ function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets}) {
     if (lowered.startsWith('javascript:') || lowered.startsWith('vbscript:') || lowered.startsWith('about:') || value.startsWith('#')) {
         return '#';
     }
-    const assetPath = prefixRelativeAssetPath(value, assetPrefix, null);
+    const normalizedPath = normalizeReferencedAssetKey(value, assetPrefix, null);
+    if (normalizedPath !== null) {
+        assetReferences.add(normalizedPath);
+    }
+    const assetPath = normalizedPath === null ? null : (
+        normalizedPath.startsWith(assetPrefix) ? normalizedPath : `${assetPrefix}${normalizedPath}`
+    );
     return assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
 }
 
 /**
  * @param {Record<string, string>} attrs
- * @param {{assetPrefix: string, embeddedAssets: EmbeddedAssetCollector}} details
+ * @param {{assetPrefix: string, embeddedAssets: EmbeddedAssetCollector, assetReferences: Set<string>}} details
  * @returns {Record<string, unknown>|null}
  */
-function createStructuredImage(attrs, {assetPrefix, embeddedAssets}) {
+function createStructuredImage(attrs, {assetPrefix, embeddedAssets, assetReferences}) {
     const src = attrs.src ?? '';
     const lowerSrc = src.trim().toLowerCase();
-    const path = lowerSrc.startsWith('data:') ? embeddedAssets.registerDataUrl(src) : prefixRelativeAssetPath(src, assetPrefix, null);
+    let path;
+    if (lowerSrc.startsWith('data:')) {
+        path = embeddedAssets.registerDataUrl(src);
+    } else {
+        const normalizedPath = normalizeReferencedAssetKey(src, assetPrefix, null);
+        if (normalizedPath !== null) {
+            assetReferences.add(normalizedPath);
+        }
+        path = normalizedPath === null ? null : (
+            normalizedPath.startsWith(assetPrefix) ? normalizedPath : `${assetPrefix}${normalizedPath}`
+        );
+    }
     if (path === null) { return null; }
     /** @type {Record<string, unknown>} */
     const image = {tag: 'img', path};
@@ -587,7 +672,7 @@ function getDirectTextContent(parent) {
 /**
  * @param {Parse5ParentNode} parent
  * @param {Array<unknown>} content
- * @param {{assetPrefix: string, enableAudio: boolean, embeddedAssets: EmbeddedAssetCollector, inlineStylesheets: Array<[string, string]>}} details
+ * @param {{assetPrefix: string, enableAudio: boolean, embeddedAssets: EmbeddedAssetCollector, inlineStylesheets: Array<[string, string]>, assetReferences: Set<string>}} details
  */
 function appendStructuredContent(parent, content, details) {
     for (const child of parent.childNodes ?? []) {
@@ -642,7 +727,7 @@ function appendStructuredContent(parent, content, details) {
         if (typeof defaultStyle !== 'undefined') {
             Object.assign(style, defaultStyle);
         }
-        const inlineStyle = convertInlineStyle(attrs.style, details.assetPrefix);
+        const inlineStyle = convertInlineStyle(attrs.style, details.assetPrefix, details.assetReferences);
         if (inlineStyle !== null) {
             Object.assign(style, inlineStyle);
         }
@@ -695,10 +780,12 @@ function appendStructuredContent(parent, content, details) {
 /**
  * @param {string} definition
  * @param {{enableAudio: boolean, assetPrefix: string}} options
- * @returns {{glossary: Record<string, unknown>, inlineStylesheets: Array<[string, string]>, embeddedAssets: Map<string, Uint8Array>}}
+ * @returns {{glossary: Record<string, unknown>, inlineStylesheets: Array<[string, string]>, embeddedAssets: Map<string, Uint8Array>, assetReferences: Set<string>}}
  */
 function convertDefinitionToStructuredContent(definition, options) {
     const embeddedAssets = new EmbeddedAssetCollector(options.assetPrefix);
+    /** @type {Set<string>} */
+    const assetReferences = new Set();
     /** @type {Array<[string, string]>} */
     const inlineStylesheets = [];
     const fragmentResult = /** @type {unknown} */ (parse5.parseFragment(definition));
@@ -710,6 +797,7 @@ function convertDefinitionToStructuredContent(definition, options) {
         enableAudio: options.enableAudio,
         embeddedAssets,
         inlineStylesheets,
+        assetReferences,
     });
     return {
         glossary: {
@@ -725,27 +813,8 @@ function convertDefinitionToStructuredContent(definition, options) {
         },
         inlineStylesheets,
         embeddedAssets: embeddedAssets.assets,
+        assetReferences,
     };
-}
-
-/**
- * @param {MdxDictionaryLike} mdx
- * @returns {Map<string, string[]>}
- */
-function buildRedirectMap(mdx) {
-    /** @type {Map<string, string[]>} */
-    const redirects = new Map();
-    for (const item of mdx.keywordList) {
-        const result = mdx.fetch_definition(item);
-        const term = trimNullSuffix(item.keyText);
-        const definition = trimNullSuffix(result.definition ?? '');
-        if (term.length === 0 || !definition.startsWith('@@@LINK=')) { continue; }
-        const target = trimNullSuffix(definition.slice(8));
-        const values = redirects.get(target) ?? [];
-        values.push(term);
-        redirects.set(target, values);
-    }
-    return redirects;
 }
 
 /**
@@ -778,7 +847,7 @@ function extractDescription(mdx, override) {
  * @param {Uint8Array} mdxBytes
  * @param {Array<{name: string, bytes: Uint8Array}>} mddSources
  * @param {?(details: {stage: 'convert', completed: number, total: number}) => void} onProgress
- * @returns {Promise<{files: Map<string, Uint8Array>, archiveFileName: string}>}
+ * @returns {Promise<{files: Map<string, Uint8Array>, archiveFileName: string, phaseTimings: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>}>}
  */
 export async function createMdxImportData(fileName, options, mdxBytes, mddSources, onProgress = null) {
     const {
@@ -791,32 +860,63 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
     } = options;
 
     const mdx = /** @type {MdxDictionaryLike} */ (new MDX(fileName, mdxBytes));
+    /** @type {MddAssetResolver|null} */
+    let assetResolver = null;
     try {
-        const redirects = buildRedirectMap(mdx);
         const title = extractTitle(mdx, fileName, titleOverride);
         const description = extractDescription(mdx, descriptionOverride);
         const assetPrefix = 'mdict-media/';
-        /** @type {Map<string, Uint8Array>} */
-        const assets = new Map();
-        if (includeAssets && mddSources.length > 0) {
-            collectAssets(assets, mddSources);
-        }
+        /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
+        const phaseTimings = [];
+        /**
+         * @param {string} phase
+         * @param {number} startTime
+         * @param {Record<string, string|number|boolean|null>} [details]
+         * @returns {void}
+         */
+        const recordPhaseTiming = (phase, startTime, details = {}) => {
+            phaseTimings.push({
+                phase,
+                elapsedMs: Math.max(0, Date.now() - startTime),
+                details,
+            });
+        };
 
+        const tIndexMddStart = Date.now();
+        if (includeAssets && mddSources.length > 0) {
+            assetResolver = new MddAssetResolver(mddSources);
+        }
+        recordPhaseTiming('prepare-mdx:index-mdd', tIndexMddStart, {
+            includeAssets,
+            mddCount: mddSources.length,
+            indexedAssetCount: assetResolver?.recordCount ?? 0,
+            cssAssetCount: assetResolver?.cssKeys.length ?? 0,
+        });
+
+        const totalEntries = Math.max(1, mdx.keywordList.length);
         if (typeof onProgress === 'function') {
-            onProgress({stage: 'convert', completed: 0, total: Math.max(1, mdx.keywordList.length)});
+            onProgress({stage: 'convert', completed: 0, total: totalEntries});
         }
 
         const encoder = new TextEncoder();
         /** @type {Map<string, Uint8Array>} */
         const files = new Map();
+        /** @type {Map<string, Uint8Array>} */
+        const embeddedAssets = new Map();
         /** @type {Array<[string, string]>} */
         const inlineStylesheets = [];
-        let bankIndex = 1;
+        /** @type {Set<string>} */
+        const referencedAssetKeys = new Set();
+        /** @type {Map<string, string[]>} */
+        const redirects = new Map();
+        /** @type {Array<{term: string, glossary: Record<string, unknown>, sequence: number}>} */
+        const convertedEntries = [];
         let sequence = 0;
-        /** @type {unknown[][]} */
-        let bank = [];
-        const totalEntries = Math.max(1, mdx.keywordList.length);
         let processedEntries = 0;
+        let redirectCount = 0;
+        let encodedTermBankCount = 0;
+        let encodedTermRowCount = 0;
+        let jsonEncodeMs = 0;
 
         /**
          * @param {string} path
@@ -824,7 +924,9 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
          * @returns {void}
          */
         const writeJson = (path, value) => {
+            const tEncodeStart = Date.now();
             files.set(path, encoder.encode(JSON.stringify(value)));
+            jsonEncodeMs += Math.max(0, Date.now() - tEncodeStart);
         };
 
         writeJson('index.json', {
@@ -835,12 +937,26 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             description,
         });
 
+        const tConvertEntriesStart = Date.now();
         for (const item of mdx.keywordList) {
             const term = trimNullSuffix(item.keyText);
             const result = mdx.fetch_definition(item);
             const definition = trimNullSuffix(result.definition ?? '');
             processedEntries += 1;
-            if (term.length === 0 || definition.startsWith('@@@LINK=')) {
+            if (term.length === 0) {
+                if (typeof onProgress === 'function') {
+                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
+                }
+                continue;
+            }
+            if (definition.startsWith('@@@LINK=')) {
+                const target = trimNullSuffix(definition.slice(8));
+                if (target.length > 0) {
+                    const aliases = redirects.get(target) ?? [];
+                    aliases.push(term);
+                    redirects.set(target, aliases);
+                    redirectCount += 1;
+                }
                 if (typeof onProgress === 'function') {
                     onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
                 }
@@ -849,13 +965,36 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
 
             const converted = convertDefinitionToStructuredContent(definition, {enableAudio, assetPrefix});
             for (const [path, bytes] of converted.embeddedAssets) {
-                if (!assets.has(path)) {
-                    assets.set(path, bytes);
+                if (!embeddedAssets.has(path)) {
+                    embeddedAssets.set(path, bytes);
                 }
             }
             for (const [sourceName, stylesheet] of converted.inlineStylesheets) {
                 inlineStylesheets.push([`${term}/${sourceName}`, stylesheet]);
             }
+            for (const assetKey of converted.assetReferences) {
+                referencedAssetKeys.add(assetKey);
+            }
+            convertedEntries.push({term, glossary: converted.glossary, sequence});
+            sequence += 1;
+            if (typeof onProgress === 'function') {
+                onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
+            }
+        }
+        recordPhaseTiming('prepare-mdx:convert-entries', tConvertEntriesStart, {
+            entries: processedEntries,
+            convertedEntryCount: convertedEntries.length,
+            redirectCount,
+            referencedAssetCount: referencedAssetKeys.size,
+            inlineStylesheetCount: inlineStylesheets.length,
+            embeddedAssetCount: embeddedAssets.size,
+        });
+
+        const tEncodeBanksStart = Date.now();
+        let bankIndex = 1;
+        /** @type {unknown[][]} */
+        let bank = [];
+        for (const {term, glossary, sequence: entrySequence} of convertedEntries) {
             const expressions = [term, ...(redirects.get(term) ?? [])];
             for (const expression of expressions) {
                 bank.push([
@@ -864,46 +1003,83 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                     '',
                     '',
                     0,
-                    [converted.glossary],
-                    sequence,
+                    [glossary],
+                    entrySequence,
                     '',
                 ]);
             }
-            sequence += 1;
             if (bank.length >= termBankSize) {
+                encodedTermRowCount += bank.length;
                 writeJson(`term_bank_${bankIndex}.json`, bank);
                 bank = [];
                 bankIndex += 1;
-            }
-            if (typeof onProgress === 'function') {
-                onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
+                encodedTermBankCount += 1;
             }
         }
-
         if (bank.length > 0) {
+            encodedTermRowCount += bank.length;
             writeJson(`term_bank_${bankIndex}.json`, bank);
+            encodedTermBankCount += 1;
         }
+        recordPhaseTiming('prepare-mdx:encode-banks', tEncodeBanksStart, {
+            encodedTermBankCount,
+            encodedTermRowCount,
+            jsonEncodeMs: Math.max(0, jsonEncodeMs),
+        });
 
+        const tMaterializeAssetsStart = Date.now();
         /** @type {Map<string, Uint8Array>} */
-        const archiveAssets = new Map();
-        for (const [path, bytes] of assets) {
-            archiveAssets.set(path.startsWith(assetPrefix) ? path : `${assetPrefix}${path}`, bytes);
+        const cssAssets = new Map();
+        if (assetResolver !== null) {
+            for (const cssKey of assetResolver.cssKeys) {
+                const bytes = assetResolver.getBytes(cssKey);
+                if (!(bytes instanceof Uint8Array)) { continue; }
+                cssAssets.set(cssKey, bytes);
+            }
         }
-        const rootStylesheet = buildRootStylesheet(archiveAssets, assetPrefix, inlineStylesheets);
+        /** @type {Set<string>} */
+        const cssReferencedAssetKeys = new Set();
+        const rootStylesheet = buildRootStylesheet(cssAssets, assetPrefix, inlineStylesheets, cssReferencedAssetKeys);
         if (rootStylesheet !== null) {
             files.set('styles.css', encoder.encode(rootStylesheet));
         }
-        for (const [archivePath, bytes] of archiveAssets) {
-            files.set(archivePath, bytes);
+        for (const [assetPath, bytes] of embeddedAssets) {
+            files.set(assetPath, bytes);
         }
+        for (const [cssKey, bytes] of cssAssets) {
+            files.set(`${assetPrefix}${cssKey}`, bytes);
+        }
+        let materializedReferencedAssetCount = 0;
+        if (assetResolver !== null) {
+            const allReferencedAssetKeys = new Set([...referencedAssetKeys, ...cssReferencedAssetKeys]);
+            for (const assetKey of allReferencedAssetKeys) {
+                if (assetKey.toLowerCase().endsWith('.css')) { continue; }
+                const bytes = assetResolver.getBytes(assetKey);
+                if (!(bytes instanceof Uint8Array)) { continue; }
+                const archivePath = `${assetPrefix}${assetKey}`;
+                if (files.has(archivePath)) { continue; }
+                files.set(archivePath, bytes);
+                materializedReferencedAssetCount += 1;
+            }
+        }
+        recordPhaseTiming('prepare-mdx:materialize-assets', tMaterializeAssetsStart, {
+            cssAssetCount: cssAssets.size,
+            referencedAssetCount: referencedAssetKeys.size,
+            cssReferencedAssetCount: cssReferencedAssetKeys.size,
+            embeddedAssetCount: embeddedAssets.size,
+            materializedReferencedAssetCount,
+            hasRootStylesheet: rootStylesheet !== null,
+        });
         if (typeof onProgress === 'function') {
             onProgress({stage: 'convert', completed: totalEntries, total: totalEntries});
         }
         return {
             files,
             archiveFileName: `${title}.zip`,
+            phaseTimings,
         };
     } finally {
+        assetResolver?.close();
         mdx.close();
     }
 }

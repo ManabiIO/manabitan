@@ -363,7 +363,7 @@ export class DictionaryImporter {
                         indexVersion: typeof index.version === 'number' ? index.version : null,
                     });
                     this._logImport(`archive+index ${Date.now() - tArchiveStart}ms files=${fileMap.size}`);
-                    return {fileMap, index};
+                    return {fileMap, index, extraPhaseTimings: []};
                 } catch (error) {
                     recordPhaseTiming('archive-and-index', tArchiveStart, {ok: false});
                     throw error;
@@ -386,7 +386,7 @@ export class DictionaryImporter {
             async (recordPhaseTiming) => {
                 const tPrepareStart = Date.now();
                 try {
-                    const {files} = await createMdxImportData(
+                    const {files, phaseTimings: mdxPhaseTimings} = await createMdxImportData(
                         mdxSource.mdxFileName,
                         mdxSource.options ?? {},
                         mdxSource.mdxBytes,
@@ -405,7 +405,7 @@ export class DictionaryImporter {
                         indexVersion: typeof index.version === 'number' ? index.version : null,
                     });
                     this._logImport(`prepare-mdx ${Date.now() - tPrepareStart}ms files=${fileMap.size}`);
-                    return {fileMap, index};
+                    return {fileMap, index, extraPhaseTimings: mdxPhaseTimings};
                 } catch (error) {
                     recordPhaseTiming('prepare-mdx', tPrepareStart, {ok: false});
                     throw error;
@@ -417,7 +417,7 @@ export class DictionaryImporter {
     /**
      * @param {import('./dictionary-database.js').DictionaryDatabase} dictionaryDatabase
      * @param {import('dictionary-importer').ImportDetails} details
-     * @param {(recordPhaseTiming: (phase: string, startTime: number, phaseDetails?: Record<string, string|number|boolean|null>) => void) => Promise<{fileMap: import('dictionary-importer').ArchiveFileMap, index: import('dictionary-data').Index}>} loadSource
+     * @param {(recordPhaseTiming: (phase: string, startTime: number, phaseDetails?: Record<string, string|number|boolean|null>) => void) => Promise<{fileMap: import('dictionary-importer').ArchiveFileMap, index: import('dictionary-data').Index, extraPhaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>}>} loadSource
      * @returns {Promise<import('dictionary-importer').ImportResult>}
      */
     async _importDictionaryFromSource(dictionaryDatabase, details, loadSource) {
@@ -533,14 +533,20 @@ export class DictionaryImporter {
         let fileMap;
         /** @type {import('dictionary-data').Index} */
         let index;
+        /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
+        let extraPhaseTimings = [];
         try {
-            ({fileMap, index} = await loadSource(recordPhaseTiming));
+            ({fileMap, index, extraPhaseTimings = []} = await loadSource(recordPhaseTiming));
         } catch (e) {
             return {
                 result: null,
                 errors: [toError(e)],
                 debug: {phaseTimings},
             };
+        }
+        for (const phaseTiming of extraPhaseTimings) {
+            phaseTimings.push(phaseTiming);
+            this._logImport(`phase ${phaseTiming.phase} ${phaseTiming.elapsedMs}ms details=${JSON.stringify(phaseTiming.details ?? {})}`);
         }
 
         const dictionaryTitle = index.title;

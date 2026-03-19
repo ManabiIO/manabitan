@@ -167,22 +167,52 @@ export class DictionaryWorkerHandler {
                 [],
             options: (typeof options === 'object' && options !== null && !Array.isArray(options)) ? options : {},
         };
+        const progressState = {
+            messageCount: 0,
+            lastCompleted: 0,
+            lastReportedAt: 0,
+        };
 
-        return await this._runImport(details, onProgress, async (dictionaryImporter, dictionaryDatabase) => (
-            await dictionaryImporter.importMdxDictionary(
+        return await this._runImport(details, onProgress, async (dictionaryImporter, dictionaryDatabase) => {
+            const importPayload = await dictionaryImporter.importMdxDictionary(
                 dictionaryDatabase,
                 mdxSource,
                 details,
                 ({completed, total}) => {
-                    const normalizedProgress = total > 0 ? Math.max(0, Math.min(1, completed / total)) : 1;
+                    const normalizedTotal = Math.max(1, total);
+                    const clampedCompleted = Math.max(0, Math.min(normalizedTotal, completed));
+                    const now = Date.now();
+                    const minimumEntryDelta = Math.max(1, Math.min(100, Math.ceil(normalizedTotal * 0.01)));
+                    const shouldEmit = (
+                        progressState.messageCount === 0 ||
+                        clampedCompleted >= normalizedTotal ||
+                        (clampedCompleted - progressState.lastCompleted) >= minimumEntryDelta ||
+                        (now - progressState.lastReportedAt) >= 50
+                    );
+                    if (!shouldEmit) { return; }
+                    progressState.messageCount += 1;
+                    progressState.lastCompleted = clampedCompleted;
+                    progressState.lastReportedAt = now;
+                    const normalizedProgress = normalizedTotal > 0 ? Math.max(0, Math.min(1, clampedCompleted / normalizedTotal)) : 1;
                     onProgress({
                         nextStep: false,
                         index: MDX_PREPARATION_PROGRESS_START_INDEX + Math.round(MDX_PREPARATION_PROGRESS_RANGE * normalizedProgress),
                         count: MDX_PREPARATION_PROGRESS_TOTAL,
                     });
                 },
-            )
-        ));
+            );
+            const importerDebug = (typeof importPayload === 'object' && importPayload !== null && !Array.isArray(importPayload)) ?
+                (/** @type {import('dictionary-importer').ImportDebug|null} */ (Reflect.get(importPayload, 'debug') ?? null)) :
+                null;
+            const preparePhaseTiming = importerDebug?.phaseTimings.find(({phase}) => phase === 'prepare-mdx') ?? null;
+            if (preparePhaseTiming !== null) {
+                preparePhaseTiming.details = {
+                    ...(preparePhaseTiming.details ?? {}),
+                    progressMessageCount: progressState.messageCount,
+                };
+            }
+            return importPayload;
+        });
     }
 
     /**

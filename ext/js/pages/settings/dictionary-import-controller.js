@@ -2294,14 +2294,10 @@ export class DictionaryImportController {
         };
 
         const mdxBytes = await readFileWithProgress(source.mdxFile);
-        /** @type {Array<{name: string, bytes: ArrayBuffer}>} */
-        const mddFiles = [];
-        for (const file of source.mddFiles) {
-            mddFiles.push({
-                name: file.name,
-                bytes: await readFileWithProgress(file),
-            });
-        }
+        const mddFiles = await Promise.all(source.mddFiles.map(async (file) => ({
+            name: file.name,
+            bytes: await readFileWithProgress(file),
+        })));
         return {mdxBytes, mddFiles, totalBytes: totalUploadBytes};
     }
 
