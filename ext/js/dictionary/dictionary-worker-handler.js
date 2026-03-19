@@ -207,7 +207,7 @@ export class DictionaryWorkerHandler {
             const preparePhaseTiming = importerDebug?.phaseTimings.find(({phase}) => phase === 'prepare-mdx') ?? null;
             if (preparePhaseTiming !== null) {
                 preparePhaseTiming.details = {
-                    ...(preparePhaseTiming.details ?? {}),
+                    ...preparePhaseTiming.details,
                     progressMessageCount: progressState.messageCount,
                 };
             }
