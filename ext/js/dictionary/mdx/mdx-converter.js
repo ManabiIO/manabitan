@@ -484,9 +484,7 @@ function rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetRefe
         if (normalizedPath !== null && assetReferences !== null) {
             assetReferences.add(normalizedPath);
         }
-        const prefixedPath = normalizedPath === null ? null : (
-            normalizedPath.startsWith(assetPrefix) ? normalizedPath : `${assetPrefix}${normalizedPath}`
-        );
+        const prefixedPath = prefixRelativeAssetPath(path, assetPrefix, sourceAssetPath);
         return prefixedPath === null ? match : `url("${prefixedPath}")`;
     });
 }
@@ -583,9 +581,7 @@ function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetR
         if (normalizedPath !== null) {
             assetReferences.add(normalizedPath);
         }
-        const assetPath = normalizedPath === null ? null : (
-            normalizedPath.startsWith(assetPrefix) ? normalizedPath : `${assetPrefix}${normalizedPath}`
-        );
+        const assetPath = prefixRelativeAssetPath(value.slice(8), assetPrefix);
         return enableAudio && assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
     }
     if (lowered.startsWith('http://') || lowered.startsWith('https://') || lowered.startsWith('mailto:') || lowered.startsWith('tel:')) {
@@ -602,9 +598,7 @@ function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetR
     if (normalizedPath !== null) {
         assetReferences.add(normalizedPath);
     }
-    const assetPath = normalizedPath === null ? null : (
-        normalizedPath.startsWith(assetPrefix) ? normalizedPath : `${assetPrefix}${normalizedPath}`
-    );
+    const assetPath = prefixRelativeAssetPath(value, assetPrefix);
     return assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
 }
 
@@ -624,9 +618,7 @@ function createStructuredImage(attrs, {assetPrefix, embeddedAssets, assetReferen
         if (normalizedPath !== null) {
             assetReferences.add(normalizedPath);
         }
-        path = normalizedPath === null ? null : (
-            normalizedPath.startsWith(assetPrefix) ? normalizedPath : `${assetPrefix}${normalizedPath}`
-        );
+        path = prefixRelativeAssetPath(src, assetPrefix);
     }
     if (path === null) { return null; }
     /** @type {Record<string, unknown>} */
