@@ -22,8 +22,10 @@ export type OnProgressCallback = (...args: unknown[]) => void;
 
 export type Message = (
     ImportDictionaryMessage |
+    ImportMdxDictionaryMessage |
     DeleteDictionaryMessage |
     GetDictionaryCountsMessage |
+    GetMdxVersionMessage |
     GetImageDetailsResponseMessage
 );
 
@@ -35,6 +37,19 @@ export type ImportDictionaryMessage = {
 export type ImportDictionaryMessageParams = {
     details: DictionaryImporter.ImportDetails;
     archiveContent: ArrayBuffer;
+};
+
+export type ImportMdxDictionaryMessage = {
+    action: 'importMdxDictionary';
+    params: ImportMdxDictionaryMessageParams;
+};
+
+export type ImportMdxDictionaryMessageParams = {
+    details: DictionaryImporter.ImportDetails;
+    mdxFileName: string;
+    mdxBytes: ArrayBuffer;
+    mddFiles: Array<{name: string, bytes: ArrayBuffer}>;
+    options?: DictionaryImporter.MdxImportOptions;
 };
 
 export type DeleteDictionaryMessage = {
@@ -54,6 +69,11 @@ export type GetDictionaryCountsMessage = {
 export type GetDictionaryCountsMessageParams = {
     dictionaryNames: string[];
     getTotal: boolean;
+};
+
+export type GetMdxVersionMessage = {
+    action: 'getMdxVersion';
+    params: Record<string, never>;
 };
 
 export type GetImageDetailsResponseMessage = {

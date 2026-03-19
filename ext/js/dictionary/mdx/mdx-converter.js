@@ -777,10 +777,10 @@ function extractDescription(mdx, override) {
  * @param {{titleOverride?: string, descriptionOverride?: string, revision?: string, enableAudio?: boolean, includeAssets?: boolean, termBankSize?: number}} options
  * @param {Uint8Array} mdxBytes
  * @param {Array<{name: string, bytes: Uint8Array}>} mddSources
- * @param {?(details: {stage: 'convert'|'download', completed: number, total: number}) => void} onProgress
- * @returns {Promise<{archiveContent: ArrayBuffer, archiveFileName: string}>}
+ * @param {?(details: {stage: 'convert', completed: number, total: number}) => void} onProgress
+ * @returns {Promise<{files: Map<string, Uint8Array>, archiveFileName: string}>}
  */
-export async function convertMdxToArchive(fileName, options, mdxBytes, mddSources, onProgress = null) {
+export async function createMdxImportData(fileName, options, mdxBytes, mddSources, onProgress = null) {
     const {
         titleOverride = '',
         descriptionOverride = '',
@@ -806,9 +806,9 @@ export async function convertMdxToArchive(fileName, options, mdxBytes, mddSource
             onProgress({stage: 'convert', completed: 0, total: Math.max(1, mdx.keywordList.length)});
         }
 
-        const writer = new BlobWriter();
-        const zipWriter = new ZipWriter(writer, {level: 0});
         const encoder = new TextEncoder();
+        /** @type {Map<string, Uint8Array>} */
+        const files = new Map();
         /** @type {Array<[string, string]>} */
         const inlineStylesheets = [];
         let bankIndex = 1;
@@ -821,13 +821,13 @@ export async function convertMdxToArchive(fileName, options, mdxBytes, mddSource
         /**
          * @param {string} path
          * @param {unknown} value
-         * @returns {Promise<void>}
+         * @returns {void}
          */
-        const writeJson = async (path, value) => {
-            await zipWriter.add(path, new Uint8ArrayReader(encoder.encode(JSON.stringify(value))));
+        const writeJson = (path, value) => {
+            files.set(path, encoder.encode(JSON.stringify(value)));
         };
 
-        await writeJson('index.json', {
+        writeJson('index.json', {
             title,
             revision: revision.trim().length > 0 ? revision.trim() : 'mdx import',
             sequenced: true,
@@ -871,7 +871,7 @@ export async function convertMdxToArchive(fileName, options, mdxBytes, mddSource
             }
             sequence += 1;
             if (bank.length >= termBankSize) {
-                await writeJson(`term_bank_${bankIndex}.json`, bank);
+                writeJson(`term_bank_${bankIndex}.json`, bank);
                 bank = [];
                 bankIndex += 1;
             }
@@ -881,7 +881,7 @@ export async function convertMdxToArchive(fileName, options, mdxBytes, mddSource
         }
 
         if (bank.length > 0) {
-            await writeJson(`term_bank_${bankIndex}.json`, bank);
+            writeJson(`term_bank_${bankIndex}.json`, bank);
         }
 
         /** @type {Map<string, Uint8Array>} */
@@ -891,22 +891,56 @@ export async function convertMdxToArchive(fileName, options, mdxBytes, mddSource
         }
         const rootStylesheet = buildRootStylesheet(archiveAssets, assetPrefix, inlineStylesheets);
         if (rootStylesheet !== null) {
-            await zipWriter.add('styles.css', new Uint8ArrayReader(encoder.encode(rootStylesheet)));
+            files.set('styles.css', encoder.encode(rootStylesheet));
         }
         for (const [archivePath, bytes] of archiveAssets) {
-            await zipWriter.add(archivePath, new Uint8ArrayReader(bytes));
+            files.set(archivePath, bytes);
         }
-
-        await zipWriter.close();
-        const archiveContent = await (await writer.getData()).arrayBuffer();
         if (typeof onProgress === 'function') {
-            onProgress({stage: 'download', completed: archiveContent.byteLength, total: archiveContent.byteLength});
+            onProgress({stage: 'convert', completed: totalEntries, total: totalEntries});
         }
         return {
-            archiveContent,
+            files,
             archiveFileName: `${title}.zip`,
         };
     } finally {
         mdx.close();
     }
+}
+
+/**
+ * @param {string} fileName
+ * @param {{titleOverride?: string, descriptionOverride?: string, revision?: string, enableAudio?: boolean, includeAssets?: boolean, termBankSize?: number}} options
+ * @param {Uint8Array} mdxBytes
+ * @param {Array<{name: string, bytes: Uint8Array}>} mddSources
+ * @param {?(details: {stage: 'convert'|'download', completed: number, total: number}) => void} onProgress
+ * @returns {Promise<{archiveContent: ArrayBuffer, archiveFileName: string}>}
+ */
+export async function convertMdxToArchive(fileName, options, mdxBytes, mddSources, onProgress = null) {
+    const {files, archiveFileName} = await createMdxImportData(
+        fileName,
+        options,
+        mdxBytes,
+        mddSources,
+        (details) => {
+            if (typeof onProgress === 'function') {
+                onProgress(details);
+            }
+        },
+    );
+
+    const writer = new BlobWriter();
+    const zipWriter = new ZipWriter(writer, {level: 0});
+    for (const [archivePath, bytes] of files) {
+        await zipWriter.add(archivePath, new Uint8ArrayReader(bytes));
+    }
+    await zipWriter.close();
+    const archiveContent = await (await writer.getData()).arrayBuffer();
+    if (typeof onProgress === 'function') {
+        onProgress({stage: 'download', completed: archiveContent.byteLength, total: archiveContent.byteLength});
+    }
+    return {
+        archiveContent,
+        archiveFileName,
+    };
 }

@@ -50,6 +50,32 @@ export class DictionaryWorker {
     }
 
     /**
+     * @param {string} mdxFileName
+     * @param {ArrayBuffer} mdxBytes
+     * @param {Array<{name: string, bytes: ArrayBuffer}>} mddFiles
+     * @param {import('dictionary-importer').ImportDetails} details
+     * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {{titleOverride?: string, descriptionOverride?: string, revision?: string, enableAudio?: boolean, includeAssets?: boolean, termBankSize?: number}} [options]
+     * @returns {Promise<import('dictionary-importer').ImportResult>}
+     */
+    importMdxDictionary(mdxFileName, mdxBytes, mddFiles, details, onProgress, options = {}) {
+        return this._invoke(
+            'importMdxDictionary',
+            {details, mdxFileName, mdxBytes, mddFiles, options},
+            [mdxBytes, ...mddFiles.map(({bytes}) => bytes)],
+            onProgress,
+            this._formatImportDictionaryResult.bind(this),
+        );
+    }
+
+    /**
+     * @returns {Promise<number>}
+     */
+    getMdxVersion() {
+        return this._invoke('getMdxVersion', {}, [], null, null);
+    }
+
+    /**
      * @param {string} dictionaryTitle
      * @param {?import('dictionary-worker').DeleteProgressCallback} onProgress
      * @returns {Promise<void>}
