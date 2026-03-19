@@ -817,6 +817,70 @@ describe('MDX import flow integration', () => {
         expect(triggerStorageChanged).toHaveBeenCalledTimes(1);
     });
 
+    test('recycles shared import sessions for large batches to cap retained import memory', async () => {
+        setupImportFlowDom(window.document);
+        vi.stubGlobal('chrome', {
+            runtime: {
+                getManifest: () => ({version: '1.2.3.4'}),
+            },
+        });
+
+        const controller = createControllerForInternalTests();
+        const {showErrors, releaseDictionaryWorker, setDictionaryImportMode} = setupControllerImportHarness(controller);
+        const sessionWorkerA = {name: 'session-a'};
+        const sessionWorkerB = {name: 'session-b'};
+        const standaloneWorker = {name: 'standalone'};
+        const getDictionaryWorker = vi.fn()
+            .mockReturnValueOnce(sessionWorkerA)
+            .mockReturnValueOnce(sessionWorkerB)
+            .mockReturnValueOnce(standaloneWorker);
+        const importZipCall = vi.fn().mockResolvedValue([]);
+
+        Reflect.set(controller, '_getUseImportSession', vi.fn(() => true));
+        Reflect.set(controller, '_getDictionaryWorker', getDictionaryWorker);
+        Reflect.set(controller, '_importDictionaryFromZip', importZipCall);
+        Reflect.set(controller, '_waitForImportMemoryCleanup', vi.fn().mockResolvedValue(void 0));
+
+        const sources = [
+            {type: 'zip', file: createFile('Alpha.zip')},
+            {type: 'zip', file: createFile('Beta.zip')},
+            {type: 'zip', file: createFile('Gamma.zip')},
+            {type: 'zip', file: createFile('Delta.zip')},
+            {type: 'zip', file: createFile('Epsilon.zip')},
+        ];
+        const tracker = new ImportProgressTracker(getFileImportSteps(), sources.length);
+
+        await importDictionaries.call(
+            controller,
+            arrayToAsyncGenerator.call(controller, sources),
+            null,
+            null,
+            tracker,
+            [],
+        );
+
+        expect(importZipCall).toHaveBeenCalledTimes(5);
+        expect(importZipCall.mock.calls.map((call) => [call[4], call[5]])).toStrictEqual([
+            [true, false],
+            [true, true],
+            [true, false],
+            [true, true],
+            [false, false],
+        ]);
+        expect(getDictionaryWorker.mock.calls).toStrictEqual([
+            [true],
+            [true],
+            [false],
+        ]);
+        expect(releaseDictionaryWorker.mock.calls).toStrictEqual([
+            [sessionWorkerA, true],
+            [sessionWorkerB, true],
+            [standaloneWorker, false],
+        ]);
+        expect(setDictionaryImportMode.mock.calls).toStrictEqual([[true], [false]]);
+        expect(showErrors).toHaveBeenLastCalledWith([]);
+    });
+
     test('imports MDX sources through the direct worker path with upload progress and session flags', async () => {
         const controller = createControllerForInternalTests();
         const importDictionaryWithWorkerInvocation = vi.fn(async (...args) => {
