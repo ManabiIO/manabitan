@@ -603,7 +603,7 @@ export async function openOpfsDatabase(caller = 'unknown') {
             context: contextDiagnostics,
             diagnostics: lastOpenStorageDiagnostics,
         });
-        return new sqlite3.oo1.DB(':memory:', 'ct');
+        return new sqlite3.oo1.DB(':memory:', 'c');
     } catch (e) {
         lastOpenStorageDiagnostics.mode = 'fallback-memory-open-failed';
         lastOpenStorageDiagnostics.openFailureClass = classifyOpenFailureMessage(String(e));

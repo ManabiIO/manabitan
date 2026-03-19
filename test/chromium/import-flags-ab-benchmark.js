@@ -22,6 +22,15 @@ import {fileURLToPath} from 'node:url';
 import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import {parseJson} from '../../ext/js/core/json.js';
 
+const nodeMajorVersion = Number.parseInt(process.versions.node.split('.')[0], 10);
+if (!Number.isFinite(nodeMajorVersion) || nodeMajorVersion < 22) {
+    console.error(
+        `Chromium import benchmarks require Node.js 22 or newer. Detected ${process.version}. ` +
+        'Use Node.js 22+ for deterministic benchmark collection.',
+    );
+    process.exit(1);
+}
+
 const execFileAsync = promisify(execFile);
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
@@ -361,6 +370,12 @@ async function runPairedVariant(variant, skipBuildForFirstBaseline) {
 async function main() {
     if (!Number.isFinite(pairIterations) || pairIterations < 1) {
         throw new Error(`Invalid pair iteration count derived from referenceIterations=${String(referenceIterations)} iterationPercent=${String(iterationPercent)}`);
+    }
+    if (variants.length === 0) {
+        throw new Error(
+            'No import benchmark variants are configured. ' +
+            'Add at least one entry to the variants array before running bench:import:flags-ab.',
+        );
     }
     await mkdir(buildsDir, {recursive: true});
 

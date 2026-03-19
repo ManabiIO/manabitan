@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {bench, describe, vi} from 'vitest';
+import {beforeAll, bench, describe, vi} from 'vitest';
 
 vi.mock('../ext/lib/kanji-processor.js', () => ({
     /**
@@ -36,7 +36,12 @@ const benchmarkOptions = Object.freeze({
 const noteCount = 50;
 const oversizedFieldValue = 'x'.repeat(4096);
 const notes = createNotes(noteCount, oversizedFieldValue);
-const backend = /** @type {any} */ (createBackendBenchmarkHarness(notes));
+/** @type {any} */
+let backend;
+
+beforeAll(() => {
+    backend = /** @type {any} */ (createBackendBenchmarkHarness(notes));
+});
 
 describe('Backend Anki deduplication', () => {
     bench(`Backend._stripNotesArray (n=${noteCount})`, () => {

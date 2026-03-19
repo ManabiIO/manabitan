@@ -11,7 +11,10 @@
     "type": "module",
     "scripts": {
         "anki:css-json:write": "node ./dev/bin/generate-css-json.js --dryRun --all",
-        "bench": "vitest bench",
+        "bench": "node ./dev/bin/run-bench.js --run",
+        "bench:import:flags-ab": "node ./test/chromium/import-flags-ab-benchmark.js",
+        "bench:import:mdx": "node ./test/chromium/mdx-import-benchmark.js",
+        "bench:watch": "node ./dev/bin/run-bench.js",
         "build": "node ./dev/bin/build.js",
         "build:libs": "node ./dev/bin/build-libs.js",
         "build:source-release": "npm run build:libs && npm run license-report:html && npm run-script build -- --all",

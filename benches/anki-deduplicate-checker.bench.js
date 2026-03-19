@@ -18,7 +18,7 @@
 import {readFileSync} from 'fs';
 import {fileURLToPath} from 'node:url';
 import path from 'path';
-import {afterAll, bench, describe, vi} from 'vitest';
+import {afterAll, beforeAll, bench, describe, vi} from 'vitest';
 import {parseJson} from '../dev/json.js';
 import {AnkiNoteBuilder} from '../ext/js/data/anki-note-builder.js';
 import {getStandardFieldMarkers} from '../ext/js/data/anki-template-util.js';
@@ -107,7 +107,12 @@ const kanjiDuplicateCheckDetails = [createDuplicateCheckDetails(kanjiDictionaryE
 const kanjiCreateNoteDetails = [createCreateNoteDetails(kanjiDictionaryEntry, kanjiCardFormat, dictionaryStylesMap)];
 const termDuplicateCheckNotes = await Promise.all(termDuplicateCheckDetails.map((details) => ankiNoteBuilder.createDuplicateCheckNote(details)));
 const duplicateNoteKeys = createDuplicateNoteKeys(termDuplicateCheckNotes);
-const backend = /** @type {any} */ (createBackendBenchmarkHarness(duplicateNoteKeys));
+/** @type {any} */
+let backend;
+
+beforeAll(() => {
+    backend = /** @type {any} */ (createBackendBenchmarkHarness(duplicateNoteKeys));
+});
 
 describe('Anki deduplicate checker', () => {
     bench(`AnkiNoteBuilder.createDuplicateCheckNote - term batch (n=${termDuplicateCheckDetails.length})`, async () => {
