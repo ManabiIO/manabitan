@@ -3194,19 +3194,19 @@ export class DictionaryImporter {
     /**
      * @overload
      * @param {import('dictionary-importer').ImportFileEntry} entry
-     * @param {TextWriter} writer
+     * @param {import('@zip.js/zip.js').TextWriter} writer
      * @returns {Promise<string>}
      */
     /**
      * @overload
      * @param {import('dictionary-importer').ImportFileEntry} entry
-     * @param {Uint8ArrayWriter} writer
+     * @param {import('@zip.js/zip.js').Uint8ArrayWriter} writer
      * @returns {Promise<Uint8Array>}
      */
     /**
      * @overload
      * @param {import('dictionary-importer').ImportFileEntry} entry
-     * @param {BlobWriter} writer
+     * @param {import('@zip.js/zip.js').BlobWriter} writer
      * @returns {Promise<Blob>}
      */
     /**
