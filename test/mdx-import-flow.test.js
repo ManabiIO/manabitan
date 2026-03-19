@@ -139,15 +139,19 @@ describe('MDX import controller handoff', () => {
 
         expect(importMdxDictionary).toHaveBeenCalledTimes(1);
         const workerCall = importMdxDictionary.mock.calls[0];
-        expect(workerCall?.[0]).toBe('fixture.mdx');
-        expect(new Uint8Array(/** @type {ArrayBuffer} */ (workerCall?.[1]))).toStrictEqual(createBytes(32_000, 17));
-        expect((/** @type {Array<{name: string, bytes: ArrayBuffer}>} */ (workerCall?.[2])).map(({name}) => name)).toStrictEqual(['fixture.mdd']);
-        expect(workerCall?.[3]).toStrictEqual({
+        expect(workerCall).toBeDefined();
+        if (typeof workerCall === 'undefined') {
+            throw new Error('Missing direct MDX worker call');
+        }
+        expect(workerCall[0]).toBe('fixture.mdx');
+        expect(new Uint8Array(/** @type {ArrayBuffer} */ (workerCall[1]))).toStrictEqual(createBytes(32_000, 17));
+        expect((/** @type {Array<{name: string, bytes: ArrayBuffer}>} */ (workerCall[2])).map(({name}) => name)).toStrictEqual(['fixture.mdd']);
+        expect(workerCall[3]).toStrictEqual({
             ...importDetails,
             useImportSession: true,
             finalizeImportSession: false,
         });
-        expect(workerCall?.[5]).toStrictEqual({enableAudio: false});
+        expect(workerCall[5]).toStrictEqual({enableAudio: false});
 
         expect(progressEvents[0]).toStrictEqual({nextStep: true, index: 0, count: 0});
         expect(progressEvents.every(({nextStep}, index) => index === 0 || nextStep === false)).toBe(true);

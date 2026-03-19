@@ -3192,21 +3192,38 @@ export class DictionaryImporter {
     }
 
     /**
-     * @template [T=unknown]
+     * @overload
      * @param {import('dictionary-importer').ImportFileEntry} entry
-     * @param {import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter} writer
-     * @returns {Promise<T>}
+     * @param {TextWriter} writer
+     * @returns {Promise<string>}
+     */
+    /**
+     * @overload
+     * @param {import('dictionary-importer').ImportFileEntry} entry
+     * @param {Uint8ArrayWriter} writer
+     * @returns {Promise<Uint8Array>}
+     */
+    /**
+     * @overload
+     * @param {import('dictionary-importer').ImportFileEntry} entry
+     * @param {BlobWriter} writer
+     * @returns {Promise<Blob>}
+     */
+    /**
+     * @param {import('dictionary-importer').ImportFileEntry} entry
+     * @param {import('@zip.js/zip.js').Writer<unknown>|import('@zip.js/zip.js').WritableWriter} writer
+     * @returns {Promise<unknown>}
      */
     async _getData(entry, writer) {
         if (entry instanceof MemoryImportFile) {
             if (writer instanceof TextWriter) {
-                return /** @type {T} */ (/** @type {unknown} */ (this._textDecoder.decode(entry.bytes)));
+                return this._textDecoder.decode(entry.bytes);
             }
             if (writer instanceof Uint8ArrayWriter) {
-                return /** @type {T} */ (/** @type {unknown} */ (new Uint8Array(entry.bytes)));
+                return new Uint8Array(entry.bytes);
             }
             if (writer instanceof BlobWriter) {
-                return /** @type {T} */ (/** @type {unknown} */ (new Blob([entry.bytes])));
+                return new Blob([entry.bytes]);
             }
             throw new Error(`Unsupported in-memory dictionary writer for ${entry.filename}`);
         }

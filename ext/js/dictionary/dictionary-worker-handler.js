@@ -156,13 +156,15 @@ export class DictionaryWorkerHandler {
         const mdxSource = {
             mdxFileName: typeof mdxFileName === 'string' && mdxFileName.length > 0 ? mdxFileName : 'dictionary.mdx',
             mdxBytes: new Uint8Array(mdxBytes),
-            mddFiles: Array.isArray(mddFiles) ? mddFiles
-                .filter((value) => typeof value === 'object' && value !== null && !Array.isArray(value))
-                .map((value) => {
-                    const name = typeof value.name === 'string' && value.name.length > 0 ? value.name : 'dictionary.mdd';
-                    const bytes = value.bytes instanceof ArrayBuffer ? new Uint8Array(value.bytes) : new Uint8Array(0);
-                    return {name, bytes};
-                }) : [],
+            mddFiles: Array.isArray(mddFiles) ?
+                mddFiles
+                    .filter((value) => typeof value === 'object' && value !== null && !Array.isArray(value))
+                    .map((value) => {
+                        const name = typeof value.name === 'string' && value.name.length > 0 ? value.name : 'dictionary.mdd';
+                        const bytes = value.bytes instanceof ArrayBuffer ? new Uint8Array(value.bytes) : new Uint8Array(0);
+                        return {name, bytes};
+                    }) :
+                [],
             options: (typeof options === 'object' && options !== null && !Array.isArray(options)) ? options : {},
         };
 
