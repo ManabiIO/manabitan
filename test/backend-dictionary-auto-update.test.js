@@ -476,6 +476,7 @@ describe('Backend dictionary auto-update helpers', () => {
             },
         });
 
+        const applyDictionaryMetadataOverrides = vi.fn(getBackendMethod('_applyDictionaryMetadataOverrides'));
         const dictionary = createDictionarySummary({title: 'Custom Title'});
         const archiveContent = new Uint8Array([1, 2, 3, 4]);
         const context = {
@@ -504,6 +505,12 @@ describe('Backend dictionary auto-update helpers', () => {
             _handleDatabaseUpdated: vi.fn(async () => {}),
             _pruneStaleProfileDictionaryOptions: vi.fn(async () => {}),
             _pruneStaleDictionaryAutoUpdates: vi.fn(async () => {}),
+            _applyDictionaryMetadataOverrides(
+                /** @type {import('dictionary-importer').Summary} */ importedSummary,
+                /** @type {import('dictionary-importer').Summary} */ previousSummary,
+            ) {
+                return applyDictionaryMetadataOverrides.call(this, importedSummary, previousSummary);
+            },
         };
         const createDictionaryImportDetails = vi.fn(getBackendMethod('_createDictionaryImportDetails').bind(context));
         Reflect.set(context, '_createDictionaryImportDetails', createDictionaryImportDetails);
@@ -528,6 +535,100 @@ describe('Backend dictionary auto-update helpers', () => {
             dictionary,
             expect.objectContaining({title: 'Custom Title'}),
             expect.any(Object),
+        );
+        expect(context._setDictionaryAutoUpdateError).not.toHaveBeenCalled();
+    });
+
+    test('Dictionary updates preserve stored metadata overrides across re-imports', async () => {
+        vi.stubGlobal('chrome', {
+            runtime: {
+                getManifest: () => ({version: '9.9.9.9'}),
+            },
+        });
+
+        const applyDictionaryMetadataOverrides = getBackendMethod('_applyDictionaryMetadataOverrides');
+        const dictionary = createDictionarySummary({
+            title: 'Custom Title',
+            url: 'https://example.invalid/dictionaries/custom',
+            description: 'Custom description',
+            metadataOverrides: {
+                title: 'Custom Title',
+                url: 'https://example.invalid/dictionaries/custom',
+                description: 'Custom description',
+            },
+        });
+        const archiveContent = new Uint8Array([1, 2, 3, 4]);
+        const updateDictionaryMetadata = vi.fn(async () => {});
+        const context = {
+            _options: {
+                global: {
+                    database: {
+                        prefixWildcardsSupported: true,
+                    },
+                },
+            },
+            _captureDictionaryUpdateSettings: vi.fn(() => ({profilesDictionarySettings: {}, mainDictionaryProfileIds: new Set(), sortFrequencyDictionaryProfileIds: new Set()})),
+            _dictionaryDatabase: {
+                deleteDictionary: vi.fn(async () => {}),
+                updateDictionaryMetadata,
+            },
+            _setDictionaryImportMode: vi.fn(async () => {}),
+            _importDictionaryArchiveHeadless: vi.fn(async () => ({
+                result: createDictionarySummary({
+                    title: 'Archive Title',
+                    revision: '2026.03',
+                    url: 'https://example.invalid/dictionaries/archive',
+                    description: 'Archive description',
+                }),
+                errors: [],
+            })),
+            _applyImportedDictionarySettings: vi.fn(async () => {}),
+            _updateDictionaryAutoUpdateStateAfterSuccess: vi.fn(async () => {}),
+            _setDictionaryAutoUpdateError: vi.fn(async () => {}),
+            _handleDatabaseUpdated: vi.fn(async () => {}),
+            _pruneStaleProfileDictionaryOptions: vi.fn(async () => {}),
+            _pruneStaleDictionaryAutoUpdates: vi.fn(async () => {}),
+            _applyDictionaryMetadataOverrides(
+                /** @type {import('dictionary-importer').Summary} */ importedSummary,
+                /** @type {import('dictionary-importer').Summary} */ previousSummary,
+            ) {
+                return applyDictionaryMetadataOverrides.call(this, importedSummary, previousSummary);
+            },
+        };
+        const createDictionaryImportDetails = vi.fn(getBackendMethod('_createDictionaryImportDetails').bind(context));
+        Reflect.set(context, '_createDictionaryImportDetails', createDictionaryImportDetails);
+
+        const result = await getBackendMethod('_performDictionaryUpdate').call(context, dictionary, archiveContent, '2026.03');
+
+        expect(result).toStrictEqual({
+            dictionaryTitle: 'Custom Title',
+            status: 'updated',
+            latestRevision: '2026.03',
+            error: null,
+        });
+        expect(updateDictionaryMetadata).toHaveBeenCalledTimes(1);
+        expect(updateDictionaryMetadata).toHaveBeenCalledWith('Archive Title', expect.objectContaining({
+            title: 'Custom Title',
+            url: 'https://example.invalid/dictionaries/custom',
+            description: 'Custom description',
+            metadataOverrides: {
+                title: 'Custom Title',
+                url: 'https://example.invalid/dictionaries/custom',
+                description: 'Custom description',
+            },
+        }));
+        expect(context._applyImportedDictionarySettings).toHaveBeenCalledWith(
+            dictionary,
+            expect.objectContaining({
+                title: 'Custom Title',
+                url: 'https://example.invalid/dictionaries/custom',
+                description: 'Custom description',
+            }),
+            expect.any(Object),
+        );
+        expect(context._updateDictionaryAutoUpdateStateAfterSuccess).toHaveBeenCalledWith(
+            dictionary,
+            expect.objectContaining({title: 'Custom Title'}),
         );
         expect(context._setDictionaryAutoUpdateError).not.toHaveBeenCalled();
     });
@@ -646,5 +747,280 @@ describe('Backend dictionary auto-update helpers', () => {
         expect(context._options.global.dictionaryAutoUpdates).toStrictEqual(['https://example.invalid/new-index.json']);
         expect(saveOptions).toHaveBeenCalledTimes(1);
         expect(saveOptions).toHaveBeenCalledWith('background');
+    });
+
+    test('Dictionary metadata edits rename settings-backed references and trim optional fields', async () => {
+        const saveOptions = vi.fn(async () => {});
+        const updateDictionaryMetadata = vi.fn(async () => {});
+        const handleDatabaseUpdated = vi.fn(async () => {});
+        const captureDictionaryUpdateSettings = getBackendMethod('_captureDictionaryUpdateSettings');
+        const applyImportedDictionarySettings = getBackendMethod('_applyImportedDictionarySettings');
+        const createDefaultDictionarySettings = getBackendMethod('_createDefaultDictionarySettings');
+        const createEditedDictionarySummary = getBackendMethod('_createEditedDictionarySummary');
+        const previousSummary = createDictionarySummary({
+            title: 'Old Dictionary',
+            styles: 'old-style',
+        });
+        const context = {
+            _options: {
+                profileCurrent: 0,
+                profiles: [
+                    {
+                        id: 'profile-1',
+                        options: {
+                            dictionaries: [
+                                {
+                                    name: 'Old Dictionary',
+                                    alias: 'Old Dictionary',
+                                    enabled: true,
+                                    allowSecondarySearches: false,
+                                    definitionsCollapsible: 'not-collapsible',
+                                    partsOfSpeechFilter: true,
+                                    useDeinflections: true,
+                                    styles: 'old-style',
+                                },
+                            ],
+                            general: {
+                                mainDictionary: 'Old Dictionary',
+                                sortFrequencyDictionary: 'Old Dictionary',
+                            },
+                            anki: {
+                                cardFormats: [
+                                    {
+                                        fields: {
+                                            expression: {
+                                                value: 'old-dictionary-term',
+                                            },
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                global: {
+                    dictionaryAutoUpdates: [],
+                },
+            },
+            _dictionaryDatabase: {
+                getDictionaryInfo: async () => [previousSummary],
+                dictionaryExists: async () => false,
+                updateDictionaryMetadata,
+            },
+            _runWithDictionaryMutationLock: async (
+                /** @type {() => Promise<void>} */ callback,
+                _options = {},
+            ) => { await callback(); },
+            _ensureDictionaryDatabaseReady: async () => {},
+            _handleDatabaseUpdated: handleDatabaseUpdated,
+            _saveOptions: saveOptions,
+            _captureDictionaryUpdateSettings(
+                /** @type {string} */ dictionaryTitle,
+            ) {
+                return captureDictionaryUpdateSettings.call(this, dictionaryTitle);
+            },
+            _applyImportedDictionarySettings(
+                /** @type {import('dictionary-importer').Summary} */ previous,
+                /** @type {import('dictionary-importer').Summary} */ next,
+                /** @type {unknown} */ updateContext,
+            ) {
+                return applyImportedDictionarySettings.call(this, previous, next, updateContext);
+            },
+            _createDefaultDictionarySettings(
+                /** @type {string} */ name,
+                /** @type {boolean} */ enabled,
+                /** @type {string} */ styles,
+            ) {
+                return createDefaultDictionarySettings.call(this, name, enabled, styles);
+            },
+            _createEditedDictionarySummary(
+                /** @type {import('dictionary-importer').Summary} */ previous,
+                /** @type {string} */ nextTitle,
+                /** @type {string|undefined} */ nextUrl,
+                /** @type {string|undefined} */ nextDescription,
+            ) {
+                return createEditedDictionarySummary.call(this, previous, nextTitle, nextUrl, nextDescription);
+            },
+        };
+
+        const result = await getBackendMethod('_updateDictionaryMetadata').call(
+            context,
+            'Old Dictionary',
+            'New Dictionary',
+            ' https://example.invalid/dictionaries/new ',
+            '  Updated description  ',
+        );
+
+        expect(updateDictionaryMetadata).toHaveBeenCalledTimes(1);
+        expect(updateDictionaryMetadata).toHaveBeenCalledWith('Old Dictionary', expect.objectContaining({
+            title: 'New Dictionary',
+            url: 'https://example.invalid/dictionaries/new',
+            description: 'Updated description',
+            metadataOverrides: {
+                title: 'New Dictionary',
+                url: 'https://example.invalid/dictionaries/new',
+                description: 'Updated description',
+            },
+        }));
+        expect(result).toEqual(expect.objectContaining({
+            title: 'New Dictionary',
+            url: 'https://example.invalid/dictionaries/new',
+            description: 'Updated description',
+            metadataOverrides: {
+                title: 'New Dictionary',
+                url: 'https://example.invalid/dictionaries/new',
+                description: 'Updated description',
+            },
+        }));
+        const profile = context._options.profiles[0];
+        expect(profile.options.dictionaries).toStrictEqual([
+            {
+                name: 'New Dictionary',
+                alias: 'New Dictionary',
+                enabled: true,
+                allowSecondarySearches: false,
+                definitionsCollapsible: 'not-collapsible',
+                partsOfSpeechFilter: true,
+                useDeinflections: true,
+                styles: 'old-style',
+            },
+        ]);
+        expect(profile.options.general.mainDictionary).toBe('New Dictionary');
+        expect(profile.options.general.sortFrequencyDictionary).toBe('New Dictionary');
+        expect(profile.options.anki.cardFormats[0].fields.expression.value).toBe('new-dictionary-term');
+        expect(saveOptions).toHaveBeenCalledTimes(1);
+        expect(saveOptions).toHaveBeenCalledWith('background');
+        expect(handleDatabaseUpdated).toHaveBeenCalledTimes(1);
+        expect(handleDatabaseUpdated).toHaveBeenCalledWith('dictionary', 'edit');
+    });
+
+    test('Dictionary metadata edits roll back the rename when saving migrated settings fails', async () => {
+        const updateDictionaryMetadata = vi.fn(async () => {});
+        const saveOptions = vi.fn(async () => {
+            throw new Error('save failed');
+        });
+        const optionsUtilSave = vi.fn(async () => {});
+        const clearProfileConditionsSchemaCache = vi.fn(() => {});
+        const applyOptions = vi.fn(() => {});
+        const captureDictionaryUpdateSettings = getBackendMethod('_captureDictionaryUpdateSettings');
+        const applyImportedDictionarySettings = getBackendMethod('_applyImportedDictionarySettings');
+        const applyOptionsSnapshot = getBackendMethod('_applyOptionsSnapshot');
+        const createDefaultDictionarySettings = getBackendMethod('_createDefaultDictionarySettings');
+        const createEditedDictionarySummary = getBackendMethod('_createEditedDictionarySummary');
+        const previousSummary = createDictionarySummary({
+            title: 'Old Dictionary',
+            styles: 'old-style',
+        });
+        const context = {
+            _options: {
+                profileCurrent: 0,
+                profiles: [
+                    {
+                        id: 'profile-1',
+                        options: {
+                            dictionaries: [
+                                {
+                                    name: 'Old Dictionary',
+                                    alias: 'Old Dictionary',
+                                    enabled: true,
+                                    allowSecondarySearches: false,
+                                    definitionsCollapsible: 'not-collapsible',
+                                    partsOfSpeechFilter: true,
+                                    useDeinflections: true,
+                                    styles: 'old-style',
+                                },
+                            ],
+                            general: {
+                                mainDictionary: 'Old Dictionary',
+                                sortFrequencyDictionary: 'Old Dictionary',
+                            },
+                            anki: {
+                                cardFormats: [
+                                    {
+                                        fields: {
+                                            expression: {
+                                                value: 'old-dictionary-term',
+                                            },
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                global: {
+                    dictionaryAutoUpdates: [],
+                },
+            },
+            _dictionaryDatabase: {
+                getDictionaryInfo: async () => [previousSummary],
+                updateDictionaryMetadata,
+            },
+            _optionsUtil: {
+                save: optionsUtilSave,
+            },
+            _runWithDictionaryMutationLock: async (
+                /** @type {() => Promise<void>} */ callback,
+                _options = {},
+            ) => { await callback(); },
+            _ensureDictionaryDatabaseReady: async () => {},
+            _handleDatabaseUpdated: vi.fn(async () => {}),
+            _clearProfileConditionsSchemaCache: clearProfileConditionsSchemaCache,
+            _applyOptions: applyOptions,
+            _saveOptions: saveOptions,
+            _captureDictionaryUpdateSettings(
+                /** @type {string} */ dictionaryTitle,
+            ) {
+                return captureDictionaryUpdateSettings.call(this, dictionaryTitle);
+            },
+            _applyImportedDictionarySettings(
+                /** @type {import('dictionary-importer').Summary} */ previous,
+                /** @type {import('dictionary-importer').Summary} */ next,
+                /** @type {unknown} */ updateContext,
+            ) {
+                return applyImportedDictionarySettings.call(this, previous, next, updateContext);
+            },
+            _createDefaultDictionarySettings(
+                /** @type {string} */ name,
+                /** @type {boolean} */ enabled,
+                /** @type {string} */ styles,
+            ) {
+                return createDefaultDictionarySettings.call(this, name, enabled, styles);
+            },
+            _createEditedDictionarySummary(
+                /** @type {import('dictionary-importer').Summary} */ previous,
+                /** @type {string} */ nextTitle,
+                /** @type {string|undefined} */ nextUrl,
+                /** @type {string|undefined} */ nextDescription,
+            ) {
+                return createEditedDictionarySummary.call(this, previous, nextTitle, nextUrl, nextDescription);
+            },
+            _applyOptionsSnapshot(
+                /** @type {import('settings').Options} */ options,
+                /** @type {string} */ source,
+            ) {
+                return applyOptionsSnapshot.call(this, options, source);
+            },
+        };
+
+        await expect(getBackendMethod('_updateDictionaryMetadata').call(
+            context,
+            'Old Dictionary',
+            'New Dictionary',
+            'https://example.invalid/dictionaries/new',
+            'Updated description',
+        )).rejects.toThrow('save failed');
+
+        expect(updateDictionaryMetadata).toHaveBeenCalledTimes(2);
+        expect(updateDictionaryMetadata).toHaveBeenNthCalledWith(1, 'Old Dictionary', expect.objectContaining({
+            title: 'New Dictionary',
+        }));
+        expect(updateDictionaryMetadata).toHaveBeenNthCalledWith(2, 'New Dictionary', previousSummary);
+        expect(optionsUtilSave).toHaveBeenCalledTimes(1);
+        expect(context._options.profiles[0].options.dictionaries[0]).toMatchObject({
+            name: 'Old Dictionary',
+            alias: 'Old Dictionary',
+        });
+        expect(context._options.profiles[0].options.general.mainDictionary).toBe('Old Dictionary');
     });
 });

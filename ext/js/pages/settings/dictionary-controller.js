@@ -211,9 +211,10 @@ class DictionaryEntry {
     _onMenuOpen(e) {
         const bodyNode = e.detail.menu.bodyNode;
         const count = this._dictionaryController.dictionaryOptionCount;
+        const mutationDisabled = this._dictionaryController.isDictionaryInTaskQueue(this.dictionaryTitle);
         this._setMenuActionEnabled(bodyNode, 'moveTo', count > 1);
-        const deleteDisabled = this._dictionaryController.isDictionaryInTaskQueue(this.dictionaryTitle);
-        this._setMenuActionEnabled(bodyNode, 'delete', !deleteDisabled);
+        this._setMenuActionEnabled(bodyNode, 'edit', !mutationDisabled);
+        this._setMenuActionEnabled(bodyNode, 'delete', !mutationDisabled);
     }
 
     /**
@@ -226,6 +227,9 @@ class DictionaryEntry {
                 break;
             case 'showDetails':
                 void this._showDetails();
+                break;
+            case 'edit':
+                this._showEditMetadataModal();
                 break;
             case 'moveTo':
                 this._showMoveToModal();
@@ -429,6 +433,30 @@ class DictionaryEntry {
         titleNode.textContent = title;
         input.value = `${this._index + 1}`;
         input.max = `${count}`;
+
+        modal.setVisible(true);
+    }
+
+    /** */
+    _showEditMetadataModal() {
+        const {title, url, description} = this._dictionaryInfo;
+        const modal = this._dictionaryController.modalController.getModal('dictionary-edit-metadata');
+        if (modal === null) { return; }
+        /** @type {HTMLInputElement} */
+        const nameInput = querySelectorNotNull(modal.node, '#dictionary-metadata-name-input');
+        /** @type {HTMLInputElement} */
+        const urlInput = querySelectorNotNull(modal.node, '#dictionary-metadata-url-input');
+        /** @type {HTMLTextAreaElement} */
+        const descriptionInput = querySelectorNotNull(modal.node, '#dictionary-metadata-description-input');
+
+        modal.node.dataset.dictionaryTitle = title;
+        modal.node.dataset.originalTitle = title;
+        modal.node.dataset.originalUrl = url ?? '';
+        modal.node.dataset.originalDescription = description ?? '';
+        nameInput.value = title;
+        urlInput.value = url ?? '';
+        descriptionInput.value = description ?? '';
+        this._dictionaryController.setDictionaryMetadataEditError('');
 
         modal.setVisible(true);
     }
@@ -660,6 +688,10 @@ export class DictionaryController {
         const dictionaryMoveButton = querySelectorNotNull(document, '#dictionary-move-button');
 
         /** @type {HTMLButtonElement} */
+        const dictionaryResetMetadataButton = querySelectorNotNull(document, '#dictionary-reset-metadata-button');
+        /** @type {HTMLButtonElement} */
+        const dictionarySaveMetadataButton = querySelectorNotNull(document, '#dictionary-save-metadata-button');
+        /** @type {HTMLButtonElement} */
         const dictionaryResetAliasButton = querySelectorNotNull(document, '#dictionary-reset-alias-button');
         /** @type {HTMLButtonElement} */
         const dictionarySetAliasButton = querySelectorNotNull(document, '#dictionary-set-alias-button');
@@ -673,6 +705,8 @@ export class DictionaryController {
 
         dictionaryMoveButton.addEventListener('click', this._onDictionaryMoveButtonClick.bind(this), false);
 
+        dictionarySaveMetadataButton.addEventListener('click', this._onDictionarySaveMetadataButtonClick.bind(this), false);
+        dictionaryResetMetadataButton.addEventListener('click', this._onDictionaryResetMetadataButtonClick.bind(this), false);
         dictionarySetAliasButton.addEventListener('click', this._onDictionarySetAliasButtonClick.bind(this), false);
         dictionaryResetAliasButton.addEventListener('click', this._onDictionaryResetAliasButtonClick.bind(this), false);
 
@@ -1140,6 +1174,73 @@ export class DictionaryController {
         if (!Number.isFinite(target) || !Number.isFinite(indexNumber) || indexNumber === target) { return; }
 
         void this.moveDictionaryOptions(indexNumber, target);
+    }
+
+    /** */
+    _onDictionaryResetMetadataButtonClick() {
+        const modal = /** @type {import('./modal.js').Modal} */ (this._modalController.getModal('dictionary-edit-metadata'));
+        /** @type {HTMLInputElement} */
+        const nameInput = querySelectorNotNull(modal.node, '#dictionary-metadata-name-input');
+        /** @type {HTMLInputElement} */
+        const urlInput = querySelectorNotNull(modal.node, '#dictionary-metadata-url-input');
+        /** @type {HTMLTextAreaElement} */
+        const descriptionInput = querySelectorNotNull(modal.node, '#dictionary-metadata-description-input');
+
+        nameInput.value = modal.node.dataset.originalTitle ?? '';
+        urlInput.value = modal.node.dataset.originalUrl ?? '';
+        descriptionInput.value = modal.node.dataset.originalDescription ?? '';
+        this.setDictionaryMetadataEditError('');
+    }
+
+    /** */
+    async _onDictionarySaveMetadataButtonClick() {
+        const modal = /** @type {import('./modal.js').Modal} */ (this._modalController.getModal('dictionary-edit-metadata'));
+        const dictionaryTitle = modal.node.dataset.dictionaryTitle;
+        if (typeof dictionaryTitle !== 'string' || dictionaryTitle.length === 0) { return; }
+
+        /** @type {HTMLInputElement} */
+        const nameInput = querySelectorNotNull(modal.node, '#dictionary-metadata-name-input');
+        /** @type {HTMLInputElement} */
+        const urlInput = querySelectorNotNull(modal.node, '#dictionary-metadata-url-input');
+        /** @type {HTMLTextAreaElement} */
+        const descriptionInput = querySelectorNotNull(modal.node, '#dictionary-metadata-description-input');
+        /** @type {HTMLButtonElement} */
+        const saveButton = querySelectorNotNull(modal.node, '#dictionary-save-metadata-button');
+
+        nameInput.value = nameInput.value.trim();
+        urlInput.value = urlInput.value.trim();
+        if (!nameInput.reportValidity() || !urlInput.reportValidity()) {
+            return;
+        }
+
+        this.setDictionaryMetadataEditError('');
+        saveButton.disabled = true;
+        try {
+            await this._settingsController.application.api.updateDictionaryMetadata(
+                dictionaryTitle,
+                nameInput.value,
+                urlInput.value,
+                descriptionInput.value,
+            );
+            modal.setVisible(false);
+        } catch (e) {
+            const message = e instanceof Error ? e.message : String(e);
+            this.setDictionaryMetadataEditError(message);
+        } finally {
+            saveButton.disabled = false;
+        }
+    }
+
+    /**
+     * @param {string} message
+     */
+    setDictionaryMetadataEditError(message) {
+        const modal = this._modalController.getModal('dictionary-edit-metadata');
+        if (modal === null) { return; }
+        /** @type {HTMLElement} */
+        const errorNode = querySelectorNotNull(modal.node, '#dictionary-edit-metadata-error');
+        errorNode.textContent = message;
+        errorNode.hidden = message.length === 0;
     }
 
     /** */
