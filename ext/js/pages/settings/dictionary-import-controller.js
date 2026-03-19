@@ -23,7 +23,6 @@ import {log} from '../../core/log.js';
 import {safePerformance} from '../../core/safe-performance.js';
 import {toError} from '../../core/to-error.js';
 import {getKebabCase} from '../../data/anki-template-util.js';
-import {Mdx} from '../../comm/mdx.js';
 import {DictionaryWorker} from '../../dictionary/dictionary-worker.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {DictionaryController} from './dictionary-controller.js';
@@ -31,6 +30,7 @@ import {DictionaryController} from './dictionary-controller.js';
 const OPFS_REQUIRED_USER_MESSAGE = 'Manabitan requires OPFS storage support. Update to Chrome/Edge 120+ or Firefox 115+ and reload the extension.';
 const RECOMMENDED_DICTIONARY_CATEGORIES = ['terms', 'kanji', 'frequency', 'grammar', 'pronunciation'];
 const MDX_CONVERSION_PROGRESS_TOTAL = 1000;
+const MDX_UPLOAD_PROGRESS_RATIO = 0.45;
 const DUPLICATE_IMPORT_SKIP_ERROR_PATTERN = /^Dictionary .+ is already imported, skipped it\.$/;
 
 /**
@@ -405,8 +405,6 @@ export class DictionaryImportController {
         this._recommendedDictionariesPrimed = false;
         /** @type {DictionaryImportSource[]} */
         this._pendingImportSources = [];
-        /** @type {Mdx} */
-        this._mdx = new Mdx();
         /** @type {(event: MouseEvent) => void} */
         this._onDocumentClickCaptureBind = this._onDocumentClickCapture.bind(this);
         /** @type {(event: Event) => void} */
@@ -505,7 +503,6 @@ export class DictionaryImportController {
             this._sessionDictionaryWorker.destroy();
             this._sessionDictionaryWorker = null;
         }
-        this._mdx.disconnect();
     }
 
     /**
@@ -1512,7 +1509,19 @@ export class DictionaryImportController {
      * @returns {Promise<void>}
      */
     async _ensureMdxImportReady() {
-        await this._mdx.getVersion();
+        await this._getMdxVersion();
+    }
+
+    /**
+     * @returns {Promise<number>}
+     */
+    async _getMdxVersion() {
+        const dictionaryWorker = new DictionaryWorker({reuseWorker: false});
+        try {
+            return await dictionaryWorker.getMdxVersion();
+        } finally {
+            dictionaryWorker.destroy();
+        }
     }
 
     /**
@@ -1524,13 +1533,13 @@ export class DictionaryImportController {
         let progress = 0;
         switch (stage) {
             case 'upload':
-                progress = (total > 0 ? completed / total : 0) * 0.45;
+                progress = (total > 0 ? completed / total : 0) * MDX_UPLOAD_PROGRESS_RATIO;
                 break;
             case 'convert':
-                progress = 0.55;
+                progress = MDX_UPLOAD_PROGRESS_RATIO + ((total > 0 ? completed / total : 1) * (1 - MDX_UPLOAD_PROGRESS_RATIO));
                 break;
             case 'download':
-                progress = 0.55 + ((total > 0 ? completed / total : 0) * 0.45);
+                progress = 1;
                 break;
         }
         onProgress({
@@ -2262,6 +2271,42 @@ export class DictionaryImportController {
 
     /**
      * @param {MdxImportSource} source
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @returns {Promise<{mdxBytes: ArrayBuffer, mddFiles: Array<{name: string, bytes: ArrayBuffer}>, totalBytes: number}>}
+     */
+    async _readMdxImportSourceBytes(source, onProgress) {
+        const uploadFiles = [source.mdxFile, ...source.mddFiles];
+        const totalUploadBytes = uploadFiles.reduce((sum, file) => sum + file.size, 0);
+        let uploadedBytes = 0;
+        /**
+         * @param {File} file
+         * @returns {Promise<ArrayBuffer>}
+         */
+        const readFileWithProgress = async (file) => {
+            const buffer = await file.arrayBuffer();
+            uploadedBytes += file.size;
+            this._reportMdxConversionProgress(onProgress, {
+                stage: 'upload',
+                completed: uploadedBytes,
+                total: totalUploadBytes,
+            });
+            return buffer;
+        };
+
+        const mdxBytes = await readFileWithProgress(source.mdxFile);
+        /** @type {Array<{name: string, bytes: ArrayBuffer}>} */
+        const mddFiles = [];
+        for (const file of source.mddFiles) {
+            mddFiles.push({
+                name: file.name,
+                bytes: await readFileWithProgress(file),
+            });
+        }
+        return {mdxBytes, mddFiles, totalBytes: totalUploadBytes};
+    }
+
+    /**
+     * @param {MdxImportSource} source
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('dictionary-importer').ImportDetails} importDetails
      * @param {DictionaryWorker} dictionaryWorker
@@ -2287,7 +2332,7 @@ export class DictionaryImportController {
             log.log(`[ImportTiming] [${sourceTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
         };
 
-        log.log(`[ImportTiming] [${sourceTitle}] starting MDX conversion`);
+        log.log(`[ImportTiming] [${sourceTitle}] starting MDX import`);
         reportDiagnostics('dictionary-import-mdx-begin', {
             dictionaryTitle: sourceTitle,
             mddCount: source.mddFiles.length,
@@ -2297,34 +2342,33 @@ export class DictionaryImportController {
         });
 
         onProgress({nextStep: true, index: 0, count: 0});
-        const convertStartTime = safePerformance.now();
-        const {archiveContent, archiveFileName} = await this._mdx.convertDictionary(
-            {
-                mdxFile: source.mdxFile,
-                mddFiles: source.mddFiles,
-                enableAudio: false,
-            },
-            this._reportMdxConversionProgress.bind(this, onProgress),
-        );
-        const convertEndTime = safePerformance.now();
-        recordLocalPhase('convert-mdx', convertStartTime, convertEndTime, {
-            archiveFileName,
+        const readStartTime = safePerformance.now();
+        const {mdxBytes, mddFiles, totalBytes} = await this._readMdxImportSourceBytes(source, onProgress);
+        const readEndTime = safePerformance.now();
+        recordLocalPhase('read-mdx-source', readStartTime, readEndTime, {
             mddCount: source.mddFiles.length,
-            archiveSizeBytes: archiveContent.byteLength,
+            sizeBytes: totalBytes,
         });
 
-        return await this._importDictionaryArchiveContent(
-            archiveFileName,
-            archiveContent,
+        return await this._importDictionaryWithWorkerInvocation(
+            sourceTitle,
             profilesDictionarySettings,
-            importDetails,
-            dictionaryWorker,
             useImportSession,
             finalizeImportSession,
-            onProgress,
             importStartTime,
             localPhaseTimings,
             recordLocalPhase,
+            async () => await dictionaryWorker.importMdxDictionary(
+                source.mdxFile.name,
+                new Uint8Array(mdxBytes).buffer,
+                mddFiles.map(({name, bytes}) => ({name, bytes: new Uint8Array(bytes).buffer})),
+                {
+                    ...importDetails,
+                    ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
+                },
+                onProgress,
+                {enableAudio: false},
+            ),
         );
     }
 
@@ -2402,23 +2446,44 @@ export class DictionaryImportController {
      */
     async _importDictionaryArchiveContent(dictionaryTitle, archiveContent, profilesDictionarySettings, importDetails, dictionaryWorker, useImportSession, finalizeImportSession, onProgress, importStartTime, localPhaseTimings, recordLocalPhase) {
         const archiveContentBytes = new Uint8Array(archiveContent);
+        return await this._importDictionaryWithWorkerInvocation(
+            dictionaryTitle,
+            profilesDictionarySettings,
+            useImportSession,
+            finalizeImportSession,
+            importStartTime,
+            localPhaseTimings,
+            recordLocalPhase,
+            async () => await dictionaryWorker.importDictionary(
+                new Uint8Array(archiveContentBytes).buffer,
+                {
+                    ...importDetails,
+                    ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
+                },
+                onProgress,
+            ),
+        );
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
+     * @param {boolean} useImportSession
+     * @param {boolean} finalizeImportSession
+     * @param {number} importStartTime
+     * @param {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} localPhaseTimings
+     * @param {(phase: string, startTime: number, endTime: number, details?: Record<string, string|number|boolean|null>) => void} recordLocalPhase
+     * @param {() => Promise<import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}>} invokeWorkerImport
+     * @returns {Promise<Error[] | undefined>}
+     */
+    async _importDictionaryWithWorkerInvocation(dictionaryTitle, profilesDictionarySettings, useImportSession, finalizeImportSession, importStartTime, localPhaseTimings, recordLocalPhase, invokeWorkerImport) {
         const workerImportStartTime = safePerformance.now();
         /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */
         let importResult;
         const maxImportAttempts = 6;
         for (let attempt = 1; ; ++attempt) {
             try {
-                const archiveContentAttempt = new Uint8Array(archiveContentBytes).buffer;
-                importResult = /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
-                    await dictionaryWorker.importDictionary(
-                        archiveContentAttempt,
-                        {
-                            ...importDetails,
-                            ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
-                        },
-                        onProgress,
-                    )
-                );
+                importResult = await invokeWorkerImport();
             } catch (error) {
                 const message = (error instanceof Error) ? error.message : String(error);
                 const failureClass = classifyImportOpenFailure(message);

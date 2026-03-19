@@ -42,6 +42,7 @@ import {
 } from './zstd-term-content.js';
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
 import {compareRevisions} from './dictionary-data-util.js';
+import {createMdxImportData} from './mdx/mdx-converter.js';
 import {consumeLastTermBankWasmParseProfile, parseTermBankWithWasmChunks} from './term-bank-wasm-parser.js';
 
 const BlobWriter = /** @type {typeof import('@zip.js/zip.js').BlobWriter} */ (/** @type {unknown} */ (BlobWriter0));
@@ -74,6 +75,19 @@ const STRUCTURED_CONTENT_MEDIA_LINK_PREFIX = 'media:';
 /** @type {import('dictionary-data').TermGlossary[]} */
 const EMPTY_TERM_GLOSSARY = [];
 Object.freeze(EMPTY_TERM_GLOSSARY);
+
+class MemoryImportFile {
+    /**
+     * @param {string} filename
+     * @param {Uint8Array} bytes
+     */
+    constructor(filename, bytes) {
+        /** @type {string} */
+        this.filename = filename;
+        /** @type {Uint8Array} */
+        this.bytes = bytes;
+    }
+}
 
 /**
  * @param {string} href
@@ -335,6 +349,78 @@ export class DictionaryImporter {
      * @returns {Promise<import('dictionary-importer').ImportResult>}
      */
     async importDictionary(dictionaryDatabase, archiveContent, details) {
+        return await this._importDictionaryFromSource(
+            dictionaryDatabase,
+            details,
+            async (recordPhaseTiming) => {
+                const tArchiveStart = Date.now();
+                try {
+                    const fileMap = await this._getFilesFromArchive(archiveContent);
+                    const index = await this._readAndValidateIndex(fileMap);
+                    recordPhaseTiming('archive-and-index', tArchiveStart, {
+                        ok: true,
+                        fileCount: fileMap.size,
+                        indexVersion: typeof index.version === 'number' ? index.version : null,
+                    });
+                    this._logImport(`archive+index ${Date.now() - tArchiveStart}ms files=${fileMap.size}`);
+                    return {fileMap, index};
+                } catch (error) {
+                    recordPhaseTiming('archive-and-index', tArchiveStart, {ok: false});
+                    throw error;
+                }
+            },
+        );
+    }
+
+    /**
+     * @param {import('./dictionary-database.js').DictionaryDatabase} dictionaryDatabase
+     * @param {{mdxFileName: string, mdxBytes: Uint8Array, mddFiles: Array<{name: string, bytes: Uint8Array}>, options?: {titleOverride?: string, descriptionOverride?: string, revision?: string, enableAudio?: boolean, includeAssets?: boolean, termBankSize?: number}}} mdxSource
+     * @param {import('dictionary-importer').ImportDetails} details
+     * @param {?((progress: {completed: number, total: number}) => void)} onPrepareProgress
+     * @returns {Promise<import('dictionary-importer').ImportResult>}
+     */
+    async importMdxDictionary(dictionaryDatabase, mdxSource, details, onPrepareProgress = null) {
+        return await this._importDictionaryFromSource(
+            dictionaryDatabase,
+            details,
+            async (recordPhaseTiming) => {
+                const tPrepareStart = Date.now();
+                try {
+                    const {files} = await createMdxImportData(
+                        mdxSource.mdxFileName,
+                        mdxSource.options ?? {},
+                        mdxSource.mdxBytes,
+                        mdxSource.mddFiles,
+                        ({completed, total}) => {
+                            if (typeof onPrepareProgress === 'function') {
+                                onPrepareProgress({completed, total});
+                            }
+                        },
+                    );
+                    const fileMap = this._createMemoryImportFileMap(files);
+                    const index = await this._readAndValidateIndex(fileMap);
+                    recordPhaseTiming('prepare-mdx', tPrepareStart, {
+                        ok: true,
+                        fileCount: fileMap.size,
+                        indexVersion: typeof index.version === 'number' ? index.version : null,
+                    });
+                    this._logImport(`prepare-mdx ${Date.now() - tPrepareStart}ms files=${fileMap.size}`);
+                    return {fileMap, index};
+                } catch (error) {
+                    recordPhaseTiming('prepare-mdx', tPrepareStart, {ok: false});
+                    throw error;
+                }
+            },
+        );
+    }
+
+    /**
+     * @param {import('./dictionary-database.js').DictionaryDatabase} dictionaryDatabase
+     * @param {import('dictionary-importer').ImportDetails} details
+     * @param {(recordPhaseTiming: (phase: string, startTime: number, phaseDetails?: Record<string, string|number|boolean|null>) => void) => Promise<{fileMap: import('dictionary-importer').ArchiveFileMap, index: import('dictionary-data').Index}>} loadSource
+     * @returns {Promise<import('dictionary-importer').ImportResult>}
+     */
+    async _importDictionaryFromSource(dictionaryDatabase, details, loadSource) {
         if (!dictionaryDatabase) {
             throw new Error('Invalid database');
         }
@@ -443,29 +529,19 @@ export class DictionaryImporter {
             },
         });
 
-        // Read archive
-        const tArchiveStart = Date.now();
         /** @type {import('dictionary-importer').ArchiveFileMap} */
         let fileMap;
         /** @type {import('dictionary-data').Index} */
         let index;
         try {
-            fileMap = await this._getFilesFromArchive(archiveContent);
-            index = await this._readAndValidateIndex(fileMap);
+            ({fileMap, index} = await loadSource(recordPhaseTiming));
         } catch (e) {
-            recordPhaseTiming('archive-and-index', tArchiveStart, {ok: false});
             return {
                 result: null,
                 errors: [toError(e)],
                 debug: {phaseTimings},
             };
         }
-        recordPhaseTiming('archive-and-index', tArchiveStart, {
-            ok: true,
-            fileCount: fileMap.size,
-            indexVersion: typeof index.version === 'number' ? index.version : null,
-        });
-        this._logImport(`archive+index ${Date.now() - tArchiveStart}ms files=${fileMap.size}`);
 
         const dictionaryTitle = index.title;
         const version = /** @type {import('dictionary-data').IndexVersion} */ (index.version);
@@ -538,7 +614,7 @@ export class DictionaryImporter {
         if (useTermArtifactFiles || typeof packedTermArtifactEntry !== 'undefined') {
             if (typeof packedTermArtifactEntry !== 'undefined') {
                 const tPackedArtifactReadStart = Date.now();
-                packedTermArtifactBytes = await this._getData(/** @type {import('@zip.js/zip.js').Entry} */ (packedTermArtifactEntry), new Uint8ArrayWriter());
+                packedTermArtifactBytes = await this._getData(/** @type {import('dictionary-importer').ImportFileEntry} */ (packedTermArtifactEntry), new Uint8ArrayWriter());
                 packedTermArtifactPreloadMs = Math.max(0, Date.now() - tPackedArtifactReadStart);
                 this._logImport(`packed term artifact preload ${packedTermArtifactPreloadMs}ms bytes=${packedTermArtifactBytes.byteLength}`);
             } else if (termArtifactFiles.length > 1) {
@@ -568,7 +644,7 @@ export class DictionaryImporter {
         }
         if (sharedGlossaryArtifactBytes === null && typeof sharedGlossaryArtifactEntry !== 'undefined') {
             const tSharedGlossaryReadStart = Date.now();
-            sharedGlossaryArtifactBytes = await this._getData(/** @type {import('@zip.js/zip.js').Entry} */ (sharedGlossaryArtifactEntry), new Uint8ArrayWriter());
+            sharedGlossaryArtifactBytes = await this._getData(/** @type {import('dictionary-importer').ImportFileEntry} */ (sharedGlossaryArtifactEntry), new Uint8ArrayWriter());
             sharedGlossaryArtifactPreloadMs = Math.max(0, Date.now() - tSharedGlossaryReadStart);
             this._logImport(`shared glossary artifact preload ${sharedGlossaryArtifactPreloadMs}ms bytes=${sharedGlossaryArtifactBytes.byteLength}`);
         }
@@ -597,7 +673,7 @@ export class DictionaryImporter {
             termArtifactManifest !== null &&
             termArtifactManifest.termBanksByArtifact.size > 0
         );
-        /** @type {Array<import('@zip.js/zip.js').Entry|{filename: string}>} */
+        /** @type {Array<import('dictionary-importer').ImportFileEntry|{filename: string}>} */
         const activeTermFiles = usePackedTermArtifact ?
             this._createPackedTermArtifactFiles(termArtifactManifest.termBanksByArtifact) :
             (useTermArtifactFiles ? termArtifactFiles : termFiles);
@@ -956,7 +1032,7 @@ export class DictionaryImporter {
                     streamedImportCompleted = true;
                 } else if (!this._disableTermBankWasmFastPath) {
                     try {
-                        const termFileEntry = /** @type {import('@zip.js/zip.js').Entry} */ (termFile);
+                        const termFileEntry = /** @type {import('dictionary-importer').ImportFileEntry} */ (termFile);
                         await this._readTermBankFileFast(
                             termFileEntry,
                             version,
@@ -1033,7 +1109,7 @@ export class DictionaryImporter {
                     updateStreamedTermFileProgress(streamedProgressStartIndex, 1, 1, true);
                 } else {
                     const tTermParseStart = Date.now();
-                    const termFileEntry = /** @type {import('@zip.js/zip.js').Entry} */ (termFile);
+                    const termFileEntry = /** @type {import('dictionary-importer').ImportFileEntry} */ (termFile);
                     const termReadResult = await this._readTermBankFile(
                         termFileEntry,
                         version,
@@ -1280,6 +1356,19 @@ export class DictionaryImporter {
     }
 
     /**
+     * @param {Map<string, Uint8Array>} files
+     * @returns {import('dictionary-importer').ArchiveFileMap}
+     */
+    _createMemoryImportFileMap(files) {
+        /** @type {import('dictionary-importer').ArchiveFileMap} */
+        const fileMap = new Map();
+        for (const [filename, bytes] of files) {
+            fileMap.set(filename, new MemoryImportFile(filename, bytes));
+        }
+        return fileMap;
+    }
+
+    /**
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
      * @returns {?string}
      */
@@ -1309,7 +1398,7 @@ export class DictionaryImporter {
             }
             throw new Error('No dictionary index found in archive');
         }
-        const indexFile2 = /** @type {import('@zip.js/zip.js').Entry} */ (indexFile);
+        const indexFile2 = /** @type {import('dictionary-importer').ImportFileEntry} */ (indexFile);
 
         const indexContent = await this._getData(indexFile2, new TextWriter());
         const index = /** @type {unknown} */ (parseJson(indexContent));
@@ -2238,7 +2327,7 @@ export class DictionaryImporter {
         let manifest;
         try {
             manifest = /** @type {{termBanks?: Array<{artifact?: unknown, packedOffset?: unknown, packedLength?: unknown, rows?: unknown}>, packedTermArtifact?: {file?: unknown}|null, sharedGlossaryArtifact?: {file?: unknown, packedOffset?: unknown, packedLength?: unknown, compression?: unknown, uncompressedBytes?: unknown}|null, termContentMode?: unknown}|null} */ (
-                parseJson(await this._getData(/** @type {import('@zip.js/zip.js').Entry} */ (manifestEntry), new TextWriter()))
+                parseJson(await this._getData(/** @type {import('dictionary-importer').ImportFileEntry} */ (manifestEntry), new TextWriter()))
             );
         } catch (_) {
             return null;
@@ -2315,7 +2404,7 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {import('@zip.js/zip.js').Entry[]} termArtifactFiles
+     * @param {import('dictionary-importer').ImportFileEntry[]} termArtifactFiles
      * @returns {Promise<Map<string, Uint8Array>>}
      */
     async _preloadTermArtifactFiles(termArtifactFiles) {
@@ -2353,7 +2442,7 @@ export class DictionaryImporter {
     /**
      * @template [TEntry=unknown]
      * @template [TResult=unknown]
-     * @param {import('@zip.js/zip.js').Entry[]} files
+     * @param {import('dictionary-importer').ImportFileEntry[]} files
      * @param {(entry: TEntry, dictionaryTitle: string) => TResult} convertEntry
      * @param {string} dictionaryTitle
      * @returns {Promise<TResult[]>}
@@ -2383,7 +2472,7 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {import('@zip.js/zip.js').Entry} termFile
+     * @param {import('dictionary-importer').ImportFileEntry} termFile
      * @param {import('dictionary-data').IndexVersion} version
      * @param {string} dictionaryTitle
      * @param {boolean} prefixWildcardsSupported
@@ -2462,7 +2551,7 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {import('@zip.js/zip.js').Entry} termFile
+     * @param {import('dictionary-importer').ImportFileEntry} termFile
      * @param {import('dictionary-data').IndexVersion} version
      * @param {string} dictionaryTitle
      * @param {boolean} prefixWildcardsSupported
@@ -2713,7 +2802,7 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {import('@zip.js/zip.js').Entry} termFile
+     * @param {import('dictionary-importer').ImportFileEntry} termFile
      * @param {string} dictionaryTitle
      * @param {boolean} prefixWildcardsSupported
      * @param {'baseline'|'raw-bytes'} termContentStorageMode
@@ -3104,14 +3193,27 @@ export class DictionaryImporter {
 
     /**
      * @template [T=unknown]
-     * @param {import('@zip.js/zip.js').Entry} entry
+     * @param {import('dictionary-importer').ImportFileEntry} entry
      * @param {import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter} writer
      * @returns {Promise<T>}
      */
     async _getData(entry, writer) {
-        if (typeof entry.getData === 'undefined') {
-            throw new Error(`Cannot read ${entry.filename}`);
+        if (entry instanceof MemoryImportFile) {
+            if (writer instanceof TextWriter) {
+                return /** @type {T} */ (/** @type {unknown} */ (this._textDecoder.decode(entry.bytes)));
+            }
+            if (writer instanceof Uint8ArrayWriter) {
+                return /** @type {T} */ (/** @type {unknown} */ (new Uint8Array(entry.bytes)));
+            }
+            if (writer instanceof BlobWriter) {
+                return /** @type {T} */ (/** @type {unknown} */ (new Blob([entry.bytes])));
+            }
+            throw new Error(`Unsupported in-memory dictionary writer for ${entry.filename}`);
         }
-        return await entry.getData(writer);
+        const archiveEntry = /** @type {import('@zip.js/zip.js').Entry} */ (entry);
+        if (typeof archiveEntry.getData === 'undefined') {
+            throw new Error(`Cannot read ${archiveEntry.filename}`);
+        }
+        return await archiveEntry.getData(writer);
     }
 }

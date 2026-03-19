@@ -115,7 +115,11 @@ function createLanguageSelect(document, value) {
  * @returns {File}
  */
 function createFile(name) {
-    return new File(['test'], name);
+    const file = new File(['test'], name);
+    if (typeof file.arrayBuffer !== 'function') {
+        Reflect.set(file, 'arrayBuffer', async () => new TextEncoder().encode('test').buffer);
+    }
+    return file;
 }
 
 /**
@@ -351,26 +355,22 @@ describe('MDX import readiness', () => {
 
     test('checks MDX converter availability through the browser client', async () => {
         const controller = createControllerForInternalTests();
-        const getVersion = vi.fn().mockResolvedValue(2);
+        const getMdxVersion = vi.fn().mockResolvedValue(2);
 
-        Reflect.set(controller, '_mdx', {
-            getVersion,
-        });
+        Reflect.set(controller, '_getMdxVersion', getMdxVersion);
 
         await expect(ensureMdxImportReady.call(controller)).resolves.toBeUndefined();
-        expect(getVersion).toHaveBeenCalledTimes(1);
+        expect(getMdxVersion).toHaveBeenCalledTimes(1);
     });
 
     test('surfaces browser-side converter readiness errors unchanged', async () => {
         const controller = createControllerForInternalTests();
-        const getVersion = vi.fn().mockRejectedValue(new Error('MDX worker bootstrap failed'));
+        const getMdxVersion = vi.fn().mockRejectedValue(new Error('MDX worker bootstrap failed'));
 
-        Reflect.set(controller, '_mdx', {
-            getVersion,
-        });
+        Reflect.set(controller, '_getMdxVersion', getMdxVersion);
 
         await expect(ensureMdxImportReady.call(controller)).rejects.toThrow('MDX worker bootstrap failed');
-        expect(getVersion).toHaveBeenCalledTimes(1);
+        expect(getMdxVersion).toHaveBeenCalledTimes(1);
     });
 });
 
@@ -817,19 +817,14 @@ describe('MDX import flow integration', () => {
         expect(triggerStorageChanged).toHaveBeenCalledTimes(1);
     });
 
-    test('converts MDX sources with default options, reports progress, and hands the archive to the importer', async () => {
+    test('imports MDX sources through the direct worker path with upload progress and session flags', async () => {
         const controller = createControllerForInternalTests();
-        const archiveContent = new Uint8Array([1, 2, 3, 4]).buffer;
-        const importArchiveContent = vi.fn().mockResolvedValue(void 0);
-        const convertDictionary = vi.fn(async (_details, onProgress) => {
-            onProgress({stage: 'upload', completed: 5, total: 10});
-            onProgress({stage: 'convert', completed: 0, total: 0});
-            onProgress({stage: 'download', completed: 10, total: 10});
-            return {archiveContent, archiveFileName: 'alpha-converted.zip'};
+        const importDictionaryWithWorkerInvocation = vi.fn(async (...args) => {
+            const invokeWorkerImport = /** @type {() => Promise<unknown>} */ (args[7]);
+            await invokeWorkerImport();
+            return [];
         });
-
-        Reflect.set(controller, '_mdx', {convertDictionary});
-        Reflect.set(controller, '_importDictionaryArchiveContent', importArchiveContent);
+        Reflect.set(controller, '_importDictionaryWithWorkerInvocation', importDictionaryWithWorkerInvocation);
 
         /** @type {{type: 'mdx', mdxFile: File, mddFiles: File[]}} */
         const source = {type: 'mdx', mdxFile: createFile('Alpha.mdx'), mddFiles: [createFile('Alpha.mdd'), createFile('Alpha.1.mdd')]};
@@ -838,31 +833,44 @@ describe('MDX import flow integration', () => {
             yomitanVersion: '1.2.3.4',
         }));
         const onProgress = vi.fn();
+        const dictionaryWorker = {
+            importMdxDictionary: vi.fn().mockResolvedValue({
+                result: null,
+                errors: [],
+                debug: {importerDebug: {phaseTimings: []}},
+            }),
+        };
 
-        await importDictionaryFromMdx.call(controller, source, null, importDetails, {importDictionary: vi.fn()}, true, false, onProgress);
+        await importDictionaryFromMdx.call(controller, source, null, importDetails, dictionaryWorker, true, false, onProgress);
 
-        expect(convertDictionary).toHaveBeenCalledWith({
-            mdxFile: source.mdxFile,
-            mddFiles: source.mddFiles,
-            enableAudio: false,
-        }, expect.any(Function));
         expect(onProgress.mock.calls.map(([value]) => value)).toContainEqual({nextStep: true, index: 0, count: 0});
-        expect(onProgress.mock.calls.map(([value]) => value)).toContainEqual({nextStep: false, index: 225, count: 1000});
-        expect(onProgress.mock.calls.map(([value]) => value)).toContainEqual({nextStep: false, index: 550, count: 1000});
-        expect(onProgress.mock.calls.map(([value]) => value)).toContainEqual({nextStep: false, index: 1000, count: 1000});
-        expect(importArchiveContent).toHaveBeenCalledWith(
-            'alpha-converted.zip',
-            archiveContent,
+        expect(onProgress.mock.calls.map(([value]) => value)).toContainEqual({nextStep: false, index: 150, count: 1000});
+        expect(onProgress.mock.calls.map(([value]) => value)).toContainEqual({nextStep: false, index: 300, count: 1000});
+        expect(onProgress.mock.calls.map(([value]) => value)).toContainEqual({nextStep: false, index: 450, count: 1000});
+        expect(importDictionaryWithWorkerInvocation).toHaveBeenCalledWith(
+            'Alpha.mdx',
             null,
-            importDetails,
-            {importDictionary: expect.any(Function)},
             true,
             false,
-            onProgress,
             expect.any(Number),
             expect.any(Array),
             expect.any(Function),
+            expect.any(Function),
         );
+        expect(dictionaryWorker.importMdxDictionary).toHaveBeenCalledTimes(1);
+        const [mdxFileName, mdxBytes, mddFiles, workerImportDetails, workerOnProgress, options] = dictionaryWorker.importMdxDictionary.mock.calls[0];
+        expect(mdxFileName).toBe('Alpha.mdx');
+        expect(new Uint8Array(/** @type {ArrayBuffer} */ (mdxBytes))).toStrictEqual(new TextEncoder().encode('test'));
+        expect(mddFiles).toHaveLength(2);
+        expect(mddFiles.map((/** @type {{name: string}} */ value) => value.name)).toStrictEqual(['Alpha.mdd', 'Alpha.1.mdd']);
+        expect(workerImportDetails).toStrictEqual({
+            prefixWildcardsSupported: true,
+            yomitanVersion: '1.2.3.4',
+            useImportSession: true,
+            finalizeImportSession: false,
+        });
+        expect(workerOnProgress).toBe(onProgress);
+        expect(options).toStrictEqual({enableAudio: false});
     });
 
     test('defers database-updated notifications until the import session is finalized', async () => {
@@ -921,27 +929,25 @@ describe('MDX import flow integration', () => {
         expect(shownErrors?.[1]?.message).toBe('Dictionary may not have been imported properly: 1 error reported.');
     });
 
-    test('surfaces MDX conversion failures without attempting a worker import', async () => {
+    test('surfaces direct MDX worker failures unchanged', async () => {
         const controller = createControllerForInternalTests();
         const conversionError = new Error('Unsupported MDX variant');
-        const importArchiveContent = vi.fn();
-
-        Reflect.set(controller, '_mdx', {
-            convertDictionary: vi.fn().mockRejectedValue(conversionError),
-        });
-        Reflect.set(controller, '_importDictionaryArchiveContent', importArchiveContent);
+        Reflect.set(controller, '_importDictionaryWithWorkerInvocation', vi.fn(async (...args) => {
+            const invokeWorkerImport = /** @type {() => Promise<unknown>} */ (args[7]);
+            await invokeWorkerImport();
+            return [];
+        }));
 
         await expect(importDictionaryFromMdx.call(
             controller,
             {type: 'mdx', mdxFile: createFile('Broken.mdx'), mddFiles: []},
             null,
             /** @type {import('dictionary-importer').ImportDetails} */ (/** @type {unknown} */ ({yomitanVersion: '1.2.3.4'})),
-            {importDictionary: vi.fn()},
+            {importMdxDictionary: vi.fn().mockRejectedValue(conversionError)},
             true,
             true,
             vi.fn(),
         )).rejects.toThrow('Unsupported MDX variant');
-        expect(importArchiveContent).not.toHaveBeenCalled();
     });
 
     test('closes the import modal and starts importing selected sources with initial errors', () => {

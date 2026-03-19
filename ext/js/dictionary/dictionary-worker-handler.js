@@ -22,6 +22,11 @@ import {DictionaryDatabase} from './dictionary-database.js';
 import {DictionaryImporter} from './dictionary-importer.js';
 import {DictionaryWorkerMediaLoader} from './dictionary-worker-media-loader.js';
 
+const MDX_IMPORT_VERSION = 1;
+const MDX_PREPARATION_PROGRESS_TOTAL = 1000;
+const MDX_PREPARATION_PROGRESS_START_INDEX = 450;
+const MDX_PREPARATION_PROGRESS_RANGE = MDX_PREPARATION_PROGRESS_TOTAL - MDX_PREPARATION_PROGRESS_START_INDEX;
+
 export class DictionaryWorkerHandler {
     constructor() {
         /** @type {DictionaryWorkerMediaLoader} */
@@ -46,11 +51,17 @@ export class DictionaryWorkerHandler {
             case 'importDictionary':
                 void this._onMessageWithProgress(params, this._importDictionary.bind(this));
                 break;
+            case 'importMdxDictionary':
+                void this._onMessageWithProgress(params, this._importMdxDictionary.bind(this));
+                break;
             case 'deleteDictionary':
                 void this._onMessageWithProgress(params, this._deleteDictionary.bind(this));
                 break;
             case 'getDictionaryCounts':
                 void this._onMessageWithProgress(params, this._getDictionaryCounts.bind(this));
+                break;
+            case 'getMdxVersion':
+                void this._onMessageWithProgress(params, this._getMdxVersion.bind(this));
                 break;
             case 'getImageDetails.response':
                 this._mediaLoader.handleMessage(params);
@@ -128,6 +139,57 @@ export class DictionaryWorkerHandler {
      * @returns {Promise<import('dictionary-worker').MessageCompleteResultSerialized>}
      */
     async _importDictionary({details, archiveContent}, onProgress) {
+        return await this._runImport(details, onProgress, async (dictionaryImporter, dictionaryDatabase) => (
+            await dictionaryImporter.importDictionary(dictionaryDatabase, archiveContent, details)
+        ));
+    }
+
+    /**
+     * @param {import('dictionary-worker-handler').ImportMdxDictionaryMessageParams} params
+     * @param {import('dictionary-worker-handler').OnProgressCallback} onProgress
+     * @returns {Promise<import('dictionary-worker').MessageCompleteResultSerialized>}
+     */
+    async _importMdxDictionary({details, mdxFileName, mdxBytes, mddFiles = [], options = {}}, onProgress) {
+        if (!(mdxBytes instanceof ArrayBuffer)) {
+            throw new Error('MDX import worker did not receive MDX bytes');
+        }
+        const mdxSource = {
+            mdxFileName: typeof mdxFileName === 'string' && mdxFileName.length > 0 ? mdxFileName : 'dictionary.mdx',
+            mdxBytes: new Uint8Array(mdxBytes),
+            mddFiles: Array.isArray(mddFiles) ? mddFiles
+                .filter((value) => typeof value === 'object' && value !== null && !Array.isArray(value))
+                .map((value) => {
+                    const name = typeof value.name === 'string' && value.name.length > 0 ? value.name : 'dictionary.mdd';
+                    const bytes = value.bytes instanceof ArrayBuffer ? new Uint8Array(value.bytes) : new Uint8Array(0);
+                    return {name, bytes};
+                }) : [],
+            options: (typeof options === 'object' && options !== null && !Array.isArray(options)) ? options : {},
+        };
+
+        return await this._runImport(details, onProgress, async (dictionaryImporter, dictionaryDatabase) => (
+            await dictionaryImporter.importMdxDictionary(
+                dictionaryDatabase,
+                mdxSource,
+                details,
+                ({completed, total}) => {
+                    const normalizedProgress = total > 0 ? Math.max(0, Math.min(1, completed / total)) : 1;
+                    onProgress({
+                        nextStep: false,
+                        index: MDX_PREPARATION_PROGRESS_START_INDEX + Math.round(MDX_PREPARATION_PROGRESS_RANGE * normalizedProgress),
+                        count: MDX_PREPARATION_PROGRESS_TOTAL,
+                    });
+                },
+            )
+        ));
+    }
+
+    /**
+     * @param {import('dictionary-importer').ImportDetails} details
+     * @param {import('dictionary-worker-handler').OnProgressCallback} onProgress
+     * @param {(dictionaryImporter: DictionaryImporter, dictionaryDatabase: DictionaryDatabase) => Promise<import('dictionary-importer').ImportResult>} importCallback
+     * @returns {Promise<import('dictionary-worker').MessageCompleteResultSerialized>}
+     */
+    async _runImport(details, onProgress, importCallback) {
         const useImportSession = (
             typeof details === 'object' &&
             details !== null &&
@@ -164,7 +226,7 @@ export class DictionaryWorkerHandler {
             /** @type {import('dictionary-importer').ImportDebug|null} */
             let importerDebug = null;
             try {
-                const importPayload = await dictionaryImporter.importDictionary(dictionaryDatabase, archiveContent, details);
+                const importPayload = await importCallback(dictionaryImporter, dictionaryDatabase);
                 ({result, errors} = importPayload);
                 importerDebug = (typeof importPayload === 'object' && importPayload !== null && !Array.isArray(importPayload)) ?
                     (/** @type {import('dictionary-importer').ImportDebug|null} */ (Reflect.get(importPayload, 'debug') ?? null)) :
@@ -197,6 +259,15 @@ export class DictionaryWorkerHandler {
                 await dictionaryDatabase.close();
             }
         }
+    }
+
+    /**
+     * @param {Record<string, never>} _params
+     * @param {import('dictionary-worker-handler').OnProgressCallback} _onProgress
+     * @returns {Promise<number>}
+     */
+    async _getMdxVersion(_params, _onProgress) {
+        return MDX_IMPORT_VERSION;
     }
 
     /**
