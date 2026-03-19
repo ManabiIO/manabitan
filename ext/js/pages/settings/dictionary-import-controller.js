@@ -31,6 +31,7 @@ import {DictionaryController} from './dictionary-controller.js';
 const OPFS_REQUIRED_USER_MESSAGE = 'Manabitan requires OPFS storage support. Update to Chrome/Edge 120+ or Firefox 115+ and reload the extension.';
 const RECOMMENDED_DICTIONARY_CATEGORIES = ['terms', 'kanji', 'frequency', 'grammar', 'pronunciation'];
 const MDX_CONVERSION_PROGRESS_TOTAL = 1000;
+const DUPLICATE_IMPORT_SKIP_ERROR_PATTERN = /^Dictionary .+ is already imported, skipped it\.$/;
 
 /**
  * @typedef {object} ZipImportSource
@@ -1251,7 +1252,7 @@ export class DictionaryImportController {
                 return;
             }
         }
-        this._appendPendingImportSources(sources, errors);
+        this._importSelectedSources(sources, errors);
     }
 
     /**
@@ -1442,6 +1443,22 @@ export class DictionaryImportController {
         }
     }
 
+    /**
+     * @param {DictionaryImportSource[]} sources
+     * @param {Error[]} [initialErrors]
+     */
+    _importSelectedSources(sources, initialErrors = []) {
+        if (sources.length === 0) { return; }
+        /** @type {import('./modal.js').Modal} */ (this._importModal).setVisible(false);
+        void this._importDictionaries(
+            this._arrayToAsyncGenerator(sources),
+            null,
+            null,
+            new ImportProgressTracker(this._getFileImportSteps(), sources.length),
+            initialErrors,
+        );
+    }
+
     /** */
     _clearPendingImportSources() {
         this._pendingImportSources = [];
@@ -1534,14 +1551,7 @@ export class DictionaryImportController {
     /** */
     _onImportConfirm() {
         if (this._pendingImportSources.length === 0) { return; }
-        const pendingImportSources = [...this._pendingImportSources];
-        /** @type {import('./modal.js').Modal} */ (this._importModal).setVisible(false);
-        void this._importDictionaries(
-            this._arrayToAsyncGenerator(pendingImportSources),
-            null,
-            null,
-            new ImportProgressTracker(this._getFileImportSteps(), pendingImportSources.length),
-        );
+        this._importSelectedSources([...this._pendingImportSources]);
     }
 
     /**
@@ -1583,7 +1593,7 @@ export class DictionaryImportController {
                 return;
             }
         }
-        this._appendPendingImportSources(sources, errors);
+        this._importSelectedSources(sources, errors);
     }
 
     /** */
@@ -2673,20 +2683,28 @@ export class DictionaryImportController {
             errorCount: errors.length,
             messages: errors.slice(0, 5).map((error) => this._errorToString(error)),
         });
-        /** @type {Map<string, number>} */
+        /** @type {Map<string, {count: number, error: Error}>} */
         const uniqueErrors = new Map();
         for (const error of errors) {
-            log.error(error);
             const errorString = this._errorToString(error);
-            let count = uniqueErrors.get(errorString);
-            if (typeof count === 'undefined') {
-                count = 0;
+            const entry = uniqueErrors.get(errorString);
+            if (typeof entry === 'undefined') {
+                uniqueErrors.set(errorString, {count: 1, error});
+            } else {
+                entry.count += 1;
             }
-            uniqueErrors.set(errorString, count + 1);
+        }
+
+        for (const {error} of uniqueErrors.values()) {
+            if (this._isDuplicateImportSkipError(error)) {
+                log.warn(error);
+            } else {
+                log.error(error);
+            }
         }
 
         const fragment = document.createDocumentFragment();
-        for (const [e, count] of uniqueErrors.entries()) {
+        for (const [e, {count}] of uniqueErrors.entries()) {
             const div = document.createElement('p');
             if (count > 1) {
                 div.textContent = `${e} `;
@@ -2702,6 +2720,14 @@ export class DictionaryImportController {
         const errorContainer = /** @type {HTMLElement} */ (this._errorContainer);
         errorContainer.appendChild(fragment);
         errorContainer.hidden = false;
+    }
+
+    /**
+     * @param {Error} error
+     * @returns {boolean}
+     */
+    _isDuplicateImportSkipError(error) {
+        return DUPLICATE_IMPORT_SKIP_ERROR_PATTERN.test(error.message);
     }
 
     /** */

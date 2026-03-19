@@ -17,6 +17,7 @@
  */
 
 import {afterAll, afterEach, describe, expect, test, vi} from 'vitest';
+import {log} from '../ext/js/core/log.js';
 import {DictionaryImportController, ImportProgressTracker} from '../ext/js/pages/settings/dictionary-import-controller.js';
 import {setupDomTest} from './fixtures/dom-test.js';
 
@@ -435,7 +436,7 @@ describe('MDX file picker flow', () => {
         vi.unstubAllGlobals();
     });
 
-    test('stages MDX files without prompting for missing companions', async () => {
+    test('starts importing MDX files without prompting for missing companions', async () => {
         const controller = createControllerForInternalTests();
         const source = /** @type {{type: 'mdx', mdxFile: File, mddFiles: File[]}} */ ({
             type: 'mdx',
@@ -444,13 +445,13 @@ describe('MDX file picker flow', () => {
         });
         const createImportSourcesFromFiles = vi.fn().mockReturnValue({sources: [source], errors: [], hasMdx: true});
         const ensureMdxImportReady = vi.fn().mockResolvedValue(void 0);
-        const appendPendingImportSources = vi.fn();
+        const importSelectedSources = vi.fn();
 
         vi.stubGlobal('showDirectoryPicker', vi.fn());
 
         Reflect.set(controller, '_createImportSourcesFromFiles', createImportSourcesFromFiles);
         Reflect.set(controller, '_ensureMdxImportReady', ensureMdxImportReady);
-        Reflect.set(controller, '_appendPendingImportSources', appendPendingImportSources);
+        Reflect.set(controller, '_importSelectedSources', importSelectedSources);
         Reflect.set(controller, '_showErrors', vi.fn());
 
         const input = /** @type {HTMLInputElement} */ (/** @type {unknown} */ ({
@@ -466,7 +467,142 @@ describe('MDX file picker flow', () => {
         expect(input.value).toBe('');
         expect(createImportSourcesFromFiles).toHaveBeenCalledWith([expect.objectContaining({name: 'Alpha.mdx'})]);
         expect(ensureMdxImportReady).toHaveBeenCalledOnce();
-        expect(appendPendingImportSources).toHaveBeenCalledWith([source], []);
+        expect(importSelectedSources).toHaveBeenCalledWith([source], []);
+    });
+
+    test('starts one import batch when multiple valid local dictionaries are selected', async () => {
+        const controller = createControllerForInternalTests();
+        const sources = [
+            /** @type {{type: 'mdx', mdxFile: File, mddFiles: File[]}} */ ({
+                type: 'mdx',
+                mdxFile: createFile('Alpha.mdx'),
+                mddFiles: [],
+            }),
+            /** @type {{type: 'mdx', mdxFile: File, mddFiles: File[]}} */ ({
+                type: 'mdx',
+                mdxFile: createFile('Beta.mdx'),
+                mddFiles: [],
+            }),
+        ];
+        const ensureMdxImportReady = vi.fn().mockResolvedValue(void 0);
+        const importSelectedSources = vi.fn();
+
+        Reflect.set(controller, '_createImportSourcesFromFiles', vi.fn().mockReturnValue({
+            sources,
+            errors: [],
+            hasMdx: true,
+        }));
+        Reflect.set(controller, '_ensureMdxImportReady', ensureMdxImportReady);
+        Reflect.set(controller, '_importSelectedSources', importSelectedSources);
+        Reflect.set(controller, '_showErrors', vi.fn());
+
+        const input = /** @type {HTMLInputElement} */ (/** @type {unknown} */ ({
+            files: [sources[0].mdxFile, sources[1].mdxFile],
+            value: 'picked',
+        }));
+
+        await onImportFileChange.call(
+            controller,
+            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: input})),
+        );
+
+        expect(input.value).toBe('');
+        expect(ensureMdxImportReady).toHaveBeenCalledOnce();
+        expect(importSelectedSources).toHaveBeenCalledTimes(1);
+        expect(importSelectedSources).toHaveBeenCalledWith(sources, []);
+    });
+
+    test('does not start importing when MDX readiness fails', async () => {
+        const controller = createControllerForInternalTests();
+        const readinessError = new Error('MDX worker bootstrap failed');
+        const importSelectedSources = vi.fn();
+        const showErrors = vi.fn();
+
+        Reflect.set(controller, '_createImportSourcesFromFiles', vi.fn().mockReturnValue({
+            sources: [{type: 'mdx', mdxFile: createFile('Alpha.mdx'), mddFiles: []}],
+            errors: [],
+            hasMdx: true,
+        }));
+        Reflect.set(controller, '_ensureMdxImportReady', vi.fn().mockRejectedValue(readinessError));
+        Reflect.set(controller, '_importSelectedSources', importSelectedSources);
+        Reflect.set(controller, '_showErrors', showErrors);
+
+        const input = /** @type {HTMLInputElement} */ (/** @type {unknown} */ ({
+            files: [createFile('Alpha.mdx')],
+            value: 'picked',
+        }));
+
+        await onImportFileChange.call(
+            controller,
+            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: input})),
+        );
+
+        expect(importSelectedSources).not.toHaveBeenCalled();
+        expect(showErrors).toHaveBeenCalledWith([readinessError]);
+    });
+
+    test('passes selection errors into the auto-import flow when valid files remain', async () => {
+        const controller = createControllerForInternalTests();
+        const source = {type: 'zip', file: createFile('Alpha.zip')};
+        const selectionError = new Error('Unsupported dictionary file: notes.txt');
+        const importSelectedSources = vi.fn();
+
+        Reflect.set(controller, '_createImportSourcesFromFiles', vi.fn().mockReturnValue({
+            sources: [source],
+            errors: [selectionError],
+            hasMdx: false,
+        }));
+        Reflect.set(controller, '_importSelectedSources', importSelectedSources);
+        Reflect.set(controller, '_showErrors', vi.fn());
+
+        const input = /** @type {HTMLInputElement} */ (/** @type {unknown} */ ({
+            files: [createFile('Alpha.zip'), createFile('notes.txt')],
+            value: 'picked',
+        }));
+
+        await onImportFileChange.call(
+            controller,
+            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: input})),
+        );
+
+        expect(importSelectedSources).toHaveBeenCalledWith([source], [selectionError]);
+    });
+});
+
+describe('Dictionary import error display', () => {
+    const {window} = testEnv;
+    const showErrors = /** @type {(this: DictionaryImportController, errors: Error[]) => void} */ (getDictionaryImportControllerMethod('_showErrors'));
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        window.document.body.innerHTML = '';
+    });
+
+    test('shows duplicate import skip errors while logging them as warnings', () => {
+        const controller = createControllerForInternalTests();
+        const errorContainer = window.document.createElement('div');
+        errorContainer.hidden = true;
+        window.document.body.appendChild(errorContainer);
+
+        Reflect.set(controller, '_errorContainer', errorContainer);
+        Reflect.set(controller, '_errorToStringOverrides', []);
+
+        const duplicateImportError = new Error('Dictionary Alpha Dictionary is already imported, skipped it.');
+        const importFailure = new Error('Invalid dictionary archive');
+        const warnSpy = vi.spyOn(log, 'warn').mockImplementation(() => {});
+        const errorSpy = vi.spyOn(log, 'error').mockImplementation(() => {});
+
+        showErrors.call(controller, [duplicateImportError, duplicateImportError, importFailure]);
+
+        expect(warnSpy).toHaveBeenCalledTimes(1);
+        expect(warnSpy).toHaveBeenCalledWith(duplicateImportError);
+        expect(errorSpy).toHaveBeenCalledTimes(1);
+        expect(errorSpy).toHaveBeenCalledWith(importFailure);
+        expect(errorContainer.hidden).toBe(false);
+        expect(errorContainer.querySelectorAll('p')).toHaveLength(2);
+        expect(errorContainer.textContent).toContain('Error: Dictionary Alpha Dictionary is already imported, skipped it.');
+        expect(errorContainer.textContent).toContain('(2)');
+        expect(errorContainer.textContent).toContain('Error: Invalid dictionary archive');
     });
 });
 
@@ -599,9 +735,12 @@ describe('Welcome recommended dictionary auto import', () => {
 describe('MDX import flow integration', () => {
     const {window} = testEnv;
     const arrayToAsyncGenerator = /** @type {(this: DictionaryImportController, arr: unknown[]) => AsyncGenerator<unknown, void, void>} */ (getDictionaryImportControllerMethod('_arrayToAsyncGenerator'));
+    const importSelectedSources = /** @type {(this: DictionaryImportController, sources: unknown[], initialErrors?: Error[]) => void} */ (getDictionaryImportControllerMethod('_importSelectedSources'));
     const importDictionaries = /** @type {(this: DictionaryImportController, dictionaries: AsyncGenerator<unknown, void, void>, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, onImportDone: import('settings-controller').ImportDictionaryDoneCallback, importProgressTracker: ImportProgressTracker, initialErrors?: Error[]) => Promise<void>} */ (getDictionaryImportControllerMethod('_importDictionaries'));
     const importDictionaryFromMdx = /** @type {(this: DictionaryImportController, source: {type: 'mdx', mdxFile: File, mddFiles: File[]}, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importDetails: import('dictionary-importer').ImportDetails, dictionaryWorker: unknown, useImportSession: boolean, finalizeImportSession: boolean, onProgress: import('dictionary-worker').ImportProgressCallback) => Promise<Error[]|undefined>} */ (getDictionaryImportControllerMethod('_importDictionaryFromMdx'));
     const importDictionaryArchiveContent = /** @type {(this: DictionaryImportController, dictionaryTitle: string, archiveContent: ArrayBuffer, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importDetails: import('dictionary-importer').ImportDetails, dictionaryWorker: {importDictionary: ReturnType<typeof vi.fn>}, useImportSession: boolean, finalizeImportSession: boolean, onProgress: import('dictionary-worker').ImportProgressCallback, importStartTime: number, localPhaseTimings: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>, recordLocalPhase: (phase: string, startTime: number, endTime: number, details?: Record<string, string|number|boolean|null>) => void) => Promise<Error[]|undefined>} */ (getDictionaryImportControllerMethod('_importDictionaryArchiveContent'));
+    const onFileDrop = /** @type {(this: DictionaryImportController, e: DragEvent) => Promise<void>} */ (getDictionaryImportControllerMethod('_onFileDrop'));
+    const onImportConfirm = /** @type {(this: DictionaryImportController) => void} */ (getDictionaryImportControllerMethod('_onImportConfirm'));
 
     afterEach(() => {
         vi.restoreAllMocks();
@@ -788,24 +927,125 @@ describe('MDX import flow integration', () => {
         expect(importArchiveContent).not.toHaveBeenCalled();
     });
 
-    test('stages file input sources instead of importing immediately', async () => {
+    test('closes the import modal and starts importing selected sources with initial errors', () => {
         const controller = createControllerForInternalTests();
-        const appendPendingImportSources = vi.fn();
-        const showErrors = vi.fn();
-        const input = document.createElement('input');
-        Object.defineProperty(input, 'files', {value: [createFile('Alpha.zip')]});
+        const sources = [{type: 'zip', file: createFile('Alpha.zip')}];
+        const selectionError = new Error('Unsupported dictionary file: notes.txt');
+        const setVisible = vi.fn();
+        const dictionaries = arrayToAsyncGenerator.call(controller, sources);
+        const arrayToAsyncGeneratorStub = vi.fn().mockReturnValue(dictionaries);
+        const importDictionariesStub = vi.fn();
 
+        Reflect.set(controller, '_importModal', {setVisible});
+        Reflect.set(controller, '_arrayToAsyncGenerator', arrayToAsyncGeneratorStub);
+        Reflect.set(controller, '_importDictionaries', importDictionariesStub);
+
+        importSelectedSources.call(controller, sources, [selectionError]);
+
+        expect(setVisible).toHaveBeenCalledWith(false);
+        expect(arrayToAsyncGeneratorStub).toHaveBeenCalledWith(sources);
+        expect(importDictionariesStub).toHaveBeenCalledWith(
+            dictionaries,
+            null,
+            null,
+            expect.any(ImportProgressTracker),
+            [selectionError],
+        );
+    });
+
+    test('starts drag-and-drop imports immediately instead of staging them', async () => {
+        const controller = createControllerForInternalTests();
+        const importSelectedSourcesStub = vi.fn();
+        const dropZone = window.document.createElement('div');
+        dropZone.classList.add('drag-over');
+        const file = createFile('Alpha.zip');
+
+        Reflect.set(controller, '_importFileDrop', dropZone);
+        Reflect.set(controller, '_getAllFileEntries', vi.fn().mockResolvedValue([{
+            file(resolve) {
+                resolve(file);
+            },
+        }]));
         Reflect.set(controller, '_createImportSourcesFromFiles', vi.fn(() => ({
-            sources: [{type: 'zip', file: createFile('Alpha.zip')}],
+            sources: [{type: 'zip', file}],
             errors: [],
             hasMdx: false,
         })));
-        Reflect.set(controller, '_appendPendingImportSources', appendPendingImportSources);
+        Reflect.set(controller, '_importSelectedSources', importSelectedSourcesStub);
+        Reflect.set(controller, '_showErrors', vi.fn());
+
+        await onFileDrop.call(
+            controller,
+            /** @type {DragEvent} */ (/** @type {unknown} */ ({
+                preventDefault: vi.fn(),
+                dataTransfer: {items: []},
+            })),
+        );
+
+        expect(dropZone.classList.contains('drag-over')).toBe(false);
+        expect(importSelectedSourcesStub).toHaveBeenCalledWith([{type: 'zip', file}], []);
+    });
+
+    test('starts one drag-and-drop import batch when multiple valid local dictionaries are dropped', async () => {
+        const controller = createControllerForInternalTests();
+        const importSelectedSourcesStub = vi.fn();
+        const ensureMdxImportReady = vi.fn().mockResolvedValue(void 0);
+        const dropZone = window.document.createElement('div');
+        dropZone.classList.add('drag-over');
+        const alphaFile = createFile('Alpha.mdx');
+        const betaFile = createFile('Beta.mdx');
+        const sources = [
+            {type: 'mdx', mdxFile: alphaFile, mddFiles: []},
+            {type: 'mdx', mdxFile: betaFile, mddFiles: []},
+        ];
+
+        Reflect.set(controller, '_importFileDrop', dropZone);
+        Reflect.set(controller, '_getAllFileEntries', vi.fn().mockResolvedValue([
+            {file(resolve) { resolve(alphaFile); }},
+            {file(resolve) { resolve(betaFile); }},
+        ]));
+        Reflect.set(controller, '_createImportSourcesFromFiles', vi.fn(() => ({
+            sources,
+            errors: [],
+            hasMdx: true,
+        })));
+        Reflect.set(controller, '_ensureMdxImportReady', ensureMdxImportReady);
+        Reflect.set(controller, '_importSelectedSources', importSelectedSourcesStub);
+        Reflect.set(controller, '_showErrors', vi.fn());
+
+        await onFileDrop.call(
+            controller,
+            /** @type {DragEvent} */ (/** @type {unknown} */ ({
+                preventDefault: vi.fn(),
+                dataTransfer: {items: []},
+            })),
+        );
+
+        expect(dropZone.classList.contains('drag-over')).toBe(false);
+        expect(ensureMdxImportReady).toHaveBeenCalledOnce();
+        expect(importSelectedSourcesStub).toHaveBeenCalledTimes(1);
+        expect(importSelectedSourcesStub).toHaveBeenCalledWith(sources, []);
+    });
+
+    test('starts file input imports immediately instead of staging them', async () => {
+        const controller = createControllerForInternalTests();
+        const importSelectedSourcesStub = vi.fn();
+        const showErrors = vi.fn();
+        const input = document.createElement('input');
+        const file = createFile('Alpha.zip');
+        Object.defineProperty(input, 'files', {value: [file]});
+
+        Reflect.set(controller, '_createImportSourcesFromFiles', vi.fn(() => ({
+            sources: [{type: 'zip', file}],
+            errors: [],
+            hasMdx: false,
+        })));
+        Reflect.set(controller, '_importSelectedSources', importSelectedSourcesStub);
         Reflect.set(controller, '_showErrors', showErrors);
 
         await getDictionaryImportControllerMethod('_onImportFileChange').call(controller, {currentTarget: input});
 
-        expect(appendPendingImportSources).toHaveBeenCalledWith([{type: 'zip', file: expect.any(File)}], []);
+        expect(importSelectedSourcesStub).toHaveBeenCalledWith([{type: 'zip', file}], []);
         expect(showErrors).not.toHaveBeenCalled();
     });
 
@@ -826,6 +1066,19 @@ describe('MDX import flow integration', () => {
         expect(appendPendingImportSources).toHaveBeenCalledWith([{type: 'zip', file: expect.any(File)}], []);
         expect(Reflect.get(controller, '_importURLText').value).toBe('');
         expect(showErrors).not.toHaveBeenCalled();
+    });
+
+    test('import confirm still imports staged pending sources', () => {
+        const controller = createControllerForInternalTests();
+        const stagedSources = [{type: 'zip', file: createFile('Alpha.zip')}];
+        const importSelectedSourcesStub = vi.fn();
+
+        Reflect.set(controller, '_pendingImportSources', stagedSources);
+        Reflect.set(controller, '_importSelectedSources', importSelectedSourcesStub);
+
+        onImportConfirm.call(controller);
+
+        expect(importSelectedSourcesStub).toHaveBeenCalledWith(stagedSources);
     });
 
     test('renders one staged entry per pending source and enables import', () => {
