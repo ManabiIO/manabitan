@@ -26,6 +26,7 @@
     --animation-duration: 0s;
 
     --example-text-color: #333333;
+    --example-border-color: #dddddd;
     --background-color: rgba(0, 0, 0, 0);
 }
 :root[data-loaded=true] {
@@ -34,7 +35,33 @@
 
 :root[data-theme=dark] {
     --example-text-color: #d4d4d4;
+    --example-border-color: rgba(255, 255, 255, 0.2);
     --background-color: rgba(0, 0, 0, 0);
+}
+:root[data-theme-preset=glass][data-theme=light] {
+    --example-text-color: #202020;
+    --example-border-color: rgba(255, 255, 255, 0.3);
+    --background-color: radial-gradient(circle at top left, rgba(255, 255, 255, 0.82), rgba(224, 234, 252, 0.56) 40%, rgba(188, 203, 227, 0.18) 100%);
+}
+:root[data-theme-preset=glass][data-theme=dark] {
+    --example-text-color: #dfdfdf;
+    --example-border-color: rgba(255, 255, 255, 0.16);
+    --background-color: radial-gradient(circle at top left, rgba(76, 95, 128, 0.42), rgba(29, 34, 48, 0.82) 38%, rgba(16, 18, 25, 0.98) 100%);
+}
+:root[data-theme-preset=glass-autumnal][data-theme=light] {
+    --example-text-color: #3f2516;
+    --example-border-color: rgba(255, 244, 232, 0.34);
+    --background-color: radial-gradient(circle at top left, rgba(255, 235, 210, 0.94), rgba(236, 197, 160, 0.54) 36%, rgba(195, 132, 80, 0.2) 100%);
+}
+:root[data-theme-preset=glass-autumnal][data-theme=dark] {
+    --example-text-color: #f6ddd0;
+    --example-border-color: rgba(255, 209, 179, 0.16);
+    --background-color: radial-gradient(circle at top left, rgba(146, 92, 57, 0.42), rgba(63, 37, 26, 0.82) 40%, rgba(23, 14, 10, 0.98) 100%);
+}
+:root[data-theme-preset=glass-tokyo-night] {
+    --example-text-color: #c0caf5;
+    --example-border-color: rgba(192, 202, 245, 0.16);
+    --background-color: radial-gradient(circle at top left, rgba(122, 162, 247, 0.26), rgba(26, 27, 38, 0.84) 42%, rgba(17, 19, 28, 0.98) 100%);
 }
 
 
@@ -105,7 +132,7 @@ body {
 }
 .example-text:hover,
 .example-text-input {
-    border-color: #dddddd;
+    border-color: var(--example-border-color);
 }
 .example-text[hidden] {
     display: none;
@@ -129,6 +156,10 @@ body {
     border: 1px solid rgba(0, 0, 0, 0);
     flex-flow: column nowrap;
     justify-content: center;
+}
+:root[data-theme-preset^=glass] .content-body,
+:root[data-theme-preset^=glass] .popup-placeholder {
+    border-radius: 16px;
 }
 .placeholder-info {
     flex: 0 1 auto;

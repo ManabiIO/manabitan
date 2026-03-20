@@ -314,6 +314,7 @@ export class OptionsUtil {
                 compactGlossaries: false,
                 mainDictionary: '',
                 popupTheme: 'default',
+                popupThemePreset: 'default',
                 popupOuterTheme: 'default',
                 customPopupCss: '',
                 customPopupOuterCss: '',
@@ -589,6 +590,7 @@ export class OptionsUtil {
             this._updateVersion75,
             this._updateVersion76,
             this._updateVersion77,
+            this._updateVersion78,
         ];
         /* eslint-enable @typescript-eslint/unbound-method */
         if (typeof targetVersion === 'number' && targetVersion < result.length) {
@@ -1872,6 +1874,21 @@ export class OptionsUtil {
             general.popupBlurByFrequencyThreshold = 10000;
             general.popupBlurByFrequencyOrder = 'descending';
             general.popupBlurByFrequencyUnblurDelay = 0;
+        }
+    }
+
+    /**
+     *  - Added general.popupThemePreset
+     *  - Migrated general.popupTheme='site' to 'browser'
+     *  @type {import('options-util').UpdateFunction}
+     */
+    async _updateVersion78(options) {
+        for (const profile of options.profiles) {
+            const {general} = profile.options;
+            general.popupThemePreset = 'default';
+            if (general.popupTheme === 'site') {
+                general.popupTheme = 'browser';
+            }
         }
     }
 

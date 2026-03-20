@@ -44,6 +44,8 @@ export class SettingsDisplayController {
         this._themeController = new ThemeController(document.documentElement);
         /** @type {HTMLSelectElement | null}*/
         this._themeDropdown = document.querySelector('[data-setting="general.popupTheme"]');
+        /** @type {HTMLSelectElement | null}*/
+        this._themePresetDropdown = document.querySelector('[data-setting="general.popupThemePreset"]');
     }
 
     /** */
@@ -94,16 +96,21 @@ export class SettingsDisplayController {
         if (this._themeDropdown) {
             this._themeDropdown.addEventListener('change', this._updateTheme.bind(this), false);
         }
+        if (this._themePresetDropdown) {
+            this._themePresetDropdown.addEventListener('change', this._updateTheme.bind(this), false);
+        }
     }
 
     /** */
     async _setTheme() {
         const preparedOptions = this._settingsController.getPreparedProfileOptions();
-        this._themeController.theme = (
+        const options = (
             preparedOptions !== null ?
-                preparedOptions.general.popupTheme :
-                (await this._settingsController.getOptions()).general.popupTheme
+                preparedOptions :
+                await this._settingsController.getOptions()
         );
+        this._themeController.theme = options.general.popupTheme;
+        this._themeController.themePreset = options.general.popupThemePreset;
         this._themeController.siteOverride = true;
         this._themeController.updateTheme();
     }
@@ -111,8 +118,12 @@ export class SettingsDisplayController {
     /** */
     async _updateTheme() {
         const theme = this._themeDropdown?.value;
-        if (theme === 'site' || theme === 'light' || theme === 'dark' || theme === 'browser') {
+        if (theme === 'light' || theme === 'dark' || theme === 'browser') {
             this._themeController.theme = theme;
+        }
+        const themePreset = this._themePresetDropdown?.value;
+        if (themePreset === 'default' || themePreset === 'glass' || themePreset === 'glass-autumnal' || themePreset === 'glass-tokyo-night') {
+            this._themeController.themePreset = themePreset;
         }
         this._themeController.siteOverride = true;
         this._themeController.updateTheme();

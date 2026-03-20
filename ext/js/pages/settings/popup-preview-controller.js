@@ -105,6 +105,7 @@ export class PopupPreviewController {
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
     _onOptionsChanged({options}) {
+        this._onOptionsContextChange();
         this._invoke('setLanguageExampleText', {language: options.general.language});
     }
 

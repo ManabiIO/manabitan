@@ -875,18 +875,26 @@
     <div class="settings-group">
         <div class="settings-item"><div class="settings-item-inner settings-item-inner-wrappable">
             <div class="settings-item-left">
-                <div class="settings-item-label">Theme</div>
+                <div class="settings-item-label">Appearance</div>
                 <div class="settings-item-description">Adjust the style of Manabitan.</div>
             </div>
             <div class="settings-item-right">
                 <div class="settings-item-group">
                     <div class="settings-item-group-item">
-                        <div class="settings-item-group-item-label">Body</div>
+                        <div class="settings-item-group-item-label">Mode</div>
                         <select data-setting="general.popupTheme" class="short-width short-height">
-                            <option value="site">Auto</option>
+                            <option value="browser">System</option>
                             <option value="light">Light</option>
                             <option value="dark">Dark</option>
-                            <option value="browser">Browser</option>
+                        </select>
+                    </div>
+                    <div class="settings-item-group-item">
+                        <div class="settings-item-group-item-label">Theme</div>
+                        <select data-setting="general.popupThemePreset" class="short-width short-height">
+                            <option value="default">Default</option>
+                            <option value="glass">Glass</option>
+                            <option value="glass-autumnal">Autumnal (Glass)</option>
+                            <option value="glass-tokyo-night">Tokyo Night (Glass)</option>
                         </select>
                     </div>
                     <div class="settings-item-group-item">

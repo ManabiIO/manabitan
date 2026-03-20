@@ -143,6 +143,7 @@ export class PopupPreviewFrame {
         options.general.popupVerticalTextPosition = 'before';
         options.scanning.selectText = false;
         this._themeController.theme = options.general.popupTheme;
+        this._themeController.themePreset = options.general.popupThemePreset;
         this._themeController.siteOverride = true;
         this._themeController.updateTheme();
         return options;

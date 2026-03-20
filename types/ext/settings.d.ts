@@ -135,6 +135,7 @@ export type GeneralOptions = {
     glossaryLayoutMode: GlossaryLayoutMode;
     mainDictionary: string;
     popupTheme: PopupTheme;
+    popupThemePreset: PopupThemePreset;
     popupOuterTheme: PopupOuterTheme;
     customPopupCss: string;
     customPopupOuterCss: string;
@@ -410,6 +411,8 @@ export type PopupVerticalTextPosition = 'default' | 'before' | 'after' | 'left' 
 export type GlossaryLayoutMode = 'default' | 'compact' | 'compact-popup-anki';
 
 export type PopupTheme = 'light' | 'dark' | 'browser' | 'site';
+
+export type PopupThemePreset = 'default' | 'glass' | 'glass-autumnal' | 'glass-tokyo-night';
 
 export type PopupOuterTheme = 'light' | 'dark' | 'browser' | 'site' | 'none';
 

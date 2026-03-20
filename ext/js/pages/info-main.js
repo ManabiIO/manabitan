@@ -128,6 +128,7 @@ await Application.main(true, async (application) => {
     const defaultProfile = (profileCurrent >= 0 && profileCurrent < profiles.length) ? profiles[profileCurrent] : null;
     if (defaultProfile !== null) {
         themeController.theme = defaultProfile.options.general.popupTheme;
+        themeController.themePreset = defaultProfile.options.general.popupThemePreset;
         themeController.siteOverride = true;
         themeController.updateTheme();
     }

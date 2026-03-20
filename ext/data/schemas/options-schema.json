@@ -106,6 +106,7 @@
                                     "glossaryLayoutMode",
                                     "mainDictionary",
                                     "popupTheme",
+                                    "popupThemePreset",
                                     "popupOuterTheme",
                                     "customPopupCss",
                                     "customPopupOuterCss",
@@ -260,7 +261,12 @@
                                     "popupTheme": {
                                         "type": "string",
                                         "enum": ["light", "dark", "browser", "site"],
-                                        "default": "site"
+                                        "default": "browser"
+                                    },
+                                    "popupThemePreset": {
+                                        "type": "string",
+                                        "enum": ["default", "glass", "glass-autumnal", "glass-tokyo-night"],
+                                        "default": "default"
                                     },
                                     "popupOuterTheme": {
                                         "type": "string",

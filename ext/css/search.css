@@ -40,6 +40,10 @@
 :root[data-theme=dark] {
     --separator-color1: #333333;
 }
+:root[data-theme-preset^=glass] {
+    --background-color: transparent;
+    --separator-color1: transparent;
+}
 
 /* Common styles */
 :root {
@@ -52,6 +56,9 @@ body {
     color: var(--text-color);
     height: 100%;
     overflow: hidden;
+}
+:root[data-theme-preset^=glass] body {
+    background: var(--glass-page-background);
 }
 .search-header {
     padding-left: var(--search-scroll-container-horizontal-padding);
@@ -214,6 +221,14 @@ h1 {
 }
 .search-option:not([hidden]) {
     display: flex;
+}
+:root[data-theme-preset^=glass] #search-textbox,
+:root[data-theme-preset^=glass] .search-button,
+:root[data-theme-preset^=glass] .clear-button {
+    border-radius: 14px;
+}
+:root[data-theme-preset^=glass] .search-textbox-container {
+    gap: 0.35em;
 }
 .search-option-label {
     padding-left: 0.5em;

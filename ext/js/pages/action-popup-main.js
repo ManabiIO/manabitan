@@ -243,6 +243,7 @@ class DisplayController {
         void this._updatePermissionsWarnings(options);
 
         this._themeController.theme = options.general.popupTheme;
+        this._themeController.themePreset = options.general.popupThemePreset;
         this._themeController.siteOverride = true;
         this._themeController.updateTheme();
     }

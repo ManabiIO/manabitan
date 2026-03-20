@@ -669,6 +669,7 @@ export class BackupController {
 
         // Update display theme
         this._themeController.theme = optionsFull.profiles[optionsFull.profileCurrent].options.general.popupTheme;
+        this._themeController.themePreset = optionsFull.profiles[optionsFull.profileCurrent].options.general.popupThemePreset;
         this._themeController.prepare();
         this._themeController.siteOverride = true;
         this._themeController.updateTheme();

@@ -294,6 +294,7 @@ function createProfileOptionsUpdatedTestData1() {
             glossaryLayoutMode: 'default',
             mainDictionary: '',
             popupTheme: 'light',
+            popupThemePreset: 'default',
             popupOuterTheme: 'light',
             customPopupCss: '',
             customPopupOuterCss: '',
@@ -711,7 +712,7 @@ function createOptionsUpdatedTestData1() {
             },
         ],
         profileCurrent: 0,
-        version: 77,
+        version: 78,
         global: {
             database: {
                 prefixWildcardsSupported: false,
@@ -778,35 +779,29 @@ describe('OptionsUtil', () => {
         delete options.global.database.maxHeadwordLength;
 
         const optionsUpdated = structuredClone(await optionsUtil.update(options));
-        expect(optionsUpdated.version).toBe(77);
+        expect(optionsUpdated.version).toBe(78);
         expect(optionsUpdated.global.dictionaryAutoUpdates).toStrictEqual([]);
         expect(optionsUpdated.global.database.maxHeadwordLength).toBe(0);
     });
 
-    test('PopupFrequencyBlurVersion77MigrationUsesDefaultsAndStaysDecoupled', async () => {
+    test('PopupFrequencyBlurAndThemePresetVersion78MigrationUsesDefaultsAndStaysDecoupled', async () => {
         const optionsUtil = new OptionsUtil();
         await optionsUtil.prepare();
 
         const options = /** @type {import('settings').Options} */ (structuredClone(createOptionsUpdatedTestData1()));
-        options.version = 76;
+        options.version = 77;
         const general = /** @type {import('core').SafeAny} */ (options.profiles[0].options.general);
         general.sortFrequencyDictionary = 'Sort Dictionary';
         general.sortFrequencyDictionaryOrder = 'ascending';
-        delete general.popupBlurByFrequencyEnabled;
-        delete general.popupBlurByFrequencyDictionary;
-        delete general.popupBlurByFrequencyThreshold;
-        delete general.popupBlurByFrequencyOrder;
-        delete general.popupBlurByFrequencyUnblurDelay;
+        general.popupTheme = 'site';
+        delete general.popupThemePreset;
 
         const optionsUpdated = structuredClone(await optionsUtil.update(options));
         const defaultGeneral = optionsUtil.getDefault().profiles[0].options.general;
-        expect(optionsUpdated.version).toBe(77);
+        expect(optionsUpdated.version).toBe(78);
         expect(optionsUpdated.profiles[0].options.general).toMatchObject({
-            popupBlurByFrequencyEnabled: defaultGeneral.popupBlurByFrequencyEnabled,
-            popupBlurByFrequencyDictionary: defaultGeneral.popupBlurByFrequencyDictionary,
-            popupBlurByFrequencyThreshold: defaultGeneral.popupBlurByFrequencyThreshold,
-            popupBlurByFrequencyOrder: defaultGeneral.popupBlurByFrequencyOrder,
-            popupBlurByFrequencyUnblurDelay: defaultGeneral.popupBlurByFrequencyUnblurDelay,
+            popupTheme: 'browser',
+            popupThemePreset: defaultGeneral.popupThemePreset,
             sortFrequencyDictionary: 'Sort Dictionary',
             sortFrequencyDictionaryOrder: 'ascending',
         });

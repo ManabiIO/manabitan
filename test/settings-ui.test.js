@@ -40,4 +40,28 @@ describe('Settings UI scan length exposure', () => {
             expect(hasScanLengthSetting).toBe(false);
         }
     });
+
+    test('settings page renders separate mode, theme, and shadow controls', () => {
+        const html = fs.readFileSync(path.join(dirname, '..', 'ext', 'settings.html'), {encoding: 'utf8'});
+
+        expect(html).toContain('data-setting="general.popupTheme"');
+        expect(html).toContain('data-setting="general.popupThemePreset"');
+        expect(html).toContain('data-setting="general.popupOuterTheme"');
+        expect(html).toContain('<option value="browser">System</option>');
+        expect(html).toContain('<option value="default">Default</option>');
+        expect(html).toContain('<option value="glass">Glass</option>');
+        expect(html).toContain('<option value="glass-autumnal">Autumnal (Glass)</option>');
+        expect(html).toContain('<option value="glass-tokyo-night">Tokyo Night (Glass)</option>');
+    });
+
+    test('welcome page renders separate mode and theme controls', () => {
+        const html = fs.readFileSync(path.join(dirname, '..', 'ext', 'welcome.html'), {encoding: 'utf8'});
+
+        expect(html).toContain('data-setting="general.popupTheme"');
+        expect(html).toContain('data-setting="general.popupThemePreset"');
+        expect(html).toContain('<div class="settings-item-group-item-label">Mode</div>');
+        expect(html).toContain('<div class="settings-item-group-item-label">Theme</div>');
+        expect(html).toContain('<option value="browser">System</option>');
+        expect(html).toContain('<option value="glass-tokyo-night">Tokyo Night (Glass)</option>');
+    });
 });

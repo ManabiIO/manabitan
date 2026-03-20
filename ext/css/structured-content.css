@@ -233,6 +233,11 @@
     padding: 0.25em;
     vertical-align: top;
 }
+:root[data-theme-preset^=glass] .gloss-sc-thead,
+:root[data-theme-preset^=glass] .gloss-sc-tfoot,
+:root[data-theme-preset^=glass] .gloss-sc-th {
+    background-color: transparent;
+}
 .gloss-sc-ol,
 .gloss-sc-ul {
     padding-left: var(--list-padding2);

@@ -1105,6 +1105,7 @@ export class Popup extends EventDispatcher {
         const options = await this._application.api.optionsGet(optionsContext);
         const {general, scanning} = options;
         this._themeController.theme = general.popupTheme;
+        this._themeController.themePreset = general.popupThemePreset;
         this._themeController.outerTheme = general.popupOuterTheme;
         this._themeController.siteOverride = checkPopupPreviewURL(optionsContext.url);
         if (this._themeController.outerTheme === 'site' && this._themeController.siteOverride && ['dark', 'light'].includes(this._themeController.theme)) {
