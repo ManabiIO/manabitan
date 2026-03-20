@@ -4,7 +4,7 @@ Improving Yomitan's features for the language(s) you are interested in is pretty
 
 ## Adding a Language
 
-<img align="right" src="../../img/language-dropdown.png">
+<img align="right" src="../images/language-dropdown.png">
 
 If your language is not already available in the Language dropdown, here is how you can add it with just a few lines. As an example, we'll use [PR #913](https://github.com/yomidevs/yomitan/pull/913/files), where a first-time contributor added Dutch.
 
@@ -134,7 +134,7 @@ This kind of text processing is to a degree interdependent with the dictionaries
 
 ### Deinflection Rules (a.k.a. Language Transforms)
 
-<img align="right" src="../../img/deinflection-example-simple.png">
+<img align="right" src="../images/deinflection-example-simple.png">
 
 Deinflection is the process of converting a word to its base or dictionary form. For example, "running" should be deinflected to "run". This is useful for finding the word in the dictionary, as well as helping the user understand the grammar (morphology) of the language.
 
@@ -217,7 +217,7 @@ transforms: {
 
 Now, only dictionary entries marked with the same "n" condition will be eligible for matching the `plural` rule. The verb "read" should be marked as "v" in the dictionary, and will no longer be matched by the `plural` rule. The entries in the dictionary need to be marked with the exact same conditions defined in the `conditions` object. The `isDictionaryForm` field can be set to `false`, to allow some conditions to be used only in between rules, and not in the dictionary. In most cases however, it will be set to `true`.
 
-<img align="right" src="../../img/deinflection-example-chain.png">
+<img align="right" src="../images/deinflection-example-chain.png">
 
 Now consider the word `dogs'`, as in the `the dogs' bones`. This is the possessive of a plural noun. We can add a rule for the possessive:
 

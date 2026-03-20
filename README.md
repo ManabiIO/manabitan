@@ -90,10 +90,10 @@ Manabitan provides powerful features not available in other browser-based dictio
 - 📖 Support for multiple dictionary formats including [EPWING](https://ja.wikipedia.org/wiki/EPWING) via the [Yomitan Import](https://github.com/yomidevs/yomitan-import) tool.
 - ✨ Clean, modern code makes it easy for developers to [contribute](#contributing) new features and languages.
 
-[![Term definitions](img/ss-terms-thumb.png)](img/ss-terms.png)
-[![Kanji information](img/ss-kanji-thumb.png)](img/ss-kanji.png)
-[![Dictionary options](img/ss-dictionaries-thumb.png)](img/ss-dictionaries.png)
-[![Anki options](img/ss-anki-thumb.png)](img/ss-anki.png)
+[![Term definitions](docs/images/ss-terms-thumb.png)](docs/images/ss-terms.png)
+[![Kanji information](docs/images/ss-kanji-thumb.png)](docs/images/ss-kanji.png)
+[![Dictionary options](docs/images/ss-dictionaries-thumb.png)](docs/images/ss-dictionaries.png)
+[![Anki options](docs/images/ss-anki-thumb.png)](docs/images/ss-anki.png)
 
 ## Documentation/How To
 
