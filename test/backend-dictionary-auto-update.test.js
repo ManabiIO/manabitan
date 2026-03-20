@@ -237,7 +237,7 @@ describe('Backend dictionary auto-update helpers', () => {
         });
     });
 
-    test('Global hourly auto-update settings sync dictionary summary schedules between hourly and manual', async () => {
+    test('Global hourly auto-update settings sync hourly schedules without clearing non-hourly metadata', async () => {
         let currentDictionaries = /** @type {import('dictionary-importer').Summary[]} */ ([
             createDictionarySummary({
                 autoUpdate: {
@@ -277,16 +277,16 @@ describe('Backend dictionary auto-update helpers', () => {
 
         await getBackendMethod('_syncDictionaryAutoUpdateSummarySchedulesWithGlobalSettings').call(context);
 
-        expect(updateDictionarySummaryByTitle).toHaveBeenCalledTimes(2);
+        expect(updateDictionarySummaryByTitle).toHaveBeenCalledTimes(1);
         expect(currentDictionaries[0].autoUpdate).toStrictEqual({
             schedule: 'hourly',
             lastUpdatedAt: 10,
             nextUpdateAt: 10 + DICTIONARY_AUTO_UPDATE_INTERVAL_MS,
         });
         expect(currentDictionaries[1].autoUpdate).toStrictEqual({
-            schedule: 'manual',
+            schedule: 'daily',
             lastUpdatedAt: 20,
-            nextUpdateAt: null,
+            nextUpdateAt: 20 + DICTIONARY_AUTO_UPDATE_DAY_MS,
         });
     });
 

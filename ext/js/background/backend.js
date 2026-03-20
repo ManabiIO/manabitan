@@ -4014,12 +4014,16 @@ export class Backend {
             const dictionaries = await this._dictionaryDatabase.getDictionaryInfo();
             for (const dictionary of dictionaries) {
                 const normalizedDictionary = normalizeDictionarySummary(dictionary);
+                const normalizedAutoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (normalizedDictionary.autoUpdate);
                 const indexUrl = normalizedDictionary.indexUrl;
                 if (typeof indexUrl !== 'string' || indexUrl.length === 0) {
                     continue;
                 }
+                const nextSchedule = enabledIndexUrls.has(indexUrl) ? 'hourly' : (
+                    normalizedAutoUpdate.schedule === 'hourly' ? 'manual' : normalizedAutoUpdate.schedule
+                );
                 const nextSummary = setDictionarySummaryAutoUpdate(normalizedDictionary, {
-                    schedule: enabledIndexUrls.has(indexUrl) ? 'hourly' : 'manual',
+                    schedule: nextSchedule,
                 });
                 if (!hasDictionaryAutoUpdateMetadataChanged(normalizedDictionary, nextSummary)) {
                     continue;
