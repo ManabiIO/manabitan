@@ -626,8 +626,11 @@ describe('Dictionary import error display', () => {
 describe('Welcome recommended dictionary auto import', () => {
     const {window} = testEnv;
     const resolveRecommendedLanguage = /** @type {(requestedLanguage: string, recommendedDictionaries: import('dictionary-recommended.js').RecommendedDictionaries, allowJapaneseFallback: boolean) => string | null} */ (getDictionaryImportControllerMethod('_resolveRecommendedLanguage'));
+    const getRecommendedDictionaryImportTargets = /** @type {(requestedLanguage: string, recommendedDictionaries: import('dictionary-recommended.js').RecommendedDictionaries, installedDictionaries: import('dictionary-importer').Summary[], allowJapaneseFallback: boolean, queuedUrls?: string[]) => {resolvedLanguage: string | null, urls: string[]}} */ (getDictionaryImportControllerMethod('_getRecommendedDictionaryImportTargets'));
     const getWelcomeAutoImportDecision = /** @type {(requestedLanguage: string, recommendedDictionaries: import('dictionary-recommended.js').RecommendedDictionaries, installedDictionaries: import('dictionary-importer').Summary[]) => {status: string, resolvedLanguage: string | null, urls: string[]}} */ (getDictionaryImportControllerMethod('_getWelcomeAutoImportDecision'));
     const onWelcomeLanguageSelectChanged = /** @type {(event: Event) => Promise<void>} */ (getDictionaryImportControllerMethod('_onWelcomeLanguageSelectChanged'));
+    const updateRecommendedInstallAllButtonState = /** @type {() => void} */ (getDictionaryImportControllerMethod('_updateRecommendedInstallAllButtonState'));
+    const onRecommendedInstallAllClick = /** @type {(event: MouseEvent) => Promise<void>} */ (getDictionaryImportControllerMethod('_onRecommendedInstallAllClick'));
 
     test('resolves exact and base language without Japanese fallback', () => {
         const controller = createControllerForInternalTests();
@@ -704,6 +707,98 @@ describe('Welcome recommended dictionary auto import', () => {
         ]));
         const decision = getWelcomeAutoImportDecision.call(controller, 'en', recommended, installed);
         expect(decision.status).toBe('already-installed');
+    });
+
+    test('install-all targets use Japanese fallback, de-duplicate URLs, and exclude installed and queued dictionaries', () => {
+        const controller = createControllerForInternalTests();
+        const recommended = {
+            ja: createLanguageRecommendations({
+                terms: [
+                    {name: 'Jitendex', downloadUrl: 'https://example.invalid/jitendex.zip', description: 'J'},
+                    {name: 'JMdict', downloadUrl: 'https://example.invalid/jmdict.zip', description: 'M'},
+                    {name: 'JMdict duplicate', downloadUrl: 'https://example.invalid/jmdict.zip', description: 'M2'},
+                    {name: 'KANJIDIC', downloadUrl: 'https://example.invalid/kanjidic.zip', description: 'K'},
+                ],
+            }),
+        };
+        const installed = /** @type {import('dictionary-importer').Summary[]} */ (/** @type {unknown} */ ([
+            {title: 'Jitendex', downloadUrl: 'https://example.invalid/other.zip'},
+        ]));
+
+        const result = getRecommendedDictionaryImportTargets.call(
+            controller,
+            'de',
+            recommended,
+            installed,
+            true,
+            ['https://example.invalid/kanjidic.zip'],
+        );
+
+        expect(result.resolvedLanguage).toBe('ja');
+        expect(result.urls).toStrictEqual([
+            'https://example.invalid/jmdict.zip',
+        ]);
+    });
+
+    test('install-all button disables when no eligible recommendations remain', () => {
+        const controller = createControllerForInternalTests();
+        const button = window.document.createElement('button');
+        Reflect.set(controller, '_recommendedInstallAllButton', button);
+        Reflect.set(controller, '_recommendedInstallAllCount', 0);
+        Reflect.set(controller, '_modifying', false);
+        Reflect.set(controller, '_recommendedDictionaryActiveImport', false);
+        Reflect.set(controller, '_recommendedDictionaryQueue', []);
+
+        updateRecommendedInstallAllButtonState.call(controller);
+        expect(button.disabled).toBe(true);
+
+        Reflect.set(controller, '_recommendedInstallAllCount', 1);
+        updateRecommendedInstallAllButtonState.call(controller);
+        expect(button.disabled).toBe(false);
+    });
+
+    test('install-all click imports eligible recommendation URLs once', async () => {
+        const controller = createControllerForInternalTests();
+        const button = window.document.createElement('button');
+        Reflect.set(controller, '_recommendedInstallAllButton', button);
+        Reflect.set(controller, '_recommendedInstallAllCount', 2);
+        Reflect.set(controller, '_recommendedDictionaryQueue', []);
+        Reflect.set(controller, '_recommendedDictionaryActiveImport', false);
+        Reflect.set(controller, '_modifying', false);
+        Reflect.set(controller, '_clearRecommendedError', vi.fn());
+        Reflect.set(controller, '_updateRecommendedInstallAllButtonState', vi.fn());
+        Reflect.set(controller, '_onRecommendedInstallAllImportDone', vi.fn());
+        Reflect.set(controller, '_settingsController', {
+            getOptions: vi.fn().mockResolvedValue({general: {language: 'de'}}),
+            getDictionaryInfo: vi.fn().mockResolvedValue([]),
+        });
+        Reflect.set(controller, '_loadRecommendedDictionaries', vi.fn().mockResolvedValue({
+            recommendedDictionaries: {
+                ja: createLanguageRecommendations({
+                    terms: [
+                        {name: 'Jitendex', downloadUrl: 'https://example.invalid/jitendex.zip', description: 'J'},
+                        {name: 'JMdict', downloadUrl: 'https://example.invalid/jmdict.zip', description: 'M'},
+                    ],
+                }),
+            },
+            source: 'extension-data',
+            url: '../../data/recommended-dictionaries.json',
+        }));
+        const importFilesFromURLs = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(controller, 'importFilesFromURLs', importFilesFromURLs);
+
+        await onRecommendedInstallAllClick.call(
+            controller,
+            /** @type {MouseEvent} */ (/** @type {unknown} */ ({currentTarget: button})),
+        );
+
+        expect(button.disabled).toBe(true);
+        expect(importFilesFromURLs).toHaveBeenCalledTimes(1);
+        expect(importFilesFromURLs).toHaveBeenCalledWith(
+            'https://example.invalid/jitendex.zip\nhttps://example.invalid/jmdict.zip',
+            null,
+            expect.any(Function),
+        );
     });
 
     test('change handler does not auto-import outside welcome page', async () => {

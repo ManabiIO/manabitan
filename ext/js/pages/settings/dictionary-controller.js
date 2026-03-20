@@ -740,6 +740,8 @@ export class DictionaryController {
         /** @type {?HTMLButtonElement} */
         this._checkUpdatesButton = document.querySelector('#dictionary-check-updates');
         /** @type {?HTMLButtonElement} */
+        this._updateAllButton = document.querySelector('#dictionary-update-all-button');
+        /** @type {?HTMLButtonElement} */
         this._checkIntegrityButton = document.querySelector('#dictionary-check-integrity');
         /** @type {HTMLElement} */
         this._dictionaryEntryContainer = querySelectorNotNull(document, '#dictionary-list');
@@ -822,11 +824,15 @@ export class DictionaryController {
         if (this._checkUpdatesButton !== null) {
             this._checkUpdatesButton.addEventListener('click', this._onCheckUpdatesButtonClick.bind(this), false);
         }
+        if (this._updateAllButton !== null) {
+            this._updateAllButton.addEventListener('click', this._onUpdateAllButtonClick.bind(this), false);
+        }
         if (this._checkIntegrityButton !== null) {
             this._checkIntegrityButton.addEventListener('click', this._onCheckIntegrityButtonClick.bind(this), false);
         }
 
         this._updateDictionaryEntryCount();
+        this._updateUpdateAllButtonState();
 
         await this._onDatabaseUpdated();
     }
@@ -1039,6 +1045,7 @@ export class DictionaryController {
         const token = {};
         this._databaseStateToken = token;
         this._dictionaries = null;
+        this._updateUpdateAllButtonState();
         const dictionaries = await this._settingsController.getDictionaryInfo();
         if (this._databaseStateToken !== token) { return; }
         this._dictionaries = dictionaries;
@@ -1061,7 +1068,10 @@ export class DictionaryController {
     /** */
     async _updateEntries() {
         const dictionaries = this._dictionaries;
-        if (dictionaries === null) { return; }
+        if (dictionaries === null) {
+            this._updateUpdateAllButtonState();
+            return;
+        }
         this._updateMainDictionarySelectOptions(dictionaries);
 
         /** @type {Map<string, string | null>} */
@@ -1101,6 +1111,7 @@ export class DictionaryController {
             if (typeof dictionaryInfo === 'undefined') { continue; }
             this._createDictionaryEntry(i, dictionaryInfo, updateDownloadUrl, null);
         }
+        this._updateUpdateAllButtonState();
     }
 
     /**
@@ -1136,6 +1147,7 @@ export class DictionaryController {
             this._createDictionaryEntry(i, dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts);
         }
         this._dictionaryModalBody.scroll({top: dictionariesModalBodyScrollY});
+        this._updateUpdateAllButtonState();
     }
 
     /**
@@ -1315,6 +1327,23 @@ export class DictionaryController {
         void this._checkForUpdates();
     }
 
+    /**
+     * @param {MouseEvent} e
+     */
+    _onUpdateAllButtonClick(e) {
+        e.preventDefault();
+        const dictionaryTitles = this._getUpdateAllDictionaryTitles();
+        if (dictionaryTitles.length === 0) {
+            this._updateUpdateAllButtonState();
+            return;
+        }
+        for (const dictionaryTitle of dictionaryTitles) {
+            this._enqueueTask({type: 'update', dictionaryTitle, downloadUrl: void 0});
+            this._hideUpdatesAvailableButton(dictionaryTitle);
+        }
+        this._updateUpdateAllButtonState();
+    }
+
     /** */
     _onDictionaryMoveButtonClick() {
         const modal = /** @type {import('./modal.js').Modal} */ (this._modalController.getModal('dictionary-move-location'));
@@ -1472,6 +1501,7 @@ export class DictionaryController {
                 this._checkUpdatesButton.disabled = true;
             }
             this._checkingUpdates = false;
+            this._updateUpdateAllButtonState();
         }
     }
 
@@ -1498,6 +1528,7 @@ export class DictionaryController {
         } finally {
             this._setButtonsEnabled(true);
             this._checkingIntegrity = false;
+            this._updateUpdateAllButtonState();
         }
     }
 
@@ -1551,6 +1582,42 @@ export class DictionaryController {
         this._updateDictionaryEntryCount();
     }
 
+    /**
+     * @returns {string[]}
+     */
+    _getUpdateAllDictionaryTitles() {
+        const dictionaries = this._dictionaries;
+        if (dictionaries === null) { return []; }
+
+        /** @type {Map<string, import('dictionary-importer').Summary>} */
+        const dictionaryInfoMap = new Map();
+        for (const dictionary of dictionaries) {
+            dictionaryInfoMap.set(dictionary.title, dictionary);
+        }
+
+        /** @type {Set<string>} */
+        const seenDictionaryTitles = new Set();
+        /** @type {string[]} */
+        const dictionaryTitles = [];
+        for (const {dictionaryTitle} of this._dictionaryEntries) {
+            if (seenDictionaryTitles.has(dictionaryTitle)) { continue; }
+            seenDictionaryTitles.add(dictionaryTitle);
+
+            const dictionary = dictionaryInfoMap.get(dictionaryTitle);
+            if (
+                typeof dictionary === 'undefined' ||
+                dictionary.isUpdatable !== true ||
+                typeof dictionary.indexUrl !== 'string' ||
+                typeof dictionary.downloadUrl !== 'string' ||
+                this.isDictionaryInTaskQueue(dictionaryTitle)
+            ) {
+                continue;
+            }
+            dictionaryTitles.push(dictionaryTitle);
+        }
+        return dictionaryTitles;
+    }
+
 
     /**
      * @param {string} dictionaryTitle
@@ -1566,6 +1633,7 @@ export class DictionaryController {
     _enqueueTask(task) {
         if (this.isDictionaryInTaskQueue(task.dictionaryTitle)) { return; }
         this._dictionaryTaskQueue.push(task);
+        this._updateUpdateAllButtonState();
         void this._runTaskQueue();
     }
 
@@ -1574,6 +1642,7 @@ export class DictionaryController {
     async _runTaskQueue() {
         if (this._isTaskQueueRunning) { return; }
         this._isTaskQueueRunning = true;
+        this._updateUpdateAllButtonState();
         while (this._dictionaryTaskQueue.length > 0) {
             const task = this._dictionaryTaskQueue[0];
             if (task.type === 'delete') {
@@ -1582,8 +1651,10 @@ export class DictionaryController {
                 await this._updateDictionary(task.dictionaryTitle, task.downloadUrl);
             }
             void this._dictionaryTaskQueue.shift();
+            this._updateUpdateAllButtonState();
         }
         this._isTaskQueueRunning = false;
+        this._updateUpdateAllButtonState();
     }
 
     /**
@@ -1713,6 +1784,18 @@ export class DictionaryController {
     /** */
     _updateDictionaryEntryCount() {
         /** @type {HTMLElement} */ (this._dictionaryEntryContainer).dataset.count = `${this._dictionaryEntries.length}`;
+    }
+
+    /** */
+    _updateUpdateAllButtonState() {
+        const button = this._updateAllButton;
+        if (!(button instanceof HTMLButtonElement)) { return; }
+        button.disabled = (
+            this._checkingIntegrity ||
+            this._checkingUpdates ||
+            this._isTaskQueueRunning ||
+            this._getUpdateAllDictionaryTitles().length === 0
+        );
     }
 
     /**
