@@ -29,7 +29,7 @@ class MockSettingsController extends EventDispatcher {
     constructor() {
         super();
         /** @type {import('settings').ProfileOptions} */
-        this._options = {
+        this._options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
             anki: {
                 cardFormats: [{
                     type: 'term',
@@ -58,7 +58,7 @@ class MockSettingsController extends EventDispatcher {
             general: {
                 language: 'ja',
             },
-        };
+        }));
     }
 
     /** @returns {Promise<import('settings').ProfileOptions>} */
@@ -115,7 +115,7 @@ class MockSettingsController extends EventDispatcher {
                 <select class="anki-card-field-overwrite"></select>
             </div>
         `;
-        return template.content.cloneNode(true);
+        return /** @type {DocumentFragment} */ (template.content.cloneNode(true));
     }
 
     /**
@@ -123,8 +123,9 @@ class MockSettingsController extends EventDispatcher {
      * @returns {Promise<unknown[]>}
      */
     async modifyProfileSettings(targets) {
-        for (const {path, value} of targets) {
-            setObjectProperty(this._options, path, value);
+        for (const target of targets) {
+            if (target.action !== 'set') { continue; }
+            setObjectProperty(this._options, target.path, target.value);
         }
         return [];
     }
@@ -166,11 +167,11 @@ function setupAnkiDom(window) {
  */
 function setObjectProperty(target, path, value) {
     const pathParts = path.replace(/\[(\d+)\]/g, '.$1').split('.');
-    /** @type {Record<string, unknown>|unknown[]} */
-    let current = /** @type {Record<string, unknown>|unknown[]} */ (target);
+    /** @type {any} */
+    let current = target;
     for (let i = 0, ii = pathParts.length - 1; i < ii; ++i) {
         const key = getPathKey(pathParts[i]);
-        current = /** @type {Record<string, unknown>|unknown[]} */ (current[key]);
+        current = current[key];
     }
     current[getPathKey(pathParts[pathParts.length - 1])] = value;
 }

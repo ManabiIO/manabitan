@@ -1159,6 +1159,7 @@ class AnkiCardController {
 
         let fieldNames;
         let options;
+        /** @type {import('dictionary-importer').Summary[]} */
         let dictionaryInfo = [];
         try {
             this._modelChangingTo = value;
