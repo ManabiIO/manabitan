@@ -29,6 +29,14 @@
 - 100% test coverage with extensive end to end tests
 - Significantly less RAM usage
 - Auto import Kiku/Lapis/Senren/Crop-Theft Anki Note types.
+- No scan length. Before you had to say "only scan 10 characters", now you don't have to do that. We will show you the longest possible word in the dict 🤷‍♀️
+
+## What's being upstreamed?
+
+I am [actively](https://github.com/yomidevs/yomitan/issues?q=is%3Apr%20author%3Abee-san
+) pushing PRs to Yomitan to improve it based on this work. 
+
+Using this fork and telling me what's wrong will let me write better PRs for Yomitan.
 
 # Visit [yomitan.wiki](https://yomitan.wiki) to learn more!
 
