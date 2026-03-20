@@ -19,7 +19,7 @@ import type * as Api from './api';
 
 export type DatabaseUpdateType = 'dictionary';
 
-export type DatabaseUpdateCause = 'purge' | 'delete' | 'import';
+export type DatabaseUpdateCause = 'purge' | 'delete' | 'import' | 'edit';
 
 export type DictionaryUpdateCheckResult = {
     dictionaryTitle: string;
@@ -49,6 +49,12 @@ export type TabInfo = {
 
 export type FindTabsPredicate = (tabInfo: TabInfo) => boolean | Promise<boolean>;
 
-export type CanAddResults = {note: import('anki').Note, isDuplicate: boolean}[];
+export type CanAddResult = {
+    note: import('anki').Note;
+    isDuplicate: boolean;
+    cachedNoteIds?: import('anki').NoteId[] | null;
+};
+
+export type CanAddResults = CanAddResult[];
 
 export type Mode = 'existingOrNewTab' | 'newTab' | 'popup';

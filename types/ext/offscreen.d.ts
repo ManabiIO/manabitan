@@ -67,6 +67,13 @@ type ApiSurface = {
         };
         return: void;
     };
+    updateDictionaryMetadataOffscreen: {
+        params: {
+            dictionaryTitle: string;
+            summary: DictionaryImporter.Summary;
+        };
+        return: void;
+    };
     getDictionaryCountsOffscreen: {
         params: {
             dictionaryNames: string[];

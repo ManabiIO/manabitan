@@ -95,6 +95,13 @@ export type Summary = {
     frequencyMode?: 'occurrence-based' | 'rank-based';
     importSuccess?: boolean;
     autoUpdate?: DictionaryAutoUpdateInfo;
+    metadataOverrides?: SummaryMetadataOverrides;
+};
+
+export type SummaryMetadataOverrides = {
+    title?: string;
+    url?: string | null;
+    description?: string | null;
 };
 
 export type SummaryDetails = {

@@ -2223,6 +2223,88 @@ export class DictionaryDatabase {
     }
 
     /**
+     * @param {string} dictionaryTitle
+     * @param {import('dictionary-importer').Summary} summary
+     * @returns {Promise<void>}
+     */
+    async updateDictionaryMetadata(dictionaryTitle, summary) {
+        const db = this._requireDb();
+        const nextTitle = this._asString(summary.title).trim();
+        if (nextTitle.length === 0) {
+            throw new Error('Dictionary title cannot be empty');
+        }
+
+        const currentTitle = this._asString(dictionaryTitle);
+        const row = db.selectObject(
+            'SELECT id FROM dictionaries WHERE title = $title LIMIT 1',
+            {$title: currentTitle},
+        );
+        if (typeof row === 'undefined') {
+            throw new Error(`Dictionary not found: ${currentTitle}`);
+        }
+        if (
+            nextTitle !== currentTitle &&
+            typeof db.selectValue(
+                'SELECT 1 FROM dictionaries WHERE title = $title LIMIT 1',
+                {$title: nextTitle},
+            ) !== 'undefined'
+        ) {
+            throw new Error(`Dictionary already exists: ${nextTitle}`);
+        }
+
+        /** @type {import('dictionary-importer').Summary} */
+        const nextSummary = {
+            ...summary,
+            title: nextTitle,
+        };
+
+        await this._beginImmediateTransaction(db);
+        let termRecordStoreRenamed = false;
+        try {
+            if (nextTitle !== currentTitle) {
+                await this._termRecordStore.renameDictionary(currentTitle, nextTitle);
+                termRecordStoreRenamed = true;
+                for (const table of ['kanji', 'kanjiMeta', 'termMeta', 'tagMeta', 'media', 'sharedGlossaryArtifacts']) {
+                    db.exec({
+                        sql: `UPDATE ${table} SET dictionary = $nextTitle WHERE dictionary = $currentTitle`,
+                        bind: {$nextTitle: nextTitle, $currentTitle: currentTitle},
+                    });
+                }
+            }
+            db.exec({
+                sql: 'UPDATE dictionaries SET title = $title, version = $version, summaryJson = $summaryJson WHERE id = $id',
+                bind: {
+                    $id: this._asNumber(row.id, -1),
+                    $title: nextTitle,
+                    $version: nextSummary.version,
+                    $summaryJson: JSON.stringify(nextSummary),
+                },
+            });
+            db.exec('COMMIT');
+        } catch (e) {
+            const error = toError(e);
+            try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+            if (termRecordStoreRenamed) {
+                try {
+                    await this._termRecordStore.renameDictionary(nextTitle, currentTitle);
+                } catch (rollbackError) {
+                    error.message = `${error.message}; failed to rollback term-record rename: ${toError(rollbackError).message}`;
+                }
+            }
+            throw error;
+        }
+
+        this._termEntryContentCache.clear();
+        this._termEntryContentIdByHash.clear();
+        this._clearTermEntryContentMetaCaches();
+        this._termExactPresenceCache.clear();
+        this._termPrefixNegativeCache.clear();
+        this._directTermIndexByDictionary.clear();
+        this._sharedGlossaryArtifactMetaByDictionary.clear();
+        this._sharedGlossaryArtifactInflatedByDictionary.clear();
+    }
+
+    /**
      * @template {import('dictionary-database').ObjectStoreName} T
      * @param {T} objectStoreName
      * @param {import('dictionary-database').ObjectStoreData<T>[]} items

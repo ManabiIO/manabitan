@@ -5,20 +5,59 @@
 [Download for Chrome, Firefox, Edge](https://github.com/ManabiIO/manabitan/releases/latest)
 [Firefox Dev Builds](https://github.com/ManabiIO/manabitan/releases/latest)
 
+[![CI](https://img.shields.io/github/actions/workflow/status/ManabiIO/manabitan/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/ManabiIO/manabitan/actions/workflows/ci.yml)
+[![Test Coverage](https://img.shields.io/badge/test%20coverage-100%25-brightgreen?style=for-the-badge)](https://github.com/ManabiIO/manabitan/blob/main/docs/development/npm-scripts.md#testcoverage)
 [![Manabi Discord](https://dcbadge.limes.pink/api/server/gvxzS93C3w?style=for-the-badge)](https://discord.gg/gvxzS93C3w)
 [![Discord](https://dcbadge.limes.pink/api/server/YkQrXW6TXF?style=for-the-badge)](https://discord.gg/YkQrXW6TXF)
 
 # Differences from Yomitan
 
+## Speed
+
 - 5001% dictionary import speedup
 - 6800% faster anki dedupe check
 - 2x faster to make Anki cards
 - Lookup is 1038% faster
-- MDX dictionary support
-- Auto-updating dictionaries
-- Blur when word is under a certain frequency
+- In memory cache support for dictionaries + Anki dupe. The benchmarks above are with the cache turned off btw
+
+## Features
+
+- MDX dictionary support (now supports 20,000 more dicts than Yomitan)
+- Auto-updating dictionaries, never manually update a dictionary again.
+- Schedule when a specific dictionary updates (hourly, daily, weekly, monthly)
+- Blur when word is under a certain frequency to force you to recall it.
+- Edit dictionary metadata (name etc) after importing.
+
+## Nerdy
+
 - 100% test coverage with extensive end to end tests
 - Significantly less RAM usage
+- Auto import Kiku/Lapis/Senren/Crop-Theft Anki Note types.
+- No scan length. Before you had to say "only scan 10 characters", now you don't have to do that. We will show you the longest possible word in the dict (plus a few more characters for grammar etc)
+
+We have benchmarks for these 3 things:
+
+1. Importing dictionaries
+2. Looking up words
+3. Adding to Anki
+
+We regularly benchmark these 3 things and if if it becomes slower than normal we will work to fix it.
+
+If a new feature or bug makes one of these 3 things slower, we will exterminate it ruthlessly to ensure we are the best dictionary app on the market.
+
+Manabitan is a dictionary app that lets you mine to Anki. If this is not fast, then what is the point of this software?
+
+## Why not contribute to Yomitan directly?
+
+A lot of this stuff is experimental and may break.
+
+When you use this software you are aware it may break, but you also want a significantly beefed up and improved version of Yomitan.
+
+As well as this, Yomitan says no to a lot of feature requests. We take the opposite approach. If it seems like a good idea, we will add it!
+
+I am also [actively](https://github.com/yomidevs/yomitan/issues?q=is%3Apr%20author%3Abee-san) pushing PRs to Yomitan to improve it based on this work.
+
+Using this fork and telling me what works and doesn't will allow me to contribute back to Yomitan easier.
 
 # Visit [yomitan.wiki](https://yomitan.wiki) to learn more!
 

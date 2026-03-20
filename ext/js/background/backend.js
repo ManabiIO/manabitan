@@ -30,7 +30,9 @@ import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
+import {toError} from '../core/to-error.js';
 import {clone, deferPromise, promiseTimeout} from '../core/utilities.js';
+import {createAnkiNoteDuplicateSearchDetails} from '../data/anki-note-query-util.js';
 import {generateAnkiNoteMediaFileName, INVALID_NOTE_ID, isNoteDataValid} from '../data/anki-util.js';
 import {getKebabCase} from '../data/anki-template-util.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
@@ -63,6 +65,23 @@ const STARTUP_DIAGNOSTICS_STORAGE_KEY = 'manabitanStartupDiagnostics';
 const DICTIONARY_AUTO_UPDATE_STATE_STORAGE_KEY = 'manabitanDictionaryAutoUpdateState';
 const DICTIONARY_AUTO_UPDATE_ALARM_NAME = 'manabitanDictionaryAutoUpdateHourly';
 const SCAN_LENGTH_INFLECTION_BUFFER = 8;
+
+/**
+ * @param {string} value
+ * @returns {string|undefined}
+ */
+function normalizeOptionalDictionaryMetadataText(value) {
+    const normalized = value.trim();
+    return normalized.length > 0 ? normalized : void 0;
+}
+
+/**
+ * @param {Error} error
+ * @param {string} message
+ */
+function appendErrorMessage(error, message) {
+    error.message = `${error.message}; ${message}`;
+}
 
 /**
  * @param {string} previousText
@@ -265,6 +284,7 @@ export class Backend {
             ['getDefaultAnkiFieldTemplates', this._onApiGetDefaultAnkiFieldTemplates.bind(this)],
             ['getDictionaryInfo',            this._onApiGetDictionaryInfo.bind(this)],
             ['deleteDictionaryByTitle',      this._onApiDeleteDictionaryByTitle.bind(this)],
+            ['updateDictionaryMetadata',     this._onApiUpdateDictionaryMetadata.bind(this)],
             ['getDictionaryCounts',          this._onApiGetDictionaryCounts.bind(this)],
             ['checkDictionaryUpdates',       this._onApiCheckDictionaryUpdates.bind(this)],
             ['updateDictionaryByTitle',      this._onApiUpdateDictionaryByTitle.bind(this)],
@@ -313,6 +333,8 @@ export class Backend {
         this._yomitanApi = new YomitanApi(this._apiMap, this._offscreen);
         /** @type {CacheMap<string, {originalTextLength: number, textSegments: import('api').ParseTextSegment[]}>} */
         this._textParseCache = new CacheMap(10000, 3600000); // 1 hour idle time, ~32MB per 1000 entries for Japanese
+        /** @type {Map<string, {status: 'pending'|'ready'|'error', fieldNameLower: string, query: string, noteIdsByFieldValue: Map<string, number[]>}>} */
+        this._ankiDuplicateCache = new Map();
         /** @type {Record<string, unknown>|null} */
         this._startupDiagnosticsSnapshot = null;
         /** @type {boolean} */
@@ -529,6 +551,7 @@ export class Backend {
                 this._applyOptions('background');
                 recordPhase('applyOptions(background)', startedAt);
             }
+            void this._warmAnkiDuplicateCacheStartupBuckets();
 
             {
                 const startedAt = safePerformance.now();
@@ -892,12 +915,21 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'addAnkiNote'>} */
     async _onApiAddAnkiNote({note}) {
-        return await this._anki.addNote(note);
+        const noteId = await this._anki.addNote(note);
+        if (typeof noteId === 'number') {
+            this._addAnkiDuplicateCacheNote(note, noteId);
+        }
+        return noteId;
     }
 
     /** @type {import('api').ApiHandler<'updateAnkiNote'>} */
     async _onApiUpdateAnkiNote({noteWithId}) {
-        return await this._anki.updateNoteFields(noteWithId);
+        const result = await this._anki.updateNoteFields(noteWithId);
+        if (typeof noteWithId.id === 'number') {
+            this._removeAnkiDuplicateCacheNoteId(noteWithId.id);
+            this._addAnkiDuplicateCacheNote(noteWithId, noteWithId.id);
+        }
+        return result;
     }
 
     /**
@@ -961,6 +993,27 @@ export class Backend {
 
     /**
      * @param {import('anki').Note[]} notes
+     * @param {import('anki').Note[]} notesStrippedNoDuplicates
+     * @returns {Promise<{ note: import('anki').Note, isDuplicate: boolean }[]>}
+     */
+    async _findDuplicatesLive(notes, notesStrippedNoDuplicates) {
+        try {
+            return await this._findDuplicates(notes, notesStrippedNoDuplicates);
+        } catch (e) {
+            // User has older anki-connect that does not support canAddNotesWithErrorDetail
+            if (e instanceof ExtensionError && e.message.includes('Anki error: unsupported action')) {
+                const strippedNotesAllowDuplicates = notesStrippedNoDuplicates.map((note) => ({
+                    ...note,
+                    options: {...note.options, allowDuplicate: true},
+                }));
+                return await this._findDuplicatesFallback(notes, notesStrippedNoDuplicates, strippedNotesAllowDuplicates);
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * @param {import('anki').Note[]} notes
      * @returns {Promise<{canAddArray: import('backend').CanAddResults, strippedNotes: import('anki').Note[]}>}
      */
     async partitionAddibleNotes(notes) {
@@ -973,22 +1026,247 @@ export class Backend {
             note.options.allowDuplicate = false;
         }
 
-        let canAddArray;
+        const canAddArray = await this._findDuplicatesWithCache(notes, strippedNotes);
+        return {canAddArray, strippedNotes};
+    }
+
+    /**
+     * @param {import('anki').Note} note
+     * @param {'exact'|'any'} [fieldValueMode='exact']
+     * @returns {?({
+     *   key: string,
+     * } & NonNullable<ReturnType<typeof createAnkiNoteDuplicateSearchDetails>>)}
+     */
+    _getAnkiDuplicateCacheDescriptor(note, fieldValueMode = 'exact') {
+        const details = createAnkiNoteDuplicateSearchDetails(note, fieldValueMode);
+        if (details === null) { return null; }
+
+        const key = JSON.stringify([
+            this._anki.server ?? '',
+            this._anki.apiKey ?? '',
+            details.duplicateScope,
+            details.deckName ?? '',
+            details.checkChildren,
+            details.checkAllModels,
+            details.checkAllModels ? '' : details.modelName,
+            details.fieldNameLower,
+        ]);
+        return {key, ...details};
+    }
+
+    /**
+     * @param {import('settings').AnkiCardFormat} cardFormat
+     * @param {import('settings').AnkiOptions} ankiOptions
+     * @param {string} firstFieldName
+     * @returns {import('anki').Note}
+     */
+    _createAnkiDuplicateCacheStartupNote(cardFormat, ankiOptions, firstFieldName) {
+        return {
+            fields: {[firstFieldName]: ''},
+            tags: [],
+            deckName: cardFormat.deck,
+            modelName: cardFormat.model,
+            options: {
+                allowDuplicate: false,
+                duplicateScope: ankiOptions.duplicateScope,
+                duplicateScopeOptions: {
+                    deckName: null,
+                    checkChildren: false,
+                    checkAllModels: ankiOptions.duplicateScopeCheckAllModels,
+                },
+            },
+        };
+    }
+
+    /**
+     * @returns {Array<{
+     *   key: string,
+     *   query: string,
+     *   fieldName: string,
+     *   fieldNameLower: string,
+     *   fieldValue: string,
+     *   duplicateScope: 'collection'|'deck',
+     *   deckName: string|null,
+     *   checkChildren: boolean,
+     *   checkAllModels: boolean,
+     *   modelName: string,
+     * }>}
+     */
+    _getAnkiDuplicateCacheStartupDescriptors() {
+        if (!this._anki.enabled) { return []; }
+
+        const options = this._getProfileOptions({current: true}, false);
+        /** @type {Map<string, NonNullable<ReturnType<Backend['_getAnkiDuplicateCacheDescriptor']>>>} */
+        const descriptorsByKey = new Map();
+        for (const cardFormat of options.anki.cardFormats) {
+            const [firstFieldName] = Object.keys(cardFormat.fields);
+            if (typeof firstFieldName !== 'string') { continue; }
+
+            const descriptor = this._getAnkiDuplicateCacheDescriptor(
+                this._createAnkiDuplicateCacheStartupNote(cardFormat, options.anki, firstFieldName),
+                'any',
+            );
+            if (descriptor === null || descriptorsByKey.has(descriptor.key)) { continue; }
+            descriptorsByKey.set(descriptor.key, descriptor);
+        }
+        return [...descriptorsByKey.values()];
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _warmAnkiDuplicateCacheStartupBuckets() {
+        for (const descriptor of this._getAnkiDuplicateCacheStartupDescriptors()) {
+            if (this._ankiDuplicateCache.has(descriptor.key)) { continue; }
+
+            const bucket = {
+                status: /** @type {'pending'} */ ('pending'),
+                fieldNameLower: descriptor.fieldNameLower,
+                query: descriptor.query,
+                noteIdsByFieldValue: new Map(),
+            };
+            this._ankiDuplicateCache.set(descriptor.key, bucket);
+            void this._warmAnkiDuplicateCacheBucket(bucket);
+        }
+    }
+
+    /**
+     * @param {{status: 'pending'|'ready'|'error', fieldNameLower: string, query: string, noteIdsByFieldValue: Map<string, number[]>}} bucket
+     * @returns {Promise<void>}
+     */
+    async _warmAnkiDuplicateCacheBucket(bucket) {
         try {
-            canAddArray = await this._findDuplicates(notes, strippedNotes);
+            const noteIds = await this._anki.findNotes(bucket.query);
+            const notesInfo = (noteIds.length > 0 ? await this._anki.notesInfo(noteIds) : []);
+            /** @type {Map<string, number[]>} */
+            const noteIdsByFieldValue = new Map();
+            for (const noteInfo of notesInfo) {
+                if (noteInfo === null) { continue; }
+                const fieldValue = this._getAnkiDuplicateCacheFieldValueFromNoteInfo(noteInfo, bucket.fieldNameLower);
+                if (fieldValue === null) { continue; }
+
+                let fieldNoteIds = noteIdsByFieldValue.get(fieldValue);
+                if (typeof fieldNoteIds === 'undefined') {
+                    fieldNoteIds = [];
+                    noteIdsByFieldValue.set(fieldValue, fieldNoteIds);
+                }
+                fieldNoteIds.push(noteInfo.noteId);
+            }
+            bucket.noteIdsByFieldValue = noteIdsByFieldValue;
+            bucket.status = 'ready';
         } catch (e) {
-            // User has older anki-connect that does not support canAddNotesWithErrorDetail
-            if (e instanceof ExtensionError && e.message.includes('Anki error: unsupported action')) {
-                const strippedNotesAllowDuplicates = strippedNotes.map((note) => ({
-                    ...note,
-                    options: {...note.options, allowDuplicate: true},
-                }));
-                canAddArray = await this._findDuplicatesFallback(notes, strippedNotes, strippedNotesAllowDuplicates);
-            } else {
-                throw e;
+            bucket.status = 'error';
+            log.error(e);
+        }
+    }
+
+    /**
+     * @param {import('anki').NoteInfo} noteInfo
+     * @param {string} fieldNameLower
+     * @returns {?string}
+     */
+    _getAnkiDuplicateCacheFieldValueFromNoteInfo(noteInfo, fieldNameLower) {
+        for (const [fieldName, fieldInfo] of Object.entries(noteInfo.fields)) {
+            if (fieldName.toLowerCase() !== fieldNameLower) { continue; }
+            return typeof fieldInfo.value === 'string' ? fieldInfo.value : null;
+        }
+        return null;
+    }
+
+    /**
+     * @param {import('anki').Note} note
+     * @returns {number[]|null}
+     */
+    _getAnkiDuplicateCacheNoteIds(note) {
+        const descriptor = this._getAnkiDuplicateCacheDescriptor(note);
+        if (descriptor === null) { return null; }
+
+        const bucket = this._ankiDuplicateCache.get(descriptor.key);
+        if (typeof bucket === 'undefined' || bucket.status !== 'ready') { return null; }
+
+        return [...(bucket.noteIdsByFieldValue.get(descriptor.fieldValue) ?? [])];
+    }
+
+    /**
+     * @param {import('anki').Note} note
+     * @param {number} noteId
+     */
+    _addAnkiDuplicateCacheNote(note, noteId) {
+        const descriptor = this._getAnkiDuplicateCacheDescriptor(note);
+        if (descriptor === null) { return; }
+
+        const bucket = this._ankiDuplicateCache.get(descriptor.key);
+        if (typeof bucket === 'undefined' || bucket.status !== 'ready') { return; }
+
+        let noteIds = bucket.noteIdsByFieldValue.get(descriptor.fieldValue);
+        if (typeof noteIds === 'undefined') {
+            noteIds = [];
+            bucket.noteIdsByFieldValue.set(descriptor.fieldValue, noteIds);
+        }
+        if (!noteIds.includes(noteId)) {
+            noteIds.push(noteId);
+        }
+    }
+
+    /**
+     * @param {number} noteId
+     */
+    _removeAnkiDuplicateCacheNoteId(noteId) {
+        for (const bucket of this._ankiDuplicateCache.values()) {
+            if (bucket.status !== 'ready') { continue; }
+            for (const [fieldValue, noteIds] of bucket.noteIdsByFieldValue.entries()) {
+                const filteredNoteIds = noteIds.filter((cachedNoteId) => cachedNoteId !== noteId);
+                if (filteredNoteIds.length === noteIds.length) { continue; }
+                if (filteredNoteIds.length === 0) {
+                    bucket.noteIdsByFieldValue.delete(fieldValue);
+                } else {
+                    bucket.noteIdsByFieldValue.set(fieldValue, filteredNoteIds);
+                }
             }
         }
-        return {canAddArray, strippedNotes};
+    }
+
+    /**
+     * @param {import('anki').Note[]} notes
+     * @param {import('anki').Note[]} strippedNotes
+     * @returns {Promise<Array<{note: import('anki').Note, isDuplicate: boolean, cachedNoteIds: number[]|null}>>}
+     */
+    async _findDuplicatesWithCache(notes, strippedNotes) {
+        /** @type {Array<{note: import('anki').Note, isDuplicate: boolean, cachedNoteIds: number[]|null}>} */
+        const results = new Array(notes.length);
+        /** @type {import('anki').Note[]} */
+        const fallbackNotes = [];
+        /** @type {import('anki').Note[]} */
+        const fallbackStrippedNotes = [];
+        /** @type {number[]} */
+        const fallbackIndices = [];
+
+        for (let i = 0, ii = strippedNotes.length; i < ii; ++i) {
+            const cachedNoteIds = this._getAnkiDuplicateCacheNoteIds(strippedNotes[i]);
+            if (cachedNoteIds !== null) {
+                results[i] = {
+                    note: notes[i],
+                    isDuplicate: cachedNoteIds.length > 0,
+                    cachedNoteIds,
+                };
+            } else {
+                fallbackNotes.push(notes[i]);
+                fallbackStrippedNotes.push(strippedNotes[i]);
+                fallbackIndices.push(i);
+            }
+        }
+
+        if (fallbackIndices.length > 0) {
+            const fallbackResults = await this._findDuplicatesLive(fallbackNotes, fallbackStrippedNotes);
+            for (let i = 0, ii = fallbackResults.length; i < ii; ++i) {
+                results[fallbackIndices[i]] = {
+                    ...fallbackResults[i],
+                    cachedNoteIds: null,
+                };
+            }
+        }
+
+        return results;
     }
 
     /** @type {import('api').ApiHandler<'getAnkiNoteInfo'>} */
@@ -1004,10 +1282,16 @@ export class Backend {
             const duplicateNoteIndices = [];
 
             for (let i = 0; i < canAddArray.length; i++) {
-                if (canAddArray[i].isDuplicate) {
-                    duplicateNotes.push(strippedNotes[i]);
-                    duplicateNoteIndices.push(i);
+                const {cachedNoteIds, isDuplicate} = canAddArray[i];
+                if (!isDuplicate) { continue; }
+
+                if (Array.isArray(cachedNoteIds)) {
+                    duplicateNoteIdsByIndex[i] = (cachedNoteIds.length > 0 ? cachedNoteIds : [INVALID_NOTE_ID]);
+                    continue;
                 }
+
+                duplicateNotes.push(strippedNotes[i]);
+                duplicateNoteIndices.push(i);
             }
 
             const duplicateNoteIdResults =
@@ -1299,6 +1583,11 @@ export class Backend {
             await this._ensureDictionaryDatabaseReady({allowDuringMutation: true});
             await this._dictionaryDatabase.deleteDictionary(dictionaryTitle, 1000, () => {});
         });
+    }
+
+    /** @type {import('api').ApiHandler<'updateDictionaryMetadata'>} */
+    async _onApiUpdateDictionaryMetadata({dictionaryTitle, title, url, description}) {
+        return await this._updateDictionaryMetadata(dictionaryTitle, title, url, description);
     }
 
     /** @type {import('api').ApiHandler<'getDictionaryCounts'>} */
@@ -1960,6 +2249,7 @@ export class Backend {
         void this._accessibilityController.update(this._getOptionsFull(false));
 
         this._textParseCache.clear();
+        this._ankiDuplicateCache.clear();
 
         this._sendMessageAllTabsIgnoreResponse({action: 'applicationOptionsUpdated', params: {source}});
     }
@@ -3685,14 +3975,17 @@ export class Backend {
                 archiveContent.buffer.slice(archiveContent.byteOffset, archiveContent.byteOffset + archiveContent.byteLength),
                 this._createDictionaryImportDetails(),
             );
-            const importedSummary = importResult.result;
-            if (importedSummary === null) {
+            const rawImportedSummary = importResult.result;
+            if (rawImportedSummary === null) {
                 const message = importResult.errors.map((error) => error.message).join('; ') || 'Dictionary import failed';
                 throw new Error(message);
             }
-            const persistedSummary = await this._setDictionarySummaryByTitle(
-                importedSummary.title,
-                this._createUpdatedDictionarySummaryAfterImport(dictionary, importedSummary),
+            const importedSummary = this._applyDictionaryMetadataOverrides(rawImportedSummary, dictionary);
+            const nextSummary = this._createUpdatedDictionarySummaryAfterImport(dictionary, importedSummary);
+            const persistedSummary = (
+                importedSummary !== rawImportedSummary ?
+                    (await this._dictionaryDatabase.updateDictionaryMetadata(rawImportedSummary.title, nextSummary), nextSummary) :
+                    await this._setDictionarySummaryByTitle(rawImportedSummary.title, nextSummary)
             );
 
             await this._applyImportedDictionarySettings(dictionary, persistedSummary, updateContext);
@@ -3720,6 +4013,198 @@ export class Backend {
             await this._pruneStaleDictionaryAutoUpdates();
         }
         return {dictionaryTitle: dictionary.title, status: 'skipped', latestRevision, error: failureMessage};
+    }
+
+    /**
+     * @param {import('dictionary-importer').Summary} previousSummary
+     * @param {string} title
+     * @param {string|undefined} url
+     * @param {string|undefined} description
+     * @returns {import('dictionary-importer').Summary}
+     */
+    _createEditedDictionarySummary(previousSummary, title, url, description) {
+        /** @type {import('dictionary-importer').Summary} */
+        const nextSummary = {
+            ...previousSummary,
+            title,
+        };
+        if (typeof url === 'string') {
+            nextSummary.url = url;
+        } else {
+            delete nextSummary.url;
+        }
+        if (typeof description === 'string') {
+            nextSummary.description = description;
+        } else {
+            delete nextSummary.description;
+        }
+
+        const previousMetadataOverrides = isObjectNotArray(previousSummary.metadataOverrides) ? previousSummary.metadataOverrides : null;
+        /** @type {import('dictionary-importer').SummaryMetadataOverrides} */
+        const metadataOverrides = {};
+        let hasMetadataOverrides = false;
+        if (title !== previousSummary.title || typeof previousMetadataOverrides?.title === 'string') {
+            metadataOverrides.title = title;
+            hasMetadataOverrides = true;
+        }
+        if (
+            url !== previousSummary.url ||
+            (previousMetadataOverrides !== null && Object.prototype.hasOwnProperty.call(previousMetadataOverrides, 'url'))
+        ) {
+            metadataOverrides.url = typeof url === 'string' ? url : null;
+            hasMetadataOverrides = true;
+        }
+        if (
+            description !== previousSummary.description ||
+            (previousMetadataOverrides !== null && Object.prototype.hasOwnProperty.call(previousMetadataOverrides, 'description'))
+        ) {
+            metadataOverrides.description = typeof description === 'string' ? description : null;
+            hasMetadataOverrides = true;
+        }
+        if (hasMetadataOverrides) {
+            nextSummary.metadataOverrides = metadataOverrides;
+        } else {
+            delete nextSummary.metadataOverrides;
+        }
+
+        return nextSummary;
+    }
+
+    /**
+     * @param {import('dictionary-importer').Summary} summary
+     * @param {import('dictionary-importer').Summary} previousSummary
+     * @returns {import('dictionary-importer').Summary}
+     */
+    _applyDictionaryMetadataOverrides(summary, previousSummary) {
+        const previousMetadataOverrides = isObjectNotArray(previousSummary.metadataOverrides) ? previousSummary.metadataOverrides : null;
+        if (previousMetadataOverrides === null) {
+            return summary;
+        }
+
+        /** @type {import('dictionary-importer').SummaryMetadataOverrides} */
+        const metadataOverrides = {};
+        let hasMetadataOverrides = false;
+        /** @type {import('dictionary-importer').Summary} */
+        const nextSummary = {
+            ...summary,
+        };
+
+        const titleOverride = typeof previousMetadataOverrides.title === 'string' ? previousMetadataOverrides.title.trim() : '';
+        if (titleOverride.length > 0) {
+            nextSummary.title = titleOverride;
+            metadataOverrides.title = titleOverride;
+            hasMetadataOverrides = true;
+        }
+        if (Object.prototype.hasOwnProperty.call(previousMetadataOverrides, 'url')) {
+            const urlOverride = typeof previousMetadataOverrides.url === 'string' ?
+                normalizeOptionalDictionaryMetadataText(previousMetadataOverrides.url) :
+                void 0;
+            if (typeof urlOverride === 'string') {
+                nextSummary.url = urlOverride;
+                metadataOverrides.url = urlOverride;
+            } else {
+                delete nextSummary.url;
+                metadataOverrides.url = null;
+            }
+            hasMetadataOverrides = true;
+        }
+        if (Object.prototype.hasOwnProperty.call(previousMetadataOverrides, 'description')) {
+            const descriptionOverride = typeof previousMetadataOverrides.description === 'string' ?
+                normalizeOptionalDictionaryMetadataText(previousMetadataOverrides.description) :
+                void 0;
+            if (typeof descriptionOverride === 'string') {
+                nextSummary.description = descriptionOverride;
+                metadataOverrides.description = descriptionOverride;
+            } else {
+                delete nextSummary.description;
+                metadataOverrides.description = null;
+            }
+            hasMetadataOverrides = true;
+        }
+
+        if (!hasMetadataOverrides) {
+            return summary;
+        }
+        nextSummary.metadataOverrides = metadataOverrides;
+        return nextSummary;
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {string} title
+     * @param {string} url
+     * @param {string} description
+     * @returns {Promise<import('dictionary-importer').Summary>}
+     */
+    async _updateDictionaryMetadata(dictionaryTitle, title, url, description) {
+        const normalizedTitle = title.trim();
+        if (normalizedTitle.length === 0) {
+            throw new Error('Dictionary name cannot be empty');
+        }
+
+        /** @type {import('dictionary-importer').Summary|null} */
+        let updatedSummary = null;
+        await this._runWithDictionaryMutationLock(async () => {
+            await this._ensureDictionaryDatabaseReady({allowDuringMutation: true});
+            const dictionaries = await this._dictionaryDatabase.getDictionaryInfo();
+            const previousSummary = dictionaries.find((dictionary) => dictionary.title === dictionaryTitle);
+            if (typeof previousSummary === 'undefined') {
+                throw new Error(`Dictionary not found: ${dictionaryTitle}`);
+            }
+
+            if (
+                normalizedTitle !== previousSummary.title &&
+                dictionaries.some((dictionary) => dictionary.title === normalizedTitle)
+            ) {
+                throw new Error(`Dictionary already exists: ${normalizedTitle}`);
+            }
+
+            const normalizedUrl = normalizeOptionalDictionaryMetadataText(url);
+            const normalizedDescription = normalizeOptionalDictionaryMetadataText(description);
+            const nextSummary = this._createEditedDictionarySummary(previousSummary, normalizedTitle, normalizedUrl, normalizedDescription);
+            const titleChanged = nextSummary.title !== previousSummary.title;
+            const updateContext = titleChanged ? this._captureDictionaryUpdateSettings(previousSummary.title) : null;
+            const previousOptions = titleChanged && this._options !== null ? clone(this._options) : null;
+
+            let databaseUpdated = false;
+            try {
+                await this._dictionaryDatabase.updateDictionaryMetadata(previousSummary.title, nextSummary);
+                databaseUpdated = true;
+                if (updateContext !== null) {
+                    await this._applyImportedDictionarySettings(previousSummary, nextSummary, updateContext);
+                }
+            } catch (e) {
+                const error = toError(e);
+                let databaseRolledBack = !databaseUpdated;
+                if (databaseUpdated) {
+                    try {
+                        await this._dictionaryDatabase.updateDictionaryMetadata(nextSummary.title, previousSummary);
+                        databaseRolledBack = true;
+                    } catch (rollbackError) {
+                        appendErrorMessage(error, `failed to rollback dictionary metadata update: ${toError(rollbackError).message}`);
+                    }
+                }
+                if (databaseRolledBack && previousOptions !== null) {
+                    try {
+                        this._applyOptionsSnapshot(previousOptions, 'background');
+                    } catch (restoreError) {
+                        appendErrorMessage(error, `failed to restore in-memory options after metadata update error: ${toError(restoreError).message}`);
+                    }
+                    try {
+                        await this._optionsUtil.save(previousOptions);
+                    } catch (restoreError) {
+                        appendErrorMessage(error, `failed to restore persisted options after metadata update error: ${toError(restoreError).message}`);
+                    }
+                }
+                throw error;
+            }
+            updatedSummary = nextSummary;
+        });
+        await this._handleDatabaseUpdated('dictionary', 'edit');
+        if (updatedSummary === null) {
+            throw new Error('Dictionary metadata update did not complete');
+        }
+        return updatedSummary;
     }
 
     /**
@@ -4225,9 +4710,18 @@ export class Backend {
      * @param {string} source
      */
     async _saveOptions(source) {
-        this._clearProfileConditionsSchemaCache();
         const options = this._getOptionsFull(false);
         await this._optionsUtil.save(options);
+        this._applyOptionsSnapshot(options, source);
+    }
+
+    /**
+     * @param {import('settings').Options} options
+     * @param {string} source
+     */
+    _applyOptionsSnapshot(options, source) {
+        this._clearProfileConditionsSchemaCache();
+        this._options = options;
         this._applyOptions(source);
     }
 

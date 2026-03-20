@@ -32,13 +32,11 @@ describe('Backend._onApiParseText', () => {
                     {name: 'unidic-csj-202302', lines: [parsedLine]},
                 ]),
             },
-            // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/unbound-method
             _textParseMecab: Backend.prototype._textParseMecab,
             _textParseScanning: async () => {
                 throw new Error('Unexpected call to _textParseScanning');
             },
         };
-        // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/unbound-method
         const onApiParseText = Backend.prototype._onApiParseText;
 
         const results = await onApiParseText.call(context, {

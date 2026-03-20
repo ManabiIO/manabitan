@@ -298,6 +298,15 @@ type ApiSurface = {
         };
         return: void;
     };
+    updateDictionaryMetadata: {
+        params: {
+            dictionaryTitle: string;
+            title: string;
+            url: string;
+            description: string;
+        };
+        return: DictionaryImporter.Summary;
+    };
     getDictionaryCounts: {
         params: {
             dictionaryNames: string[];

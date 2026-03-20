@@ -160,6 +160,14 @@ class OffscreenDictionaryWorkerHandler {
                 await this._ensureDatabasePrepared();
                 await this._dictionaryDatabase.deleteDictionary(/** @type {string} */ (params.dictionaryTitle ?? ''), 1000, () => {});
                 return;
+            case 'updateDictionaryMetadataOffscreen':
+                this._assertDatabaseAvailable(action);
+                await this._ensureDatabasePrepared();
+                await this._dictionaryDatabase.updateDictionaryMetadata(
+                    /** @type {string} */ (params.dictionaryTitle ?? ''),
+                    /** @type {import('dictionary-importer').Summary} */ (params.summary ?? {}),
+                );
+                return;
             case 'getDictionaryCountsOffscreen':
                 this._assertDatabaseAvailable(action);
                 await this._ensureDatabasePrepared();
