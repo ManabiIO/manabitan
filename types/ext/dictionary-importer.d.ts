@@ -65,6 +65,14 @@ export type ImportDetails = {
     termContentStorageMode?: 'baseline' | 'raw-bytes';
 };
 
+export type DictionaryAutoUpdateSchedule = 'manual' | 'hourly' | 'daily' | 'weekly';
+
+export type DictionaryAutoUpdateInfo = {
+    schedule: DictionaryAutoUpdateSchedule;
+    lastUpdatedAt: number | null;
+    nextUpdateAt: number | null;
+};
+
 export type Summary = {
     title: string;
     revision: string;
@@ -86,6 +94,7 @@ export type Summary = {
     targetLanguage?: string;
     frequencyMode?: 'occurrence-based' | 'rank-based';
     importSuccess?: boolean;
+    autoUpdate?: DictionaryAutoUpdateInfo;
     metadataOverrides?: SummaryMetadataOverrides;
 };
 

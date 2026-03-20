@@ -8,6 +8,11 @@
     "importDate": 0,
     "importSuccess": true,
     "prefixWildcardsSupported": true,
+    "autoUpdate": {
+      "schedule": "manual",
+      "lastUpdatedAt": 0,
+      "nextUpdateAt": null
+    },
     "counts": {
       "kanji": {
         "total": 2

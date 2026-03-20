@@ -42,6 +42,7 @@ import {
 } from './zstd-term-content.js';
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
 import {compareRevisions} from './dictionary-data-util.js';
+import {createDictionaryAutoUpdate} from './dictionary-auto-update-util.js';
 import {createMdxImportData} from './mdx/mdx-converter.js';
 import {consumeLastTermBankWasmParseProfile, parseTermBankWithWasmChunks} from './term-bank-wasm-parser.js';
 
@@ -1505,17 +1506,19 @@ export class DictionaryImporter {
             styles,
             importSuccess,
         } = details;
+        const importDate = Date.now();
         /** @type {import('dictionary-importer').Summary} */
         const summary = {
             title: dictionaryTitle,
             revision: index.revision,
             sequenced: typeof indexSequenced === 'boolean' && indexSequenced,
             version,
-            importDate: Date.now(),
+            importDate,
             prefixWildcardsSupported,
             counts,
             styles,
             importSuccess,
+            autoUpdate: createDictionaryAutoUpdate('manual', importDate),
         };
 
         const {minimumYomitanVersion, author, url, description, attribution, frequencyMode, isUpdatable, sourceLanguage, targetLanguage} = index;

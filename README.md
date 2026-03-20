@@ -38,6 +38,7 @@
 - No scan length. Before you had to say "only scan 10 characters", now you don't have to do that. We will show you the longest possible word in the dict (plus a few more characters for grammar etc)
 
 We have benchmarks for these 3 things:
+
 1. Importing dictionaries
 2. Looking up words
 3. Adding to Anki

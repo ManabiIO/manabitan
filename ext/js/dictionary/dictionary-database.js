@@ -50,6 +50,7 @@ import {
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
 import {TermContentOpfsStore} from './term-content-opfs-store.js';
 import {TermRecordOpfsStore} from './term-record-opfs-store.js';
+import {normalizeDictionarySummary} from './dictionary-auto-update-util.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 4;
 const TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES = 4096;
@@ -1930,7 +1931,31 @@ export class DictionaryDatabase {
     async getDictionaryInfo() {
         const db = this._requireDb();
         const rows = db.selectObjects('SELECT summaryJson FROM dictionaries ORDER BY id ASC');
-        return rows.map((row) => /** @type {import('dictionary-importer').Summary} */ (this._safeParseJson(this._asString(row.summaryJson), {})));
+        return rows.map((row) => normalizeDictionarySummary(/** @type {import('dictionary-importer').Summary} */ (this._safeParseJson(this._asString(row.summaryJson), {}))));
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {import('dictionary-importer').Summary} summary
+     * @returns {Promise<import('dictionary-importer').Summary|null>}
+     */
+    async updateDictionarySummaryByTitle(dictionaryTitle, summary) {
+        const db = this._requireDb();
+        const row = db.selectObject('SELECT id FROM dictionaries WHERE title = $title ORDER BY id ASC LIMIT 1', {$title: dictionaryTitle});
+        if (typeof row !== 'object' || typeof row?.id === 'undefined') {
+            return null;
+        }
+        const normalizedSummary = normalizeDictionarySummary(summary);
+        const stmt = this._getCachedStatement('UPDATE dictionaries SET title = $title, version = $version, summaryJson = $summaryJson WHERE id = $id');
+        stmt.reset(true);
+        stmt.bind({
+            $id: this._asNumber(row.id, -1),
+            $title: normalizedSummary.title,
+            $version: normalizedSummary.version,
+            $summaryJson: JSON.stringify(normalizedSummary),
+        });
+        stmt.step();
+        return normalizedSummary;
     }
 
     /**

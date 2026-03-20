@@ -39,6 +39,12 @@ import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-uti
 import {JsonSchema} from '../data/json-schema.js';
 import {OptionsUtil} from '../data/options-util.js';
 import {getAllPermissions, hasPermissions, hasRequiredPermissionsForOptions} from '../data/permissions-util.js';
+import {
+    getNextDictionaryAutoUpdateTime,
+    isDictionaryAutoUpdateSchedule,
+    normalizeDictionarySummary,
+    setDictionarySummaryAutoUpdate,
+} from '../dictionary/dictionary-auto-update-util.js';
 import {compareRevisions} from '../dictionary/dictionary-data-util.js';
 import {DictionaryDatabase} from '../dictionary/dictionary-database.js';
 import {DictionaryWorker} from '../dictionary/dictionary-worker.js';
@@ -58,7 +64,6 @@ import {injectStylesheet} from './script-manager.js';
 const STARTUP_DIAGNOSTICS_STORAGE_KEY = 'manabitanStartupDiagnostics';
 const DICTIONARY_AUTO_UPDATE_STATE_STORAGE_KEY = 'manabitanDictionaryAutoUpdateState';
 const DICTIONARY_AUTO_UPDATE_ALARM_NAME = 'manabitanDictionaryAutoUpdateHourly';
-const DICTIONARY_AUTO_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 const SCAN_LENGTH_INFLECTION_BUFFER = 8;
 
 /**
@@ -91,6 +96,47 @@ function canAppendUngroupedParserCharacter(previousText, character) {
     const previousKanaScript = getKanaScriptType(previousCharacter);
     const currentKanaScript = getKanaScriptType(character);
     return previousKanaScript === null || currentKanaScript === null || previousKanaScript === currentKanaScript;
+}
+
+/**
+ * @param {string[]} values1
+ * @param {string[]} values2
+ * @returns {boolean}
+ */
+function areSortedStringArraysEqual(values1, values2) {
+    if (values1.length !== values2.length) {
+        return false;
+    }
+    for (let i = 0; i < values1.length; ++i) {
+        if (values1[i] !== values2[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * @param {import('dictionary-importer').Summary} summary1
+ * @param {import('dictionary-importer').Summary} summary2
+ * @returns {boolean}
+ */
+function hasDictionaryAutoUpdateMetadataChanged(summary1, summary2) {
+    const rawAutoUpdate1 = (
+        typeof summary1.autoUpdate === 'object' &&
+        summary1.autoUpdate !== null &&
+        !Array.isArray(summary1.autoUpdate)
+    ) ?
+        /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (summary1.autoUpdate) :
+        null;
+    if (rawAutoUpdate1 === null) {
+        return true;
+    }
+    const autoUpdate2 = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (normalizeDictionarySummary(summary2).autoUpdate);
+    return (
+        rawAutoUpdate1.schedule !== autoUpdate2.schedule ||
+        rawAutoUpdate1.lastUpdatedAt !== autoUpdate2.lastUpdatedAt ||
+        rawAutoUpdate1.nextUpdateAt !== autoUpdate2.nextUpdateAt
+    );
 }
 
 /**
@@ -242,6 +288,7 @@ export class Backend {
             ['getDictionaryCounts',          this._onApiGetDictionaryCounts.bind(this)],
             ['checkDictionaryUpdates',       this._onApiCheckDictionaryUpdates.bind(this)],
             ['updateDictionaryByTitle',      this._onApiUpdateDictionaryByTitle.bind(this)],
+            ['setDictionaryUpdateSchedule',  this._onApiSetDictionaryUpdateSchedule.bind(this)],
             ['setDictionaryImportMode',      this._onApiSetDictionaryImportMode.bind(this)],
             ['purgeDatabase',                this._onApiPurgeDatabase.bind(this)],
             ['exportDictionaryDatabase',     this._onApiExportDictionaryDatabase.bind(this)],
@@ -514,6 +561,9 @@ export class Backend {
 
             await measureAsyncPhase('ensureDictionaryAutoUpdateAlarm', async () => {
                 await this._ensureDictionaryAutoUpdateAlarm();
+            });
+            await measureAsyncPhase('backfillDictionaryAutoUpdateSummarySchedules', async () => {
+                await this._backfillDictionaryAutoUpdateSummarySchedules();
             });
             void this._runDictionaryAutoUpdatePass('prepare');
 
@@ -1556,6 +1606,11 @@ export class Backend {
         return await this._updateDictionaryByTitle(dictionaryTitle, true);
     }
 
+    /** @type {import('api').ApiHandler<'setDictionaryUpdateSchedule'>} */
+    async _onApiSetDictionaryUpdateSchedule({dictionaryTitle, schedule}) {
+        return await this._setDictionaryUpdateSchedule(dictionaryTitle, schedule);
+    }
+
     /** @type {import('api').ApiHandler<'setDictionaryImportMode'>} */
     async _onApiSetDictionaryImportMode({active}) {
         await this._setDictionaryImportMode(active);
@@ -1624,9 +1679,11 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'setAllSettings'>} */
     async _onApiSetAllSettings({value, source}) {
+        const previousDictionaryAutoUpdates = this._getSortedDictionaryAutoUpdateIndexUrls();
         this._optionsUtil.validate(value);
         this._options = clone(value);
         await this._saveOptions(source);
+        await this._syncDictionaryAutoUpdateSummariesAfterOptionsChange(previousDictionaryAutoUpdates);
     }
 
     /** @type {import('api').ApiHandlerNoExtraArgs<'getOrCreateSearchPopup'>} */
@@ -1937,6 +1994,7 @@ export class Backend {
      * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
      */
     async _modifySettings(targets, source) {
+        const previousDictionaryAutoUpdates = this._getSortedDictionaryAutoUpdateIndexUrls();
         /** @type {import('core').Response<import('settings-modifications').ModificationResult>[]} */
         const results = [];
         for (const target of targets) {
@@ -1948,7 +2006,31 @@ export class Backend {
             }
         }
         await this._saveOptions(source);
+        await this._syncDictionaryAutoUpdateSummariesAfterOptionsChange(previousDictionaryAutoUpdates);
         return results;
+    }
+
+    /**
+     * @returns {string[]}
+     */
+    _getSortedDictionaryAutoUpdateIndexUrls() {
+        const options = this._options;
+        if (options === null) {
+            return [];
+        }
+        return [...new Set(options.global.dictionaryAutoUpdates)].sort((a, b) => a.localeCompare(b));
+    }
+
+    /**
+     * @param {string[]} previousDictionaryAutoUpdates
+     * @returns {Promise<void>}
+     */
+    async _syncDictionaryAutoUpdateSummariesAfterOptionsChange(previousDictionaryAutoUpdates) {
+        const nextDictionaryAutoUpdates = this._getSortedDictionaryAutoUpdateIndexUrls();
+        if (areSortedStringArraysEqual(previousDictionaryAutoUpdates, nextDictionaryAutoUpdates)) {
+            return;
+        }
+        await this._syncDictionaryAutoUpdateSummarySchedulesWithGlobalSettings();
     }
 
     /**
@@ -3608,34 +3690,31 @@ export class Backend {
             if (options === null) {
                 return;
             }
-            const enabledIndexUrls = new Set(options.global.dictionaryAutoUpdates);
-            if (enabledIndexUrls.size === 0) {
+            await this._ensureDictionaryDatabaseReady();
+            const dictionaries = (await this._dictionaryDatabase.getDictionaryInfo()).map((dictionary) => normalizeDictionarySummary(dictionary));
+            const now = Date.now();
+            const scheduledDictionaries = dictionaries.filter((dictionary) => {
+                const autoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (dictionary.autoUpdate);
+                return (
+                    dictionary.isUpdatable === true &&
+                    autoUpdate.schedule !== 'manual' &&
+                    typeof autoUpdate.nextUpdateAt === 'number'
+                );
+            });
+            if (scheduledDictionaries.length === 0) {
                 return;
             }
 
-            await this._ensureDictionaryDatabaseReady();
-            const dictionaries = await this._dictionaryDatabase.getDictionaryInfo();
-            const state = await this._getDictionaryAutoUpdateState();
-            const now = Date.now();
-            const dueDictionaries = dictionaries
+            const dueDictionaries = scheduledDictionaries
                 .filter((dictionary) => {
-                    const indexUrl = dictionary.indexUrl;
-                    if (
-                        dictionary.isUpdatable !== true ||
-                        typeof indexUrl !== 'string' ||
-                        indexUrl.length === 0 ||
-                        !enabledIndexUrls.has(indexUrl)
-                    ) {
-                        return false;
-                    }
-                    const lastAttemptAt = state[indexUrl]?.lastAttemptAt ?? 0;
-                    return (now - lastAttemptAt) >= DICTIONARY_AUTO_UPDATE_INTERVAL_MS;
+                    const autoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (dictionary.autoUpdate);
+                    return (typeof autoUpdate.nextUpdateAt === 'number' && autoUpdate.nextUpdateAt <= now);
                 })
                 .sort((a, b) => a.title.localeCompare(b.title));
 
             reportDiagnostics('dictionary-auto-update-pass-begin', {
                 reason,
-                enabledCount: enabledIndexUrls.size,
+                enabledCount: scheduledDictionaries.length,
                 dueCount: dueDictionaries.length,
             });
 
@@ -3644,7 +3723,11 @@ export class Backend {
                     break;
                 }
                 const [checkResult] = await this._checkDictionaryUpdates([dictionary.title]);
-                if (typeof checkResult === 'undefined' || !checkResult.hasUpdate) {
+                if (typeof checkResult === 'undefined' || checkResult.error !== null) {
+                    continue;
+                }
+                if (!checkResult.hasUpdate) {
+                    await this._advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck(dictionary.title, Date.now());
                     continue;
                 }
                 await this._updateDictionaryByTitle(dictionary.title, false, checkResult);
@@ -3855,8 +3938,8 @@ export class Backend {
                 return /** @type {import('backend').DictionaryUpdateResult} */ ({dictionaryTitle, status: 'skipped', latestRevision: checkResult.latestRevision, error: null});
             }
             if (!waitForLock) {
-                const enabledIndexUrls = new Set(this._options?.global.dictionaryAutoUpdates ?? []);
-                if (!enabledIndexUrls.has(latestDictionary.indexUrl)) {
+                const latestAutoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (normalizeDictionarySummary(latestDictionary).autoUpdate);
+                if (latestAutoUpdate.schedule === 'manual') {
                     return /** @type {import('backend').DictionaryUpdateResult} */ ({dictionaryTitle, status: 'skipped', latestRevision: checkResult.latestRevision, error: null});
                 }
             }
@@ -3898,12 +3981,15 @@ export class Backend {
                 throw new Error(message);
             }
             const importedSummary = this._applyDictionaryMetadataOverrides(rawImportedSummary, dictionary);
-            if (importedSummary !== rawImportedSummary) {
-                await this._dictionaryDatabase.updateDictionaryMetadata(rawImportedSummary.title, importedSummary);
-            }
+            const nextSummary = this._createUpdatedDictionarySummaryAfterImport(dictionary, importedSummary);
+            const persistedSummary = (
+                importedSummary !== rawImportedSummary ?
+                    (await this._dictionaryDatabase.updateDictionaryMetadata(rawImportedSummary.title, nextSummary), nextSummary) :
+                    await this._setDictionarySummaryByTitle(rawImportedSummary.title, nextSummary)
+            );
 
-            await this._applyImportedDictionarySettings(dictionary, importedSummary, updateContext);
-            await this._updateDictionaryAutoUpdateStateAfterSuccess(dictionary, importedSummary);
+            await this._applyImportedDictionarySettings(dictionary, persistedSummary, updateContext);
+            await this._updateDictionaryAutoUpdateStateAfterSuccess(dictionary, persistedSummary);
             updateSucceeded = true;
         } catch (e) {
             const error = e instanceof Error ? e : new Error(String(e));
@@ -4151,6 +4237,109 @@ export class Backend {
 
     /**
      * @param {string} dictionaryTitle
+     * @param {import('dictionary-importer').Summary} summary
+     * @returns {Promise<import('dictionary-importer').Summary>}
+     */
+    async _setDictionarySummaryByTitle(dictionaryTitle, summary) {
+        const persistedSummary = await this._dictionaryDatabase.updateDictionarySummaryByTitle(dictionaryTitle, summary);
+        if (persistedSummary === null) {
+            throw new Error(`Dictionary not found: ${dictionaryTitle}`);
+        }
+        return persistedSummary;
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {number} referenceTimestamp
+     * @returns {Promise<import('dictionary-importer').Summary|null>}
+     */
+    async _advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck(dictionaryTitle, referenceTimestamp) {
+        const result = await this._runWithDictionaryMutationLock(async () => {
+            await this._ensureDictionaryDatabaseReady({allowDuringMutation: true});
+            const dictionaries = await this._dictionaryDatabase.getDictionaryInfo();
+            const dictionary = dictionaries.find((item) => item.title === dictionaryTitle);
+            if (typeof dictionary === 'undefined') {
+                return null;
+            }
+
+            const normalizedDictionary = normalizeDictionarySummary(dictionary);
+            const normalizedAutoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (normalizedDictionary.autoUpdate);
+            if (normalizedDictionary.isUpdatable !== true || normalizedAutoUpdate.schedule === 'manual') {
+                return normalizedDictionary;
+            }
+
+            const nextSummary = setDictionarySummaryAutoUpdate(normalizedDictionary, {
+                nextUpdateAt: getNextDictionaryAutoUpdateTime(normalizedAutoUpdate.schedule, referenceTimestamp),
+            });
+            return (
+                hasDictionaryAutoUpdateMetadataChanged(normalizedDictionary, nextSummary) ?
+                    await this._setDictionarySummaryByTitle(dictionaryTitle, nextSummary) :
+                    normalizedDictionary
+            );
+        });
+        return (typeof result === 'undefined' ? null : result);
+    }
+
+    /**
+     * @param {import('dictionary-importer').Summary} previousSummary
+     * @param {import('dictionary-importer').Summary} importedSummary
+     * @returns {import('dictionary-importer').Summary}
+     */
+    _createUpdatedDictionarySummaryAfterImport(previousSummary, importedSummary) {
+        const normalizedPreviousSummary = normalizeDictionarySummary(previousSummary);
+        const normalizedImportedSummary = normalizeDictionarySummary(importedSummary);
+        const previousAutoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (normalizedPreviousSummary.autoUpdate);
+        const nextSchedule = (
+            normalizedImportedSummary.isUpdatable === true
+        ) ?
+            previousAutoUpdate.schedule :
+            'manual';
+        return setDictionarySummaryAutoUpdate(normalizedImportedSummary, {
+            schedule: nextSchedule,
+            lastUpdatedAt: normalizedImportedSummary.importDate,
+        });
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {import('dictionary-importer').DictionaryAutoUpdateSchedule} schedule
+     * @returns {Promise<import('dictionary-importer').Summary>}
+     */
+    async _setDictionaryUpdateSchedule(dictionaryTitle, schedule) {
+        if (!isDictionaryAutoUpdateSchedule(schedule)) {
+            throw new Error(`Invalid dictionary auto-update schedule: ${String(schedule)}`);
+        }
+
+        const result = await this._runWithDictionaryMutationLock(async () => {
+            await this._ensureDictionaryDatabaseReady({allowDuringMutation: true});
+            const dictionaries = await this._dictionaryDatabase.getDictionaryInfo();
+            const dictionary = dictionaries.find((item) => item.title === dictionaryTitle);
+            if (typeof dictionary === 'undefined') {
+                throw new Error(`Dictionary not found: ${dictionaryTitle}`);
+            }
+
+            const normalizedDictionary = normalizeDictionarySummary(dictionary);
+            if (schedule !== 'manual' && normalizedDictionary.isUpdatable !== true) {
+                throw new Error(`Dictionary is not updatable: ${dictionaryTitle}`);
+            }
+
+            const nextSummary = setDictionarySummaryAutoUpdate(normalizedDictionary, {schedule});
+            const persistedSummary = (
+                hasDictionaryAutoUpdateMetadataChanged(normalizedDictionary, nextSummary) ?
+                    await this._setDictionarySummaryByTitle(dictionaryTitle, nextSummary) :
+                    normalizedDictionary
+            );
+            await this._syncGlobalDictionaryAutoUpdateOptionsFromSummaries({allowDuringMutation: true});
+            return persistedSummary;
+        });
+        if (typeof result === 'undefined') {
+            throw new Error(`Failed to update dictionary schedule: ${dictionaryTitle}`);
+        }
+        return result;
+    }
+
+    /**
+     * @param {string} dictionaryTitle
      * @returns {{
      *   profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings,
      *   mainDictionaryProfileIds: Set<string>,
@@ -4251,17 +4440,8 @@ export class Backend {
             }
         }
 
-        const oldIndexUrl = previousSummary.indexUrl;
-        const newIndexUrl = importedSummary.indexUrl;
-        if (typeof oldIndexUrl === 'string') {
-            const enabledIndexUrls = new Set(options.global.dictionaryAutoUpdates);
-            if (enabledIndexUrls.delete(oldIndexUrl) && typeof newIndexUrl === 'string' && importedSummary.isUpdatable === true) {
-                enabledIndexUrls.add(newIndexUrl);
-            }
-            options.global.dictionaryAutoUpdates = [...enabledIndexUrls].sort((a, b) => a.localeCompare(b));
-        }
-
         await this._saveOptions('background');
+        await this._syncGlobalDictionaryAutoUpdateOptionsFromSummaries({allowDuringMutation: true});
     }
 
     /**
@@ -4281,6 +4461,104 @@ export class Backend {
             useDeinflections: true,
             styles: styles ?? '',
         };
+    }
+
+    /**
+     * @param {{allowDuringMutation?: boolean}} [root0]
+     * @returns {Promise<void>}
+     */
+    async _syncGlobalDictionaryAutoUpdateOptionsFromSummaries({allowDuringMutation = false} = {}) {
+        const options = this._options;
+        if (options === null) {
+            return;
+        }
+        await this._ensureDictionaryDatabaseReady({allowDuringMutation});
+        const dictionaries = await this._dictionaryDatabase.getDictionaryInfo();
+        const nextIndexUrls = [...new Set(
+            dictionaries
+                .filter((dictionary) => dictionary.isUpdatable === true && typeof dictionary.indexUrl === 'string')
+                .filter((dictionary) => (
+                    /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (
+                        normalizeDictionarySummary(dictionary).autoUpdate
+                    )
+                ).schedule === 'hourly')
+                .map((dictionary) => /** @type {string} */ (dictionary.indexUrl)),
+        )].sort((a, b) => a.localeCompare(b));
+        if (areSortedStringArraysEqual(this._getSortedDictionaryAutoUpdateIndexUrls(), nextIndexUrls)) {
+            return;
+        }
+        options.global.dictionaryAutoUpdates = nextIndexUrls;
+        await this._saveOptions('background');
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _backfillDictionaryAutoUpdateSummarySchedules() {
+        const options = this._options;
+        if (options === null || options.global.dictionaryAutoUpdates.length === 0) {
+            return;
+        }
+        await this._runWithDictionaryMutationLock(async () => {
+            await this._ensureDictionaryDatabaseReady({allowDuringMutation: true});
+            const enabledIndexUrls = new Set(options.global.dictionaryAutoUpdates);
+            const dictionaries = await this._dictionaryDatabase.getDictionaryInfo();
+            for (const dictionary of dictionaries) {
+                const normalizedDictionary = normalizeDictionarySummary(dictionary);
+                const indexUrl = normalizedDictionary.indexUrl;
+                if (
+                    normalizedDictionary.isUpdatable !== true ||
+                    typeof indexUrl !== 'string' ||
+                    !enabledIndexUrls.has(indexUrl)
+                ) {
+                    continue;
+                }
+                const nextSummary = setDictionarySummaryAutoUpdate(normalizedDictionary, {schedule: 'hourly'});
+                if (!hasDictionaryAutoUpdateMetadataChanged(normalizedDictionary, nextSummary)) {
+                    continue;
+                }
+                await this._setDictionarySummaryByTitle(normalizedDictionary.title, nextSummary);
+            }
+        });
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _syncDictionaryAutoUpdateSummarySchedulesWithGlobalSettings() {
+        const options = this._options;
+        if (options === null) {
+            return;
+        }
+        await this._runWithDictionaryMutationLock(async () => {
+            await this._ensureDictionaryDatabaseReady({allowDuringMutation: true});
+            const enabledIndexUrls = new Set(options.global.dictionaryAutoUpdates);
+            const dictionaries = await this._dictionaryDatabase.getDictionaryInfo();
+            for (const dictionary of dictionaries) {
+                const normalizedDictionary = normalizeDictionarySummary(dictionary);
+                const normalizedAutoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (normalizedDictionary.autoUpdate);
+                const indexUrl = normalizedDictionary.indexUrl;
+                if (typeof indexUrl !== 'string' || indexUrl.length === 0) {
+                    continue;
+                }
+                /** @type {import('dictionary-importer').DictionaryAutoUpdateSchedule} */
+                let nextSchedule;
+                if (enabledIndexUrls.has(indexUrl)) {
+                    nextSchedule = 'hourly';
+                } else if (normalizedAutoUpdate.schedule === 'hourly') {
+                    nextSchedule = 'manual';
+                } else {
+                    nextSchedule = normalizedAutoUpdate.schedule;
+                }
+                const nextSummary = setDictionarySummaryAutoUpdate(normalizedDictionary, {
+                    schedule: nextSchedule,
+                });
+                if (!hasDictionaryAutoUpdateMetadataChanged(normalizedDictionary, nextSummary)) {
+                    continue;
+                }
+                await this._setDictionarySummaryByTitle(normalizedDictionary.title, nextSummary);
+            }
+        });
     }
 
     /**

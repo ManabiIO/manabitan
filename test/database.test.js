@@ -1394,6 +1394,9 @@ describe('Database', () => {
 
             if (importDictionaryResult) {
                 importDictionaryResult.importDate = fakeImportDate;
+                if (typeof importDictionaryResult.autoUpdate === 'object' && importDictionaryResult.autoUpdate !== null) {
+                    importDictionaryResult.autoUpdate.lastUpdatedAt = fakeImportDate;
+                }
             }
 
             expect.soft(importDictionaryErrors).toStrictEqual([]);
@@ -1402,7 +1405,12 @@ describe('Database', () => {
 
             // Get info summary
             const info = await dictionaryDatabase.getDictionaryInfo();
-            for (const item of info) { item.importDate = fakeImportDate; }
+            for (const item of info) {
+                item.importDate = fakeImportDate;
+                if (typeof item.autoUpdate === 'object' && item.autoUpdate !== null) {
+                    item.autoUpdate.lastUpdatedAt = fakeImportDate;
+                }
+            }
             expect.soft(info).toStrictEqual([testData.expectedSummary]);
 
             // Get counts
@@ -1493,6 +1501,68 @@ describe('Database', () => {
             }
 
             // Close
+            await dictionaryDatabase.close();
+        });
+
+        test('Normalizes legacy dictionary auto-update metadata on read and can persist metadata updates by title', async ({expect}) => {
+            const testDictionarySource = await createTestDictionaryArchiveData('valid-dictionary1');
+            const testDictionaryIndex = await getDictionaryArchiveIndex(testDictionarySource);
+            const dictionaryImporter = createDictionaryImporter(expect);
+            const dictionaryDatabase = new DictionaryDatabase();
+            await dictionaryDatabase.prepare();
+            await dictionaryImporter.importDictionary(
+                dictionaryDatabase,
+                testDictionarySource,
+                {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
+            );
+
+            const db = dictionaryDatabase._requireDb();
+            const summaryRow = db.selectObject('SELECT summaryJson FROM dictionaries WHERE title = $title LIMIT 1', {$title: testDictionaryIndex.title});
+            expect.soft(typeof summaryRow).toBe('object');
+            if (typeof summaryRow === 'undefined') {
+                throw new Error('Imported dictionary summary row missing');
+            }
+            if (typeof summaryRow.summaryJson !== 'string') {
+                throw new Error('Imported dictionary summaryJson missing');
+            }
+            const summary = /** @type {import('dictionary-importer').Summary} */ (parseJson(summaryRow.summaryJson));
+            delete summary.autoUpdate;
+            db.exec({
+                sql: 'UPDATE dictionaries SET summaryJson = $summaryJson WHERE title = $title',
+                bind: {
+                    $summaryJson: JSON.stringify(summary),
+                    $title: testDictionaryIndex.title,
+                },
+            });
+
+            const [legacyInfo] = await dictionaryDatabase.getDictionaryInfo();
+            expect.soft(legacyInfo?.autoUpdate).toStrictEqual({
+                schedule: 'manual',
+                lastUpdatedAt: legacyInfo?.importDate ?? null,
+                nextUpdateAt: null,
+            });
+
+            const updatedSummary = await dictionaryDatabase.updateDictionarySummaryByTitle(testDictionaryIndex.title, {
+                ...legacyInfo,
+                autoUpdate: {
+                    schedule: 'manual',
+                    lastUpdatedAt: 1234,
+                    nextUpdateAt: null,
+                },
+            });
+            expect.soft(updatedSummary?.autoUpdate).toStrictEqual({
+                schedule: 'manual',
+                lastUpdatedAt: 1234,
+                nextUpdateAt: null,
+            });
+
+            const [persistedInfo] = await dictionaryDatabase.getDictionaryInfo();
+            expect.soft(persistedInfo?.autoUpdate).toStrictEqual({
+                schedule: 'manual',
+                lastUpdatedAt: 1234,
+                nextUpdateAt: null,
+            });
+
             await dictionaryDatabase.close();
         });
 

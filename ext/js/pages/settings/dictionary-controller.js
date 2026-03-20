@@ -21,6 +21,62 @@ import {log} from '../../core/log.js';
 import {deferPromise} from '../../core/utilities.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
+const DICTIONARY_AUTO_UPDATE_SCHEDULE_SET = new Set(['manual', 'hourly', 'daily', 'weekly']);
+const DICTIONARY_AUTO_UPDATE_SCHEDULE_LABELS = Object.freeze({
+    manual: 'Manual',
+    hourly: 'Hourly',
+    daily: 'Daily',
+    weekly: 'Weekly',
+});
+const DICTIONARY_AUTO_UPDATE_SCHEDULE_DESCRIPTIONS = Object.freeze({
+    manual: 'Updates must be started manually.',
+    hourly: 'Checks for updates every hour and installs them automatically.',
+    daily: 'Checks for updates every day and installs them automatically.',
+    weekly: 'Checks for updates every week and installs them automatically.',
+});
+const DICTIONARY_AUTO_UPDATE_DATE_TIME_FORMATTER = new Intl.DateTimeFormat([], {dateStyle: 'medium', timeStyle: 'short'});
+
+/**
+ * @param {string} value
+ * @returns {value is import('dictionary-importer').DictionaryAutoUpdateSchedule}
+ */
+function isDictionaryAutoUpdateSchedule(value) {
+    return DICTIONARY_AUTO_UPDATE_SCHEDULE_SET.has(value);
+}
+
+/**
+ * @param {string} [schedule='']
+ * @returns {import('dictionary-importer').DictionaryAutoUpdateSchedule}
+ */
+function normalizeDictionaryAutoUpdateSchedule(schedule = '') {
+    return isDictionaryAutoUpdateSchedule(schedule) ? schedule : 'manual';
+}
+
+/**
+ * @param {import('dictionary-importer').DictionaryAutoUpdateSchedule} schedule
+ * @returns {string}
+ */
+function getDictionaryAutoUpdateScheduleLabel(schedule) {
+    return DICTIONARY_AUTO_UPDATE_SCHEDULE_LABELS[schedule];
+}
+
+/**
+ * @param {import('dictionary-importer').DictionaryAutoUpdateSchedule} schedule
+ * @returns {string}
+ */
+function getDictionaryAutoUpdateScheduleDescription(schedule) {
+    return DICTIONARY_AUTO_UPDATE_SCHEDULE_DESCRIPTIONS[schedule];
+}
+
+/**
+ * @param {number|undefined|null} timestamp
+ * @param {string} fallback
+ * @returns {string}
+ */
+function formatDictionaryAutoUpdateTimestamp(timestamp, fallback) {
+    return (typeof timestamp === 'number' && Number.isFinite(timestamp)) ? DICTIONARY_AUTO_UPDATE_DATE_TIME_FORMATTER.format(timestamp) : fallback;
+}
+
 class DictionaryEntry {
     /**
      * @param {DictionaryController} dictionaryController
@@ -194,6 +250,20 @@ class DictionaryEntry {
         this._aliasNode.dispatchEvent(new CustomEvent('change', {bubbles: true}));
     }
 
+    /**
+     * @param {import('dictionary-importer').Summary} dictionaryInfo
+     */
+    updateDictionaryInfo(dictionaryInfo) {
+        this._dictionaryInfo = dictionaryInfo;
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async showDetails() {
+        await this._showDetails();
+    }
+
     // Private
 
     /** */
@@ -267,7 +337,7 @@ class DictionaryEntry {
 
     /** */
     _onOutdatedButtonClick() {
-        void this._showDetails();
+        void this.showDetails();
     }
 
     /** */
@@ -277,12 +347,12 @@ class DictionaryEntry {
 
     /** */
     _onIntegrityButtonClick() {
-        void this._showDetails();
+        void this.showDetails();
     }
 
     /** */
     async _showDetails() {
-        const {title, revision, version, counts, prefixWildcardsSupported, isUpdatable, indexUrl, downloadUrl} = this._dictionaryInfo;
+        const {title, revision, version, counts, prefixWildcardsSupported, isUpdatable, indexUrl, downloadUrl, autoUpdate} = this._dictionaryInfo;
 
         const modal = this._dictionaryController.modalController.getModal('dictionary-details');
         if (modal === null) { return; }
@@ -307,9 +377,12 @@ class DictionaryEntry {
         const useDeinflectionsToggle = querySelectorNotNull(useDeinflectionsSetting, '.dictionary-use-deinflections-toggle');
         /** @type {HTMLElement} */
         const autoUpdateSetting = querySelectorNotNull(modal.node, '.dictionary-auto-update-setting');
-        /** @type {HTMLInputElement} */
-        const autoUpdateToggle = querySelectorNotNull(autoUpdateSetting, '.dictionary-auto-update-toggle');
+        /** @type {HTMLSelectElement} */
+        const autoUpdateSelect = querySelectorNotNull(autoUpdateSetting, '.dictionary-auto-update-select');
+        /** @type {HTMLElement} */
+        const autoUpdateDescription = querySelectorNotNull(autoUpdateSetting, '.dictionary-auto-update-description');
 
+        modal.node.dataset.dictionaryTitle = title;
         titleElement.textContent = title;
         versionElement.textContent = `rev.${revision}`;
         outdateElement.hidden = (version >= 3);
@@ -322,12 +395,13 @@ class DictionaryEntry {
 
         const canAutoUpdate = (isUpdatable === true && typeof indexUrl === 'string' && typeof downloadUrl === 'string');
         autoUpdateSetting.hidden = !canAutoUpdate;
-        autoUpdateToggle.checked = false;
-        delete autoUpdateToggle.dataset.indexUrl;
+        const autoUpdateSchedule = normalizeDictionaryAutoUpdateSchedule(autoUpdate?.schedule);
+        autoUpdateSelect.value = autoUpdateSchedule;
+        autoUpdateSelect.dataset.currentSchedule = autoUpdateSchedule;
+        autoUpdateDescription.textContent = getDictionaryAutoUpdateScheduleDescription(autoUpdateSchedule);
+        delete autoUpdateSelect.dataset.dictionaryTitle;
         if (canAutoUpdate) {
-            const optionsFull = await this._dictionaryController.settingsController.getOptionsFull();
-            autoUpdateToggle.checked = optionsFull.global.dictionaryAutoUpdates.includes(indexUrl);
-            autoUpdateToggle.dataset.indexUrl = indexUrl;
+            autoUpdateSelect.dataset.dictionaryTitle = title;
         }
 
         this._setupDetails(detailsTableElement);
@@ -340,29 +414,45 @@ class DictionaryEntry {
      * @returns {boolean}
      */
     _setupDetails(detailsTable) {
-        /** @type {Partial<Record<keyof (typeof this._dictionaryInfo & typeof this._dictionaryInfo.counts), string>>} */
-        const targets = {
-            author: 'Author',
-            url: 'URL',
-            description: 'Description',
-            attribution: 'Attribution',
-            sourceLanguage: 'Source Language',
-            targetLanguage: 'Target Language',
-            terms: 'Term Count',
-            termMeta: 'Term Meta Count',
-            kanji: 'Kanji Count',
-            kanjiMeta: 'Kanji Meta Count',
-            tagMeta: 'Tag Count',
-            media: 'Media Count',
-            importSuccess: 'Import Success',
-        };
-
         const dictionaryInfo = {...this._dictionaryInfo, ...this._dictionaryInfo.counts};
         const fragment = document.createDocumentFragment();
         let any = false;
-        for (const [key, label] of /** @type {([keyof (typeof this._dictionaryInfo & typeof this._dictionaryInfo.counts), string])[]} */ (Object.entries(targets))) {
+        /**
+         * @param {string} type
+         * @param {string} label
+         * @param {string} displayText
+         * @param {keyof import('dictionary-database').DictionaryCountGroup|null} [databaseCountKey]
+         */
+        const appendDetailsRow = (type, label, displayText, databaseCountKey = null) => {
+            if (!displayText) { return; }
+            const details = /** @type {HTMLElement} */ (this._dictionaryController.instantiateTemplate('dictionary-details-entry'));
+            details.dataset.type = type;
+
+            /** @type {HTMLElement} */
+            const labelElement = querySelectorNotNull(details, '.dictionary-details-entry-label');
+            /** @type {HTMLElement} */
+            const infoElement = querySelectorNotNull(details, '.dictionary-details-entry-info');
+
+            labelElement.textContent = `${label}:`;
+            if (databaseCountKey !== null && this._databaseCounts && this._databaseCounts[databaseCountKey]) {
+                displayText = 'Expected: ' + displayText + ' (Database: ' + this._databaseCounts[databaseCountKey] + ')';
+            }
+            infoElement.textContent = displayText;
+            fragment.appendChild(details);
+            any = true;
+        };
+        /** @type {([keyof (typeof this._dictionaryInfo & typeof this._dictionaryInfo.counts), string])[]} */
+        const metadataTargets = [
+            ['author', 'Author'],
+            ['url', 'URL'],
+            ['description', 'Description'],
+            ['attribution', 'Attribution'],
+            ['sourceLanguage', 'Source Language'],
+            ['targetLanguage', 'Target Language'],
+        ];
+        for (const [key, label] of metadataTargets) {
             const info = dictionaryInfo[key];
-            let displayText = ((_info) => {
+            const displayText = ((_info) => {
                 if (typeof _info === 'string') { return _info; }
                 if (_info && typeof _info === 'object' && 'total' in _info) {
                     return _info.total ? `${_info.total}` : false;
@@ -371,23 +461,42 @@ class DictionaryEntry {
                 return false;
             })(info);
             if (!displayText) { continue; }
-
-            const details = /** @type {HTMLElement} */ (this._dictionaryController.instantiateTemplate('dictionary-details-entry'));
-            details.dataset.type = key;
-
-            /** @type {HTMLElement} */
-            const labelElement = querySelectorNotNull(details, '.dictionary-details-entry-label');
-            /** @type {HTMLElement} */
-            const infoElement = querySelectorNotNull(details, '.dictionary-details-entry-info');
-
-            labelElement.textContent = `${label}:`;
-            if (this._databaseCounts && this._databaseCounts[key]) {
-                displayText = 'Expected: ' + displayText + ' (Database: ' + this._databaseCounts[key] + ')';
-            }
-            infoElement.textContent = displayText;
-            fragment.appendChild(details);
-
-            any = true;
+            appendDetailsRow(String(key), label, displayText);
+        }
+        if (this._dictionaryInfo.isUpdatable === true) {
+            const autoUpdateSchedule = normalizeDictionaryAutoUpdateSchedule(this._dictionaryInfo.autoUpdate?.schedule);
+            appendDetailsRow('autoUpdateSchedule', 'Update Schedule', getDictionaryAutoUpdateScheduleLabel(autoUpdateSchedule));
+            appendDetailsRow('autoUpdateLastUpdated', 'Last Updated', formatDictionaryAutoUpdateTimestamp(this._dictionaryInfo.autoUpdate?.lastUpdatedAt, 'Not available'));
+            appendDetailsRow(
+                'autoUpdateNextScheduled',
+                'Next Scheduled Update',
+                this._dictionaryInfo.autoUpdate?.nextUpdateAt === null ?
+                    'Not scheduled' :
+                    formatDictionaryAutoUpdateTimestamp(this._dictionaryInfo.autoUpdate?.nextUpdateAt, 'Not scheduled'),
+            );
+        }
+        /** @type {([keyof import('dictionary-importer').SummaryCounts, string])[]} */
+        const countTargets = [
+            ['terms', 'Term Count'],
+            ['termMeta', 'Term Meta Count'],
+            ['kanji', 'Kanji Count'],
+            ['kanjiMeta', 'Kanji Meta Count'],
+            ['tagMeta', 'Tag Count'],
+            ['media', 'Media Count'],
+        ];
+        for (const [key, label] of countTargets) {
+            const info = dictionaryInfo[key];
+            const displayText = ((_info) => {
+                if (_info && typeof _info === 'object' && 'total' in _info) {
+                    return _info.total ? `${_info.total}` : false;
+                }
+                return false;
+            })(info);
+            if (!displayText) { continue; }
+            appendDetailsRow(String(key), label, displayText, key);
+        }
+        if (typeof this._dictionaryInfo.importSuccess === 'boolean') {
+            appendDetailsRow('importSuccess', 'Import Success', this._dictionaryInfo.importSuccess.toString());
         }
 
         detailsTable.textContent = '';
@@ -701,7 +810,7 @@ export class DictionaryController {
         this._allCheckbox.addEventListener('change', this._onAllCheckboxChange.bind(this), false);
         dictionaryDeleteButton.addEventListener('click', this._onDictionaryConfirmDelete.bind(this), false);
         dictionaryUpdateButton.addEventListener('click', this._onDictionaryConfirmUpdate.bind(this), false);
-        /** @type {HTMLInputElement} */ (querySelectorNotNull(document, '.dictionary-auto-update-toggle')).addEventListener('change', this._onDictionaryAutoUpdateToggleChange.bind(this), false);
+        /** @type {HTMLSelectElement} */ (querySelectorNotNull(document, '.dictionary-auto-update-select')).addEventListener('change', this._onDictionaryAutoUpdateSelectChange.bind(this), false);
 
         dictionaryMoveButton.addEventListener('click', this._onDictionaryMoveButtonClick.bind(this), false);
 
@@ -1111,24 +1220,40 @@ export class DictionaryController {
     /**
      * @param {Event} e
      */
-    async _onDictionaryAutoUpdateToggleChange(e) {
-        const toggle = /** @type {HTMLInputElement} */ (e.currentTarget);
-        const indexUrl = toggle.dataset.indexUrl;
-        if (typeof indexUrl !== 'string' || indexUrl.length === 0) {
+    async _onDictionaryAutoUpdateSelectChange(e) {
+        const select = /** @type {HTMLSelectElement} */ (e.currentTarget);
+        const autoUpdateSetting = select.closest('.dictionary-auto-update-setting');
+        const autoUpdateDescription = autoUpdateSetting?.querySelector('.dictionary-auto-update-description');
+        const dictionaryTitle = select.dataset.dictionaryTitle;
+        if (typeof dictionaryTitle !== 'string' || dictionaryTitle.length === 0) {
             return;
         }
-        const optionsFull = await this._settingsController.getOptionsFull();
-        const nextIndexUrls = new Set(optionsFull.global.dictionaryAutoUpdates);
-        if (toggle.checked) {
-            nextIndexUrls.add(indexUrl);
-        } else {
-            nextIndexUrls.delete(indexUrl);
+        const previousSchedule = normalizeDictionaryAutoUpdateSchedule(select.dataset.currentSchedule);
+        const nextSchedule = select.value;
+        if (!isDictionaryAutoUpdateSchedule(nextSchedule)) {
+            select.value = previousSchedule;
+            return;
         }
-        await this._settingsController.modifyGlobalSettings([{
-            action: 'set',
-            path: 'dictionaryAutoUpdates',
-            value: [...nextIndexUrls].sort((a, b) => a.localeCompare(b)),
-        }]);
+        if (nextSchedule === previousSchedule) {
+            return;
+        }
+        if (autoUpdateDescription instanceof HTMLElement) {
+            autoUpdateDescription.textContent = getDictionaryAutoUpdateScheduleDescription(nextSchedule);
+        }
+        select.disabled = true;
+        try {
+            const dictionaryInfo = await this._settingsController.application.api.setDictionaryUpdateSchedule(dictionaryTitle, nextSchedule);
+            this._updateDictionaryInfo(dictionaryInfo);
+            await this._refreshDictionaryDetailsModal(dictionaryInfo.title);
+        } catch (error) {
+            select.value = previousSchedule;
+            if (autoUpdateDescription instanceof HTMLElement) {
+                autoUpdateDescription.textContent = getDictionaryAutoUpdateScheduleDescription(previousSchedule);
+            }
+            log.error(error);
+        } finally {
+            select.disabled = false;
+        }
     }
 
     /**
@@ -1141,6 +1266,37 @@ export class DictionaryController {
                 break;
             }
         }
+    }
+
+    /**
+     * @param {import('dictionary-importer').Summary} dictionaryInfo
+     */
+    _updateDictionaryInfo(dictionaryInfo) {
+        const dictionaries = this._dictionaries;
+        if (dictionaries !== null) {
+            const dictionaryIndex = dictionaries.findIndex(({title}) => title === dictionaryInfo.title);
+            if (dictionaryIndex >= 0) {
+                dictionaries[dictionaryIndex] = dictionaryInfo;
+            }
+        }
+        const entry = this._dictionaryEntries.find(({dictionaryTitle}) => dictionaryTitle === dictionaryInfo.title);
+        entry?.updateDictionaryInfo(dictionaryInfo);
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @returns {Promise<void>}
+     */
+    async _refreshDictionaryDetailsModal(dictionaryTitle) {
+        const modal = this._modalController.getModal('dictionary-details');
+        if (modal === null || modal.node.hidden || modal.node.dataset.dictionaryTitle !== dictionaryTitle) {
+            return;
+        }
+        const entry = this._dictionaryEntries.find(({dictionaryTitle: entryDictionaryTitle}) => entryDictionaryTitle === dictionaryTitle);
+        if (typeof entry === 'undefined') {
+            return;
+        }
+        await entry.showDetails();
     }
 
     /**

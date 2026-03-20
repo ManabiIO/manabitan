@@ -50,6 +50,13 @@ type ApiSurface = {
         params: void;
         return: DictionaryImporter.Summary[];
     };
+    updateDictionarySummaryByTitleOffscreen: {
+        params: {
+            dictionaryTitle: string;
+            summary: DictionaryImporter.Summary;
+        };
+        return: DictionaryImporter.Summary | null;
+    };
     getMaxHeadwordLengthOffscreen: {
         params: void;
         return: number;

@@ -53,6 +53,7 @@ export class Offscreen {
             ['databaseRefreshOffscreen',       this._refreshDatabaseHandler.bind(this)],
             ['databaseSetSuspendedOffscreen',  this._setDatabaseSuspendedHandler.bind(this)],
             ['getDictionaryInfoOffscreen',     this._getDictionaryInfoHandler.bind(this)],
+            ['updateDictionarySummaryByTitleOffscreen', this._updateDictionarySummaryByTitleHandler.bind(this)],
             ['getMaxHeadwordLengthOffscreen',  this._getMaxHeadwordLengthHandler.bind(this)],
             ['deleteDictionaryOffscreen',      this._deleteDictionaryHandler.bind(this)],
             ['updateDictionaryMetadataOffscreen', this._updateDictionaryMetadataHandler.bind(this)],
@@ -197,6 +198,11 @@ export class Offscreen {
     /** @type {import('offscreen').ApiHandler<'getDictionaryInfoOffscreen'>} */
     async _getDictionaryInfoHandler() {
         return await this._invokeDictionaryWorker('getDictionaryInfoOffscreen', {});
+    }
+
+    /** @type {import('offscreen').ApiHandler<'updateDictionarySummaryByTitleOffscreen'>} */
+    async _updateDictionarySummaryByTitleHandler({dictionaryTitle, summary}) {
+        return await this._invokeDictionaryWorker('updateDictionarySummaryByTitleOffscreen', {dictionaryTitle, summary});
     }
 
     /** @type {import('offscreen').ApiHandler<'getMaxHeadwordLengthOffscreen'>} */
