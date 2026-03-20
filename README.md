@@ -35,11 +35,15 @@
 - Auto import Kiku/Lapis/Senren/Crop-Theft Anki Note types.
 - No scan length. Before you had to say "only scan 10 characters", now you don't have to do that. We will show you the longest possible word in the dict 🤷‍♀️
 
-## What's being upstreamed?
+## Why not contribute to Yomitan directly?
+
+A lot of this stuff is experimental and may break.
+
+When you use this software you are aware it may break, but you also want a significantly beefed up and improved version of Yomitan.
 
 I am [actively](https://github.com/yomidevs/yomitan/issues?q=is%3Apr%20author%3Abee-san) pushing PRs to Yomitan to improve it based on this work.
 
-Using this fork and telling me what's wrong will let me write better PRs for Yomitan.
+Using this fork and telling me what works and doesn't will allow me to contribute back to Yomitan easier.
 
 # Visit [yomitan.wiki](https://yomitan.wiki) to learn more!
 
