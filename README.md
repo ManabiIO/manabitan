@@ -20,6 +20,8 @@
 - 100% test coverage with extensive end to end tests
 - Significantly less RAM usage
 - Edit dictionary metadata (name etc) after the fact
+- Auto import Kiku/Lapis/Senren/Crop-Theft Anki Note types.
+- In memory cache support for dictionaries + Anki dupe cache. The benchmarks above are with the cache turned off btw.
 
 # Visit [yomitan.wiki](https://yomitan.wiki) to learn more!
 
