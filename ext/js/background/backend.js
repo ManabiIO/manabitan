@@ -38,6 +38,7 @@ import {JsonSchema} from '../data/json-schema.js';
 import {OptionsUtil} from '../data/options-util.js';
 import {getAllPermissions, hasPermissions, hasRequiredPermissionsForOptions} from '../data/permissions-util.js';
 import {
+    getNextDictionaryAutoUpdateTime,
     isDictionaryAutoUpdateSchedule,
     normalizeDictionarySummary,
     setDictionarySummaryAutoUpdate,
@@ -61,7 +62,6 @@ import {injectStylesheet} from './script-manager.js';
 const STARTUP_DIAGNOSTICS_STORAGE_KEY = 'manabitanStartupDiagnostics';
 const DICTIONARY_AUTO_UPDATE_STATE_STORAGE_KEY = 'manabitanDictionaryAutoUpdateState';
 const DICTIONARY_AUTO_UPDATE_ALARM_NAME = 'manabitanDictionaryAutoUpdateHourly';
-const DICTIONARY_AUTO_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 const SCAN_LENGTH_INFLECTION_BUFFER = 8;
 
 /**
@@ -106,7 +106,9 @@ function hasDictionaryAutoUpdateMetadataChanged(summary1, summary2) {
         typeof summary1.autoUpdate === 'object' &&
         summary1.autoUpdate !== null &&
         !Array.isArray(summary1.autoUpdate)
-    ) ? /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (summary1.autoUpdate) : null;
+    ) ?
+        /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (summary1.autoUpdate) :
+        null;
     if (rawAutoUpdate1 === null) {
         return true;
     }
@@ -3398,34 +3400,31 @@ export class Backend {
             if (options === null) {
                 return;
             }
-            const enabledIndexUrls = new Set(options.global.dictionaryAutoUpdates);
-            if (enabledIndexUrls.size === 0) {
+            await this._ensureDictionaryDatabaseReady();
+            const dictionaries = (await this._dictionaryDatabase.getDictionaryInfo()).map((dictionary) => normalizeDictionarySummary(dictionary));
+            const now = Date.now();
+            const scheduledDictionaries = dictionaries.filter((dictionary) => {
+                const autoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (dictionary.autoUpdate);
+                return (
+                    dictionary.isUpdatable === true &&
+                    autoUpdate.schedule !== 'manual' &&
+                    typeof autoUpdate.nextUpdateAt === 'number'
+                );
+            });
+            if (scheduledDictionaries.length === 0) {
                 return;
             }
 
-            await this._ensureDictionaryDatabaseReady();
-            const dictionaries = await this._dictionaryDatabase.getDictionaryInfo();
-            const state = await this._getDictionaryAutoUpdateState();
-            const now = Date.now();
-            const dueDictionaries = dictionaries
+            const dueDictionaries = scheduledDictionaries
                 .filter((dictionary) => {
-                    const indexUrl = dictionary.indexUrl;
-                    if (
-                        dictionary.isUpdatable !== true ||
-                        typeof indexUrl !== 'string' ||
-                        indexUrl.length === 0 ||
-                        !enabledIndexUrls.has(indexUrl)
-                    ) {
-                        return false;
-                    }
-                    const lastAttemptAt = state[indexUrl]?.lastAttemptAt ?? 0;
-                    return (now - lastAttemptAt) >= DICTIONARY_AUTO_UPDATE_INTERVAL_MS;
+                    const autoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (dictionary.autoUpdate);
+                    return (typeof autoUpdate.nextUpdateAt === 'number' && autoUpdate.nextUpdateAt <= now);
                 })
                 .sort((a, b) => a.title.localeCompare(b.title));
 
             reportDiagnostics('dictionary-auto-update-pass-begin', {
                 reason,
-                enabledCount: enabledIndexUrls.size,
+                enabledCount: scheduledDictionaries.length,
                 dueCount: dueDictionaries.length,
             });
 
@@ -3434,7 +3433,11 @@ export class Backend {
                     break;
                 }
                 const [checkResult] = await this._checkDictionaryUpdates([dictionary.title]);
-                if (typeof checkResult === 'undefined' || !checkResult.hasUpdate) {
+                if (typeof checkResult === 'undefined' || checkResult.error !== null) {
+                    continue;
+                }
+                if (!checkResult.hasUpdate) {
+                    await this._advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck(dictionary.title, Date.now());
                     continue;
                 }
                 await this._updateDictionaryByTitle(dictionary.title, false, checkResult);
@@ -3645,8 +3648,8 @@ export class Backend {
                 return /** @type {import('backend').DictionaryUpdateResult} */ ({dictionaryTitle, status: 'skipped', latestRevision: checkResult.latestRevision, error: null});
             }
             if (!waitForLock) {
-                const enabledIndexUrls = new Set(this._options?.global.dictionaryAutoUpdates ?? []);
-                if (!enabledIndexUrls.has(latestDictionary.indexUrl)) {
+                const latestAutoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (normalizeDictionarySummary(latestDictionary).autoUpdate);
+                if (latestAutoUpdate.schedule === 'manual') {
                     return /** @type {import('backend').DictionaryUpdateResult} */ ({dictionaryTitle, status: 'skipped', latestRevision: checkResult.latestRevision, error: null});
                 }
             }
@@ -3761,6 +3764,38 @@ export class Backend {
     }
 
     /**
+     * @param {string} dictionaryTitle
+     * @param {number} referenceTimestamp
+     * @returns {Promise<import('dictionary-importer').Summary|null>}
+     */
+    async _advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck(dictionaryTitle, referenceTimestamp) {
+        const result = await this._runWithDictionaryMutationLock(async () => {
+            await this._ensureDictionaryDatabaseReady({allowDuringMutation: true});
+            const dictionaries = await this._dictionaryDatabase.getDictionaryInfo();
+            const dictionary = dictionaries.find((item) => item.title === dictionaryTitle);
+            if (typeof dictionary === 'undefined') {
+                return null;
+            }
+
+            const normalizedDictionary = normalizeDictionarySummary(dictionary);
+            const normalizedAutoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (normalizedDictionary.autoUpdate);
+            if (normalizedDictionary.isUpdatable !== true || normalizedAutoUpdate.schedule === 'manual') {
+                return normalizedDictionary;
+            }
+
+            const nextSummary = setDictionarySummaryAutoUpdate(normalizedDictionary, {
+                nextUpdateAt: getNextDictionaryAutoUpdateTime(normalizedAutoUpdate.schedule, referenceTimestamp),
+            });
+            return (
+                hasDictionaryAutoUpdateMetadataChanged(normalizedDictionary, nextSummary) ?
+                    await this._setDictionarySummaryByTitle(dictionaryTitle, nextSummary) :
+                    normalizedDictionary
+            );
+        });
+        return (typeof result === 'undefined' ? null : result);
+    }
+
+    /**
      * @param {import('dictionary-importer').Summary} previousSummary
      * @param {import('dictionary-importer').Summary} importedSummary
      * @returns {import('dictionary-importer').Summary}
@@ -3771,7 +3806,9 @@ export class Backend {
         const previousAutoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (normalizedPreviousSummary.autoUpdate);
         const nextSchedule = (
             normalizedImportedSummary.isUpdatable === true
-        ) ? previousAutoUpdate.schedule : 'manual';
+        ) ?
+            previousAutoUpdate.schedule :
+            'manual';
         return setDictionarySummaryAutoUpdate(normalizedImportedSummary, {
             schedule: nextSchedule,
             lastUpdatedAt: normalizedImportedSummary.importDate,
@@ -4019,9 +4056,15 @@ export class Backend {
                 if (typeof indexUrl !== 'string' || indexUrl.length === 0) {
                     continue;
                 }
-                const nextSchedule = enabledIndexUrls.has(indexUrl) ? 'hourly' : (
-                    normalizedAutoUpdate.schedule === 'hourly' ? 'manual' : normalizedAutoUpdate.schedule
-                );
+                /** @type {import('dictionary-importer').DictionaryAutoUpdateSchedule} */
+                let nextSchedule;
+                if (enabledIndexUrls.has(indexUrl)) {
+                    nextSchedule = 'hourly';
+                } else if (normalizedAutoUpdate.schedule === 'hourly') {
+                    nextSchedule = 'manual';
+                } else {
+                    nextSchedule = normalizedAutoUpdate.schedule;
+                }
                 const nextSummary = setDictionarySummaryAutoUpdate(normalizedDictionary, {
                     schedule: nextSchedule,
                 });

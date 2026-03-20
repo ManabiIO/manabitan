@@ -55,15 +55,21 @@ export function getNextDictionaryAutoUpdateTime(schedule, referenceTimestamp) {
 /**
  * @param {import('dictionary-importer').DictionaryAutoUpdateSchedule} schedule
  * @param {number|null|undefined} lastUpdatedAt
+ * @param {number|null|undefined} [nextUpdateAt]
  * @returns {import('dictionary-importer').DictionaryAutoUpdateInfo}
  */
-export function createDictionaryAutoUpdate(schedule, lastUpdatedAt) {
+export function createDictionaryAutoUpdate(schedule, lastUpdatedAt, nextUpdateAt = void 0) {
     const normalizedSchedule = isDictionaryAutoUpdateSchedule(schedule) ? schedule : 'manual';
     const normalizedLastUpdatedAt = normalizeTimestamp(lastUpdatedAt);
+    const normalizedNextUpdateAt = normalizeTimestamp(nextUpdateAt);
     return {
         schedule: normalizedSchedule,
         lastUpdatedAt: normalizedLastUpdatedAt,
-        nextUpdateAt: getNextDictionaryAutoUpdateTime(normalizedSchedule, normalizedLastUpdatedAt),
+        nextUpdateAt: (
+            normalizedSchedule === 'manual' ?
+                null :
+                normalizedNextUpdateAt ?? getNextDictionaryAutoUpdateTime(normalizedSchedule, normalizedLastUpdatedAt)
+        ),
     };
 }
 
@@ -76,20 +82,27 @@ export function normalizeDictionarySummary(summary) {
         typeof summary === 'object' &&
         summary !== null &&
         !Array.isArray(summary)
-    ) ? summary : /** @type {import('dictionary-importer').Summary} */ ({});
+    ) ?
+        summary :
+        /** @type {import('dictionary-importer').Summary} */ ({});
     const importDate = normalizeTimestamp(normalizedSummary.importDate);
-    /** @type {{schedule?: unknown, lastUpdatedAt?: unknown}} */
+    /** @type {{schedule?: unknown, lastUpdatedAt?: unknown, nextUpdateAt?: unknown}} */
     const rawAutoUpdate = (
         typeof normalizedSummary.autoUpdate === 'object' &&
         normalizedSummary.autoUpdate !== null &&
         !Array.isArray(normalizedSummary.autoUpdate)
-    ) ? normalizedSummary.autoUpdate : {};
+    ) ?
+        normalizedSummary.autoUpdate :
+        {};
     const schedule = (
         normalizedSummary.isUpdatable === true &&
         isDictionaryAutoUpdateSchedule(rawAutoUpdate.schedule)
-    ) ? rawAutoUpdate.schedule : 'manual';
+    ) ?
+        rawAutoUpdate.schedule :
+        'manual';
     const lastUpdatedAt = normalizeTimestamp(rawAutoUpdate.lastUpdatedAt) ?? importDate;
-    const autoUpdate = createDictionaryAutoUpdate(schedule, lastUpdatedAt);
+    const nextUpdateAt = normalizeTimestamp(rawAutoUpdate.nextUpdateAt);
+    const autoUpdate = createDictionaryAutoUpdate(schedule, lastUpdatedAt, nextUpdateAt);
     return {
         ...normalizedSummary,
         autoUpdate,
@@ -98,21 +111,36 @@ export function normalizeDictionarySummary(summary) {
 
 /**
  * @param {import('dictionary-importer').Summary} summary
- * @param {{schedule?: import('dictionary-importer').DictionaryAutoUpdateSchedule, lastUpdatedAt?: number|null}} [details]
+ * @param {{schedule?: import('dictionary-importer').DictionaryAutoUpdateSchedule, lastUpdatedAt?: number|null, nextUpdateAt?: number|null}} [details]
  * @returns {import('dictionary-importer').Summary}
  */
 export function setDictionarySummaryAutoUpdate(summary, details = {}) {
     const normalizedSummary = normalizeDictionarySummary(summary);
-    const {schedule, lastUpdatedAt} = details;
+    const {schedule, lastUpdatedAt, nextUpdateAt} = details;
     const normalizedAutoUpdate = /** @type {import('dictionary-importer').DictionaryAutoUpdateInfo} */ (normalizedSummary.autoUpdate);
     const requestedSchedule = typeof schedule === 'undefined' ? normalizedAutoUpdate.schedule : schedule;
     const nextSchedule = (
         normalizedSummary.isUpdatable === true &&
         isDictionaryAutoUpdateSchedule(requestedSchedule)
-    ) ? requestedSchedule : 'manual';
-    const nextLastUpdatedAt = normalizeTimestamp(lastUpdatedAt) ?? normalizedAutoUpdate.lastUpdatedAt;
+    ) ?
+        requestedSchedule :
+        'manual';
+    const nextLastUpdatedAt = Object.prototype.hasOwnProperty.call(details, 'lastUpdatedAt') ?
+        normalizeTimestamp(lastUpdatedAt) :
+        normalizedAutoUpdate.lastUpdatedAt;
+    let nextNextUpdateAt;
+    if (Object.prototype.hasOwnProperty.call(details, 'nextUpdateAt')) {
+        nextNextUpdateAt = normalizeTimestamp(nextUpdateAt);
+    } else if (
+        nextSchedule === normalizedAutoUpdate.schedule &&
+        nextLastUpdatedAt === normalizedAutoUpdate.lastUpdatedAt
+    ) {
+        nextNextUpdateAt = normalizedAutoUpdate.nextUpdateAt;
+    } else {
+        nextNextUpdateAt = null;
+    }
     return {
         ...normalizedSummary,
-        autoUpdate: createDictionaryAutoUpdate(nextSchedule, nextLastUpdatedAt),
+        autoUpdate: createDictionaryAutoUpdate(nextSchedule, nextLastUpdatedAt, nextNextUpdateAt),
     };
 }

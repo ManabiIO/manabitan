@@ -255,15 +255,20 @@
                 <div class="settings-item-inner">
                     <div class="settings-item-left">
                         <div class="settings-item-label">
-                            Automatic hourly updates
+                            Automatic updates
                         </div>
                     </div>
                     <div class="settings-item-right">
-                        <label class="toggle"><input type="checkbox" class="dictionary-auto-update-toggle"><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
+                        <select class="dictionary-auto-update-select medium-width">
+                            <option value="manual">Manual</option>
+                            <option value="hourly">Hourly</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                        </select>
                     </div>
                 </div>
-                <div class="settings-item-children">
-                    Check for updates every hour and install them automatically.
+                <div class="settings-item-children dictionary-auto-update-description">
+                    Updates must be started manually.
                 </div>
             </div>
             <hr>

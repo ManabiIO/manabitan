@@ -1816,9 +1816,9 @@ async function closeDictionaryDetailsModal(driver) {
     }, 30_000, 'Expected dictionary details modal to be hidden');
 }
 
-async function setDictionaryAutoUpdateEnabled(driver, dictionaryName, enabled) {
+async function getDictionaryAutoUpdateUiState(driver, dictionaryName) {
     await openDictionaryDetailsModal(driver, dictionaryName);
-    const indexUrl = String(await driver.executeScript(`
+    const uiState = await driver.executeScript(`
         const modal = document.querySelector('#dictionary-details-modal');
         if (!(modal instanceof HTMLElement)) {
             throw new Error('Dictionary details modal missing');
@@ -1827,30 +1827,82 @@ async function setDictionaryAutoUpdateEnabled(driver, dictionaryName, enabled) {
         if (!(setting instanceof HTMLElement) || setting.hidden) {
             throw new Error('Dictionary auto-update setting is hidden');
         }
-        const toggle = setting.querySelector('.dictionary-auto-update-toggle');
-        if (!(toggle instanceof HTMLInputElement)) {
-            throw new Error('Dictionary auto-update toggle missing');
+        const select = setting.querySelector('.dictionary-auto-update-select');
+        if (!(select instanceof HTMLSelectElement)) {
+            throw new Error('Dictionary auto-update select missing');
         }
-        const currentIndexUrl = String(toggle.dataset.indexUrl || '');
-        if (currentIndexUrl.length === 0) {
-            throw new Error('Dictionary auto-update toggle is missing data-index-url');
+        const description = setting.querySelector('.dictionary-auto-update-description');
+        if (!(description instanceof HTMLElement)) {
+            throw new Error('Dictionary auto-update description missing');
         }
-        if (toggle.checked !== arguments[0]) {
-            toggle.click();
+        /** @type {Record<string, string>} */
+        const details = {};
+        for (const row of modal.querySelectorAll('.dictionary-details-entry')) {
+            const labelNode = row.querySelector('.dictionary-details-entry-label');
+            const infoNode = row.querySelector('.dictionary-details-entry-info');
+            const label = String(labelNode?.textContent || '').replace(/:\\s*$/, '').trim();
+            if (label.length === 0) { continue; }
+            details[label] = String(infoNode?.textContent || '').trim();
         }
-        return currentIndexUrl;
-    `, enabled));
+        return {
+            value: select.value,
+            dictionaryTitle: String(select.dataset.dictionaryTitle || ''),
+            currentSchedule: String(select.dataset.currentSchedule || ''),
+            description: String(description.textContent || '').trim(),
+            details,
+        };
+    `);
+    await closeDictionaryDetailsModal(driver);
+    return uiState;
+}
+
+async function setDictionaryAutoUpdateSchedule(driver, dictionaryName, schedule) {
+    await openDictionaryDetailsModal(driver, dictionaryName);
+    const dictionaryTitle = String(await driver.executeScript(`
+        const modal = document.querySelector('#dictionary-details-modal');
+        if (!(modal instanceof HTMLElement)) {
+            throw new Error('Dictionary details modal missing');
+        }
+        const setting = modal.querySelector('.dictionary-auto-update-setting');
+        if (!(setting instanceof HTMLElement) || setting.hidden) {
+            throw new Error('Dictionary auto-update setting is hidden');
+        }
+        const select = setting.querySelector('.dictionary-auto-update-select');
+        if (!(select instanceof HTMLSelectElement)) {
+            throw new Error('Dictionary auto-update select missing');
+        }
+        const currentDictionaryTitle = String(select.dataset.dictionaryTitle || '');
+        if (currentDictionaryTitle.length === 0) {
+            throw new Error('Dictionary auto-update select is missing data-dictionary-title');
+        }
+        if (!['manual', 'hourly', 'daily', 'weekly'].includes(arguments[0])) {
+            throw new Error(\`Invalid dictionary auto-update schedule: \${String(arguments[0])}\`);
+        }
+        if (select.value !== arguments[0]) {
+            select.value = arguments[0];
+            select.dispatchEvent(new Event('change', {bubbles: true}));
+        }
+        return currentDictionaryTitle;
+    `, schedule));
     const deadline = safePerformance.now() + 30_000;
+    let latestDictionary = null;
     while (safePerformance.now() < deadline) {
+        const dictionaryInfo = await getDictionaryInfoRuntime(driver);
+        latestDictionary = Array.isArray(dictionaryInfo) ?
+            dictionaryInfo.find((dictionary) => String(dictionary?.title || '') === dictionaryTitle) :
+            null;
+        const savedSchedule = String(latestDictionary?.autoUpdate?.schedule || '');
         const optionsFull = await getOptionsFullRuntime(driver);
         const enabledIndexUrls = Array.isArray(optionsFull?.global?.dictionaryAutoUpdates) ? optionsFull.global.dictionaryAutoUpdates.map(String) : [];
-        if (enabledIndexUrls.includes(indexUrl) === enabled) {
+        const indexUrl = String(latestDictionary?.indexUrl || '');
+        const isHourlyEnabled = indexUrl.length > 0 && enabledIndexUrls.includes(indexUrl);
+        if (savedSchedule === schedule && (schedule === 'hourly' ? isHourlyEnabled : !isHourlyEnabled)) {
             break;
         }
         await driver.sleep(250);
     }
     await closeDictionaryDetailsModal(driver);
-    return indexUrl;
+    return latestDictionary;
 }
 
 async function configureAutoUpdateDictionaryProfile(driver, dictionaryName) {
@@ -1980,22 +2032,59 @@ async function runAutoUpdateScenario(driver, extensionBaseUrl, localServer, repo
             importEnd,
         );
 
-        const enableToggleStart = safePerformance.now();
-        const enabledIndexUrl = await setDictionaryAutoUpdateEnabled(driver, fixture.initialTitle, true);
+        const scheduleUiStart = safePerformance.now();
+        const initialUiState = await getDictionaryAutoUpdateUiState(driver, fixture.initialTitle);
+        const dailyDictionary = await setDictionaryAutoUpdateSchedule(driver, fixture.initialTitle, 'daily');
+        const dailyUiState = await getDictionaryAutoUpdateUiState(driver, fixture.initialTitle);
+        const manualDictionary = await setDictionaryAutoUpdateSchedule(driver, fixture.initialTitle, 'manual');
+        const manualUiState = await getDictionaryAutoUpdateUiState(driver, fixture.initialTitle);
+        const hourlyDictionary = await setDictionaryAutoUpdateSchedule(driver, fixture.initialTitle, 'hourly');
         await configureAutoUpdateDictionaryProfile(driver, fixture.initialTitle);
-        const enableToggleEnd = safePerformance.now();
+        const scheduleUiEnd = safePerformance.now();
         ensureAutoUpdateRequest(
-            enabledIndexUrl === fixture.oldIndexUrl,
-            'Auto-update toggle did not bind to the expected initial index URL',
-            enabledIndexUrl,
+            initialUiState?.value === 'manual' &&
+            initialUiState?.currentSchedule === 'manual' &&
+            initialUiState?.dictionaryTitle === fixture.initialTitle &&
+            initialUiState?.description === 'Updates must be started manually.' &&
+            initialUiState?.details?.['Update Schedule'] === 'Manual' &&
+            initialUiState?.details?.['Next Scheduled Update'] === 'Not scheduled' &&
+            typeof initialUiState?.details?.['Last Updated'] === 'string' &&
+            initialUiState.details['Last Updated'].length > 0,
+            'Initial manual auto-update UI state was not rendered as expected',
+            initialUiState,
+        );
+        ensureAutoUpdateRequest(
+            String(dailyDictionary?.autoUpdate?.schedule || '') === 'daily' &&
+            String(dailyUiState?.value || '') === 'daily' &&
+            String(dailyUiState?.currentSchedule || '') === 'daily' &&
+            String(dailyUiState?.description || '') === 'Checks for updates every day and installs them automatically.' &&
+            String(dailyUiState?.details?.['Update Schedule'] || '') === 'Daily' &&
+            String(dailyUiState?.details?.['Next Scheduled Update'] || '') !== 'Not scheduled',
+            'Daily auto-update schedule UI state was not rendered as expected',
+            dailyUiState,
+        );
+        ensureAutoUpdateRequest(
+            String(manualDictionary?.autoUpdate?.schedule || '') === 'manual' &&
+            String(manualUiState?.value || '') === 'manual' &&
+            String(manualUiState?.currentSchedule || '') === 'manual' &&
+            String(manualUiState?.details?.['Update Schedule'] || '') === 'Manual' &&
+            String(manualUiState?.details?.['Next Scheduled Update'] || '') === 'Not scheduled',
+            'Manual auto-update schedule did not persist after reopening the modal',
+            manualUiState,
+        );
+        ensureAutoUpdateRequest(
+            String(hourlyDictionary?.indexUrl || '') === fixture.oldIndexUrl &&
+            String(hourlyDictionary?.autoUpdate?.schedule || '') === 'hourly',
+            'Hourly auto-update schedule did not bind to the expected initial index URL',
+            hourlyDictionary,
         );
         await addReportPhase(
             report,
             driver,
-            'Enable hourly auto-updates',
-            `Enabled automatic hourly updates for ${fixture.initialTitle} using index URL ${fixture.oldIndexUrl}`,
-            enableToggleStart,
-            enableToggleEnd,
+            'Configure dictionary update schedules',
+            `Verified manual, daily, and hourly schedule UI states for ${fixture.initialTitle} using index URL ${fixture.oldIndexUrl}`,
+            scheduleUiStart,
+            scheduleUiEnd,
         );
 
         localServer.clearAutoUpdateRequests();

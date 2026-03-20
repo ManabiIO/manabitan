@@ -387,6 +387,40 @@ describe('Backend dictionary auto-update helpers', () => {
         await expect(getBackendMethod('_setDictionaryUpdateSchedule').call(context, 'Test Dictionary', 'daily')).rejects.toThrow('Dictionary is not updatable');
     });
 
+    test('Successful scheduled no-update checks advance nextUpdateAt without changing lastUpdatedAt', async () => {
+        let currentDictionary = createDictionarySummary({
+            autoUpdate: {
+                schedule: 'daily',
+                lastUpdatedAt: 100,
+                nextUpdateAt: 150,
+            },
+        });
+        const updateDictionarySummaryByTitle = vi.fn(async (_dictionaryTitle, summary) => {
+            currentDictionary = summary;
+            return summary;
+        });
+        const context = {
+            _runWithDictionaryMutationLock: vi.fn(async (callback) => await callback()),
+            _ensureDictionaryDatabaseReady: async () => {},
+            _dictionaryDatabase: {
+                getDictionaryInfo: async () => [currentDictionary],
+                updateDictionarySummaryByTitle,
+            },
+            _setDictionarySummaryByTitle: getBackendMethod('_setDictionarySummaryByTitle'),
+        };
+
+        const updatedSummary = /** @type {import('dictionary-importer').Summary} */ (
+            await getBackendMethod('_advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck').call(context, 'Test Dictionary', 500)
+        );
+
+        expect(updatedSummary.autoUpdate).toStrictEqual({
+            schedule: 'daily',
+            lastUpdatedAt: 100,
+            nextUpdateAt: 500 + DICTIONARY_AUTO_UPDATE_DAY_MS,
+        });
+        expect(updateDictionarySummaryByTitle).toHaveBeenCalledTimes(1);
+    });
+
     test('HEAD 304 check updates validators without fetching the index body', async () => {
         const dictionary = createDictionarySummary();
         /** @type {Record<string, {etag?: string, lastModified?: string, lastAttemptAt?: number, lastSuccessfulCheckAt?: number, lastSeenRevision?: string, lastError?: string|null}>} */
@@ -535,67 +569,212 @@ describe('Backend dictionary auto-update helpers', () => {
         });
     });
 
-    test('Auto-update pass only checks enabled dictionaries that are due', async () => {
+    test('Auto-update pass only checks scheduled dictionaries that are due by nextUpdateAt', async () => {
         vi.spyOn(Date, 'now').mockReturnValue(2 * DICTIONARY_AUTO_UPDATE_INTERVAL_MS);
-        const checkDictionaryUpdates = vi.fn(async () => [createCheckResult()]);
+        const checkDictionaryUpdates = vi.fn(async (dictionaryTitles) => [createCheckResult({dictionaryTitle: dictionaryTitles[0]})]);
         const updateDictionaryByTitle = vi.fn(async () => ({status: 'updated'}));
+        const advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck = vi.fn(async () => null);
         const context = {
             _dictionaryAutoUpdatePassPromise: null,
             _dictionaryImportModeActive: false,
             _options: {
                 global: {
-                    dictionaryAutoUpdates: [
-                        'https://example.invalid/due.json',
-                        'https://example.invalid/recent.json',
-                    ],
+                    dictionaryAutoUpdates: [],
                 },
             },
             _ensureDictionaryDatabaseReady: async () => {},
             _dictionaryDatabase: {
                 getDictionaryInfo: async () => [
-                    createDictionarySummary({title: 'Recent', indexUrl: 'https://example.invalid/recent.json'}),
-                    createDictionarySummary({title: 'Due', indexUrl: 'https://example.invalid/due.json'}),
                     createDictionarySummary({
-                        title: 'Daily Metadata Only',
+                        title: 'Weekly Due',
+                        indexUrl: 'https://example.invalid/weekly.json',
+                        autoUpdate: {
+                            schedule: 'weekly',
+                            lastUpdatedAt: 0,
+                            nextUpdateAt: DICTIONARY_AUTO_UPDATE_INTERVAL_MS,
+                        },
+                    }),
+                    createDictionarySummary({
+                        title: 'Recent Daily',
                         indexUrl: 'https://example.invalid/daily.json',
                         autoUpdate: {
                             schedule: 'daily',
                             lastUpdatedAt: 0,
-                            nextUpdateAt: DICTIONARY_AUTO_UPDATE_DAY_MS,
+                            nextUpdateAt: 3 * DICTIONARY_AUTO_UPDATE_DAY_MS,
+                        },
+                    }),
+                    createDictionarySummary({
+                        title: 'Due Hourly',
+                        indexUrl: 'https://example.invalid/due.json',
+                        autoUpdate: {
+                            schedule: 'hourly',
+                            lastUpdatedAt: 0,
+                            nextUpdateAt: 0,
+                        },
+                    }),
+                    createDictionarySummary({
+                        title: 'Manual',
+                        indexUrl: 'https://example.invalid/manual.json',
+                        autoUpdate: {
+                            schedule: 'manual',
+                            lastUpdatedAt: 0,
+                            nextUpdateAt: null,
                         },
                     }),
                     createDictionarySummary({title: 'Static', isUpdatable: false, indexUrl: 'https://example.invalid/static.json'}),
                 ],
             },
-            _getDictionaryAutoUpdateState: async () => ({
-                'https://example.invalid/due.json': {lastAttemptAt: 0},
-                'https://example.invalid/recent.json': {lastAttemptAt: (2 * DICTIONARY_AUTO_UPDATE_INTERVAL_MS) - 1},
-                'https://example.invalid/daily.json': {lastAttemptAt: 0},
-            }),
             _checkDictionaryUpdates: checkDictionaryUpdates,
             _updateDictionaryByTitle: updateDictionaryByTitle,
+            _advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck: advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck,
+        };
+
+        await getBackendMethod('_runDictionaryAutoUpdatePass').call(context, 'alarm');
+
+        expect(checkDictionaryUpdates.mock.calls.map(([dictionaryTitles]) => dictionaryTitles)).toStrictEqual([
+            ['Due Hourly'],
+            ['Weekly Due'],
+        ]);
+        expect(updateDictionaryByTitle).toHaveBeenCalledTimes(2);
+        expect(updateDictionaryByTitle).toHaveBeenNthCalledWith(1, 'Due Hourly', false, expect.objectContaining({
+            dictionaryTitle: 'Due Hourly',
+            hasUpdate: true,
+        }));
+        expect(updateDictionaryByTitle).toHaveBeenNthCalledWith(2, 'Weekly Due', false, expect.objectContaining({
+            dictionaryTitle: 'Weekly Due',
+            hasUpdate: true,
+        }));
+        expect(advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck).not.toHaveBeenCalled();
+        expect(context._dictionaryAutoUpdatePassPromise).toBeNull();
+    });
+
+    test('Auto-update pass advances nextUpdateAt after successful scheduled checks with no update', async () => {
+        vi.spyOn(Date, 'now').mockReturnValue(500);
+        const checkDictionaryUpdates = vi.fn(async () => [createCheckResult({
+            dictionaryTitle: 'Daily Due',
+            hasUpdate: false,
+            latestRevision: '1',
+        })]);
+        const updateDictionaryByTitle = vi.fn(async () => ({status: 'updated'}));
+        const advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck = vi.fn(async () => null);
+        const context = {
+            _dictionaryAutoUpdatePassPromise: null,
+            _dictionaryImportModeActive: false,
+            _options: {
+                global: {
+                    dictionaryAutoUpdates: [],
+                },
+            },
+            _ensureDictionaryDatabaseReady: async () => {},
+            _dictionaryDatabase: {
+                getDictionaryInfo: async () => [createDictionarySummary({
+                    title: 'Daily Due',
+                    indexUrl: 'https://example.invalid/daily.json',
+                    autoUpdate: {
+                        schedule: 'daily',
+                        lastUpdatedAt: 10,
+                        nextUpdateAt: 0,
+                    },
+                })],
+            },
+            _checkDictionaryUpdates: checkDictionaryUpdates,
+            _updateDictionaryByTitle: updateDictionaryByTitle,
+            _advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck: advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck,
         };
 
         await getBackendMethod('_runDictionaryAutoUpdatePass').call(context, 'alarm');
 
         expect(checkDictionaryUpdates).toHaveBeenCalledTimes(1);
-        expect(checkDictionaryUpdates).toHaveBeenCalledWith(['Due']);
+        expect(checkDictionaryUpdates).toHaveBeenCalledWith(['Daily Due']);
+        expect(updateDictionaryByTitle).not.toHaveBeenCalled();
+        expect(advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck).toHaveBeenCalledTimes(1);
+        expect(advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck).toHaveBeenCalledWith('Daily Due', 500);
+    });
+
+    test('Auto-update pass leaves overdue schedules unchanged when scheduled checks or updates fail', async () => {
+        vi.spyOn(Date, 'now').mockReturnValue(750);
+        const checkDictionaryUpdates = vi.fn(async (dictionaryTitles) => {
+            const dictionaryTitle = dictionaryTitles[0];
+            if (dictionaryTitle === 'Check Failure') {
+                return [createCheckResult({
+                    dictionaryTitle,
+                    hasUpdate: false,
+                    error: 'network error',
+                })];
+            }
+            return [createCheckResult({dictionaryTitle})];
+        });
+        const updateDictionaryByTitle = vi.fn(async () => ({
+            dictionaryTitle: 'Update Failure',
+            status: 'skipped',
+            latestRevision: '2',
+            error: 'import failed',
+        }));
+        const advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck = vi.fn(async () => null);
+        const context = {
+            _dictionaryAutoUpdatePassPromise: null,
+            _dictionaryImportModeActive: false,
+            _options: {
+                global: {
+                    dictionaryAutoUpdates: [],
+                },
+            },
+            _ensureDictionaryDatabaseReady: async () => {},
+            _dictionaryDatabase: {
+                getDictionaryInfo: async () => [
+                    createDictionarySummary({
+                        title: 'Check Failure',
+                        indexUrl: 'https://example.invalid/check.json',
+                        autoUpdate: {
+                            schedule: 'daily',
+                            lastUpdatedAt: 10,
+                            nextUpdateAt: 0,
+                        },
+                    }),
+                    createDictionarySummary({
+                        title: 'Update Failure',
+                        indexUrl: 'https://example.invalid/update.json',
+                        autoUpdate: {
+                            schedule: 'weekly',
+                            lastUpdatedAt: 20,
+                            nextUpdateAt: 0,
+                        },
+                    }),
+                ],
+            },
+            _checkDictionaryUpdates: checkDictionaryUpdates,
+            _updateDictionaryByTitle: updateDictionaryByTitle,
+            _advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck: advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck,
+        };
+
+        await getBackendMethod('_runDictionaryAutoUpdatePass').call(context, 'alarm');
+
+        expect(checkDictionaryUpdates.mock.calls.map(([dictionaryTitles]) => dictionaryTitles)).toStrictEqual([
+            ['Check Failure'],
+            ['Update Failure'],
+        ]);
         expect(updateDictionaryByTitle).toHaveBeenCalledTimes(1);
-        expect(updateDictionaryByTitle).toHaveBeenCalledWith('Due', false, expect.objectContaining({
-            dictionaryTitle: 'Test Dictionary',
+        expect(updateDictionaryByTitle).toHaveBeenCalledWith('Update Failure', false, expect.objectContaining({
+            dictionaryTitle: 'Update Failure',
             hasUpdate: true,
         }));
-        expect(context._dictionaryAutoUpdatePassPromise).toBeNull();
+        expect(advanceDictionaryAutoUpdateScheduleAfterSuccessfulCheck).not.toHaveBeenCalled();
     });
 
     test('Auto-update update skips when the mutation lock is busy', async () => {
-        const dictionary = createDictionarySummary();
+        const dictionary = createDictionarySummary({
+            autoUpdate: {
+                schedule: 'daily',
+                lastUpdatedAt: 0,
+                nextUpdateAt: 0,
+            },
+        });
         const fetchAnonymous = vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), {status: 200}));
         const performDictionaryUpdate = vi.fn(async () => ({status: 'updated'}));
         const context = {
             _options: {
                 global: {
-                    dictionaryAutoUpdates: ['https://example.invalid/index.json'],
+                    dictionaryAutoUpdates: [],
                 },
             },
             _ensureDictionaryDatabaseReady: async () => {},
@@ -625,8 +804,71 @@ describe('Backend dictionary auto-update helpers', () => {
         expect(performDictionaryUpdate).not.toHaveBeenCalled();
     });
 
-    test('Auto-update update aborts when hourly updates were disabled before commit', async () => {
-        const dictionary = createDictionarySummary();
+    test('Auto-update update allows scheduled non-hourly dictionaries when the hourly compatibility list is empty', async () => {
+        const dictionary = createDictionarySummary({
+            autoUpdate: {
+                schedule: 'daily',
+                lastUpdatedAt: 0,
+                nextUpdateAt: 0,
+            },
+        });
+        const performDictionaryUpdate = vi.fn(async () => ({
+            dictionaryTitle: 'Test Dictionary',
+            status: 'updated',
+            latestRevision: '2',
+            error: null,
+        }));
+        const context = {
+            _options: {
+                global: {
+                    dictionaryAutoUpdates: [],
+                },
+            },
+            _ensureDictionaryDatabaseReady: async () => {},
+            _dictionaryDatabase: {
+                getDictionaryInfo: vi.fn()
+                    .mockResolvedValueOnce([dictionary])
+                    .mockResolvedValueOnce([dictionary]),
+            },
+            _requestBuilder: {
+                fetchAnonymous: vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), {status: 200})),
+            },
+            _setDictionaryAutoUpdateError: vi.fn(async () => {}),
+            _runWithDictionaryMutationLock: vi.fn(async (callback) => await callback()),
+            _performDictionaryUpdate: performDictionaryUpdate,
+        };
+
+        const result = await getBackendMethod('_updateDictionaryByTitle').call(
+            context,
+            'Test Dictionary',
+            false,
+            createCheckResult(),
+        );
+
+        expect(result).toStrictEqual({
+            dictionaryTitle: 'Test Dictionary',
+            status: 'updated',
+            latestRevision: '2',
+            error: null,
+        });
+        expect(performDictionaryUpdate).toHaveBeenCalledTimes(1);
+    });
+
+    test('Auto-update update aborts when automatic updates were disabled before commit', async () => {
+        const scheduledDictionary = createDictionarySummary({
+            autoUpdate: {
+                schedule: 'daily',
+                lastUpdatedAt: 0,
+                nextUpdateAt: 0,
+            },
+        });
+        const disabledDictionary = createDictionarySummary({
+            autoUpdate: {
+                schedule: 'manual',
+                lastUpdatedAt: 0,
+                nextUpdateAt: null,
+            },
+        });
         const performDictionaryUpdate = vi.fn(async () => ({status: 'updated'}));
         const context = {
             _options: {
@@ -636,7 +878,9 @@ describe('Backend dictionary auto-update helpers', () => {
             },
             _ensureDictionaryDatabaseReady: async () => {},
             _dictionaryDatabase: {
-                getDictionaryInfo: vi.fn(async () => [dictionary]),
+                getDictionaryInfo: vi.fn()
+                    .mockResolvedValueOnce([scheduledDictionary])
+                    .mockResolvedValueOnce([disabledDictionary]),
             },
             _requestBuilder: {
                 fetchAnonymous: vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), {status: 200})),
