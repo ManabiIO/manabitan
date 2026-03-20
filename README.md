@@ -42,9 +42,9 @@ We have benchmarks for these 3 things:
 
 We regularly benchmark these 3 things and if if it becomes slower than normal we will work to fix it.
 
-Manabitan is a dictionary app that lets you mine to Anki.
-
 If a new feature or bug makes one of these 3 things slower, we will exterminate it ruthlessly to ensure we are the best dictionary app on the market.
+
+Manabitan is a dictionary app that lets you mine to Anki. If this is not fast, then what is the point of this software?
 
 ## Why not contribute to Yomitan directly?
 
