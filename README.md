@@ -5,12 +5,15 @@
 [Download for Chrome, Firefox, Edge](https://github.com/ManabiIO/manabitan/releases/latest)
 [Firefox Dev Builds](https://github.com/ManabiIO/manabitan/releases/latest)
 
+[![CI](https://img.shields.io/github/actions/workflow/status/ManabiIO/manabitan/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/ManabiIO/manabitan/actions/workflows/ci.yml)
+[![Test Coverage](https://img.shields.io/badge/test%20coverage-100%25-brightgreen?style=for-the-badge)](https://github.com/ManabiIO/manabitan/blob/main/docs/development/npm-scripts.md#testcoverage)
 [![Manabi Discord](https://dcbadge.limes.pink/api/server/gvxzS93C3w?style=for-the-badge)](https://discord.gg/gvxzS93C3w)
 [![Discord](https://dcbadge.limes.pink/api/server/YkQrXW6TXF?style=for-the-badge)](https://discord.gg/YkQrXW6TXF)
 
 # Differences from Yomitan
 
 ## Speed
+
 - 5001% dictionary import speedup
 - 6800% faster anki dedupe check
 - 2x faster to make Anki cards
@@ -18,11 +21,11 @@
 - In memory cache support for dictionaries + Anki dupe. The benchmarks above are with the cache turned off btw
 
 ## Features
+
 - MDX dictionary support (now supports 20,000 more dicts than Yomitan)
 - Auto-updating dictionaries, never manually update a dictionary again.
 - Blur when word is under a certain frequency to force you to recall it.
 - Edit dictionary metadata (name etc) after importing.
-
 
 ## Nerdy
 
@@ -33,8 +36,7 @@
 
 ## What's being upstreamed?
 
-I am [actively](https://github.com/yomidevs/yomitan/issues?q=is%3Apr%20author%3Abee-san
-) pushing PRs to Yomitan to improve it based on this work. 
+I am [actively](https://github.com/yomidevs/yomitan/issues?q=is%3Apr%20author%3Abee-san) pushing PRs to Yomitan to improve it based on this work.
 
 Using this fork and telling me what's wrong will let me write better PRs for Yomitan.
 
