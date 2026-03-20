@@ -227,6 +227,15 @@ export class DictionaryDatabaseProxy {
     }
 
     /**
+     * @param {string} dictionaryTitle
+     * @param {import('dictionary-importer').Summary} summary
+     * @returns {Promise<import('dictionary-importer').Summary|null>}
+     */
+    async updateDictionarySummaryByTitle(dictionaryTitle, summary) {
+        return await this._offscreen.sendMessagePromise({action: 'updateDictionarySummaryByTitleOffscreen', params: {dictionaryTitle, summary}});
+    }
+
+    /**
      * @returns {Promise<number>}
      */
     async getMaxHeadwordLength() {

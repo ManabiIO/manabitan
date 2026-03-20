@@ -28,6 +28,8 @@ vi.mock('../ext/lib/kanji-processor.js', () => ({
 const {Backend} = await import('../ext/js/background/backend.js');
 
 const DICTIONARY_AUTO_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
+const DICTIONARY_AUTO_UPDATE_DAY_MS = 24 * DICTIONARY_AUTO_UPDATE_INTERVAL_MS;
+const DICTIONARY_AUTO_UPDATE_WEEK_MS = 7 * DICTIONARY_AUTO_UPDATE_DAY_MS;
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -72,6 +74,11 @@ function createDictionarySummary(overrides = {}) {
         indexUrl: 'https://example.invalid/index.json',
         downloadUrl: 'https://example.invalid/dictionary.zip',
         importSuccess: true,
+        autoUpdate: {
+            schedule: 'manual',
+            lastUpdatedAt: 0,
+            nextUpdateAt: null,
+        },
         ...overrides,
     });
 }
@@ -178,6 +185,206 @@ describe('Backend dictionary auto-update helpers', () => {
         expect(setState).toHaveBeenCalledWith({
             'https://example.invalid/keep.json': {lastAttemptAt: 1},
         });
+    });
+
+    test('Backfills hourly schedule metadata for dictionaries already enabled in global auto-update settings', async () => {
+        let currentDictionaries = /** @type {import('dictionary-importer').Summary[]} */ ([
+            createDictionarySummary({
+                autoUpdate: void 0,
+                importDate: 500,
+            }),
+            createDictionarySummary({
+                title: 'Other Dictionary',
+                indexUrl: 'https://example.invalid/other.json',
+                autoUpdate: {
+                    schedule: 'daily',
+                    lastUpdatedAt: 250,
+                    nextUpdateAt: 250 + DICTIONARY_AUTO_UPDATE_DAY_MS,
+                },
+            }),
+        ]);
+        const updateDictionarySummaryByTitle = vi.fn(async (dictionaryTitle, summary) => {
+            currentDictionaries = currentDictionaries.map((dictionary) => (dictionary.title === dictionaryTitle ? summary : dictionary));
+            return summary;
+        });
+        const context = {
+            _options: {
+                global: {
+                    dictionaryAutoUpdates: ['https://example.invalid/index.json'],
+                },
+            },
+            _runWithDictionaryMutationLock: vi.fn(async (callback) => await callback()),
+            _ensureDictionaryDatabaseReady: async () => {},
+            _dictionaryDatabase: {
+                getDictionaryInfo: async () => currentDictionaries,
+                updateDictionarySummaryByTitle,
+            },
+            _setDictionarySummaryByTitle: getBackendMethod('_setDictionarySummaryByTitle'),
+        };
+
+        await getBackendMethod('_backfillDictionaryAutoUpdateSummarySchedules').call(context);
+
+        expect(updateDictionarySummaryByTitle).toHaveBeenCalledTimes(1);
+        expect(currentDictionaries[0].autoUpdate).toStrictEqual({
+            schedule: 'hourly',
+            lastUpdatedAt: 500,
+            nextUpdateAt: 500 + DICTIONARY_AUTO_UPDATE_INTERVAL_MS,
+        });
+        expect(currentDictionaries[1].autoUpdate).toStrictEqual({
+            schedule: 'daily',
+            lastUpdatedAt: 250,
+            nextUpdateAt: 250 + DICTIONARY_AUTO_UPDATE_DAY_MS,
+        });
+    });
+
+    test('Global hourly auto-update settings sync dictionary summary schedules between hourly and manual', async () => {
+        let currentDictionaries = /** @type {import('dictionary-importer').Summary[]} */ ([
+            createDictionarySummary({
+                autoUpdate: {
+                    schedule: 'manual',
+                    lastUpdatedAt: 10,
+                    nextUpdateAt: null,
+                },
+            }),
+            createDictionarySummary({
+                title: 'Daily Dictionary',
+                indexUrl: 'https://example.invalid/daily.json',
+                autoUpdate: {
+                    schedule: 'daily',
+                    lastUpdatedAt: 20,
+                    nextUpdateAt: 20 + DICTIONARY_AUTO_UPDATE_DAY_MS,
+                },
+            }),
+        ]);
+        const updateDictionarySummaryByTitle = vi.fn(async (dictionaryTitle, summary) => {
+            currentDictionaries = currentDictionaries.map((dictionary) => (dictionary.title === dictionaryTitle ? summary : dictionary));
+            return summary;
+        });
+        const context = {
+            _options: {
+                global: {
+                    dictionaryAutoUpdates: ['https://example.invalid/index.json'],
+                },
+            },
+            _runWithDictionaryMutationLock: vi.fn(async (callback) => await callback()),
+            _ensureDictionaryDatabaseReady: async () => {},
+            _dictionaryDatabase: {
+                getDictionaryInfo: async () => currentDictionaries,
+                updateDictionarySummaryByTitle,
+            },
+            _setDictionarySummaryByTitle: getBackendMethod('_setDictionarySummaryByTitle'),
+        };
+
+        await getBackendMethod('_syncDictionaryAutoUpdateSummarySchedulesWithGlobalSettings').call(context);
+
+        expect(updateDictionarySummaryByTitle).toHaveBeenCalledTimes(2);
+        expect(currentDictionaries[0].autoUpdate).toStrictEqual({
+            schedule: 'hourly',
+            lastUpdatedAt: 10,
+            nextUpdateAt: 10 + DICTIONARY_AUTO_UPDATE_INTERVAL_MS,
+        });
+        expect(currentDictionaries[1].autoUpdate).toStrictEqual({
+            schedule: 'manual',
+            lastUpdatedAt: 20,
+            nextUpdateAt: null,
+        });
+    });
+
+    test('setDictionaryUpdateSchedule persists schedules and syncs the hourly compatibility list', async () => {
+        let currentDictionary = createDictionarySummary({
+            importDate: 100,
+            autoUpdate: {
+                schedule: 'manual',
+                lastUpdatedAt: 100,
+                nextUpdateAt: null,
+            },
+        });
+        const saveOptions = vi.fn(async () => {});
+        const updateDictionarySummaryByTitle = vi.fn(async (_dictionaryTitle, summary) => {
+            currentDictionary = summary;
+            return summary;
+        });
+        const context = {
+            _options: {
+                global: {
+                    dictionaryAutoUpdates: [],
+                },
+            },
+            _runWithDictionaryMutationLock: vi.fn(async (callback) => await callback()),
+            _ensureDictionaryDatabaseReady: async () => {},
+            _dictionaryDatabase: {
+                getDictionaryInfo: async () => [currentDictionary],
+                updateDictionarySummaryByTitle,
+            },
+            _saveOptions: saveOptions,
+            _setDictionarySummaryByTitle: getBackendMethod('_setDictionarySummaryByTitle'),
+            _syncGlobalDictionaryAutoUpdateOptionsFromSummaries: getBackendMethod('_syncGlobalDictionaryAutoUpdateOptionsFromSummaries'),
+            _getSortedDictionaryAutoUpdateIndexUrls: getBackendMethod('_getSortedDictionaryAutoUpdateIndexUrls'),
+        };
+
+        const hourlySummary = /** @type {import('dictionary-importer').Summary} */ (
+            await getBackendMethod('_setDictionaryUpdateSchedule').call(context, 'Test Dictionary', 'hourly')
+        );
+        expect(hourlySummary.autoUpdate).toStrictEqual({
+            schedule: 'hourly',
+            lastUpdatedAt: 100,
+            nextUpdateAt: 100 + DICTIONARY_AUTO_UPDATE_INTERVAL_MS,
+        });
+        expect(context._options.global.dictionaryAutoUpdates).toStrictEqual(['https://example.invalid/index.json']);
+
+        const dailySummary = /** @type {import('dictionary-importer').Summary} */ (
+            await getBackendMethod('_setDictionaryUpdateSchedule').call(context, 'Test Dictionary', 'daily')
+        );
+        expect(dailySummary.autoUpdate).toStrictEqual({
+            schedule: 'daily',
+            lastUpdatedAt: 100,
+            nextUpdateAt: 100 + DICTIONARY_AUTO_UPDATE_DAY_MS,
+        });
+        expect(context._options.global.dictionaryAutoUpdates).toStrictEqual([]);
+
+        const weeklySummary = /** @type {import('dictionary-importer').Summary} */ (
+            await getBackendMethod('_setDictionaryUpdateSchedule').call(context, 'Test Dictionary', 'weekly')
+        );
+        expect(weeklySummary.autoUpdate).toStrictEqual({
+            schedule: 'weekly',
+            lastUpdatedAt: 100,
+            nextUpdateAt: 100 + DICTIONARY_AUTO_UPDATE_WEEK_MS,
+        });
+        expect(context._options.global.dictionaryAutoUpdates).toStrictEqual([]);
+        expect(updateDictionarySummaryByTitle).toHaveBeenCalledTimes(3);
+        expect(saveOptions).toHaveBeenCalledTimes(2);
+    });
+
+    test('setDictionaryUpdateSchedule rejects non-manual schedules for non-updatable dictionaries', async () => {
+        const dictionary = createDictionarySummary({
+            isUpdatable: false,
+            indexUrl: void 0,
+            downloadUrl: void 0,
+            autoUpdate: {
+                schedule: 'manual',
+                lastUpdatedAt: 50,
+                nextUpdateAt: null,
+            },
+        });
+        const context = {
+            _options: {
+                global: {
+                    dictionaryAutoUpdates: [],
+                },
+            },
+            _runWithDictionaryMutationLock: vi.fn(async (callback) => await callback()),
+            _ensureDictionaryDatabaseReady: async () => {},
+            _dictionaryDatabase: {
+                getDictionaryInfo: async () => [dictionary],
+                updateDictionarySummaryByTitle: vi.fn(async () => dictionary),
+            },
+            _saveOptions: vi.fn(async () => {}),
+            _setDictionarySummaryByTitle: getBackendMethod('_setDictionarySummaryByTitle'),
+            _syncGlobalDictionaryAutoUpdateOptionsFromSummaries: getBackendMethod('_syncGlobalDictionaryAutoUpdateOptionsFromSummaries'),
+            _getSortedDictionaryAutoUpdateIndexUrls: getBackendMethod('_getSortedDictionaryAutoUpdateIndexUrls'),
+        };
+
+        await expect(getBackendMethod('_setDictionaryUpdateSchedule').call(context, 'Test Dictionary', 'daily')).rejects.toThrow('Dictionary is not updatable');
     });
 
     test('HEAD 304 check updates validators without fetching the index body', async () => {
@@ -348,12 +555,22 @@ describe('Backend dictionary auto-update helpers', () => {
                 getDictionaryInfo: async () => [
                     createDictionarySummary({title: 'Recent', indexUrl: 'https://example.invalid/recent.json'}),
                     createDictionarySummary({title: 'Due', indexUrl: 'https://example.invalid/due.json'}),
+                    createDictionarySummary({
+                        title: 'Daily Metadata Only',
+                        indexUrl: 'https://example.invalid/daily.json',
+                        autoUpdate: {
+                            schedule: 'daily',
+                            lastUpdatedAt: 0,
+                            nextUpdateAt: DICTIONARY_AUTO_UPDATE_DAY_MS,
+                        },
+                    }),
                     createDictionarySummary({title: 'Static', isUpdatable: false, indexUrl: 'https://example.invalid/static.json'}),
                 ],
             },
             _getDictionaryAutoUpdateState: async () => ({
                 'https://example.invalid/due.json': {lastAttemptAt: 0},
                 'https://example.invalid/recent.json': {lastAttemptAt: (2 * DICTIONARY_AUTO_UPDATE_INTERVAL_MS) - 1},
+                'https://example.invalid/daily.json': {lastAttemptAt: 0},
             }),
             _checkDictionaryUpdates: checkDictionaryUpdates,
             _updateDictionaryByTitle: updateDictionaryByTitle,
@@ -489,6 +706,7 @@ describe('Backend dictionary auto-update helpers', () => {
             _captureDictionaryUpdateSettings: vi.fn(() => ({profilesDictionarySettings: {}, mainDictionaryProfileIds: new Set(), sortFrequencyDictionaryProfileIds: new Set()})),
             _dictionaryDatabase: {
                 deleteDictionary: vi.fn(async () => {}),
+                updateDictionarySummaryByTitle: vi.fn(async (_dictionaryTitle, summary) => summary),
             },
             _setDictionaryImportMode: vi.fn(async () => {}),
             _importDictionaryArchiveHeadless: vi.fn(async () => ({
@@ -498,6 +716,8 @@ describe('Backend dictionary auto-update helpers', () => {
                 }),
                 errors: [],
             })),
+            _setDictionarySummaryByTitle: getBackendMethod('_setDictionarySummaryByTitle'),
+            _createUpdatedDictionarySummaryAfterImport: getBackendMethod('_createUpdatedDictionarySummaryAfterImport'),
             _applyImportedDictionarySettings: vi.fn(async () => {}),
             _updateDictionaryAutoUpdateStateAfterSuccess: vi.fn(async () => {}),
             _setDictionaryAutoUpdateError: vi.fn(async () => {}),
@@ -530,6 +750,118 @@ describe('Backend dictionary auto-update helpers', () => {
             expect.any(Object),
         );
         expect(context._setDictionaryAutoUpdateError).not.toHaveBeenCalled();
+    });
+
+    test('Dictionary updates preserve stored schedule metadata and refresh lastUpdatedAt', async () => {
+        const dictionary = createDictionarySummary({
+            title: 'Custom Title',
+            importDate: 25,
+            autoUpdate: {
+                schedule: 'weekly',
+                lastUpdatedAt: 25,
+                nextUpdateAt: 25 + DICTIONARY_AUTO_UPDATE_WEEK_MS,
+            },
+        });
+        const archiveContent = new Uint8Array([1, 2, 3, 4]);
+        /** @type {import('dictionary-importer').Summary[]} */
+        const persistedSummaries = [];
+        const updateDictionarySummaryByTitle = vi.fn(async (_dictionaryTitle, summary) => {
+            persistedSummaries.push(summary);
+            return summary;
+        });
+        const context = {
+            _captureDictionaryUpdateSettings: vi.fn(() => ({profilesDictionarySettings: {}, mainDictionaryProfileIds: new Set(), sortFrequencyDictionaryProfileIds: new Set()})),
+            _dictionaryDatabase: {
+                deleteDictionary: vi.fn(async () => {}),
+                updateDictionarySummaryByTitle,
+            },
+            _createDictionaryImportDetails: vi.fn(() => ({prefixWildcardsSupported: false, yomitanVersion: '0.0.0.0'})),
+            _setDictionaryImportMode: vi.fn(async () => {}),
+            _importDictionaryArchiveHeadless: vi.fn(async () => ({
+                result: createDictionarySummary({
+                    title: 'Custom Title',
+                    revision: '2026.03',
+                    importDate: 500,
+                }),
+                errors: [],
+            })),
+            _setDictionarySummaryByTitle: getBackendMethod('_setDictionarySummaryByTitle'),
+            _createUpdatedDictionarySummaryAfterImport: getBackendMethod('_createUpdatedDictionarySummaryAfterImport'),
+            _applyImportedDictionarySettings: vi.fn(async () => {}),
+            _updateDictionaryAutoUpdateStateAfterSuccess: vi.fn(async () => {}),
+            _setDictionaryAutoUpdateError: vi.fn(async () => {}),
+            _handleDatabaseUpdated: vi.fn(async () => {}),
+            _pruneStaleProfileDictionaryOptions: vi.fn(async () => {}),
+            _pruneStaleDictionaryAutoUpdates: vi.fn(async () => {}),
+        };
+
+        const result = await getBackendMethod('_performDictionaryUpdate').call(context, dictionary, archiveContent, '2026.03');
+
+        expect(result).toStrictEqual({
+            dictionaryTitle: 'Custom Title',
+            status: 'updated',
+            latestRevision: '2026.03',
+            error: null,
+        });
+        expect(updateDictionarySummaryByTitle).toHaveBeenCalledTimes(1);
+        expect(persistedSummaries[0]?.autoUpdate).toStrictEqual({
+            schedule: 'weekly',
+            lastUpdatedAt: 500,
+            nextUpdateAt: 500 + DICTIONARY_AUTO_UPDATE_WEEK_MS,
+        });
+    });
+
+    test('Dictionary updates reset stored schedule metadata when the imported dictionary is no longer updatable', async () => {
+        const dictionary = createDictionarySummary({
+            title: 'Custom Title',
+            autoUpdate: {
+                schedule: 'hourly',
+                lastUpdatedAt: 75,
+                nextUpdateAt: 75 + DICTIONARY_AUTO_UPDATE_INTERVAL_MS,
+            },
+        });
+        const archiveContent = new Uint8Array([1, 2, 3, 4]);
+        /** @type {import('dictionary-importer').Summary[]} */
+        const persistedSummaries = [];
+        const context = {
+            _captureDictionaryUpdateSettings: vi.fn(() => ({profilesDictionarySettings: {}, mainDictionaryProfileIds: new Set(), sortFrequencyDictionaryProfileIds: new Set()})),
+            _dictionaryDatabase: {
+                deleteDictionary: vi.fn(async () => {}),
+                updateDictionarySummaryByTitle: vi.fn(async (_dictionaryTitle, summary) => {
+                    persistedSummaries.push(summary);
+                    return summary;
+                }),
+            },
+            _createDictionaryImportDetails: vi.fn(() => ({prefixWildcardsSupported: false, yomitanVersion: '0.0.0.0'})),
+            _setDictionaryImportMode: vi.fn(async () => {}),
+            _importDictionaryArchiveHeadless: vi.fn(async () => ({
+                result: createDictionarySummary({
+                    title: 'Custom Title',
+                    revision: '2026.03',
+                    importDate: 800,
+                    isUpdatable: false,
+                    indexUrl: void 0,
+                    downloadUrl: void 0,
+                }),
+                errors: [],
+            })),
+            _setDictionarySummaryByTitle: getBackendMethod('_setDictionarySummaryByTitle'),
+            _createUpdatedDictionarySummaryAfterImport: getBackendMethod('_createUpdatedDictionarySummaryAfterImport'),
+            _applyImportedDictionarySettings: vi.fn(async () => {}),
+            _updateDictionaryAutoUpdateStateAfterSuccess: vi.fn(async () => {}),
+            _setDictionaryAutoUpdateError: vi.fn(async () => {}),
+            _handleDatabaseUpdated: vi.fn(async () => {}),
+            _pruneStaleProfileDictionaryOptions: vi.fn(async () => {}),
+            _pruneStaleDictionaryAutoUpdates: vi.fn(async () => {}),
+        };
+
+        await getBackendMethod('_performDictionaryUpdate').call(context, dictionary, archiveContent, '2026.03');
+
+        expect(persistedSummaries[0]?.autoUpdate).toStrictEqual({
+            schedule: 'manual',
+            lastUpdatedAt: 800,
+            nextUpdateAt: null,
+        });
     });
 
     test('Imported dictionary settings migrate aliases, Anki fields, and auto-update preferences', async () => {
@@ -586,16 +918,32 @@ describe('Backend dictionary auto-update helpers', () => {
                 },
             },
             _saveOptions: saveOptions,
+            _ensureDictionaryDatabaseReady: async () => {},
+            _dictionaryDatabase: {
+                getDictionaryInfo: async () => [importedSummary],
+            },
+            _syncGlobalDictionaryAutoUpdateOptionsFromSummaries: getBackendMethod('_syncGlobalDictionaryAutoUpdateOptionsFromSummaries'),
+            _getSortedDictionaryAutoUpdateIndexUrls: getBackendMethod('_getSortedDictionaryAutoUpdateIndexUrls'),
         };
         const previousSummary = createDictionarySummary({
             title: 'Old Dictionary',
             indexUrl: 'https://example.invalid/old-index.json',
             styles: 'old-style',
+            autoUpdate: {
+                schedule: 'hourly',
+                lastUpdatedAt: 10,
+                nextUpdateAt: 10 + DICTIONARY_AUTO_UPDATE_INTERVAL_MS,
+            },
         });
         const importedSummary = createDictionarySummary({
             title: 'New Dictionary',
             indexUrl: 'https://example.invalid/new-index.json',
             styles: 'new-style',
+            autoUpdate: {
+                schedule: 'hourly',
+                lastUpdatedAt: 10,
+                nextUpdateAt: 10 + DICTIONARY_AUTO_UPDATE_INTERVAL_MS,
+            },
         });
         const updateContext = {
             profilesDictionarySettings: {
@@ -644,7 +992,7 @@ describe('Backend dictionary auto-update helpers', () => {
         expect(profile.options.general.sortFrequencyDictionary).toBe('New Dictionary');
         expect(profile.options.anki.cardFormats[0].fields.expression.value).toBe('new-dictionary-term new-dictionary-reading');
         expect(context._options.global.dictionaryAutoUpdates).toStrictEqual(['https://example.invalid/new-index.json']);
-        expect(saveOptions).toHaveBeenCalledTimes(1);
+        expect(saveOptions).toHaveBeenCalledTimes(2);
         expect(saveOptions).toHaveBeenCalledWith('background');
     });
 });

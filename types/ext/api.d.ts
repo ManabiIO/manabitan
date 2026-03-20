@@ -317,6 +317,13 @@ type ApiSurface = {
         };
         return: Backend.DictionaryUpdateResult;
     };
+    setDictionaryUpdateSchedule: {
+        params: {
+            dictionaryTitle: string;
+            schedule: DictionaryImporter.DictionaryAutoUpdateSchedule;
+        };
+        return: DictionaryImporter.Summary;
+    };
     setDictionaryImportMode: {
         params: {
             active: boolean;

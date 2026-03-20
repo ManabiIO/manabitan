@@ -283,6 +283,15 @@ export class API {
     }
 
     /**
+     * @param {import('api').ApiParam<'setDictionaryUpdateSchedule', 'dictionaryTitle'>} dictionaryTitle
+     * @param {import('api').ApiParam<'setDictionaryUpdateSchedule', 'schedule'>} schedule
+     * @returns {Promise<import('api').ApiReturn<'setDictionaryUpdateSchedule'>>}
+     */
+    setDictionaryUpdateSchedule(dictionaryTitle, schedule) {
+        return this._invoke('setDictionaryUpdateSchedule', {dictionaryTitle, schedule});
+    }
+
+    /**
      * @param {import('api').ApiParam<'setDictionaryImportMode', 'active'>} active
      * @returns {Promise<import('api').ApiReturn<'setDictionaryImportMode'>>}
      */

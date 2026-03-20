@@ -144,6 +144,13 @@ class OffscreenDictionaryWorkerHandler {
                 this._assertDatabaseAvailable(action);
                 await this._ensureDatabasePrepared();
                 return await this._dictionaryDatabase.getDictionaryInfo();
+            case 'updateDictionarySummaryByTitleOffscreen':
+                this._assertDatabaseAvailable(action);
+                await this._ensureDatabasePrepared();
+                return await this._dictionaryDatabase.updateDictionarySummaryByTitle(
+                    /** @type {string} */ (params.dictionaryTitle ?? ''),
+                    /** @type {import('dictionary-importer').Summary} */ (params.summary ?? {}),
+                );
             case 'getMaxHeadwordLengthOffscreen':
                 this._assertDatabaseAvailable(action);
                 await this._ensureDatabasePrepared();
