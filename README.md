@@ -35,6 +35,17 @@
 - Auto import Kiku/Lapis/Senren/Crop-Theft Anki Note types.
 - No scan length. Before you had to say "only scan 10 characters", now you don't have to do that. We will show you the longest possible word in the dict (plus a few more characters for grammar etc)
 
+We have benchmarks for these 3 things:
+1. Importing dictionaries
+2. Looking up words
+3. Adding to Anki
+
+We regularly benchmark these 3 things and if if it becomes slower than normal we will work to fix it.
+
+Manabitan is a dictionary app that lets you mine to Anki.
+
+If a new feature or bug makes one of these 3 things slower, we will exterminate it ruthlessly to ensure we are the best dictionary app on the market.
+
 ## Why not contribute to Yomitan directly?
 
 A lot of this stuff is experimental and may break.
