@@ -49,6 +49,7 @@ import {Translator} from '../language/translator.js';
 import {AudioDownloader} from '../media/audio-downloader.js';
 import {getFileExtensionFromAudioMediaType, getFileExtensionFromImageMediaType} from '../media/media-util.js';
 import {ClipboardReaderProxy, DictionaryDatabaseProxy, OffscreenProxy, TranslatorProxy} from './offscreen-proxy.js';
+import {openSettingsPage} from './extension-page-navigation.js';
 import {createSchema, normalizeContext} from './profile-conditions-util.js';
 import {RequestBuilder} from './request-builder.js';
 import {injectStylesheet} from './script-manager.js';
@@ -1581,12 +1582,22 @@ export class Backend {
 
         switch (mode) {
             case 'existingOrNewTab':
+                /** @type {Error|null} */
+                let openInTabError = null;
                 try {
                     if (await openInTab()) { return; }
-                } catch (e) {
-                    // NOP
+                } catch (error) {
+                    openInTabError = (error instanceof Error ? error : new Error(`${error}`));
                 }
-                await this._createTab(queryUrl);
+                try {
+                    await this._createTab(queryUrl);
+                } catch (error) {
+                    if (openInTabError !== null) {
+                        const createTabError = (error instanceof Error ? error : new Error(`${error}`));
+                        throw new Error(`Failed to focus the existing search page tab or create a new one: ${openInTabError.message}; ${createTabError.message}`);
+                    }
+                    throw error;
+                }
                 return;
             case 'newTab':
                 await this._createTab(queryUrl);
@@ -4383,29 +4394,7 @@ export class Backend {
      * @param {import('backend').Mode} mode
      */
     async _openSettingsPage(mode) {
-        const manifest = chrome.runtime.getManifest();
-        const optionsUI = manifest.options_ui;
-        if (typeof optionsUI === 'undefined') { throw new Error('Failed to find options_ui'); }
-        const {page} = optionsUI;
-        if (typeof page === 'undefined') { throw new Error('Failed to find options_ui.page'); }
-        const url = chrome.runtime.getURL(page);
-        switch (mode) {
-            case 'existingOrNewTab':
-                await /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
-                    chrome.runtime.openOptionsPage(() => {
-                        const e = chrome.runtime.lastError;
-                        if (e) {
-                            reject(new Error(e.message));
-                        } else {
-                            resolve();
-                        }
-                    });
-                }));
-                break;
-            case 'newTab':
-                await this._createTab(url);
-                break;
-        }
+        await openSettingsPage(mode, this._createTab.bind(this));
     }
 
     /**

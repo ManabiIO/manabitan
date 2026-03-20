@@ -19,6 +19,7 @@
 import {ClipboardMonitor} from '../comm/clipboard-monitor.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {addPrimaryActivationEventListeners} from '../dom/primary-activation-event-listeners.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {isComposing} from '../language/ime-utilities.js';
 import {convertToKana, convertToKanaIME} from '../language/ja/japanese-wanakana.js';
@@ -106,10 +107,7 @@ export class SearchDisplayController {
         this._display.queryParserVisible = true;
         this._display.setHistorySettings({useBrowserHistory: true});
 
-        this._searchButton.addEventListener('click', this._onSearch.bind(this), false);
-        this._clearButton.addEventListener('click', this._onClear.bind(this), false);
-
-        this._searchBackButton.addEventListener('click', this._onSearchBackButtonClick.bind(this), false);
+        this._setupButtonActivationListeners();
         this._wanakanaEnableCheckbox.addEventListener('change', this._onWanakanaEnableChange.bind(this));
         window.addEventListener('copy', this._onCopy.bind(this));
         window.addEventListener('paste', this._onPaste.bind(this));
@@ -124,6 +122,13 @@ export class SearchDisplayController {
         if (displayOptions !== null) {
             await this._onDisplayOptionsUpdated({options: displayOptions});
         }
+    }
+
+    /** */
+    _setupButtonActivationListeners() {
+        addPrimaryActivationEventListeners(this._searchButton, this._onSearch.bind(this));
+        addPrimaryActivationEventListeners(this._clearButton, this._onClear.bind(this));
+        addPrimaryActivationEventListeners(this._searchBackButton, this._onSearchBackButtonClick.bind(this));
     }
 
     /**

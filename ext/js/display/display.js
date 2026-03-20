@@ -28,6 +28,7 @@ import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
 import {addScopeToCss, clone, deepEqual, promiseTimeout} from '../core/utilities.js';
 import {setProfile} from '../data/profiles-util.js';
+import {addPrimaryActivationEventListeners} from '../dom/primary-activation-event-listeners.js';
 import {PopupMenu} from '../dom/popup-menu.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {ScrollElement} from '../dom/scroll-element.js';
@@ -2078,18 +2079,18 @@ export class Display extends EventDispatcher {
      */
     _addEntryEventListeners(entry) {
         const eventListeners = this._eventListeners;
-        eventListeners.addEventListener(entry, 'click', this._onEntryClickBind);
+        addPrimaryActivationEventListeners(entry, this._onEntryClickBind, eventListeners);
         for (const node of entry.querySelectorAll('.headword-kanji-link')) {
-            eventListeners.addEventListener(node, 'click', this._onKanjiLookupBind);
+            addPrimaryActivationEventListeners(node, this._onKanjiLookupBind, eventListeners);
         }
         for (const node of entry.querySelectorAll('.inflection[data-reason]')) {
-            eventListeners.addEventListener(node, 'click', this._onInflectionClickBind);
+            addPrimaryActivationEventListeners(node, this._onInflectionClickBind, eventListeners);
         }
         for (const node of entry.querySelectorAll('.tag-label')) {
-            eventListeners.addEventListener(node, 'click', this._onTagClickBind);
+            addPrimaryActivationEventListeners(node, this._onTagClickBind, eventListeners);
         }
         for (const node of entry.querySelectorAll('.action-button[data-action=menu]')) {
-            eventListeners.addEventListener(node, 'click', this._onMenuButtonClickBind);
+            addPrimaryActivationEventListeners(node, this._onMenuButtonClickBind, eventListeners);
             eventListeners.addEventListener(node, 'menuClose', this._onMenuButtonMenuCloseBind);
         }
     }

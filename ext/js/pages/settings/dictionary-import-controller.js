@@ -250,6 +250,8 @@ export class DictionaryImportController {
         this._importFileDropItemCount = 0;
         /** @type {HTMLInputElement} */
         this._importButton = querySelectorNotNull(document, '#dictionary-import-button');
+        /** @type {HTMLButtonElement} */
+        this._openSearchButton = querySelectorNotNull(document, '#dictionary-open-search-button');
         /** @type {HTMLInputElement} */
         this._importURLButton = querySelectorNotNull(document, '#dictionary-import-url-button');
         /** @type {HTMLInputElement} */
@@ -326,6 +328,7 @@ export class DictionaryImportController {
         this._purgeButton.addEventListener('click', this._onPurgeButtonClick.bind(this), false);
         this._purgeConfirmButton.addEventListener('click', this._onPurgeConfirmButtonClick.bind(this), false);
         this._importButton.addEventListener('click', this._onImportButtonClick.bind(this), false);
+        this._openSearchButton.addEventListener('click', this._onOpenSearchButtonClick.bind(this), false);
         this._importURLButton.addEventListener('click', this._onImportFromURL.bind(this), false);
         this._importFileInput.addEventListener('change', this._onImportFileChange.bind(this), false);
 
@@ -410,6 +413,14 @@ export class DictionaryImportController {
         if (!visible || this._recommendedDictionariesRenderPending) { return; }
         this._recommendedDictionariesRenderPending = true;
         void this._onRecommendedDictionariesOpen();
+    }
+
+    /**
+     * @param {MouseEvent} e
+     */
+    _onOpenSearchButtonClick(e) {
+        e.preventDefault();
+        location.href = '/search.html';
     }
 
     /**
