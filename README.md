@@ -51,7 +51,9 @@ Manabitan is a dictionary app that lets you mine to Anki. If this is not fast, t
 
 A lot of this stuff is experimental and may break.
 
-When you use this software you are aware it may break, but you also want a significantly beefed up and improved version of Yomitan.
+When you use this software you are aware it may break.
+
+Some of these features are so big and drastic Yomitan will never merge that code, such as changing the entire database structure.
 
 I am also [actively](https://github.com/yomidevs/yomitan/issues?q=is%3Apr%20author%3Abee-san) pushing PRs to Yomitan to improve it based on this work.
 
