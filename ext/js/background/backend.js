@@ -1025,7 +1025,7 @@ export class Backend {
         if (!this._anki.enabled) { return []; }
 
         const options = this._getProfileOptions({current: true}, false);
-        /** @type {Map<string, ReturnType<Backend['_getAnkiDuplicateCacheDescriptor']>>} */
+        /** @type {Map<string, NonNullable<ReturnType<Backend['_getAnkiDuplicateCacheDescriptor']>>>} */
         const descriptorsByKey = new Map();
         for (const cardFormat of options.anki.cardFormats) {
             const [firstFieldName] = Object.keys(cardFormat.fields);

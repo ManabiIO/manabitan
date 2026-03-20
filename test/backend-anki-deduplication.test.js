@@ -52,6 +52,10 @@ vi.mock('../ext/js/language/ja/japanese.js', () => ({
     distributeFuriganaInflected: () => [],
     getKanaScriptType: () => null,
     isCodePointJapanese: () => false,
+    /**
+     * @param {string} text
+     * @returns {string}
+     */
     convertKatakanaToHiragana: (text) => text,
 }));
 

@@ -68,12 +68,18 @@ export function normalizeAnkiDuplicateScope(note) {
         note !== null &&
         typeof note.options === 'object' &&
         note.options !== null
-    ) ? note.options : null;
-    const duplicateScopeRaw = typeof options?.duplicateScope === 'string' ? options.duplicateScope : 'collection';
+    ) ?
+        note.options :
+        null;
+    const duplicateScopeRaw = typeof options?.duplicateScope === 'string' ?
+        options.duplicateScope :
+        'collection';
     const duplicateScopeOptions = (
         typeof options?.duplicateScopeOptions === 'object' &&
         options.duplicateScopeOptions !== null
-    ) ? options.duplicateScopeOptions : null;
+    ) ?
+        options.duplicateScopeOptions :
+        null;
 
     let deckName = typeof duplicateScopeOptions?.deckName === 'string' ? duplicateScopeOptions.deckName : '';
     if (deckName.length === 0) {
