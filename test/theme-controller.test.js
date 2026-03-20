@@ -36,7 +36,11 @@ describe('ThemeController', () => {
         expect(document.documentElement.dataset.themeRaw).toBe('browser');
         expect(document.documentElement.dataset.themePreset).toBe('glass');
 
-        controller._onPrefersColorSchemeDarkChange({matches: true});
+        controller._onPrefersColorSchemeDarkChange(
+            /** @type {MediaQueryListEvent} */ (
+                /** @type {unknown} */ ({matches: true})
+            ),
+        );
         expect(document.documentElement.dataset.theme).toBe('dark');
         expect(document.documentElement.dataset.browserTheme).toBe('dark');
     });

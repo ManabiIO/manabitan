@@ -1,5 +1,11 @@
 [
     {
+        "selectors": [":root[data-theme-preset^=glass]"],
+        "styles": [
+            ["--pronunciation-annotation-color", "var(--reason-text-color)"]
+        ]
+    },
+    {
         "selectors": [".pronunciation-downstep-notation"],
         "styles": [
             ["display", "inline"]
