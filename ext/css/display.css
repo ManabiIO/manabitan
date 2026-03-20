@@ -260,167 +260,67 @@
 :root[data-theme-preset=glass][data-theme=light] {
     color-scheme: light;
     --background-color: transparent;
-    --gloss-image-background-color: rgba(255, 255, 255, 0.16);
     --text-color: #202020;
     --reason-text-color: #535353;
     --headword-furigana-text-color: #535353;
     --headword-reading-text-color: #535353;
-    --light-border-color: rgba(255, 255, 255, 0.26);
-    --medium-border-color: rgba(255, 255, 255, 0.2);
-    --dark-border-color: rgba(104, 118, 138, 0.38);
-    --sidebar-background-color: rgba(255, 255, 255, 0.12);
-    --scrollbar-thumb-color: rgba(0, 0, 0, 0.28);
-    --scrollbar-track-color: rgba(255, 255, 255, 0.08);
-    --notification-text-color: #202020;
-    --notification-background-color: rgba(255, 255, 255, 0.2);
-    --notification-background-color-light: rgba(255, 255, 255, 0.26);
-    --notification-background-color-lighter: rgba(255, 255, 255, 0.32);
-    --notification-shadow-color: rgba(23, 32, 51, 0.15);
-    --background-color-light: rgba(255, 255, 255, 0.22);
-    --background-color-dark1: rgba(255, 255, 255, 0.08);
     --text-color-light2: #535353;
-    --text-color-light3: #60656f;
-    --text-color-light4: #737983;
-    --input-background-color: rgba(255, 255, 255, 0.18);
-    --input-background-color-dark: rgba(255, 255, 255, 0.24);
-    --input-background-color-darker: rgba(255, 255, 255, 0.3);
-    --glass-panel-background: rgba(255, 255, 255, 0.12);
-    --glass-panel-background-strong: rgba(255, 255, 255, 0.22);
-    --glass-panel-border-color: rgba(255, 255, 255, 0.24);
-    --glass-panel-shadow: 0 18px 40px rgba(28, 39, 59, 0.14);
-    --glass-page-background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.85), rgba(228, 237, 255, 0.5) 32%, rgba(201, 217, 242, 0.32) 65%, rgba(189, 203, 224, 0.14) 100%);
+    --glass-subtext-color: #535353;
+    --glass-panel-background: rgba(210, 210, 215, 0.85);
+    --glass-panel-background-strong: rgba(210, 210, 215, 0.85);
+    --glass-panel-border-color: rgba(0, 0, 0, 0.2);
 }
 :root[data-theme-preset=glass][data-theme=dark] {
     color-scheme: dark;
     --background-color: transparent;
-    --gloss-image-background-color: rgba(32, 37, 48, 0.52);
     --text-color: #dfdfdf;
     --reason-text-color: #acacac;
     --headword-furigana-text-color: #acacac;
     --headword-reading-text-color: #acacac;
-    --light-border-color: rgba(255, 255, 255, 0.12);
-    --medium-border-color: rgba(255, 255, 255, 0.16);
-    --dark-border-color: rgba(255, 255, 255, 0.24);
-    --sidebar-background-color: rgba(20, 24, 33, 0.3);
-    --scrollbar-thumb-color: rgba(255, 255, 255, 0.18);
-    --scrollbar-track-color: rgba(0, 0, 0, 0.08);
-    --notification-text-color: #dfdfdf;
-    --notification-background-color: rgba(27, 31, 43, 0.56);
-    --notification-background-color-light: rgba(37, 42, 58, 0.68);
-    --notification-background-color-lighter: rgba(46, 52, 72, 0.82);
-    --notification-shadow-color: rgba(0, 0, 0, 0.35);
-    --background-color-light: rgba(255, 255, 255, 0.08);
-    --background-color-dark1: rgba(255, 255, 255, 0.04);
     --text-color-light2: #acacac;
-    --text-color-light3: #9ba3ae;
-    --text-color-light4: #88909b;
-    --input-background-color: rgba(20, 24, 33, 0.32);
-    --input-background-color-dark: rgba(30, 35, 46, 0.44);
-    --input-background-color-darker: rgba(38, 44, 58, 0.56);
-    --glass-panel-background: rgba(18, 22, 31, 0.36);
-    --glass-panel-background-strong: rgba(24, 29, 40, 0.54);
-    --glass-panel-border-color: rgba(255, 255, 255, 0.12);
-    --glass-panel-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
-    --glass-page-background: radial-gradient(circle at top left, rgba(76, 95, 128, 0.46), rgba(29, 34, 48, 0.82) 38%, rgba(16, 18, 25, 0.96) 100%);
+    --glass-subtext-color: #acacac;
+    --glass-panel-background: rgba(45, 45, 50, 0.85);
+    --glass-panel-background-strong: rgba(45, 45, 50, 0.85);
+    --glass-panel-border-color: rgba(255, 255, 255, 0.2);
 }
 :root[data-theme-preset=glass-autumnal][data-theme=light] {
     color-scheme: light;
     --background-color: transparent;
-    --gloss-image-background-color: rgba(255, 243, 232, 0.26);
     --text-color: #3f2516;
     --reason-text-color: #7a5541;
-    --headword-furigana-text-color: #8a6047;
-    --headword-reading-text-color: #8a6047;
-    --light-border-color: rgba(255, 243, 232, 0.34);
-    --medium-border-color: rgba(224, 180, 145, 0.28);
-    --dark-border-color: rgba(168, 103, 60, 0.34);
-    --sidebar-background-color: rgba(255, 237, 221, 0.16);
-    --scrollbar-thumb-color: rgba(122, 85, 65, 0.34);
-    --scrollbar-track-color: rgba(255, 245, 236, 0.12);
-    --notification-text-color: #3f2516;
-    --notification-background-color: rgba(255, 241, 229, 0.2);
-    --notification-background-color-light: rgba(255, 241, 229, 0.26);
-    --notification-background-color-lighter: rgba(255, 241, 229, 0.34);
-    --notification-shadow-color: rgba(101, 59, 27, 0.16);
-    --background-color-light: rgba(255, 243, 232, 0.2);
-    --background-color-dark1: rgba(255, 226, 196, 0.14);
+    --headword-furigana-text-color: #7a5541;
+    --headword-reading-text-color: #7a5541;
     --text-color-light2: #7a5541;
-    --text-color-light3: #8a6047;
-    --text-color-light4: #9d7156;
-    --input-background-color: rgba(255, 240, 225, 0.22);
-    --input-background-color-dark: rgba(249, 220, 195, 0.3);
-    --input-background-color-darker: rgba(240, 198, 166, 0.4);
-    --glass-panel-background: rgba(255, 238, 222, 0.14);
-    --glass-panel-background-strong: rgba(255, 233, 214, 0.26);
-    --glass-panel-border-color: rgba(255, 244, 232, 0.3);
-    --glass-panel-shadow: 0 18px 40px rgba(114, 67, 33, 0.14);
-    --glass-page-background: radial-gradient(circle at top left, rgba(255, 235, 210, 0.92), rgba(236, 197, 160, 0.54) 34%, rgba(195, 132, 80, 0.24) 100%);
+    --glass-subtext-color: #7a5541;
+    --glass-panel-background: rgba(243, 219, 198, 0.85);
+    --glass-panel-background-strong: rgba(243, 219, 198, 0.85);
+    --glass-panel-border-color: rgba(116, 68, 39, 0.2);
 }
 :root[data-theme-preset=glass-autumnal][data-theme=dark] {
     color-scheme: dark;
     --background-color: transparent;
-    --gloss-image-background-color: rgba(59, 37, 24, 0.56);
     --text-color: #f6ddd0;
     --reason-text-color: #ddb6a0;
     --headword-furigana-text-color: #ddb6a0;
     --headword-reading-text-color: #ddb6a0;
-    --light-border-color: rgba(255, 209, 179, 0.12);
-    --medium-border-color: rgba(255, 209, 179, 0.18);
-    --dark-border-color: rgba(255, 209, 179, 0.28);
-    --sidebar-background-color: rgba(41, 24, 16, 0.32);
-    --scrollbar-thumb-color: rgba(255, 209, 179, 0.22);
-    --scrollbar-track-color: rgba(0, 0, 0, 0.08);
-    --notification-text-color: #f6ddd0;
-    --notification-background-color: rgba(66, 39, 27, 0.54);
-    --notification-background-color-light: rgba(82, 50, 36, 0.64);
-    --notification-background-color-lighter: rgba(100, 61, 43, 0.78);
-    --notification-shadow-color: rgba(0, 0, 0, 0.32);
-    --background-color-light: rgba(255, 209, 179, 0.08);
-    --background-color-dark1: rgba(255, 209, 179, 0.04);
     --text-color-light2: #ddb6a0;
-    --text-color-light3: #cca088;
-    --text-color-light4: #b98a72;
-    --input-background-color: rgba(54, 32, 22, 0.34);
-    --input-background-color-dark: rgba(71, 42, 29, 0.46);
-    --input-background-color-darker: rgba(88, 53, 37, 0.58);
-    --glass-panel-background: rgba(47, 28, 20, 0.38);
-    --glass-panel-background-strong: rgba(63, 37, 26, 0.56);
-    --glass-panel-border-color: rgba(255, 209, 179, 0.12);
-    --glass-panel-shadow: 0 24px 48px rgba(0, 0, 0, 0.32);
-    --glass-page-background: radial-gradient(circle at top left, rgba(146, 92, 57, 0.42), rgba(63, 37, 26, 0.82) 40%, rgba(23, 14, 10, 0.96) 100%);
+    --glass-subtext-color: #ddb6a0;
+    --glass-panel-background: rgba(63, 37, 26, 0.85);
+    --glass-panel-background-strong: rgba(63, 37, 26, 0.85);
+    --glass-panel-border-color: rgba(255, 221, 196, 0.2);
 }
 :root[data-theme-preset=glass-tokyo-night] {
     color-scheme: dark;
     --background-color: transparent;
-    --gloss-image-background-color: rgba(39, 46, 74, 0.54);
     --text-color: #c0caf5;
     --reason-text-color: #9aa5ce;
     --headword-furigana-text-color: #9aa5ce;
     --headword-reading-text-color: #9aa5ce;
-    --light-border-color: rgba(192, 202, 245, 0.12);
-    --medium-border-color: rgba(192, 202, 245, 0.18);
-    --dark-border-color: rgba(192, 202, 245, 0.26);
-    --sidebar-background-color: rgba(26, 27, 38, 0.32);
-    --scrollbar-thumb-color: rgba(192, 202, 245, 0.2);
-    --scrollbar-track-color: rgba(0, 0, 0, 0.08);
-    --notification-text-color: #c0caf5;
-    --notification-background-color: rgba(36, 40, 59, 0.56);
-    --notification-background-color-light: rgba(52, 58, 84, 0.68);
-    --notification-background-color-lighter: rgba(68, 76, 110, 0.8);
-    --notification-shadow-color: rgba(0, 0, 0, 0.34);
-    --background-color-light: rgba(192, 202, 245, 0.08);
-    --background-color-dark1: rgba(192, 202, 245, 0.04);
     --text-color-light2: #9aa5ce;
-    --text-color-light3: #7aa2f7;
-    --text-color-light4: #7dcfff;
-    --input-background-color: rgba(36, 40, 59, 0.36);
-    --input-background-color-dark: rgba(49, 54, 82, 0.48);
-    --input-background-color-darker: rgba(63, 70, 104, 0.62);
-    --glass-panel-background: rgba(26, 27, 38, 0.4);
-    --glass-panel-background-strong: rgba(36, 40, 59, 0.58);
-    --glass-panel-border-color: rgba(192, 202, 245, 0.12);
-    --glass-panel-shadow: 0 24px 48px rgba(0, 0, 0, 0.34);
-    --glass-page-background: radial-gradient(circle at top left, rgba(122, 162, 247, 0.28), rgba(26, 27, 38, 0.84) 42%, rgba(17, 19, 28, 0.98) 100%);
+    --glass-subtext-color: #9aa5ce;
+    --glass-panel-background: rgba(36, 40, 59, 0.85);
+    --glass-panel-background-strong: rgba(36, 40, 59, 0.85);
+    --glass-panel-border-color: rgba(192, 202, 245, 0.2);
 }
 
 
@@ -438,6 +338,10 @@
 }
 body {
     overflow: hidden;
+}
+:root[data-theme-preset^=glass] body {
+    background: transparent;
+    color: var(--text-color);
 }
 @supports (-moz-appearance: none) {
     :root[data-theme-preset^=glass] ruby>* {
@@ -620,41 +524,42 @@ a:has(rt) {
 :root[data-theme-preset^=glass] html::-webkit-scrollbar {
     display: none;
 }
-:root[data-theme-preset^=glass] .search-header-wrapper {
+:root[data-theme-preset^=glass] .headword-term,
+:root[data-theme-preset^=glass] .headword-term * {
+    color: var(--text-color);
+}
+:root[data-theme-preset^=glass] .headword-term>ruby>rt {
+    color: var(--glass-subtext-color);
+}
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] .search-header-wrapper {
     background-color: transparent;
 }
-:root[data-theme-preset^=glass] .search-header,
-:root[data-theme-preset^=glass] #query-parser-container,
-:root[data-theme-preset^=glass] .entry,
-:root[data-theme-preset^=glass] .content-sidebar,
-:root[data-theme-preset^=glass] .content-footer {
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] .search-header,
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] #query-parser-container,
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] .entry,
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] .content-sidebar,
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] .content-footer {
     background: var(--glass-panel-background);
     border: 1px solid var(--glass-panel-border-color);
-    box-shadow: var(--glass-panel-shadow);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    box-shadow: none;
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
 }
-:root[data-theme-preset^=glass] .search-header,
-:root[data-theme-preset^=glass] .content-sidebar {
-    border-radius: 18px;
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] .search-header,
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] #query-parser-container,
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] .entry,
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] .content-sidebar,
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] .content-footer {
+    border-radius: 12px;
 }
-:root[data-theme-preset^=glass] #query-parser-container,
-:root[data-theme-preset^=glass] .entry,
-:root[data-theme-preset^=glass] .content-footer {
-    border-radius: 16px;
-}
-:root[data-theme-preset^=glass] .entry {
-    background: var(--glass-panel-background-strong);
-}
-:root[data-theme-preset^=glass] .entry+.entry {
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] .entry+.entry {
     margin-top: 0.75em;
     border-top: none;
 }
-:root[data-theme-preset^=glass] #query-parser-container {
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] #query-parser-container {
     margin-top: 0.5em;
-    border-bottom: 1px solid var(--glass-panel-border-color);
 }
-:root[data-theme-preset^=glass] .content-footer {
+:root:is([data-page-type=search], [data-page-type=popupPreview])[data-theme-preset^=glass] .content-footer {
     margin-bottom: 0.5em;
 }
 

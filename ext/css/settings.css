@@ -701,6 +701,24 @@ a.settings-item.settings-item-button {
 .settings-item-group.settings-item-group-wrap {
     flex-wrap: wrap;
 }
+.popup-appearance-right {
+    max-height: none;
+}
+.popup-appearance-group {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.75em;
+}
+.popup-appearance-group .settings-item-group-item {
+    padding-right: 0;
+}
+.popup-appearance-group .settings-item-group-item-label {
+    margin-bottom: 0.25em;
+    white-space: nowrap;
+}
+.popup-appearance-group .appearance-select-width {
+    width: min(10.75em, var(--input-short-width));
+}
 .settings-item-group-item {
     flex: 0 1 auto;
     padding-right: var(--padding);
@@ -725,6 +743,11 @@ select.short-height {
     height: var(--input-short-height);
     margin-top: calc(var(--settings-group-right-max-height) - var(--input-short-height) - var(--font-size-small));
     line-height: var(--line-height);
+}
+@media (max-width: 820px) {
+    .popup-appearance-right {
+        width: 100%;
+    }
 }
 .settings-item-button-group-container {
     max-height: none;

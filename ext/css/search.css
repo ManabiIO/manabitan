@@ -58,7 +58,7 @@ body {
     overflow: hidden;
 }
 :root[data-theme-preset^=glass] body {
-    background: var(--glass-page-background);
+    background: transparent;
 }
 .search-header {
     padding-left: var(--search-scroll-container-horizontal-padding);
@@ -225,7 +225,11 @@ h1 {
 :root[data-theme-preset^=glass] #search-textbox,
 :root[data-theme-preset^=glass] .search-button,
 :root[data-theme-preset^=glass] .clear-button {
-    border-radius: 14px;
+    background: var(--glass-panel-background);
+    border: 1px solid var(--glass-panel-border-color);
+    border-radius: 12px;
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
 }
 :root[data-theme-preset^=glass] .search-textbox-container {
     gap: 0.35em;

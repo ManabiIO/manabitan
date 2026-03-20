@@ -40,18 +40,18 @@ iframe.yomitan-popup[data-theme-preset=glass][data-theme=dark] {
 }
 iframe.yomitan-popup[data-theme-preset=glass-autumnal][data-theme=light] {
     color-scheme: light;
-    --outer-bg: rgba(243, 219, 198, 0.84);
+    --outer-bg: rgba(243, 219, 198, 0.85);
     --outer-border: rgba(116, 68, 39, 0.2);
 }
 iframe.yomitan-popup[data-theme-preset=glass-autumnal][data-theme=dark] {
     color-scheme: dark;
-    --outer-bg: rgba(63, 37, 26, 0.86);
-    --outer-border: rgba(255, 221, 196, 0.18);
+    --outer-bg: rgba(63, 37, 26, 0.85);
+    --outer-border: rgba(255, 221, 196, 0.2);
 }
 iframe.yomitan-popup[data-theme-preset=glass-tokyo-night] {
     color-scheme: dark;
-    --outer-bg: rgba(36, 40, 59, 0.86);
-    --outer-border: rgba(192, 202, 245, 0.18);
+    --outer-bg: rgba(36, 40, 59, 0.85);
+    --outer-border: rgba(192, 202, 245, 0.2);
 }
 iframe.yomitan-popup[data-theme=dark] {
     background-color: #1e1e1e;
