@@ -15,11 +15,7 @@
 
 ## Speed
 
-- 5001% dictionary import speedup
-- 6800% faster anki dedupe check
-- 2x faster to make Anki cards
-- Lookup is 1038% faster
-- In memory cache support for dictionaries + Anki dupe. The benchmarks above are with the cache turned off btw
+![manabitan_vs_yomitan_chart](https://github.com/user-attachments/assets/1351b902-c918-43a6-b4ac-c64c333fa68d)
 
 ## Features
 
