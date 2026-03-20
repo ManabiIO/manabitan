@@ -68,8 +68,19 @@ describe('Display Anki duplicate note-id loading', () => {
 function createTermEntry() {
     return {
         type: 'term',
+        isPrimary: true,
+        textProcessorRuleChainCandidates: [],
+        inflectionRuleChainCandidates: [],
+        score: 0,
+        frequencyOrder: 0,
+        dictionaryIndex: 0,
+        dictionaryAlias: 'Benchmark',
+        sourceTermExactMatchCount: 1,
+        matchPrimaryReading: true,
+        maxOriginalTextLength: 4,
         headwords: [
             {
+                index: 0,
                 term: 'term',
                 reading: 'reading',
                 sources: [
@@ -82,8 +93,13 @@ function createTermEntry() {
                         isPrimary: true,
                     },
                 ],
+                tags: [],
+                wordClasses: [],
             },
         ],
+        definitions: [],
+        pronunciations: [],
+        frequencies: [],
     };
 }
 
@@ -218,9 +234,20 @@ function createDisplayAnki(document, dictionaryEntries2, dictionaryEntryNodes, b
         hotkeyHandler: {registerActions: vi.fn()},
         on: vi.fn(),
         displayGenerator: {
+            /**
+             * @param {string} name
+             * @returns {HTMLElement}
+             */
             instantiateTemplate(name) {
                 const template = document.querySelector(`#${name}-template`);
-                return template.content.firstElementChild.cloneNode(true);
+                if (!(template instanceof HTMLTemplateElement)) {
+                    throw new Error(`Missing template: ${name}`);
+                }
+                const {firstElementChild} = template.content;
+                if (!(firstElementChild instanceof HTMLElement)) {
+                    throw new Error(`Template has no element child: ${name}`);
+                }
+                return /** @type {HTMLElement} */ (firstElementChild.cloneNode(true));
             },
             createAnkiNoteErrorsNotificationContent() {
                 return document.createElement('div');
