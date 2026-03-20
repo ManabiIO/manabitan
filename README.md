@@ -10,18 +10,25 @@
 
 # Differences from Yomitan
 
+## Speed
 - 5001% dictionary import speedup
 - 6800% faster anki dedupe check
 - 2x faster to make Anki cards
 - Lookup is 1038% faster
-- MDX dictionary support
-- Auto-updating dictionaries
-- Blur when word is under a certain frequency
+- In memory cache support for dictionaries + Anki dupe. The benchmarks above are with the cache turned off btw
+
+## Features
+- MDX dictionary support (now supports 20,000 more dicts than Yomitan)
+- Auto-updating dictionaries, never manually update a dictionary again.
+- Blur when word is under a certain frequency to force you to recall it.
+- Edit dictionary metadata (name etc) after importing.
+
+
+## Nerdy
+
 - 100% test coverage with extensive end to end tests
 - Significantly less RAM usage
-- Edit dictionary metadata (name etc) after the fact
 - Auto import Kiku/Lapis/Senren/Crop-Theft Anki Note types.
-- In memory cache support for dictionaries + Anki dupe cache. The benchmarks above are with the cache turned off btw.
 
 # Visit [yomitan.wiki](https://yomitan.wiki) to learn more!
 
