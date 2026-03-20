@@ -33,7 +33,7 @@
 - 100% test coverage with extensive end to end tests
 - Significantly less RAM usage
 - Auto import Kiku/Lapis/Senren/Crop-Theft Anki Note types.
-- No scan length. Before you had to say "only scan 10 characters", now you don't have to do that. We will show you the longest possible word in the dict 🤷‍♀️
+- No scan length. Before you had to say "only scan 10 characters", now you don't have to do that. We will show you the longest possible word in the dict (plus a few more characters for grammar etc)
 
 ## Why not contribute to Yomitan directly?
 
