@@ -53,8 +53,6 @@ A lot of this stuff is experimental and may break.
 
 When you use this software you are aware it may break, but you also want a significantly beefed up and improved version of Yomitan.
 
-As well as this, Yomitan says no to a lot of feature requests. We take the opposite approach. If it seems like a good idea, we will add it!
-
 I am also [actively](https://github.com/yomidevs/yomitan/issues?q=is%3Apr%20author%3Abee-san) pushing PRs to Yomitan to improve it based on this work.
 
 Using this fork and telling me what works and doesn't will allow me to contribute back to Yomitan easier.
