@@ -82,37 +82,50 @@ function getPrimaryField(fields) {
 
 /**
  * @param {string} query
- * @returns {{deckQuery: string|null, fieldName: string|null, fieldValue: string|null}}
+ * @returns {{deckQuery: string|null, excludedDeckQueries: string[], noteName: string|null, fieldName: string|null, fieldValue: string|null}}
  */
 function parseFindNotesQuery(query) {
     /** @type {string[]} */
     const tokens = [];
-    const pattern = /"([^"]+)"/g;
+    const pattern = /"([^"]*)"|(\S+)/g;
     while (true) {
         const match = pattern.exec(query);
         if (match === null) { break; }
-        tokens.push(match[1]);
-    }
-    if (tokens.length === 0 && query.trim().length > 0) {
-        tokens.push(query.trim());
+        tokens.push(typeof match[1] === 'string' ? match[1] : String(match[2] || ''));
     }
     let deckQuery = null;
+    /** @type {string[]} */
+    const excludedDeckQueries = [];
+    let noteName = null;
     let fieldName = null;
     let fieldValue = null;
-    for (const token of tokens) {
+    for (let token of tokens) {
+        let negative = false;
+        if (token.startsWith('-')) {
+            negative = true;
+            token = token.substring(1);
+        }
         const index = token.indexOf(':');
         if (index < 0) { continue; }
         const key = token.slice(0, index).trim();
         const value = token.slice(index + 1).trim();
         if (key.length === 0) { continue; }
         if (key.toLowerCase() === 'deck') {
-            deckQuery = value;
-        } else {
+            if (negative) {
+                excludedDeckQueries.push(value);
+            } else {
+                deckQuery = value;
+            }
+        } else if (key.toLowerCase() === 'note') {
+            if (!negative) {
+                noteName = value;
+            }
+        } else if (!negative) {
             fieldName = key;
             fieldValue = value;
         }
     }
-    return {deckQuery, fieldName, fieldValue};
+    return {deckQuery, excludedDeckQueries, noteName, fieldName, fieldValue};
 }
 
 /**
@@ -364,10 +377,16 @@ export function createAnkiMockState() {
             }
             case 'findNotes': {
                 const query = String(payload.query || '');
-                const {deckQuery, fieldName, fieldValue} = parseFindNotesQuery(query);
+                const {deckQuery, excludedDeckQueries, noteName, fieldName, fieldValue} = parseFindNotesQuery(query);
                 return notes.filter((item) => {
                     if (!item.findable) { return false; }
                     if (deckQuery !== null && !matchesDeckQuery(item, deckQuery)) {
+                        return false;
+                    }
+                    if (excludedDeckQueries.some((value) => matchesDeckQuery(item, value))) {
+                        return false;
+                    }
+                    if (noteName !== null && item.modelName.toLowerCase() !== noteName.toLowerCase()) {
                         return false;
                     }
                     if (fieldName !== null && fieldValue !== null) {

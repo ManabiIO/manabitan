@@ -31,6 +31,7 @@ import {isObjectNotArray} from '../core/object-utilities.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {clone, deferPromise, promiseTimeout} from '../core/utilities.js';
+import {createAnkiNoteDuplicateSearchDetails} from '../data/anki-note-query-util.js';
 import {generateAnkiNoteMediaFileName, INVALID_NOTE_ID, isNoteDataValid} from '../data/anki-util.js';
 import {getKebabCase} from '../data/anki-template-util.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
@@ -266,6 +267,8 @@ export class Backend {
         this._yomitanApi = new YomitanApi(this._apiMap, this._offscreen);
         /** @type {CacheMap<string, {originalTextLength: number, textSegments: import('api').ParseTextSegment[]}>} */
         this._textParseCache = new CacheMap(10000, 3600000); // 1 hour idle time, ~32MB per 1000 entries for Japanese
+        /** @type {Map<string, {status: 'pending'|'ready'|'error', fieldNameLower: string, query: string, noteIdsByFieldValue: Map<string, number[]>}>} */
+        this._ankiDuplicateCache = new Map();
         /** @type {Record<string, unknown>|null} */
         this._startupDiagnosticsSnapshot = null;
         /** @type {boolean} */
@@ -480,6 +483,7 @@ export class Backend {
                 this._applyOptions('background');
                 recordPhase('applyOptions(background)', startedAt);
             }
+            void this._warmAnkiDuplicateCacheStartupBuckets();
 
             {
                 const startedAt = safePerformance.now();
@@ -840,12 +844,21 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'addAnkiNote'>} */
     async _onApiAddAnkiNote({note}) {
-        return await this._anki.addNote(note);
+        const noteId = await this._anki.addNote(note);
+        if (typeof noteId === 'number') {
+            this._addAnkiDuplicateCacheNote(note, noteId);
+        }
+        return noteId;
     }
 
     /** @type {import('api').ApiHandler<'updateAnkiNote'>} */
     async _onApiUpdateAnkiNote({noteWithId}) {
-        return await this._anki.updateNoteFields(noteWithId);
+        const result = await this._anki.updateNoteFields(noteWithId);
+        if (typeof noteWithId.id === 'number') {
+            this._removeAnkiDuplicateCacheNoteId(noteWithId.id);
+            this._addAnkiDuplicateCacheNote(noteWithId, noteWithId.id);
+        }
+        return result;
     }
 
     /**
@@ -909,6 +922,27 @@ export class Backend {
 
     /**
      * @param {import('anki').Note[]} notes
+     * @param {import('anki').Note[]} notesStrippedNoDuplicates
+     * @returns {Promise<{ note: import('anki').Note, isDuplicate: boolean }[]>}
+     */
+    async _findDuplicatesLive(notes, notesStrippedNoDuplicates) {
+        try {
+            return await this._findDuplicates(notes, notesStrippedNoDuplicates);
+        } catch (e) {
+            // User has older anki-connect that does not support canAddNotesWithErrorDetail
+            if (e instanceof ExtensionError && e.message.includes('Anki error: unsupported action')) {
+                const strippedNotesAllowDuplicates = notesStrippedNoDuplicates.map((note) => ({
+                    ...note,
+                    options: {...note.options, allowDuplicate: true},
+                }));
+                return await this._findDuplicatesFallback(notes, notesStrippedNoDuplicates, strippedNotesAllowDuplicates);
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * @param {import('anki').Note[]} notes
      * @returns {Promise<{canAddArray: import('backend').CanAddResults, strippedNotes: import('anki').Note[]}>}
      */
     async partitionAddibleNotes(notes) {
@@ -921,22 +955,247 @@ export class Backend {
             note.options.allowDuplicate = false;
         }
 
-        let canAddArray;
+        const canAddArray = await this._findDuplicatesWithCache(notes, strippedNotes);
+        return {canAddArray, strippedNotes};
+    }
+
+    /**
+     * @param {import('anki').Note} note
+     * @param {'exact'|'any'} [fieldValueMode='exact']
+     * @returns {?({
+     *   key: string,
+     * } & NonNullable<ReturnType<typeof createAnkiNoteDuplicateSearchDetails>>)}
+     */
+    _getAnkiDuplicateCacheDescriptor(note, fieldValueMode = 'exact') {
+        const details = createAnkiNoteDuplicateSearchDetails(note, fieldValueMode);
+        if (details === null) { return null; }
+
+        const key = JSON.stringify([
+            this._anki.server ?? '',
+            this._anki.apiKey ?? '',
+            details.duplicateScope,
+            details.deckName ?? '',
+            details.checkChildren,
+            details.checkAllModels,
+            details.checkAllModels ? '' : details.modelName,
+            details.fieldNameLower,
+        ]);
+        return {key, ...details};
+    }
+
+    /**
+     * @param {import('settings').AnkiCardFormat} cardFormat
+     * @param {import('settings').AnkiOptions} ankiOptions
+     * @param {string} firstFieldName
+     * @returns {import('anki').Note}
+     */
+    _createAnkiDuplicateCacheStartupNote(cardFormat, ankiOptions, firstFieldName) {
+        return {
+            fields: {[firstFieldName]: ''},
+            tags: [],
+            deckName: cardFormat.deck,
+            modelName: cardFormat.model,
+            options: {
+                allowDuplicate: false,
+                duplicateScope: ankiOptions.duplicateScope,
+                duplicateScopeOptions: {
+                    deckName: null,
+                    checkChildren: false,
+                    checkAllModels: ankiOptions.duplicateScopeCheckAllModels,
+                },
+            },
+        };
+    }
+
+    /**
+     * @returns {Array<{
+     *   key: string,
+     *   query: string,
+     *   fieldName: string,
+     *   fieldNameLower: string,
+     *   fieldValue: string,
+     *   duplicateScope: 'collection'|'deck',
+     *   deckName: string|null,
+     *   checkChildren: boolean,
+     *   checkAllModels: boolean,
+     *   modelName: string,
+     * }>}
+     */
+    _getAnkiDuplicateCacheStartupDescriptors() {
+        if (!this._anki.enabled) { return []; }
+
+        const options = this._getProfileOptions({current: true}, false);
+        /** @type {Map<string, ReturnType<Backend['_getAnkiDuplicateCacheDescriptor']>>} */
+        const descriptorsByKey = new Map();
+        for (const cardFormat of options.anki.cardFormats) {
+            const [firstFieldName] = Object.keys(cardFormat.fields);
+            if (typeof firstFieldName !== 'string') { continue; }
+
+            const descriptor = this._getAnkiDuplicateCacheDescriptor(
+                this._createAnkiDuplicateCacheStartupNote(cardFormat, options.anki, firstFieldName),
+                'any',
+            );
+            if (descriptor === null || descriptorsByKey.has(descriptor.key)) { continue; }
+            descriptorsByKey.set(descriptor.key, descriptor);
+        }
+        return [...descriptorsByKey.values()];
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _warmAnkiDuplicateCacheStartupBuckets() {
+        for (const descriptor of this._getAnkiDuplicateCacheStartupDescriptors()) {
+            if (this._ankiDuplicateCache.has(descriptor.key)) { continue; }
+
+            const bucket = {
+                status: /** @type {'pending'} */ ('pending'),
+                fieldNameLower: descriptor.fieldNameLower,
+                query: descriptor.query,
+                noteIdsByFieldValue: new Map(),
+            };
+            this._ankiDuplicateCache.set(descriptor.key, bucket);
+            void this._warmAnkiDuplicateCacheBucket(bucket);
+        }
+    }
+
+    /**
+     * @param {{status: 'pending'|'ready'|'error', fieldNameLower: string, query: string, noteIdsByFieldValue: Map<string, number[]>}} bucket
+     * @returns {Promise<void>}
+     */
+    async _warmAnkiDuplicateCacheBucket(bucket) {
         try {
-            canAddArray = await this._findDuplicates(notes, strippedNotes);
+            const noteIds = await this._anki.findNotes(bucket.query);
+            const notesInfo = (noteIds.length > 0 ? await this._anki.notesInfo(noteIds) : []);
+            /** @type {Map<string, number[]>} */
+            const noteIdsByFieldValue = new Map();
+            for (const noteInfo of notesInfo) {
+                if (noteInfo === null) { continue; }
+                const fieldValue = this._getAnkiDuplicateCacheFieldValueFromNoteInfo(noteInfo, bucket.fieldNameLower);
+                if (fieldValue === null) { continue; }
+
+                let fieldNoteIds = noteIdsByFieldValue.get(fieldValue);
+                if (typeof fieldNoteIds === 'undefined') {
+                    fieldNoteIds = [];
+                    noteIdsByFieldValue.set(fieldValue, fieldNoteIds);
+                }
+                fieldNoteIds.push(noteInfo.noteId);
+            }
+            bucket.noteIdsByFieldValue = noteIdsByFieldValue;
+            bucket.status = 'ready';
         } catch (e) {
-            // User has older anki-connect that does not support canAddNotesWithErrorDetail
-            if (e instanceof ExtensionError && e.message.includes('Anki error: unsupported action')) {
-                const strippedNotesAllowDuplicates = strippedNotes.map((note) => ({
-                    ...note,
-                    options: {...note.options, allowDuplicate: true},
-                }));
-                canAddArray = await this._findDuplicatesFallback(notes, strippedNotes, strippedNotesAllowDuplicates);
-            } else {
-                throw e;
+            bucket.status = 'error';
+            log.error(e);
+        }
+    }
+
+    /**
+     * @param {import('anki').NoteInfo} noteInfo
+     * @param {string} fieldNameLower
+     * @returns {?string}
+     */
+    _getAnkiDuplicateCacheFieldValueFromNoteInfo(noteInfo, fieldNameLower) {
+        for (const [fieldName, fieldInfo] of Object.entries(noteInfo.fields)) {
+            if (fieldName.toLowerCase() !== fieldNameLower) { continue; }
+            return typeof fieldInfo.value === 'string' ? fieldInfo.value : null;
+        }
+        return null;
+    }
+
+    /**
+     * @param {import('anki').Note} note
+     * @returns {number[]|null}
+     */
+    _getAnkiDuplicateCacheNoteIds(note) {
+        const descriptor = this._getAnkiDuplicateCacheDescriptor(note);
+        if (descriptor === null) { return null; }
+
+        const bucket = this._ankiDuplicateCache.get(descriptor.key);
+        if (typeof bucket === 'undefined' || bucket.status !== 'ready') { return null; }
+
+        return [...(bucket.noteIdsByFieldValue.get(descriptor.fieldValue) ?? [])];
+    }
+
+    /**
+     * @param {import('anki').Note} note
+     * @param {number} noteId
+     */
+    _addAnkiDuplicateCacheNote(note, noteId) {
+        const descriptor = this._getAnkiDuplicateCacheDescriptor(note);
+        if (descriptor === null) { return; }
+
+        const bucket = this._ankiDuplicateCache.get(descriptor.key);
+        if (typeof bucket === 'undefined' || bucket.status !== 'ready') { return; }
+
+        let noteIds = bucket.noteIdsByFieldValue.get(descriptor.fieldValue);
+        if (typeof noteIds === 'undefined') {
+            noteIds = [];
+            bucket.noteIdsByFieldValue.set(descriptor.fieldValue, noteIds);
+        }
+        if (!noteIds.includes(noteId)) {
+            noteIds.push(noteId);
+        }
+    }
+
+    /**
+     * @param {number} noteId
+     */
+    _removeAnkiDuplicateCacheNoteId(noteId) {
+        for (const bucket of this._ankiDuplicateCache.values()) {
+            if (bucket.status !== 'ready') { continue; }
+            for (const [fieldValue, noteIds] of bucket.noteIdsByFieldValue.entries()) {
+                const filteredNoteIds = noteIds.filter((cachedNoteId) => cachedNoteId !== noteId);
+                if (filteredNoteIds.length === noteIds.length) { continue; }
+                if (filteredNoteIds.length === 0) {
+                    bucket.noteIdsByFieldValue.delete(fieldValue);
+                } else {
+                    bucket.noteIdsByFieldValue.set(fieldValue, filteredNoteIds);
+                }
             }
         }
-        return {canAddArray, strippedNotes};
+    }
+
+    /**
+     * @param {import('anki').Note[]} notes
+     * @param {import('anki').Note[]} strippedNotes
+     * @returns {Promise<Array<{note: import('anki').Note, isDuplicate: boolean, cachedNoteIds: number[]|null}>>}
+     */
+    async _findDuplicatesWithCache(notes, strippedNotes) {
+        /** @type {Array<{note: import('anki').Note, isDuplicate: boolean, cachedNoteIds: number[]|null}>} */
+        const results = new Array(notes.length);
+        /** @type {import('anki').Note[]} */
+        const fallbackNotes = [];
+        /** @type {import('anki').Note[]} */
+        const fallbackStrippedNotes = [];
+        /** @type {number[]} */
+        const fallbackIndices = [];
+
+        for (let i = 0, ii = strippedNotes.length; i < ii; ++i) {
+            const cachedNoteIds = this._getAnkiDuplicateCacheNoteIds(strippedNotes[i]);
+            if (cachedNoteIds !== null) {
+                results[i] = {
+                    note: notes[i],
+                    isDuplicate: cachedNoteIds.length > 0,
+                    cachedNoteIds,
+                };
+            } else {
+                fallbackNotes.push(notes[i]);
+                fallbackStrippedNotes.push(strippedNotes[i]);
+                fallbackIndices.push(i);
+            }
+        }
+
+        if (fallbackIndices.length > 0) {
+            const fallbackResults = await this._findDuplicatesLive(fallbackNotes, fallbackStrippedNotes);
+            for (let i = 0, ii = fallbackResults.length; i < ii; ++i) {
+                results[fallbackIndices[i]] = {
+                    ...fallbackResults[i],
+                    cachedNoteIds: null,
+                };
+            }
+        }
+
+        return results;
     }
 
     /** @type {import('api').ApiHandler<'getAnkiNoteInfo'>} */
@@ -952,10 +1211,16 @@ export class Backend {
             const duplicateNoteIndices = [];
 
             for (let i = 0; i < canAddArray.length; i++) {
-                if (canAddArray[i].isDuplicate) {
-                    duplicateNotes.push(strippedNotes[i]);
-                    duplicateNoteIndices.push(i);
+                const {cachedNoteIds, isDuplicate} = canAddArray[i];
+                if (!isDuplicate) { continue; }
+
+                if (Array.isArray(cachedNoteIds)) {
+                    duplicateNoteIdsByIndex[i] = (cachedNoteIds.length > 0 ? cachedNoteIds : [INVALID_NOTE_ID]);
+                    continue;
                 }
+
+                duplicateNotes.push(strippedNotes[i]);
+                duplicateNoteIndices.push(i);
             }
 
             const duplicateNoteIdResults =
@@ -1876,6 +2141,7 @@ export class Backend {
         void this._accessibilityController.update(this._getOptionsFull(false));
 
         this._textParseCache.clear();
+        this._ankiDuplicateCache.clear();
 
         this._sendMessageAllTabsIgnoreResponse({action: 'applicationOptionsUpdated', params: {source}});
     }
