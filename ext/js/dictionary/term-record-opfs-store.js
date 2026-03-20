@@ -643,6 +643,36 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {string} currentDictionaryName
+     * @param {string} nextDictionaryName
+     * @returns {Promise<void>}
+     */
+    async renameDictionary(currentDictionaryName, nextDictionaryName) {
+        if (currentDictionaryName === nextDictionaryName) {
+            return;
+        }
+
+        let renamed = false;
+        for (const record of this._recordsById.values()) {
+            if (record.dictionary !== currentDictionaryName) { continue; }
+            record.dictionary = nextDictionaryName;
+            renamed = true;
+        }
+
+        const currentShardFileName = this._getShardFileName(currentDictionaryName);
+        if (!renamed && !this._shardStateByFileName.has(currentShardFileName)) {
+            return;
+        }
+
+        this._indexByDictionary.delete(currentDictionaryName);
+        this._indexByDictionary.delete(nextDictionaryName);
+        if (this._deferIndexBuild) {
+            this._indexDirty = true;
+        }
+        await this._rewriteAllShardsFromMemory();
+    }
+
+    /**
      * @param {Iterable<number>} ids
      * @returns {Map<number, TermRecord>}
      */

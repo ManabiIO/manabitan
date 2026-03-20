@@ -1246,6 +1246,127 @@ describe('Database', () => {
             }
         });
 
+        test('Updates dictionary metadata and renames dictionary-backed records', async ({expect}) => {
+            const testDictionarySource = await createTestDictionaryArtifactArchiveData('valid-dictionary1', 'Editable Dictionary', 'raw-v4');
+            const dictionaryDatabase = new DictionaryDatabase();
+            await dictionaryDatabase.prepare();
+            try {
+                const dictionaryImporter = createDictionaryImporter(expect);
+                const {result, errors} = await dictionaryImporter.importDictionary(
+                    dictionaryDatabase,
+                    testDictionarySource,
+                    {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
+                );
+                expect.soft(errors).toStrictEqual([]);
+                if (result === null) {
+                    throw new Error('Expected imported dictionary summary');
+                }
+
+                await dictionaryDatabase.updateDictionaryMetadata('Editable Dictionary', {
+                    ...result,
+                    title: 'Edited Dictionary',
+                    url: 'https://example.invalid/dictionaries/edited',
+                    description: 'Edited description',
+                });
+
+                const info = await dictionaryDatabase.getDictionaryInfo();
+                expect.soft(info.length).toBe(1);
+                expect.soft(info[0]?.title).toBe('Edited Dictionary');
+                expect.soft(info[0]?.url).toBe('https://example.invalid/dictionaries/edited');
+                expect.soft(info[0]?.description).toBe('Edited description');
+                expect.soft(await dictionaryDatabase.dictionaryExists('Editable Dictionary')).toBe(false);
+                expect.soft(await dictionaryDatabase.dictionaryExists('Edited Dictionary')).toBe(true);
+
+                const counts = await dictionaryDatabase.getDictionaryCounts(['Edited Dictionary'], true);
+                expect.soft(counts.counts[0]?.terms).toBeGreaterThan(0);
+
+                const titles = new Map([
+                    ['Edited Dictionary', {alias: 'Edited Dictionary', allowSecondarySearches: false}],
+                ]);
+                const results = await dictionaryDatabase.findTermsBulk(['打'], titles, 'exact');
+                expect.soft(results.length).toBeGreaterThan(0);
+                expect.soft(results.some((entry) => entry.dictionary === 'Edited Dictionary')).toBe(true);
+                expect.soft(results.some((entry) => entry.dictionary === 'Editable Dictionary')).toBe(false);
+
+                const db = dictionaryDatabase._requireDb();
+                for (const table of ['kanji', 'kanjiMeta', 'termMeta', 'tagMeta', 'media']) {
+                    const dictionaries = db.selectObjects(`SELECT DISTINCT dictionary FROM ${table} ORDER BY dictionary ASC`)
+                        .map((row) => row.dictionary);
+                    if (dictionaries.length > 0) {
+                        expect.soft(dictionaries.includes('Editable Dictionary')).toBe(false);
+                        expect.soft(dictionaries.includes('Edited Dictionary')).toBe(true);
+                    }
+                }
+                expect.soft(Number(db.selectValue(
+                    'SELECT COUNT(*) FROM sharedGlossaryArtifacts WHERE dictionary = $dictionary',
+                    {$dictionary: 'Editable Dictionary'},
+                ))).toBe(0);
+                expect.soft(Number(db.selectValue(
+                    'SELECT COUNT(*) FROM sharedGlossaryArtifacts WHERE dictionary = $dictionary',
+                    {$dictionary: 'Edited Dictionary'},
+                ))).toBeGreaterThan(0);
+            } finally {
+                await dictionaryDatabase.close();
+            }
+        });
+
+        test('Dictionary metadata rename rolls back term-record storage when the SQL update fails', async ({expect}) => {
+            const testDictionarySource = await createTestDictionaryArtifactArchiveData('valid-dictionary1', 'Editable Dictionary', 'raw-v4');
+            const dictionaryDatabase = new DictionaryDatabase();
+            await dictionaryDatabase.prepare();
+            try {
+                const dictionaryImporter = createDictionaryImporter(expect);
+                const {result, errors} = await dictionaryImporter.importDictionary(
+                    dictionaryDatabase,
+                    testDictionarySource,
+                    {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
+                );
+                expect.soft(errors).toStrictEqual([]);
+                if (result === null) {
+                    throw new Error('Expected imported dictionary summary');
+                }
+
+                const db = dictionaryDatabase._requireDb();
+                const exec = db.exec.bind(db);
+                const renameDictionary = vi.spyOn(dictionaryDatabase._termRecordStore, 'renameDictionary');
+                vi.spyOn(db, 'exec').mockImplementation((query) => {
+                    if (
+                        typeof query === 'object' &&
+                        query !== null &&
+                        'sql' in query &&
+                        query.sql === 'UPDATE dictionaries SET title = $title, version = $version, summaryJson = $summaryJson WHERE id = $id'
+                    ) {
+                        throw new Error('Synthetic metadata update failure');
+                    }
+                    return exec(query);
+                });
+
+                await expect(dictionaryDatabase.updateDictionaryMetadata('Editable Dictionary', {
+                    ...result,
+                    title: 'Edited Dictionary',
+                })).rejects.toThrow('Synthetic metadata update failure');
+
+                expect(renameDictionary).toHaveBeenCalledTimes(2);
+                expect(renameDictionary).toHaveBeenNthCalledWith(1, 'Editable Dictionary', 'Edited Dictionary');
+                expect(renameDictionary).toHaveBeenNthCalledWith(2, 'Edited Dictionary', 'Editable Dictionary');
+                expect.soft(await dictionaryDatabase.dictionaryExists('Editable Dictionary')).toBe(true);
+                expect.soft(await dictionaryDatabase.dictionaryExists('Edited Dictionary')).toBe(false);
+
+                const info = await dictionaryDatabase.getDictionaryInfo();
+                expect.soft(info.length).toBe(1);
+                expect.soft(info[0]?.title).toBe('Editable Dictionary');
+
+                const titles = new Map([
+                    ['Editable Dictionary', {alias: 'Editable Dictionary', allowSecondarySearches: false}],
+                ]);
+                const results = await dictionaryDatabase.findTermsBulk(['打'], titles, 'exact');
+                expect.soft(results.length).toBeGreaterThan(0);
+                expect.soft(results.every((entry) => entry.dictionary === 'Editable Dictionary')).toBe(true);
+            } finally {
+                await dictionaryDatabase.close();
+            }
+        });
+
         test('Import data and test', async ({expect}) => {
             const fakeImportDate = testData.expectedSummary.importDate;
 

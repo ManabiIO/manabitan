@@ -30,6 +30,7 @@ import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
+import {toError} from '../core/to-error.js';
 import {clone, deferPromise, promiseTimeout} from '../core/utilities.js';
 import {generateAnkiNoteMediaFileName, INVALID_NOTE_ID, isNoteDataValid} from '../data/anki-util.js';
 import {getKebabCase} from '../data/anki-template-util.js';
@@ -58,6 +59,23 @@ const DICTIONARY_AUTO_UPDATE_STATE_STORAGE_KEY = 'manabitanDictionaryAutoUpdateS
 const DICTIONARY_AUTO_UPDATE_ALARM_NAME = 'manabitanDictionaryAutoUpdateHourly';
 const DICTIONARY_AUTO_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 const SCAN_LENGTH_INFLECTION_BUFFER = 8;
+
+/**
+ * @param {string} value
+ * @returns {string|undefined}
+ */
+function normalizeOptionalDictionaryMetadataText(value) {
+    const normalized = value.trim();
+    return normalized.length > 0 ? normalized : void 0;
+}
+
+/**
+ * @param {Error} error
+ * @param {string} message
+ */
+function appendErrorMessage(error, message) {
+    error.message = `${error.message}; ${message}`;
+}
 
 /**
  * @param {string} previousText
@@ -219,6 +237,7 @@ export class Backend {
             ['getDefaultAnkiFieldTemplates', this._onApiGetDefaultAnkiFieldTemplates.bind(this)],
             ['getDictionaryInfo',            this._onApiGetDictionaryInfo.bind(this)],
             ['deleteDictionaryByTitle',      this._onApiDeleteDictionaryByTitle.bind(this)],
+            ['updateDictionaryMetadata',     this._onApiUpdateDictionaryMetadata.bind(this)],
             ['getDictionaryCounts',          this._onApiGetDictionaryCounts.bind(this)],
             ['checkDictionaryUpdates',       this._onApiCheckDictionaryUpdates.bind(this)],
             ['updateDictionaryByTitle',      this._onApiUpdateDictionaryByTitle.bind(this)],
@@ -1249,6 +1268,11 @@ export class Backend {
             await this._ensureDictionaryDatabaseReady({allowDuringMutation: true});
             await this._dictionaryDatabase.deleteDictionary(dictionaryTitle, 1000, () => {});
         });
+    }
+
+    /** @type {import('api').ApiHandler<'updateDictionaryMetadata'>} */
+    async _onApiUpdateDictionaryMetadata({dictionaryTitle, title, url, description}) {
+        return await this._updateDictionaryMetadata(dictionaryTitle, title, url, description);
     }
 
     /** @type {import('api').ApiHandler<'getDictionaryCounts'>} */
@@ -3602,10 +3626,14 @@ export class Backend {
                 archiveContent.buffer.slice(archiveContent.byteOffset, archiveContent.byteOffset + archiveContent.byteLength),
                 this._createDictionaryImportDetails(),
             );
-            const importedSummary = importResult.result;
-            if (importedSummary === null) {
+            const rawImportedSummary = importResult.result;
+            if (rawImportedSummary === null) {
                 const message = importResult.errors.map((error) => error.message).join('; ') || 'Dictionary import failed';
                 throw new Error(message);
+            }
+            const importedSummary = this._applyDictionaryMetadataOverrides(rawImportedSummary, dictionary);
+            if (importedSummary !== rawImportedSummary) {
+                await this._dictionaryDatabase.updateDictionaryMetadata(rawImportedSummary.title, importedSummary);
             }
 
             await this._applyImportedDictionarySettings(dictionary, importedSummary, updateContext);
@@ -3633,6 +3661,198 @@ export class Backend {
             await this._pruneStaleDictionaryAutoUpdates();
         }
         return {dictionaryTitle: dictionary.title, status: 'skipped', latestRevision, error: failureMessage};
+    }
+
+    /**
+     * @param {import('dictionary-importer').Summary} previousSummary
+     * @param {string} title
+     * @param {string|undefined} url
+     * @param {string|undefined} description
+     * @returns {import('dictionary-importer').Summary}
+     */
+    _createEditedDictionarySummary(previousSummary, title, url, description) {
+        /** @type {import('dictionary-importer').Summary} */
+        const nextSummary = {
+            ...previousSummary,
+            title,
+        };
+        if (typeof url === 'string') {
+            nextSummary.url = url;
+        } else {
+            delete nextSummary.url;
+        }
+        if (typeof description === 'string') {
+            nextSummary.description = description;
+        } else {
+            delete nextSummary.description;
+        }
+
+        const previousMetadataOverrides = isObjectNotArray(previousSummary.metadataOverrides) ? previousSummary.metadataOverrides : null;
+        /** @type {import('dictionary-importer').SummaryMetadataOverrides} */
+        const metadataOverrides = {};
+        let hasMetadataOverrides = false;
+        if (title !== previousSummary.title || typeof previousMetadataOverrides?.title === 'string') {
+            metadataOverrides.title = title;
+            hasMetadataOverrides = true;
+        }
+        if (
+            url !== previousSummary.url ||
+            (previousMetadataOverrides !== null && Object.prototype.hasOwnProperty.call(previousMetadataOverrides, 'url'))
+        ) {
+            metadataOverrides.url = typeof url === 'string' ? url : null;
+            hasMetadataOverrides = true;
+        }
+        if (
+            description !== previousSummary.description ||
+            (previousMetadataOverrides !== null && Object.prototype.hasOwnProperty.call(previousMetadataOverrides, 'description'))
+        ) {
+            metadataOverrides.description = typeof description === 'string' ? description : null;
+            hasMetadataOverrides = true;
+        }
+        if (hasMetadataOverrides) {
+            nextSummary.metadataOverrides = metadataOverrides;
+        } else {
+            delete nextSummary.metadataOverrides;
+        }
+
+        return nextSummary;
+    }
+
+    /**
+     * @param {import('dictionary-importer').Summary} summary
+     * @param {import('dictionary-importer').Summary} previousSummary
+     * @returns {import('dictionary-importer').Summary}
+     */
+    _applyDictionaryMetadataOverrides(summary, previousSummary) {
+        const previousMetadataOverrides = isObjectNotArray(previousSummary.metadataOverrides) ? previousSummary.metadataOverrides : null;
+        if (previousMetadataOverrides === null) {
+            return summary;
+        }
+
+        /** @type {import('dictionary-importer').SummaryMetadataOverrides} */
+        const metadataOverrides = {};
+        let hasMetadataOverrides = false;
+        /** @type {import('dictionary-importer').Summary} */
+        const nextSummary = {
+            ...summary,
+        };
+
+        const titleOverride = typeof previousMetadataOverrides.title === 'string' ? previousMetadataOverrides.title.trim() : '';
+        if (titleOverride.length > 0) {
+            nextSummary.title = titleOverride;
+            metadataOverrides.title = titleOverride;
+            hasMetadataOverrides = true;
+        }
+        if (Object.prototype.hasOwnProperty.call(previousMetadataOverrides, 'url')) {
+            const urlOverride = typeof previousMetadataOverrides.url === 'string' ?
+                normalizeOptionalDictionaryMetadataText(previousMetadataOverrides.url) :
+                void 0;
+            if (typeof urlOverride === 'string') {
+                nextSummary.url = urlOverride;
+                metadataOverrides.url = urlOverride;
+            } else {
+                delete nextSummary.url;
+                metadataOverrides.url = null;
+            }
+            hasMetadataOverrides = true;
+        }
+        if (Object.prototype.hasOwnProperty.call(previousMetadataOverrides, 'description')) {
+            const descriptionOverride = typeof previousMetadataOverrides.description === 'string' ?
+                normalizeOptionalDictionaryMetadataText(previousMetadataOverrides.description) :
+                void 0;
+            if (typeof descriptionOverride === 'string') {
+                nextSummary.description = descriptionOverride;
+                metadataOverrides.description = descriptionOverride;
+            } else {
+                delete nextSummary.description;
+                metadataOverrides.description = null;
+            }
+            hasMetadataOverrides = true;
+        }
+
+        if (!hasMetadataOverrides) {
+            return summary;
+        }
+        nextSummary.metadataOverrides = metadataOverrides;
+        return nextSummary;
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {string} title
+     * @param {string} url
+     * @param {string} description
+     * @returns {Promise<import('dictionary-importer').Summary>}
+     */
+    async _updateDictionaryMetadata(dictionaryTitle, title, url, description) {
+        const normalizedTitle = title.trim();
+        if (normalizedTitle.length === 0) {
+            throw new Error('Dictionary name cannot be empty');
+        }
+
+        /** @type {import('dictionary-importer').Summary|null} */
+        let updatedSummary = null;
+        await this._runWithDictionaryMutationLock(async () => {
+            await this._ensureDictionaryDatabaseReady({allowDuringMutation: true});
+            const dictionaries = await this._dictionaryDatabase.getDictionaryInfo();
+            const previousSummary = dictionaries.find((dictionary) => dictionary.title === dictionaryTitle);
+            if (typeof previousSummary === 'undefined') {
+                throw new Error(`Dictionary not found: ${dictionaryTitle}`);
+            }
+
+            if (
+                normalizedTitle !== previousSummary.title &&
+                dictionaries.some((dictionary) => dictionary.title === normalizedTitle)
+            ) {
+                throw new Error(`Dictionary already exists: ${normalizedTitle}`);
+            }
+
+            const normalizedUrl = normalizeOptionalDictionaryMetadataText(url);
+            const normalizedDescription = normalizeOptionalDictionaryMetadataText(description);
+            const nextSummary = this._createEditedDictionarySummary(previousSummary, normalizedTitle, normalizedUrl, normalizedDescription);
+            const titleChanged = nextSummary.title !== previousSummary.title;
+            const updateContext = titleChanged ? this._captureDictionaryUpdateSettings(previousSummary.title) : null;
+            const previousOptions = titleChanged && this._options !== null ? clone(this._options) : null;
+
+            let databaseUpdated = false;
+            try {
+                await this._dictionaryDatabase.updateDictionaryMetadata(previousSummary.title, nextSummary);
+                databaseUpdated = true;
+                if (updateContext !== null) {
+                    await this._applyImportedDictionarySettings(previousSummary, nextSummary, updateContext);
+                }
+            } catch (e) {
+                const error = toError(e);
+                let databaseRolledBack = !databaseUpdated;
+                if (databaseUpdated) {
+                    try {
+                        await this._dictionaryDatabase.updateDictionaryMetadata(nextSummary.title, previousSummary);
+                        databaseRolledBack = true;
+                    } catch (rollbackError) {
+                        appendErrorMessage(error, `failed to rollback dictionary metadata update: ${toError(rollbackError).message}`);
+                    }
+                }
+                if (databaseRolledBack && previousOptions !== null) {
+                    try {
+                        this._applyOptionsSnapshot(previousOptions, 'background');
+                    } catch (restoreError) {
+                        appendErrorMessage(error, `failed to restore in-memory options after metadata update error: ${toError(restoreError).message}`);
+                    }
+                    try {
+                        await this._optionsUtil.save(previousOptions);
+                    } catch (restoreError) {
+                        appendErrorMessage(error, `failed to restore persisted options after metadata update error: ${toError(restoreError).message}`);
+                    }
+                }
+                throw error;
+            }
+            updatedSummary = nextSummary;
+        });
+        await this._handleDatabaseUpdated('dictionary', 'edit');
+        if (updatedSummary === null) {
+            throw new Error('Dictionary metadata update did not complete');
+        }
+        return updatedSummary;
     }
 
     /**
@@ -3946,9 +4166,18 @@ export class Backend {
      * @param {string} source
      */
     async _saveOptions(source) {
-        this._clearProfileConditionsSchemaCache();
         const options = this._getOptionsFull(false);
         await this._optionsUtil.save(options);
+        this._applyOptionsSnapshot(options, source);
+    }
+
+    /**
+     * @param {import('settings').Options} options
+     * @param {string} source
+     */
+    _applyOptionsSnapshot(options, source) {
+        this._clearProfileConditionsSchemaCache();
+        this._options = options;
         this._applyOptions(source);
     }
 

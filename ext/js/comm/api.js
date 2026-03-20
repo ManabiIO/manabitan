@@ -258,6 +258,17 @@ export class API {
     }
 
     /**
+     * @param {import('api').ApiParam<'updateDictionaryMetadata', 'dictionaryTitle'>} dictionaryTitle
+     * @param {import('api').ApiParam<'updateDictionaryMetadata', 'title'>} title
+     * @param {import('api').ApiParam<'updateDictionaryMetadata', 'url'>} url
+     * @param {import('api').ApiParam<'updateDictionaryMetadata', 'description'>} description
+     * @returns {Promise<import('api').ApiReturn<'updateDictionaryMetadata'>>}
+     */
+    updateDictionaryMetadata(dictionaryTitle, title, url, description) {
+        return this._invoke('updateDictionaryMetadata', {dictionaryTitle, title, url, description});
+    }
+
+    /**
      * @param {import('api').ApiParam<'getDictionaryCounts', 'dictionaryNames'>} dictionaryNames
      * @param {import('api').ApiParam<'getDictionaryCounts', 'getTotal'>} getTotal
      * @returns {Promise<import('api').ApiReturn<'getDictionaryCounts'>>}

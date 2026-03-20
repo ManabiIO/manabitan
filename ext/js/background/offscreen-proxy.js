@@ -244,6 +244,15 @@ export class DictionaryDatabaseProxy {
     }
 
     /**
+     * @param {string} dictionaryTitle
+     * @param {import('dictionary-importer').Summary} summary
+     * @returns {Promise<void>}
+     */
+    async updateDictionaryMetadata(dictionaryTitle, summary) {
+        await this._offscreen.sendMessagePromise({action: 'updateDictionaryMetadataOffscreen', params: {dictionaryTitle, summary}});
+    }
+
+    /**
      * @param {string[]} dictionaryNames
      * @param {boolean} getTotal
      * @returns {Promise<import('dictionary-database').DictionaryCounts>}

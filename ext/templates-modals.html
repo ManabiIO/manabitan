@@ -310,8 +310,50 @@
         </div>
     </div></div>
 
+    <div id="dictionary-edit-metadata-modal" class="modal" tabindex="-1" role="dialog" hidden><div class="modal-content modal-content-small">
+        <div class="modal-header"><div class="modal-title">Edit Dictionary Metadata</div></div>
+        <div class="modal-body">
+            <div class="settings-item">
+                <div class="settings-item-inner settings-item-inner-wrappable">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">Name</div>
+                    </div>
+                    <div class="settings-item-right">
+                        <input type="text" id="dictionary-metadata-name-input" required>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-item-inner settings-item-inner-wrappable">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">URL</div>
+                    </div>
+                    <div class="settings-item-right">
+                        <input type="url" id="dictionary-metadata-url-input" placeholder="https://example.com">
+                    </div>
+                </div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-item-inner settings-item-inner-wrappable">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">Description</div>
+                    </div>
+                    <div class="settings-item-right">
+                        <textarea id="dictionary-metadata-description-input" rows="5"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div id="dictionary-edit-metadata-error" class="danger-text margin-above" hidden></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="low-emphasis" id="dictionary-reset-metadata-button">Reset</button>
+            <button type="button" class="low-emphasis" data-modal-action="hide">Cancel</button>
+            <button type="button" id="dictionary-save-metadata-button">Save</button>
+        </div>
+    </div></div>
+
     <div id="dictionary-set-alias-modal" class="modal" tabindex="-1" role="dialog" hidden><div class="modal-content modal-content-small">
-        <div class="modal-header"><div class="modal-title">Rename</div></div>
+        <div class="modal-header"><div class="modal-title">Rename Display Name</div></div>
         <div class="modal-body">
             <p>Input the display name for <strong class="dictionary-title"></strong> dictionary:</p>
             <div class="margin-above">

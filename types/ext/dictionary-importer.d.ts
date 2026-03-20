@@ -86,6 +86,13 @@ export type Summary = {
     targetLanguage?: string;
     frequencyMode?: 'occurrence-based' | 'rank-based';
     importSuccess?: boolean;
+    metadataOverrides?: SummaryMetadataOverrides;
+};
+
+export type SummaryMetadataOverrides = {
+    title?: string;
+    url?: string | null;
+    description?: string | null;
 };
 
 export type SummaryDetails = {

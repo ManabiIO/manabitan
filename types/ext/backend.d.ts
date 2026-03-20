@@ -19,7 +19,7 @@ import type * as Api from './api';
 
 export type DatabaseUpdateType = 'dictionary';
 
-export type DatabaseUpdateCause = 'purge' | 'delete' | 'import';
+export type DatabaseUpdateCause = 'purge' | 'delete' | 'import' | 'edit';
 
 export type DictionaryUpdateCheckResult = {
     dictionaryTitle: string;
