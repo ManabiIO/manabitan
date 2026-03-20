@@ -19,6 +19,7 @@
 - Blur when word is under a certain frequency
 - 100% test coverage with extensive end to end tests
 - Significantly less RAM usage
+- Edit dictionary metadata (name etc) after the fact
 
 # Visit [yomitan.wiki](https://yomitan.wiki) to learn more!
 
