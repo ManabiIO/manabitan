@@ -24,9 +24,11 @@
 
 - MDX dictionary support (now supports 20,000 more dicts than Yomitan)
 - Auto-updating dictionaries, never manually update a dictionary again.
-- Schedule when a specific dictionary updates (hourly, daily, weekly, monthly)
+- Schedule when a specific dictionary updates (hourly, daily, weekly, monthly) ((Imports are so fast you won't even notice it's updating))
 - Blur when word is under a certain frequency to force you to recall it.
 - Edit dictionary metadata (name etc) after importing.
+- Install all reccomended dicts with one button
+- Update all dicts with one button
 
 ## Nerdy
 
