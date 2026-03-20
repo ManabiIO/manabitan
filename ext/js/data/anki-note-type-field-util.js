@@ -186,15 +186,15 @@ function getKnownAnkiNoteTypePreset(modelName, dictionaryEntryType, dynamicField
             };
         case 'crop-theft-vocab':
             return {
-                Word: '{expression}',
-                Reading: '{reading}',
-                PitchPattern: '{pitch-accents}',
-                Audio: '{audio}',
-                Definition: '{glossary-brief}',
+                'Word': '{expression}',
+                'Reading': '{reading}',
+                'PitchPattern': '{pitch-accents}',
+                'Audio': '{audio}',
+                'Definition': '{glossary-brief}',
                 'Example Sentence': '{sentence}',
                 'Example Target': '{search-query}',
-                Frequency: '{frequency-harmonic-rank}',
-                Notes: '',
+                'Frequency': '{frequency-harmonic-rank}',
+                'Notes': '',
             };
         default:
             return null;
