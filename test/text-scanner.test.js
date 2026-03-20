@@ -134,7 +134,7 @@ function createMockTermEntry() {
 }
 
 describe('TextScanner lookup robustness', () => {
-    const {teardown} = testEnv;
+    const {window, teardown} = testEnv;
     const searchAt = getSearchAtMethod();
 
     afterAll(async () => {
@@ -274,5 +274,59 @@ describe('TextScanner lookup robustness', () => {
         // Late completions from stale timed-out lookups must not emit extra events.
         expect(searchSuccessCount).toBe(totalScans - pendingResolvers.length);
         expect(searchErrorCount).toBe(0);
+    });
+
+    test('coalesces repeated mouse moves to the latest pending lookup', async () => {
+        const scanner = new TextScanner({
+            api: /** @type {import('../ext/js/comm/api.js').API} */ ({}),
+            node: window,
+            getSearchContext: () => ({optionsContext: {url: 'https://example.com'}, detail: {documentTitle: 'Bench'}}),
+            textSourceGenerator: /** @type {import('../ext/js/dom/text-source-generator.js').TextSourceGenerator} */ ({
+                getRangeFromPoint: () => null,
+                extractSentence: () => ({text: '', offset: 0}),
+            }),
+        });
+
+        const inputInfo = createInputInfo();
+        Reflect.set(scanner, '_getMatchingInputGroupFromEvent', vi.fn(() => inputInfo));
+        Reflect.set(scanner, '_scanTimerClear', vi.fn());
+
+        /** @type {() => void} */
+        let releaseFirstLookup = () => {};
+        const firstLookupPromise = new Promise((resolve) => {
+            releaseFirstLookup = resolve;
+        });
+        /** @type {Array<{x: number, y: number}>} */
+        const calls = [];
+        const searchAtSpy = vi.fn(async (x, y, searchInputInfo) => {
+            const nextX = Number(x);
+            const nextY = Number(y);
+            calls.push({x: nextX, y: nextY});
+            Reflect.set(scanner, '_pendingLookup', true);
+            if (calls.length === 1) {
+                await firstLookupPromise;
+            }
+            Reflect.set(scanner, '_pendingLookup', false);
+            Reflect.get(scanner, '_dispatchPendingMouseMoveSearch').call(scanner);
+            void searchInputInfo;
+        });
+        Reflect.set(scanner, '_searchAt', searchAtSpy);
+
+        Reflect.get(scanner, '_onMousePointerMove').call(scanner, /** @type {PointerEvent} */ ({clientX: 10, clientY: 10}));
+        await Promise.resolve();
+
+        Reflect.get(scanner, '_onMousePointerMove').call(scanner, /** @type {PointerEvent} */ ({clientX: 20, clientY: 20}));
+        Reflect.get(scanner, '_onMousePointerMove').call(scanner, /** @type {PointerEvent} */ ({clientX: 30, clientY: 30}));
+
+        expect(calls).toStrictEqual([{x: 10, y: 10}]);
+
+        releaseFirstLookup();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(calls).toStrictEqual([
+            {x: 10, y: 10},
+            {x: 30, y: 30},
+        ]);
     });
 });

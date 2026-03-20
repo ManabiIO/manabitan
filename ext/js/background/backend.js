@@ -252,6 +252,8 @@ export class Backend {
         this._permissions = null;
         /** @type {Map<string, (() => void)[]>} */
         this._applicationReadyHandlers = new Map();
+        /** @type {WeakMap<import('settings').ProfileOptions, object>} */
+        this._translatorProfileOptionsCache = new WeakMap();
 
         /* eslint-disable @stylistic/no-multi-spaces */
         /** @type {import('api').ApiMap} */
@@ -2224,6 +2226,7 @@ export class Backend {
     _applyOptions(source) {
         const options = this._getProfileOptions({current: true}, false);
         this._updateBadge();
+        this._clearTranslatorProfileOptionsCache();
 
         const enabled = options.general.enable;
 
@@ -2505,6 +2508,13 @@ export class Backend {
      */
     _clearProfileConditionsSchemaCache() {
         this._profileConditionsSchemaCache = [];
+    }
+
+    /**
+     * @returns {void}
+     */
+    _clearTranslatorProfileOptionsCache() {
+        this._translatorProfileOptionsCache = new WeakMap();
     }
 
     /**
@@ -5038,27 +5048,35 @@ export class Backend {
         if (typeof matchType !== 'string') { matchType = /** @type {import('translation').FindTermsMatchType} */ ('exact'); }
         if (typeof deinflect !== 'boolean') { deinflect = true; }
         if (typeof primaryReading !== 'string') { primaryReading = ''; }
-        const enabledDictionaryMap = this._getTranslatorEnabledDictionaryMap(options);
-        const {
-            general: {mainDictionary, sortFrequencyDictionary, sortFrequencyDictionaryOrder, language},
-            scanning: {alphanumeric},
-            translation: {
-                textReplacements: textReplacementsOptions,
-                searchResolution,
-            },
-        } = options;
-        const textReplacements = this._getTranslatorTextReplacements(textReplacementsOptions);
+        const cachedOptions = this._getTranslatorProfileOptionsCache(options);
+        let {
+            enabledDictionaryMap,
+            mainDictionary,
+            sortFrequencyDictionary,
+            sortFrequencyDictionaryOrder,
+            removeNonJapaneseCharacters,
+            searchResolution,
+            textReplacements,
+            language,
+        } = cachedOptions;
         let excludeDictionaryDefinitions = null;
         if (mode === 'merge' && !enabledDictionaryMap.has(mainDictionary)) {
-            enabledDictionaryMap.set(mainDictionary, {
-                index: enabledDictionaryMap.size,
-                alias: mainDictionary,
-                allowSecondarySearches: false,
-                partsOfSpeechFilter: true,
-                useDeinflections: true,
-            });
-            excludeDictionaryDefinitions = new Set();
-            excludeDictionaryDefinitions.add(mainDictionary);
+            let {mergeEnabledDictionaryMap, mergeExcludeDictionaryDefinitions} = cachedOptions;
+            if (typeof mergeEnabledDictionaryMap === 'undefined') {
+                mergeEnabledDictionaryMap = new Map(enabledDictionaryMap);
+                mergeEnabledDictionaryMap.set(mainDictionary, {
+                    index: mergeEnabledDictionaryMap.size,
+                    alias: mainDictionary,
+                    allowSecondarySearches: false,
+                    partsOfSpeechFilter: true,
+                    useDeinflections: true,
+                });
+                mergeExcludeDictionaryDefinitions = new Set([mainDictionary]);
+                cachedOptions.mergeEnabledDictionaryMap = mergeEnabledDictionaryMap;
+                cachedOptions.mergeExcludeDictionaryDefinitions = mergeExcludeDictionaryDefinitions;
+            }
+            enabledDictionaryMap = mergeEnabledDictionaryMap;
+            excludeDictionaryDefinitions = mergeExcludeDictionaryDefinitions ?? null;
         }
         return {
             matchType,
@@ -5067,7 +5085,7 @@ export class Backend {
             mainDictionary,
             sortFrequencyDictionary,
             sortFrequencyDictionaryOrder,
-            removeNonJapaneseCharacters: !alphanumeric,
+            removeNonJapaneseCharacters,
             searchResolution,
             textReplacements,
             enabledDictionaryMap,
@@ -5082,11 +5100,55 @@ export class Backend {
      * @returns {import('translation').FindKanjiOptions} An options object.
      */
     _getTranslatorFindKanjiOptions(options) {
-        const enabledDictionaryMap = this._getTranslatorEnabledDictionaryMap(options);
+        const {enabledDictionaryMap, removeNonJapaneseCharacters} = this._getTranslatorProfileOptionsCache(options);
         return {
             enabledDictionaryMap,
-            removeNonJapaneseCharacters: !options.scanning.alphanumeric,
+            removeNonJapaneseCharacters,
         };
+    }
+
+    /**
+     * @param {import('settings').ProfileOptions} options
+     * @returns {{
+     *     enabledDictionaryMap: Map<string, import('translation').FindTermDictionary>,
+     *     mergeEnabledDictionaryMap?: Map<string, import('translation').FindTermDictionary>,
+     *     mergeExcludeDictionaryDefinitions?: Set<string>,
+     *     mainDictionary: string,
+     *     sortFrequencyDictionary: string | null,
+     *     sortFrequencyDictionaryOrder: import('settings').SortFrequencyDictionaryOrder,
+     *     removeNonJapaneseCharacters: boolean,
+     *     searchResolution: import('settings').SearchResolution,
+     *     textReplacements: (?(import('translation').FindTermsTextReplacement[]))[],
+     *     language: string,
+     * }}
+     */
+    _getTranslatorProfileOptionsCache(options) {
+        let cache = this._translatorProfileOptionsCache.get(options);
+        if (typeof cache !== 'undefined') {
+            return cache;
+        }
+
+        const {
+            general: {mainDictionary, sortFrequencyDictionary, sortFrequencyDictionaryOrder, language},
+            scanning: {alphanumeric},
+            translation: {
+                textReplacements: textReplacementsOptions,
+                searchResolution,
+            },
+        } = options;
+
+        cache = {
+            enabledDictionaryMap: this._getTranslatorEnabledDictionaryMap(options),
+            mainDictionary,
+            sortFrequencyDictionary,
+            sortFrequencyDictionaryOrder,
+            removeNonJapaneseCharacters: !alphanumeric,
+            searchResolution,
+            textReplacements: this._getTranslatorTextReplacements(textReplacementsOptions),
+            language,
+        };
+        this._translatorProfileOptionsCache.set(options, cache);
+        return cache;
     }
 
     /**

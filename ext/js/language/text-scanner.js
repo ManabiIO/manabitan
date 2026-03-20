@@ -67,6 +67,8 @@ export class TextScanner extends EventDispatcher {
         this._searchOnClickOnly = searchOnClickOnly;
         /** @type {import('../dom/text-source-generator').TextSourceGenerator} */
         this._textSourceGenerator = textSourceGenerator;
+        /** @type {ThemeController} */
+        this._themeController = new ThemeController(document.documentElement);
 
         /** @type {boolean} */
         this._isPrepared = false;
@@ -102,6 +104,8 @@ export class TextScanner extends EventDispatcher {
 
         /** @type {PointerEvent | null} */
         this._lastMouseMove = null;
+        /** @type {?{x: number, y: number, inputInfo: import('text-scanner').InputInfo}} */
+        this._pendingMouseMoveSearch = null;
 
         /** @type {boolean} */
         this._deepContentScan = false;
@@ -254,6 +258,7 @@ export class TextScanner extends EventDispatcher {
         this._preventScroll = false;
         this._penPointerState = 0;
         this._pointerIdTypeMap.clear();
+        this._pendingMouseMoveSearch = null;
 
         this._enabledValue = value;
 
@@ -541,8 +546,6 @@ export class TextScanner extends EventDispatcher {
                 this.setCurrentTextSource(textSource);
                 this._selectionRestoreInfo = selectionRestoreInfo;
 
-                /** @type {ThemeController} */
-                this._themeController = new ThemeController(document.documentElement);
                 const pageTheme = this._themeController.computeSiteTheme();
 
                 this.trigger('searchSuccess', {
@@ -707,6 +710,7 @@ export class TextScanner extends EventDispatcher {
     /** */
     _onMouseOut() {
         this._scanTimerClear();
+        this._pendingMouseMoveSearch = null;
         this.clearMousePosition();
     }
 
@@ -958,6 +962,11 @@ export class TextScanner extends EventDispatcher {
 
         const inputInfo = this._getMatchingInputGroupFromEvent('mouse', 'mouseMove', e);
         if (inputInfo === null) { return; }
+
+        if (this._pendingLookup) {
+            this._pendingMouseMoveSearch = {x: e.clientX, y: e.clientY, inputInfo};
+            return;
+        }
 
         void this._searchAtFromMouseMove(e.clientX, e.clientY, inputInfo);
     }
@@ -1401,6 +1410,7 @@ export class TextScanner extends EventDispatcher {
                 this._activeLookupSequence = null;
             }
             this._pendingLookup = false;
+            this._dispatchPendingMouseMoveSearch();
         }
     }
 
@@ -1418,14 +1428,36 @@ export class TextScanner extends EventDispatcher {
      * @param {import('text-scanner').InputInfo} inputInfo
      */
     async _searchAtFromMouseMove(x, y, inputInfo) {
-        if (this._pendingLookup) { return; }
+        if (this._pendingLookup) {
+            this._pendingMouseMoveSearch = {x, y, inputInfo};
+            return;
+        }
 
         if (inputInfo.passive && !await this._scanTimerWait()) {
             // Aborted
             return;
         }
 
+        if (this._pendingLookup) {
+            this._pendingMouseMoveSearch = {x, y, inputInfo};
+            return;
+        }
+
         await this._searchAt(x, y, inputInfo);
+    }
+
+    /**
+     * @returns {void}
+     */
+    _dispatchPendingMouseMoveSearch() {
+        if (this._pendingLookup) { return; }
+
+        const pendingMouseMoveSearch = this._pendingMouseMoveSearch;
+        if (pendingMouseMoveSearch === null) { return; }
+
+        this._pendingMouseMoveSearch = null;
+        const {x, y, inputInfo} = pendingMouseMoveSearch;
+        void this._searchAt(x, y, inputInfo);
     }
 
     /**

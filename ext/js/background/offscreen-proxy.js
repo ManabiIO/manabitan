@@ -20,6 +20,15 @@ import {ExtensionError} from '../core/extension-error.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
 
+/** @type {WeakMap<object, [string, import('translation').FindKanjiDictionary][]>} */
+const KANJI_ENABLED_DICTIONARY_MAP_LIST_CACHE = new WeakMap();
+/** @type {WeakMap<object, [string, import('translation').FindTermDictionary][]>} */
+const TERM_ENABLED_DICTIONARY_MAP_LIST_CACHE = new WeakMap();
+/** @type {WeakMap<object, string[]>} */
+const EXCLUDE_DICTIONARY_DEFINITIONS_LIST_CACHE = new WeakMap();
+/** @type {WeakMap<object, (import('offscreen').FindTermsTextReplacementOffscreen[] | null)[]>} */
+const TEXT_REPLACEMENTS_SERIALIZED_CACHE = new WeakMap();
+
 /**
  * This class is responsible for creating and communicating with an offscreen document.
  * This offscreen document is used to solve three issues:
@@ -331,7 +340,7 @@ export class TranslatorProxy {
      * @returns {Promise<import('dictionary').KanjiDictionaryEntry[]>}
      */
     async findKanji(text, options) {
-        const enabledDictionaryMapList = [...options.enabledDictionaryMap];
+        const enabledDictionaryMapList = this._getKanjiEnabledDictionaryMapList(options.enabledDictionaryMap);
         /** @type {import('offscreen').FindKanjiOptionsOffscreen} */
         const modifiedOptions = {
             ...options,
@@ -348,11 +357,9 @@ export class TranslatorProxy {
      */
     async findTerms(mode, text, options) {
         const {enabledDictionaryMap, excludeDictionaryDefinitions, textReplacements} = options;
-        const enabledDictionaryMapList = [...enabledDictionaryMap];
-        const excludeDictionaryDefinitionsList = excludeDictionaryDefinitions ? [...excludeDictionaryDefinitions] : null;
-        const textReplacementsSerialized = textReplacements.map((group) => {
-            return group !== null ? group.map((opt) => ({...opt, pattern: opt.pattern.toString()})) : null;
-        });
+        const enabledDictionaryMapList = this._getTermEnabledDictionaryMapList(enabledDictionaryMap);
+        const excludeDictionaryDefinitionsList = this._getExcludeDictionaryDefinitionsList(excludeDictionaryDefinitions);
+        const textReplacementsSerialized = this._getTextReplacementsSerialized(textReplacements);
         /** @type {import('offscreen').FindTermsOptionsOffscreen} */
         const modifiedOptions = {
             ...options,
@@ -375,6 +382,64 @@ export class TranslatorProxy {
     /** */
     async clearDatabaseCaches() {
         await this._offscreen.sendMessagePromise({action: 'clearDatabaseCachesOffscreen'});
+    }
+
+    /**
+     * @param {Map<string, import('translation').FindKanjiDictionary>} enabledDictionaryMap
+     * @returns {[string, import('translation').FindKanjiDictionary][]}
+     */
+    _getKanjiEnabledDictionaryMapList(enabledDictionaryMap) {
+        let cached = KANJI_ENABLED_DICTIONARY_MAP_LIST_CACHE.get(enabledDictionaryMap);
+        if (typeof cached === 'undefined') {
+            cached = [...enabledDictionaryMap];
+            KANJI_ENABLED_DICTIONARY_MAP_LIST_CACHE.set(enabledDictionaryMap, cached);
+        }
+        return cached;
+    }
+
+    /**
+     * @param {Map<string, import('translation').FindTermDictionary>} enabledDictionaryMap
+     * @returns {[string, import('translation').FindTermDictionary][]}
+     */
+    _getTermEnabledDictionaryMapList(enabledDictionaryMap) {
+        let cached = TERM_ENABLED_DICTIONARY_MAP_LIST_CACHE.get(enabledDictionaryMap);
+        if (typeof cached === 'undefined') {
+            cached = [...enabledDictionaryMap];
+            TERM_ENABLED_DICTIONARY_MAP_LIST_CACHE.set(enabledDictionaryMap, cached);
+        }
+        return cached;
+    }
+
+    /**
+     * @param {?Set<string>} excludeDictionaryDefinitions
+     * @returns {?string[]}
+     */
+    _getExcludeDictionaryDefinitionsList(excludeDictionaryDefinitions) {
+        if (excludeDictionaryDefinitions === null) {
+            return null;
+        }
+
+        let cached = EXCLUDE_DICTIONARY_DEFINITIONS_LIST_CACHE.get(excludeDictionaryDefinitions);
+        if (typeof cached === 'undefined') {
+            cached = [...excludeDictionaryDefinitions];
+            EXCLUDE_DICTIONARY_DEFINITIONS_LIST_CACHE.set(excludeDictionaryDefinitions, cached);
+        }
+        return cached;
+    }
+
+    /**
+     * @param {(import('translation').FindTermsTextReplacement[]|null)[]} textReplacements
+     * @returns {(import('offscreen').FindTermsTextReplacementOffscreen[] | null)[]}
+     */
+    _getTextReplacementsSerialized(textReplacements) {
+        let cached = TEXT_REPLACEMENTS_SERIALIZED_CACHE.get(textReplacements);
+        if (typeof cached === 'undefined') {
+            cached = textReplacements.map((group) => {
+                return group !== null ? group.map((opt) => ({...opt, pattern: opt.pattern.toString()})) : null;
+            });
+            TEXT_REPLACEMENTS_SERIALIZED_CACHE.set(textReplacements, cached);
+        }
+        return cached;
     }
 }
 
