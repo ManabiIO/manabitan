@@ -30,6 +30,7 @@
 - Edit dictionary metadata (name etc) after importing.
 - Install all reccomended dicts with one button
 - Update all dicts with one button
+- Custom themes built in. Glass, Autumn, Tokyo, Dark etc
 
 ## Nerdy
 
