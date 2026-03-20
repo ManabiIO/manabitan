@@ -30,6 +30,7 @@ import {DictionaryController} from './dictionary-controller.js';
 const OPFS_REQUIRED_USER_MESSAGE = 'Manabitan requires OPFS storage support. Update to Chrome/Edge 120+ or Firefox 115+ and reload the extension.';
 const RECOMMENDED_DICTIONARY_CATEGORIES = ['terms', 'kanji', 'frequency', 'grammar', 'pronunciation'];
 const MDX_CONVERSION_PROGRESS_TOTAL = 1000;
+const DEFAULT_IMPORT_SESSION_DICTIONARY_LIMIT = 2;
 const MDX_UPLOAD_PROGRESS_RATIO = 0.45;
 const DUPLICATE_IMPORT_SKIP_ERROR_PATTERN = /^Dictionary .+ is already imported, skipped it\.$/;
 
@@ -189,6 +190,18 @@ function getHeapDeltaBytes(start, end) {
     if (start.source !== 'performance.memory' || end.source !== 'performance.memory') { return null; }
     if (typeof start.usedJSHeapSize !== 'number' || typeof end.usedJSHeapSize !== 'number') { return null; }
     return end.usedJSHeapSize - start.usedJSHeapSize;
+}
+
+/**
+ * @returns {number|null}
+ */
+function getApproximateDeviceMemoryGiB() {
+    try {
+        const rawValue = /** @type {unknown} */ (Reflect.get(globalThis.navigator ?? {}, 'deviceMemory'));
+        return (typeof rawValue === 'number' && Number.isFinite(rawValue) && rawValue > 0) ? rawValue : null;
+    } catch (_) {
+        return null;
+    }
 }
 
 /**
@@ -2032,14 +2045,25 @@ export class DictionaryImportController {
 
         /** @type {Error[]} */
         let errors = [...initialErrors];
-        const useImportSession = this._getUseImportSession();
-        log.log(`[ImportTiming] import session reuse enabled=${String(useImportSession)} (globalOverride=${String(this._getUseImportSession())})`);
+        const importSessionDictionaryLimit = this._getImportSessionDictionaryLimit(importProgressTracker.dictionaryCount);
+        const useImportSession = (
+            this._getUseImportSession() &&
+            importProgressTracker.dictionaryCount > 1 &&
+            importSessionDictionaryLimit > 1
+        );
+        log.log(
+            `[ImportTiming] import session reuse enabled=${String(useImportSession)} ` +
+            `(globalOverride=${String(this._getUseImportSession())} limit=${String(importSessionDictionaryLimit)})`,
+        );
         reportDiagnostics('dictionary-import-session-begin', {
             dictionaryCount: importProgressTracker.dictionaryCount,
             useImportSession,
+            importSessionDictionaryLimit,
             hasProfilesDictionarySettings: profilesDictionarySettings !== null,
         });
-        const dictionaryWorker = this._getDictionaryWorker(useImportSession);
+        /** @type {DictionaryWorker|null} */
+        let dictionaryWorker = null;
+        let sessionDictionaryCount = 0;
         let importModeEnabled = false;
         const importStartTime = safePerformance.now();
         try {
@@ -2074,54 +2098,99 @@ export class DictionaryImportController {
                 importProgressTracker.onNextDictionary();
                 if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, true); }
                 const dictionaryLoopStartTime = safePerformance.now();
-                const finalizeImportSession = useImportSession && i >= (importProgressTracker.dictionaryCount - 1);
+                const remainingDictionaryCount = importProgressTracker.dictionaryCount - i;
+                /** @type {boolean} */
+                const currentUseImportSession = (
+                    dictionaryWorker !== null ||
+                    (useImportSession && remainingDictionaryCount > 1)
+                );
+                /** @type {DictionaryWorker} */
+                const currentDictionaryWorker = currentUseImportSession ?
+                    (dictionaryWorker ?? this._getDictionaryWorker(true)) :
+                    this._getDictionaryWorker(false);
+                if (currentUseImportSession && dictionaryWorker === null) {
+                    dictionaryWorker = currentDictionaryWorker;
+                    sessionDictionaryCount = 0;
+                }
+                if (currentUseImportSession) {
+                    sessionDictionaryCount += 1;
+                }
+                /** @type {boolean} */
+                const finalizeImportSession = (
+                    currentUseImportSession &&
+                    (
+                        sessionDictionaryCount >= importSessionDictionaryLimit ||
+                        remainingDictionaryCount <= 1
+                    )
+                );
                 reportDiagnostics('dictionary-import-item-begin', {
                     index: i + 1,
                     dictionaryCount: importProgressTracker.dictionaryCount,
+                    useImportSession: currentUseImportSession,
                     finalizeImportSession,
+                    importSessionDictionaryLimit,
+                    sessionDictionaryCount,
                 });
                 const nextDictionary = await dictionaries.next();
                 const source = nextDictionary.done ? null : nextDictionary.value;
-                if (source && typeof source === 'object' && source.type === 'zip' && source.file instanceof File) {
-                    errors = [
-                        ...errors,
-                        ...(await this._importDictionaryFromZip(
-                            source.file,
-                            profilesDictionarySettings,
-                            importDetails,
-                            dictionaryWorker,
-                            useImportSession,
-                            finalizeImportSession,
-                            onProgress,
-                        ) ?? []),
-                    ];
-                } else if (
-                    source &&
-                    typeof source === 'object' &&
-                    source.type === 'mdx' &&
-                    source.mdxFile instanceof File &&
-                    Array.isArray(source.mddFiles)
-                ) {
-                    errors = [
-                        ...errors,
-                        ...(await this._importDictionaryFromMdx(
-                            source,
-                            profilesDictionarySettings,
-                            importDetails,
-                            dictionaryWorker,
-                            useImportSession,
-                            finalizeImportSession,
-                            onProgress,
-                        ) ?? []),
-                    ];
-                } else {
-                    errors.push(new Error(`Failed to read file ${i + 1} of ${importProgressTracker.dictionaryCount} (value-type=${typeof source}).`));
-                    reportDiagnostics('dictionary-import-item-invalid-file', {
-                        index: i + 1,
-                        dictionaryCount: importProgressTracker.dictionaryCount,
-                        valueType: typeof source,
-                    });
-                    continue;
+                try {
+                    if (source && typeof source === 'object' && source.type === 'zip' && source.file instanceof File) {
+                        errors = [
+                            ...errors,
+                            ...(await this._importDictionaryFromZip(
+                                source.file,
+                                profilesDictionarySettings,
+                                importDetails,
+                                currentDictionaryWorker,
+                                currentUseImportSession,
+                                finalizeImportSession,
+                                onProgress,
+                            ) ?? []),
+                        ];
+                    } else if (
+                        source &&
+                        typeof source === 'object' &&
+                        source.type === 'mdx' &&
+                        source.mdxFile instanceof File &&
+                        Array.isArray(source.mddFiles)
+                    ) {
+                        errors = [
+                            ...errors,
+                            ...(await this._importDictionaryFromMdx(
+                                source,
+                                profilesDictionarySettings,
+                                importDetails,
+                                currentDictionaryWorker,
+                                currentUseImportSession,
+                                finalizeImportSession,
+                                onProgress,
+                            ) ?? []),
+                        ];
+                    } else {
+                        errors.push(new Error(`Failed to read file ${i + 1} of ${importProgressTracker.dictionaryCount} (value-type=${typeof source}).`));
+                        reportDiagnostics('dictionary-import-item-invalid-file', {
+                            index: i + 1,
+                            dictionaryCount: importProgressTracker.dictionaryCount,
+                            valueType: typeof source,
+                        });
+                        continue;
+                    }
+                } finally {
+                    if (currentUseImportSession) {
+                        if (finalizeImportSession) {
+                            this._releaseDictionaryWorker(currentDictionaryWorker, true);
+                            dictionaryWorker = null;
+                            sessionDictionaryCount = 0;
+                            if (remainingDictionaryCount > 1) {
+                                await this._waitForImportMemoryCleanup();
+                            }
+                        }
+                    } else {
+                        this._releaseDictionaryWorker(currentDictionaryWorker, false);
+                        if (remainingDictionaryCount > 1) {
+                            await this._waitForImportMemoryCleanup();
+                        }
+                    }
                 }
                 const dictionaryLoopEndTime = safePerformance.now();
                 log.log(`[ImportTiming] dictionary ${i + 1}/${importProgressTracker.dictionaryCount} total ${formatDurationMs(dictionaryLoopEndTime - dictionaryLoopStartTime)}`);
@@ -2161,7 +2230,9 @@ export class DictionaryImportController {
             for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = true; }
             if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, false); }
             this._setModifying(false);
-            this._releaseDictionaryWorker(dictionaryWorker, useImportSession);
+            if (dictionaryWorker !== null) {
+                this._releaseDictionaryWorker(dictionaryWorker, true);
+            }
             if (importModeEnabled) {
                 try {
                     await this._settingsController.application.api.setDictionaryImportMode(false);
@@ -2233,6 +2304,34 @@ export class DictionaryImportController {
      */
     _getUseImportSession() {
         return Reflect.get(globalThis, 'manabitanImportUseSession') !== false;
+    }
+
+    /**
+     * @param {number} dictionaryCount
+     * @returns {number}
+     */
+    _getImportSessionDictionaryLimit(dictionaryCount) {
+        const overrideRaw = /** @type {unknown} */ (Reflect.get(globalThis, 'manabitanImportSessionDictionaryLimit'));
+        if (typeof overrideRaw === 'number' && Number.isFinite(overrideRaw)) {
+            return Math.max(1, Math.trunc(overrideRaw));
+        }
+        if (dictionaryCount <= 1) {
+            return 1;
+        }
+        const deviceMemoryGiB = getApproximateDeviceMemoryGiB();
+        if (deviceMemoryGiB !== null && deviceMemoryGiB <= 4) {
+            return 1;
+        }
+        return DEFAULT_IMPORT_SESSION_DICTIONARY_LIMIT;
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _waitForImportMemoryCleanup() {
+        await new Promise((resolve) => {
+            setTimeout(resolve, 0);
+        });
     }
 
     /**
@@ -2343,44 +2442,50 @@ export class DictionaryImportController {
 
         onProgress({nextStep: true, index: 0, count: 0});
         const readStartTime = safePerformance.now();
-        const {mdxBytes, mddFiles, totalBytes} = await this._readMdxImportSourceBytes(source, onProgress);
+        let {mdxBytes, mddFiles, totalBytes} = await this._readMdxImportSourceBytes(source, onProgress);
         const readEndTime = safePerformance.now();
         recordLocalPhase('read-mdx-source', readStartTime, readEndTime, {
             mddCount: source.mddFiles.length,
             sizeBytes: totalBytes,
         });
 
-        return await this._importDictionaryWithWorkerInvocation(
-            sourceTitle,
-            profilesDictionarySettings,
-            useImportSession,
-            finalizeImportSession,
-            importStartTime,
-            localPhaseTimings,
-            recordLocalPhase,
-            async () => {
-                const mdxBytesView = (mdxBytes instanceof Uint8Array ? mdxBytes : new Uint8Array(mdxBytes));
-                const mdxBytesCopyBuffer = mdxBytesView.slice().buffer;
+        try {
+            return await this._importDictionaryWithWorkerInvocation(
+                sourceTitle,
+                profilesDictionarySettings,
+                useImportSession,
+                finalizeImportSession,
+                importStartTime,
+                localPhaseTimings,
+                recordLocalPhase,
+                async () => {
+                    const mdxBytesView = (mdxBytes instanceof Uint8Array ? mdxBytes : new Uint8Array(mdxBytes));
+                    const mdxBytesCopyBuffer = new Uint8Array(mdxBytesView).buffer;
 
-                const mddFilesCopy = mddFiles.map(({name, bytes}) => {
-                    const bytesView = (bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes));
-                    const bytesCopyBuffer = bytesView.slice().buffer;
-                    return {name, bytes: bytesCopyBuffer};
-                });
+                    const mddFilesCopy = mddFiles.map(({name, bytes}) => {
+                        const bytesView = (bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes));
+                        const bytesCopyBuffer = new Uint8Array(bytesView).buffer;
+                        return {name, bytes: bytesCopyBuffer};
+                    });
 
-                return await dictionaryWorker.importMdxDictionary(
-                    source.mdxFile.name,
-                    mdxBytesCopyBuffer,
-                    mddFilesCopy,
-                    {
-                        ...importDetails,
-                        ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
-                    },
-                    onProgress,
-                    {enableAudio: false},
-                );
-            },
-        );
+                    return await dictionaryWorker.importMdxDictionary(
+                        source.mdxFile.name,
+                        mdxBytesCopyBuffer,
+                        mddFilesCopy,
+                        {
+                            ...importDetails,
+                            ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
+                        },
+                        onProgress,
+                        {enableAudio: false},
+                    );
+                },
+            );
+        } finally {
+            mdxBytes = new Uint8Array(0);
+            mddFiles = [];
+            totalBytes = 0;
+        }
     }
 
     /**
@@ -2456,24 +2561,28 @@ export class DictionaryImportController {
      * @returns {Promise<Error[] | undefined>}
      */
     async _importDictionaryArchiveContent(dictionaryTitle, archiveContent, profilesDictionarySettings, importDetails, dictionaryWorker, useImportSession, finalizeImportSession, onProgress, importStartTime, localPhaseTimings, recordLocalPhase) {
-        const archiveContentBytes = new Uint8Array(archiveContent);
-        return await this._importDictionaryWithWorkerInvocation(
-            dictionaryTitle,
-            profilesDictionarySettings,
-            useImportSession,
-            finalizeImportSession,
-            importStartTime,
-            localPhaseTimings,
-            recordLocalPhase,
-            async () => await dictionaryWorker.importDictionary(
-                new Uint8Array(archiveContentBytes).buffer,
-                {
-                    ...importDetails,
-                    ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
-                },
-                onProgress,
-            ),
-        );
+        let archiveContentBytes = new Uint8Array(archiveContent);
+        try {
+            return await this._importDictionaryWithWorkerInvocation(
+                dictionaryTitle,
+                profilesDictionarySettings,
+                useImportSession,
+                finalizeImportSession,
+                importStartTime,
+                localPhaseTimings,
+                recordLocalPhase,
+                async () => await dictionaryWorker.importDictionary(
+                    new Uint8Array(archiveContentBytes).buffer,
+                    {
+                        ...importDetails,
+                        ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
+                    },
+                    onProgress,
+                ),
+            );
+        } finally {
+            archiveContentBytes = new Uint8Array(0);
+        }
     }
 
     /**
