@@ -40,86 +40,143 @@ function getBackendMethod(name) {
     return method;
 }
 
-describe('Backend derived scan length', () => {
-    test('optionsGet injects the cached max headword length plus buffer', async () => {
+describe('Backend hover scan length', () => {
+    test('optionsGet returns the raw stored scan length', async () => {
         const rawProfileOptions = {scanning: {length: 16}};
         const context = {
             _getProfileOptions: vi.fn(() => rawProfileOptions),
-            _getEffectiveScanLength: vi.fn(async () => 32),
-            _createEffectiveProfileOptions: getBackendMethod('_createEffectiveProfileOptions'),
-        };
-
-        const result = await getBackendMethod('_onApiOptionsGet').call(context, {optionsContext: {current: true}});
-
-        expect(result).toStrictEqual({scanning: {length: 32}});
-        expect(rawProfileOptions).toStrictEqual({scanning: {length: 16}});
-        expect(context._getEffectiveScanLength).toHaveBeenCalledWith(16);
-    });
-
-    test('missing cached max headword length backfills from the database once', async () => {
-        const rawProfileOptions = {scanning: {length: 16}};
-        const saveOptions = vi.fn(async () => {});
-        const context = {
-            _options: {
-                global: {
-                    database: {
-                        maxHeadwordLength: 0,
-                    },
-                },
-            },
-            _dictionaryDatabase: {
-                getMaxHeadwordLength: vi.fn(async () => 21),
-            },
-            _dictionaryImportModeActive: false,
-            _ensureDictionaryDatabaseReady: vi.fn(async () => {}),
-            _saveOptions: saveOptions,
-            _getProfileOptions: vi.fn(() => rawProfileOptions),
-            _getStoredGlobalMaxHeadwordLength: getBackendMethod('_getStoredGlobalMaxHeadwordLength'),
-            _setGlobalMaxHeadwordLength: getBackendMethod('_setGlobalMaxHeadwordLength'),
-            _computeMaxHeadwordLengthFromDatabase: getBackendMethod('_computeMaxHeadwordLengthFromDatabase'),
-            _getEffectiveScanLength: getBackendMethod('_getEffectiveScanLength'),
-            _createEffectiveProfileOptions: getBackendMethod('_createEffectiveProfileOptions'),
-        };
-
-        const result = await getBackendMethod('_onApiOptionsGet').call(context, {optionsContext: {current: true}});
-
-        expect(result).toStrictEqual({scanning: {length: 29}});
-        expect(rawProfileOptions).toStrictEqual({scanning: {length: 16}});
-        expect(context._dictionaryDatabase.getMaxHeadwordLength).toHaveBeenCalledTimes(1);
-        expect(context._options.global.database.maxHeadwordLength).toBe(21);
-        expect(saveOptions).toHaveBeenCalledTimes(1);
-        expect(saveOptions).toHaveBeenCalledWith('background');
-    });
-
-    test('falls back to the stored scan length when the database max is 0', async () => {
-        const rawProfileOptions = {scanning: {length: 16}};
-        const saveOptions = vi.fn(async () => {});
-        const context = {
-            _options: {
-                global: {
-                    database: {
-                        maxHeadwordLength: 0,
-                    },
-                },
-            },
-            _dictionaryDatabase: {
-                getMaxHeadwordLength: vi.fn(async () => 0),
-            },
-            _dictionaryImportModeActive: false,
-            _ensureDictionaryDatabaseReady: vi.fn(async () => {}),
-            _saveOptions: saveOptions,
-            _getProfileOptions: vi.fn(() => rawProfileOptions),
-            _getStoredGlobalMaxHeadwordLength: getBackendMethod('_getStoredGlobalMaxHeadwordLength'),
-            _setGlobalMaxHeadwordLength: getBackendMethod('_setGlobalMaxHeadwordLength'),
-            _computeMaxHeadwordLengthFromDatabase: getBackendMethod('_computeMaxHeadwordLengthFromDatabase'),
-            _getEffectiveScanLength: getBackendMethod('_getEffectiveScanLength'),
-            _createEffectiveProfileOptions: getBackendMethod('_createEffectiveProfileOptions'),
         };
 
         const result = await getBackendMethod('_onApiOptionsGet').call(context, {optionsContext: {current: true}});
 
         expect(result).toStrictEqual({scanning: {length: 16}});
-        expect(saveOptions).not.toHaveBeenCalled();
+        expect(result).not.toBe(rawProfileOptions);
+        expect(rawProfileOptions).toStrictEqual({scanning: {length: 16}});
+    });
+
+    test('getEffectiveHoverScanLength caps enabled dictionaries by the stored scan length and caches the result', async () => {
+        const rawProfileOptions = {
+            scanning: {length: 32},
+            dictionaries: [
+                {name: 'Enabled B', enabled: true},
+                {name: 'Disabled', enabled: false},
+                {name: 'Enabled A', enabled: true},
+            ],
+        };
+        const getMaxHeadwordLength = vi.fn(async (dictionaryNames) => {
+            expect(dictionaryNames).toStrictEqual(['Enabled A', 'Enabled B']);
+            return 21;
+        });
+        const context = {
+            _effectiveScanLengthMaxHeadwordLengthCache: new Map(),
+            _dictionaryDatabase: {getMaxHeadwordLength},
+            _dictionaryImportModeActive: false,
+            _ensureDictionaryDatabaseReady: vi.fn(async () => {}),
+            _getProfileOptions: vi.fn(() => rawProfileOptions),
+            _getEffectiveHoverScanLength: getBackendMethod('_getEffectiveHoverScanLength'),
+            _computeMaxHeadwordLengthFromDatabase: getBackendMethod('_computeMaxHeadwordLengthFromDatabase'),
+            _getEnabledDictionaryNames: getBackendMethod('_getEnabledDictionaryNames'),
+            _getDictionarySetCacheKey: getBackendMethod('_getDictionarySetCacheKey'),
+            _getStoredGlobalMaxHeadwordLength: getBackendMethod('_getStoredGlobalMaxHeadwordLength'),
+            _setGlobalMaxHeadwordLength: vi.fn(async () => false),
+            _options: {
+                global: {
+                    database: {
+                        maxHeadwordLength: 0,
+                    },
+                },
+            },
+        };
+
+        const first = await getBackendMethod('_onApiGetEffectiveHoverScanLength').call(context, {optionsContext: {current: true}});
+        const second = await getBackendMethod('_onApiGetEffectiveHoverScanLength').call(context, {optionsContext: {current: true}});
+
+        expect(first).toBe(29);
+        expect(second).toBe(29);
+        expect(getMaxHeadwordLength).toHaveBeenCalledTimes(1);
+    });
+
+    test('getEffectiveHoverScanLength falls back to the stored scan length when the database returns 0', async () => {
+        const rawProfileOptions = {
+            scanning: {length: 16},
+            dictionaries: [{name: 'Enabled', enabled: true}],
+        };
+        const context = {
+            _effectiveScanLengthMaxHeadwordLengthCache: new Map(),
+            _dictionaryDatabase: {getMaxHeadwordLength: vi.fn(async () => 0)},
+            _dictionaryImportModeActive: false,
+            _ensureDictionaryDatabaseReady: vi.fn(async () => {}),
+            _getProfileOptions: vi.fn(() => rawProfileOptions),
+            _getEffectiveHoverScanLength: getBackendMethod('_getEffectiveHoverScanLength'),
+            _computeMaxHeadwordLengthFromDatabase: getBackendMethod('_computeMaxHeadwordLengthFromDatabase'),
+            _getEnabledDictionaryNames: getBackendMethod('_getEnabledDictionaryNames'),
+            _getDictionarySetCacheKey: getBackendMethod('_getDictionarySetCacheKey'),
+            _getStoredGlobalMaxHeadwordLength: getBackendMethod('_getStoredGlobalMaxHeadwordLength'),
+            _setGlobalMaxHeadwordLength: vi.fn(async () => false),
+            _options: {
+                global: {
+                    database: {
+                        maxHeadwordLength: 0,
+                    },
+                },
+            },
+        };
+
+        const result = await getBackendMethod('_onApiGetEffectiveHoverScanLength').call(context, {optionsContext: {current: true}});
+
+        expect(result).toBe(16);
+    });
+
+    test('getEffectiveHoverScanLength falls back to the stored scan length when the database is unavailable', async () => {
+        const rawProfileOptions = {
+            scanning: {length: 16},
+            dictionaries: [{name: 'Enabled', enabled: true}],
+        };
+        const context = {
+            _effectiveScanLengthMaxHeadwordLengthCache: new Map(),
+            _dictionaryDatabase: {getMaxHeadwordLength: vi.fn(async () => 21)},
+            _dictionaryImportModeActive: false,
+            _ensureDictionaryDatabaseReady: vi.fn(async () => {
+                throw new Error('database unavailable');
+            }),
+            _getProfileOptions: vi.fn(() => rawProfileOptions),
+            _getEffectiveHoverScanLength: getBackendMethod('_getEffectiveHoverScanLength'),
+            _computeMaxHeadwordLengthFromDatabase: getBackendMethod('_computeMaxHeadwordLengthFromDatabase'),
+            _getEnabledDictionaryNames: getBackendMethod('_getEnabledDictionaryNames'),
+            _getDictionarySetCacheKey: getBackendMethod('_getDictionarySetCacheKey'),
+            _getStoredGlobalMaxHeadwordLength: getBackendMethod('_getStoredGlobalMaxHeadwordLength'),
+            _setGlobalMaxHeadwordLength: vi.fn(async () => false),
+            _options: {
+                global: {
+                    database: {
+                        maxHeadwordLength: 0,
+                    },
+                },
+            },
+        };
+
+        const result = await getBackendMethod('_onApiGetEffectiveHoverScanLength').call(context, {optionsContext: {current: true}});
+
+        expect(result).toBe(16);
+        expect(context._dictionaryDatabase.getMaxHeadwordLength).not.toHaveBeenCalled();
+    });
+
+    test('dictionary updates clear the cached hover scan lengths', async () => {
+        const refreshCachedMaxHeadwordLength = vi.fn(async () => 21);
+        const triggerDatabaseUpdated = vi.fn(async () => {});
+        const cache = new Map([['Enabled', 21]]);
+        const context = {
+            _effectiveScanLengthMaxHeadwordLengthCache: cache,
+            _refreshCachedMaxHeadwordLength: refreshCachedMaxHeadwordLength,
+            _triggerDatabaseUpdated: triggerDatabaseUpdated,
+            _dictionaryMutationActive: false,
+        };
+
+        await getBackendMethod('_handleDatabaseUpdated').call(context, 'dictionary', 'import');
+
+        expect(cache.size).toBe(0);
+        expect(refreshCachedMaxHeadwordLength).toHaveBeenCalledWith('background', {allowDuringMutation: false});
+        expect(triggerDatabaseUpdated).toHaveBeenCalledWith('dictionary', 'import');
     });
 
     test('optionsGetFull still returns the raw stored options object', () => {

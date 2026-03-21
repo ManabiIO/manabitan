@@ -252,6 +252,19 @@ export class Backend {
         this._permissions = null;
         /** @type {Map<string, (() => void)[]>} */
         this._applicationReadyHandlers = new Map();
+        /** @type {WeakMap<import('settings').ProfileOptions, {
+         *     enabledDictionaryMap: Map<string, import('translation').FindTermDictionary>,
+         *     mainDictionary: string,
+         *     sortFrequencyDictionary: string|null,
+         *     sortFrequencyDictionaryOrder: import('settings').SortFrequencyDictionaryOrder,
+         *     removeNonJapaneseCharacters: boolean,
+         *     searchResolution: import('settings').SearchResolution,
+         *     textReplacements: (?(import('translation').FindTermsTextReplacement[]))[],
+         *     language: string,
+         * }>} */
+        this._translatorProfileOptionsCache = new WeakMap();
+        /** @type {Map<string, number>} */
+        this._effectiveScanLengthMaxHeadwordLengthCache = new Map();
 
         /* eslint-disable @stylistic/no-multi-spaces */
         /** @type {import('api').ApiMap} */
@@ -260,6 +273,7 @@ export class Backend {
             ['requestBackendReadySignal',    this._onApiRequestBackendReadySignal.bind(this)],
             ['optionsGet',                   this._onApiOptionsGet.bind(this)],
             ['optionsGetFull',               this._onApiOptionsGetFull.bind(this)],
+            ['getEffectiveHoverScanLength',  this._onApiGetEffectiveHoverScanLength.bind(this)],
             ['kanjiFind',                    this._onApiKanjiFind.bind(this)],
             ['termsFind',                    this._onApiTermsFind.bind(this)],
             ['parseText',                    this._onApiParseText.bind(this)],
@@ -286,6 +300,7 @@ export class Backend {
             ['deleteDictionaryByTitle',      this._onApiDeleteDictionaryByTitle.bind(this)],
             ['updateDictionaryMetadata',     this._onApiUpdateDictionaryMetadata.bind(this)],
             ['getDictionaryCounts',          this._onApiGetDictionaryCounts.bind(this)],
+            ['clearDatabaseCaches',         this._onApiClearDatabaseCaches.bind(this)],
             ['checkDictionaryUpdates',       this._onApiCheckDictionaryUpdates.bind(this)],
             ['updateDictionaryByTitle',      this._onApiUpdateDictionaryByTitle.bind(this)],
             ['setDictionaryUpdateSchedule',  this._onApiSetDictionaryUpdateSchedule.bind(this)],
@@ -821,12 +836,23 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'optionsGet'>} */
     async _onApiOptionsGet({optionsContext}) {
-        return await this._createEffectiveProfileOptions(optionsContext);
+        return clone(this._getProfileOptions(optionsContext, false));
     }
 
     /** @type {import('api').ApiHandler<'optionsGetFull'>} */
     _onApiOptionsGetFull() {
         return this._getOptionsFull(false);
+    }
+
+    /** @type {import('api').ApiHandler<'getEffectiveHoverScanLength'>} */
+    async _onApiGetEffectiveHoverScanLength({optionsContext}) {
+        const options = this._getProfileOptions(optionsContext, false);
+        try {
+            await this._ensureDictionaryDatabaseReady();
+        } catch (_) {
+            return options.scanning.length;
+        }
+        return await this._getEffectiveHoverScanLength(options.scanning.length, options);
     }
 
     /** @type {import('api').ApiHandler<'kanjiFind'>} */
@@ -848,13 +874,84 @@ export class Backend {
         if (this._dictionaryImportModeActive) {
             return {dictionaryEntries: [], originalTextLength: 0};
         }
+        const includeTimingDiagnostics = (details?.includeTimingDiagnostics === true);
+        const serializeDictionaryEntries = (details?.serializeDictionaryEntries === true);
+        const totalStartedAt = safePerformance.now();
+        const ensureDatabaseStartedAt = safePerformance.now();
         await this._ensureDictionaryDatabaseReady();
+        const ensureDatabaseElapsedMs = Math.max(0, safePerformance.now() - ensureDatabaseStartedAt);
+        const getProfileOptionsStartedAt = safePerformance.now();
         const options = this._getProfileOptions(optionsContext, false);
+        const getProfileOptionsElapsedMs = Math.max(0, safePerformance.now() - getProfileOptionsStartedAt);
         const {general: {resultOutputMode: mode, maxResults}} = options;
+        const createFindTermsOptionsStartedAt = safePerformance.now();
         const findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
-        const {dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions);
+        const createFindTermsOptionsElapsedMs = Math.max(0, safePerformance.now() - createFindTermsOptionsStartedAt);
+        const translatorFindTermsStartedAt = safePerformance.now();
+        const {
+            dictionaryEntries,
+            originalTextLength,
+            timingDiagnostics: translatorTimingDiagnosticsRaw = null,
+        } = this._translator instanceof TranslatorProxy ?
+            await this._translator.findTerms(mode, text, findTermsOptions, maxResults, includeTimingDiagnostics) :
+            await this._translator.findTerms(mode, text, findTermsOptions, includeTimingDiagnostics);
+        const translatorFindTermsElapsedMs = Math.max(0, safePerformance.now() - translatorFindTermsStartedAt);
+        const spliceResultsStartedAt = safePerformance.now();
         dictionaryEntries.splice(maxResults);
-        return {dictionaryEntries, originalTextLength};
+        const spliceResultsElapsedMs = Math.max(0, safePerformance.now() - spliceResultsStartedAt);
+        const dictionaryEntryCount = dictionaryEntries.length;
+        let dictionaryEntriesResult = dictionaryEntries;
+        let dictionaryEntriesJson;
+        let serializeDictionaryEntriesElapsedMs = 0;
+        let serializedDictionaryEntries = false;
+        let serializedDictionaryEntriesLength = 0;
+        let serializeDictionaryEntriesErrorMessage = null;
+        if (serializeDictionaryEntries && dictionaryEntries.length > 0) {
+            const serializeDictionaryEntriesStartedAt = safePerformance.now();
+            try {
+                dictionaryEntriesJson = JSON.stringify(dictionaryEntries);
+                serializeDictionaryEntriesElapsedMs = Math.max(0, safePerformance.now() - serializeDictionaryEntriesStartedAt);
+                serializedDictionaryEntries = true;
+                serializedDictionaryEntriesLength = dictionaryEntriesJson.length;
+                dictionaryEntriesResult = [];
+            } catch (error) {
+                serializeDictionaryEntriesElapsedMs = Math.max(0, safePerformance.now() - serializeDictionaryEntriesStartedAt);
+                serializeDictionaryEntriesErrorMessage = error instanceof Error ? error.message : String(error);
+            }
+        }
+        /** @type {Record<string, unknown>} */
+        const timingDiagnostics = {
+            backend: {
+                transport: this._translator instanceof TranslatorProxy ? 'offscreen-proxy' : 'direct',
+                ensureDatabaseElapsedMs,
+                getProfileOptionsElapsedMs,
+                createFindTermsOptionsElapsedMs,
+                translatorFindTermsElapsedMs,
+                spliceResultsElapsedMs,
+                serializeDictionaryEntriesRequested: serializeDictionaryEntries,
+                serializeDictionaryEntriesElapsedMs,
+                serializedDictionaryEntries,
+                serializedDictionaryEntriesLength,
+                serializeDictionaryEntriesErrorMessage,
+                totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                textLength: text.length,
+                maxResults,
+            },
+        };
+        if (isObjectNotArray(translatorTimingDiagnosticsRaw)) {
+            Object.assign(timingDiagnostics, translatorTimingDiagnosticsRaw);
+        }
+        if (!includeTimingDiagnostics) {
+            if (isObjectNotArray(timingDiagnostics.backend)) {
+                reportDiagnostics('hover-terms-find-summary', {
+                    ...timingDiagnostics.backend,
+                    dictionaryEntryCount,
+                    originalTextLength,
+                });
+            }
+            return {dictionaryEntries: dictionaryEntriesResult, dictionaryEntriesJson, dictionaryEntryCount, originalTextLength};
+        }
+        return {dictionaryEntries: dictionaryEntriesResult, dictionaryEntriesJson, dictionaryEntryCount, originalTextLength, timingDiagnostics};
     }
 
     /** @type {import('api').ApiHandler<'parseText'>} */
@@ -1596,6 +1693,11 @@ export class Backend {
         return await this._dictionaryDatabase.getDictionaryCounts(dictionaryNames, getTotal);
     }
 
+    /** @type {import('api').ApiHandler<'clearDatabaseCaches'>} */
+    async _onApiClearDatabaseCaches() {
+        await Promise.resolve(this._translator.clearDatabaseCaches());
+    }
+
     /** @type {import('api').ApiHandler<'checkDictionaryUpdates'>} */
     async _onApiCheckDictionaryUpdates({dictionaryTitles = []}) {
         return await this._checkDictionaryUpdates(dictionaryTitles);
@@ -2224,6 +2326,7 @@ export class Backend {
     _applyOptions(source) {
         const options = this._getProfileOptions({current: true}, false);
         this._updateBadge();
+        this._clearTranslatorProfileOptionsCache();
 
         const enabled = options.general.enable;
 
@@ -2318,9 +2421,33 @@ export class Backend {
      * @returns {Promise<import('settings').ProfileOptions>}
      */
     async _createEffectiveProfileOptions(optionsContext) {
-        const options = clone(this._getProfileOptions(optionsContext, false));
-        options.scanning.length = await this._getEffectiveScanLength(options.scanning.length);
-        return options;
+        return clone(this._getProfileOptions(optionsContext, false));
+    }
+
+    /**
+     * @param {import('settings').ProfileOptions} options
+     * @returns {string[]}
+     */
+    _getEnabledDictionaryNames(options) {
+        const names = [];
+        const seen = new Set();
+        for (const dictionary of options.dictionaries) {
+            if (dictionary.enabled !== true) { continue; }
+            const name = String(dictionary.name || '').trim();
+            if (name.length === 0 || seen.has(name)) { continue; }
+            seen.add(name);
+            names.push(name);
+        }
+        names.sort();
+        return names;
+    }
+
+    /**
+     * @param {string[]} dictionaryNames
+     * @returns {string}
+     */
+    _getDictionarySetCacheKey(dictionaryNames) {
+        return dictionaryNames.join('\u001f');
     }
 
     /**
@@ -2354,9 +2481,10 @@ export class Backend {
     /**
      * @param {object} [root0]
      * @param {boolean} [root0.allowDuringMutation=false]
+     * @param {string[]|null} [root0.dictionaryNames=null]
      * @returns {Promise<number|null>}
      */
-    async _computeMaxHeadwordLengthFromDatabase({allowDuringMutation = false} = {}) {
+    async _computeMaxHeadwordLengthFromDatabase({allowDuringMutation = false, dictionaryNames = null} = {}) {
         if (this._dictionaryImportModeActive) {
             return null;
         }
@@ -2372,7 +2500,7 @@ export class Backend {
         }
 
         try {
-            const value = await /** @type {() => Promise<number>} */ (getMaxHeadwordLength).call(this._dictionaryDatabase);
+            const value = await /** @type {(dictionaryNames?: string[]|null) => Promise<number>} */ (getMaxHeadwordLength).call(this._dictionaryDatabase, dictionaryNames);
             if (!(typeof value === 'number' && Number.isFinite(value))) {
                 return 0;
             }
@@ -2384,21 +2512,49 @@ export class Backend {
 
     /**
      * @param {number} legacyScanLength
+     * @param {import('settings').ProfileOptions} options
      * @returns {Promise<number>}
      */
-    async _getEffectiveScanLength(legacyScanLength) {
-        const cached = this._getStoredGlobalMaxHeadwordLength();
-        if (cached > 0) {
-            return cached + SCAN_LENGTH_INFLECTION_BUFFER;
+    async _getEffectiveScanLength(legacyScanLength, options) {
+        return await this._getEffectiveHoverScanLength(legacyScanLength, options);
+    }
+
+    /**
+     * @param {number} legacyScanLength
+     * @param {import('settings').ProfileOptions} options
+     * @returns {Promise<number>}
+     */
+    async _getEffectiveHoverScanLength(legacyScanLength, options) {
+        const enabledDictionaryNames = this._getEnabledDictionaryNames(options);
+        if (enabledDictionaryNames.length === 0) {
+            return legacyScanLength;
         }
 
-        const computed = await this._computeMaxHeadwordLengthFromDatabase();
+        const allInstalledDictionariesEnabled = (enabledDictionaryNames.length === options.dictionaries.length);
+        const cachedGlobal = (allInstalledDictionariesEnabled ? this._getStoredGlobalMaxHeadwordLength() : 0);
+        if (cachedGlobal > 0) {
+            const effectiveCachedGlobal = cachedGlobal + SCAN_LENGTH_INFLECTION_BUFFER;
+            return Math.max(1, Math.min(legacyScanLength, effectiveCachedGlobal));
+        }
+
+        const cacheKey = this._getDictionarySetCacheKey(enabledDictionaryNames);
+        const cached = this._effectiveScanLengthMaxHeadwordLengthCache.get(cacheKey);
+        if (typeof cached === 'number') {
+            const effectiveCached = cached + SCAN_LENGTH_INFLECTION_BUFFER;
+            return Math.max(1, Math.min(legacyScanLength, effectiveCached));
+        }
+
+        const computed = await this._computeMaxHeadwordLengthFromDatabase({dictionaryNames: enabledDictionaryNames});
         if (computed === null || computed <= 0) {
             return legacyScanLength;
         }
 
-        await this._setGlobalMaxHeadwordLength(computed, 'background');
-        return computed + SCAN_LENGTH_INFLECTION_BUFFER;
+        this._effectiveScanLengthMaxHeadwordLengthCache.set(cacheKey, computed);
+        if (allInstalledDictionariesEnabled) {
+            await this._setGlobalMaxHeadwordLength(computed, 'background');
+        }
+        const effectiveComputed = computed + SCAN_LENGTH_INFLECTION_BUFFER;
+        return Math.max(1, Math.min(legacyScanLength, effectiveComputed));
     }
 
     /**
@@ -2423,6 +2579,7 @@ export class Backend {
      */
     async _handleDatabaseUpdated(type, cause) {
         if (type === 'dictionary') {
+            this._effectiveScanLengthMaxHeadwordLengthCache.clear();
             await this._refreshCachedMaxHeadwordLength('background', {allowDuringMutation: this._dictionaryMutationActive});
         }
         this._triggerDatabaseUpdated(type, cause);
@@ -2505,6 +2662,13 @@ export class Backend {
      */
     _clearProfileConditionsSchemaCache() {
         this._profileConditionsSchemaCache = [];
+    }
+
+    /**
+     * @returns {void}
+     */
+    _clearTranslatorProfileOptionsCache() {
+        this._translatorProfileOptionsCache = new WeakMap();
     }
 
     /**
@@ -5038,27 +5202,35 @@ export class Backend {
         if (typeof matchType !== 'string') { matchType = /** @type {import('translation').FindTermsMatchType} */ ('exact'); }
         if (typeof deinflect !== 'boolean') { deinflect = true; }
         if (typeof primaryReading !== 'string') { primaryReading = ''; }
-        const enabledDictionaryMap = this._getTranslatorEnabledDictionaryMap(options);
-        const {
-            general: {mainDictionary, sortFrequencyDictionary, sortFrequencyDictionaryOrder, language},
-            scanning: {alphanumeric},
-            translation: {
-                textReplacements: textReplacementsOptions,
-                searchResolution,
-            },
-        } = options;
-        const textReplacements = this._getTranslatorTextReplacements(textReplacementsOptions);
+        const cachedOptions = this._getTranslatorProfileOptionsCache(options);
+        let {
+            enabledDictionaryMap,
+            mainDictionary,
+            sortFrequencyDictionary,
+            sortFrequencyDictionaryOrder,
+            removeNonJapaneseCharacters,
+            searchResolution,
+            textReplacements,
+            language,
+        } = cachedOptions;
         let excludeDictionaryDefinitions = null;
         if (mode === 'merge' && !enabledDictionaryMap.has(mainDictionary)) {
-            enabledDictionaryMap.set(mainDictionary, {
-                index: enabledDictionaryMap.size,
-                alias: mainDictionary,
-                allowSecondarySearches: false,
-                partsOfSpeechFilter: true,
-                useDeinflections: true,
-            });
-            excludeDictionaryDefinitions = new Set();
-            excludeDictionaryDefinitions.add(mainDictionary);
+            let {mergeEnabledDictionaryMap, mergeExcludeDictionaryDefinitions} = cachedOptions;
+            if (typeof mergeEnabledDictionaryMap === 'undefined') {
+                mergeEnabledDictionaryMap = new Map(enabledDictionaryMap);
+                mergeEnabledDictionaryMap.set(mainDictionary, {
+                    index: mergeEnabledDictionaryMap.size,
+                    alias: mainDictionary,
+                    allowSecondarySearches: false,
+                    partsOfSpeechFilter: true,
+                    useDeinflections: true,
+                });
+                mergeExcludeDictionaryDefinitions = new Set([mainDictionary]);
+                cachedOptions.mergeEnabledDictionaryMap = mergeEnabledDictionaryMap;
+                cachedOptions.mergeExcludeDictionaryDefinitions = mergeExcludeDictionaryDefinitions;
+            }
+            enabledDictionaryMap = mergeEnabledDictionaryMap;
+            excludeDictionaryDefinitions = mergeExcludeDictionaryDefinitions ?? null;
         }
         return {
             matchType,
@@ -5067,7 +5239,7 @@ export class Backend {
             mainDictionary,
             sortFrequencyDictionary,
             sortFrequencyDictionaryOrder,
-            removeNonJapaneseCharacters: !alphanumeric,
+            removeNonJapaneseCharacters,
             searchResolution,
             textReplacements,
             enabledDictionaryMap,
@@ -5082,11 +5254,55 @@ export class Backend {
      * @returns {import('translation').FindKanjiOptions} An options object.
      */
     _getTranslatorFindKanjiOptions(options) {
-        const enabledDictionaryMap = this._getTranslatorEnabledDictionaryMap(options);
+        const {enabledDictionaryMap, removeNonJapaneseCharacters} = this._getTranslatorProfileOptionsCache(options);
         return {
             enabledDictionaryMap,
-            removeNonJapaneseCharacters: !options.scanning.alphanumeric,
+            removeNonJapaneseCharacters,
         };
+    }
+
+    /**
+     * @param {import('settings').ProfileOptions} options
+     * @returns {{
+     *     enabledDictionaryMap: Map<string, import('translation').FindTermDictionary>,
+     *     mergeEnabledDictionaryMap?: Map<string, import('translation').FindTermDictionary>,
+     *     mergeExcludeDictionaryDefinitions?: Set<string>,
+     *     mainDictionary: string,
+     *     sortFrequencyDictionary: string | null,
+     *     sortFrequencyDictionaryOrder: import('settings').SortFrequencyDictionaryOrder,
+     *     removeNonJapaneseCharacters: boolean,
+     *     searchResolution: import('settings').SearchResolution,
+     *     textReplacements: (?(import('translation').FindTermsTextReplacement[]))[],
+     *     language: string,
+     * }}
+     */
+    _getTranslatorProfileOptionsCache(options) {
+        let cache = this._translatorProfileOptionsCache.get(options);
+        if (typeof cache !== 'undefined') {
+            return cache;
+        }
+
+        const {
+            general: {mainDictionary, sortFrequencyDictionary, sortFrequencyDictionaryOrder, language},
+            scanning: {alphanumeric},
+            translation: {
+                textReplacements: textReplacementsOptions,
+                searchResolution,
+            },
+        } = options;
+
+        cache = {
+            enabledDictionaryMap: this._getTranslatorEnabledDictionaryMap(options),
+            mainDictionary,
+            sortFrequencyDictionary,
+            sortFrequencyDictionaryOrder,
+            removeNonJapaneseCharacters: !alphanumeric,
+            searchResolution,
+            textReplacements: this._getTranslatorTextReplacements(textReplacementsOptions),
+            language,
+        };
+        this._translatorProfileOptionsCache.set(options, cache);
+        return cache;
     }
 
     /**

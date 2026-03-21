@@ -23,11 +23,11 @@ import {describe, expect, test} from 'vitest';
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 describe('Settings UI scan length exposure', () => {
-    test('settings page no longer renders a manual scan length control', () => {
+    test('settings page renders a manual hover scan length cap', () => {
         const html = fs.readFileSync(path.join(dirname, '..', 'ext', 'settings.html'), {encoding: 'utf8'});
 
-        expect(html).not.toContain('data-setting="scanning.length"');
-        expect(html).not.toContain('Text scan length');
+        expect(html).toContain('data-setting="scanning.length"');
+        expect(html).toContain('Hover scan length cap');
     });
 
     test('recommended settings no longer modify scanning.length', () => {

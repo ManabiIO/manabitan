@@ -41,6 +41,18 @@ function getSearchAtMethod() {
 }
 
 /**
+ * @returns {(scanner: TextScanner, textSource: import('text-source').TextSource, optionsContext: import('settings').OptionsContext) => Promise<import('text-scanner').TermSearchResults|null>}
+ * @throws {Error}
+ */
+function getFindTermDictionaryEntriesMethod() {
+    const findTermDictionaryEntries = Reflect.get(TextScanner.prototype, '_findTermDictionaryEntries');
+    if (typeof findTermDictionaryEntries !== 'function') {
+        throw new Error('Expected TextScanner._findTermDictionaryEntries to be available');
+    }
+    return (scanner, textSource, optionsContext) => findTermDictionaryEntries.call(scanner, textSource, optionsContext);
+}
+
+/**
  * @param {string} text
  * @returns {import('text-source').TextSource}
  */
@@ -134,8 +146,9 @@ function createMockTermEntry() {
 }
 
 describe('TextScanner lookup robustness', () => {
-    const {teardown} = testEnv;
+    const {window, teardown} = testEnv;
     const searchAt = getSearchAtMethod();
+    const findTermDictionaryEntries = getFindTermDictionaryEntriesMethod();
 
     afterAll(async () => {
         await teardown(global);
@@ -274,5 +287,96 @@ describe('TextScanner lookup robustness', () => {
         // Late completions from stale timed-out lookups must not emit extra events.
         expect(searchSuccessCount).toBe(totalScans - pendingResolvers.length);
         expect(searchErrorCount).toBe(0);
+    });
+
+    test('coalesces repeated mouse moves to the latest pending lookup', async () => {
+        const scanner = new TextScanner({
+            api: /** @type {import('../ext/js/comm/api.js').API} */ ({}),
+            node: window,
+            getSearchContext: () => ({optionsContext: {url: 'https://example.com'}, detail: {documentTitle: 'Bench'}}),
+            textSourceGenerator: /** @type {import('../ext/js/dom/text-source-generator.js').TextSourceGenerator} */ ({
+                getRangeFromPoint: () => null,
+                extractSentence: () => ({text: '', offset: 0}),
+            }),
+        });
+
+        const inputInfo = createInputInfo();
+        Reflect.set(scanner, '_getMatchingInputGroupFromEvent', vi.fn(() => inputInfo));
+        Reflect.set(scanner, '_scanTimerClear', vi.fn());
+
+        /** @type {() => void} */
+        let releaseFirstLookup = () => {};
+        const firstLookupPromise = new Promise((resolve) => {
+            releaseFirstLookup = resolve;
+        });
+        /** @type {Array<{x: number, y: number}>} */
+        const calls = [];
+        const searchAtSpy = vi.fn(async (x, y, searchInputInfo) => {
+            const nextX = Number(x);
+            const nextY = Number(y);
+            calls.push({x: nextX, y: nextY});
+            Reflect.set(scanner, '_pendingLookup', true);
+            if (calls.length === 1) {
+                await firstLookupPromise;
+            }
+            Reflect.set(scanner, '_pendingLookup', false);
+            Reflect.get(scanner, '_dispatchPendingMouseMoveSearch').call(scanner);
+            void searchInputInfo;
+        });
+        Reflect.set(scanner, '_searchAt', searchAtSpy);
+
+        Reflect.get(scanner, '_onMousePointerMove').call(scanner, /** @type {PointerEvent} */ ({clientX: 10, clientY: 10}));
+        await Promise.resolve();
+
+        Reflect.get(scanner, '_onMousePointerMove').call(scanner, /** @type {PointerEvent} */ ({clientX: 20, clientY: 20}));
+        Reflect.get(scanner, '_onMousePointerMove').call(scanner, /** @type {PointerEvent} */ ({clientX: 30, clientY: 30}));
+
+        expect(calls).toStrictEqual([{x: 10, y: 10}]);
+
+        releaseFirstLookup();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(calls).toStrictEqual([
+            {x: 10, y: 10},
+            {x: 30, y: 30},
+        ]);
+    });
+
+    test('hover scan length diagnostics are included in term lookup timing', async () => {
+        const termsFindImpl = vi.fn().mockResolvedValue({
+            dictionaryEntries: [createMockTermEntry()],
+            originalTextLength: 2,
+        });
+        const termsFind = /** @type {import('../ext/js/comm/api.js').API['termsFind']} */ (/** @type {unknown} */ (termsFindImpl));
+        const scanner = createScanner(termsFind, [createFakeTextSource('暗記')]);
+        scanner.setOptions({
+            scanLength: 8,
+            hoverScanLengthDiagnostics: {
+                configuredScanLength: 24,
+                automaticScanLength: 12,
+                effectiveScanLength: 8,
+            },
+        });
+
+        const result = await findTermDictionaryEntries(
+            scanner,
+            createFakeTextSource('暗記'),
+            {
+                depth: 0,
+                url: 'https://example.test/',
+                modifiers: [],
+                modifierKeys: [],
+                pointerType: 'mouse',
+            },
+        );
+
+        expect(result).not.toBeNull();
+        expect(result?.timingDiagnostics).toMatchObject({
+            configuredScanLength: 24,
+            automaticScanLength: 12,
+            effectiveScanLength: 8,
+            scanLength: 8,
+        });
     });
 });

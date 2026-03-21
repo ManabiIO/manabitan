@@ -18,6 +18,11 @@
 
 import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
+import {safePerformance} from '../core/safe-performance.js';
+import {publishDevTimingSnapshot} from '../core/dev-timing-diagnostics.js';
+
+const API_INVOKE_DIAGNOSTICS_DATASET_KEY = 'manabitanDevApiInvokeDiagnostics';
+const API_INVOKE_DIAGNOSTICS_EVENT = 'api-invoke-summary';
 
 export class API {
     /**
@@ -34,6 +39,7 @@ export class API {
 
         /** @type {MessagePort?} */
         this._backendPort = backendPort;
+
     }
 
     /**
@@ -49,6 +55,14 @@ export class API {
      */
     optionsGetFull() {
         return this._invoke('optionsGetFull', void 0);
+    }
+
+    /**
+     * @param {import('api').ApiParam<'getEffectiveHoverScanLength', 'optionsContext'>} optionsContext
+     * @returns {Promise<import('api').ApiReturn<'getEffectiveHoverScanLength'>>}
+     */
+    getEffectiveHoverScanLength(optionsContext) {
+        return this._invoke('getEffectiveHoverScanLength', {optionsContext});
     }
 
     /**
@@ -417,6 +431,13 @@ export class API {
     }
 
     /**
+     * @returns {Promise<import('api').ApiReturn<'clearDatabaseCaches'>>}
+     */
+    clearDatabaseCaches() {
+        return this._invoke('clearDatabaseCaches', void 0);
+    }
+
+    /**
      * @returns {Promise<import('api').ApiReturn<'testMecab'>>}
      */
     testMecab() {
@@ -523,27 +544,103 @@ export class API {
     _invoke(action, params) {
         /** @type {import('api').ApiMessage<TAction>} */
         const data = {action, params};
+        const startedAt = safePerformance.now();
+        /**
+         * @param {string} status
+         * @param {Record<string, unknown>} [details]
+         * @returns {void}
+         */
+        const publishDiagnostics = (status, details = {}) => {
+            const elapsedMs = Math.max(0, safePerformance.now() - startedAt);
+            if (!(action === 'termsFind' || action === 'kanjiFind' || status !== 'success' || elapsedMs >= 200)) { return; }
+            publishDevTimingSnapshot(
+                API_INVOKE_DIAGNOSTICS_DATASET_KEY,
+                {
+                    action,
+                    status,
+                    elapsedMs,
+                    ...details,
+                },
+                API_INVOKE_DIAGNOSTICS_EVENT,
+            );
+        };
         return new Promise((resolve, reject) => {
+            /** @param {unknown} response */
+            const handleResponseViaRuntimeMessage = (response) => {
+                this._handleInvokeResponse(data, response, publishDiagnostics, /** @type {(result: unknown) => void} */ (resolve), reject);
+            };
             try {
-                this._webExtension.sendMessage(data, (response) => {
-                    this._webExtension.getLastError();
-                    if (response !== null && typeof response === 'object') {
-                        const {error} = /** @type {import('core').UnknownObject} */ (response);
-                        if (typeof error !== 'undefined') {
-                            reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */(error)));
-                        } else {
-                            const {result} = /** @type {import('core').UnknownObject} */ (response);
-                            resolve(/** @type {import('api').ApiReturn<TAction>} */(result));
-                        }
-                    } else {
-                        const message = response === null ? 'Unexpected null response. You may need to refresh the page.' : `Unexpected response of type ${typeof response}. You may need to refresh the page.`;
-                        reject(new Error(`${message} (${JSON.stringify(data)})`));
-                    }
-                });
+                this._webExtension.sendMessage(data, handleResponseViaRuntimeMessage);
             } catch (e) {
+                publishDiagnostics('send-error', {
+                    transport: 'runtime-message',
+                    errorMessage: e instanceof Error ? e.message : String(e),
+                });
                 reject(e);
             }
         });
+    }
+
+    /**
+     * @template {import('api').ApiNames} TAction
+     * @param {import('api').ApiMessage<TAction>} data
+     * @param {unknown} response
+     * @param {(status: string, details?: Record<string, unknown>) => void} publishDiagnostics
+     * @param {(result: unknown) => void} resolve
+     * @param {(error: unknown) => void} reject
+     * @returns {void}
+     */
+    _handleInvokeResponse(data, response, publishDiagnostics, resolve, reject) {
+        const lastError = this._webExtension.getLastError();
+        if (lastError !== null) {
+            publishDiagnostics('runtime-error', {
+                transport: 'runtime-message',
+                errorMessage: lastError.message,
+                responseType: response === null ? 'null' : typeof response,
+            });
+            reject(lastError);
+            return;
+        }
+        if (response !== null && typeof response === 'object') {
+            const {error} = /** @type {import('core').UnknownObject} */ (response);
+            if (typeof error !== 'undefined') {
+                publishDiagnostics('extension-error', {transport: 'runtime-message'});
+                reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */(error)));
+            } else {
+                const {result} = /** @type {import('core').UnknownObject} */ (response);
+                const resultObject = (
+                    typeof result === 'object' &&
+                    result !== null &&
+                    !Array.isArray(result)
+                ) ?
+                    /** @type {import('core').UnknownObject} */ (result) :
+                    null;
+                const dictionaryEntries = resultObject?.dictionaryEntries;
+                const dictionaryEntriesJson = resultObject?.dictionaryEntriesJson;
+                const dictionaryEntryCount = resultObject?.dictionaryEntryCount;
+                publishDiagnostics('success', {
+                    transport: 'runtime-message',
+                    responseType: typeof result,
+                    dictionaryEntryCount: (
+                        typeof dictionaryEntryCount === 'number' &&
+                        Number.isFinite(dictionaryEntryCount) &&
+                        dictionaryEntryCount >= 0
+                    ) ?
+                        dictionaryEntryCount :
+                        (Array.isArray(dictionaryEntries) ? dictionaryEntries.length : null),
+                    serializedDictionaryEntries: (typeof dictionaryEntriesJson === 'string' && dictionaryEntriesJson.length > 0),
+                    serializedDictionaryEntriesLength: typeof dictionaryEntriesJson === 'string' ? dictionaryEntriesJson.length : 0,
+                });
+                resolve(result);
+            }
+        } else {
+            const message = response === null ? 'Unexpected null response. You may need to refresh the page.' : `Unexpected response of type ${typeof response}. You may need to refresh the page.`;
+            publishDiagnostics('invalid-response', {
+                transport: 'runtime-message',
+                responseType: response === null ? 'null' : typeof response,
+            });
+            reject(new Error(`${message} (${JSON.stringify(data)})`));
+        }
     }
 
     /**

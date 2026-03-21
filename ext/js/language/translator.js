@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {isObjectNotArray} from '../core/object-utilities.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {applyTextReplacement} from '../general/regex-util.js';
 import {isCodePointJapanese} from './ja/japanese.js';
@@ -80,6 +81,10 @@ export class Translator {
      */
     clearDatabaseCaches() {
         this._tagCache.clear();
+        const clearTagCaches = /** @type {unknown} */ (Reflect.get(this._database, 'clearTagCaches'));
+        if (typeof clearTagCaches === 'function') {
+            clearTagCaches.call(this._database);
+        }
     }
 
     /**
@@ -87,14 +92,22 @@ export class Translator {
      * @param {import('translator').FindTermsMode} mode The mode to use for finding terms, which determines the format of the resulting array.
      * @param {string} text The text to find terms for.
      * @param {import('translation').FindTermsOptions} options A object describing settings about the lookup.
-     * @returns {Promise<{dictionaryEntries: import('dictionary').TermDictionaryEntry[], originalTextLength: number}>} An object containing dictionary entries and the length of the original source text.
+     * @returns {Promise<import('translator').FindTermsResult>} An object containing dictionary entries and the length of the original source text.
      */
-    async findTerms(mode, text, options) {
+    async findTerms(mode, text, options, includeTimingDiagnostics = true) {
         safePerformance.mark('translator:findTerms:start');
+        const totalStartedAt = safePerformance.now();
         const {enabledDictionaryMap, excludeDictionaryDefinitions, sortFrequencyDictionary, sortFrequencyDictionaryOrder, language, primaryReading} = options;
         const tagAggregator = new TranslatorTagAggregator();
-        let {dictionaryEntries, originalTextLength} = await this._findTermsInternal(text, options, tagAggregator, primaryReading);
+        const findTermsInternalStartedAt = safePerformance.now();
+        let {
+            dictionaryEntries,
+            originalTextLength,
+            timingDiagnostics: internalTimingDiagnostics = null,
+        } = await this._findTermsInternal(text, options, tagAggregator, primaryReading);
+        const findTermsInternalElapsedMs = Math.max(0, safePerformance.now() - findTermsInternalStartedAt);
 
+        const groupEntriesStartedAt = safePerformance.now();
         switch (mode) {
             case 'group':
                 dictionaryEntries = this._groupDictionaryEntriesByHeadword(language, dictionaryEntries, tagAggregator, primaryReading);
@@ -106,14 +119,19 @@ export class Translator {
                 dictionaryEntries = await this._getRelatedDictionaryEntries(dictionaryEntries, options, tagAggregator);
                 break;
         }
+        const groupEntriesElapsedMs = Math.max(0, safePerformance.now() - groupEntriesStartedAt);
 
+        const removeExcludedDefinitionsStartedAt = safePerformance.now();
         if (excludeDictionaryDefinitions !== null) {
             this._removeExcludedDefinitions(dictionaryEntries, excludeDictionaryDefinitions);
         }
+        const removeExcludedDefinitionsElapsedMs = Math.max(0, safePerformance.now() - removeExcludedDefinitionsStartedAt);
 
+        let addTermMetaDiagnostics = null;
+        let expandTagGroupsDiagnostics = null;
         if (mode !== 'simple') {
-            await this._addTermMeta(dictionaryEntries, enabledDictionaryMap, tagAggregator);
-            await this._expandTagGroupsAndGroup(tagAggregator.getTagExpansionTargets());
+            addTermMetaDiagnostics = await this._addTermMeta(dictionaryEntries, enabledDictionaryMap, tagAggregator);
+            expandTagGroupsDiagnostics = await this._expandTagGroupsAndGroup(tagAggregator.getTagExpansionTargets());
         } else {
             if (sortFrequencyDictionary !== null) {
                 /** @type {import('translation').TermEnabledDictionaryMap} */
@@ -126,6 +144,7 @@ export class Translator {
             }
         }
 
+        const finalizeStartedAt = safePerformance.now();
         if (sortFrequencyDictionary !== null) {
             this._updateSortFrequencies(dictionaryEntries, sortFrequencyDictionary, sortFrequencyDictionaryOrder === 'ascending');
         }
@@ -139,10 +158,39 @@ export class Translator {
             if (pronunciations.length > 1) { this._sortTermDictionaryEntrySimpleData(pronunciations); }
         }
         const withUserFacingInflections = this._addUserFacingInflections(language, dictionaryEntries);
+        const finalizeElapsedMs = Math.max(0, safePerformance.now() - finalizeStartedAt);
         safePerformance.mark('translator:findTerms:end');
         safePerformance.measure('translator:findTerms', 'translator:findTerms:start', 'translator:findTerms:end');
 
-        return {dictionaryEntries: withUserFacingInflections, originalTextLength};
+        if (!includeTimingDiagnostics) {
+            return {
+                dictionaryEntries: withUserFacingInflections,
+                originalTextLength,
+            };
+        }
+        return {
+            dictionaryEntries: withUserFacingInflections,
+            originalTextLength,
+            timingDiagnostics: {
+                translator: {
+                    findTermsInternalElapsedMs,
+                    groupEntriesElapsedMs,
+                    removeExcludedDefinitionsElapsedMs,
+                    addTermMetaElapsedMs: Number(addTermMetaDiagnostics?.totalElapsedMs || 0),
+                    expandTagGroupsElapsedMs: Number(expandTagGroupsDiagnostics?.totalElapsedMs || 0),
+                    finalizeElapsedMs,
+                    totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                    dictionaryEntryCount: withUserFacingInflections.length,
+                    originalTextLength,
+                    mode,
+                    language,
+                    sortFrequencyDictionary: sortFrequencyDictionary !== null,
+                },
+                translatorInternal: internalTimingDiagnostics,
+                translatorAddTermMeta: addTermMetaDiagnostics,
+                translatorExpandTagGroups: expandTagGroupsDiagnostics,
+            },
+        };
     }
 
     /**
@@ -241,20 +289,54 @@ export class Translator {
      * @param {import('translation').FindTermsOptions} options
      * @param {TranslatorTagAggregator} tagAggregator
      * @param {string} primaryReading
-     * @returns {Promise<{dictionaryEntries: import('translation-internal').TermDictionaryEntry[], originalTextLength: number}>}
+     * @returns {Promise<{dictionaryEntries: import('translation-internal').TermDictionaryEntry[], originalTextLength: number, timingDiagnostics: Record<string, unknown>}>}
      */
     async _findTermsInternal(text, options, tagAggregator, primaryReading) {
+        const totalStartedAt = safePerformance.now();
         const {removeNonJapaneseCharacters, enabledDictionaryMap} = options;
+        const normalizeInputStartedAt = safePerformance.now();
         if (removeNonJapaneseCharacters && (['ja', 'zh', 'yue', 'ko'].includes(options.language))) {
             text = this._getJapaneseChineseKoreanOnlyText(text);
         }
+        const normalizeInputElapsedMs = Math.max(0, safePerformance.now() - normalizeInputStartedAt);
         if (text.length === 0) {
-            return {dictionaryEntries: [], originalTextLength: 0};
+            return {
+                dictionaryEntries: [],
+                originalTextLength: 0,
+                timingDiagnostics: {
+                    normalizeInputElapsedMs,
+                    getDeinflectionsElapsedMs: 0,
+                    getDictionaryEntriesElapsedMs: 0,
+                    totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                    normalizedTextLength: 0,
+                    deinflectionCount: 0,
+                },
+            };
         }
 
-        const deinflections = await this._getDeinflections(text, options);
+        const getDeinflectionsStartedAt = safePerformance.now();
+        const {
+            deinflections,
+            timingDiagnostics: deinflectionTimingDiagnostics = null,
+        } = await this._getDeinflections(text, options);
+        const getDeinflectionsElapsedMs = Math.max(0, safePerformance.now() - getDeinflectionsStartedAt);
+        const getDictionaryEntriesStartedAt = safePerformance.now();
+        const {dictionaryEntries, originalTextLength} = this._getDictionaryEntries(deinflections, enabledDictionaryMap, tagAggregator, primaryReading);
+        const getDictionaryEntriesElapsedMs = Math.max(0, safePerformance.now() - getDictionaryEntriesStartedAt);
 
-        return this._getDictionaryEntries(deinflections, enabledDictionaryMap, tagAggregator, primaryReading);
+        return {
+            dictionaryEntries,
+            originalTextLength,
+            timingDiagnostics: {
+                normalizeInputElapsedMs,
+                getDeinflectionsElapsedMs,
+                getDictionaryEntriesElapsedMs,
+                totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                normalizedTextLength: text.length,
+                deinflectionCount: deinflections.length,
+                deinflections: deinflectionTimingDiagnostics,
+            },
+        };
     }
 
     /**
@@ -372,24 +454,58 @@ export class Translator {
     /**
      * @param {string} text
      * @param {import('translation').FindTermsOptions} options
-     * @returns {Promise<import('translation-internal').DatabaseDeinflection[]>}
+     * @returns {Promise<{deinflections: import('translation-internal').DatabaseDeinflection[], timingDiagnostics: Record<string, unknown>}>}
      */
     async _getDeinflections(text, options) {
         safePerformance.mark('translator:getDeinflections:start');
-        let deinflections = (
-            options.deinflect ?
-                this._getAlgorithmDeinflections(text, options) :
-                [this._createDeinflection(text, text, text, 0, [], [])]
-        );
-        if (deinflections.length === 0) { return []; }
+        const totalStartedAt = safePerformance.now();
+        let deinflections;
+        let algorithmDiagnostics = null;
+        const getAlgorithmDeinflectionsStartedAt = safePerformance.now();
+        if (options.deinflect) {
+            ({
+                deinflections,
+                timingDiagnostics: algorithmDiagnostics = null,
+            } = this._getAlgorithmDeinflections(text, options));
+        } else {
+            deinflections = [this._createDeinflection(text, text, text, 0, [], [])];
+        }
+        const getAlgorithmDeinflectionsElapsedMs = Math.max(0, safePerformance.now() - getAlgorithmDeinflectionsStartedAt);
+        if (deinflections.length === 0) {
+            return {
+                deinflections: [],
+                timingDiagnostics: {
+                    getAlgorithmDeinflectionsElapsedMs,
+                    addEntriesElapsedMs: 0,
+                    dictionaryDeinflectionsElapsedMs: 0,
+                    cleanupElapsedMs: 0,
+                    totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                    usedAlgorithmDeinflections: options.deinflect,
+                    initialDeinflectionCount: 0,
+                    dictionaryDeinflectionCount: 0,
+                    finalDeinflectionCount: 0,
+                    algorithm: algorithmDiagnostics,
+                    initialDatabaseMatch: null,
+                    dictionaryDeinflections: null,
+                },
+            };
+        }
 
         const {matchType, language, enabledDictionaryMap} = options;
 
-        await this._addEntriesToDeinflections(language, deinflections, enabledDictionaryMap, matchType);
+        const addEntriesStartedAt = safePerformance.now();
+        const initialDatabaseMatchDiagnostics = await this._addEntriesToDeinflections(language, deinflections, enabledDictionaryMap, matchType);
+        const addEntriesElapsedMs = Math.max(0, safePerformance.now() - addEntriesStartedAt);
 
-        const dictionaryDeinflections = await this._getDictionaryDeinflections(language, deinflections, enabledDictionaryMap, matchType);
+        const getDictionaryDeinflectionsStartedAt = safePerformance.now();
+        const {
+            dictionaryDeinflections,
+            timingDiagnostics: dictionaryDeinflectionsDiagnostics = null,
+        } = await this._getDictionaryDeinflections(language, deinflections, enabledDictionaryMap, matchType);
+        const dictionaryDeinflectionsElapsedMs = Math.max(0, safePerformance.now() - getDictionaryDeinflectionsStartedAt);
         deinflections.push(...dictionaryDeinflections);
 
+        const cleanupStartedAt = safePerformance.now();
         for (const deinflection of deinflections) {
             for (const entry of deinflection.databaseEntries) {
                 entry.definitions = entry.definitions.filter((definition) => !Array.isArray(definition));
@@ -397,10 +513,27 @@ export class Translator {
             deinflection.databaseEntries = deinflection.databaseEntries.filter((entry) => entry.definitions.length);
         }
         deinflections = deinflections.filter((deinflection) => deinflection.databaseEntries.length);
+        const cleanupElapsedMs = Math.max(0, safePerformance.now() - cleanupStartedAt);
 
         safePerformance.mark('translator:getDeinflections:end');
         safePerformance.measure('translator:getDeinflections', 'translator:getDeinflections:start', 'translator:getDeinflections:end');
-        return deinflections;
+        return {
+            deinflections,
+            timingDiagnostics: {
+                getAlgorithmDeinflectionsElapsedMs,
+                addEntriesElapsedMs,
+                dictionaryDeinflectionsElapsedMs,
+                cleanupElapsedMs,
+                totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                usedAlgorithmDeinflections: options.deinflect,
+                initialDeinflectionCount: Number(algorithmDiagnostics?.deinflectionCount || deinflections.length),
+                dictionaryDeinflectionCount: dictionaryDeinflections.length,
+                finalDeinflectionCount: deinflections.length,
+                algorithm: algorithmDiagnostics,
+                initialDatabaseMatch: initialDatabaseMatchDiagnostics,
+                dictionaryDeinflections: dictionaryDeinflectionsDiagnostics,
+            },
+        };
     }
 
     /**
@@ -408,12 +541,16 @@ export class Translator {
      * @param {import('translation-internal').DatabaseDeinflection[]} deinflections
      * @param {Map<string, import('translation').FindTermDictionary>} enabledDictionaryMap
      * @param {import('dictionary').TermSourceMatchType} matchType
-     * @returns {Promise<import('translation-internal').DatabaseDeinflection[]>}
+     * @returns {Promise<{dictionaryDeinflections: import('translation-internal').DatabaseDeinflection[], timingDiagnostics: Record<string, unknown>}>}
      */
     async _getDictionaryDeinflections(language, deinflections, enabledDictionaryMap, matchType) {
         safePerformance.mark('translator:getDictionaryDeinflections:start');
+        const totalStartedAt = safePerformance.now();
         /** @type {import('translation-internal').DatabaseDeinflection[]} */
         const dictionaryDeinflections = [];
+        let definitionCount = 0;
+        let inflectedDefinitionCount = 0;
+        const buildDictionaryDeinflectionsStartedAt = safePerformance.now();
         for (const deinflection of deinflections) {
             const {originalText, transformedText, textProcessorRuleChainCandidates, inflectionRuleChainCandidates: algorithmChains, databaseEntries} = deinflection;
             for (const entry of databaseEntries) {
@@ -422,9 +559,11 @@ export class Translator {
                 const useDeinflections = entryDictionary?.useDeinflections ?? true;
                 if (!useDeinflections) { continue; }
                 for (const definition of definitions) {
+                    ++definitionCount;
                     if (Array.isArray(definition)) {
                         const [formOf, inflectionRules] = definition;
                         if (!formOf) { continue; }
+                        ++inflectedDefinitionCount;
 
                         const inflectionRuleChainCandidates = algorithmChains.map(({inflectionRules: algInflections}) => {
                             return {
@@ -439,12 +578,26 @@ export class Translator {
                 }
             }
         }
+        const buildDictionaryDeinflectionsElapsedMs = Math.max(0, safePerformance.now() - buildDictionaryDeinflectionsStartedAt);
 
-        await this._addEntriesToDeinflections(language, dictionaryDeinflections, enabledDictionaryMap, matchType);
+        const addEntriesStartedAt = safePerformance.now();
+        const addEntriesDiagnostics = await this._addEntriesToDeinflections(language, dictionaryDeinflections, enabledDictionaryMap, matchType);
+        const addEntriesElapsedMs = Math.max(0, safePerformance.now() - addEntriesStartedAt);
 
         safePerformance.mark('translator:getDictionaryDeinflections:end');
         safePerformance.measure('translator:getDictionaryDeinflections', 'translator:getDictionaryDeinflections:start', 'translator:getDictionaryDeinflections:end');
-        return dictionaryDeinflections;
+        return {
+            dictionaryDeinflections,
+            timingDiagnostics: {
+                buildDictionaryDeinflectionsElapsedMs,
+                addEntriesElapsedMs,
+                totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                definitionCount,
+                inflectedDefinitionCount,
+                dictionaryDeinflectionCount: dictionaryDeinflections.length,
+                addEntries: addEntriesDiagnostics,
+            },
+        };
     }
 
     /**
@@ -454,12 +607,35 @@ export class Translator {
      * @param {import('dictionary').TermSourceMatchType} matchType
      */
     async _addEntriesToDeinflections(language, deinflections, enabledDictionaryMap, matchType) {
+        const totalStartedAt = safePerformance.now();
+        const groupDeinflectionsStartedAt = safePerformance.now();
         const uniqueDeinflectionsMap = this._groupDeinflectionsByTerm(deinflections);
+        const groupDeinflectionsElapsedMs = Math.max(0, safePerformance.now() - groupDeinflectionsStartedAt);
         const uniqueDeinflectionArrays = [...uniqueDeinflectionsMap.values()];
         const uniqueDeinflectionTerms = [...uniqueDeinflectionsMap.keys()];
 
+        const findTermsBulkStartedAt = safePerformance.now();
         const databaseEntries = await this._database.findTermsBulk(uniqueDeinflectionTerms, enabledDictionaryMap, matchType);
+        const findTermsBulkElapsedMs = Math.max(0, safePerformance.now() - findTermsBulkStartedAt);
+        const findTermsBulkDiagnostics = (
+            Array.isArray(databaseEntries) &&
+            isObjectNotArray(Reflect.get(databaseEntries, 'timingDiagnostics'))
+        ) ?
+            /** @type {Record<string, unknown>} */ (Reflect.get(databaseEntries, 'timingDiagnostics')) :
+            null;
+        const matchEntriesStartedAt = safePerformance.now();
         this._matchEntriesToDeinflections(language, databaseEntries, uniqueDeinflectionArrays, enabledDictionaryMap);
+        const matchEntriesElapsedMs = Math.max(0, safePerformance.now() - matchEntriesStartedAt);
+        return {
+            groupDeinflectionsElapsedMs,
+            findTermsBulkElapsedMs,
+            matchEntriesElapsedMs,
+            totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+            deinflectionCount: deinflections.length,
+            uniqueDeinflectionTermCount: uniqueDeinflectionTerms.length,
+            databaseEntryCount: databaseEntries.length,
+            findTermsBulk: findTermsBulkDiagnostics,
+        };
     }
 
     /**
@@ -506,10 +682,11 @@ export class Translator {
     /**
      * @param {string} text
      * @param {import('translation').FindTermsOptions} options
-     * @returns {import('translation-internal').DatabaseDeinflection[]}
+     * @returns {{deinflections: import('translation-internal').DatabaseDeinflection[], timingDiagnostics: Record<string, unknown>}}
      * @throws {Error}
      */
     _getAlgorithmDeinflections(text, options) {
+        const totalStartedAt = safePerformance.now();
         const {language} = options;
         const processorsForLanguage = this._textProcessors.get(language);
         if (typeof processorsForLanguage === 'undefined') { throw new Error(`Unsupported language: ${language}`); }
@@ -519,18 +696,27 @@ export class Translator {
         const deinflections = [];
         /** @type {import('translation-internal').TextCache} */
         const sourceCache = new Map(); // For reusing text processors' outputs
+        let rawSourceCount = 0;
+        let preprocessedVariantCount = 0;
+        let algorithmDeinflectionCount = 0;
+        let postprocessedVariantCount = 0;
+        let textProcessorRuleChainCandidateCount = 0;
 
         for (
             let rawSource = text;
             rawSource.length > 0;
             rawSource = this._getNextSubstring(options.searchResolution, rawSource)
         ) {
+            ++rawSourceCount;
             const preprocessedTextVariants = this._getTextVariants(rawSource, textPreprocessors, this._getTextReplacementsVariants(options), sourceCache);
+            preprocessedVariantCount += preprocessedTextVariants.size;
 
             for (const [source, preprocessorRuleChainCandidates] of preprocessedTextVariants) {
                 for (const deinflection of this._multiLanguageTransformer.transform(language, source)) {
+                    ++algorithmDeinflectionCount;
                     const {trace, conditions} = deinflection;
                     const postprocessedTextVariants = this._getTextVariants(deinflection.text, textPostprocessors, [null], sourceCache);
+                    postprocessedVariantCount += postprocessedTextVariants.size;
                     for (const [transformedText, postprocessorRuleChainCandidates] of postprocessedTextVariants) {
                         /** @type {import('translation-internal').InflectionRuleChainCandidate} */
                         const inflectionRuleChainCandidate = {
@@ -544,12 +730,24 @@ export class Translator {
                                 (postprocessorRuleChainCandidate) => [...preprocessorRuleChainCandidate, ...postprocessorRuleChainCandidate],
                             ),
                         );
+                        textProcessorRuleChainCandidateCount += textProcessorRuleChainCandidates.length;
                         deinflections.push(this._createDeinflection(rawSource, source, transformedText, conditions, textProcessorRuleChainCandidates, [inflectionRuleChainCandidate]));
                     }
                 }
             }
         }
-        return deinflections;
+        return {
+            deinflections,
+            timingDiagnostics: {
+                totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                rawSourceCount,
+                preprocessedVariantCount,
+                algorithmDeinflectionCount,
+                postprocessedVariantCount,
+                textProcessorRuleChainCandidateCount,
+                deinflectionCount: deinflections.length,
+            },
+        };
     }
 
     /**
@@ -1049,8 +1247,20 @@ export class Translator {
      * @param {import('translator').TagExpansionTarget[]} tagExpansionTargets
      */
     async _expandTagGroupsAndGroup(tagExpansionTargets) {
-        await this._expandTagGroups(tagExpansionTargets);
+        const totalStartedAt = safePerformance.now();
+        const expandTagGroupsStartedAt = safePerformance.now();
+        const expandTagGroupsDiagnostics = await this._expandTagGroups(tagExpansionTargets);
+        const expandTagGroupsElapsedMs = Math.max(0, safePerformance.now() - expandTagGroupsStartedAt);
+        const groupTagsStartedAt = safePerformance.now();
         this._groupTags(tagExpansionTargets);
+        const groupTagsElapsedMs = Math.max(0, safePerformance.now() - groupTagsStartedAt);
+        return {
+            expandTagGroupsElapsedMs,
+            groupTagsElapsedMs,
+            totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+            tagExpansionTargetCount: tagExpansionTargets.length,
+            ...expandTagGroupsDiagnostics,
+        };
     }
 
     /**
@@ -1099,8 +1309,15 @@ export class Translator {
         }
 
         const nonCachedItemCount = nonCachedItems.length;
+        const findTagMetaBulkStartedAt = safePerformance.now();
+        let findTagMetaBulkDiagnostics = null;
         if (nonCachedItemCount > 0) {
             const databaseTags = await this._database.findTagMetaBulk(nonCachedItems);
+            findTagMetaBulkDiagnostics = (
+                isObjectNotArray(Reflect.get(databaseTags, 'timingDiagnostics')) ?
+                /** @type {Record<string, unknown>} */ (Reflect.get(databaseTags, 'timingDiagnostics')) :
+                null
+            );
             for (let i = 0; i < nonCachedItemCount; ++i) {
                 const item = nonCachedItems[i];
                 const databaseTag = databaseTags[i];
@@ -1111,12 +1328,19 @@ export class Translator {
                 }
             }
         }
+        const findTagMetaBulkElapsedMs = Math.max(0, safePerformance.now() - findTagMetaBulkStartedAt);
 
         for (const {dictionary, tagName, databaseTag, targets} of allItems) {
             for (const tags of targets) {
                 tags.push(this._createTag(databaseTag, tagName, dictionary));
             }
         }
+        return {
+            totalTagCount: allItems.length,
+            nonCachedTagCount: nonCachedItemCount,
+            findTagMetaBulkElapsedMs,
+            findTagMetaBulk: findTagMetaBulkDiagnostics,
+        };
     }
 
     /**
@@ -1222,6 +1446,7 @@ export class Translator {
      * @param {TranslatorTagAggregator} tagAggregator
      */
     async _addTermMeta(dictionaryEntries, enabledDictionaryMap, tagAggregator) {
+        const totalStartedAt = safePerformance.now();
         /** @type {Map<string, Map<string, {headwordIndex: number, pronunciations: import('dictionary').TermPronunciation[], frequencies: import('dictionary').TermFrequency[]}[]>>} */
         const headwordMap = new Map();
         /** @type {string[]} */
@@ -1229,6 +1454,7 @@ export class Translator {
         /** @type {Map<string, {headwordIndex: number, pronunciations: import('dictionary').TermPronunciation[], frequencies: import('dictionary').TermFrequency[]}[]>[]} */
         const headwordReadingMaps = [];
 
+        const buildHeadwordTargetsStartedAt = safePerformance.now();
         for (const {headwords, pronunciations, frequencies} of dictionaryEntries) {
             for (let i = 0, ii = headwords.length; i < ii; ++i) {
                 const {term, reading} = headwords[i];
@@ -1247,8 +1473,15 @@ export class Translator {
                 targets.push({headwordIndex: i, pronunciations, frequencies});
             }
         }
+        const buildHeadwordTargetsElapsedMs = Math.max(0, safePerformance.now() - buildHeadwordTargetsStartedAt);
 
+        const findTermMetaBulkStartedAt = safePerformance.now();
         const metas = await this._database.findTermMetaBulk(headwordMapKeys, enabledDictionaryMap);
+        const findTermMetaBulkElapsedMs = Math.max(0, safePerformance.now() - findTermMetaBulkStartedAt);
+        let frequencyMetaCount = 0;
+        let pitchMetaCount = 0;
+        let ipaMetaCount = 0;
+        const applyMetasStartedAt = safePerformance.now();
         for (const {mode, data, dictionary, index} of metas) {
             const {index: dictionaryIndex} = this._getDictionaryOrder(dictionary, enabledDictionaryMap);
             const dictionaryAlias = this._getDictionaryAlias(dictionary, enabledDictionaryMap);
@@ -1257,6 +1490,7 @@ export class Translator {
                 switch (mode) {
                     case 'freq':
                         {
+                            ++frequencyMetaCount;
                             const hasReading = (data !== null && typeof data === 'object' && typeof data.reading === 'string');
                             if (hasReading && data.reading !== reading) { continue; }
                             const frequency = hasReading ? data.frequency : /** @type {import('dictionary-data').GenericFrequencyData} */ (data);
@@ -1278,6 +1512,7 @@ export class Translator {
                         break;
                     case 'pitch':
                         {
+                            ++pitchMetaCount;
                             if (data.reading !== reading) { continue; }
                             /** @type {import('dictionary').PitchAccent[]} */
                             const pitches = [];
@@ -1311,6 +1546,7 @@ export class Translator {
                         break;
                     case 'ipa':
                     {
+                        ++ipaMetaCount;
                         if (data.reading !== reading) { continue; }
                         /** @type {import('dictionary').PhoneticTranscription[]} */
                         const phoneticTranscriptions = [];
@@ -1340,6 +1576,17 @@ export class Translator {
                 }
             }
         }
+        return {
+            buildHeadwordTargetsElapsedMs,
+            findTermMetaBulkElapsedMs,
+            applyMetasElapsedMs: Math.max(0, safePerformance.now() - applyMetasStartedAt),
+            totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+            uniqueHeadwordCount: headwordMapKeys.length,
+            metaCount: metas.length,
+            frequencyMetaCount,
+            pitchMetaCount,
+            ipaMetaCount,
+        };
     }
 
     /**

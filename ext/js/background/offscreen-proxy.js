@@ -18,7 +18,17 @@
 
 import {ExtensionError} from '../core/extension-error.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
+import {safePerformance} from '../core/safe-performance.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
+
+/** @type {WeakMap<object, [string, import('translation').FindKanjiDictionary][]>} */
+const KANJI_ENABLED_DICTIONARY_MAP_LIST_CACHE = new WeakMap();
+/** @type {WeakMap<object, [string, import('translation').FindTermDictionary][]>} */
+const TERM_ENABLED_DICTIONARY_MAP_LIST_CACHE = new WeakMap();
+/** @type {WeakMap<object, string[]>} */
+const EXCLUDE_DICTIONARY_DEFINITIONS_LIST_CACHE = new WeakMap();
+/** @type {WeakMap<object, (import('offscreen').FindTermsTextReplacementOffscreen[] | null)[]>} */
+const TEXT_REPLACEMENTS_SERIALIZED_CACHE = new WeakMap();
 
 /**
  * This class is responsible for creating and communicating with an offscreen document.
@@ -186,6 +196,7 @@ export class OffscreenProxy {
             void this.sendMessagePromise({action: 'createAndRegisterPortOffscreen'});
         }
     }
+
 }
 
 export class DictionaryDatabaseProxy {
@@ -195,6 +206,15 @@ export class DictionaryDatabaseProxy {
     constructor(offscreen) {
         /** @type {OffscreenProxy} */
         this._offscreen = offscreen;
+        /** @type {boolean} */
+        this._prepared = false;
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    isPrepared() {
+        return this._prepared;
     }
 
     /**
@@ -202,6 +222,7 @@ export class DictionaryDatabaseProxy {
      */
     async prepare() {
         await this._offscreen.sendMessagePromise({action: 'databasePrepareOffscreen'});
+        this._prepared = true;
     }
 
     /**
@@ -209,6 +230,7 @@ export class DictionaryDatabaseProxy {
      */
     async refreshConnection() {
         await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
+        this._prepared = true;
     }
 
     /**
@@ -217,6 +239,7 @@ export class DictionaryDatabaseProxy {
      */
     async setSuspended(suspended) {
         await this._offscreen.sendMessagePromise({action: 'databaseSetSuspendedOffscreen', params: {suspended}});
+        this._prepared = !suspended;
     }
 
     /**
@@ -236,10 +259,11 @@ export class DictionaryDatabaseProxy {
     }
 
     /**
+     * @param {string[]|null} [dictionaryNames=null]
      * @returns {Promise<number>}
      */
-    async getMaxHeadwordLength() {
-        return await this._offscreen.sendMessagePromise({action: 'getMaxHeadwordLengthOffscreen'});
+    async getMaxHeadwordLength(dictionaryNames = null) {
+        return await this._offscreen.sendMessagePromise({action: 'getMaxHeadwordLengthOffscreen', params: {dictionaryNames}});
     }
 
     /**
@@ -331,7 +355,7 @@ export class TranslatorProxy {
      * @returns {Promise<import('dictionary').KanjiDictionaryEntry[]>}
      */
     async findKanji(text, options) {
-        const enabledDictionaryMapList = [...options.enabledDictionaryMap];
+        const enabledDictionaryMapList = this._getKanjiEnabledDictionaryMapList(options.enabledDictionaryMap);
         /** @type {import('offscreen').FindKanjiOptionsOffscreen} */
         const modifiedOptions = {
             ...options,
@@ -344,23 +368,59 @@ export class TranslatorProxy {
      * @param {import('translator').FindTermsMode} mode
      * @param {string} text
      * @param {import('translation').FindTermsOptions} options
+     * @param {number} [maxResults]
      * @returns {Promise<import('translator').FindTermsResult>}
      */
-    async findTerms(mode, text, options) {
+    async findTerms(mode, text, options, maxResults, includeTimingDiagnostics = false) {
+        const totalStartedAt = safePerformance.now();
         const {enabledDictionaryMap, excludeDictionaryDefinitions, textReplacements} = options;
-        const enabledDictionaryMapList = [...enabledDictionaryMap];
-        const excludeDictionaryDefinitionsList = excludeDictionaryDefinitions ? [...excludeDictionaryDefinitions] : null;
-        const textReplacementsSerialized = textReplacements.map((group) => {
-            return group !== null ? group.map((opt) => ({...opt, pattern: opt.pattern.toString()})) : null;
-        });
+        const serializeEnabledDictionaryMapStartedAt = safePerformance.now();
+        const enabledDictionaryMapList = this._getTermEnabledDictionaryMapList(enabledDictionaryMap);
+        const serializeEnabledDictionaryMapElapsedMs = Math.max(0, safePerformance.now() - serializeEnabledDictionaryMapStartedAt);
+        const serializeExcludeDictionaryDefinitionsStartedAt = safePerformance.now();
+        const excludeDictionaryDefinitionsList = this._getExcludeDictionaryDefinitionsList(excludeDictionaryDefinitions);
+        const serializeExcludeDictionaryDefinitionsElapsedMs = Math.max(0, safePerformance.now() - serializeExcludeDictionaryDefinitionsStartedAt);
+        const serializeTextReplacementsStartedAt = safePerformance.now();
+        const textReplacementsSerialized = this._getTextReplacementsSerialized(textReplacements);
+        const serializeTextReplacementsElapsedMs = Math.max(0, safePerformance.now() - serializeTextReplacementsStartedAt);
         /** @type {import('offscreen').FindTermsOptionsOffscreen} */
         const modifiedOptions = {
             ...options,
             enabledDictionaryMap: enabledDictionaryMapList,
             excludeDictionaryDefinitions: excludeDictionaryDefinitionsList,
             textReplacements: textReplacementsSerialized,
+            maxResults: typeof maxResults === 'number' ? maxResults : void 0,
+            includeTimingDiagnostics,
         };
-        return this._offscreen.sendMessagePromise({action: 'findTermsOffscreen', params: {mode, text, options: modifiedOptions}});
+        const sendMessageStartedAt = safePerformance.now();
+        const result = await this._offscreen.sendMessagePromise({action: 'findTermsOffscreen', params: {mode, text, options: modifiedOptions}});
+        const sendMessageElapsedMs = Math.max(0, safePerformance.now() - sendMessageStartedAt);
+        if (!includeTimingDiagnostics) {
+            return result;
+        }
+        const timingDiagnostics = (
+            isObjectNotArray(result) &&
+            isObjectNotArray(Reflect.get(result, 'timingDiagnostics'))
+        ) ?
+            /** @type {Record<string, unknown>} */ (Reflect.get(result, 'timingDiagnostics')) :
+            {};
+        return {
+            ...result,
+            timingDiagnostics: {
+                ...timingDiagnostics,
+                translatorProxy: {
+                    serializeEnabledDictionaryMapElapsedMs,
+                    serializeExcludeDictionaryDefinitionsElapsedMs,
+                    serializeTextReplacementsElapsedMs,
+                    sendMessageElapsedMs,
+                    totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                    transport: 'runtime-message',
+                    enabledDictionaryCount: enabledDictionaryMap.size,
+                    excludeDictionaryDefinitionCount: excludeDictionaryDefinitions?.size ?? 0,
+                    textReplacementGroupCount: textReplacements.length,
+                },
+            },
+        };
     }
 
     /**
@@ -375,6 +435,64 @@ export class TranslatorProxy {
     /** */
     async clearDatabaseCaches() {
         await this._offscreen.sendMessagePromise({action: 'clearDatabaseCachesOffscreen'});
+    }
+
+    /**
+     * @param {Map<string, import('translation').FindKanjiDictionary>} enabledDictionaryMap
+     * @returns {[string, import('translation').FindKanjiDictionary][]}
+     */
+    _getKanjiEnabledDictionaryMapList(enabledDictionaryMap) {
+        let cached = KANJI_ENABLED_DICTIONARY_MAP_LIST_CACHE.get(enabledDictionaryMap);
+        if (typeof cached === 'undefined') {
+            cached = [...enabledDictionaryMap];
+            KANJI_ENABLED_DICTIONARY_MAP_LIST_CACHE.set(enabledDictionaryMap, cached);
+        }
+        return cached;
+    }
+
+    /**
+     * @param {Map<string, import('translation').FindTermDictionary>} enabledDictionaryMap
+     * @returns {[string, import('translation').FindTermDictionary][]}
+     */
+    _getTermEnabledDictionaryMapList(enabledDictionaryMap) {
+        let cached = TERM_ENABLED_DICTIONARY_MAP_LIST_CACHE.get(enabledDictionaryMap);
+        if (typeof cached === 'undefined') {
+            cached = [...enabledDictionaryMap];
+            TERM_ENABLED_DICTIONARY_MAP_LIST_CACHE.set(enabledDictionaryMap, cached);
+        }
+        return cached;
+    }
+
+    /**
+     * @param {?Set<string>} excludeDictionaryDefinitions
+     * @returns {?string[]}
+     */
+    _getExcludeDictionaryDefinitionsList(excludeDictionaryDefinitions) {
+        if (excludeDictionaryDefinitions === null) {
+            return null;
+        }
+
+        let cached = EXCLUDE_DICTIONARY_DEFINITIONS_LIST_CACHE.get(excludeDictionaryDefinitions);
+        if (typeof cached === 'undefined') {
+            cached = [...excludeDictionaryDefinitions];
+            EXCLUDE_DICTIONARY_DEFINITIONS_LIST_CACHE.set(excludeDictionaryDefinitions, cached);
+        }
+        return cached;
+    }
+
+    /**
+     * @param {(import('translation').FindTermsTextReplacement[]|null)[]} textReplacements
+     * @returns {(import('offscreen').FindTermsTextReplacementOffscreen[] | null)[]}
+     */
+    _getTextReplacementsSerialized(textReplacements) {
+        let cached = TEXT_REPLACEMENTS_SERIALIZED_CACHE.get(textReplacements);
+        if (typeof cached === 'undefined') {
+            cached = textReplacements.map((group) => {
+                return group !== null ? group.map((opt) => ({...opt, pattern: opt.pattern.toString()})) : null;
+            });
+            TEXT_REPLACEMENTS_SERIALIZED_CACHE.set(textReplacements, cached);
+        }
+        return cached;
     }
 }
 

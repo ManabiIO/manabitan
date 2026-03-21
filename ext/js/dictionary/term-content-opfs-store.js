@@ -64,6 +64,8 @@ export class TermContentOpfsStore {
         this._readFile = null;
         /** @type {Map<number, Uint8Array>} */
         this._readPageCache = new Map();
+        /** @type {{cacheHitCount: number, cacheMissCount: number, fileReadCallCount: number, fileReadBytes: number}} */
+        this._readDiagnostics = this._createEmptyReadDiagnostics();
         /** @type {string} */
         this._lastSliceCacheKey = '';
         /** @type {Uint8Array|null} */
@@ -201,6 +203,13 @@ export class TermContentOpfsStore {
             this._lastSliceCacheKey = '';
             this._lastSliceCacheValue = null;
         }
+    }
+
+    /**
+     * @returns {{cacheHitCount: number, cacheMissCount: number, fileReadCallCount: number, fileReadBytes: number}}
+     */
+    getReadDiagnostics() {
+        return {...this._readDiagnostics};
     }
 
     /**
@@ -602,10 +611,10 @@ export class TermContentOpfsStore {
         }
         for (let attempt = 0; attempt < 2; ++attempt) {
             try {
-                const output = new Uint8Array(length);
                 const pageSize = READ_PAGE_SIZE_BYTES;
                 const startPage = Math.floor(offset / pageSize);
                 const endPage = Math.floor((offset + length - 1) / pageSize);
+                const output = new Uint8Array(length);
                 let outputOffset = 0;
                 for (let pageIndex = startPage; pageIndex <= endPage; ++pageIndex) {
                     const page = await this._getReadPage(pageIndex);
@@ -642,6 +651,7 @@ export class TermContentOpfsStore {
     async _getReadPage(pageIndex) {
         const cached = this._readPageCache.get(pageIndex);
         if (typeof cached !== 'undefined') {
+            ++this._readDiagnostics.cacheHitCount;
             this._touchReadPage(pageIndex, cached);
             return cached;
         }
@@ -655,6 +665,9 @@ export class TermContentOpfsStore {
         }
         const pageEnd = Math.min(this._length, pageOffset + READ_PAGE_SIZE_BYTES);
         const bytes = new Uint8Array(await file.slice(pageOffset, pageEnd).arrayBuffer());
+        ++this._readDiagnostics.cacheMissCount;
+        ++this._readDiagnostics.fileReadCallCount;
+        this._readDiagnostics.fileReadBytes += bytes.byteLength;
         this._setReadPage(pageIndex, bytes);
         return bytes;
     }
@@ -710,6 +723,7 @@ export class TermContentOpfsStore {
         this._loadedForRead = false;
         this._readFile = null;
         this._readPageCache.clear();
+        this._readDiagnostics = this._createEmptyReadDiagnostics();
         this._lastSliceCacheKey = '';
         this._lastSliceCacheValue = null;
     }
@@ -892,6 +906,18 @@ export class TermContentOpfsStore {
             flushFinalGroupCount: 0,
             writeCoalesceTargetBytes: this._writeCoalesceTargetBytes,
             writeCoalesceMaxChunks: this._writeCoalesceMaxChunks,
+        };
+    }
+
+    /**
+     * @returns {{cacheHitCount: number, cacheMissCount: number, fileReadCallCount: number, fileReadBytes: number}}
+     */
+    _createEmptyReadDiagnostics() {
+        return {
+            cacheHitCount: 0,
+            cacheMissCount: 0,
+            fileReadCallCount: 0,
+            fileReadBytes: 0,
         };
     }
 

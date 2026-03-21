@@ -122,9 +122,10 @@ export class PopupWindow extends EventDispatcher {
     /**
      * Sets the options context for the popup.
      * @param {import('settings').OptionsContext} optionsContext The options context object.
+     * @param {?import('settings').ProfileOptions} [_resolvedOptions=null]
      * @returns {Promise<void>}
      */
-    async setOptionsContext(optionsContext) {
+    async setOptionsContext(optionsContext, _resolvedOptions = null) {
         await this._invoke(false, 'displaySetOptionsContext', {optionsContext});
     }
 

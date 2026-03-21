@@ -48,6 +48,15 @@ const e2eLogTag = `[${browserFlavor}-e2e]`;
 const browserChannel = browserFlavor === 'edge' ? 'msedge' : null;
 const expectedLookupDictionaries = ['Jitendex', 'JMdict'];
 const autoUpdateStateStorageKey = 'manabitanDictionaryAutoUpdateState';
+const hoverPageDiagnosticsDatasetKeys = [
+    'manabitanDevHoverScannerDiagnostics',
+    'manabitanDevHoverFrontendDiagnostics',
+    'manabitanDevPopupDiagnostics',
+    'manabitanDevApiInvokeDiagnostics',
+];
+const hoverPopupDiagnosticsDatasetKeys = [
+    'manabitanDevPopupDisplayDiagnostics',
+];
 const overlapLookupCandidates = [
     '日本',
     '名前',
@@ -152,6 +161,28 @@ function parseBooleanEnv(value, defaultValue) {
     return defaultValue;
 }
 
+function parseIntegerEnv(value, defaultValue, minimum = Number.NEGATIVE_INFINITY, maximum = Number.POSITIVE_INFINITY) {
+    if (typeof value !== 'string') {
+        return defaultValue;
+    }
+    const parsed = Number.parseInt(value.trim(), 10);
+    if (!Number.isFinite(parsed)) {
+        return defaultValue;
+    }
+    return Math.min(maximum, Math.max(minimum, parsed));
+}
+
+function parseStringListEnv(value, fallbackValues) {
+    if (typeof value !== 'string') {
+        return fallbackValues;
+    }
+    const parsed = value
+        .split(',')
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
+    return parsed.length > 0 ? parsed : fallbackValues;
+}
+
 const strictUnsupportedRuntime = parseBooleanEnv(
     process.env.MANABITAN_E2E_STRICT_RUNTIME,
     parseBooleanEnv(process.env.CI, false),
@@ -160,6 +191,17 @@ const maxReportLogLinesRaw = Number.parseInt(process.env.MANABITAN_CHROMIUM_E2E_
 const maxReportLogLines = Number.isFinite(maxReportLogLinesRaw) && maxReportLogLinesRaw > 0 ? maxReportLogLinesRaw : 1000;
 const quickImportBenchmarkMode = parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_BENCH_QUICK, false);
 const stopAfterIsolatedProbes = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_ISOLATED_PROBES, false);
+const stopAfterHoverStress = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_HOVER_STRESS, false);
+const hoverStressIterations = parseIntegerEnv(process.env.MANABITAN_E2E_HOVER_STRESS_ITERATIONS, 12, 1, 64);
+const hoverStressTargets = parseStringListEnv(process.env.MANABITAN_E2E_HOVER_TARGETS, [
+    '#target-word',
+    '#target-cat',
+    '#target-name',
+    '#target-kotoba',
+    '#target-born',
+    '#target-mitou',
+]);
+const overrideJmdictUrl = typeof process.env.MANABITAN_E2E_JMDICT_URL === 'string' ? process.env.MANABITAN_E2E_JMDICT_URL.trim() : '';
 const concurrentDbOpenPressureEnabled = (
     !quickImportBenchmarkMode &&
     parseBooleanEnv(process.env.MANABITAN_E2E_DB_OPEN_PRESSURE, true)
@@ -672,11 +714,28 @@ async function loadRecommendedDictionaryUrls() {
         return '';
     };
     const jitendexUrl = findDownloadUrl('Jitendex');
-    const jmdictUrl = findDownloadUrl('JMdict') || fallbackJmdictUrl;
+    const jmdictUrl = (
+        overrideJmdictUrl.length > 0 ?
+        overrideJmdictUrl :
+        (findDownloadUrl('JMdict') || fallbackJmdictUrl)
+    );
     if (jitendexUrl.length === 0 || jmdictUrl.length === 0) {
         fail(`Unable to resolve recommended dictionary URLs (jitendex="${jitendexUrl}", jmdict="${jmdictUrl}")`);
     }
     return {jitendexUrl, jmdictUrl};
+}
+
+function getCachedDownloadFileName(url, fallbackFileName) {
+    try {
+        const parsedUrl = new URL(url);
+        const baseName = path.basename(parsedUrl.pathname || '');
+        if (/^[A-Za-z0-9._-]+\.zip$/u.test(baseName)) {
+            return baseName;
+        }
+    } catch (_) {
+        // Fall back to the provided file name when URL parsing fails.
+    }
+    return fallbackFileName;
 }
 
 async function ensureCachedDownload(url, outputPath) {
@@ -701,7 +760,7 @@ async function ensureRealDictionaryCache() {
     await mkdir(dictionaryCacheDir, {recursive: true});
     const {jitendexUrl, jmdictUrl} = await loadRecommendedDictionaryUrls();
     const jitendexPath = path.join(dictionaryCacheDir, 'jitendex-yomitan.zip');
-    const jmdictPath = path.join(dictionaryCacheDir, 'JMdict.zip');
+    const jmdictPath = path.join(dictionaryCacheDir, getCachedDownloadFileName(jmdictUrl, 'JMdict.zip'));
     await ensureCachedDownload(jitendexUrl, jitendexPath);
     await ensureCachedDownload(jmdictUrl, jmdictPath);
     return {jitendexPath, jmdictPath};
@@ -1059,10 +1118,14 @@ async function evalSendMessage(page, expression, arg = null) {
             const installedTitles = (Array.isArray(dictionaryInfo) ? dictionaryInfo : [])
                 .map((row) => String(row?.title || '').trim())
                 .filter((value) => value.length > 0);
+            const clearDatabaseCaches = async () => {
+                await send('clearDatabaseCaches', undefined);
+            };
             const collectTermLookup = async (details) => {
                 const termsFind = await send('termsFind', {
                     text: term,
                     details: {
+                        includeTimingDiagnostics: true,
                         primaryReading: '',
                         ...details,
                     },
@@ -1078,9 +1141,15 @@ async function evalSendMessage(page, expression, arg = null) {
                 return {
                     termResultCount: Array.isArray(termsFind?.dictionaryEntries) ? termsFind.dictionaryEntries.length : 0,
                     termDictionaryNames: [...new Set(termDictionaryNames)],
+                    originalTextLength: Number(termsFind?.originalTextLength || 0),
+                    timingDiagnostics: (typeof termsFind?.timingDiagnostics === 'object' && termsFind?.timingDiagnostics !== null) ?
+                        termsFind.timingDiagnostics :
+                        null,
                 };
             };
             const termLookupDefault = await collectTermLookup({});
+            await clearDatabaseCaches();
+            const termLookupExactNoDeinflectColdTagCache = await collectTermLookup({matchType: 'exact', deinflect: false});
             const termLookupExactNoDeinflect = await collectTermLookup({matchType: 'exact', deinflect: false});
             const termLookupPrefixNoDeinflect = await collectTermLookup({matchType: 'prefix', deinflect: false});
             const enabledDictionaryNames = [];
@@ -1108,6 +1177,7 @@ async function evalSendMessage(page, expression, arg = null) {
                 termDictionaryNames: termLookupDefault.termDictionaryNames,
                 termLookupDiagnostics: {
                     default: termLookupDefault,
+                    exactNoDeinflectColdTagCache: termLookupExactNoDeinflectColdTagCache,
                     exactNoDeinflect: termLookupExactNoDeinflect,
                     prefixNoDeinflect: termLookupPrefixNoDeinflect,
                 },
@@ -1232,6 +1302,40 @@ async function evalSendMessage(page, expression, arg = null) {
             });
             const profileMainDictionaries = (updatedOptions?.profiles || []).map((profile) => String(profile?.options?.general?.mainDictionary || '').trim());
             return {ok: true, targetNames, profileEnabledDictionaryNames, profileMainDictionaries};
+        }
+        if (expression === 'configureHoverScanning') {
+            const optionsFull = await send('optionsGetFull', undefined);
+            const nextOptions = structuredClone(optionsFull);
+            for (const profile of nextOptions.profiles || []) {
+                const general = profile?.options?.general;
+                const scanning = profile?.options?.scanning;
+                if (!(general && scanning && Array.isArray(scanning.inputs))) { continue; }
+                general.enable = true;
+                scanning.delay = 0;
+                scanning.scanWithoutMousemove = false;
+                for (const input of scanning.inputs) {
+                    if (!(input?.types?.mouse === true)) { continue; }
+                    input.include = '';
+                    if (typeof input.exclude !== 'string' || input.exclude.length === 0) {
+                        input.exclude = 'mouse0';
+                    }
+                }
+            }
+            await send('setAllSettings', {value: nextOptions, source: 'chromium-e2e-hover-scanning'});
+            const updatedOptions = await send('optionsGetFull', undefined);
+            return {
+                ok: true,
+                profiles: (updatedOptions?.profiles || []).map((profile) => ({
+                    enabled: profile?.options?.general?.enable === true,
+                    delay: Number(profile?.options?.scanning?.delay || 0),
+                    mouseInputs: (profile?.options?.scanning?.inputs || [])
+                        .filter((input) => input?.types?.mouse === true)
+                        .map((input) => ({
+                            include: String(input?.include || ''),
+                            exclude: String(input?.exclude || ''),
+                        })),
+                })),
+            };
         }
         if (expression === 'backendProbe') {
             const dictionaryInfo = await send('getDictionaryInfo', undefined);
@@ -1950,45 +2054,141 @@ async function waitForVisiblePopupFrameHandle(page, timeoutMs = 6000) {
     return null;
 }
 
+async function clearDocumentDatasetDiagnostics(frameOrPage, datasetKeys) {
+    await frameOrPage.evaluate((keys) => {
+        const {documentElement} = document;
+        if (!(documentElement instanceof HTMLElement)) { return; }
+        for (const key of keys) {
+            delete documentElement.dataset[key];
+        }
+    }, datasetKeys);
+}
+
+async function readDocumentDatasetDiagnostics(frameOrPage, datasetKeys) {
+    return await frameOrPage.evaluate((keys) => {
+        const {documentElement} = document;
+        if (!(documentElement instanceof HTMLElement)) { return {}; }
+        const results = {};
+        for (const key of keys) {
+            const value = documentElement.dataset[key];
+            if (typeof value !== 'string' || value.length === 0) {
+                results[key] = null;
+                continue;
+            }
+            try {
+                results[key] = JSON.parse(value);
+            } catch (_) {
+                results[key] = value;
+            }
+        }
+        return results;
+    }, datasetKeys);
+}
+
+async function waitForDocumentDatasetDiagnostics(frameOrPage, datasetKeys, timeoutMs = 1000) {
+    const deadline = safePerformance.now() + timeoutMs;
+    while (safePerformance.now() < deadline) {
+        const diagnostics = await readDocumentDatasetDiagnostics(frameOrPage, datasetKeys);
+        if (Object.values(diagnostics).some((value) => value !== null)) {
+            return diagnostics;
+        }
+        await frameOrPage.waitForTimeout(25);
+    }
+    return await readDocumentDatasetDiagnostics(frameOrPage, datasetKeys);
+}
+
+async function clearPopupFrameDiagnostics(page, datasetKeys) {
+    const frameHandles = await page.$$('iframe.yomitan-popup');
+    for (const frameHandle of frameHandles) {
+        const popupFrame = await frameHandle.contentFrame();
+        if (popupFrame === null) { continue; }
+        await clearDocumentDatasetDiagnostics(popupFrame, datasetKeys);
+    }
+}
+
 async function hoverLookupOnWagahai(page, targetSelector) {
     const target = page.locator(targetSelector).first();
     await target.waitFor({state: 'visible', timeout: 10000});
     await target.scrollIntoViewIfNeeded();
     await page.bringToFront();
-    await page.locator('body').click({position: {x: 12, y: 12}});
+    await page.evaluate(() => {
+        document.documentElement.dataset.manabitanDevIncludeApiTimingDiagnostics = 'true';
+    });
+    await clearDocumentDatasetDiagnostics(page, hoverPageDiagnosticsDatasetKeys);
+    let lastDiagnostics = null;
     const box = await target.boundingBox();
     if (box === null) {
         throw new Error(`Unable to resolve bounding box for selector ${targetSelector}`);
     }
+    const viewportSize = page.viewportSize();
     const hoverX = box.x + Math.max(2, Math.min(10, box.width * 0.25));
     const hoverY = box.y + Math.max(2, Math.min(12, box.height * 0.5));
-    const resetX = Math.max(2, hoverX - 120);
-    const modifierCandidates = ['Shift', 'Alt', 'Control', null];
+    const resetX = Math.max(2, Math.min((viewportSize?.width ?? hoverX + 220) - 24, hoverX + 180));
+    await page.locator('body').click({position: {x: resetX, y: Math.max(12, hoverY)}});    
+    const modifierCandidates = [null, 'Shift', 'Alt', 'Control'];
     for (const modifier of modifierCandidates) {
         if (modifier !== null) {
             await page.keyboard.down(modifier);
         }
         try {
             for (let attempt = 0; attempt < 3; ++attempt) {
+                await clearDocumentDatasetDiagnostics(page, hoverPageDiagnosticsDatasetKeys);
+                await clearPopupFrameDiagnostics(page, hoverPopupDiagnosticsDatasetKeys);
                 await page.mouse.move(resetX, hoverY, {steps: 6});
                 await page.waitForTimeout(35);
                 await page.mouse.move(hoverX, hoverY, {steps: 16});
                 const popupFrameHandle = await waitForVisiblePopupFrameHandle(page, 3000);
                 if (popupFrameHandle === null) {
+                    lastDiagnostics = {
+                        page: await readDocumentDatasetDiagnostics(page, hoverPageDiagnosticsDatasetKeys),
+                        popup: null,
+                    };
                     continue;
                 }
                 const popupFrame = await popupFrameHandle.contentFrame();
                 if (popupFrame === null) {
+                    lastDiagnostics = {
+                        page: await readDocumentDatasetDiagnostics(page, hoverPageDiagnosticsDatasetKeys),
+                        popup: null,
+                    };
                     continue;
                 }
                 await popupFrame.waitForSelector('#dictionary-entries, #no-results, #no-dictionaries', {timeout: 5000});
                 const popupText = (await popupFrame.locator('body').textContent()) ?? '';
+                const popupMetrics = await popupFrame.evaluate(() => {
+                    const body = document.body;
+                    const dictionaryEntries = document.querySelector('#dictionary-entries');
+                    return {
+                        bodyHtmlLength: body?.innerHTML.length ?? 0,
+                        bodyTextLength: body?.textContent?.length ?? 0,
+                        dictionaryEntryNodeCount: dictionaryEntries?.querySelectorAll('.entry').length ?? 0,
+                        definitionItemCount: dictionaryEntries?.querySelectorAll('.definition-item').length ?? 0,
+                        structuredContentNodeCount: dictionaryEntries?.querySelectorAll('.structured-content').length ?? 0,
+                        structuredContentTableCount: dictionaryEntries?.querySelectorAll('.structured-content table').length ?? 0,
+                        glossaryImageCount: dictionaryEntries?.querySelectorAll('.gloss-image-link, .gloss-image-container img').length ?? 0,
+                    };
+                });
                 if (popupText.trim().length === 0) {
+                    lastDiagnostics = {
+                        page: await readDocumentDatasetDiagnostics(page, hoverPageDiagnosticsDatasetKeys),
+                        popup: await readDocumentDatasetDiagnostics(popupFrame, hoverPopupDiagnosticsDatasetKeys),
+                    };
                     continue;
                 }
+                const pageDiagnostics = await readDocumentDatasetDiagnostics(page, hoverPageDiagnosticsDatasetKeys);
+                const popupDiagnostics = await waitForDocumentDatasetDiagnostics(popupFrame, hoverPopupDiagnosticsDatasetKeys, 1000);
+                lastDiagnostics = {
+                    page: pageDiagnostics,
+                    popup: popupDiagnostics,
+                };
                 return {
                     popupText,
+                    popupMetrics,
                     usedModifier: modifier,
+                    diagnostics: {
+                        page: pageDiagnostics,
+                        popup: popupDiagnostics,
+                    },
                 };
             }
         } finally {
@@ -1997,7 +2197,7 @@ async function hoverLookupOnWagahai(page, targetSelector) {
             }
         }
     }
-    throw new Error(`Hover scan did not produce a visible popup for selector ${targetSelector}`);
+    throw new Error(`Hover scan did not produce a visible popup for selector ${targetSelector}. diagnostics=${JSON.stringify(lastDiagnostics)}`);
 }
 
 async function loadDictionaryProbeTermsFromArchive(zipPath, maxTerms = 80) {
@@ -3319,6 +3519,33 @@ async function main() {
                 processSampler,
             );
 
+            const configureHoverScanningStart = safePerformance.now();
+            let configureHoverScanningProfile = null;
+            let configureHoverScanningResult = null;
+            let configureHoverScanningError = '';
+            try {
+                configureHoverScanningProfile = await runPhaseProfile(cdpSession, async () => {
+                    return await evalSendMessage(page, 'configureHoverScanning');
+                });
+                configureHoverScanningResult = configureHoverScanningProfile.result;
+            } catch (e) {
+                configureHoverScanningError = errorMessage(e);
+                verificationErrors.push(`Hover scanning configuration failed: ${configureHoverScanningError}`);
+            }
+            const configureHoverScanningEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                page,
+                'Configure hover scanning profile',
+                configureHoverScanningError.length > 0 ?
+                    `Failed to configure hover scanning defaults for Playwright mouse hover: ${configureHoverScanningError}` :
+                    `Configured hover scanning defaults for Playwright mouse hover: ${JSON.stringify(configureHoverScanningResult)}`,
+                configureHoverScanningStart,
+                configureHoverScanningEnd,
+                configureHoverScanningProfile,
+                processSampler,
+            );
+
             const scanningStressStart = safePerformance.now();
             let scanningStressProfile = null;
             let scanningStressError = '';
@@ -3330,19 +3557,11 @@ async function main() {
                         throw new Error('Local E2E server is unavailable for scanning stress test');
                     }
                     await page.goto(`${localServer.baseUrl}/wagahai-neko.html`);
-                    const scanTargets = [
-                        '#target-word',
-                        '#target-cat',
-                        '#target-name',
-                        '#target-kotoba',
-                        '#target-born',
-                        '#target-mitou',
-                    ];
                     const iterations = [];
-                    for (let i = 0; i < 12; ++i) {
-                        const selector = scanTargets[i % scanTargets.length];
+                    for (let i = 0; i < hoverStressIterations; ++i) {
+                        const selector = hoverStressTargets[i % hoverStressTargets.length];
                         const iterationStart = safePerformance.now();
-                        const {popupText, usedModifier} = await hoverLookupOnWagahai(page, selector);
+                        const {popupText, popupMetrics = null, usedModifier, diagnostics = null} = await hoverLookupOnWagahai(page, selector);
                         const iterationEnd = safePerformance.now();
                         const hasDictionaryResult = /jmdict|jitendex/i.test(popupText);
                         iterations.push({
@@ -3352,6 +3571,8 @@ async function main() {
                             durationMs: Math.max(0, iterationEnd - iterationStart),
                             hasDictionaryResult,
                             popupTextPreview: popupText.replaceAll(/\s+/g, ' ').trim().slice(0, 180),
+                            popupMetrics,
+                            diagnostics,
                         });
                         if (!hasDictionaryResult) {
                             throw new Error(`Scan iteration ${String(i + 1)} (${selector}) produced popup without dictionary result`);
@@ -3399,6 +3620,12 @@ async function main() {
                 scanningStressProfile,
                 processSampler,
             );
+            if (stopAfterHoverStress) {
+                report.status = 'success';
+                appendLog(report, 'info', 'Stopped after hover scanning stress by MANABITAN_E2E_STOP_AFTER_HOVER_STRESS=1.');
+                console.log(`${e2eLogTag} PASS: Stopped after hover scanning stress by MANABITAN_E2E_STOP_AFTER_HOVER_STRESS=1.`);
+                return;
+            }
 
             const postUsageSearchStart = safePerformance.now();
             let postUsageSearchProfile = null;

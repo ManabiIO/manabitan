@@ -18,11 +18,13 @@
 
 import {ThemeController} from '../app/theme-controller.js';
 import {FrameEndpoint} from '../comm/frame-endpoint.js';
+import {publishDevTimingSnapshot} from '../core/dev-timing-diagnostics.js';
 import {extendApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {DynamicProperty} from '../core/dynamic-property.js';
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
+import {parseJson} from '../core/json.js';
 import {log} from '../core/log.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -42,6 +44,9 @@ import {DisplayNotification} from './display-notification.js';
 import {ElementOverflowController} from './element-overflow-controller.js';
 import {OptionToggleHotkeyHandler} from './option-toggle-hotkey-handler.js';
 import {QueryParser} from './query-parser.js';
+
+const POPUP_DISPLAY_DIAGNOSTICS_DATASET_KEY = 'manabitanDevPopupDisplayDiagnostics';
+const POPUP_DISPLAY_DIAGNOSTICS_EVENT = 'popup-display-phase-summary';
 
 /**
  * @augments EventDispatcher<import('display').Events>
@@ -81,6 +86,12 @@ export class Display extends EventDispatcher {
         this._eventListeners = new EventListenerCollection();
         /** @type {?import('core').TokenObject} */
         this._setContentToken = null;
+        /** @type {?Record<string, unknown>} */
+        this._pendingPopupSetContentDiagnostics = null;
+        /** @type {?import('settings').ProfileOptions} */
+        this._pendingResolvedOptions = null;
+        /** @type {?Record<string, unknown>} */
+        this._latestSetContentTimingDiagnostics = null;
         /** @type {DisplayContentManager} */
         this._contentManager = new DisplayContentManager(this);
         /** @type {HotkeyHelpController} */
@@ -445,15 +456,31 @@ export class Display extends EventDispatcher {
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {?import('settings').ProfileOptions} [resolvedOptions=null]
      */
-    async setOptionsContext(optionsContext) {
+    async setOptionsContext(optionsContext, resolvedOptions = null) {
         this._optionsContext = optionsContext;
+        if (
+            typeof resolvedOptions === 'object' &&
+            resolvedOptions !== null &&
+            !Array.isArray(resolvedOptions)
+        ) {
+            this._applyOptions(/** @type {import('settings').ProfileOptions} */ (resolvedOptions));
+            return;
+        }
         await this.updateOptions();
     }
 
     /** */
     async updateOptions() {
         const options = await this._application.api.optionsGet(this.getOptionsContext());
+        this._applyOptions(options);
+    }
+
+    /**
+     * @param {import('settings').ProfileOptions} options
+     */
+    _applyOptions(options) {
         const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
         this._options = options;
 
@@ -754,7 +781,48 @@ export class Display extends EventDispatcher {
     }
 
     /** @type {import('display').DirectApiHandler<'displaySetContent'>} */
-    _onMessageSetContent({details}) {
+    _onMessageSetContent({details, resolvedOptions}) {
+        const content = (
+            typeof details?.content === 'object' &&
+            details.content !== null &&
+            !Array.isArray(details.content)
+        ) ?
+            /** @type {import('display').HistoryContent & Record<string, unknown>} */ (details.content) :
+            null;
+        let providedDictionaryEntriesJsonLength = 0;
+        const providedSerializedDictionaryEntries = (
+            content !== null &&
+            typeof Reflect.get(content, 'dictionaryEntriesJson') === 'string' &&
+            /** @type {string} */ (Reflect.get(content, 'dictionaryEntriesJson')).length > 0
+        );
+        if (providedSerializedDictionaryEntries) {
+            providedDictionaryEntriesJsonLength = /** @type {string} */ (Reflect.get(content, 'dictionaryEntriesJson')).length;
+        }
+        const params = (
+            typeof details?.params === 'object' &&
+            details.params !== null &&
+            !Array.isArray(details.params)
+        ) ?
+            details.params :
+            {};
+        const contentSafe = content !== null ? content : {};
+        const providedDictionaryEntries = Reflect.get(contentSafe, 'dictionaryEntries');
+        this._pendingPopupSetContentDiagnostics = {
+            receivedAtMs: safePerformance.now(),
+            queryLength: String(Reflect.get(params, 'query') || '').length,
+            type: String(Reflect.get(params, 'type') || ''),
+            providedDictionaryEntryCount: Array.isArray(providedDictionaryEntries) ? providedDictionaryEntries.length : 0,
+            lookupParam: Reflect.get(params, 'lookup') ?? null,
+            parseProvidedDictionaryEntriesElapsedMs: 0,
+            parsedProvidedDictionaryEntries: false,
+            providedSerializedDictionaryEntries,
+            providedDictionaryEntriesJsonLength,
+        };
+        this._pendingResolvedOptions = (
+            typeof resolvedOptions === 'object' &&
+            resolvedOptions !== null &&
+            !Array.isArray(resolvedOptions)
+        ) ? /** @type {import('settings').ProfileOptions} */ (resolvedOptions) : null;
         safePerformance.mark('invokeDisplaySetContent:end');
         this.setContent(details);
     }
@@ -810,6 +878,10 @@ export class Display extends EventDispatcher {
         if (this._historyChangeIgnore) { return; }
 
         safePerformance.mark('display:_onStateChanged:start');
+        const totalStartedAt = safePerformance.now();
+        const pendingPopupSetContentDiagnostics = this._pendingPopupSetContentDiagnostics;
+        this._pendingPopupSetContentDiagnostics = null;
+        this._latestSetContentTimingDiagnostics = null;
 
         /** @type {?import('core').TokenObject} */
         const token = {}; // Unique identifier token
@@ -817,6 +889,7 @@ export class Display extends EventDispatcher {
         try {
             // Clear
             safePerformance.mark('display:_onStateChanged:clear:start');
+            const clearStartedAt = safePerformance.now();
             this._closePopups();
             this._closeAllPopupMenus();
             this._eventListeners.removeAllEventListeners();
@@ -829,9 +902,11 @@ export class Display extends EventDispatcher {
             this._elementOverflowController.clearElements();
             safePerformance.mark('display:_onStateChanged:clear:end');
             safePerformance.measure('display:_onStateChanged:clear', 'display:_onStateChanged:clear:start', 'display:_onStateChanged:clear:end');
+            const clearElapsedMs = Math.max(0, safePerformance.now() - clearStartedAt);
 
             // Prepare
             safePerformance.mark('display:_onStateChanged:prepare:start');
+            const prepareStartedAt = safePerformance.now();
             const urlSearchParams = new URLSearchParams(location.search);
             let type = urlSearchParams.get('type');
             if (type === null && urlSearchParams.get('query') !== null) { type = 'terms'; }
@@ -842,8 +917,10 @@ export class Display extends EventDispatcher {
             this._historyHasChanged = true;
             safePerformance.mark('display:_onStateChanged:prepare:end');
             safePerformance.measure('display:_onStateChanged:prepare', 'display:_onStateChanged:prepare:start', 'display:_onStateChanged:prepare:end');
+            const prepareElapsedMs = Math.max(0, safePerformance.now() - prepareStartedAt);
 
             safePerformance.mark('display:_onStateChanged:setContent:start');
+            const setContentStartedAt = safePerformance.now();
             // Set content
             switch (type) {
                 case 'terms':
@@ -852,17 +929,47 @@ export class Display extends EventDispatcher {
                     await this._setContentTermsOrKanji(type, urlSearchParams, token);
                     break;
                 case 'unloaded':
+                    this._pendingResolvedOptions = null;
                     this._contentType = type;
                     this._setContentExtensionUnloaded();
                     break;
                 default:
+                    this._pendingResolvedOptions = null;
                     this._contentType = 'clear';
                     this._clearContent();
                     break;
             }
             safePerformance.mark('display:_onStateChanged:setContent:end');
             safePerformance.measure('display:_onStateChanged:setContent', 'display:_onStateChanged:setContent:start', 'display:_onStateChanged:setContent:end');
+            publishDevTimingSnapshot(
+                POPUP_DISPLAY_DIAGNOSTICS_DATASET_KEY,
+                {
+                    ...pendingPopupSetContentDiagnostics,
+                    ...(this._latestSetContentTimingDiagnostics ?? {}),
+                    pageType: this._pageType,
+                    contentType: this._contentType,
+                    clearElapsedMs,
+                    prepareElapsedMs,
+                    setContentElapsedMs: Math.max(0, safePerformance.now() - setContentStartedAt),
+                    totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                    status: 'success',
+                },
+                POPUP_DISPLAY_DIAGNOSTICS_EVENT,
+            );
         } catch (e) {
+            publishDevTimingSnapshot(
+                POPUP_DISPLAY_DIAGNOSTICS_DATASET_KEY,
+                {
+                    ...pendingPopupSetContentDiagnostics,
+                    ...(this._latestSetContentTimingDiagnostics ?? {}),
+                    pageType: this._pageType,
+                    contentType: this._contentType,
+                    totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                    status: 'error',
+                    errorMessage: e instanceof Error ? e.message : String(e),
+                },
+                POPUP_DISPLAY_DIAGNOSTICS_EVENT,
+            );
             this.onError(toError(e));
         }
         safePerformance.mark('display:_onStateChanged:end');
@@ -1378,12 +1485,20 @@ export class Display extends EventDispatcher {
      * @param {import('core').TokenObject} token
      */
     async _setContentTermsOrKanji(type, urlSearchParams, token) {
+        const totalStartedAt = safePerformance.now();
         const lookup = (urlSearchParams.get('lookup') !== 'false');
         const wildcardsEnabled = (urlSearchParams.get('wildcards') !== 'off');
         const hasEnabledDictionaries = this._options ? this._options.dictionaries.some(({enabled}) => enabled) : false;
+        /** @type {Record<string, unknown>} */
+        const timingDiagnostics = {
+            lookup,
+            wildcardsEnabled,
+            hasEnabledDictionaries,
+        };
 
         // Set query
         safePerformance.mark('display:setQuery:start');
+        const setQueryStartedAt = safePerformance.now();
         let query = urlSearchParams.get('query');
         if (query === null) { query = ''; }
         let queryFull = urlSearchParams.get('full');
@@ -1398,6 +1513,9 @@ export class Display extends EventDispatcher {
         this._setQuery(query, queryFull, queryOffset);
         safePerformance.mark('display:setQuery:end');
         safePerformance.measure('display:setQuery', 'display:setQuery:start', 'display:setQuery:end');
+        timingDiagnostics.queryLength = query.length;
+        timingDiagnostics.fullQueryLength = queryFull.length;
+        timingDiagnostics.setQueryElapsedMs = Math.max(0, safePerformance.now() - setQueryStartedAt);
 
         let {state, content} = this._history;
         let changeHistory = false;
@@ -1419,20 +1537,48 @@ export class Display extends EventDispatcher {
         }
 
         let {dictionaryEntries} = content;
+        const dictionaryEntriesJson = (typeof content.dictionaryEntriesJson === 'string' ? content.dictionaryEntriesJson : '');
+        let parseProvidedDictionaryEntriesElapsedMs = 0;
+        let parsedProvidedDictionaryEntries = false;
+        if (!Array.isArray(dictionaryEntries) && dictionaryEntriesJson.length > 0) {
+            const parseProvidedDictionaryEntriesStartedAt = safePerformance.now();
+            const parsedDictionaryEntries = parseJson(dictionaryEntriesJson);
+            parseProvidedDictionaryEntriesElapsedMs = Math.max(0, safePerformance.now() - parseProvidedDictionaryEntriesStartedAt);
+            if (!Array.isArray(parsedDictionaryEntries)) {
+                throw new Error('Invalid serialized dictionary entries payload');
+            }
+            dictionaryEntries = /** @type {import('dictionary').DictionaryEntry[]} */ (parsedDictionaryEntries);
+            parsedProvidedDictionaryEntries = true;
+        }
+        const providedDictionaryEntryCount = Array.isArray(dictionaryEntries) ? dictionaryEntries.length : 0;
+        timingDiagnostics.providedDictionaryEntryCount = providedDictionaryEntryCount;
+        timingDiagnostics.usedProvidedDictionaryEntries = Array.isArray(dictionaryEntries);
+        timingDiagnostics.providedSerializedDictionaryEntries = (dictionaryEntriesJson.length > 0);
+        timingDiagnostics.providedDictionaryEntriesJsonLength = dictionaryEntriesJson.length;
+        timingDiagnostics.parseProvidedDictionaryEntriesElapsedMs = parseProvidedDictionaryEntriesElapsedMs;
+        timingDiagnostics.parsedProvidedDictionaryEntries = parsedProvidedDictionaryEntries;
         if (lookup && Array.isArray(dictionaryEntries)) {
-            dictionaryEntries = void 0;
             content.dictionaryEntries = void 0;
+            content.dictionaryEntriesJson = void 0;
             changeHistory = true;
         }
         if (!Array.isArray(dictionaryEntries)) {
             safePerformance.mark('display:findDictionaryEntries:start');
+            const findDictionaryEntriesStartedAt = safePerformance.now();
             dictionaryEntries = hasEnabledDictionaries && lookup && query.length > 0 ? await this._findDictionaryEntries(type === 'kanji', query, primaryReading, wildcardsEnabled, optionsContext) : [];
             safePerformance.mark('display:findDictionaryEntries:end');
             safePerformance.measure('display:findDictionaryEntries', 'display:findDictionaryEntries:start', 'display:findDictionaryEntries:end');
+            timingDiagnostics.performedDictionaryLookup = true;
+            timingDiagnostics.findDictionaryEntriesElapsedMs = Math.max(0, safePerformance.now() - findDictionaryEntriesStartedAt);
             if (this._setContentToken !== token) { return; }
             content.dictionaryEntries = void 0;
+            content.dictionaryEntriesJson = void 0;
             changeHistory = true;
+        } else {
+            timingDiagnostics.performedDictionaryLookup = false;
+            timingDiagnostics.findDictionaryEntriesElapsedMs = 0;
         }
+        timingDiagnostics.dictionaryEntryCount = dictionaryEntries.length;
 
         let contentOriginValid = false;
         const {contentOrigin} = content;
@@ -1449,12 +1595,20 @@ export class Display extends EventDispatcher {
             changeHistory = true;
         }
 
-        await this._setOptionsContextIfDifferent(optionsContext);
+        const resolvedOptions = this._pendingResolvedOptions;
+        this._pendingResolvedOptions = null;
+        const setOptionsContextStartedAt = safePerformance.now();
+        await this._setOptionsContextIfDifferent(optionsContext, resolvedOptions);
+        timingDiagnostics.setOptionsContextElapsedMs = Math.max(0, safePerformance.now() - setOptionsContextStartedAt);
         if (this._setContentToken !== token) { return; }
 
         if (this._options === null) {
+            const updateOptionsStartedAt = safePerformance.now();
             await this.updateOptions();
+            timingDiagnostics.updateOptionsElapsedMs = Math.max(0, safePerformance.now() - updateOptionsStartedAt);
             if (this._setContentToken !== token) { return; }
+        } else {
+            timingDiagnostics.updateOptionsElapsedMs = 0;
         }
 
         if (changeHistory) {
@@ -1475,49 +1629,72 @@ export class Display extends EventDispatcher {
         container.textContent = '';
 
         safePerformance.mark('display:contentUpdate:start');
+        const contentUpdateStartedAt = safePerformance.now();
+        const shouldYieldBetweenEntries = (this._pageType !== 'popup');
+        const renderYieldIntervalEntries = 8;
+        const renderYieldIntervalMs = 12;
+        let yieldCount = 0;
+        let yieldElapsedMs = 0;
+        let createDictionaryEntryNodesElapsedMs = 0;
+        let createDictionaryEntryGeneratorElapsedMs = 0;
+        let createDictionaryEntryBookkeepingElapsedMs = 0;
+        let addDictionaryEntryNodesElapsedMs = 0;
+        let entriesSinceYield = 0;
+        let lastYieldAt = safePerformance.now();
+        const fragment = document.createDocumentFragment();
         this._triggerContentUpdateStart();
 
         let i = 0;
         for (const dictionaryEntry of dictionaryEntries) {
-            safePerformance.mark('display:createEntry:start');
-
-            if (i > 0) {
-                await promiseTimeout(1);
+            if (
+                shouldYieldBetweenEntries &&
+                i > 0 &&
+                (
+                    entriesSinceYield >= renderYieldIntervalEntries ||
+                    (safePerformance.now() - lastYieldAt) >= renderYieldIntervalMs
+                )
+            ) {
+                const yieldStartedAt = safePerformance.now();
+                await promiseTimeout(0);
+                yieldElapsedMs += Math.max(0, safePerformance.now() - yieldStartedAt);
+                ++yieldCount;
+                entriesSinceYield = 0;
+                lastYieldAt = safePerformance.now();
                 if (this._setContentToken !== token) { return; }
             }
 
-            safePerformance.mark('display:createEntryReal:start');
-
+            const createEntryStartedAt = safePerformance.now();
+            const createEntryGeneratorStartedAt = safePerformance.now();
             const entry = (
                 dictionaryEntry.type === 'term' ?
                 this._displayGenerator.createTermEntry(dictionaryEntry, this._dictionaryInfo) :
                 this._displayGenerator.createKanjiEntry(dictionaryEntry, this._dictionaryInfo)
             );
+            createDictionaryEntryGeneratorElapsedMs += Math.max(0, safePerformance.now() - createEntryGeneratorStartedAt);
+            const createEntryBookkeepingStartedAt = safePerformance.now();
             entry.dataset.index = `${i}`;
             this._dictionaryEntryNodes.push(entry);
             this._addEntryEventListeners(entry);
             this._triggerContentUpdateEntry(dictionaryEntry, entry, i);
             if (this._setContentToken !== token) { return; }
-            container.appendChild(entry);
-
-            if (focusEntry === i) {
-                this._focusEntry(i, 0, false);
-            }
-
+            fragment.appendChild(entry);
             this._elementOverflowController.addElements(entry);
-
-            safePerformance.mark('display:createEntryReal:end');
-            safePerformance.measure('display:createEntryReal', 'display:createEntryReal:start', 'display:createEntryReal:end');
-
-            safePerformance.mark('display:createEntry:end');
-            safePerformance.measure('display:createEntry', 'display:createEntry:start', 'display:createEntry:end');
+            createDictionaryEntryBookkeepingElapsedMs += Math.max(0, safePerformance.now() - createEntryBookkeepingStartedAt);
+            createDictionaryEntryNodesElapsedMs += Math.max(0, safePerformance.now() - createEntryStartedAt);
 
             if (i === 0) {
                 void this._contentManager.executeMediaRequests(); // prioritize loading media for first entry since it is visible
             }
+            ++entriesSinceYield;
             ++i;
         }
         if (this._setContentToken !== token) { return; }
+        const addDictionaryEntryNodesStartedAt = safePerformance.now();
+        container.appendChild(fragment);
+        addDictionaryEntryNodesElapsedMs = Math.max(0, safePerformance.now() - addDictionaryEntryNodesStartedAt);
+        if (focusEntry >= 0 && focusEntry < this._dictionaryEntryNodes.length) {
+            this._focusEntry(focusEntry, 0, false);
+        }
         void this._contentManager.executeMediaRequests();
 
         if (typeof scrollX === 'number' || typeof scrollY === 'number') {
@@ -1531,6 +1708,17 @@ export class Display extends EventDispatcher {
         this._triggerContentUpdateComplete();
         safePerformance.mark('display:contentUpdate:end');
         safePerformance.measure('display:contentUpdate', 'display:contentUpdate:start', 'display:contentUpdate:end');
+        timingDiagnostics.renderedDictionaryEntryCount = i;
+        timingDiagnostics.renderYieldEnabled = shouldYieldBetweenEntries;
+        timingDiagnostics.renderYieldCount = yieldCount;
+        timingDiagnostics.renderYieldElapsedMs = yieldElapsedMs;
+        timingDiagnostics.createDictionaryEntryNodesElapsedMs = createDictionaryEntryNodesElapsedMs;
+        timingDiagnostics.createDictionaryEntryGeneratorElapsedMs = createDictionaryEntryGeneratorElapsedMs;
+        timingDiagnostics.createDictionaryEntryBookkeepingElapsedMs = createDictionaryEntryBookkeepingElapsedMs;
+        timingDiagnostics.addDictionaryEntryNodesElapsedMs = addDictionaryEntryNodesElapsedMs;
+        timingDiagnostics.contentUpdateElapsedMs = Math.max(0, safePerformance.now() - contentUpdateStartedAt);
+        timingDiagnostics.totalElapsedMs = Math.max(0, safePerformance.now() - totalStartedAt);
+        this._latestSetContentTimingDiagnostics = timingDiagnostics;
     }
 
     /** */
@@ -1930,10 +2118,16 @@ export class Display extends EventDispatcher {
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {?import('settings').ProfileOptions} [resolvedOptions=null]
      */
-    async _setOptionsContextIfDifferent(optionsContext) {
-        if (deepEqual(this._optionsContext, optionsContext)) { return; }
-        await this.setOptionsContext(optionsContext);
+    async _setOptionsContextIfDifferent(optionsContext, resolvedOptions = null) {
+        if (deepEqual(this._optionsContext, optionsContext)) {
+            if (resolvedOptions !== null && this._options === null) {
+                this._applyOptions(resolvedOptions);
+            }
+            return;
+        }
+        await this.setOptionsContext(optionsContext, resolvedOptions);
     }
 
     /**
@@ -2176,7 +2370,7 @@ export class Display extends EventDispatcher {
     /**
      * @param {import('text-scanner').EventArgument<'searchSuccess'>} details
      */
-    _onContentTextScannerSearchSuccess({type, dictionaryEntries, sentence, textSource, optionsContext}) {
+    _onContentTextScannerSearchSuccess({type, dictionaryEntries, dictionaryEntriesJson, sentence, textSource, optionsContext}) {
         const query = textSource.text();
         const url = window.location.href;
         const documentTitle = document.title;
@@ -2188,6 +2382,7 @@ export class Display extends EventDispatcher {
                 type,
                 query,
                 wildcards: 'off',
+                lookup: 'false',
             },
             state: {
                 focusEntry: 0,
@@ -2198,7 +2393,15 @@ export class Display extends EventDispatcher {
                 pageTheme: 'light',
             },
             content: {
-                dictionaryEntries: dictionaryEntries !== null ? dictionaryEntries : void 0,
+                dictionaryEntries: (
+                    dictionaryEntries !== null &&
+                    (
+                        dictionaryEntries.length > 0 ||
+                        typeof dictionaryEntriesJson !== 'string' ||
+                        dictionaryEntriesJson.length === 0
+                    )
+                ) ? dictionaryEntries : void 0,
+                dictionaryEntriesJson: typeof dictionaryEntriesJson === 'string' ? dictionaryEntriesJson : void 0,
                 contentOrigin: this.getContentOrigin(),
             },
         };

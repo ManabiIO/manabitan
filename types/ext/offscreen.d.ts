@@ -58,7 +58,9 @@ type ApiSurface = {
         return: DictionaryImporter.Summary | null;
     };
     getMaxHeadwordLengthOffscreen: {
-        params: void;
+        params: {
+            dictionaryNames: string[] | null;
+        };
         return: number;
     };
     deleteDictionaryOffscreen: {
@@ -192,6 +194,8 @@ export type FindTermsOptionsOffscreen = Omit<Translation.FindTermsOptions, 'enab
     ][];
     excludeDictionaryDefinitions: string[] | null;
     textReplacements: (FindTermsTextReplacementOffscreen[] | null)[];
+    maxResults?: number;
+    includeTimingDiagnostics?: boolean;
 };
 
 export type FindTermsTextReplacementOffscreen = Omit<Translation.FindTermsTextReplacement, 'pattern'> & {

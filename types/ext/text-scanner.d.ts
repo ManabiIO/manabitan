@@ -36,6 +36,7 @@ export type Options = {
     selectText?: boolean;
     delay?: number;
     scanLength?: number;
+    hoverScanLengthDiagnostics?: HoverScanLengthDiagnostics | null;
     layoutAwareScan?: boolean;
     preventMiddleMouseOnPage?: boolean;
     preventMiddleMouseOnTextHover?: boolean;
@@ -46,6 +47,12 @@ export type Options = {
     scanWithoutMousemove?: boolean;
     scanResolution?: string;
     pageType?: PageType;
+};
+
+export type HoverScanLengthDiagnostics = {
+    configuredScanLength: number;
+    automaticScanLength: number | null;
+    effectiveScanLength: number;
 };
 
 export type InputOptionsOuter = {
@@ -124,6 +131,8 @@ export type Events = {
     searchSuccess: {
         type: 'terms' | 'kanji';
         dictionaryEntries: Dictionary.DictionaryEntry[];
+        dictionaryEntriesJson?: string;
+        dictionaryEntryCount?: number;
         sentence: Display.HistoryStateSentence;
         inputInfo: InputInfo;
         textSource: TextSource.TextSource;
@@ -176,13 +185,19 @@ export type SelectionRestoreInfo = {
 export type TermSearchResults = {
     type: 'terms';
     dictionaryEntries: Dictionary.TermDictionaryEntry[];
+    dictionaryEntriesJson?: string;
+    dictionaryEntryCount?: number;
     sentence: Sentence;
+    timingDiagnostics?: Record<string, unknown>;
 };
 
 export type KanjiSearchResults = {
     type: 'kanji';
     dictionaryEntries: Dictionary.KanjiDictionaryEntry[];
+    dictionaryEntriesJson?: string;
+    dictionaryEntryCount?: number;
     sentence: Sentence;
+    timingDiagnostics?: Record<string, unknown>;
 };
 
 export type SearchResults = TermSearchResults | KanjiSearchResults;
