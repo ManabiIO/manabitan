@@ -80,4 +80,5 @@ export type TermReadingList = TermReadingItem[];
 export type FindTermsResult = {
     dictionaryEntries: Dictionary.TermDictionaryEntry[];
     originalTextLength: number;
+    timingDiagnostics?: Record<string, unknown>;
 };

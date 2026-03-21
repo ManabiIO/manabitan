@@ -59,6 +59,7 @@ const ENTRY_CONTENT_DICT_NAME_FLAG_READING_EQUALS_EXPRESSION = 0x8000;
 const ENTRY_CONTENT_DICT_NAME_FLAG_READING_REVERSE_EQUALS_EXPRESSION_REVERSE = 0x40000000;
 const ENTRY_CONTENT_DICT_NAME_FLAGS_MASK = 0x8000;
 const ENTRY_CONTENT_DICT_NAME_VALUE_MASK = 0x7fff;
+const DIRECT_TERM_PREFIX_BUCKET_MAX_LENGTH = 2;
 
 /**
  * @typedef {object} TermRecord
@@ -85,6 +86,38 @@ const ENTRY_CONTENT_DICT_NAME_VALUE_MASK = 0x7fff;
  * @property {Uint8Array[]} pendingWriteChunks
  */
 
+/**
+ * @typedef {object} DictionaryTermIndex
+ * @property {Map<string, number[]>} expression
+ * @property {Map<string, number[]>} reading
+ * @property {Map<string, number[]>} expressionReverse
+ * @property {Map<string, number[]>} readingReverse
+ * @property {Map<string, string[]>} expressionPrefixes
+ * @property {Map<string, string[]>} readingPrefixes
+ * @property {Map<string, string[]>} expressionReversePrefixes
+ * @property {Map<string, string[]>} readingReversePrefixes
+ * @property {Map<string, number[]>} pair
+ * @property {Map<number, number[]>} sequence
+ */
+
+/**
+ * @param {string} value
+ * @returns {string[]}
+ */
+function getTermPrefixBucketKeys(value) {
+    /** @type {string[]} */
+    const result = [];
+    let prefix = '';
+    for (const char of value) {
+        prefix += char;
+        result.push(prefix);
+        if (result.length >= DIRECT_TERM_PREFIX_BUCKET_MAX_LENGTH) {
+            break;
+        }
+    }
+    return result;
+}
+
 export class TermRecordOpfsStore {
     constructor() {
         /** @type {FileSystemDirectoryHandle|null} */
@@ -101,7 +134,7 @@ export class TermRecordOpfsStore {
         this._recordsById = new Map();
         /** @type {number} */
         this._nextId = 1;
-        /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
+        /** @type {Map<string, DictionaryTermIndex>} */
         this._indexByDictionary = new Map();
         /** @type {boolean} */
         this._deferIndexBuild = false;
@@ -697,7 +730,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {string} dictionaryName
-     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}}
+     * @returns {DictionaryTermIndex}
      */
     getDictionaryIndex(dictionaryName) {
         this._ensureIndexesReady();
@@ -718,6 +751,10 @@ export class TermRecordOpfsStore {
             reading: new Map(),
             expressionReverse: new Map(),
             readingReverse: new Map(),
+            expressionPrefixes: new Map(),
+            readingPrefixes: new Map(),
+            expressionReversePrefixes: new Map(),
+            readingReversePrefixes: new Map(),
             pair: new Map(),
             sequence: new Map(),
         };
@@ -1766,6 +1803,10 @@ export class TermRecordOpfsStore {
                 reading: new Map(),
                 expressionReverse: new Map(),
                 readingReverse: new Map(),
+                expressionPrefixes: new Map(),
+                readingPrefixes: new Map(),
+                expressionReversePrefixes: new Map(),
+                readingReversePrefixes: new Map(),
                 pair: new Map(),
                 sequence: new Map(),
             };
@@ -1775,13 +1816,14 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} index
+     * @param {DictionaryTermIndex} index
      * @param {TermRecord} record
      */
     _addRecordToDictionaryIndex(index, record) {
         const expressionList = index.expression.get(record.expression);
         if (typeof expressionList === 'undefined') {
             index.expression.set(record.expression, [record.id]);
+            this._addValueToPrefixBuckets(index.expressionPrefixes, record.expression);
         } else {
             expressionList.push(record.id);
         }
@@ -1789,6 +1831,7 @@ export class TermRecordOpfsStore {
         const readingList = index.reading.get(record.reading);
         if (typeof readingList === 'undefined') {
             index.reading.set(record.reading, [record.id]);
+            this._addValueToPrefixBuckets(index.readingPrefixes, record.reading);
         } else {
             readingList.push(record.id);
         }
@@ -1796,6 +1839,7 @@ export class TermRecordOpfsStore {
             const expressionReverseList = index.expressionReverse.get(record.expressionReverse);
             if (typeof expressionReverseList === 'undefined') {
                 index.expressionReverse.set(record.expressionReverse, [record.id]);
+                this._addValueToPrefixBuckets(index.expressionReversePrefixes, record.expressionReverse);
             } else {
                 expressionReverseList.push(record.id);
             }
@@ -1804,6 +1848,7 @@ export class TermRecordOpfsStore {
             const readingReverseList = index.readingReverse.get(record.readingReverse);
             if (typeof readingReverseList === 'undefined') {
                 index.readingReverse.set(record.readingReverse, [record.id]);
+                this._addValueToPrefixBuckets(index.readingReversePrefixes, record.readingReverse);
             } else {
                 readingReverseList.push(record.id);
             }
@@ -1823,6 +1868,21 @@ export class TermRecordOpfsStore {
                 index.sequence.set(record.sequence, [record.id]);
             } else {
                 sequenceList.push(record.id);
+            }
+        }
+    }
+
+    /**
+     * @param {Map<string, string[]>} prefixes
+     * @param {string} value
+     */
+    _addValueToPrefixBuckets(prefixes, value) {
+        for (const prefix of getTermPrefixBucketKeys(value)) {
+            const bucket = prefixes.get(prefix);
+            if (typeof bucket === 'undefined') {
+                prefixes.set(prefix, [value]);
+            } else {
+                bucket.push(value);
             }
         }
     }

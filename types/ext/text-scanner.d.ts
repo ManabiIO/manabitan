@@ -124,6 +124,8 @@ export type Events = {
     searchSuccess: {
         type: 'terms' | 'kanji';
         dictionaryEntries: Dictionary.DictionaryEntry[];
+        dictionaryEntriesJson?: string;
+        dictionaryEntryCount?: number;
         sentence: Display.HistoryStateSentence;
         inputInfo: InputInfo;
         textSource: TextSource.TextSource;
@@ -176,13 +178,19 @@ export type SelectionRestoreInfo = {
 export type TermSearchResults = {
     type: 'terms';
     dictionaryEntries: Dictionary.TermDictionaryEntry[];
+    dictionaryEntriesJson?: string;
+    dictionaryEntryCount?: number;
     sentence: Sentence;
+    timingDiagnostics?: Record<string, unknown>;
 };
 
 export type KanjiSearchResults = {
     type: 'kanji';
     dictionaryEntries: Dictionary.KanjiDictionaryEntry[];
+    dictionaryEntriesJson?: string;
+    dictionaryEntryCount?: number;
     sentence: Sentence;
+    timingDiagnostics?: Record<string, unknown>;
 };
 
 export type SearchResults = TermSearchResults | KanjiSearchResults;

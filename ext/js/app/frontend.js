@@ -17,6 +17,7 @@
  */
 
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
+import {publishDevTimingSnapshot} from '../core/dev-timing-diagnostics.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {log} from '../core/log.js';
 import {promiseAnimationFrame} from '../core/promise-animation-frame.js';
@@ -27,6 +28,9 @@ import {TextSourceElement} from '../dom/text-source-element.js';
 import {TextSourceGenerator} from '../dom/text-source-generator.js';
 import {TextSourceRange} from '../dom/text-source-range.js';
 import {TextScanner} from '../language/text-scanner.js';
+
+const HOVER_FRONTEND_DIAGNOSTICS_DATASET_KEY = 'manabitanDevHoverFrontendDiagnostics';
+const HOVER_FRONTEND_DIAGNOSTICS_EVENT = 'hover-frontend-phase-summary';
 
 /**
  * This is the main class responsible for scanning and handling webpage content.
@@ -388,14 +392,14 @@ export class Frontend {
     /**
      * @param {import('text-scanner').EventArgument<'searchSuccess'>} details
      */
-    _onSearchSuccess({type, dictionaryEntries, sentence, inputInfo: {eventType, detail: inputInfoDetail}, textSource, optionsContext, detail, pageTheme}) {
+    _onSearchSuccess({type, dictionaryEntries, dictionaryEntriesJson, dictionaryEntryCount, sentence, inputInfo: {eventType, detail: inputInfoDetail}, textSource, optionsContext, detail, pageTheme}) {
         this._stopClearSelectionDelayed();
         let focus = (eventType === 'mouseMove');
         if (typeof inputInfoDetail === 'object' && inputInfoDetail !== null) {
             const focus2 = inputInfoDetail.focus;
             if (typeof focus2 === 'boolean') { focus = focus2; }
         }
-        this._showContent(textSource, focus, dictionaryEntries, type, sentence, detail !== null ? detail.documentTitle : null, optionsContext, pageTheme);
+        this._showContent(textSource, focus, dictionaryEntries, dictionaryEntriesJson, dictionaryEntryCount, type, sentence, detail !== null ? detail.documentTitle : null, optionsContext, pageTheme);
     }
 
     /** */
@@ -767,13 +771,16 @@ export class Frontend {
      * @param {import('text-source').TextSource} textSource
      * @param {boolean} focus
      * @param {?import('dictionary').DictionaryEntry[]} dictionaryEntries
+     * @param {string|undefined} dictionaryEntriesJson
+     * @param {number|undefined} dictionaryEntryCount
      * @param {import('display').PageType} type
      * @param {?import('display').HistoryStateSentence} sentence
      * @param {?string} documentTitle
      * @param {import('settings').OptionsContext} optionsContext
      * @param {'dark' | 'light'} pageTheme
      */
-    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme) {
+    _showContent(textSource, focus, dictionaryEntries, dictionaryEntriesJson, dictionaryEntryCount, type, sentence, documentTitle, optionsContext, pageTheme) {
+        const buildDisplayDetailsStartedAt = safePerformance.now();
         const query = textSource.text();
         const {url} = optionsContext;
         /** @type {import('display').HistoryState} */
@@ -790,8 +797,14 @@ export class Frontend {
         const detailsContent = {
             contentOrigin: {tabId, frameId},
         };
-        if (dictionaryEntries !== null) {
+        if (dictionaryEntries !== null && (
+            dictionaryEntries.length > 0 ||
+            !(typeof dictionaryEntriesJson === 'string' && dictionaryEntriesJson.length > 0)
+        )) {
             detailsContent.dictionaryEntries = dictionaryEntries;
+        }
+        if (typeof dictionaryEntriesJson === 'string' && dictionaryEntriesJson.length > 0) {
+            detailsContent.dictionaryEntriesJson = dictionaryEntriesJson;
         }
         /** @type {import('display').ContentDetails} */
         const details = {
@@ -801,6 +814,7 @@ export class Frontend {
                 type,
                 query,
                 wildcards: 'off',
+                lookup: 'false',
             },
             state: detailsState,
             content: detailsContent,
@@ -809,20 +823,39 @@ export class Frontend {
             details.params.full = textSource.fullContent;
             details.params['full-visible'] = 'true';
         }
-        void this._showPopupContent(textSource, optionsContext, details);
+        void this._showPopupContent(textSource, optionsContext, details, {
+            focus,
+            type,
+            queryLength: query.length,
+            fullQueryLength: textSource instanceof TextSourceElement ? textSource.fullContent.length : query.length,
+            dictionaryEntryCount: (
+                typeof dictionaryEntryCount === 'number' &&
+                Number.isFinite(dictionaryEntryCount) &&
+                dictionaryEntryCount >= 0
+            ) ?
+                dictionaryEntryCount :
+                (Array.isArray(dictionaryEntries) ? dictionaryEntries.length : 0),
+            deferredSerializedDictionaryEntries: (typeof dictionaryEntriesJson === 'string' && dictionaryEntriesJson.length > 0),
+            buildDisplayDetailsElapsedMs: Math.max(0, safePerformance.now() - buildDisplayDetailsStartedAt),
+        });
     }
 
     /**
      * @param {import('text-source').TextSource} textSource
      * @param {?import('settings').OptionsContext} optionsContext
      * @param {?import('display').ContentDetails} details
+     * @param {Record<string, unknown>} [diagnosticsContext]
      * @returns {Promise<void>}
      */
-    _showPopupContent(textSource, optionsContext, details) {
+    _showPopupContent(textSource, optionsContext, details, diagnosticsContext = {}) {
+        const totalStartedAt = safePerformance.now();
+        const sourceRectsStartedAt = safePerformance.now();
         const sourceRects = [];
         for (const {left, top, right, bottom} of textSource.getRects()) {
             sourceRects.push({left, top, right, bottom});
         }
+        const sourceRectsElapsedMs = Math.max(0, safePerformance.now() - sourceRectsStartedAt);
+        const popupShowStartedAt = safePerformance.now();
         this._lastShowPromise = (
             this._popup !== null ?
             this._popup.showContent(
@@ -834,6 +867,33 @@ export class Frontend {
                 details,
             ) :
             Promise.resolve()
+        );
+        const popupShowDispatchElapsedMs = Math.max(0, safePerformance.now() - popupShowStartedAt);
+        /** @type {(status: string, errorMessage?: string|null) => void} */
+        const publishDiagnostics = (status, errorMessage = null) => {
+            publishDevTimingSnapshot(
+                HOVER_FRONTEND_DIAGNOSTICS_DATASET_KEY,
+                {
+                    ...diagnosticsContext,
+                    status,
+                    errorMessage,
+                    popupPresent: (this._popup !== null),
+                    sourceRectCount: sourceRects.length,
+                    sourceRectsElapsedMs,
+                    popupShowDispatchElapsedMs,
+                    popupShowCompletedElapsedMs: Math.max(0, safePerformance.now() - popupShowStartedAt),
+                    totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                },
+                HOVER_FRONTEND_DIAGNOSTICS_EVENT,
+            );
+        };
+        this._lastShowPromise.then(
+            () => {
+                publishDiagnostics('success');
+            },
+            (error) => {
+                publishDiagnostics('error', error instanceof Error ? error.message : String(error));
+            },
         );
         this._lastShowPromise.catch((error) => {
             if (this._application.webExtension.unloaded) { return; }

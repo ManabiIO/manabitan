@@ -18,6 +18,7 @@
 
 import {ExtensionError} from '../core/extension-error.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
+import {safePerformance} from '../core/safe-performance.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
 
 /** @type {WeakMap<object, [string, import('translation').FindKanjiDictionary][]>} */
@@ -195,6 +196,7 @@ export class OffscreenProxy {
             void this.sendMessagePromise({action: 'createAndRegisterPortOffscreen'});
         }
     }
+
 }
 
 export class DictionaryDatabaseProxy {
@@ -204,6 +206,15 @@ export class DictionaryDatabaseProxy {
     constructor(offscreen) {
         /** @type {OffscreenProxy} */
         this._offscreen = offscreen;
+        /** @type {boolean} */
+        this._prepared = false;
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    isPrepared() {
+        return this._prepared;
     }
 
     /**
@@ -211,6 +222,7 @@ export class DictionaryDatabaseProxy {
      */
     async prepare() {
         await this._offscreen.sendMessagePromise({action: 'databasePrepareOffscreen'});
+        this._prepared = true;
     }
 
     /**
@@ -218,6 +230,7 @@ export class DictionaryDatabaseProxy {
      */
     async refreshConnection() {
         await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
+        this._prepared = true;
     }
 
     /**
@@ -226,6 +239,7 @@ export class DictionaryDatabaseProxy {
      */
     async setSuspended(suspended) {
         await this._offscreen.sendMessagePromise({action: 'databaseSetSuspendedOffscreen', params: {suspended}});
+        this._prepared = !suspended;
     }
 
     /**
@@ -353,21 +367,59 @@ export class TranslatorProxy {
      * @param {import('translator').FindTermsMode} mode
      * @param {string} text
      * @param {import('translation').FindTermsOptions} options
+     * @param {number} [maxResults]
      * @returns {Promise<import('translator').FindTermsResult>}
      */
-    async findTerms(mode, text, options) {
+    async findTerms(mode, text, options, maxResults, includeTimingDiagnostics = false) {
+        const totalStartedAt = safePerformance.now();
         const {enabledDictionaryMap, excludeDictionaryDefinitions, textReplacements} = options;
+        const serializeEnabledDictionaryMapStartedAt = safePerformance.now();
         const enabledDictionaryMapList = this._getTermEnabledDictionaryMapList(enabledDictionaryMap);
+        const serializeEnabledDictionaryMapElapsedMs = Math.max(0, safePerformance.now() - serializeEnabledDictionaryMapStartedAt);
+        const serializeExcludeDictionaryDefinitionsStartedAt = safePerformance.now();
         const excludeDictionaryDefinitionsList = this._getExcludeDictionaryDefinitionsList(excludeDictionaryDefinitions);
+        const serializeExcludeDictionaryDefinitionsElapsedMs = Math.max(0, safePerformance.now() - serializeExcludeDictionaryDefinitionsStartedAt);
+        const serializeTextReplacementsStartedAt = safePerformance.now();
         const textReplacementsSerialized = this._getTextReplacementsSerialized(textReplacements);
+        const serializeTextReplacementsElapsedMs = Math.max(0, safePerformance.now() - serializeTextReplacementsStartedAt);
         /** @type {import('offscreen').FindTermsOptionsOffscreen} */
         const modifiedOptions = {
             ...options,
             enabledDictionaryMap: enabledDictionaryMapList,
             excludeDictionaryDefinitions: excludeDictionaryDefinitionsList,
             textReplacements: textReplacementsSerialized,
+            maxResults: typeof maxResults === 'number' ? maxResults : void 0,
+            includeTimingDiagnostics,
         };
-        return this._offscreen.sendMessagePromise({action: 'findTermsOffscreen', params: {mode, text, options: modifiedOptions}});
+        const sendMessageStartedAt = safePerformance.now();
+        const result = await this._offscreen.sendMessagePromise({action: 'findTermsOffscreen', params: {mode, text, options: modifiedOptions}});
+        const sendMessageElapsedMs = Math.max(0, safePerformance.now() - sendMessageStartedAt);
+        if (!includeTimingDiagnostics) {
+            return result;
+        }
+        const timingDiagnostics = (
+            isObjectNotArray(result) &&
+            isObjectNotArray(Reflect.get(result, 'timingDiagnostics'))
+        ) ?
+            /** @type {Record<string, unknown>} */ (Reflect.get(result, 'timingDiagnostics')) :
+            {};
+        return {
+            ...result,
+            timingDiagnostics: {
+                ...timingDiagnostics,
+                translatorProxy: {
+                    serializeEnabledDictionaryMapElapsedMs,
+                    serializeExcludeDictionaryDefinitionsElapsedMs,
+                    serializeTextReplacementsElapsedMs,
+                    sendMessageElapsedMs,
+                    totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                    transport: 'runtime-message',
+                    enabledDictionaryCount: enabledDictionaryMap.size,
+                    excludeDictionaryDefinitionCount: excludeDictionaryDefinitions?.size ?? 0,
+                    textReplacementGroupCount: textReplacements.length,
+                },
+            },
+        };
     }
 
     /**

@@ -192,6 +192,8 @@ export type FindTermsOptionsOffscreen = Omit<Translation.FindTermsOptions, 'enab
     ][];
     excludeDictionaryDefinitions: string[] | null;
     textReplacements: (FindTermsTextReplacementOffscreen[] | null)[];
+    maxResults?: number;
+    includeTimingDiagnostics?: boolean;
 };
 
 export type FindTermsTextReplacementOffscreen = Omit<Translation.FindTermsTextReplacement, 'pattern'> & {

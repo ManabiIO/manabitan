@@ -117,6 +117,8 @@ export type HistoryContent = {
     animate?: boolean;
     /** An array of dictionary entries to display as content. */
     dictionaryEntries?: Dictionary.DictionaryEntry[];
+    /** JSON-serialized dictionary entries for more efficient popup transport. */
+    dictionaryEntriesJson?: string;
     /** The identifying information for the frame the content originated from. */
     contentOrigin?: Extension.ContentOrigin;
 };

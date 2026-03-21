@@ -49,6 +49,8 @@ export type FindTermsDetails = {
     matchType?: Translation.FindTermsMatchType;
     deinflect?: boolean;
     primaryReading?: string;
+    includeTimingDiagnostics?: boolean;
+    serializeDictionaryEntries?: boolean;
 };
 
 export type ParseTextResultItem = {
@@ -144,7 +146,10 @@ type ApiSurface = {
         };
         return: {
             dictionaryEntries: Dictionary.TermDictionaryEntry[];
+            dictionaryEntriesJson?: string;
+            dictionaryEntryCount?: number;
             originalTextLength: number;
+            timingDiagnostics?: Record<string, unknown>;
         };
     };
     parseText: {
@@ -412,6 +417,10 @@ type ApiSurface = {
             type: Backend.DatabaseUpdateType;
             cause: Backend.DatabaseUpdateCause;
         };
+        return: void;
+    };
+    clearDatabaseCaches: {
+        params: void;
         return: void;
     };
     testMecab: {

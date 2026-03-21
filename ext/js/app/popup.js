@@ -17,6 +17,7 @@
  */
 
 import {FrameClient} from '../comm/frame-client.js';
+import {publishDevTimingSnapshot} from '../core/dev-timing-diagnostics.js';
 import {DynamicProperty} from '../core/dynamic-property.js';
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
@@ -27,6 +28,9 @@ import {addFullscreenChangeEventListener, computeZoomScale, convertRectZoomCoord
 import {loadStyle} from '../dom/style-util.js';
 import {checkPopupPreviewURL} from '../pages/settings/popup-preview-controller.js';
 import {ThemeController} from './theme-controller.js';
+
+const POPUP_DIAGNOSTICS_DATASET_KEY = 'manabitanDevPopupDiagnostics';
+const POPUP_DIAGNOSTICS_EVENT = 'popup-show-phase-summary';
 
 /**
  * This class is the container which hosts the display of search results.
@@ -333,19 +337,122 @@ export class Popup extends EventDispatcher {
     async showContent(details, displayDetails) {
         if (this._optionsContext === null) { throw new Error('Options not assigned'); }
 
+        const totalStartedAt = safePerformance.now();
         const {optionsContext, sourceRects, writingMode} = details;
+        const frameConnectedBeforeShow = this._frameConnected;
+        const visibleBeforeShow = this.isVisibleSync();
+        let setOptionsContextElapsedMs = 0;
         if (optionsContext !== null) {
+            const setOptionsContextStartedAt = safePerformance.now();
             await this._setOptionsContextIfDifferent(optionsContext);
+            setOptionsContextElapsedMs = Math.max(0, safePerformance.now() - setOptionsContextStartedAt);
         }
 
         // If there's already a timer running on the same popup from a previous lookup, reset it
         this.stopHideDelayed();
 
-        await this._show(sourceRects, writingMode);
+        /** @type {Record<string, unknown>} */
+        const showTimingDiagnostics = {};
+        const showStartedAt = safePerformance.now();
+        await this._show(sourceRects, writingMode, showTimingDiagnostics);
+        const showElapsedMs = Math.max(0, safePerformance.now() - showStartedAt);
+
+        let displayDetailsMessage = displayDetails;
+        let serializeDisplayDetailsElapsedMs = 0;
+        let serializedDictionaryEntries = false;
+        let serializedDictionaryEntriesLength = 0;
+        if (displayDetails !== null) {
+            const content = Reflect.get(displayDetails, 'content');
+            const dictionaryEntriesJson = (
+                typeof content === 'object' &&
+                content !== null &&
+                !Array.isArray(content) &&
+                typeof Reflect.get(content, 'dictionaryEntriesJson') === 'string'
+            ) ?
+                /** @type {string} */ (Reflect.get(content, 'dictionaryEntriesJson')) :
+                null;
+            if (dictionaryEntriesJson !== null && dictionaryEntriesJson.length > 0) {
+                serializedDictionaryEntries = true;
+                serializedDictionaryEntriesLength = dictionaryEntriesJson.length;
+                displayDetailsMessage = {
+                    ...displayDetails,
+                    content: {
+                        .../** @type {Record<string, unknown>} */ (content),
+                        dictionaryEntries: void 0,
+                        dictionaryEntriesJson,
+                    },
+                };
+            }
+            const dictionaryEntries = (
+                typeof content === 'object' &&
+                content !== null &&
+                !Array.isArray(content) &&
+                Array.isArray(Reflect.get(content, 'dictionaryEntries'))
+            ) ?
+                /** @type {import('dictionary').DictionaryEntry[]} */ (Reflect.get(content, 'dictionaryEntries')) :
+                null;
+            if (dictionaryEntries !== null && dictionaryEntriesJson === null) {
+                const serializeDisplayDetailsStartedAt = safePerformance.now();
+                try {
+                    const dictionaryEntriesJsonNew = JSON.stringify(dictionaryEntries);
+                    serializeDisplayDetailsElapsedMs = Math.max(0, safePerformance.now() - serializeDisplayDetailsStartedAt);
+                    serializedDictionaryEntries = true;
+                    serializedDictionaryEntriesLength = dictionaryEntriesJsonNew.length;
+                    displayDetailsMessage = {
+                        ...displayDetails,
+                        content: {
+                            .../** @type {Record<string, unknown>} */ (content),
+                            dictionaryEntries: void 0,
+                            dictionaryEntriesJson: dictionaryEntriesJsonNew,
+                        },
+                    };
+                } catch (_) {
+                    serializeDisplayDetailsElapsedMs = Math.max(0, safePerformance.now() - serializeDisplayDetailsStartedAt);
+                }
+            }
+        }
+
+        /** @type {(status: string, errorMessage?: string|null, displaySetContentCompletedElapsedMs?: number|null) => void} */
+        const publishDiagnostics = (status, errorMessage = null, displaySetContentCompletedElapsedMs = null) => {
+            publishDevTimingSnapshot(
+                POPUP_DIAGNOSTICS_DATASET_KEY,
+                {
+                    status,
+                    errorMessage,
+                    frameConnectedBeforeShow,
+                    visibleBeforeShow,
+                    displayDetailsProvided: (displayDetails !== null),
+                    sourceRectCount: sourceRects.length,
+                    setOptionsContextElapsedMs,
+                    showElapsedMs,
+                    serializeDisplayDetailsElapsedMs,
+                    serializedDictionaryEntries,
+                    serializedDictionaryEntriesLength,
+                    displaySetContentCompletedElapsedMs,
+                    totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                    ...showTimingDiagnostics,
+                },
+                POPUP_DIAGNOSTICS_EVENT,
+            );
+        };
 
         if (displayDetails !== null) {
             safePerformance.mark('invokeDisplaySetContent:start');
-            void this._invokeSafe('displaySetContent', {details: displayDetails});
+            const displaySetContentStartedAt = safePerformance.now();
+            void this._invokeSafe('displaySetContent', {details: /** @type {import('display').ContentDetails} */ (displayDetailsMessage)}).then(
+                () => {
+                    publishDiagnostics('success', null, Math.max(0, safePerformance.now() - displaySetContentStartedAt));
+                },
+                (error) => {
+                    publishDiagnostics(
+                        'error',
+                        error instanceof Error ? error.message : String(error),
+                        Math.max(0, safePerformance.now() - displaySetContentStartedAt),
+                    );
+                },
+            );
+        } else {
+            publishDiagnostics('success');
         }
     }
 
@@ -699,13 +806,25 @@ export class Popup extends EventDispatcher {
     /**
      * @param {import('popup').Rect[]} sourceRects
      * @param {import('document-util').NormalizedWritingMode} writingMode
+     * @param {?Record<string, unknown>} [showTimingDiagnostics]
      */
-    async _show(sourceRects, writingMode) {
+    async _show(sourceRects, writingMode, showTimingDiagnostics = null) {
+        const injectStartedAt = safePerformance.now();
         const injected = await this._inject();
+        if (showTimingDiagnostics !== null) {
+            showTimingDiagnostics.injectElapsedMs = Math.max(0, safePerformance.now() - injectStartedAt);
+            showTimingDiagnostics.injected = injected;
+        }
         if (!injected) { return; }
 
+        const positionStartedAt = safePerformance.now();
         const viewport = this._getViewport(this._scaleRelativeToVisualViewport);
         let {left, top, width, height, after, below} = this._getPosition(sourceRects, writingMode, viewport);
+        if (showTimingDiagnostics !== null) {
+            showTimingDiagnostics.positionElapsedMs = Math.max(0, safePerformance.now() - positionStartedAt);
+            showTimingDiagnostics.popupWidth = width;
+            showTimingDiagnostics.popupHeight = height;
+        }
 
         if (this._displayModeIsFullWidth) {
             left = viewport.left;

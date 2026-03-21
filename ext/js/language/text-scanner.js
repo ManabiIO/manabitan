@@ -17,6 +17,7 @@
  */
 
 import {ThemeController} from '../app/theme-controller.js';
+import {publishDevTimingSnapshot} from '../core/dev-timing-diagnostics.js';
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {log} from '../core/log.js';
@@ -26,6 +27,8 @@ import {anyNodeMatchesSelector, everyNodeMatchesSelector, getActiveModifiers, ge
 import {TextSourceElement} from '../dom/text-source-element.js';
 
 const SCAN_RESOLUTION_EXCLUDED_LANGUAGES = new Set(['ja', 'zh', 'yue', 'ko']);
+const HOVER_SCANNER_DIAGNOSTICS_DATASET_KEY = 'manabitanDevHoverScannerDiagnostics';
+const HOVER_SCANNER_DIAGNOSTICS_EVENT = 'hover-scanner-phase-summary';
 
 /**
  * @augments EventDispatcher<import('text-scanner').Events>
@@ -482,8 +485,10 @@ export class TextScanner extends EventDispatcher {
      * @param {boolean} showEmpty shows a "No results found" popup if no results are found
      * @param {boolean} disallowExpandStartOffset disallows expanding the start offset of the range
      * @param {?number} lookupSequence
+     * @param {?Record<string, unknown>} searchTimingDiagnostics
      */
-    async _search(textSource, searchTerms, searchKanji, inputInfo, showEmpty = false, disallowExpandStartOffset = false, lookupSequence = null) {
+    async _search(textSource, searchTerms, searchKanji, inputInfo, showEmpty = false, disallowExpandStartOffset = false, lookupSequence = null, searchTimingDiagnostics = null) {
+        const totalStartedAt = safePerformance.now();
         try {
             safePerformance.mark('scanner:_search:start');
             if (this._isLookupStale(lookupSequence)) { return; }
@@ -508,32 +513,67 @@ export class TextScanner extends EventDispatcher {
                 null
             );
 
+            const expandStartOffsetStartedAt = safePerformance.now();
             if (this._scanResolution === 'word' && !disallowExpandStartOffset &&
             (this._language === null || !SCAN_RESOLUTION_EXCLUDED_LANGUAGES.has(this._language))) {
                 // Move the start offset to the beginning of the word
                 textSource.setStartOffset(this._scanLength, this._layoutAwareScan, true);
             }
+            if (searchTimingDiagnostics !== null) {
+                searchTimingDiagnostics.expandStartOffsetElapsedMs = Math.max(0, safePerformance.now() - expandStartOffsetStartedAt);
+            }
 
             if (this._textSourceCurrent !== null && this._textSourceCurrent.hasSameStart(textSource)) {
+                if (searchTimingDiagnostics !== null) {
+                    searchTimingDiagnostics.skippedReason = 'same-start-as-current-selection';
+                }
                 return;
             }
 
+            const getSearchContextStartedAt = safePerformance.now();
             const getSearchContextPromise = this._getSearchContext();
             const getSearchContextResult = getSearchContextPromise instanceof Promise ? await getSearchContextPromise : getSearchContextPromise;
+            if (searchTimingDiagnostics !== null) {
+                searchTimingDiagnostics.getSearchContextElapsedMs = Math.max(0, safePerformance.now() - getSearchContextStartedAt);
+            }
             if (this._isLookupStale(lookupSequence)) { return; }
             const {detail} = getSearchContextResult;
+            const createOptionsContextStartedAt = safePerformance.now();
             const optionsContext = this._createOptionsContextForInput(getSearchContextResult.optionsContext, inputInfo);
+            if (searchTimingDiagnostics !== null) {
+                searchTimingDiagnostics.createOptionsContextElapsedMs = Math.max(0, safePerformance.now() - createOptionsContextStartedAt);
+            }
 
             /** @type {?import('dictionary').DictionaryEntry[]} */
             let dictionaryEntries = null;
+            let dictionaryEntriesJson;
+            let dictionaryEntryCount = 0;
             /** @type {?import('display').HistoryStateSentence} */
             let sentence = null;
             /** @type {'terms'|'kanji'} */
             let type = 'terms';
+            let resultTimingDiagnostics = null;
+            const findDictionaryEntriesStartedAt = safePerformance.now();
             const result = await this._findDictionaryEntries(textSource, searchTerms, searchKanji, optionsContext);
+            if (searchTimingDiagnostics !== null) {
+                searchTimingDiagnostics.findDictionaryEntriesElapsedMs = Math.max(0, safePerformance.now() - findDictionaryEntriesStartedAt);
+            }
             if (this._isLookupStale(lookupSequence)) { return; }
             if (result !== null) {
-                ({dictionaryEntries, sentence, type} = result);
+                ({dictionaryEntries, dictionaryEntriesJson, sentence, type} = result);
+                dictionaryEntryCount = (
+                    typeof result.dictionaryEntryCount === 'number' &&
+                    Number.isFinite(result.dictionaryEntryCount) &&
+                    result.dictionaryEntryCount >= 0
+                ) ?
+                    result.dictionaryEntryCount :
+                    dictionaryEntries.length;
+                if (searchTimingDiagnostics !== null) {
+                    resultTimingDiagnostics = Reflect.get(result, 'timingDiagnostics');
+                    if (typeof resultTimingDiagnostics === 'object' && resultTimingDiagnostics !== null && !Array.isArray(resultTimingDiagnostics)) {
+                        searchTimingDiagnostics.findDictionaryEntriesTimingDiagnostics = resultTimingDiagnostics;
+                    }
+                }
             } else if (showEmpty || (textSource !== null && isAltText && await this._isTextLookupWorthy(textSource.content))) {
                 // Shows a "No results found" message
                 dictionaryEntries = [];
@@ -541,6 +581,7 @@ export class TextScanner extends EventDispatcher {
             }
             if (this._isLookupStale(lookupSequence)) { return; }
 
+            const triggerSearchResultStartedAt = safePerformance.now();
             if (dictionaryEntries !== null && sentence !== null) {
                 this._inputInfoCurrent = inputInfo;
                 this.setCurrentTextSource(textSource);
@@ -551,6 +592,8 @@ export class TextScanner extends EventDispatcher {
                 this.trigger('searchSuccess', {
                     type,
                     dictionaryEntries,
+                    dictionaryEntriesJson,
+                    dictionaryEntryCount,
                     sentence,
                     inputInfo,
                     textSource,
@@ -558,18 +601,38 @@ export class TextScanner extends EventDispatcher {
                     detail,
                     pageTheme,
                 });
+                if (searchTimingDiagnostics !== null) {
+                    searchTimingDiagnostics.resultState = 'success';
+                    searchTimingDiagnostics.resultType = type;
+                    searchTimingDiagnostics.dictionaryEntryCount = dictionaryEntryCount;
+                    searchTimingDiagnostics.sentenceTextLength = sentence.text.length;
+                }
             } else {
                 this._triggerSearchEmpty(inputInfo);
+                if (searchTimingDiagnostics !== null) {
+                    searchTimingDiagnostics.resultState = 'empty';
+                }
+            }
+            if (searchTimingDiagnostics !== null) {
+                searchTimingDiagnostics.triggerResultElapsedMs = Math.max(0, safePerformance.now() - triggerSearchResultStartedAt);
             }
             safePerformance.mark('scanner:_search:end');
             safePerformance.measure('scanner:_search', 'scanner:_search:start', 'scanner:_search:end');
         } catch (error) {
             if (this._isLookupStale(lookupSequence)) { return; }
+            if (searchTimingDiagnostics !== null) {
+                searchTimingDiagnostics.resultState = 'error';
+                searchTimingDiagnostics.errorMessage = error instanceof Error ? error.message : String(error);
+            }
             this.trigger('searchError', {
                 error: error instanceof Error ? error : new Error(`A search error occurred: ${error}`),
                 textSource,
                 inputInfo,
             });
+        } finally {
+            if (searchTimingDiagnostics !== null) {
+                searchTimingDiagnostics.totalElapsedMs = Math.max(0, safePerformance.now() - totalStartedAt);
+            }
         }
     }
 
@@ -1281,10 +1344,38 @@ export class TextScanner extends EventDispatcher {
         if (searchText.length === 0) { return null; }
 
         /** @type {import('api').FindTermsDetails} */
-        const details = {};
-        const {dictionaryEntries, originalTextLength} = await this._api.termsFind(searchText, details, optionsContext);
-        if (dictionaryEntries.length === 0) { return null; }
+        const details = {
+            includeTimingDiagnostics: (
+                Reflect.get(globalThis, 'manabitanDevIncludeApiTimingDiagnostics') === true ||
+                document.documentElement?.dataset.manabitanDevIncludeApiTimingDiagnostics === 'true'
+            ),
+            serializeDictionaryEntries: true,
+        };
+        const apiTermsFindStartedAt = safePerformance.now();
+        const {
+            dictionaryEntries: dictionaryEntriesRaw,
+            dictionaryEntriesJson,
+            dictionaryEntryCount: dictionaryEntryCountRaw = null,
+            originalTextLength,
+            timingDiagnostics = null,
+        } = await this._api.termsFind(searchText, details, optionsContext);
+        const apiTermsFindElapsedMs = Math.max(0, safePerformance.now() - apiTermsFindStartedAt);
+        let dictionaryEntries = dictionaryEntriesRaw;
+        let serializedDictionaryEntriesLength = 0;
+        const serializedDictionaryEntries = (typeof dictionaryEntriesJson === 'string' && dictionaryEntriesJson.length > 0);
+        if (serializedDictionaryEntries) {
+            serializedDictionaryEntriesLength = dictionaryEntriesJson.length;
+        }
+        const dictionaryEntryCount = (
+            typeof dictionaryEntryCountRaw === 'number' &&
+            Number.isFinite(dictionaryEntryCountRaw) &&
+            dictionaryEntryCountRaw >= 0
+        ) ?
+            dictionaryEntryCountRaw :
+            dictionaryEntries.length;
+        if (dictionaryEntryCount === 0) { return null; }
 
+        const extractSentenceStartedAt = safePerformance.now();
         textSource.setEndOffset(originalTextLength, false, layoutAwareScan);
         const sentence = this._textSourceGenerator.extractSentence(
             textSource,
@@ -1295,8 +1386,24 @@ export class TextScanner extends EventDispatcher {
             sentenceForwardQuoteMap,
             sentenceBackwardQuoteMap,
         );
+        const extractSentenceElapsedMs = Math.max(0, safePerformance.now() - extractSentenceStartedAt);
 
-        return {dictionaryEntries, sentence, type: 'terms'};
+        return {
+            dictionaryEntries,
+            dictionaryEntriesJson,
+            dictionaryEntryCount,
+            sentence,
+            type: 'terms',
+            timingDiagnostics: {
+                searchTextLength: searchText.length,
+                originalTextLength,
+                apiTermsFindElapsedMs,
+                deferredSerializedDictionaryEntries: serializedDictionaryEntries,
+                serializedDictionaryEntriesLength,
+                extractSentenceElapsedMs,
+                apiTimingDiagnostics: timingDiagnostics,
+            },
+        };
     }
 
     /**
@@ -1314,9 +1421,12 @@ export class TextScanner extends EventDispatcher {
         const searchText = this.getTextSourceContent(textSource, 1, layoutAwareScan, optionsContext.pointerType);
         if (searchText.length === 0) { return null; }
 
+        const apiKanjiFindStartedAt = safePerformance.now();
         const dictionaryEntries = await this._api.kanjiFind(searchText, optionsContext);
+        const apiKanjiFindElapsedMs = Math.max(0, safePerformance.now() - apiKanjiFindStartedAt);
         if (dictionaryEntries.length === 0) { return null; }
 
+        const extractSentenceStartedAt = safePerformance.now();
         textSource.setEndOffset(1, false, layoutAwareScan);
         const sentence = this._textSourceGenerator.extractSentence(
             textSource,
@@ -1327,8 +1437,19 @@ export class TextScanner extends EventDispatcher {
             sentenceForwardQuoteMap,
             sentenceBackwardQuoteMap,
         );
+        const extractSentenceElapsedMs = Math.max(0, safePerformance.now() - extractSentenceStartedAt);
 
-        return {dictionaryEntries, sentence, type: 'kanji'};
+        return {
+            dictionaryEntries,
+            dictionaryEntryCount: dictionaryEntries.length,
+            sentence,
+            type: 'kanji',
+            timingDiagnostics: {
+                searchTextLength: searchText.length,
+                apiKanjiFindElapsedMs,
+                extractSentenceElapsedMs,
+            },
+        };
     }
 
     /**
@@ -1343,6 +1464,16 @@ export class TextScanner extends EventDispatcher {
         this._activeLookupSequence = lookupSequence;
         /** @type {?import('text-source').TextSource} */
         let activeTextSource = null;
+        /** @type {Record<string, unknown>} */
+        const hoverTimingDiagnostics = {
+            lookupSequence,
+            x,
+            y,
+            pointerType: inputInfo.pointerType,
+            eventType: inputInfo.eventType,
+            passive: inputInfo.passive,
+        };
+        const totalStartedAt = safePerformance.now();
         try {
             safePerformance.mark('scanner:_searchAt:start');
             const sourceInput = inputInfo.input;
@@ -1352,24 +1483,42 @@ export class TextScanner extends EventDispatcher {
                 if (searchTerms && !sourceInput.searchTerms) { searchTerms = false; }
                 if (searchKanji && !sourceInput.searchKanji) { searchKanji = false; }
             }
+            hoverTimingDiagnostics.searchTerms = searchTerms;
+            hoverTimingDiagnostics.searchKanji = searchKanji;
 
             this._pendingLookup = true;
             this._scanTimerClear();
 
-            if (typeof this._ignorePoint === 'function' && await this._ignorePoint(x, y)) {
-                return;
+            const ignorePointStartedAt = safePerformance.now();
+            if (typeof this._ignorePoint === 'function') {
+                const ignored = await this._ignorePoint(x, y);
+                hoverTimingDiagnostics.ignorePointElapsedMs = Math.max(0, safePerformance.now() - ignorePointStartedAt);
+                hoverTimingDiagnostics.ignoredPoint = ignored;
+                if (ignored) {
+                    return;
+                }
+            } else {
+                hoverTimingDiagnostics.ignorePointElapsedMs = 0;
             }
 
+            const getRangeFromPointStartedAt = safePerformance.now();
             activeTextSource = this._textSourceGenerator.getRangeFromPoint(x, y, {
                 deepContentScan: this._deepContentScan,
                 normalizeCssZoom: this._normalizeCssZoom,
                 language: this._language,
             });
+            hoverTimingDiagnostics.getRangeFromPointElapsedMs = Math.max(0, safePerformance.now() - getRangeFromPointStartedAt);
+            hoverTimingDiagnostics.hadTextSource = (activeTextSource !== null);
             if (activeTextSource !== null) {
                 try {
                     this._isMouseOverText = true;
-                    const searchPromise = this._search(activeTextSource, searchTerms, searchKanji, inputInfo, false, false, lookupSequence);
+                    /** @type {Record<string, unknown>} */
+                    const searchTimingDiagnostics = {};
+                    hoverTimingDiagnostics.search = searchTimingDiagnostics;
+                    const searchStartedAt = safePerformance.now();
+                    const searchPromise = this._search(activeTextSource, searchTerms, searchKanji, inputInfo, false, false, lookupSequence, searchTimingDiagnostics);
                     const timeoutMs = this._lookupTimeoutMs;
+                    hoverTimingDiagnostics.lookupTimeoutMs = timeoutMs;
                     if (Number.isFinite(timeoutMs) && timeoutMs > 0) {
                         /** @type {?import('core').Timeout} */
                         let timeout = null;
@@ -1388,24 +1537,41 @@ export class TextScanner extends EventDispatcher {
                             clearTimeout(timeout);
                             timeout = null;
                         }
+                        hoverTimingDiagnostics.searchElapsedMs = Math.max(0, safePerformance.now() - searchStartedAt);
+                        hoverTimingDiagnostics.searchTimedOut = timedOut;
                         if (this._isLookupStale(lookupSequence) || timedOut) {
+                            hoverTimingDiagnostics.staleAfterSearch = this._isLookupStale(lookupSequence);
                             return;
                         }
                     } else {
                         await searchPromise;
+                        hoverTimingDiagnostics.searchElapsedMs = Math.max(0, safePerformance.now() - searchStartedAt);
+                        hoverTimingDiagnostics.searchTimedOut = false;
                     }
                 } finally {
+                    const cleanupStartedAt = safePerformance.now();
                     activeTextSource.cleanup();
+                    hoverTimingDiagnostics.cleanupElapsedMs = Math.max(0, safePerformance.now() - cleanupStartedAt);
                 }
             } else {
                 this._isMouseOverText = false;
                 this._triggerSearchEmpty(inputInfo);
+                hoverTimingDiagnostics.resultState = 'empty-no-text-source';
             }
             safePerformance.mark('scanner:_searchAt:end');
             safePerformance.measure('scanner:_searchAt', 'scanner:_searchAt:start', 'scanner:_searchAt:end');
         } catch (e) {
+            hoverTimingDiagnostics.resultState = 'error';
+            hoverTimingDiagnostics.errorMessage = e instanceof Error ? e.message : String(e);
             log.error(e);
         } finally {
+            hoverTimingDiagnostics.totalElapsedMs = Math.max(0, safePerformance.now() - totalStartedAt);
+            hoverTimingDiagnostics.isMouseOverText = this._isMouseOverText;
+            publishDevTimingSnapshot(
+                HOVER_SCANNER_DIAGNOSTICS_DATASET_KEY,
+                hoverTimingDiagnostics,
+                HOVER_SCANNER_DIAGNOSTICS_EVENT,
+            );
             if (this._activeLookupSequence === lookupSequence) {
                 this._activeLookupSequence = null;
             }

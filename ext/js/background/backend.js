@@ -252,7 +252,16 @@ export class Backend {
         this._permissions = null;
         /** @type {Map<string, (() => void)[]>} */
         this._applicationReadyHandlers = new Map();
-        /** @type {WeakMap<import('settings').ProfileOptions, object>} */
+        /** @type {WeakMap<import('settings').ProfileOptions, {
+         *     enabledDictionaryMap: Map<string, import('translation').FindTermDictionary>,
+         *     mainDictionary: string,
+         *     sortFrequencyDictionary: string|null,
+         *     sortFrequencyDictionaryOrder: import('settings').SortFrequencyDictionaryOrder,
+         *     removeNonJapaneseCharacters: boolean,
+         *     searchResolution: import('settings').SearchResolution,
+         *     textReplacements: (?(import('translation').FindTermsTextReplacement[]))[],
+         *     language: string,
+         * }>} */
         this._translatorProfileOptionsCache = new WeakMap();
 
         /* eslint-disable @stylistic/no-multi-spaces */
@@ -288,6 +297,7 @@ export class Backend {
             ['deleteDictionaryByTitle',      this._onApiDeleteDictionaryByTitle.bind(this)],
             ['updateDictionaryMetadata',     this._onApiUpdateDictionaryMetadata.bind(this)],
             ['getDictionaryCounts',          this._onApiGetDictionaryCounts.bind(this)],
+            ['clearDatabaseCaches',         this._onApiClearDatabaseCaches.bind(this)],
             ['checkDictionaryUpdates',       this._onApiCheckDictionaryUpdates.bind(this)],
             ['updateDictionaryByTitle',      this._onApiUpdateDictionaryByTitle.bind(this)],
             ['setDictionaryUpdateSchedule',  this._onApiSetDictionaryUpdateSchedule.bind(this)],
@@ -850,13 +860,84 @@ export class Backend {
         if (this._dictionaryImportModeActive) {
             return {dictionaryEntries: [], originalTextLength: 0};
         }
+        const includeTimingDiagnostics = (details?.includeTimingDiagnostics === true);
+        const serializeDictionaryEntries = (details?.serializeDictionaryEntries === true);
+        const totalStartedAt = safePerformance.now();
+        const ensureDatabaseStartedAt = safePerformance.now();
         await this._ensureDictionaryDatabaseReady();
+        const ensureDatabaseElapsedMs = Math.max(0, safePerformance.now() - ensureDatabaseStartedAt);
+        const getProfileOptionsStartedAt = safePerformance.now();
         const options = this._getProfileOptions(optionsContext, false);
+        const getProfileOptionsElapsedMs = Math.max(0, safePerformance.now() - getProfileOptionsStartedAt);
         const {general: {resultOutputMode: mode, maxResults}} = options;
+        const createFindTermsOptionsStartedAt = safePerformance.now();
         const findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
-        const {dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions);
+        const createFindTermsOptionsElapsedMs = Math.max(0, safePerformance.now() - createFindTermsOptionsStartedAt);
+        const translatorFindTermsStartedAt = safePerformance.now();
+        const {
+            dictionaryEntries,
+            originalTextLength,
+            timingDiagnostics: translatorTimingDiagnosticsRaw = null,
+        } = this._translator instanceof TranslatorProxy ?
+            await this._translator.findTerms(mode, text, findTermsOptions, maxResults, includeTimingDiagnostics) :
+            await this._translator.findTerms(mode, text, findTermsOptions, includeTimingDiagnostics);
+        const translatorFindTermsElapsedMs = Math.max(0, safePerformance.now() - translatorFindTermsStartedAt);
+        const spliceResultsStartedAt = safePerformance.now();
         dictionaryEntries.splice(maxResults);
-        return {dictionaryEntries, originalTextLength};
+        const spliceResultsElapsedMs = Math.max(0, safePerformance.now() - spliceResultsStartedAt);
+        const dictionaryEntryCount = dictionaryEntries.length;
+        let dictionaryEntriesResult = dictionaryEntries;
+        let dictionaryEntriesJson;
+        let serializeDictionaryEntriesElapsedMs = 0;
+        let serializedDictionaryEntries = false;
+        let serializedDictionaryEntriesLength = 0;
+        let serializeDictionaryEntriesErrorMessage = null;
+        if (serializeDictionaryEntries && dictionaryEntries.length > 0) {
+            const serializeDictionaryEntriesStartedAt = safePerformance.now();
+            try {
+                dictionaryEntriesJson = JSON.stringify(dictionaryEntries);
+                serializeDictionaryEntriesElapsedMs = Math.max(0, safePerformance.now() - serializeDictionaryEntriesStartedAt);
+                serializedDictionaryEntries = true;
+                serializedDictionaryEntriesLength = dictionaryEntriesJson.length;
+                dictionaryEntriesResult = [];
+            } catch (error) {
+                serializeDictionaryEntriesElapsedMs = Math.max(0, safePerformance.now() - serializeDictionaryEntriesStartedAt);
+                serializeDictionaryEntriesErrorMessage = error instanceof Error ? error.message : String(error);
+            }
+        }
+        /** @type {Record<string, unknown>} */
+        const timingDiagnostics = {
+            backend: {
+                transport: this._translator instanceof TranslatorProxy ? 'offscreen-proxy' : 'direct',
+                ensureDatabaseElapsedMs,
+                getProfileOptionsElapsedMs,
+                createFindTermsOptionsElapsedMs,
+                translatorFindTermsElapsedMs,
+                spliceResultsElapsedMs,
+                serializeDictionaryEntriesRequested: serializeDictionaryEntries,
+                serializeDictionaryEntriesElapsedMs,
+                serializedDictionaryEntries,
+                serializedDictionaryEntriesLength,
+                serializeDictionaryEntriesErrorMessage,
+                totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                textLength: text.length,
+                maxResults,
+            },
+        };
+        if (isObjectNotArray(translatorTimingDiagnosticsRaw)) {
+            Object.assign(timingDiagnostics, translatorTimingDiagnosticsRaw);
+        }
+        if (!includeTimingDiagnostics) {
+            if (isObjectNotArray(timingDiagnostics.backend)) {
+                reportDiagnostics('hover-terms-find-summary', {
+                    ...timingDiagnostics.backend,
+                    dictionaryEntryCount,
+                    originalTextLength,
+                });
+            }
+            return {dictionaryEntries: dictionaryEntriesResult, dictionaryEntriesJson, dictionaryEntryCount, originalTextLength};
+        }
+        return {dictionaryEntries: dictionaryEntriesResult, dictionaryEntriesJson, dictionaryEntryCount, originalTextLength, timingDiagnostics};
     }
 
     /** @type {import('api').ApiHandler<'parseText'>} */
@@ -1596,6 +1677,11 @@ export class Backend {
     async _onApiGetDictionaryCounts({dictionaryNames, getTotal}) {
         await this._ensureDictionaryDatabaseReady();
         return await this._dictionaryDatabase.getDictionaryCounts(dictionaryNames, getTotal);
+    }
+
+    /** @type {import('api').ApiHandler<'clearDatabaseCaches'>} */
+    async _onApiClearDatabaseCaches() {
+        await Promise.resolve(this._translator.clearDatabaseCaches());
     }
 
     /** @type {import('api').ApiHandler<'checkDictionaryUpdates'>} */

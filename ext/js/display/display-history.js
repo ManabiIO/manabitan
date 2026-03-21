@@ -298,10 +298,11 @@ export class DisplayHistory extends EventDispatcher {
         while (entry !== null) {
             if (depth > this._maxContentEntries && isObjectNotArray(entry.content)) {
                 const content = /** @type {Record<string, unknown>} */ (entry.content);
-                if (Array.isArray(content.dictionaryEntries)) {
+                if (Array.isArray(content.dictionaryEntries) || typeof content.dictionaryEntriesJson === 'string') {
                     entry.content = {
                         ...content,
                         dictionaryEntries: void 0,
+                        dictionaryEntriesJson: void 0,
                     };
                 }
             }

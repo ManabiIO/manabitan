@@ -18,6 +18,7 @@
 
 import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
+import {safePerformance} from '../core/safe-performance.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
 import {DictionaryDatabase} from '../dictionary/dictionary-database.js';
 import {getSqlite3} from '../dictionary/sqlite-wasm.js';
@@ -222,10 +223,13 @@ class OffscreenDictionaryWorkerHandler {
             }
             case 'findTermsOffscreen': {
                 this._assertDatabaseAvailable(action);
+                const totalStartedAt = safePerformance.now();
                 await this._ensureDatabasePrepared();
                 const mode = /** @type {import('translator').FindTermsMode} */ (params.mode);
                 const text = /** @type {string} */ (params.text ?? '');
                 const options = /** @type {import('offscreen').FindTermsOptionsOffscreen} */ (params.options);
+                const includeTimingDiagnostics = (options.includeTimingDiagnostics === true);
+                const hydrateOptionsStartedAt = safePerformance.now();
                 const enabledDictionaryMap = new Map(options.enabledDictionaryMap);
                 const excludeDictionaryDefinitions = (
                     options.excludeDictionaryDefinitions !== null ?
@@ -247,7 +251,45 @@ class OffscreenDictionaryWorkerHandler {
                     excludeDictionaryDefinitions,
                     textReplacements,
                 };
-                return await this._translator.findTerms(mode, text, modifiedOptions);
+                const maxResults = (
+                    Number.isFinite(options.maxResults) &&
+                    /** @type {number} */ (options.maxResults) >= 0
+                ) ? Math.trunc(/** @type {number} */ (options.maxResults)) : -1;
+                const hydrateOptionsElapsedMs = Math.max(0, safePerformance.now() - hydrateOptionsStartedAt);
+                const translatorFindTermsStartedAt = safePerformance.now();
+                const result = await this._translator.findTerms(mode, text, modifiedOptions, includeTimingDiagnostics);
+                const translatorFindTermsElapsedMs = Math.max(0, safePerformance.now() - translatorFindTermsStartedAt);
+                if (maxResults >= 0 && Array.isArray(result?.dictionaryEntries)) {
+                    result.dictionaryEntries.splice(maxResults);
+                }
+                if (!includeTimingDiagnostics) {
+                    return result;
+                }
+                const timingDiagnostics = (
+                    typeof result === 'object' &&
+                    result !== null &&
+                    !Array.isArray(result) &&
+                    typeof Reflect.get(result, 'timingDiagnostics') === 'object' &&
+                    Reflect.get(result, 'timingDiagnostics') !== null &&
+                    !Array.isArray(Reflect.get(result, 'timingDiagnostics'))
+                ) ?
+                    /** @type {Record<string, unknown>} */ (Reflect.get(result, 'timingDiagnostics')) :
+                    {};
+                return {
+                    ...result,
+                    timingDiagnostics: {
+                        ...timingDiagnostics,
+                        offscreenWorker: {
+                            hydrateOptionsElapsedMs,
+                            translatorFindTermsElapsedMs,
+                            totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
+                            enabledDictionaryCount: enabledDictionaryMap.size,
+                            excludeDictionaryDefinitionCount: excludeDictionaryDefinitions?.size ?? 0,
+                            textReplacementGroupCount: textReplacements.length,
+                            textLength: text.length,
+                        },
+                    },
+                };
             }
             case 'getTermFrequenciesOffscreen':
                 this._assertDatabaseAvailable(action);
