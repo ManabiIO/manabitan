@@ -543,7 +543,16 @@ export class Frontend {
      */
     async _updateOptionsInternal() {
         const optionsContext = await this._getOptionsContext();
-        const options = await this._application.api.optionsGet(optionsContext);
+        const hoverPage = (this._pageType === 'web');
+        const effectiveHoverScanLengthPromise = (
+            hoverPage ?
+                this._application.api.getEffectiveHoverScanLength(optionsContext).catch(() => null) :
+                Promise.resolve(null)
+        );
+        const [options, effectiveHoverScanLengthRaw] = await Promise.all([
+            this._application.api.optionsGet(optionsContext),
+            effectiveHoverScanLengthPromise,
+        ]);
         const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
         this._options = options;
 
@@ -555,6 +564,36 @@ export class Frontend {
         const preventMiddleMouseOnTextHover = scanningOptions.preventMiddleMouse.onTextHover;
         const preventBackForwardOnPage = this._getPreventSecondaryMouseValueForPageType(scanningOptions.preventBackForward);
         const preventBackForwardOnTextHover = scanningOptions.preventBackForward.onTextHover;
+        const configuredScanLength = (
+            typeof scanningOptions.length === 'number' &&
+            Number.isFinite(scanningOptions.length) &&
+            scanningOptions.length > 0
+        ) ?
+            Math.trunc(scanningOptions.length) :
+            1;
+        let scanLength = scanningOptions.length;
+        /** @type {?{
+         * configuredScanLength: number,
+         * automaticScanLength: number | null,
+         * effectiveScanLength: number,
+         * }} */
+        let hoverScanLengthDiagnostics = null;
+        if (hoverPage) {
+            const effectiveHoverScanLength = (
+                typeof effectiveHoverScanLengthRaw === 'number' &&
+                Number.isFinite(effectiveHoverScanLengthRaw) &&
+                effectiveHoverScanLengthRaw > 0
+            ) ?
+                Math.trunc(effectiveHoverScanLengthRaw) :
+                configuredScanLength;
+            scanLength = effectiveHoverScanLength;
+            hoverScanLengthDiagnostics = {
+                configuredScanLength,
+                automaticScanLength: (effectiveHoverScanLength < configuredScanLength ? effectiveHoverScanLength : null),
+                effectiveScanLength: effectiveHoverScanLength,
+            };
+        }
+
         this._textScanner.language = options.general.language;
         this._textScanner.setOptions({
             inputs: scanningOptions.inputs,
@@ -562,7 +601,8 @@ export class Frontend {
             normalizeCssZoom: scanningOptions.normalizeCssZoom,
             selectText: scanningOptions.selectText,
             delay: scanningOptions.delay,
-            scanLength: scanningOptions.length,
+            scanLength,
+            hoverScanLengthDiagnostics,
             layoutAwareScan: scanningOptions.layoutAwareScan,
             preventMiddleMouseOnPage,
             preventMiddleMouseOnTextHover,
@@ -641,7 +681,7 @@ export class Frontend {
         const optionsContext = await this._getOptionsContext();
         if (this._updatePopupToken !== token) { return; }
         if (popup !== null) {
-            await popup.setOptionsContext(optionsContext);
+            await popup.setOptionsContext(optionsContext, /** @type {import('settings').ProfileOptions} */ (this._options));
         }
         if (this._updatePopupToken !== token) { return; }
 

@@ -78,8 +78,10 @@ const DIRECT_TERM_PREFIX_BUCKET_MAX_LENGTH = 2;
 
 /**
  * @typedef {object} TermRecordShardState
+ * @property {string|null} dictionaryName
  * @property {string} fileName
  * @property {FileSystemFileHandle} fileHandle
+ * @property {boolean} loaded
  * @property {FileSystemWritableFileStream|null} writable
  * @property {number} fileLength
  * @property {number} pendingWriteBytes
@@ -126,6 +128,8 @@ export class TermRecordOpfsStore {
         this._recordsDirectoryHandle = null;
         /** @type {Map<string, TermRecordShardState>} */
         this._shardStateByFileName = new Map();
+        /** @type {Set<string>} */
+        this._loadedDictionaryNames = new Set();
         /** @type {number} */
         this._flushThresholdBytes = this._computeFlushThresholdBytes();
         /** @type {boolean} */
@@ -148,6 +152,8 @@ export class TermRecordOpfsStore {
         this._wasmEncoderUnavailable = false;
         /** @type {string[]} */
         this._invalidShardFileNames = [];
+        /** @type {boolean} */
+        this._allShardsLoaded = true;
         /** @type {number} */
         this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
     }
@@ -165,7 +171,9 @@ export class TermRecordOpfsStore {
         this._rootDirectoryHandle = null;
         this._recordsDirectoryHandle = null;
         this._shardStateByFileName.clear();
+        this._loadedDictionaryNames.clear();
         this._invalidShardFileNames = [];
+        this._allShardsLoaded = true;
         if (typeof navigator === 'undefined' || !('storage' in navigator) || !('getDirectory' in navigator.storage)) {
             return;
         }
@@ -175,7 +183,7 @@ export class TermRecordOpfsStore {
 
         const shardFileCount = await this._loadShardFiles();
         await (shardFileCount === 0 ? this._migrateLegacyMonolithicIfPresent() : this._deleteLegacyMonolithicIfPresent());
-        await this.verifyIntegrity();
+        this._updateAllShardsLoadedFlag();
     }
 
     /**
@@ -185,6 +193,7 @@ export class TermRecordOpfsStore {
         if (this._importSessionActive) {
             return;
         }
+        await this.ensureAllShardsLoaded();
         this._importSessionActive = true;
         this._deferIndexBuild = true;
         this._indexDirty = true;
@@ -223,7 +232,9 @@ export class TermRecordOpfsStore {
         this._deferIndexBuild = false;
         this._indexDirty = false;
         this._shardStateByFileName.clear();
+        this._loadedDictionaryNames.clear();
         this._invalidShardFileNames = [];
+        this._allShardsLoaded = true;
         if (this._recordsDirectoryHandle === null) {
             return;
         }
@@ -258,6 +269,7 @@ export class TermRecordOpfsStore {
      */
     async appendBatch(records) {
         if (records.length === 0) { return; }
+        await this.ensureAllShardsLoaded();
         /** @type {Map<string, TermRecord[]>} */
         const recordsByDictionary = new Map();
         for (const row of records) {
@@ -308,6 +320,7 @@ export class TermRecordOpfsStore {
      */
     async appendBatchFromTermRows(rows, start, count) {
         if (count <= 0) { return; }
+        await this.ensureAllShardsLoaded();
         /** @type {Map<string, TermRecord[]>|null} */
         let recordsByDictionary = null;
         /** @type {TermRecord[]} */
@@ -390,6 +403,7 @@ export class TermRecordOpfsStore {
         if (contentOffsets.length < (start + count) || contentLengths.length < (start + count) || contentDictNames.length < (start + count)) {
             throw new Error('appendBatchFromResolvedImportTermEntries content refs length is smaller than row count');
         }
+        await this.ensureAllShardsLoaded();
         const tBuildStart = safePerformance.now();
         let buildRecordsMs = 0;
         let encodeMs = 0;
@@ -481,6 +495,7 @@ export class TermRecordOpfsStore {
         if (spans.length < count) {
             throw new Error('appendBatchFromImportTermEntries spans length is smaller than row count');
         }
+        await this.ensureAllShardsLoaded();
         /** @type {Map<string, TermRecord[]>|null} */
         let recordsByDictionary = null;
         /** @type {TermRecord[]} */
@@ -564,6 +579,7 @@ export class TermRecordOpfsStore {
         if (contentOffsets.length < count || contentLengths.length < count) {
             throw new Error('appendBatchFromImportTermEntriesResolvedContent content arrays are smaller than row count');
         }
+        await this.ensureAllShardsLoaded();
         const tBuildStart = safePerformance.now();
         let buildRecordsMs = 0;
         let encodeMs = 0;
@@ -662,6 +678,7 @@ export class TermRecordOpfsStore {
      * @returns {Promise<number>}
      */
     async deleteByDictionary(dictionaryName) {
+        await this._ensureShardLoaded(dictionaryName);
         let deletedCount = 0;
         const ids = [...this._recordsById.keys()];
         for (const id of ids) {
@@ -672,6 +689,8 @@ export class TermRecordOpfsStore {
         }
         this._indexByDictionary.delete(dictionaryName);
         await this._deleteShardByDictionary(dictionaryName);
+        this._loadedDictionaryNames.delete(dictionaryName);
+        this._updateAllShardsLoadedFlag();
         return deletedCount;
     }
 
@@ -684,6 +703,7 @@ export class TermRecordOpfsStore {
         if (currentDictionaryName === nextDictionaryName) {
             return;
         }
+        await this.ensureAllShardsLoaded();
 
         let renamed = false;
         for (const record of this._recordsById.values()) {
@@ -730,9 +750,10 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {string} dictionaryName
-     * @returns {DictionaryTermIndex}
+     * @returns {Promise<DictionaryTermIndex>}
      */
-    getDictionaryIndex(dictionaryName) {
+    async getDictionaryIndex(dictionaryName) {
+        await this._ensureShardLoaded(dictionaryName);
         this._ensureIndexesReady();
         const existing = this._indexByDictionary.get(dictionaryName);
         if (typeof existing !== 'undefined') {
@@ -775,6 +796,24 @@ export class TermRecordOpfsStore {
         }
         this._indexByDictionary.set(dictionaryName, created);
         return created;
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async ensureAllShardsLoaded() {
+        if (this._allShardsLoaded) {
+            return;
+        }
+        const dictionaryNames = [];
+        for (const state of this._shardStateByFileName.values()) {
+            if (state.loaded || state.dictionaryName === null) { continue; }
+            dictionaryNames.push(state.dictionaryName);
+        }
+        for (const dictionaryName of dictionaryNames) {
+            await this._ensureShardLoaded(dictionaryName);
+        }
+        this._updateAllShardsLoadedFlag();
     }
 
     /**
@@ -1380,8 +1419,11 @@ export class TermRecordOpfsStore {
         if (this._recordsDirectoryHandle === null) {
             return;
         }
+        await this.ensureAllShardsLoaded();
         await this._closeAllWritables();
         this._shardStateByFileName.clear();
+        this._loadedDictionaryNames.clear();
+        this._allShardsLoaded = true;
 
         const existingShardFileNames = await this._listShardFileNames();
         for (const fileName of existingShardFileNames) {
@@ -1417,7 +1459,8 @@ export class TermRecordOpfsStore {
                 fileLength = output.byteLength;
             }
             await writable.close();
-            this._shardStateByFileName.set(fileName, this._createShardState(fileName, fileHandle, fileLength));
+            this._shardStateByFileName.set(fileName, this._createShardState(fileName, dictionaryName, fileHandle, fileLength, true));
+            this._loadedDictionaryNames.add(dictionaryName);
         }
     }
 
@@ -1447,28 +1490,19 @@ export class TermRecordOpfsStore {
             } catch (_) {
                 continue;
             }
-            ++shardFileCount;
-            const state = this._createShardState(name, fileHandle, file.size);
-            this._shardStateByFileName.set(name, state);
-            if (file.size <= 0) {
-                continue;
-            }
-            const arrayBuffer = await file.arrayBuffer();
-            const content = new Uint8Array(arrayBuffer);
-            if (this._isBinaryFormat(content)) {
-                this._loadBinary(content, this._decodeDictionaryNameFromShardFileName(name));
-                continue;
-            }
-            // Invalid shard payloads are discarded so they cannot poison future reads.
-            this._invalidShardFileNames.push(name);
-            this._shardStateByFileName.delete(name);
-            if (this._recordsDirectoryHandle !== null) {
+            const dictionaryName = this._decodeDictionaryNameFromShardFileName(name);
+            if (dictionaryName === null) {
+                this._invalidShardFileNames.push(name);
                 try {
                     await this._recordsDirectoryHandle.removeEntry(name);
                 } catch (_) {
                     // NOP
                 }
+                continue;
             }
+            ++shardFileCount;
+            const state = this._createShardState(name, dictionaryName, fileHandle, file.size);
+            this._shardStateByFileName.set(name, state);
         }
         return shardFileCount;
     }
@@ -1567,8 +1601,9 @@ export class TermRecordOpfsStore {
         }
         const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName, {create: true});
         const file = await fileHandle.getFile();
-        const created = this._createShardState(fileName, fileHandle, file.size);
+        const created = this._createShardState(fileName, dictionaryName, fileHandle, file.size, this._loadedDictionaryNames.has(dictionaryName));
         this._shardStateByFileName.set(fileName, created);
+        this._updateAllShardsLoadedFlag();
         return created;
     }
 
@@ -1618,14 +1653,18 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {string} fileName
+     * @param {string|null} dictionaryName
      * @param {FileSystemFileHandle} fileHandle
      * @param {number} fileLength
+     * @param {boolean} [loaded=false]
      * @returns {TermRecordShardState}
      */
-    _createShardState(fileName, fileHandle, fileLength) {
+    _createShardState(fileName, dictionaryName, fileHandle, fileLength, loaded = false) {
         return {
+            dictionaryName,
             fileName,
             fileHandle,
+            loaded,
             writable: null,
             fileLength,
             pendingWriteBytes: 0,
@@ -1772,6 +1811,72 @@ export class TermRecordOpfsStore {
         } catch (_) {
             return null;
         }
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {Promise<void>}
+     */
+    async _ensureShardLoaded(dictionaryName) {
+        if (this._loadedDictionaryNames.has(dictionaryName)) {
+            return;
+        }
+        const fileName = this._getShardFileName(dictionaryName);
+        const state = this._shardStateByFileName.get(fileName);
+        if (typeof state === 'undefined') {
+            this._loadedDictionaryNames.add(dictionaryName);
+            this._updateAllShardsLoadedFlag();
+            return;
+        }
+        if (state.loaded) {
+            this._loadedDictionaryNames.add(dictionaryName);
+            this._updateAllShardsLoadedFlag();
+            return;
+        }
+        await this._flushPendingWritesForShard(state);
+        let file;
+        try {
+            file = await state.fileHandle.getFile();
+        } catch (_) {
+            return;
+        }
+        state.fileLength = file.size;
+        if (file.size > 0) {
+            const arrayBuffer = await file.arrayBuffer();
+            const content = new Uint8Array(arrayBuffer);
+            if (!this._isBinaryFormat(content)) {
+                this._invalidShardFileNames.push(state.fileName);
+                this._shardStateByFileName.delete(state.fileName);
+                if (this._recordsDirectoryHandle !== null) {
+                    try {
+                        await this._recordsDirectoryHandle.removeEntry(state.fileName);
+                    } catch (_) {
+                        // NOP
+                    }
+                }
+                this._updateAllShardsLoadedFlag();
+                return;
+            }
+            this._loadBinary(content, dictionaryName);
+        }
+        state.loaded = true;
+        this._loadedDictionaryNames.add(dictionaryName);
+        this._updateAllShardsLoadedFlag();
+    }
+
+    /** */
+    _updateAllShardsLoadedFlag() {
+        if (this._shardStateByFileName.size === 0) {
+            this._allShardsLoaded = true;
+            return;
+        }
+        for (const state of this._shardStateByFileName.values()) {
+            if (!state.loaded) {
+                this._allShardsLoaded = false;
+                return;
+            }
+        }
+        this._allShardsLoaded = true;
     }
 
     /** */

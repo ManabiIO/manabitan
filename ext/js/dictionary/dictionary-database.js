@@ -227,6 +227,8 @@ export class DictionaryDatabase {
         this._termMetaTableHasRows = null;
         /** @type {number|null} */
         this._maxHeadwordLengthCache = null;
+        /** @type {Map<string, number>} */
+        this._maxHeadwordLengthCacheByDictionaryKey = new Map();
         /** @type {Map<string, Map<string, import('dictionary-database').Tag>>} */
         this._tagMetaIndexByDictionary = new Map();
         /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, expressionPrefixes: Map<string, string[]>, readingPrefixes: Map<string, string[]>, expressionReversePrefixes: Map<string, string[]>, readingReversePrefixes: Map<string, string[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
@@ -986,6 +988,7 @@ export class DictionaryDatabase {
      */
     async _copyTermRowsToDatabase(targetDb) {
         await this._termContentStore.ensureLoadedForRead();
+        await this._termRecordStore.ensureAllShardsLoaded();
         const targetStmt = /** @type {import('@sqlite.org/sqlite-wasm').PreparedStatement} */ (targetDb.prepare(
             'INSERT INTO terms(dictionary, expression, reading, expressionReverse, readingReverse, definitionTags, termTags, rules, score, glossaryJson, sequence) VALUES($dictionary, $expression, $reading, $expressionReverse, $readingReverse, $definitionTags, $termTags, $rules, $score, $glossaryJson, $sequence)',
         ));
@@ -1129,8 +1132,9 @@ export class DictionaryDatabase {
 
         /** @type {number[]} */
         const counts = [];
-        const termCount = this._termRecordStore.getDictionaryIndex(dictionaryName).expression.size > 0 ?
-            [...this._termRecordStore.getDictionaryIndex(dictionaryName).expression.values()].reduce((sum, list) => sum + list.length, 0) :
+        const termIndex = await this._termRecordStore.getDictionaryIndex(dictionaryName);
+        const termCount = termIndex.expression.size > 0 ?
+            [...termIndex.expression.values()].reduce((sum, list) => sum + list.length, 0) :
             0;
         progressData.count += termCount;
         counts.push(termCount);
@@ -1231,6 +1235,15 @@ export class DictionaryDatabase {
     /** */
     _invalidateMaxHeadwordLengthCache() {
         this._maxHeadwordLengthCache = null;
+        this._maxHeadwordLengthCacheByDictionaryKey.clear();
+    }
+
+    /**
+     * @param {string[]} dictionaryNames
+     * @returns {string}
+     */
+    _getDictionarySetCacheKey(dictionaryNames) {
+        return dictionaryNames.join('\u001f');
     }
 
     /** */
@@ -1370,14 +1383,14 @@ export class DictionaryDatabase {
 
     /**
      * @param {string} dictionaryName
-     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, expressionPrefixes: Map<string, string[]>, readingPrefixes: Map<string, string[]>, expressionReversePrefixes: Map<string, string[]>, readingReversePrefixes: Map<string, string[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}}
+     * @returns {Promise<{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, expressionPrefixes: Map<string, string[]>, readingPrefixes: Map<string, string[]>, expressionReversePrefixes: Map<string, string[]>, readingReversePrefixes: Map<string, string[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>}
      */
-    _ensureDirectTermIndex(dictionaryName) {
+    async _ensureDirectTermIndex(dictionaryName) {
         const existing = this._directTermIndexByDictionary.get(dictionaryName);
         if (typeof existing !== 'undefined') {
             return existing;
         }
-        const index = this._termRecordStore.getDictionaryIndex(dictionaryName);
+        const index = await this._termRecordStore.getDictionaryIndex(dictionaryName);
         this._directTermIndexByDictionary.set(dictionaryName, index);
         return index;
     }
@@ -1460,7 +1473,7 @@ export class DictionaryDatabase {
                 const itemIndexes = /** @type {number[]} */ (termIndexMap.get(term));
                 let found = false;
                 for (const dictionaryName of dictionaryNames) {
-                    const index = this._ensureDirectTermIndex(dictionaryName);
+                    const index = await this._ensureDirectTermIndex(dictionaryName);
                     const expressionIds = index.expression.get(term);
                     if (typeof expressionIds !== 'undefined') {
                         found = true;
@@ -1479,7 +1492,7 @@ export class DictionaryDatabase {
                     }
                 }
                 for (const dictionaryName of dictionaryNames) {
-                    const index = this._ensureDirectTermIndex(dictionaryName);
+                    const index = await this._ensureDirectTermIndex(dictionaryName);
                     const readingIds = index.reading.get(term);
                     if (typeof readingIds !== 'undefined') {
                         found = true;
@@ -1559,7 +1572,7 @@ export class DictionaryDatabase {
         const queriesToCheck = [...uniqueQueryMap.values()].filter(({query}) => !this._termPrefixNegativeCache.has(`${negativeCachePrefix}${query}`));
         /** @type {Set<string>} */
         const foundQueries = new Set();
-        const directTermLookups = dictionaryNames.map((dictionaryName) => this._ensureDirectTermIndex(dictionaryName));
+        const directTermLookups = await Promise.all(dictionaryNames.map((dictionaryName) => this._ensureDirectTermIndex(dictionaryName)));
         let prefixBucketHitCount = 0;
         let prefixBucketMissCount = 0;
         let prefixBucketCandidateValueCount = 0;
@@ -1698,7 +1711,7 @@ export class DictionaryDatabase {
             const itemIndexes = termReadingIndexes.get(pair);
             if (typeof itemIndexes === 'undefined') { continue; }
             for (const dictionaryName of dictionaryNames) {
-                const index = this._ensureDirectTermIndex(dictionaryName);
+                const index = await this._ensureDirectTermIndex(dictionaryName);
                 const ids = index.pair.get(pair);
                 if (typeof ids === 'undefined') { continue; }
                 for (const id of ids) {
@@ -1760,7 +1773,7 @@ export class DictionaryDatabase {
         /** @type {Map<number, number[]>} */
         const idMatches = new Map();
         for (const dictionaryName of dictionaryNames) {
-            const index = this._ensureDirectTermIndex(dictionaryName);
+            const index = await this._ensureDirectTermIndex(dictionaryName);
             for (const sequence of sequenceValues) {
                 const ids = index.sequence.get(sequence);
                 if (typeof ids === 'undefined') { continue; }
@@ -2136,9 +2149,42 @@ export class DictionaryDatabase {
     }
 
     /**
+     * @param {string[]|null} [dictionaryNames=null]
      * @returns {Promise<number>}
      */
-    async getMaxHeadwordLength() {
+    async getMaxHeadwordLength(dictionaryNames = null) {
+        if (Array.isArray(dictionaryNames)) {
+            const normalizedDictionaryNames = [...new Set(dictionaryNames
+                .map((value) => this._asString(value).trim())
+                .filter((value) => value.length > 0))]
+                .sort();
+            if (normalizedDictionaryNames.length === 0) {
+                return 0;
+            }
+
+            const cacheKey = this._getDictionarySetCacheKey(normalizedDictionaryNames);
+            const cachedByDictionarySet = this._maxHeadwordLengthCacheByDictionaryKey.get(cacheKey);
+            if (typeof cachedByDictionarySet === 'number') {
+                return cachedByDictionarySet;
+            }
+
+            const db = this._requireDb();
+            const {clause: dictionaryInClause, bind: dictionaryBind} = this._buildTextInClause(normalizedDictionaryNames, 'dict');
+            const value = db.selectValue(`
+                SELECT MAX(
+                    CASE
+                        WHEN LENGTH(COALESCE(reading, '')) > LENGTH(COALESCE(expression, '')) THEN LENGTH(COALESCE(reading, ''))
+                        ELSE LENGTH(COALESCE(expression, ''))
+                    END
+                )
+                FROM terms
+                WHERE dictionary IN (${dictionaryInClause})
+            `, dictionaryBind);
+            const maxHeadwordLength = Math.max(0, this._asNumber(value, 0));
+            this._maxHeadwordLengthCacheByDictionaryKey.set(cacheKey, maxHeadwordLength);
+            return maxHeadwordLength;
+        }
+
         const cached = this._maxHeadwordLengthCache;
         if (typeof cached === 'number') {
             return cached;
@@ -2363,6 +2409,7 @@ export class DictionaryDatabase {
         const counts = [];
 
         if (getTotal) {
+            await this._termRecordStore.ensureAllShardsLoaded();
             /** @type {import('dictionary-database').DictionaryCountGroup} */
             const total = {terms: this._termRecordStore.size};
             for (const table of tables) {
@@ -2374,7 +2421,7 @@ export class DictionaryDatabase {
         for (const dictionaryName of dictionaryNames) {
             /** @type {import('dictionary-database').DictionaryCountGroup} */
             const countGroup = {terms: 0};
-            const termIndex = this._termRecordStore.getDictionaryIndex(dictionaryName);
+            const termIndex = await this._termRecordStore.getDictionaryIndex(dictionaryName);
             countGroup.terms = [...termIndex.expression.values()].reduce((sum, list) => sum + list.length, 0);
             for (const table of tables) {
                 countGroup[table] = this._asNumber(
@@ -3857,6 +3904,7 @@ export class DictionaryDatabase {
         const mediaBefore = this._asNumber(db.selectValue('SELECT COUNT(*) FROM media'), 0);
         const termContentBefore = this._asNumber(db.selectValue('SELECT COUNT(*) FROM termEntryContent'), 0);
         const sharedGlossaryArtifactsBefore = this._asNumber(db.selectValue('SELECT COUNT(*) FROM sharedGlossaryArtifacts'), 0);
+        await this._termRecordStore.ensureAllShardsLoaded();
         const termRecordsBefore = this._termRecordStore.size;
 
         await this._termContentStore.reset();

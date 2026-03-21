@@ -88,6 +88,8 @@ export class Display extends EventDispatcher {
         this._setContentToken = null;
         /** @type {?Record<string, unknown>} */
         this._pendingPopupSetContentDiagnostics = null;
+        /** @type {?import('settings').ProfileOptions} */
+        this._pendingResolvedOptions = null;
         /** @type {?Record<string, unknown>} */
         this._latestSetContentTimingDiagnostics = null;
         /** @type {DisplayContentManager} */
@@ -454,15 +456,31 @@ export class Display extends EventDispatcher {
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {?import('settings').ProfileOptions} [resolvedOptions=null]
      */
-    async setOptionsContext(optionsContext) {
+    async setOptionsContext(optionsContext, resolvedOptions = null) {
         this._optionsContext = optionsContext;
+        if (
+            typeof resolvedOptions === 'object' &&
+            resolvedOptions !== null &&
+            !Array.isArray(resolvedOptions)
+        ) {
+            this._applyOptions(/** @type {import('settings').ProfileOptions} */ (resolvedOptions));
+            return;
+        }
         await this.updateOptions();
     }
 
     /** */
     async updateOptions() {
         const options = await this._application.api.optionsGet(this.getOptionsContext());
+        this._applyOptions(options);
+    }
+
+    /**
+     * @param {import('settings').ProfileOptions} options
+     */
+    _applyOptions(options) {
         const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
         this._options = options;
 
@@ -763,7 +781,7 @@ export class Display extends EventDispatcher {
     }
 
     /** @type {import('display').DirectApiHandler<'displaySetContent'>} */
-    _onMessageSetContent({details}) {
+    _onMessageSetContent({details, resolvedOptions}) {
         const content = (
             typeof details?.content === 'object' &&
             details.content !== null &&
@@ -800,6 +818,11 @@ export class Display extends EventDispatcher {
             providedSerializedDictionaryEntries,
             providedDictionaryEntriesJsonLength,
         };
+        this._pendingResolvedOptions = (
+            typeof resolvedOptions === 'object' &&
+            resolvedOptions !== null &&
+            !Array.isArray(resolvedOptions)
+        ) ? /** @type {import('settings').ProfileOptions} */ (resolvedOptions) : null;
         safePerformance.mark('invokeDisplaySetContent:end');
         this.setContent(details);
     }
@@ -906,10 +929,12 @@ export class Display extends EventDispatcher {
                     await this._setContentTermsOrKanji(type, urlSearchParams, token);
                     break;
                 case 'unloaded':
+                    this._pendingResolvedOptions = null;
                     this._contentType = type;
                     this._setContentExtensionUnloaded();
                     break;
                 default:
+                    this._pendingResolvedOptions = null;
                     this._contentType = 'clear';
                     this._clearContent();
                     break;
@@ -1570,8 +1595,10 @@ export class Display extends EventDispatcher {
             changeHistory = true;
         }
 
+        const resolvedOptions = this._pendingResolvedOptions;
+        this._pendingResolvedOptions = null;
         const setOptionsContextStartedAt = safePerformance.now();
-        await this._setOptionsContextIfDifferent(optionsContext);
+        await this._setOptionsContextIfDifferent(optionsContext, resolvedOptions);
         timingDiagnostics.setOptionsContextElapsedMs = Math.max(0, safePerformance.now() - setOptionsContextStartedAt);
         if (this._setContentToken !== token) { return; }
 
@@ -2091,10 +2118,16 @@ export class Display extends EventDispatcher {
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {?import('settings').ProfileOptions} [resolvedOptions=null]
      */
-    async _setOptionsContextIfDifferent(optionsContext) {
-        if (deepEqual(this._optionsContext, optionsContext)) { return; }
-        await this.setOptionsContext(optionsContext);
+    async _setOptionsContextIfDifferent(optionsContext, resolvedOptions = null) {
+        if (deepEqual(this._optionsContext, optionsContext)) {
+            if (resolvedOptions !== null && this._options === null) {
+                this._applyOptions(resolvedOptions);
+            }
+            return;
+        }
+        await this.setOptionsContext(optionsContext, resolvedOptions);
     }
 
     /**

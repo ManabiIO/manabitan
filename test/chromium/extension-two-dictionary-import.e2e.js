@@ -161,6 +161,28 @@ function parseBooleanEnv(value, defaultValue) {
     return defaultValue;
 }
 
+function parseIntegerEnv(value, defaultValue, minimum = Number.NEGATIVE_INFINITY, maximum = Number.POSITIVE_INFINITY) {
+    if (typeof value !== 'string') {
+        return defaultValue;
+    }
+    const parsed = Number.parseInt(value.trim(), 10);
+    if (!Number.isFinite(parsed)) {
+        return defaultValue;
+    }
+    return Math.min(maximum, Math.max(minimum, parsed));
+}
+
+function parseStringListEnv(value, fallbackValues) {
+    if (typeof value !== 'string') {
+        return fallbackValues;
+    }
+    const parsed = value
+        .split(',')
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
+    return parsed.length > 0 ? parsed : fallbackValues;
+}
+
 const strictUnsupportedRuntime = parseBooleanEnv(
     process.env.MANABITAN_E2E_STRICT_RUNTIME,
     parseBooleanEnv(process.env.CI, false),
@@ -170,6 +192,16 @@ const maxReportLogLines = Number.isFinite(maxReportLogLinesRaw) && maxReportLogL
 const quickImportBenchmarkMode = parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_BENCH_QUICK, false);
 const stopAfterIsolatedProbes = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_ISOLATED_PROBES, false);
 const stopAfterHoverStress = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_HOVER_STRESS, false);
+const hoverStressIterations = parseIntegerEnv(process.env.MANABITAN_E2E_HOVER_STRESS_ITERATIONS, 12, 1, 64);
+const hoverStressTargets = parseStringListEnv(process.env.MANABITAN_E2E_HOVER_TARGETS, [
+    '#target-word',
+    '#target-cat',
+    '#target-name',
+    '#target-kotoba',
+    '#target-born',
+    '#target-mitou',
+]);
+const overrideJmdictUrl = typeof process.env.MANABITAN_E2E_JMDICT_URL === 'string' ? process.env.MANABITAN_E2E_JMDICT_URL.trim() : '';
 const concurrentDbOpenPressureEnabled = (
     !quickImportBenchmarkMode &&
     parseBooleanEnv(process.env.MANABITAN_E2E_DB_OPEN_PRESSURE, true)
@@ -682,11 +714,28 @@ async function loadRecommendedDictionaryUrls() {
         return '';
     };
     const jitendexUrl = findDownloadUrl('Jitendex');
-    const jmdictUrl = findDownloadUrl('JMdict') || fallbackJmdictUrl;
+    const jmdictUrl = (
+        overrideJmdictUrl.length > 0 ?
+        overrideJmdictUrl :
+        (findDownloadUrl('JMdict') || fallbackJmdictUrl)
+    );
     if (jitendexUrl.length === 0 || jmdictUrl.length === 0) {
         fail(`Unable to resolve recommended dictionary URLs (jitendex="${jitendexUrl}", jmdict="${jmdictUrl}")`);
     }
     return {jitendexUrl, jmdictUrl};
+}
+
+function getCachedDownloadFileName(url, fallbackFileName) {
+    try {
+        const parsedUrl = new URL(url);
+        const baseName = path.basename(parsedUrl.pathname || '');
+        if (/^[A-Za-z0-9._-]+\.zip$/u.test(baseName)) {
+            return baseName;
+        }
+    } catch (_) {
+        // Fall back to the provided file name when URL parsing fails.
+    }
+    return fallbackFileName;
 }
 
 async function ensureCachedDownload(url, outputPath) {
@@ -711,7 +760,7 @@ async function ensureRealDictionaryCache() {
     await mkdir(dictionaryCacheDir, {recursive: true});
     const {jitendexUrl, jmdictUrl} = await loadRecommendedDictionaryUrls();
     const jitendexPath = path.join(dictionaryCacheDir, 'jitendex-yomitan.zip');
-    const jmdictPath = path.join(dictionaryCacheDir, 'JMdict.zip');
+    const jmdictPath = path.join(dictionaryCacheDir, getCachedDownloadFileName(jmdictUrl, 'JMdict.zip'));
     await ensureCachedDownload(jitendexUrl, jitendexPath);
     await ensureCachedDownload(jmdictUrl, jmdictPath);
     return {jitendexPath, jmdictPath};
@@ -2106,6 +2155,19 @@ async function hoverLookupOnWagahai(page, targetSelector) {
                 }
                 await popupFrame.waitForSelector('#dictionary-entries, #no-results, #no-dictionaries', {timeout: 5000});
                 const popupText = (await popupFrame.locator('body').textContent()) ?? '';
+                const popupMetrics = await popupFrame.evaluate(() => {
+                    const body = document.body;
+                    const dictionaryEntries = document.querySelector('#dictionary-entries');
+                    return {
+                        bodyHtmlLength: body?.innerHTML.length ?? 0,
+                        bodyTextLength: body?.textContent?.length ?? 0,
+                        dictionaryEntryNodeCount: dictionaryEntries?.querySelectorAll('.entry').length ?? 0,
+                        definitionItemCount: dictionaryEntries?.querySelectorAll('.definition-item').length ?? 0,
+                        structuredContentNodeCount: dictionaryEntries?.querySelectorAll('.structured-content').length ?? 0,
+                        structuredContentTableCount: dictionaryEntries?.querySelectorAll('.structured-content table').length ?? 0,
+                        glossaryImageCount: dictionaryEntries?.querySelectorAll('.gloss-image-link, .gloss-image-container img').length ?? 0,
+                    };
+                });
                 if (popupText.trim().length === 0) {
                     lastDiagnostics = {
                         page: await readDocumentDatasetDiagnostics(page, hoverPageDiagnosticsDatasetKeys),
@@ -2121,6 +2183,7 @@ async function hoverLookupOnWagahai(page, targetSelector) {
                 };
                 return {
                     popupText,
+                    popupMetrics,
                     usedModifier: modifier,
                     diagnostics: {
                         page: pageDiagnostics,
@@ -3494,19 +3557,11 @@ async function main() {
                         throw new Error('Local E2E server is unavailable for scanning stress test');
                     }
                     await page.goto(`${localServer.baseUrl}/wagahai-neko.html`);
-                    const scanTargets = [
-                        '#target-word',
-                        '#target-cat',
-                        '#target-name',
-                        '#target-kotoba',
-                        '#target-born',
-                        '#target-mitou',
-                    ];
                     const iterations = [];
-                    for (let i = 0; i < 12; ++i) {
-                        const selector = scanTargets[i % scanTargets.length];
+                    for (let i = 0; i < hoverStressIterations; ++i) {
+                        const selector = hoverStressTargets[i % hoverStressTargets.length];
                         const iterationStart = safePerformance.now();
-                        const {popupText, usedModifier, diagnostics = null} = await hoverLookupOnWagahai(page, selector);
+                        const {popupText, popupMetrics = null, usedModifier, diagnostics = null} = await hoverLookupOnWagahai(page, selector);
                         const iterationEnd = safePerformance.now();
                         const hasDictionaryResult = /jmdict|jitendex/i.test(popupText);
                         iterations.push({
@@ -3516,6 +3571,7 @@ async function main() {
                             durationMs: Math.max(0, iterationEnd - iterationStart),
                             hasDictionaryResult,
                             popupTextPreview: popupText.replaceAll(/\s+/g, ' ').trim().slice(0, 180),
+                            popupMetrics,
                             diagnostics,
                         });
                         if (!hasDictionaryResult) {

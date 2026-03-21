@@ -259,10 +259,11 @@ export class DictionaryDatabaseProxy {
     }
 
     /**
+     * @param {string[]|null} [dictionaryNames=null]
      * @returns {Promise<number>}
      */
-    async getMaxHeadwordLength() {
-        return await this._offscreen.sendMessagePromise({action: 'getMaxHeadwordLengthOffscreen'});
+    async getMaxHeadwordLength(dictionaryNames = null) {
+        return await this._offscreen.sendMessagePromise({action: 'getMaxHeadwordLengthOffscreen', params: {dictionaryNames}});
     }
 
     /**

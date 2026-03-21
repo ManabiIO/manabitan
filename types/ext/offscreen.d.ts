@@ -58,7 +58,9 @@ type ApiSurface = {
         return: DictionaryImporter.Summary | null;
     };
     getMaxHeadwordLengthOffscreen: {
-        params: void;
+        params: {
+            dictionaryNames: string[] | null;
+        };
         return: number;
     };
     deleteDictionaryOffscreen: {

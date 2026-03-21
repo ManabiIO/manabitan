@@ -134,6 +134,12 @@ type ApiSurface = {
         };
         return: Settings.ProfileOptions;
     };
+    getEffectiveHoverScanLength: {
+        params: {
+            optionsContext: Settings.OptionsContext;
+        };
+        return: number;
+    };
     optionsGetFull: {
         params: void;
         return: Settings.Options;

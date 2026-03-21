@@ -181,6 +181,7 @@ export type DirectApiSurface = {
     displaySetContent: {
         params: {
             details: ContentDetails;
+            resolvedOptions?: Settings.ProfileOptions;
         };
         return: void;
     };

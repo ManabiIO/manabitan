@@ -36,6 +36,7 @@ describe('DictionaryDatabase max headword length cache', () => {
         const selectValue = vi.fn(() => null);
         const context = {
             _maxHeadwordLengthCache: null,
+            _maxHeadwordLengthCacheByDictionaryKey: new Map(),
             _requireDb: () => ({selectValue}),
             _asNumber: getDictionaryDatabaseMethod('_asNumber'),
         };
@@ -53,6 +54,7 @@ describe('DictionaryDatabase max headword length cache', () => {
         const selectValue = vi.fn(() => 11);
         const context = {
             _maxHeadwordLengthCache: null,
+            _maxHeadwordLengthCacheByDictionaryKey: new Map(),
             _requireDb: () => ({selectValue}),
             _asNumber: getDictionaryDatabaseMethod('_asNumber'),
         };
@@ -70,11 +72,40 @@ describe('DictionaryDatabase max headword length cache', () => {
         expect(sql).toContain('LENGTH(COALESCE(expression');
     });
 
+    test('filters headword length by dictionary set and caches the result per set', async () => {
+        const selectValue = vi.fn(() => 17);
+        const context = {
+            _maxHeadwordLengthCache: null,
+            _maxHeadwordLengthCacheByDictionaryKey: new Map(),
+            _requireDb: () => ({selectValue}),
+            _asNumber: getDictionaryDatabaseMethod('_asNumber'),
+            _asString: getDictionaryDatabaseMethod('_asString'),
+            _buildTextInClause: getDictionaryDatabaseMethod('_buildTextInClause'),
+            _getDictionarySetCacheKey: getDictionaryDatabaseMethod('_getDictionarySetCacheKey'),
+        };
+
+        const getMaxHeadwordLength = getDictionaryDatabaseMethod('getMaxHeadwordLength');
+        const first = await getMaxHeadwordLength.call(context, ['Beta', 'Alpha', 'Beta']);
+        const second = await getMaxHeadwordLength.call(context, ['Alpha', 'Beta']);
+
+        expect(first).toBe(17);
+        expect(second).toBe(17);
+        expect(selectValue).toHaveBeenCalledTimes(1);
+        const firstCall = selectValue.mock.calls[0];
+        if (typeof firstCall === 'undefined') {
+            throw new Error('Expected selectValue to be called');
+        }
+        const [sql, bind] = /** @type {[string, Record<string, string>]} */ (/** @type {unknown} */ (firstCall));
+        expect(sql).toContain('WHERE dictionary IN');
+        expect(Object.values(bind)).toStrictEqual(['Alpha', 'Beta']);
+    });
+
     test('term mutations invalidate the memoized max headword length', async () => {
         const clearTermEntryContentMetaCaches = vi.fn();
         const bulkAddTerms = vi.fn(async () => {});
         const context = {
             _maxHeadwordLengthCache: 12,
+            _maxHeadwordLengthCacheByDictionaryKey: new Map([['Alpha\u001fBeta', 17]]),
             _requireDb: () => ({}),
             _invalidateMaxHeadwordLengthCache: getDictionaryDatabaseMethod('_invalidateMaxHeadwordLengthCache'),
             _lastBulkAddTermsMetrics: null,
@@ -92,6 +123,7 @@ describe('DictionaryDatabase max headword length cache', () => {
         await getDictionaryDatabaseMethod('bulkAdd').call(context, 'terms', [{}], 0, 1);
 
         expect(context._maxHeadwordLengthCache).toBeNull();
+        expect(context._maxHeadwordLengthCacheByDictionaryKey.size).toBe(0);
         expect(bulkAddTerms).toHaveBeenCalledTimes(1);
         expect(clearTermEntryContentMetaCaches).toHaveBeenCalledTimes(1);
     });

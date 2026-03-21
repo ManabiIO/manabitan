@@ -41,6 +41,18 @@ function getSearchAtMethod() {
 }
 
 /**
+ * @returns {(scanner: TextScanner, textSource: import('text-source').TextSource, optionsContext: import('settings').OptionsContext) => Promise<import('text-scanner').TermSearchResults|null>}
+ * @throws {Error}
+ */
+function getFindTermDictionaryEntriesMethod() {
+    const findTermDictionaryEntries = Reflect.get(TextScanner.prototype, '_findTermDictionaryEntries');
+    if (typeof findTermDictionaryEntries !== 'function') {
+        throw new Error('Expected TextScanner._findTermDictionaryEntries to be available');
+    }
+    return (scanner, textSource, optionsContext) => findTermDictionaryEntries.call(scanner, textSource, optionsContext);
+}
+
+/**
  * @param {string} text
  * @returns {import('text-source').TextSource}
  */
@@ -136,6 +148,7 @@ function createMockTermEntry() {
 describe('TextScanner lookup robustness', () => {
     const {window, teardown} = testEnv;
     const searchAt = getSearchAtMethod();
+    const findTermDictionaryEntries = getFindTermDictionaryEntriesMethod();
 
     afterAll(async () => {
         await teardown(global);
@@ -328,5 +341,42 @@ describe('TextScanner lookup robustness', () => {
             {x: 10, y: 10},
             {x: 30, y: 30},
         ]);
+    });
+
+    test('hover scan length diagnostics are included in term lookup timing', async () => {
+        const termsFindImpl = vi.fn().mockResolvedValue({
+            dictionaryEntries: [createMockTermEntry()],
+            originalTextLength: 2,
+        });
+        const termsFind = /** @type {import('../ext/js/comm/api.js').API['termsFind']} */ (/** @type {unknown} */ (termsFindImpl));
+        const scanner = createScanner(termsFind, [createFakeTextSource('暗記')]);
+        scanner.setOptions({
+            scanLength: 8,
+            hoverScanLengthDiagnostics: {
+                configuredScanLength: 24,
+                automaticScanLength: 12,
+                effectiveScanLength: 8,
+            },
+        });
+
+        const result = await findTermDictionaryEntries(
+            scanner,
+            createFakeTextSource('暗記'),
+            {
+                depth: 0,
+                url: 'https://example.test/',
+                modifiers: [],
+                modifierKeys: [],
+                pointerType: 'mouse',
+            },
+        );
+
+        expect(result).not.toBeNull();
+        expect(result?.timingDiagnostics).toMatchObject({
+            configuredScanLength: 24,
+            automaticScanLength: 12,
+            effectiveScanLength: 8,
+            scanLength: 8,
+        });
     });
 });

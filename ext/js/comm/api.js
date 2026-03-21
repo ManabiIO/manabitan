@@ -58,6 +58,14 @@ export class API {
     }
 
     /**
+     * @param {import('api').ApiParam<'getEffectiveHoverScanLength', 'optionsContext'>} optionsContext
+     * @returns {Promise<import('api').ApiReturn<'getEffectiveHoverScanLength'>>}
+     */
+    getEffectiveHoverScanLength(optionsContext) {
+        return this._invoke('getEffectiveHoverScanLength', {optionsContext});
+    }
+
+    /**
      * @param {import('api').ApiParam<'termsFind', 'text'>} text
      * @param {import('api').ApiParam<'termsFind', 'details'>} details
      * @param {import('api').ApiParam<'termsFind', 'optionsContext'>} optionsContext

@@ -263,6 +263,8 @@ export class Backend {
          *     language: string,
          * }>} */
         this._translatorProfileOptionsCache = new WeakMap();
+        /** @type {Map<string, number>} */
+        this._effectiveScanLengthMaxHeadwordLengthCache = new Map();
 
         /* eslint-disable @stylistic/no-multi-spaces */
         /** @type {import('api').ApiMap} */
@@ -271,6 +273,7 @@ export class Backend {
             ['requestBackendReadySignal',    this._onApiRequestBackendReadySignal.bind(this)],
             ['optionsGet',                   this._onApiOptionsGet.bind(this)],
             ['optionsGetFull',               this._onApiOptionsGetFull.bind(this)],
+            ['getEffectiveHoverScanLength',  this._onApiGetEffectiveHoverScanLength.bind(this)],
             ['kanjiFind',                    this._onApiKanjiFind.bind(this)],
             ['termsFind',                    this._onApiTermsFind.bind(this)],
             ['parseText',                    this._onApiParseText.bind(this)],
@@ -833,12 +836,23 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'optionsGet'>} */
     async _onApiOptionsGet({optionsContext}) {
-        return await this._createEffectiveProfileOptions(optionsContext);
+        return clone(this._getProfileOptions(optionsContext, false));
     }
 
     /** @type {import('api').ApiHandler<'optionsGetFull'>} */
     _onApiOptionsGetFull() {
         return this._getOptionsFull(false);
+    }
+
+    /** @type {import('api').ApiHandler<'getEffectiveHoverScanLength'>} */
+    async _onApiGetEffectiveHoverScanLength({optionsContext}) {
+        const options = this._getProfileOptions(optionsContext, false);
+        try {
+            await this._ensureDictionaryDatabaseReady();
+        } catch (_) {
+            return options.scanning.length;
+        }
+        return await this._getEffectiveHoverScanLength(options.scanning.length, options);
     }
 
     /** @type {import('api').ApiHandler<'kanjiFind'>} */
@@ -2407,9 +2421,33 @@ export class Backend {
      * @returns {Promise<import('settings').ProfileOptions>}
      */
     async _createEffectiveProfileOptions(optionsContext) {
-        const options = clone(this._getProfileOptions(optionsContext, false));
-        options.scanning.length = await this._getEffectiveScanLength(options.scanning.length);
-        return options;
+        return clone(this._getProfileOptions(optionsContext, false));
+    }
+
+    /**
+     * @param {import('settings').ProfileOptions} options
+     * @returns {string[]}
+     */
+    _getEnabledDictionaryNames(options) {
+        const names = [];
+        const seen = new Set();
+        for (const dictionary of options.dictionaries) {
+            if (dictionary.enabled !== true) { continue; }
+            const name = String(dictionary.name || '').trim();
+            if (name.length === 0 || seen.has(name)) { continue; }
+            seen.add(name);
+            names.push(name);
+        }
+        names.sort();
+        return names;
+    }
+
+    /**
+     * @param {string[]} dictionaryNames
+     * @returns {string}
+     */
+    _getDictionarySetCacheKey(dictionaryNames) {
+        return dictionaryNames.join('\u001f');
     }
 
     /**
@@ -2443,9 +2481,10 @@ export class Backend {
     /**
      * @param {object} [root0]
      * @param {boolean} [root0.allowDuringMutation=false]
+     * @param {string[]|null} [root0.dictionaryNames=null]
      * @returns {Promise<number|null>}
      */
-    async _computeMaxHeadwordLengthFromDatabase({allowDuringMutation = false} = {}) {
+    async _computeMaxHeadwordLengthFromDatabase({allowDuringMutation = false, dictionaryNames = null} = {}) {
         if (this._dictionaryImportModeActive) {
             return null;
         }
@@ -2461,7 +2500,7 @@ export class Backend {
         }
 
         try {
-            const value = await /** @type {() => Promise<number>} */ (getMaxHeadwordLength).call(this._dictionaryDatabase);
+            const value = await /** @type {(dictionaryNames?: string[]|null) => Promise<number>} */ (getMaxHeadwordLength).call(this._dictionaryDatabase, dictionaryNames);
             if (!(typeof value === 'number' && Number.isFinite(value))) {
                 return 0;
             }
@@ -2473,21 +2512,49 @@ export class Backend {
 
     /**
      * @param {number} legacyScanLength
+     * @param {import('settings').ProfileOptions} options
      * @returns {Promise<number>}
      */
-    async _getEffectiveScanLength(legacyScanLength) {
-        const cached = this._getStoredGlobalMaxHeadwordLength();
-        if (cached > 0) {
-            return cached + SCAN_LENGTH_INFLECTION_BUFFER;
+    async _getEffectiveScanLength(legacyScanLength, options) {
+        return await this._getEffectiveHoverScanLength(legacyScanLength, options);
+    }
+
+    /**
+     * @param {number} legacyScanLength
+     * @param {import('settings').ProfileOptions} options
+     * @returns {Promise<number>}
+     */
+    async _getEffectiveHoverScanLength(legacyScanLength, options) {
+        const enabledDictionaryNames = this._getEnabledDictionaryNames(options);
+        if (enabledDictionaryNames.length === 0) {
+            return legacyScanLength;
         }
 
-        const computed = await this._computeMaxHeadwordLengthFromDatabase();
+        const allInstalledDictionariesEnabled = (enabledDictionaryNames.length === options.dictionaries.length);
+        const cachedGlobal = (allInstalledDictionariesEnabled ? this._getStoredGlobalMaxHeadwordLength() : 0);
+        if (cachedGlobal > 0) {
+            const effectiveCachedGlobal = cachedGlobal + SCAN_LENGTH_INFLECTION_BUFFER;
+            return Math.max(1, Math.min(legacyScanLength, effectiveCachedGlobal));
+        }
+
+        const cacheKey = this._getDictionarySetCacheKey(enabledDictionaryNames);
+        const cached = this._effectiveScanLengthMaxHeadwordLengthCache.get(cacheKey);
+        if (typeof cached === 'number') {
+            const effectiveCached = cached + SCAN_LENGTH_INFLECTION_BUFFER;
+            return Math.max(1, Math.min(legacyScanLength, effectiveCached));
+        }
+
+        const computed = await this._computeMaxHeadwordLengthFromDatabase({dictionaryNames: enabledDictionaryNames});
         if (computed === null || computed <= 0) {
             return legacyScanLength;
         }
 
-        await this._setGlobalMaxHeadwordLength(computed, 'background');
-        return computed + SCAN_LENGTH_INFLECTION_BUFFER;
+        this._effectiveScanLengthMaxHeadwordLengthCache.set(cacheKey, computed);
+        if (allInstalledDictionariesEnabled) {
+            await this._setGlobalMaxHeadwordLength(computed, 'background');
+        }
+        const effectiveComputed = computed + SCAN_LENGTH_INFLECTION_BUFFER;
+        return Math.max(1, Math.min(legacyScanLength, effectiveComputed));
     }
 
     /**
@@ -2512,6 +2579,7 @@ export class Backend {
      */
     async _handleDatabaseUpdated(type, cause) {
         if (type === 'dictionary') {
+            this._effectiveScanLengthMaxHeadwordLengthCache.clear();
             await this._refreshCachedMaxHeadwordLength('background', {allowDuringMutation: this._dictionaryMutationActive});
         }
         this._triggerDatabaseUpdated(type, cause);

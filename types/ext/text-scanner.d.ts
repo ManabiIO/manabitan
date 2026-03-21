@@ -36,6 +36,7 @@ export type Options = {
     selectText?: boolean;
     delay?: number;
     scanLength?: number;
+    hoverScanLengthDiagnostics?: HoverScanLengthDiagnostics | null;
     layoutAwareScan?: boolean;
     preventMiddleMouseOnPage?: boolean;
     preventMiddleMouseOnTextHover?: boolean;
@@ -46,6 +47,12 @@ export type Options = {
     scanWithoutMousemove?: boolean;
     scanResolution?: string;
     pageType?: PageType;
+};
+
+export type HoverScanLengthDiagnostics = {
+    configuredScanLength: number;
+    automaticScanLength: number | null;
+    effectiveScanLength: number;
 };
 
 export type InputOptionsOuter = {

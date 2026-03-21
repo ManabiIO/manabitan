@@ -120,6 +120,12 @@ export class TextScanner extends EventDispatcher {
         this._delay = 0;
         /** @type {number} */
         this._scanLength = 1;
+        /** @type {?{
+         * configuredScanLength: number,
+         * automaticScanLength: number | null,
+         * effectiveScanLength: number,
+         * }} */
+        this._hoverScanLengthDiagnostics = null;
         /** @type {boolean} */
         this._layoutAwareScan = false;
         /** @type {boolean} */
@@ -281,6 +287,7 @@ export class TextScanner extends EventDispatcher {
         selectText,
         delay,
         scanLength,
+        hoverScanLengthDiagnostics,
         layoutAwareScan,
         preventMiddleMouseOnPage,
         preventMiddleMouseOnTextHover,
@@ -307,6 +314,12 @@ export class TextScanner extends EventDispatcher {
         }
         if (typeof scanLength === 'number') {
             this._scanLength = scanLength;
+        }
+        if (
+            hoverScanLengthDiagnostics === null ||
+            (typeof hoverScanLengthDiagnostics === 'object' && !Array.isArray(hoverScanLengthDiagnostics))
+        ) {
+            this._hoverScanLengthDiagnostics = hoverScanLengthDiagnostics;
         }
         if (typeof layoutAwareScan === 'boolean') {
             this._layoutAwareScan = layoutAwareScan;
@@ -1334,13 +1347,16 @@ export class TextScanner extends EventDispatcher {
      */
     async _findTermDictionaryEntries(textSource, optionsContext) {
         const scanLength = this._scanLength;
+        const hoverScanLengthDiagnostics = this._hoverScanLengthDiagnostics;
         const sentenceScanExtent = this._sentenceScanExtent;
         const sentenceTerminateAtNewlines = this._sentenceTerminateAtNewlines;
         const sentenceTerminatorMap = this._sentenceTerminatorMap;
         const sentenceForwardQuoteMap = this._sentenceForwardQuoteMap;
         const sentenceBackwardQuoteMap = this._sentenceBackwardQuoteMap;
         const layoutAwareScan = this._layoutAwareScan;
+        const getSearchTextStartedAt = safePerformance.now();
         const searchText = this.getTextSourceContent(textSource, scanLength, layoutAwareScan, optionsContext.pointerType);
+        const getSearchTextElapsedMs = Math.max(0, safePerformance.now() - getSearchTextStartedAt);
         if (searchText.length === 0) { return null; }
 
         /** @type {import('api').FindTermsDetails} */
@@ -1395,6 +1411,9 @@ export class TextScanner extends EventDispatcher {
             sentence,
             type: 'terms',
             timingDiagnostics: {
+                ...(hoverScanLengthDiagnostics !== null ? hoverScanLengthDiagnostics : {}),
+                scanLength,
+                getSearchTextElapsedMs,
                 searchTextLength: searchText.length,
                 originalTextLength,
                 apiTermsFindElapsedMs,
@@ -1462,6 +1481,7 @@ export class TextScanner extends EventDispatcher {
 
         const lookupSequence = ++this._lookupSequence;
         this._activeLookupSequence = lookupSequence;
+        const hoverScanLengthDiagnostics = this._hoverScanLengthDiagnostics;
         /** @type {?import('text-source').TextSource} */
         let activeTextSource = null;
         /** @type {Record<string, unknown>} */
@@ -1473,6 +1493,9 @@ export class TextScanner extends EventDispatcher {
             eventType: inputInfo.eventType,
             passive: inputInfo.passive,
         };
+        if (hoverScanLengthDiagnostics !== null) {
+            Object.assign(hoverTimingDiagnostics, hoverScanLengthDiagnostics);
+        }
         const totalStartedAt = safePerformance.now();
         try {
             safePerformance.mark('scanner:_searchAt:start');

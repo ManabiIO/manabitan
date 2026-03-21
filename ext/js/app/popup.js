@@ -70,6 +70,10 @@ export class Popup extends EventDispatcher {
         this._visibleValue = false;
         /** @type {?import('settings').OptionsContext} */
         this._optionsContext = null;
+        /** @type {?import('settings').ProfileOptions} */
+        this._options = null;
+        /** @type {boolean} */
+        this._displayResolvedOptionsPending = true;
         /** @type {number} */
         this._contentScale = 1;
         /** @type {string} */
@@ -227,9 +231,10 @@ export class Popup extends EventDispatcher {
     /**
      * Sets the options context for the popup.
      * @param {import('settings').OptionsContext} optionsContext The options context object.
+     * @param {?import('settings').ProfileOptions} [resolvedOptions=null]
      */
-    async setOptionsContext(optionsContext) {
-        await this._setOptionsContext(optionsContext);
+    async setOptionsContext(optionsContext, resolvedOptions = null) {
+        await this._setOptionsContext(optionsContext, resolvedOptions);
         if (this._frameConnected) {
             await this._invokeSafe('displaySetOptionsContext', {optionsContext});
         }
@@ -361,6 +366,7 @@ export class Popup extends EventDispatcher {
         let serializeDisplayDetailsElapsedMs = 0;
         let serializedDictionaryEntries = false;
         let serializedDictionaryEntriesLength = 0;
+        const includeResolvedOptions = (this._displayResolvedOptionsPending && this._options !== null);
         if (displayDetails !== null) {
             const content = Reflect.get(displayDetails, 'content');
             const dictionaryEntriesJson = (
@@ -428,6 +434,8 @@ export class Popup extends EventDispatcher {
                     serializeDisplayDetailsElapsedMs,
                     serializedDictionaryEntries,
                     serializedDictionaryEntriesLength,
+                    includedResolvedOptions: includeResolvedOptions,
+                    includedResolvedOptionsDictionaryCount: includeResolvedOptions ? this._options?.dictionaries.length ?? 0 : 0,
                     displaySetContentCompletedElapsedMs,
                     totalElapsedMs: Math.max(0, safePerformance.now() - totalStartedAt),
                     ...showTimingDiagnostics,
@@ -439,8 +447,14 @@ export class Popup extends EventDispatcher {
         if (displayDetails !== null) {
             safePerformance.mark('invokeDisplaySetContent:start');
             const displaySetContentStartedAt = safePerformance.now();
-            void this._invokeSafe('displaySetContent', {details: /** @type {import('display').ContentDetails} */ (displayDetailsMessage)}).then(
+            void this._invokeSafe('displaySetContent', {
+                details: /** @type {import('display').ContentDetails} */ (displayDetailsMessage),
+                resolvedOptions: includeResolvedOptions ? this._options ?? void 0 : void 0,
+            }).then(
                 () => {
+                    if (includeResolvedOptions) {
+                        this._displayResolvedOptionsPending = false;
+                    }
                     publishDiagnostics('success', null, Math.max(0, safePerformance.now() - displaySetContentStartedAt));
                 },
                 (error) => {
@@ -673,6 +687,7 @@ export class Popup extends EventDispatcher {
         this._frameClient = frameClient;
         await frameClient.connect(this._frame, this._targetOrigin, this._frameId, setupFrame);
         this._frameConnected = true;
+        this._displayResolvedOptionsPending = true;
 
         // Reattach mouse event listeners after frame injection
         const boundMouseOver = this._onFrameMouseOver.bind(this);
@@ -716,6 +731,7 @@ export class Popup extends EventDispatcher {
         this._frameConnected = false;
         this._injectPromise = null;
         this._injectPromiseComplete = false;
+        this._displayResolvedOptionsPending = true;
     }
 
     /**
@@ -1218,10 +1234,19 @@ export class Popup extends EventDispatcher {
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {?import('settings').ProfileOptions} [resolvedOptions=null]
      */
-    async _setOptionsContext(optionsContext) {
+    async _setOptionsContext(optionsContext, resolvedOptions = null) {
         this._optionsContext = optionsContext;
-        const options = await this._application.api.optionsGet(optionsContext);
+        const options = (
+            typeof resolvedOptions === 'object' &&
+            resolvedOptions !== null &&
+            !Array.isArray(resolvedOptions)
+        ) ?
+            /** @type {import('settings').ProfileOptions} */ (resolvedOptions) :
+            await this._application.api.optionsGet(optionsContext);
+        this._options = options;
+        this._displayResolvedOptionsPending = true;
         const {general, scanning} = options;
         this._themeController.theme = general.popupTheme;
         this._themeController.themePreset = general.popupThemePreset;
