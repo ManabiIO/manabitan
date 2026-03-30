@@ -47,12 +47,12 @@ export type ImportDebug = {
 export type ImportPhaseTiming = {
     phase: string;
     elapsedMs: number;
-    details?: Record<string, string | number | boolean | null>;
+    details?: Record<string, unknown>;
 };
 
 export type ImportDetails = {
-    prefixWildcardsSupported: boolean;
-    yomitanVersion: string;
+    prefixWildcardsSupported?: boolean;
+    yomitanVersion?: string;
     existingDatabaseContentBase64?: string;
     useImportSession?: boolean;
     finalizeImportSession?: boolean;
@@ -66,6 +66,8 @@ export type ImportDetails = {
     termContentStorageMode?: 'baseline' | 'raw-bytes';
     expectedTermContentImportBytes?: number;
     preserveCompressedMedia?: boolean;
+    skipMediaImport?: boolean;
+    updateSessionToken?: string | null;
 };
 
 export type DictionaryAutoUpdateSchedule = 'manual' | 'hourly' | 'daily' | 'weekly';
@@ -78,6 +80,10 @@ export type DictionaryAutoUpdateInfo = {
 
 export type Summary = {
     title: string;
+    sourceTitle?: string | null;
+    replacedDictionaryTitle?: string | null;
+    transientUpdateStage?: string | null;
+    updateSessionToken?: string | null;
     revision: string;
     sequenced: boolean;
     minimumYomitanVersion?: string;

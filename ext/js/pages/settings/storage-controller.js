@@ -128,7 +128,7 @@ export class StorageController {
         if (this._storageRuntimeCheckNode === null) { return; }
         const userAgent = typeof navigator.userAgent === 'string' ? navigator.userAgent : '';
         const browserLabel = /Firefox\//i.test(userAgent) ? 'Firefox runtime' : 'Extension runtime';
-        const storageValue = /** @type {Record<string, unknown>} */ (Reflect.get(navigator, 'storage') ?? {});
+        const storageValue = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (Reflect.get(navigator, 'storage') ?? {}));
         const hasStorageGetDirectory = typeof Reflect.get(storageValue, 'getDirectory') === 'function';
         const hasCreateSyncAccessHandle = (
             typeof Reflect.get(globalThis, 'FileSystemFileHandle') === 'function' &&

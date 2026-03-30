@@ -400,6 +400,7 @@ export class DisplayAudio {
 
     /** */
     async _refreshDataTransmissionConsentState() {
+        /** @type {import('core').TokenObject} */
         const token = {};
         this._consentStateToken = token;
         try {

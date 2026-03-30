@@ -49,7 +49,7 @@ export type NoteInfoWrapper = {
     valid: boolean;
     isDuplicate: boolean;
     noteIds: NoteId[] | null;
-    noteInfos?: (NoteInfo | null)[];
+    noteInfos?: (NoteInfo | null)[] | null;
 };
 
 export type NoteInfo = {

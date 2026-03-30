@@ -17,6 +17,7 @@
  */
 
 import {EventDispatcher} from '../../core/event-dispatcher.js';
+import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {
     getDataTransmissionConsentStateFromOptionsFull,
@@ -208,6 +209,7 @@ export class AudioController extends EventDispatcher {
             this._setDataTransmissionConsentState('accepted');
             return;
         }
+        /** @type {import('core').TokenObject} */
         const token = {};
         this._consentStateToken = token;
         try {

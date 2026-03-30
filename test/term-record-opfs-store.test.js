@@ -19,16 +19,29 @@ import {describe, expect, test} from 'vitest';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME} from '../ext/js/dictionary/raw-term-content.js';
 
+/**
+ * @param {Map<string, Uint8Array>} fileBytesByName
+ * @param {{removeEntryFailures?: Map<string, number>}} [options]
+ * @returns {FileSystemDirectoryHandle}
+ */
 function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new Map()} = {}) {
-    return {
-        async getFileHandle(name, {create} = {create: false}) {
+    return /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+        async getFileHandle(/** @type {string} */ name, {create} = {create: false}) {
             if (!fileBytesByName.has(name)) {
                 if (!create) {
                     throw new Error(`File not found: ${name}`);
                 }
                 fileBytesByName.set(name, new Uint8Array());
             }
-            return {
+            return /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+                kind: 'file',
+                name,
+                async isSameEntry() {
+                    return false;
+                },
+                async createSyncAccessHandle() {
+                    throw new Error('SyncAccessHandle not implemented in test double');
+                },
                 async getFile() {
                     const bytes = fileBytesByName.get(name) ?? new Uint8Array();
                     return {
@@ -41,26 +54,28 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
                 async createWritable() {
                     let nextBytes = fileBytesByName.get(name) ?? new Uint8Array();
                     return {
-                        async truncate(length) {
+                        async truncate(/** @type {number} */ length) {
                             nextBytes = nextBytes.slice(0, Math.max(0, length));
                         },
-                        async write(value) {
+                        async write(/** @type {FileSystemWriteChunkType} */ value) {
                             if (value instanceof ArrayBuffer) {
                                 nextBytes = new Uint8Array(value.slice(0));
                                 return;
                             }
                             if (ArrayBuffer.isView(value)) {
                                 nextBytes = new Uint8Array(value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength));
+                                return;
                             }
+                            throw new Error(`Unsupported write value: ${String(value)}`);
                         },
                         async close() {
                             fileBytesByName.set(name, nextBytes);
                         },
                     };
                 },
-            };
+            }));
         },
-        async removeEntry(name) {
+        async removeEntry(/** @type {string} */ name) {
             const failuresRemaining = removeEntryFailures.get(name) ?? 0;
             if (failuresRemaining > 0) {
                 removeEntryFailures.set(name, failuresRemaining - 1);
@@ -73,7 +88,7 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
                 yield [name, {kind: 'file'}];
             }
         },
-    };
+    }));
 }
 
 describe('TermRecordOpfsStore', () => {

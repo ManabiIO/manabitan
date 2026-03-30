@@ -246,7 +246,7 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
 }
 
 /**
- * @param {{rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[]}} chunk
+ * @param {{rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
  * @param {number[]} contentOffsets
  * @param {number[]} contentLengths
  * @param {TextEncoder} textEncoder

@@ -395,6 +395,11 @@ class OffscreenDictionaryWorkerHandler {
         }
     }
 
+    /**
+     * @param {string} text
+     * @param {string[]} dictionaryNames
+     * @returns {Promise<unknown>}
+     */
     async _debugDictionaryLookupState(text, dictionaryNames) {
         const ensureIndex = Reflect.get(this._dictionaryDatabase, '_ensureDirectTermIndex');
         const fetchTermRowsByIds = Reflect.get(this._dictionaryDatabase, '_fetchTermRowsByIds');
@@ -461,8 +466,8 @@ class OffscreenDictionaryWorkerHandler {
             const dictionaryName = String(dictionaryNameRaw || '').trim();
             if (dictionaryName.length === 0) { continue; }
             const index = ensureIndex.call(this._dictionaryDatabase, dictionaryName);
-            const expressionIds = Array.isArray(index?.expression?.get?.(text)) ? index.expression.get(text) : [];
-            const readingIds = Array.isArray(index?.reading?.get?.(text)) ? index.reading.get(text) : [];
+            const expressionIds = Array.isArray(index?.expression?.get?.(text)) ? /** @type {number[]} */ (index.expression.get(text)) : [];
+            const readingIds = Array.isArray(index?.reading?.get?.(text)) ? /** @type {number[]} */ (index.reading.get(text)) : [];
             for (const id of expressionIds) {
                 if (typeof id === 'number' && id > 0 && !ids.has(id)) {
                     ids.set(id, {dictionary: dictionaryName, matchSource: 'expression'});

@@ -34,6 +34,10 @@ let sqliteInitDiagnosticsReported = false;
 /** @type {{mode: string, caller: string, runtimeContext: ReturnType<typeof getRuntimeContextDiagnostics>|null, forceFallback: boolean, opfsReadyTimeoutMs: number, opfsReadyWait: {attempts: number, elapsedMs: number, ready: boolean}|null, hasOpfsDbCtor: boolean, hasOpfsImportDb: boolean, hasWasmfsDir: boolean, hasInstallOpfsSAHPoolVfs: boolean, hasOpfsVfs: boolean, hasOpfsSahpoolVfs: boolean, opfsVfsPtr: string|number|null, opfsSahpoolVfsPtr: string|number|null, opfsSahpoolInstallAttempted: boolean, opfsSahpoolInstallResult: string|null, opfsSahpoolInstallError: string|null, opfsSahpoolDirectory: string|null, opfsSahpoolCapacity: number|null, opfsSahpoolFileCount: number|null, opfsSahpoolFileNames: string[]|null, openFailureClass: 'unsupported-opfs'|'lock-contention'|'corruption'|'transient-open-race'|'worker-required'|'unknown'|null, attempts?: Array<{strategy: string, target: string, flags: string, error: string, errorClass: 'unsupported-opfs'|'lock-contention'|'corruption'|'transient-open-race'|'worker-required'|'unknown'}>, lastError?: string|null}} */
 let lastOpenStorageDiagnostics = createInitialDiagnostics('unknown');
 
+/**
+ * @param {string} caller
+ * @returns {typeof lastOpenStorageDiagnostics}
+ */
 function createInitialDiagnostics(caller) {
     return {
         mode: 'unknown',
@@ -253,6 +257,7 @@ export async function getSqlite3() {
         return await sqlite3Promise;
     }
     const initWithOptions = /** @type {(options: {locateFile: (file: string) => string}) => Promise<import('@sqlite.org/sqlite-wasm').Sqlite3Static>} */ (sqlite3InitModule);
+    /** @param {string} file */
     const locateFile = (file) => new URL(`../../lib/sqlite/${file}`, import.meta.url).href;
     sqlite3Promise = initWithOptions({locateFile});
     const sqlite3 = await sqlite3Promise;

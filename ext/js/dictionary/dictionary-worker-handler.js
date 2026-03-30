@@ -159,28 +159,31 @@ export class DictionaryWorkerHandler {
         }
         try {
             const dictionaryImporter = new DictionaryImporter(this._mediaLoader, onProgress);
+            /** @param {unknown} error */
             const isReadonlyError = (error) => {
                 const message = (error instanceof Error) ? error.message : String(error);
                 return /readonly database|SQLITE_READONLY/i.test(message);
             };
+            const detailsRecord = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (details));
             const dictionaryTitleOverride = (
                 typeof details === 'object' &&
                 details !== null &&
                 !Array.isArray(details) &&
-                typeof Reflect.get(details, 'dictionaryTitleOverride') === 'string' &&
-                Reflect.get(details, 'dictionaryTitleOverride').trim().length > 0
+                typeof Reflect.get(detailsRecord, 'dictionaryTitleOverride') === 'string' &&
+                /** @type {string} */ (Reflect.get(detailsRecord, 'dictionaryTitleOverride')).trim().length > 0
             ) ?
-                Reflect.get(details, 'dictionaryTitleOverride').trim() :
+                /** @type {string} */ (Reflect.get(detailsRecord, 'dictionaryTitleOverride')).trim() :
                 null;
             const replacementDictionaryTitle = (
                 typeof details === 'object' &&
                 details !== null &&
                 !Array.isArray(details) &&
-                typeof Reflect.get(details, 'replacementDictionaryTitle') === 'string' &&
-                Reflect.get(details, 'replacementDictionaryTitle').trim().length > 0
+                typeof Reflect.get(detailsRecord, 'replacementDictionaryTitle') === 'string' &&
+                /** @type {string} */ (Reflect.get(detailsRecord, 'replacementDictionaryTitle')).trim().length > 0
             ) ?
-                Reflect.get(details, 'replacementDictionaryTitle').trim() :
+                /** @type {string} */ (Reflect.get(detailsRecord, 'replacementDictionaryTitle')).trim() :
                 null;
+            /** @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase */
             const cleanupTransientReplacementTitles = async (activeDictionaryDatabase) => {
                 const transientTitleCandidates = new Set();
                 const transientTitlePattern = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
@@ -206,7 +209,7 @@ export class DictionaryWorkerHandler {
                         dictionaryInfo &&
                         typeof dictionaryInfo === 'object' &&
                         typeof Reflect.get(dictionaryInfo, 'updateSessionToken') === 'string'
-                    ) ? Reflect.get(dictionaryInfo, 'updateSessionToken').trim() : '';
+                    ) ? /** @type {string} */ (Reflect.get(dictionaryInfo, 'updateSessionToken')).trim() : '';
                     if (
                         transientTitlePattern.test(title) &&
                         (
@@ -225,7 +228,7 @@ export class DictionaryWorkerHandler {
                         // NOP - best effort cleanup before retry.
                     }
                 }
-                await activeDictionaryDatabase.cleanupTransientTermRecordShards((dictionaryName) => {
+                await activeDictionaryDatabase.cleanupTransientTermRecordShards((/** @type {string} */ dictionaryName) => {
                     const title = String(dictionaryName || '').trim();
                     if (title.length === 0) {
                         return false;
@@ -239,6 +242,7 @@ export class DictionaryWorkerHandler {
                     );
                 });
             };
+            /** @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase */
             const importOnce = async (activeDictionaryDatabase) => {
                 const importPayload = await dictionaryImporter.importDictionary(activeDictionaryDatabase, archiveContent, details);
                 let {result, errors} = importPayload;
@@ -250,9 +254,9 @@ export class DictionaryWorkerHandler {
                     typeof result === 'object' &&
                     !Array.isArray(result) &&
                     typeof Reflect.get(result, 'sourceTitle') === 'string' &&
-                    Reflect.get(result, 'sourceTitle').trim().length > 0
+                    /** @type {string} */ (Reflect.get(result, 'sourceTitle')).trim().length > 0
                 ) ?
-                    Reflect.get(result, 'sourceTitle').trim() :
+                    /** @type {string} */ (Reflect.get(result, 'sourceTitle')).trim() :
                     ((result !== null && typeof result?.title === 'string') ? result.title.trim() : '');
                 if (
                     result !== null &&

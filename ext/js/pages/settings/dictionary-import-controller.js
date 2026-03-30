@@ -168,7 +168,7 @@ function getOpfsUnavailableUserMessage(message) {
     const base = OPFS_REQUIRED_USER_MESSAGE;
     const userAgent = typeof navigator?.userAgent === 'string' ? navigator.userAgent : '';
     const isFirefoxRuntime = /Firefox\//i.test(userAgent);
-    const storageValue = /** @type {Record<string, unknown>} */ (Reflect.get(navigator ?? {}, 'storage') ?? {});
+    const storageValue = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (Reflect.get(navigator ?? {}, 'storage') ?? {}));
     const hasStorageGetDirectoryFallback = typeof Reflect.get(storageValue, 'getDirectory') === 'function';
     const hasCreateSyncAccessHandleFallback = (
         typeof Reflect.get(globalThis, 'FileSystemFileHandle') === 'function' &&
@@ -205,9 +205,9 @@ function getOpfsUnavailableUserMessage(message) {
         const opfsSahpoolVfs = typeof Reflect.get(diagnostics, 'hasOpfsSahpoolVfs') === 'boolean' ? Reflect.get(diagnostics, 'hasOpfsSahpoolVfs') : null;
         const attempts = Array.isArray(Reflect.get(diagnostics, 'attempts')) ? Reflect.get(diagnostics, 'attempts') : [];
         const lastSahpoolOpenError = attempts
-            .filter((attempt) => typeof Reflect.get(attempt ?? {}, 'strategy') === 'string' && Reflect.get(attempt ?? {}, 'strategy') === 'uri-opfs-sahpool')
-            .map((attempt) => typeof Reflect.get(attempt ?? {}, 'error') === 'string' ? Reflect.get(attempt ?? {}, 'error') : '')
-            .filter((value) => value.length > 0)
+            .filter((/** @type {unknown} */ attempt) => typeof Reflect.get(attempt ?? {}, 'strategy') === 'string' && Reflect.get(attempt ?? {}, 'strategy') === 'uri-opfs-sahpool')
+            .map((/** @type {unknown} */ attempt) => typeof Reflect.get(attempt ?? {}, 'error') === 'string' ? Reflect.get(attempt ?? {}, 'error') : '')
+            .filter((/** @type {string} */ value) => value.length > 0)
             .at(-1) ?? null;
         const runtimeUserAgent = typeof Reflect.get(runtimeContext ?? {}, 'userAgent') === 'string' ? Reflect.get(runtimeContext ?? {}, 'userAgent') : '';
         const isFirefoxRuntimeFromDiagnostics = /Firefox\//i.test(runtimeUserAgent) || isFirefoxRuntime;
@@ -1143,7 +1143,12 @@ export class DictionaryImportController {
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
      */
-    async importFilesFromURLs(text, profilesDictionarySettings, onImportDone, importDetailsOverrides = null) {
+    async importFilesFromURLs(
+        text,
+        profilesDictionarySettings,
+        onImportDone,
+        /** @type {Partial<import('dictionary-importer').ImportDetails>|null} */ importDetailsOverrides = null,
+    ) {
         const urls = text.split('\n');
 
         const importProgressTracker = new ImportProgressTracker(this._getUrlImportSteps(), urls.length);
@@ -1162,7 +1167,12 @@ export class DictionaryImportController {
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
      */
-    async importFiles(files, profilesDictionarySettings, onImportDone, importDetailsOverrides = null) {
+    async importFiles(
+        files,
+        profilesDictionarySettings,
+        onImportDone,
+        /** @type {Partial<import('dictionary-importer').ImportDetails>|null} */ importDetailsOverrides = null,
+    ) {
         const importProgressTracker = new ImportProgressTracker(this._getFileImportSteps(), files.length);
         void this._importDictionaries(
             this._arrayToAsyncGenerator(files),
@@ -1344,7 +1354,13 @@ export class DictionaryImportController {
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
      * @param {ImportProgressTracker} importProgressTracker
      */
-    async _importDictionaries(dictionaries, profilesDictionarySettings, onImportDone, importProgressTracker, importDetailsOverrides = null) {
+    async _importDictionaries(
+        dictionaries,
+        profilesDictionarySettings,
+        onImportDone,
+        importProgressTracker,
+        /** @type {Partial<import('dictionary-importer').ImportDetails>|null} */ importDetailsOverrides = null,
+    ) {
         if (this._modifying) { return; }
 
         const statusFooter = this._statusFooter;

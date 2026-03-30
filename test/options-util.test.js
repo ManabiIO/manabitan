@@ -720,6 +720,7 @@ function createOptionsUpdatedTestData1() {
             },
             dataTransmissionConsentShown: false,
             dictionaryAutoUpdates: [],
+            dataTransmissionConsentState: 'unknown',
         },
     };
 }
