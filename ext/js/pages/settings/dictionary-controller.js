@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2026  Yomitan Authors
+ * Copyright (C) 2023-2025  Yomitan Authors
  * Copyright (C) 2020-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,66 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import * as ajvSchemas0 from '../../../lib/validate-schemas.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {deferPromise} from '../../core/utilities.js';
+import {compareRevisions} from '../../dictionary/dictionary-data-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
-const DICTIONARY_AUTO_UPDATE_SCHEDULE_SET = new Set(['manual', 'hourly', 'daily', 'weekly']);
-const DICTIONARY_AUTO_UPDATE_SCHEDULE_LABELS = Object.freeze({
-    manual: 'Manual',
-    hourly: 'Hourly',
-    daily: 'Daily',
-    weekly: 'Weekly',
-});
-const DICTIONARY_AUTO_UPDATE_SCHEDULE_DESCRIPTIONS = Object.freeze({
-    manual: 'Updates must be started manually.',
-    hourly: 'Checks for updates every hour and installs them automatically.',
-    daily: 'Checks for updates every day and installs them automatically.',
-    weekly: 'Checks for updates every week and installs them automatically.',
-});
-const DICTIONARY_AUTO_UPDATE_DATE_TIME_FORMATTER = new Intl.DateTimeFormat([], {dateStyle: 'medium', timeStyle: 'short'});
-
-/**
- * @param {string} value
- * @returns {value is import('dictionary-importer').DictionaryAutoUpdateSchedule}
- */
-function isDictionaryAutoUpdateSchedule(value) {
-    return DICTIONARY_AUTO_UPDATE_SCHEDULE_SET.has(value);
-}
-
-/**
- * @param {string} [schedule='']
- * @returns {import('dictionary-importer').DictionaryAutoUpdateSchedule}
- */
-function normalizeDictionaryAutoUpdateSchedule(schedule = '') {
-    return isDictionaryAutoUpdateSchedule(schedule) ? schedule : 'manual';
-}
-
-/**
- * @param {import('dictionary-importer').DictionaryAutoUpdateSchedule} schedule
- * @returns {string}
- */
-function getDictionaryAutoUpdateScheduleLabel(schedule) {
-    return DICTIONARY_AUTO_UPDATE_SCHEDULE_LABELS[schedule];
-}
-
-/**
- * @param {import('dictionary-importer').DictionaryAutoUpdateSchedule} schedule
- * @returns {string}
- */
-function getDictionaryAutoUpdateScheduleDescription(schedule) {
-    return DICTIONARY_AUTO_UPDATE_SCHEDULE_DESCRIPTIONS[schedule];
-}
-
-/**
- * @param {number|undefined|null} timestamp
- * @param {string} fallback
- * @returns {string}
- */
-function formatDictionaryAutoUpdateTimestamp(timestamp, fallback) {
-    return (typeof timestamp === 'number' && Number.isFinite(timestamp)) ? DICTIONARY_AUTO_UPDATE_DATE_TIME_FORMATTER.format(timestamp) : fallback;
-}
+const ajvSchemas = /** @type {import('dictionary-importer').CompiledSchemaValidators} */ (/** @type {unknown} */ (ajvSchemas0));
 
 class DictionaryEntry {
     /**
@@ -223,16 +172,29 @@ class DictionaryEntry {
      */
     async checkForUpdate() {
         this._updatesAvailable.hidden = true;
-        const [updateCheck] = await this._dictionaryController.settingsController.application.api.checkDictionaryUpdates([this.dictionaryTitle]);
-        if (typeof updateCheck === 'undefined') {
+        const {isUpdatable, indexUrl, revision: currentRevision, downloadUrl: currentDownloadUrl} = this._dictionaryInfo;
+        if (!isUpdatable || !indexUrl || !currentDownloadUrl) { return false; }
+        const response = await fetch(indexUrl);
+
+        /** @type {unknown} */
+        const index = await readResponseJson(response);
+
+        if (!ajvSchemas.dictionaryIndex(index)) {
+            throw new Error('Invalid dictionary index');
+        }
+
+        const validIndex = /** @type {import('dictionary-data').Index} */ (index);
+        const {revision: latestRevision, downloadUrl: latestDownloadUrl} = validIndex;
+
+        if (!compareRevisions(currentRevision, latestRevision)) {
             return false;
         }
-        if (typeof updateCheck.error === 'string' && updateCheck.error.length > 0) {
-            log.error(new Error(updateCheck.error));
-        }
-        this._updateDownloadUrl = updateCheck.hasUpdate ? (updateCheck.downloadUrl ?? this._dictionaryInfo.downloadUrl ?? null) : null;
+
+        const downloadUrl = latestDownloadUrl ?? currentDownloadUrl;
+
+        this._updateDownloadUrl = downloadUrl;
         this._showUpdatesAvailableButton();
-        return updateCheck.hasUpdate;
+        return true;
     }
 
     /**
@@ -248,20 +210,6 @@ class DictionaryEntry {
     updateAliasSettings(alias) {
         this._aliasNode.textContent = alias;
         this._aliasNode.dispatchEvent(new CustomEvent('change', {bubbles: true}));
-    }
-
-    /**
-     * @param {import('dictionary-importer').Summary} dictionaryInfo
-     */
-    updateDictionaryInfo(dictionaryInfo) {
-        this._dictionaryInfo = dictionaryInfo;
-    }
-
-    /**
-     * @returns {Promise<void>}
-     */
-    async showDetails() {
-        await this._showDetails();
     }
 
     // Private
@@ -281,10 +229,9 @@ class DictionaryEntry {
     _onMenuOpen(e) {
         const bodyNode = e.detail.menu.bodyNode;
         const count = this._dictionaryController.dictionaryOptionCount;
-        const mutationDisabled = this._dictionaryController.isDictionaryInTaskQueue(this.dictionaryTitle);
         this._setMenuActionEnabled(bodyNode, 'moveTo', count > 1);
-        this._setMenuActionEnabled(bodyNode, 'edit', !mutationDisabled);
-        this._setMenuActionEnabled(bodyNode, 'delete', !mutationDisabled);
+        const deleteDisabled = this._dictionaryController.isDictionaryInTaskQueue(this.dictionaryTitle);
+        this._setMenuActionEnabled(bodyNode, 'delete', !deleteDisabled);
     }
 
     /**
@@ -296,10 +243,7 @@ class DictionaryEntry {
                 this._delete();
                 break;
             case 'showDetails':
-                void this._showDetails();
-                break;
-            case 'edit':
-                this._showEditMetadataModal();
+                this._showDetails();
                 break;
             case 'moveTo':
                 this._showMoveToModal();
@@ -337,22 +281,23 @@ class DictionaryEntry {
 
     /** */
     _onOutdatedButtonClick() {
-        void this.showDetails();
+        this._showDetails();
     }
 
     /** */
     _onUpdateButtonClick() {
-        this._dictionaryController.updateDictionary(this.dictionaryTitle);
+        const downloadUrl = this._updatesAvailable.dataset.downloadUrl;
+        this._dictionaryController.updateDictionary(this.dictionaryTitle, downloadUrl);
     }
 
     /** */
     _onIntegrityButtonClick() {
-        void this.showDetails();
+        this._showDetails();
     }
 
     /** */
-    async _showDetails() {
-        const {title, revision, version, counts, prefixWildcardsSupported, isUpdatable, indexUrl, downloadUrl, autoUpdate} = this._dictionaryInfo;
+    _showDetails() {
+        const {title, revision, version, counts, prefixWildcardsSupported} = this._dictionaryInfo;
 
         const modal = this._dictionaryController.modalController.getModal('dictionary-details');
         if (modal === null) { return; }
@@ -375,14 +320,7 @@ class DictionaryEntry {
         const useDeinflectionsSetting = querySelectorNotNull(modal.node, '.dictionary-use-deinflections-setting');
         /** @type {HTMLElement} */
         const useDeinflectionsToggle = querySelectorNotNull(useDeinflectionsSetting, '.dictionary-use-deinflections-toggle');
-        /** @type {HTMLElement} */
-        const autoUpdateSetting = querySelectorNotNull(modal.node, '.dictionary-auto-update-setting');
-        /** @type {HTMLSelectElement} */
-        const autoUpdateSelect = querySelectorNotNull(autoUpdateSetting, '.dictionary-auto-update-select');
-        /** @type {HTMLElement} */
-        const autoUpdateDescription = querySelectorNotNull(autoUpdateSetting, '.dictionary-auto-update-description');
 
-        modal.node.dataset.dictionaryTitle = title;
         titleElement.textContent = title;
         versionElement.textContent = `rev.${revision}`;
         outdateElement.hidden = (version >= 3);
@@ -392,17 +330,6 @@ class DictionaryEntry {
 
         useDeinflectionsSetting.hidden = !counts?.terms.total;
         useDeinflectionsToggle.dataset.setting = `dictionaries[${this._index}].useDeinflections`;
-
-        const canAutoUpdate = (isUpdatable === true && typeof indexUrl === 'string' && typeof downloadUrl === 'string');
-        autoUpdateSetting.hidden = !canAutoUpdate;
-        const autoUpdateSchedule = normalizeDictionaryAutoUpdateSchedule(autoUpdate?.schedule);
-        autoUpdateSelect.value = autoUpdateSchedule;
-        autoUpdateSelect.dataset.currentSchedule = autoUpdateSchedule;
-        autoUpdateDescription.textContent = getDictionaryAutoUpdateScheduleDescription(autoUpdateSchedule);
-        delete autoUpdateSelect.dataset.dictionaryTitle;
-        if (canAutoUpdate) {
-            autoUpdateSelect.dataset.dictionaryTitle = title;
-        }
 
         this._setupDetails(detailsTableElement);
 
@@ -414,45 +341,29 @@ class DictionaryEntry {
      * @returns {boolean}
      */
     _setupDetails(detailsTable) {
+        /** @type {Partial<Record<keyof (typeof this._dictionaryInfo & typeof this._dictionaryInfo.counts), string>>} */
+        const targets = {
+            author: 'Author',
+            url: 'URL',
+            description: 'Description',
+            attribution: 'Attribution',
+            sourceLanguage: 'Source Language',
+            targetLanguage: 'Target Language',
+            terms: 'Term Count',
+            termMeta: 'Term Meta Count',
+            kanji: 'Kanji Count',
+            kanjiMeta: 'Kanji Meta Count',
+            tagMeta: 'Tag Count',
+            media: 'Media Count',
+            importSuccess: 'Import Success',
+        };
+
         const dictionaryInfo = {...this._dictionaryInfo, ...this._dictionaryInfo.counts};
         const fragment = document.createDocumentFragment();
         let any = false;
-        /**
-         * @param {string} type
-         * @param {string} label
-         * @param {string} displayText
-         * @param {keyof import('dictionary-database').DictionaryCountGroup|null} [databaseCountKey]
-         */
-        const appendDetailsRow = (type, label, displayText, databaseCountKey = null) => {
-            if (!displayText) { return; }
-            const details = /** @type {HTMLElement} */ (this._dictionaryController.instantiateTemplate('dictionary-details-entry'));
-            details.dataset.type = type;
-
-            /** @type {HTMLElement} */
-            const labelElement = querySelectorNotNull(details, '.dictionary-details-entry-label');
-            /** @type {HTMLElement} */
-            const infoElement = querySelectorNotNull(details, '.dictionary-details-entry-info');
-
-            labelElement.textContent = `${label}:`;
-            if (databaseCountKey !== null && this._databaseCounts && this._databaseCounts[databaseCountKey]) {
-                displayText = 'Expected: ' + displayText + ' (Database: ' + this._databaseCounts[databaseCountKey] + ')';
-            }
-            infoElement.textContent = displayText;
-            fragment.appendChild(details);
-            any = true;
-        };
-        /** @type {([keyof (typeof this._dictionaryInfo & typeof this._dictionaryInfo.counts), string])[]} */
-        const metadataTargets = [
-            ['author', 'Author'],
-            ['url', 'URL'],
-            ['description', 'Description'],
-            ['attribution', 'Attribution'],
-            ['sourceLanguage', 'Source Language'],
-            ['targetLanguage', 'Target Language'],
-        ];
-        for (const [key, label] of metadataTargets) {
+        for (const [key, label] of /** @type {([keyof (typeof this._dictionaryInfo & typeof this._dictionaryInfo.counts), string])[]} */ (Object.entries(targets))) {
             const info = dictionaryInfo[key];
-            const displayText = ((_info) => {
+            let displayText = ((_info) => {
                 if (typeof _info === 'string') { return _info; }
                 if (_info && typeof _info === 'object' && 'total' in _info) {
                     return _info.total ? `${_info.total}` : false;
@@ -461,42 +372,23 @@ class DictionaryEntry {
                 return false;
             })(info);
             if (!displayText) { continue; }
-            appendDetailsRow(String(key), label, displayText);
-        }
-        if (this._dictionaryInfo.isUpdatable === true) {
-            const autoUpdateSchedule = normalizeDictionaryAutoUpdateSchedule(this._dictionaryInfo.autoUpdate?.schedule);
-            appendDetailsRow('autoUpdateSchedule', 'Update Schedule', getDictionaryAutoUpdateScheduleLabel(autoUpdateSchedule));
-            appendDetailsRow('autoUpdateLastUpdated', 'Last Updated', formatDictionaryAutoUpdateTimestamp(this._dictionaryInfo.autoUpdate?.lastUpdatedAt, 'Not available'));
-            appendDetailsRow(
-                'autoUpdateNextScheduled',
-                'Next Scheduled Update',
-                this._dictionaryInfo.autoUpdate?.nextUpdateAt === null ?
-                    'Not scheduled' :
-                    formatDictionaryAutoUpdateTimestamp(this._dictionaryInfo.autoUpdate?.nextUpdateAt, 'Not scheduled'),
-            );
-        }
-        /** @type {([keyof import('dictionary-importer').SummaryCounts, string])[]} */
-        const countTargets = [
-            ['terms', 'Term Count'],
-            ['termMeta', 'Term Meta Count'],
-            ['kanji', 'Kanji Count'],
-            ['kanjiMeta', 'Kanji Meta Count'],
-            ['tagMeta', 'Tag Count'],
-            ['media', 'Media Count'],
-        ];
-        for (const [key, label] of countTargets) {
-            const info = dictionaryInfo[key];
-            const displayText = ((_info) => {
-                if (_info && typeof _info === 'object' && 'total' in _info) {
-                    return _info.total ? `${_info.total}` : false;
-                }
-                return false;
-            })(info);
-            if (!displayText) { continue; }
-            appendDetailsRow(String(key), label, displayText, key);
-        }
-        if (typeof this._dictionaryInfo.importSuccess === 'boolean') {
-            appendDetailsRow('importSuccess', 'Import Success', this._dictionaryInfo.importSuccess.toString());
+
+            const details = /** @type {HTMLElement} */ (this._dictionaryController.instantiateTemplate('dictionary-details-entry'));
+            details.dataset.type = key;
+
+            /** @type {HTMLElement} */
+            const labelElement = querySelectorNotNull(details, '.dictionary-details-entry-label');
+            /** @type {HTMLElement} */
+            const infoElement = querySelectorNotNull(details, '.dictionary-details-entry-info');
+
+            labelElement.textContent = `${label}:`;
+            if (this._databaseCounts && this._databaseCounts[key]) {
+                displayText = 'Expected: ' + displayText + ' (Database: ' + this._databaseCounts[key] + ')';
+            }
+            infoElement.textContent = displayText;
+            fragment.appendChild(details);
+
+            any = true;
         }
 
         detailsTable.textContent = '';
@@ -542,30 +434,6 @@ class DictionaryEntry {
         titleNode.textContent = title;
         input.value = `${this._index + 1}`;
         input.max = `${count}`;
-
-        modal.setVisible(true);
-    }
-
-    /** */
-    _showEditMetadataModal() {
-        const {title, url, description} = this._dictionaryInfo;
-        const modal = this._dictionaryController.modalController.getModal('dictionary-edit-metadata');
-        if (modal === null) { return; }
-        /** @type {HTMLInputElement} */
-        const nameInput = querySelectorNotNull(modal.node, '#dictionary-metadata-name-input');
-        /** @type {HTMLInputElement} */
-        const urlInput = querySelectorNotNull(modal.node, '#dictionary-metadata-url-input');
-        /** @type {HTMLTextAreaElement} */
-        const descriptionInput = querySelectorNotNull(modal.node, '#dictionary-metadata-description-input');
-
-        modal.node.dataset.dictionaryTitle = title;
-        modal.node.dataset.originalTitle = title;
-        modal.node.dataset.originalUrl = url ?? '';
-        modal.node.dataset.originalDescription = description ?? '';
-        nameInput.value = title;
-        urlInput.value = url ?? '';
-        descriptionInput.value = description ?? '';
-        this._dictionaryController.setDictionaryMetadataEditError('');
 
         modal.setVisible(true);
     }
@@ -740,8 +608,6 @@ export class DictionaryController {
         /** @type {?HTMLButtonElement} */
         this._checkUpdatesButton = document.querySelector('#dictionary-check-updates');
         /** @type {?HTMLButtonElement} */
-        this._updateAllButton = document.querySelector('#dictionary-update-all-button');
-        /** @type {?HTMLButtonElement} */
         this._checkIntegrityButton = document.querySelector('#dictionary-check-integrity');
         /** @type {HTMLElement} */
         this._dictionaryEntryContainer = querySelectorNotNull(document, '#dictionary-list');
@@ -774,11 +640,6 @@ export class DictionaryController {
         return this._modalController;
     }
 
-    /** @type {import('./settings-controller.js').SettingsController} */
-    get settingsController() {
-        return this._settingsController;
-    }
-
     /** @type {number} */
     get dictionaryOptionCount() {
         return this._dictionaryEntries.length;
@@ -799,10 +660,6 @@ export class DictionaryController {
         const dictionaryMoveButton = querySelectorNotNull(document, '#dictionary-move-button');
 
         /** @type {HTMLButtonElement} */
-        const dictionaryResetMetadataButton = querySelectorNotNull(document, '#dictionary-reset-metadata-button');
-        /** @type {HTMLButtonElement} */
-        const dictionarySaveMetadataButton = querySelectorNotNull(document, '#dictionary-save-metadata-button');
-        /** @type {HTMLButtonElement} */
         const dictionaryResetAliasButton = querySelectorNotNull(document, '#dictionary-reset-alias-button');
         /** @type {HTMLButtonElement} */
         const dictionarySetAliasButton = querySelectorNotNull(document, '#dictionary-set-alias-button');
@@ -812,27 +669,20 @@ export class DictionaryController {
         this._allCheckbox.addEventListener('change', this._onAllCheckboxChange.bind(this), false);
         dictionaryDeleteButton.addEventListener('click', this._onDictionaryConfirmDelete.bind(this), false);
         dictionaryUpdateButton.addEventListener('click', this._onDictionaryConfirmUpdate.bind(this), false);
-        /** @type {HTMLSelectElement} */ (querySelectorNotNull(document, '.dictionary-auto-update-select')).addEventListener('change', this._onDictionaryAutoUpdateSelectChange.bind(this), false);
 
         dictionaryMoveButton.addEventListener('click', this._onDictionaryMoveButtonClick.bind(this), false);
 
-        dictionarySaveMetadataButton.addEventListener('click', this._onDictionarySaveMetadataButtonClick.bind(this), false);
-        dictionaryResetMetadataButton.addEventListener('click', this._onDictionaryResetMetadataButtonClick.bind(this), false);
         dictionarySetAliasButton.addEventListener('click', this._onDictionarySetAliasButtonClick.bind(this), false);
         dictionaryResetAliasButton.addEventListener('click', this._onDictionaryResetAliasButtonClick.bind(this), false);
 
         if (this._checkUpdatesButton !== null) {
             this._checkUpdatesButton.addEventListener('click', this._onCheckUpdatesButtonClick.bind(this), false);
         }
-        if (this._updateAllButton !== null) {
-            this._updateAllButton.addEventListener('click', this._onUpdateAllButtonClick.bind(this), false);
-        }
         if (this._checkIntegrityButton !== null) {
             this._checkIntegrityButton.addEventListener('click', this._onCheckIntegrityButtonClick.bind(this), false);
         }
 
         this._updateDictionaryEntryCount();
-        this._updateUpdateAllButtonState();
 
         await this._onDatabaseUpdated();
     }
@@ -891,7 +741,7 @@ export class DictionaryController {
      * @param {string} dictionaryTitle
      * @param {string|undefined} downloadUrl
      */
-    updateDictionary(dictionaryTitle, downloadUrl = void 0) {
+    updateDictionary(dictionaryTitle, downloadUrl) {
         const modal = this._updateDictionaryModal;
         if (modal === null) { return; }
         modal.node.dataset.downloadUrl = downloadUrl;
@@ -1045,12 +895,12 @@ export class DictionaryController {
         const token = {};
         this._databaseStateToken = token;
         this._dictionaries = null;
-        this._updateUpdateAllButtonState();
         const dictionaries = await this._settingsController.getDictionaryInfo();
         if (this._databaseStateToken !== token) { return; }
         this._dictionaries = dictionaries;
 
-        await this._updateEntries();
+        await this._updateEntries(token);
+        if (this._databaseStateToken !== token) { return; }
 
         if (this._onDictionariesUpdate) {
             this._onDictionariesUpdate();
@@ -1066,12 +916,9 @@ export class DictionaryController {
     }
 
     /** */
-    async _updateEntries() {
+    async _updateEntries(token = null) {
         const dictionaries = this._dictionaries;
-        if (dictionaries === null) {
-            this._updateUpdateAllButtonState();
-            return;
-        }
+        if (dictionaries === null) { return; }
         this._updateMainDictionarySelectOptions(dictionaries);
 
         /** @type {Map<string, string | null>} */
@@ -1093,8 +940,10 @@ export class DictionaryController {
         }
 
         await DictionaryController.ensureDictionarySettings(this._settingsController, dictionaries, void 0, true, false);
+        if (token !== null && this._databaseStateToken !== token) { return; }
 
         const options = await this._settingsController.getOptions();
+        if (token !== null && this._databaseStateToken !== token) { return; }
         this._updateDictionariesEnabledWarnings(options);
 
         /** @type {Map<string, import('dictionary-importer').Summary>} */
@@ -1111,7 +960,6 @@ export class DictionaryController {
             if (typeof dictionaryInfo === 'undefined') { continue; }
             this._createDictionaryEntry(i, dictionaryInfo, updateDownloadUrl, null);
         }
-        this._updateUpdateAllButtonState();
     }
 
     /**
@@ -1147,7 +995,6 @@ export class DictionaryController {
             this._createDictionaryEntry(i, dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts);
         }
         this._dictionaryModalBody.scroll({top: dictionariesModalBodyScrollY});
-        this._updateUpdateAllButtonState();
     }
 
     /**
@@ -1230,45 +1077,6 @@ export class DictionaryController {
     }
 
     /**
-     * @param {Event} e
-     */
-    async _onDictionaryAutoUpdateSelectChange(e) {
-        const select = /** @type {HTMLSelectElement} */ (e.currentTarget);
-        const autoUpdateSetting = select.closest('.dictionary-auto-update-setting');
-        const autoUpdateDescription = autoUpdateSetting?.querySelector('.dictionary-auto-update-description');
-        const dictionaryTitle = select.dataset.dictionaryTitle;
-        if (typeof dictionaryTitle !== 'string' || dictionaryTitle.length === 0) {
-            return;
-        }
-        const previousSchedule = normalizeDictionaryAutoUpdateSchedule(select.dataset.currentSchedule);
-        const nextSchedule = select.value;
-        if (!isDictionaryAutoUpdateSchedule(nextSchedule)) {
-            select.value = previousSchedule;
-            return;
-        }
-        if (nextSchedule === previousSchedule) {
-            return;
-        }
-        if (autoUpdateDescription instanceof HTMLElement) {
-            autoUpdateDescription.textContent = getDictionaryAutoUpdateScheduleDescription(nextSchedule);
-        }
-        select.disabled = true;
-        try {
-            const dictionaryInfo = await this._settingsController.application.api.setDictionaryUpdateSchedule(dictionaryTitle, nextSchedule);
-            this._updateDictionaryInfo(dictionaryInfo);
-            await this._refreshDictionaryDetailsModal(dictionaryInfo.title);
-        } catch (error) {
-            select.value = previousSchedule;
-            if (autoUpdateDescription instanceof HTMLElement) {
-                autoUpdateDescription.textContent = getDictionaryAutoUpdateScheduleDescription(previousSchedule);
-            }
-            log.error(error);
-        } finally {
-            select.disabled = false;
-        }
-    }
-
-    /**
      * @param {string} dictionaryTitle
      */
     _hideUpdatesAvailableButton(dictionaryTitle) {
@@ -1278,37 +1086,6 @@ export class DictionaryController {
                 break;
             }
         }
-    }
-
-    /**
-     * @param {import('dictionary-importer').Summary} dictionaryInfo
-     */
-    _updateDictionaryInfo(dictionaryInfo) {
-        const dictionaries = this._dictionaries;
-        if (dictionaries !== null) {
-            const dictionaryIndex = dictionaries.findIndex(({title}) => title === dictionaryInfo.title);
-            if (dictionaryIndex >= 0) {
-                dictionaries[dictionaryIndex] = dictionaryInfo;
-            }
-        }
-        const entry = this._dictionaryEntries.find(({dictionaryTitle}) => dictionaryTitle === dictionaryInfo.title);
-        entry?.updateDictionaryInfo(dictionaryInfo);
-    }
-
-    /**
-     * @param {string} dictionaryTitle
-     * @returns {Promise<void>}
-     */
-    async _refreshDictionaryDetailsModal(dictionaryTitle) {
-        const modal = this._modalController.getModal('dictionary-details');
-        if (modal === null || modal.node.hidden || modal.node.dataset.dictionaryTitle !== dictionaryTitle) {
-            return;
-        }
-        const entry = this._dictionaryEntries.find(({dictionaryTitle: entryDictionaryTitle}) => entryDictionaryTitle === dictionaryTitle);
-        if (typeof entry === 'undefined') {
-            return;
-        }
-        await entry.showDetails();
     }
 
     /**
@@ -1327,23 +1104,6 @@ export class DictionaryController {
         void this._checkForUpdates();
     }
 
-    /**
-     * @param {MouseEvent} e
-     */
-    _onUpdateAllButtonClick(e) {
-        e.preventDefault();
-        const dictionaryTitles = this._getUpdateAllDictionaryTitles();
-        if (dictionaryTitles.length === 0) {
-            this._updateUpdateAllButtonState();
-            return;
-        }
-        for (const dictionaryTitle of dictionaryTitles) {
-            this._enqueueTask({type: 'update', dictionaryTitle, downloadUrl: void 0});
-            this._hideUpdatesAvailableButton(dictionaryTitle);
-        }
-        this._updateUpdateAllButtonState();
-    }
-
     /** */
     _onDictionaryMoveButtonClick() {
         const modal = /** @type {import('./modal.js').Modal} */ (this._modalController.getModal('dictionary-move-location'));
@@ -1359,73 +1119,6 @@ export class DictionaryController {
         if (!Number.isFinite(target) || !Number.isFinite(indexNumber) || indexNumber === target) { return; }
 
         void this.moveDictionaryOptions(indexNumber, target);
-    }
-
-    /** */
-    _onDictionaryResetMetadataButtonClick() {
-        const modal = /** @type {import('./modal.js').Modal} */ (this._modalController.getModal('dictionary-edit-metadata'));
-        /** @type {HTMLInputElement} */
-        const nameInput = querySelectorNotNull(modal.node, '#dictionary-metadata-name-input');
-        /** @type {HTMLInputElement} */
-        const urlInput = querySelectorNotNull(modal.node, '#dictionary-metadata-url-input');
-        /** @type {HTMLTextAreaElement} */
-        const descriptionInput = querySelectorNotNull(modal.node, '#dictionary-metadata-description-input');
-
-        nameInput.value = modal.node.dataset.originalTitle ?? '';
-        urlInput.value = modal.node.dataset.originalUrl ?? '';
-        descriptionInput.value = modal.node.dataset.originalDescription ?? '';
-        this.setDictionaryMetadataEditError('');
-    }
-
-    /** */
-    async _onDictionarySaveMetadataButtonClick() {
-        const modal = /** @type {import('./modal.js').Modal} */ (this._modalController.getModal('dictionary-edit-metadata'));
-        const dictionaryTitle = modal.node.dataset.dictionaryTitle;
-        if (typeof dictionaryTitle !== 'string' || dictionaryTitle.length === 0) { return; }
-
-        /** @type {HTMLInputElement} */
-        const nameInput = querySelectorNotNull(modal.node, '#dictionary-metadata-name-input');
-        /** @type {HTMLInputElement} */
-        const urlInput = querySelectorNotNull(modal.node, '#dictionary-metadata-url-input');
-        /** @type {HTMLTextAreaElement} */
-        const descriptionInput = querySelectorNotNull(modal.node, '#dictionary-metadata-description-input');
-        /** @type {HTMLButtonElement} */
-        const saveButton = querySelectorNotNull(modal.node, '#dictionary-save-metadata-button');
-
-        nameInput.value = nameInput.value.trim();
-        urlInput.value = urlInput.value.trim();
-        if (!nameInput.reportValidity() || !urlInput.reportValidity()) {
-            return;
-        }
-
-        this.setDictionaryMetadataEditError('');
-        saveButton.disabled = true;
-        try {
-            await this._settingsController.application.api.updateDictionaryMetadata(
-                dictionaryTitle,
-                nameInput.value,
-                urlInput.value,
-                descriptionInput.value,
-            );
-            modal.setVisible(false);
-        } catch (e) {
-            const message = e instanceof Error ? e.message : String(e);
-            this.setDictionaryMetadataEditError(message);
-        } finally {
-            saveButton.disabled = false;
-        }
-    }
-
-    /**
-     * @param {string} message
-     */
-    setDictionaryMetadataEditError(message) {
-        const modal = this._modalController.getModal('dictionary-edit-metadata');
-        if (modal === null) { return; }
-        /** @type {HTMLElement} */
-        const errorNode = querySelectorNotNull(modal.node, '#dictionary-edit-metadata-error');
-        errorNode.textContent = message;
-        errorNode.hidden = message.length === 0;
     }
 
     /** */
@@ -1501,7 +1194,6 @@ export class DictionaryController {
                 this._checkUpdatesButton.disabled = true;
             }
             this._checkingUpdates = false;
-            this._updateUpdateAllButtonState();
         }
     }
 
@@ -1528,7 +1220,6 @@ export class DictionaryController {
         } finally {
             this._setButtonsEnabled(true);
             this._checkingIntegrity = false;
-            this._updateUpdateAllButtonState();
         }
     }
 
@@ -1582,42 +1273,6 @@ export class DictionaryController {
         this._updateDictionaryEntryCount();
     }
 
-    /**
-     * @returns {string[]}
-     */
-    _getUpdateAllDictionaryTitles() {
-        const dictionaries = this._dictionaries;
-        if (dictionaries === null) { return []; }
-
-        /** @type {Map<string, import('dictionary-importer').Summary>} */
-        const dictionaryInfoMap = new Map();
-        for (const dictionary of dictionaries) {
-            dictionaryInfoMap.set(dictionary.title, dictionary);
-        }
-
-        /** @type {Set<string>} */
-        const seenDictionaryTitles = new Set();
-        /** @type {string[]} */
-        const dictionaryTitles = [];
-        for (const {dictionaryTitle} of this._dictionaryEntries) {
-            if (seenDictionaryTitles.has(dictionaryTitle)) { continue; }
-            seenDictionaryTitles.add(dictionaryTitle);
-
-            const dictionary = dictionaryInfoMap.get(dictionaryTitle);
-            if (
-                typeof dictionary === 'undefined' ||
-                dictionary.isUpdatable !== true ||
-                typeof dictionary.indexUrl !== 'string' ||
-                typeof dictionary.downloadUrl !== 'string' ||
-                this.isDictionaryInTaskQueue(dictionaryTitle)
-            ) {
-                continue;
-            }
-            dictionaryTitles.push(dictionaryTitle);
-        }
-        return dictionaryTitles;
-    }
-
 
     /**
      * @param {string} dictionaryTitle
@@ -1633,7 +1288,6 @@ export class DictionaryController {
     _enqueueTask(task) {
         if (this.isDictionaryInTaskQueue(task.dictionaryTitle)) { return; }
         this._dictionaryTaskQueue.push(task);
-        this._updateUpdateAllButtonState();
         void this._runTaskQueue();
     }
 
@@ -1642,7 +1296,6 @@ export class DictionaryController {
     async _runTaskQueue() {
         if (this._isTaskQueueRunning) { return; }
         this._isTaskQueueRunning = true;
-        this._updateUpdateAllButtonState();
         while (this._dictionaryTaskQueue.length > 0) {
             const task = this._dictionaryTaskQueue[0];
             if (task.type === 'delete') {
@@ -1651,10 +1304,8 @@ export class DictionaryController {
                 await this._updateDictionary(task.dictionaryTitle, task.downloadUrl);
             }
             void this._dictionaryTaskQueue.shift();
-            this._updateUpdateAllButtonState();
         }
         this._isTaskQueueRunning = false;
-        this._updateUpdateAllButtonState();
     }
 
     /**
@@ -1712,17 +1363,57 @@ export class DictionaryController {
 
     /**
      * @param {string} dictionaryTitle
-     * @param {string|undefined} _downloadUrl
+     * @param {string|undefined} downloadUrl
      */
-    async _updateDictionary(dictionaryTitle, _downloadUrl) {
+    async _updateDictionary(dictionaryTitle, downloadUrl) {
         if (this._checkingIntegrity || this._checkingUpdates || this._dictionaries === null) { return; }
-        const result = await this._settingsController.application.api.updateDictionaryByTitle(dictionaryTitle);
-        if (typeof result.error === 'string' && result.error.length > 0) {
-            log.error(new Error(result.error));
+
+        const dictionaryInfo = this._dictionaries.find((entry) => entry.title === dictionaryTitle);
+        if (typeof dictionaryInfo === 'undefined') { throw new Error('Dictionary not found'); }
+        downloadUrl = downloadUrl ?? dictionaryInfo.downloadUrl;
+        if (typeof downloadUrl !== 'string') { throw new Error('Attempted to update dictionary without download URL'); }
+
+        const options = await this._settingsController.getOptionsFull();
+        const {profiles} = options;
+
+        /** @type {import('settings-controller.js').ProfilesDictionarySettings} */
+        const profilesDictionarySettings = {};
+
+        for (const profile of profiles) {
+            const dictionaries = profile.options.dictionaries;
+            for (let i = 0; i < dictionaries.length; ++i) {
+                if (dictionaries[i].name === dictionaryTitle) {
+                    profilesDictionarySettings[profile.id] = {...dictionaries[i], index: i};
+                    break;
+                }
+            }
         }
-        if (result.status !== 'updated') {
-            return;
+
+        /** @type {import('core').DeferredPromiseDetails<File|null>} */
+        const {promise: downloadPromise, resolve: resolveDownload} = deferPromise();
+        this._settingsController.trigger('downloadDictionaryFromUrl', {url: downloadUrl, onDownloadDone: resolveDownload});
+        const downloadedFile = await downloadPromise;
+        if (!(downloadedFile instanceof File)) {
+            throw new Error(`Failed to download replacement dictionary for ${dictionaryTitle}`);
         }
+
+        /** @type {import('core').DeferredPromiseDetails<void>} */
+        const {promise: importPromise, resolve} = deferPromise();
+        const importToken = Math.random().toString(36).slice(2, 10);
+        const stagedDictionaryTitle = `${dictionaryTitle} [update-staging ${importToken}]`;
+        this._settingsController.trigger('importDictionaryFromFile', {
+            files: [downloadedFile],
+            profilesDictionarySettings,
+            importDetailsOverrides: {
+                dictionaryTitleOverride: stagedDictionaryTitle,
+                replacementDictionaryTitle: dictionaryTitle,
+                updateSessionToken: importToken,
+                useImportSession: false,
+                finalizeImportSession: false,
+            },
+            onImportDone: resolve,
+        });
+        await importPromise;
     }
 
     /**
@@ -1746,7 +1437,7 @@ export class DictionaryController {
         /** @type {import('core').DeferredPromiseDetails<void>} */
         const {promise: dictionariesUpdatePromise, resolve} = deferPromise();
         this._onDictionariesUpdate = resolve;
-        void this._settingsController.application.api.triggerDatabaseUpdated('dictionary', 'delete');
+        await this._settingsController.application.api.triggerDatabaseUpdated('dictionary', 'delete');
         await dictionariesUpdatePromise;
         this._onDictionariesUpdate = null;
     }
@@ -1760,7 +1451,7 @@ export class DictionaryController {
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
         for (let i = 0, ii = profiles.length; i < ii; ++i) {
-            const {options: {dictionaries}} = profiles[i];
+            const {options: {dictionaries, general}} = profiles[i];
             for (let j = 0, jj = dictionaries.length; j < jj; ++j) {
                 if (dictionaries[j].name !== dictionaryTitle) { continue; }
                 const path = `profiles[${i}].options.dictionaries`;
@@ -1770,6 +1461,20 @@ export class DictionaryController {
                     start: j,
                     deleteCount: 1,
                     items: [],
+                });
+            }
+            if (general.mainDictionary === dictionaryTitle) {
+                targets.push({
+                    action: 'set',
+                    path: `profiles[${i}].options.general.mainDictionary`,
+                    value: '',
+                });
+            }
+            if (general.sortFrequencyDictionary === dictionaryTitle) {
+                targets.push({
+                    action: 'set',
+                    path: `profiles[${i}].options.general.sortFrequencyDictionary`,
+                    value: null,
                 });
             }
         }
@@ -1784,18 +1489,6 @@ export class DictionaryController {
     /** */
     _updateDictionaryEntryCount() {
         /** @type {HTMLElement} */ (this._dictionaryEntryContainer).dataset.count = `${this._dictionaryEntries.length}`;
-    }
-
-    /** */
-    _updateUpdateAllButtonState() {
-        const button = this._updateAllButton;
-        if (!(button instanceof HTMLButtonElement)) { return; }
-        button.disabled = (
-            this._checkingIntegrity ||
-            this._checkingUpdates ||
-            this._isTaskQueueRunning ||
-            this._getUpdateAllDictionaryTitles().length === 0
-        );
     }
 
     /**

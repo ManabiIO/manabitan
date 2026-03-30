@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2026  Yomitan Authors
+ * Copyright (C) 2023-2025  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import type * as Dictionary from './dictionary';
 import type * as DictionaryDatabase from './dictionary-database';
 import type * as DictionaryImporter from './dictionary-importer';
 import type * as Environment from './environment';
-import type * as Core from './core';
 import type * as Translation from './translation';
 import type * as Translator from './translator';
 import type {
@@ -40,6 +39,14 @@ type ApiSurface = {
         params: void;
         return: void;
     };
+    getDatabaseRuntimeStateOffscreen: {
+        params: void;
+        return: {
+            isPrepared: boolean;
+            usesFallbackStorage: boolean;
+            openStorageDiagnostics: unknown;
+        };
+    };
     databaseSetSuspendedOffscreen: {
         params: {
             suspended: boolean;
@@ -50,27 +57,18 @@ type ApiSurface = {
         params: void;
         return: DictionaryImporter.Summary[];
     };
-    updateDictionarySummaryByTitleOffscreen: {
-        params: {
-            dictionaryTitle: string;
-            summary: DictionaryImporter.Summary;
-        };
-        return: DictionaryImporter.Summary | null;
-    };
-    getMaxHeadwordLengthOffscreen: {
-        params: void;
-        return: number;
-    };
     deleteDictionaryOffscreen: {
         params: {
             dictionaryTitle: string;
         };
         return: void;
     };
-    updateDictionaryMetadataOffscreen: {
+    replaceDictionaryTitleOffscreen: {
         params: {
-            dictionaryTitle: string;
-            summary: DictionaryImporter.Summary;
+            fromDictionaryTitle: string;
+            toDictionaryTitle: string;
+            summaryOverride: DictionaryImporter.Summary | null;
+            replacedDictionaryTitle: string | null;
         };
         return: void;
     };
@@ -81,16 +79,30 @@ type ApiSurface = {
         };
         return: DictionaryDatabase.DictionaryCounts;
     };
-    importDictionaryArchiveOffscreen: {
-        params: {
-            archiveContent: string;
-            importDetails: DictionaryImporter.ImportDetails;
-        };
+    debugDictionaryStorageStateOffscreen: {
+        params: void;
         return: {
-            result: DictionaryImporter.Summary | null;
-            errors: Core.SerializedError[];
-            debug?: unknown;
+            dictionaryRows: Array<{
+                id: number;
+                titleColumn: string;
+                versionColumn: number;
+                summaryJsonLength: number;
+                summaryParseOk: boolean;
+                summaryTitle: string | null;
+                summaryImportSuccess: boolean | null;
+            }>;
+            lastReplaceDictionaryTitleDebug?: unknown;
+            startupCleanupIncompleteImportsSummary?: unknown;
+            startupCleanupMissingTermRecordShardsSummary?: unknown;
+            termRecordShardFileNames?: string[];
         };
+    };
+    debugDictionaryLookupStateOffscreen: {
+        params: {
+            text: string;
+            dictionaryNames: string[];
+        };
+        return: unknown;
     };
     databasePurgeOffscreen: {
         params: void;
@@ -215,6 +227,13 @@ export type ApiMessageAny = {[name in ApiNames]: ApiMessage<name>}[ApiNames];
 type McApiSurface = {
     connectToDatabaseWorker: {
         params: void;
+        return: void;
+    };
+    importDictionaryOffscreen: {
+        params: {
+            archiveContent: Blob;
+            details: DictionaryImporter.ImportDetails;
+        };
         return: void;
     };
     dummy: {

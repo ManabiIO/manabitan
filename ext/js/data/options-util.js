@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2026  Yomitan Authors
+ * Copyright (C) 2023-2025  Yomitan Authors
  * Copyright (C) 2016-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -314,7 +314,6 @@ export class OptionsUtil {
                 compactGlossaries: false,
                 mainDictionary: '',
                 popupTheme: 'default',
-                popupThemePreset: 'default',
                 popupOuterTheme: 'default',
                 customPopupCss: '',
                 customPopupOuterCss: '',
@@ -587,10 +586,6 @@ export class OptionsUtil {
             this._updateVersion72,
             this._updateVersion73,
             this._updateVersion74,
-            this._updateVersion75,
-            this._updateVersion76,
-            this._updateVersion77,
-            this._updateVersion78,
         ];
         /* eslint-enable @typescript-eslint/unbound-method */
         if (typeof targetVersion === 'number' && targetVersion < result.length) {
@@ -1837,59 +1832,23 @@ export class OptionsUtil {
     }
 
     /**
-     *  - Added global.dictionaryAutoUpdates
+     *  - Added global.dataTransmissionConsentState
      *  @type {import('options-util').UpdateFunction}
      */
     async _updateVersion75(options) {
-        options.global.dictionaryAutoUpdates = [];
-    }
-
-    /**
-     *  - Added global.database.maxHeadwordLength
-     *  @type {import('options-util').UpdateFunction}
-     */
-    async _updateVersion76(options) {
-        if (!isObjectNotArray(options.global)) {
-            options.global = {};
-        }
-        if (!isObjectNotArray(options.global.database)) {
-            options.global.database = {};
-        }
-        options.global.database.maxHeadwordLength = 0;
-    }
-
-    /**
-     *  - Added general.popupBlurByFrequencyEnabled
-     *  - Added general.popupBlurByFrequencyDictionary
-     *  - Added general.popupBlurByFrequencyThreshold
-     *  - Added general.popupBlurByFrequencyOrder
-     *  - Added general.popupBlurByFrequencyUnblurDelay
-     *  @type {import('options-util').UpdateFunction}
-     */
-    async _updateVersion77(options) {
-        for (const profile of options.profiles) {
-            const {general} = profile.options;
-            general.popupBlurByFrequencyEnabled = false;
-            general.popupBlurByFrequencyDictionary = null;
-            general.popupBlurByFrequencyThreshold = 10000;
-            general.popupBlurByFrequencyOrder = 'descending';
-            general.popupBlurByFrequencyUnblurDelay = 0;
-        }
-    }
-
-    /**
-     *  - Added general.popupThemePreset
-     *  - Migrated general.popupTheme='site' to 'browser'
-     *  @type {import('options-util').UpdateFunction}
-     */
-    async _updateVersion78(options) {
-        for (const profile of options.profiles) {
-            const {general} = profile.options;
-            general.popupThemePreset = 'default';
-            if (general.popupTheme === 'site') {
-                general.popupTheme = 'browser';
+        const consentShown = options.global.dataTransmissionConsentShown === true;
+        let consentState = 'unknown';
+        if (consentShown) {
+            let hasEnabledAudioProfile = false;
+            for (const profile of options.profiles) {
+                if (profile?.options?.audio?.enabled === true) {
+                    hasEnabledAudioProfile = true;
+                    break;
+                }
             }
+            consentState = (hasEnabledAudioProfile ? 'accepted' : 'declined');
         }
+        options.global.dataTransmissionConsentState = consentState;
     }
 
     /**

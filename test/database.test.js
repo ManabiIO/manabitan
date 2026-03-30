@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2026  Yomitan Authors
+ * Copyright (C) 2023-2025  Yomitan Authors
  * Copyright (C) 2020-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,6 @@ import {parseJson} from '../dev/json.js';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {encodeRawTermContentSharedGlossaryBinary} from '../ext/js/dictionary/raw-term-content.js';
-import {Translator} from '../ext/js/language/translator.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {DictionaryWorkerHandler} from '../ext/js/dictionary/dictionary-worker-handler.js';
 import {compress as zstdCompress, init as zstdInit} from '../ext/lib/zstd-wasm.js';
@@ -43,18 +42,15 @@ vi.stubGlobal('fetch', fetch);
 vi.stubGlobal('chrome', chrome);
 
 /**
- * @param {{writeDelay?: ((fileName: string, chunk: Uint8Array) => Promise<void>|void)}|undefined} [config]
  * @returns {{
  *   kind: 'directory',
  *   getDirectoryHandle: (name: string, options?: {create?: boolean}) => Promise<unknown>,
  *   getFileHandle: (name: string, options?: {create?: boolean}) => Promise<unknown>,
  *   removeEntry: (name: string) => Promise<void>,
- *   entries: () => AsyncGenerator<[string, unknown], void, unknown>,
- *   values: () => AsyncGenerator<unknown, void, unknown>
+ *   entries: () => AsyncGenerator<[string, unknown], void, unknown>
  * }}
  */
-function createInMemoryOpfsDirectoryHandle(config = void 0) {
-    const writeDelay = config?.writeDelay;
+function createInMemoryOpfsDirectoryHandle() {
     /** @type {Map<string, ReturnType<typeof createInMemoryOpfsDirectoryHandle>>} */
     const directories = new Map();
     /** @type {Map<string, Uint8Array>} */
@@ -64,7 +60,7 @@ function createInMemoryOpfsDirectoryHandle(config = void 0) {
      * @param {string} fileName
      * @returns {{
      *   kind: 'file',
-     *   getFile: () => Promise<{size: number, arrayBuffer: () => Promise<ArrayBuffer>, slice: (start?: number, end?: number) => {arrayBuffer: () => Promise<ArrayBuffer>}}>,
+     *   getFile: () => Promise<{size: number, arrayBuffer: () => Promise<ArrayBuffer>}>,
      *   createWritable: (options?: {keepExistingData?: boolean}) => Promise<{
      *     seek: (offset: number) => Promise<void>,
      *     truncate: (size: number) => Promise<void>,
@@ -80,14 +76,6 @@ function createInMemoryOpfsDirectoryHandle(config = void 0) {
             return {
                 size: bytes.byteLength,
                 arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
-                slice(start = 0, end = bytes.byteLength) {
-                    const normalizedStart = Math.max(0, Math.trunc(start));
-                    const normalizedEnd = Math.max(normalizedStart, Math.min(bytes.byteLength, Math.trunc(end)));
-                    const sliceBytes = bytes.subarray(normalizedStart, normalizedEnd);
-                    return {
-                        arrayBuffer: async () => sliceBytes.buffer.slice(sliceBytes.byteOffset, sliceBytes.byteOffset + sliceBytes.byteLength),
-                    };
-                },
             };
         },
         async createWritable(options = {}) {
@@ -125,9 +113,6 @@ function createInMemoryOpfsDirectoryHandle(config = void 0) {
                 },
                 write: async (chunk) => {
                     const source = chunk instanceof Uint8Array ? chunk : new Uint8Array(chunk);
-                    if (typeof writeDelay === 'function') {
-                        await writeDelay(fileName, source);
-                    }
                     const end = position + source.byteLength;
                     ensureCapacity(end);
                     bytes.set(source, position);
@@ -150,7 +135,7 @@ function createInMemoryOpfsDirectoryHandle(config = void 0) {
             if (options.create !== true) {
                 throw new Error(`NotFoundError: directory '${name}'`);
             }
-            const created = createInMemoryOpfsDirectoryHandle(config);
+            const created = createInMemoryOpfsDirectoryHandle();
             directories.set(name, created);
             return created;
         },
@@ -175,14 +160,6 @@ function createInMemoryOpfsDirectoryHandle(config = void 0) {
             }
             for (const [name] of files) {
                 yield [name, createFileHandle(name)];
-            }
-        },
-        async *values() {
-            for (const [, directoryHandle] of directories) {
-                yield directoryHandle;
-            }
-            for (const [name] of files) {
-                yield createFileHandle(name);
             }
         },
     };
@@ -226,78 +203,6 @@ function installInMemoryOpfsNavigator(rootDirectoryHandle) {
 async function createTestDictionaryArchiveData(dictionary, dictionaryName) {
     const dictionaryDirectory = join(dirname, 'data', 'dictionaries', dictionary);
     return await createDictionaryArchiveData(dictionaryDirectory, dictionaryName);
-}
-
-/**
- * @param {string} [dictionaryName]
- * @returns {Promise<ArrayBuffer>}
- */
-async function createStreamedFastParserRegressionArchiveData(dictionaryName = 'Fast Parser Regression') {
-    const zipFileWriter = new BlobWriter();
-    const zipWriter = new ZipWriter(zipFileWriter, {level: 0});
-    const index = {
-        title: dictionaryName,
-        format: 3,
-        revision: 'test',
-        sequenced: true,
-    };
-    const readTermBank = [
-        ['読む', 'よむ', '', 'v5', 10, ['to read'], 1, ''],
-    ];
-    const overwriteTermBank = [
-        ['食べる', 'たべる', '', 'v1', 5, [`to eat ${'x'.repeat(4096)}`], 2, ''],
-    ];
-    await zipWriter.add('index.json', new TextReader(JSON.stringify(index, null, 0)));
-    await zipWriter.add('term_bank_1.json', new TextReader(JSON.stringify(readTermBank, null, 0)));
-    await zipWriter.add('term_bank_2.json', new TextReader(JSON.stringify(overwriteTermBank, null, 0)));
-    const blob = await zipWriter.close();
-    return await blob.arrayBuffer();
-}
-
-/**
- * @param {string} [dictionaryName]
- * @param {string} [mediaHref]
- * @returns {Promise<ArrayBuffer>}
- */
-async function createStructuredContentMediaArchiveData(dictionaryName = 'Structured Content Media', mediaHref = 'media:mdict-media/audio/ping.mp3') {
-    const zipFileWriter = new BlobWriter();
-    const zipWriter = new ZipWriter(zipFileWriter, {level: 0});
-    const index = {
-        title: dictionaryName,
-        format: 3,
-        revision: 'test',
-        sequenced: true,
-    };
-    const termBank = [
-        [
-            'ping',
-            '',
-            '',
-            '',
-            0,
-            [{
-                type: 'structured-content',
-                content: {
-                    tag: 'div',
-                    data: {tag: 'div', class: 'mdict-yomitan-content'},
-                    content: [{
-                        tag: 'a',
-                        href: mediaHref,
-                        data: {tag: 'a', class: 'sound'},
-                        content: ['play'],
-                    }],
-                },
-            }],
-            1,
-            '',
-        ],
-    ];
-    await zipWriter.add('index.json', new TextReader(JSON.stringify(index, null, 0)));
-    await zipWriter.add('term_bank_1.json', new TextReader(JSON.stringify(termBank, null, 0)));
-    await zipWriter.add('styles.css', new TextReader('[data-sc-class~="sound"] { color: red; }'));
-    await zipWriter.add('mdict-media/audio/ping.mp3', new TextReader('MP3'));
-    const blob = await zipWriter.close();
-    return await blob.arrayBuffer();
 }
 
 /**
@@ -352,7 +257,6 @@ function createTermArtifactPayload(dictionaryImporter, version, dictionaryTitle,
     );
     /** @type {Uint8Array[]} */
     const chunks = [textEncoder.encode('MBTB0001')];
-    /** @type {Uint8Array[]|null} */
     const sharedGlossaryBytes = termContentMode === 'raw-v3' || termContentMode === 'raw-v4' ? [] : null;
     /** @type {Map<string, {offset: number, length: number}>|null} */
     const sharedGlossarySpanByKey = termContentMode === 'raw-v3' || termContentMode === 'raw-v4' ? new Map() : null;
@@ -375,11 +279,11 @@ function createTermArtifactPayload(dictionaryImporter, version, dictionaryTitle,
             const glossaryKey = JSON.stringify(entry.glossary);
             let span = /** @type {{offset: number, length: number}|undefined} */ (sharedGlossarySpanByKey?.get(glossaryKey));
             if (typeof span === 'undefined') {
-                const glossaryByteChunks = /** @type {Uint8Array[]} */ (sharedGlossaryBytes);
-                const offset = glossaryByteChunks.reduce((sum, chunk) => (sum + chunk.byteLength), 0);
+                const sharedGlossaryChunks = /** @type {Uint8Array[]} */ (sharedGlossaryBytes ?? []);
+                const offset = sharedGlossaryChunks.reduce((sum, chunk) => (sum + chunk.byteLength), 0);
                 span = {offset, length: glossaryBytes.byteLength};
                 sharedGlossarySpanByKey?.set(glossaryKey, span);
-                glossaryByteChunks.push(glossaryBytes);
+                sharedGlossaryChunks.push(glossaryBytes);
             }
             return encodeRawTermContentSharedGlossaryBinary(
                 entry.rules,
@@ -531,35 +435,6 @@ function createDictionaryImporter(testExpect, onProgress) {
 }
 
 /**
- * @param {string} dictionaryName
- * @returns {import('translation').FindTermsOptions}
- */
-function createSimpleFindTermsOptions(dictionaryName) {
-    return {
-        matchType: 'exact',
-        deinflect: true,
-        mainDictionary: dictionaryName,
-        sortFrequencyDictionary: null,
-        sortFrequencyDictionaryOrder: 'ascending',
-        removeNonJapaneseCharacters: false,
-        primaryReading: '',
-        textReplacements: [],
-        enabledDictionaryMap: new Map([
-            [dictionaryName, {
-                index: 0,
-                alias: dictionaryName,
-                allowSecondarySearches: false,
-                partsOfSpeechFilter: true,
-                useDeinflections: true,
-            }],
-        ]),
-        excludeDictionaryDefinitions: null,
-        searchResolution: 'letter',
-        language: 'ja',
-    };
-}
-
-/**
  * @param {import('dictionary-database').TermEntry[]} dictionaryDatabaseEntries
  * @param {string} term
  * @returns {number}
@@ -708,9 +583,7 @@ describe('Database', () => {
                 expect.soft(errors.some((error) => error.message.includes('Unsupported dictionary format version: 0'))).toBe(true);
                 expect.soft(await dictionaryDatabase.getDictionaryInfo()).toStrictEqual([]);
             } finally {
-                if (dictionaryDatabase.isPrepared()) {
-                    await dictionaryDatabase.close();
-                }
+                await dictionaryDatabase.close();
             }
         });
     });
@@ -758,54 +631,6 @@ describe('Database', () => {
                 importDictionarySpy.mockRestore();
             }
         });
-
-        test('Imports dictionaries using original source metadata and duplicate detection uses the original title', async ({expect}) => {
-            const dictionaryDatabase = new DictionaryDatabase();
-            await dictionaryDatabase.prepare();
-
-            const testDictionarySource = await createTestDictionaryArchiveData('valid-dictionary1');
-            const testDictionaryIndex = await getDictionaryArchiveIndex(testDictionarySource);
-            const originalTitle = testDictionaryIndex.title;
-            const originalDescription = testDictionaryIndex.description;
-            const originalRevision = testDictionaryIndex.revision;
-            /** @type {import('dictionary-importer').ImportDetails} */
-            const importDetails = {
-                prefixWildcardsSupported: true,
-                yomitanVersion: '0.0.0.0',
-            };
-
-            try {
-                const {result, errors} = await createDictionaryImporter(expect).importDictionary(
-                    dictionaryDatabase,
-                    testDictionarySource,
-                    importDetails,
-                );
-                expect.soft(errors).toStrictEqual([]);
-                expect.soft(result).not.toBeNull();
-                expect.soft(result?.title).toBe(originalTitle);
-                expect.soft(result?.description).toBe(originalDescription);
-                expect.soft(result?.revision).toBe(originalRevision);
-
-                const info = await dictionaryDatabase.getDictionaryInfo();
-                expect.soft(info).toHaveLength(1);
-                expect.soft(info[0]?.title).toBe(originalTitle);
-                expect.soft(info[0]?.description).toBe(originalDescription);
-                expect.soft(info[0]?.revision).toBe(originalRevision);
-
-                const duplicateImportResult = await createDictionaryImporter(expect).importDictionary(
-                    dictionaryDatabase,
-                    testDictionarySource,
-                    importDetails,
-                );
-                expect.soft(duplicateImportResult.result).toBeNull();
-                expect.soft(duplicateImportResult.errors).toStrictEqual([
-                    new Error(`Dictionary ${originalTitle} is already imported, skipped it.`),
-                ]);
-            } finally {
-                await dictionaryDatabase.close();
-            }
-        });
-
         test('Deduplicates shared term entry content', async ({expect}) => {
             const dictionaryDatabase = new DictionaryDatabase();
             await dictionaryDatabase.prepare();
@@ -849,7 +674,7 @@ describe('Database', () => {
 
             await dictionaryDatabase.bulkAdd('terms', entries, 0, entries.length);
 
-
+            // eslint-disable-next-line no-underscore-dangle
             const db = dictionaryDatabase._requireDb();
             const termsCount = db.selectValue('SELECT COUNT(*) FROM terms');
             const termsWithExternalContentCount = db.selectValue(`
@@ -912,7 +737,7 @@ describe('Database', () => {
 
             await dictionaryDatabase.bulkAdd('terms', entries, 0, entries.length);
 
-
+            // eslint-disable-next-line no-underscore-dangle
             const db = dictionaryDatabase._requireDb();
             const reusedContentCount = db.selectValue(`
                 SELECT COUNT(*)
@@ -952,190 +777,6 @@ describe('Database', () => {
             } finally {
                 readTermBankFileFastSpy.mockRestore();
                 await dictionaryDatabase.close();
-            }
-        });
-
-        test('Imports structured-content media links into the media store', async ({expect}) => {
-            const dictionaryName = 'Structured Content Media';
-            const testDictionarySource = await createStructuredContentMediaArchiveData(dictionaryName);
-            const dictionaryDatabase = new DictionaryDatabase();
-            await dictionaryDatabase.prepare();
-            try {
-                const dictionaryImporter = createDictionaryImporter(expect);
-                const {result, errors} = await dictionaryImporter.importDictionary(
-                    dictionaryDatabase,
-                    testDictionarySource,
-                    {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
-                );
-                expect.soft(errors).toStrictEqual([]);
-                expect.soft(result?.title).toBe(dictionaryName);
-
-                const info = await dictionaryDatabase.getDictionaryInfo();
-                expect.soft(info.length).toBe(1);
-                expect.soft(info[0]?.counts?.media.total).toBe(1);
-
-                const titles = new Map([
-                    [dictionaryName, {alias: dictionaryName, allowSecondarySearches: false}],
-                ]);
-                const results = await dictionaryDatabase.findTermsBulk(['ping'], titles, 'exact');
-                expect.soft(results.length).toBe(1);
-                const glossary = results[0]?.definitions[0];
-                if (!(typeof glossary === 'object' && glossary !== null && 'type' in glossary && glossary.type === 'structured-content')) {
-                    throw new Error('Expected structured-content glossary');
-                }
-                const root = glossary.content;
-                if (!(typeof root === 'object' && root !== null && !Array.isArray(root))) {
-                    throw new Error('Expected structured-content root element');
-                }
-                expect.soft(root.tag).toBe('div');
-                expect.soft(root.data?.class).toBe('mdict-yomitan-content');
-                const link = Array.isArray(root.content) ? root.content[0] : null;
-                if (!(typeof link === 'object' && link !== null && !Array.isArray(link) && link.tag === 'a')) {
-                    throw new Error('Expected structured-content media link');
-                }
-                expect.soft(link.tag).toBe('a');
-                expect.soft(link.href).toBe('media:mdict-media/audio/ping.mp3');
-
-                const media = await dictionaryDatabase.getMedia([{dictionary: dictionaryName, path: 'mdict-media/audio/ping.mp3'}]);
-                expect.soft(media.length).toBe(1);
-                expect.soft(media[0]?.mediaType).toBe('audio/mpeg');
-                expect.soft(media[0]?.width).toBe(0);
-                expect.soft(media[0]?.height).toBe(0);
-                expect.soft([...new Uint8Array(media[0]?.content ?? new ArrayBuffer(0))]).toStrictEqual([77, 80, 51]);
-            } finally {
-                await dictionaryDatabase.close();
-            }
-        });
-
-        test('Ignores malformed structured-content media links without aborting import', async ({expect}) => {
-            const dictionaryName = 'Structured Content Media Malformed';
-            const testDictionarySource = await createStructuredContentMediaArchiveData(
-                dictionaryName,
-                'media:mdict-media/audio/%E0%A4%A.mp3',
-            );
-            const dictionaryDatabase = new DictionaryDatabase();
-            await dictionaryDatabase.prepare();
-            try {
-                const dictionaryImporter = createDictionaryImporter(expect);
-                const {result, errors} = await dictionaryImporter.importDictionary(
-                    dictionaryDatabase,
-                    testDictionarySource,
-                    {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
-                );
-                expect.soft(errors).toStrictEqual([]);
-                expect.soft(result?.title).toBe(dictionaryName);
-
-                const info = await dictionaryDatabase.getDictionaryInfo();
-                expect.soft(info.length).toBe(1);
-                expect.soft(info[0]?.counts?.media.total).toBe(0);
-
-                const titles = new Map([
-                    [dictionaryName, {alias: dictionaryName, allowSecondarySearches: false}],
-                ]);
-                const results = await dictionaryDatabase.findTermsBulk(['ping'], titles, 'exact');
-                expect.soft(results.length).toBe(1);
-                const glossary = results[0]?.definitions[0];
-                if (!(typeof glossary === 'object' && glossary !== null && 'type' in glossary && glossary.type === 'structured-content')) {
-                    throw new Error('Expected structured-content glossary');
-                }
-                const root = glossary.content;
-                if (!(typeof root === 'object' && root !== null && !Array.isArray(root))) {
-                    throw new Error('Expected structured-content root element');
-                }
-                const link = Array.isArray(root.content) ? root.content[0] : null;
-                if (!(typeof link === 'object' && link !== null && !Array.isArray(link) && link.tag === 'a')) {
-                    throw new Error('Expected structured-content media link');
-                }
-                expect.soft(link.href).toBe('media:mdict-media/audio/%E0%A4%A.mp3');
-            } finally {
-                await dictionaryDatabase.close();
-            }
-        });
-
-        test('Preserves exact term content for streamed fast-path imports across term banks', async ({expect}) => {
-            const testDictionarySource = await createStreamedFastParserRegressionArchiveData();
-            const opfsRootDirectoryHandle = createInMemoryOpfsDirectoryHandle({
-                writeDelay: async () => {
-                    await new Promise((resolve) => { setTimeout(resolve, 0); });
-                },
-            });
-            const restoreNavigator = installInMemoryOpfsNavigator(opfsRootDirectoryHandle);
-            const dictionaryDatabase = new DictionaryDatabase();
-            await dictionaryDatabase.prepare();
-            const readTermBankFileFastSpy = vi.spyOn(DictionaryImporter.prototype, '_readTermBankFileFast');
-            try {
-                const dictionaryImporter = createDictionaryImporter(expect);
-                dictionaryImporter._disableTermBankWasmFastPath = false;
-                dictionaryImporter._wasmCanonicalRowsFastPath = true;
-                dictionaryImporter._wasmPassThroughTermContent = true;
-                const {result, errors} = await dictionaryImporter.importDictionary(
-                    dictionaryDatabase,
-                    testDictionarySource,
-                    {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
-                );
-                expect.soft(errors).toStrictEqual([]);
-                expect.soft(result).not.toBeNull();
-                expect.soft(readTermBankFileFastSpy).toHaveBeenCalled();
-
-                const dictionaryName = result?.title ?? 'Fast Parser Regression';
-                const titles = new Map([
-                    [dictionaryName, {alias: dictionaryName, allowSecondarySearches: false}],
-                ]);
-                const exact = await dictionaryDatabase.findTermsBulk(['読む'], titles, 'exact');
-                expect.soft(exact.length).toBeGreaterThan(0);
-                expect.soft(exact[0]?.rules).toStrictEqual(['v5']);
-                expect.soft(exact[0]?.definitions.length ?? 0).toBeGreaterThan(0);
-            } finally {
-                readTermBankFileFastSpy.mockRestore();
-                if (dictionaryDatabase.isPrepared()) {
-                    await dictionaryDatabase.close();
-                }
-                restoreNavigator();
-            }
-        });
-
-        test('Resolves 読め after streamed fast-path import', async ({expect}) => {
-            const testDictionarySource = await createStreamedFastParserRegressionArchiveData();
-            const opfsRootDirectoryHandle = createInMemoryOpfsDirectoryHandle({
-                writeDelay: async () => {
-                    await new Promise((resolve) => { setTimeout(resolve, 0); });
-                },
-            });
-            const restoreNavigator = installInMemoryOpfsNavigator(opfsRootDirectoryHandle);
-            const dictionaryDatabase = new DictionaryDatabase();
-            await dictionaryDatabase.prepare();
-            try {
-                const dictionaryImporter = createDictionaryImporter(expect);
-                dictionaryImporter._disableTermBankWasmFastPath = false;
-                dictionaryImporter._wasmCanonicalRowsFastPath = true;
-                dictionaryImporter._wasmPassThroughTermContent = true;
-                const {result, errors} = await dictionaryImporter.importDictionary(
-                    dictionaryDatabase,
-                    testDictionarySource,
-                    {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
-                );
-                expect.soft(errors).toStrictEqual([]);
-                expect.soft(result).not.toBeNull();
-
-                const dictionaryName = result?.title ?? 'Fast Parser Regression';
-                const translator = new Translator(dictionaryDatabase);
-                translator.prepare();
-                const {dictionaryEntries, originalTextLength} = await translator.findTerms(
-                    'simple',
-                    '読め',
-                    createSimpleFindTermsOptions(dictionaryName),
-                );
-                expect.soft(originalTextLength).toBe(2);
-                expect.soft(dictionaryEntries.length).toBeGreaterThan(0);
-                expect.soft(dictionaryEntries.some((dictionaryEntry) => dictionaryEntry.headwords.some((headword) => (
-                    headword.term === '読む' &&
-                    headword.reading === 'よむ'
-                )))).toBe(true);
-            } finally {
-                if (dictionaryDatabase.isPrepared()) {
-                    await dictionaryDatabase.close();
-                }
-                restoreNavigator();
             }
         });
 
@@ -1192,10 +833,7 @@ describe('Database', () => {
                 expect.soft(info[0]?.importSuccess).toBe(true);
 
                 const counts = await dictionaryDatabase.getDictionaryCounts(['Artifact Raw Dictionary'], true);
-                if (counts.total === null) {
-                    throw new Error('Expected dictionary counts total for raw-v3 import');
-                }
-                expect.soft(counts.total.terms).toBeGreaterThan(0);
+                expect.soft(counts.total?.terms ?? 0).toBeGreaterThan(0);
 
                 const titles = new Map([
                     ['Artifact Raw Dictionary', {alias: 'Artifact Raw Dictionary', allowSecondarySearches: false}],
@@ -1204,9 +842,7 @@ describe('Database', () => {
                 expect.soft(results.length).toBeGreaterThan(0);
                 expect.soft(results.some((entry) => entry.dictionary === 'Artifact Raw Dictionary')).toBe(true);
             } finally {
-                if (dictionaryDatabase.isPrepared()) {
-                    await dictionaryDatabase.close();
-                }
+                await dictionaryDatabase.close();
             }
         });
 
@@ -1230,10 +866,7 @@ describe('Database', () => {
                 expect.soft(info[0]?.importSuccess).toBe(true);
 
                 const counts = await dictionaryDatabase.getDictionaryCounts(['Artifact Raw V4 Dictionary'], true);
-                if (counts.total === null) {
-                    throw new Error('Expected dictionary counts total for raw-v4 import');
-                }
-                expect.soft(counts.total.terms).toBeGreaterThan(0);
+                expect.soft(counts.total?.terms ?? 0).toBeGreaterThan(0);
 
                 const titles = new Map([
                     ['Artifact Raw V4 Dictionary', {alias: 'Artifact Raw V4 Dictionary', allowSecondarySearches: false}],
@@ -1241,127 +874,6 @@ describe('Database', () => {
                 const results = await dictionaryDatabase.findTermsBulk(['打'], titles, 'exact');
                 expect.soft(results.length).toBeGreaterThan(0);
                 expect.soft(results.some((entry) => entry.dictionary === 'Artifact Raw V4 Dictionary')).toBe(true);
-            } finally {
-                await dictionaryDatabase.close();
-            }
-        });
-
-        test('Updates dictionary metadata and renames dictionary-backed records', async ({expect}) => {
-            const testDictionarySource = await createTestDictionaryArtifactArchiveData('valid-dictionary1', 'Editable Dictionary', 'raw-v4');
-            const dictionaryDatabase = new DictionaryDatabase();
-            await dictionaryDatabase.prepare();
-            try {
-                const dictionaryImporter = createDictionaryImporter(expect);
-                const {result, errors} = await dictionaryImporter.importDictionary(
-                    dictionaryDatabase,
-                    testDictionarySource,
-                    {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
-                );
-                expect.soft(errors).toStrictEqual([]);
-                if (result === null) {
-                    throw new Error('Expected imported dictionary summary');
-                }
-
-                await dictionaryDatabase.updateDictionaryMetadata('Editable Dictionary', {
-                    ...result,
-                    title: 'Edited Dictionary',
-                    url: 'https://example.invalid/dictionaries/edited',
-                    description: 'Edited description',
-                });
-
-                const info = await dictionaryDatabase.getDictionaryInfo();
-                expect.soft(info.length).toBe(1);
-                expect.soft(info[0]?.title).toBe('Edited Dictionary');
-                expect.soft(info[0]?.url).toBe('https://example.invalid/dictionaries/edited');
-                expect.soft(info[0]?.description).toBe('Edited description');
-                expect.soft(await dictionaryDatabase.dictionaryExists('Editable Dictionary')).toBe(false);
-                expect.soft(await dictionaryDatabase.dictionaryExists('Edited Dictionary')).toBe(true);
-
-                const counts = await dictionaryDatabase.getDictionaryCounts(['Edited Dictionary'], true);
-                expect.soft(counts.counts[0]?.terms).toBeGreaterThan(0);
-
-                const titles = new Map([
-                    ['Edited Dictionary', {alias: 'Edited Dictionary', allowSecondarySearches: false}],
-                ]);
-                const results = await dictionaryDatabase.findTermsBulk(['打'], titles, 'exact');
-                expect.soft(results.length).toBeGreaterThan(0);
-                expect.soft(results.some((entry) => entry.dictionary === 'Edited Dictionary')).toBe(true);
-                expect.soft(results.some((entry) => entry.dictionary === 'Editable Dictionary')).toBe(false);
-
-                const db = dictionaryDatabase._requireDb();
-                for (const table of ['kanji', 'kanjiMeta', 'termMeta', 'tagMeta', 'media']) {
-                    const dictionaries = db.selectObjects(`SELECT DISTINCT dictionary FROM ${table} ORDER BY dictionary ASC`)
-                        .map((row) => row.dictionary);
-                    if (dictionaries.length > 0) {
-                        expect.soft(dictionaries.includes('Editable Dictionary')).toBe(false);
-                        expect.soft(dictionaries.includes('Edited Dictionary')).toBe(true);
-                    }
-                }
-                expect.soft(Number(db.selectValue(
-                    'SELECT COUNT(*) FROM sharedGlossaryArtifacts WHERE dictionary = $dictionary',
-                    {$dictionary: 'Editable Dictionary'},
-                ))).toBe(0);
-                expect.soft(Number(db.selectValue(
-                    'SELECT COUNT(*) FROM sharedGlossaryArtifacts WHERE dictionary = $dictionary',
-                    {$dictionary: 'Edited Dictionary'},
-                ))).toBeGreaterThan(0);
-            } finally {
-                await dictionaryDatabase.close();
-            }
-        });
-
-        test('Dictionary metadata rename rolls back term-record storage when the SQL update fails', async ({expect}) => {
-            const testDictionarySource = await createTestDictionaryArtifactArchiveData('valid-dictionary1', 'Editable Dictionary', 'raw-v4');
-            const dictionaryDatabase = new DictionaryDatabase();
-            await dictionaryDatabase.prepare();
-            try {
-                const dictionaryImporter = createDictionaryImporter(expect);
-                const {result, errors} = await dictionaryImporter.importDictionary(
-                    dictionaryDatabase,
-                    testDictionarySource,
-                    {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
-                );
-                expect.soft(errors).toStrictEqual([]);
-                if (result === null) {
-                    throw new Error('Expected imported dictionary summary');
-                }
-
-                const db = dictionaryDatabase._requireDb();
-                const exec = db.exec.bind(db);
-                const renameDictionary = vi.spyOn(dictionaryDatabase._termRecordStore, 'renameDictionary');
-                vi.spyOn(db, 'exec').mockImplementation((query) => {
-                    if (
-                        typeof query === 'object' &&
-                        query !== null &&
-                        'sql' in query &&
-                        query.sql === 'UPDATE dictionaries SET title = $title, version = $version, summaryJson = $summaryJson WHERE id = $id'
-                    ) {
-                        throw new Error('Synthetic metadata update failure');
-                    }
-                    return exec(query);
-                });
-
-                await expect(dictionaryDatabase.updateDictionaryMetadata('Editable Dictionary', {
-                    ...result,
-                    title: 'Edited Dictionary',
-                })).rejects.toThrow('Synthetic metadata update failure');
-
-                expect(renameDictionary).toHaveBeenCalledTimes(2);
-                expect(renameDictionary).toHaveBeenNthCalledWith(1, 'Editable Dictionary', 'Edited Dictionary');
-                expect(renameDictionary).toHaveBeenNthCalledWith(2, 'Edited Dictionary', 'Editable Dictionary');
-                expect.soft(await dictionaryDatabase.dictionaryExists('Editable Dictionary')).toBe(true);
-                expect.soft(await dictionaryDatabase.dictionaryExists('Edited Dictionary')).toBe(false);
-
-                const info = await dictionaryDatabase.getDictionaryInfo();
-                expect.soft(info.length).toBe(1);
-                expect.soft(info[0]?.title).toBe('Editable Dictionary');
-
-                const titles = new Map([
-                    ['Editable Dictionary', {alias: 'Editable Dictionary', allowSecondarySearches: false}],
-                ]);
-                const results = await dictionaryDatabase.findTermsBulk(['打'], titles, 'exact');
-                expect.soft(results.length).toBeGreaterThan(0);
-                expect.soft(results.every((entry) => entry.dictionary === 'Editable Dictionary')).toBe(true);
             } finally {
                 await dictionaryDatabase.close();
             }
@@ -1394,9 +906,6 @@ describe('Database', () => {
 
             if (importDictionaryResult) {
                 importDictionaryResult.importDate = fakeImportDate;
-                if (typeof importDictionaryResult.autoUpdate === 'object' && importDictionaryResult.autoUpdate !== null) {
-                    importDictionaryResult.autoUpdate.lastUpdatedAt = fakeImportDate;
-                }
             }
 
             expect.soft(importDictionaryErrors).toStrictEqual([]);
@@ -1405,12 +914,7 @@ describe('Database', () => {
 
             // Get info summary
             const info = await dictionaryDatabase.getDictionaryInfo();
-            for (const item of info) {
-                item.importDate = fakeImportDate;
-                if (typeof item.autoUpdate === 'object' && item.autoUpdate !== null) {
-                    item.autoUpdate.lastUpdatedAt = fakeImportDate;
-                }
-            }
+            for (const item of info) { item.importDate = fakeImportDate; }
             expect.soft(info).toStrictEqual([testData.expectedSummary]);
 
             // Get counts
@@ -1501,68 +1005,6 @@ describe('Database', () => {
             }
 
             // Close
-            await dictionaryDatabase.close();
-        });
-
-        test('Normalizes legacy dictionary auto-update metadata on read and can persist metadata updates by title', async ({expect}) => {
-            const testDictionarySource = await createTestDictionaryArchiveData('valid-dictionary1');
-            const testDictionaryIndex = await getDictionaryArchiveIndex(testDictionarySource);
-            const dictionaryImporter = createDictionaryImporter(expect);
-            const dictionaryDatabase = new DictionaryDatabase();
-            await dictionaryDatabase.prepare();
-            await dictionaryImporter.importDictionary(
-                dictionaryDatabase,
-                testDictionarySource,
-                {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
-            );
-
-            const db = dictionaryDatabase._requireDb();
-            const summaryRow = db.selectObject('SELECT summaryJson FROM dictionaries WHERE title = $title LIMIT 1', {$title: testDictionaryIndex.title});
-            expect.soft(typeof summaryRow).toBe('object');
-            if (typeof summaryRow === 'undefined') {
-                throw new Error('Imported dictionary summary row missing');
-            }
-            if (typeof summaryRow.summaryJson !== 'string') {
-                throw new Error('Imported dictionary summaryJson missing');
-            }
-            const summary = /** @type {import('dictionary-importer').Summary} */ (parseJson(summaryRow.summaryJson));
-            delete summary.autoUpdate;
-            db.exec({
-                sql: 'UPDATE dictionaries SET summaryJson = $summaryJson WHERE title = $title',
-                bind: {
-                    $summaryJson: JSON.stringify(summary),
-                    $title: testDictionaryIndex.title,
-                },
-            });
-
-            const [legacyInfo] = await dictionaryDatabase.getDictionaryInfo();
-            expect.soft(legacyInfo?.autoUpdate).toStrictEqual({
-                schedule: 'manual',
-                lastUpdatedAt: legacyInfo?.importDate ?? null,
-                nextUpdateAt: null,
-            });
-
-            const updatedSummary = await dictionaryDatabase.updateDictionarySummaryByTitle(testDictionaryIndex.title, {
-                ...legacyInfo,
-                autoUpdate: {
-                    schedule: 'manual',
-                    lastUpdatedAt: 1234,
-                    nextUpdateAt: null,
-                },
-            });
-            expect.soft(updatedSummary?.autoUpdate).toStrictEqual({
-                schedule: 'manual',
-                lastUpdatedAt: 1234,
-                nextUpdateAt: null,
-            });
-
-            const [persistedInfo] = await dictionaryDatabase.getDictionaryInfo();
-            expect.soft(persistedInfo?.autoUpdate).toStrictEqual({
-                schedule: 'manual',
-                lastUpdatedAt: 1234,
-                nextUpdateAt: null,
-            });
-
             await dictionaryDatabase.close();
         });
 
@@ -1754,6 +1196,101 @@ describe('Database', () => {
             }
         }, 15000);
 
+        test('Preserves the live dictionary when staged title cutover fails before delete', async ({expect}) => {
+            const liveDictionarySource = await createTestDictionaryArchiveData('valid-dictionary1', 'Live Dictionary');
+            const stagedDictionarySource = await createTestDictionaryArchiveData('valid-dictionary1', 'Live Dictionary');
+            const stagedDictionaryTitle = 'Live Dictionary [update-staging cutover-test]';
+            const dictionaryDatabase = new DictionaryDatabase();
+            await dictionaryDatabase.prepare();
+
+            const dictionaryImporter = createDictionaryImporter(expect);
+            await dictionaryImporter.importDictionary(
+                dictionaryDatabase,
+                liveDictionarySource,
+                {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
+            );
+            await dictionaryImporter.importDictionary(
+                dictionaryDatabase,
+                stagedDictionarySource,
+                {
+                    prefixWildcardsSupported: true,
+                    yomitanVersion: '0.0.0.0',
+                    dictionaryTitleOverride: stagedDictionaryTitle,
+                },
+            );
+
+            // eslint-disable-next-line no-underscore-dangle
+            const replaceDictionaryNameSpy = vi.spyOn(dictionaryDatabase._termRecordStore, 'replaceDictionaryName').mockImplementationOnce(async () => {
+                throw new Error('Injected staged cutover failure');
+            });
+
+            try {
+                await expect.soft(dictionaryDatabase.replaceDictionaryTitle(
+                    stagedDictionaryTitle,
+                    'Live Dictionary',
+                    {title: 'Live Dictionary', sourceTitle: 'Live Dictionary'},
+                    'Live Dictionary',
+                )).rejects.toThrow('Injected staged cutover failure');
+
+                const info = await dictionaryDatabase.getDictionaryInfo();
+                const titles = info.map(({title}) => title);
+                expect.soft(titles.some((title) => title === 'Live Dictionary')).toBe(true);
+                expect.soft(titles.some((title) => title.includes('[cutover '))).toBe(false);
+            } finally {
+                replaceDictionaryNameSpy.mockRestore();
+                await dictionaryDatabase.close();
+            }
+        }, 15000);
+
+        test('Removes the temporary replaced dictionary when post-cutover delete fails', async ({expect}) => {
+            const liveDictionarySource = await createTestDictionaryArchiveData('valid-dictionary1', 'Live Dictionary');
+            const stagedDictionarySource = await createTestDictionaryArchiveData('valid-dictionary1', 'Live Dictionary');
+            const stagedDictionaryTitle = 'Live Dictionary [update-staging cleanup-test]';
+            const dictionaryDatabase = new DictionaryDatabase();
+            await dictionaryDatabase.prepare();
+
+            const dictionaryImporter = createDictionaryImporter(expect);
+            await dictionaryImporter.importDictionary(
+                dictionaryDatabase,
+                liveDictionarySource,
+                {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
+            );
+            await dictionaryImporter.importDictionary(
+                dictionaryDatabase,
+                stagedDictionarySource,
+                {
+                    prefixWildcardsSupported: true,
+                    yomitanVersion: '0.0.0.0',
+                    dictionaryTitleOverride: stagedDictionaryTitle,
+                },
+            );
+
+            const originalDeleteDictionary = dictionaryDatabase.deleteDictionary.bind(dictionaryDatabase);
+            const deleteDictionarySpy = vi.spyOn(dictionaryDatabase, 'deleteDictionary').mockImplementation(async (title, deleteStepSize, onProgress) => {
+                if (typeof title === 'string' && title.includes('[replaced ') && !title.includes('[retry-ok]')) {
+                    throw new Error('Injected replaced-title delete failure');
+                }
+                await originalDeleteDictionary(title, deleteStepSize, onProgress);
+            });
+
+            try {
+                await dictionaryDatabase.replaceDictionaryTitle(
+                    stagedDictionaryTitle,
+                    'Live Dictionary',
+                    {title: 'Live Dictionary', sourceTitle: 'Live Dictionary'},
+                    'Live Dictionary',
+                );
+
+                const info = await dictionaryDatabase.getDictionaryInfo();
+                const titles = info.map(({title}) => title);
+                expect.soft(titles).toStrictEqual(['Live Dictionary']);
+                expect.soft(titles.some((title) => title.includes('[replaced '))).toBe(false);
+            } finally {
+                deleteDictionarySpy.mockRestore();
+                await dictionaryDatabase.close();
+            }
+        }, 15000);
+
         test('Cleans incomplete dictionaries during prepare', async ({expect}) => {
             const testDictionarySource = await createTestDictionaryArchiveData('valid-dictionary1');
             const testDictionaryIndex = await getDictionaryArchiveIndex(testDictionarySource);
@@ -1767,7 +1304,7 @@ describe('Database', () => {
                 {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
             );
 
-
+            // eslint-disable-next-line no-underscore-dangle
             const db = dictionaryDatabase._requireDb();
             const summaryRow = db.selectObject('SELECT summaryJson FROM dictionaries WHERE title = $title LIMIT 1', {$title: testDictionaryIndex.title});
             expect.soft(typeof summaryRow).toBe('object');
@@ -1816,7 +1353,7 @@ describe('Database', () => {
                 {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
             );
 
-
+            // eslint-disable-next-line no-underscore-dangle
             const db = dictionaryDatabase._requireDb();
             db.exec({
                 sql: 'UPDATE dictionaries SET summaryJson = $summaryJson WHERE title = $title',
@@ -1904,7 +1441,7 @@ describe('Database', () => {
                 await reopenedTermRecordStore.prepare();
                 try {
                     // Simulate a stale empty cached index even though the records are loaded.
-
+                    // eslint-disable-next-line no-underscore-dangle
                     reopenedTermRecordStore._indexByDictionary.set('Test Dictionary', {
                         expression: new Map(),
                         reading: new Map(),
@@ -1930,7 +1467,7 @@ describe('Database', () => {
             const dictionaryDatabase = new DictionaryDatabase();
             await dictionaryDatabase.prepare();
 
-
+            // eslint-disable-next-line no-underscore-dangle
             const db = dictionaryDatabase._requireDb();
             db.exec({
                 sql: 'INSERT INTO dictionaries(title, version, summaryJson) VALUES ($title, $version, $summaryJson)',
@@ -1964,6 +1501,29 @@ describe('Database', () => {
                     $summaryJson: JSON.stringify({title: 'Broken Flag', revision: '1', version: 3, importSuccess: false}),
                 },
             });
+            db.exec({
+                sql: 'INSERT INTO dictionaries(title, version, summaryJson) VALUES ($title, $version, $summaryJson)',
+                bind: {
+                    $title: 'Healthy [cutover abc123]',
+                    $version: 3,
+                    $summaryJson: JSON.stringify({
+                        title: 'Healthy [cutover abc123]',
+                        revision: '1',
+                        version: 3,
+                        importSuccess: true,
+                        transientUpdateStage: 'cutover',
+                        updateSessionToken: 'abc123',
+                    }),
+                },
+            });
+            db.exec({
+                sql: 'INSERT INTO dictionaries(title, version, summaryJson) VALUES ($title, $version, $summaryJson)',
+                bind: {
+                    $title: 'Legit [cutover abc123]',
+                    $version: 3,
+                    $summaryJson: JSON.stringify({title: 'Legit [cutover abc123]', revision: '1', version: 3, importSuccess: true}),
+                },
+            });
 
             const originalDeleteDictionary = dictionaryDatabase.deleteDictionary.bind(dictionaryDatabase);
             const deleteDictionarySpy = vi.spyOn(dictionaryDatabase, 'deleteDictionary').mockImplementation(async (title, deleteStepSize, onProgress) => {
@@ -1980,9 +1540,9 @@ describe('Database', () => {
                 }
                 const summary = await Promise.resolve(cleanupMethod.call(dictionaryDatabase));
                 expect.soft(summary).toStrictEqual({
-                    scannedCount: 4,
-                    removedCount: 2,
-                    removedTitles: ['Broken Parse'],
+                    scannedCount: 6,
+                    removedCount: 3,
+                    removedTitles: ['Broken Parse', 'Healthy [cutover abc123]'],
                     removedEmptyTitleRows: 1,
                     failedCount: 1,
                     failedTitles: ['Broken Flag'],
@@ -1990,7 +1550,7 @@ describe('Database', () => {
                 });
 
                 const remainingTitles = db.selectObjects('SELECT title FROM dictionaries ORDER BY title ASC').map((row) => row.title);
-                expect.soft(remainingTitles).toStrictEqual(['Broken Flag', 'Healthy']);
+                expect.soft(remainingTitles).toStrictEqual(['Broken Flag', 'Healthy', 'Legit [cutover abc123]']);
             } finally {
                 deleteDictionarySpy.mockRestore();
                 await dictionaryDatabase.close();
@@ -2010,7 +1570,7 @@ describe('Database', () => {
 
             const beforeInfo = await dictionaryDatabase.getDictionaryInfo();
             expect.soft(beforeInfo.length).toBe(1);
-
+            // eslint-disable-next-line no-underscore-dangle
             const db = dictionaryDatabase._requireDb();
             db.exec('PRAGMA user_version = 0');
             const runSchemaMigrations = Reflect.get(dictionaryDatabase, '_runSchemaMigrations');
@@ -2027,7 +1587,7 @@ describe('Database', () => {
             await dictionaryDatabase.close();
         });
 
-        test('Schema migration v2 upgrades from v1 without wiping dictionary data, and v3/v4 reset dictionary data', async ({expect}) => {
+        test('Schema migration v2 upgrades from v1 without wiping dictionary data, and v3 resets for raw-v3 schema', async ({expect}) => {
             const testDictionarySource = await createTestDictionaryArchiveData('valid-dictionary1');
             const dictionaryDatabase = new DictionaryDatabase();
             await dictionaryDatabase.prepare();
@@ -2038,7 +1598,7 @@ describe('Database', () => {
                 {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
             );
 
-
+            // eslint-disable-next-line no-underscore-dangle
             const db = dictionaryDatabase._requireDb();
             db.exec('PRAGMA user_version = 1');
             const runSchemaMigrations = Reflect.get(dictionaryDatabase, '_runSchemaMigrations');
@@ -2070,7 +1630,7 @@ describe('Database', () => {
                 {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
             );
 
-
+            // eslint-disable-next-line no-underscore-dangle
             const db = dictionaryDatabase._requireDb();
             const runSchemaMigrations = Reflect.get(dictionaryDatabase, '_runSchemaMigrations');
             if (typeof runSchemaMigrations !== 'function') {
@@ -2097,7 +1657,7 @@ describe('Database', () => {
                 {prefixWildcardsSupported: true, yomitanVersion: '0.0.0.0'},
             );
 
-
+            // eslint-disable-next-line no-underscore-dangle
             const db = dictionaryDatabase._requireDb();
             db.exec('PRAGMA user_version = 999');
             const runSchemaMigrations = Reflect.get(dictionaryDatabase, '_runSchemaMigrations');
@@ -2111,22 +1671,6 @@ describe('Database', () => {
             expect.soft(info[0]?.importSuccess).toBe(true);
             expect.soft(Number(db.selectValue('PRAGMA user_version'))).toBe(999);
             await dictionaryDatabase.close();
-        });
-
-        test('Schema migration throws for unknown target version', async ({expect}) => {
-            const dictionaryDatabase = new DictionaryDatabase();
-            await dictionaryDatabase.prepare();
-            try {
-                const runSchemaMigrationToVersion = Reflect.get(dictionaryDatabase, '_runSchemaMigrationToVersion');
-                if (typeof runSchemaMigrationToVersion !== 'function') {
-                    throw new Error('Expected _runSchemaMigrationToVersion method');
-                }
-                await expect(Promise.resolve(runSchemaMigrationToVersion.call(dictionaryDatabase, 999)))
-                    .rejects
-                    .toThrow('Unhandled dictionary schema migration target version: 999');
-            } finally {
-                await dictionaryDatabase.close();
-            }
         });
     });
     describe('Database cleanup', () => {

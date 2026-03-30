@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2026  Yomitan Authors
+ * Copyright (C) 2023-2025  Yomitan Authors
  * Copyright (C) 2016-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,8 +23,7 @@ import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {sanitizeCSS} from '../core/utilities.js';
-import {base64ToArrayBuffer} from '../data/array-buffer-util.js';
-import {DictionaryWorker} from '../dictionary/dictionary-worker.js';
+import {getSqlite3} from '../dictionary/sqlite-wasm.js';
 import {WebExtension} from '../extension/web-extension.js';
 
 /**
@@ -51,14 +50,14 @@ export class Offscreen {
             ['clipboardSetBrowserOffscreen',   this._setClipboardBrowser.bind(this)],
             ['databasePrepareOffscreen',       this._prepareDatabaseHandler.bind(this)],
             ['databaseRefreshOffscreen',       this._refreshDatabaseHandler.bind(this)],
+            ['getDatabaseRuntimeStateOffscreen', this._getDatabaseRuntimeStateHandler.bind(this)],
             ['databaseSetSuspendedOffscreen',  this._setDatabaseSuspendedHandler.bind(this)],
             ['getDictionaryInfoOffscreen',     this._getDictionaryInfoHandler.bind(this)],
-            ['updateDictionarySummaryByTitleOffscreen', this._updateDictionarySummaryByTitleHandler.bind(this)],
-            ['getMaxHeadwordLengthOffscreen',  this._getMaxHeadwordLengthHandler.bind(this)],
             ['deleteDictionaryOffscreen',      this._deleteDictionaryHandler.bind(this)],
-            ['updateDictionaryMetadataOffscreen', this._updateDictionaryMetadataHandler.bind(this)],
+            ['replaceDictionaryTitleOffscreen', this._replaceDictionaryTitleHandler.bind(this)],
             ['getDictionaryCountsOffscreen',   this._getDictionaryCountsHandler.bind(this)],
-            ['importDictionaryArchiveOffscreen', this._importDictionaryArchiveHandler.bind(this)],
+            ['debugDictionaryStorageStateOffscreen', this._debugDictionaryStorageStateHandler.bind(this)],
+            ['debugDictionaryLookupStateOffscreen', this._debugDictionaryLookupStateHandler.bind(this)],
             ['databasePurgeOffscreen',         this._purgeDatabaseHandler.bind(this)],
             ['databaseGetMediaOffscreen',      this._getMediaHandler.bind(this)],
             ['databaseExportOffscreen',        this._exportDatabaseHandler.bind(this)],
@@ -76,6 +75,7 @@ export class Offscreen {
         /** @type {import('offscreen').McApiMap} */
         this._mcApiMap = createApiMap([
             ['connectToDatabaseWorker', this._connectToDatabaseWorkerHandler.bind(this)],
+            ['importDictionaryOffscreen', this._importDictionaryOffscreenHandler.bind(this)],
         ]);
 
         /** @type {?Promise<void>} */
@@ -111,15 +111,11 @@ export class Offscreen {
         const locationValue = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (Reflect.get(globalThis, 'location') ?? {}));
         const navigatorValue = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (Reflect.get(globalThis, 'navigator') ?? {}));
         const storageValue = /** @type {Record<string, unknown>} */ (Reflect.get(navigatorValue, 'storage') ?? {});
-        const crossOriginIsolatedValue = Reflect.get(globalThis, 'crossOriginIsolated');
         /** @type {Record<string, unknown>} */
         const payload = {
             context: {
                 href: typeof locationValue.href === 'string' ? locationValue.href : null,
                 origin: typeof locationValue.origin === 'string' ? locationValue.origin : null,
-                crossOriginIsolated: typeof crossOriginIsolatedValue === 'boolean' ? crossOriginIsolatedValue : null,
-                hasSharedArrayBuffer: typeof Reflect.get(globalThis, 'SharedArrayBuffer') === 'function',
-                hasAtomics: typeof Reflect.get(globalThis, 'Atomics') === 'object' && Reflect.get(globalThis, 'Atomics') !== null,
                 hasNavigatorStorage: typeof storageValue === 'object' && storageValue !== null,
                 hasStorageGetDirectory: typeof storageValue.getDirectory === 'function',
                 hasFileSystemHandle: typeof Reflect.get(globalThis, 'FileSystemHandle') === 'function',
@@ -136,21 +132,41 @@ export class Offscreen {
             },
         };
         try {
-            const workerDiagnostics = /** @type {unknown} */ (
-                await this._invokeDictionaryWorker('getOpfsRuntimeDiagnosticsOffscreen', {})
-            );
-            if (!(typeof workerDiagnostics === 'object' && workerDiagnostics !== null && !Array.isArray(workerDiagnostics))) {
-                throw new Error('Offscreen dictionary worker returned invalid OPFS diagnostics payload');
-            }
-            const sqlite = /** @type {unknown} */ (Reflect.get(workerDiagnostics, 'sqlite'));
-            const sqliteRuntimeContext = /** @type {unknown} */ (Reflect.get(workerDiagnostics, 'context'));
-            payload.sqliteProbeSource = 'offscreen-dictionary-worker';
-            if (typeof sqlite === 'object' && sqlite !== null && !Array.isArray(sqlite)) {
-                payload.sqlite = sqlite;
-            }
-            if (typeof sqliteRuntimeContext === 'object' && sqliteRuntimeContext !== null && !Array.isArray(sqliteRuntimeContext)) {
-                payload.sqliteRuntimeContext = sqliteRuntimeContext;
-            }
+            const sqlite3 = await getSqlite3();
+            /**
+             * @param {unknown} pointer
+             * @returns {string|number|null}
+             */
+            const serializePointer = (pointer) => {
+                if (typeof pointer === 'bigint') {
+                    return pointer.toString();
+                }
+                if (typeof pointer === 'number') {
+                    return pointer;
+                }
+                return null;
+            };
+            /**
+             * @param {unknown} pointer
+             * @returns {boolean}
+             */
+            const isNonZeroPointer = (pointer) => {
+                if (typeof pointer === 'bigint') {
+                    return pointer !== 0n;
+                }
+                if (typeof pointer === 'number') {
+                    return pointer !== 0;
+                }
+                return false;
+            };
+            const findVfs = sqlite3?.capi?.sqlite3_vfs_find;
+            const opfsSahpoolVfsRaw = typeof findVfs === 'function' ? findVfs('opfs-sahpool') : null;
+            payload.sqlite = {
+                sqliteVersion: sqlite3?.version?.libVersion ?? null,
+                hasInstallOpfsSAHPoolVfs: typeof Reflect.get(sqlite3, 'installOpfsSAHPoolVfs') === 'function',
+                hasOpfsSahpoolVfs: opfsSahpoolVfsRaw !== null && isNonZeroPointer(opfsSahpoolVfsRaw),
+                opfsSahpoolVfsPtr: serializePointer(opfsSahpoolVfsRaw),
+            };
         } catch (e) {
             payload.sqliteInitError = (e instanceof Error) ? e.message : String(e);
         }
@@ -200,19 +216,14 @@ export class Offscreen {
         return await this._invokeDictionaryWorker('getDictionaryInfoOffscreen', {});
     }
 
-    /** @type {import('offscreen').ApiHandler<'updateDictionarySummaryByTitleOffscreen'>} */
-    async _updateDictionarySummaryByTitleHandler({dictionaryTitle, summary}) {
-        return await this._invokeDictionaryWorker('updateDictionarySummaryByTitleOffscreen', {dictionaryTitle, summary});
-    }
-
-    /** @type {import('offscreen').ApiHandler<'getMaxHeadwordLengthOffscreen'>} */
-    async _getMaxHeadwordLengthHandler() {
-        return await this._invokeDictionaryWorker('getMaxHeadwordLengthOffscreen', {});
-    }
-
     /** @type {import('offscreen').ApiHandler<'databaseRefreshOffscreen'>} */
     async _refreshDatabaseHandler() {
         await this._invokeDictionaryWorker('databaseRefreshOffscreen', {});
+    }
+
+    /** @type {import('offscreen').ApiHandler<'getDatabaseRuntimeStateOffscreen'>} */
+    async _getDatabaseRuntimeStateHandler() {
+        return await this._invokeDictionaryWorker('getDatabaseRuntimeStateOffscreen', {});
     }
 
     /** @type {import('offscreen').ApiHandler<'databaseSetSuspendedOffscreen'>} */
@@ -230,9 +241,14 @@ export class Offscreen {
         await this._invokeDictionaryWorker('deleteDictionaryOffscreen', {dictionaryTitle});
     }
 
-    /** @type {import('offscreen').ApiHandler<'updateDictionaryMetadataOffscreen'>} */
-    async _updateDictionaryMetadataHandler({dictionaryTitle, summary}) {
-        await this._invokeDictionaryWorker('updateDictionaryMetadataOffscreen', {dictionaryTitle, summary});
+    /** @type {import('offscreen').ApiHandler<'replaceDictionaryTitleOffscreen'>} */
+    async _replaceDictionaryTitleHandler({fromDictionaryTitle, toDictionaryTitle, summaryOverride, replacedDictionaryTitle}) {
+        await this._invokeDictionaryWorker('replaceDictionaryTitleOffscreen', {
+            fromDictionaryTitle,
+            toDictionaryTitle,
+            summaryOverride,
+            replacedDictionaryTitle,
+        });
     }
 
     /** @type {import('offscreen').ApiHandler<'getDictionaryCountsOffscreen'>} */
@@ -240,18 +256,12 @@ export class Offscreen {
         return await this._invokeDictionaryWorker('getDictionaryCountsOffscreen', {dictionaryNames, getTotal});
     }
 
-    /** @type {import('offscreen').ApiHandler<'importDictionaryArchiveOffscreen'>} */
-    async _importDictionaryArchiveHandler({archiveContent, importDetails}) {
-        const dictionaryWorker = new DictionaryWorker({reuseWorker: false});
-        try {
-            const result = await dictionaryWorker.importDictionary(base64ToArrayBuffer(archiveContent), importDetails, null);
-            return {
-                ...result,
-                errors: result.errors.map((error) => ExtensionError.serialize(error)),
-            };
-        } finally {
-            dictionaryWorker.destroy();
-        }
+    async _debugDictionaryStorageStateHandler() {
+        return await this._invokeDictionaryWorker('debugDictionaryStorageStateOffscreen', {});
+    }
+
+    async _debugDictionaryLookupStateHandler({text, dictionaryNames}) {
+        return await this._invokeDictionaryWorker('debugDictionaryLookupStateOffscreen', {text, dictionaryNames});
     }
 
     /** @type {import('offscreen').ApiHandler<'databaseGetMediaOffscreen'>} */
@@ -317,6 +327,19 @@ export class Offscreen {
         await this._invokeDictionaryWorker('connectToDatabaseWorker', {}, [ports[0]]);
     }
 
+    /** @type {import('offscreen').McApiHandler<'importDictionaryOffscreen'>} */
+    async _importDictionaryOffscreenHandler({archiveContent, details}, ports) {
+        if (ports.length === 0) {
+            throw new Error('Offscreen import response port missing');
+        }
+        try {
+            await this._invokeDictionaryWorker('importDictionaryOffscreen', {archiveContent, details}, [ports[0]]);
+        } catch (error) {
+            ports[0].postMessage({type: 'error', error: ExtensionError.serialize(error)});
+            ports[0].close();
+        }
+    }
+
     /** @type {import('offscreen').ApiHandler<'sanitizeCSSOffscreen'>} */
     _sanitizeCSSOffscreen(params) {
         return sanitizeCSS(params.css);
@@ -363,16 +386,6 @@ export class Offscreen {
     }
 
     /**
-     * @param {unknown} reason
-     */
-    _rejectPendingDictionaryWorkerResponses(reason) {
-        for (const {reject} of this._dictionaryWorkerResponseHandlers.values()) {
-            reject(reason);
-        }
-        this._dictionaryWorkerResponseHandlers.clear();
-    }
-
-    /**
      * @param {ErrorEvent} event
      */
     _onDictionaryWorkerError(event) {
@@ -383,7 +396,6 @@ export class Offscreen {
             colno: event.colno,
             message: event.message,
         };
-        this._rejectPendingDictionaryWorkerResponses(error);
         log.error(error);
     }
 

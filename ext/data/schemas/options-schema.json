@@ -106,7 +106,6 @@
                                     "glossaryLayoutMode",
                                     "mainDictionary",
                                     "popupTheme",
-                                    "popupThemePreset",
                                     "popupOuterTheme",
                                     "customPopupCss",
                                     "customPopupOuterCss",
@@ -125,11 +124,6 @@
                                     "termDisplayMode",
                                     "sortFrequencyDictionary",
                                     "sortFrequencyDictionaryOrder",
-                                    "popupBlurByFrequencyEnabled",
-                                    "popupBlurByFrequencyDictionary",
-                                    "popupBlurByFrequencyThreshold",
-                                    "popupBlurByFrequencyOrder",
-                                    "popupBlurByFrequencyUnblurDelay",
                                     "stickySearchHeader",
                                     "fontFamily",
                                     "fontSize",
@@ -261,12 +255,7 @@
                                     "popupTheme": {
                                         "type": "string",
                                         "enum": ["light", "dark", "browser", "site"],
-                                        "default": "browser"
-                                    },
-                                    "popupThemePreset": {
-                                        "type": "string",
-                                        "enum": ["default", "glass", "glass-autumnal", "glass-tokyo-night"],
-                                        "default": "default"
+                                        "default": "site"
                                     },
                                     "popupOuterTheme": {
                                         "type": "string",
@@ -346,28 +335,6 @@
                                         "type": "string",
                                         "enum": ["ascending", "descending"],
                                         "default": "descending"
-                                    },
-                                    "popupBlurByFrequencyEnabled": {
-                                        "type": "boolean",
-                                        "default": false
-                                    },
-                                    "popupBlurByFrequencyDictionary": {
-                                        "type": ["string", "null"],
-                                        "default": null
-                                    },
-                                    "popupBlurByFrequencyThreshold": {
-                                        "type": "number",
-                                        "default": 10000
-                                    },
-                                    "popupBlurByFrequencyOrder": {
-                                        "type": "string",
-                                        "enum": ["ascending", "descending"],
-                                        "default": "descending"
-                                    },
-                                    "popupBlurByFrequencyUnblurDelay": {
-                                        "type": "number",
-                                        "minimum": 0,
-                                        "default": 0
                                     },
                                     "stickySearchHeader": {
                                         "type": "boolean",
@@ -1034,8 +1001,7 @@
                                     "noteGuiMode",
                                     "apiKey",
                                     "downloadTimeout",
-                                    "forceSync",
-                                    "noteDupeCheckFirst"
+                                    "forceSync"
                                 ],
                                 "properties": {
                                     "enable": {
@@ -1209,10 +1175,6 @@
                                         "minimum": 0
                                     },
                                     "forceSync": {
-                                        "type": "boolean",
-                                        "default": false
-                                    },
-                                    "noteDupeCheckFirst": {
                                         "type": "boolean",
                                         "default": false
                                     }
@@ -1427,24 +1389,18 @@
             "required": [
                 "database",
                 "dataTransmissionConsentShown",
-                "dictionaryAutoUpdates"
+                "dataTransmissionConsentState"
             ],
             "properties": {
                 "database": {
                     "type": "object",
                     "required": [
-                        "prefixWildcardsSupported",
-                        "maxHeadwordLength"
+                        "prefixWildcardsSupported"
                     ],
                     "properties": {
                         "prefixWildcardsSupported": {
                             "type": "boolean",
                             "default": false
-                        },
-                        "maxHeadwordLength": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "default": 0
                         }
                     }
                 },
@@ -1452,12 +1408,10 @@
                     "type": "boolean",
                     "default": false
                 },
-                "dictionaryAutoUpdates": {
-                    "type": "array",
-                    "default": [],
-                    "items": {
-                        "type": "string"
-                    }
+                "dataTransmissionConsentState": {
+                    "type": "string",
+                    "enum": ["unknown", "accepted", "declined"],
+                    "default": "unknown"
                 }
             }
         }

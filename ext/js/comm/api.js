@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2026  Yomitan Authors
+ * Copyright (C) 2023-2025  Yomitan Authors
  * Copyright (C) 2016-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -115,11 +115,10 @@ export class API {
     /**
      * @param {import('api').ApiParam<'getAnkiNoteInfo', 'notes'>} notes
      * @param {import('api').ApiParam<'getAnkiNoteInfo', 'fetchAdditionalInfo'>} fetchAdditionalInfo
-     * @param {import('api').ApiParam<'getAnkiNoteInfo', 'fetchDuplicateNoteIds'>} fetchDuplicateNoteIds
      * @returns {Promise<import('api').ApiReturn<'getAnkiNoteInfo'>>}
      */
-    getAnkiNoteInfo(notes, fetchAdditionalInfo, fetchDuplicateNoteIds = true) {
-        return this._invoke('getAnkiNoteInfo', {notes, fetchAdditionalInfo, fetchDuplicateNoteIds});
+    getAnkiNoteInfo(notes, fetchAdditionalInfo) {
+        return this._invoke('getAnkiNoteInfo', {notes, fetchAdditionalInfo});
     }
 
     /**
@@ -258,14 +257,17 @@ export class API {
     }
 
     /**
-     * @param {import('api').ApiParam<'updateDictionaryMetadata', 'dictionaryTitle'>} dictionaryTitle
-     * @param {import('api').ApiParam<'updateDictionaryMetadata', 'title'>} title
-     * @param {import('api').ApiParam<'updateDictionaryMetadata', 'url'>} url
-     * @param {import('api').ApiParam<'updateDictionaryMetadata', 'description'>} description
-     * @returns {Promise<import('api').ApiReturn<'updateDictionaryMetadata'>>}
+     * @param {import('api').ApiParams<'replaceDictionaryTitle'>} details
+     * @returns {Promise<import('api').ApiReturn<'replaceDictionaryTitle'>>}
      */
-    updateDictionaryMetadata(dictionaryTitle, title, url, description) {
-        return this._invoke('updateDictionaryMetadata', {dictionaryTitle, title, url, description});
+    replaceDictionaryTitle(details) {
+        const {
+            fromDictionaryTitle,
+            toDictionaryTitle,
+            summary,
+            replacedDictionaryTitle,
+        } = details;
+        return this._invoke('replaceDictionaryTitle', {fromDictionaryTitle, toDictionaryTitle, summary, replacedDictionaryTitle});
     }
 
     /**
@@ -275,31 +277,6 @@ export class API {
      */
     getDictionaryCounts(dictionaryNames, getTotal) {
         return this._invoke('getDictionaryCounts', {dictionaryNames, getTotal});
-    }
-
-    /**
-     * @param {import('api').ApiParam<'checkDictionaryUpdates', 'dictionaryTitles'>} [dictionaryTitles]
-     * @returns {Promise<import('api').ApiReturn<'checkDictionaryUpdates'>>}
-     */
-    checkDictionaryUpdates(dictionaryTitles) {
-        return this._invoke('checkDictionaryUpdates', typeof dictionaryTitles === 'undefined' ? {} : {dictionaryTitles});
-    }
-
-    /**
-     * @param {import('api').ApiParam<'updateDictionaryByTitle', 'dictionaryTitle'>} dictionaryTitle
-     * @returns {Promise<import('api').ApiReturn<'updateDictionaryByTitle'>>}
-     */
-    updateDictionaryByTitle(dictionaryTitle) {
-        return this._invoke('updateDictionaryByTitle', {dictionaryTitle});
-    }
-
-    /**
-     * @param {import('api').ApiParam<'setDictionaryUpdateSchedule', 'dictionaryTitle'>} dictionaryTitle
-     * @param {import('api').ApiParam<'setDictionaryUpdateSchedule', 'schedule'>} schedule
-     * @returns {Promise<import('api').ApiReturn<'setDictionaryUpdateSchedule'>>}
-     */
-    setDictionaryUpdateSchedule(dictionaryTitle, schedule) {
-        return this._invoke('setDictionaryUpdateSchedule', {dictionaryTitle, schedule});
     }
 
     /**
@@ -481,6 +458,63 @@ export class API {
      */
     heartbeat() {
         return this._invoke('heartbeat', void 0);
+    }
+
+    /**
+     * @param {Blob} archiveContent
+     * @param {import('dictionary-importer').ImportDetails} details
+     * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
+     * @returns {Promise<unknown>}
+     */
+    importDictionaryOffscreen(archiveContent, details, onProgress) {
+        const channel = new MessageChannel();
+        return new Promise((resolve, reject) => {
+            channel.port1.onmessage = (event) => {
+                const eventData = /** @type {unknown} */ (event.data);
+                const data = (
+                    typeof eventData === 'object' &&
+                    eventData !== null &&
+                    !Array.isArray(eventData)
+                ) ? /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) : null;
+                switch (data?.type) {
+                    case 'progress':
+                        onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
+                        return;
+                    case 'complete':
+                        channel.port1.close();
+                        if (
+                            data.result &&
+                            typeof data.result === 'object' &&
+                            !Array.isArray(data.result)
+                        ) {
+                            const result = /** @type {{errors?: unknown[]}} */ (data.result);
+                            if (Array.isArray(result.errors)) {
+                                result.errors = result.errors.map((error) => {
+                                    if (error && typeof error === 'object' && !Array.isArray(error)) {
+                                        return ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error));
+                                    }
+                                    return error;
+                                });
+                            }
+                        }
+                        resolve(data.result ?? null);
+                        return;
+                    case 'error':
+                        channel.port1.close();
+                        reject(ExtensionError.deserialize(
+                            data.error ?? {name: 'Error', message: 'Dictionary runtime import failed', stack: ''},
+                        ));
+                        return;
+                    default:
+                        return;
+                }
+            };
+            channel.port1.onmessageerror = () => {
+                channel.port1.close();
+                reject(new Error('Dictionary runtime import response channel failed'));
+            };
+            this._pmInvoke('importDictionaryOffscreen', {archiveContent, details}, [channel.port2]);
+        });
     }
 
     /**

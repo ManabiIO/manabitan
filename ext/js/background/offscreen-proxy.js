@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2026  Yomitan Authors
+ * Copyright (C) 2023-2025  Yomitan Authors
  * Copyright (C) 2016-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -122,27 +122,6 @@ export class OffscreenProxy {
     }
 
     /**
-     * @param {ArrayBuffer} archiveContent
-     * @param {import('dictionary-importer').ImportDetails} importDetails
-     * @returns {Promise<{result: import('dictionary-importer').Summary | null, errors: Error[], debug?: unknown}>}
-     */
-    async importDictionaryArchive(archiveContent, importDetails) {
-        const result = /** @type {{result: import('dictionary-importer').Summary | null, errors: import('core').SerializedError[], debug?: unknown}} */ (
-            await this.sendMessagePromise({
-                action: 'importDictionaryArchiveOffscreen',
-                params: {
-                    archiveContent: arrayBufferToBase64(archiveContent),
-                    importDetails,
-                },
-            })
-        );
-        return {
-            ...result,
-            errors: result.errors.map((error) => ExtensionError.deserialize(error)),
-        };
-    }
-
-    /**
      * @template [TReturn=unknown]
      * @param {import('core').Response<TReturn>} response
      * @returns {TReturn}
@@ -188,13 +167,119 @@ export class OffscreenProxy {
     }
 }
 
+/**
+ * @typedef {{
+ *   sendMessagePromise: (message: unknown) => Promise<unknown>,
+ *   sendMessageViaPort: (message: unknown, transfers: Transferable[]) => void
+ * }} DictionaryRuntimeMessenger
+ */
+
+export class DictionaryRuntimeWorkerProxy {
+    /**
+     * @param {string} workerPath
+     */
+    constructor(workerPath) {
+        /** @type {Worker} */
+        this._worker = new Worker(workerPath, {type: 'module'});
+        /** @type {Map<number, {resolve: (value: unknown) => void, reject: (reason?: unknown) => void}>} */
+        this._responseHandlers = new Map();
+        /** @type {number} */
+        this._requestId = 0;
+        this._worker.addEventListener('message', this._onMessage.bind(this));
+        this._worker.addEventListener('messageerror', this._onMessageError.bind(this));
+        this._worker.addEventListener('error', this._onError.bind(this));
+    }
+
+    /**
+     * @template [TReturn=unknown]
+     * @param {import('offscreen').ApiMessageAny} message
+     * @returns {Promise<TReturn>}
+     */
+    async sendMessagePromise(message) {
+        const id = ++this._requestId;
+        return await new Promise((resolve, reject) => {
+            this._responseHandlers.set(id, {resolve, reject});
+            const payload = /** @type {{action?: string, params?: unknown}} */ (
+                typeof message === 'object' && message !== null && !Array.isArray(message) ? message : {}
+            );
+            this._worker.postMessage({id, action: payload.action ?? '', params: payload.params ?? {}});
+        });
+    }
+
+    /**
+     * @param {import('offscreen').McApiMessageAny} message
+     * @param {Transferable[]} transfers
+     */
+    sendMessageViaPort(message, transfers) {
+        const payload = /** @type {{action?: string, params?: unknown}} */ (
+            typeof message === 'object' && message !== null && !Array.isArray(message) ? message : {}
+        );
+        this._worker.postMessage({id: ++this._requestId, action: payload.action ?? '', params: payload.params ?? {}}, transfers);
+    }
+
+    /**
+     * @param {MessageEvent<{id?: number, result?: unknown, error?: import('core').SerializedError}>} event
+     */
+    _onMessage(event) {
+        const id = typeof event.data?.id === 'number' ? event.data.id : null;
+        if (id === null) { return; }
+        const handler = this._responseHandlers.get(id);
+        if (typeof handler === 'undefined') { return; }
+        this._responseHandlers.delete(id);
+        if (typeof event.data?.error !== 'undefined') {
+            handler.reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (event.data.error)));
+            return;
+        }
+        handler.resolve(event.data?.result);
+    }
+
+    /**
+     * @param {MessageEvent} _event
+     */
+    _onMessageError(_event) {
+        for (const [, handler] of this._responseHandlers) {
+            handler.reject(new Error('Dictionary runtime worker message deserialization failed'));
+        }
+        this._responseHandlers.clear();
+    }
+
+    /**
+     * @param {ErrorEvent} event
+     */
+    _onError(event) {
+        const message = event.message ? `: ${event.message}` : '';
+        for (const [, handler] of this._responseHandlers) {
+            handler.reject(new Error(`Dictionary runtime worker failed${message}`));
+        }
+        this._responseHandlers.clear();
+    }
+}
+
 export class DictionaryDatabaseProxy {
     /**
-     * @param {OffscreenProxy} offscreen
+     * @param {DictionaryRuntimeMessenger} offscreen
      */
     constructor(offscreen) {
-        /** @type {OffscreenProxy} */
+        /** @type {DictionaryRuntimeMessenger} */
         this._offscreen = offscreen;
+        /** @type {boolean} */
+        this._isPrepared = false;
+        /** @type {boolean} */
+        this._usesFallbackStorage = false;
+        /** @type {unknown} */
+        this._openStorageDiagnostics = null;
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _refreshRuntimeState() {
+        const state = /** @type {{isPrepared?: boolean, usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown}|null} */ (
+            await this._offscreen.sendMessagePromise({action: 'getDatabaseRuntimeStateOffscreen'})
+        );
+        this._isPrepared = state?.isPrepared === true;
+        this._usesFallbackStorage = state?.usesFallbackStorage === true;
+        this._openStorageDiagnostics = state?.openStorageDiagnostics ?? null;
     }
 
     /**
@@ -202,6 +287,7 @@ export class DictionaryDatabaseProxy {
      */
     async prepare() {
         await this._offscreen.sendMessagePromise({action: 'databasePrepareOffscreen'});
+        await this._refreshRuntimeState();
     }
 
     /**
@@ -209,6 +295,7 @@ export class DictionaryDatabaseProxy {
      */
     async refreshConnection() {
         await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
+        await this._refreshRuntimeState();
     }
 
     /**
@@ -217,6 +304,31 @@ export class DictionaryDatabaseProxy {
      */
     async setSuspended(suspended) {
         await this._offscreen.sendMessagePromise({action: 'databaseSetSuspendedOffscreen', params: {suspended}});
+        await this._refreshRuntimeState();
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    isPrepared() {
+        return this._isPrepared;
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    usesFallbackStorage() {
+        return this._usesFallbackStorage;
+    }
+
+    /**
+     * @returns {unknown}
+     */
+    getOpenStorageDiagnostics() {
+        if (this._openStorageDiagnostics === null || typeof this._openStorageDiagnostics !== 'object') {
+            return null;
+        }
+        return {.../** @type {Record<string, unknown>} */ (this._openStorageDiagnostics)};
     }
 
     /**
@@ -224,22 +336,6 @@ export class DictionaryDatabaseProxy {
      */
     async getDictionaryInfo() {
         return this._offscreen.sendMessagePromise({action: 'getDictionaryInfoOffscreen'});
-    }
-
-    /**
-     * @param {string} dictionaryTitle
-     * @param {import('dictionary-importer').Summary} summary
-     * @returns {Promise<import('dictionary-importer').Summary|null>}
-     */
-    async updateDictionarySummaryByTitle(dictionaryTitle, summary) {
-        return await this._offscreen.sendMessagePromise({action: 'updateDictionarySummaryByTitleOffscreen', params: {dictionaryTitle, summary}});
-    }
-
-    /**
-     * @returns {Promise<number>}
-     */
-    async getMaxHeadwordLength() {
-        return await this._offscreen.sendMessagePromise({action: 'getMaxHeadwordLengthOffscreen'});
     }
 
     /**
@@ -253,12 +349,22 @@ export class DictionaryDatabaseProxy {
     }
 
     /**
-     * @param {string} dictionaryTitle
-     * @param {import('dictionary-importer').Summary} summary
+     * @param {string} fromDictionaryTitle
+     * @param {string} toDictionaryTitle
+     * @param {import('dictionary-importer').Summary|null} [summaryOverride]
+     * @param {string|null} [replacedDictionaryTitle]
      * @returns {Promise<void>}
      */
-    async updateDictionaryMetadata(dictionaryTitle, summary) {
-        await this._offscreen.sendMessagePromise({action: 'updateDictionaryMetadataOffscreen', params: {dictionaryTitle, summary}});
+    async replaceDictionaryTitle(fromDictionaryTitle, toDictionaryTitle, summaryOverride = null, replacedDictionaryTitle = null) {
+        await this._offscreen.sendMessagePromise({
+            action: 'replaceDictionaryTitleOffscreen',
+            params: {
+                fromDictionaryTitle,
+                toDictionaryTitle,
+                summaryOverride,
+                replacedDictionaryTitle,
+            },
+        });
     }
 
     /**
@@ -274,7 +380,9 @@ export class DictionaryDatabaseProxy {
      * @returns {Promise<boolean>}
      */
     async purge() {
-        return await this._offscreen.sendMessagePromise({action: 'databasePurgeOffscreen'});
+        const result = await this._offscreen.sendMessagePromise({action: 'databasePurgeOffscreen'});
+        await this._refreshRuntimeState();
+        return result === true;
     }
 
     /**
@@ -291,7 +399,7 @@ export class DictionaryDatabaseProxy {
      */
     async exportDatabase() {
         const content = await this._offscreen.sendMessagePromise({action: 'databaseExportOffscreen'});
-        return base64ToArrayBuffer(content);
+        return base64ToArrayBuffer(typeof content === 'string' ? content : '');
     }
 
     /**
@@ -300,6 +408,7 @@ export class DictionaryDatabaseProxy {
      */
     async importDatabase(content) {
         await this._offscreen.sendMessagePromise({action: 'databaseImportOffscreen', params: {content: arrayBufferToBase64(content)}});
+        await this._refreshRuntimeState();
     }
 
     /**
@@ -313,10 +422,10 @@ export class DictionaryDatabaseProxy {
 
 export class TranslatorProxy {
     /**
-     * @param {OffscreenProxy} offscreen
+     * @param {DictionaryRuntimeMessenger} offscreen
      */
     constructor(offscreen) {
-        /** @type {OffscreenProxy} */
+        /** @type {DictionaryRuntimeMessenger} */
         this._offscreen = offscreen;
     }
 

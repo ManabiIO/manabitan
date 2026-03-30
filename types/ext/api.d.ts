@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2026  Yomitan Authors
+ * Copyright (C) 2023-2025  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,8 +62,6 @@ export type ParseTextResultItem = {
 export type ParseTextSegment = {
     text: string;
     reading: string;
-    lemma?: string;
-    lemmaReading?: string;
     headwords?: {
         term: string;
         reading: string;
@@ -188,7 +186,6 @@ type ApiSurface = {
         params: {
             notes: Anki.Note[];
             fetchAdditionalInfo: boolean;
-            fetchDuplicateNoteIds: boolean;
         };
         return: Anki.NoteInfoWrapper[];
     };
@@ -298,14 +295,14 @@ type ApiSurface = {
         };
         return: void;
     };
-    updateDictionaryMetadata: {
+    replaceDictionaryTitle: {
         params: {
-            dictionaryTitle: string;
-            title: string;
-            url: string;
-            description: string;
+            fromDictionaryTitle: string;
+            toDictionaryTitle: string;
+            summary: DictionaryImporter.Summary | null;
+            replacedDictionaryTitle: string | null;
         };
-        return: DictionaryImporter.Summary;
+        return: void;
     };
     getDictionaryCounts: {
         params: {
@@ -313,25 +310,6 @@ type ApiSurface = {
             getTotal: boolean;
         };
         return: DictionaryDatabase.DictionaryCounts;
-    };
-    checkDictionaryUpdates: {
-        params: {
-            dictionaryTitles?: string[];
-        };
-        return: Backend.DictionaryUpdateCheckResult[];
-    };
-    updateDictionaryByTitle: {
-        params: {
-            dictionaryTitle: string;
-        };
-        return: Backend.DictionaryUpdateResult;
-    };
-    setDictionaryUpdateSchedule: {
-        params: {
-            dictionaryTitle: string;
-            schedule: DictionaryImporter.DictionaryAutoUpdateSchedule;
-        };
-        return: DictionaryImporter.Summary;
     };
     setDictionaryImportMode: {
         params: {
@@ -532,6 +510,13 @@ type PmApiSurface = {
     };
     registerOffscreenPort: {
         params: void;
+        return: void;
+    };
+    importDictionaryOffscreen: {
+        params: {
+            archiveContent: Blob;
+            details: DictionaryImporter.ImportDetails;
+        };
         return: void;
     };
     registerDatabasePort: {

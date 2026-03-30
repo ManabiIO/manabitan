@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2026  Yomitan Authors
+ * Copyright (C) 2023-2025  Yomitan Authors
  * Copyright (C) 2021-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,11 +21,6 @@ import {log} from '../core/log.js';
 import {DictionaryDatabase} from './dictionary-database.js';
 import {DictionaryImporter} from './dictionary-importer.js';
 import {DictionaryWorkerMediaLoader} from './dictionary-worker-media-loader.js';
-
-const MDX_IMPORT_VERSION = 1;
-const MDX_PREPARATION_PROGRESS_TOTAL = 1000;
-const MDX_PREPARATION_PROGRESS_START_INDEX = 450;
-const MDX_PREPARATION_PROGRESS_RANGE = MDX_PREPARATION_PROGRESS_TOTAL - MDX_PREPARATION_PROGRESS_START_INDEX;
 
 export class DictionaryWorkerHandler {
     constructor() {
@@ -51,17 +46,11 @@ export class DictionaryWorkerHandler {
             case 'importDictionary':
                 void this._onMessageWithProgress(params, this._importDictionary.bind(this));
                 break;
-            case 'importMdxDictionary':
-                void this._onMessageWithProgress(params, this._importMdxDictionary.bind(this));
-                break;
             case 'deleteDictionary':
                 void this._onMessageWithProgress(params, this._deleteDictionary.bind(this));
                 break;
             case 'getDictionaryCounts':
                 void this._onMessageWithProgress(params, this._getDictionaryCounts.bind(this));
-                break;
-            case 'getMdxVersion':
-                void this._onMessageWithProgress(params, this._getMdxVersion.bind(this));
                 break;
             case 'getImageDetails.response':
                 this._mediaLoader.handleMessage(params);
@@ -139,62 +128,6 @@ export class DictionaryWorkerHandler {
      * @returns {Promise<import('dictionary-worker').MessageCompleteResultSerialized>}
      */
     async _importDictionary({details, archiveContent}, onProgress) {
-        return await this._runImport(details, onProgress, async (dictionaryImporter, dictionaryDatabase) => (
-            await dictionaryImporter.importDictionary(dictionaryDatabase, archiveContent, details)
-        ));
-    }
-
-    /**
-     * @param {import('dictionary-worker-handler').ImportMdxDictionaryMessageParams} params
-     * @param {import('dictionary-worker-handler').OnProgressCallback} onProgress
-     * @returns {Promise<import('dictionary-worker').MessageCompleteResultSerialized>}
-     */
-    async _importMdxDictionary({details, mdxFileName, mdxBytes, mddFiles = [], options = {}}, onProgress) {
-        if (!(mdxBytes instanceof ArrayBuffer)) {
-            throw new Error('MDX import worker did not receive MDX bytes');
-        }
-        const mdxSource = {
-            mdxFileName: typeof mdxFileName === 'string' && mdxFileName.length > 0 ? mdxFileName : 'dictionary.mdx',
-            mdxBytes: new Uint8Array(mdxBytes),
-            mddFiles: Array.isArray(mddFiles) ?
-                mddFiles
-                    .filter((value) => typeof value === 'object' && value !== null && !Array.isArray(value))
-                    .map((value, index) => {
-                        const name = typeof value.name === 'string' && value.name.length > 0 ? value.name : 'dictionary.mdd';
-                        if (!(value.bytes instanceof ArrayBuffer)) {
-                            throw new Error(`MDX import worker did not receive valid bytes for MDD file at index ${index} (${name})`);
-                        }
-                        const bytes = new Uint8Array(value.bytes);
-                        return {name, bytes};
-                    }) :
-                [],
-            options: (typeof options === 'object' && options !== null && !Array.isArray(options)) ? options : {},
-        };
-
-        return await this._runImport(details, onProgress, async (dictionaryImporter, dictionaryDatabase) => (
-            await dictionaryImporter.importMdxDictionary(
-                dictionaryDatabase,
-                mdxSource,
-                details,
-                ({completed, total}) => {
-                    const normalizedProgress = total > 0 ? Math.max(0, Math.min(1, completed / total)) : 1;
-                    onProgress({
-                        nextStep: false,
-                        index: MDX_PREPARATION_PROGRESS_START_INDEX + Math.round(MDX_PREPARATION_PROGRESS_RANGE * normalizedProgress),
-                        count: MDX_PREPARATION_PROGRESS_TOTAL,
-                    });
-                },
-            )
-        ));
-    }
-
-    /**
-     * @param {import('dictionary-importer').ImportDetails} details
-     * @param {import('dictionary-worker-handler').OnProgressCallback} onProgress
-     * @param {(dictionaryImporter: DictionaryImporter, dictionaryDatabase: DictionaryDatabase) => Promise<import('dictionary-importer').ImportResult>} importCallback
-     * @returns {Promise<import('dictionary-worker').MessageCompleteResultSerialized>}
-     */
-    async _runImport(details, onProgress, importCallback) {
         const useImportSession = (
             typeof details === 'object' &&
             details !== null &&
@@ -226,24 +159,171 @@ export class DictionaryWorkerHandler {
         }
         try {
             const dictionaryImporter = new DictionaryImporter(this._mediaLoader, onProgress);
+            const isReadonlyError = (error) => {
+                const message = (error instanceof Error) ? error.message : String(error);
+                return /readonly database|SQLITE_READONLY/i.test(message);
+            };
+            const dictionaryTitleOverride = (
+                typeof details === 'object' &&
+                details !== null &&
+                !Array.isArray(details) &&
+                typeof Reflect.get(details, 'dictionaryTitleOverride') === 'string' &&
+                Reflect.get(details, 'dictionaryTitleOverride').trim().length > 0
+            ) ?
+                Reflect.get(details, 'dictionaryTitleOverride').trim() :
+                null;
+            const replacementDictionaryTitle = (
+                typeof details === 'object' &&
+                details !== null &&
+                !Array.isArray(details) &&
+                typeof Reflect.get(details, 'replacementDictionaryTitle') === 'string' &&
+                Reflect.get(details, 'replacementDictionaryTitle').trim().length > 0
+            ) ?
+                Reflect.get(details, 'replacementDictionaryTitle').trim() :
+                null;
+            const cleanupTransientReplacementTitles = async (activeDictionaryDatabase) => {
+                const transientTitleCandidates = new Set();
+                const transientTitlePattern = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
+                const transientTokenMatch = (
+                    dictionaryTitleOverride !== null &&
+                    transientTitlePattern.test(dictionaryTitleOverride)
+                ) ? dictionaryTitleOverride.match(/\[(?:update-staging|cutover|replaced) ([^\]]+)\]$/) : null;
+                const transientSessionToken = Array.isArray(transientTokenMatch) && typeof transientTokenMatch[1] === 'string' && transientTokenMatch[1].length > 0 ?
+                    transientTokenMatch[1] :
+                    null;
+                if (dictionaryTitleOverride !== null && transientTitlePattern.test(dictionaryTitleOverride)) {
+                    transientTitleCandidates.add(dictionaryTitleOverride);
+                }
+                const dictionaryInfos = await activeDictionaryDatabase.getDictionaryInfo();
+                for (const dictionaryInfo of dictionaryInfos) {
+                    const title = (
+                        dictionaryInfo &&
+                        typeof dictionaryInfo === 'object' &&
+                        typeof Reflect.get(dictionaryInfo, 'title') === 'string'
+                    ) ? Reflect.get(dictionaryInfo, 'title').trim() : '';
+                    if (title.length === 0) { continue; }
+                    const infoToken = (
+                        dictionaryInfo &&
+                        typeof dictionaryInfo === 'object' &&
+                        typeof Reflect.get(dictionaryInfo, 'updateSessionToken') === 'string'
+                    ) ? Reflect.get(dictionaryInfo, 'updateSessionToken').trim() : '';
+                    if (
+                        transientTitlePattern.test(title) &&
+                        (
+                            title === dictionaryTitleOverride ||
+                            (transientSessionToken !== null && infoToken === transientSessionToken) ||
+                            (transientSessionToken !== null && title.endsWith(` ${transientSessionToken}]`))
+                        )
+                    ) {
+                        transientTitleCandidates.add(title);
+                    }
+                }
+                for (const transientTitle of transientTitleCandidates) {
+                    try {
+                        await activeDictionaryDatabase.deleteDictionary(transientTitle, 1000, () => {});
+                    } catch (_) {
+                        // NOP - best effort cleanup before retry.
+                    }
+                }
+                await activeDictionaryDatabase.cleanupTransientTermRecordShards((dictionaryName) => {
+                    const title = String(dictionaryName || '').trim();
+                    if (title.length === 0) {
+                        return false;
+                    }
+                    if (transientTitleCandidates.has(title)) {
+                        return true;
+                    }
+                    return transientTitlePattern.test(title) && (
+                        transientSessionToken !== null &&
+                        title.endsWith(` ${transientSessionToken}]`)
+                    );
+                });
+            };
+            const importOnce = async (activeDictionaryDatabase) => {
+                const importPayload = await dictionaryImporter.importDictionary(activeDictionaryDatabase, archiveContent, details);
+                let {result, errors} = importPayload;
+                const importerDebug = (typeof importPayload === 'object' && importPayload !== null && !Array.isArray(importPayload)) ?
+                    (/** @type {import('dictionary-importer').ImportDebug|null} */ (Reflect.get(importPayload, 'debug') ?? null)) :
+                    null;
+                const sourceDictionaryTitle = (
+                    result !== null &&
+                    typeof result === 'object' &&
+                    !Array.isArray(result) &&
+                    typeof Reflect.get(result, 'sourceTitle') === 'string' &&
+                    Reflect.get(result, 'sourceTitle').trim().length > 0
+                ) ?
+                    Reflect.get(result, 'sourceTitle').trim() :
+                    ((result !== null && typeof result?.title === 'string') ? result.title.trim() : '');
+                if (
+                    result !== null &&
+                    replacementDictionaryTitle !== null &&
+                    sourceDictionaryTitle.length > 0 &&
+                    result.title !== sourceDictionaryTitle
+                ) {
+                    await activeDictionaryDatabase.replaceDictionaryTitle(
+                        result.title,
+                        sourceDictionaryTitle,
+                        {...result, title: sourceDictionaryTitle},
+                        replacementDictionaryTitle,
+                    );
+                    result.title = sourceDictionaryTitle;
+                    result.sourceTitle = sourceDictionaryTitle;
+                }
+                return {result, errors, importerDebug};
+            };
+
             let result;
             let errors;
             /** @type {import('dictionary-importer').ImportDebug|null} */
             let importerDebug = null;
             try {
-                const importPayload = await importCallback(dictionaryImporter, dictionaryDatabase);
-                ({result, errors} = importPayload);
-                importerDebug = (typeof importPayload === 'object' && importPayload !== null && !Array.isArray(importPayload)) ?
-                    (/** @type {import('dictionary-importer').ImportDebug|null} */ (Reflect.get(importPayload, 'debug') ?? null)) :
-                    null;
+                ({result, errors, importerDebug} = await importOnce(dictionaryDatabase));
             } catch (error) {
-                const diagnostics = (
-                    typeof dictionaryDatabase.getOpenStorageDiagnostics === 'function' ?
-                        dictionaryDatabase.getOpenStorageDiagnostics() :
-                        openStorageDiagnostics
-                );
-                const message = (error instanceof Error) ? error.message : String(error);
-                throw new Error(`Dictionary import failed: ${message}. workerStorageDiagnostics=${JSON.stringify(diagnostics)}`);
+                const canRetryReadonlyImport = isReadonlyError(error) && (!useImportSession || finalizeImportSession);
+                if (!canRetryReadonlyImport) {
+                    if (replacementDictionaryTitle !== null || dictionaryTitleOverride !== null) {
+                        try {
+                            await cleanupTransientReplacementTitles(dictionaryDatabase);
+                        } catch (_) {
+                            // NOP - preserve the original failure.
+                        }
+                    }
+                    throw error;
+                }
+                try {
+                    await dictionaryDatabase.close();
+                } catch (_) {
+                    // NOP
+                }
+                if (this._importSessionDictionaryDatabase === dictionaryDatabase) {
+                    this._importSessionDictionaryDatabase = null;
+                }
+                const retryDictionaryDatabase = await this._getPreparedDictionaryDatabase();
+                if (useImportSession) {
+                    this._importSessionDictionaryDatabase = retryDictionaryDatabase;
+                }
+                try {
+                    await cleanupTransientReplacementTitles(retryDictionaryDatabase);
+                    ({result, errors, importerDebug} = await importOnce(retryDictionaryDatabase));
+                } finally {
+                    if (!useImportSession) {
+                        await retryDictionaryDatabase.close();
+                    } else if (finalizeImportSession) {
+                        await retryDictionaryDatabase.close();
+                        this._importSessionDictionaryDatabase = null;
+                    }
+                }
+                return {
+                    result,
+                    errors: errors.map((error2) => ExtensionError.serialize(error2)),
+                    debug: {
+                        usesFallbackStorage,
+                        openStorageDiagnostics,
+                        useImportSession,
+                        finalizeImportSession,
+                        importerDebug,
+                    },
+                };
             }
             return {
                 result,
@@ -260,19 +340,10 @@ export class DictionaryWorkerHandler {
             if (useImportSession && finalizeImportSession && this._importSessionDictionaryDatabase !== null) {
                 await this._importSessionDictionaryDatabase.close();
                 this._importSessionDictionaryDatabase = null;
-            } else if (!useImportSession) {
+            } else if (!useImportSession && dictionaryDatabase.isPrepared()) {
                 await dictionaryDatabase.close();
             }
         }
-    }
-
-    /**
-     * @param {Record<string, never>} _params
-     * @param {import('dictionary-worker-handler').OnProgressCallback} _onProgress
-     * @returns {Promise<number>}
-     */
-    async _getMdxVersion(_params, _onProgress) {
-        return MDX_IMPORT_VERSION;
     }
 
     /**

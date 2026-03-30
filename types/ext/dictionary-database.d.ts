@@ -30,6 +30,10 @@ export type MediaDataBase<TContentType = unknown> = {
     width: number;
     height: number;
     content: TContentType;
+    contentOffset?: number;
+    contentLength?: number;
+    contentCompressionMethod?: number;
+    contentUncompressedLength?: number;
 };
 
 export type MediaDataArrayBufferContent = MediaDataBase<ArrayBuffer>;
@@ -45,6 +49,9 @@ export type DrawMedia<T extends MediaType = ArrayBuffer> = {index: number} & Med
 export type DatabaseTermEntry = {
     expression: string;
     reading: string;
+    readingEqualsExpression?: boolean;
+    expressionBytes?: Uint8Array;
+    readingBytes?: Uint8Array;
     expressionReverse?: string;
     readingReverse?: string;
     definitionTags: string | null;
