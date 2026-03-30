@@ -90,8 +90,8 @@ export class Backend {
             );
         } else {
             offscreen = new OffscreenProxy(webExtension);
-            dictionaryDatabase = new DictionaryDatabaseProxy(offscreen);
-            translator = new TranslatorProxy(offscreen);
+            dictionaryDatabase = new DictionaryDatabaseProxy(/** @type {import('./offscreen-proxy.js').DictionaryRuntimeMessenger} */ (/** @type {unknown} */ (offscreen)));
+            translator = new TranslatorProxy(/** @type {import('./offscreen-proxy.js').DictionaryRuntimeMessenger} */ (/** @type {unknown} */ (offscreen)));
             clipboardReader = new ClipboardReaderProxy(offscreen);
         }
         /** @type {?OffscreenProxy} */
@@ -920,7 +920,7 @@ export class Backend {
             }
 
             const noteIds = isDuplicate ? duplicateNoteIds[originalIndices.indexOf(i)] : null;
-            const noteInfos = (fetchAdditionalInfo && noteIds !== null && noteIds.length > 0) ? await this._notesCardsInfo(noteIds) : [];
+            const noteInfos = (fetchAdditionalInfo && noteIds !== null && noteIds.length > 0) ? await this._notesCardsInfo(noteIds) : null;
 
             const info = {
                 canAdd: valid,
@@ -1120,6 +1120,9 @@ export class Backend {
         await this._dictionaryDatabase.deleteDictionary(dictionaryTitle, 1000, () => {});
     }
 
+    /**
+     * @param {import('api').ApiParams<'replaceDictionaryTitle'>} params
+     */
     async _onApiReplaceDictionaryTitle({fromDictionaryTitle, toDictionaryTitle, summary, replacedDictionaryTitle}) {
         await this._ensureDictionaryDatabaseReady();
         await this._dictionaryDatabase.replaceDictionaryTitle(
@@ -1137,6 +1140,9 @@ export class Backend {
         return await this._dictionaryDatabase.getDictionaryCounts(dictionaryNames, getTotal);
     }
 
+    /**
+     * @param {{text: string, dictionaryNames: string[]}} params
+     */
     async _onApiDebugDictionaryLookupState({text, dictionaryNames}) {
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
@@ -1154,7 +1160,7 @@ export class Backend {
                 }),
             ]);
             return {
-                ok: Boolean(localState?.ok) && Boolean(offscreenState?.ok),
+                ok: Boolean((/** @type {{ok?: unknown}|null|undefined} */ (localState))?.ok) && Boolean((/** @type {{ok?: unknown}|null|undefined} */ (offscreenState))?.ok),
                 text: normalizedText,
                 dictionaryNames: normalizedDictionaryNames,
                 localState,
@@ -1174,10 +1180,9 @@ export class Backend {
         const dictionaryRows = (typeof rowsMethod === 'function') ?
             await /** @type {() => Promise<unknown>} */ (rowsMethod).call(this._dictionaryDatabase) :
             null;
-        const offscreenDictionaryRows = (this._offscreen !== null) ? (() => this._offscreen.sendMessagePromise({
-            action: 'debugDictionaryStorageStateOffscreen',
-            params: {},
-        }))() : null;
+            const offscreenDictionaryRows = (this._offscreen !== null) ? (() => this._offscreen.sendMessagePromise({
+                action: 'debugDictionaryStorageStateOffscreen',
+            }))() : null;
         const offscreenDictionaryRowsResult = (offscreenDictionaryRows !== null) ? await offscreenDictionaryRows : null;
         return {
             dictionaryRows: Array.isArray(dictionaryRows) ? dictionaryRows : [],
@@ -1225,7 +1230,7 @@ export class Backend {
     async _onApiPurgeDatabase() {
         if (this._offscreen !== null) {
             try {
-                await this._offscreen.sendMessagePromise({action: 'databasePurgeOffscreen', params: {}});
+                await this._offscreen.sendMessagePromise({action: 'databasePurgeOffscreen'});
             } catch (e) {
                 log.error(e);
             }
@@ -3003,8 +3008,8 @@ export class Backend {
                     return;
                 }
                 try {
-                    await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen', params: {}});
-                    await this._offscreen.sendMessagePromise({action: 'clearDatabaseCachesOffscreen', params: {}});
+                    await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
+                    await this._offscreen.sendMessagePromise({action: 'clearDatabaseCachesOffscreen'});
                 } catch (e) {
                     log.error(e);
                 }
@@ -3698,6 +3703,11 @@ export class Backend {
         }
     }
 
+    /**
+     * @param {string} text
+     * @param {string[]} dictionaryNames
+     * @returns {Promise<unknown>}
+     */
     async _debugDictionaryLookupStateLocal(text, dictionaryNames) {
         const database = this._dictionaryDatabase;
         const ensureIndex = Reflect.get(database, '_ensureDirectTermIndex');

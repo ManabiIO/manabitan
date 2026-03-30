@@ -469,7 +469,7 @@ export class DictionaryImporter {
             expectedTermContentImportBytes: void 0,
         });
         const tImportStart = Date.now();
-        /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
+        /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, unknown>}>} */
         const phaseTimings = [];
         /** @type {{termParseMs: number, termSerializationMs: number, bulkAddTermsMs: number, bulkAddTagsMetaMs: number, mediaResolveMs: number, mediaWriteMs: number, termFileNonParseWriteMs: number, termMetaReadMs: number, kanjiReadMs: number, kanjiMetaReadMs: number, tagReadMs: number}} */
         const step4TimingBreakdown = {
@@ -493,7 +493,7 @@ export class DictionaryImporter {
         /**
          * @param {string} phase
          * @param {number} startTime
-         * @param {Record<string, string|number|boolean|null>} [phaseDetails]
+         * @param {Record<string, unknown>} [phaseDetails]
          */
         const recordPhaseTiming = (phase, startTime, phaseDetails = {}) => {
             const elapsedMs = Math.max(0, Date.now() - startTime);
@@ -859,7 +859,7 @@ export class DictionaryImporter {
             media: {total: 0},
         };
 
-        const yomitanVersion = details.yomitanVersion;
+        const yomitanVersion = typeof details.yomitanVersion === 'string' ? details.yomitanVersion : '';
         /** @type {import('dictionary-importer').SummaryDetails} */
         let summaryDetails = {prefixWildcardsSupported, counts, styles: '', yomitanVersion, importSuccess};
 
@@ -1164,7 +1164,7 @@ export class DictionaryImporter {
                                             metadataBytes.buffer :
                                             metadataBytes.buffer.slice(metadataBytes.byteOffset, metadataBytes.byteOffset + metadataBytes.byteLength);
                                     }
-                                    ({content: _ignoredContent, width, height} = await this._mediaLoader.getImageDetails(metadataContent, mediaType));
+                                    ({width, height} = await this._mediaLoader.getImageDetails(metadataContent, mediaType));
                                 } catch (_) {
                                     width = 0;
                                     height = 0;
@@ -1229,7 +1229,7 @@ export class DictionaryImporter {
             };
             /**
              * @param {{filename: string}} termFile
-             * @param {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} termChunk
+             * @param {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} termChunk
              * @param {import('dictionary-importer').ImportRequirement[]|null} requirements
              * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}|null} streamedProgress
              * @param {number} streamedProgressStartIndex
@@ -1237,7 +1237,7 @@ export class DictionaryImporter {
              */
             const processTermChunk = async (termFile, termChunk, requirements, streamedProgress = null, streamedProgressStartIndex = 0) => {
                 const trackProgress = streamedProgress === null;
-                /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}|null} */
+                /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}|null} */
                 const directArtifactChunk = Array.isArray(termChunk) ? null : termChunk;
                 /** @type {import('dictionary-database').DatabaseTermEntry[]} */
                 const termList = Array.isArray(termChunk) ? termChunk : [];
@@ -3097,10 +3097,14 @@ export class DictionaryImporter {
         const requirements = (useMediaPipeline && !streamToChunkHandler) ? [] : null;
         /** @type {import('dictionary-database').DatabaseTermEntry[]} */
         const termList = [];
-        const minimalDecode = this._wasmCanonicalRowsFastPath && !useMediaPipeline;
-        const usePrecomputedContentForMediaRows = useMediaPipeline && this._wasmPassThroughTermContent && this._usePrecomputedContentForMediaRows;
         const useRawBytesDirectContent = (termContentStorageMode === 'raw-bytes' && !useMediaPipeline);
         const includeContentMetadata = useRawBytesDirectContent ? false : (this._wasmPassThroughTermContent || !this._wasmSkipUnusedTermContentEncoding);
+        const minimalDecode = (
+            this._wasmCanonicalRowsFastPath &&
+            !useMediaPipeline &&
+            includeContentMetadata
+        );
+        const usePrecomputedContentForMediaRows = useMediaPipeline && this._wasmPassThroughTermContent && this._usePrecomputedContentForMediaRows;
         const useLazyGlossaryDecode = useRawBytesDirectContent || (useMediaPipeline && (this._lazyGlossaryDecodeForMedia || this._glossaryMediaFastScan || usePrecomputedContentForMediaRows));
         const useMediaHintFastScan = useMediaPipeline && (
             this._wasmPassThroughTermContent ||
@@ -3162,11 +3166,12 @@ export class DictionaryImporter {
                                 dictionary: dictionaryTitle,
                             };
                         if (requirementsForChunk === null) {
-                            if (typeof row.glossaryJson === 'string' && row.glossaryJson.length > 0) {
-                                entry.glossaryJson = row.glossaryJson;
+                            const rowGlossaryJson = this._getFastRowGlossaryJson(row);
+                            if (rowGlossaryJson.length > 0) {
+                                entry.glossaryJson = rowGlossaryJson;
                             }
                             usePrecomputedTermContent = useRawBytesDirectContent ?
-                                hasPrecomputedTermContent(row) :
+                                hasPrecomputedTermContent :
                                 true;
                         } else {
                             const skipGlossaryParse = (
@@ -3239,13 +3244,7 @@ export class DictionaryImporter {
                             this._prepareTermEntrySerialization(
                                 entry,
                                 enableTermEntryContentDedup,
-                                (
-                                    useRawBytesDirectContent &&
-                                    requirementsForChunk === null &&
-                                    row.glossaryJsonBytes instanceof Uint8Array
-                                ) ?
-                                    row.glossaryJsonBytes :
-                                    null,
+                                null,
                             );
                         }
                         termListChunk[i] = entry;
@@ -3568,7 +3567,7 @@ export class DictionaryImporter {
                         null;
                     ++chunkIndex;
                     const tChunkSinkStart = Date.now();
-                    /** @type {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentHash1List: number[], contentHash2List: number[], contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} */
+                    /** @type {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} */
                     const chunkPayload = directArtifactChunkImport ?
                         {
                             dictionary: dictionaryTitle,
@@ -3593,7 +3592,7 @@ export class DictionaryImporter {
                         }
                         setTermRecordPreinternedPlan(termList, termRecordPreinternedPlan);
                     }
-                    await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(chunkPayload, null, {
+                    await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(chunkPayload, null, {
                         processedRows: i + 1,
                         totalRows: rowCount,
                         chunkIndex,
@@ -3651,7 +3650,7 @@ export class DictionaryImporter {
                 null;
             ++chunkIndex;
             const tChunkSinkStart = Date.now();
-            /** @type {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentHash1List: number[], contentHash2List: number[], contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} */
+            /** @type {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} */
             const chunkPayload = directArtifactChunkImport ?
                 {
                     dictionary: dictionaryTitle,
@@ -3676,7 +3675,7 @@ export class DictionaryImporter {
                 }
                 setTermRecordPreinternedPlan(termList, termRecordPreinternedPlan);
             }
-            await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(chunkPayload, null, {
+            await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(chunkPayload, null, {
                 processedRows: rowCount,
                 totalRows: rowCount,
                 chunkIndex,
@@ -3763,13 +3762,13 @@ export class DictionaryImporter {
             return termEntryContentBytes;
         }
         try {
-            const value = /** @type {{rules?: unknown, definitionTags?: unknown, termTags?: unknown, glossary?: unknown}} */ (
-                parseJson(this._textDecoder.decode(termEntryContentBytes))
-            );
-            const rules = typeof value.rules === 'string' ? value.rules : '';
-            const definitionTags = typeof value.definitionTags === 'string' ? value.definitionTags : '';
-            const termTags = typeof value.termTags === 'string' ? value.termTags : '';
-            const glossaryJsonBytes = this._textEncoder.encode(JSON.stringify(Array.isArray(value.glossary) ? value.glossary : []));
+            const parsedValue = /** @type {unknown} */ (parseJson(this._textDecoder.decode(termEntryContentBytes)));
+            const value = /** @type {{rules?: unknown, definitionTags?: unknown, termTags?: unknown, glossary?: unknown}|import('dictionary-data').TermGlossary[]} */ (parsedValue);
+            const rules = (!Array.isArray(value) && typeof value.rules === 'string') ? value.rules : '';
+            const definitionTags = (!Array.isArray(value) && typeof value.definitionTags === 'string') ? value.definitionTags : '';
+            const termTags = (!Array.isArray(value) && typeof value.termTags === 'string') ? value.termTags : '';
+            const glossary = Array.isArray(value) ? value : (Array.isArray(value.glossary) ? value.glossary : []);
+            const glossaryJsonBytes = this._textEncoder.encode(JSON.stringify(glossary));
             return encodeRawTermContentBinary(
                 rules,
                 definitionTags,
@@ -3803,13 +3802,13 @@ export class DictionaryImporter {
             return {contentBytes, contentDictName: RAW_TERM_CONTENT_DICT_NAME};
         }
         try {
-            const value = /** @type {{rules?: unknown, definitionTags?: unknown, termTags?: unknown, glossary?: unknown}} */ (
-                parseJson(this._textDecoder.decode(contentBytes))
-            );
-            const rules = typeof value.rules === 'string' ? value.rules : '';
-            const definitionTags = typeof value.definitionTags === 'string' ? value.definitionTags : '';
-            const termTags = typeof value.termTags === 'string' ? value.termTags : '';
-            const glossaryJsonBytes = this._textEncoder.encode(JSON.stringify(Array.isArray(value.glossary) ? value.glossary : []));
+            const parsedValue = /** @type {unknown} */ (parseJson(this._textDecoder.decode(contentBytes)));
+            const value = /** @type {{rules?: unknown, definitionTags?: unknown, termTags?: unknown, glossary?: unknown}|import('dictionary-data').TermGlossary[]} */ (parsedValue);
+            const rules = (!Array.isArray(value) && typeof value.rules === 'string') ? value.rules : '';
+            const definitionTags = (!Array.isArray(value) && typeof value.definitionTags === 'string') ? value.definitionTags : '';
+            const termTags = (!Array.isArray(value) && typeof value.termTags === 'string') ? value.termTags : '';
+            const glossary = Array.isArray(value) ? value : (Array.isArray(value.glossary) ? value.glossary : []);
+            const glossaryJsonBytes = this._textEncoder.encode(JSON.stringify(glossary));
             return {
                 contentBytes: encodeRawTermContentBinary(
                     rules,
@@ -3851,7 +3850,13 @@ export class DictionaryImporter {
      * @returns {string}
      */
     _getFastRowGlossaryJson(row) {
-        if (typeof row.glossaryJson === 'string') {
+        if (
+            typeof row.glossaryJson === 'string' &&
+            (
+                row.glossaryJson.length > 0 ||
+                !(row.glossaryJsonBytes instanceof Uint8Array)
+            )
+        ) {
             return row.glossaryJson;
         }
         if (row.glossaryJsonBytes instanceof Uint8Array) {
@@ -3942,13 +3947,12 @@ export class DictionaryImporter {
                     glossary: this._parseGlossaryJsonFromFastRow(rawContent.glossaryJson, fileName),
                 };
             }
-            const value = /** @type {{rules?: unknown, definitionTags?: unknown, termTags?: unknown, glossary?: unknown}} */ (
-                parseJson(this._textDecoder.decode(termEntryContentBytes))
-            );
-            const rules = typeof value.rules === 'string' ? value.rules : '';
-            const definitionTags = typeof value.definitionTags === 'string' ? value.definitionTags : '';
-            const termTags = typeof value.termTags === 'string' ? value.termTags : '';
-            const glossary = Array.isArray(value.glossary) ? /** @type {import('dictionary-data').TermGlossary[]} */ (value.glossary) : [];
+            const parsedValue = /** @type {unknown} */ (parseJson(this._textDecoder.decode(termEntryContentBytes)));
+            const value = /** @type {{rules?: unknown, definitionTags?: unknown, termTags?: unknown, glossary?: unknown}|import('dictionary-data').TermGlossary[]} */ (parsedValue);
+            const rules = (!Array.isArray(value) && typeof value.rules === 'string') ? value.rules : '';
+            const definitionTags = (!Array.isArray(value) && typeof value.definitionTags === 'string') ? value.definitionTags : '';
+            const termTags = (!Array.isArray(value) && typeof value.termTags === 'string') ? value.termTags : '';
+            const glossary = Array.isArray(value) ? value : (Array.isArray(value.glossary) ? /** @type {import('dictionary-data').TermGlossary[]} */ (value.glossary) : []);
             return {rules, definitionTags, termTags, glossary};
         } catch (error) {
             if (error instanceof Error) {

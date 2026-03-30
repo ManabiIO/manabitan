@@ -260,6 +260,10 @@ export class Offscreen {
         return await this._invokeDictionaryWorker('debugDictionaryStorageStateOffscreen', {});
     }
 
+    /**
+     * @param {{text: string, dictionaryNames: string[]}} params
+     * @returns {Promise<unknown>}
+     */
     async _debugDictionaryLookupStateHandler({text, dictionaryNames}) {
         return await this._invokeDictionaryWorker('debugDictionaryLookupStateOffscreen', {text, dictionaryNames});
     }

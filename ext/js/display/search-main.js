@@ -29,11 +29,15 @@ import {SearchActionPopupController} from './search-action-popup-controller.js';
 import {SearchDisplayController} from './search-display-controller.js';
 import {SearchPersistentStateController} from './search-persistent-state-controller.js';
 
+/**
+ * @param {Record<string, unknown>} patch
+ */
 function setSearchDebugState(patch) {
-    const state = (typeof globalThis.__manabitanSearchDebug === 'object' && globalThis.__manabitanSearchDebug !== null) ?
-        globalThis.__manabitanSearchDebug :
+    const globalState = /** @type {import('core').SafeAny} */ (globalThis);
+    const state = (typeof globalState.__manabitanSearchDebug === 'object' && globalState.__manabitanSearchDebug !== null) ?
+        globalState.__manabitanSearchDebug :
         {};
-    globalThis.__manabitanSearchDebug = {
+    globalState.__manabitanSearchDebug = {
         ...state,
         ...patch,
         updatedAt: Date.now(),

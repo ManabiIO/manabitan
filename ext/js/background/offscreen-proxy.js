@@ -169,8 +169,8 @@ export class OffscreenProxy {
 
 /**
  * @typedef {{
- *   sendMessagePromise: (message: unknown) => Promise<unknown>,
- *   sendMessageViaPort: (message: unknown, transfers: Transferable[]) => void
+ *   sendMessagePromise: (message: import('offscreen').ApiMessageAny) => Promise<unknown>,
+ *   sendMessageViaPort: (message: import('offscreen').McApiMessageAny, transfers: Transferable[]) => void
  * }} DictionaryRuntimeMessenger
  */
 
@@ -198,7 +198,10 @@ export class DictionaryRuntimeWorkerProxy {
     async sendMessagePromise(message) {
         const id = ++this._requestId;
         return await new Promise((resolve, reject) => {
-            this._responseHandlers.set(id, {resolve, reject});
+            this._responseHandlers.set(id, {
+                resolve: /** @type {(value: unknown) => void} */ (resolve),
+                reject,
+            });
             const payload = /** @type {{action?: string, params?: unknown}} */ (
                 typeof message === 'object' && message !== null && !Array.isArray(message) ? message : {}
             );
@@ -335,7 +338,7 @@ export class DictionaryDatabaseProxy {
      * @returns {Promise<import('dictionary-importer').Summary[]>}
      */
     async getDictionaryInfo() {
-        return this._offscreen.sendMessagePromise({action: 'getDictionaryInfoOffscreen'});
+        return /** @type {Promise<import('dictionary-importer').Summary[]>} */ (this._offscreen.sendMessagePromise({action: 'getDictionaryInfoOffscreen'}));
     }
 
     /**
@@ -373,7 +376,7 @@ export class DictionaryDatabaseProxy {
      * @returns {Promise<import('dictionary-database').DictionaryCounts>}
      */
     async getDictionaryCounts(dictionaryNames, getTotal) {
-        return await this._offscreen.sendMessagePromise({action: 'getDictionaryCountsOffscreen', params: {dictionaryNames, getTotal}});
+        return /** @type {Promise<import('dictionary-database').DictionaryCounts>} */ (this._offscreen.sendMessagePromise({action: 'getDictionaryCountsOffscreen', params: {dictionaryNames, getTotal}}));
     }
 
     /**
@@ -446,7 +449,7 @@ export class TranslatorProxy {
             ...options,
             enabledDictionaryMap: enabledDictionaryMapList,
         };
-        return this._offscreen.sendMessagePromise({action: 'findKanjiOffscreen', params: {text, options: modifiedOptions}});
+        return /** @type {Promise<import('dictionary').KanjiDictionaryEntry[]>} */ (this._offscreen.sendMessagePromise({action: 'findKanjiOffscreen', params: {text, options: modifiedOptions}}));
     }
 
     /**
@@ -469,7 +472,7 @@ export class TranslatorProxy {
             excludeDictionaryDefinitions: excludeDictionaryDefinitionsList,
             textReplacements: textReplacementsSerialized,
         };
-        return this._offscreen.sendMessagePromise({action: 'findTermsOffscreen', params: {mode, text, options: modifiedOptions}});
+        return /** @type {Promise<import('translator').FindTermsResult>} */ (this._offscreen.sendMessagePromise({action: 'findTermsOffscreen', params: {mode, text, options: modifiedOptions}}));
     }
 
     /**
@@ -478,7 +481,7 @@ export class TranslatorProxy {
      * @returns {Promise<import('translator').TermFrequencySimple[]>}
      */
     async getTermFrequencies(termReadingList, dictionaries) {
-        return this._offscreen.sendMessagePromise({action: 'getTermFrequenciesOffscreen', params: {termReadingList, dictionaries}});
+        return /** @type {Promise<import('translator').TermFrequencySimple[]>} */ (this._offscreen.sendMessagePromise({action: 'getTermFrequenciesOffscreen', params: {termReadingList, dictionaries}}));
     }
 
     /** */

@@ -48,7 +48,7 @@ export type NoteInfoWrapper = {
     canAdd: boolean;
     valid: boolean;
     noteIds: NoteId[] | null;
-    noteInfos?: (NoteInfo | null)[];
+    noteInfos?: (NoteInfo | null)[] | null;
 };
 
 export type NoteInfo = {

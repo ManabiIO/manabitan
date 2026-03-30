@@ -709,7 +709,7 @@ export class DisplayAnki {
         const relevantNoteDetails = relevantEntryDetails.noteMap.get(cardFormatIndex);
         if (typeof relevantNoteDetails === 'undefined') { return null; }
         const {noteIds, noteInfos} = relevantNoteDetails;
-        if (noteIds === null || typeof noteInfos === 'undefined') { return null; }
+        if (noteIds === null || !Array.isArray(noteInfos)) { return null; }
         const overwriteId = noteIds.find((id) => id !== INVALID_NOTE_ID);
         if (typeof overwriteId === 'undefined') { return null; }
         const overwriteInfo = noteInfos.find((info) => info !== null && info.noteId === overwriteId);

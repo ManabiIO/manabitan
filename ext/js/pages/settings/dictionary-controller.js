@@ -899,7 +899,7 @@ export class DictionaryController {
         if (this._databaseStateToken !== token) { return; }
         this._dictionaries = dictionaries;
 
-        await this._updateEntries(token);
+        await this._updateEntries(null);
         if (this._databaseStateToken !== token) { return; }
 
         if (this._onDictionariesUpdate) {

@@ -19,6 +19,7 @@ import type {DictionaryController} from '../../ext/js/pages/settings/dictionary-
 import type {ScanInputsController} from '../../ext/js/pages/settings/scan-inputs-controller';
 import type {ScanInputsSimpleController} from '../../ext/js/pages/settings/scan-inputs-simple-controller';
 import type * as Core from './core';
+import type * as DictionaryImporter from './dictionary-importer';
 import type * as Settings from './settings';
 import type * as SettingsModifications from './settings-modifications';
 import type {EventNames, EventArgument as BaseEventArgument} from './core';
@@ -50,11 +51,13 @@ export type Events = {
         url: string;
         profilesDictionarySettings: ProfilesDictionarySettings;
         onImportDone: ImportDictionaryDoneCallback;
+        importDetailsOverrides?: Partial<DictionaryImporter.ImportDetails> | null;
     };
     importDictionaryFromFile: {
         files: File[];
         profilesDictionarySettings: ProfilesDictionarySettings;
         onImportDone: ImportDictionaryDoneCallback;
+        importDetailsOverrides?: Partial<DictionaryImporter.ImportDetails> | null;
     };
     downloadDictionaryFromUrl: {
         url: string;

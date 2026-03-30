@@ -2580,7 +2580,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentHash1List?: number[], contentHash2List?: number[], contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
      * @returns {Promise<void>}
      */
     async bulkAddArtifactTermsChunk(chunk) {

@@ -48,7 +48,7 @@ export type DictionaryEntryNoteDetails = {
      * Anki IDs of duplicate notes. May contain INVALID_NOTE_ID for notes whose ID could not be found.
      */
     noteIds: Anki.NoteId[] | null;
-    noteInfos?: (Anki.NoteInfo | null)[];
+    noteInfos?: (Anki.NoteInfo | null)[] | null;
     ankiError: Error | null;
 };
 

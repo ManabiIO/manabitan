@@ -23,11 +23,15 @@ import {querySelectorNotNull} from '../dom/query-selector.js';
 import {isComposing} from '../language/ime-utilities.js';
 import {convertToKana, convertToKanaIME} from '../language/ja/japanese-wanakana.js';
 
+/**
+ * @param {Record<string, unknown>} patch
+ */
 function updateSearchDebugState(patch) {
-    const state = (typeof globalThis.__manabitanSearchDebug === 'object' && globalThis.__manabitanSearchDebug !== null) ?
-        globalThis.__manabitanSearchDebug :
+    const globalState = /** @type {import('core').SafeAny} */ (globalThis);
+    const state = (typeof globalState.__manabitanSearchDebug === 'object' && globalState.__manabitanSearchDebug !== null) ?
+        globalState.__manabitanSearchDebug :
         {};
-    globalThis.__manabitanSearchDebug = {
+    globalState.__manabitanSearchDebug = {
         ...state,
         ...patch,
         updatedAt: Date.now(),
@@ -121,7 +125,12 @@ export class SearchDisplayController {
             this._updateSearchHeight(true);
             this._search(animate, historyMode, lookup, flags);
         });
-        globalThis.__manabitanSearchDebugApi = {
+        /** @type {import('core').SafeAny} */ (globalThis).__manabitanSearchDebugApi = {
+            /**
+             * @param {string} query
+             * @param {{animate?: boolean, historyMode?: import('display').HistoryMode, lookup?: boolean, flags?: string[]|null}} [details]
+             * @returns {{ok: boolean, query?: string, error?: string}}
+             */
             triggerSearch: (query, {animate = true, historyMode = 'new', lookup = true, flags = null} = {}) => {
                 try {
                     updateSearchDebugState({
@@ -134,7 +143,7 @@ export class SearchDisplayController {
                     });
                     this._queryInput.value = String(query ?? '');
                     this._updateSearchHeight(true);
-                    this._search(Boolean(animate), historyMode, Boolean(lookup), Array.isArray(flags) ? flags : null);
+                    this._search(Boolean(animate), historyMode, Boolean(lookup), Array.isArray(flags) ? /** @type {'clipboard'[]|null} */ (/** @type {unknown} */ (flags)) : null);
                     return {
                         ok: true,
                         query: this._queryInput.value,

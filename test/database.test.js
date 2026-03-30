@@ -1228,7 +1228,16 @@ describe('Database', () => {
                 await expect.soft(dictionaryDatabase.replaceDictionaryTitle(
                     stagedDictionaryTitle,
                     'Live Dictionary',
-                    {title: 'Live Dictionary', sourceTitle: 'Live Dictionary'},
+                    {
+                        title: 'Live Dictionary',
+                        sourceTitle: 'Live Dictionary',
+                        revision: 'test',
+                        sequenced: false,
+                        version: 3,
+                        importDate: Date.now(),
+                        prefixWildcardsSupported: true,
+                        styles: '',
+                    },
                     'Live Dictionary',
                 )).rejects.toThrow('Injected staged cutover failure');
 
@@ -1277,7 +1286,16 @@ describe('Database', () => {
                 await dictionaryDatabase.replaceDictionaryTitle(
                     stagedDictionaryTitle,
                     'Live Dictionary',
-                    {title: 'Live Dictionary', sourceTitle: 'Live Dictionary'},
+                    {
+                        title: 'Live Dictionary',
+                        sourceTitle: 'Live Dictionary',
+                        revision: 'test',
+                        sequenced: false,
+                        version: 3,
+                        importDate: Date.now(),
+                        prefixWildcardsSupported: true,
+                        styles: '',
+                    },
                     'Live Dictionary',
                 );
 

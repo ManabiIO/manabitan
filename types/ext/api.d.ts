@@ -311,6 +311,17 @@ type ApiSurface = {
         };
         return: DictionaryDatabase.DictionaryCounts;
     };
+    debugDictionaryLookupState: {
+        params: {
+            text: string;
+            dictionaryNames: string[];
+        };
+        return: unknown;
+    };
+    debugDictionaryStorageState: {
+        params: void;
+        return: unknown;
+    };
     setDictionaryImportMode: {
         params: {
             active: boolean;

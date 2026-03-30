@@ -710,6 +710,7 @@ function createOptionsUpdatedTestData1() {
                 prefixWildcardsSupported: false,
             },
             dataTransmissionConsentShown: false,
+            dataTransmissionConsentState: 'unknown',
         },
     };
 }

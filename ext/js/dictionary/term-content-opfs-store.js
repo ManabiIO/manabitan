@@ -85,7 +85,7 @@ export class TermContentOpfsStore {
         this._writeCoalesceMaxChunksOverride = null;
         /** @type {number|null} */
         this._expectedImportBytes = null;
-        /** @type {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number}|null} */
+        /** @type {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, persistedLengthAfterClose: number, logicalLengthAfterClose: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number}|null} */
         this._lastEndImportSessionMetrics = null;
         /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number}} */
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
@@ -1350,7 +1350,7 @@ export class TermContentOpfsStore {
         }
         let wrote = false;
         try {
-            await this._writable.write(chunk);
+            await /** @type {FileSystemWritableFileStream} */ (this._writable).write(chunk);
             wrote = true;
         } catch (error) {
             if (!this._isClosingWritableStreamError(error)) {
@@ -1361,7 +1361,7 @@ export class TermContentOpfsStore {
             if (this._writable === null) {
                 throw error;
             }
-            await this._writable.write(chunk);
+            await /** @type {FileSystemWritableFileStream} */ (this._writable).write(chunk);
             wrote = true;
         }
         if (wrote) {

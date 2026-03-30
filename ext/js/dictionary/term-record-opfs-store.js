@@ -252,7 +252,7 @@ class DenseIdRecordStore {
  * @property {number} rowCount
  * @property {Uint8Array[]} expressionBytesList
  * @property {Uint8Array[]} readingBytesList
- * @property {boolean[]} readingEqualsExpressionList
+ * @property {boolean[]|Uint8Array} readingEqualsExpressionList
  * @property {number[]} contentOffsets
  * @property {number[]} contentLengths
  * @property {string | (string|null)[]} contentDictNames
@@ -919,7 +919,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
      * @param {number[]} contentOffsets
      * @param {number[]} contentLengths
      * @param {string | (string|null)[]} contentDictNames
@@ -1041,7 +1041,7 @@ export class TermRecordOpfsStore {
                 runStart = runEnd;
                 continue;
             }
-            /** @type {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} */
+            /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} */
             const chunkSlice = {
                 dictionary: chunk.dictionary,
                 rowCount: runCount,
@@ -1086,7 +1086,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {TermRecordShardState} state
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[]}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
      * @param {number} firstId
      * @param {number[]} contentOffsets
      * @param {number[]} contentLengths
@@ -1206,6 +1206,11 @@ export class TermRecordOpfsStore {
                 fileSize: file.size,
             });
         }
+        /**
+         * @param {FileSystemFileHandle} fileHandle
+         * @param {ArrayBuffer} bytes
+         * @returns {Promise<void>}
+         */
         const writeShardBytes = async (fileHandle, bytes) => {
             const writable = await fileHandle.createWritable();
             try {
@@ -1292,7 +1297,7 @@ export class TermRecordOpfsStore {
         const fileNames = await this._listShardFileNames();
         for (const fileName of fileNames) {
             const dictionaryName = this._decodeDictionaryNameFromShardFileName(fileName);
-            if (!predicate(dictionaryName)) {
+            if (dictionaryName === null || !predicate(dictionaryName)) {
                 continue;
             }
             removedDictionaryNames.add(dictionaryName);
@@ -1452,7 +1457,7 @@ export class TermRecordOpfsStore {
         const statesToLoad = [];
         for (const state of this._shardStateByFileName.values()) {
             const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
-            if (pending.has(dictionaryName)) {
+            if (dictionaryName !== null && pending.has(dictionaryName)) {
                 statesToLoad.push(state);
             }
         }
@@ -1480,7 +1485,7 @@ export class TermRecordOpfsStore {
         }
         for (const state of this._shardStateByFileName.values()) {
             const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
-            if (dictionaryName.length > 0) {
+            if (dictionaryName !== null && dictionaryName.length > 0) {
                 this._loadedDictionaryNames.add(dictionaryName);
             }
         }
@@ -2112,7 +2117,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[]}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
      * @param {number[]} contentOffsets
      * @param {number[]} contentLengths
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
@@ -2713,7 +2718,7 @@ export class TermRecordOpfsStore {
         for (const chunk of chunks) {
             if (chunk.byteLength <= 0) { continue; }
             try {
-                await state.writable.write(chunk);
+                await /** @type {FileSystemWritableFileStream} */ (state.writable).write(chunk);
                 writtenBytes += chunk.byteLength;
             } catch (error) {
                 if (!this._isClosingWritableStreamError(error)) {
@@ -2725,7 +2730,7 @@ export class TermRecordOpfsStore {
                 if (state.writable === null) {
                     throw error;
                 }
-                await state.writable.write(chunk);
+                await /** @type {FileSystemWritableFileStream} */ (state.writable).write(chunk);
                 writtenBytes += chunk.byteLength;
             }
         }
