@@ -3007,30 +3007,18 @@ export class Backend {
                 if (this._offscreen === null) {
                     return;
                 }
-                try {
-                    await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
-                    await this._offscreen.sendMessagePromise({action: 'clearDatabaseCachesOffscreen'});
-                } catch (e) {
-                    log.error(e);
-                }
+                await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
+                await this._offscreen.sendMessagePromise({action: 'clearDatabaseCachesOffscreen'});
             })();
             if (this._dictionaryRefreshPromise !== null) {
                 this._dictionaryRefreshQueued = true;
-                await refreshOffscreenPromise;
-                await this._dictionaryRefreshPromise;
+                await Promise.all([refreshOffscreenPromise, this._dictionaryRefreshPromise]);
                 continue;
             }
             if (typeof refreshConnectionMethod === 'function') {
-                this._dictionaryRefreshPromise = (async () => {
-                    try {
-                        await /** @type {() => Promise<void>} */ (refreshConnectionMethod).call(dictionaryDatabase);
-                    } catch (e) {
-                        log.error(e);
-                    }
-                })();
+                this._dictionaryRefreshPromise = /** @type {() => Promise<void>} */ (refreshConnectionMethod).call(dictionaryDatabase);
                 try {
-                    await refreshOffscreenPromise;
-                    await this._dictionaryRefreshPromise;
+                    await Promise.all([refreshOffscreenPromise, this._dictionaryRefreshPromise]);
                 } finally {
                     this._dictionaryRefreshPromise = null;
                     rerunRefresh = this._dictionaryRefreshQueued;
@@ -3049,18 +3037,13 @@ export class Backend {
                 continue;
             }
             this._dictionaryRefreshPromise = (async () => {
-                try {
-                    if ('close' in dictionaryDatabase && typeof dictionaryDatabase.close === 'function') {
-                        await dictionaryDatabase.close();
-                    }
-                    await dictionaryDatabase.prepare();
-                } catch (e) {
-                    log.error(e);
+                if ('close' in dictionaryDatabase && typeof dictionaryDatabase.close === 'function') {
+                    await dictionaryDatabase.close();
                 }
+                await dictionaryDatabase.prepare();
             })();
             try {
-                await refreshOffscreenPromise;
-                await this._dictionaryRefreshPromise;
+                await Promise.all([refreshOffscreenPromise, this._dictionaryRefreshPromise]);
             } finally {
                 this._dictionaryRefreshPromise = null;
                 rerunRefresh = this._dictionaryRefreshQueued;
@@ -3848,10 +3831,10 @@ export class Backend {
             this._dictionaryImportModeActive = false;
             await this._ensureDictionaryDatabaseReady();
             reportDiagnostics('dictionary-import-mode-changed', {active: false});
-            if (this._deferredDictionaryRefreshDuringImport) {
-                this._deferredDictionaryRefreshDuringImport = false;
-                await this._refreshDictionaryDatabaseAfterUpdate();
-            }
+            const hadDeferredRefresh = this._deferredDictionaryRefreshDuringImport;
+            this._deferredDictionaryRefreshDuringImport = false;
+            reportDiagnostics('dictionary-refresh-on-import-mode-exit', {hadDeferredRefresh});
+            await this._refreshDictionaryDatabaseAfterUpdate();
         })();
         try {
             await this._setDictionaryImportModePromise;
