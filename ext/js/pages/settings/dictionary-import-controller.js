@@ -22,6 +22,7 @@ import {parseJson, readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {safePerformance} from '../../core/safe-performance.js';
 import {toError} from '../../core/to-error.js';
+import {promiseTimeout} from '../../core/utilities.js';
 import {getKebabCase} from '../../data/anki-template-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {DictionaryController} from './dictionary-controller.js';
@@ -1555,6 +1556,57 @@ export class DictionaryImportController {
     }
 
     /**
+     * @param {string} dictionaryTitle
+     * @param {boolean} requireEnabledForActiveProfile
+     * @returns {Promise<void>}
+     */
+    async _verifyImportedDictionaryVisible(dictionaryTitle, requireEnabledForActiveProfile) {
+        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle.trim() : '';
+        if (normalizedTitle.length === 0) {
+            throw new Error('Cannot verify imported dictionary visibility without a title');
+        }
+        const activeProfileIndex = this._settingsController.profileIndex;
+        let lastInstalled = false;
+        let lastEnabled = !requireEnabledForActiveProfile;
+        /** @type {import('dictionary-database').DictionaryCountGroup|null} */
+        let lastCountGroup = null;
+        for (let attempt = 0; attempt < 5; ++attempt) {
+            const [dictionaryInfo, dictionaryCounts, optionsFull] = await Promise.all([
+                this._settingsController.application.api.getDictionaryInfo(),
+                this._settingsController.application.api.getDictionaryCounts([normalizedTitle], false),
+                this._settingsController.getOptionsFull(),
+            ]);
+            lastInstalled = dictionaryInfo.some((dictionary) => dictionary.title === normalizedTitle);
+            const activeProfile = Array.isArray(optionsFull.profiles) ? optionsFull.profiles[activeProfileIndex] : void 0;
+            const activeProfileDictionaries = Array.isArray(activeProfile?.options?.dictionaries) ? activeProfile.options.dictionaries : [];
+            lastEnabled = !requireEnabledForActiveProfile || activeProfileDictionaries.some((dictionary) => (
+                dictionary.name === normalizedTitle &&
+                dictionary.enabled === true
+            ));
+            lastCountGroup = Array.isArray(dictionaryCounts.counts) && dictionaryCounts.counts.length > 0 ?
+                dictionaryCounts.counts[0] :
+                null;
+            const hasCountEntry = lastCountGroup !== null;
+            if (lastInstalled && lastEnabled && hasCountEntry) {
+                reportDiagnostics('dictionary-import-visibility-verified', {
+                    dictionaryTitle: normalizedTitle,
+                    attempt: attempt + 1,
+                    requireEnabledForActiveProfile,
+                    countGroup: lastCountGroup,
+                });
+                return;
+            }
+            if (attempt < 4) {
+                await promiseTimeout(250 * (attempt + 1));
+            }
+        }
+        throw new Error(
+            `Imported dictionary visibility verification failed for "${normalizedTitle}" ` +
+            `(installed=${String(lastInstalled)} enabled=${String(lastEnabled)} counts=${JSON.stringify(lastCountGroup)})`,
+        );
+    }
+
+    /**
      * @param {Record<string, unknown>} snapshot
      */
     _recordImportDebugSnapshot(snapshot) {
@@ -1869,6 +1921,21 @@ export class DictionaryImportController {
             const triggerDatabaseUpdatedEndTime = safePerformance.now();
             log.log(`[ImportTiming] [${dictionaryTitle}] triggerDatabaseUpdated ${formatDurationMs(triggerDatabaseUpdatedEndTime - triggerDatabaseUpdatedStartTime)}`);
             recordLocalPhase('trigger-database-updated', triggerDatabaseUpdatedStartTime, triggerDatabaseUpdatedEndTime);
+            const verifyImportedDictionaryVisibleStartTime = safePerformance.now();
+            await this._verifyImportedDictionaryVisible(
+                result.title || sourceDictionaryTitle || dictionaryTitle,
+                shouldAddDictionarySettings && profilesDictionarySettings === null,
+            );
+            const verifyImportedDictionaryVisibleEndTime = safePerformance.now();
+            recordLocalPhase(
+                'verify-imported-dictionary-visible',
+                verifyImportedDictionaryVisibleStartTime,
+                verifyImportedDictionaryVisibleEndTime,
+                {
+                    dictionaryTitle: result.title || sourceDictionaryTitle || dictionaryTitle,
+                    requireEnabledForActiveProfile: shouldAddDictionarySettings && profilesDictionarySettings === null,
+                },
+            );
         } else {
             log.log(`[ImportTiming] [${dictionaryTitle}] triggerDatabaseUpdated deferred until import session finalize`);
             localPhaseTimings.push({
