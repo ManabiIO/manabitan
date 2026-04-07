@@ -33,7 +33,13 @@ type ProfileDictionarySettings = Settings.DictionaryOptions & {index: number};
 
 export type ProfilesDictionarySettings = {[profileId: string]: ProfileDictionarySettings} | null;
 
-export type ImportDictionaryDoneCallback = (() => void) | null;
+export type ImportDictionaryDoneResult = {
+    ok: boolean;
+    errors: Error[];
+    importedTitles: string[];
+};
+
+export type ImportDictionaryDoneCallback = ((result: ImportDictionaryDoneResult) => void) | null;
 
 export type Events = {
     optionsChanged: {

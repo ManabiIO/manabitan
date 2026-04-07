@@ -23,6 +23,11 @@ export type DatabaseId = {
     id: number; // Automatic database primary key
 };
 
+export type DictionaryTermProbe = {
+    expression: string;
+    reading: string;
+};
+
 export type MediaDataBase<TContentType = unknown> = {
     dictionary: string;
     path: string;

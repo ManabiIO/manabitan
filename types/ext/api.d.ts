@@ -186,6 +186,7 @@ type ApiSurface = {
         params: {
             notes: Anki.Note[];
             fetchAdditionalInfo: boolean;
+            fetchDuplicateNoteIds?: boolean;
         };
         return: Anki.NoteInfoWrapper[];
     };
@@ -310,6 +311,23 @@ type ApiSurface = {
             getTotal: boolean;
         };
         return: DictionaryDatabase.DictionaryCounts;
+    };
+    verifyDictionaryVisibility: {
+        params: {
+            dictionaryTitle: string;
+            requireEnabledForActiveProfile: boolean;
+        };
+        return: {
+            ok: boolean;
+            dictionaryTitle: string;
+            installed: boolean;
+            enabled: boolean;
+            counts: DictionaryDatabase.DictionaryCountGroup | null;
+            probe: DictionaryDatabase.DictionaryTermProbe | null;
+            directMatch: boolean;
+            translatorMatch: boolean;
+            reason: string | null;
+        };
     };
     debugDictionaryLookupState: {
         params: {

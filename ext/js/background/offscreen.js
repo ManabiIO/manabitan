@@ -56,6 +56,8 @@ export class Offscreen {
             ['deleteDictionaryOffscreen',      this._deleteDictionaryHandler.bind(this)],
             ['replaceDictionaryTitleOffscreen', this._replaceDictionaryTitleHandler.bind(this)],
             ['getDictionaryCountsOffscreen',   this._getDictionaryCountsHandler.bind(this)],
+            ['getDictionaryTermProbeOffscreen', this._getDictionaryTermProbeHandler.bind(this)],
+            ['findTermsBulkOffscreen',         this._findTermsBulkHandler.bind(this)],
             ['debugDictionaryStorageStateOffscreen', this._debugDictionaryStorageStateHandler.bind(this)],
             ['debugDictionaryLookupStateOffscreen', this._debugDictionaryLookupStateHandler.bind(this)],
             ['databasePurgeOffscreen',         this._purgeDatabaseHandler.bind(this)],
@@ -86,6 +88,8 @@ export class Offscreen {
         this._dictionaryWorkerResponseHandlers = new Map();
         /** @type {number} */
         this._dictionaryWorkerRequestId = 0;
+        /** @type {Error|null} */
+        this._dictionaryWorkerFatalError = null;
         this._dictionaryWorker.addEventListener('message', this._onDictionaryWorkerMessage.bind(this));
         this._dictionaryWorker.addEventListener('messageerror', this._onDictionaryWorkerMessageError.bind(this));
         this._dictionaryWorker.addEventListener('error', this._onDictionaryWorkerError.bind(this));
@@ -256,6 +260,16 @@ export class Offscreen {
         return await this._invokeDictionaryWorker('getDictionaryCountsOffscreen', {dictionaryNames, getTotal});
     }
 
+    /** @type {import('offscreen').ApiHandler<'getDictionaryTermProbeOffscreen'>} */
+    async _getDictionaryTermProbeHandler({dictionaryTitle}) {
+        return await this._invokeDictionaryWorker('getDictionaryTermProbeOffscreen', {dictionaryTitle});
+    }
+
+    /** @type {import('offscreen').ApiHandler<'findTermsBulkOffscreen'>} */
+    async _findTermsBulkHandler({termList, dictionaryNames, matchType}) {
+        return await this._invokeDictionaryWorker('findTermsBulkOffscreen', {termList, dictionaryNames, matchType});
+    }
+
     async _debugDictionaryStorageStateHandler() {
         return await this._invokeDictionaryWorker('debugDictionaryStorageStateOffscreen', {});
     }
@@ -339,8 +353,13 @@ export class Offscreen {
         try {
             await this._invokeDictionaryWorker('importDictionaryOffscreen', {archiveContent, details}, [ports[0]]);
         } catch (error) {
-            ports[0].postMessage({type: 'error', error: ExtensionError.serialize(error)});
-            ports[0].close();
+            try {
+                ports[0].postMessage({type: 'error', error: ExtensionError.serialize(error)});
+            } catch (postMessageError) {
+                log.error(postMessageError);
+            } finally {
+                ports[0].close();
+            }
         }
     }
 
@@ -356,11 +375,38 @@ export class Offscreen {
      * @returns {Promise<any>}
      */
     _invokeDictionaryWorker(action, params, transferables = []) {
+        const fatalError = this._dictionaryWorkerFatalError;
+        if (fatalError !== null) {
+            return Promise.reject(fatalError);
+        }
         const id = ++this._dictionaryWorkerRequestId;
         return new Promise((resolve, reject) => {
             this._dictionaryWorkerResponseHandlers.set(id, {resolve, reject});
-            this._dictionaryWorker.postMessage({id, action, params}, transferables);
+            try {
+                this._dictionaryWorker.postMessage({id, action, params}, transferables);
+            } catch (error) {
+                this._dictionaryWorkerResponseHandlers.delete(id);
+                const fatalError = error instanceof Error ? error : new Error(String(error));
+                this._dictionaryWorkerFatalError = fatalError;
+                this._rejectPendingDictionaryWorkerRequests(fatalError);
+                reject(fatalError);
+            }
         });
+    }
+
+    /**
+     * @param {Error} error
+     * @returns {void}
+     */
+    _rejectPendingDictionaryWorkerRequests(error) {
+        if (this._dictionaryWorkerResponseHandlers.size === 0) {
+            return;
+        }
+        const handlers = [...this._dictionaryWorkerResponseHandlers.values()];
+        this._dictionaryWorkerResponseHandlers.clear();
+        for (const {reject} of handlers) {
+            reject(error);
+        }
     }
 
     /**
@@ -386,6 +432,9 @@ export class Offscreen {
     _onDictionaryWorkerMessageError(event) {
         const error = new ExtensionError('Offscreen: Error receiving dictionary worker message');
         error.data = event;
+        this._dictionaryWorkerFatalError = error;
+        this._rejectPendingDictionaryWorkerRequests(error);
+        this._dictionaryWorker.terminate();
         log.error(error);
     }
 
@@ -400,6 +449,9 @@ export class Offscreen {
             colno: event.colno,
             message: event.message,
         };
+        this._dictionaryWorkerFatalError = error;
+        this._rejectPendingDictionaryWorkerRequests(error);
+        this._dictionaryWorker.terminate();
         log.error(error);
     }
 

@@ -1144,6 +1144,18 @@ export class TermRecordOpfsStore {
         await this._flushPendingWrites();
         await this._awaitQueuedWrites();
         await this._closeAllWritables();
+        if (!this._indexByDictionary.has(toName)) {
+            const removedStaleTargetFiles = await this.cleanupShardFilesByDictionaryPredicate((dictionaryName) => dictionaryName === toName);
+            if (removedStaleTargetFiles.length > 0) {
+                reportDiagnostics('term-record-store-rename-cleanup-stale-target', {
+                    fromName,
+                    toName,
+                    removedStaleTargetFiles,
+                });
+            }
+        }
+        const targetRecordIds = this._indexByDictionary.get(toName);
+        const hasLiveTargetRecords = targetRecordIds instanceof Set && targetRecordIds.size > 0;
 
         const recordIdsToRename = [];
         for (const id of this._recordsById.keys()) {
@@ -1183,13 +1195,53 @@ export class TermRecordOpfsStore {
             const shardInfo = this._decodeShardInfoFromShardFileName(state.fileName);
             if (shardInfo === null) { continue; }
             const nextFileName = this._getShardSegmentFileName(toName, shardInfo.contentDictName, shardInfo.segmentIndex);
-            if (this._shardStateByFileName.has(nextFileName)) {
-                throw new Error(`Target shard file already exists for dictionary rename: ${nextFileName}`);
+            const existingTargetState = this._shardStateByFileName.get(nextFileName);
+            if (typeof existingTargetState !== 'undefined') {
+                if (hasLiveTargetRecords) {
+                    throw new Error(`Target shard file already exists for dictionary rename: ${nextFileName}`);
+                }
+                await this._flushPendingWritesForShard(existingTargetState);
+                await this._closeShardWritable(existingTargetState);
+                this._shardStateByFileName.delete(nextFileName);
+                this._activeAppendShardStateByKey.delete(existingTargetState.logicalKey);
+                try {
+                    await this._recordsDirectoryHandle.removeEntry(nextFileName);
+                } catch (_) {
+                    // NOP - fall through and let create/write validation below fail if cleanup was insufficient.
+                }
+                reportDiagnostics('term-record-store-rename-remove-colliding-target', {
+                    fromName,
+                    toName,
+                    nextFileName,
+                });
             }
             const nextFileHandle = await this._recordsDirectoryHandle.getFileHandle(nextFileName, {create: true});
             try {
                 const nextFile = await nextFileHandle.getFile();
                 if (nextFile.size > 0) {
+                    if (!hasLiveTargetRecords) {
+                        try {
+                            await this._recordsDirectoryHandle.removeEntry(nextFileName);
+                            reportDiagnostics('term-record-store-rename-remove-colliding-target-bytes', {
+                                fromName,
+                                toName,
+                                nextFileName,
+                                nextFileSize: nextFile.size,
+                            });
+                            const replacementHandle = await this._recordsDirectoryHandle.getFileHandle(nextFileName, {create: true});
+                            renamePlans.push({
+                                state,
+                                shardInfo,
+                                nextFileName,
+                                nextFileHandle: replacementHandle,
+                                bytes: await file.arrayBuffer(),
+                                fileSize: file.size,
+                            });
+                            continue;
+                        } catch (_) {
+                            // NOP - fall through to the explicit collision error below.
+                        }
+                    }
                     throw new Error(`Target shard file already contains data for dictionary rename: ${nextFileName}`);
                 }
             } catch (e) {
