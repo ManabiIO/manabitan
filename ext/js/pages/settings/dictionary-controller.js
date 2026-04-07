@@ -169,6 +169,11 @@ class DictionaryEntry {
         this._updatesAvailable.hidden = true;
     }
 
+    /** */
+    restoreUpdatesAvailableButton() {
+        this._showUpdatesAvailableButton();
+    }
+
     /**
      * @returns {Promise<boolean>}
      */
@@ -595,6 +600,8 @@ export class DictionaryController {
         this._modalController = modalController;
         /** @type {HTMLElement} */
         this._dictionaryModalBody = querySelectorNotNull(document, '#dictionaries-modal-body');
+        /** @type {HTMLElement} */
+        this._errorContainer = querySelectorNotNull(document, '#dictionary-error');
         /** @type {import('./status-footer.js').StatusFooter} */
         this._statusFooter = statusFooter;
         /** @type {?import('dictionary-importer').Summary[]} */
@@ -633,8 +640,6 @@ export class DictionaryController {
         this._dictionaryTaskQueue = [];
         /** @type {boolean} */
         this._isTaskQueueRunning = false;
-        /** @type {(() => void) | null} */
-        this._onDictionariesUpdate = null;
     }
 
     /** @type {import('./modal-controller.js').ModalController} */
@@ -904,9 +909,6 @@ export class DictionaryController {
         await this._updateEntries(null);
         if (this._databaseStateToken !== token) { return; }
 
-        if (this._onDictionariesUpdate) {
-            this._onDictionariesUpdate();
-        }
     }
 
     /** */
@@ -1085,6 +1087,18 @@ export class DictionaryController {
         for (const entry of this._dictionaryEntries) {
             if (entry.dictionaryTitle === dictionaryTitle) {
                 entry.hideUpdatesAvailableButton();
+                break;
+            }
+        }
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     */
+    _restoreUpdatesAvailableButton(dictionaryTitle) {
+        for (const entry of this._dictionaryEntries) {
+            if (entry.dictionaryTitle === dictionaryTitle) {
+                entry.restoreUpdatesAvailableButton();
                 break;
             }
         }
@@ -1298,16 +1312,34 @@ export class DictionaryController {
     async _runTaskQueue() {
         if (this._isTaskQueueRunning) { return; }
         this._isTaskQueueRunning = true;
-        while (this._dictionaryTaskQueue.length > 0) {
-            const task = this._dictionaryTaskQueue[0];
-            if (task.type === 'delete') {
-                await this._deleteDictionary(task.dictionaryTitle);
-            } else if (task.type === 'update') {
-                await this._updateDictionary(task.dictionaryTitle, task.downloadUrl);
+        try {
+            while (this._dictionaryTaskQueue.length > 0) {
+                const task = this._dictionaryTaskQueue[0];
+                try {
+                    this._hideErrors();
+                    if (task.type === 'delete') {
+                        await this._deleteDictionary(task.dictionaryTitle);
+                    } else if (task.type === 'update') {
+                        await this._updateDictionary(task.dictionaryTitle, task.downloadUrl);
+                    }
+                } catch (error) {
+                    const normalizedError = error instanceof Error ? error : new Error(String(error));
+                    if (task.type === 'update') {
+                        this._restoreUpdatesAvailableButton(task.dictionaryTitle);
+                    }
+                    reportDiagnostics('dictionary-task-queue-failed', {
+                        type: task.type,
+                        dictionaryTitle: task.dictionaryTitle,
+                        error: normalizedError.message,
+                    });
+                    this._showErrors([normalizedError]);
+                    log.error(normalizedError);
+                }
+                void this._dictionaryTaskQueue.shift();
             }
-            void this._dictionaryTaskQueue.shift();
+        } finally {
+            this._isTaskQueueRunning = false;
         }
-        this._isTaskQueueRunning = false;
     }
 
     /**
@@ -1352,8 +1384,6 @@ export class DictionaryController {
 
             await this._deleteDictionaryInternal(dictionaryTitle, onProgress);
             await this._deleteDictionarySettings(dictionaryTitle);
-        } catch (e) {
-            log.error(e);
         } finally {
             prevention.end();
             for (const progress of progressContainers) { progress.hidden = true; }
@@ -1368,9 +1398,9 @@ export class DictionaryController {
      * @param {string|undefined} downloadUrl
      */
     async _updateDictionary(dictionaryTitle, downloadUrl) {
-        if (this._checkingIntegrity || this._checkingUpdates || this._dictionaries === null) { return; }
+        if (this._checkingIntegrity || this._checkingUpdates) { return; }
 
-        const dictionaryInfo = this._dictionaries.find((entry) => entry.title === dictionaryTitle);
+        const dictionaryInfo = await this._getDictionaryInfoForTask(dictionaryTitle);
         if (typeof dictionaryInfo === 'undefined') { throw new Error('Dictionary not found'); }
         downloadUrl = downloadUrl ?? dictionaryInfo.downloadUrl;
         if (typeof downloadUrl !== 'string') { throw new Error('Attempted to update dictionary without download URL'); }
@@ -1403,26 +1433,73 @@ export class DictionaryController {
         const {promise: importPromise, resolve} = deferPromise();
         const importToken = Math.random().toString(36).slice(2, 10);
         const stagedDictionaryTitle = `${dictionaryTitle} [update-staging ${importToken}]`;
-        this._settingsController.trigger('importDictionaryFromFile', {
-            files: [downloadedFile],
-            profilesDictionarySettings,
-            importDetailsOverrides: {
-                dictionaryTitleOverride: stagedDictionaryTitle,
-                replacementDictionaryTitle: dictionaryTitle,
-                updateSessionToken: importToken,
-                useImportSession: false,
-                finalizeImportSession: false,
-            },
-            onImportDone: resolve,
-        });
-        const importResult = await importPromise;
-        if (!importResult.ok) {
-            throw new Error(
-                `Replacement dictionary import failed for ${dictionaryTitle}: ` +
-                importResult.errors.map((error) => error.message).join('; '),
-            );
+        try {
+            this._settingsController.trigger('importDictionaryFromFile', {
+                files: [downloadedFile],
+                profilesDictionarySettings,
+                importDetailsOverrides: {
+                    dictionaryTitleOverride: stagedDictionaryTitle,
+                    replacementDictionaryTitle: dictionaryTitle,
+                    updateSessionToken: importToken,
+                    useImportSession: false,
+                    finalizeImportSession: false,
+                },
+                onImportDone: resolve,
+            });
+            const importResult = await importPromise;
+            if (!importResult.ok) {
+                throw new Error(
+                    `Replacement dictionary import failed for ${dictionaryTitle}: ` +
+                    importResult.errors.map((error) => error.message).join('; '),
+                );
+            }
+            await this._validateUpdatedDictionaryState(dictionaryTitle, importToken, stagedDictionaryTitle, importResult.importedTitles);
+        } catch (error) {
+            const cleanupErrors = await this._cleanupTransientUpdateTitles(importToken, stagedDictionaryTitle);
+            if (cleanupErrors.length > 0) {
+                throw new Error(
+                    `Dictionary update failed for "${dictionaryTitle}" and transient cleanup also failed: ` +
+                    cleanupErrors.map((cleanupError) => cleanupError.message).join('; '),
+                );
+            }
+            throw error;
         }
-        await this._validateUpdatedDictionaryState(dictionaryTitle, importToken, stagedDictionaryTitle, importResult.importedTitles);
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @returns {Promise<import('dictionary-importer').Summary|undefined>}
+     */
+    async _getDictionaryInfoForTask(dictionaryTitle) {
+        const dictionaryInfo = this._dictionaries ?? await this._settingsController.getDictionaryInfo();
+        const exactDictionaryInfo = dictionaryInfo.find((entry) => entry.title === dictionaryTitle);
+        if (typeof exactDictionaryInfo !== 'undefined') {
+            return exactDictionaryInfo;
+        }
+        const normalizedDictionaryTitle = dictionaryTitle.trim().toLocaleLowerCase();
+        const fuzzyMatches = dictionaryInfo.filter(({title}) => {
+            const normalizedTitle = title.trim().toLocaleLowerCase();
+            return (
+                normalizedTitle === normalizedDictionaryTitle ||
+                normalizedTitle.startsWith(normalizedDictionaryTitle) ||
+                normalizedTitle.includes(normalizedDictionaryTitle) ||
+                normalizedDictionaryTitle.startsWith(normalizedTitle)
+            );
+        });
+        if (fuzzyMatches.length === 1) {
+            reportDiagnostics('dictionary-task-title-fuzzy-match', {
+                requestedTitle: dictionaryTitle,
+                resolvedTitle: fuzzyMatches[0].title,
+            });
+            return fuzzyMatches[0];
+        }
+        if (fuzzyMatches.length > 1) {
+            reportDiagnostics('dictionary-task-title-fuzzy-match-ambiguous', {
+                requestedTitle: dictionaryTitle,
+                candidateTitles: fuzzyMatches.map(({title}) => title),
+            });
+        }
+        return void 0;
     }
 
     /**
@@ -1433,24 +1510,11 @@ export class DictionaryController {
      * @returns {Promise<void>}
      */
     async _validateUpdatedDictionaryState(dictionaryTitle, importToken, stagedDictionaryTitle, importedTitles) {
-        let dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
-        let transientTitles = dictionaryInfo
+        const cleanupErrors = await this._cleanupTransientUpdateTitles(importToken, stagedDictionaryTitle);
+        const dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
+        const transientTitles = dictionaryInfo
             .map((dictionary) => dictionary.title)
             .filter((title) => typeof title === 'string' && TRANSIENT_UPDATE_TITLE_PATTERN.test(title));
-        for (const transientTitle of transientTitles) {
-            try {
-                await this._deleteDictionaryInternal(transientTitle, () => {});
-                await this._deleteDictionarySettings(transientTitle);
-            } catch (error) {
-                log.error(error);
-            }
-        }
-        if (transientTitles.length > 0) {
-            dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
-            transientTitles = dictionaryInfo
-                .map((dictionary) => dictionary.title)
-                .filter((title) => typeof title === 'string' && TRANSIENT_UPDATE_TITLE_PATTERN.test(title));
-        }
         const updatedDictionary = dictionaryInfo.find((dictionary) => dictionary.title === dictionaryTitle);
         const importedDictionaryPresent = importedTitles.includes(dictionaryTitle);
         const updateTokenApplied = typeof updatedDictionary?.updateSessionToken === 'string' && updatedDictionary.updateSessionToken === importToken;
@@ -1462,14 +1526,55 @@ export class DictionaryController {
             importedDictionaryPresent,
             updateTokenApplied,
             transientTitles,
+            cleanupErrors: cleanupErrors.map((error) => error.message),
         });
-        if (!importedDictionaryPresent || typeof updatedDictionary === 'undefined' || !updateTokenApplied || transientTitles.length > 0) {
+        if (!importedDictionaryPresent || typeof updatedDictionary === 'undefined' || !updateTokenApplied || transientTitles.length > 0 || cleanupErrors.length > 0) {
             throw new Error(
                 `Dictionary update requires repair for "${dictionaryTitle}" ` +
                 `(imported=${String(importedDictionaryPresent)} tokenApplied=${String(updateTokenApplied)} ` +
-                `transientTitles=${JSON.stringify(transientTitles)})`,
+                `transientTitles=${JSON.stringify(transientTitles)} cleanupErrors=${JSON.stringify(cleanupErrors.map((error) => error.message))})`,
             );
         }
+    }
+
+    /**
+     * @param {string} importToken
+     * @param {string} stagedDictionaryTitle
+     * @returns {Promise<Error[]>}
+     */
+    async _cleanupTransientUpdateTitles(importToken, stagedDictionaryTitle) {
+        const dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
+        const transientTitles = dictionaryInfo
+            .map((dictionary) => dictionary.title)
+            .filter((title) => (
+                typeof title === 'string' &&
+                (
+                    title === stagedDictionaryTitle ||
+                    title.includes(`[update-staging ${importToken}]`) ||
+                    TRANSIENT_UPDATE_TITLE_PATTERN.test(title)
+                )
+            ));
+        /** @type {Error[]} */
+        const cleanupErrors = [];
+        for (const transientTitle of transientTitles) {
+            try {
+                await this._deleteDictionaryInternal(transientTitle, () => {});
+                await this._deleteDictionarySettings(transientTitle);
+            } catch (error) {
+                const normalizedError = error instanceof Error ? error : new Error(String(error));
+                cleanupErrors.push(normalizedError);
+                log.error(normalizedError);
+            }
+        }
+        if (transientTitles.length > 0 || cleanupErrors.length > 0) {
+            reportDiagnostics('dictionary-update-transient-cleanup', {
+                importToken,
+                stagedDictionaryTitle,
+                transientTitles,
+                cleanupErrors: cleanupErrors.map((error) => error.message),
+            });
+        }
+        return cleanupErrors;
     }
 
     /**
@@ -1490,12 +1595,8 @@ export class DictionaryController {
         onProgress({processed: 0, count: 1, storeCount: 1, storesProcesed: 0});
         await this._settingsController.application.api.deleteDictionaryByTitle(dictionaryTitle);
         onProgress({processed: 1, count: 1, storeCount: 1, storesProcesed: 1});
-        /** @type {import('core').DeferredPromiseDetails<void>} */
-        const {promise: dictionariesUpdatePromise, resolve} = deferPromise();
-        this._onDictionariesUpdate = resolve;
         await this._settingsController.application.api.triggerDatabaseUpdated('dictionary', 'delete');
-        await dictionariesUpdatePromise;
-        this._onDictionariesUpdate = null;
+        await this._onDatabaseUpdated();
     }
 
     /**
@@ -1540,6 +1641,33 @@ export class DictionaryController {
     /** */
     _triggerStorageChanged() {
         this._settingsController.application.triggerStorageChanged();
+    }
+
+    /**
+     * @param {Error[]} errors
+     */
+    _showErrors(errors) {
+        if (!Array.isArray(errors) || errors.length === 0) {
+            this._hideErrors();
+            return;
+        }
+        const fragment = document.createDocumentFragment();
+        for (const error of errors) {
+            const div = document.createElement('p');
+            div.textContent = error instanceof Error ? error.message : String(error);
+            fragment.appendChild(div);
+        }
+        const errorContainer = this._errorContainer;
+        errorContainer.textContent = '';
+        errorContainer.appendChild(fragment);
+        errorContainer.hidden = false;
+    }
+
+    /** */
+    _hideErrors() {
+        const errorContainer = this._errorContainer;
+        errorContainer.textContent = '';
+        errorContainer.hidden = true;
     }
 
     /** */

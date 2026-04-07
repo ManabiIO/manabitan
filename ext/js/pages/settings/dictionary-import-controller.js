@@ -857,7 +857,16 @@ export class DictionaryImportController {
                 this._showErrors([e]);
             } finally {
                 if (typeof onDownloadDone === 'function') {
-                    onDownloadDone(file);
+                    try {
+                        onDownloadDone(file);
+                    } catch (error) {
+                        const callbackError = toError(error);
+                        reportDiagnostics('dictionary-url-download-callback-failed', {
+                            message: callbackError.message,
+                            url: summarizeUrlForDiagnostics(url),
+                        });
+                        log.error(callbackError);
+                    }
                 }
             }
         })();
@@ -1399,11 +1408,21 @@ export class DictionaryImportController {
             }
             this._triggerStorageChanged();
             if (onImportDone) {
-                onImportDone({
-                    ok: errors.length === 0,
-                    errors,
-                    importedTitles: [...new Set(importedTitles)],
-                });
+                try {
+                    onImportDone({
+                        ok: errors.length === 0,
+                        errors,
+                        importedTitles: [...new Set(importedTitles)],
+                    });
+                } catch (error) {
+                    const callbackError = toError(error);
+                    reportDiagnostics('dictionary-import-done-callback-failed', {
+                        message: callbackError.message,
+                        importedTitles: [...new Set(importedTitles)],
+                        errorCount: errors.length,
+                    });
+                    log.error(callbackError);
+                }
             }
         }
     }
@@ -1838,9 +1857,11 @@ export class DictionaryImportController {
             const {profiles} = options;
 
             for (const profile of profiles) {
+                const profileDictionarySettings = profilesDictionarySettings[profile.id];
+                if (typeof profileDictionarySettings === 'undefined') { continue; }
                 for (const cardFormat of profile.options.anki.cardFormats) {
                     const ankiTermFields = cardFormat.fields;
-                    const oldFieldSegmentRegex = new RegExp(getKebabCase(profilesDictionarySettings[profile.id].name), 'g');
+                    const oldFieldSegmentRegex = new RegExp(getKebabCase(profileDictionarySettings.name), 'g');
                     const newFieldSegment = getKebabCase(result.title);
                     for (const key of Object.keys(ankiTermFields)) {
                         ankiTermFields[key].value = ankiTermFields[key].value.replace(oldFieldSegmentRegex, newFieldSegment);

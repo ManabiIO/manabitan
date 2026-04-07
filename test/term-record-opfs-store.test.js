@@ -185,11 +185,12 @@ describe('TermRecordOpfsStore', () => {
         expect(shardStateByFileName.has(newFileName)).toBe(false);
     });
 
-    test('replaceDictionaryName preserves existing target shard files when rename cannot start cleanly', async () => {
+    test('replaceDictionaryName preserves existing target shard files when live target records already exist', async () => {
         const store = new TermRecordOpfsStore();
         const recordsById = Reflect.get(store, '_recordsById');
         const shardStateByFileName = Reflect.get(store, '_shardStateByFileName');
         const activeAppendShardStateByKey = Reflect.get(store, '_activeAppendShardStateByKey');
+        const indexByDictionary = Reflect.get(store, '_indexByDictionary');
         const oldFileName = store._getShardSegmentFileName('JMdict staging', 'raw', 0);
         const oldLogicalKey = store._getShardFileName('JMdict staging', 'raw');
         const newFileName = store._getShardSegmentFileName('JMdict [2026-02-26]', 'raw', 0);
@@ -209,6 +210,7 @@ describe('TermRecordOpfsStore', () => {
         shardStateByFileName.set(newFileName, newShardState);
         activeAppendShardStateByKey.set(oldLogicalKey, oldShardState);
         activeAppendShardStateByKey.set(newLogicalKey, newShardState);
+        indexByDictionary.set('JMdict [2026-02-26]', new Set([2]));
         recordsById.set(1, {
             id: 1,
             dictionary: 'JMdict staging',
@@ -230,6 +232,52 @@ describe('TermRecordOpfsStore', () => {
         expect(Array.from(fileBytesByName.get(newFileName) ?? [])).toStrictEqual([5, 6, 7, 8]);
         expect(shardStateByFileName.has(oldFileName)).toBe(true);
         expect(shardStateByFileName.has(newFileName)).toBe(true);
+    });
+
+    test('replaceDictionaryName removes stale colliding target shard files when no live target records exist', async () => {
+        const store = new TermRecordOpfsStore();
+        const recordsById = Reflect.get(store, '_recordsById');
+        const shardStateByFileName = Reflect.get(store, '_shardStateByFileName');
+        const activeAppendShardStateByKey = Reflect.get(store, '_activeAppendShardStateByKey');
+        const oldFileName = store._getShardSegmentFileName('JMdict staging', 'raw', 0);
+        const oldLogicalKey = store._getShardFileName('JMdict staging', 'raw');
+        const newFileName = store._getShardSegmentFileName('JMdict [2026-02-26]', 'raw', 0);
+        const newLogicalKey = store._getShardFileName('JMdict [2026-02-26]', 'raw');
+        const fileBytesByName = new Map([
+            [oldFileName, new Uint8Array([1, 2, 3, 4])],
+            [newFileName, new Uint8Array([9, 9, 9, 9])],
+        ]);
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const oldFileHandle = await recordsDirectoryHandle.getFileHandle(oldFileName, {create: false});
+        const staleTargetHandle = await recordsDirectoryHandle.getFileHandle(newFileName, {create: false});
+        const oldShardState = store._createShardState(oldFileName, oldFileHandle, 4, 'raw', 0, oldLogicalKey);
+        const staleTargetState = store._createShardState(newFileName, staleTargetHandle, 4, 'raw', 0, newLogicalKey);
+
+        Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        shardStateByFileName.set(oldFileName, oldShardState);
+        shardStateByFileName.set(newFileName, staleTargetState);
+        activeAppendShardStateByKey.set(oldLogicalKey, oldShardState);
+        activeAppendShardStateByKey.set(newLogicalKey, staleTargetState);
+        recordsById.set(1, {
+            id: 1,
+            dictionary: 'JMdict staging',
+            expression: '暗記',
+            reading: 'あんき',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+
+        const renamedCount = await store.replaceDictionaryName('JMdict staging', 'JMdict [2026-02-26]');
+
+        expect(renamedCount).toBe(1);
+        expect(recordsById.get(1)?.dictionary).toBe('JMdict [2026-02-26]');
+        expect(Array.from(fileBytesByName.get(newFileName) ?? [])).toStrictEqual([1, 2, 3, 4]);
+        expect(fileBytesByName.has(oldFileName)).toBe(false);
     });
 
     test('cleanupShardFilesByDictionaryPredicate removes transient shard files and state', async () => {

@@ -1,8 +1,6 @@
 name: Create prerelease on tag
 on:
   push:
-    branches:
-      - main
     tags:
       - "*.*.*.*"
   workflow_dispatch:

@@ -926,7 +926,7 @@ export class DictionaryImporter {
                 !this._skipMediaImport &&
                 (hasArchiveImageMediaFiles || hasUsableArtifactMediaFiles)
             );
-            /** @type {Array<{path: string, mediaType: string, packedOffset?: number, packedLength?: number, compressionMethod?: number, uncompressedLength?: number, fileEntry?: import('@zip.js/zip.js').Entry}>} */
+            /** @type {Array<{path: string, mediaType: string, packedOffset?: number, packedLength?: number, compressionMethod?: number, uncompressedLength?: number, fileEntry?: import('dictionary-importer').ImportFileEntry}>} */
             const artifactArchiveImageFileEntries = (() => {
                 if (
                     !useMediaPipeline ||
@@ -1260,7 +1260,11 @@ export class DictionaryImporter {
                     /** @type {import('dictionary-importer').ImportRequirement[]} */
                     const notAddedRequirements = [];
                     for (const requirement of requirements) {
-                        const mediaPath = requirement.source.path;
+                        const mediaPath = (
+                            requirement.type === 'structured-content-media-link' ?
+                                requirement.source.href :
+                                requirement.source.path
+                        );
                         if (uniqueMediaPaths.has(mediaPath)) {
                             alreadyAddedRequirements.push(requirement);
                             continue;
@@ -1603,7 +1607,7 @@ export class DictionaryImporter {
                     updateStreamedTermFileProgress(streamedProgressStartIndex, 1, 1, true);
                 } else {
                     const tTermParseStart = Date.now();
-                    const termFileEntry = /** @type {import('@zip.js/zip.js').Entry} */ (termFile);
+                    const termFileEntry = /** @type {import('dictionary-importer').ImportFileEntry} */ (termFile);
                     const termReadResult = await this._readTermBankFile(
                         termFileEntry,
                         version,
@@ -1631,7 +1635,7 @@ export class DictionaryImporter {
 
             for (const termMetaFile of termMetaFiles) {
                 const tTermMetaFile = Date.now();
-                let termMetaList = await this._readFileSequence([termMetaFile], this._convertTermMetaBankEntry.bind(this), dictionaryTitle);
+                let termMetaList = /** @type {import('dictionary-database').DatabaseTermMeta[]} */ (await this._readFileSequence([termMetaFile], this._convertTermMetaBankEntry.bind(this), dictionaryTitle));
                 step4TimingBreakdown.termMetaReadMs += Math.max(0, Date.now() - tTermMetaFile);
 
                 const tMetaWriteStart = Date.now();
@@ -1653,11 +1657,11 @@ export class DictionaryImporter {
 
             for (const kanjiFile of kanjiFiles) {
                 const tKanjiFile = Date.now();
-                let kanjiList = await (
+                let kanjiList = /** @type {import('dictionary-database').DatabaseKanjiEntry[]} */ (await (
                     version === 1 ?
                         this._readFileSequence([kanjiFile], this._convertKanjiBankEntryV1.bind(this), dictionaryTitle) :
                         this._readFileSequence([kanjiFile], this._convertKanjiBankEntryV3.bind(this), dictionaryTitle)
-                );
+                ));
                 step4TimingBreakdown.kanjiReadMs += Math.max(0, Date.now() - tKanjiFile);
 
                 const tKanjiWriteStart = Date.now();
@@ -1673,7 +1677,7 @@ export class DictionaryImporter {
 
             for (const kanjiMetaFile of kanjiMetaFiles) {
                 const tKanjiMetaFile = Date.now();
-                let kanjiMetaList = await this._readFileSequence([kanjiMetaFile], this._convertKanjiMetaBankEntry.bind(this), dictionaryTitle);
+                let kanjiMetaList = /** @type {import('dictionary-database').DatabaseKanjiMetaFrequency[]} */ (await this._readFileSequence([kanjiMetaFile], this._convertKanjiMetaBankEntry.bind(this), dictionaryTitle));
                 step4TimingBreakdown.kanjiMetaReadMs += Math.max(0, Date.now() - tKanjiMetaFile);
 
                 const tKanjiMetaWriteStart = Date.now();
@@ -1695,7 +1699,7 @@ export class DictionaryImporter {
 
             for (const tagFile of tagFiles) {
                 const tTagFile = Date.now();
-                let tagList = await this._readFileSequence([tagFile], this._convertTagBankEntry.bind(this), dictionaryTitle);
+                let tagList = /** @type {import('dictionary-database').Tag[]} */ (await this._readFileSequence([tagFile], this._convertTagBankEntry.bind(this), dictionaryTitle));
                 this._addOldIndexTags(index, tagList, dictionaryTitle);
                 step4TimingBreakdown.tagReadMs += Math.max(0, Date.now() - tTagFile);
 
@@ -2245,7 +2249,11 @@ export class DictionaryImporter {
      * @returns {boolean}
      */
     _tryResolveRequirementFromCachedImageMetadata(requirement) {
-        const sourcePath = requirement.source.path;
+        const sourcePath = (
+            requirement.type === 'structured-content-media-link' ?
+                requirement.source.href :
+                requirement.source.path
+        );
         const cachedMetadata = this._imageMetadataByPath.get(sourcePath);
         if (typeof cachedMetadata === 'undefined') {
             return false;
@@ -2747,7 +2755,7 @@ export class DictionaryImporter {
         let manifest;
         try {
             manifest = /** @type {{termBanks?: Array<{artifact?: unknown, packedOffset?: unknown, packedLength?: unknown, rows?: unknown}>, packedTermArtifact?: {file?: unknown}|null, mediaArtifact?: {file?: unknown, entries?: Array<{path?: unknown, packedOffset?: unknown, packedLength?: unknown, mediaType?: unknown, compressionMethod?: unknown, uncompressedLength?: unknown}>|null}|null, sharedGlossaryArtifact?: {file?: unknown, packedOffset?: unknown, packedLength?: unknown, compression?: unknown, uncompressedBytes?: unknown}|null, termContentMode?: unknown, prunedAuxFiles?: unknown, includesMediaFiles?: unknown}|null} */ (
-                parseJson(await this._getData(/** @type {import('@zip.js/zip.js').Entry} */ (manifestEntry), new TextWriter()))
+                parseJson(await this._getData(manifestEntry, new TextWriter()))
             );
         } catch (_) {
             return null;
@@ -2857,7 +2865,7 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {import('@zip.js/zip.js').Entry[]} termArtifactFiles
+     * @param {import('dictionary-importer').ImportFileEntry[]} termArtifactFiles
      * @returns {Promise<Map<string, Uint8Array>>}
      */
     async _preloadTermArtifactFiles(termArtifactFiles) {
@@ -2881,7 +2889,7 @@ export class DictionaryImporter {
      * @param {Uint8Array|null} sharedGlossaryArtifactBytes
      * @param {{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>}|null} termArtifactManifest
      * @param {Map<string, Uint8Array>|null} preloadedTermArtifactBytes
-     * @param {import('@zip.js/zip.js').Entry[]} termArtifactFiles
+     * @param {import('dictionary-importer').ImportFileEntry[]} termArtifactFiles
      * @returns {number|null}
      */
     _estimateExpectedTermContentImportBytes(
@@ -2904,8 +2912,9 @@ export class DictionaryImporter {
             }
         } else {
             for (const termArtifactFile of termArtifactFiles) {
-                const size = typeof termArtifactFile.uncompressedSize === 'number' && Number.isFinite(termArtifactFile.uncompressedSize) ?
-                    Math.max(0, Math.trunc(termArtifactFile.uncompressedSize)) :
+                const uncompressedSize = /** @type {unknown} */ (Reflect.get(/** @type {Record<string, unknown>} */ (/** @type {unknown} */ (termArtifactFile)), 'uncompressedSize'));
+                const size = typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) ?
+                    Math.max(0, Math.trunc(uncompressedSize)) :
                     0;
                 total += size;
             }
@@ -2938,7 +2947,7 @@ export class DictionaryImporter {
     /**
      * @template [TEntry=unknown]
      * @template [TResult=unknown]
-     * @param {import('@zip.js/zip.js').Entry[]} files
+     * @param {import('dictionary-importer').ImportFileEntry[]} files
      * @param {(entry: TEntry, dictionaryTitle: string) => TResult} convertEntry
      * @param {string} dictionaryTitle
      * @returns {Promise<TResult[]>}
@@ -2968,7 +2977,7 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {import('@zip.js/zip.js').Entry} termFile
+     * @param {import('dictionary-importer').ImportFileEntry} termFile
      * @param {import('dictionary-data').IndexVersion} version
      * @param {string} dictionaryTitle
      * @param {boolean} prefixWildcardsSupported
@@ -3047,7 +3056,7 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {import('@zip.js/zip.js').Entry} termFile
+     * @param {import('dictionary-importer').ImportFileEntry} termFile
      * @param {import('dictionary-data').IndexVersion} version
      * @param {string} dictionaryTitle
      * @param {boolean} prefixWildcardsSupported
@@ -3296,7 +3305,7 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {import('@zip.js/zip.js').Entry} termFile
+     * @param {import('dictionary-importer').ImportFileEntry} termFile
      * @param {string} dictionaryTitle
      * @param {boolean} prefixWildcardsSupported
      * @param {'baseline'|'raw-bytes'} termContentStorageMode
@@ -3985,15 +3994,30 @@ export class DictionaryImporter {
 
     /**
      * @template [T=unknown]
-     * @param {import('@zip.js/zip.js').Entry} entry
+     * @param {import('dictionary-importer').ImportFileEntry} entry
      * @param {import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter} writer
      * @returns {Promise<T>}
      */
     async _getData(entry, writer) {
-        if (typeof entry.getData === 'undefined') {
-            throw new Error(`Cannot read ${entry.filename}`);
+        const getData = /** @type {unknown} */ (Reflect.get(/** @type {Record<string, unknown>} */ (/** @type {unknown} */ (entry)), 'getData'));
+        if (typeof getData === 'function') {
+            return await /** @type {(writer: import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter) => Promise<T>} */ (getData).call(entry, writer);
         }
-        return await entry.getData(writer);
+        const bytes = /** @type {unknown} */ (Reflect.get(/** @type {Record<string, unknown>} */ (/** @type {unknown} */ (entry)), 'bytes'));
+        const filename = String(Reflect.get(/** @type {Record<string, unknown>} */ (/** @type {unknown} */ (entry)), 'filename') ?? 'unknown-file');
+        if (!(bytes instanceof Uint8Array)) {
+            throw new Error(`Cannot read ${filename}`);
+        }
+        if (writer instanceof TextWriter) {
+            return /** @type {T} */ (new TextDecoder().decode(bytes));
+        }
+        if (writer instanceof Uint8ArrayWriter) {
+            return /** @type {T} */ (bytes.slice());
+        }
+        if (writer instanceof BlobWriter) {
+            return /** @type {T} */ (new Blob([bytes]));
+        }
+        throw new Error(`Unsupported writer for ${filename}`);
     }
 
 }
