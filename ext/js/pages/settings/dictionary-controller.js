@@ -17,6 +17,7 @@
  */
 
 import * as ajvSchemas0 from '../../../lib/validate-schemas.js';
+import {reportDiagnostics} from '../../core/diagnostics-reporter.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
@@ -25,6 +26,7 @@ import {compareRevisions} from '../../dictionary/dictionary-data-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 const ajvSchemas = /** @type {import('dictionary-importer').CompiledSchemaValidators} */ (/** @type {unknown} */ (ajvSchemas0));
+const TRANSIENT_UPDATE_TITLE_PATTERN = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
 
 class DictionaryEntry {
     /**
@@ -1397,7 +1399,7 @@ export class DictionaryController {
             throw new Error(`Failed to download replacement dictionary for ${dictionaryTitle}`);
         }
 
-        /** @type {import('core').DeferredPromiseDetails<void>} */
+        /** @type {import('core').DeferredPromiseDetails<import('settings-controller').ImportDictionaryDoneResult>} */
         const {promise: importPromise, resolve} = deferPromise();
         const importToken = Math.random().toString(36).slice(2, 10);
         const stagedDictionaryTitle = `${dictionaryTitle} [update-staging ${importToken}]`;
@@ -1413,7 +1415,61 @@ export class DictionaryController {
             },
             onImportDone: resolve,
         });
-        await importPromise;
+        const importResult = await importPromise;
+        if (!importResult.ok) {
+            throw new Error(
+                `Replacement dictionary import failed for ${dictionaryTitle}: ` +
+                importResult.errors.map((error) => error.message).join('; '),
+            );
+        }
+        await this._validateUpdatedDictionaryState(dictionaryTitle, importToken, stagedDictionaryTitle, importResult.importedTitles);
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {string} importToken
+     * @param {string} stagedDictionaryTitle
+     * @param {string[]} importedTitles
+     * @returns {Promise<void>}
+     */
+    async _validateUpdatedDictionaryState(dictionaryTitle, importToken, stagedDictionaryTitle, importedTitles) {
+        let dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
+        let transientTitles = dictionaryInfo
+            .map((dictionary) => dictionary.title)
+            .filter((title) => typeof title === 'string' && TRANSIENT_UPDATE_TITLE_PATTERN.test(title));
+        for (const transientTitle of transientTitles) {
+            try {
+                await this._deleteDictionaryInternal(transientTitle, () => {});
+                await this._deleteDictionarySettings(transientTitle);
+            } catch (error) {
+                log.error(error);
+            }
+        }
+        if (transientTitles.length > 0) {
+            dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
+            transientTitles = dictionaryInfo
+                .map((dictionary) => dictionary.title)
+                .filter((title) => typeof title === 'string' && TRANSIENT_UPDATE_TITLE_PATTERN.test(title));
+        }
+        const updatedDictionary = dictionaryInfo.find((dictionary) => dictionary.title === dictionaryTitle);
+        const importedDictionaryPresent = importedTitles.includes(dictionaryTitle);
+        const updateTokenApplied = typeof updatedDictionary?.updateSessionToken === 'string' && updatedDictionary.updateSessionToken === importToken;
+        reportDiagnostics('dictionary-update-state-validated', {
+            dictionaryTitle,
+            importToken,
+            stagedDictionaryTitle,
+            importedTitles,
+            importedDictionaryPresent,
+            updateTokenApplied,
+            transientTitles,
+        });
+        if (!importedDictionaryPresent || typeof updatedDictionary === 'undefined' || !updateTokenApplied || transientTitles.length > 0) {
+            throw new Error(
+                `Dictionary update requires repair for "${dictionaryTitle}" ` +
+                `(imported=${String(importedDictionaryPresent)} tokenApplied=${String(updateTokenApplied)} ` +
+                `transientTitles=${JSON.stringify(transientTitles)})`,
+            );
+        }
     }
 
     /**

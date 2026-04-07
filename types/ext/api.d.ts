@@ -311,6 +311,23 @@ type ApiSurface = {
         };
         return: DictionaryDatabase.DictionaryCounts;
     };
+    verifyDictionaryVisibility: {
+        params: {
+            dictionaryTitle: string;
+            requireEnabledForActiveProfile: boolean;
+        };
+        return: {
+            ok: boolean;
+            dictionaryTitle: string;
+            installed: boolean;
+            enabled: boolean;
+            counts: DictionaryDatabase.DictionaryCountGroup | null;
+            probe: DictionaryDatabase.DictionaryTermProbe | null;
+            directMatch: boolean;
+            translatorMatch: boolean;
+            reason: string | null;
+        };
+    };
     debugDictionaryLookupState: {
         params: {
             text: string;

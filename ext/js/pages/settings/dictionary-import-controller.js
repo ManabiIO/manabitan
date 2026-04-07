@@ -240,62 +240,6 @@ function getOpfsUnavailableUserMessage(message) {
 }
 
 /**
- * @param {string} message
- * @returns {'unsupported-opfs'|'lock-contention'|'corruption'|'transient-open-race'|'readonly-race'|'unknown'}
- */
-function classifyImportOpenFailure(message) {
-    const text = message.toLowerCase();
-    if (
-        text.includes('no such vfs') ||
-        text.includes('opfs is required') ||
-        text.includes('createSyncAccessHandle'.toLowerCase()) ||
-        text.includes('dedicatedworkerglobalscope') ||
-        text.includes('opfs-sahpool')
-    ) {
-        return 'unsupported-opfs';
-    }
-    if (
-        text.includes('sqlite_busy') ||
-        text.includes('database is locked') ||
-        text.includes('database table is locked') ||
-        text.includes('locked')
-    ) {
-        return 'lock-contention';
-    }
-    if (
-        text.includes('sqlite_corrupt') ||
-        text.includes('database disk image is malformed') ||
-        text.includes('file is not a database')
-    ) {
-        return 'corruption';
-    }
-    if (
-        text.includes('sqlite_cantopen') ||
-        text.includes('unable to open database file')
-    ) {
-        return 'transient-open-race';
-    }
-    if (
-        text.includes('sqlite_readonly') ||
-        text.includes('readonly database') ||
-        text.includes('attempt to write a readonly database')
-    ) {
-        return 'readonly-race';
-    }
-    return 'unknown';
-}
-
-/**
- * @param {number} attempt
- * @returns {number}
- */
-function getImportRetryDelayMs(attempt) {
-    const base = Math.min(1200, 100 * (2 ** (attempt - 1)));
-    const jitter = Math.floor(Math.random() * 50);
-    return base + jitter;
-}
-
-/**
  * @returns {{name: string, version: string, id: string}|null}
  */
 function getExtensionBuildStamp() {
@@ -660,7 +604,6 @@ export class DictionaryImportController {
         try {
             const response = await fetch(url, {
                 method: 'GET',
-                mode: 'no-cors',
                 cache: 'default',
                 credentials: 'omit',
                 redirect: 'follow',
@@ -672,15 +615,14 @@ export class DictionaryImportController {
             recommendedDictionaries = (await readResponseJson(response));
             diagnostics.push('fetch=ok');
         } catch (error) {
-            log.warn(`Using fallback recommended dictionaries due to fetch/parse error: ${toError(error).message}`);
-            diagnostics.push(`fetch=failed:${toError(error).message}`);
+            const message = toError(error).message;
+            diagnostics.push(`fetch=failed:${message}`);
+            throw new Error(`Failed to load recommended dictionaries feed: ${message}`);
         }
         if (!(recommendedDictionaries && typeof recommendedDictionaries === 'object' && !Array.isArray(recommendedDictionaries))) {
-            recommendedDictionaries = this._getFallbackRecommendedDictionaries();
-            diagnostics.push('feed=fallback');
-        } else {
-            diagnostics.push('feed=extension-data');
+            throw new Error('Recommended dictionaries feed returned invalid data.');
         }
+        diagnostics.push('feed=extension-data');
 
         /** @type {import('dictionary-recommended.js').RecommendedDictionaryElementMap[]} */
         const recommendedDictionaryCategories = [
@@ -700,9 +642,6 @@ export class DictionaryImportController {
                 languageCandidates.push(baseLanguage);
             }
         }
-        if (!languageCandidates.includes('ja')) {
-            languageCandidates.push('ja');
-        }
         const categories = ['terms', 'kanji', 'frequency', 'grammar', 'pronunciation'];
         let resolvedLanguage = languageCandidates.find((candidate) => candidate in recommendedDictionaries);
         if (typeof resolvedLanguage === 'string') {
@@ -711,8 +650,8 @@ export class DictionaryImportController {
                 const values = Reflect.get(languageConfig, category);
                 return Array.isArray(values) && values.length > 0;
             });
-            if (!hasAnyRecommendedEntries && resolvedLanguage !== 'ja' && ('ja' in recommendedDictionaries)) {
-                resolvedLanguage = 'ja';
+            if (!hasAnyRecommendedEntries) {
+                resolvedLanguage = undefined;
             }
         }
 
@@ -773,18 +712,7 @@ export class DictionaryImportController {
             this._renderRecommendedDictionaryGroup(dictionariesForCategory, element, installedDictionaryNames, installedDictionaryDownloadUrls);
         }
 
-        if (renderedRecommendationCount === 0 && resolvedLanguage !== 'ja' && ('ja' in recommendedDictionaries)) {
-            log.warn(`[recommended-dictionaries] zero entries for "${resolvedLanguage}", falling back to "ja"`);
-            for (const {property, element} of recommendedDictionaryCategories) {
-                const jaConfig = /** @type {Record<string, unknown>} */ (recommendedDictionaries.ja);
-                const values = Reflect.get(jaConfig, property);
-                const dictionariesForCategory = /** @type {import('dictionary-recommended.js').RecommendedDictionary[]} */ (Array.isArray(values) ? values : []);
-                this._renderRecommendedDictionaryGroup(dictionariesForCategory, element, installedDictionaryNames, installedDictionaryDownloadUrls);
-            }
-            diagnostics.push('renderedFrom=ja-fallback');
-        } else {
-            diagnostics.push(`renderedFrom=${resolvedLanguage}`);
-        }
+        diagnostics.push(`renderedFrom=${resolvedLanguage}`);
         log.log(`[recommended-dictionaries] resolvedLanguage="${resolvedLanguage}" renderedCount=${String(renderedRecommendationCount)}`);
         diagnostics.push(
             `requestedLanguage="${language}" resolvedLanguage="${resolvedLanguage}"`,
@@ -836,34 +764,6 @@ export class DictionaryImportController {
         if (!(container instanceof HTMLElement)) { return; }
         container.textContent = '';
         container.hidden = true;
-    }
-
-    /**
-     * @returns {import('dictionary-recommended.js').RecommendedDictionaries}
-     */
-    _getFallbackRecommendedDictionaries() {
-        return {
-            ja: {
-                terms: [
-                    {
-                        name: 'Jitendex',
-                        description: 'Japanese-to-English dictionary with example sentences and usage notes.',
-                        homepage: 'https://jitendex.org',
-                        downloadUrl: 'https://github.com/stephenmk/stephenmk.github.io/releases/latest/download/jitendex-yomitan.zip',
-                    },
-                    {
-                        name: 'JMdict',
-                        description: 'Large Japanese multilingual dictionary from the Electronic Dictionary Research and Development Group.',
-                        homepage: 'https://www.edrdg.org/jmdict/j_jmdict.html',
-                        downloadUrl: 'https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMdict_english.zip',
-                    },
-                ],
-                kanji: [],
-                frequency: [],
-                grammar: [],
-                pronunciation: [],
-            },
-        };
     }
 
     /**
@@ -1376,6 +1276,8 @@ export class DictionaryImportController {
 
         /** @type {Error[]} */
         let errors = [];
+        /** @type {string[]} */
+        let importedTitles = [];
         const useImportSession = this._getUseImportSession();
         log.log(`[ImportTiming] import session reuse enabled=${String(useImportSession)} (globalOverride=${String(this._getUseImportSession())})`);
         reportDiagnostics('dictionary-import-session-begin', {
@@ -1440,17 +1342,18 @@ export class DictionaryImportController {
                     });
                     continue;
                 }
-                errors = [
-                    ...errors,
-                    ...(await this._importDictionaryFromZip(
-                        file,
-                        profilesDictionarySettings,
-                        importDetails,
-                        useImportSession,
-                        finalizeImportSession,
-                        onProgress,
-                    ) ?? []),
-                ];
+                const importItemResult = await this._importDictionaryFromZip(
+                    file,
+                    profilesDictionarySettings,
+                    importDetails,
+                    useImportSession,
+                    finalizeImportSession,
+                    onProgress,
+                );
+                errors = [...errors, ...importItemResult.errors];
+                if (typeof importItemResult.importedTitle === 'string' && importItemResult.importedTitle.length > 0) {
+                    importedTitles.push(importItemResult.importedTitle);
+                }
                 const dictionaryLoopEndTime = safePerformance.now();
                 log.log(`[ImportTiming] dictionary ${i + 1}/${importProgressTracker.dictionaryCount} total ${formatDurationMs(dictionaryLoopEndTime - dictionaryLoopStartTime)}`);
                 reportDiagnostics('dictionary-import-item-complete', {
@@ -1487,11 +1390,21 @@ export class DictionaryImportController {
                 try {
                     await this._settingsController.application.api.setDictionaryImportMode(false);
                 } catch (error) {
-                    log.error(error);
+                    const importModeExitError = toError(error);
+                    errors.push(importModeExitError);
+                    reportDiagnostics('dictionary-import-session-import-mode-exit-failed', {
+                        message: importModeExitError.message,
+                    });
                 }
             }
             this._triggerStorageChanged();
-            if (onImportDone) { onImportDone(); }
+            if (onImportDone) {
+                onImportDone({
+                    ok: errors.length === 0,
+                    errors,
+                    importedTitles: [...new Set(importedTitles)],
+                });
+            }
         }
     }
 
@@ -1566,33 +1479,37 @@ export class DictionaryImportController {
             throw new Error('Cannot verify imported dictionary visibility without a title');
         }
         const activeProfileIndex = this._settingsController.profileIndex;
-        let lastInstalled = false;
-        let lastEnabled = !requireEnabledForActiveProfile;
-        /** @type {import('dictionary-database').DictionaryCountGroup|null} */
-        let lastCountGroup = null;
+        /** @type {import('api').ApiReturn<'verifyDictionaryVisibility'>|null} */
+        let lastVerification = null;
         for (let attempt = 0; attempt < 5; ++attempt) {
-            const [dictionaryInfo, dictionaryCounts, optionsFull] = await Promise.all([
-                this._settingsController.application.api.getDictionaryInfo(),
-                this._settingsController.application.api.getDictionaryCounts([normalizedTitle], false),
+            const [verification, optionsFull] = await Promise.all([
+                this._settingsController.application.api.verifyDictionaryVisibility(
+                    normalizedTitle,
+                    requireEnabledForActiveProfile,
+                ),
                 this._settingsController.getOptionsFull(),
             ]);
-            lastInstalled = dictionaryInfo.some((dictionary) => dictionary.title === normalizedTitle);
+            lastVerification = verification;
             const activeProfile = Array.isArray(optionsFull.profiles) ? optionsFull.profiles[activeProfileIndex] : void 0;
             const activeProfileDictionaries = Array.isArray(activeProfile?.options?.dictionaries) ? activeProfile.options.dictionaries : [];
-            lastEnabled = !requireEnabledForActiveProfile || activeProfileDictionaries.some((dictionary) => (
+            const activeProfileEnabled = !requireEnabledForActiveProfile || activeProfileDictionaries.some((dictionary) => (
                 dictionary.name === normalizedTitle &&
                 dictionary.enabled === true
             ));
-            lastCountGroup = Array.isArray(dictionaryCounts.counts) && dictionaryCounts.counts.length > 0 ?
-                dictionaryCounts.counts[0] :
-                null;
-            const hasCountEntry = lastCountGroup !== null;
-            if (lastInstalled && lastEnabled && hasCountEntry) {
+            if (verification.ok) {
+                this._emitImportedDictionaryProfileEnablementDiagnostics(normalizedTitle, optionsFull.profiles, activeProfileIndex);
+                if (!activeProfileEnabled) {
+                    reportDiagnostics('dictionary-import-active-profile-disabled', {
+                        dictionaryTitle: normalizedTitle,
+                        activeProfileIndex,
+                    });
+                }
                 reportDiagnostics('dictionary-import-visibility-verified', {
                     dictionaryTitle: normalizedTitle,
                     attempt: attempt + 1,
                     requireEnabledForActiveProfile,
-                    countGroup: lastCountGroup,
+                    verification,
+                    activeProfileEnabled,
                 });
                 return;
             }
@@ -1600,10 +1517,43 @@ export class DictionaryImportController {
                 await promiseTimeout(250 * (attempt + 1));
             }
         }
+        const lastInstalled = lastVerification?.installed ?? false;
+        const lastEnabled = lastVerification?.enabled ?? false;
+        const lastCountGroup = lastVerification?.counts ?? null;
         throw new Error(
             `Imported dictionary visibility verification failed for "${normalizedTitle}" ` +
-            `(installed=${String(lastInstalled)} enabled=${String(lastEnabled)} counts=${JSON.stringify(lastCountGroup)})`,
+            `(installed=${String(lastInstalled)} enabled=${String(lastEnabled)} counts=${JSON.stringify(lastCountGroup)} ` +
+            `probe=${JSON.stringify(lastVerification?.probe ?? null)} directMatch=${String(lastVerification?.directMatch ?? false)} ` +
+            `translatorMatch=${String(lastVerification?.translatorMatch ?? false)} reason=${String(lastVerification?.reason ?? null)})`,
         );
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {Array<{id: string, options: {dictionaries: Array<{name: string, enabled: boolean}>}}>} profiles
+     * @param {number} activeProfileIndex
+     * @returns {void}
+     */
+    _emitImportedDictionaryProfileEnablementDiagnostics(dictionaryTitle, profiles, activeProfileIndex) {
+        /** @type {string[]} */
+        const enabledProfileIds = [];
+        /** @type {string[]} */
+        const disabledProfileIds = [];
+        for (const profile of profiles) {
+            const dictionaries = Array.isArray(profile?.options?.dictionaries) ? profile.options.dictionaries : [];
+            const dictionarySetting = dictionaries.find((dictionary) => dictionary.name === dictionaryTitle);
+            if (dictionarySetting?.enabled === true) {
+                enabledProfileIds.push(profile.id);
+            } else {
+                disabledProfileIds.push(profile.id);
+            }
+        }
+        reportDiagnostics('dictionary-import-profile-enablement', {
+            dictionaryTitle,
+            activeProfileIndex,
+            enabledProfileIds,
+            disabledProfileIds,
+        });
     }
 
     /**
@@ -1647,7 +1597,7 @@ export class DictionaryImportController {
      * @param {boolean} useImportSession
      * @param {boolean} finalizeImportSession
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
-     * @returns {Promise<Error[] | undefined>}
+     * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
     async _importDictionaryFromZip(file, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, onProgress) {
         const dictionaryTitle = file.name || 'unknown-dictionary';
@@ -1685,77 +1635,13 @@ export class DictionaryImportController {
         const workerImportStartTime = safePerformance.now();
         /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */
         let importResult;
-        const maxImportAttempts = 6;
-        const cleanupStagedDictionaryBeforeRetry = async () => {
-            const stagedDictionaryTitle = (
-                typeof importDetails.dictionaryTitleOverride === 'string' &&
-                importDetails.dictionaryTitleOverride.trim().length > 0
-            ) ?
-                importDetails.dictionaryTitleOverride.trim() :
-                null;
-            if (stagedDictionaryTitle === null) { return; }
-            try {
-                await this._settingsController.application.api.deleteDictionaryByTitle(stagedDictionaryTitle);
-            } catch (_) {
-                // NOP - best effort cleanup before retry.
-            }
+        const detailsAttempt = {
+            ...importDetails,
+            ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
         };
-        for (let attempt = 1; ; ++attempt) {
-            try {
-                const useImportSessionAttempt = (
-                    typeof importDetails.useImportSession === 'boolean' ?
-                        importDetails.useImportSession :
-                        useImportSession
-                );
-                const finalizeImportSessionAttempt = (
-                    typeof importDetails.finalizeImportSession === 'boolean' ?
-                        importDetails.finalizeImportSession :
-                        finalizeImportSession
-                );
-                const detailsAttempt = {
-                    ...importDetails,
-                    ...(useImportSessionAttempt ? {useImportSession: true, finalizeImportSession: finalizeImportSessionAttempt} : {}),
-                };
-                const archiveContentAttempt = (attempt === 1 ? archiveContent : file);
-                importResult = /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
-                    await this._tryImportDictionaryOffscreen(archiveContentAttempt, detailsAttempt, onProgress)
-                );
-            } catch (error) {
-                const message = (error instanceof Error) ? error.message : String(error);
-                const failureClass = classifyImportOpenFailure(message);
-                const isRetryableThrown = (
-                    failureClass === 'lock-contention' ||
-                    failureClass === 'transient-open-race' ||
-                    failureClass === 'readonly-race'
-                );
-                if (!isRetryableThrown || attempt >= maxImportAttempts) {
-                    throw error;
-                }
-                log.log(`[ImportTiming] [${dictionaryTitle}] retrying import after transient open failure (${failureClass}) attempt ${attempt}`);
-                await cleanupStagedDictionaryBeforeRetry();
-                await new Promise((resolve) => {
-                    setTimeout(resolve, getImportRetryDelayMs(attempt));
-                });
-                continue;
-            }
-            const retryableImportError = Array.isArray(importResult.errors) && importResult.errors.some((error) => {
-                const message = (error instanceof Error) ? error.message : String(error);
-                const failureClass = classifyImportOpenFailure(message);
-                return (
-                    failureClass === 'lock-contention' ||
-                    failureClass === 'transient-open-race' ||
-                    failureClass === 'readonly-race'
-                );
-            });
-            if (!retryableImportError || attempt >= maxImportAttempts) {
-                break;
-            }
-            log.log(`[ImportTiming] [${dictionaryTitle}] retrying import after transient open failure in importer result (attempt ${attempt})`);
-            await cleanupStagedDictionaryBeforeRetry();
-            await new Promise((resolve) => {
-                setTimeout(resolve, getImportRetryDelayMs(attempt));
-            });
-        }
+        importResult = /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
+            await this._tryImportDictionaryOffscreen(archiveContent, detailsAttempt, onProgress)
+        );
         const workerImportEndTime = safePerformance.now();
         log.log(`[ImportTiming] [${dictionaryTitle}] worker importDictionary ${formatDurationMs(workerImportEndTime - workerImportStartTime)}`);
         recordLocalPhase('worker-import-dictionary', workerImportStartTime, workerImportEndTime, {
@@ -1800,7 +1686,7 @@ export class DictionaryImportController {
                 importerPhaseTimings,
                 localPhaseTimings,
             });
-            return errors;
+            return {errors, importedTitle: null};
         }
 
         if (debug?.usesFallbackStorage === true) {
@@ -1824,7 +1710,7 @@ export class DictionaryImportController {
                 importerPhaseTimings,
                 localPhaseTimings,
             });
-            return errorsWithOpfsRequirement;
+            return {errors: errorsWithOpfsRequirement, importedTitle: null};
         }
 
         const replacementDictionaryTitle = (
@@ -1986,6 +1872,10 @@ export class DictionaryImportController {
         } else if (errors2.length > 0) {
             this._showErrors(errors2);
         }
+        return {
+            errors: [...errors, ...errors2],
+            importedTitle: errors.length === 0 && errors2.length === 0 ? (result.title || sourceDictionaryTitle || dictionaryTitle) : null,
+        };
     }
 
     /**

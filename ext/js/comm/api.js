@@ -280,6 +280,15 @@ export class API {
     }
 
     /**
+     * @param {import('api').ApiParam<'verifyDictionaryVisibility', 'dictionaryTitle'>} dictionaryTitle
+     * @param {import('api').ApiParam<'verifyDictionaryVisibility', 'requireEnabledForActiveProfile'>} requireEnabledForActiveProfile
+     * @returns {Promise<import('api').ApiReturn<'verifyDictionaryVisibility'>>}
+     */
+    verifyDictionaryVisibility(dictionaryTitle, requireEnabledForActiveProfile) {
+        return this._invoke('verifyDictionaryVisibility', {dictionaryTitle, requireEnabledForActiveProfile});
+    }
+
+    /**
      * @param {import('api').ApiParam<'setDictionaryImportMode', 'active'>} active
      * @returns {Promise<import('api').ApiReturn<'setDictionaryImportMode'>>}
      */

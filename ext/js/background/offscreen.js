@@ -56,6 +56,8 @@ export class Offscreen {
             ['deleteDictionaryOffscreen',      this._deleteDictionaryHandler.bind(this)],
             ['replaceDictionaryTitleOffscreen', this._replaceDictionaryTitleHandler.bind(this)],
             ['getDictionaryCountsOffscreen',   this._getDictionaryCountsHandler.bind(this)],
+            ['getDictionaryTermProbeOffscreen', this._getDictionaryTermProbeHandler.bind(this)],
+            ['findTermsBulkOffscreen',         this._findTermsBulkHandler.bind(this)],
             ['debugDictionaryStorageStateOffscreen', this._debugDictionaryStorageStateHandler.bind(this)],
             ['debugDictionaryLookupStateOffscreen', this._debugDictionaryLookupStateHandler.bind(this)],
             ['databasePurgeOffscreen',         this._purgeDatabaseHandler.bind(this)],
@@ -254,6 +256,16 @@ export class Offscreen {
     /** @type {import('offscreen').ApiHandler<'getDictionaryCountsOffscreen'>} */
     async _getDictionaryCountsHandler({dictionaryNames, getTotal}) {
         return await this._invokeDictionaryWorker('getDictionaryCountsOffscreen', {dictionaryNames, getTotal});
+    }
+
+    /** @type {import('offscreen').ApiHandler<'getDictionaryTermProbeOffscreen'>} */
+    async _getDictionaryTermProbeHandler({dictionaryTitle}) {
+        return await this._invokeDictionaryWorker('getDictionaryTermProbeOffscreen', {dictionaryTitle});
+    }
+
+    /** @type {import('offscreen').ApiHandler<'findTermsBulkOffscreen'>} */
+    async _findTermsBulkHandler({termList, dictionaryNames, matchType}) {
+        return await this._invokeDictionaryWorker('findTermsBulkOffscreen', {termList, dictionaryNames, matchType});
     }
 
     async _debugDictionaryStorageStateHandler() {

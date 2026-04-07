@@ -196,6 +196,7 @@ export class Backend {
             ['deleteDictionaryByTitle',      this._onApiDeleteDictionaryByTitle.bind(this)],
             ['replaceDictionaryTitle',       this._onApiReplaceDictionaryTitle.bind(this)],
             ['getDictionaryCounts',          this._onApiGetDictionaryCounts.bind(this)],
+            ['verifyDictionaryVisibility',   this._onApiVerifyDictionaryVisibility.bind(this)],
             ['debugDictionaryLookupState',   this._onApiDebugDictionaryLookupState.bind(this)],
             ['debugDictionaryStorageState',  this._onApiDebugDictionaryStorageState.bind(this)],
             ['setDictionaryImportMode',      this._onApiSetDictionaryImportMode.bind(this)],
@@ -471,6 +472,10 @@ export class Backend {
                 recordPhase('applyOptions(background)', startedAt);
             }
 
+            await measureAsyncPhase('reconcileInstalledDictionaryVisibilityStartup', async () => {
+                await this._reconcileInstalledDictionaryVisibilityStartup();
+            });
+
             {
                 const startedAt = safePerformance.now();
                 this._attachOmniboxListener();
@@ -738,8 +743,29 @@ export class Backend {
         await this._ensureDictionaryDatabaseReady();
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {resultOutputMode: mode, maxResults}} = options;
-        const findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
-        const {dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions);
+        let findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
+        let {dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions);
+        if (
+            dictionaryEntries.length === 0 &&
+            findTermsOptions.enabledDictionaryMap.size > 0 &&
+            await this._hasInstalledDictionaries()
+        ) {
+            reportDiagnostics('dictionary-lookup-self-heal-begin', {
+                textLength: text.length,
+                enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
+                mode,
+            });
+            await this._refreshDictionaryDatabaseAfterUpdate();
+            void this._translator.clearDatabaseCaches();
+            findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
+            ({dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions));
+            reportDiagnostics('dictionary-lookup-self-heal-complete', {
+                textLength: text.length,
+                enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
+                mode,
+                recovered: dictionaryEntries.length > 0,
+            });
+        }
         dictionaryEntries.splice(maxResults);
         return {dictionaryEntries, originalTextLength};
     }
@@ -1138,6 +1164,11 @@ export class Backend {
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         return await this._dictionaryDatabase.getDictionaryCounts(dictionaryNames, getTotal);
+    }
+
+    /** @type {import('api').ApiHandler<'verifyDictionaryVisibility'>} */
+    async _onApiVerifyDictionaryVisibility({dictionaryTitle, requireEnabledForActiveProfile}) {
+        return await this._verifyDictionaryVisibilityInternal(dictionaryTitle, requireEnabledForActiveProfile);
     }
 
     /**
@@ -3050,6 +3081,182 @@ export class Backend {
                 this._dictionaryRefreshQueued = false;
             }
         } while (rerunRefresh);
+    }
+
+    /**
+     * @returns {Promise<boolean>}
+     */
+    async _hasInstalledDictionaries() {
+        await this._awaitDictionaryRefreshSettled();
+        await this._ensureDictionaryDatabaseReady();
+        const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
+        return Array.isArray(dictionaryInfo) && dictionaryInfo.length > 0;
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {import('dictionary-database').DictionaryTermProbe} probe
+     * @returns {Promise<boolean>}
+     */
+    async _probeDictionaryVisibilityDirect(dictionaryTitle, probe) {
+        const candidates = [...new Set([probe.expression, probe.reading].map((value) => value.trim()).filter((value) => value.length > 0))];
+        if (candidates.length === 0) { return false; }
+        const dictionarySet = new Set([dictionaryTitle]);
+        const entries = await this._dictionaryDatabase.findTermsBulk(candidates, dictionarySet, 'exact');
+        return entries.some((entry) => (
+            entry.dictionary === dictionaryTitle &&
+            (
+                candidates.includes(entry.term) ||
+                candidates.includes(entry.reading)
+            )
+        ));
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {import('dictionary-database').DictionaryTermProbe} probe
+     * @param {import('settings').ProfileOptions} options
+     * @returns {Promise<boolean>}
+     */
+    async _probeDictionaryVisibilityTranslator(dictionaryTitle, probe, options) {
+        const enabledDictionary = options.dictionaries.find((dictionary) => dictionary.name === dictionaryTitle);
+        const enabledDictionaryMap = new Map();
+        enabledDictionaryMap.set(dictionaryTitle, {
+            index: 0,
+            alias: typeof enabledDictionary?.alias === 'string' ? enabledDictionary.alias : dictionaryTitle,
+            allowSecondarySearches: typeof enabledDictionary?.allowSecondarySearches === 'boolean' ? enabledDictionary.allowSecondarySearches : false,
+            partsOfSpeechFilter: typeof enabledDictionary?.partsOfSpeechFilter === 'boolean' ? enabledDictionary.partsOfSpeechFilter : true,
+            useDeinflections: typeof enabledDictionary?.useDeinflections === 'boolean' ? enabledDictionary.useDeinflections : true,
+        });
+        const findTermsOptions = this._getTranslatorFindTermsOptions('split', {
+            matchType: 'exact',
+            deinflect: false,
+            primaryReading: probe.reading,
+        }, options);
+        findTermsOptions.enabledDictionaryMap = enabledDictionaryMap;
+        findTermsOptions.mainDictionary = dictionaryTitle;
+        findTermsOptions.excludeDictionaryDefinitions = null;
+        const searchText = probe.expression.trim().length > 0 ? probe.expression.trim() : probe.reading.trim();
+        if (searchText.length === 0) { return false; }
+        const {dictionaryEntries} = await this._translator.findTerms('split', searchText, findTermsOptions);
+        return dictionaryEntries.length > 0;
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {boolean} requireEnabledForActiveProfile
+     * @returns {Promise<import('api').ApiReturn<'verifyDictionaryVisibility'>>}
+     */
+    async _verifyDictionaryVisibilityInternal(dictionaryTitle, requireEnabledForActiveProfile) {
+        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle.trim() : '';
+        if (normalizedTitle.length === 0) {
+            return {
+                ok: false,
+                dictionaryTitle: normalizedTitle,
+                installed: false,
+                enabled: false,
+                counts: null,
+                probe: null,
+                directMatch: false,
+                translatorMatch: false,
+                reason: 'missing-dictionary-title',
+            };
+        }
+        await this._awaitDictionaryRefreshSettled();
+        await this._ensureDictionaryDatabaseReady();
+        const [dictionaryInfo, dictionaryCounts] = await Promise.all([
+            this._dictionaryDatabase.getDictionaryInfo(),
+            this._dictionaryDatabase.getDictionaryCounts([normalizedTitle], false),
+        ]);
+        const installed = dictionaryInfo.some((dictionary) => dictionary.title === normalizedTitle);
+        const counts = Array.isArray(dictionaryCounts.counts) && dictionaryCounts.counts.length > 0 ? dictionaryCounts.counts[0] : null;
+        const options = this._getProfileOptions({current: true}, false);
+        const enabledDictionaryMap = this._getTranslatorEnabledDictionaryMap(options);
+        const enabled = !requireEnabledForActiveProfile || enabledDictionaryMap.has(normalizedTitle);
+        const termCount = typeof counts?.terms === 'number' ? counts.terms : 0;
+        const requiresTermProbe = termCount > 0;
+        const probe = (installed && requiresTermProbe) ? await this._dictionaryDatabase.getDictionaryTermProbe(normalizedTitle) : null;
+        const directMatch = (probe !== null && requiresTermProbe) ? await this._probeDictionaryVisibilityDirect(normalizedTitle, probe) : !requiresTermProbe;
+        const translatorMatch = (probe !== null && directMatch && requiresTermProbe) ? await this._probeDictionaryVisibilityTranslator(normalizedTitle, probe, options) : !requiresTermProbe;
+        let reason = null;
+        if (!installed) {
+            reason = 'dictionary-not-installed';
+        } else if (counts === null) {
+            reason = 'dictionary-counts-missing';
+        } else if (requiresTermProbe && probe === null) {
+            reason = 'dictionary-probe-missing';
+        } else if (requiresTermProbe && !directMatch) {
+            reason = 'dictionary-direct-lookup-missing';
+        } else if (requiresTermProbe && !translatorMatch) {
+            reason = 'dictionary-translator-lookup-missing';
+        }
+        return {
+            ok: reason === null,
+            dictionaryTitle: normalizedTitle,
+            installed,
+            enabled,
+            counts,
+            probe,
+            directMatch,
+            translatorMatch,
+            reason,
+        };
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _reconcileInstalledDictionaryVisibilityStartup() {
+        if (this._options === null) {
+            reportDiagnostics('dictionary-startup-visibility-reconcile-skipped', {
+                reason: 'options-unavailable',
+            });
+            return;
+        }
+        await this._awaitDictionaryRefreshSettled();
+        await this._ensureDictionaryDatabaseReady();
+        const options = this._getProfileOptions({current: true}, false);
+        const enabledTitles = options.dictionaries
+            .filter((dictionary) => dictionary.enabled)
+            .map((dictionary) => dictionary.name)
+            .filter((value, index, array) => value.length > 0 && array.indexOf(value) === index);
+        if (enabledTitles.length === 0) {
+            reportDiagnostics('dictionary-startup-visibility-reconcile-summary', {
+                checkedCount: 0,
+                refreshed: false,
+                failedBeforeRefresh: [],
+                failedAfterRefresh: [],
+            });
+            return;
+        }
+        /** @type {string[]} */
+        const failedBeforeRefresh = [];
+        for (const title of enabledTitles) {
+            const result = await this._verifyDictionaryVisibilityInternal(title, true);
+            if (!result.ok) {
+                failedBeforeRefresh.push(title);
+            }
+        }
+        /** @type {string[]} */
+        let failedAfterRefresh = [];
+        let refreshed = false;
+        if (failedBeforeRefresh.length > 0) {
+            refreshed = true;
+            await this._refreshDictionaryDatabaseAfterUpdate();
+            for (const title of enabledTitles) {
+                const result = await this._verifyDictionaryVisibilityInternal(title, true);
+                if (!result.ok) {
+                    failedAfterRefresh.push(title);
+                }
+            }
+        }
+        reportDiagnostics('dictionary-startup-visibility-reconcile-summary', {
+            checkedCount: enabledTitles.length,
+            checkedTitles: enabledTitles,
+            refreshed,
+            failedBeforeRefresh,
+            failedAfterRefresh,
+        });
     }
 
     /**

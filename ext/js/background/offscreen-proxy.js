@@ -380,6 +380,29 @@ export class DictionaryDatabaseProxy {
     }
 
     /**
+     * @param {string} dictionaryTitle
+     * @returns {Promise<import('dictionary-database').DictionaryTermProbe|null>}
+     */
+    async getDictionaryTermProbe(dictionaryTitle) {
+        return /** @type {Promise<import('dictionary-database').DictionaryTermProbe|null>} */ (
+            this._offscreen.sendMessagePromise({action: 'getDictionaryTermProbeOffscreen', params: {dictionaryTitle}})
+        );
+    }
+
+    /**
+     * @param {string[]} termList
+     * @param {import('dictionary-database').DictionarySet} dictionaries
+     * @param {import('dictionary-database').MatchType} matchType
+     * @returns {Promise<import('dictionary-database').TermEntry[]>}
+     */
+    async findTermsBulk(termList, dictionaries, matchType) {
+        const dictionaryNames = dictionaries instanceof Map ? [...dictionaries.keys()] : [...dictionaries];
+        return /** @type {Promise<import('dictionary-database').TermEntry[]>} */ (
+            this._offscreen.sendMessagePromise({action: 'findTermsBulkOffscreen', params: {termList, dictionaryNames, matchType}})
+        );
+    }
+
+    /**
      * @returns {Promise<boolean>}
      */
     async purge() {
