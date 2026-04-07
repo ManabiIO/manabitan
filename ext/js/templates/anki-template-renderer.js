@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2021-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -792,7 +792,6 @@ export class AnkiTemplateRenderer {
             if (Array.isArray(structuredContent)) {
                 extractedContent.push(...this._extractGlossaryStructuredContentRecursive(structuredContent));
             } else if (typeof structuredContent === 'object' && structuredContent) {
-                // @ts-expect-error - Checking if `data` exists
                 if (structuredContent.data?.content === 'glossary') {
                     extractedContent.push(structuredContent);
                     continue;

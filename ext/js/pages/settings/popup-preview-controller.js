@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2019-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -49,6 +49,7 @@ export class PopupPreviewController {
         this._settingsController.on('optionsContextChanged', this._onOptionsContextChange.bind(this));
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
         this._settingsController.on('dictionaryEnabled', this._onOptionsContextChange.bind(this));
+        this._settingsController.application.on('databaseUpdated', this._onDatabaseUpdated.bind(this));
         const languageSelect = querySelectorNotNull(document, '#language-select');
         languageSelect.addEventListener(
             /** @type {string} */ ('settingChanged'),
@@ -93,9 +94,18 @@ export class PopupPreviewController {
     }
 
     /**
+     * @param {{type: string}} details
+     */
+    _onDatabaseUpdated({type}) {
+        if (type !== 'dictionary') { return; }
+        this._onOptionsContextChange();
+    }
+
+    /**
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
     _onOptionsChanged({options}) {
+        this._onOptionsContextChange();
         this._invoke('setLanguageExampleText', {language: options.general.language});
     }
 

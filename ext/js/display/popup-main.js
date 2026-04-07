@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2020-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,6 +23,7 @@ import {ModalController} from '../pages/settings/modal-controller.js';
 import {DisplayAnki} from './display-anki.js';
 import {DisplayAudio} from './display-audio.js';
 import {DisplayProfileSelection} from './display-profile-selection.js';
+import {PopupFrequencyBlurController} from './popup-frequency-blur-controller.js';
 import {DisplayResizer} from './display-resizer.js';
 import {Display} from './display.js';
 
@@ -54,6 +55,9 @@ await Application.main(true, async (application) => {
 
     const displayResizer = new DisplayResizer(display);
     displayResizer.prepare();
+
+    const popupFrequencyBlurController = new PopupFrequencyBlurController(display);
+    popupFrequencyBlurController.prepare();
 
     display.initializeState();
 

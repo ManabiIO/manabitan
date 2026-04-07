@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2021-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -48,6 +48,32 @@ export class DictionaryWorker {
             onProgress,
             this._formatImportDictionaryResult.bind(this),
         );
+    }
+
+    /**
+     * @param {string} mdxFileName
+     * @param {ArrayBuffer} mdxBytes
+     * @param {Array<{name: string, bytes: ArrayBuffer}>} mddFiles
+     * @param {import('dictionary-importer').ImportDetails} details
+     * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {{titleOverride?: string, descriptionOverride?: string, revision?: string, enableAudio?: boolean, includeAssets?: boolean, termBankSize?: number}} [options]
+     * @returns {Promise<import('dictionary-importer').ImportResult>}
+     */
+    importMdxDictionary(mdxFileName, mdxBytes, mddFiles, details, onProgress, options = {}) {
+        return this._invoke(
+            'importMdxDictionary',
+            {details, mdxFileName, mdxBytes, mddFiles, options},
+            [mdxBytes, ...mddFiles.map(({bytes}) => bytes)],
+            onProgress,
+            this._formatImportDictionaryResult.bind(this),
+        );
+    }
+
+    /**
+     * @returns {Promise<number>}
+     */
+    getMdxVersion() {
+        return this._invoke('getMdxVersion', {}, [], null, null);
     }
 
     /**

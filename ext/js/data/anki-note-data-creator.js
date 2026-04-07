@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2021-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -488,7 +488,13 @@ function getTermDefinition(dictionaryEntry, context, resultOutputMode, dictionar
         get dictScopedStyles() { return getCachedValue(styleInfo)?.dictScopedStyles; },
         get definitionTags() { return type === 'term' ? getCachedValue(commonInfo).definitionTags : void 0; },
         get termTags() { return getCachedValue(termTags); },
-        get definitions() { return getCachedValue(commonInfo).definitions; },
+        ...(
+            type === 'term' ?
+                {} :
+                {
+                    get definitions() { return getCachedValue(commonInfo).definitions; },
+                }
+        ),
         get frequencies() { return getCachedValue(frequencies); },
         get frequencyNumbers() { return getCachedValue(frequencyNumbers); },
         get frequencyHarmonic() { return getCachedValue(frequencyHarmonic); },

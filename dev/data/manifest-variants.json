@@ -63,6 +63,7 @@
         },
         "permissions": [
             "storage",
+            "alarms",
             "clipboardWrite",
             "unlimitedStorage",
             "declarativeNetRequest",
@@ -164,6 +165,13 @@
             "fileName": "manabitan-chrome-playwright.zip",
             "modifications": [
                 {
+                    "action": "set",
+                    "path": [
+                        "key"
+                    ],
+                    "value": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCVT50WLFmgMjARRAMqPSEtvAUYW/HB0Dh77LH4+wU+dOYI/YOEOXMOK2mG7KCQ2F7IhE7x1bU8ndIi9I9QXNNXnX8ycBv1Jgg4kYR6qd+LLkCaZDcGZkzt4+Cp9BR28Tr5BDqCAtdNggLU1gpptFQ74/dPcEz7obnCZ96XTiQi6QIDAQAB"
+                },
+                {
                     "action": "remove",
                     "path": [
                         "optional_permissions"
@@ -252,7 +260,7 @@
                     ],
                     "value": {
                         "gecko": {
-                            "id": "{6b733b82-9261-47ee-a595-2dda294a4d08}",
+                            "id": "{1e12d533-8e72-4ec5-9edc-cd50e26d7d43}",
                             "strict_min_version": "115.0",
                             "data_collection_permissions": {
                                 "required": [

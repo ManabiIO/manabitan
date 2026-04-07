@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,13 @@ type ProfileDictionarySettings = Settings.DictionaryOptions & {index: number};
 
 export type ProfilesDictionarySettings = {[profileId: string]: ProfileDictionarySettings} | null;
 
-export type ImportDictionaryDoneCallback = (() => void) | null;
+export type ImportDictionaryDoneResult = {
+    ok: boolean;
+    errors: Error[];
+    importedTitles: string[];
+};
+
+export type ImportDictionaryDoneCallback = ((result: ImportDictionaryDoneResult) => void) | null;
 
 export type Events = {
     optionsChanged: {

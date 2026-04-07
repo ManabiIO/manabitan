@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {readFileSync} from 'fs';
+import {existsSync, readFileSync} from 'fs';
 import path from 'path';
 import {pathToFileURL} from 'url';
 import {createDictionaryArchiveData} from '../../dev/dictionary-archive-util.js';
+import {parseJson} from '../../ext/js/core/json.js';
 import {expect, root, test} from './playwright-util.js';
+
+if (process.platform === 'win32') {
+    test.skip(true, 'Chromium visual extension tests are not reliable on local Windows runs.');
+}
+
+const localJmdictEnglishPath = path.join(root, 'dictionaries/jmdict_english.zip');
 
 test.beforeEach(async ({context}) => {
     // Wait for the on-install welcome.html tab to load, which becomes the foreground tab
@@ -31,13 +38,15 @@ test('welcome', async ({page, extensionId}) => {
     // Open welcome page
     console.log('Open welcome page');
     await page.goto(`chrome-extension://${extensionId}/welcome.html`);
-    await expect(page.getByText('Welcome to Yomitan!')).toBeVisible();
+    await expect(page.getByText('Welcome to Manabitan!')).toBeVisible();
 
     // Take a screenshot of the welcome page
     await expect.soft(page).toHaveScreenshot('welcome-page.png');
 });
 test.describe('settings', () => {
     test('local load of jmdict_english', async ({page, extensionId}) => {
+        test.skip(!existsSync(localJmdictEnglishPath), 'Requires dictionaries/jmdict_english.zip test data.');
+
         // Open settings
         console.log('Open settings');
         await page.goto(`chrome-extension://${extensionId}/settings.html`);
@@ -52,7 +61,11 @@ test.describe('settings', () => {
 
         // Load in jmdict_english.zip
         console.log('Load in jmdict_english.zip');
-        await page.locator('input[id="dictionary-import-file-input"]').setInputFiles(path.join(root, 'dictionaries/jmdict_english.zip'));
+        await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+        await page.locator('button[id="dictionary-import-button"]').click();
+        await page.locator('input[id="dictionary-import-file-input"]').setInputFiles(localJmdictEnglishPath);
+        await expect(page.locator('#dictionary-import-source-list .dictionary-import-source')).toHaveCount(1, {timeout: 30_000});
+        await page.locator('button[id="dictionary-import-confirm-button"]').click();
         await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 5 * 60 * 1000});
 
         // Take a screenshot of the settings page with jmdict loaded
@@ -73,6 +86,8 @@ test.describe('settings', () => {
         await page.locator('button[id="dictionary-import-button"]').click();
         await page.locator('textarea[id="dictionary-import-url-text"]').fill('https://github.com/yomidevs/yomitan/raw/dictionaries/jmdict_swedish.zip');
         await page.locator('button[id="dictionary-import-url-button"]').click();
+        await expect(page.locator('#dictionary-import-source-list .dictionary-import-source')).toHaveCount(1, {timeout: 30_000});
+        await page.locator('button[id="dictionary-import-confirm-button"]').click();
         await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 5 * 60 * 1000});
 
         // Delete the jmdict_swedish dictionary
@@ -115,11 +130,15 @@ test.describe('popup', () => {
 
         // Load in test dictionary
         const dictionary = await createDictionaryArchiveData(path.join(root, 'test/data/dictionaries/valid-dictionary1'), 'valid-dictionary1');
+        await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click();
+        await page.locator('button[id="dictionary-import-button"]').click();
         await page.locator('input[id="dictionary-import-file-input"]').setInputFiles({
             name: 'valid-dictionary1.zip',
             mimeType: 'application/x-zip',
             buffer: Buffer.from(dictionary),
         });
+        await expect(page.locator('#dictionary-import-source-list .dictionary-import-source')).toHaveCount(1, {timeout: 30_000});
+        await page.locator('button[id="dictionary-import-confirm-button"]').click();
         await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 1 * 60 * 1000});
 
         console.log('Open popup-tests.html');
@@ -173,4 +192,93 @@ test.describe('popup', () => {
             await expect.soft(page).toHaveScreenshot(test_name + '.png');
         });
     }
+});
+test.describe('popup frequency blur', () => {
+    const popupFrequencyBlurTestsPath = path.join(root, 'test/data/html/popup-frequency-blur.html');
+
+    /**
+     * @param {import('@playwright/test').Page} page
+     * @param {Partial<import('settings').ProfileOptions['general']>} generalSettings
+     * @returns {Promise<void>}
+     */
+    async function updateGeneralOptions(page, generalSettings) {
+        const optionsString = /** @type {unknown} */ (await page.evaluate(() => new Promise((resolve, reject) => {
+            chrome.storage.local.get(['options'], ({options}) => {
+                if (typeof options !== 'string') {
+                    reject(new Error('Options were not loaded from storage.'));
+                    return;
+                }
+                resolve(options);
+            });
+        })));
+        if (typeof optionsString !== 'string') {
+            throw new Error('Options were not loaded from storage.');
+        }
+
+        const optionsData = /** @type {import('settings').Options} */ (parseJson(optionsString));
+        Object.assign(optionsData.profiles[0].options.general, generalSettings);
+        await page.evaluate((options) => new Promise((resolve, reject) => {
+            chrome.storage.local.set({options}, () => {
+                const error = chrome.runtime.lastError;
+                if (typeof error?.message === 'string') {
+                    reject(new Error(error.message));
+                    return;
+                }
+                resolve(null);
+            });
+        }), JSON.stringify(optionsData));
+    }
+
+    test.beforeEach(async ({page, extensionId}) => {
+        console.log('Open settings');
+        await page.goto(`chrome-extension://${extensionId}/settings.html`);
+        await expect.poll(async () => await page.evaluate(() => document.documentElement.dataset.loaded === 'true')).toBe(true);
+        await expect(page.locator('id=dictionaries')).toBeVisible();
+
+        const dictionary = await createDictionaryArchiveData(path.join(root, 'test/data/dictionaries/valid-dictionary1'), 'valid-dictionary1');
+        await page.locator('input[id="dictionary-import-file-input"]').setInputFiles({
+            name: 'valid-dictionary1.zip',
+            mimeType: 'application/x-zip',
+            buffer: Buffer.from(dictionary),
+        });
+        await expect(page.locator('id=dictionaries')).toHaveText('Dictionaries (1 installed, 1 enabled)', {timeout: 1 * 60 * 1000});
+        await updateGeneralOptions(page, {
+            popupBlurByFrequencyEnabled: true,
+            popupBlurByFrequencyDictionary: 'Test Dictionary',
+            popupBlurByFrequencyThreshold: 1,
+            popupBlurByFrequencyOrder: 'descending',
+            popupBlurByFrequencyUnblurDelay: 0,
+        });
+
+        console.log('Open popup-frequency-blur.html');
+        await page.goto(pathToFileURL(popupFrequencyBlurTestsPath).toString());
+        await page.setViewportSize({width: 900, height: 700});
+        await expect(page.locator('#term-common')).toBeVisible();
+        await page.keyboard.down('Shift');
+    });
+
+    test.afterEach(async ({page}) => {
+        await page.keyboard.up('Shift');
+    });
+
+    test('qualifying popup starts blurred, reveals on hover, and blurs again on leave', async ({page}) => {
+        const popupFramePromise = page.waitForEvent('frameattached', {timeout: 10000});
+
+        await page.locator('#term-common').hover();
+
+        const popupFrame = await popupFramePromise;
+        const overlay = popupFrame.locator('#popup-frequency-blur-overlay');
+        await expect.poll(async () => await popupFrame.evaluate(() => document.documentElement.dataset.popupFrequencyBlurState)).toBe('blurred');
+        await expect(overlay).toBeVisible();
+        await expect(popupFrame.locator('#popup-frequency-blur-overlay-sublabel')).toHaveText('Test Dictionary · frequency 1');
+        await expect.soft(popupFrame.locator('.popup-frequency-blur-card')).toHaveScreenshot('popup-frequency-blur-overlay-card.png');
+
+        await popupFrame.locator('.content-outer').hover();
+        await expect.poll(async () => await popupFrame.evaluate(() => document.documentElement.dataset.popupFrequencyBlurState)).toBe('revealed');
+        await expect(overlay).toBeHidden();
+
+        await page.locator('#outside-hover-target').hover();
+        await expect.poll(async () => await popupFrame.evaluate(() => document.documentElement.dataset.popupFrequencyBlurState)).toBe('blurred');
+        await expect(overlay).toBeVisible();
+    });
 });

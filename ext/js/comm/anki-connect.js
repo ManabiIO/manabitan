@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2016-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 import {ExtensionError} from '../core/extension-error.js';
 import {parseJson} from '../core/json.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
-import {getRootDeckName} from '../data/anki-util.js';
+import {createAnkiNoteDuplicateSearchDetails} from '../data/anki-note-query-util.js';
 
 /**
  * This class controls communication with Anki via the AnkiConnect plugin.
@@ -317,7 +317,12 @@ export class AnkiConnect {
         const allNoteIds = [];
 
         for (const note of notes) {
-            const query = this._getNoteQuery(note);
+            const duplicateSearchDetails = createAnkiNoteDuplicateSearchDetails(note);
+            if (duplicateSearchDetails === null) {
+                allNoteIds.push([]);
+                continue;
+            }
+            const {query} = duplicateSearchDetails;
             let actionsTargets = actionsTargetsMap.get(query);
             if (typeof actionsTargets === 'undefined') {
                 actionsTargets = [];
@@ -522,61 +527,6 @@ export class AnkiConnect {
             throw this._createUnexpectedResultError('array', result);
         }
         return result;
-    }
-
-    /**
-     * @param {string} text
-     * @returns {string}
-     */
-    _escapeQuery(text) {
-        return text.replace(/"/g, '');
-    }
-
-    /**
-     * @param {import('anki').NoteFields} fields
-     * @returns {string}
-     */
-    _fieldsToQuery(fields) {
-        const fieldNames = Object.keys(fields);
-        if (fieldNames.length === 0) {
-            return '';
-        }
-
-        const key = fieldNames[0];
-        return `"${key.toLowerCase()}:${this._escapeQuery(fields[key])}"`;
-    }
-
-    /**
-     * @param {import('anki').Note} note
-     * @returns {?('collection'|'deck'|'deck-root')}
-     */
-    _getDuplicateScopeFromNote(note) {
-        const {options} = note;
-        if (typeof options === 'object' && options !== null) {
-            const {duplicateScope} = options;
-            if (typeof duplicateScope !== 'undefined') {
-                return duplicateScope;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @param {import('anki').Note} note
-     * @returns {string}
-     */
-    _getNoteQuery(note) {
-        let query = '';
-        switch (this._getDuplicateScopeFromNote(note)) {
-            case 'deck':
-                query = `"deck:${this._escapeQuery(note.deckName)}" `;
-                break;
-            case 'deck-root':
-                query = `"deck:${this._escapeQuery(getRootDeckName(note.deckName))}" `;
-                break;
-        }
-        query += this._fieldsToQuery(note.fields);
-        return query;
     }
 
     /**

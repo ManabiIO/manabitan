@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2021-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -232,6 +232,11 @@
     border-color: var(--text-color-light2);
     padding: 0.25em;
     vertical-align: top;
+}
+:root[data-theme-preset^=glass] .gloss-sc-thead,
+:root[data-theme-preset^=glass] .gloss-sc-tfoot,
+:root[data-theme-preset^=glass] .gloss-sc-th {
+    background-color: transparent;
 }
 .gloss-sc-ol,
 .gloss-sc-ul {

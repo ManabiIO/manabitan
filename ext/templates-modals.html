@@ -42,7 +42,7 @@
 
             <div class="warning-text margin-above no-dictionaries-installed-warning" hidden>
                 No dictionaries have been installed yet.
-                Visit the <a href="https://github.com/yomidevs/yomitan/blob/master/docs/dictionaries.md#dictionaries" target="_blank" rel="noopener noreferrer">Manabitan homepage</a>
+                Visit the <a href="https://yomitan.wiki/dictionaries/" target="_blank" rel="noopener noreferrer">dictionary guide</a>
                 for a list of free dictionaries or click the <em>Import</em> button below to select a dictionary file to import.
             </div>
             <div id="dictionary-error" class="danger-text margin-above" hidden></div>
@@ -55,7 +55,7 @@
                 <div class="dictionary-item-top dictionary-item-button-height"></div>
             </div>
 
-            <div hidden><input type="file" id="dictionary-import-file-input" accept=".zip,application/zip" multiple></div>
+            <div hidden><input type="file" id="dictionary-import-file-input" accept=".zip,.mdx,.mdd,application/zip" multiple></div>
         </div>
         <div class="modal-body-addon dictionary-delete-progress" hidden>
             <div class="progress-labels"><div class="progress-info"></div><div class="progress-status"></div></div>
@@ -69,6 +69,7 @@
             <button type="button" class="low-emphasis danger dictionary-database-mutating-input" id="dictionary-delete-all-button">Delete All</button>
             <button type="button" class="low-emphasis dictionary-database-mutating-input advanced-only" id="dictionary-check-integrity">Check Integrity</button>
             <button type="button" class="low-emphasis dictionary-database-mutating-input" id="dictionary-check-updates">Check for Updates</button>
+            <button type="button" class="low-emphasis dictionary-database-mutating-input" id="dictionary-update-all-button">Update All</button>
             <button type="button" class="low-emphasis dictionary-database-mutating-input" id="dictionary-import-button">Import</button>
             <button type="button" data-modal-action="hide">Close</button>
         </div>
@@ -76,24 +77,45 @@
 
     <div id="dictionary-import-modal" class="modal" tabindex="-1" role="dialog" hidden><div class="modal-content modal-content-medium">
         <div class="modal-header"><div class="modal-title">Import Dictionaries</div></div>
-        <div class="modal-body">
-            <div id="dictionary-drop-file-zone">
-                <div id="dictionary-drag-drop-text">
+        <div class="modal-body dictionary-import-drop-section">
+            <button type="button" id="dictionary-drop-file-zone" aria-describedby="dictionary-import-upload-copy dictionary-import-helper-copy">
+                <span id="dictionary-drag-drop-text">
                     <span class="icon" data-icon="book"></span>
-                    <h1>Drag and drop dictionaries (.zip)</h1>
-                    <h5>or click here to upload</h5>
+                    <h1>Drag and drop dictionaries to import</h1>
+                    <h5>or click here to upload and import</h5>
+                    <p id="dictionary-import-upload-copy" class="dictionary-import-note-text">Dropped or selected files import immediately. Supports <code>.zip</code>, <code>.mdx</code>, and optional matching <code>.mdd</code> files.</p>
+                </span>
+            </button>
+        </div>
+        <div class="modal-body dictionary-import-config-body">
+            <div class="settings-item">
+                <div class="settings-item-inner">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">Pending URL imports</div>
+                        <div id="dictionary-import-helper-copy" class="settings-item-description">Dictionaries added from URLs wait here until you click <em>Import</em>.</div>
+                    </div>
+                </div>
+                <div id="dictionary-import-source-list" class="settings-item-children settings-item-children-group dictionary-import-source-list"></div>
+                <p id="dictionary-import-source-empty" class="dictionary-import-empty-state">No dictionaries have been added yet.</p>
+            </div>
+
+            <div class="settings-item advanced-only">
+                <div class="settings-item-inner settings-item-inner-wrappable">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">Import from URLs</div>
+                        <div class="settings-item-description">Paste direct dictionary file URLs, or an MDX directory listing page that links to one <code>.mdx</code> with any matching <code>.mdd</code> files.</div>
+                    </div>
+                    <div class="settings-item-right">
+                        <button type="button" class="low-emphasis dictionary-database-mutating-input" id="dictionary-import-url-button">Add URLs</button>
+                    </div>
+                </div>
+                <div class="settings-item-children">
+                    <textarea id="dictionary-import-url-text"></textarea>
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" data-modal-action="hide" class="basic-only">Close</button>
-        </div>
-        <div class="modal-body advanced-only">
-            <p>Import dictionaries from URLs:</p>
-            <textarea type="text" id="dictionary-import-url-text"></textarea>
-        </div>
-        <div class="modal-footer advanced-only">
-            <button type="button" data-modal-action="hide" class="low-emphasis dictionary-database-mutating-input" id="dictionary-import-url-button">Import from URLs</button>
+            <button type="button" class="low-emphasis dictionary-database-mutating-input" id="dictionary-import-confirm-button" disabled>Import</button>
             <button type="button" data-modal-action="hide">Close</button>
         </div>
     </div></div>
@@ -230,6 +252,26 @@
                     <p><a tabindex="0" class="more-toggle" data-parent-distance="3">Hide&hellip;</a></p>
                 </div>
             </div>
+            <div class="settings-item dictionary-auto-update-setting" hidden>
+                <div class="settings-item-inner">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">
+                            Automatic updates
+                        </div>
+                    </div>
+                    <div class="settings-item-right">
+                        <select class="dictionary-auto-update-select medium-width">
+                            <option value="manual">Manual</option>
+                            <option value="hourly">Hourly</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="settings-item-children dictionary-auto-update-description">
+                    Updates must be started manually.
+                </div>
+            </div>
             <hr>
             <div class="settings-item"><div class="settings-item-children">
                 <div class="dictionary-details-table"></div>
@@ -274,8 +316,50 @@
         </div>
     </div></div>
 
+    <div id="dictionary-edit-metadata-modal" class="modal" tabindex="-1" role="dialog" hidden><div class="modal-content modal-content-small">
+        <div class="modal-header"><div class="modal-title">Edit Dictionary Metadata</div></div>
+        <div class="modal-body">
+            <div class="settings-item">
+                <div class="settings-item-inner settings-item-inner-wrappable">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">Name</div>
+                    </div>
+                    <div class="settings-item-right">
+                        <input type="text" id="dictionary-metadata-name-input" required>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-item-inner settings-item-inner-wrappable">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">URL</div>
+                    </div>
+                    <div class="settings-item-right">
+                        <input type="url" id="dictionary-metadata-url-input" placeholder="https://example.com">
+                    </div>
+                </div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-item-inner settings-item-inner-wrappable">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">Description</div>
+                    </div>
+                    <div class="settings-item-right">
+                        <textarea id="dictionary-metadata-description-input" rows="5"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div id="dictionary-edit-metadata-error" class="danger-text margin-above" hidden></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="low-emphasis" id="dictionary-reset-metadata-button">Reset</button>
+            <button type="button" class="low-emphasis" data-modal-action="hide">Cancel</button>
+            <button type="button" id="dictionary-save-metadata-button">Save</button>
+        </div>
+    </div></div>
+
     <div id="dictionary-set-alias-modal" class="modal" tabindex="-1" role="dialog" hidden><div class="modal-content modal-content-small">
-        <div class="modal-header"><div class="modal-title">Rename</div></div>
+        <div class="modal-header"><div class="modal-title">Rename Display Name</div></div>
         <div class="modal-body">
             <p>Input the display name for <strong class="dictionary-title"></strong> dictionary:</p>
             <div class="margin-above">
@@ -302,7 +386,7 @@
         <div class="modal-body">
             <p>
                 For non-English dictionaries, please refer to the list of available
-                <a href="https://yomidevs.github.io/kaikki-to-yomitan/" target="_blank"> Kaikki dictionaries</a>.
+                <a href="https://yomidevs.github.io/wiktionary-to-yomitan/" target="_blank"> Wiktionary dictionaries</a>.
             </p>
             <div id="recommended-dictionaries-diagnostics" class="recommended-dictionaries-diagnostics" hidden></div>
             <div id="recommended-dictionaries-error" class="danger-text margin-above" hidden></div>
@@ -336,6 +420,7 @@
             <div class="progress-bar-track"><div class="progress-bar"></div></div>
         </div>
         <div class="modal-footer">
+            <button type="button" class="dictionary-database-mutating-input" id="recommended-dictionaries-install-all-button">Install All</button>
             <button type="button" data-modal-action="hide">Close</button>
         </div>
     </div></div>

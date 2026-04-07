@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2019-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -143,6 +143,7 @@ export class PopupPreviewFrame {
         options.general.popupVerticalTextPosition = 'before';
         options.scanning.selectText = false;
         this._themeController.theme = options.general.popupTheme;
+        this._themeController.themePreset = options.general.popupThemePreset;
         this._themeController.siteOverride = true;
         this._themeController.updateTheme();
         return options;

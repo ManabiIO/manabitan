@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024-2025  Yomitan Authors
+ * Copyright (C) 2024-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ await Application.main(true, async (application) => {
     const defaultProfile = (profileCurrent >= 0 && profileCurrent < profiles.length) ? profiles[profileCurrent] : null;
     if (defaultProfile !== null) {
         themeController.theme = defaultProfile.options.general.popupTheme;
+        themeController.themePreset = defaultProfile.options.general.popupThemePreset;
         themeController.siteOverride = true;
         themeController.updateTheme();
     }

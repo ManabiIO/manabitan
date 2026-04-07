@@ -3,10 +3,61 @@
 # Manabitan
 
 [Download for Chrome, Firefox, Edge](https://github.com/ManabiIO/manabitan/releases/latest)
-[Firefox Dev Build (auto-updates)](https://github.com/ManabiIO/manabitan/releases/latest/download/manabitan-firefox-dev.xpi)
+[Firefox Dev Builds](https://github.com/ManabiIO/manabitan/releases/latest)
 
+[![CI](https://img.shields.io/github/actions/workflow/status/ManabiIO/manabitan/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/ManabiIO/manabitan/actions/workflows/ci.yml)
+[![GitHub Downloads](https://img.shields.io/github/downloads/ManabiIO/manabitan/total?style=for-the-badge&label=Downloads)](https://github.com/ManabiIO/manabitan/releases)
+[![Test Coverage](https://img.shields.io/badge/test%20coverage-100%25-brightgreen?style=for-the-badge)](https://github.com/ManabiIO/manabitan/blob/main/docs/development/npm-scripts.md#testcoverage)
 [![Manabi Discord](https://dcbadge.limes.pink/api/server/gvxzS93C3w?style=for-the-badge)](https://discord.gg/gvxzS93C3w)
 [![Discord](https://dcbadge.limes.pink/api/server/YkQrXW6TXF?style=for-the-badge)](https://discord.gg/YkQrXW6TXF)
+
+# Differences from Yomitan
+
+## Speed
+
+![manabitan_vs_yomitan_chart](https://github.com/user-attachments/assets/1351b902-c918-43a6-b4ac-c64c333fa68d)
+
+## Features
+
+- MDX dictionary support (now supports 20,000 more dicts than Yomitan)
+- Auto-updating dictionaries, never manually update a dictionary again.
+- Schedule when a specific dictionary updates (hourly, daily, weekly, monthly) ((Imports are so fast you won't even notice it's updating))
+- Blur when word is under a certain frequency to force you to recall it.
+- Edit dictionary metadata (name etc) after importing.
+- Install all reccomended dicts with one button
+- Update all dicts with one button
+- Custom themes built in. Glass, Autumn, Tokyo, Dark etc
+
+## Nerdy
+
+- 100% test coverage with extensive end to end tests
+- Significantly less RAM usage
+- Auto import Kiku/Lapis/Senren/Crop-Theft Anki Note types.
+- No scan length. Before you had to say "only scan 10 characters", now you don't have to do that. We will show you the longest possible word in the dict (plus a few more characters for grammar etc)
+
+We have benchmarks for these 3 things:
+
+1. Importing dictionaries
+2. Looking up words
+3. Adding to Anki
+
+We regularly benchmark these 3 things and if if it becomes slower than normal we will work to fix it.
+
+If a new feature or bug makes one of these 3 things slower, we will exterminate it ruthlessly to ensure we are the best dictionary app on the market.
+
+Manabitan is a dictionary app that lets you mine to Anki. If this is not fast, then what is the point of this software?
+
+## Why not contribute to Yomitan directly?
+
+A lot of this stuff is experimental and may break.
+
+When you use this software you are aware it may break.
+
+Some of these features are so big and drastic Yomitan will never merge that code, such as changing the entire database structure.
+
+I am also [actively](https://github.com/yomidevs/yomitan/issues?q=is%3Apr%20author%3Abee-san) pushing PRs to Yomitan to improve it based on this work.
+
+Using this fork and telling me what works and doesn't will allow me to contribute back to Yomitan easier.
 
 # Visit [yomitan.wiki](https://yomitan.wiki) to learn more!
 
@@ -36,10 +87,10 @@ Manabitan provides powerful features not available in other browser-based dictio
 - 📖 Support for multiple dictionary formats including [EPWING](https://ja.wikipedia.org/wiki/EPWING) via the [Yomitan Import](https://github.com/yomidevs/yomitan-import) tool.
 - ✨ Clean, modern code makes it easy for developers to [contribute](#contributing) new features and languages.
 
-[![Term definitions](img/ss-terms-thumb.png)](img/ss-terms.png)
-[![Kanji information](img/ss-kanji-thumb.png)](img/ss-kanji.png)
-[![Dictionary options](img/ss-dictionaries-thumb.png)](img/ss-dictionaries.png)
-[![Anki options](img/ss-anki-thumb.png)](img/ss-anki.png)
+[![Term definitions](docs/images/ss-terms-thumb.png)](docs/images/ss-terms.png)
+[![Kanji information](docs/images/ss-kanji-thumb.png)](docs/images/ss-kanji.png)
+[![Dictionary options](docs/images/ss-dictionaries-thumb.png)](docs/images/ss-dictionaries.png)
+[![Anki options](docs/images/ss-anki-thumb.png)](docs/images/ss-anki.png)
 
 ## Documentation/How To
 
@@ -118,7 +169,7 @@ Feel free to join us on the [Manabi Discord](https://discord.gg/gvxzS93C3w) or t
 
 ## Building Manabitan
 
-1. Install [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/).
+1. Install [Node.js](https://nodejs.org/) and [npm](https://docs.npmjs.com/).
 
 2. Run `npm ci` to set up the environment.
 
@@ -210,4 +261,5 @@ Manabitan uses several third-party libraries to function.
 
 ## Attribution
 
+MDX import support uses [PyGlossary](https://github.com/ilius/pyglossary), licensed under the [GNU GPLv3](https://raw.githubusercontent.com/ilius/pyglossary/master/LICENSE).
 `fallback-bloop.mp3` is provided by [UNIVERSFIELD](https://pixabay.com/sound-effects/error-8-206492/) and licensed under the [Pixabay Content License](https://pixabay.com/service/license-summary/).

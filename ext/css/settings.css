@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2020-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -723,6 +723,24 @@ a.settings-item.settings-item-button {
 .settings-item-group.settings-item-group-wrap {
     flex-wrap: wrap;
 }
+.popup-appearance-right {
+    max-height: none;
+}
+.popup-appearance-group {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.75em;
+}
+.popup-appearance-group .settings-item-group-item {
+    padding-right: 0;
+}
+.popup-appearance-group .settings-item-group-item-label {
+    margin-bottom: 0.25em;
+    white-space: nowrap;
+}
+.popup-appearance-group .appearance-select-width {
+    width: min(10.75em, var(--input-short-width));
+}
 .settings-item-group-item {
     flex: 0 1 auto;
     padding-right: var(--padding);
@@ -747,6 +765,11 @@ select.short-height {
     height: var(--input-short-height);
     margin-top: calc(var(--settings-group-right-max-height) - var(--input-short-height) - var(--font-size-small));
     line-height: var(--line-height);
+}
+@media (max-width: 820px) {
+    .popup-appearance-right {
+        width: 100%;
+    }
 }
 .settings-item-button-group-container {
     max-height: none;
@@ -2560,6 +2583,18 @@ button.hotkey-list-item-enabled-button[data-scope-count='0'] {
 
 
 /* Dictionary Import */
+#dictionary-import-modal .modal-content.modal-content-medium {
+    max-height: min(720px, calc(100vh - 1.5rem));
+}
+
+.dictionary-import-drop-section {
+    display: flex;
+}
+
+.dictionary-import-config-body {
+    padding-top: 0;
+}
+
 #dictionary-import-url-text {
     width: 100%;
     height: 4em;
@@ -2568,10 +2603,12 @@ button.hotkey-list-item-enabled-button[data-scope-count='0'] {
 }
 
 #dictionary-import-url-button {
-    flex: auto;
+    flex: 0 0 auto;
 }
 
 #dictionary-drop-file-zone {
+    appearance: none;
+    -webkit-appearance: none;
     transition: background-color var(--animation-duration) ease-in-out, border var(--animation-duration) ease-in-out;
     border: 2px dashed var(--dictionary-import-border-color);
     border-radius: 5px;
@@ -2583,6 +2620,11 @@ button.hotkey-list-item-enabled-button[data-scope-count='0'] {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    color: inherit;
+    font: inherit;
+    box-sizing: border-box;
+    background-color: transparent;
 }
 
 #dictionary-drop-file-zone:hover {
@@ -2595,8 +2637,24 @@ button.hotkey-list-item-enabled-button[data-scope-count='0'] {
     background-color: var(--dictionary-import-border-color-hover);
 }
 
+#dictionary-drop-file-zone:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 3px;
+}
+
+.dictionary-import-note-text {
+    margin: 0.75em 0 0;
+    color: var(--text-color-light2);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
 #dictionary-drag-drop-text {
     pointer-events: none;
+    display: grid;
+    gap: 0.35rem;
+    justify-items: center;
+    width: 100%;
 }
 
 #dictionary-drag-drop-text>.icon {
@@ -2615,8 +2673,36 @@ button.hotkey-list-item-enabled-button[data-scope-count='0'] {
     border-bottom: none;
 }
 
-#dictionary-import-modal .modal-body:has(#dictionary-drop-file-zone) {
-    display: flex;
+.dictionary-import-source-list.settings-item-children-group {
+    padding-top: 0.25rem;
+    padding-bottom: 0;
+}
+
+.dictionary-import-source-list.settings-item-children-group .dictionary-import-source:first-child {
+    border-top: none;
+}
+
+.dictionary-import-source-description {
+    overflow-wrap: anywhere;
+}
+
+.dictionary-import-empty-state {
+    margin: 0;
+    padding: 0 var(--settings-group-inner-horizontal-padding-half) var(--settings-group-inner-vertical-padding) var(--settings-group-inner-horizontal-padding);
+    color: var(--text-color-light2);
+}
+
+@media (max-width: 720px) {
+    #dictionary-import-modal .modal-content.modal-content-medium {
+        width: calc(100vw - 1rem);
+        max-height: calc(100vh - 1rem);
+    }
+}
+
+@media (max-width: 560px) {
+    #dictionary-drop-file-zone {
+        min-height: 14rem;
+    }
 }
 
 

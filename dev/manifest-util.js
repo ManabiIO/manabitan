@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2021-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -142,6 +142,7 @@ export class ManifestUtil {
                             if (typeof command === 'object' && command !== null) {
                                 value = this._evaluateModificationCommand(command);
                             }
+                            value = structuredClone(value);
 
                             this._setObjectKeyAtIndex(object, key, value, index);
                         }

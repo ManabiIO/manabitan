@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2017-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1278,7 +1278,7 @@ export class Display extends EventDispatcher {
      */
     _setTheme(options) {
         const {general} = options;
-        const {popupTheme, popupOuterTheme, fontFamily, fontSize, lineHeight} = general;
+        const {popupTheme, popupThemePreset, popupOuterTheme, fontFamily, fontSize, lineHeight} = general;
         /** @type {string} */
         let pageType = this._pageType;
         try {
@@ -1295,6 +1295,7 @@ export class Display extends EventDispatcher {
             log.error(e);
         }
         this._themeController.theme = popupTheme;
+        this._themeController.themePreset = popupThemePreset;
         this._themeController.outerTheme = popupOuterTheme;
         this._themeController.siteOverride = pageType === 'search' || pageType === 'popupPreview';
         this._themeController.updateTheme();

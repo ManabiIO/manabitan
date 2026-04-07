@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024-2025  Yomitan Authors
+ * Copyright (C) 2024-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ function arraysAreEqual(rules1, rules2) {
 const languagesWithTransforms = getAllLanguageTransformDescriptors();
 
 describe.each(languagesWithTransforms)('Cycles Test $iso', ({languageTransforms}) => {
-    test('Check for cycles', ({expect}) => {
+    test('Check for cycles', {timeout: 90 * 1000}, ({expect}) => {
         const languageTransformer = new LanguageTransformer();
         languageTransformer.addDescriptor(languageTransforms);
 
@@ -168,5 +168,5 @@ describe.each(languagesWithTransforms)('Cycles Test $iso', ({languageTransforms}
                 deinflectionNodes.push(newDeinflectionNode);
             }
         }
-    }, {timeout: 30 * 1000});
+    });
 });

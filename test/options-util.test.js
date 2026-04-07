@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2020-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -252,6 +252,7 @@ function createOptionsTestData1() {
         global: {
             database: {
                 prefixWildcardsSupported: false,
+                maxHeadwordLength: 0,
             },
         },
     };
@@ -293,6 +294,7 @@ function createProfileOptionsUpdatedTestData1() {
             glossaryLayoutMode: 'default',
             mainDictionary: '',
             popupTheme: 'light',
+            popupThemePreset: 'default',
             popupOuterTheme: 'light',
             customPopupCss: '',
             customPopupOuterCss: '',
@@ -311,6 +313,11 @@ function createProfileOptionsUpdatedTestData1() {
             termDisplayMode: 'ruby',
             sortFrequencyDictionary: null,
             sortFrequencyDictionaryOrder: 'descending',
+            popupBlurByFrequencyEnabled: false,
+            popupBlurByFrequencyDictionary: null,
+            popupBlurByFrequencyThreshold: 10000,
+            popupBlurByFrequencyOrder: 'descending',
+            popupBlurByFrequencyUnblurDelay: 0,
             stickySearchHeader: false,
             enableYomitanApi: false,
             yomitanApiServer: 'http://127.0.0.1:19633',
@@ -548,6 +555,7 @@ function createProfileOptionsUpdatedTestData1() {
             apiKey: '',
             downloadTimeout: 0,
             forceSync: false,
+            noteDupeCheckFirst: false,
         },
         sentenceParsing: {
             scanExtent: 200,
@@ -704,12 +712,14 @@ function createOptionsUpdatedTestData1() {
             },
         ],
         profileCurrent: 0,
-        version: 74,
+        version: 78,
         global: {
             database: {
                 prefixWildcardsSupported: false,
+                maxHeadwordLength: 0,
             },
             dataTransmissionConsentShown: false,
+            dictionaryAutoUpdates: [],
             dataTransmissionConsentState: 'unknown',
         },
     };
@@ -758,6 +768,44 @@ describe('OptionsUtil', () => {
         const partialsExpected = getHandlebarsPartials(defaultAnkiFieldTemplates);
 
         expect(partialsUpdated).toStrictEqual(partialsExpected);
+    });
+
+    test('Version75And76MigrationsAddDictionaryOptions', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+
+        const options = /** @type {import('core').SafeAny} */ (createOptionsUpdatedTestData1());
+        options.version = 74;
+        delete options.global.dictionaryAutoUpdates;
+        delete options.global.database.maxHeadwordLength;
+
+        const optionsUpdated = structuredClone(await optionsUtil.update(options));
+        expect(optionsUpdated.version).toBe(78);
+        expect(optionsUpdated.global.dictionaryAutoUpdates).toStrictEqual([]);
+        expect(optionsUpdated.global.database.maxHeadwordLength).toBe(0);
+    });
+
+    test('PopupFrequencyBlurAndThemePresetVersion78MigrationUsesDefaultsAndStaysDecoupled', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+
+        const options = /** @type {import('settings').Options} */ (structuredClone(createOptionsUpdatedTestData1()));
+        options.version = 77;
+        const general = /** @type {import('core').SafeAny} */ (options.profiles[0].options.general);
+        general.sortFrequencyDictionary = 'Sort Dictionary';
+        general.sortFrequencyDictionaryOrder = 'ascending';
+        general.popupTheme = 'site';
+        delete general.popupThemePreset;
+
+        const optionsUpdated = structuredClone(await optionsUtil.update(options));
+        const defaultGeneral = optionsUtil.getDefault().profiles[0].options.general;
+        expect(optionsUpdated.version).toBe(78);
+        expect(optionsUpdated.profiles[0].options.general).toMatchObject({
+            popupTheme: 'browser',
+            popupThemePreset: defaultGeneral.popupThemePreset,
+            sortFrequencyDictionary: 'Sort Dictionary',
+            sortFrequencyDictionaryOrder: 'ascending',
+        });
     });
 
     describe('Default', () => {

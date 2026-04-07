@@ -609,18 +609,6 @@
                 </p>
             </div>
         </div>
-        <div class="settings-item advanced-only"><div class="settings-item-inner settings-item-inner-wrappable">
-            <div class="settings-item-left">
-                <div class="settings-item-label">Text scan length</div>
-                <div class="settings-item-description">Change how many characters are read when scanning for terms.</div>
-                <div class="warning-text margin-above">
-                    <strong>Setting this value too high (100+) may impact performance.</strong>
-                </div>
-            </div>
-            <div class="settings-item-right">
-                <input type="number" data-setting="scanning.length" min="1" step="1">
-            </div>
-        </div></div>
         <div class="settings-item settings-item-button advanced-only" data-modal-action="show,input-action-prevention"><div class="settings-item-inner">
             <div class="settings-item-left">
                 <div class="settings-item-label">Configure input action prevention&hellip;</div>
@@ -730,6 +718,62 @@
                 </div></div>
             </div>
         </div>
+        <div class="settings-item">
+            <div class="settings-item-inner">
+                <div class="settings-item-left">
+                    <div class="settings-item-label">Blur popup by frequency</div>
+                    <div class="settings-item-description">Popup pages only. Blur the first term entry when the selected frequency dictionary crosses the configured threshold.</div>
+                </div>
+                <div class="settings-item-right">
+                    <label class="toggle"><input type="checkbox" id="popup-frequency-blur-enabled" data-setting="general.popupBlurByFrequencyEnabled"
+                        data-transform='{
+                            "type": "setVisibility",
+                            "selector": "#popup-frequency-blur-options",
+                            "condition": {"op": "===", "value": true}
+                        }'
+                    ><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
+                </div>
+            </div>
+            <div class="settings-item-children settings-item-children-group" id="popup-frequency-blur-options" hidden>
+                <div class="settings-item"><div class="settings-item-inner settings-item-inner-wrappable">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">Frequency dictionary</div>
+                        <div class="settings-item-description">Only installed dictionaries with term frequency data are available.</div>
+                    </div>
+                    <div class="settings-item-right">
+                        <select id="popup-frequency-blur-dictionary" data-setting="general.popupBlurByFrequencyDictionary"></select>
+                    </div>
+                </div></div>
+                <div class="settings-item"><div class="settings-item-inner settings-item-inner-wrappable">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">Frequency mode</div>
+                        <div class="settings-item-description">Occurrence-based treats higher values as more common; rank-based treats lower values as more common.</div>
+                    </div>
+                    <div class="settings-item-right">
+                        <select data-setting="general.popupBlurByFrequencyOrder">
+                            <option value="descending">Occurrence-based</option>
+                            <option value="ascending">Rank-based</option>
+                        </select>
+                    </div>
+                </div></div>
+                <div class="settings-item"><div class="settings-item-inner settings-item-inner-wrappable">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">Threshold</div>
+                    </div>
+                    <div class="settings-item-right">
+                        <input type="number" id="popup-frequency-blur-threshold" min="0" step="1" data-setting="general.popupBlurByFrequencyThreshold">
+                    </div>
+                </div></div>
+                <div class="settings-item"><div class="settings-item-inner settings-item-inner-wrappable">
+                    <div class="settings-item-left">
+                        <div class="settings-item-label">Unblur in <span class="light">(in seconds)</span></div>
+                    </div>
+                    <div class="settings-item-right">
+                        <input type="number" id="popup-frequency-blur-unblur-delay" min="0" step="0.1" data-setting="general.popupBlurByFrequencyUnblurDelay">
+                    </div>
+                </div></div>
+            </div>
+        </div>
         <div class="settings-item advanced-only">
             <div class="settings-item-inner">
                 <div class="settings-item-left">
@@ -832,23 +876,31 @@
     <div class="settings-group">
         <div class="settings-item"><div class="settings-item-inner settings-item-inner-wrappable">
             <div class="settings-item-left">
-                <div class="settings-item-label">Theme</div>
-                <div class="settings-item-description">Adjust the style of Manabitan.</div>
+                <div class="settings-item-label">Appearance</div>
+                <div class="settings-item-description">Pick the popup mode, theme, and shadow.</div>
             </div>
-            <div class="settings-item-right">
-                <div class="settings-item-group">
+            <div class="settings-item-right popup-appearance-right">
+                <div class="settings-item-group popup-appearance-group">
                     <div class="settings-item-group-item">
-                        <div class="settings-item-group-item-label">Body</div>
-                        <select data-setting="general.popupTheme" class="short-width short-height">
-                            <option value="site">Auto</option>
+                        <div class="settings-item-group-item-label">Mode</div>
+                        <select data-setting="general.popupTheme" class="short-height appearance-select-width">
+                            <option value="browser">System</option>
                             <option value="light">Light</option>
                             <option value="dark">Dark</option>
-                            <option value="browser">Browser</option>
+                        </select>
+                    </div>
+                    <div class="settings-item-group-item">
+                        <div class="settings-item-group-item-label">Theme</div>
+                        <select data-setting="general.popupThemePreset" class="short-height appearance-select-width">
+                            <option value="default">Default</option>
+                            <option value="glass">Glass</option>
+                            <option value="glass-autumnal">Autumnal (Glass)</option>
+                            <option value="glass-tokyo-night">Tokyo Night (Glass)</option>
                         </select>
                     </div>
                     <div class="settings-item-group-item">
                         <div class="settings-item-group-item-label">Shadow</div>
-                        <select data-setting="general.popupOuterTheme" class="short-width short-height">
+                        <select data-setting="general.popupOuterTheme" class="short-height appearance-select-width">
                             <option value="site">Auto</option>
                             <option value="light">Light</option>
                             <option value="dark">Dark</option>
@@ -1994,6 +2046,31 @@
                             <li>If there are multiple duplicate cards, the first card found will be overwritten.</li>
                             <li>You can customize overwriting for each field in the <code>Configure Anki card format&hellip;</code> menu.</li>
                         </ul>
+                        <p>
+                            <a tabindex="0" class="more-toggle" data-parent-distance="3">Less&hellip;</a>
+                        </p>
+                    </div>
+                </div>
+        <div class="settings-item">
+                    <div class="settings-item-inner settings-item-inner-wrappable">
+                        <div class="settings-item-left">
+                            <div class="settings-item-label">
+                                Prioritize Anki note duplicate checks before note creation
+                                <a tabindex="0" class="more-toggle more-only" data-parent-distance="4">(?)</a>
+                                <div class="settings-item-description">
+                            </div>
+                            </div>
+                        </div>
+                        <div class="settings-item-right">
+                <label class="toggle"><input type="checkbox" data-setting="anki.noteDupeCheckFirst"><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
+            </div>
+                    </div>
+                    <div class="settings-item-children more" hidden>
+                        <p>
+                            Recommended to those who with "Maximum number of results" set to a high number, and many active dictionaries. <br>
+                            Normally, Yomitan will create and render the Anki notes for each dictionary entry, perform the duplicate check, and then display the buttons, which may take some time depending on the users' settings. <br>
+                            This option will perform duplicate checks first, and then append the appropriate buttons you would normally see at the end, but earlier, disabled, and opaque. Once the notes are made, they will be re-enabled.<br>
+                        </p>
                         <p>
                             <a tabindex="0" class="more-toggle" data-parent-distance="3">Less&hellip;</a>
                         </p>

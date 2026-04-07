@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2020-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -65,6 +65,51 @@ export function getImageMediaTypeFromFileName(path) {
         default:
             return null;
     }
+}
+
+/**
+ * Gets an audio file's media type using a file path.
+ * @param {string} path The path to the file.
+ * @returns {?string} The media type string if it can be determined from the file path,
+ *   otherwise `null`.
+ */
+export function getAudioMediaTypeFromFileName(path) {
+    switch (getFileNameExtension(path).toLowerCase()) {
+        case '.aac':
+            return 'audio/aac';
+        case '.flac':
+            return 'audio/flac';
+        case '.m4a':
+        case '.m4b':
+        case '.mp4':
+            return 'audio/mp4';
+        case '.mp3':
+            return 'audio/mpeg';
+        case '.oga':
+        case '.ogg':
+        case '.opus':
+            return 'audio/ogg';
+        case '.wav':
+            return 'audio/wav';
+        case '.weba':
+        case '.webm':
+            return 'audio/webm';
+        default:
+            return null;
+    }
+}
+
+/**
+ * Gets a file's media type using a file path.
+ * @param {string} path The path to the file.
+ * @returns {string} The media type string.
+ */
+export function getMediaTypeFromFileName(path) {
+    return (
+        getImageMediaTypeFromFileName(path) ??
+        getAudioMediaTypeFromFileName(path) ??
+        'application/octet-stream'
+    );
 }
 
 /**

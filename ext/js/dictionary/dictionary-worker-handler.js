@@ -159,11 +159,6 @@ export class DictionaryWorkerHandler {
         }
         try {
             const dictionaryImporter = new DictionaryImporter(this._mediaLoader, onProgress);
-            /** @param {unknown} error */
-            const isReadonlyError = (error) => {
-                const message = (error instanceof Error) ? error.message : String(error);
-                return /readonly database|SQLITE_READONLY/i.test(message);
-            };
             const detailsRecord = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (details));
             const dictionaryTitleOverride = (
                 typeof details === 'object' &&
@@ -283,51 +278,14 @@ export class DictionaryWorkerHandler {
             try {
                 ({result, errors, importerDebug} = await importOnce(dictionaryDatabase));
             } catch (error) {
-                const canRetryReadonlyImport = isReadonlyError(error) && (!useImportSession || finalizeImportSession);
-                if (!canRetryReadonlyImport) {
-                    if (replacementDictionaryTitle !== null || dictionaryTitleOverride !== null) {
-                        try {
-                            await cleanupTransientReplacementTitles(dictionaryDatabase);
-                        } catch (_) {
-                            // NOP - preserve the original failure.
-                        }
-                    }
-                    throw error;
-                }
-                try {
-                    await dictionaryDatabase.close();
-                } catch (_) {
-                    // NOP
-                }
-                if (this._importSessionDictionaryDatabase === dictionaryDatabase) {
-                    this._importSessionDictionaryDatabase = null;
-                }
-                const retryDictionaryDatabase = await this._getPreparedDictionaryDatabase();
-                if (useImportSession) {
-                    this._importSessionDictionaryDatabase = retryDictionaryDatabase;
-                }
-                try {
-                    await cleanupTransientReplacementTitles(retryDictionaryDatabase);
-                    ({result, errors, importerDebug} = await importOnce(retryDictionaryDatabase));
-                } finally {
-                    if (!useImportSession) {
-                        await retryDictionaryDatabase.close();
-                    } else if (finalizeImportSession) {
-                        await retryDictionaryDatabase.close();
-                        this._importSessionDictionaryDatabase = null;
+                if (replacementDictionaryTitle !== null || dictionaryTitleOverride !== null) {
+                    try {
+                        await cleanupTransientReplacementTitles(dictionaryDatabase);
+                    } catch (_) {
+                        // NOP - preserve the original failure.
                     }
                 }
-                return {
-                    result,
-                    errors: errors.map((error2) => ExtensionError.serialize(error2)),
-                    debug: {
-                        usesFallbackStorage,
-                        openStorageDiagnostics,
-                        useImportSession,
-                        finalizeImportSession,
-                        importerDebug,
-                    },
-                };
+                throw error;
             }
             return {
                 result,

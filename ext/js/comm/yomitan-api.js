@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025  Yomitan Authors
+ * Copyright (C) 2025-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -239,7 +239,7 @@ export class YomitanApi {
                     case 'tokenize': {
                         /** @type {import('yomitan-api.js').tokenizeInput} */
                         // @ts-expect-error - Allow this to error
-                        const {text, scanLength} = parsedBody;
+                        const {text, scanLength, parser} = parsedBody;
                         if (typeof text !== 'string' && !Array.isArray(text)) {
                             throw new Error('Invalid input for tokenize, expected "text" to be a string or a string array but got ' + typeof text);
                         }
@@ -250,8 +250,8 @@ export class YomitanApi {
                             text: text,
                             optionsContext: {index: optionsFull.profileCurrent},
                             scanLength: scanLength,
-                            useInternalParser: true,
-                            useMecabParser: false,
+                            useInternalParser: parser !== 'mecab',
+                            useMecabParser: parser === 'mecab',
                         };
                         result = await this._invoke('parseText', invokeParams);
                         break;

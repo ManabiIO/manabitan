@@ -1,6 +1,6 @@
 # Deployments
 
-We deploy yomitan to the Firefox and Chrome webstore via two channels -- the dev build and the stable build. We do this via a series of GitHub Actions.
+We deploy Manabitan to the Firefox and Chrome web stores via two channels: the dev build and the stable build. We do this via a series of GitHub Actions.
 
 Only collaborators with deployment permissions are allowed to deploy.
 
@@ -19,7 +19,8 @@ Only collaborators with deployment permissions are allowed to deploy.
 
 ## Deploying a stable build
 
-1. Go to ["Releases"](https://github.com/yomidevs/yomitan/releases) and pick a version you want to promote to stable.
-2. On the top right corner click on "Edit" and on the bottom there are two options `Set as a pre-release` and `Set as the latest release`. Uncheck `Set as a pre-release` and check `Set as the latest release`.
-3. This will trigger the [`release`](https://github.com/yomidevs/yomitan/actions/workflows/release.yml) workflow which will in turn trigger the `publish-chrome` and `publish-firefox` GH workflows.
-4. Unblock `publish-chrome` and `publish-firefox` respectively and wait 5 mins to a few hours for the extensions to reflect on [Chrome](https://chromewebstore.google.com/detail/yomitan/likgccmbimhjbgkjambclfkhldnlhbnn) and [Firefox](https://addons.mozilla.org/en-US/firefox/addon/yomitan/)
+1. If this is the first standalone Manabitan Firefox stable release, create the AMO listing manually first using the stable Firefox add-on ID from `dev/data/manifest-variants.json`, then update the `FF_EXTENSION_ID` secret to match that listing before continuing. Existing Firefox installs of Yomitan will not auto-upgrade to the new Manabitan listing because the add-on ID changes.
+2. Go to ["Releases"](https://github.com/yomidevs/yomitan/releases) and pick a version you want to promote to stable.
+3. On the top right corner click on "Edit" and on the bottom there are two options `Set as a pre-release` and `Set as the latest release`. Uncheck `Set as a pre-release` and check `Set as the latest release`.
+4. This will trigger the [`release`](https://github.com/yomidevs/yomitan/actions/workflows/release.yml) workflow which will in turn trigger the `publish-chrome` and `publish-firefox` GH workflows.
+5. Unblock `publish-chrome` and `publish-firefox` respectively and wait 5 mins to a few hours for the extensions to reflect on [Chrome](https://chromewebstore.google.com/detail/yomitan/likgccmbimhjbgkjambclfkhldnlhbnn) and the Firefox AMO listing configured by `FF_EXTENSION_ID`.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,8 +72,8 @@ export type DictionaryEntryGroup = {
 export type TextProcessorMap = Map<
     string,
     {
-        textPreprocessors: Language.TextProcessorWithId<unknown>[];
-        textPostprocessors: Language.TextProcessorWithId<unknown>[];
+        textPreprocessors: Language.TextProcessorWithId[];
+        textPostprocessors: Language.TextProcessorWithId[];
     }
 >;
 
@@ -82,4 +82,4 @@ export type ReadingNormalizerMap = Map<
     Language.ReadingNormalizer
 >;
 
-export type TextCache = Map<string, Map<string, Map<unknown, string>>>;
+export type TextCache = Map<string, Map<string, string[]>>;

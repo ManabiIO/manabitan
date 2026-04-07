@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,23 @@ import type * as Api from './api';
 
 export type DatabaseUpdateType = 'dictionary';
 
-export type DatabaseUpdateCause = 'purge' | 'delete' | 'import';
+export type DatabaseUpdateCause = 'purge' | 'delete' | 'import' | 'edit';
+
+export type DictionaryUpdateCheckResult = {
+    dictionaryTitle: string;
+    hasUpdate: boolean;
+    currentRevision: string | null;
+    latestRevision: string | null;
+    downloadUrl: string | null;
+    error: string | null;
+};
+
+export type DictionaryUpdateResult = {
+    dictionaryTitle: string;
+    status: 'updated' | 'no-update' | 'not-updatable' | 'skipped';
+    latestRevision: string | null;
+    error: string | null;
+};
 
 export type MecabParseResults = [
     dictionary: string,
@@ -33,6 +49,12 @@ export type TabInfo = {
 
 export type FindTabsPredicate = (tabInfo: TabInfo) => boolean | Promise<boolean>;
 
-export type CanAddResults = {note: import('anki').Note, isDuplicate: boolean}[];
+export type CanAddResult = {
+    note: import('anki').Note;
+    isDuplicate: boolean;
+    cachedNoteIds?: import('anki').NoteId[] | null;
+};
+
+export type CanAddResults = CanAddResult[];
 
 export type Mode = 'existingOrNewTab' | 'newTab' | 'popup';

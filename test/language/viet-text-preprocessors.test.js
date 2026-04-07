@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2020-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {normalizeDiacritics} from '../../ext/js/language/vi/viet-text-preprocessors.js';
 import {describe, expect, test} from 'vitest';
+import {normalizeDiacritics} from '../../ext/js/language/vi/viet-text-preprocessors.js';
 
 const testCasesOldStyle = [
     ['hoạ', 'họa'],
@@ -41,20 +41,17 @@ const testCasesNewStyle = [
 ];
 
 describe('diacritics normalization', () => {
-    const {options, process} = normalizeDiacritics;
-    for (const option of options) {
-        if (option === 'off') { return; }
-
-        describe(`${option} style`, () => {
-            if (option === 'new') {
-                test.each(testCasesNewStyle)('%s normalizes to %s', (input, expected) => {
-                    expect(process(input, option)).toStrictEqual(expected);
-                });
-            } else {
-                test.each(testCasesOldStyle)('%s normalizes to %s', (input, expected) => {
-                    expect(process(input, option)).toStrictEqual(expected);
-                });
-            }
+    describe('old style', () => {
+        test.each(testCasesOldStyle)('%s normalizes to %s', (input, expected) => {
+            // process returns [original, oldStyle, newStyle]
+            expect(normalizeDiacritics.process(input)[1]).toStrictEqual(expected);
         });
-    }
+    });
+
+    describe('new style', () => {
+        test.each(testCasesNewStyle)('%s normalizes to %s', (input, expected) => {
+            // process returns [original, oldStyle, newStyle]
+            expect(normalizeDiacritics.process(input)[2]).toStrictEqual(expected);
+        });
+    });
 });

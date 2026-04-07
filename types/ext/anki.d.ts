@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ export type NoteFields = {
 export type NoteInfoWrapper = {
     canAdd: boolean;
     valid: boolean;
+    isDuplicate: boolean;
     noteIds: NoteId[] | null;
     noteInfos?: (NoteInfo | null)[] | null;
 };

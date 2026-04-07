@@ -2229,6 +2229,36 @@ export class DictionaryDatabase {
     }
 
     /**
+     * @param {string} dictionaryName
+     * @returns {Promise<import('dictionary-database').DictionaryTermProbe|null>}
+     */
+    async getDictionaryTermProbe(dictionaryName) {
+        await this._termRecordStore.ensureDictionariesLoaded([dictionaryName]);
+        const index = this._termRecordStore.getDictionaryIndex(dictionaryName);
+        for (const ids of index.expression.values()) {
+            for (const id of ids) {
+                const record = this._termRecordStore.getById(id);
+                if (typeof record === 'undefined') { continue; }
+                const expression = this._asString(record.expression).trim();
+                const reading = this._asString(record.reading).trim();
+                if (expression.length === 0 && reading.length === 0) { continue; }
+                return {expression, reading};
+            }
+        }
+        for (const ids of index.reading.values()) {
+            for (const id of ids) {
+                const record = this._termRecordStore.getById(id);
+                if (typeof record === 'undefined') { continue; }
+                const expression = this._asString(record.expression).trim();
+                const reading = this._asString(record.reading).trim();
+                if (expression.length === 0 && reading.length === 0) { continue; }
+                return {expression, reading};
+            }
+        }
+        return null;
+    }
+
+    /**
      * @param {(dictionaryName: string) => boolean} predicate
      * @returns {Promise<string[]>}
      */

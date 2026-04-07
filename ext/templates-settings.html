@@ -103,10 +103,19 @@
 </template>
 <template id="dictionary-menu-template"><div class="popup-menu-container" tabindex="-1" role="dialog"><div class="popup-menu"><div class="popup-menu-body">
     <button type="button" class="popup-menu-item" data-menu-action="showDetails">Details&hellip;</button>
-    <button type="button" class="popup-menu-item" data-menu-action="rename">Rename&hellip;</button>
+    <button type="button" class="popup-menu-item" data-menu-action="edit">Edit metadata&hellip;</button>
+    <button type="button" class="popup-menu-item" data-menu-action="rename">Rename display name&hellip;</button>
     <button type="button" class="popup-menu-item" data-menu-action="moveTo">Move to&hellip;</button>
     <button type="button" class="popup-menu-item" data-menu-action="delete">Delete</button>
 </div></div></div></template>
+<template id="dictionary-import-source-template"><div class="settings-item dictionary-import-source">
+    <div class="settings-item-inner">
+        <div class="settings-item-left">
+            <div class="settings-item-label dictionary-import-source-title"></div>
+            <div class="settings-item-description dictionary-import-source-description"></div>
+        </div>
+    </div>
+</div></template>
 <template id="secondary-search-dictionary-template"><div class="secondary-search-dictionary-item horizontal-flex">
     <label class="toggle"><input type="checkbox" class="dictionary-allow-secondary-searches"><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
     <span class="horizontal-flex-fill"><strong class="dictionary-title"></strong> <span class="light dictionary-revision"></span></span>

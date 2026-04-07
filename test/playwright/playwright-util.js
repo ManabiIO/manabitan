@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  */
 
 import {test as base, chromium} from '@playwright/test';
+import {createHash} from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import {fileURLToPath} from 'url';
@@ -26,6 +27,26 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 export const root = path.join(dirname, '..', '..');
 
 const manifestPath = path.join(root, 'ext', 'manifest.json');
+
+/**
+ * @returns {string|null}
+ */
+function getConfiguredExtensionId() {
+    if (!fs.existsSync(manifestPath)) {
+        return null;
+    }
+
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    if (typeof manifest?.key !== 'string' || manifest.key.length === 0) {
+        return null;
+    }
+
+    const hash = createHash('sha256')
+        .update(Buffer.from(manifest.key, 'base64'))
+        .digest('hex')
+        .slice(0, 32);
+    return [...hash].map((character) => String.fromCharCode('a'.charCodeAt(0) + Number.parseInt(character, 16))).join('');
+}
 
 export const test = base.extend({
     // eslint-disable-next-line no-empty-pattern
@@ -39,13 +60,21 @@ export const test = base.extend({
         }
 
         const pathToExtension = path.join(root, 'ext');
+        const runHeadless = (process.env.MANABITAN_CHROMIUM_HEADLESS ?? (process.platform === 'win32' ? '0' : '1')).trim() === '1';
+        const hideWindow = (process.env.MANABITAN_CHROMIUM_HIDE_WINDOW ?? (process.platform === 'win32' ? '1' : '0')).trim() === '1';
+        /** @type {string[]} */
+        const launchArgs = [
+            `--disable-extensions-except=${pathToExtension}`,
+            `--load-extension=${pathToExtension}`,
+            '--disable-crash-reporter',
+            '--disable-crashpad',
+        ];
+        if (!runHeadless && hideWindow) {
+            launchArgs.push('--window-position=3000,3000', '--window-size=1280,800', '--start-minimized');
+        }
         const context = await chromium.launchPersistentContext('', {
-            // Disabled: headless: false,
-            args: [
-                '--headless=new',
-                `--disable-extensions-except=${pathToExtension}`,
-                `--load-extension=${pathToExtension}`,
-            ],
+            headless: runHeadless,
+            args: launchArgs,
         });
         try {
             await use(context);
@@ -57,52 +86,51 @@ export const test = base.extend({
         }
     },
     extensionId: async ({context}, use) => {
-        let [background] = context.serviceWorkers();
-        if (!background) {
-            background = await context.waitForEvent('serviceworker', {timeout: 15_000});
+        const configuredExtensionId = getConfiguredExtensionId();
+        if (configuredExtensionId !== null) {
+            await use(configuredExtensionId);
+            return;
         }
 
-        const extensionId = background.url().split('/')[2];
-        await use(extensionId);
+        const deadline = Date.now() + 45_000;
+        while (Date.now() < deadline) {
+            const [background] = context.serviceWorkers();
+            if (background) {
+                await use(background.url().split('/')[2]);
+                return;
+            }
+
+            const extensionPage = context.pages().find((page) => page.url().startsWith('chrome-extension://'));
+            if (extensionPage) {
+                await use(extensionPage.url().split('/')[2]);
+                return;
+            }
+
+            const timeout = Math.max(1, Math.min(5_000, deadline - Date.now()));
+            try {
+                const eventResult = await Promise.any([
+                    context.waitForEvent('serviceworker', {timeout}).then((serviceWorker) => serviceWorker.url()),
+                    context.waitForEvent('page', {timeout}).then((page) => page.url()),
+                ]);
+                if (eventResult.startsWith('chrome-extension://')) {
+                    await use(eventResult.split('/')[2]);
+                    return;
+                }
+            } catch (_) {
+                // Retry until the extension worker or page is available.
+            }
+
+            const extensionPageAfterEvent = context.pages().find((page) => page.url().startsWith('chrome-extension://'));
+            if (extensionPageAfterEvent) {
+                await use(extensionPageAfterEvent.url().split('/')[2]);
+                return;
+            }
+        }
+        throw new Error('Unable to discover extension id');
     },
 });
 
 export const expect = test.expect;
-
-/**
- * @returns {Map<string, string>}
- */
-export function getMockModelFields() {
-    return new Map([
-        ['Word', '{expression}'],
-        ['Reading', '{furigana-plain}'],
-        ['Sentence', '{clipboard-text}'],
-        ['Audio', '{audio}'],
-    ]);
-}
-
-/**
- * @param {import('playwright').Route} route
- * @returns {Promise<void>}
- */
-export async function mockAnkiRouteHandler(route) {
-    try {
-        /** @type {unknown} */
-        const requestJson = route.request().postDataJSON();
-        if (typeof requestJson !== 'object' || requestJson === null) {
-            throw new Error(`Invalid request type: ${typeof requestJson}`);
-        }
-        const body = getResponseBody(/** @type {import('core').SerializableObject} */ (requestJson).action);
-        const responseJson = {
-            status: 200,
-            contentType: 'text/json',
-            body: JSON.stringify(body),
-        };
-        await route.fulfill(responseJson);
-    } catch {
-        return await route.abort();
-    }
-}
 
 /**
  * @param {import('playwright').Page} page
@@ -110,57 +138,9 @@ export async function mockAnkiRouteHandler(route) {
  * @returns {Promise<void>}
  */
 export const writeToClipboardFromPage = async (page, text) => {
+    await page.bringToFront();
+    await page.evaluate(() => {
+        window.focus();
+    });
     await page.evaluate(`navigator.clipboard.writeText('${text}')`);
 };
-
-/**
- * @returns {Record<string, unknown>}
- */
-export function getExpectedAddNoteBody() {
-    return {
-        version: 2,
-        action: 'addNote',
-        params: {
-            note: {
-                fields: {
-                    Word: '読む',
-                    Reading: '読[よ]む',
-                    Audio: '[sound:mock_audio.mp3]',
-                    Sentence: '読むの例文',
-                },
-                tags: ['yomitan'],
-                deckName: 'Mock Deck',
-                modelName: 'Mock Model',
-                options: {
-                    allowDuplicate: true,
-                    duplicateScope: 'collection',
-                    duplicateScopeOptions: {
-                        deckName: null,
-                        checkChildren: false,
-                        checkAllModels: false,
-                    },
-                },
-            },
-        },
-    };
-}
-
-/**
- * @param {unknown} action
- * @returns {unknown}
- * @throws {Error}
- */
-function getResponseBody(action) {
-    switch (action) {
-        case 'version': return 6;
-        case 'deckNames': return ['Mock Deck'];
-        case 'modelNames': return ['Mock Model'];
-        case 'modelFieldNames': return [...getMockModelFields().keys()];
-        case 'canAddNotes': return [true, true];
-        case 'canAddNotesWithErrorDetail': return [{canAdd: true}, {canAdd: true}];
-        case 'storeMediaFile': return 'mock_audio.mp3';
-        case 'addNote': return 102312488912;
-        case 'multi': return [];
-        default: throw new Error(`Unknown action: ${action}`);
-    }
-}

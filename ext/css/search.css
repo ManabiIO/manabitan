@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2020-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -40,6 +40,10 @@
 :root[data-theme=dark] {
     --separator-color1: #333333;
 }
+:root[data-theme-preset^=glass] {
+    --background-color: transparent;
+    --separator-color1: transparent;
+}
 
 /* Common styles */
 :root {
@@ -52,6 +56,9 @@ body {
     color: var(--text-color);
     height: 100%;
     overflow: hidden;
+}
+:root[data-theme-preset^=glass] body {
+    background: transparent;
 }
 .search-header {
     padding-left: var(--search-scroll-container-horizontal-padding);
@@ -214,6 +221,18 @@ h1 {
 }
 .search-option:not([hidden]) {
     display: flex;
+}
+:root[data-theme-preset^=glass] #search-textbox,
+:root[data-theme-preset^=glass] .search-button,
+:root[data-theme-preset^=glass] .clear-button {
+    background: var(--glass-panel-background);
+    border: 1px solid var(--glass-panel-border-color);
+    border-radius: 12px;
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+}
+:root[data-theme-preset^=glass] .search-textbox-container {
+    gap: 0.35em;
 }
 .search-option-label {
     padding-left: 0.5em;

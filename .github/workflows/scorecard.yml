@@ -8,7 +8,7 @@ on:
   schedule:
     - cron: "34 17 * * 1"
   push:
-    branches: ["master"]
+    branches: ["main"]
 
 # Declare default permissions as read only.
 permissions: read-all
@@ -38,11 +38,9 @@ jobs:
         with:
           results_file: results.sarif
           results_format: sarif
-          # (Optional) "write" PAT token. Uncomment the `repo_token` line below if:
-          # - you want to enable the Branch-Protection check on a *public* repository, or
-          # - you are installing Scorecard on a *private* repository
-          # To create the PAT, follow the steps in https://github.com/ossf/scorecard-action#authentication-with-pat.
-          repo_token: ${{ secrets.SCORECARD_TOKEN }}
+          # Use the workflow token for this public repository so Scorecard can
+          # authenticate consistently without relying on an optional extra secret.
+          repo_token: ${{ github.token }}
 
           # Public repositories:
           #   - Publish results to OpenSSF REST API for easy access by consumers

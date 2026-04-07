@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,14 +18,33 @@
 import codspeedPlugin from '@codspeed/vitest-plugin';
 import {configDefaults, defineConfig} from 'vitest/config';
 
+const sharedExclude = [
+    ...configDefaults.exclude,
+    '.codex-worktrees/**',
+    '**/.codex-worktrees/**',
+    'builds/**',
+    '**/builds/**',
+    'dev/lib/**',
+    'ext/lib/**',
+    'test/playwright/**',
+];
+
 export default defineConfig({
     plugins: [codspeedPlugin()],
     test: {
+        setupFiles: [
+            './test/vitest.setup.js',
+        ],
+        benchmark: {
+            include: [
+                '**/*.bench.js',
+            ],
+            exclude: sharedExclude,
+        },
         exclude: [
-            ...configDefaults.exclude,
-            'dev/lib/**',
-            'test/playwright/**',
+            ...sharedExclude,
             'test/json.test.js',
+            '.tmp-*.test.js',
         ],
         poolOptions: {
             threads: {

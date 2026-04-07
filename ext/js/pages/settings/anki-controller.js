@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2019-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@ import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {ExtensionError} from '../../core/extension-error.js';
 import {log} from '../../core/log.js';
 import {toError} from '../../core/to-error.js';
+import {buildAnkiFieldsForModel, getDefaultAnkiFieldValue} from '../../data/anki-note-type-field-util.js';
 import {getDynamicFieldMarkers, getStandardFieldMarkers} from '../../data/anki-template-util.js';
 import {stringContainsAnyFieldMarker} from '../../data/anki-util.js';
 import {getRequiredPermissionsForAnkiFieldValue, hasPermissions, setPermissionsGranted} from '../../data/permissions-util.js';
@@ -1158,10 +1159,14 @@ class AnkiCardController {
 
         let fieldNames;
         let options;
+        /** @type {import('dictionary-importer').Summary[]} */
+        let dictionaryInfo = [];
         try {
             this._modelChangingTo = value;
-            fieldNames = await this._ankiController.getModelFieldNames(value);
-            options = await this._ankiController.settingsController.getOptions();
+            [fieldNames, options] = await Promise.all([
+                this._ankiController.getModelFieldNames(value),
+                this._ankiController.settingsController.getOptions(),
+            ]);
         } catch (e) {
             // Revert
             select.value = this._modelController.value;
@@ -1172,16 +1177,24 @@ class AnkiCardController {
 
         const cardFormat = this._getCardFormat(options.anki, this._cardFormatIndex);
         const oldFields = cardFormat !== null ? cardFormat.fields : null;
-
-        /** @type {import('settings').AnkiFields} */
-        const fields = {};
-        for (let i = 0, ii = fieldNames.length; i < ii; ++i) {
-            const fieldName = fieldNames[i];
-            fields[fieldName] = {
-                value: this._getDefaultFieldValue(fieldName, i, cardFormat.type, oldFields),
-                overwriteMode: 'coalesce',
-            };
+        if (cardFormat.type === 'term') {
+            try {
+                dictionaryInfo = await this._ankiController.settingsController.getDictionaryInfo();
+            } catch (e) {
+                // If dictionary info is unavailable, presets can still be applied without a primary dictionary marker.
+            }
         }
+        const fields = buildAnkiFieldsForModel({
+            modelName: value,
+            fieldNames,
+            dictionaryEntryType: cardFormat.type,
+            oldFields,
+            dynamicFieldMarkers: (
+                cardFormat.type === 'term' ?
+                getDynamicFieldMarkers(options.dictionaries, dictionaryInfo) :
+                []
+            ),
+        });
 
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [
@@ -1272,58 +1285,7 @@ class AnkiCardController {
      * @returns {string}
      */
     _getDefaultFieldValue(fieldName, index, dictionaryEntryType, oldFields) {
-        if (
-            typeof oldFields === 'object' &&
-            oldFields !== null &&
-            Object.prototype.hasOwnProperty.call(oldFields, fieldName)
-        ) {
-            return oldFields[fieldName].value;
-        }
-
-        if (index === 0) {
-            return (dictionaryEntryType === 'kanji' ? '{character}' : '{expression}');
-        }
-
-        const markers = getStandardFieldMarkers(dictionaryEntryType);
-        const markerAliases = new Map([
-            ['expression', ['phrase', 'term', 'word']],
-            ['reading', ['expression-reading', 'term-reading', 'word-reading']],
-            ['furigana', ['expression-furigana', 'term-furigana', 'word-furigana']],
-            ['glossary', ['definition', 'meaning']],
-            ['audio', ['sound', 'word-audio', 'term-audio', 'expression-audio']],
-            ['dictionary', ['dict']],
-            ['pitch-accents', ['pitch', 'pitch-accent', 'pitch-pattern']],
-            ['sentence', ['example-sentence']],
-            ['frequency-harmonic-rank', ['freq', 'frequency', 'freq-sort', 'freqency-sort']],
-            ['popup-selection-text', ['selection']],
-            ['pitch-accent-positions', ['pitch-position']],
-            ['pitch-accent-categories', ['pitch-categories']],
-            ['popup-selection-text', ['selection-text']],
-        ]);
-
-        const hyphenPattern = /-/g;
-        for (const marker of markers) {
-            const names = [marker];
-            const aliases = markerAliases.get(marker);
-            if (typeof aliases !== 'undefined') {
-                names.push(...aliases);
-            }
-
-            let pattern = '^(?:';
-            for (let i = 0, ii = names.length; i < ii; ++i) {
-                const name = names[i];
-                if (i > 0) { pattern += '|'; }
-                pattern += name.replace(hyphenPattern, '[-_ ]*');
-            }
-            pattern += ')$';
-            const patternRegExp = new RegExp(pattern, 'i');
-
-            if (patternRegExp.test(fieldName)) {
-                return `{${marker}}`;
-            }
-        }
-
-        return '';
+        return getDefaultAnkiFieldValue(fieldName, index, dictionaryEntryType, oldFields);
     }
 
     /** @type {import('dictionary').DictionaryEntryType} */

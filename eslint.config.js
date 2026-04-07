@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024-2025  Yomitan Authors
+ * Copyright (C) 2024-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ const manabitanHeaderFiles = [
     'ext/js/core/diagnostics-reporter.js',
 ];
 
-const upstreamCopyrightPattern = ' \\* Copyright \\(C\\) (20(23|24)-)?2025  Yomitan Authors(\n \\* Copyright \\(C\\) (20(16|17|18|19|20|21)-)?2022  Yomichan Authors)?\n \\*\n \\* This program is free software: you can redistribute it and/or modify\n \\* it under the terms of the GNU General Public License as published by\n \\* the Free Software Foundation, either version 3 of the License, or\n \\* \\(at your option\\) any later version\\.\n \\*\n \\* This program is distributed in the hope that it will be useful,\n \\* but WITHOUT ANY WARRANTY; without even the implied warranty of\n \\* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\\.  See the\n \\* GNU General Public License for more details\\.\n \\*\n \\* You should have received a copy of the GNU General Public License\n \\* along with this program\\.  If not, see <https://www\\.gnu\\.org/licenses/>\\.\n ';
+const upstreamCopyrightPattern = ' \\* Copyright \\(C\\) (20(23|24|25)-)?202(5|6)  Yomitan Authors(\n \\* Copyright \\(C\\) (20(16|17|18|19|20|21)-)?2022  Yomichan Authors)?\n \\*\n \\* This program is free software: you can redistribute it and/or modify\n \\* it under the terms of the GNU General Public License as published by\n \\* the Free Software Foundation, either version 3 of the License, or\n \\* \\(at your option\\) any later version\\.\n \\*\n \\* This program is distributed in the hope that it will be useful,\n \\* but WITHOUT ANY WARRANTY; without even the implied warranty of\n \\* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\\.  See the\n \\* GNU General Public License for more details\\.\n \\*\n \\* You should have received a copy of the GNU General Public License\n \\* along with this program\\.  If not, see <https://www\\.gnu\\.org/licenses/>\\.\n ';
 const manabitanCopyrightPattern = ' \\* Copyright \\(C\\) 2026 {1,2}Manabitan authors\n \\*\n \\* This program is free software: you can redistribute it and/or modify\n \\* it under the terms of the GNU General Public License as published by\n \\* the Free Software Foundation, either version 3 of the License, or\n \\* \\(at your option\\) any later version\\.\n \\*\n \\* This program is distributed in the hope that it will be useful,\n \\* but WITHOUT ANY WARRANTY; without even the implied warranty of\n \\* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\\.  See the\n \\* GNU General Public License for more details\\.\n \\*\n \\* You should have received a copy of the GNU General Public License\n \\* along with this program\\.  If not, see <https://www\\.gnu\\.org/licenses/>\\.\n ';
 
 /**
@@ -86,7 +86,7 @@ async function getDependencies(scriptPaths) {
  */
 export default [
     {
-        ignores: ['ext/lib/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/'],
+        ignores: ['.tmp-*', 'ext/lib/', 'ext/js/dictionary/mdx/vendor/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],
     },
     ...compat.extends(
         'eslint:recommended',
@@ -810,6 +810,16 @@ export default [
     },
     {
         files: [
+            'ext/js/dictionary/mdx/mdx-converter.js',
+        ],
+
+        rules: {
+            '@typescript-eslint/no-unsafe-argument': 'off',
+            '@typescript-eslint/no-unsafe-assignment': 'off',
+        },
+    },
+    {
+        files: [
             'test/**/*.js',
             'dev/**/*.js',
             '**/integration.spec.js',
@@ -866,6 +876,40 @@ export default [
         ...vitest.configs.recommended,
         rules: {
             'vitest/prefer-to-be': 'off',
+        },
+    },
+    ...compat.extends('plugin:@typescript-eslint/disable-type-checked').map((config) => ({
+        ...config,
+        files: [
+            'benches/**/*.js',
+            'test/**/*.js',
+        ],
+    })),
+    {
+        files: [
+            'benches/**/*.js',
+            'test/**/*.js',
+        ],
+
+        rules: {
+            'header/header': 'off',
+            'no-restricted-syntax': 'off',
+            'no-shadow': 'off',
+            'no-underscore-dangle': 'off',
+            'no-undefined': 'off',
+            '@stylistic/eol-last': 'off',
+            '@stylistic/padding-line-between-statements': 'off',
+            '@stylistic/quote-props': 'off',
+            '@typescript-eslint/no-shadow': 'off',
+            '@typescript-eslint/no-unused-vars': 'off',
+            'jsdoc/no-undefined-types': 'off',
+            'jsdoc/require-jsdoc': 'off',
+            'jsdoc/require-returns-check': 'off',
+            'jsdoc/require-throws': 'off',
+            'sonarjs/no-duplicated-branches': 'off',
+            'unicorn/catch-error-name': 'off',
+            'unicorn/prefer-export-from': 'off',
+            'unicorn/prefer-native-coercion-functions': 'off',
         },
     },
     ...compat.extends('plugin:@typescript-eslint/disable-type-checked').map((config) => ({

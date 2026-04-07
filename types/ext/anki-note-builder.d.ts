@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,20 @@ export type CreateNoteDetails = {
     compactTags: boolean;
     mediaOptions: MediaOptions | null;
     dictionaryStylesMap: Map<string, string>;
+};
+
+export type CreateDuplicateCheckNoteDetails = {
+    dictionaryEntry: Dictionary.DictionaryEntry;
+    cardFormat: Settings.AnkiCardFormat;
+    context: AnkiTemplatesInternal.Context;
+    template: string;
+    tags?: string[];
+    duplicateScope?: Settings.AnkiDuplicateScope;
+    duplicateScopeCheckAllModels?: boolean;
+    resultOutputMode?: Settings.ResultOutputMode;
+    glossaryLayoutMode?: Settings.GlossaryLayoutMode;
+    compactTags?: boolean;
+    dictionaryStylesMap?: Map<string, string>;
 };
 
 export type Field = [

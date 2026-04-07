@@ -259,6 +259,20 @@ class OffscreenDictionaryWorkerHandler {
                     /** @type {string[]} */ (params.dictionaryNames ?? []),
                     params.getTotal === true,
                 );
+            case 'getDictionaryTermProbeOffscreen':
+                this._assertDatabaseAvailable(action);
+                await this._ensureDatabasePrepared();
+                return await this._dictionaryDatabase.getDictionaryTermProbe(
+                    /** @type {string} */ (params.dictionaryTitle ?? ''),
+                );
+            case 'findTermsBulkOffscreen':
+                this._assertDatabaseAvailable(action);
+                await this._ensureDatabasePrepared();
+                return await this._dictionaryDatabase.findTermsBulk(
+                    /** @type {string[]} */ (params.termList ?? []),
+                    new Set(/** @type {string[]} */ (params.dictionaryNames ?? [])),
+                    /** @type {import('dictionary-database').MatchType} */ (params.matchType ?? 'exact'),
+                );
             case 'debugDictionaryStorageStateOffscreen':
                 this._assertDatabaseAvailable(action);
                 await this._ensureDatabasePrepared();

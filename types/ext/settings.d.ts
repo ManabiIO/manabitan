@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,10 +64,12 @@ export type Options = {
 export type GlobalOptions = {
     database: GlobalDatabaseOptions;
     dataTransmissionConsentShown: boolean;
+    dictionaryAutoUpdates: string[];
 };
 
 export type GlobalDatabaseOptions = {
     prefixWildcardsSupported: boolean;
+    maxHeadwordLength: number;
 };
 
 export type Profile = {
@@ -133,6 +135,7 @@ export type GeneralOptions = {
     glossaryLayoutMode: GlossaryLayoutMode;
     mainDictionary: string;
     popupTheme: PopupTheme;
+    popupThemePreset: PopupThemePreset;
     popupOuterTheme: PopupOuterTheme;
     customPopupCss: string;
     customPopupOuterCss: string;
@@ -151,6 +154,11 @@ export type GeneralOptions = {
     termDisplayMode: TermDisplayMode;
     sortFrequencyDictionary: string | null;
     sortFrequencyDictionaryOrder: SortFrequencyDictionaryOrder;
+    popupBlurByFrequencyEnabled: boolean;
+    popupBlurByFrequencyDictionary: string | null;
+    popupBlurByFrequencyThreshold: number;
+    popupBlurByFrequencyOrder: SortFrequencyDictionaryOrder;
+    popupBlurByFrequencyUnblurDelay: number;
     stickySearchHeader: boolean;
     enableYomitanApi: boolean;
     yomitanApiAllowCssSanitizationBypass: boolean;
@@ -314,6 +322,7 @@ export type AnkiOptions = {
     apiKey: string;
     downloadTimeout: number;
     forceSync: boolean;
+    noteDupeCheckFirst: boolean;
 };
 
 export type AnkiScreenshotOptions = {
@@ -402,6 +411,8 @@ export type PopupVerticalTextPosition = 'default' | 'before' | 'after' | 'left' 
 export type GlossaryLayoutMode = 'default' | 'compact' | 'compact-popup-anki';
 
 export type PopupTheme = 'light' | 'dark' | 'browser' | 'site';
+
+export type PopupThemePreset = 'default' | 'glass' | 'glass-autumnal' | 'glass-tokyo-night';
 
 export type PopupOuterTheme = 'light' | 'dark' | 'browser' | 'site' | 'none';
 

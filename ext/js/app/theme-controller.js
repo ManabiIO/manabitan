@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,9 @@ export class ThemeController {
         /** @type {?HTMLElement} */
         this._element = element;
         /** @type {import("settings.js").PopupTheme} */
-        this._theme = 'site';
+        this._theme = 'browser';
+        /** @type {import("settings.js").PopupThemePreset} */
+        this._themePreset = 'default';
         /** @type {import("settings.js").PopupOuterTheme} */
         this._outerTheme = 'site';
         /** @type {?('dark'|'light')} */
@@ -69,6 +71,22 @@ export class ThemeController {
      */
     set theme(value) {
         this._theme = value;
+    }
+
+    /**
+     * Gets the visual preset for the content.
+     * @type {import("settings.js").PopupThemePreset}
+     */
+    get themePreset() {
+        return this._themePreset;
+    }
+
+    /**
+     * Sets the visual preset for the content.
+     * @param {import("settings.js").PopupThemePreset} value The preset value to assign.
+     */
+    set themePreset(value) {
+        this._themePreset = value;
     }
 
     /**
@@ -131,11 +149,12 @@ export class ThemeController {
         if (this._element === null) { return; }
         const computedSiteTheme = this._siteTheme !== null ? this._siteTheme : this.computeSiteTheme();
         const data = this._element.dataset;
-        data.theme = this._resolveThemeValue(this._theme, computedSiteTheme);
+        data.theme = this._resolveThemePresetValue(this._resolveThemeValue(this._theme, computedSiteTheme), this._themePreset);
         data.outerTheme = this._resolveThemeValue(this._outerTheme, computedSiteTheme);
         data.siteTheme = computedSiteTheme;
         data.browserTheme = this._browserTheme;
         data.themeRaw = this._theme;
+        data.themePreset = this._themePreset;
         data.outerThemeRaw = this._outerTheme;
     }
 
@@ -176,6 +195,21 @@ export class ThemeController {
             case 'site': return this.siteOverride ? this._browserTheme : computedSiteTheme;
             case 'browser': return this._browserTheme;
             default: return theme;
+        }
+    }
+
+    /**
+     * Resolves a theme preset to the actual base theme value which should be used.
+     * @param {string} theme The resolved base theme value.
+     * @param {import("settings.js").PopupThemePreset} themePreset The theme preset value.
+     * @returns {string} The resolved theme value after applying preset-specific constraints.
+     */
+    _resolveThemePresetValue(theme, themePreset) {
+        switch (themePreset) {
+            case 'glass-tokyo-night':
+                return 'dark';
+            default:
+                return theme;
         }
     }
 

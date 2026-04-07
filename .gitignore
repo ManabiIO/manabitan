@@ -1,10 +1,15 @@
 .DS_Store
 
+/.codex-worktrees/
+/.env
+
 node_modules/
 
 builds/
 
 dictionaries/
+
+**/__pycache__/
 
 /test-results/
 /playwright-report/
@@ -14,3 +19,4 @@ dictionaries/
 ext/manifest.json
 
 ext/lib/*
+/.tmp-*

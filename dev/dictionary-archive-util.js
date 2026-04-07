@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024-2025  Yomitan Authors
+ * Copyright (C) 2024-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {BlobWriter, TextReader, TextWriter, Uint8ArrayReader, ZipReader, ZipWriter} from '@zip.js/zip.js';
+import {BlobWriter, TextWriter, Uint8ArrayReader, ZipReader, ZipWriter} from '@zip.js/zip.js';
 import {readFileSync, readdirSync} from 'fs';
 import {join} from 'path';
 import {parseJson} from './json.js';
@@ -42,10 +42,10 @@ export async function createDictionaryArchiveData(dictionaryDirectory, dictionar
             if (fileName === 'index.json' && typeof dictionaryName === 'string') {
                 json.title = dictionaryName;
             }
-            await zipWriter.add(fileName, new TextReader(JSON.stringify(json, null, 0)));
+            await zipWriter.add(fileName, new Uint8ArrayReader(Buffer.from(JSON.stringify(json, null, 0), 'utf8')));
         } else {
             const content = readFileSync(join(dictionaryDirectory, fileName), {encoding: null});
-            await zipWriter.add(fileName, new Blob([content]).stream());
+            await zipWriter.add(fileName, new Uint8ArrayReader(content));
         }
     }
     const blob = await zipWriter.close();

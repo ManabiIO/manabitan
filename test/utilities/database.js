@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,27 @@ export function setupStubs() {
             name: 'Window',
         },
     });
+    const sqlite3ApiConfig = /** @type {{warn?: ((...args: unknown[]) => void)}|undefined} */ (Reflect.get(globalThis, 'sqlite3ApiConfig'));
+    /**
+     * @param {...unknown} args
+     * @returns {void}
+     */
+    const warn = (...args) => {
+        if (typeof args[0] === 'string' && args[0].startsWith('Ignoring inability to install OPFS sqlite3_vfs:')) {
+            return;
+        }
+        if (typeof sqlite3ApiConfig?.warn === 'function') {
+            sqlite3ApiConfig.warn(...args);
+            return;
+        }
+        console.warn(...args);
+    };
+    Reflect.set(globalThis, 'sqlite3ApiConfig', {
+        ...sqlite3ApiConfig,
+        warn,
+    });
 
-    // eslint-disable-next-line jsdoc/require-jsdoc
+
     function Worker() {
         return {
             addEventListener: () => {},

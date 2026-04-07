@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ vi.stubGlobal('fetch', fetch);
 export async function createAnkiTemplateRendererTest() {
     const test = createDomTest(void 0);
     // @ts-expect-error - Document and Window are not accessible in this test and is not accessed, allow it to be undefined
-    // eslint-disable-next-line no-undefined
+
     const ankiTemplateRenderer = new AnkiTemplateRenderer(undefined, undefined);
     await ankiTemplateRenderer.prepare();
     /** @type {import('vitest').TestAPI<{window: import('jsdom').DOMWindow, ankiTemplateRenderer: AnkiTemplateRenderer}>} */

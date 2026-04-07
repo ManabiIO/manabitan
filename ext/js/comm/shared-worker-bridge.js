@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024-2025  Yomitan Authors
+ * Copyright (C) 2024-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,12 +47,32 @@ export class SharedWorkerBridge {
     constructor() {
         /** @type {MessagePort?} */
         this._backendPort = null;
+        /** @type {MessagePort[]} */
+        this._pendingBackendConnectionPorts = [];
 
         /** @type {import('shared-worker').ApiMap} */
         this._apiMap = createApiMap([
             ['registerBackendPort', this._onRegisterBackendPort.bind(this)],
             ['connectToBackend1', this._onConnectToBackend1.bind(this)],
         ]);
+    }
+
+    /**
+     * @param {MessagePort} port
+     * @returns {boolean}
+     */
+    _postBackendConnectionPort(port) {
+        if (this._backendPort === null) {
+            return false;
+        }
+        try {
+            this._backendPort.postMessage(void 0, [port]); // connectToBackend2
+            return true;
+        } catch (error) {
+            this._backendPort = null;
+            log.error(error instanceof Error ? error : new Error(String(error)));
+            return false;
+        }
     }
 
     /**
@@ -77,14 +97,34 @@ export class SharedWorkerBridge {
     /** @type {import('shared-worker').ApiHandler<'registerBackendPort'>} */
     _onRegisterBackendPort(_params, interlocutorPort, _ports) {
         this._backendPort = interlocutorPort;
+        interlocutorPort.addEventListener('messageerror', (event) => {
+            if (this._backendPort === interlocutorPort) {
+                this._backendPort = null;
+            }
+            const error = new ExtensionError('SharedWorkerBridge: backend port message deserialization failed');
+            error.data = event;
+            log.error(error);
+        });
+        if (this._pendingBackendConnectionPorts.length === 0) {
+            return;
+        }
+        const pendingPorts = this._pendingBackendConnectionPorts.splice(0, this._pendingBackendConnectionPorts.length);
+        for (const pendingPort of pendingPorts) {
+            if (!this._postBackendConnectionPort(pendingPort)) {
+                break;
+            }
+        }
     }
 
     /** @type {import('shared-worker').ApiHandler<'connectToBackend1'>} */
     _onConnectToBackend1(_params, _interlocutorPort, ports) {
-        if (this._backendPort !== null) {
-            this._backendPort.postMessage(void 0, [ports[0]]); // connectToBackend2
-        } else {
-            log.warn('SharedWorkerBridge: backend port is not registered; this can happen if one of the content scripts loads faster than the backend when extension is reloading');
+        if (ports.length === 0) {
+            log.warn('SharedWorkerBridge: missing backend connection port from interlocutor');
+            return;
+        }
+        if (!this._postBackendConnectionPort(ports[0])) {
+            this._pendingBackendConnectionPorts.push(ports[0]);
+            log.warn('SharedWorkerBridge: backend port is not registered yet; queued backend connection port');
         }
     }
 }

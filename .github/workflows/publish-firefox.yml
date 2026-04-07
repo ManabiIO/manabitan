@@ -19,8 +19,8 @@ jobs:
         uses: cardinalby/webext-buildtools-firefox-addons-action@987e338100095280ec8daf942e5640aeb55d3647 # pin@v1.0.10
         continue-on-error: true
         with:
-          zipFilePath: yomitan-firefox.zip
-          sourcesZipFilePath: yomitan-${{ github.ref_name }}.zip
+          zipFilePath: manabitan-firefox.zip
+          sourcesZipFilePath: manabitan-${{ github.ref_name }}.zip
           extensionId: ${{ secrets.FF_EXTENSION_ID }}
           jwtIssuer: ${{ secrets.FF_JWT_ISSUER }}
           jwtSecret: ${{ secrets.FF_JWT_SECRET }}

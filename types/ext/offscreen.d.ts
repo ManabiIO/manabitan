@@ -79,6 +79,20 @@ type ApiSurface = {
         };
         return: DictionaryDatabase.DictionaryCounts;
     };
+    getDictionaryTermProbeOffscreen: {
+        params: {
+            dictionaryTitle: string;
+        };
+        return: DictionaryDatabase.DictionaryTermProbe | null;
+    };
+    findTermsBulkOffscreen: {
+        params: {
+            termList: string[];
+            dictionaryNames: string[];
+            matchType: DictionaryDatabase.MatchType;
+        };
+        return: DictionaryDatabase.TermEntry[];
+    };
     debugDictionaryStorageStateOffscreen: {
         params: void;
         return: {

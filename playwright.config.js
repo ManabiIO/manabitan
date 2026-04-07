@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,10 @@ import {defineConfig, devices} from '@playwright/test';
  * https://github.com/motdotla/dotenv
  */
 import 'dotenv/config';
+
+// Keep service-worker network events enabled even when contributors do not
+// have a local .env file in the repository root.
+process.env.PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS ??= '1';
 
 const nodeMajorVersion = Number.parseInt(process.versions.node.split('.')[0], 10);
 if (!Number.isFinite(nodeMajorVersion) || nodeMajorVersion < 18 || nodeMajorVersion > 22) {

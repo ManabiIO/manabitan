@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,6 +70,14 @@ export type ImportDetails = {
     updateSessionToken?: string | null;
 };
 
+export type DictionaryAutoUpdateSchedule = 'manual' | 'hourly' | 'daily' | 'weekly';
+
+export type DictionaryAutoUpdateInfo = {
+    schedule: DictionaryAutoUpdateSchedule;
+    lastUpdatedAt: number | null;
+    nextUpdateAt: number | null;
+};
+
 export type Summary = {
     title: string;
     sourceTitle?: string | null;
@@ -95,6 +103,14 @@ export type Summary = {
     targetLanguage?: string;
     frequencyMode?: 'occurrence-based' | 'rank-based';
     importSuccess?: boolean;
+    autoUpdate?: DictionaryAutoUpdateInfo;
+    metadataOverrides?: SummaryMetadataOverrides;
+};
+
+export type SummaryMetadataOverrides = {
+    title?: string;
+    url?: string | null;
+    description?: string | null;
 };
 
 export type SummaryDetails = {
@@ -125,7 +141,8 @@ export type SummaryMetaCount = {
 
 export type ImportRequirement = (
     ImageImportRequirement |
-    StructuredContentImageImportRequirement
+    StructuredContentImageImportRequirement |
+    StructuredContentMediaLinkImportRequirement
 );
 
 export type ImageImportRequirement = {
@@ -142,12 +159,47 @@ export type StructuredContentImageImportRequirement = {
     entry: DictionaryDatabase.DatabaseTermEntry;
 };
 
+export type StructuredContentMediaLinkImportRequirement = {
+    type: 'structured-content-media-link';
+    target: StructuredContent.LinkElement;
+    source: StructuredContent.LinkElement;
+    entry: DictionaryDatabase.DatabaseTermEntry;
+};
+
 export type ImportRequirementContext = {
     fileMap: ArchiveFileMap;
     media: Map<string, DictionaryDatabase.MediaDataArrayBufferContent>;
 };
 
-export type ArchiveFileMap = Map<string, ZipJS.Entry>;
+export type MemoryImportFile = {
+    filename: string;
+    bytes: Uint8Array;
+};
+
+export type ImportFileEntry = ZipJS.Entry | MemoryImportFile;
+
+export type MdxInputFile = {
+    name: string;
+    bytes: Uint8Array;
+};
+
+export type MdxImportOptions = {
+    titleOverride?: string;
+    descriptionOverride?: string;
+    revision?: string;
+    enableAudio?: boolean;
+    includeAssets?: boolean;
+    termBankSize?: number;
+};
+
+export type MdxImportSource = {
+    mdxFileName: string;
+    mdxBytes: Uint8Array;
+    mddFiles: MdxInputFile[];
+    options?: MdxImportOptions;
+};
+
+export type ArchiveFileMap = Map<string, ImportFileEntry>;
 
 /**
  * An array of tuples of a file type inside a dictionary and its corresponding regular expression.
@@ -157,7 +209,7 @@ export type QueryDetails = [fileType: string, fileNameFormat: RegExp][];
 /**
  * A map of file types inside a dictionary and its matching entries.
  */
-export type QueryResult = Map<string, ZipJS.Entry[]>;
+export type QueryResult = Map<string, ImportFileEntry[]>;
 
 export type CompiledSchemaNameArray = [
     termBank: CompiledSchemaName,

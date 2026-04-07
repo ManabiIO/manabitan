@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
  * Copyright (C) 2019-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -47,6 +47,8 @@ export class StorageController {
         this._storageUseInvalidNodes = null;
         /** @type {HTMLElement|null} */
         this._storageRuntimeCheckNode = null;
+        /** @type {string|null} */
+        this._dictionaryBackendRuntimeError = null;
     }
 
     /** */
@@ -117,14 +119,14 @@ export class StorageController {
             this._setElementsVisible(this._storageUseValidNodes, valid);
             this._setElementsVisible(this._storageUseInvalidNodes, !valid);
             this._setElementsVisible(this._storageUseExhaustWarnNodes, storageIsLow);
-            this._updateRuntimeCheck();
+            await this._updateRuntimeCheck();
         } finally {
             this._isUpdating = false;
         }
     }
 
     /** */
-    _updateRuntimeCheck() {
+    async _updateRuntimeCheck() {
         if (this._storageRuntimeCheckNode === null) { return; }
         const userAgent = typeof navigator.userAgent === 'string' ? navigator.userAgent : '';
         const browserLabel = /Firefox\//i.test(userAgent) ? 'Firefox runtime' : 'Extension runtime';
@@ -137,12 +139,58 @@ export class StorageController {
                 'createSyncAccessHandle',
             ) === 'function'
         );
-        const dictionaryBackendUsable = hasStorageGetDirectory && hasCreateSyncAccessHandle;
+        let dictionaryBackendUsable = false;
+        let backendMode = null;
+        let backendStartupError = null;
+        let backendOpenFailureClass = null;
+        try {
+            const storageState = /** @type {unknown} */ (await this._persistentStorageController.application.api.debugDictionaryStorageState());
+            const storageStateRecord = (
+                typeof storageState === 'object' &&
+                storageState !== null &&
+                !Array.isArray(storageState)
+            ) ? /** @type {Record<string, unknown>} */ (storageState) : null;
+            const rawOpenStorageDiagnostics = storageStateRecord !== null ? Reflect.get(storageStateRecord, 'openStorageDiagnostics') : null;
+            const rawStartupDiagnosticsSnapshot = storageStateRecord !== null ? Reflect.get(storageStateRecord, 'startupDiagnosticsSnapshot') : null;
+            /** @type {Record<string, unknown>|null} */
+            let openStorageDiagnostics = null;
+            if (
+                typeof rawOpenStorageDiagnostics === 'object' &&
+                rawOpenStorageDiagnostics !== null &&
+                !Array.isArray(rawOpenStorageDiagnostics)
+            ) {
+                openStorageDiagnostics = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (rawOpenStorageDiagnostics));
+            }
+            /** @type {Record<string, unknown>|null} */
+            let startupDiagnosticsSnapshot = null;
+            if (
+                typeof rawStartupDiagnosticsSnapshot === 'object' &&
+                rawStartupDiagnosticsSnapshot !== null &&
+                !Array.isArray(rawStartupDiagnosticsSnapshot)
+            ) {
+                startupDiagnosticsSnapshot = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (rawStartupDiagnosticsSnapshot));
+            }
+            dictionaryBackendUsable = true;
+            backendMode = typeof openStorageDiagnostics?.mode === 'string' ? openStorageDiagnostics.mode : null;
+            backendOpenFailureClass = typeof openStorageDiagnostics?.openFailureClass === 'string' ? openStorageDiagnostics.openFailureClass : null;
+            backendStartupError = (
+                typeof startupDiagnosticsSnapshot?.dictionaryPrepareError === 'string' &&
+                startupDiagnosticsSnapshot.dictionaryPrepareError.length > 0
+            ) ? startupDiagnosticsSnapshot.dictionaryPrepareError : null;
+            this._dictionaryBackendRuntimeError = backendStartupError;
+        } catch (error) {
+            const normalizedError = error instanceof Error ? error : new Error(String(error));
+            this._dictionaryBackendRuntimeError = normalizedError.message;
+            backendStartupError = normalizedError.message;
+        }
         this._storageRuntimeCheckNode.textContent = (
             `${browserLabel} check:\n` +
             `dictionary backend usable=${String(dictionaryBackendUsable)}\n` +
-            `storage.getDirectory=${String(hasStorageGetDirectory)}\n` +
-            `createSyncAccessHandle=${String(hasCreateSyncAccessHandle)}`
+            `backend mode=${String(backendMode)}\n` +
+            `backend startup error=${String(backendStartupError)}\n` +
+            `backend open failure class=${String(backendOpenFailureClass)}\n` +
+            `page storage.getDirectory=${String(hasStorageGetDirectory)}\n` +
+            `page createSyncAccessHandle=${String(hasCreateSyncAccessHandle)}`
         );
     }
 
