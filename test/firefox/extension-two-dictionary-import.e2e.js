@@ -552,7 +552,8 @@ function isDiscardedBrowsingContextError(value) {
     const message = errorMessage(value);
     return (
         message.includes('Browsing context has been discarded') ||
-        message.includes('Failed to decode response from marionette')
+        message.includes('Failed to decode response from marionette') ||
+        message.includes('Tried to run command without establishing a connection')
     );
 }
 
@@ -757,7 +758,14 @@ function createReportJsonSummary(report) {
  */
 async function addReportPhase(report, driver, name, details, startMs, endMs) {
     console.log(`[firefox-e2e] phase: ${name} (${formatDuration(Math.max(0, endMs - startMs))})`);
-    const screenshotBase64 = String(await driver.takeScreenshot());
+    let screenshotBase64 = '';
+    try {
+        screenshotBase64 = String(await driver.takeScreenshot());
+    } catch (error) {
+        if (!isDiscardedBrowsingContextError(error)) {
+            throw error;
+        }
+    }
     report.phases.push({
         name,
         details,
