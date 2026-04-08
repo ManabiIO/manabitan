@@ -104,7 +104,16 @@ describe('DictionaryImportController staged update profile rewrites', () => {
             controller,
             new File([new Uint8Array([1, 2, 3])], 'Jitendex staged [update-staging token123].zip', {type: 'application/zip'}),
             {
-                'profile-1': {index: 0, alias: 'Jitendex', name: 'Jitendex.org [2025-01-01]', enabled: true},
+                'profile-1': {
+                    index: 0,
+                    alias: 'Jitendex',
+                    name: 'Jitendex.org [2025-01-01]',
+                    enabled: true,
+                    allowSecondarySearches: false,
+                    definitionsCollapsible: 'not-collapsible',
+                    partsOfSpeechFilter: false,
+                    useDeinflections: true,
+                },
             },
             /** @type {import('dictionary-importer').ImportDetails} */ (/** @type {unknown} */ ({
                 replacementDictionaryTitle: 'Jitendex.org [2025-01-01]',
