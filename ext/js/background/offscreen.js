@@ -88,7 +88,7 @@ export class Offscreen {
         this._dictionaryWorkerResponseHandlers = new Map();
         /** @type {number} */
         this._dictionaryWorkerRequestId = 0;
-        /** @type {Error|null} */
+        /** @type {ExtensionError|null} */
         this._dictionaryWorkerFatalError = null;
         this._dictionaryWorker.addEventListener('message', this._onDictionaryWorkerMessage.bind(this));
         this._dictionaryWorker.addEventListener('messageerror', this._onDictionaryWorkerMessageError.bind(this));
@@ -353,13 +353,8 @@ export class Offscreen {
         try {
             await this._invokeDictionaryWorker('importDictionaryOffscreen', {archiveContent, details}, [ports[0]]);
         } catch (error) {
-            try {
-                ports[0].postMessage({type: 'error', error: ExtensionError.serialize(error)});
-            } catch (postMessageError) {
-                log.error(postMessageError);
-            } finally {
-                ports[0].close();
-            }
+            ports[0].postMessage({type: 'error', error: ExtensionError.serialize(error)});
+            ports[0].close();
         }
     }
 
@@ -375,9 +370,8 @@ export class Offscreen {
      * @returns {Promise<any>}
      */
     _invokeDictionaryWorker(action, params, transferables = []) {
-        const fatalError = this._dictionaryWorkerFatalError;
-        if (fatalError !== null) {
-            return Promise.reject(fatalError);
+        if (this._dictionaryWorkerFatalError !== null) {
+            return Promise.reject(this._dictionaryWorkerFatalError);
         }
         const id = ++this._dictionaryWorkerRequestId;
         return new Promise((resolve, reject) => {
@@ -386,26 +380,31 @@ export class Offscreen {
                 this._dictionaryWorker.postMessage({id, action, params}, transferables);
             } catch (error) {
                 this._dictionaryWorkerResponseHandlers.delete(id);
-                const fatalError = error instanceof Error ? error : new Error(String(error));
-                this._dictionaryWorkerFatalError = fatalError;
-                this._rejectPendingDictionaryWorkerRequests(fatalError);
-                reject(fatalError);
+                const normalizedError = error instanceof Error ?
+                    new ExtensionError(error.message) :
+                    new ExtensionError(String(error));
+                this._rejectPendingDictionaryWorkerResponses(normalizedError);
+                reject(normalizedError);
             }
         });
     }
 
     /**
-     * @param {Error} error
+     * @param {ExtensionError} error
      * @returns {void}
      */
-    _rejectPendingDictionaryWorkerRequests(error) {
-        if (this._dictionaryWorkerResponseHandlers.size === 0) {
-            return;
+    _rejectPendingDictionaryWorkerResponses(error) {
+        if (this._dictionaryWorkerFatalError === null) {
+            this._dictionaryWorkerFatalError = error;
         }
-        const handlers = [...this._dictionaryWorkerResponseHandlers.values()];
+        for (const [, handler] of this._dictionaryWorkerResponseHandlers) {
+            handler.reject(error);
+        }
         this._dictionaryWorkerResponseHandlers.clear();
-        for (const {reject} of handlers) {
-            reject(error);
+        try {
+            this._dictionaryWorker.terminate();
+        } catch (_) {
+            // Ignore termination failures after a fatal worker error.
         }
     }
 
@@ -432,10 +431,8 @@ export class Offscreen {
     _onDictionaryWorkerMessageError(event) {
         const error = new ExtensionError('Offscreen: Error receiving dictionary worker message');
         error.data = event;
-        this._dictionaryWorkerFatalError = error;
-        this._rejectPendingDictionaryWorkerRequests(error);
-        this._dictionaryWorker.terminate();
         log.error(error);
+        this._rejectPendingDictionaryWorkerResponses(error);
     }
 
     /**
@@ -449,10 +446,8 @@ export class Offscreen {
             colno: event.colno,
             message: event.message,
         };
-        this._dictionaryWorkerFatalError = error;
-        this._rejectPendingDictionaryWorkerRequests(error);
-        this._dictionaryWorker.terminate();
         log.error(error);
+        this._rejectPendingDictionaryWorkerResponses(error);
     }
 
     /**

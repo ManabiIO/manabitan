@@ -337,8 +337,8 @@ export class Backend {
         } catch (error) {
             try {
                 responsePort?.postMessage({type: 'error', error: ExtensionError.serialize(error)});
-            } catch (postMessageError) {
-                log.error(postMessageError);
+            } catch (_) {
+                // Best effort error delivery to the import caller.
             } finally {
                 responsePort?.close();
             }
@@ -443,10 +443,12 @@ export class Backend {
                 sharedWorkerBridge.port.start();
                 recordPhase('sharedWorkerBridge.setup', startedAt);
             }
-            {
+            try {
                 const startedAt = safePerformance.now();
                 await this._ensureDictionaryDatabaseReady();
                 recordPhase('dictionaryDatabase.prepare', startedAt);
+            } catch (e) {
+                throw e;
             }
 
             void this._translator.prepare();
@@ -914,7 +916,7 @@ export class Backend {
     }
 
     /** @type {import('api').ApiHandler<'getAnkiNoteInfo'>} */
-    async _onApiGetAnkiNoteInfo({notes, fetchAdditionalInfo, fetchDuplicateNoteIds = true}) {
+    async _onApiGetAnkiNoteInfo({notes, fetchAdditionalInfo}) {
         const canAddArray = await this.partitionAddibleNotes(notes);
 
         /** @type {import('anki').NoteInfoWrapper[]} */
@@ -935,7 +937,7 @@ export class Backend {
         }
 
         const duplicateNoteIds =
-            fetchDuplicateNoteIds && duplicateNotes.length > 0 ?
+            duplicateNotes.length > 0 ?
                 await this._anki.findNoteIds(duplicateNotes) :
                 [];
 
@@ -954,7 +956,6 @@ export class Backend {
             const info = {
                 canAdd: valid,
                 valid,
-                isDuplicate,
                 noteIds: noteIds,
                 noteInfos: noteInfos,
             };
@@ -1211,10 +1212,6 @@ export class Backend {
     async _onApiDebugDictionaryStorageState() {
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
-        const getOpenStorageDiagnostics = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'getOpenStorageDiagnostics'));
-        const openStorageDiagnostics = (typeof getOpenStorageDiagnostics === 'function') ?
-            await /** @type {() => Promise<unknown>} */ (getOpenStorageDiagnostics).call(this._dictionaryDatabase) :
-            null;
         const rowsMethod = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'debugGetDictionaryRows'));
         const dictionaryRows = (typeof rowsMethod === 'function') ?
             await /** @type {() => Promise<unknown>} */ (rowsMethod).call(this._dictionaryDatabase) :
@@ -1224,12 +1221,6 @@ export class Backend {
             }))() : null;
         const offscreenDictionaryRowsResult = (offscreenDictionaryRows !== null) ? await offscreenDictionaryRows : null;
         return {
-            startupDiagnosticsSnapshot: this._startupDiagnosticsSnapshot,
-            openStorageDiagnostics: (
-                typeof openStorageDiagnostics === 'object' &&
-                openStorageDiagnostics !== null &&
-                !Array.isArray(openStorageDiagnostics)
-            ) ? openStorageDiagnostics : null,
             dictionaryRows: Array.isArray(dictionaryRows) ? dictionaryRows : [],
             offscreenDictionaryRows: Array.isArray(offscreenDictionaryRowsResult?.dictionaryRows) ? offscreenDictionaryRowsResult.dictionaryRows : [],
             offscreenLastReplaceDictionaryTitleDebug: (
@@ -3245,22 +3236,8 @@ export class Backend {
         }
         /** @type {string[]} */
         const failedBeforeRefresh = [];
-        /** @type {Array<{title: string, stage: 'before-refresh'|'after-refresh', message: string}>} */
-        const verificationErrors = [];
         for (const title of enabledTitles) {
-            let result;
-            try {
-                result = await this._verifyDictionaryVisibilityInternal(title, true);
-            } catch (error) {
-                const normalizedError = error instanceof Error ? error : new Error(String(error));
-                verificationErrors.push({
-                    title,
-                    stage: 'before-refresh',
-                    message: normalizedError.message,
-                });
-                failedBeforeRefresh.push(title);
-                continue;
-            }
+            const result = await this._verifyDictionaryVisibilityInternal(title, true);
             if (!result.ok) {
                 failedBeforeRefresh.push(title);
             }
@@ -3268,34 +3245,14 @@ export class Backend {
         /** @type {string[]} */
         let failedAfterRefresh = [];
         let refreshed = false;
-        /** @type {string|null} */
-        let refreshError = null;
         if (failedBeforeRefresh.length > 0) {
             refreshed = true;
-            try {
-                await this._refreshDictionaryDatabaseAfterUpdate();
-                for (const title of enabledTitles) {
-                    let result;
-                    try {
-                        result = await this._verifyDictionaryVisibilityInternal(title, true);
-                    } catch (error) {
-                        const normalizedError = error instanceof Error ? error : new Error(String(error));
-                        verificationErrors.push({
-                            title,
-                            stage: 'after-refresh',
-                            message: normalizedError.message,
-                        });
-                        failedAfterRefresh.push(title);
-                        continue;
-                    }
-                    if (!result.ok) {
-                        failedAfterRefresh.push(title);
-                    }
+            await this._refreshDictionaryDatabaseAfterUpdate();
+            for (const title of enabledTitles) {
+                const result = await this._verifyDictionaryVisibilityInternal(title, true);
+                if (!result.ok) {
+                    failedAfterRefresh.push(title);
                 }
-            } catch (error) {
-                const normalizedError = error instanceof Error ? error : new Error(String(error));
-                refreshError = normalizedError.message;
-                failedAfterRefresh = [...enabledTitles];
             }
         }
         reportDiagnostics('dictionary-startup-visibility-reconcile-summary', {
@@ -3304,8 +3261,6 @@ export class Backend {
             refreshed,
             failedBeforeRefresh,
             failedAfterRefresh,
-            refreshError,
-            verificationErrors,
         });
     }
 
