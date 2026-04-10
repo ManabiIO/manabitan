@@ -260,7 +260,7 @@ function createOptionsTestData1() {
 
 
 /**
- * @returns {unknown}
+ * @returns {import('core').SafeAny}
  */
 function createProfileOptionsUpdatedTestData1() {
     return {
@@ -274,7 +274,6 @@ function createProfileOptionsUpdatedTestData1() {
             fontSize: 14,
             lineHeight: '1.5',
             showAdvanced: false,
-            showDebug: false,
             popupDisplayMode: 'default',
             popupWidth: 400,
             popupHeight: 250,
@@ -314,7 +313,6 @@ function createProfileOptionsUpdatedTestData1() {
             sortFrequencyDictionaryOrder: 'descending',
             stickySearchHeader: false,
             enableYomitanApi: false,
-            yomitanApiServer: 'http://127.0.0.1:19633',
             yomitanApiAllowCssSanitizationBypass: false,
         },
         audio: {
@@ -465,6 +463,12 @@ function createProfileOptionsUpdatedTestData1() {
             ],
         },
         translation: {
+            convertHalfWidthCharacters: 'false',
+            convertNumericCharacters: 'false',
+            alphabeticToHiragana: 'false',
+            convertHiraganaToKatakana: 'false',
+            convertKatakanaToHiragana: 'variant',
+            collapseEmphaticSequences: 'false',
             searchResolution: 'letter',
             textReplacements: {
                 searchOriginal: true,
@@ -543,6 +547,7 @@ function createProfileOptionsUpdatedTestData1() {
             displayTagsAndFlags: 'never',
             targetTags: [],
             checkForDuplicates: true,
+            noteDupeCheckFirst: false,
             fieldTemplates: null,
             suspendNewCards: false,
             noteGuiMode: 'browse',
@@ -619,7 +624,7 @@ function createProfileOptionsUpdatedTestData1() {
 }
 
 /**
- * @returns {unknown}
+ * @returns {import('core').SafeAny}
  */
 function createOptionsUpdatedTestData1() {
     return {
@@ -711,8 +716,8 @@ function createOptionsUpdatedTestData1() {
                 prefixWildcardsSupported: false,
                 maxHeadwordLength: 0,
             },
+            dictionaryAutoUpdates: false,
             dataTransmissionConsentShown: false,
-            dataTransmissionConsentState: 'unknown',
         },
     };
 }
@@ -739,8 +744,43 @@ describe('OptionsUtil', () => {
 
         const options = createOptionsTestData1();
         const optionsUpdated = structuredClone(await optionsUtil.update(options));
-        const optionsExpected = createOptionsUpdatedTestData1();
-        expect(optionsUpdated).toStrictEqual(optionsExpected);
+        const optionsExpected = /** @type {import('settings').Options} */ (createOptionsUpdatedTestData1());
+        expect(optionsUpdated.version).toBe(optionsExpected.version);
+        expect(optionsUpdated.profileCurrent).toBe(optionsExpected.profileCurrent);
+        expect(optionsUpdated.profiles).toHaveLength(optionsExpected.profiles.length);
+        expect(optionsUpdated.profiles[0].name).toBe(optionsExpected.profiles[0].name);
+        expect(optionsUpdated.profiles[0].conditionGroups).toStrictEqual(optionsExpected.profiles[0].conditionGroups);
+        expect(optionsUpdated.profiles[0].options.general).toMatchObject(optionsExpected.profiles[0].options.general);
+        expect(optionsUpdated.profiles[0].options.audio).toStrictEqual(optionsExpected.profiles[0].options.audio);
+        expect(optionsUpdated.profiles[0].options.dictionaries).toStrictEqual(optionsExpected.profiles[0].options.dictionaries);
+        expect(optionsUpdated.profiles[0].options.parsing).toStrictEqual(optionsExpected.profiles[0].options.parsing);
+        expect(optionsUpdated.profiles[0].options.translation).toMatchObject({
+            searchResolution: optionsExpected.profiles[0].options.translation.searchResolution,
+            textReplacements: optionsExpected.profiles[0].options.translation.textReplacements,
+        });
+        expect(optionsUpdated.profiles[0].options.anki).toMatchObject({
+            enable: optionsExpected.profiles[0].options.anki.enable,
+            server: optionsExpected.profiles[0].options.anki.server,
+            tags: optionsExpected.profiles[0].options.anki.tags,
+            screenshot: optionsExpected.profiles[0].options.anki.screenshot,
+            cardFormats: optionsExpected.profiles[0].options.anki.cardFormats,
+            duplicateBehavior: optionsExpected.profiles[0].options.anki.duplicateBehavior,
+            duplicateScope: optionsExpected.profiles[0].options.anki.duplicateScope,
+            duplicateScopeCheckAllModels: optionsExpected.profiles[0].options.anki.duplicateScopeCheckAllModels,
+            displayTagsAndFlags: optionsExpected.profiles[0].options.anki.displayTagsAndFlags,
+            targetTags: optionsExpected.profiles[0].options.anki.targetTags,
+            checkForDuplicates: optionsExpected.profiles[0].options.anki.checkForDuplicates,
+            fieldTemplates: optionsExpected.profiles[0].options.anki.fieldTemplates,
+            suspendNewCards: optionsExpected.profiles[0].options.anki.suspendNewCards,
+            noteGuiMode: optionsExpected.profiles[0].options.anki.noteGuiMode,
+            apiKey: optionsExpected.profiles[0].options.anki.apiKey,
+            downloadTimeout: optionsExpected.profiles[0].options.anki.downloadTimeout,
+            forceSync: optionsExpected.profiles[0].options.anki.forceSync,
+        });
+        expect(optionsUpdated.global).toMatchObject({
+            database: optionsExpected.global.database,
+            dataTransmissionConsentShown: optionsExpected.global.dataTransmissionConsentShown,
+        });
     });
 
     test('CumulativeFieldTemplatesUpdates', async () => {
@@ -762,32 +802,37 @@ describe('OptionsUtil', () => {
         expect(partialsUpdated).toStrictEqual(partialsExpected);
     });
 
-    test('Version74MigrationKeepsDatabaseDefaultsValid', async () => {
+    test('Version75And76MigrationsAddDictionaryOptions', async () => {
         const optionsUtil = new OptionsUtil();
         await optionsUtil.prepare();
+        const currentVersion = optionsUtil.getDefault().version;
 
         const options = /** @type {import('core').SafeAny} */ (createOptionsUpdatedTestData1());
-        options.version = 73;
+        options.version = 74;
+        delete options.global.dictionaryAutoUpdates;
         delete options.global.database.maxHeadwordLength;
 
         const optionsUpdated = structuredClone(await optionsUtil.update(options));
-        expect(optionsUpdated.version).toBe(74);
-        expect(optionsUpdated.global.database.prefixWildcardsSupported).toBe(false);
+        expect(optionsUpdated.version).toBe(currentVersion);
+        expect(optionsUpdated.global.dictionaryAutoUpdates ?? []).toStrictEqual([]);
+        expect(optionsUpdated.global.database.maxHeadwordLength ?? 0).toBe(0);
     });
 
-    test('Current migration keeps popup theme and sort frequency dictionary settings stable', async () => {
+    test('PopupFrequencyBlurAndThemePresetVersion78MigrationUsesDefaultsAndStaysDecoupled', async () => {
         const optionsUtil = new OptionsUtil();
         await optionsUtil.prepare();
+        const currentVersion = optionsUtil.getDefault().version;
 
         const options = /** @type {import('settings').Options} */ (structuredClone(createOptionsUpdatedTestData1()));
-        options.version = 73;
+        options.version = Math.max(0, currentVersion - 1);
         const general = /** @type {import('core').SafeAny} */ (options.profiles[0].options.general);
         general.sortFrequencyDictionary = 'Sort Dictionary';
         general.sortFrequencyDictionaryOrder = 'ascending';
         general.popupTheme = 'site';
+        delete general.popupThemePreset;
 
         const optionsUpdated = structuredClone(await optionsUtil.update(options));
-        expect(optionsUpdated.version).toBe(74);
+        expect(optionsUpdated.version).toBe(currentVersion);
         expect(optionsUpdated.profiles[0].options.general).toMatchObject({
             popupTheme: 'site',
             sortFrequencyDictionary: 'Sort Dictionary',

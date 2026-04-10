@@ -103,9 +103,29 @@ export class Offscreen {
     /** */
     prepare() {
         chrome.runtime.onMessage.addListener(this._onMessage.bind(this));
-        navigator.serviceWorker.addEventListener('controllerchange', this._createAndRegisterPort.bind(this));
-        this._createAndRegisterPort();
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            void this._createAndRegisterPort().catch((error) => {
+                this._reportControlPortRegistrationFailure(error, 'controllerchange');
+            });
+        });
+        void this._createAndRegisterPort().catch((error) => {
+            this._reportControlPortRegistrationFailure(error, 'prepare');
+        });
         void this._reportOpfsPreflight();
+    }
+
+    /**
+     * @param {unknown} error
+     * @param {string} stage
+     * @returns {void}
+     */
+    _reportControlPortRegistrationFailure(error, stage) {
+        const normalizedError = error instanceof Error ? error : new Error(String(error));
+        reportDiagnostics('offscreen-control-port-registration-failed', {
+            stage,
+            message: normalizedError.message,
+        });
+        log.error(normalizedError);
     }
 
     /**
@@ -330,11 +350,25 @@ export class Offscreen {
     /**
      *
      */
-    _createAndRegisterPort() {
+    async _createAndRegisterPort() {
         const mc = new MessageChannel();
         mc.port1.onmessage = this._onMcMessage.bind(this);
         mc.port1.onmessageerror = this._onMcMessageError.bind(this);
-        this._api.registerOffscreenPort([mc.port2]);
+        try {
+            await this._api.registerOffscreenPort([mc.port2]);
+        } catch (error) {
+            try {
+                mc.port1.close();
+            } catch (_) {
+                // NOP
+            }
+            try {
+                mc.port2.close();
+            } catch (_) {
+                // NOP
+            }
+            throw error;
+        }
     }
 
     /** @type {import('offscreen').McApiHandler<'connectToDatabaseWorker'>} */

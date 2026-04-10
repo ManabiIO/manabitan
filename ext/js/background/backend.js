@@ -199,6 +199,7 @@ export class Backend {
             ['verifyDictionaryVisibility',   this._onApiVerifyDictionaryVisibility.bind(this)],
             ['debugDictionaryLookupState',   this._onApiDebugDictionaryLookupState.bind(this)],
             ['debugDictionaryStorageState',  this._onApiDebugDictionaryStorageState.bind(this)],
+            ['downloadDictionaryArchive',    this._onApiDownloadDictionaryArchive.bind(this)],
             ['setDictionaryImportMode',      this._onApiSetDictionaryImportMode.bind(this)],
             ['purgeDatabase',                this._onApiPurgeDatabase.bind(this)],
             ['exportDictionaryDatabase',     this._onApiExportDictionaryDatabase.bind(this)],
@@ -227,6 +228,7 @@ export class Backend {
         this._pmApiMap = createApiMap([
             ['connectToDatabaseWorker', this._onPmConnectToDatabaseWorker.bind(this)],
             ['importDictionaryOffscreen', this._onPmImportDictionaryOffscreen.bind(this)],
+            ['importDictionaryUrlOffscreen', this._onPmImportDictionaryUrlOffscreen.bind(this)],
             ['registerOffscreenPort',   this._onPmApiRegisterOffscreenPort.bind(this)],
         ]);
         /* eslint-enable @stylistic/no-multi-spaces */
@@ -252,6 +254,12 @@ export class Backend {
         this._deferredDictionaryRefreshDuringImport = false;
         /** @type {Promise<void>|null} */
         this._setDictionaryImportModePromise = null;
+        /** @type {Record<string, unknown>|null} */
+        this._lastDictionaryUrlImportDebug = null;
+        /** @type {SharedWorker|null} */
+        this._sharedWorkerBridge = null;
+        /** @type {boolean} */
+        this._sharedWorkerBridgeReconnectScheduled = false;
     }
 
     /**
@@ -324,16 +332,7 @@ export class Backend {
             if (responsePort === null) {
                 throw new Error('Offscreen import response port missing');
             }
-            if (this._offscreen !== null) {
-                await this._offscreen.prepare();
-                await this._offscreen.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, [responsePort]);
-                return;
-            }
-            if (this._localDictionaryRuntime !== null) {
-                await this._localDictionaryRuntime.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, [responsePort]);
-                return;
-            }
-            throw new Error('Dictionary runtime import is unavailable');
+            await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort);
         } catch (error) {
             try {
                 responsePort?.postMessage({type: 'error', error: ExtensionError.serialize(error)});
@@ -345,11 +344,160 @@ export class Backend {
         }
     }
 
+    /** @type {import('api').PmApiHandler<'importDictionaryUrlOffscreen'>} */
+    async _onPmImportDictionaryUrlOffscreen({url, details}, ports) {
+        const responsePort = ports !== null && ports.length > 0 ? ports[0] : null;
+        try {
+            if (responsePort === null) {
+                throw new Error('Offscreen import response port missing');
+            }
+            const normalizedUrl = typeof url === 'string' ? url.trim() : '';
+            if (normalizedUrl.length === 0) {
+                throw new Error('Dictionary import URL is required');
+            }
+            this._lastDictionaryUrlImportDebug = {
+                stage: 'begin',
+                url: normalizedUrl,
+                startedAtIso: new Date().toISOString(),
+            };
+            const downloadTimeoutMs = 120_000;
+            try {
+                const archiveContent = await this._downloadDictionaryArchiveBlobViaXhr(normalizedUrl, downloadTimeoutMs, (phase) => {
+                    this._lastDictionaryUrlImportDebug = {
+                        ...this._lastDictionaryUrlImportDebug,
+                        ...phase,
+                    };
+                });
+                this._lastDictionaryUrlImportDebug = {
+                    ...this._lastDictionaryUrlImportDebug,
+                    stage: 'blob-ready',
+                    sizeBytes: archiveContent.size,
+                    blobReadyAtIso: new Date().toISOString(),
+                };
+                this._lastDictionaryUrlImportDebug = {
+                    ...this._lastDictionaryUrlImportDebug,
+                    stage: 'forward-to-runtime',
+                    forwardedAtIso: new Date().toISOString(),
+                };
+                await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort);
+                this._lastDictionaryUrlImportDebug = {
+                    ...this._lastDictionaryUrlImportDebug,
+                    stage: 'runtime-forwarded',
+                    runtimeForwardedAtIso: new Date().toISOString(),
+                };
+            } catch (error) {
+                const normalizedError = toError(error);
+                this._lastDictionaryUrlImportDebug = {
+                    ...this._lastDictionaryUrlImportDebug,
+                    stage: 'error',
+                    errorMessage: normalizedError.message,
+                    failedAtIso: new Date().toISOString(),
+                };
+                throw normalizedError;
+            }
+        } catch (error) {
+            const normalizedError = toError(error);
+            this._lastDictionaryUrlImportDebug = {
+                ...this._lastDictionaryUrlImportDebug,
+                stage: 'error',
+                errorMessage: normalizedError.message,
+                failedAtIso: new Date().toISOString(),
+            };
+            try {
+                responsePort?.postMessage({type: 'error', error: ExtensionError.serialize(normalizedError)});
+            } catch (_) {
+                // Best effort error delivery to the import caller.
+            } finally {
+                responsePort?.close();
+            }
+        }
+    }
+
+    /**
+     * @param {string} url
+     * @param {number} timeoutMs
+     * @param {(details: Record<string, string|number|null>) => void} onPhase
+     * @returns {Promise<Blob>}
+     */
+    async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase) {
+        return await new Promise((resolve, reject) => {
+            const request = new XMLHttpRequest();
+            const cleanup = () => {
+                request.onload = null;
+                request.onerror = null;
+                request.onabort = null;
+                request.ontimeout = null;
+                request.onprogress = null;
+                request.onreadystatechange = null;
+            };
+            const fail = (error) => {
+                cleanup();
+                reject(toError(error));
+            };
+            request.open('GET', url, true);
+            request.responseType = 'blob';
+            request.timeout = timeoutMs;
+            request.onreadystatechange = () => {
+                if (request.readyState < XMLHttpRequest.HEADERS_RECEIVED) { return; }
+                onPhase({
+                    stage: 'fetch-response',
+                    status: request.status,
+                    contentType: request.getResponseHeader('Content-Type'),
+                    contentLength: request.getResponseHeader('Content-Length'),
+                    respondedAtIso: new Date().toISOString(),
+                });
+            };
+            request.onload = () => {
+                if (!(request.status >= 200 && request.status < 300)) {
+                    fail(new Error(`Failed to fetch dictionary archive: ${url} (status=${String(request.status)})`));
+                    return;
+                }
+                const response = request.response;
+                const content = response instanceof Blob ? response : new Blob([]);
+                if (content.size === 0) {
+                    fail(new Error(`Fetched dictionary archive had no content: ${url}`));
+                    return;
+                }
+                cleanup();
+                resolve(content);
+            };
+            request.onerror = () => {
+                fail(new Error(`Failed to fetch dictionary archive: ${url}`));
+            };
+            request.onabort = () => {
+                fail(new Error(`Aborted fetching dictionary archive: ${url}`));
+            };
+            request.ontimeout = () => {
+                fail(new Error(`Timed out fetching dictionary archive after ${String(timeoutMs)}ms: ${url}`));
+            };
+            request.send();
+        });
+    }
+
     /** @type {import('api').PmApiHandler<'registerOffscreenPort'>} */
     async _onPmApiRegisterOffscreenPort(_params, ports) {
         if (ports !== null && ports.length > 0) {
             await this._offscreen?.registerOffscreenPort(ports[0]);
         }
+    }
+
+    /**
+     * @param {Blob} archiveContent
+     * @param {import('dictionary-importer').ImportDetails} details
+     * @param {MessagePort} responsePort
+     * @returns {Promise<void>}
+     */
+    async _forwardDictionaryImportToRuntime(archiveContent, details, responsePort) {
+        if (this._offscreen !== null) {
+            await this._offscreen.prepare();
+            await this._offscreen.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, [responsePort]);
+            return;
+        }
+        if (this._localDictionaryRuntime !== null) {
+            await this._localDictionaryRuntime.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, [responsePort]);
+            return;
+        }
+        throw new Error('Dictionary runtime import is unavailable');
     }
 
     /**
@@ -431,16 +579,9 @@ export class Backend {
             this._clipboardReader.browser = this._environment.getInfo().browser;
 
             // if this is Firefox and therefore not running in Service Worker, we need to use a SharedWorker to setup a MessageChannel to postMessage with the popup
-            if (self.constructor.name === 'Window') {
+            if (this._isWindowBackgroundRuntime()) {
                 const startedAt = safePerformance.now();
-                const sharedWorkerBridge = new SharedWorker(new URL('../comm/shared-worker-bridge.js', import.meta.url), {type: 'module'});
-                sharedWorkerBridge.port.postMessage({action: 'registerBackendPort'});
-                sharedWorkerBridge.port.addEventListener('message', (/** @type {MessageEvent} */ e) => {
-                    // connectToBackend2
-                    e.ports[0].onmessage = this._onPmMessage.bind(this);
-                });
-                sharedWorkerBridge.port.addEventListener('messageerror', this._onPmMessageError.bind(this));
-                sharedWorkerBridge.port.start();
+                this._setupSharedWorkerBridge();
                 recordPhase('sharedWorkerBridge.setup', startedAt);
             }
             try {
@@ -663,6 +804,83 @@ export class Backend {
         const error = new ExtensionError('Backend: Error receiving message via postMessage');
         error.data = event;
         log.error(error);
+    }
+
+    /**
+     * @returns {void}
+     */
+    _setupSharedWorkerBridge() {
+        const sharedWorkerBridge = new SharedWorker(new URL('../comm/shared-worker-bridge.js', import.meta.url), {type: 'module'});
+        this._sharedWorkerBridge = sharedWorkerBridge;
+        sharedWorkerBridge.port.addEventListener('message', (/** @type {MessageEvent} */ e) => {
+            // connectToBackend2
+            e.ports[0].onmessage = this._onPmMessage.bind(this);
+        });
+        sharedWorkerBridge.port.addEventListener('messageerror', (/** @type {MessageEvent} */ event) => {
+            this._onPmMessageError(event);
+            this._resetSharedWorkerBridge(sharedWorkerBridge, 'messageerror', new Error('Shared worker backend bridge message deserialization failed'));
+        });
+        sharedWorkerBridge.onerror = (event) => {
+            const message = typeof event.message === 'string' && event.message.length > 0 ? event.message : 'unknown shared worker failure';
+            this._resetSharedWorkerBridge(sharedWorkerBridge, 'error', new Error(message));
+        };
+        sharedWorkerBridge.port.start();
+        try {
+            sharedWorkerBridge.port.postMessage({action: 'registerBackendPort'});
+        } catch (error) {
+            this._resetSharedWorkerBridge(
+                sharedWorkerBridge,
+                'registerBackendPort',
+                error instanceof Error ? error : new Error(String(error)),
+            );
+            throw error;
+        }
+    }
+
+    /**
+     * @param {SharedWorker} sharedWorkerBridge
+     * @param {string} stage
+     * @param {Error} error
+     * @returns {void}
+     */
+    _resetSharedWorkerBridge(sharedWorkerBridge, stage, error) {
+        if (this._sharedWorkerBridge !== sharedWorkerBridge) {
+            return;
+        }
+        this._sharedWorkerBridge = null;
+        try {
+            sharedWorkerBridge.port.close();
+        } catch (_) {
+            // Ignore close failures for broken shared worker bridge ports.
+        }
+        reportDiagnostics('shared-worker-bridge-reset', {
+            stage,
+            message: error.message,
+        });
+        log.error(error);
+        if (this._sharedWorkerBridgeReconnectScheduled || !this._isWindowBackgroundRuntime()) {
+            return;
+        }
+        this._sharedWorkerBridgeReconnectScheduled = true;
+        queueMicrotask(() => {
+            this._sharedWorkerBridgeReconnectScheduled = false;
+            try {
+                this._setupSharedWorkerBridge();
+            } catch (reconnectError) {
+                const normalizedError = reconnectError instanceof Error ? reconnectError : new Error(String(reconnectError));
+                reportDiagnostics('shared-worker-bridge-reconnect-failed', {
+                    message: normalizedError.message,
+                });
+                log.error(normalizedError);
+            }
+        });
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    _isWindowBackgroundRuntime() {
+        return typeof self !== 'undefined' && self !== null && self.constructor?.name === 'Window';
     }
 
 
@@ -956,6 +1174,7 @@ export class Backend {
             const info = {
                 canAdd: valid,
                 valid,
+                isDuplicate,
                 noteIds: noteIds,
                 noteInfos: noteInfos,
             };
@@ -1212,15 +1431,31 @@ export class Backend {
     async _onApiDebugDictionaryStorageState() {
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
+        const usesFallbackStorageValue = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'usesFallbackStorage'));
+        const getOpenStorageDiagnosticsValue = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'getOpenStorageDiagnostics'));
         const rowsMethod = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'debugGetDictionaryRows'));
         const dictionaryRows = (typeof rowsMethod === 'function') ?
             await /** @type {() => Promise<unknown>} */ (rowsMethod).call(this._dictionaryDatabase) :
             null;
-            const offscreenDictionaryRows = (this._offscreen !== null) ? (() => this._offscreen.sendMessagePromise({
-                action: 'debugDictionaryStorageStateOffscreen',
-            }))() : null;
+        const offscreenDictionaryRows = (this._offscreen !== null) ? (() => this._offscreen.sendMessagePromise({
+            action: 'debugDictionaryStorageStateOffscreen',
+        }))() : null;
         const offscreenDictionaryRowsResult = (offscreenDictionaryRows !== null) ? await offscreenDictionaryRows : null;
+        const usesFallbackStorage = typeof usesFallbackStorageValue === 'function' ?
+            /** @type {() => boolean} */ (usesFallbackStorageValue).call(this._dictionaryDatabase) :
+            null;
+        const openStorageDiagnostics = typeof getOpenStorageDiagnosticsValue === 'function' ?
+            /** @type {() => unknown} */ (getOpenStorageDiagnosticsValue).call(this._dictionaryDatabase) :
+            null;
         return {
+            usesFallbackStorage: typeof usesFallbackStorage === 'boolean' ? usesFallbackStorage : null,
+            openStorageDiagnostics: (
+                typeof openStorageDiagnostics === 'object' &&
+                openStorageDiagnostics !== null &&
+                !Array.isArray(openStorageDiagnostics)
+            ) ? openStorageDiagnostics : null,
+            startupDiagnosticsSnapshot: this._startupDiagnosticsSnapshot,
+            lastDictionaryUrlImportDebug: this._lastDictionaryUrlImportDebug,
             dictionaryRows: Array.isArray(dictionaryRows) ? dictionaryRows : [],
             offscreenDictionaryRows: Array.isArray(offscreenDictionaryRowsResult?.dictionaryRows) ? offscreenDictionaryRowsResult.dictionaryRows : [],
             offscreenLastReplaceDictionaryTitleDebug: (
@@ -1255,6 +1490,68 @@ export class Backend {
                 // NOP
             }
         }
+    }
+
+    /** @type {import('api').ApiHandler<'downloadDictionaryArchive'>} */
+    async _onApiDownloadDictionaryArchive({url}) {
+        const normalizedUrl = typeof url === 'string' ? url.trim() : '';
+        if (normalizedUrl.length === 0) {
+            throw new Error('Dictionary archive download URL is required');
+        }
+        const downloadTimeoutMs = 120_000;
+        const abortController = new AbortController();
+        const timeoutId = globalThis.setTimeout(() => {
+            abortController.abort(new Error(`Timed out fetching dictionary archive after ${String(downloadTimeoutMs)}ms: ${normalizedUrl}`));
+        }, downloadTimeoutMs);
+        let response;
+        try {
+            response = await fetch(normalizedUrl, {
+                method: 'GET',
+                cache: 'no-store',
+                credentials: 'omit',
+                redirect: 'follow',
+                referrerPolicy: 'no-referrer',
+                signal: abortController.signal,
+            });
+        } catch (error) {
+            const abortReason = /** @type {unknown} */ (abortController.signal.reason);
+            if (abortController.signal.aborted && abortReason instanceof Error) {
+                throw abortReason;
+            }
+            throw toError(error);
+        } finally {
+            globalThis.clearTimeout(timeoutId);
+        }
+        if (!response.ok) {
+            throw new Error(`Failed to fetch dictionary archive: ${normalizedUrl} (status=${String(response.status)})`);
+        }
+        const content = await RequestBuilder.readFetchResponseArrayBuffer(response, null);
+        const fileName = (() => {
+            const contentDisposition = response.headers.get('Content-Disposition') || '';
+            const match = /filename\\*?=(?:UTF-8''|\"?)([^\";]+)/i.exec(contentDisposition);
+            if (match) {
+                try {
+                    return decodeURIComponent(match[1].replace(/^\"|\"$/g, ''));
+                } catch (_) {
+                    return match[1].replace(/^\"|\"$/g, '');
+                }
+            }
+            try {
+                const parsed = new URL(normalizedUrl);
+                const pathPart = parsed.pathname.split('/').filter((part) => part.length > 0).pop();
+                if (typeof pathPart === 'string' && pathPart.length > 0) {
+                    return pathPart;
+                }
+            } catch (_) {
+                // Ignore malformed URL parsing here; we already attempted the request.
+            }
+            return 'fileFromURL.zip';
+        })();
+        return {
+            contentBase64: arrayBufferToBase64(content),
+            fileName,
+            contentType: response.headers.get('Content-Type'),
+        };
     }
 
     /** @type {import('api').ApiHandler<'setDictionaryImportMode'>} */

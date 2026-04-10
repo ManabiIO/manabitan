@@ -64,6 +64,29 @@ const dictionaryOptionsPruneSummarySchema = {
     },
 };
 
+const dictionaryStartupCleanupSummarySchema = {
+    type: 'object',
+    additionalProperties: false,
+    required: [
+        'scannedCount',
+        'removedCount',
+        'removedTitles',
+        'removedEmptyTitleRows',
+        'failedCount',
+        'failedTitles',
+        'parseErrorCount',
+    ],
+    properties: {
+        scannedCount: {type: 'integer', minimum: 0},
+        removedCount: {type: 'integer', minimum: 0},
+        removedTitles: {type: 'array', items: {type: 'string'}},
+        removedEmptyTitleRows: {type: 'integer', minimum: 0},
+        failedCount: {type: 'integer', minimum: 0},
+        failedTitles: {type: 'array', items: {type: 'string'}},
+        parseErrorCount: {type: 'integer', minimum: 0},
+    },
+};
+
 /**
  * @returns {(this: unknown) => Promise<unknown>}
  * @throws {Error}
@@ -136,5 +159,23 @@ describe('Diagnostics payload schema', () => {
         expect(summary.removedEntryCount).toBe(0);
         expect(summary.removedNames).toStrictEqual([]);
         expect(summary.installedCount).toBe(0);
+    });
+
+    test('Dictionary startup cleanup summary matches schema and count semantics', () => {
+        const summary = {
+            scannedCount: 4,
+            removedCount: 3,
+            removedTitles: ['Broken Flag', 'Broken Parse'],
+            removedEmptyTitleRows: 1,
+            failedCount: 0,
+            failedTitles: [],
+            parseErrorCount: 1,
+        };
+        const validate = ajv.compile(dictionaryStartupCleanupSummarySchema);
+
+        expect(validate(summary)).toBe(true);
+        expect(summary.removedCount).toBe(summary.removedTitles.length + summary.removedEmptyTitleRows);
+        expect(summary.failedCount).toBe(summary.failedTitles.length);
+        expect(summary.parseErrorCount).toBe(1);
     });
 });

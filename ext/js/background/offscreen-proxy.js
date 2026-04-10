@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
 
@@ -649,7 +650,9 @@ export class ClipboardReaderProxy {
     set browser(value) {
         if (this._browser === value) { return; }
         this._browser = value;
-        void this._offscreen.sendMessagePromise({action: 'clipboardSetBrowserOffscreen', params: {value}});
+        void this._offscreen.sendMessagePromise({action: 'clipboardSetBrowserOffscreen', params: {value}}).catch((error) => {
+            log.error(error);
+        });
     }
 
     /**

@@ -83,6 +83,28 @@ async function setupGenericSettingController(genericSettingController) {
     await genericSettingController.refresh();
 }
 
+/**
+ * @param {unknown} error
+ */
+function showSettingsStartupFailure(error) {
+    const message = error instanceof Error ? error.message : String(error);
+    document.body.hidden = false;
+    document.documentElement.dataset.loadingStalled = 'true';
+    document.documentElement.dataset.loadingError = 'true';
+    const runtimeCheckNode = document.querySelector('#storage-runtime-check');
+    if (runtimeCheckNode instanceof HTMLElement) {
+        runtimeCheckNode.textContent = (
+            'Settings startup failed before the backend became ready.\n' +
+            `error=${message}`
+        );
+    }
+    reportDiagnostics('settings-startup-failure-ui', {
+        page: 'settings',
+        errorMessage: message,
+    });
+}
+
+try {
 await Application.main(true, async (application) => {
     /** @type {Array<{phase: string, durationMs: number}>} */
     const startupPhases = [];
@@ -398,3 +420,6 @@ await Application.main(true, async (application) => {
 
     document.documentElement.dataset.loaded = 'true';
 });
+} catch (error) {
+    showSettingsStartupFailure(error);
+}
