@@ -1230,7 +1230,6 @@ export class DisplayAnki {
                 infos = await this._display.application.api.getAnkiNoteInfo(
                     validNotes,
                     fetchAdditionalInfo,
-                    fetchDuplicateNoteIds,
                 );
             } else {
                 const isAnkiConnected = await this._display.application.api.isAnkiConnected();

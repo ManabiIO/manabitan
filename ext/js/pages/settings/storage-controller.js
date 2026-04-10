@@ -18,6 +18,8 @@
 
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
+const backendStartupFailureStorageKey = 'manabitanLastBackendStartupError';
+
 export class StorageController {
     /**
      * @param {import('./persistent-storage-controller.js').PersistentStorageController} persistentStorageController
@@ -117,14 +119,14 @@ export class StorageController {
             this._setElementsVisible(this._storageUseValidNodes, valid);
             this._setElementsVisible(this._storageUseInvalidNodes, !valid);
             this._setElementsVisible(this._storageUseExhaustWarnNodes, storageIsLow);
-            this._updateRuntimeCheck();
+            await this._updateRuntimeCheck();
         } finally {
             this._isUpdating = false;
         }
     }
 
     /** */
-    _updateRuntimeCheck() {
+    async _updateRuntimeCheck() {
         if (this._storageRuntimeCheckNode === null) { return; }
         const userAgent = typeof navigator.userAgent === 'string' ? navigator.userAgent : '';
         const browserLabel = /Firefox\//i.test(userAgent) ? 'Firefox runtime' : 'Extension runtime';
@@ -137,12 +139,66 @@ export class StorageController {
                 'createSyncAccessHandle',
             ) === 'function'
         );
-        const dictionaryBackendUsable = hasStorageGetDirectory && hasCreateSyncAccessHandle;
+        const application = this._persistentStorageController.application;
+        let backendSummary = null;
+        let backendError = null;
+        try {
+            backendSummary = await application.api.debugDictionaryStorageState();
+        } catch (e) {
+            backendError = e instanceof Error ? e.message : String(e);
+        }
+        const startupFailure = await this._getStoredBackendStartupFailure();
+        if (backendSummary !== null && typeof backendSummary === 'object' && !Array.isArray(backendSummary)) {
+            const summary = /** @type {Record<string, unknown>} */ (backendSummary);
+            const openStorageDiagnostics = (
+                typeof summary.openStorageDiagnostics === 'object' &&
+                summary.openStorageDiagnostics !== null &&
+                !Array.isArray(summary.openStorageDiagnostics)
+            ) ? /** @type {Record<string, unknown>} */ (summary.openStorageDiagnostics) : null;
+            const startupDiagnosticsSnapshot = (
+                typeof summary.startupDiagnosticsSnapshot === 'object' &&
+                summary.startupDiagnosticsSnapshot !== null &&
+                !Array.isArray(summary.startupDiagnosticsSnapshot)
+            ) ? /** @type {Record<string, unknown>} */ (summary.startupDiagnosticsSnapshot) : null;
+            const mode = typeof openStorageDiagnostics?.mode === 'string' ? openStorageDiagnostics.mode : 'unknown';
+            const dictionaryBackendUsable = (
+                mode !== 'opfs-unavailable' &&
+                mode !== 'fallback-memory' &&
+                mode !== 'fallback-memory-open-failed'
+            );
+            const startupError = typeof startupDiagnosticsSnapshot?.dictionaryPrepareError === 'string' ? startupDiagnosticsSnapshot.dictionaryPrepareError : '';
+            const dictionaryRows = Array.isArray(summary.dictionaryRows) ? summary.dictionaryRows.length : 0;
+            const offscreenDictionaryRows = Array.isArray(summary.offscreenDictionaryRows) ? summary.offscreenDictionaryRows.length : 0;
+            const usesFallbackStorage = summary.usesFallbackStorage === true;
+            this._storageRuntimeCheckNode.textContent = (
+                `${browserLabel} check:\n` +
+                `backend reachable=true\n` +
+                `dictionary backend usable=${String(dictionaryBackendUsable)}\n` +
+                `storage.getDirectory=${String(hasStorageGetDirectory)}\n` +
+                `createSyncAccessHandle=${String(hasCreateSyncAccessHandle)}\n` +
+                `backend mode=${mode}\n` +
+                `usesFallbackStorage=${String(usesFallbackStorage)}\n` +
+                `dictionaryRows=${String(dictionaryRows)}\n` +
+                `offscreenDictionaryRows=${String(offscreenDictionaryRows)}\n` +
+                `startupError=${startupError.length > 0 ? startupError : 'none'}`
+            );
+            return;
+        }
+
+        const startupFailureMessage = (
+            startupFailure !== null &&
+            typeof startupFailure === 'object' &&
+            !Array.isArray(startupFailure) &&
+            typeof startupFailure.errorMessage === 'string'
+        ) ? startupFailure.errorMessage : '';
         this._storageRuntimeCheckNode.textContent = (
             `${browserLabel} check:\n` +
-            `dictionary backend usable=${String(dictionaryBackendUsable)}\n` +
+            `backend reachable=false\n` +
+            `dictionary backend usable=false\n` +
             `storage.getDirectory=${String(hasStorageGetDirectory)}\n` +
-            `createSyncAccessHandle=${String(hasCreateSyncAccessHandle)}`
+            `createSyncAccessHandle=${String(hasCreateSyncAccessHandle)}\n` +
+            `backendError=${backendError ?? 'unknown'}\n` +
+            `startupError=${startupFailureMessage.length > 0 ? startupFailureMessage : 'none'}`
         );
     }
 
@@ -161,6 +217,28 @@ export class StorageController {
             return value;
         } catch (e) {
             this._storageEstimateFailed = true;
+        }
+        return null;
+    }
+
+    /**
+     * @returns {Promise<Record<string, unknown>|null>}
+     */
+    async _getStoredBackendStartupFailure() {
+        for (const storageArea of [chrome.storage?.session, chrome.storage?.local]) {
+            if (!(storageArea && typeof storageArea.get === 'function')) { continue; }
+            try {
+                const result = await storageArea.get(backendStartupFailureStorageKey);
+                const value = /** @type {unknown} */ (Reflect.get(result, backendStartupFailureStorageKey));
+                if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                    return /** @type {Record<string, unknown>} */ (value);
+                }
+                if (value === null) {
+                    return null;
+                }
+            } catch (_) {
+                // NOP
+            }
         }
         return null;
     }

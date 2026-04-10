@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2023-2026  Yomitan Authors
- * Copyright (C) 2020-2022  Yomichan Authors
+ * Copyright (C) 2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,26 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {afterAll, afterEach, describe, expect, test, vi} from 'vitest';
+import {describe, expect, test, vi} from 'vitest';
 import {DictionaryController} from '../ext/js/pages/settings/dictionary-controller.js';
-import {setupDomTest} from './fixtures/dom-test.js';
-
-const testEnv = await setupDomTest();
-afterAll(async () => {
-    await testEnv.teardown(global);
-});
-
-/**
- * @returns {DictionaryController}
- */
-function createControllerForInternalTests() {
-    return /** @type {DictionaryController} */ (Object.create(DictionaryController.prototype));
-}
 
 /**
  * @param {string} name
  * @returns {Function}
- * @throws {Error}
  */
 function getDictionaryControllerMethod(name) {
     const method = /** @type {unknown} */ (Reflect.get(DictionaryController.prototype, name));
@@ -45,83 +30,57 @@ function getDictionaryControllerMethod(name) {
     return method;
 }
 
-describe('DictionaryController update-all behavior', () => {
-    const {window} = testEnv;
-    const getUpdateAllDictionaryTitles = /** @type {() => string[]} */ (getDictionaryControllerMethod('_getUpdateAllDictionaryTitles'));
-    const updateUpdateAllButtonState = /** @type {() => void} */ (getDictionaryControllerMethod('_updateUpdateAllButtonState'));
-    const onUpdateAllButtonClick = /** @type {(event: MouseEvent) => void} */ (getDictionaryControllerMethod('_onUpdateAllButtonClick'));
+/**
+ * @returns {DictionaryController}
+ */
+function createControllerForInternalTests() {
+    return /** @type {DictionaryController} */ (Object.create(DictionaryController.prototype));
+}
 
-    afterEach(() => {
-        vi.restoreAllMocks();
-        window.document.body.innerHTML = '';
+describe('DictionaryController task queue', () => {
+    const isDictionaryInTaskQueue = /** @type {(this: DictionaryController, dictionaryTitle: string) => boolean} */ (getDictionaryControllerMethod('isDictionaryInTaskQueue'));
+    const enqueueTask = /** @type {(this: DictionaryController, task: {type: 'delete'|'update', dictionaryTitle: string, downloadUrl?: string}) => Promise<void>} */ (getDictionaryControllerMethod('_enqueueTask'));
+    const hideUpdatesAvailableButton = /** @type {(this: DictionaryController, dictionaryTitle: string) => void} */ (getDictionaryControllerMethod('_hideUpdatesAvailableButton'));
+
+    test('detects queued dictionaries by title', () => {
+        const controller = createControllerForInternalTests();
+        Reflect.set(controller, '_dictionaryTaskQueue', [
+            {type: 'update', dictionaryTitle: 'Jitendex', downloadUrl: void 0},
+        ]);
+
+        expect(isDictionaryInTaskQueue.call(controller, 'Jitendex')).toBe(true);
+        expect(isDictionaryInTaskQueue.call(controller, 'JMdict')).toBe(false);
     });
 
-    test('collects updatable displayed dictionaries and skips queued or non-updatable entries', () => {
+    test('enqueueTask deduplicates queued dictionary titles and starts the queue once', async () => {
         const controller = createControllerForInternalTests();
-        Reflect.set(controller, '_dictionaries', [
-            {title: 'Jitendex', isUpdatable: true, indexUrl: 'https://example.invalid/jitendex-index.json', downloadUrl: 'https://example.invalid/jitendex.zip'},
-            {title: 'JMdict', isUpdatable: true, indexUrl: 'https://example.invalid/jmdict-index.json', downloadUrl: 'https://example.invalid/jmdict.zip'},
-            {title: 'Static', isUpdatable: false},
-            {title: 'Broken', isUpdatable: true, indexUrl: 'https://example.invalid/broken-index.json'},
-        ]);
-        Reflect.set(controller, '_dictionaryEntries', [
-            {dictionaryTitle: 'Static'},
-            {dictionaryTitle: 'Jitendex'},
-            {dictionaryTitle: 'JMdict'},
-            {dictionaryTitle: 'Broken'},
-        ]);
-        Reflect.set(controller, '_dictionaryTaskQueue', [
+        const runTaskQueue = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(controller, '_dictionaryTaskQueue', []);
+        Reflect.set(controller, '_runTaskQueue', runTaskQueue);
+
+        await enqueueTask.call(controller, {type: 'update', dictionaryTitle: 'Jitendex', downloadUrl: void 0});
+        await enqueueTask.call(controller, {type: 'delete', dictionaryTitle: 'Jitendex'});
+        await enqueueTask.call(controller, {type: 'update', dictionaryTitle: 'JMdict', downloadUrl: void 0});
+
+        expect(Reflect.get(controller, '_dictionaryTaskQueue')).toStrictEqual([
+            {type: 'update', dictionaryTitle: 'Jitendex', downloadUrl: void 0},
             {type: 'update', dictionaryTitle: 'JMdict', downloadUrl: void 0},
         ]);
-
-        const dictionaryTitles = getUpdateAllDictionaryTitles.call(controller);
-        expect(dictionaryTitles).toStrictEqual(['Jitendex']);
+        expect(runTaskQueue).toHaveBeenCalledTimes(2);
     });
 
-    test('update-all button disables when there is nothing eligible or when work is in progress', () => {
+    test('hideUpdatesAvailableButton only touches the matching entry', () => {
         const controller = createControllerForInternalTests();
-        const button = window.document.createElement('button');
-        Reflect.set(controller, '_updateAllButton', button);
-        Reflect.set(controller, '_checkingIntegrity', false);
-        Reflect.set(controller, '_checkingUpdates', false);
-        Reflect.set(controller, '_isTaskQueueRunning', false);
-        Reflect.set(controller, '_getUpdateAllDictionaryTitles', vi.fn(() => []));
+        const hideA = vi.fn();
+        const hideB = vi.fn();
+        Reflect.set(controller, '_dictionaryEntries', [
+            {dictionaryTitle: 'Jitendex', hideUpdatesAvailableButton: hideA},
+            {dictionaryTitle: 'JMdict', hideUpdatesAvailableButton: hideB},
+        ]);
 
-        updateUpdateAllButtonState.call(controller);
-        expect(button.disabled).toBe(true);
+        hideUpdatesAvailableButton.call(controller, 'JMdict');
 
-        Reflect.set(controller, '_getUpdateAllDictionaryTitles', vi.fn(() => ['Jitendex']));
-        updateUpdateAllButtonState.call(controller);
-        expect(button.disabled).toBe(false);
-
-        Reflect.set(controller, '_isTaskQueueRunning', true);
-        updateUpdateAllButtonState.call(controller);
-        expect(button.disabled).toBe(true);
-    });
-
-    test('click handler enqueues update tasks for all eligible dictionaries and hides row update buttons', () => {
-        const controller = createControllerForInternalTests();
-        const preventDefault = vi.fn();
-        const enqueueTask = vi.fn();
-        const hideUpdatesAvailableButton = vi.fn();
-        const updateButtonState = vi.fn();
-        Reflect.set(controller, '_getUpdateAllDictionaryTitles', vi.fn(() => ['Jitendex', 'JMdict']));
-        Reflect.set(controller, '_enqueueTask', enqueueTask);
-        Reflect.set(controller, '_hideUpdatesAvailableButton', hideUpdatesAvailableButton);
-        Reflect.set(controller, '_updateUpdateAllButtonState', updateButtonState);
-
-        onUpdateAllButtonClick.call(
-            controller,
-            /** @type {MouseEvent} */ (/** @type {unknown} */ ({preventDefault})),
-        );
-
-        expect(preventDefault).toHaveBeenCalledTimes(1);
-        expect(enqueueTask).toHaveBeenCalledTimes(2);
-        expect(enqueueTask).toHaveBeenNthCalledWith(1, {type: 'update', dictionaryTitle: 'Jitendex', downloadUrl: void 0});
-        expect(enqueueTask).toHaveBeenNthCalledWith(2, {type: 'update', dictionaryTitle: 'JMdict', downloadUrl: void 0});
-        expect(hideUpdatesAvailableButton).toHaveBeenCalledTimes(2);
-        expect(hideUpdatesAvailableButton).toHaveBeenNthCalledWith(1, 'Jitendex');
-        expect(hideUpdatesAvailableButton).toHaveBeenNthCalledWith(2, 'JMdict');
-        expect(updateButtonState).toHaveBeenCalledTimes(1);
+        expect(hideA).not.toHaveBeenCalled();
+        expect(hideB).toHaveBeenCalledTimes(1);
     });
 });

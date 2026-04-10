@@ -47,6 +47,8 @@ export class SharedWorkerBridge {
     constructor() {
         /** @type {MessagePort?} */
         this._backendPort = null;
+        /** @type {MessagePort[]} */
+        this._pendingBackendConnectionPorts = [];
 
         /** @type {import('shared-worker').ApiMap} */
         this._apiMap = createApiMap([
@@ -76,15 +78,65 @@ export class SharedWorkerBridge {
 
     /** @type {import('shared-worker').ApiHandler<'registerBackendPort'>} */
     _onRegisterBackendPort(_params, interlocutorPort, _ports) {
+        interlocutorPort.addEventListener('messageerror', () => {
+            if (this._backendPort === interlocutorPort) {
+                this._backendPort = null;
+            }
+            log.error(new ExtensionError('SharedWorkerBridge: backend port message deserialization failed'));
+        });
         this._backendPort = interlocutorPort;
+        this._flushPendingBackendConnections();
     }
 
     /** @type {import('shared-worker').ApiHandler<'connectToBackend1'>} */
     _onConnectToBackend1(_params, _interlocutorPort, ports) {
+        if (ports.length === 0) {
+            return;
+        }
+        const backendConnectionPort = ports[0];
         if (this._backendPort !== null) {
-            this._backendPort.postMessage(void 0, [ports[0]]); // connectToBackend2
+            if (!this._forwardConnectionPort(backendConnectionPort)) {
+                this._pendingBackendConnectionPorts.push(backendConnectionPort);
+            }
         } else {
-            log.warn('SharedWorkerBridge: backend port is not registered; this can happen if one of the content scripts loads faster than the backend when extension is reloading');
+            this._pendingBackendConnectionPorts.push(backendConnectionPort);
+            log.warn('SharedWorkerBridge: backend port is not registered yet; queuing frontend backend connection');
+        }
+    }
+
+    /**
+     * @param {MessagePort} port
+     * @returns {boolean}
+     */
+    _forwardConnectionPort(port) {
+        if (this._backendPort === null) {
+            return false;
+        }
+        try {
+            this._backendPort.postMessage(void 0, [port]); // connectToBackend2
+            return true;
+        } catch (error) {
+            this._backendPort = null;
+            log.error(new ExtensionError(
+                `SharedWorkerBridge: failed to forward frontend backend connection: ${String(error)}`,
+            ));
+            return false;
+        }
+    }
+
+    /**
+     * @returns {void}
+     */
+    _flushPendingBackendConnections() {
+        if (this._backendPort === null || this._pendingBackendConnectionPorts.length === 0) {
+            return;
+        }
+        const pendingPorts = this._pendingBackendConnectionPorts.splice(0);
+        for (const port of pendingPorts) {
+            if (!this._forwardConnectionPort(port)) {
+                this._pendingBackendConnectionPorts.unshift(port, ...pendingPorts.slice(pendingPorts.indexOf(port) + 1));
+                return;
+            }
         }
     }
 }

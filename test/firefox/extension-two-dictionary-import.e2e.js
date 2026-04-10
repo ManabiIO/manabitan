@@ -20,6 +20,7 @@
 
 import {createServer} from 'node:http';
 import {execFile} from 'node:child_process';
+import {openSync, closeSync} from 'node:fs';
 import {access, mkdir, readFile, stat, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {promisify} from 'node:util';
@@ -40,6 +41,8 @@ const expectedLookupDictionaries = ['Jitendex', 'JMdict'];
 const extendedLookupDictionaries = ['Jitendex', 'JMdict', 'JMnedict'];
 const lookupWords = ['暗記', '名前', '日本', '学生', '食べる', '見る', '言う', '行く', '水', '猫'];
 const jmdictProbeTerms = ['打', '日本', '食べる', '見る', '水', '猫', '名前'];
+const firefoxDevGeckoId = '{accbebce-862b-48a9-bb9a-1da9ad1f8702}';
+const firefoxDevExtensionUuid = '6d1d0bf0-9b57-4ff8-9d93-64e13ae0f5da';
 
 /**
  * @param {string} observedName
@@ -706,6 +709,7 @@ function formatDuration(valueMs) {
  *   skippedVerification: boolean,
  *   skipReason: string,
  *   runtimeDiagnostics: Record<string, unknown>|null,
+ *   artifacts: Record<string, string>|null,
  *   phases: ReportPhase[]
  * }} E2EReport
  */
@@ -721,15 +725,17 @@ function createReport() {
         skippedVerification: false,
         skipReason: '',
         runtimeDiagnostics: null,
+        artifacts: null,
         phases: [],
     };
 }
 
 /**
  * @param {E2EReport} report
- * @returns {{startedAtIso: string, status: E2EReport['status'], failureReason: string, skippedVerification: boolean, skipReason: string, runtimeDiagnostics: Record<string, unknown>|null, phaseCount: number, phases: Array<{name: string, details: string, durationMs: number}>}}
+ * @param {Record<string, unknown>} [extra]
+ * @returns {{startedAtIso: string, status: E2EReport['status'], failureReason: string, skippedVerification: boolean, skipReason: string, runtimeDiagnostics: Record<string, unknown>|null, artifacts: Record<string, string>|null, phaseCount: number, phases: Array<{name: string, details: string, durationMs: number}>} & Record<string, unknown>}
  */
-function createReportJsonSummary(report) {
+function createReportJsonSummary(report, extra = {}) {
     return {
         startedAtIso: report.startedAtIso,
         status: report.status,
@@ -737,12 +743,88 @@ function createReportJsonSummary(report) {
         skippedVerification: report.skippedVerification,
         skipReason: report.skipReason,
         runtimeDiagnostics: report.runtimeDiagnostics,
+        artifacts: report.artifacts,
         phaseCount: Array.isArray(report.phases) ? report.phases.length : 0,
         phases: (Array.isArray(report.phases) ? report.phases : []).map((phase) => ({
             name: phase.name,
             details: phase.details,
             durationMs: phase.durationMs,
         })),
+        ...extra,
+    };
+}
+
+/**
+ * @param {string} reportJsonPath
+ * @returns {{heartbeatJsonPath: string, geckodriverLogPath: string, crashDumpDir: string}}
+ */
+function createDiagnosticsArtifactPaths(reportJsonPath) {
+    return {
+        heartbeatJsonPath: reportJsonPath.replace(/\.json$/i, '-live.json'),
+        geckodriverLogPath: reportJsonPath.replace(/\.json$/i, '-geckodriver.log'),
+        crashDumpDir: reportJsonPath.replace(/\.json$/i, '-crash'),
+    };
+}
+
+/**
+ * @param {E2EReport} report
+ * @param {string} snapshotPath
+ * @param {Record<string, unknown>} [extra]
+ * @returns {Promise<void>}
+ */
+async function writeReportSnapshot(report, snapshotPath, extra = {}) {
+    await mkdir(path.dirname(snapshotPath), {recursive: true});
+    await writeFile(snapshotPath, JSON.stringify(createReportJsonSummary(report, extra), null, 2), 'utf8');
+}
+
+/**
+ * @param {E2EReport} report
+ * @param {string} heartbeatJsonPath
+ * @returns {{setActiveOperation: (value: string) => void, flush: (reason?: string) => Promise<void>, stop: (reason?: string) => Promise<void>}}
+ */
+function startHeartbeat(report, heartbeatJsonPath) {
+    let activeOperation = 'initializing';
+    let writeInFlight = false;
+    const startedAtEpochMs = Number.isFinite(Date.parse(report.startedAtIso)) ? Date.parse(report.startedAtIso) : Date.now();
+    const flush = async (reason = 'heartbeat') => {
+        if (writeInFlight) { return; }
+        writeInFlight = true;
+        try {
+            const lastPhase = report.phases.at(-1) ?? null;
+            const nowEpochMs = Date.now();
+            const nowMonotonicMs = safePerformance.now();
+            const lastPhaseAgeMs = lastPhase ? Math.max(0, nowMonotonicMs - lastPhase.endMs) : null;
+            const lastPhaseEndIso = lastPhase ? new Date(startedAtEpochMs + lastPhase.endMs).toISOString() : null;
+            console.log(`[firefox-e2e] heartbeat: status=${report.status} phases=${String(report.phases.length)} active=${activeOperation} lastPhase=${lastPhase ? lastPhase.name : 'none'} lastPhaseAgeMs=${lastPhaseAgeMs !== null ? String(lastPhaseAgeMs) : 'n/a'} reason=${reason}`);
+            await writeReportSnapshot(report, heartbeatJsonPath, {
+                heartbeatReason: reason,
+                heartbeatAtIso: new Date(nowEpochMs).toISOString(),
+                activeOperation,
+                lastPhaseName: lastPhase ? lastPhase.name : null,
+                lastPhaseEndIso,
+                lastPhaseAgeMs,
+            });
+        } catch (e) {
+            console.error(`[firefox-e2e] Failed to write heartbeat snapshot: ${errorMessage(e)}`);
+        } finally {
+            writeInFlight = false;
+        }
+    };
+    const interval = setInterval(() => {
+        void flush('interval');
+    }, 10_000);
+    void flush('start');
+    return {
+        setActiveOperation(value) {
+            activeOperation = value;
+        },
+        async flush(reason = 'manual') {
+            await flush(reason);
+        },
+        async stop(reason = 'stop') {
+            clearInterval(interval);
+            await flush(reason);
+        },
     };
 }
 
@@ -836,6 +918,7 @@ function renderReportHtml(report) {
     <div><strong>Failure reason:</strong> ${escapeHtml(report.failureReason || 'none')}</div>
     <div><strong>Skip reason:</strong> ${escapeHtml(report.skipReason || 'none')}</div>
     <div><strong>Recorded phases:</strong> ${report.phases.length}</div>
+    <div><strong>Artifacts:</strong> ${escapeHtml(report.artifacts ? JSON.stringify(report.artifacts) : 'none')}</div>
   </div>
   ${rows}
 </body>
@@ -934,6 +1017,7 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
     let clearedAfterStep = false;
     let emptySince = null;
     const emptyStabilityMs = 2_000;
+    let lastCountsText = '';
 
     while (safePerformance.now() < deadline) {
         const now = safePerformance.now();
@@ -942,6 +1026,7 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
             fail(`${dictionaryName} import reported error before completion: ${immediateError}`);
         }
         const currentLabel = await getImportProgressLabel(driver);
+        lastCountsText = await getDictionaryCountsText(driver);
         if (currentLabel.includes('Step ')) {
             sawStepText = true;
             emptySince = null;
@@ -993,10 +1078,35 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
             emptySince = null;
         }
 
+        if (currentLabel.length === 0 && lastCountsText === expectedCounts) {
+            emptySince ??= now;
+            if ((now - emptySince) >= emptyStabilityMs) {
+                if (previousLabel.length > 0) {
+                    await addReportPhase(
+                        report,
+                        driver,
+                        `${dictionaryName}: ${previousLabel}`,
+                        `${dictionaryName} import progress phase`,
+                        previousLabelStart,
+                        now,
+                    );
+                }
+                await addReportPhase(
+                    report,
+                    driver,
+                    `${dictionaryName}: total import`,
+                    `Accepted settled end state after counts reached expected target with empty progress text. Expected counts target for this phase: ${expectedCounts}. Current counts=${lastCountsText} dictionary-error="${await getDictionaryErrorText(driver)}" import-debug=${JSON.stringify(await getLastImportDebug(driver))} mock-urls=${JSON.stringify(await getMockSeenUrls(driver))}`,
+                    importStartTime,
+                    now,
+                );
+                return;
+            }
+        }
+
         await driver.sleep(250);
     }
 
-    const countsText = await getDictionaryCountsText(driver);
+    const countsText = lastCountsText || await getDictionaryCountsText(driver);
     const errorText = await getDictionaryErrorText(driver);
     if (errorText.length === 0 && countsText === expectedCounts) {
         const now = safePerformance.now();
@@ -1047,7 +1157,10 @@ async function waitForImportProgressPhase(driver, pattern, timeoutMs = 30_000) {
  * @param {number} [iterationCount]
  * @returns {Promise<{phaseState: {ok: boolean, label: string, error: string|null}, iterations: Array<Record<string, unknown>>}>}
  */
-async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWindowHandle, lookupWindowHandle, phasePattern, term, expectedDictionaryNames, iterationCount = 3) {
+async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWindowHandle, lookupWindowHandle, phasePattern, term, expectedDictionaryNames, iterationCount = 3, setActiveOperation = null) {
+    if (typeof setActiveOperation === 'function') {
+        setActiveOperation(`wait for import phase gate: ${String(phasePattern)}`);
+    }
     await driver.switchTo().window(settingsWindowHandle);
     let phaseState = await waitForImportProgressPhase(driver, phasePattern, 20_000);
     if (phaseState.ok !== true && typeof phaseState.error === 'string' && phaseState.error.length > 0 && !phaseState.error.startsWith('Timed out waiting for import progress phase')) {
@@ -1063,6 +1176,9 @@ async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWi
     /** @type {Array<Record<string, unknown>>} */
     const iterations = [];
     for (let i = 0; i < iterationCount; ++i) {
+        if (typeof setActiveOperation === 'function') {
+            setActiveOperation(`lookup during import phase iteration ${String(i + 1)}/${String(iterationCount)}`);
+        }
         await driver.switchTo().window(lookupWindowHandle);
         const iterationStart = safePerformance.now();
         const counts = await searchTermAndGetDictionaryHitCounts(driver, term, expectedDictionaryNames, 20_000);
@@ -1082,6 +1198,9 @@ async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWi
             await driver.sleep(400);
         }
     }
+    if (typeof setActiveOperation === 'function') {
+        setActiveOperation('return to settings after import phase lookup verification');
+    }
     await driver.switchTo().window(settingsWindowHandle);
     return {phaseState, iterations};
 }
@@ -1091,20 +1210,32 @@ async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWi
  * @returns {Promise<string>}
  * @throws {Error}
  */
-async function waitForExtensionBaseUrl(driver) {
+async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
+    const normalizedAddonId = String(installedAddonId || '').trim();
+    const expectedBaseUrl = normalizedAddonId.length > 0 ? `moz-extension://${normalizedAddonId}` : '';
     const deadline = Date.now() + 30_000;
+    let fallbackBaseUrl = '';
     while (Date.now() < deadline) {
         const handlesUnknown = /** @type {unknown} */ (await driver.getAllWindowHandles());
         const handles = Array.isArray(handlesUnknown) ? handlesUnknown.map(String) : [];
         for (const handle of handles) {
             await driver.switchTo().window(handle);
             const url = String(await driver.getCurrentUrl());
-            const match = /^(moz-extension:\/\/[^/]+)\//.exec(url);
+            const match = /^(moz-extension:\/\/[^/]+)(?:\/|$)/.exec(url);
             if (match !== null) {
-                return match[1];
+                fallbackBaseUrl = match[1];
+                if (expectedBaseUrl.length === 0 || expectedBaseUrl === match[1]) {
+                    return match[1];
+                }
             }
         }
         await driver.sleep(500);
+    }
+    if (fallbackBaseUrl.length > 0) {
+        return fallbackBaseUrl;
+    }
+    if (expectedBaseUrl.length > 0) {
+        return expectedBaseUrl;
     }
     fail('Failed to discover moz-extension base URL from open tabs.');
 }
@@ -2128,6 +2259,41 @@ async function purgeBackendDatabase(driver) {
 
 /**
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @returns {Promise<Record<string, unknown>|null>}
+ */
+async function getBackendStorageDiagnostics(driver) {
+    // Selenium executeAsyncScript return value is untyped (`any`).
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const result = await driver.executeAsyncScript(`
+        const done = arguments[arguments.length - 1];
+        chrome.runtime.sendMessage({action: 'debugDictionaryStorageState', params: undefined}, (response) => {
+            const runtimeError = chrome.runtime.lastError;
+            if (runtimeError) {
+                done({ok: false, error: runtimeError.message || String(runtimeError)});
+                return;
+            }
+            if (!(response && typeof response === 'object')) {
+                done({ok: false, error: 'Unexpected storage diagnostics payload'});
+                return;
+            }
+            if ('error' in response) {
+                done({ok: false, error: JSON.stringify(response.error)});
+                return;
+            }
+            done({ok: true, result: response.result});
+        });
+    `);
+    if (!(typeof result === 'object' && result !== null && !Array.isArray(result))) {
+        return null;
+    }
+    const record = /** @type {Record<string, unknown>} */ (result);
+    if (record.ok !== true) { return null; }
+    const payload = record.result;
+    return (typeof payload === 'object' && payload !== null && !Array.isArray(payload)) ? /** @type {Record<string, unknown>} */ (payload) : null;
+}
+
+/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
  * @param {string} dictionaryTitle
  * @returns {Promise<{ok: boolean, error: string|null}>}
  */
@@ -2264,10 +2430,18 @@ async function main() {
     let xpiPath = process.env.MANABITAN_FIREFOX_XPI ?? defaultFirefoxXpiPath;
     const reportPath = process.env.MANABITAN_FIREFOX_E2E_REPORT ?? path.join(root, 'builds', 'firefox-e2e-import-report.html');
     const reportJsonPath = reportPath.replace(/\.html$/i, '.json');
+    const diagnosticsArtifactPaths = createDiagnosticsArtifactPaths(reportJsonPath);
     const chromiumReportPath = path.join(root, 'builds', 'chromium-e2e-import-report.html');
     const edgeReportPath = path.join(root, 'builds', 'edge-e2e-import-report.html');
     const combinedReportPath = path.join(root, 'builds', 'extension-e2e-report.html');
     const report = createReport();
+    report.artifacts = {
+        geckodriverLogPath: diagnosticsArtifactPaths.geckodriverLogPath,
+        heartbeatJsonPath: diagnosticsArtifactPaths.heartbeatJsonPath,
+        crashDumpDir: diagnosticsArtifactPaths.crashDumpDir,
+    };
+    const heartbeat = startHeartbeat(report, diagnosticsArtifactPaths.heartbeatJsonPath);
+    let geckodriverLogFd = null;
     /** @type {Error | undefined} */
     let runError;
     if (process.env.MANABITAN_FIREFOX_XPI) {
@@ -2296,6 +2470,7 @@ async function main() {
         candidates.sort((a, b) => b.mtimeMs - a.mtimeMs);
         xpiPath = candidates[0].path;
     }
+    const extensionPackageStats = await stat(xpiPath);
     const firefoxOptions = new firefox.Options();
     const headlessEnv = (process.env.MANABITAN_FIREFOX_HEADLESS ?? '1').trim().toLowerCase();
     const headless = !(headlessEnv === '0' || headlessEnv === 'false' || headlessEnv === 'no');
@@ -2305,6 +2480,10 @@ async function main() {
     firefoxOptions.setPreference('xpinstall.signatures.required', false);
     firefoxOptions.setPreference('extensions.manifestV3.enabled', true);
     firefoxOptions.setPreference('extensions.backgroundServiceWorker.enabled', true);
+    firefoxOptions.setPreference(
+        'extensions.webextensions.uuids',
+        JSON.stringify({[firefoxDevGeckoId]: firefoxDevExtensionUuid}),
+    );
     // Selenium Firefox profiles can start with stricter defaults that keep
     // SharedArrayBuffer unavailable even when extension pages set COOP/COEP.
     // Ensure test runtime exposes the required shared-memory primitives for OPFS.
@@ -2328,15 +2507,31 @@ async function main() {
             // Use default Firefox binary when Developer Edition is unavailable.
         }
     }
+    firefoxOptions.addExtensions(xpiPath);
+    console.log(`[firefox-e2e] addon package: path=${xpiPath} sizeBytes=${String(extensionPackageStats.size)} installMode=profile headless=${String(headless)} binary=${configuredFirefoxBinary || 'default'}`);
+    await mkdir(diagnosticsArtifactPaths.crashDumpDir, {recursive: true});
+    geckodriverLogFd = openSync(diagnosticsArtifactPaths.geckodriverLogPath, 'a');
+    const firefoxService = new firefox.ServiceBuilder();
+    firefoxService.enableVerboseLogging(true);
+    firefoxService.setEnvironment({
+        ...process.env,
+        MINIDUMP_SAVE_PATH: diagnosticsArtifactPaths.crashDumpDir,
+        MOZ_CRASHREPORTER: '1',
+        MOZ_CRASHREPORTER_SHUTDOWN: '1',
+        MOZ_CRASHREPORTER_NO_REPORT: '1',
+    });
+    firefoxService.setStdio(['ignore', geckodriverLogFd, geckodriverLogFd]);
     const driver = /** @type {import('selenium-webdriver').ThenableWebDriver} */ (
         new Builder()
             .forBrowser(Browser.FIREFOX)
             .setFirefoxOptions(firefoxOptions)
+            .setFirefoxService(firefoxService)
             .build()
     );
     /** @type {null|{close: () => Promise<void>, baseUrl: string}} */
     let localServer = null;
     try {
+        heartbeat.setActiveOperation('cache warmup');
         const cacheWarmupStart = safePerformance.now();
         const cachedDictionaries = await ensureRealDictionaryCache();
         const jitendexArchiveProbeTerms = await loadDictionaryProbeTermsFromArchive(cachedDictionaries.jitendexPath, 80);
@@ -2350,13 +2545,11 @@ async function main() {
             jmdictPath: cachedDictionaries.jmdictPath,
         });
         const cacheWarmupEnd = safePerformance.now();
-
-        const temporaryAddonInstall = parseBooleanEnv(process.env.MANABITAN_FIREFOX_TEMPORARY_ADDON, true);
-        await driver.installAddon(xpiPath, temporaryAddonInstall);
         const firefoxPid = await getFirefoxProcessId(driver);
 
         const baseUrlStart = safePerformance.now();
-        const extensionBaseUrl = await waitForExtensionBaseUrl(driver);
+        heartbeat.setActiveOperation('wait for extension base URL');
+        const extensionBaseUrl = await waitForExtensionBaseUrl(driver, firefoxDevExtensionUuid);
         const baseUrlEnd = safePerformance.now();
         await addReportPhase(report, driver, 'Install extension and discover base URL', 'Extension installed and moz-extension base URL discovered', baseUrlStart, baseUrlEnd);
         const firefoxPidStart = safePerformance.now();
@@ -2364,12 +2557,14 @@ async function main() {
         await addReportPhase(report, driver, 'Firefox process detection', `Detected Firefox browser PID for profiling: ${firefoxPid !== null ? String(firefoxPid) : 'unavailable'}`, firefoxPidStart, firefoxPidEnd);
 
         const settingsOpenStart = safePerformance.now();
+        heartbeat.setActiveOperation('open settings page');
         await driver.get(`${extensionBaseUrl}/settings.html`);
         await driver.wait(until.elementLocated(By.css('#dictionary-import-file-input')), 30_000);
         await ensurePageProfiler(driver);
         const settingsOpenEnd = safePerformance.now();
         await addReportPhase(report, driver, 'Open settings page', 'Settings loaded and dictionary import controls visible', settingsOpenStart, settingsOpenEnd);
         const resetStateStart = safePerformance.now();
+        heartbeat.setActiveOperation('purge backend database');
         const resetState = await purgeBackendDatabase(driver);
         const resetStateEnd = safePerformance.now();
         await addReportPhase(
@@ -2452,6 +2647,7 @@ async function main() {
             fail(`Firefox runtime does not satisfy opfs-sahpool prerequisites: ${JSON.stringify(runtimeDiagnostics)}`);
         }
         const backendPreflightStart = safePerformance.now();
+        heartbeat.setActiveOperation('backend API preflight');
         const backendPreflight = await checkBackendApiAvailability(driver);
         const backendPreflightEnd = safePerformance.now();
         await addReportPhase(
@@ -2790,6 +2986,7 @@ async function main() {
             '暗記',
             ['Jitendex', 'JMdict'],
             4,
+            heartbeat.setActiveOperation,
         );
         const searchDuringActiveUpdateImportEnd = safePerformance.now();
         await addReportPhase(
@@ -2803,6 +3000,7 @@ async function main() {
 
         await driver.switchTo().window(settingsWindowHandle);
         const updateProfileStart = safePerformance.now();
+        heartbeat.setActiveOperation('wait for updated Jitendex import completion');
         await beginPageProfilePhase(driver);
         const updateSampler = startFirefoxResourceSampler(firefoxPid);
         await waitForImportWithPhaseScreenshots(driver, report, 'Jitendex', '2 installed, 2 enabled', 300_000);
@@ -2819,6 +3017,7 @@ async function main() {
             updateProfileEnd,
         );
         const verifyUpdatedJitendexContentStart = safePerformance.now();
+        heartbeat.setActiveOperation('verify updated Jitendex backend content integrity');
         const verifyUpdatedJitendexContentProfile = await waitForBackendDictionaryContentIntegrity(
             driver,
             ['Jitendex'],
@@ -2839,6 +3038,7 @@ async function main() {
         }
 
         const searchOpenStart = safePerformance.now();
+        heartbeat.setActiveOperation('open search page from action popup');
         await closeModalIfOpen(driver, '#dictionaries-modal');
         await openSearchPageViaActionPopup(driver, extensionBaseUrl);
         await ensurePageProfiler(driver);
@@ -2857,6 +3057,7 @@ async function main() {
         );
 
         const searchVerifyStart = safePerformance.now();
+        heartbeat.setActiveOperation('verify search results include both dictionaries');
         const searchTerm = '暗記';
         let dictionaryHitCounts = await searchTermAndGetDictionaryHitCounts(driver, searchTerm, expectedLookupDictionaries, 20_000);
         if ((dictionaryHitCounts.Jitendex ?? 0) < 1 || (dictionaryHitCounts.JMdict ?? 0) < 1) {
@@ -2887,6 +3088,7 @@ async function main() {
         const lookupProfiles = [];
         for (const lookupChar of lookupChars) {
             const lookupStart = safePerformance.now();
+            heartbeat.setActiveOperation(`profile lookup: ${lookupChar}`);
             await beginPageProfilePhase(driver);
             const sampler = startFirefoxResourceSampler(firefoxPid);
             const lookupCounts = await searchTermAndGetDictionaryHitCounts(driver, lookupChar, expectedLookupDictionaries, 4_000);
@@ -2930,6 +3132,7 @@ async function main() {
         );
 
         const multiImportOpenStart = safePerformance.now();
+        heartbeat.setActiveOperation('return to settings for multi-file import');
         await driver.get(`${extensionBaseUrl}/settings.html?popup-preview=false`);
         await driver.wait(until.elementLocated(By.css('#dictionary-import-file-input')), 30_000);
         const multiImportOpenEnd = safePerformance.now();
@@ -2958,6 +3161,7 @@ async function main() {
             fail(`Failed to delete JMdict before batch import: ${String(deleteJmdictBeforeBatchResult.error || 'unknown error')}`);
         }
         const multiImportTriggerStart = safePerformance.now();
+        heartbeat.setActiveOperation('trigger multi-file import');
         await importDictionariesViaFileInput(driver, [cachedDictionaries.jmdictPath, cachedDictionaries.jmnedictPath]);
         const multiImportTriggerEnd = safePerformance.now();
         await addReportPhase(
@@ -2969,6 +3173,7 @@ async function main() {
             multiImportTriggerEnd,
         );
         const multiImportProfileStart = safePerformance.now();
+        heartbeat.setActiveOperation('wait for JMdict + JMnedict batch import completion');
         await beginPageProfilePhase(driver);
         const multiImportSampler = startFirefoxResourceSampler(firefoxPid);
         await waitForImportWithPhaseScreenshots(driver, report, 'JMdict + JMnedict batch import', '3 installed, 3 enabled', 300_000);
@@ -3231,7 +3436,20 @@ async function main() {
         report.status = 'success';
         console.log('[firefox-e2e] PASS: Recommended dictionary imports installed Jitendex and JMdict.');
     } catch (e) {
-        const failureReason = errorMessage(e);
+        let failureReason = errorMessage(e);
+        try {
+            const backendStorageDiagnostics = await getBackendStorageDiagnostics(driver);
+            if (backendStorageDiagnostics !== null) {
+                const runtimeDiagnostics = asRecordOrNull(report.runtimeDiagnostics) ?? {};
+                report.runtimeDiagnostics = {
+                    ...runtimeDiagnostics,
+                    backendStorageDiagnostics,
+                };
+                failureReason += ` backendStorageDiagnostics=${JSON.stringify(backendStorageDiagnostics)}`;
+            }
+        } catch (diagnosticsError) {
+            failureReason += ` backendStorageDiagnosticsError=${errorMessage(diagnosticsError)}`;
+        }
         const skipReason = strictUnsupportedRuntime ? '' : getUnsupportedRuntimeSkipReason(failureReason);
         if (skipReason.length > 0) {
             report.status = 'success-with-skips';
@@ -3246,6 +3464,7 @@ async function main() {
         }
     } finally {
         try {
+            await heartbeat.stop('finalize');
             await mkdir(path.dirname(reportPath), {recursive: true});
             const reportHtml = renderReportHtml(report);
             await writeFile(reportPath, reportHtml);
@@ -3275,6 +3494,13 @@ async function main() {
         } catch (driverQuitError) {
             if (!isIgnorableDriverQuitError(driverQuitError)) {
                 throw driverQuitError;
+            }
+        }
+        if (geckodriverLogFd !== null) {
+            try {
+                closeSync(geckodriverLogFd);
+            } catch (streamError) {
+                console.error(`[firefox-e2e] Failed to close geckodriver log fd: ${errorMessage(streamError)}`);
             }
         }
     }

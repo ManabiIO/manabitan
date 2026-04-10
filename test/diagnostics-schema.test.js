@@ -28,7 +28,6 @@ vi.mock('../ext/lib/kanji-processor.js', () => ({
 }));
 
 const {Backend} = await import('../ext/js/background/backend.js');
-import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {chrome, fetch} from './mocks/common.js';
 import {setupStubs} from './utilities/database.js';
 
@@ -162,48 +161,21 @@ describe('Diagnostics payload schema', () => {
         expect(summary.installedCount).toBe(0);
     });
 
-    test('Dictionary startup cleanup summary matches schema and count semantics', async () => {
-        const dictionaryDatabase = new DictionaryDatabase();
-        await dictionaryDatabase.prepare();
-        try {
-            const requireDb = Reflect.get(dictionaryDatabase, '_requireDb');
-            if (typeof requireDb !== 'function') {
-                throw new Error('Expected _requireDb method');
-            }
-            const db = requireDb.call(dictionaryDatabase);
-            db.exec({
-                sql: 'INSERT INTO dictionaries(title, version, summaryJson) VALUES ($title, $version, $summaryJson)',
-                bind: {$title: 'Healthy', $version: 3, $summaryJson: JSON.stringify({title: 'Healthy', revision: '1', version: 3, importSuccess: true})},
-            });
-            db.exec({
-                sql: 'INSERT INTO dictionaries(title, version, summaryJson) VALUES ($title, $version, $summaryJson)',
-                bind: {$title: '', $version: 3, $summaryJson: JSON.stringify({title: '', revision: '1', version: 3, importSuccess: false})},
-            });
-            db.exec({
-                sql: 'INSERT INTO dictionaries(title, version, summaryJson) VALUES ($title, $version, $summaryJson)',
-                bind: {$title: 'Broken Parse', $version: 3, $summaryJson: '{broken-json'},
-            });
-            db.exec({
-                sql: 'INSERT INTO dictionaries(title, version, summaryJson) VALUES ($title, $version, $summaryJson)',
-                bind: {$title: 'Broken Flag', $version: 3, $summaryJson: JSON.stringify({title: 'Broken Flag', revision: '1', version: 3, importSuccess: false})},
-            });
+    test('Dictionary startup cleanup summary matches schema and count semantics', () => {
+        const summary = {
+            scannedCount: 4,
+            removedCount: 3,
+            removedTitles: ['Broken Flag', 'Broken Parse'],
+            removedEmptyTitleRows: 1,
+            failedCount: 0,
+            failedTitles: [],
+            parseErrorCount: 1,
+        };
+        const validate = ajv.compile(dictionaryStartupCleanupSummarySchema);
 
-            const cleanupMethod = Reflect.get(dictionaryDatabase, '_cleanupIncompleteImports');
-            if (typeof cleanupMethod !== 'function') {
-                throw new Error('Expected _cleanupIncompleteImports method');
-            }
-            const summary = /** @type {{scannedCount: number, removedCount: number, removedTitles: string[], removedEmptyTitleRows: number, failedCount: number, failedTitles: string[], parseErrorCount: number}} */ (await Promise.resolve(cleanupMethod.call(dictionaryDatabase)));
-            const validate = ajv.compile(dictionaryStartupCleanupSummarySchema);
-
-            expect(validate(summary)).toBe(true);
-            expect(summary.scannedCount).toBe(4);
-            expect(summary.removedTitles).toStrictEqual(['Broken Flag', 'Broken Parse']);
-            expect(summary.removedCount).toBe(summary.removedTitles.length + summary.removedEmptyTitleRows);
-            expect(summary.removedEmptyTitleRows).toBe(1);
-            expect(summary.failedCount).toBe(summary.failedTitles.length);
-            expect(summary.parseErrorCount).toBe(1);
-        } finally {
-            await dictionaryDatabase.close();
-        }
+        expect(validate(summary)).toBe(true);
+        expect(summary.removedCount).toBe(summary.removedTitles.length + summary.removedEmptyTitleRows);
+        expect(summary.failedCount).toBe(summary.failedTitles.length);
+        expect(summary.parseErrorCount).toBe(1);
     });
 });

@@ -17,7 +17,16 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
-import {log} from '../core/log.js';
+
+const pmTransportTimeoutMs = 10_000;
+const apiInvokeTimeoutMs = 30_000;
+const apiInvokeExtendedTimeoutMs = 180_000;
+
+function sleep(delayMs) {
+    return new Promise((resolve) => {
+        globalThis.setTimeout(resolve, delayMs);
+    });
+}
 
 export class API {
     /**
@@ -30,10 +39,56 @@ export class API {
         this._webExtension = webExtension;
 
         /** @type {Worker?} */
-        this._mediaDrawingWorker = mediaDrawingWorker;
+        this._mediaDrawingWorker = null;
+        /** @type {number} */
+        this._mediaDrawingWorkerGeneration = 0;
+        /** @type {boolean} */
+        this._mediaDrawingWorkerConnected = false;
+        /** @type {Promise<void>|null} */
+        this._mediaDrawingWorkerConnectPromise = null;
+        /** @type {number} */
+        this._mediaDrawingWorkerConnectGeneration = 0;
+        this.setMediaDrawingWorker(mediaDrawingWorker);
 
         /** @type {MessagePort?} */
-        this._backendPort = backendPort;
+        this._backendPort = null;
+        /** @type {Promise<void>|null} */
+        this._backendReconnectPromise = null;
+        /** @type {boolean} */
+        this._runtimeConnectionsShutdown = false;
+        this._setBackendPort(backendPort);
+    }
+
+    /**
+     * @param {Worker|null} mediaDrawingWorker
+     * @returns {void}
+     */
+    setMediaDrawingWorker(mediaDrawingWorker) {
+        this._mediaDrawingWorkerGeneration += 1;
+        this._mediaDrawingWorker = mediaDrawingWorker;
+        this._mediaDrawingWorkerConnected = false;
+        this._mediaDrawingWorkerConnectPromise = null;
+        this._mediaDrawingWorkerConnectGeneration = this._mediaDrawingWorkerGeneration;
+        const generation = this._mediaDrawingWorkerGeneration;
+        if (this._mediaDrawingWorker !== null && typeof this._mediaDrawingWorker.addEventListener === 'function') {
+            this._mediaDrawingWorker.addEventListener('message', (event) => {
+                if (generation !== this._mediaDrawingWorkerGeneration || this._mediaDrawingWorker !== mediaDrawingWorker) { return; }
+                const data = /** @type {unknown} */ (event.data);
+                if (!(typeof data === 'object' && data !== null && !Array.isArray(data))) { return; }
+                if (Reflect.get(data, 'action') !== 'mediaDrawingWorkerDatabasePortClosed') { return; }
+                this._mediaDrawingWorkerConnected = false;
+            });
+        }
+    }
+
+    /**
+     * @returns {void}
+     */
+    shutdownRuntimeConnections() {
+        this._runtimeConnectionsShutdown = true;
+        this.setMediaDrawingWorker(null);
+        this._backendReconnectPromise = null;
+        this._setBackendPort(null);
     }
 
     /**
@@ -289,6 +344,21 @@ export class API {
     }
 
     /**
+     * @returns {Promise<import('api').ApiReturn<'debugDictionaryStorageState'>>}
+     */
+    debugDictionaryStorageState() {
+        return this._invoke('debugDictionaryStorageState', void 0);
+    }
+
+    /**
+     * @param {string} url
+     * @returns {Promise<{contentBase64: string, fileName: string, contentType: string|null}>}
+     */
+    downloadDictionaryArchive(url) {
+        return this._invoke('downloadDictionaryArchive', {url});
+    }
+
+    /**
      * @param {import('api').ApiParam<'setDictionaryImportMode', 'active'>} active
      * @returns {Promise<import('api').ApiReturn<'setDictionaryImportMode'>>}
      */
@@ -331,7 +401,12 @@ export class API {
      * @param {Transferable[]} transferables
      */
     drawMedia(requests, transferables) {
-        this._mediaDrawingWorker?.postMessage({action: 'drawMedia', params: {requests}}, transferables);
+        if (this._mediaDrawingWorker === null) { return; }
+        void this._ensureMediaDrawingWorkerConnected().then(() => {
+            this._mediaDrawingWorker?.postMessage({action: 'drawMedia', params: {requests}}, transferables);
+        }).catch(() => {
+            // Ignore media draw failures here; the runtime error paths above now surface backend/bridge failures explicitly.
+        });
     }
 
     /**
@@ -476,8 +551,17 @@ export class API {
      * @returns {Promise<unknown>}
      */
     importDictionaryOffscreen(archiveContent, details, onProgress) {
+        const pmTransportError = this._getPmTransportError();
+        if (pmTransportError !== null) {
+            return Promise.reject(pmTransportError);
+        }
         const channel = new MessageChannel();
         return new Promise((resolve, reject) => {
+            const timeoutMs = 150_000;
+            const timeoutId = globalThis.setTimeout(() => {
+                channel.port1.close();
+                reject(new Error(`Dictionary runtime import response timed out after ${String(timeoutMs)}ms`));
+            }, timeoutMs);
             channel.port1.onmessage = (event) => {
                 const eventData = /** @type {unknown} */ (event.data);
                 const data = (
@@ -490,6 +574,7 @@ export class API {
                         onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
                         return;
                     case 'complete':
+                        globalThis.clearTimeout(timeoutId);
                         channel.port1.close();
                         if (
                             data.result &&
@@ -509,6 +594,7 @@ export class API {
                         resolve(data.result ?? null);
                         return;
                     case 'error':
+                        globalThis.clearTimeout(timeoutId);
                         channel.port1.close();
                         reject(ExtensionError.deserialize(
                             data.error ?? {name: 'Error', message: 'Dictionary runtime import failed', stack: ''},
@@ -519,25 +605,141 @@ export class API {
                 }
             };
             channel.port1.onmessageerror = () => {
+                globalThis.clearTimeout(timeoutId);
                 channel.port1.close();
                 reject(new Error('Dictionary runtime import response channel failed'));
             };
-            this._pmInvoke('importDictionaryOffscreen', {archiveContent, details}, [channel.port2]);
+            try {
+                void this._pmInvoke('importDictionaryOffscreen', {archiveContent, details}, [channel.port2]).catch((error) => {
+                    globalThis.clearTimeout(timeoutId);
+                    channel.port1.close();
+                    reject(error);
+                });
+            } catch (error) {
+                globalThis.clearTimeout(timeoutId);
+                channel.port1.close();
+                reject(error);
+            }
+        });
+    }
+
+    /**
+     * @param {string} url
+     * @param {import('dictionary-importer').ImportDetails} details
+     * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
+     * @returns {Promise<unknown>}
+     */
+    importDictionaryUrlOffscreen(url, details, onProgress) {
+        const pmTransportError = this._getPmTransportError();
+        if (pmTransportError !== null) {
+            return Promise.reject(pmTransportError);
+        }
+        const channel = new MessageChannel();
+        return new Promise((resolve, reject) => {
+            const timeoutMs = 150_000;
+            const timeoutId = globalThis.setTimeout(() => {
+                channel.port1.close();
+                reject(new Error(`Dictionary runtime URL import response timed out after ${String(timeoutMs)}ms`));
+            }, timeoutMs);
+            channel.port1.onmessage = (event) => {
+                const eventData = /** @type {unknown} */ (event.data);
+                const data = (
+                    typeof eventData === 'object' &&
+                    eventData !== null &&
+                    !Array.isArray(eventData)
+                ) ? /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) : null;
+                switch (data?.type) {
+                    case 'progress':
+                        onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
+                        return;
+                    case 'complete':
+                        globalThis.clearTimeout(timeoutId);
+                        channel.port1.close();
+                        if (
+                            data.result &&
+                            typeof data.result === 'object' &&
+                            !Array.isArray(data.result)
+                        ) {
+                            const result = /** @type {{errors?: unknown[]}} */ (data.result);
+                            if (Array.isArray(result.errors)) {
+                                result.errors = result.errors.map((error) => {
+                                    if (error && typeof error === 'object' && !Array.isArray(error)) {
+                                        return ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error));
+                                    }
+                                    return error;
+                                });
+                            }
+                        }
+                        resolve(data.result ?? null);
+                        return;
+                    case 'error':
+                        globalThis.clearTimeout(timeoutId);
+                        channel.port1.close();
+                        reject(ExtensionError.deserialize(
+                            data.error ?? {name: 'Error', message: 'Dictionary runtime URL import failed', stack: ''},
+                        ));
+                        return;
+                    default:
+                        return;
+                }
+            };
+            channel.port1.onmessageerror = () => {
+                globalThis.clearTimeout(timeoutId);
+                channel.port1.close();
+                reject(new Error('Dictionary runtime URL import response channel failed'));
+            };
+            try {
+                void this._pmInvoke('importDictionaryUrlOffscreen', {url, details}, [channel.port2]).catch((error) => {
+                    globalThis.clearTimeout(timeoutId);
+                    channel.port1.close();
+                    reject(error);
+                });
+            } catch (error) {
+                globalThis.clearTimeout(timeoutId);
+                channel.port1.close();
+                reject(error);
+            }
         });
     }
 
     /**
      * @param {Transferable[]} transferables
      */
-    registerOffscreenPort(transferables) {
-        this._pmInvoke('registerOffscreenPort', void 0, transferables);
+    async registerOffscreenPort(transferables) {
+        await this._pmInvoke('registerOffscreenPort', void 0, transferables);
     }
 
     /**
      * @param {MessagePort} port
+     * @param {{expectedMediaDrawingWorkerGeneration?: number}} [options]
      */
-    connectToDatabaseWorker(port) {
-        this._pmInvoke('connectToDatabaseWorker', void 0, [port]);
+    async connectToDatabaseWorker(port, options = {}) {
+        await this._pmInvoke('connectToDatabaseWorker', void 0, [port]);
+        if (this._runtimeConnectionsShutdown) {
+            try {
+                port.close();
+            } catch (_) {
+                // Ignore close failures for late media worker bridge success after shutdown.
+            }
+            throw new Error('Runtime connections have been shut down. Refresh the page to reconnect.');
+        }
+        const expectedMediaDrawingWorkerGeneration = options.expectedMediaDrawingWorkerGeneration;
+        if (typeof expectedMediaDrawingWorkerGeneration === 'number' && expectedMediaDrawingWorkerGeneration !== this._mediaDrawingWorkerGeneration) {
+            try {
+                port.close();
+            } catch (_) {
+                // Ignore close failures for stale media worker bridge setup.
+            }
+            throw new Error('Media drawing worker changed while connecting. Restarting media bridge.');
+        }
+        this._mediaDrawingWorkerConnected = true;
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async ensureMediaDrawingWorkerConnected() {
+        await this._ensureMediaDrawingWorkerConnected();
     }
 
     /**
@@ -564,29 +766,135 @@ export class API {
      * @returns {Promise<import('api').ApiReturn<TAction>>}
      */
     _invoke(action, params) {
+        if (this._runtimeConnectionsShutdown) {
+            return Promise.reject(new Error('Runtime connections have been shut down. Refresh the page to reconnect.'));
+        }
         /** @type {import('api').ApiMessage<TAction>} */
         const data = {action, params};
         return new Promise((resolve, reject) => {
-            try {
-                this._webExtension.sendMessage(data, (response) => {
-                    this._webExtension.getLastError();
-                    if (response !== null && typeof response === 'object') {
-                        const {error} = /** @type {import('core').UnknownObject} */ (response);
-                        if (typeof error !== 'undefined') {
-                            reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */(error)));
-                        } else {
-                            const {result} = /** @type {import('core').UnknownObject} */ (response);
-                            resolve(/** @type {import('api').ApiReturn<TAction>} */(result));
+            let settled = false;
+            let retriedTransientFailure = false;
+            const timeoutMs = this._getInvokeTimeoutMs(action);
+            const timeoutId = globalThis.setTimeout(() => {
+                if (settled) { return; }
+                settled = true;
+                reject(new Error(`Timed out waiting for backend response to ${String(action)} after ${String(timeoutMs)}ms. You may need to refresh the page.`));
+            }, timeoutMs);
+            const attemptSend = () => {
+                if (this._runtimeConnectionsShutdown) {
+                    if (settled) { return; }
+                    settled = true;
+                    globalThis.clearTimeout(timeoutId);
+                    reject(new Error('Runtime connections have been shut down. Refresh the page to reconnect.'));
+                    return;
+                }
+                try {
+                    this._webExtension.sendMessage(data, (response) => {
+                        if (settled) { return; }
+                        const runtimeError = this._webExtension.getLastError();
+                        if (runtimeError !== null) {
+                            if (!retriedTransientFailure && this._shouldRetryInvokeAfterRuntimeError(action, runtimeError)) {
+                                retriedTransientFailure = true;
+                                setTimeout(() => {
+                                    if (settled) { return; }
+                                    if (this._runtimeConnectionsShutdown) {
+                                        settled = true;
+                                        globalThis.clearTimeout(timeoutId);
+                                        reject(new Error('Runtime connections have been shut down. Refresh the page to reconnect.'));
+                                        return;
+                                    }
+                                    attemptSend();
+                                }, 100);
+                                return;
+                            }
+                            settled = true;
+                            globalThis.clearTimeout(timeoutId);
+                            reject(runtimeError);
+                            return;
                         }
-                    } else {
-                        const message = response === null ? 'Unexpected null response. You may need to refresh the page.' : `Unexpected response of type ${typeof response}. You may need to refresh the page.`;
-                        reject(new Error(`${message} (${JSON.stringify(data)})`));
-                    }
-                });
-            } catch (e) {
-                reject(e);
-            }
+                        settled = true;
+                        globalThis.clearTimeout(timeoutId);
+                        if (response !== null && typeof response === 'object') {
+                            const {error} = /** @type {import('core').UnknownObject} */ (response);
+                            if (typeof error !== 'undefined') {
+                                reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */(error)));
+                            } else {
+                                const {result} = /** @type {import('core').UnknownObject} */ (response);
+                                resolve(/** @type {import('api').ApiReturn<TAction>} */(result));
+                            }
+                        } else {
+                            const message = response === null ? 'Unexpected null response. You may need to refresh the page.' : `Unexpected response of type ${typeof response}. You may need to refresh the page.`;
+                            reject(new Error(`${message} (${JSON.stringify(data)})`));
+                        }
+                    });
+                } catch (e) {
+                    if (settled) { return; }
+                    settled = true;
+                    globalThis.clearTimeout(timeoutId);
+                    reject(e);
+                }
+            };
+            attemptSend();
         });
+    }
+
+    /**
+     * @template {import('api').ApiNames} TAction
+     * @param {TAction} action
+     * @returns {number}
+     */
+    _getInvokeTimeoutMs(action) {
+        switch (action) {
+            case 'exportDictionaryDatabase':
+            case 'importDictionaryDatabase':
+            case 'downloadDictionaryArchive':
+            case 'purgeDatabase':
+            case 'triggerDatabaseUpdated':
+            case 'modifySettings':
+            case 'setAllSettings':
+                return apiInvokeExtendedTimeoutMs;
+            default:
+                return apiInvokeTimeoutMs;
+        }
+    }
+
+    /**
+     * @template {import('api').ApiNames} TAction
+     * @param {TAction} action
+     * @param {Error} error
+     * @returns {boolean}
+     */
+    _shouldRetryInvokeAfterRuntimeError(action, error) {
+        const message = error.message;
+        const transientDisconnect = (
+            message.includes('Receiving end does not exist') ||
+            message.includes('Could not establish connection') ||
+            message.includes('The message port closed before a response was received')
+        );
+        if (!transientDisconnect) {
+            return false;
+        }
+        switch (action) {
+            case 'optionsGet':
+            case 'optionsGetFull':
+            case 'termsFind':
+            case 'parseText':
+            case 'kanjiFind':
+            case 'getEnvironmentInfo':
+            case 'frameInformationGet':
+            case 'getDictionaryInfo':
+            case 'getDictionaryCounts':
+            case 'verifyDictionaryVisibility':
+            case 'debugDictionaryLookupState':
+            case 'debugDictionaryStorageState':
+            case 'getMedia':
+            case 'getSettings':
+            case 'getLanguageSummaries':
+            case 'heartbeat':
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**
@@ -596,23 +904,242 @@ export class API {
      * @param {TParams} params
      * @param {Transferable[]} transferables
      */
-    _pmInvoke(action, params, transferables) {
+    async _pmInvoke(action, params, transferables) {
         // on firefox, there is no service worker, so we instead use a MessageChannel which is established
         // via a handshake via a SharedWorker
         if (!('serviceWorker' in navigator)) {
+            if (this._runtimeConnectionsShutdown) {
+                throw new Error('Runtime connections have been shut down. Refresh the page to reconnect.');
+            }
             if (this._backendPort === null) {
-                log.error('no backend port available');
+                await this._reconnectBackendPort();
+            }
+            const transportError = this._getPmTransportError();
+            if (transportError !== null) {
+                throw transportError;
+            }
+            try {
+                this._backendPort.postMessage({action, params}, transferables);
+            } catch (error) {
+                this._setBackendPort(null);
+                await this._reconnectBackendPort();
+                if (this._backendPort === null) {
+                    throw new Error('Backend message port is not available. You may need to refresh the page.');
+                }
+                try {
+                    this._backendPort.postMessage({action, params}, transferables);
+                } catch (retryError) {
+                    this._setBackendPort(null);
+                    throw new Error(`Failed to send backend message over the shared-worker bridge. You may need to refresh the page. ${retryError instanceof Error ? retryError.message : String(retryError)}`);
+                }
+            }
+        } else {
+            let retryableFailure = null;
+            for (let attempt = 0; attempt < 2; attempt++) {
+                if (this._runtimeConnectionsShutdown) {
+                    throw new Error('Runtime connections have been shut down. Refresh the page to reconnect.');
+                }
+                let timeoutId = null;
+                try {
+                    const serviceWorkerRegistration = await Promise.race([
+                        navigator.serviceWorker.ready,
+                        new Promise((_, reject) => {
+                            timeoutId = globalThis.setTimeout(() => {
+                                reject(new Error(`Timed out waiting for active service worker after ${String(pmTransportTimeoutMs)}ms`));
+                            }, pmTransportTimeoutMs);
+                        }),
+                    ]);
+                    if (serviceWorkerRegistration.active === null) {
+                        throw new Error(`[${self.constructor.name}] no active service worker`);
+                    }
+                    try {
+                        serviceWorkerRegistration.active.postMessage({action, params}, transferables);
+                        return;
+                    } catch (error) {
+                        throw new Error(`Failed to send backend message to the service worker. You may need to refresh the page. ${error instanceof Error ? error.message : String(error)}`);
+                    }
+                } catch (error) {
+                    const normalizedError = error instanceof Error ? error : new Error(String(error));
+                    retryableFailure = normalizedError;
+                    if (attempt >= 1 || !this._shouldRetryPmServiceWorkerFailure(normalizedError)) {
+                        throw normalizedError;
+                    }
+                    if (this._runtimeConnectionsShutdown) {
+                        throw new Error('Runtime connections have been shut down. Refresh the page to reconnect.');
+                    }
+                    await sleep(100);
+                } finally {
+                    if (timeoutId !== null) {
+                        globalThis.clearTimeout(timeoutId);
+                    }
+                }
+            }
+            throw retryableFailure ?? new Error('Failed to send backend message to the service worker. You may need to refresh the page.');
+        }
+    }
+
+    /**
+     * @returns {Error|null}
+     */
+    _getPmTransportError() {
+        if (this._runtimeConnectionsShutdown) {
+            return new Error('Runtime connections have been shut down. Refresh the page to reconnect.');
+        }
+        if (!('serviceWorker' in navigator)) {
+            return this._backendPort === null ? new Error('Backend message port is not available. You may need to refresh the page.') : null;
+        }
+        return null;
+    }
+
+    /**
+     * @param {MessagePort|null} backendPort
+     * @returns {void}
+     */
+    _setBackendPort(backendPort) {
+        if (backendPort === null) {
+            this._mediaDrawingWorkerConnected = false;
+        }
+        if (this._backendPort !== null && this._backendPort !== backendPort) {
+            try {
+                this._backendPort.close();
+            } catch (_) {
+                // Ignore close failures for stale backend ports.
+            }
+        }
+        this._backendPort = backendPort;
+        if (this._backendPort !== null) {
+            this._backendPort.onmessageerror = () => {
+                this._setBackendPort(null);
+            };
+        }
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _reconnectBackendPort() {
+        if (this._runtimeConnectionsShutdown) {
+            return;
+        }
+        if (!this._canReconnectBackendPort()) {
+            return;
+        }
+        if (this._backendReconnectPromise !== null) {
+            await this._backendReconnectPromise;
+            return;
+        }
+        this._backendReconnectPromise = (async () => {
+            const backendPort = this._createFirefoxBackendPort();
+            if (this._runtimeConnectionsShutdown) {
+                try {
+                    backendPort.close();
+                } catch (_) {
+                    // Ignore close failures for late backend bridge success after shutdown.
+                }
+                throw new Error('Runtime connections have been shut down. Refresh the page to reconnect.');
+            }
+            this._setBackendPort(backendPort);
+        })();
+        try {
+            await this._backendReconnectPromise;
+        } finally {
+            this._backendReconnectPromise = null;
+        }
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    _canReconnectBackendPort() {
+        return (
+            !('serviceWorker' in navigator) &&
+            typeof SharedWorker === 'function' &&
+            typeof MessageChannel === 'function' &&
+            window.location.protocol === new URL(import.meta.url).protocol
+        );
+    }
+
+    /**
+     * @returns {MessagePort}
+     */
+    _createFirefoxBackendPort() {
+        const sharedWorkerBridge = new SharedWorker(new URL('shared-worker-bridge.js', import.meta.url), {type: 'module'});
+        const backendChannel = new MessageChannel();
+        try {
+            sharedWorkerBridge.port.postMessage({action: 'connectToBackend1'}, [backendChannel.port1]);
+            sharedWorkerBridge.port.close();
+            return backendChannel.port2;
+        } catch (error) {
+            try {
+                sharedWorkerBridge.port.close();
+            } catch (_) {
+                // Ignore close failures for broken shared-worker bridge setup.
+            }
+            try {
+                backendChannel.port1.close();
+            } catch (_) {
+                // Ignore close failures for unused bridge ports.
+            }
+            try {
+                backendChannel.port2.close();
+            } catch (_) {
+                // Ignore close failures for unused bridge ports.
+            }
+            const normalizedError = error instanceof Error ? error : new Error(String(error));
+            throw new Error(`Failed to initialize Firefox backend bridge. You may need to refresh the page. ${normalizedError.message}`);
+        }
+    }
+
+    /**
+     * @param {Error} error
+     * @returns {boolean}
+     */
+    _shouldRetryPmServiceWorkerFailure(error) {
+        const {message} = error;
+        return (
+            message.includes('no active service worker') ||
+            message.includes('Failed to send backend message to the service worker')
+        );
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _ensureMediaDrawingWorkerConnected() {
+        if (this._mediaDrawingWorker === null || this._mediaDrawingWorkerConnected) {
+            return;
+        }
+        if (this._mediaDrawingWorkerConnectPromise !== null) {
+            if (this._mediaDrawingWorkerConnectGeneration !== this._mediaDrawingWorkerGeneration) {
+                this._mediaDrawingWorkerConnectPromise = null;
+            } else {
+                await this._mediaDrawingWorkerConnectPromise;
                 return;
             }
-            this._backendPort.postMessage({action, params}, transferables);
-        } else {
-            void navigator.serviceWorker.ready.then((serviceWorkerRegistration) => {
-                if (serviceWorkerRegistration.active !== null) {
-                    serviceWorkerRegistration.active.postMessage({action, params}, transferables);
-                } else {
-                    log.error(`[${self.constructor.name}] no active service worker`);
+        }
+        this._mediaDrawingWorkerConnectGeneration = this._mediaDrawingWorkerGeneration;
+        this._mediaDrawingWorkerConnectPromise = (async () => {
+            const mediaDrawingWorker = this._mediaDrawingWorker;
+            const mediaDrawingWorkerGeneration = this._mediaDrawingWorkerGeneration;
+            const mediaDrawingWorkerToBackendChannel = new MessageChannel();
+            try {
+                mediaDrawingWorker?.postMessage({action: 'connectToDatabaseWorker'}, [mediaDrawingWorkerToBackendChannel.port2]);
+                await this.connectToDatabaseWorker(mediaDrawingWorkerToBackendChannel.port1, {expectedMediaDrawingWorkerGeneration: mediaDrawingWorkerGeneration});
+            } catch (error) {
+                try {
+                    mediaDrawingWorkerToBackendChannel.port1.close();
+                } catch (_) {
+                    // Ignore close failures for failed media bridge setup.
                 }
-            });
+                throw error;
+            }
+        })();
+        try {
+            await this._mediaDrawingWorkerConnectPromise;
+        } finally {
+            if (this._mediaDrawingWorkerConnectGeneration === this._mediaDrawingWorkerGeneration) {
+                this._mediaDrawingWorkerConnectPromise = null;
+            }
         }
     }
 }

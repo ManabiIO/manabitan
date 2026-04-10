@@ -88,6 +88,8 @@ export class Offscreen {
         this._dictionaryWorkerResponseHandlers = new Map();
         /** @type {number} */
         this._dictionaryWorkerRequestId = 0;
+        /** @type {ExtensionError|null} */
+        this._dictionaryWorkerFatalError = null;
         this._dictionaryWorker.addEventListener('message', this._onDictionaryWorkerMessage.bind(this));
         this._dictionaryWorker.addEventListener('messageerror', this._onDictionaryWorkerMessageError.bind(this));
         this._dictionaryWorker.addEventListener('error', this._onDictionaryWorkerError.bind(this));
@@ -101,9 +103,29 @@ export class Offscreen {
     /** */
     prepare() {
         chrome.runtime.onMessage.addListener(this._onMessage.bind(this));
-        navigator.serviceWorker.addEventListener('controllerchange', this._createAndRegisterPort.bind(this));
-        this._createAndRegisterPort();
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            void this._createAndRegisterPort().catch((error) => {
+                this._reportControlPortRegistrationFailure(error, 'controllerchange');
+            });
+        });
+        void this._createAndRegisterPort().catch((error) => {
+            this._reportControlPortRegistrationFailure(error, 'prepare');
+        });
         void this._reportOpfsPreflight();
+    }
+
+    /**
+     * @param {unknown} error
+     * @param {string} stage
+     * @returns {void}
+     */
+    _reportControlPortRegistrationFailure(error, stage) {
+        const normalizedError = error instanceof Error ? error : new Error(String(error));
+        reportDiagnostics('offscreen-control-port-registration-failed', {
+            stage,
+            message: normalizedError.message,
+        });
+        log.error(normalizedError);
     }
 
     /**
@@ -328,11 +350,25 @@ export class Offscreen {
     /**
      *
      */
-    _createAndRegisterPort() {
+    async _createAndRegisterPort() {
         const mc = new MessageChannel();
         mc.port1.onmessage = this._onMcMessage.bind(this);
         mc.port1.onmessageerror = this._onMcMessageError.bind(this);
-        this._api.registerOffscreenPort([mc.port2]);
+        try {
+            await this._api.registerOffscreenPort([mc.port2]);
+        } catch (error) {
+            try {
+                mc.port1.close();
+            } catch (_) {
+                // NOP
+            }
+            try {
+                mc.port2.close();
+            } catch (_) {
+                // NOP
+            }
+            throw error;
+        }
     }
 
     /** @type {import('offscreen').McApiHandler<'connectToDatabaseWorker'>} */
@@ -368,11 +404,42 @@ export class Offscreen {
      * @returns {Promise<any>}
      */
     _invokeDictionaryWorker(action, params, transferables = []) {
+        if (this._dictionaryWorkerFatalError !== null) {
+            return Promise.reject(this._dictionaryWorkerFatalError);
+        }
         const id = ++this._dictionaryWorkerRequestId;
         return new Promise((resolve, reject) => {
             this._dictionaryWorkerResponseHandlers.set(id, {resolve, reject});
-            this._dictionaryWorker.postMessage({id, action, params}, transferables);
+            try {
+                this._dictionaryWorker.postMessage({id, action, params}, transferables);
+            } catch (error) {
+                this._dictionaryWorkerResponseHandlers.delete(id);
+                const normalizedError = error instanceof Error ?
+                    new ExtensionError(error.message) :
+                    new ExtensionError(String(error));
+                this._rejectPendingDictionaryWorkerResponses(normalizedError);
+                reject(normalizedError);
+            }
         });
+    }
+
+    /**
+     * @param {ExtensionError} error
+     * @returns {void}
+     */
+    _rejectPendingDictionaryWorkerResponses(error) {
+        if (this._dictionaryWorkerFatalError === null) {
+            this._dictionaryWorkerFatalError = error;
+        }
+        for (const [, handler] of this._dictionaryWorkerResponseHandlers) {
+            handler.reject(error);
+        }
+        this._dictionaryWorkerResponseHandlers.clear();
+        try {
+            this._dictionaryWorker.terminate();
+        } catch (_) {
+            // Ignore termination failures after a fatal worker error.
+        }
     }
 
     /**
@@ -399,6 +466,7 @@ export class Offscreen {
         const error = new ExtensionError('Offscreen: Error receiving dictionary worker message');
         error.data = event;
         log.error(error);
+        this._rejectPendingDictionaryWorkerResponses(error);
     }
 
     /**
@@ -413,6 +481,7 @@ export class Offscreen {
             message: event.message,
         };
         log.error(error);
+        this._rejectPendingDictionaryWorkerResponses(error);
     }
 
     /**

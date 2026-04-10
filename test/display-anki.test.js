@@ -304,7 +304,7 @@ describe('DisplayAnki preload and save flow', () => {
                     checkAllModels: false,
                 },
             },
-        }], true, true);
+        }], true);
 
         const saveButton = display.dictionaryEntryNodes[0].querySelector('.action-button[data-action="save-note"]');
         const viewNoteButton = display.dictionaryEntryNodes[0].querySelector('.action-button[data-action="view-note"]');
@@ -351,7 +351,7 @@ describe('DisplayAnki preload and save flow', () => {
                     },
                 },
             },
-        ], false, false);
+        ], false);
     });
 
     test('cold save performs the two-pass note build before adding a note', async ({window}) => {
@@ -428,7 +428,7 @@ describe('DisplayAnki preload and save flow', () => {
                     checkAllModels: false,
                 },
             },
-        }], false, false);
+        }], false);
         const saveButton = display.dictionaryEntryNodes[0].querySelector('.action-button[data-action="save-note"]');
         expect(saveButton?.disabled).toBe(true);
     });
@@ -478,7 +478,7 @@ describe('DisplayAnki preload and save flow', () => {
                     checkAllModels: false,
                 },
             },
-        }], false, false);
+        }], false);
         expect(getAnkiNoteInfo).toHaveBeenNthCalledWith(2, [{
             fields: {Front: 'term'},
             tags: [],
@@ -493,7 +493,7 @@ describe('DisplayAnki preload and save flow', () => {
                     checkAllModels: false,
                 },
             },
-        }], false, true);
+        }], false);
 
         const saveButton = display.dictionaryEntryNodes[0].querySelector('.action-button[data-action="save-note"]');
         const viewNoteButton = display.dictionaryEntryNodes[0].querySelector('.action-button[data-action="view-note"]');
