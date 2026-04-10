@@ -41,6 +41,7 @@ describe('DictionaryController task queue', () => {
     const isDictionaryInTaskQueue = /** @type {(this: DictionaryController, dictionaryTitle: string) => boolean} */ (getDictionaryControllerMethod('isDictionaryInTaskQueue'));
     const enqueueTask = /** @type {(this: DictionaryController, task: {type: 'delete'|'update', dictionaryTitle: string, downloadUrl?: string}) => Promise<void>} */ (getDictionaryControllerMethod('_enqueueTask'));
     const hideUpdatesAvailableButton = /** @type {(this: DictionaryController, dictionaryTitle: string) => void} */ (getDictionaryControllerMethod('_hideUpdatesAvailableButton'));
+    const showUpdatesAvailableButton = /** @type {(this: DictionaryController, dictionaryTitle: string) => void} */ (getDictionaryControllerMethod('_showUpdatesAvailableButton'));
     const runTaskQueue = /** @type {(this: DictionaryController) => Promise<void>} */ (getDictionaryControllerMethod('_runTaskQueue'));
     const deleteDictionaryInternal = /** @type {(this: DictionaryController, dictionaryTitle: string, onProgress: (details: unknown) => void) => Promise<void>} */ (getDictionaryControllerMethod('_deleteDictionaryInternal'));
     const updateDictionary = /** @type {(this: DictionaryController, dictionaryTitle: string, downloadUrl?: string) => Promise<void>} */ (getDictionaryControllerMethod('_updateDictionary'));
@@ -291,7 +292,27 @@ describe('DictionaryController task queue', () => {
         await openDeleteDictionaryModal.call(controller, 'Jitendex');
 
         expect(node.dataset.dictionaryTitle).toBe('Old Title');
-        expect(nameElement.textContent).toBe('Jitendex');
+        expect(nameElement.textContent).toBe('');
+    });
+
+    test('deleteDictionary does not mutate modal content when profile lookup fails', async () => {
+        const controller = createControllerForInternalTests();
+        const nameElement = {textContent: 'Old Title'};
+        const node = /** @type {{dataset: Record<string, string|undefined>, querySelector: (selector: string) => unknown}} */ ({
+            dataset: {dictionaryTitle: 'Old Title'},
+            querySelector(selector) {
+                if (selector === '#dictionary-confirm-delete-name') { return nameElement; }
+                if (selector === '#dictionary-confirm-delete-used-profiles-text') { return {}; }
+                if (selector === '#dictionary-confirm-delete-used-profiles') { return {}; }
+                return null;
+            },
+        });
+        Reflect.set(controller, '_deleteDictionaryModal', {setVisible: vi.fn(), node});
+        Reflect.set(controller, 'getProfileNamesUsingDictionary', vi.fn().mockRejectedValue(new Error('lookup failed')));
+
+        await expect(openDeleteDictionaryModal.call(controller, 'Jitendex')).rejects.toThrow('lookup failed');
+        expect(node.dataset.dictionaryTitle).toBe('Old Title');
+        expect(nameElement.textContent).toBe('Old Title');
     });
 
     test('getProfileNamesUsingDictionary includes disabled, main, and sort-frequency references', async () => {
@@ -388,6 +409,23 @@ describe('DictionaryController task queue', () => {
                 value: null,
             },
         ]);
+    });
+
+    test('update availability helpers apply to every matching dictionary entry', () => {
+        const controller = createControllerForInternalTests();
+        const hidden = [];
+        const shown = [];
+        Reflect.set(controller, '_dictionaryEntries', [
+            {dictionaryTitle: 'Jitendex', hideUpdatesAvailableButton: vi.fn(() => hidden.push('a')), _showUpdatesAvailableButton: vi.fn(() => shown.push('a'))},
+            {dictionaryTitle: 'Jitendex', hideUpdatesAvailableButton: vi.fn(() => hidden.push('b')), _showUpdatesAvailableButton: vi.fn(() => shown.push('b'))},
+            {dictionaryTitle: 'JMdict', hideUpdatesAvailableButton: vi.fn(() => hidden.push('c')), _showUpdatesAvailableButton: vi.fn(() => shown.push('c'))},
+        ]);
+
+        hideUpdatesAvailableButton.call(controller, 'Jitendex');
+        showUpdatesAvailableButton.call(controller, 'Jitendex');
+
+        expect(hidden).toStrictEqual(['a', 'b']);
+        expect(shown).toStrictEqual(['a', 'b']);
     });
 
     test('runTaskQueue clears the running flag and continues after a task failure', async () => {
@@ -546,7 +584,7 @@ describe('DictionaryController task queue', () => {
 
         await checkForUpdates.call(controller);
 
-        expect(button.textContent).toBe('1 update');
+        expect(button.textContent).toBe('1 update (partial)');
         expect(button.disabled).toBe(false);
         expect(showMutationError).toHaveBeenCalledTimes(1);
         expect(Reflect.get(controller, '_checkingUpdates')).toBe(false);

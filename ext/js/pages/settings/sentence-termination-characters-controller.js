@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 export class SentenceTerminationCharactersController {
@@ -122,7 +123,13 @@ export class SentenceTerminationCharactersController {
             listContainer.appendChild(node);
             const entry = new SentenceTerminationCharacterEntry(this, terminationCharacterEntry, i, node);
             this._entries.push(entry);
-            entry.prepare();
+            try {
+                entry.prepare();
+            } catch (error) {
+                log.error(error);
+                entry.cleanup();
+                this._entries.pop();
+            }
         }
 
         const empty = terminationCharacters.length === 0;

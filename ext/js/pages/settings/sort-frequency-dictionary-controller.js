@@ -55,16 +55,21 @@ export class SortFrequencyDictionaryController {
         /** @type {?import('core').TokenObject} */
         const token = {};
         this._getDictionaryInfoToken = token;
-        const dictionaries = await this._settingsController.getDictionaryInfo();
-        if (this._getDictionaryInfoToken !== token) { return; }
+        try {
+            const dictionaries = await this._settingsController.getDictionaryInfo();
+            if (this._getDictionaryInfoToken !== token) { return; }
 
-        this._updateDictionaryOptions(dictionaries);
+            this._updateDictionaryOptions(dictionaries);
 
-        const options = await this._settingsController.getOptions();
-        if (this._getDictionaryInfoToken !== token) { return; }
-        this._getDictionaryInfoToken = null;
-        const optionsContext = this._settingsController.getOptionsContext();
-        this._onOptionsChanged({options, optionsContext});
+            const options = await this._settingsController.getOptions();
+            if (this._getDictionaryInfoToken !== token) { return; }
+            const optionsContext = this._settingsController.getOptionsContext();
+            this._onOptionsChanged({options, optionsContext});
+        } finally {
+            if (this._getDictionaryInfoToken === token) {
+                this._getDictionaryInfoToken = null;
+            }
+        }
     }
 
     /**
