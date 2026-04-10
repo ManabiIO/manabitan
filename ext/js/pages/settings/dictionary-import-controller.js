@@ -322,6 +322,8 @@ export class DictionaryImportController {
         this._recommendedDictionaryQueue = [];
         /** @type {boolean} */
         this._recommendedDictionaryActiveImport = false;
+        /** @type {string|null} */
+        this._recommendedDictionaryCurrentUrl = null;
         /** @type {boolean} */
         this._recommendedDictionariesRenderPending = false;
         /** @type {boolean} */
@@ -503,7 +505,12 @@ export class DictionaryImportController {
      * @param {MouseEvent} e
      */
     async _onRecommendedImportClick(e) {
-        if (!e.target || !(e.target instanceof HTMLButtonElement)) {
+        const button = (
+            e.currentTarget instanceof HTMLButtonElement ?
+            e.currentTarget :
+            (e.target instanceof HTMLButtonElement ? e.target : null)
+        );
+        if (button === null) {
             reportDiagnostics('recommended-dictionaries-import-click-ignored', {
                 reason: 'target-not-button',
                 targetType: typeof e.target,
@@ -511,22 +518,38 @@ export class DictionaryImportController {
             return;
         }
 
-        const import_url = e.target.attributes.getNamedItem('data-import-url');
+        const import_url = button.attributes.getNamedItem('data-import-url');
         if (!import_url) {
             reportDiagnostics('recommended-dictionaries-import-click-ignored', {
                 reason: 'missing-data-import-url',
-                buttonText: e.target.textContent ?? '',
+                buttonText: button.textContent ?? '',
             });
             return;
         }
         const importUrl = import_url.value;
+        if (importUrl.length === 0) {
+            reportDiagnostics('recommended-dictionaries-import-click-ignored', {
+                reason: 'empty-data-import-url',
+                buttonText: button.textContent ?? '',
+            });
+            return;
+        }
+        if (this._isRecommendedImportQueuedOrActive(importUrl)) {
+            button.disabled = true;
+            reportDiagnostics('recommended-dictionaries-import-click-deduplicated', {
+                importUrl: summarizeUrlForDiagnostics(importUrl),
+                queueLength: this._recommendedDictionaryQueue.length,
+                activeImport: this._recommendedDictionaryActiveImport,
+            });
+            return;
+        }
         this._recommendedDictionaryQueue.push(importUrl);
         this._updateRecommendedImportDebugState({
             queueLength: this._recommendedDictionaryQueue.length,
             lastError: null,
         });
 
-        e.target.disabled = true;
+        button.disabled = true;
         reportDiagnostics('recommended-dictionaries-import-clicked', {
             importUrl: summarizeUrlForDiagnostics(importUrl),
             queueLength: this._recommendedDictionaryQueue.length,
@@ -554,6 +577,7 @@ export class DictionaryImportController {
                     queueLength: this._recommendedDictionaryQueue.length,
                     lastError: null,
                 });
+                this._recommendedDictionaryCurrentUrl = url;
                 reportDiagnostics('recommended-dictionaries-import-queue-item-start', {
                     importUrl: summarizeUrlForDiagnostics(url),
                     queueLength: this._recommendedDictionaryQueue.length,
@@ -585,6 +609,7 @@ export class DictionaryImportController {
                     this._setRecommendedImportButtonDisabled(url, false);
                 } finally {
                     void this._recommendedDictionaryQueue.shift();
+                    this._recommendedDictionaryCurrentUrl = null;
                     this._updateRecommendedImportDebugState({
                         queueLength: this._recommendedDictionaryQueue.length,
                         currentUrl: this._recommendedDictionaryQueue[0] ? summarizeUrlForDiagnostics(this._recommendedDictionaryQueue[0]) : null,
@@ -597,6 +622,7 @@ export class DictionaryImportController {
             }
         } finally {
             this._recommendedDictionaryActiveImport = false;
+            this._recommendedDictionaryCurrentUrl = null;
             this._updateRecommendedImportDebugState({
                 activeImport: false,
                 currentUrl: null,
@@ -847,7 +873,7 @@ export class DictionaryImportController {
                 button.disabled = (
                     installedDictionaryNames.has(dictionary.name) ||
                     installedDictionaryDownloadUrls.has(dictionary.downloadUrl) ||
-                    this._recommendedDictionaryQueue.includes(dictionary.downloadUrl)
+                    this._isRecommendedImportQueuedOrActive(dictionary.downloadUrl)
                 );
 
                 const urlAttribute = document.createAttribute('data-import-url');
@@ -879,6 +905,14 @@ export class DictionaryImportController {
             if (button.dataset.importUrl !== importUrl) { continue; }
             button.disabled = disabled;
         }
+    }
+
+    /**
+     * @param {string} importUrl
+     * @returns {boolean}
+     */
+    _isRecommendedImportQueuedOrActive(importUrl) {
+        return this._recommendedDictionaryCurrentUrl === importUrl || this._recommendedDictionaryQueue.includes(importUrl);
     }
 
     /**
@@ -1094,11 +1128,15 @@ export class DictionaryImportController {
         if (files === null) { return; }
         const files2 = [...files];
         node.value = '';
+        if (files2.length === 0) { return; }
         void this.importFiles(files2, null, null);
     }
 
-    /** */
-    async _onImportFromURL() {
+    /**
+     * @param {Event} e
+     */
+    async _onImportFromURL(e) {
+        e.preventDefault();
         const text = this._importURLText.value.trim();
         if (!text) { return; }
         await this.importFilesFromURLs(text, null, null);
@@ -1115,10 +1153,7 @@ export class DictionaryImportController {
         onImportDone,
         /** @type {Partial<import('dictionary-importer').ImportDetails>|null} */ importDetailsOverrides = null,
     ) {
-        const urls = text
-            .split('\n')
-            .map((url) => url.trim())
-            .filter((url) => url.length > 0);
+        const urls = this._normalizeImportUrls(text);
         if (urls.length === 0) { return; }
 
         const importProgressTracker = new ImportProgressTracker(this._getUrlImportSteps(), urls.length);
@@ -1133,6 +1168,23 @@ export class DictionaryImportController {
             ),
             `URL dictionary import (${String(urls.length)})`,
         );
+    }
+
+    /**
+     * @param {string} text
+     * @returns {string[]}
+     */
+    _normalizeImportUrls(text) {
+        /** @type {string[]} */
+        const urls = [];
+        /** @type {Set<string>} */
+        const seen = new Set();
+        for (const url of text.split('\n').map((value) => value.trim())) {
+            if (url.length === 0 || seen.has(url)) { continue; }
+            seen.add(url);
+            urls.push(url);
+        }
+        return urls;
     }
 
     /**
@@ -1200,6 +1252,7 @@ export class DictionaryImportController {
         this._showErrors([error]);
         this._recommendedDictionaryQueue = [];
         this._recommendedDictionaryActiveImport = false;
+        this._recommendedDictionaryCurrentUrl = null;
         this._updateRecommendedImportDebugState({
             queueLength: 0,
             activeImport: false,
@@ -1693,6 +1746,17 @@ export class DictionaryImportController {
                     }
                 }
             } else {
+                if (importModeEnabled && !this._modifying) {
+                    try {
+                        await this._settingsController.application.api.setDictionaryImportMode(false);
+                    } catch (error) {
+                        reportDiagnostics('dictionary-import-session-import-mode-exit-failed-stale', {
+                            message: toError(error).message,
+                            importRunGeneration,
+                            activeImportRunGeneration: this._activeImportRunGeneration,
+                        });
+                    }
+                }
                 reportDiagnostics('dictionary-import-session-complete-stale', {
                     dictionaryCount: importProgressTracker.dictionaryCount,
                     errorCount: errors.length,
@@ -2478,6 +2542,8 @@ export class DictionaryImportController {
             targets.push({action: 'set', path: path1, value: []});
             const path2 = `profiles[${i}].options.general.mainDictionary`;
             targets.push({action: 'set', path: path2, value: ''});
+            const path3 = `profiles[${i}].options.general.sortFrequencyDictionary`;
+            targets.push({action: 'set', path: path3, value: null});
         }
         return await this._modifyGlobalSettings(targets);
     }
@@ -2528,6 +2594,7 @@ export class DictionaryImportController {
         }
 
         const errorContainer = /** @type {HTMLElement} */ (this._errorContainer);
+        errorContainer.textContent = '';
         errorContainer.appendChild(fragment);
         errorContainer.hidden = false;
     }

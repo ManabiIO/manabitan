@@ -276,6 +276,125 @@ describe('Dictionary import stale-run fencing', () => {
         expect(options.profiles[1].options.anki.cardFormats[0].fields.glossary.value).toBe('should stay old-dictionary glossary');
     });
 
+    test('stale import sessions still exit dictionary import mode', async () => {
+        const importDictionaries = /** @type {(this: DictionaryImportController, ...args: unknown[]) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_importDictionaries')
+        );
+        const setDictionaryImportMode = vi.fn()
+            .mockResolvedValueOnce(void 0)
+            .mockResolvedValueOnce(void 0);
+        const setModifying = vi.fn();
+        const showErrors = vi.fn();
+        const triggerStorageChanged = vi.fn();
+        const onImportDone = vi.fn();
+
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _activeImportRunGeneration: 1,
+            _modifying: false,
+            _statusFooter: null,
+            _isImportRunCurrent() {
+                return false;
+            },
+            _setModifying: setModifying,
+            _hideErrors: vi.fn(),
+            _showErrors: showErrors,
+            _triggerStorageChanged: triggerStorageChanged,
+            _preventPageExit: () => ({end() {}}),
+            _getUseImportSession: () => false,
+            _getImportPerformanceFlags: () => ({
+                skipImageMetadata: false,
+                mediaResolutionConcurrency: 4,
+                debugImportLogging: false,
+                enableTermEntryContentDedup: true,
+                termContentStorageMode: 'inline',
+            }),
+            _settingsController: {
+                getOptionsFull: vi.fn().mockResolvedValue({global: {database: {prefixWildcardsSupported: false}}}),
+                application: {
+                    api: {
+                        setDictionaryImportMode,
+                    },
+                },
+            },
+            _importDictionaryFromZip: vi.fn().mockResolvedValue({errors: [], importedTitle: 'JMdict'}),
+        }));
+
+        await importDictionaries.call(
+            controller,
+            (async function* () {
+                yield new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
+            })(),
+            null,
+            onImportDone,
+            {dictionaryCount: 1, onProgress() {}, onNextDictionary() {}, onImportComplete() {}, getStepTimingHistory() { return []; }},
+            null,
+        );
+
+        expect(setDictionaryImportMode).toHaveBeenCalledTimes(2);
+        expect(setDictionaryImportMode).toHaveBeenNthCalledWith(1, true);
+        expect(setDictionaryImportMode).toHaveBeenNthCalledWith(2, false);
+        expect(setModifying).toHaveBeenCalledWith(true);
+        expect(setModifying).not.toHaveBeenCalledWith(false);
+        expect(showErrors).not.toHaveBeenCalled();
+        expect(triggerStorageChanged).not.toHaveBeenCalled();
+        expect(onImportDone).not.toHaveBeenCalled();
+    });
+
+    test('stale import sessions do not exit import mode after a newer run has taken over', async () => {
+        const importDictionaries = /** @type {(this: DictionaryImportController, ...args: unknown[]) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_importDictionaries')
+        );
+        const setDictionaryImportMode = vi.fn()
+            .mockResolvedValueOnce(void 0);
+        const setModifying = vi.fn(function(value) {
+            this._modifying = value;
+        });
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _activeImportRunGeneration: 1,
+            _modifying: false,
+            _statusFooter: null,
+            _isImportRunCurrent() {
+                return false;
+            },
+            _setModifying: setModifying,
+            _hideErrors: vi.fn(),
+            _showErrors: vi.fn(),
+            _triggerStorageChanged: vi.fn(),
+            _preventPageExit: () => ({end() {}}),
+            _getUseImportSession: () => false,
+            _getImportPerformanceFlags: () => ({
+                skipImageMetadata: false,
+                mediaResolutionConcurrency: 4,
+                debugImportLogging: false,
+                enableTermEntryContentDedup: true,
+                termContentStorageMode: 'inline',
+            }),
+            _settingsController: {
+                getOptionsFull: vi.fn().mockResolvedValue({global: {database: {prefixWildcardsSupported: false}}}),
+                application: {
+                    api: {
+                        setDictionaryImportMode,
+                    },
+                },
+            },
+            _importDictionaryFromZip: vi.fn().mockResolvedValue({errors: [], importedTitle: 'JMdict'}),
+        }));
+
+        await importDictionaries.call(
+            controller,
+            (async function* () {
+                yield new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
+            })(),
+            null,
+            vi.fn(),
+            {dictionaryCount: 1, onProgress() {}, onNextDictionary() {}, onImportComplete() {}, getStepTimingHistory() { return []; }},
+            null,
+        );
+
+        expect(setDictionaryImportMode).toHaveBeenCalledTimes(1);
+        expect(setDictionaryImportMode).toHaveBeenCalledWith(true);
+    });
+
     test('import session ignores onImportDone callback errors after cleanup', async () => {
         const importDictionaries = /** @type {(this: DictionaryImportController, ...args: unknown[]) => Promise<void>} */ (
             getDictionaryImportControllerMethod('_importDictionaries')
@@ -439,12 +558,40 @@ describe('Dictionary import error rendering', () => {
         expect(errorContainer.hidden).toBe(true);
         expect(errorContainer.textContent).toBe('');
     });
+
+    test('showErrors replaces stale rendered errors instead of appending to them', () => {
+        const showErrors = /** @type {(this: DictionaryImportController, errors: Error[]) => void} */ (
+            getDictionaryImportControllerMethod('_showErrors')
+        );
+        const errorContainer = setupErrorDom(window.document);
+        errorContainer.innerHTML = '<p>old error</p>';
+        errorContainer.hidden = false;
+
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _errorContainer: errorContainer,
+            _errorToString(error) {
+                return error.message;
+            },
+        }));
+
+        showErrors.call(controller, [new Error('new error')]);
+
+        expect(errorContainer.hidden).toBe(false);
+        expect(errorContainer.textContent).toBe('new error');
+        expect(errorContainer.querySelectorAll('p')).toHaveLength(1);
+    });
 });
 
 describe('Dictionary import entrypoints', () => {
     const {window} = testEnv;
     const importFilesFromURLs = /** @type {(this: DictionaryImportController, text: string, profilesDictionarySettings: unknown, onImportDone: unknown, importDetailsOverrides?: Partial<import('dictionary-importer').ImportDetails>|null) => Promise<void>} */ (
         getDictionaryImportControllerMethod('importFilesFromURLs')
+    );
+    const isRecommendedImportQueuedOrActive = /** @type {(this: DictionaryImportController, importUrl: string) => boolean} */ (
+        getDictionaryImportControllerMethod('_isRecommendedImportQueuedOrActive')
+    );
+    const normalizeImportUrls = /** @type {(this: DictionaryImportController, text: string) => string[]} */ (
+        getDictionaryImportControllerMethod('_normalizeImportUrls')
     );
 
     test('file input change delegates to importFiles so the watchdog path is used', async () => {
@@ -489,8 +636,7 @@ describe('Dictionary import entrypoints', () => {
 
         await onImportFileChange.call(controller, /** @type {unknown} */ ({currentTarget: input}));
 
-        expect(importFiles).toHaveBeenCalledOnce();
-        expect(importFiles).toHaveBeenCalledWith([], null, null);
+        expect(importFiles).not.toHaveBeenCalled();
         expect(input.value).toBe('');
     });
 
@@ -502,6 +648,7 @@ describe('Dictionary import entrypoints', () => {
             _getUrlImportSteps: () => getUrlImportSteps(),
             _getUrlImportSources: getUrlImportSources,
             _importDictionaries: importDictionaries,
+            _normalizeImportUrls: normalizeImportUrls,
             _runImportWithWatchdog: runImportWithWatchdog,
         }));
 
@@ -515,6 +662,23 @@ describe('Dictionary import entrypoints', () => {
         expect(runImportWithWatchdog).toHaveBeenCalledOnce();
     });
 
+    test('URL import click prevents default before starting import', async () => {
+        const onImportFromURL = /** @type {(this: DictionaryImportController, e: Event) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_onImportFromURL')
+        );
+        const importFilesFromURLs = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+        const preventDefault = vi.fn();
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _importURLText: {value: 'https://example.com/a.zip'},
+            importFilesFromURLs,
+        }));
+
+        await onImportFromURL.call(controller, /** @type {unknown} */ ({preventDefault}));
+
+        expect(preventDefault).toHaveBeenCalledOnce();
+        expect(importFilesFromURLs).toHaveBeenCalledWith('https://example.com/a.zip', null, null);
+    });
+
     test('URL import ignores whitespace-only input after normalization', async () => {
         const importDictionaries = vi.fn();
         const runImportWithWatchdog = vi.fn();
@@ -522,6 +686,7 @@ describe('Dictionary import entrypoints', () => {
             _getUrlImportSteps: () => getUrlImportSteps(),
             _getUrlImportSources: vi.fn(),
             _importDictionaries: importDictionaries,
+            _normalizeImportUrls: normalizeImportUrls,
             _runImportWithWatchdog: runImportWithWatchdog,
         }));
 
@@ -529,6 +694,21 @@ describe('Dictionary import entrypoints', () => {
 
         expect(importDictionaries).not.toHaveBeenCalled();
         expect(runImportWithWatchdog).not.toHaveBeenCalled();
+    });
+
+    test('URL import normalization removes duplicate URLs while preserving order', () => {
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({}));
+
+        const urls = normalizeImportUrls.call(
+            controller,
+            ' https://example.com/a.zip \nhttps://example.com/b.zip\nhttps://example.com/a.zip \n\nhttps://example.com/b.zip\nhttps://example.com/c.zip',
+        );
+
+        expect(urls).toStrictEqual([
+            'https://example.com/a.zip',
+            'https://example.com/b.zip',
+            'https://example.com/c.zip',
+        ]);
     });
 
     test('file import ignores an empty file list after normalization', async () => {
@@ -548,6 +728,91 @@ describe('Dictionary import entrypoints', () => {
 
         expect(importDictionaries).not.toHaveBeenCalled();
         expect(runImportWithWatchdog).not.toHaveBeenCalled();
+    });
+
+    test('recommended import click deduplicates already queued URLs', async () => {
+        const onRecommendedImportClick = /** @type {(this: DictionaryImportController, e: MouseEvent) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_onRecommendedImportClick')
+        );
+        const button = window.document.createElement('button');
+        button.setAttribute('data-import-url', 'https://example.com/jitendex.zip');
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _recommendedDictionaryQueue: ['https://example.com/jitendex.zip'],
+            _recommendedDictionaryActiveImport: false,
+            _recommendedDictionaryCurrentUrl: null,
+            _updateRecommendedImportDebugState: vi.fn(),
+            _isRecommendedImportQueuedOrActive: isRecommendedImportQueuedOrActive,
+        }));
+
+        await onRecommendedImportClick.call(controller, /** @type {unknown} */ ({target: button}));
+
+        expect(Reflect.get(controller, '_recommendedDictionaryQueue')).toStrictEqual(['https://example.com/jitendex.zip']);
+        expect(button.disabled).toBe(true);
+    });
+
+    test('recommended import click deduplicates the currently active URL', async () => {
+        const onRecommendedImportClick = /** @type {(this: DictionaryImportController, e: MouseEvent) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_onRecommendedImportClick')
+        );
+        const button = window.document.createElement('button');
+        button.setAttribute('data-import-url', 'https://example.com/jitendex.zip');
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _recommendedDictionaryQueue: [],
+            _recommendedDictionaryActiveImport: true,
+            _recommendedDictionaryCurrentUrl: 'https://example.com/jitendex.zip',
+            _updateRecommendedImportDebugState: vi.fn(),
+            _isRecommendedImportQueuedOrActive: isRecommendedImportQueuedOrActive,
+        }));
+
+        await onRecommendedImportClick.call(controller, /** @type {unknown} */ ({target: button}));
+
+        expect(Reflect.get(controller, '_recommendedDictionaryQueue')).toStrictEqual([]);
+        expect(button.disabled).toBe(true);
+    });
+
+    test('recommended import click ignores empty import URLs', async () => {
+        const onRecommendedImportClick = /** @type {(this: DictionaryImportController, e: MouseEvent) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_onRecommendedImportClick')
+        );
+        const button = window.document.createElement('button');
+        button.setAttribute('data-import-url', '');
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _recommendedDictionaryQueue: [],
+            _recommendedDictionaryActiveImport: false,
+            _recommendedDictionaryCurrentUrl: null,
+            _updateRecommendedImportDebugState: vi.fn(),
+            _isRecommendedImportQueuedOrActive: isRecommendedImportQueuedOrActive,
+        }));
+
+        await onRecommendedImportClick.call(controller, /** @type {unknown} */ ({target: button}));
+
+        expect(Reflect.get(controller, '_recommendedDictionaryQueue')).toStrictEqual([]);
+        expect(button.disabled).toBe(false);
+    });
+
+    test('recommended import click uses currentTarget button when a nested element is clicked', async () => {
+        const onRecommendedImportClick = /** @type {(this: DictionaryImportController, e: MouseEvent) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_onRecommendedImportClick')
+        );
+        const button = window.document.createElement('button');
+        button.setAttribute('data-import-url', 'https://example.com/jitendex.zip');
+        const child = window.document.createElement('span');
+        button.append(child);
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _recommendedDictionaryQueue: [],
+            _recommendedDictionaryActiveImport: true,
+            _recommendedDictionaryCurrentUrl: 'https://example.com/jitendex.zip',
+            _updateRecommendedImportDebugState: vi.fn(),
+            _isRecommendedImportQueuedOrActive: isRecommendedImportQueuedOrActive,
+        }));
+
+        await onRecommendedImportClick.call(controller, /** @type {unknown} */ ({
+            currentTarget: button,
+            target: child,
+        }));
+
+        expect(Reflect.get(controller, '_recommendedDictionaryQueue')).toStrictEqual([]);
+        expect(button.disabled).toBe(true);
     });
 
     test('file drop delegates to importFiles so the watchdog path is used', async () => {
@@ -620,5 +885,130 @@ describe('Dictionary import entrypoints', () => {
         }));
 
         expect(importFiles).not.toHaveBeenCalled();
+    });
+});
+
+describe('Dictionary import watchdog recovery', () => {
+    const forceRecoverHungImportSession = /** @type {(this: DictionaryImportController, error: Error, label: string) => void} */ (
+        getDictionaryImportControllerMethod('_forceRecoverHungImportSession')
+    );
+
+    test('watchdog recovery clears the active recommended import URL', () => {
+        const updateRecommendedImportDebugState = vi.fn();
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _activeImportRunGeneration: 3,
+            _recommendedDictionaryQueue: ['https://example.com/jitendex.zip'],
+            _recommendedDictionaryActiveImport: true,
+            _recommendedDictionaryCurrentUrl: 'https://example.com/jitendex.zip',
+            _updateRecommendedImportDebugState: updateRecommendedImportDebugState,
+            _setRecommendedError: vi.fn(),
+            _errorToString: (error) => error.message,
+            _showErrors: vi.fn(),
+            _setModifying: vi.fn(),
+            _statusFooter: null,
+            _settingsController: {
+                application: {
+                    api: {
+                        setDictionaryImportMode: vi.fn().mockResolvedValue(void 0),
+                    },
+                },
+            },
+            _triggerStorageChanged: vi.fn(),
+        }));
+
+        forceRecoverHungImportSession.call(controller, new Error('hung import'), 'Recommended dictionary import');
+
+        expect(Reflect.get(controller, '_recommendedDictionaryQueue')).toStrictEqual([]);
+        expect(Reflect.get(controller, '_recommendedDictionaryActiveImport')).toBe(false);
+        expect(Reflect.get(controller, '_recommendedDictionaryCurrentUrl')).toBeNull();
+        expect(updateRecommendedImportDebugState).toHaveBeenCalledWith({
+            queueLength: 0,
+            activeImport: false,
+            currentUrl: null,
+            lastError: 'hung import',
+        });
+    });
+});
+
+describe('Dictionary import settings cleanup', () => {
+    const clearDictionarySettings = /** @type {(this: DictionaryImportController) => Promise<Error[]>} */ (
+        getDictionaryImportControllerMethod('_clearDictionarySettings')
+    );
+
+    test('clearDictionarySettings also resets sortFrequencyDictionary for every profile', async () => {
+        const modifyGlobalSettings = vi.fn().mockResolvedValue([]);
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _settingsController: {
+                getOptionsFull: vi.fn().mockResolvedValue({
+                    profiles: [
+                        {options: {general: {mainDictionary: 'JMdict', sortFrequencyDictionary: 'Freq A'}}},
+                        {options: {general: {mainDictionary: 'Jitendex', sortFrequencyDictionary: 'Freq B'}}},
+                    ],
+                }),
+            },
+            _modifyGlobalSettings: modifyGlobalSettings,
+        }));
+
+        await clearDictionarySettings.call(controller);
+
+        expect(modifyGlobalSettings).toHaveBeenCalledOnce();
+        expect(modifyGlobalSettings).toHaveBeenCalledWith([
+            {action: 'set', path: 'profiles[0].options.dictionaries', value: []},
+            {action: 'set', path: 'profiles[0].options.general.mainDictionary', value: ''},
+            {action: 'set', path: 'profiles[0].options.general.sortFrequencyDictionary', value: null},
+            {action: 'set', path: 'profiles[1].options.dictionaries', value: []},
+            {action: 'set', path: 'profiles[1].options.general.mainDictionary', value: ''},
+            {action: 'set', path: 'profiles[1].options.general.sortFrequencyDictionary', value: null},
+        ]);
+    });
+});
+
+describe('Recommended dictionary rendering', () => {
+    const {window} = testEnv;
+    const isRecommendedImportQueuedOrActive = /** @type {(this: DictionaryImportController, importUrl: string) => boolean} */ (
+        getDictionaryImportControllerMethod('_isRecommendedImportQueuedOrActive')
+    );
+
+    test('renderRecommendedDictionaryGroup keeps the active import button disabled', () => {
+        window.document.body.innerHTML = '<div id="list"></div><template id="recommended-dictionaries-list-item-template"></template>';
+        const dictionariesList = /** @type {HTMLElement} */ (window.document.querySelector('#list'));
+        const fragment = window.document.createDocumentFragment();
+        const item = window.document.createElement('div');
+        const label = window.document.createElement('div');
+        label.className = 'settings-item-label';
+        const description = window.document.createElement('div');
+        description.className = 'description';
+        const homepage = window.document.createElement('a');
+        homepage.className = 'homepage';
+        const button = window.document.createElement('button');
+        button.className = 'action-button';
+        button.setAttribute('data-action', 'import-recommended-dictionary');
+        item.append(label, description, homepage, button);
+        fragment.append(item);
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _recommendedDictionaryQueue: [],
+            _recommendedDictionaryCurrentUrl: 'https://example.com/jitendex.zip',
+            _isRecommendedImportQueuedOrActive: isRecommendedImportQueuedOrActive,
+            _settingsController: {
+                instantiateTemplate() {
+                    return fragment.cloneNode(true);
+                },
+            },
+        }));
+        const renderRecommendedDictionaryGroup = /** @type {(this: DictionaryImportController, recommendedDictionaries: Array<{name: string, description: string, downloadUrl: string, homepage?: string|null}>, dictionariesList: HTMLElement, installedDictionaryNames: Set<string>, installedDictionaryDownloadUrls: Set<string>) => void} */ (
+            getDictionaryImportControllerMethod('_renderRecommendedDictionaryGroup')
+        );
+
+        renderRecommendedDictionaryGroup.call(controller, [
+            {
+                name: 'Jitendex',
+                description: 'desc',
+                downloadUrl: 'https://example.com/jitendex.zip',
+                homepage: null,
+            },
+        ], dictionariesList, new Set(), new Set());
+
+        const renderedButton = /** @type {HTMLButtonElement|null} */ (dictionariesList.querySelector('.action-button[data-action=import-recommended-dictionary]'));
+        expect(renderedButton?.disabled).toBe(true);
     });
 });

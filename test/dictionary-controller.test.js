@@ -44,6 +44,11 @@ describe('DictionaryController task queue', () => {
     const runTaskQueue = /** @type {(this: DictionaryController) => Promise<void>} */ (getDictionaryControllerMethod('_runTaskQueue'));
     const deleteDictionaryInternal = /** @type {(this: DictionaryController, dictionaryTitle: string, onProgress: (details: unknown) => void) => Promise<void>} */ (getDictionaryControllerMethod('_deleteDictionaryInternal'));
     const updateDictionary = /** @type {(this: DictionaryController, dictionaryTitle: string, downloadUrl?: string) => Promise<void>} */ (getDictionaryControllerMethod('_updateDictionary'));
+    const openDeleteDictionaryModal = /** @type {(this: DictionaryController, dictionaryTitle: string) => Promise<void>} */ (getDictionaryControllerMethod('deleteDictionary'));
+    const getProfileNamesUsingDictionary = /** @type {(this: DictionaryController, dictionaryTitle: string) => Promise<string[]>} */ (getDictionaryControllerMethod('getProfileNamesUsingDictionary'));
+    const deleteDictionarySettings = /** @type {(this: DictionaryController, dictionaryTitle: string) => Promise<void>} */ (getDictionaryControllerMethod('_deleteDictionarySettings'));
+    const showUpdateDictionaryModal = /** @type {(this: DictionaryController, dictionaryTitle: string, downloadUrl?: string) => void} */ (getDictionaryControllerMethod('updateDictionary'));
+    const onDictionaryConfirmUpdate = /** @type {(this: DictionaryController, e: MouseEvent) => void} */ (getDictionaryControllerMethod('_onDictionaryConfirmUpdate'));
     const checkForUpdates = /** @type {(this: DictionaryController) => Promise<void>} */ (getDictionaryControllerMethod('_checkForUpdates'));
     const clearMutationErrors = /** @type {(this: DictionaryController) => void} */ (getDictionaryControllerMethod('_clearMutationErrors'));
 
@@ -61,6 +66,7 @@ describe('DictionaryController task queue', () => {
         const controller = createControllerForInternalTests();
         const runTaskQueue = vi.fn().mockResolvedValue(void 0);
         Reflect.set(controller, '_dictionaryTaskQueue', []);
+        Reflect.set(controller, '_isTaskQueueRunning', true);
         Reflect.set(controller, '_runTaskQueue', runTaskQueue);
 
         await enqueueTask.call(controller, {type: 'update', dictionaryTitle: 'Jitendex', downloadUrl: void 0});
@@ -78,6 +84,7 @@ describe('DictionaryController task queue', () => {
         const controller = createControllerForInternalTests();
         const runTaskQueue = vi.fn().mockResolvedValue(void 0);
         Reflect.set(controller, '_dictionaryTaskQueue', []);
+        Reflect.set(controller, '_isTaskQueueRunning', true);
         Reflect.set(controller, '_runTaskQueue', runTaskQueue);
 
         await enqueueTask.call(controller, {type: 'update', dictionaryTitle: 'Jitendex', downloadUrl: 'https://example.com/old.zip'});
@@ -93,6 +100,7 @@ describe('DictionaryController task queue', () => {
         const controller = createControllerForInternalTests();
         const runTaskQueue = vi.fn().mockResolvedValue(void 0);
         Reflect.set(controller, '_dictionaryTaskQueue', []);
+        Reflect.set(controller, '_isTaskQueueRunning', true);
         Reflect.set(controller, '_runTaskQueue', runTaskQueue);
 
         await enqueueTask.call(controller, {type: 'update', dictionaryTitle: 'Jitendex', downloadUrl: 'https://example.com/old.zip'});
@@ -100,6 +108,23 @@ describe('DictionaryController task queue', () => {
 
         expect(Reflect.get(controller, '_dictionaryTaskQueue')).toStrictEqual([
             {type: 'update', dictionaryTitle: 'Jitendex', downloadUrl: 'https://example.com/new.zip'},
+        ]);
+        expect(runTaskQueue).toHaveBeenCalledTimes(1);
+    });
+
+    test('enqueueTask restarts processing when it replaces an existing queued task while idle', async () => {
+        const controller = createControllerForInternalTests();
+        const runTaskQueue = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(controller, '_dictionaryTaskQueue', [
+            {type: 'update', dictionaryTitle: 'Jitendex', downloadUrl: 'https://example.com/old.zip'},
+        ]);
+        Reflect.set(controller, '_isTaskQueueRunning', false);
+        Reflect.set(controller, '_runTaskQueue', runTaskQueue);
+
+        await enqueueTask.call(controller, {type: 'delete', dictionaryTitle: 'Jitendex'});
+
+        expect(Reflect.get(controller, '_dictionaryTaskQueue')).toStrictEqual([
+            {type: 'delete', dictionaryTitle: 'Jitendex'},
         ]);
         expect(runTaskQueue).toHaveBeenCalledTimes(1);
     });
@@ -117,6 +142,252 @@ describe('DictionaryController task queue', () => {
 
         expect(hideA).not.toHaveBeenCalled();
         expect(hideB).toHaveBeenCalledTimes(1);
+    });
+
+    test('confirm update clears stale modal downloadUrl after enqueueing', () => {
+        const controller = createControllerForInternalTests();
+        const setVisible = vi.fn();
+        const enqueueTask = vi.fn();
+        const hideUpdatesAvailableButton = vi.fn();
+        const node = /** @type {{dataset: Record<string, string|undefined>}} */ ({
+            dataset: {
+                dictionaryTitle: 'Jitendex',
+                downloadUrl: 'https://example.com/jitendex.zip',
+            },
+        });
+        Reflect.set(controller, '_updateDictionaryModal', {setVisible, node});
+        Reflect.set(controller, '_enqueueTask', enqueueTask);
+        Reflect.set(controller, '_hideUpdatesAvailableButton', hideUpdatesAvailableButton);
+
+        onDictionaryConfirmUpdate.call(controller, /** @type {unknown} */ ({preventDefault: vi.fn()}));
+
+        expect(enqueueTask).toHaveBeenCalledWith({
+            type: 'update',
+            dictionaryTitle: 'Jitendex',
+            downloadUrl: 'https://example.com/jitendex.zip',
+        });
+        expect(node.dataset.dictionaryTitle).toBeUndefined();
+        expect(node.dataset.downloadUrl).toBeUndefined();
+    });
+
+    test('confirm update clears stale modal fields even when dictionary title is missing', () => {
+        const controller = createControllerForInternalTests();
+        const enqueueTask = vi.fn();
+        const hideUpdatesAvailableButton = vi.fn();
+        const node = /** @type {{dataset: Record<string, string|undefined>}} */ ({
+            dataset: {
+                downloadUrl: 'https://example.com/jitendex.zip',
+            },
+        });
+        Reflect.set(controller, '_updateDictionaryModal', {setVisible: vi.fn(), node});
+        Reflect.set(controller, '_enqueueTask', enqueueTask);
+        Reflect.set(controller, '_hideUpdatesAvailableButton', hideUpdatesAvailableButton);
+
+        onDictionaryConfirmUpdate.call(controller, /** @type {unknown} */ ({preventDefault: vi.fn()}));
+
+        expect(enqueueTask).not.toHaveBeenCalled();
+        expect(hideUpdatesAvailableButton).not.toHaveBeenCalled();
+        expect(node.dataset.dictionaryTitle).toBeUndefined();
+        expect(node.dataset.downloadUrl).toBeUndefined();
+    });
+
+    test('confirm update normalizes invalid modal downloadUrl values before enqueueing', () => {
+        const controller = createControllerForInternalTests();
+        const enqueueTask = vi.fn();
+        const hideUpdatesAvailableButton = vi.fn();
+        const node = /** @type {{dataset: Record<string, string|undefined>}} */ ({
+            dataset: {
+                dictionaryTitle: 'Jitendex',
+                downloadUrl: 'undefined',
+            },
+        });
+        Reflect.set(controller, '_updateDictionaryModal', {setVisible: vi.fn(), node});
+        Reflect.set(controller, '_enqueueTask', enqueueTask);
+        Reflect.set(controller, '_hideUpdatesAvailableButton', hideUpdatesAvailableButton);
+
+        onDictionaryConfirmUpdate.call(controller, /** @type {unknown} */ ({preventDefault: vi.fn()}));
+
+        expect(enqueueTask).toHaveBeenCalledWith({
+            type: 'update',
+            dictionaryTitle: 'Jitendex',
+            downloadUrl: undefined,
+        });
+        expect(hideUpdatesAvailableButton).toHaveBeenCalledWith('Jitendex');
+        expect(node.dataset.dictionaryTitle).toBeUndefined();
+        expect(node.dataset.downloadUrl).toBeUndefined();
+    });
+
+    test('confirm delete clears stale modal title even when dictionary title is missing', () => {
+        const controller = createControllerForInternalTests();
+        const enqueueTask = vi.fn();
+        const hideUpdatesAvailableButton = vi.fn();
+        const node = /** @type {{dataset: Record<string, string|undefined>}} */ ({
+            dataset: {
+                dictionaryTitle: undefined,
+            },
+        });
+        Reflect.set(controller, '_deleteDictionaryModal', {setVisible: vi.fn(), node});
+        Reflect.set(controller, '_enqueueTask', enqueueTask);
+        Reflect.set(controller, '_hideUpdatesAvailableButton', hideUpdatesAvailableButton);
+
+        const onDictionaryConfirmDelete = /** @type {(this: DictionaryController, e: MouseEvent) => void} */ (getDictionaryControllerMethod('_onDictionaryConfirmDelete'));
+        onDictionaryConfirmDelete.call(controller, /** @type {unknown} */ ({preventDefault: vi.fn()}));
+
+        expect(enqueueTask).not.toHaveBeenCalled();
+        expect(hideUpdatesAvailableButton).not.toHaveBeenCalled();
+        expect(node.dataset.dictionaryTitle).toBeUndefined();
+    });
+
+    test('updateDictionary does not persist the string "undefined" as modal downloadUrl', () => {
+        const controller = createControllerForInternalTests();
+        const setVisible = vi.fn();
+        const nameElement = {textContent: ''};
+        const node = /** @type {{dataset: Record<string, string|undefined>, querySelector: (selector: string) => unknown}} */ ({
+            dataset: {downloadUrl: 'https://example.com/stale.zip'},
+            querySelector(selector) {
+                if (selector === '#dictionary-confirm-update-name') { return nameElement; }
+                return null;
+            },
+        });
+        Reflect.set(controller, '_updateDictionaryModal', {setVisible, node});
+
+        showUpdateDictionaryModal.call(controller, 'Jitendex', undefined);
+
+        expect(node.dataset.dictionaryTitle).toBe('Jitendex');
+        expect(node.dataset.downloadUrl).toBeUndefined();
+        expect(nameElement.textContent).toBe('Jitendex');
+        expect(setVisible).toHaveBeenCalledWith(true);
+    });
+
+    test('updateDictionary does not mutate modal dataset when modal content lookup fails', () => {
+        const controller = createControllerForInternalTests();
+        const node = /** @type {{dataset: Record<string, string|undefined>, querySelector: (selector: string) => unknown}} */ ({
+            dataset: {dictionaryTitle: 'Old Title', downloadUrl: 'https://example.com/stale.zip'},
+            querySelector() {
+                return null;
+            },
+        });
+        Reflect.set(controller, '_updateDictionaryModal', {setVisible: vi.fn(), node});
+
+        expect(() => {
+            showUpdateDictionaryModal.call(controller, 'Jitendex', 'https://example.com/jitendex.zip');
+        }).toThrow();
+        expect(node.dataset.dictionaryTitle).toBe('Old Title');
+        expect(node.dataset.downloadUrl).toBe('https://example.com/stale.zip');
+    });
+
+    test('deleteDictionary does not mutate modal dataset when profile lookup UI is missing', async () => {
+        const controller = createControllerForInternalTests();
+        const nameElement = {textContent: ''};
+        const node = /** @type {{dataset: Record<string, string|undefined>, querySelector: (selector: string) => unknown}} */ ({
+            dataset: {dictionaryTitle: 'Old Title'},
+            querySelector(selector) {
+                if (selector === '#dictionary-confirm-delete-name') { return nameElement; }
+                return null;
+            },
+        });
+        Reflect.set(controller, '_deleteDictionaryModal', {setVisible: vi.fn(), node});
+
+        await openDeleteDictionaryModal.call(controller, 'Jitendex');
+
+        expect(node.dataset.dictionaryTitle).toBe('Old Title');
+        expect(nameElement.textContent).toBe('Jitendex');
+    });
+
+    test('getProfileNamesUsingDictionary includes disabled, main, and sort-frequency references', async () => {
+        const controller = createControllerForInternalTests();
+        Reflect.set(controller, '_settingsController', {
+            getOptionsFull: vi.fn().mockResolvedValue({
+                profiles: [
+                    {
+                        name: 'Disabled reference',
+                        options: {
+                            dictionaries: [{name: 'Jitendex', enabled: false}],
+                            general: {mainDictionary: '', sortFrequencyDictionary: null},
+                        },
+                    },
+                    {
+                        name: 'Main dictionary reference',
+                        options: {
+                            dictionaries: [],
+                            general: {mainDictionary: 'Jitendex', sortFrequencyDictionary: null},
+                        },
+                    },
+                    {
+                        name: 'Sort frequency reference',
+                        options: {
+                            dictionaries: [],
+                            general: {mainDictionary: '', sortFrequencyDictionary: 'Jitendex'},
+                        },
+                    },
+                    {
+                        name: 'Unrelated',
+                        options: {
+                            dictionaries: [{name: 'JMdict', enabled: true}],
+                            general: {mainDictionary: 'JMdict', sortFrequencyDictionary: 'Freq'},
+                        },
+                    },
+                ],
+            }),
+        });
+
+        await expect(getProfileNamesUsingDictionary.call(controller, 'Jitendex')).resolves.toStrictEqual([
+            'Disabled reference',
+            'Main dictionary reference',
+            'Sort frequency reference',
+        ]);
+    });
+
+    test('deleteDictionarySettings removes duplicate dictionary entries from a profile in descending index order', async () => {
+        const controller = createControllerForInternalTests();
+        const modifyGlobalSettings = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(controller, '_settingsController', {
+            getOptionsFull: vi.fn().mockResolvedValue({
+                profiles: [
+                    {
+                        options: {
+                            dictionaries: [
+                                {name: 'JMdict', enabled: true},
+                                {name: 'Jitendex', enabled: true},
+                                {name: 'Jitendex', enabled: false},
+                                {name: 'Other', enabled: true},
+                            ],
+                            general: {mainDictionary: 'Jitendex', sortFrequencyDictionary: 'Jitendex'},
+                        },
+                    },
+                ],
+            }),
+            modifyGlobalSettings,
+        });
+
+        await deleteDictionarySettings.call(controller, 'Jitendex');
+
+        expect(modifyGlobalSettings).toHaveBeenCalledWith([
+            {
+                action: 'splice',
+                path: 'profiles[0].options.dictionaries',
+                start: 2,
+                deleteCount: 1,
+                items: [],
+            },
+            {
+                action: 'splice',
+                path: 'profiles[0].options.dictionaries',
+                start: 1,
+                deleteCount: 1,
+                items: [],
+            },
+            {
+                action: 'set',
+                path: 'profiles[0].options.general.mainDictionary',
+                value: '',
+            },
+            {
+                action: 'set',
+                path: 'profiles[0].options.general.sortFrequencyDictionary',
+                value: null,
+            },
+        ]);
     });
 
     test('runTaskQueue clears the running flag and continues after a task failure', async () => {
@@ -204,7 +475,7 @@ describe('DictionaryController task queue', () => {
         Reflect.set(controller, '_getMutationCallbackTimeoutMs', () => 1);
         Reflect.set(controller, '_settingsController', {
             getOptionsFull: vi.fn().mockResolvedValue({profiles: []}),
-            trigger: vi.fn(),
+            downloadDictionaryFromUrl: vi.fn(() => new Promise(() => {})),
         });
 
         await expect(updateDictionary.call(controller, 'Jitendex')).rejects.toThrow(/Timed out downloading replacement dictionary/);
@@ -219,11 +490,8 @@ describe('DictionaryController task queue', () => {
         Reflect.set(controller, '_validateUpdatedDictionaryState', vi.fn().mockResolvedValue(void 0));
         Reflect.set(controller, '_settingsController', {
             getOptionsFull: vi.fn().mockResolvedValue({profiles: []}),
-            trigger: vi.fn((eventName, details) => {
-                if (eventName === 'downloadDictionaryFromUrl') {
-                    details.onDownloadDone(new File([new Uint8Array([1])], 'jitendex.zip', {type: 'application/zip'}));
-                }
-            }),
+            downloadDictionaryFromUrl: vi.fn().mockResolvedValue(new File([new Uint8Array([1])], 'jitendex.zip', {type: 'application/zip'})),
+            importDictionaryFromFile: vi.fn(() => new Promise(() => {})),
             application: {
                 api: {
                     getDictionaryInfo: vi.fn().mockResolvedValue([]),
@@ -246,11 +514,8 @@ describe('DictionaryController task queue', () => {
         Reflect.set(controller, '_createUpdateImportToken', () => 'recover01');
         Reflect.set(controller, '_settingsController', {
             getOptionsFull: vi.fn().mockResolvedValue({profiles: []}),
-            trigger: vi.fn((eventName, details) => {
-                if (eventName === 'downloadDictionaryFromUrl') {
-                    details.onDownloadDone(new File([new Uint8Array([1])], 'jitendex.zip', {type: 'application/zip'}));
-                }
-            }),
+            downloadDictionaryFromUrl: vi.fn().mockResolvedValue(new File([new Uint8Array([1])], 'jitendex.zip', {type: 'application/zip'})),
+            importDictionaryFromFile: vi.fn(() => new Promise(() => {})),
             application: {
                 api: {
                     getDictionaryInfo,

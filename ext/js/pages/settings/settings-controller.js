@@ -19,7 +19,7 @@
 import {EventDispatcher} from '../../core/event-dispatcher.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {isObjectNotArray} from '../../core/object-utilities.js';
-import {generateId} from '../../core/utilities.js';
+import {deferPromise, generateId} from '../../core/utilities.js';
 import {OptionsUtil} from '../../data/options-util.js';
 import {getAllPermissions} from '../../data/permissions-util.js';
 import {HtmlTemplateCollection} from '../../dom/html-template-collection.js';
@@ -206,6 +206,53 @@ export class SettingsController extends EventDispatcher {
      */
     async getDictionaryInfo() {
         return await this._application.api.getDictionaryInfo();
+    }
+
+    /**
+     * @param {string} url
+     * @returns {Promise<File|null>}
+     */
+    async downloadDictionaryFromUrl(url) {
+        /** @type {import('core').DeferredPromiseDetails<File|null>} */
+        const {promise, resolve} = deferPromise();
+        this.trigger('downloadDictionaryFromUrl', {url, onDownloadDone: resolve});
+        return await promise;
+    }
+
+    /**
+     * @param {File[]} files
+     * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
+     * @param {Partial<import('dictionary-importer').ImportDetails>|null} [importDetailsOverrides]
+     * @returns {Promise<import('settings-controller').ImportDictionaryDoneResult>}
+     */
+    async importDictionaryFromFile(files, profilesDictionarySettings, importDetailsOverrides = null) {
+        /** @type {import('core').DeferredPromiseDetails<import('settings-controller').ImportDictionaryDoneResult>} */
+        const {promise, resolve} = deferPromise();
+        this.trigger('importDictionaryFromFile', {
+            files,
+            profilesDictionarySettings,
+            importDetailsOverrides,
+            onImportDone: resolve,
+        });
+        return await promise;
+    }
+
+    /**
+     * @param {string} url
+     * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
+     * @param {Partial<import('dictionary-importer').ImportDetails>|null} [importDetailsOverrides]
+     * @returns {Promise<import('settings-controller').ImportDictionaryDoneResult>}
+     */
+    async importDictionaryFromUrl(url, profilesDictionarySettings, importDetailsOverrides = null) {
+        /** @type {import('core').DeferredPromiseDetails<import('settings-controller').ImportDictionaryDoneResult>} */
+        const {promise, resolve} = deferPromise();
+        this.trigger('importDictionaryFromUrl', {
+            url,
+            profilesDictionarySettings,
+            importDetailsOverrides,
+            onImportDone: resolve,
+        });
+        return await promise;
     }
 
     /**
