@@ -29,6 +29,32 @@ const ajvSchemas = /** @type {import('dictionary-importer').CompiledSchemaValida
 const TRANSIENT_UPDATE_TITLE_PATTERN = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
 const MUTATION_CALLBACK_TIMEOUT_MS = 180_000;
 
+/**
+ * @param {unknown} downloadUrl
+ * @returns {string|undefined}
+ */
+function normalizeOptionalDownloadUrl(downloadUrl) {
+    return (
+        typeof downloadUrl === 'string' &&
+        downloadUrl.length > 0 &&
+        downloadUrl !== 'undefined'
+    ) ? downloadUrl : undefined;
+}
+
+/**
+ * @param {import('settings').ProfileOptions} profileOptions
+ * @param {string} dictionaryTitle
+ * @returns {boolean}
+ */
+function profileReferencesDictionary(profileOptions, dictionaryTitle) {
+    const {general, dictionaries} = profileOptions;
+    return (
+        dictionaries.some((dict) => dict.name === dictionaryTitle) ||
+        general.mainDictionary === dictionaryTitle ||
+        general.sortFrequencyDictionary === dictionaryTitle
+    );
+}
+
 class DictionaryEntry {
     /**
      * @param {DictionaryController} dictionaryController
@@ -168,13 +194,15 @@ class DictionaryEntry {
     /** */
     hideUpdatesAvailableButton() {
         this._updatesAvailable.hidden = true;
+        delete this._updatesAvailable.dataset.downloadUrl;
     }
 
     /**
      * @returns {Promise<boolean>}
      */
     async checkForUpdate() {
-        this._updatesAvailable.hidden = true;
+        this.hideUpdatesAvailableButton();
+        this._updateDownloadUrl = null;
         const {isUpdatable, indexUrl, revision: currentRevision, downloadUrl: currentDownloadUrl} = this._dictionaryInfo;
         if (!isUpdatable || !indexUrl || !currentDownloadUrl) { return false; }
         const response = await fetch(indexUrl);
@@ -289,8 +317,10 @@ class DictionaryEntry {
 
     /** */
     _onUpdateButtonClick() {
-        const downloadUrl = this._updatesAvailable.dataset.downloadUrl;
-        this._dictionaryController.updateDictionary(this.dictionaryTitle, downloadUrl);
+        this._dictionaryController.updateDictionary(
+            this.dictionaryTitle,
+            normalizeOptionalDownloadUrl(this._updatesAvailable.dataset.downloadUrl),
+        );
     }
 
     /** */
@@ -695,7 +725,6 @@ export class DictionaryController {
      */
     async deleteDictionary(dictionaryTitle) {
         const modal = /** @type {import('./modal.js').Modal} */ (this._deleteDictionaryModal);
-        modal.node.dataset.dictionaryTitle = dictionaryTitle;
         /** @type {Element} */
         const nameElement = querySelectorNotNull(modal.node, '#dictionary-confirm-delete-name');
         nameElement.textContent = dictionaryTitle;
@@ -719,6 +748,7 @@ export class DictionaryController {
             usedProfilesText.hidden = true;
             usedProfilesList.hidden = true;
         }
+        modal.node.dataset.dictionaryTitle = dictionaryTitle;
         modal.setVisible(true);
     }
 
@@ -732,8 +762,7 @@ export class DictionaryController {
         /** @type {string[]} */
         const profileNames = [];
         for (const profile of profiles) {
-            const dictionaryOptions = profile.options.dictionaries.find((dict) => dict.name === dictionaryTitle);
-            if (dictionaryOptions?.enabled) {
+            if (profileReferencesDictionary(profile.options, dictionaryTitle)) {
                 profileNames.push(profile.name);
             }
         }
@@ -747,11 +776,15 @@ export class DictionaryController {
     updateDictionary(dictionaryTitle, downloadUrl) {
         const modal = this._updateDictionaryModal;
         if (modal === null) { return; }
-        modal.node.dataset.downloadUrl = downloadUrl;
-        modal.node.dataset.dictionaryTitle = dictionaryTitle;
         /** @type {Element} */
         const nameElement = querySelectorNotNull(modal.node, '#dictionary-confirm-update-name');
         nameElement.textContent = dictionaryTitle;
+        if (typeof downloadUrl === 'string') {
+            modal.node.dataset.downloadUrl = downloadUrl;
+        } else {
+            delete modal.node.dataset.downloadUrl;
+        }
+        modal.node.dataset.dictionaryTitle = dictionaryTitle;
         modal.setVisible(true);
     }
 
@@ -1054,8 +1087,8 @@ export class DictionaryController {
         modal.setVisible(false);
 
         const dictionaryTitle = modal.node.dataset.dictionaryTitle;
-        if (typeof dictionaryTitle !== 'string') { return; }
         delete modal.node.dataset.dictionaryTitle;
+        if (typeof dictionaryTitle !== 'string') { return; }
 
         void this._enqueueTask({type: 'delete', dictionaryTitle});
         this._hideUpdatesAvailableButton(dictionaryTitle);
@@ -1071,9 +1104,11 @@ export class DictionaryController {
         modal.setVisible(false);
 
         const dictionaryTitle = modal.node.dataset.dictionaryTitle;
-        const downloadUrl = modal.node.dataset.downloadUrl;
-        if (typeof dictionaryTitle !== 'string') { return; }
+        const downloadUrlValue = modal.node.dataset.downloadUrl;
         delete modal.node.dataset.dictionaryTitle;
+        delete modal.node.dataset.downloadUrl;
+        if (typeof dictionaryTitle !== 'string') { return; }
+        const downloadUrl = normalizeOptionalDownloadUrl(downloadUrlValue);
 
         void this._enqueueTask({type: 'update', dictionaryTitle, downloadUrl});
         this._hideUpdatesAvailableButton(dictionaryTitle);
@@ -1310,10 +1345,16 @@ export class DictionaryController {
         const existingTaskIndex = this._dictionaryTaskQueue.findIndex((queueTask) => queueTask.dictionaryTitle === task.dictionaryTitle);
         if (existingTaskIndex >= 0) {
             const existingTask = this._dictionaryTaskQueue[existingTaskIndex];
+            let taskReplaced = false;
             if (task.type === 'delete') {
                 this._dictionaryTaskQueue.splice(existingTaskIndex, 1, task);
+                taskReplaced = true;
             } else if (existingTask.type === 'update' && task.type === 'update') {
                 this._dictionaryTaskQueue.splice(existingTaskIndex, 1, task);
+                taskReplaced = true;
+            }
+            if (taskReplaced && !this._isTaskQueueRunning) {
+                void this._runTaskQueue();
             }
             return;
         }
@@ -1421,60 +1462,24 @@ export class DictionaryController {
         if (typeof downloadUrl !== 'string') { throw new Error('Attempted to update dictionary without download URL'); }
 
         const options = await this._settingsController.getOptionsFull();
-        const {profiles} = options;
         this._clearMutationErrors();
-
-        /** @type {import('settings-controller.js').ProfilesDictionarySettings} */
-        const profilesDictionarySettings = {};
-
-        for (const profile of profiles) {
-            const dictionaries = profile.options.dictionaries;
-            for (let i = 0; i < dictionaries.length; ++i) {
-                if (dictionaries[i].name === dictionaryTitle) {
-                    profilesDictionarySettings[profile.id] = {...dictionaries[i], index: i};
-                    break;
-                }
-            }
-        }
-
-        /** @type {import('core').DeferredPromiseDetails<File|null>} */
-        const {promise: downloadPromise, resolve: resolveDownload} = deferPromise();
-        const mutationCallbackTimeoutMs = this._getMutationCallbackTimeoutMs();
-        this._settingsController.trigger('downloadDictionaryFromUrl', {url: downloadUrl, onDownloadDone: resolveDownload});
-        const downloadedFile = await Promise.race([
-            downloadPromise,
-            promiseTimeout(mutationCallbackTimeoutMs).then(() => {
-                throw new Error(`Timed out downloading replacement dictionary for ${dictionaryTitle} after ${String(mutationCallbackTimeoutMs)}ms`);
-            }),
-        ]);
+        const profilesDictionarySettings = this._getProfilesDictionarySettingsForTitle(options.profiles, dictionaryTitle);
+        const downloadedFile = await this._downloadReplacementDictionary(dictionaryTitle, downloadUrl);
         if (!(downloadedFile instanceof File)) {
             throw new Error(`Failed to download replacement dictionary for ${dictionaryTitle}`);
         }
 
-        /** @type {import('core').DeferredPromiseDetails<import('settings-controller').ImportDictionaryDoneResult>} */
-        const {promise: importPromise, resolve} = deferPromise();
         const importToken = this._createUpdateImportToken();
         const stagedDictionaryTitle = `${dictionaryTitle} [update-staging ${importToken}]`;
-        this._settingsController.trigger('importDictionaryFromFile', {
-            files: [downloadedFile],
-            profilesDictionarySettings,
-            importDetailsOverrides: {
-                dictionaryTitleOverride: stagedDictionaryTitle,
-                replacementDictionaryTitle: dictionaryTitle,
-                updateSessionToken: importToken,
-                useImportSession: false,
-                finalizeImportSession: false,
-            },
-            onImportDone: resolve,
-        });
         let importResult;
         try {
-            importResult = await Promise.race([
-                importPromise,
-                promiseTimeout(mutationCallbackTimeoutMs).then(() => {
-                    throw new Error(`Timed out importing replacement dictionary for ${dictionaryTitle} after ${String(mutationCallbackTimeoutMs)}ms`);
-                }),
-            ]);
+            importResult = await this._importReplacementDictionary(
+                dictionaryTitle,
+                downloadedFile,
+                profilesDictionarySettings,
+                importToken,
+                stagedDictionaryTitle,
+            );
         } catch (error) {
             const normalizedError = error instanceof Error ? error : new Error(String(error));
             if (normalizedError.message.includes('Timed out importing replacement dictionary')) {
@@ -1504,6 +1509,78 @@ export class DictionaryController {
      */
     _createUpdateImportToken() {
         return Math.random().toString(36).slice(2, 10);
+    }
+
+    /**
+     * @param {import('settings').Options['profiles']} profiles
+     * @param {string} dictionaryTitle
+     * @returns {import('settings-controller.js').ProfilesDictionarySettings}
+     */
+    _getProfilesDictionarySettingsForTitle(profiles, dictionaryTitle) {
+        /** @type {import('settings-controller.js').ProfilesDictionarySettings} */
+        const profilesDictionarySettings = {};
+        for (const profile of profiles) {
+            const dictionaries = profile.options.dictionaries;
+            for (let i = 0; i < dictionaries.length; ++i) {
+                if (dictionaries[i].name !== dictionaryTitle) { continue; }
+                profilesDictionarySettings[profile.id] = {...dictionaries[i], index: i};
+                break;
+            }
+        }
+        return profilesDictionarySettings;
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {string} downloadUrl
+     * @returns {Promise<File|null>}
+     */
+    async _downloadReplacementDictionary(dictionaryTitle, downloadUrl) {
+        return await this._awaitPromiseResult(
+            this._settingsController.downloadDictionaryFromUrl(downloadUrl),
+            `Timed out downloading replacement dictionary for ${dictionaryTitle}`,
+        );
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {File} downloadedFile
+     * @param {import('settings-controller.js').ProfilesDictionarySettings} profilesDictionarySettings
+     * @param {string} importToken
+     * @param {string} stagedDictionaryTitle
+     * @returns {Promise<import('settings-controller').ImportDictionaryDoneResult>}
+     */
+    async _importReplacementDictionary(dictionaryTitle, downloadedFile, profilesDictionarySettings, importToken, stagedDictionaryTitle) {
+        return await this._awaitPromiseResult(
+            this._settingsController.importDictionaryFromFile(
+                [downloadedFile],
+                profilesDictionarySettings,
+                {
+                    dictionaryTitleOverride: stagedDictionaryTitle,
+                    replacementDictionaryTitle: dictionaryTitle,
+                    updateSessionToken: importToken,
+                    useImportSession: false,
+                    finalizeImportSession: false,
+                },
+            ),
+            `Timed out importing replacement dictionary for ${dictionaryTitle}`,
+        );
+    }
+
+    /**
+     * @template T
+     * @param {Promise<T>} promise
+     * @param {string} timeoutMessage
+     * @returns {Promise<T>}
+     */
+    async _awaitPromiseResult(promise, timeoutMessage) {
+        const mutationCallbackTimeoutMs = this._getMutationCallbackTimeoutMs();
+        return await Promise.race([
+            promise,
+            promiseTimeout(mutationCallbackTimeoutMs).then(() => {
+                throw new Error(`${timeoutMessage} after ${String(mutationCallbackTimeoutMs)}ms`);
+            }),
+        ]);
     }
 
     /**
@@ -1562,9 +1639,7 @@ export class DictionaryController {
      */
     async _getDictionaryInfoAfterTransientCleanup() {
         let dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
-        let transientTitles = dictionaryInfo
-            .map((dictionary) => dictionary.title)
-            .filter((title) => typeof title === 'string' && TRANSIENT_UPDATE_TITLE_PATTERN.test(title));
+        let transientTitles = this._getTransientDictionaryTitles(dictionaryInfo);
         for (const transientTitle of transientTitles) {
             try {
                 await this._deleteDictionaryInternal(transientTitle, () => {});
@@ -1575,11 +1650,19 @@ export class DictionaryController {
         }
         if (transientTitles.length > 0) {
             dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
-            transientTitles = dictionaryInfo
-                .map((dictionary) => dictionary.title)
-                .filter((title) => typeof title === 'string' && TRANSIENT_UPDATE_TITLE_PATTERN.test(title));
+            transientTitles = this._getTransientDictionaryTitles(dictionaryInfo);
         }
         return {dictionaryInfo, transientTitles};
+    }
+
+    /**
+     * @param {import('dictionary-importer').Summary[]} dictionaryInfo
+     * @returns {string[]}
+     */
+    _getTransientDictionaryTitles(dictionaryInfo) {
+        return dictionaryInfo
+            .map((dictionary) => dictionary.title)
+            .filter((title) => typeof title === 'string' && TRANSIENT_UPDATE_TITLE_PATTERN.test(title));
     }
 
     /**
@@ -1600,16 +1683,25 @@ export class DictionaryController {
         onProgress({processed: 0, count: 1, storeCount: 1, storesProcesed: 0});
         await this._settingsController.application.api.deleteDictionaryByTitle(dictionaryTitle);
         onProgress({processed: 1, count: 1, storeCount: 1, storesProcesed: 1});
+        await this._awaitDictionaryRefresh(dictionaryTitle, 'delete');
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {'delete'} cause
+     * @returns {Promise<void>}
+     */
+    async _awaitDictionaryRefresh(dictionaryTitle, cause) {
         /** @type {import('core').DeferredPromiseDetails<void>} */
         const {promise: dictionariesUpdatePromise, resolve} = deferPromise();
         this._onDictionariesUpdate = resolve;
         try {
             const mutationCallbackTimeoutMs = this._getMutationCallbackTimeoutMs();
-            await this._settingsController.application.api.triggerDatabaseUpdated('dictionary', 'delete');
+            await this._settingsController.application.api.triggerDatabaseUpdated('dictionary', cause);
             await Promise.race([
                 dictionariesUpdatePromise,
                 promiseTimeout(mutationCallbackTimeoutMs).then(() => {
-                    throw new Error(`Timed out waiting for dictionary delete refresh for ${dictionaryTitle} after ${String(mutationCallbackTimeoutMs)}ms`);
+                    throw new Error(`Timed out waiting for dictionary ${cause} refresh for ${dictionaryTitle} after ${String(mutationCallbackTimeoutMs)}ms`);
                 }),
             ]);
         } finally {
@@ -1627,7 +1719,7 @@ export class DictionaryController {
         const targets = [];
         for (let i = 0, ii = profiles.length; i < ii; ++i) {
             const {options: {dictionaries, general}} = profiles[i];
-            for (let j = 0, jj = dictionaries.length; j < jj; ++j) {
+            for (let j = dictionaries.length - 1; j >= 0; --j) {
                 if (dictionaries[j].name !== dictionaryTitle) { continue; }
                 const path = `profiles[${i}].options.dictionaries`;
                 targets.push({
