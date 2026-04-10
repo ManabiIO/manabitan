@@ -20,6 +20,7 @@ import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {convertElementValueToNumber, normalizeModifierKey} from '../../dom/document-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {ObjectPropertyAccessor} from '../../general/object-property-accessor.js';
+import {log} from '../../core/log.js';
 import {KeyboardMouseInputField} from './keyboard-mouse-input-field.js';
 
 export class KeyboardShortcutController {
@@ -187,7 +188,13 @@ export class KeyboardShortcutController {
             fragment.appendChild(node);
             const entry = new KeyboardShortcutHotkeyEntry(this, hotkeyEntry, i, node, os, this._stringComparer);
             this._entries.push(entry);
-            await entry.prepare();
+            try {
+                await entry.prepare();
+            } catch (error) {
+                log.error(error);
+                entry.cleanup();
+                this._entries.pop();
+            }
         }
 
         const listContainer = /** @type {HTMLElement} */ (this._listContainer);
@@ -328,7 +335,10 @@ class KeyboardShortcutHotkeyEntry {
     /** */
     cleanup() {
         this._eventListeners.removeAllEventListeners();
-        /** @type {KeyboardMouseInputField} */ (this._inputField).cleanup();
+        if (this._inputField !== null) {
+            this._inputField.cleanup();
+            this._inputField = null;
+        }
         this._clearScopeMenu();
         this._clearArgumentEventListeners();
         if (this._node.parentNode !== null) {

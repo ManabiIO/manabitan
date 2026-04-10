@@ -218,6 +218,10 @@ export class AudioController extends EventDispatcher {
             this._setDataTransmissionConsentState(getDataTransmissionConsentStateFromOptionsFull(optionsFull));
         } catch (_e) {
             // NOP
+        } finally {
+            if (this._consentStateToken === token) {
+                this._consentStateToken = {};
+            }
         }
     }
 

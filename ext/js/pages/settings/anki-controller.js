@@ -1113,21 +1113,23 @@ class AnkiCardController {
         const token = {};
         this._validateFieldsToken = token;
 
-        let fieldNames;
         try {
-            fieldNames = await this._ankiController.getModelFieldNames(this._modelController.value);
+            const fieldNames = await this._ankiController.getModelFieldNames(this._modelController.value);
+            if (token !== this._validateFieldsToken) { return; }
+
+            const fieldNamesSet = new Set(fieldNames);
+            let index = 0;
+            for (const {fieldName, fieldNameContainerNode} of this._fieldEntries) {
+                fieldNameContainerNode.dataset.invalid = `${!fieldNamesSet.has(fieldName)}`;
+                fieldNameContainerNode.dataset.orderMatches = `${index < fieldNames.length && fieldName === fieldNames[index]}`;
+                ++index;
+            }
         } catch (e) {
             return;
-        }
-
-        if (token !== this._validateFieldsToken) { return; }
-
-        const fieldNamesSet = new Set(fieldNames);
-        let index = 0;
-        for (const {fieldName, fieldNameContainerNode} of this._fieldEntries) {
-            fieldNameContainerNode.dataset.invalid = `${!fieldNamesSet.has(fieldName)}`;
-            fieldNameContainerNode.dataset.orderMatches = `${index < fieldNames.length && fieldName === fieldNames[index]}`;
-            ++index;
+        } finally {
+            if (this._validateFieldsToken === token) {
+                this._validateFieldsToken = null;
+            }
         }
     }
 

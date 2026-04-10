@@ -725,16 +725,15 @@ export class DictionaryController {
      */
     async deleteDictionary(dictionaryTitle) {
         const modal = /** @type {import('./modal.js').Modal} */ (this._deleteDictionaryModal);
+        /** @type {HTMLElement | null} */
+        const usedProfilesText = modal.node.querySelector('#dictionary-confirm-delete-used-profiles-text');
+        /** @type {HTMLElement | null} */
+        const usedProfilesList = modal.node.querySelector('#dictionary-confirm-delete-used-profiles');
+        if (usedProfilesText === null || usedProfilesList === null) { return; }
+        const usedProfileNames = await this.getProfileNamesUsingDictionary(dictionaryTitle);
         /** @type {Element} */
         const nameElement = querySelectorNotNull(modal.node, '#dictionary-confirm-delete-name');
         nameElement.textContent = dictionaryTitle;
-        /** @type {HTMLElement | null} */
-        const usedProfilesText = modal.node.querySelector('#dictionary-confirm-delete-used-profiles-text');
-        if (usedProfilesText === null) { return; }
-        /** @type {HTMLElement | null} */
-        const usedProfilesList = modal.node.querySelector('#dictionary-confirm-delete-used-profiles');
-        if (usedProfilesList === null) { return; }
-        const usedProfileNames = await this.getProfileNamesUsingDictionary(dictionaryTitle);
         if (usedProfileNames.length > 0) {
             usedProfilesText.hidden = false;
             usedProfilesList.hidden = false;
@@ -1121,7 +1120,6 @@ export class DictionaryController {
         for (const entry of this._dictionaryEntries) {
             if (entry.dictionaryTitle === dictionaryTitle) {
                 entry.hideUpdatesAvailableButton();
-                break;
             }
         }
     }
@@ -1241,7 +1239,7 @@ export class DictionaryController {
             if (this._checkUpdatesButton !== null) {
                 hasUpdates = !!updateCount;
                 this._checkUpdatesButton.textContent = hasUpdates ?
-                    `${updateCount} update${updateCount > 1 ? 's' : ''}` :
+                    `${updateCount} update${updateCount > 1 ? 's' : ''}${hadFailures ? ' (partial)' : ''}` :
                     (hadFailures ? 'Check failed' : 'No updates');
             }
         } finally {
@@ -1761,7 +1759,6 @@ export class DictionaryController {
         for (const entry of this._dictionaryEntries) {
             if (entry.dictionaryTitle === dictionaryTitle && typeof entry._showUpdatesAvailableButton === 'function') {
                 entry._showUpdatesAvailableButton();
-                break;
             }
         }
     }

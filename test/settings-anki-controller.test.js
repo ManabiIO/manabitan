@@ -233,4 +233,33 @@ describe('AnkiController known note type presets', () => {
             Reading: {value: '{reading}', overwriteMode: 'coalesce'},
         });
     });
+
+    test('validateFields clears stale validation state after a failed lookup', async ({window}) => {
+        const cardNode = setupAnkiDom(window);
+        const settingsController = new MockSettingsController();
+        const ankiController = new AnkiController(
+            /** @type {import('../ext/js/pages/settings/settings-controller.js').SettingsController} */ (/** @type {unknown} */ (settingsController)),
+            /** @type {import('../ext/js/application.js').Application} */ (/** @type {unknown} */ ({api: {}})),
+            /** @type {import('../ext/js/pages/settings/modal-controller.js').ModalController} */ (/** @type {unknown} */ ({})),
+        );
+
+        ankiController.getAnkiData = vi.fn(async () => ({
+            deckNames: ['Deck'],
+            modelNames: ['Model'],
+        }));
+        ankiController.getModelFieldNames = vi.fn().mockRejectedValue(new Error('model lookup failed'));
+        ankiController.getRequiredPermissions = vi.fn(() => []);
+
+        const cardController = Reflect.get(ankiController, '_createCardController').call(ankiController, cardNode);
+        await vi.waitFor(() => {
+            expect(cardNode.querySelectorAll('.anki-card-field-name')).toHaveLength(1);
+        });
+
+        Reflect.set(cardController, '_modelController', {value: 'Model'});
+        Reflect.set(cardController, '_fieldEntries', []);
+        Reflect.set(cardController, '_validateFieldsToken', {});
+
+        await expect(cardController._validateFields()).resolves.toBeUndefined();
+        expect(Reflect.get(cardController, '_validateFieldsToken')).toBeNull();
+    });
 });

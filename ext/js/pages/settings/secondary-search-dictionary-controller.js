@@ -52,17 +52,22 @@ export class SecondarySearchDictionaryController {
         /** @type {?import('core').TokenObject} */
         const token = {};
         this._getDictionaryInfoToken = token;
-        const dictionaries = await this._settingsController.getDictionaryInfo();
-        if (this._getDictionaryInfoToken !== token) { return; }
+        try {
+            const dictionaries = await this._settingsController.getDictionaryInfo();
+            if (this._getDictionaryInfoToken !== token) { return; }
 
-        this._dictionaryInfoMap.clear();
-        for (const entry of dictionaries) {
-            this._dictionaryInfoMap.set(entry.title, entry);
+            this._dictionaryInfoMap.clear();
+            for (const entry of dictionaries) {
+                this._dictionaryInfoMap.set(entry.title, entry);
+            }
+
+            await this._onDictionarySettingsReordered(token);
+            if (this._getDictionaryInfoToken !== token) { return; }
+        } finally {
+            if (this._getDictionaryInfoToken === token) {
+                this._getDictionaryInfoToken = null;
+            }
         }
-
-        await this._onDictionarySettingsReordered(token);
-        if (this._getDictionaryInfoToken !== token) { return; }
-        this._getDictionaryInfoToken = null;
     }
 
     /**
