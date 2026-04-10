@@ -1315,16 +1315,19 @@ export class DictionaryController {
      */
     _createDictionaryEntry(index, dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts) {
         const fragment = this.instantiateTemplateFragment('dictionary');
+        try {
+            const entry = new DictionaryEntry(this, fragment, index, dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts);
+            this._dictionaryEntries.push(entry);
+            entry.prepare();
 
-        const entry = new DictionaryEntry(this, fragment, index, dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts);
-        this._dictionaryEntries.push(entry);
-        entry.prepare();
+            const container = /** @type {HTMLElement} */ (this._dictionaryEntryContainer);
+            const relative = container.querySelector('.dictionary-item-bottom');
+            container.insertBefore(fragment, relative);
 
-        const container = /** @type {HTMLElement} */ (this._dictionaryEntryContainer);
-        const relative = container.querySelector('.dictionary-item-bottom');
-        container.insertBefore(fragment, relative);
-
-        this._updateDictionaryEntryCount();
+            this._updateDictionaryEntryCount();
+        } catch (error) {
+            log.error(error);
+        }
     }
 
 

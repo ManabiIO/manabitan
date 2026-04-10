@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../../core/extension-error.js';
+import {log} from '../../core/log.js';
 import {toError} from '../../core/to-error.js';
 import {AnkiNoteBuilder} from '../../data/anki-note-builder.js';
 import {getDynamicTemplates} from '../../data/anki-template-util.js';
@@ -77,7 +78,7 @@ export class AnkiTemplatesController {
         const resetConfirmButton = querySelectorNotNull(document, '#anki-card-templates-reset-button-confirm');
         this._fieldTemplateResetModal = this._modalController.getModal('anki-card-templates-reset');
 
-        this._fieldTemplatesTextarea.addEventListener('change', this._onChanged.bind(this), false);
+        this._fieldTemplatesTextarea.addEventListener('change', this._onChangedEvent.bind(this), false);
         testRenderButton.addEventListener('click', this._onRender.bind(this), false);
         resetButton.addEventListener('click', this._onReset.bind(this), false);
         resetConfirmButton.addEventListener('click', this._onResetConfirm.bind(this), false);
@@ -111,6 +112,7 @@ export class AnkiTemplatesController {
             if (typeof templates !== 'string') { templates = ''; }
         }
         /** @type {HTMLTextAreaElement} */ (this._fieldTemplatesTextarea).value = templates;
+        /** @type {HTMLTextAreaElement} */ (this._fieldTemplatesTextarea).dataset.value = templates;
 
         this._onValidateCompile();
     }
@@ -148,6 +150,7 @@ export class AnkiTemplatesController {
     async _onChanged(e) {
         // Get value
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
+        const previousValue = element.dataset.value ?? '';
         /** @type {?string} */
         let templates = element.value;
         if (templates === this._defaultFieldTemplates) {
@@ -156,10 +159,26 @@ export class AnkiTemplatesController {
         }
 
         // Overwrite
-        await this._settingsController.setProfileSetting('anki.fieldTemplates', templates);
+        try {
+            await this._settingsController.setProfileSetting('anki.fieldTemplates', templates);
+        } catch (error) {
+            element.value = previousValue;
+            throw error;
+        }
+
+        element.dataset.value = element.value;
 
         // Compile
         this._onValidateCompile();
+    }
+
+    /**
+     * @param {Event} e
+     */
+    _onChangedEvent(e) {
+        void this._onChanged(e).catch((error) => {
+            log.error(error);
+        });
     }
 
     /** */

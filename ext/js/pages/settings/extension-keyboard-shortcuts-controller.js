@@ -18,6 +18,7 @@
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {isObjectNotArray} from '../../core/object-utilities.js';
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {HotkeyUtil} from '../../input/hotkey-util.js';
 import {KeyboardMouseInputField} from './keyboard-mouse-input-field.js';
@@ -133,7 +134,9 @@ export class ExtensionKeyboardShortcutController {
      */
     _onResetClick(e) {
         e.preventDefault();
-        void this._resetAllCommands();
+        void this._resetAllCommands().catch((error) => {
+            log.error(error);
+        });
     }
 
     /**
@@ -141,7 +144,9 @@ export class ExtensionKeyboardShortcutController {
      */
     _onClearClick(e) {
         e.preventDefault();
-        void this._clearAllCommands();
+        void this._clearAllCommands().catch((error) => {
+            log.error(error);
+        });
     }
 
     /**
@@ -185,8 +190,14 @@ export class ExtensionKeyboardShortcutController {
             fragment.appendChild(node);
 
             const entry = new ExtensionKeyboardShortcutHotkeyEntry(this, node, name, description, key, modifiers, this._os);
-            entry.prepare();
             this._entries.push(entry);
+            try {
+                entry.prepare();
+            } catch (error) {
+                log.error(error);
+                entry.cleanup();
+                this._entries.pop();
+            }
         }
 
         const listContainer = /** @type {HTMLElement} */ (this._listContainer);
@@ -317,7 +328,9 @@ class ExtensionKeyboardShortcutHotkeyEntry {
      */
     _onInputFieldChange(e) {
         const {key, modifiers} = e;
-        void this._tryUpdateInput(key, modifiers, false);
+        void this._tryUpdateInput(key, modifiers, false).catch((error) => {
+            log.error(error);
+        });
     }
 
     /** */
@@ -331,10 +344,14 @@ class ExtensionKeyboardShortcutHotkeyEntry {
     _onMenuClose(e) {
         switch (e.detail.action) {
             case 'clearInput':
-                void this._tryUpdateInput(null, [], true);
+                void this._tryUpdateInput(null, [], true).catch((error) => {
+                    log.error(error);
+                });
                 break;
             case 'resetInput':
-                void this._resetInput();
+                void this._resetInput().catch((error) => {
+                    log.error(error);
+                });
                 break;
         }
     }

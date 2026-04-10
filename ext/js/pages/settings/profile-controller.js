@@ -534,10 +534,17 @@ export class ProfileController {
     _addProfileEntry(profileIndex) {
         const profile = this._profiles[profileIndex];
         const node = /** @type {HTMLElement} */ (this._settingsController.instantiateTemplate('profile-entry'));
-        const entry = new ProfileEntry(this, node, profile, profileIndex);
-        this._profileEntryList.push(entry);
-        entry.prepare();
-        /** @type {HTMLElement} */ (this._profileEntryListContainer).appendChild(node);
+        try {
+            const entry = new ProfileEntry(this, node, profile, profileIndex);
+            this._profileEntryList.push(entry);
+            entry.prepare();
+            /** @type {HTMLElement} */ (this._profileEntryListContainer).appendChild(node);
+        } catch (error) {
+            log.error(error);
+            if (node.parentNode !== null) {
+                node.parentNode.removeChild(node);
+            }
+        }
     }
 
     /** */

@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 export class PopupPreviewController {
@@ -125,7 +126,11 @@ export class PopupPreviewController {
      */
     _invoke(action, params) {
         if (this._frame === null || this._frame.contentWindow === null) { return; }
-        this._frame.contentWindow.postMessage({action, params}, this._targetOrigin);
+        try {
+            this._frame.contentWindow.postMessage({action, params}, this._targetOrigin);
+        } catch (error) {
+            log.error(error);
+        }
     }
 }
 

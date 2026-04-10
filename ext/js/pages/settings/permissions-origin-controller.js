@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {log} from '../../core/log.js';
 import {toError} from '../../core/to-error.js';
 import {getAllPermissions, setPermissionsGranted} from '../../data/permissions-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
@@ -51,9 +52,9 @@ export class PermissionsOriginController {
         const addButton = querySelectorNotNull(document, '#permissions-origin-add');
 
         for (const node of this._originToggleNodes) {
-            node.addEventListener('change', this._onOriginToggleChange.bind(this), false);
+            node.addEventListener('change', this._onOriginToggleChangeEvent.bind(this), false);
         }
-        addButton.addEventListener('click', this._onAddButtonClick.bind(this), false);
+        addButton.addEventListener('click', this._onAddButtonClickEvent.bind(this), false);
 
         this._settingsController.on('permissionsChanged', this._onPermissionsChanged.bind(this));
         await this._updatePermissions();
@@ -102,6 +103,7 @@ export class PermissionsOriginController {
         /** @type {HTMLElement} */ (this._originEmpty).hidden = any;
 
         /** @type {HTMLElement} */ (this._errorContainer).hidden = true;
+        /** @type {HTMLElement} */ (this._errorContainer).textContent = '';
     }
 
     /**
@@ -118,10 +120,23 @@ export class PermissionsOriginController {
     }
 
     /**
+     * @param {Event} e
+     */
+    _onOriginToggleChangeEvent(e) {
+        try {
+            this._onOriginToggleChange(e);
+        } catch (error) {
+            log.error(error);
+        }
+    }
+
+    /**
      * @param {string} origin
      */
     _onOriginMenuClose(origin) {
-        void this._setOriginPermissionEnabled(origin, false);
+        void this._setOriginPermissionEnabled(origin, false).catch((error) => {
+            log.error(error);
+        });
     }
 
     /** */
@@ -129,10 +144,22 @@ export class PermissionsOriginController {
         void this._addOrigin();
     }
 
+    /**
+     * @param {Event} _e
+     */
+    _onAddButtonClickEvent(_e) {
+        void this._addOrigin().catch((error) => {
+            log.error(error);
+        });
+    }
+
     /** */
     async _addOrigin() {
         const input = /** @type {HTMLInputElement} */ (this._addOriginInput);
-        const origin = input.value;
+        const origin = input.value.trim();
+        if (origin.length === 0) {
+            return;
+        }
         const added = await this._setOriginPermissionEnabled(origin, true);
         if (added) {
             input.value = '';
