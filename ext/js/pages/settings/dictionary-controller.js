@@ -21,12 +21,13 @@ import {reportDiagnostics} from '../../core/diagnostics-reporter.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
-import {deferPromise} from '../../core/utilities.js';
+import {deferPromise, promiseTimeout} from '../../core/utilities.js';
 import {compareRevisions} from '../../dictionary/dictionary-data-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 const ajvSchemas = /** @type {import('dictionary-importer').CompiledSchemaValidators} */ (/** @type {unknown} */ (ajvSchemas0));
 const TRANSIENT_UPDATE_TITLE_PATTERN = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
+const MUTATION_CALLBACK_TIMEOUT_MS = 180_000;
 
 class DictionaryEntry {
     /**
@@ -1179,20 +1180,38 @@ export class DictionaryController {
     /** */
     async _checkForUpdates() {
         if (this._dictionaries === null || this._checkingIntegrity || this._checkingUpdates || this._isTaskQueueRunning) { return; }
-        let hasUpdates;
+        let hasUpdates = false;
+        let hadFailures = false;
         try {
             this._checkingUpdates = true;
+            this._clearMutationErrors();
             this._setButtonsEnabled(false);
 
             const updateChecks = this._dictionaryEntries.map((entry) => entry.checkForUpdate());
-            const updateCount = (await Promise.all(updateChecks)).reduce((sum, value) => (sum + (value ? 1 : 0)), 0);
+            const results = await Promise.allSettled(updateChecks);
+            const updateCount = results.reduce((sum, result) => (sum + (result.status === 'fulfilled' && result.value ? 1 : 0)), 0);
+            const failures = results
+                .filter((result) => result.status === 'rejected')
+                .map((result) => /** @type {PromiseRejectedResult} */ (result).reason);
+            hadFailures = (failures.length > 0);
+            if (hadFailures) {
+                reportDiagnostics('dictionary-update-check-failed', {
+                    failedCount: failures.length,
+                    totalCount: results.length,
+                });
+                const [firstFailure] = failures;
+                const error = firstFailure instanceof Error ? firstFailure : new Error(String(firstFailure));
+                this._showMutationError(error);
+            }
             if (this._checkUpdatesButton !== null) {
                 hasUpdates = !!updateCount;
-                this._checkUpdatesButton.textContent = hasUpdates ? `${updateCount} update${updateCount > 1 ? 's' : ''}` : 'No updates';
+                this._checkUpdatesButton.textContent = hasUpdates ?
+                    `${updateCount} update${updateCount > 1 ? 's' : ''}` :
+                    (hadFailures ? 'Check failed' : 'No updates');
             }
         } finally {
             this._setButtonsEnabled(true);
-            if (this._checkUpdatesButton !== null && !hasUpdates) {
+            if (this._checkUpdatesButton !== null && !hasUpdates && !hadFailures) {
                 this._checkUpdatesButton.disabled = true;
             }
             this._checkingUpdates = false;
@@ -1288,7 +1307,16 @@ export class DictionaryController {
      * @param {import('dictionary-controller.js').DictionaryTask} task
      */
     _enqueueTask(task) {
-        if (this.isDictionaryInTaskQueue(task.dictionaryTitle)) { return; }
+        const existingTaskIndex = this._dictionaryTaskQueue.findIndex((queueTask) => queueTask.dictionaryTitle === task.dictionaryTitle);
+        if (existingTaskIndex >= 0) {
+            const existingTask = this._dictionaryTaskQueue[existingTaskIndex];
+            if (task.type === 'delete') {
+                this._dictionaryTaskQueue.splice(existingTaskIndex, 1, task);
+            } else if (existingTask.type === 'update' && task.type === 'update') {
+                this._dictionaryTaskQueue.splice(existingTaskIndex, 1, task);
+            }
+            return;
+        }
         this._dictionaryTaskQueue.push(task);
         void this._runTaskQueue();
     }
@@ -1298,16 +1326,34 @@ export class DictionaryController {
     async _runTaskQueue() {
         if (this._isTaskQueueRunning) { return; }
         this._isTaskQueueRunning = true;
-        while (this._dictionaryTaskQueue.length > 0) {
-            const task = this._dictionaryTaskQueue[0];
-            if (task.type === 'delete') {
-                await this._deleteDictionary(task.dictionaryTitle);
-            } else if (task.type === 'update') {
-                await this._updateDictionary(task.dictionaryTitle, task.downloadUrl);
+        try {
+            while (this._dictionaryTaskQueue.length > 0) {
+                const task = this._dictionaryTaskQueue[0];
+                try {
+                    if (task.type === 'delete') {
+                        await this._deleteDictionary(task.dictionaryTitle);
+                    } else if (task.type === 'update') {
+                        await this._updateDictionary(task.dictionaryTitle, task.downloadUrl);
+                    }
+                } catch (error) {
+                    const normalizedError = error instanceof Error ? error : new Error(String(error));
+                    reportDiagnostics('dictionary-task-queue-failed', {
+                        taskType: task.type,
+                        dictionaryTitle: task.dictionaryTitle,
+                        message: normalizedError.message,
+                    });
+                    log.error(normalizedError);
+                    this._showMutationError(normalizedError);
+                    if (task.type === 'update' || task.type === 'delete') {
+                        this._showUpdatesAvailableButton(task.dictionaryTitle);
+                    }
+                } finally {
+                    void this._dictionaryTaskQueue.shift();
+                }
             }
-            void this._dictionaryTaskQueue.shift();
+        } finally {
+            this._isTaskQueueRunning = false;
         }
-        this._isTaskQueueRunning = false;
     }
 
     /**
@@ -1327,6 +1373,7 @@ export class DictionaryController {
         const statusLabels = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll(`${progressSelector} .progress-status`));
         const prevention = this._settingsController.preventPageExit();
         try {
+            this._clearMutationErrors();
             this._setButtonsEnabled(false);
 
             /**
@@ -1352,8 +1399,6 @@ export class DictionaryController {
 
             await this._deleteDictionaryInternal(dictionaryTitle, onProgress);
             await this._deleteDictionarySettings(dictionaryTitle);
-        } catch (e) {
-            log.error(e);
         } finally {
             prevention.end();
             for (const progress of progressContainers) { progress.hidden = true; }
@@ -1377,6 +1422,7 @@ export class DictionaryController {
 
         const options = await this._settingsController.getOptionsFull();
         const {profiles} = options;
+        this._clearMutationErrors();
 
         /** @type {import('settings-controller.js').ProfilesDictionarySettings} */
         const profilesDictionarySettings = {};
@@ -1393,15 +1439,21 @@ export class DictionaryController {
 
         /** @type {import('core').DeferredPromiseDetails<File|null>} */
         const {promise: downloadPromise, resolve: resolveDownload} = deferPromise();
+        const mutationCallbackTimeoutMs = this._getMutationCallbackTimeoutMs();
         this._settingsController.trigger('downloadDictionaryFromUrl', {url: downloadUrl, onDownloadDone: resolveDownload});
-        const downloadedFile = await downloadPromise;
+        const downloadedFile = await Promise.race([
+            downloadPromise,
+            promiseTimeout(mutationCallbackTimeoutMs).then(() => {
+                throw new Error(`Timed out downloading replacement dictionary for ${dictionaryTitle} after ${String(mutationCallbackTimeoutMs)}ms`);
+            }),
+        ]);
         if (!(downloadedFile instanceof File)) {
             throw new Error(`Failed to download replacement dictionary for ${dictionaryTitle}`);
         }
 
         /** @type {import('core').DeferredPromiseDetails<import('settings-controller').ImportDictionaryDoneResult>} */
         const {promise: importPromise, resolve} = deferPromise();
-        const importToken = Math.random().toString(36).slice(2, 10);
+        const importToken = this._createUpdateImportToken();
         const stagedDictionaryTitle = `${dictionaryTitle} [update-staging ${importToken}]`;
         this._settingsController.trigger('importDictionaryFromFile', {
             files: [downloadedFile],
@@ -1415,7 +1467,22 @@ export class DictionaryController {
             },
             onImportDone: resolve,
         });
-        const importResult = await importPromise;
+        let importResult;
+        try {
+            importResult = await Promise.race([
+                importPromise,
+                promiseTimeout(mutationCallbackTimeoutMs).then(() => {
+                    throw new Error(`Timed out importing replacement dictionary for ${dictionaryTitle} after ${String(mutationCallbackTimeoutMs)}ms`);
+                }),
+            ]);
+        } catch (error) {
+            const normalizedError = error instanceof Error ? error : new Error(String(error));
+            if (normalizedError.message.includes('Timed out importing replacement dictionary')) {
+                const recovered = await this._recoverTimedOutUpdateState(dictionaryTitle, importToken, stagedDictionaryTitle);
+                if (recovered) { return; }
+            }
+            throw normalizedError;
+        }
         if (!importResult.ok) {
             throw new Error(
                 `Replacement dictionary import failed for ${dictionaryTitle}: ` +
@@ -1426,6 +1493,20 @@ export class DictionaryController {
     }
 
     /**
+     * @returns {number}
+     */
+    _getMutationCallbackTimeoutMs() {
+        return MUTATION_CALLBACK_TIMEOUT_MS;
+    }
+
+    /**
+     * @returns {string}
+     */
+    _createUpdateImportToken() {
+        return Math.random().toString(36).slice(2, 10);
+    }
+
+    /**
      * @param {string} dictionaryTitle
      * @param {string} importToken
      * @param {string} stagedDictionaryTitle
@@ -1433,24 +1514,7 @@ export class DictionaryController {
      * @returns {Promise<void>}
      */
     async _validateUpdatedDictionaryState(dictionaryTitle, importToken, stagedDictionaryTitle, importedTitles) {
-        let dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
-        let transientTitles = dictionaryInfo
-            .map((dictionary) => dictionary.title)
-            .filter((title) => typeof title === 'string' && TRANSIENT_UPDATE_TITLE_PATTERN.test(title));
-        for (const transientTitle of transientTitles) {
-            try {
-                await this._deleteDictionaryInternal(transientTitle, () => {});
-                await this._deleteDictionarySettings(transientTitle);
-            } catch (error) {
-                log.error(error);
-            }
-        }
-        if (transientTitles.length > 0) {
-            dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
-            transientTitles = dictionaryInfo
-                .map((dictionary) => dictionary.title)
-                .filter((title) => typeof title === 'string' && TRANSIENT_UPDATE_TITLE_PATTERN.test(title));
-        }
+        const {dictionaryInfo, transientTitles} = await this._getDictionaryInfoAfterTransientCleanup();
         const updatedDictionary = dictionaryInfo.find((dictionary) => dictionary.title === dictionaryTitle);
         const importedDictionaryPresent = importedTitles.includes(dictionaryTitle);
         const updateTokenApplied = typeof updatedDictionary?.updateSessionToken === 'string' && updatedDictionary.updateSessionToken === importToken;
@@ -1470,6 +1534,52 @@ export class DictionaryController {
                 `transientTitles=${JSON.stringify(transientTitles)})`,
             );
         }
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {string} importToken
+     * @param {string} stagedDictionaryTitle
+     * @returns {Promise<boolean>}
+     */
+    async _recoverTimedOutUpdateState(dictionaryTitle, importToken, stagedDictionaryTitle) {
+        const {dictionaryInfo, transientTitles} = await this._getDictionaryInfoAfterTransientCleanup();
+        const updatedDictionary = dictionaryInfo.find((dictionary) => dictionary.title === dictionaryTitle);
+        const updateTokenApplied = typeof updatedDictionary?.updateSessionToken === 'string' && updatedDictionary.updateSessionToken === importToken;
+        reportDiagnostics('dictionary-update-timeout-recovery', {
+            dictionaryTitle,
+            importToken,
+            stagedDictionaryTitle,
+            updateTokenApplied,
+            transientTitles,
+            installedTitles: dictionaryInfo.map((dictionary) => dictionary.title),
+        });
+        return typeof updatedDictionary !== 'undefined' && updateTokenApplied && transientTitles.length === 0;
+    }
+
+    /**
+     * @returns {Promise<{dictionaryInfo: import('dictionary-importer').Summary[], transientTitles: string[]}>}
+     */
+    async _getDictionaryInfoAfterTransientCleanup() {
+        let dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
+        let transientTitles = dictionaryInfo
+            .map((dictionary) => dictionary.title)
+            .filter((title) => typeof title === 'string' && TRANSIENT_UPDATE_TITLE_PATTERN.test(title));
+        for (const transientTitle of transientTitles) {
+            try {
+                await this._deleteDictionaryInternal(transientTitle, () => {});
+                await this._deleteDictionarySettings(transientTitle);
+            } catch (error) {
+                log.error(error);
+            }
+        }
+        if (transientTitles.length > 0) {
+            dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
+            transientTitles = dictionaryInfo
+                .map((dictionary) => dictionary.title)
+                .filter((title) => typeof title === 'string' && TRANSIENT_UPDATE_TITLE_PATTERN.test(title));
+        }
+        return {dictionaryInfo, transientTitles};
     }
 
     /**
@@ -1493,9 +1603,18 @@ export class DictionaryController {
         /** @type {import('core').DeferredPromiseDetails<void>} */
         const {promise: dictionariesUpdatePromise, resolve} = deferPromise();
         this._onDictionariesUpdate = resolve;
-        await this._settingsController.application.api.triggerDatabaseUpdated('dictionary', 'delete');
-        await dictionariesUpdatePromise;
-        this._onDictionariesUpdate = null;
+        try {
+            const mutationCallbackTimeoutMs = this._getMutationCallbackTimeoutMs();
+            await this._settingsController.application.api.triggerDatabaseUpdated('dictionary', 'delete');
+            await Promise.race([
+                dictionariesUpdatePromise,
+                promiseTimeout(mutationCallbackTimeoutMs).then(() => {
+                    throw new Error(`Timed out waiting for dictionary delete refresh for ${dictionaryTitle} after ${String(mutationCallbackTimeoutMs)}ms`);
+                }),
+            ]);
+        } finally {
+            this._onDictionariesUpdate = null;
+        }
     }
 
     /**
@@ -1540,6 +1659,42 @@ export class DictionaryController {
     /** */
     _triggerStorageChanged() {
         this._settingsController.application.triggerStorageChanged();
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @returns {void}
+     */
+    _showUpdatesAvailableButton(dictionaryTitle) {
+        for (const entry of this._dictionaryEntries) {
+            if (entry.dictionaryTitle === dictionaryTitle && typeof entry._showUpdatesAvailableButton === 'function') {
+                entry._showUpdatesAvailableButton();
+                break;
+            }
+        }
+    }
+
+    /**
+     * @param {Error} error
+     * @returns {void}
+     */
+    _showMutationError(error) {
+        if (typeof HTMLElement === 'undefined') { return; }
+        const errorContainer = globalThis.document?.querySelector('#dictionary-error');
+        if (!(errorContainer instanceof HTMLElement)) { return; }
+        const line = document.createElement('p');
+        line.textContent = error.message;
+        errorContainer.appendChild(line);
+        errorContainer.hidden = false;
+    }
+
+    /** */
+    _clearMutationErrors() {
+        if (typeof HTMLElement === 'undefined') { return; }
+        const errorContainer = globalThis.document?.querySelector('#dictionary-error');
+        if (!(errorContainer instanceof HTMLElement)) { return; }
+        errorContainer.textContent = '';
+        errorContainer.hidden = true;
     }
 
     /** */

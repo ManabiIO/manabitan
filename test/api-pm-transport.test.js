@@ -167,6 +167,27 @@ describe('API PM transport reliability', () => {
         await expectation;
     });
 
+    test('connectToDatabaseWorker waiting on service worker ready rejects immediately on shutdown', async () => {
+        vi.useFakeTimers();
+        Object.defineProperty(globalThis, 'navigator', {
+            configurable: true,
+            value: {
+                serviceWorker: {
+                    ready: new Promise(() => {}),
+                },
+            },
+        });
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
+
+        const promise = api.connectToDatabaseWorker(/** @type {MessagePort} */ (/** @type {unknown} */ ({close: vi.fn()})));
+        const expectation = expect(promise).rejects.toThrow(/Runtime connections have been shut down/);
+        api.shutdownRuntimeConnections();
+        await vi.runAllTimersAsync();
+
+        await expectation;
+        expect(api._shutdownRejectors.size).toBe(0);
+    });
+
     test('connectToDatabaseWorker retries once when service worker postMessage initially fails', async () => {
         vi.useFakeTimers();
         const active = {
@@ -219,6 +240,44 @@ describe('API PM transport reliability', () => {
         expect(active.postMessage).toHaveBeenCalledTimes(1);
     });
 
+    test('importDictionaryOffscreen rejects immediately when runtime shuts down mid-flight', async () => {
+        Object.defineProperty(globalThis, 'navigator', {
+            configurable: true,
+            value: {
+                serviceWorker: {},
+            },
+        });
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
+        vi.spyOn(api, '_pmInvoke').mockImplementation(() => new Promise(() => {}));
+
+        const promise = api.importDictionaryOffscreen(new Blob([]), /** @type {import('../ext/js/dictionary/dictionary-importer.js').ImportDetails} */ ({}), null);
+        const expectation = expect(promise).rejects.toThrow(/Runtime connections have been shut down/);
+
+        api.shutdownRuntimeConnections();
+
+        await expectation;
+        expect(api._shutdownRejectors.size).toBe(0);
+    });
+
+    test('importDictionaryUrlOffscreen rejects immediately when runtime shuts down mid-flight', async () => {
+        Object.defineProperty(globalThis, 'navigator', {
+            configurable: true,
+            value: {
+                serviceWorker: {},
+            },
+        });
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
+        vi.spyOn(api, '_pmInvoke').mockImplementation(() => new Promise(() => {}));
+
+        const promise = api.importDictionaryUrlOffscreen('https://example.com/test.zip', /** @type {import('../ext/js/dictionary/dictionary-importer.js').ImportDetails} */ ({}), null);
+        const expectation = expect(promise).rejects.toThrow(/Runtime connections have been shut down/);
+
+        api.shutdownRuntimeConnections();
+
+        await expectation;
+        expect(api._shutdownRejectors.size).toBe(0);
+    });
+
     test('_invoke times out when backend never answers', async () => {
         vi.useFakeTimers();
         Object.defineProperty(globalThis, 'navigator', {
@@ -238,6 +297,28 @@ describe('API PM transport reliability', () => {
         await vi.advanceTimersByTimeAsync(30_000);
 
         await expectation;
+    });
+
+    test('_invoke waiting on backend callback rejects immediately on shutdown', async () => {
+        vi.useFakeTimers();
+        Object.defineProperty(globalThis, 'navigator', {
+            configurable: true,
+            value: {
+                serviceWorker: {},
+            },
+        });
+        const webExtension = {
+            sendMessage: vi.fn((_message, _callback) => {}),
+        };
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ (webExtension)));
+
+        const promise = api.getDictionaryInfo();
+        const expectation = expect(promise).rejects.toThrow(/Runtime connections have been shut down/);
+        api.shutdownRuntimeConnections();
+        await vi.runAllTimersAsync();
+
+        await expectation;
+        expect(api._shutdownRejectors.size).toBe(0);
     });
 
     test('_invoke retries once for retryable transient runtime disconnects', async () => {

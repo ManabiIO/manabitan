@@ -68,4 +68,15 @@ describe('WebExtension', () => {
         await expect(webExtension.sendMessagePromise({action: 'noop'})).rejects.toThrow(/Could not establish connection/);
         expect(webExtension.unloaded).toBe(true);
     });
+
+    test('sendMessagePromise rejects immediately when runtime unloads before callback returns', async () => {
+        const webExtension = new WebExtension();
+        globalThis.chrome.runtime.sendMessage = vi.fn((_message, _callback) => {});
+
+        const promise = webExtension.sendMessagePromise({action: 'noop'});
+        const expectation = expect(promise).rejects.toThrow(/Lost connection to the extension runtime/);
+        webExtension.triggerUnloaded();
+
+        await expectation;
+    });
 });

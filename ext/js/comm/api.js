@@ -56,6 +56,8 @@ export class API {
         this._backendReconnectPromise = null;
         /** @type {boolean} */
         this._runtimeConnectionsShutdown = false;
+        /** @type {Set<(error: Error) => void>} */
+        this._shutdownRejectors = new Set();
         this._setBackendPort(backendPort);
     }
 
@@ -86,6 +88,11 @@ export class API {
      */
     shutdownRuntimeConnections() {
         this._runtimeConnectionsShutdown = true;
+        const error = new Error('Runtime connections have been shut down. Refresh the page to reconnect.');
+        for (const reject of this._shutdownRejectors) {
+            reject(error);
+        }
+        this._shutdownRejectors.clear();
         this.setMediaDrawingWorker(null);
         this._backendReconnectPromise = null;
         this._setBackendPort(null);
@@ -557,12 +564,26 @@ export class API {
         }
         const channel = new MessageChannel();
         return new Promise((resolve, reject) => {
+            let settled = false;
+            const shutdownReject = (error) => {
+                if (settled) { return; }
+                settled = true;
+                this._shutdownRejectors.delete(shutdownReject);
+                globalThis.clearTimeout(timeoutId);
+                try {
+                    channel.port1.close();
+                } catch (_) {
+                    // Ignore close failures for torn-down import response channels.
+                }
+                reject(error);
+            };
+            this._shutdownRejectors.add(shutdownReject);
             const timeoutMs = 150_000;
             const timeoutId = globalThis.setTimeout(() => {
-                channel.port1.close();
-                reject(new Error(`Dictionary runtime import response timed out after ${String(timeoutMs)}ms`));
+                shutdownReject(new Error(`Dictionary runtime import response timed out after ${String(timeoutMs)}ms`));
             }, timeoutMs);
             channel.port1.onmessage = (event) => {
+                if (settled) { return; }
                 const eventData = /** @type {unknown} */ (event.data);
                 const data = (
                     typeof eventData === 'object' &&
@@ -574,6 +595,8 @@ export class API {
                         onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
                         return;
                     case 'complete':
+                        settled = true;
+                        this._shutdownRejectors.delete(shutdownReject);
                         globalThis.clearTimeout(timeoutId);
                         channel.port1.close();
                         if (
@@ -594,6 +617,8 @@ export class API {
                         resolve(data.result ?? null);
                         return;
                     case 'error':
+                        settled = true;
+                        this._shutdownRejectors.delete(shutdownReject);
                         globalThis.clearTimeout(timeoutId);
                         channel.port1.close();
                         reject(ExtensionError.deserialize(
@@ -605,20 +630,14 @@ export class API {
                 }
             };
             channel.port1.onmessageerror = () => {
-                globalThis.clearTimeout(timeoutId);
-                channel.port1.close();
-                reject(new Error('Dictionary runtime import response channel failed'));
+                shutdownReject(new Error('Dictionary runtime import response channel failed'));
             };
             try {
                 void this._pmInvoke('importDictionaryOffscreen', {archiveContent, details}, [channel.port2]).catch((error) => {
-                    globalThis.clearTimeout(timeoutId);
-                    channel.port1.close();
-                    reject(error);
+                    shutdownReject(error instanceof Error ? error : new Error(String(error)));
                 });
             } catch (error) {
-                globalThis.clearTimeout(timeoutId);
-                channel.port1.close();
-                reject(error);
+                shutdownReject(error instanceof Error ? error : new Error(String(error)));
             }
         });
     }
@@ -636,12 +655,26 @@ export class API {
         }
         const channel = new MessageChannel();
         return new Promise((resolve, reject) => {
+            let settled = false;
+            const shutdownReject = (error) => {
+                if (settled) { return; }
+                settled = true;
+                this._shutdownRejectors.delete(shutdownReject);
+                globalThis.clearTimeout(timeoutId);
+                try {
+                    channel.port1.close();
+                } catch (_) {
+                    // Ignore close failures for torn-down URL import response channels.
+                }
+                reject(error);
+            };
+            this._shutdownRejectors.add(shutdownReject);
             const timeoutMs = 150_000;
             const timeoutId = globalThis.setTimeout(() => {
-                channel.port1.close();
-                reject(new Error(`Dictionary runtime URL import response timed out after ${String(timeoutMs)}ms`));
+                shutdownReject(new Error(`Dictionary runtime URL import response timed out after ${String(timeoutMs)}ms`));
             }, timeoutMs);
             channel.port1.onmessage = (event) => {
+                if (settled) { return; }
                 const eventData = /** @type {unknown} */ (event.data);
                 const data = (
                     typeof eventData === 'object' &&
@@ -653,6 +686,8 @@ export class API {
                         onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
                         return;
                     case 'complete':
+                        settled = true;
+                        this._shutdownRejectors.delete(shutdownReject);
                         globalThis.clearTimeout(timeoutId);
                         channel.port1.close();
                         if (
@@ -673,6 +708,8 @@ export class API {
                         resolve(data.result ?? null);
                         return;
                     case 'error':
+                        settled = true;
+                        this._shutdownRejectors.delete(shutdownReject);
                         globalThis.clearTimeout(timeoutId);
                         channel.port1.close();
                         reject(ExtensionError.deserialize(
@@ -684,20 +721,14 @@ export class API {
                 }
             };
             channel.port1.onmessageerror = () => {
-                globalThis.clearTimeout(timeoutId);
-                channel.port1.close();
-                reject(new Error('Dictionary runtime URL import response channel failed'));
+                shutdownReject(new Error('Dictionary runtime URL import response channel failed'));
             };
             try {
                 void this._pmInvoke('importDictionaryUrlOffscreen', {url, details}, [channel.port2]).catch((error) => {
-                    globalThis.clearTimeout(timeoutId);
-                    channel.port1.close();
-                    reject(error);
+                    shutdownReject(error instanceof Error ? error : new Error(String(error)));
                 });
             } catch (error) {
-                globalThis.clearTimeout(timeoutId);
-                channel.port1.close();
-                reject(error);
+                shutdownReject(error instanceof Error ? error : new Error(String(error)));
             }
         });
     }
@@ -774,18 +805,21 @@ export class API {
         return new Promise((resolve, reject) => {
             let settled = false;
             let retriedTransientFailure = false;
-            const timeoutMs = this._getInvokeTimeoutMs(action);
-            const timeoutId = globalThis.setTimeout(() => {
+            const shutdownReject = (error) => {
                 if (settled) { return; }
                 settled = true;
-                reject(new Error(`Timed out waiting for backend response to ${String(action)} after ${String(timeoutMs)}ms. You may need to refresh the page.`));
+                this._shutdownRejectors.delete(shutdownReject);
+                globalThis.clearTimeout(timeoutId);
+                reject(error);
+            };
+            const timeoutMs = this._getInvokeTimeoutMs(action);
+            const timeoutId = globalThis.setTimeout(() => {
+                shutdownReject(new Error(`Timed out waiting for backend response to ${String(action)} after ${String(timeoutMs)}ms. You may need to refresh the page.`));
             }, timeoutMs);
+            this._shutdownRejectors.add(shutdownReject);
             const attemptSend = () => {
                 if (this._runtimeConnectionsShutdown) {
-                    if (settled) { return; }
-                    settled = true;
-                    globalThis.clearTimeout(timeoutId);
-                    reject(new Error('Runtime connections have been shut down. Refresh the page to reconnect.'));
+                    shutdownReject(new Error('Runtime connections have been shut down. Refresh the page to reconnect.'));
                     return;
                 }
                 try {
@@ -798,9 +832,7 @@ export class API {
                                 setTimeout(() => {
                                     if (settled) { return; }
                                     if (this._runtimeConnectionsShutdown) {
-                                        settled = true;
-                                        globalThis.clearTimeout(timeoutId);
-                                        reject(new Error('Runtime connections have been shut down. Refresh the page to reconnect.'));
+                                        shutdownReject(new Error('Runtime connections have been shut down. Refresh the page to reconnect.'));
                                         return;
                                     }
                                     attemptSend();
@@ -808,11 +840,13 @@ export class API {
                                 return;
                             }
                             settled = true;
+                            this._shutdownRejectors.delete(shutdownReject);
                             globalThis.clearTimeout(timeoutId);
                             reject(runtimeError);
                             return;
                         }
                         settled = true;
+                        this._shutdownRejectors.delete(shutdownReject);
                         globalThis.clearTimeout(timeoutId);
                         if (response !== null && typeof response === 'object') {
                             const {error} = /** @type {import('core').UnknownObject} */ (response);
@@ -830,6 +864,7 @@ export class API {
                 } catch (e) {
                     if (settled) { return; }
                     settled = true;
+                    this._shutdownRejectors.delete(shutdownReject);
                     globalThis.clearTimeout(timeoutId);
                     reject(e);
                 }
@@ -940,6 +975,8 @@ export class API {
                     throw new Error('Runtime connections have been shut down. Refresh the page to reconnect.');
                 }
                 let timeoutId = null;
+                /** @type {(error: Error) => void} */
+                let shutdownReject = () => {};
                 try {
                     const serviceWorkerRegistration = await Promise.race([
                         navigator.serviceWorker.ready,
@@ -947,6 +984,12 @@ export class API {
                             timeoutId = globalThis.setTimeout(() => {
                                 reject(new Error(`Timed out waiting for active service worker after ${String(pmTransportTimeoutMs)}ms`));
                             }, pmTransportTimeoutMs);
+                        }),
+                        new Promise((_, reject) => {
+                            shutdownReject = (error) => {
+                                reject(error);
+                            };
+                            this._shutdownRejectors.add(shutdownReject);
                         }),
                     ]);
                     if (serviceWorkerRegistration.active === null) {
@@ -969,6 +1012,7 @@ export class API {
                     }
                     await sleep(100);
                 } finally {
+                    this._shutdownRejectors.delete(shutdownReject);
                     if (timeoutId !== null) {
                         globalThis.clearTimeout(timeoutId);
                     }

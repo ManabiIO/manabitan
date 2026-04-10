@@ -333,6 +333,8 @@ export class DictionaryImportController {
             currentUrl: null,
             lastError: null,
         };
+        /** @type {number} */
+        this._activeImportRunGeneration = 0;
         /** @type {(event: MouseEvent) => void} */
         this._onDocumentClickCaptureBind = this._onDocumentClickCapture.bind(this);
         /** @type {(event: Event) => void} */
@@ -921,7 +923,16 @@ export class DictionaryImportController {
                 this._showErrors([e]);
             } finally {
                 if (typeof onDownloadDone === 'function') {
-                    onDownloadDone(file);
+                    try {
+                        onDownloadDone(file);
+                    } catch (error) {
+                        const callbackError = toError(error);
+                        reportDiagnostics('dictionary-import-download-callback-failed', {
+                            message: callbackError.message,
+                            hasFile: file instanceof File,
+                        });
+                        log.error(callbackError);
+                    }
                 }
             }
         })();
@@ -973,20 +984,15 @@ export class DictionaryImportController {
         /** @type {File[]} */
         const fileArray = [];
         for (const fileEntry of await this._getAllFileEntries(e.dataTransfer.items)) {
-            if (!fileEntry) { return; }
+            if (!fileEntry) { continue; }
             try {
                 fileArray.push(await new Promise((resolve, reject) => { fileEntry.file(resolve, reject); }));
             } catch (error) {
                 log.error(error);
             }
         }
-        const importProgressTracker = new ImportProgressTracker(this._getFileImportSteps(), fileArray.length);
-        void this._importDictionaries(
-            this._arrayToAsyncGenerator(fileArray),
-            null,
-            null,
-            importProgressTracker,
-        );
+        if (fileArray.length === 0) { return; }
+        void this.importFiles(fileArray, null, null);
     }
 
     /**
@@ -1088,12 +1094,7 @@ export class DictionaryImportController {
         if (files === null) { return; }
         const files2 = [...files];
         node.value = '';
-        void this._importDictionaries(
-            this._arrayToAsyncGenerator(files2),
-            null,
-            null,
-            new ImportProgressTracker(this._getFileImportSteps(), files2.length),
-        );
+        void this.importFiles(files2, null, null);
     }
 
     /** */
@@ -1114,7 +1115,11 @@ export class DictionaryImportController {
         onImportDone,
         /** @type {Partial<import('dictionary-importer').ImportDetails>|null} */ importDetailsOverrides = null,
     ) {
-        const urls = text.split('\n');
+        const urls = text
+            .split('\n')
+            .map((url) => url.trim())
+            .filter((url) => url.length > 0);
+        if (urls.length === 0) { return; }
 
         const importProgressTracker = new ImportProgressTracker(this._getUrlImportSteps(), urls.length);
         const onProgress = importProgressTracker.onProgress.bind(importProgressTracker);
@@ -1141,6 +1146,7 @@ export class DictionaryImportController {
         onImportDone,
         /** @type {Partial<import('dictionary-importer').ImportDetails>|null} */ importDetailsOverrides = null,
     ) {
+        if (files.length === 0) { return; }
         const importProgressTracker = new ImportProgressTracker(this._getFileImportSteps(), files.length);
         await this._runImportWithWatchdog(
             this._importDictionaries(
@@ -1183,9 +1189,11 @@ export class DictionaryImportController {
      * @returns {void}
      */
     _forceRecoverHungImportSession(error, label) {
+        this._activeImportRunGeneration += 1;
         reportDiagnostics('dictionary-import-watchdog-recovery', {
             label,
             message: error.message,
+            activeImportRunGeneration: this._activeImportRunGeneration,
         });
         log.error(error);
         this._setRecommendedError(this._errorToString(error));
@@ -1221,6 +1229,14 @@ export class DictionaryImportController {
             log.error(normalizedImportModeError);
         });
         this._triggerStorageChanged();
+    }
+
+    /**
+     * @param {number} importRunGeneration
+     * @returns {boolean}
+     */
+    _isImportRunCurrent(importRunGeneration) {
+        return this._activeImportRunGeneration === importRunGeneration;
     }
 
     /**
@@ -1498,6 +1514,7 @@ export class DictionaryImportController {
         /** @type {Partial<import('dictionary-importer').ImportDetails>|null} */ importDetailsOverrides = null,
     ) {
         if (this._modifying) { return; }
+        const importRunGeneration = ++this._activeImportRunGeneration;
 
         const statusFooter = this._statusFooter;
         const progressSelector = '.dictionary-import-progress';
@@ -1519,6 +1536,7 @@ export class DictionaryImportController {
             dictionaryCount: importProgressTracker.dictionaryCount,
             useImportSession,
             hasProfilesDictionarySettings: profilesDictionarySettings !== null,
+            importRunGeneration,
         });
         let importModeEnabled = false;
         const importStartTime = safePerformance.now();
@@ -1594,6 +1612,7 @@ export class DictionaryImportController {
                         importDetails,
                         useImportSession,
                         finalizeImportSession,
+                        importRunGeneration,
                         onProgress,
                     ) :
                     await this._importDictionaryFromZip(
@@ -1602,6 +1621,7 @@ export class DictionaryImportController {
                         importDetails,
                         useImportSession,
                         finalizeImportSession,
+                        importRunGeneration,
                         onProgress,
                     );
                 errors = [...errors, ...importItemResult.errors];
@@ -1634,29 +1654,50 @@ export class DictionaryImportController {
                 elapsedMs: Math.max(0, importEndTime - importStartTime),
                 errorCount: errors.length,
                 memory: getImportMemorySnapshot(),
+                importRunGeneration,
+                importRunCurrent: this._isImportRunCurrent(importRunGeneration),
             });
-            this._showErrors(errors);
             prevention.end();
-            for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = true; }
-            if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, false); }
-            this._setModifying(false);
-            if (importModeEnabled) {
-                try {
-                    await this._settingsController.application.api.setDictionaryImportMode(false);
-                } catch (error) {
-                    const importModeExitError = toError(error);
-                    errors.push(importModeExitError);
-                    reportDiagnostics('dictionary-import-session-import-mode-exit-failed', {
-                        message: importModeExitError.message,
-                    });
+            if (this._isImportRunCurrent(importRunGeneration)) {
+                for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = true; }
+                if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, false); }
+                this._setModifying(false);
+                if (importModeEnabled) {
+                    try {
+                        await this._settingsController.application.api.setDictionaryImportMode(false);
+                    } catch (error) {
+                        const importModeExitError = toError(error);
+                        errors.push(importModeExitError);
+                        reportDiagnostics('dictionary-import-session-import-mode-exit-failed', {
+                            message: importModeExitError.message,
+                            importRunGeneration,
+                        });
+                    }
                 }
-            }
-            this._triggerStorageChanged();
-            if (onImportDone) {
-                onImportDone({
-                    ok: errors.length === 0,
-                    errors,
-                    importedTitles: [...new Set(importedTitles)],
+                this._showErrors(errors);
+                this._triggerStorageChanged();
+                if (onImportDone) {
+                    try {
+                        onImportDone({
+                            ok: errors.length === 0,
+                            errors,
+                            importedTitles: [...new Set(importedTitles)],
+                        });
+                    } catch (error) {
+                        const callbackError = toError(error);
+                        reportDiagnostics('dictionary-import-session-callback-failed', {
+                            message: callbackError.message,
+                            importRunGeneration,
+                        });
+                        log.error(callbackError);
+                    }
+                }
+            } else {
+                reportDiagnostics('dictionary-import-session-complete-stale', {
+                    dictionaryCount: importProgressTracker.dictionaryCount,
+                    errorCount: errors.length,
+                    importRunGeneration,
+                    activeImportRunGeneration: this._activeImportRunGeneration,
                 });
             }
         }
@@ -1850,10 +1891,11 @@ export class DictionaryImportController {
      * @param {import('dictionary-importer').ImportDetails} importDetails
      * @param {boolean} useImportSession
      * @param {boolean} finalizeImportSession
+     * @param {number} importRunGeneration
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
      * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
-    async _importDictionaryFromZip(file, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, onProgress) {
+    async _importDictionaryFromZip(file, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress) {
         const dictionaryTitle = file.name || 'unknown-dictionary';
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
@@ -1912,6 +1954,7 @@ export class DictionaryImportController {
             workerImportEndTime,
             useImportSession,
             finalizeImportSession,
+            importRunGeneration,
             profilesDictionarySettings,
             localPhaseTimings,
         });
@@ -1923,10 +1966,11 @@ export class DictionaryImportController {
      * @param {import('dictionary-importer').ImportDetails} importDetails
      * @param {boolean} useImportSession
      * @param {boolean} finalizeImportSession
+     * @param {number} importRunGeneration
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
      * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
-    async _importDictionaryFromUrl(downloadUrl, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, onProgress) {
+    async _importDictionaryFromUrl(downloadUrl, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress) {
         const dictionaryTitle = downloadUrl;
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
@@ -1963,6 +2007,7 @@ export class DictionaryImportController {
             workerImportEndTime,
             useImportSession,
             finalizeImportSession,
+            importRunGeneration,
             profilesDictionarySettings,
             localPhaseTimings,
         });
@@ -1978,6 +2023,7 @@ export class DictionaryImportController {
      *   workerImportEndTime: number,
      *   useImportSession: boolean,
      *   finalizeImportSession: boolean,
+     *   importRunGeneration: number,
      *   profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings,
      *   localPhaseTimings: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>
      * }} context
@@ -1992,6 +2038,7 @@ export class DictionaryImportController {
         workerImportEndTime,
         useImportSession,
         finalizeImportSession,
+        importRunGeneration,
         profilesDictionarySettings,
         localPhaseTimings,
     }) {
@@ -2006,6 +2053,24 @@ export class DictionaryImportController {
             const elapsedMs = Math.max(0, endTime - startTime);
             localPhaseTimings.push({phase, elapsedMs, details});
             log.log(`[ImportTiming] [${dictionaryTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
+        };
+        /**
+         * @param {string} phase
+         * @returns {{errors: Error[], importedTitle: string|null}|null}
+         */
+        const getStaleImportResult = (phase) => {
+            if (this._isImportRunCurrent(importRunGeneration)) { return null; }
+            reportDiagnostics('dictionary-import-stale-completion-ignored', {
+                dictionaryTitle,
+                resultTitle: result?.title || null,
+                importRunGeneration,
+                activeImportRunGeneration: this._activeImportRunGeneration,
+                phase,
+            });
+            return {
+                errors: [...errors, new Error(`Ignored stale import completion for ${dictionaryTitle}`)],
+                importedTitle: null,
+            };
         };
 
         const {result, errors, debug} = importResult;
@@ -2072,6 +2137,9 @@ export class DictionaryImportController {
             return {errors: errorsWithOpfsRequirement, importedTitle: null};
         }
 
+        const staleImportResult = getStaleImportResult('before-page-side-finalization');
+        if (staleImportResult !== null) { return staleImportResult; }
+
         const replacementDictionaryTitle = (
             typeof importDetails.replacementDictionaryTitle === 'string' &&
             importDetails.replacementDictionaryTitle.trim().length > 0
@@ -2123,6 +2191,8 @@ export class DictionaryImportController {
                 },
             });
         }
+        const staleAfterReplaceResult = getStaleImportResult('before-add-dictionary-settings');
+        if (staleAfterReplaceResult !== null) { return staleAfterReplaceResult; }
 
         const shouldAddDictionarySettings = (
             replacementDictionaryTitle === null ||
@@ -2144,6 +2214,8 @@ export class DictionaryImportController {
                 removedDictionaryTitle: replacementDictionaryTitle,
             });
         }
+        const staleAfterSettingsResult = getStaleImportResult('before-trigger-database-updated');
+        if (staleAfterSettingsResult !== null) { return staleAfterSettingsResult; }
         this._recordImportDebugSnapshot({
             dictionaryTitle,
             hasResult: true,
@@ -2192,14 +2264,22 @@ export class DictionaryImportController {
 
         // Only runs if updating a dictionary
         if (profilesDictionarySettings !== null && shouldAddDictionarySettings) {
+            const staleBeforeProfileUpdateResult = getStaleImportResult('before-update-profile-dictionary-references');
+            if (staleBeforeProfileUpdateResult !== null) { return staleBeforeProfileUpdateResult; }
             const profileUpdateStartTime = safePerformance.now();
             const options = await this._settingsController.getOptionsFull();
             const {profiles} = options;
+            let skippedProfileCount = 0;
 
             for (const profile of profiles) {
+                const profileDictionarySetting = profilesDictionarySettings[profile.id];
+                if (!(profileDictionarySetting && typeof profileDictionarySetting.name === 'string' && profileDictionarySetting.name.length > 0)) {
+                    skippedProfileCount += 1;
+                    continue;
+                }
                 for (const cardFormat of profile.options.anki.cardFormats) {
                     const ankiTermFields = cardFormat.fields;
-                    const oldFieldSegmentRegex = new RegExp(getKebabCase(profilesDictionarySettings[profile.id].name), 'g');
+                    const oldFieldSegmentRegex = new RegExp(getKebabCase(profileDictionarySetting.name), 'g');
                     const newFieldSegment = getKebabCase(result.title);
                     for (const key of Object.keys(ankiTermFields)) {
                         ankiTermFields[key].value = ankiTermFields[key].value.replace(oldFieldSegmentRegex, newFieldSegment);
@@ -2209,7 +2289,9 @@ export class DictionaryImportController {
             await this._settingsController.setAllSettings(options);
             const profileUpdateEndTime = safePerformance.now();
             log.log(`[ImportTiming] [${dictionaryTitle}] update profile dictionary references ${formatDurationMs(profileUpdateEndTime - profileUpdateStartTime)}`);
-            recordLocalPhase('update-profile-dictionary-references', profileUpdateStartTime, profileUpdateEndTime);
+            recordLocalPhase('update-profile-dictionary-references', profileUpdateStartTime, profileUpdateEndTime, {
+                skippedProfileCount,
+            });
         }
 
         const importEndTime = safePerformance.now();
@@ -2411,6 +2493,10 @@ export class DictionaryImportController {
      * @param {Error[]} errors
      */
     _showErrors(errors) {
+        if (errors.length === 0) {
+            this._hideErrors();
+            return;
+        }
         reportDiagnostics('dictionary-import-errors-shown', {
             errorCount: errors.length,
             messages: errors.slice(0, 5).map((error) => this._errorToString(error)),

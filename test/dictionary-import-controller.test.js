@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {afterAll, describe, expect, test} from 'vitest';
+import {afterAll, describe, expect, test, vi} from 'vitest';
 import {DictionaryImportController, ImportProgressTracker} from '../ext/js/pages/settings/dictionary-import-controller.js';
 import {setupDomTest} from './fixtures/dom-test.js';
 
@@ -41,6 +41,19 @@ function setupProgressDom(document) {
         throw new Error('Expected progress info element');
     }
     return info;
+}
+
+/**
+ * @param {Document} document
+ * @returns {HTMLElement}
+ */
+function setupErrorDom(document) {
+    document.body.innerHTML = '<div id="dictionary-error" hidden></div>';
+    const errorContainer = document.querySelector('#dictionary-error');
+    if (!(errorContainer instanceof HTMLElement)) {
+        throw new Error('Expected dictionary error element');
+    }
+    return errorContainer;
 }
 
 /**
@@ -120,5 +133,492 @@ describe('Dictionary import progress steps', () => {
 
         tracker.onProgress({nextStep: true, index: 0, count: 0});
         expect(infoLabel.textContent).toBe('Importing dictionary - Step 5 of 5: Finalizing import...');
+    });
+});
+
+describe('Dictionary import stale-run fencing', () => {
+    test('stale finalized imports do not perform page-side mutations', async () => {
+        const finalizeImportedDictionaryResult = /** @type {(this: DictionaryImportController, context: Record<string, unknown>) => Promise<{errors: Error[], importedTitle: string|null}>} */ (
+            getDictionaryImportControllerMethod('_finalizeImportedDictionaryResult')
+        );
+        const addDictionarySettings = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue([]));
+        const triggerDatabaseUpdated = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+        const verifyImportedDictionaryVisible = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+        const recordImportDebugSnapshot = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn());
+
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _activeImportRunGeneration: 2,
+            _isImportRunCurrent(importRunGeneration) {
+                return importRunGeneration === this._activeImportRunGeneration;
+            },
+            _addDictionarySettings: addDictionarySettings,
+            _verifyImportedDictionaryVisible: verifyImportedDictionaryVisible,
+            _recordImportDebugSnapshot: recordImportDebugSnapshot,
+            _settingsController: {
+                application: {
+                    api: {
+                        triggerDatabaseUpdated,
+                    },
+                },
+            },
+        }));
+
+        const result = await finalizeImportedDictionaryResult.call(controller, {
+            dictionaryTitle: 'JMdict',
+            importStartTime: 0,
+            importDetails: /** @type {import('dictionary-importer').ImportDetails} */ ({replacementDictionaryTitle: null}),
+            importResult: {
+                result: /** @type {import('dictionary-importer').Summary} */ ({title: 'JMdict'}),
+                errors: [],
+                debug: {},
+            },
+            workerImportStartTime: 0,
+            workerImportEndTime: 0,
+            useImportSession: false,
+            finalizeImportSession: true,
+            importRunGeneration: 1,
+            profilesDictionarySettings: null,
+            localPhaseTimings: [],
+        });
+
+        expect(result.importedTitle).toBeNull();
+        expect(addDictionarySettings).not.toHaveBeenCalled();
+        expect(triggerDatabaseUpdated).not.toHaveBeenCalled();
+        expect(verifyImportedDictionaryVisible).not.toHaveBeenCalled();
+        expect(recordImportDebugSnapshot).not.toHaveBeenCalled();
+        expect(result.errors.map((error) => error.message)).toContain('Ignored stale import completion for JMdict');
+    });
+
+    test('profile reference rewrite skips profiles without carried-over dictionary settings', async () => {
+        const finalizeImportedDictionaryResult = /** @type {(this: DictionaryImportController, context: Record<string, unknown>) => Promise<{errors: Error[], importedTitle: string|null}>} */ (
+            getDictionaryImportControllerMethod('_finalizeImportedDictionaryResult')
+        );
+        const setAllSettings = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+        const triggerDatabaseUpdated = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+        const verifyImportedDictionaryVisible = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+        const removeDictionarySettingsByName = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+
+        const options = {
+            profiles: [
+                {
+                    id: 'profile-1',
+                    options: {
+                        anki: {
+                            cardFormats: [
+                                {fields: {glossary: {value: 'old-dictionary glossary'}}},
+                            ],
+                        },
+                    },
+                },
+                {
+                    id: 'profile-2',
+                    options: {
+                        anki: {
+                            cardFormats: [
+                                {fields: {glossary: {value: 'should stay old-dictionary glossary'}}},
+                            ],
+                        },
+                    },
+                },
+            ],
+        };
+
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _activeImportRunGeneration: 1,
+            _isImportRunCurrent(importRunGeneration) {
+                return importRunGeneration === this._activeImportRunGeneration;
+            },
+            _addDictionarySettings: vi.fn().mockResolvedValue([]),
+            _removeDictionarySettingsByName: removeDictionarySettingsByName,
+            _verifyImportedDictionaryVisible: verifyImportedDictionaryVisible,
+            _recordImportDebugSnapshot: vi.fn(),
+            _settingsController: {
+                getOptionsFull: vi.fn().mockResolvedValue(options),
+                setAllSettings,
+                application: {
+                    api: {
+                        triggerDatabaseUpdated,
+                    },
+                },
+            },
+        }));
+
+        const result = await finalizeImportedDictionaryResult.call(controller, {
+            dictionaryTitle: 'JMdict',
+            importStartTime: 0,
+            importDetails: /** @type {import('dictionary-importer').ImportDetails} */ ({replacementDictionaryTitle: 'Old Dictionary'}),
+            importResult: {
+                result: /** @type {import('dictionary-importer').Summary} */ ({
+                    title: 'New Dictionary',
+                    sourceTitle: 'New Dictionary',
+                }),
+                errors: [],
+                debug: {},
+            },
+            workerImportStartTime: 0,
+            workerImportEndTime: 0,
+            useImportSession: false,
+            finalizeImportSession: true,
+            importRunGeneration: 1,
+            profilesDictionarySettings: {
+                'profile-1': {name: 'Old Dictionary'},
+            },
+            localPhaseTimings: [],
+        });
+
+        expect(result.errors).toHaveLength(0);
+        expect(result.importedTitle).toBe('New Dictionary');
+        expect(triggerDatabaseUpdated).toHaveBeenCalledOnce();
+        expect(verifyImportedDictionaryVisible).toHaveBeenCalledOnce();
+        expect(removeDictionarySettingsByName).toHaveBeenCalledOnce();
+        expect(setAllSettings).toHaveBeenCalledOnce();
+        expect(options.profiles[0].options.anki.cardFormats[0].fields.glossary.value).toContain('new-dictionary');
+        expect(options.profiles[1].options.anki.cardFormats[0].fields.glossary.value).toBe('should stay old-dictionary glossary');
+    });
+
+    test('import session ignores onImportDone callback errors after cleanup', async () => {
+        const importDictionaries = /** @type {(this: DictionaryImportController, ...args: unknown[]) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_importDictionaries')
+        );
+        const triggerStorageChanged = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn());
+        const setDictionaryImportMode = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+        const setModifying = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn());
+
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _activeImportRunGeneration: 0,
+            _modifying: false,
+            _statusFooter: null,
+            _isImportRunCurrent(importRunGeneration) {
+                return importRunGeneration === this._activeImportRunGeneration;
+            },
+            _setModifying: setModifying,
+            _hideErrors: vi.fn(),
+            _showErrors: vi.fn(),
+            _triggerStorageChanged: triggerStorageChanged,
+            _preventPageExit: () => ({end() {}}),
+            _getUseImportSession: () => false,
+            _getImportPerformanceFlags: () => ({
+                skipImageMetadata: false,
+                mediaResolutionConcurrency: 4,
+                debugImportLogging: false,
+                enableTermEntryContentDedup: true,
+                termContentStorageMode: 'inline',
+            }),
+            _settingsController: {
+                getOptionsFull: vi.fn().mockResolvedValue({global: {database: {prefixWildcardsSupported: false}}}),
+                application: {
+                    api: {
+                        setDictionaryImportMode,
+                    },
+                },
+            },
+            _importDictionaryFromZip: vi.fn().mockResolvedValue({errors: [], importedTitle: 'JMdict'}),
+        }));
+
+        await expect(importDictionaries.call(
+            controller,
+            (async function* () {
+                yield new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
+            })(),
+            null,
+            () => {
+                throw new Error('import callback failed');
+            },
+            {dictionaryCount: 1, onProgress() {}, onNextDictionary() {}, onImportComplete() {}, getStepTimingHistory() { return []; }},
+            null,
+        )).resolves.toBeUndefined();
+
+        expect(triggerStorageChanged).toHaveBeenCalledOnce();
+        expect(setDictionaryImportMode).toHaveBeenCalledTimes(2);
+        expect(setModifying).toHaveBeenCalledWith(true);
+        expect(setModifying).toHaveBeenCalledWith(false);
+    });
+
+    test('import mode exit failure is surfaced before completion callback', async () => {
+        const importDictionaries = /** @type {(this: DictionaryImportController, ...args: unknown[]) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_importDictionaries')
+        );
+        const showErrors = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn());
+        const onImportDone = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn());
+        const setDictionaryImportMode = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn()
+            .mockResolvedValueOnce(void 0)
+            .mockRejectedValueOnce(new Error('import mode exit failed')));
+
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _activeImportRunGeneration: 0,
+            _modifying: false,
+            _statusFooter: null,
+            _isImportRunCurrent(importRunGeneration) {
+                return importRunGeneration === this._activeImportRunGeneration;
+            },
+            _setModifying: vi.fn(),
+            _hideErrors: vi.fn(),
+            _showErrors: showErrors,
+            _triggerStorageChanged: vi.fn(),
+            _preventPageExit: () => ({end() {}}),
+            _getUseImportSession: () => false,
+            _getImportPerformanceFlags: () => ({
+                skipImageMetadata: false,
+                mediaResolutionConcurrency: 4,
+                debugImportLogging: false,
+                enableTermEntryContentDedup: true,
+                termContentStorageMode: 'inline',
+            }),
+            _settingsController: {
+                getOptionsFull: vi.fn().mockResolvedValue({global: {database: {prefixWildcardsSupported: false}}}),
+                application: {
+                    api: {
+                        setDictionaryImportMode,
+                    },
+                },
+            },
+            _importDictionaryFromZip: vi.fn().mockResolvedValue({errors: [], importedTitle: 'JMdict'}),
+        }));
+
+        await importDictionaries.call(
+            controller,
+            (async function* () {
+                yield new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
+            })(),
+            null,
+            onImportDone,
+            {dictionaryCount: 1, onProgress() {}, onNextDictionary() {}, onImportComplete() {}, getStepTimingHistory() { return []; }},
+            null,
+        );
+
+        expect(showErrors).toHaveBeenCalledOnce();
+        const shownErrors = showErrors.mock.calls[0][0];
+        expect(shownErrors.map((error) => error.message)).toContain('import mode exit failed');
+        expect(onImportDone).toHaveBeenCalledOnce();
+        expect(onImportDone.mock.calls[0][0].ok).toBe(false);
+        expect(onImportDone.mock.calls[0][0].errors.map((error) => error.message)).toContain('import mode exit failed');
+    });
+
+    test('download callback errors do not escape the controller', async () => {
+        const onEventDownloadDictionaryFromUrl = /** @type {(this: DictionaryImportController, details: Record<string, unknown>) => void} */ (
+            getDictionaryImportControllerMethod('_onEventDownloadDictionaryFromUrl')
+        );
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            downloadDictionaryFileFromURL: vi.fn().mockResolvedValue(new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'})),
+            _showErrors: vi.fn(),
+        }));
+
+        onEventDownloadDictionaryFromUrl.call(controller, {
+            url: 'https://example.com/JMdict.zip',
+            onDownloadDone() {
+                throw new Error('download callback failed');
+            },
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(controller.downloadDictionaryFileFromURL).toHaveBeenCalledOnce();
+    });
+});
+
+describe('Dictionary import error rendering', () => {
+    const {window} = testEnv;
+
+    test('showErrors keeps the container hidden when there are no errors', () => {
+        const showErrors = /** @type {(this: DictionaryImportController, errors: Error[]) => void} */ (
+            getDictionaryImportControllerMethod('_showErrors')
+        );
+        const hideErrors = /** @type {(this: DictionaryImportController) => void} */ (
+            getDictionaryImportControllerMethod('_hideErrors')
+        );
+        const errorContainer = setupErrorDom(window.document);
+        errorContainer.textContent = 'stale error';
+        errorContainer.hidden = false;
+
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _errorContainer: errorContainer,
+            _hideErrors: hideErrors,
+        }));
+
+        showErrors.call(controller, []);
+
+        expect(errorContainer.hidden).toBe(true);
+        expect(errorContainer.textContent).toBe('');
+    });
+});
+
+describe('Dictionary import entrypoints', () => {
+    const {window} = testEnv;
+    const importFilesFromURLs = /** @type {(this: DictionaryImportController, text: string, profilesDictionarySettings: unknown, onImportDone: unknown, importDetailsOverrides?: Partial<import('dictionary-importer').ImportDetails>|null) => Promise<void>} */ (
+        getDictionaryImportControllerMethod('importFilesFromURLs')
+    );
+
+    test('file input change delegates to importFiles so the watchdog path is used', async () => {
+        const onImportFileChange = /** @type {(this: DictionaryImportController, e: Event) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_onImportFileChange')
+        );
+        const importFiles = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            importFiles,
+            _importModal: {setVisible: vi.fn()},
+        }));
+        const input = window.document.createElement('input');
+        const file = new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
+        Object.defineProperty(input, 'files', {
+            configurable: true,
+            value: [file],
+        });
+        input.value = 'fake-value';
+
+        await onImportFileChange.call(controller, /** @type {unknown} */ ({currentTarget: input}));
+
+        expect(importFiles).toHaveBeenCalledOnce();
+        expect(importFiles).toHaveBeenCalledWith([file], null, null);
+        expect(input.value).toBe('');
+    });
+
+    test('file input change does not start an import when no files were selected', async () => {
+        const onImportFileChange = /** @type {(this: DictionaryImportController, e: Event) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_onImportFileChange')
+        );
+        const importFiles = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            importFiles,
+            _importModal: {setVisible: vi.fn()},
+        }));
+        const input = window.document.createElement('input');
+        Object.defineProperty(input, 'files', {
+            configurable: true,
+            value: [],
+        });
+        input.value = 'fake-value';
+
+        await onImportFileChange.call(controller, /** @type {unknown} */ ({currentTarget: input}));
+
+        expect(importFiles).toHaveBeenCalledOnce();
+        expect(importFiles).toHaveBeenCalledWith([], null, null);
+        expect(input.value).toBe('');
+    });
+
+    test('URL import trims blank lines before starting import', async () => {
+        const importDictionaries = vi.fn().mockResolvedValue(void 0);
+        const getUrlImportSources = vi.fn((urls) => urls);
+        const runImportWithWatchdog = vi.fn(async (promise) => await promise);
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _getUrlImportSteps: () => getUrlImportSteps(),
+            _getUrlImportSources: getUrlImportSources,
+            _importDictionaries: importDictionaries,
+            _runImportWithWatchdog: runImportWithWatchdog,
+        }));
+
+        await importFilesFromURLs.call(controller, ' https://example.com/a.zip \n\n  \nhttps://example.com/b.zip  ', null, null);
+
+        expect(importDictionaries).toHaveBeenCalledOnce();
+        expect(getUrlImportSources).toHaveBeenCalledWith(
+            ['https://example.com/a.zip', 'https://example.com/b.zip'],
+            expect.any(Function),
+        );
+        expect(runImportWithWatchdog).toHaveBeenCalledOnce();
+    });
+
+    test('URL import ignores whitespace-only input after normalization', async () => {
+        const importDictionaries = vi.fn();
+        const runImportWithWatchdog = vi.fn();
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _getUrlImportSteps: () => getUrlImportSteps(),
+            _getUrlImportSources: vi.fn(),
+            _importDictionaries: importDictionaries,
+            _runImportWithWatchdog: runImportWithWatchdog,
+        }));
+
+        await importFilesFromURLs.call(controller, ' \n \n ', null, null);
+
+        expect(importDictionaries).not.toHaveBeenCalled();
+        expect(runImportWithWatchdog).not.toHaveBeenCalled();
+    });
+
+    test('file import ignores an empty file list after normalization', async () => {
+        const importDictionaries = vi.fn();
+        const runImportWithWatchdog = vi.fn();
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _getFileImportSteps: () => getFileImportSteps(),
+            _arrayToAsyncGenerator: vi.fn(),
+            _importDictionaries: importDictionaries,
+            _runImportWithWatchdog: runImportWithWatchdog,
+        }));
+        const importFiles = /** @type {(this: DictionaryImportController, files: File[], profilesDictionarySettings: unknown, onImportDone: unknown, importDetailsOverrides?: Partial<import('dictionary-importer').ImportDetails>|null) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('importFiles')
+        );
+
+        await importFiles.call(controller, [], null, null);
+
+        expect(importDictionaries).not.toHaveBeenCalled();
+        expect(runImportWithWatchdog).not.toHaveBeenCalled();
+    });
+
+    test('file drop delegates to importFiles so the watchdog path is used', async () => {
+        const onFileDrop = /** @type {(this: DictionaryImportController, e: DragEvent) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_onFileDrop')
+        );
+        const importFiles = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+        const file = new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
+        const fileEntry = {
+            file(resolve) { resolve(file); },
+        };
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            importFiles,
+            _importModal: {setVisible: vi.fn()},
+            _importFileDrop: {classList: {remove: vi.fn()}},
+            _getAllFileEntries: vi.fn().mockResolvedValue([fileEntry]),
+        }));
+        const preventDefault = vi.fn();
+
+        await onFileDrop.call(controller, /** @type {unknown} */ ({
+            preventDefault,
+            dataTransfer: {items: {}},
+        }));
+
+        expect(preventDefault).toHaveBeenCalledOnce();
+        expect(importFiles).toHaveBeenCalledOnce();
+        expect(importFiles).toHaveBeenCalledWith([file], null, null);
+    });
+
+    test('file drop skips null entries and still imports valid files', async () => {
+        const onFileDrop = /** @type {(this: DictionaryImportController, e: DragEvent) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_onFileDrop')
+        );
+        const importFiles = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+        const file = new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
+        const fileEntry = {
+            file(resolve) { resolve(file); },
+        };
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            importFiles,
+            _importModal: {setVisible: vi.fn()},
+            _importFileDrop: {classList: {remove: vi.fn()}},
+            _getAllFileEntries: vi.fn().mockResolvedValue([null, fileEntry]),
+        }));
+
+        await onFileDrop.call(controller, /** @type {unknown} */ ({
+            preventDefault() {},
+            dataTransfer: {items: {}},
+        }));
+
+        expect(importFiles).toHaveBeenCalledOnce();
+        expect(importFiles).toHaveBeenCalledWith([file], null, null);
+    });
+
+    test('file drop does not start an empty import when no valid files were extracted', async () => {
+        const onFileDrop = /** @type {(this: DictionaryImportController, e: DragEvent) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_onFileDrop')
+        );
+        const importFiles = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            importFiles,
+            _importModal: {setVisible: vi.fn()},
+            _importFileDrop: {classList: {remove: vi.fn()}},
+            _getAllFileEntries: vi.fn().mockResolvedValue([null]),
+        }));
+
+        await onFileDrop.call(controller, /** @type {unknown} */ ({
+            preventDefault() {},
+            dataTransfer: {items: {}},
+        }));
+
+        expect(importFiles).not.toHaveBeenCalled();
     });
 });

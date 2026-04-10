@@ -84,16 +84,27 @@ export class WebExtension extends EventDispatcher {
     sendMessagePromise(message) {
         return new Promise((resolve, reject) => {
             let settled = false;
+            /** @type {() => void} */
+            const onUnloaded = () => {
+                if (settled) { return; }
+                settled = true;
+                globalThis.clearTimeout(timeoutId);
+                this.off('unloaded', onUnloaded);
+                reject(new Error('Lost connection to the extension runtime. Refresh this page to reconnect.'));
+            };
             const timeoutId = globalThis.setTimeout(() => {
                 if (settled) { return; }
                 settled = true;
+                this.off('unloaded', onUnloaded);
                 reject(new Error(`Timed out waiting for extension response after ${String(extensionMessageTimeoutMs)}ms.`));
             }, extensionMessageTimeoutMs);
+            this.on('unloaded', onUnloaded);
             try {
                 this.sendMessage(message, (response) => {
                     if (settled) { return; }
                     settled = true;
                     globalThis.clearTimeout(timeoutId);
+                    this.off('unloaded', onUnloaded);
                     const error = this.getLastError();
                     if (error !== null) {
                         reject(error);
@@ -105,6 +116,7 @@ export class WebExtension extends EventDispatcher {
                 if (settled) { return; }
                 settled = true;
                 globalThis.clearTimeout(timeoutId);
+                this.off('unloaded', onUnloaded);
                 reject(error);
             }
         });
