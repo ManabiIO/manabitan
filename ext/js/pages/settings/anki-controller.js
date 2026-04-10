@@ -919,7 +919,9 @@ class AnkiCardController {
      */
     _onCardDeckChange(e) {
         const node = /** @type {HTMLSelectElement} */ (e.currentTarget);
-        void this._setDeck(node.value);
+        void this._setDeck(node.value).catch((error) => {
+            log.error(error);
+        });
     }
 
     /**
@@ -927,7 +929,9 @@ class AnkiCardController {
      */
     _onCardModelChange(e) {
         const node = /** @type {HTMLSelectElement} */ (e.currentTarget);
-        void this._setModel(node.value);
+        void this._setModel(node.value).catch((error) => {
+            log.error(error);
+        });
     }
 
     /**
@@ -1138,13 +1142,19 @@ class AnkiCardController {
      */
     async _setDeck(value) {
         if (this._deckController.value === value) { return; }
+        const previousValue = this._deckController.value;
         this._deckController.value = value;
 
-        await this._settingsController.modifyProfileSettings([{
-            action: 'set',
-            path: ObjectPropertyAccessor.getPathString(['anki', 'cardFormats', this._cardFormatIndex, 'deck']),
-            value,
-        }]);
+        try {
+            await this._settingsController.modifyProfileSettings([{
+                action: 'set',
+                path: ObjectPropertyAccessor.getPathString(['anki', 'cardFormats', this._cardFormatIndex, 'deck']),
+                value,
+            }]);
+        } catch (error) {
+            this._deckController.value = previousValue;
+            throw error;
+        }
     }
 
     /**
@@ -1158,6 +1168,8 @@ class AnkiCardController {
             return;
         }
         if (this._modelController.value === value) { return; }
+        const previousModel = this._modelController.value;
+        const previousFields = this._fields;
 
         let fieldNames;
         let options;
@@ -1215,7 +1227,13 @@ class AnkiCardController {
         this._modelController.value = value;
         this._fields = fields;
 
-        await this._settingsController.modifyProfileSettings(targets);
+        try {
+            await this._settingsController.modifyProfileSettings(targets);
+        } catch (error) {
+            this._modelController.value = previousModel;
+            this._fields = previousFields;
+            throw error;
+        }
 
         this._setupFields();
     }

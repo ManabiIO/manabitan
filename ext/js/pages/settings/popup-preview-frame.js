@@ -20,6 +20,7 @@ import {Frontend} from '../../app/frontend.js';
 import {ThemeController} from '../../app/theme-controller.js';
 import {createApiMap, invokeApiMapHandler} from '../../core/api-map.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {TextSourceRange} from '../../dom/text-source-range.js';
 import {isComposing} from '../../language/ime-utilities.js';
@@ -94,7 +95,9 @@ export class PopupPreviewFrame {
 
         this._languageSummaries = await this._application.api.getLanguageSummaries();
         const options = await this._application.api.optionsGet({current: true});
-        void this._setLanguageExampleText({language: options.general.language});
+        void this._setLanguageExampleText({language: options.general.language}).catch((error) => {
+            log.error(error);
+        });
 
         // Overwrite frontend
         this._frontend = new Frontend({
@@ -120,7 +123,9 @@ export class PopupPreviewFrame {
         }
 
         // Update search
-        void this._updateSearch();
+        void this._updateSearch().catch((error) => {
+            log.error(error);
+        });
     }
 
     // Private
@@ -216,7 +221,9 @@ export class PopupPreviewFrame {
 
         this._exampleText.textContent = text;
         if (this._frontend === null) { return; }
-        void this._updateSearch();
+        void this._updateSearch().catch((error) => {
+            log.error(error);
+        });
     }
 
     /**
@@ -234,7 +241,9 @@ export class PopupPreviewFrame {
         if (this._frontend === null) { return; }
         const popup = this._frontend.popup;
         if (popup === null) { return; }
-        void popup.setCustomCss(css);
+        void popup.setCustomCss(css).catch((error) => {
+            log.error(error);
+        });
     }
 
     /** @type {import('popup-preview-frame').ApiHandler<'setCustomOuterCss'>} */
@@ -242,7 +251,9 @@ export class PopupPreviewFrame {
         if (this._frontend === null) { return; }
         const popup = this._frontend.popup;
         if (popup === null) { return; }
-        void popup.setCustomOuterCss(css, false);
+        void popup.setCustomOuterCss(css, false).catch((error) => {
+            log.error(error);
+        });
     }
 
     /** @type {import('popup-preview-frame').ApiHandler<'updateOptionsContext'>} */
@@ -256,7 +267,7 @@ export class PopupPreviewFrame {
     }
 
     /** @type {import('popup-preview-frame').ApiHandler<'setLanguageExampleText'>} */
-    _setLanguageExampleText({language}) {
+    async _setLanguageExampleText({language}) {
         const activeLanguage = /** @type {import('language').LanguageSummary} */ (this._languageSummaries.find(({iso}) => iso === language));
 
         this._exampleTextInputEvents.removeAllEventListeners();

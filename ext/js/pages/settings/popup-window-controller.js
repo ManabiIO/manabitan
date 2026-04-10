@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 export class PopupWindowController {
@@ -31,7 +32,7 @@ export class PopupWindowController {
     prepare() {
         /** @type {HTMLElement} */
         const testLink = querySelectorNotNull(document, '#test-window-open-link');
-        testLink.addEventListener('click', this._onTestWindowOpenLinkClick.bind(this), false);
+        testLink.addEventListener('click', this._onTestWindowOpenLinkClickEvent.bind(this), false);
     }
 
     // Private
@@ -41,7 +42,20 @@ export class PopupWindowController {
      */
     _onTestWindowOpenLinkClick(e) {
         e.preventDefault();
-        void this._testWindowOpen();
+        void this._testWindowOpen().catch((error) => {
+            log.error(error);
+        });
+    }
+
+    /**
+     * @param {MouseEvent} e
+     */
+    _onTestWindowOpenLinkClickEvent(e) {
+        try {
+            this._onTestWindowOpenLinkClick(e);
+        } catch (error) {
+            log.error(error);
+        }
     }
 
     /** */

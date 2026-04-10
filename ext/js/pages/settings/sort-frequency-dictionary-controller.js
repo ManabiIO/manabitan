@@ -129,8 +129,16 @@ export class SortFrequencyDictionaryController {
      * @param {?string} value
      */
     async _setSortFrequencyDictionaryValue(value) {
+        const previousValue = this._sortFrequencyDictionarySelect.value;
+        const previousHidden = this._sortFrequencyDictionaryOrderContainerNode.hidden;
         /** @type {HTMLElement} */ (this._sortFrequencyDictionaryOrderContainerNode).hidden = (value === null);
-        await this._settingsController.setProfileSetting('general.sortFrequencyDictionary', value);
+        try {
+            await this._settingsController.setProfileSetting('general.sortFrequencyDictionary', value);
+        } catch (e) {
+            this._sortFrequencyDictionarySelect.value = previousValue;
+            /** @type {HTMLElement} */ (this._sortFrequencyDictionaryOrderContainerNode).hidden = previousHidden;
+            throw e;
+        }
         if (value !== null) {
             await this._autoUpdateOrder(value);
         }
@@ -140,7 +148,13 @@ export class SortFrequencyDictionaryController {
      * @param {import('settings').SortFrequencyDictionaryOrder} value
      */
     async _setSortFrequencyDictionaryOrderValue(value) {
-        await this._settingsController.setProfileSetting('general.sortFrequencyDictionaryOrder', value);
+        const previousValue = this._sortFrequencyDictionaryOrderSelect.value;
+        try {
+            await this._settingsController.setProfileSetting('general.sortFrequencyDictionaryOrder', value);
+        } catch (e) {
+            this._sortFrequencyDictionaryOrderSelect.value = previousValue;
+            throw e;
+        }
     }
 
     /**
@@ -149,8 +163,14 @@ export class SortFrequencyDictionaryController {
     async _autoUpdateOrder(dictionary) {
         const order = await this._getFrequencyOrder(dictionary);
         if (order === null) { return; }
+        const previousValue = this._sortFrequencyDictionaryOrderSelect.value;
         /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect).value = order;
-        await this._setSortFrequencyDictionaryOrderValue(order);
+        try {
+            await this._setSortFrequencyDictionaryOrderValue(order);
+        } catch (e) {
+            this._sortFrequencyDictionaryOrderSelect.value = previousValue;
+            throw e;
+        }
     }
 
     /**
