@@ -111,6 +111,9 @@ function sleep(delayMs) {
 async function sendExtensionMessageWithRetry(webExtension, message, attempts = 2) {
     let remainingAttempts = attempts;
     for (;;) {
+        if (webExtension.unloaded) {
+            throw new Error('Lost connection to the extension runtime. Refresh this page to reconnect.');
+        }
         try {
             return await webExtension.sendMessagePromise(message);
         } catch (error) {
@@ -118,6 +121,9 @@ async function sendExtensionMessageWithRetry(webExtension, message, attempts = 2
                 throw error;
             }
             remainingAttempts -= 1;
+            if (webExtension.unloaded) {
+                throw new Error('Lost connection to the extension runtime. Refresh this page to reconnect.');
+            }
             await sleep(startupMessageRetryDelayMs);
         }
     }
@@ -132,8 +138,13 @@ async function waitForBackendReady(webExtension) {
     const apiMap = createApiMap([['applicationBackendReady', () => { resolve(); }]]);
     /** @type {import('extension').ChromeRuntimeOnMessageCallback<import('application').ApiMessageAny>} */
     const onMessage = ({action, params}, _sender, callback) => invokeApiMapHandler(apiMap, action, params, [], callback);
+    const onUnloaded = () => {
+        resolve();
+    };
     chrome.runtime.onMessage.addListener(onMessage);
+    webExtension.on('unloaded', onUnloaded);
     let timeoutId = null;
+    let unloaded = false;
     try {
         await sendExtensionMessageWithRetry(webExtension, {action: 'requestBackendReadySignal'});
         const timeoutPromise = new Promise((_, reject) => {
@@ -143,12 +154,21 @@ async function waitForBackendReady(webExtension) {
                 reject(new Error(`Timed out waiting for backend ready signal after ${String(backendReadyTimeoutMs)}ms.${suffix}`));
             }, backendReadyTimeoutMs);
         });
-        await Promise.race([promise, timeoutPromise]);
+        await Promise.race([
+            promise.then(() => {
+                unloaded = webExtension.unloaded;
+            }),
+            timeoutPromise,
+        ]);
+        if (unloaded) {
+            throw new Error('Lost connection to the extension runtime while waiting for backend startup. Refresh this page to reconnect.');
+        }
     } finally {
         if (timeoutId !== null) {
             clearTimeout(timeoutId);
         }
         chrome.runtime.onMessage.removeListener(onMessage);
+        webExtension.off('unloaded', onUnloaded);
     }
 }
 
@@ -505,6 +525,7 @@ export class Application extends EventDispatcher {
         }
         /** @type {boolean} */
         let heartbeatFailureLogged = false;
+        let startupCompleted = false;
         try {
             await waitForBackendReady(webExtension);
             if (mediaDrawingWorker !== null) {
@@ -527,12 +548,16 @@ export class Application extends EventDispatcher {
             application.prepare();
             if (waitForDom) { await waitForDomContentLoaded(); }
             await mainFunction(application);
+            startupCompleted = true;
         } catch (error) {
+            closeRuntimeResources();
             showStartupFailureUi(error);
             log.error(error);
             throw error;
         } finally {
-            closeRuntimeResources();
+            if (!startupCompleted) {
+                closeRuntimeResources();
+            }
         }
     }
 
