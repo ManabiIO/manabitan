@@ -52,6 +52,9 @@ describe('DictionaryController task queue', () => {
     const onDictionaryConfirmUpdate = /** @type {(this: DictionaryController, e: MouseEvent) => void} */ (getDictionaryControllerMethod('_onDictionaryConfirmUpdate'));
     const checkForUpdates = /** @type {(this: DictionaryController) => Promise<void>} */ (getDictionaryControllerMethod('_checkForUpdates'));
     const clearMutationErrors = /** @type {(this: DictionaryController) => void} */ (getDictionaryControllerMethod('_clearMutationErrors'));
+    const getProfilesDictionarySettingsForTitle = /** @type {(this: DictionaryController, profiles: import('../types/ext/settings').Options['profiles'], dictionaryTitle: string) => unknown} */ (getDictionaryControllerMethod('_getProfilesDictionarySettingsForTitle'));
+    const onDatabaseUpdatedEvent = /** @type {(this: DictionaryController, details: unknown) => void} */ (getDictionaryControllerMethod('_onDatabaseUpdatedEvent'));
+    const refreshEntriesAfterOptionsChanged = /** @type {(this: DictionaryController) => Promise<void>} */ (getDictionaryControllerMethod('_refreshEntriesAfterOptionsChanged'));
 
     test('detects queued dictionaries by title', () => {
         const controller = createControllerForInternalTests();
@@ -489,6 +492,32 @@ describe('DictionaryController task queue', () => {
         expect(Reflect.get(controller, '_onDictionariesUpdate')).toBeNull();
     });
 
+    test('databaseUpdated refresh failures are logged instead of escaping', async () => {
+        const controller = createControllerForInternalTests();
+        Reflect.set(controller, '_settingsController', {
+            getDictionaryInfo: vi.fn().mockRejectedValue(new Error('refresh failed')),
+        });
+        const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        await onDatabaseUpdatedEvent.call(controller, {type: 'dictionary', cause: 'import'});
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(logErrorSpy).toHaveBeenCalled();
+        expect(Reflect.get(controller, '_dictionaries')).toBeNull();
+    });
+
+    test('optionsChanged async entry refresh failures are logged instead of escaping', async () => {
+        const controller = createControllerForInternalTests();
+        const updateEntries = vi.fn().mockRejectedValue(new Error('refresh failed'));
+        const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        Reflect.set(controller, '_updateEntries', updateEntries);
+
+        await refreshEntriesAfterOptionsChanged.call(controller);
+
+        expect(updateEntries).toHaveBeenCalledTimes(1);
+        expect(logErrorSpy).toHaveBeenCalled();
+    });
+
     test('deleteDictionaryInternal times out if dictionary refresh never arrives', async () => {
         const controller = createControllerForInternalTests();
         Reflect.set(controller, '_getMutationCallbackTimeoutMs', () => 1);
@@ -563,6 +592,29 @@ describe('DictionaryController task queue', () => {
         await expect(updateDictionary.call(controller, 'Jitendex')).resolves.toBeUndefined();
 
         expect(getDictionaryInfo).toHaveBeenCalled();
+    });
+
+    test('getProfilesDictionarySettingsForTitle preserves duplicate profile entries for replacement import carry-over', () => {
+        const controller = createControllerForInternalTests();
+        const profiles = [
+            {
+                id: 'profile-1',
+                options: {
+                    dictionaries: [
+                        {name: 'Jitendex', enabled: true, alias: 'Primary'},
+                        {name: 'Other', enabled: true, alias: 'Other'},
+                        {name: 'Jitendex', enabled: false, alias: 'Secondary'},
+                    ],
+                },
+            },
+        ];
+
+        expect(getProfilesDictionarySettingsForTitle.call(controller, profiles, 'Jitendex')).toStrictEqual({
+            'profile-1': [
+                {name: 'Jitendex', enabled: true, alias: 'Primary', index: 0},
+                {name: 'Jitendex', enabled: false, alias: 'Secondary', index: 2},
+            ],
+        });
     });
 
     test('checkForUpdates keeps successful update results when one dictionary check fails', async () => {

@@ -261,7 +261,7 @@ describe('Dictionary import stale-run fencing', () => {
             finalizeImportSession: true,
             importRunGeneration: 1,
             profilesDictionarySettings: {
-                'profile-1': {name: 'Old Dictionary'},
+                'profile-1': [{name: 'Old Dictionary'}],
             },
             localPhaseTimings: [],
         });
@@ -531,6 +531,68 @@ describe('Dictionary import stale-run fencing', () => {
 
         await new Promise((resolve) => setTimeout(resolve, 0));
         expect(controller.downloadDictionaryFileFromURL).toHaveBeenCalledOnce();
+    });
+});
+
+describe('Dictionary import settings carry-over', () => {
+    test('replacement imports preserve duplicate profile dictionary entries', async () => {
+        const addDictionarySettings = /** @type {(this: DictionaryImportController, summary: Record<string, unknown>, profilesDictionarySettings: unknown) => Promise<Error[]>} */ (
+            getDictionaryImportControllerMethod('_addDictionarySettings')
+        );
+        const modifyGlobalSettings = vi.fn().mockResolvedValue([]);
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _settingsController: {
+                profileIndex: 0,
+                getOptionsFull: vi.fn().mockResolvedValue({
+                    profiles: [
+                        {
+                            id: 'profile-1',
+                            options: {
+                                dictionaries: [],
+                                general: {mainDictionary: '', sortFrequencyDictionary: null},
+                            },
+                        },
+                    ],
+                }),
+            },
+            _modifyGlobalSettings: modifyGlobalSettings,
+        }));
+
+        const errors = await addDictionarySettings.call(
+            controller,
+            /** @type {Record<string, unknown>} */ ({
+                title: 'New Dictionary',
+                sourceTitle: 'New Dictionary',
+                replacedDictionaryTitle: 'Old Dictionary',
+                sequenced: false,
+                styles: '.term { color: red; }',
+            }),
+            {
+                'profile-1': [
+                    {name: 'Old Dictionary', alias: 'Primary Alias', enabled: true, index: 0},
+                    {name: 'Old Dictionary', alias: 'Secondary Alias', enabled: false, index: 2},
+                ],
+            },
+        );
+
+        expect(errors).toStrictEqual([]);
+        expect(modifyGlobalSettings).toHaveBeenCalledOnce();
+        expect(modifyGlobalSettings.mock.calls[0][0]).toStrictEqual([
+            {
+                action: 'splice',
+                path: 'profiles[0].options.dictionaries',
+                start: 2,
+                items: [{alias: 'Secondary Alias', enabled: false, styles: '.term { color: red; }', name: 'New Dictionary'}],
+                deleteCount: 0,
+            },
+            {
+                action: 'splice',
+                path: 'profiles[0].options.dictionaries',
+                start: 0,
+                items: [{alias: 'Primary Alias', enabled: true, styles: '.term { color: red; }', name: 'New Dictionary'}],
+                deleteCount: 0,
+            },
+        ]);
     });
 });
 

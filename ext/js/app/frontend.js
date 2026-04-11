@@ -114,6 +114,10 @@ export class Frontend {
         this._debugSearchSuccessCount = 0;
         /** @type {number} */
         this._debugSearchEmptyCount = 0;
+        /** @type {boolean} */
+        this._dictionaryUpdateSearchActive = false;
+        /** @type {boolean} */
+        this._optionsUpdateSearchActive = false;
 
         /* eslint-disable @stylistic/no-multi-spaces */
         /** @type {import('application').ApiMap} */
@@ -182,9 +186,10 @@ export class Frontend {
             visualViewport.addEventListener('resize', this._onVisualViewportResize.bind(this));
         }
 
-        this._application.on('optionsUpdated', this.updateOptions.bind(this));
+        this._application.on('optionsUpdated', this._onOptionsUpdated.bind(this));
         this._application.on('zoomChanged', this._onZoomChanged.bind(this));
         this._application.on('closePopups', this._onClosePopups.bind(this));
+        this._application.on('databaseUpdated', this._onDatabaseUpdated.bind(this));
         chrome.runtime.onMessage.addListener(this._onRuntimeMessage.bind(this));
 
         this._textScanner.on('clear', this._onTextScannerClear.bind(this));
@@ -236,10 +241,11 @@ export class Frontend {
 
     /**
      * Updates the internal options representation.
+     * @param {boolean} [suppressSearchLast]
      */
-    async updateOptions() {
+    async updateOptions(suppressSearchLast = false) {
         try {
-            await this._updateOptionsInternal();
+            await this._updateOptionsInternal(suppressSearchLast);
         } catch (e) {
             if (!this._application.webExtension.unloaded) {
                 throw e;
@@ -371,6 +377,49 @@ export class Frontend {
     }
 
     /**
+     * @returns {Promise<void>}
+     */
+    async _onOptionsUpdated() {
+        this._updatePageDebugState({lastSearchState: 'options-updated'});
+        try {
+            this._optionsUpdateSearchActive = true;
+            await this.updateOptions();
+        } catch (error) {
+            if (!this._application.webExtension.unloaded) {
+                log.error(error);
+            }
+            this._clearSelection(true);
+            this._clearMousePosition();
+        } finally {
+            this._optionsUpdateSearchActive = false;
+        }
+    }
+
+    /**
+     * @param {import('application').EventArgument<'databaseUpdated'>} details
+     * @returns {void}
+     */
+    async _onDatabaseUpdated({type}) {
+        if (type !== 'dictionary') { return; }
+        this._updatePageDebugState({lastSearchState: 'dictionary-updated'});
+        try {
+            this._dictionaryUpdateSearchActive = true;
+            await this.updateOptions(true);
+            if (await this._textScanner.searchLast()) {
+                return;
+            }
+        } catch (error) {
+            if (!this._application.webExtension.unloaded) {
+                log.error(error);
+            }
+        } finally {
+            this._dictionaryUpdateSearchActive = false;
+        }
+        this._clearSelection(true);
+        this._clearMousePosition();
+    }
+
+    /**
      * @returns {void}
      */
     _onVisualViewportScroll() {
@@ -419,6 +468,11 @@ export class Frontend {
             lastSearchState: 'empty',
             searchEmptyCount: this._debugSearchEmptyCount,
         });
+        if (this._dictionaryUpdateSearchActive || this._optionsUpdateSearchActive) {
+            this._clearSelection(true);
+            this._clearMousePosition();
+            return;
+        }
         const scanningOptions = /** @type {import('settings').ProfileOptions} */ (this._options).scanning;
         if (scanningOptions.autoHideResults) {
             void this._clearSelectionDelayed(scanningOptions.hideDelay, false, false);
@@ -558,9 +612,10 @@ export class Frontend {
     }
 
     /**
+     * @param {boolean} [suppressSearchLast]
      * @returns {Promise<void>}
      */
-    async _updateOptionsInternal() {
+    async _updateOptionsInternal(suppressSearchLast = false) {
         const optionsContext = await this._getOptionsContext();
         const options = await this._application.api.optionsGet(optionsContext);
         const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
@@ -611,7 +666,9 @@ export class Frontend {
 
         this._updateContentScale();
 
-        await this._textScanner.searchLast();
+        if (!suppressSearchLast) {
+            await this._textScanner.searchLast();
+        }
     }
 
     /**

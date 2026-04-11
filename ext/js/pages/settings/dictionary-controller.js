@@ -697,7 +697,7 @@ export class DictionaryController {
         /** @type {HTMLButtonElement} */
         const dictionarySetAliasButton = querySelectorNotNull(document, '#dictionary-set-alias-button');
 
-        this._settingsController.application.on('databaseUpdated', this._onDatabaseUpdated.bind(this));
+        this._settingsController.application.on('databaseUpdated', this._onDatabaseUpdatedEvent.bind(this));
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
         this._allCheckbox.addEventListener('change', this._onAllCheckboxChange.bind(this), false);
         dictionaryDeleteButton.addEventListener('click', this._onDictionaryConfirmDelete.bind(this), false);
@@ -920,25 +920,51 @@ export class DictionaryController {
     _onOptionsChanged({options}) {
         this._updateDictionariesEnabledWarnings(options);
         if (this._dictionaries !== null) {
-            void this._updateEntries();
+            void this._refreshEntriesAfterOptionsChanged();
         }
     }
 
+    /**
+     * @returns {Promise<void>}
+     */
+    async _refreshEntriesAfterOptionsChanged() {
+        try {
+            await this._updateEntries();
+        } catch (error) {
+            log.error(error);
+        }
+    }
+
+    /**
+     * @param {import('application').EventArgument<'databaseUpdated'>} details
+     * @returns {void}
+     */
+    _onDatabaseUpdatedEvent(details) {
+        void this._onDatabaseUpdated(details);
+    }
+
     /** */
-    async _onDatabaseUpdated() {
+    async _onDatabaseUpdated(_details = void 0) {
         /** @type {?import('core').TokenObject} */
         const token = {};
         this._databaseStateToken = token;
         this._dictionaries = null;
-        const dictionaries = await this._settingsController.getDictionaryInfo();
-        if (this._databaseStateToken !== token) { return; }
-        this._dictionaries = dictionaries;
+        try {
+            const dictionaries = await this._settingsController.getDictionaryInfo();
+            if (this._databaseStateToken !== token) { return; }
+            this._dictionaries = dictionaries;
 
-        await this._updateEntries(null);
-        if (this._databaseStateToken !== token) { return; }
+            await this._updateEntries(null);
+            if (this._databaseStateToken !== token) { return; }
 
-        if (this._onDictionariesUpdate) {
-            this._onDictionariesUpdate();
+            if (this._onDictionariesUpdate) {
+                this._onDictionariesUpdate();
+            }
+        } catch (error) {
+            if (this._databaseStateToken === token) {
+                this._dictionaries = null;
+            }
+            log.error(error);
         }
     }
 
@@ -1522,10 +1548,14 @@ export class DictionaryController {
         const profilesDictionarySettings = {};
         for (const profile of profiles) {
             const dictionaries = profile.options.dictionaries;
+            /** @type {import('settings').DictionaryOptions[]} */
+            const profileMatches = [];
             for (let i = 0; i < dictionaries.length; ++i) {
                 if (dictionaries[i].name !== dictionaryTitle) { continue; }
-                profilesDictionarySettings[profile.id] = {...dictionaries[i], index: i};
-                break;
+                profileMatches.push({...dictionaries[i], index: i});
+            }
+            if (profileMatches.length > 0) {
+                profilesDictionarySettings[profile.id] = profileMatches;
             }
         }
         return profilesDictionarySettings;

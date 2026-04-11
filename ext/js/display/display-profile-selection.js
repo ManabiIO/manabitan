@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {log} from '../core/log.js';
 import {generateId} from '../core/utilities.js';
 import {PanelElement} from '../dom/panel-element.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
@@ -48,7 +49,7 @@ export class DisplayProfileSelection {
 
     /** */
     async prepare() {
-        this._display.application.on('optionsUpdated', this._onOptionsUpdated.bind(this));
+        this._display.application.on('optionsUpdated', this._onOptionsUpdatedEvent.bind(this));
         this._profileButton.addEventListener('click', this._onProfileButtonClick.bind(this), false);
         this._profileListNeedsUpdate = true;
         await this._updateCurrentProfileName();
@@ -58,14 +59,26 @@ export class DisplayProfileSelection {
 
     /**
      * @param {{source: string}} details
+     * @returns {void}
+     */
+    _onOptionsUpdatedEvent(details) {
+        void this._onOptionsUpdated(details);
+    }
+
+    /**
+     * @param {{source: string}} details
      */
     async _onOptionsUpdated({source}) {
         if (source === this._source) { return; }
-        this._profileListNeedsUpdate = true;
-        if (this._profilePanel.isVisible()) {
-            void this._updateProfileList();
+        try {
+            this._profileListNeedsUpdate = true;
+            if (this._profilePanel.isVisible()) {
+                await this._updateProfileList();
+            }
+            await this._updateCurrentProfileName();
+        } catch (error) {
+            log.error(error);
         }
-        await this._updateCurrentProfileName();
     }
 
     /**
