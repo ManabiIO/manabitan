@@ -113,6 +113,12 @@ export class Display extends EventDispatcher {
         this._fullQuery = '';
         /** @type {number} */
         this._queryOffset = 0;
+        /** @type {string} */
+        this._primaryReading = '';
+        /** @type {boolean} */
+        this._lookup = true;
+        /** @type {boolean} */
+        this._wildcardsEnabled = false;
         /** @type {HTMLElement} */
         this._progressIndicator = querySelectorNotNull(document, '#progress-indicator');
         /** @type {?import('core').Timeout} */
@@ -343,6 +349,8 @@ export class Display extends EventDispatcher {
         this._queryParser.on('searched', this._onQueryParserSearch.bind(this));
         this._progressIndicatorVisible.on('change', this._onProgressIndicatorVisibleChanged.bind(this));
         this._application.on('extensionUnloaded', this._onExtensionUnloaded.bind(this));
+        this._application.on('optionsUpdated', this._onOptionsUpdated.bind(this));
+        this._application.on('databaseUpdated', this._onDatabaseUpdated.bind(this));
         this._application.crossFrame.registerHandlers([
             ['displayPopupMessage1', this._onDisplayPopupMessage1.bind(this)],
             ['displayPopupMessage2', this._onDisplayPopupMessage2.bind(this)],
@@ -628,7 +636,7 @@ export class Display extends EventDispatcher {
         const details = {
             focus: false,
             historyMode: 'clear',
-            params: this._createSearchParams(type, query, false, this._queryOffset),
+            params: this._createSearchParams(type, query, this._wildcardsEnabled, this._queryOffset, this._lookup, this._primaryReading),
             state: newState,
             content: {
                 contentOrigin: this.getContentOrigin(),
@@ -1380,6 +1388,8 @@ export class Display extends EventDispatcher {
     async _setContentTermsOrKanji(type, urlSearchParams, token) {
         const lookup = (urlSearchParams.get('lookup') !== 'false');
         const wildcardsEnabled = (urlSearchParams.get('wildcards') !== 'off');
+        this._lookup = lookup;
+        this._wildcardsEnabled = wildcardsEnabled;
 
         // Set query
         safePerformance.mark('display:setQuery:start');
@@ -1388,6 +1398,7 @@ export class Display extends EventDispatcher {
         let queryFull = urlSearchParams.get('full');
         queryFull = (queryFull !== null ? queryFull : query);
         const primaryReading = urlSearchParams.get('primary_reading') ?? '';
+        this._primaryReading = primaryReading;
         const queryOffsetString = urlSearchParams.get('offset');
         let queryOffset = 0;
         if (queryOffsetString !== null) {
@@ -1887,9 +1898,11 @@ export class Display extends EventDispatcher {
      * @param {string} query
      * @param {boolean} wildcards
      * @param {?number} sentenceOffset
+     * @param {boolean} [lookup]
+     * @param {string} [primaryReading]
      * @returns {import('display').HistoryParams}
      */
-    _createSearchParams(type, query, wildcards, sentenceOffset) {
+    _createSearchParams(type, query, wildcards, sentenceOffset, lookup = true, primaryReading = '') {
         /** @type {import('display').HistoryParams} */
         const params = {};
         const fullQuery = this._fullQuery;
@@ -1906,6 +1919,12 @@ export class Display extends EventDispatcher {
         }
         if (!wildcards) {
             params.wildcards = 'off';
+        }
+        if (!lookup) {
+            params.lookup = 'false';
+        }
+        if (primaryReading.length > 0) {
+            params.primary_reading = primaryReading;
         }
         if (this._queryParserVisibleOverride !== null) {
             params['full-visible'] = `${this._queryParserVisibleOverride}`;
@@ -2213,6 +2232,79 @@ export class Display extends EventDispatcher {
     _onContentTextScannerSearchError({error}) {
         if (!this._application.webExtension.unloaded) {
             log.error(error);
+        }
+    }
+
+    /**
+     * @param {import('application').EventArgument<'databaseUpdated'>} details
+     */
+    _onDatabaseUpdated({type}) {
+        if (type !== 'dictionary') { return; }
+        void this._refreshAfterDictionaryDatabaseUpdate();
+    }
+
+    /**
+     * @returns {void}
+     */
+    _onOptionsUpdated() {
+        if (this._pageType === 'search') {
+            if (this._contentType !== 'clear') { return; }
+            void this._refreshSearchEmptyStateAfterOptionsUpdate();
+            return;
+        }
+        if (this._contentType === 'clear' || this._contentType === 'unloaded') { return; }
+        void this._refreshAfterOptionsUpdate();
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _refreshAfterOptionsUpdate() {
+        try {
+            await this.updateOptions();
+            this.searchLast(false);
+        } catch (error) {
+            if (!this._application.webExtension.unloaded) {
+                log.error(error);
+            }
+        }
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _refreshSearchEmptyStateAfterOptionsUpdate() {
+        try {
+            await this.updateOptions();
+            const hasEnabledDictionaries = this._options ? this._options.dictionaries.some(({enabled}) => enabled) : false;
+            this._setNoContentVisible(false);
+            this._setNoDictionariesVisible(!hasEnabledDictionaries);
+        } catch (error) {
+            if (!this._application.webExtension.unloaded) {
+                log.error(error);
+            }
+        }
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _refreshAfterDictionaryDatabaseUpdate() {
+        try {
+            this._dictionaryInfo = await this._application.api.getDictionaryInfo();
+            if (this._pageType === 'search' && this._contentType === 'clear') {
+                await this.updateOptions();
+                const hasEnabledDictionaries = this._options ? this._options.dictionaries.some(({enabled}) => enabled) : false;
+                this._setNoContentVisible(false);
+                this._setNoDictionariesVisible(!hasEnabledDictionaries);
+            } else if (this._pageType !== 'search' && this._contentType !== 'clear' && this._contentType !== 'unloaded') {
+                await this.updateOptions();
+                this.searchLast(false);
+            }
+        } catch (error) {
+            if (!this._application.webExtension.unloaded) {
+                log.error(error);
+            }
         }
     }
 

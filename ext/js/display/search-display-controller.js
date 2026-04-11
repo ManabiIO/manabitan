@@ -19,6 +19,7 @@
 import {ClipboardMonitor} from '../comm/clipboard-monitor.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {log} from '../core/log.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {isComposing} from '../language/ime-utilities.js';
 import {convertToKana, convertToKanaIME} from '../language/ja/japanese-wanakana.js';
@@ -164,6 +165,7 @@ export class SearchDisplayController {
 
         chrome.runtime.onMessage.addListener(this._onMessage.bind(this));
         this._display.application.on('optionsUpdated', this._onOptionsUpdated.bind(this));
+        this._display.application.on('databaseUpdated', this._onDatabaseUpdated.bind(this));
 
         this._display.on('optionsUpdated', this._onDisplayOptionsUpdated.bind(this));
         this._display.on('contentUpdateStart', this._onContentUpdateStart.bind(this));
@@ -260,11 +262,47 @@ export class SearchDisplayController {
     }
 
     /** */
-    async _onOptionsUpdated() {
-        await this._display.updateOptions();
-        const query = this._queryInput.value;
-        if (query) {
+    _onOptionsUpdated() {
+        void this._refreshAfterOptionsUpdate();
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _refreshAfterOptionsUpdate() {
+        const contentType = Reflect.get(this._display, '_contentType');
+        if (contentType === 'unloaded') { return; }
+        try {
+            await this._display.updateOptions();
+            if (contentType !== 'clear') {
+                this._display.searchLast(false);
+            }
+        } catch (error) {
+            if (!this._display.application.webExtension.unloaded) {
+                log.error(error);
+            }
+        }
+    }
+
+    /**
+     * @param {import('application').EventArgument<'databaseUpdated'>} details
+     */
+    _onDatabaseUpdated({type}) {
+        if (type !== 'dictionary') { return; }
+        void this._refreshAfterDictionaryDatabaseUpdate();
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _refreshAfterDictionaryDatabaseUpdate() {
+        try {
+            await this._display.updateOptions();
             this._display.searchLast(false);
+        } catch (error) {
+            if (!this._display.application.webExtension.unloaded) {
+                log.error(error);
+            }
         }
     }
 

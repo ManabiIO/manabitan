@@ -132,6 +132,8 @@ export class Backend {
         this._searchPopupTabCreatePromise = null;
         /** @type {?Promise<void>} */
         this._dictionaryRefreshPromise = null;
+        /** @type {?Promise<void>} */
+        this._dictionaryMutationPromise = null;
         /** @type {boolean} */
         this._dictionaryRefreshQueued = false;
         /** @type {?Promise<void>} */
@@ -252,6 +254,8 @@ export class Backend {
         this._dictionaryImportModeActive = false;
         /** @type {boolean} */
         this._deferredDictionaryRefreshDuringImport = false;
+        /** @type {{type: import('backend').DatabaseUpdateType, cause: import('backend').DatabaseUpdateCause}[]} */
+        this._pendingDatabaseUpdatedNotifications = [];
         /** @type {Promise<void>|null} */
         this._setDictionaryImportModePromise = null;
         /** @type {Record<string, unknown>|null} */
@@ -952,6 +956,8 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'kanjiFind'>} */
     async _onApiKanjiFind({text, optionsContext}) {
+        await this._awaitDictionaryMutationSettled();
+        await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {maxResults}} = options;
@@ -963,6 +969,8 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'termsFind'>} */
     async _onApiTermsFind({text, details, optionsContext}) {
+        await this._awaitDictionaryMutationSettled();
+        await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {resultOutputMode: mode, maxResults}} = options;
@@ -1359,6 +1367,7 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'getDictionaryInfo'>} */
     async _onApiGetDictionaryInfo() {
+        await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         return await this._dictionaryDatabase.getDictionaryInfo();
@@ -1366,25 +1375,32 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'deleteDictionaryByTitle'>} */
     async _onApiDeleteDictionaryByTitle({dictionaryTitle}) {
-        await this._ensureDictionaryDatabaseReady();
-        await this._dictionaryDatabase.deleteDictionary(dictionaryTitle, 1000, () => {});
+        await this._runDictionaryMutation(async () => {
+            await this._ensureDictionaryDatabaseReady();
+            await this._dictionaryDatabase.deleteDictionary(dictionaryTitle, 1000, () => {});
+            await this._refreshDictionaryDatabaseAfterUpdate();
+        });
     }
 
     /**
      * @param {import('api').ApiParams<'replaceDictionaryTitle'>} params
      */
     async _onApiReplaceDictionaryTitle({fromDictionaryTitle, toDictionaryTitle, summary, replacedDictionaryTitle}) {
-        await this._ensureDictionaryDatabaseReady();
-        await this._dictionaryDatabase.replaceDictionaryTitle(
-            fromDictionaryTitle,
-            toDictionaryTitle,
-            (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) ? summary : null,
-            typeof replacedDictionaryTitle === 'string' ? replacedDictionaryTitle : null,
-        );
+        await this._runDictionaryMutation(async () => {
+            await this._ensureDictionaryDatabaseReady();
+            await this._dictionaryDatabase.replaceDictionaryTitle(
+                fromDictionaryTitle,
+                toDictionaryTitle,
+                (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) ? summary : null,
+                typeof replacedDictionaryTitle === 'string' ? replacedDictionaryTitle : null,
+            );
+            await this._refreshDictionaryDatabaseAfterUpdate();
+        });
     }
 
     /** @type {import('api').ApiHandler<'getDictionaryCounts'>} */
     async _onApiGetDictionaryCounts({dictionaryNames, getTotal}) {
+        await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         return await this._dictionaryDatabase.getDictionaryCounts(dictionaryNames, getTotal);
@@ -1399,6 +1415,7 @@ export class Backend {
      * @param {{text: string, dictionaryNames: string[]}} params
      */
     async _onApiDebugDictionaryLookupState({text, dictionaryNames}) {
+        await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         if (this._offscreen !== null) {
@@ -1429,6 +1446,7 @@ export class Backend {
     }
 
     async _onApiDebugDictionaryStorageState() {
+        await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const usesFallbackStorageValue = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'usesFallbackStorage'));
@@ -1489,6 +1507,32 @@ export class Backend {
             } catch (_) {
                 // NOP
             }
+        }
+    }
+
+    async _awaitDictionaryMutationSettled() {
+        while (this._dictionaryMutationPromise !== null) {
+            try {
+                await this._dictionaryMutationPromise;
+            } catch (_) {
+                // NOP
+            }
+        }
+    }
+
+    /**
+     * @param {() => Promise<void>} task
+     * @returns {Promise<void>}
+     */
+    async _runDictionaryMutation(task) {
+        await this._awaitDictionaryMutationSettled();
+        this._dictionaryMutationPromise = (async () => {
+            await task();
+        })();
+        try {
+            await this._dictionaryMutationPromise;
+        } finally {
+            this._dictionaryMutationPromise = null;
         }
     }
 
@@ -1561,20 +1605,24 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'purgeDatabase'>} */
     async _onApiPurgeDatabase() {
-        if (this._offscreen !== null) {
-            try {
-                await this._offscreen.sendMessagePromise({action: 'databasePurgeOffscreen'});
-            } catch (e) {
-                log.error(e);
+        await this._runDictionaryMutation(async () => {
+            if (this._offscreen !== null) {
+                try {
+                    await this._offscreen.sendMessagePromise({action: 'databasePurgeOffscreen'});
+                } catch (e) {
+                    log.error(e);
+                }
             }
-        }
-        await this._ensureDictionaryDatabaseReady();
-        await this._dictionaryDatabase.purge();
-        await this._triggerDatabaseUpdated('dictionary', 'purge');
+            await this._ensureDictionaryDatabaseReady();
+            await this._dictionaryDatabase.purge();
+            await this._triggerDatabaseUpdated('dictionary', 'purge');
+        });
     }
 
     /** @type {import('api').ApiHandler<'exportDictionaryDatabase'>} */
     async _onApiExportDictionaryDatabase() {
+        await this._awaitDictionaryMutationSettled();
+        await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const content = await this._dictionaryDatabase.exportDatabase();
         return arrayBufferToBase64(content);
@@ -1582,9 +1630,11 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'importDictionaryDatabase'>} */
     async _onApiImportDictionaryDatabase({content}) {
-        await this._ensureDictionaryDatabaseReady();
-        await this._dictionaryDatabase.importDatabase(base64ToArrayBuffer(content));
-        await this._triggerDatabaseUpdated('dictionary', 'import');
+        await this._runDictionaryMutation(async () => {
+            await this._ensureDictionaryDatabaseReady();
+            await this._dictionaryDatabase.importDatabase(base64ToArrayBuffer(content));
+            await this._triggerDatabaseUpdated('dictionary', 'import');
+        });
     }
 
     /** @type {import('api').ApiHandler<'getMedia'>} */
@@ -1745,6 +1795,8 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'getTermFrequencies'>} */
     async _onApiGetTermFrequencies({termReadingList, dictionaries}) {
+        await this._awaitDictionaryMutationSettled();
+        await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         return await this._translator.getTermFrequencies(termReadingList, dictionaries);
     }
@@ -3313,12 +3365,39 @@ export class Backend {
         if (type === 'dictionary') {
             if (this._dictionaryImportModeActive) {
                 this._deferredDictionaryRefreshDuringImport = true;
+                this._queueDeferredDatabaseUpdatedNotification(type, cause);
                 reportDiagnostics('dictionary-refresh-deferred-during-import', {cause});
+                return;
             } else {
                 await this._refreshDictionaryDatabaseAfterUpdate();
             }
         }
+        this._sendApplicationDatabaseUpdated(type, cause);
+    }
+
+    /**
+     * @param {import('backend').DatabaseUpdateType} type
+     * @param {import('backend').DatabaseUpdateCause} cause
+     * @returns {void}
+     */
+    _sendApplicationDatabaseUpdated(type, cause) {
         this._sendMessageAllTabsIgnoreResponse({action: 'applicationDatabaseUpdated', params: {type, cause}});
+    }
+
+    /**
+     * @param {import('backend').DatabaseUpdateType} type
+     * @param {import('backend').DatabaseUpdateCause} cause
+     * @returns {void}
+     */
+    _queueDeferredDatabaseUpdatedNotification(type, cause) {
+        const pendingNotifications = this._pendingDatabaseUpdatedNotifications;
+        for (let i = pendingNotifications.length - 1; i >= 0; --i) {
+            const pendingNotification = pendingNotifications[i];
+            if (pendingNotification.type !== type) { continue; }
+            pendingNotifications[i] = {type, cause};
+            return;
+        }
+        pendingNotifications.push({type, cause});
     }
 
     /**
@@ -3389,6 +3468,7 @@ export class Backend {
      * @returns {Promise<boolean>}
      */
     async _hasInstalledDictionaries() {
+        await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
@@ -3464,6 +3544,7 @@ export class Backend {
                 reason: 'missing-dictionary-title',
             };
         }
+        await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const [dictionaryInfo, dictionaryCounts] = await Promise.all([
@@ -4159,6 +4240,8 @@ export class Backend {
      * @returns {Promise<import('dictionary-database').MediaDataStringContent[]>}
      */
     async _getNormalizedDictionaryDatabaseMedia(targets) {
+        await this._awaitDictionaryMutationSettled();
+        await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const results = [];
         for (const item of await this._dictionaryDatabase.getMedia(targets)) {
@@ -4344,6 +4427,14 @@ export class Backend {
             this._deferredDictionaryRefreshDuringImport = false;
             reportDiagnostics('dictionary-refresh-on-import-mode-exit', {hadDeferredRefresh});
             await this._refreshDictionaryDatabaseAfterUpdate();
+            if (hadDeferredRefresh) {
+                const pendingNotifications = this._pendingDatabaseUpdatedNotifications.splice(0, this._pendingDatabaseUpdatedNotifications.length);
+                for (const {type, cause} of pendingNotifications) {
+                    this._sendApplicationDatabaseUpdated(type, cause);
+                }
+            } else {
+                this._pendingDatabaseUpdatedNotifications.length = 0;
+            }
         })();
         try {
             await this._setDictionaryImportModePromise;

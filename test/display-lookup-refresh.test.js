@@ -65,4 +65,45 @@ describe('Display lookup refresh', () => {
         expect(display._setNoDictionariesVisible).toHaveBeenCalledWith(false);
         expect(display._setNoContentVisible).toHaveBeenCalledWith(true);
     });
+
+    test('searchLast preserves disabled lookup mode across refreshes', async ({window}) => {
+        const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
+        display._contentType = 'terms';
+        display._query = '暗記';
+        display._fullQuery = '暗記';
+        display._queryOffset = 0;
+        display._primaryReading = '';
+        display._lookup = false;
+        display._wildcardsEnabled = false;
+        display._optionsContext = {depth: 0, url: window.location.href};
+        display._history = {state: null};
+        display.getContentOrigin = vi.fn(() => ({tabId: 1, frameId: 1}));
+        display.setContent = vi.fn();
+
+        display.searchLast(false);
+
+        expect(display.setContent).toHaveBeenCalledOnce();
+        expect(display.setContent.mock.calls[0][0].params.lookup).toBe('false');
+        expect(display.setContent.mock.calls[0][0].params.wildcards).toBe('off');
+    });
+
+    test('searchLast preserves primary reading across refreshes', async ({window}) => {
+        const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
+        display._contentType = 'terms';
+        display._query = '自重';
+        display._fullQuery = '自重';
+        display._queryOffset = 0;
+        display._primaryReading = 'じちょう';
+        display._lookup = true;
+        display._wildcardsEnabled = false;
+        display._optionsContext = {depth: 0, url: window.location.href};
+        display._history = {state: null};
+        display.getContentOrigin = vi.fn(() => ({tabId: 1, frameId: 1}));
+        display.setContent = vi.fn();
+
+        display.searchLast(false);
+
+        expect(display.setContent).toHaveBeenCalledOnce();
+        expect(display.setContent.mock.calls[0][0].params.primary_reading).toBe('じちょう');
+    });
 });

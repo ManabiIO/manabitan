@@ -2336,7 +2336,8 @@ export class DictionaryImportController {
             let skippedProfileCount = 0;
 
             for (const profile of profiles) {
-                const profileDictionarySetting = profilesDictionarySettings[profile.id];
+                const profileDictionarySettings = profilesDictionarySettings[profile.id];
+                const profileDictionarySetting = Array.isArray(profileDictionarySettings) ? profileDictionarySettings[0] : null;
                 if (!(profileDictionarySetting && typeof profileDictionarySetting.name === 'string' && profileDictionarySetting.name.length > 0)) {
                     skippedProfileCount += 1;
                     continue;
@@ -2421,7 +2422,8 @@ export class DictionaryImportController {
             const defaultSettings = DictionaryController.createDefaultDictionarySettings(title, enabled, styles);
             const path1 = `profiles[${i}].options.dictionaries`;
 
-            if (profilesDictionarySettings === null || typeof profilesDictionarySettings[profileId] === 'undefined') {
+            const profileDictionarySettings = profilesDictionarySettings?.[profileId];
+            if (!Array.isArray(profileDictionarySettings) || profileDictionarySettings.length === 0) {
                 targets.push({action: 'push', path: path1, items: [defaultSettings]});
                 if (selectorSourceTitle !== null && options.general.mainDictionary === selectorSourceTitle) {
                     targets.push({
@@ -2441,20 +2443,24 @@ export class DictionaryImportController {
                     });
                 }
             } else {
-                const {index, alias, name, ...currentSettings} = profilesDictionarySettings[profileId];
-                const newAlias = alias === name ? title : alias;
-                targets.push({
-                    action: 'splice',
-                    path: path1,
-                    start: index,
-                    items: [{
-                        ...currentSettings,
-                        styles,
-                        name: title,
-                        alias: newAlias,
-                    }],
-                    deleteCount: 0,
-                });
+                const orderedProfileDictionarySettings = [...profileDictionarySettings]
+                    .sort((a, b) => b.index - a.index);
+                for (const {index, alias, name, ...currentSettings} of orderedProfileDictionarySettings) {
+                    const newAlias = alias === name ? title : alias;
+                    targets.push({
+                        action: 'splice',
+                        path: path1,
+                        start: index,
+                        items: [{
+                            ...currentSettings,
+                            styles,
+                            name: title,
+                            alias: newAlias,
+                        }],
+                        deleteCount: 0,
+                    });
+                }
+                const {name} = profileDictionarySettings[0];
                 if (
                     options.general.mainDictionary === name ||
                     (selectorSourceTitle !== null && options.general.mainDictionary === selectorSourceTitle)

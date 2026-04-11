@@ -31,7 +31,7 @@ export type PageExitPrevention = {
 
 type ProfileDictionarySettings = Settings.DictionaryOptions & {index: number};
 
-export type ProfilesDictionarySettings = {[profileId: string]: ProfileDictionarySettings} | null;
+export type ProfilesDictionarySettings = {[profileId: string]: ProfileDictionarySettings[]} | null;
 
 export type ImportDictionaryDoneResult = {
     ok: boolean;
