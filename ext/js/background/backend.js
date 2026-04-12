@@ -1182,7 +1182,6 @@ export class Backend {
             const info = {
                 canAdd: valid,
                 valid,
-                isDuplicate,
                 noteIds: noteIds,
                 noteInfos: noteInfos,
             };
