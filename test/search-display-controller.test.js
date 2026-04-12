@@ -225,4 +225,65 @@ describe('Keyboard Event Handling', () => {
         expect(searchLastSpy).not.toHaveBeenCalled();
         expect(logErrorSpy).toHaveBeenCalled();
     });
+
+    test('failed search-page profile selection refreshes the persisted selection and logs the error', async () => {
+        const updateProfileSelectSpy = vi.spyOn(searchDisplayController, '_updateProfileSelect').mockResolvedValue(void 0);
+        const setDefaultProfileIndexSpy = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex').mockRejectedValue(new Error('profile save failed'));
+        const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue({
+            profileCurrent: 0,
+            profiles: [{name: 'Default'}, {name: 'Mining'}],
+        });
+
+        searchDisplayController._onProfileSelectChangeEvent(/** @type {Event} */ (/** @type {unknown} */ ({
+            currentTarget: {value: '1'},
+        })));
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(setDefaultProfileIndexSpy).toHaveBeenCalledWith(1);
+        expect(updateProfileSelectSpy).toHaveBeenCalledOnce();
+        expect(logErrorSpy).toHaveBeenCalled();
+    });
+
+    test('search-page profile selection ignores out-of-range indices', async () => {
+        const setDefaultProfileIndexSpy = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex').mockResolvedValue(void 0);
+        vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue({
+            profileCurrent: 0,
+            profiles: [{name: 'Default'}, {name: 'Mining'}],
+        });
+
+        await searchDisplayController._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({
+            currentTarget: {value: '2'},
+        })));
+
+        expect(setDefaultProfileIndexSpy).not.toHaveBeenCalled();
+    });
+
+    test('stale search-page profile-select refresh does not overwrite newer options', async () => {
+        let resolveFirst;
+        let resolveSecond;
+        Reflect.set(searchDisplayController, '_profileSelectRefreshGeneration', 0);
+        vi.spyOn(display.application.api, 'optionsGetFull')
+            .mockImplementationOnce(() => new Promise((resolve) => {
+                resolveFirst = resolve;
+            }))
+            .mockImplementationOnce(() => new Promise((resolve) => {
+                resolveSecond = resolve;
+            }));
+
+        const firstRefresh = searchDisplayController._updateProfileSelect();
+        const secondRefresh = searchDisplayController._updateProfileSelect();
+        resolveSecond({
+            profileCurrent: 1,
+            profiles: [{name: 'Default'}, {name: 'Mining'}],
+        });
+        await secondRefresh;
+        resolveFirst({
+            profileCurrent: 0,
+            profiles: [{name: 'Default'}, {name: 'Mining'}],
+        });
+        await firstRefresh;
+
+        expect(searchDisplayController._profileSelect.value).toBe('1');
+    });
 });

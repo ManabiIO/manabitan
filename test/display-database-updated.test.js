@@ -23,6 +23,7 @@ describe('Display dictionary update handling', () => {
         const getDictionaryInfo = vi.fn().mockResolvedValue([{title: 'JMdict'}]);
         const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
         Reflect.set(display, '_dictionaryInfo', []);
+        Reflect.set(display, '_dictionaryInfoRefreshGeneration', 0);
         Reflect.set(display, '_pageType', 'popup');
         Reflect.set(display, '_contentType', 'clear');
         Reflect.set(display, 'searchLast', vi.fn());
@@ -48,6 +49,7 @@ describe('Display dictionary update handling', () => {
         const searchLast = vi.fn();
         const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
         Reflect.set(display, '_dictionaryInfo', []);
+        Reflect.set(display, '_dictionaryInfoRefreshGeneration', 0);
         Reflect.set(display, '_pageType', 'popup');
         Reflect.set(display, '_contentType', 'terms');
         Reflect.set(display, 'updateOptions', updateOptions);
@@ -73,6 +75,7 @@ describe('Display dictionary update handling', () => {
         const searchLast = vi.fn();
         const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
         Reflect.set(display, '_dictionaryInfo', []);
+        Reflect.set(display, '_dictionaryInfoRefreshGeneration', 0);
         Reflect.set(display, '_pageType', 'search');
         Reflect.set(display, '_contentType', 'terms');
         Reflect.set(display, 'searchLast', searchLast);
@@ -96,6 +99,7 @@ describe('Display dictionary update handling', () => {
         const searchLast = vi.fn();
         const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
         Reflect.set(display, '_dictionaryInfo', []);
+        Reflect.set(display, '_dictionaryInfoRefreshGeneration', 0);
         Reflect.set(display, '_pageType', 'popup');
         Reflect.set(display, '_contentType', 'unloaded');
         Reflect.set(display, 'updateOptions', updateOptions);
@@ -125,6 +129,7 @@ describe('Display dictionary update handling', () => {
         const setNoDictionariesVisible = vi.fn();
         const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
         Reflect.set(display, '_dictionaryInfo', []);
+        Reflect.set(display, '_dictionaryInfoRefreshGeneration', 0);
         Reflect.set(display, '_pageType', 'search');
         Reflect.set(display, '_contentType', 'clear');
         Reflect.set(display, '_options', {dictionaries: [{enabled: false}]});
@@ -146,6 +151,33 @@ describe('Display dictionary update handling', () => {
         expect(updateOptions).toHaveBeenCalledOnce();
         expect(setNoContentVisible).toHaveBeenCalledWith(false);
         expect(setNoDictionariesVisible).toHaveBeenCalledWith(false);
+    });
+
+    test('stale dictionary-info refresh does not overwrite newer display state', async () => {
+        let resolveFirst;
+        let resolveSecond;
+        const getDictionaryInfo = vi.fn()
+            .mockImplementationOnce(() => new Promise((resolve) => {
+                resolveFirst = resolve;
+            }))
+            .mockImplementationOnce(() => new Promise((resolve) => {
+                resolveSecond = resolve;
+            }));
+        const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
+        Reflect.set(display, '_dictionaryInfo', []);
+        Reflect.set(display, '_dictionaryInfoRefreshGeneration', 0);
+        Reflect.set(display, '_application', {
+            api: {getDictionaryInfo},
+        });
+
+        const firstRefresh = Display.prototype._refreshDictionaryInfo.call(display);
+        const secondRefresh = Display.prototype._refreshDictionaryInfo.call(display);
+        resolveSecond([{title: 'Jitendex'}]);
+        await secondRefresh;
+        resolveFirst([{title: 'JMdict'}]);
+        await firstRefresh;
+
+        expect(Reflect.get(display, '_dictionaryInfo')).toStrictEqual([{title: 'Jitendex'}]);
     });
 
     test('options updates rerun visible popup results outside the search page', async () => {

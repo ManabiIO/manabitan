@@ -264,6 +264,31 @@ function createCollectionNote(front) {
 }
 
 describe('DisplayAnki preload and save flow', () => {
+    test('stale anki field-template refresh does not overwrite newer dictionary-backed templates', async ({window}) => {
+        setupDocument(window.document);
+        const dictionaryEntries = [createTermEntry()];
+        let resolveFirst;
+        let resolveSecond;
+        const {display} = createDisplay(window.document, dictionaryEntries);
+        const displayAnki = new DisplayAnki(display, createDisplayAudio());
+        vi.spyOn(displayAnki, '_getAnkiFieldTemplates')
+            .mockImplementationOnce(() => new Promise((resolve) => {
+                resolveFirst = resolve;
+            }))
+            .mockImplementationOnce(() => new Promise((resolve) => {
+                resolveSecond = resolve;
+            }));
+
+        const firstRefresh = displayAnki._updateAnkiFieldTemplates(/** @type {import('settings').ProfileOptions} */ ({}));
+        const secondRefresh = displayAnki._updateAnkiFieldTemplates(/** @type {import('settings').ProfileOptions} */ ({}));
+        resolveSecond('newer templates');
+        await secondRefresh;
+        resolveFirst('older templates');
+        await firstRefresh;
+
+        expect(displayAnki._ankiFieldTemplates).toBe('newer templates');
+    });
+
     test('preload uses duplicate-check notes instead of full note creation', {timeout: 15_000}, async ({window}) => {
         setupDocument(window.document);
         const dictionaryEntries = [createTermEntry()];

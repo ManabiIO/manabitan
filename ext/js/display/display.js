@@ -207,6 +207,8 @@ export class Display extends EventDispatcher {
         this._languageSummaries = [];
         /** @type {import('dictionary-importer').Summary[]} */
         this._dictionaryInfo = [];
+        /** @type {number} */
+        this._dictionaryInfoRefreshGeneration = 0;
 
         /* eslint-disable @stylistic/no-multi-spaces */
         this._hotkeyHandler.registerActions([
@@ -335,7 +337,7 @@ export class Display extends EventDispatcher {
 
         this._languageSummaries = await this._application.api.getLanguageSummaries();
 
-        this._dictionaryInfo = await this._application.api.getDictionaryInfo();
+        await this._refreshDictionaryInfo();
 
         // Prepare
         await this._hotkeyHelpController.prepare(this._application.api);
@@ -2289,9 +2291,19 @@ export class Display extends EventDispatcher {
     /**
      * @returns {Promise<void>}
      */
+    async _refreshDictionaryInfo() {
+        const refreshGeneration = ++this._dictionaryInfoRefreshGeneration;
+        const dictionaryInfo = await this._application.api.getDictionaryInfo();
+        if (refreshGeneration !== this._dictionaryInfoRefreshGeneration) { return; }
+        this._dictionaryInfo = dictionaryInfo;
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
     async _refreshAfterDictionaryDatabaseUpdate() {
         try {
-            this._dictionaryInfo = await this._application.api.getDictionaryInfo();
+            await this._refreshDictionaryInfo();
             if (this._pageType === 'search' && this._contentType === 'clear') {
                 await this.updateOptions();
                 const hasEnabledDictionaries = this._options ? this._options.dictionaries.some(({enabled}) => enabled) : false;

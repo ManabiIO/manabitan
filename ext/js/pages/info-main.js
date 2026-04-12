@@ -22,7 +22,7 @@ import {log} from '../core/log.js';
 import {promiseTimeout} from '../core/utilities.js';
 import {DocumentFocusController} from '../dom/document-focus-controller.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
-import {showDictionaryInfo} from './info-dictionary-info.js';
+import {DictionaryInfoController} from './info-dictionary-info.js';
 import {BackupController} from './settings/backup-controller.js';
 import {SettingsController} from './settings/settings-controller.js';
 
@@ -134,10 +134,11 @@ await Application.main(true, async (application) => {
     userAgentElement.textContent = userAgent;
 
     void showAnkiConnectInfo(application.api);
-    void showDictionaryInfo(application.api);
+    const dictionaryInfoController = new DictionaryInfoController(application.api);
+    void dictionaryInfoController.refresh();
     application.on('databaseUpdated', ({type}) => {
         if (type !== 'dictionary') { return; }
-        void showDictionaryInfo(application.api).catch((error) => {
+        void dictionaryInfoController.refresh().catch((error) => {
             log.error(error);
         });
     });
