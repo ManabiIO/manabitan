@@ -59,3 +59,30 @@ export async function showDictionaryInfo(api) {
 
     renderDictionaryInfo(dictionaryInfos);
 }
+
+export class DictionaryInfoController {
+    /**
+     * @param {import('../comm/api.js').API} api
+     */
+    constructor(api) {
+        /** @type {import('../comm/api.js').API} */
+        this._api = api;
+        /** @type {number} */
+        this._refreshGeneration = 0;
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async refresh() {
+        const refreshGeneration = ++this._refreshGeneration;
+        let dictionaryInfos;
+        try {
+            dictionaryInfos = await this._api.getDictionaryInfo();
+        } catch (e) {
+            return;
+        }
+        if (refreshGeneration !== this._refreshGeneration) { return; }
+        renderDictionaryInfo(dictionaryInfos);
+    }
+}

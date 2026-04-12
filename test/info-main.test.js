@@ -38,6 +38,36 @@ describe('info page dictionary rendering', () => {
         expect(container.textContent).toBe('');
         expect(noneElement.hidden).toBe(false);
     });
+
+    test('DictionaryInfoController ignores stale refresh results', async () => {
+        const {DictionaryInfoController} = await import('../ext/js/pages/info-dictionary-info.js');
+        const {document} = window;
+        let resolveFirst;
+        let resolveSecond;
+        const controller = new DictionaryInfoController(/** @type {import('../ext/js/comm/api.js').API} */ (/** @type {unknown} */ ({
+            getDictionaryInfo: (() => {
+                let call = 0;
+                return () => new Promise((resolve) => {
+                    if (call === 0) {
+                        resolveFirst = resolve;
+                    } else {
+                        resolveSecond = resolve;
+                    }
+                    ++call;
+                });
+            })(),
+        })));
+
+        const firstRefresh = controller.refresh();
+        const secondRefresh = controller.refresh();
+        resolveSecond([{title: 'Jitendex'}]);
+        await secondRefresh;
+        resolveFirst([{title: 'JMdict'}]);
+        await firstRefresh;
+
+        const container = /** @type {HTMLElement} */ (document.querySelector('#installed-dictionaries'));
+        expect(container.textContent).toBe('Jitendex');
+    });
 });
 
 afterAll(() => teardown(global));

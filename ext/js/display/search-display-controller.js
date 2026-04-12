@@ -98,6 +98,8 @@ export class SearchDisplayController {
             ['searchDisplayControllerSetMode', this._onMessageSetMode.bind(this)],
             ['searchDisplayControllerUpdateSearchQuery', this._onExternalSearchUpdate.bind(this)],
         ]);
+        /** @type {number} */
+        this._profileSelectRefreshGeneration = 0;
     }
 
     /** */
@@ -192,7 +194,7 @@ export class SearchDisplayController {
         this._stickyHeaderEnableCheckbox.addEventListener('change', this._onStickyHeaderEnableChange.bind(this));
         this._display.hotkeyHandler.on('keydownNonHotkey', this._onKeyDown.bind(this));
 
-        this._profileSelect.addEventListener('change', this._onProfileSelectChange.bind(this), false);
+        this._profileSelect.addEventListener('change', this._onProfileSelectChangeEvent.bind(this), false);
 
         const displayOptions = this._display.getOptions();
         if (displayOptions !== null) {
@@ -563,12 +565,26 @@ export class SearchDisplayController {
     /**
      * @param {Event} event
      */
+    _onProfileSelectChangeEvent(event) {
+        void this._onProfileSelectChange(event).catch((error) => {
+            log.error(error);
+        });
+    }
+
+    /**
+     * @param {Event} event
+     */
     async _onProfileSelectChange(event) {
         const node = /** @type {HTMLInputElement} */ (event.currentTarget);
         const value = Number.parseInt(node.value, 10);
         const optionsFull = await this._display.application.api.optionsGetFull();
-        if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= optionsFull.profiles.length) {
-            await this._setDefaultProfileIndex(value);
+        if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value < optionsFull.profiles.length) {
+            try {
+                await this._setDefaultProfileIndex(value);
+            } catch (error) {
+                await this._updateProfileSelect();
+                throw error;
+            }
         }
     }
 
@@ -834,7 +850,9 @@ export class SearchDisplayController {
 
     /** */
     async _updateProfileSelect() {
+        const refreshGeneration = ++this._profileSelectRefreshGeneration;
         const {profiles, profileCurrent} = await this._display.application.api.optionsGetFull();
+        if (refreshGeneration !== this._profileSelectRefreshGeneration) { return; }
 
         /** @type {HTMLElement} */
         const optionGroup = querySelectorNotNull(document, '#profile-select-option-group');

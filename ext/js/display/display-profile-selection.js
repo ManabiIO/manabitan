@@ -45,6 +45,8 @@ export class DisplayProfileSelection {
         this._source = generateId(16);
         /** @type {HTMLElement} */
         this._profileName = querySelectorNotNull(document, '#profile-name');
+        /** @type {number} */
+        this._optionsRefreshGeneration = 0;
     }
 
     /** */
@@ -104,7 +106,9 @@ export class DisplayProfileSelection {
 
     /** */
     async _updateCurrentProfileName() {
+        const refreshGeneration = ++this._optionsRefreshGeneration;
         const {profileCurrent, profiles} = await this._display.application.api.optionsGetFull();
+        if (refreshGeneration !== this._optionsRefreshGeneration) { return; }
         if (profiles.length === 1) {
             this._profileButton.style.display = 'none';
             return;
@@ -116,7 +120,9 @@ export class DisplayProfileSelection {
     /** */
     async _updateProfileList() {
         this._profileListNeedsUpdate = false;
+        const refreshGeneration = ++this._optionsRefreshGeneration;
         const options = await this._display.application.api.optionsGetFull();
+        if (refreshGeneration !== this._optionsRefreshGeneration) { return; }
 
         this._eventListeners.removeAllEventListeners();
         const displayGenerator = this._display.displayGenerator;
@@ -146,7 +152,15 @@ export class DisplayProfileSelection {
     _onProfileRadioChange(index, e) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
         if (element.checked) {
-            void this._setProfileCurrent(index);
+            void this._setProfileCurrent(index).catch(async (error) => {
+                try {
+                    await this._updateProfileList();
+                    await this._updateCurrentProfileName();
+                } catch (refreshError) {
+                    log.error(refreshError);
+                }
+                log.error(error);
+            });
         }
     }
 
