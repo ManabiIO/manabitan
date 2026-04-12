@@ -18,6 +18,7 @@
 
 import {convertElementValueToNumber} from '../../dom/document-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
+import {log} from '../../core/log.js';
 
 export class NestedPopupsController {
     /**
@@ -63,7 +64,9 @@ export class NestedPopupsController {
         const node = /** @type {HTMLInputElement} */ (e.currentTarget);
         const value = node.checked;
         if (value && this._popupNestingMaxDepth > 0) { return; }
-        void this._setPopupNestingMaxDepth(value ? 1 : 0);
+        void this._setPopupNestingMaxDepth(value ? 1 : 0).catch((error) => {
+            log.error(error);
+        });
     }
 
     /**
@@ -72,7 +75,9 @@ export class NestedPopupsController {
     _onNestedPopupsCountChange(e) {
         const node = /** @type {HTMLInputElement} */ (e.currentTarget);
         const value = Math.max(1, convertElementValueToNumber(node.value, node));
-        void this._setPopupNestingMaxDepth(value);
+        void this._setPopupNestingMaxDepth(value).catch((error) => {
+            log.error(error);
+        });
     }
 
     /**
@@ -90,7 +95,13 @@ export class NestedPopupsController {
      * @param {number} value
      */
     async _setPopupNestingMaxDepth(value) {
+        const previousValue = this._popupNestingMaxDepth;
         this._updatePopupNestingMaxDepth(value);
-        await this._settingsController.setProfileSetting('scanning.popupNestingMaxDepth', value);
+        try {
+            await this._settingsController.setProfileSetting('scanning.popupNestingMaxDepth', value);
+        } catch (e) {
+            this._updatePopupNestingMaxDepth(previousValue);
+            throw e;
+        }
     }
 }

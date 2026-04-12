@@ -116,6 +116,8 @@ export class DisplayAnki {
         this._forceSync = false;
         /** @type {boolean} */
         this.__noteDupeCheckFirst = false;
+        /** @type {number} */
+        this._ankiFieldTemplatesGeneration = 0;
     }
 
     /** */
@@ -1093,7 +1095,10 @@ export class DisplayAnki {
      * @param {import('settings').ProfileOptions} options
      */
     async _updateAnkiFieldTemplates(options) {
-        this._ankiFieldTemplates = await this._getAnkiFieldTemplates(options);
+        const generation = ++this._ankiFieldTemplatesGeneration;
+        const templates = await this._getAnkiFieldTemplates(options);
+        if (generation !== this._ankiFieldTemplatesGeneration) { return; }
+        this._ankiFieldTemplates = templates;
     }
 
     /**
@@ -1230,7 +1235,6 @@ export class DisplayAnki {
                 infos = await this._display.application.api.getAnkiNoteInfo(
                     validNotes,
                     fetchAdditionalInfo,
-                    fetchDuplicateNoteIds,
                 );
             } else {
                 const isAnkiConnected = await this._display.application.api.isAnkiConnected();

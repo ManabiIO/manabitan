@@ -18,6 +18,8 @@
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {toError} from '../core/to-error.js';
 
+const extensionMessageTimeoutMs = 30_000;
+
 /**
  * @augments EventDispatcher<import('web-extension').Events>
  */
@@ -81,8 +83,28 @@ export class WebExtension extends EventDispatcher {
      */
     sendMessagePromise(message) {
         return new Promise((resolve, reject) => {
+            let settled = false;
+            /** @type {() => void} */
+            const onUnloaded = () => {
+                if (settled) { return; }
+                settled = true;
+                globalThis.clearTimeout(timeoutId);
+                this.off('unloaded', onUnloaded);
+                reject(new Error('Lost connection to the extension runtime. Refresh this page to reconnect.'));
+            };
+            const timeoutId = globalThis.setTimeout(() => {
+                if (settled) { return; }
+                settled = true;
+                this.off('unloaded', onUnloaded);
+                reject(new Error(`Timed out waiting for extension response after ${String(extensionMessageTimeoutMs)}ms.`));
+            }, extensionMessageTimeoutMs);
+            this.on('unloaded', onUnloaded);
             try {
                 this.sendMessage(message, (response) => {
+                    if (settled) { return; }
+                    settled = true;
+                    globalThis.clearTimeout(timeoutId);
+                    this.off('unloaded', onUnloaded);
                     const error = this.getLastError();
                     if (error !== null) {
                         reject(error);
@@ -91,6 +113,10 @@ export class WebExtension extends EventDispatcher {
                     }
                 });
             } catch (error) {
+                if (settled) { return; }
+                settled = true;
+                globalThis.clearTimeout(timeoutId);
+                this.off('unloaded', onUnloaded);
                 reject(error);
             }
         });
@@ -112,9 +138,18 @@ export class WebExtension extends EventDispatcher {
     getLastError() {
         const {lastError} = chrome.runtime;
         if (lastError) {
-            if (lastError instanceof Error) { return lastError; }
+            if (lastError instanceof Error) {
+                if (this._shouldTriggerUnloadedForError(lastError)) {
+                    this.triggerUnloaded();
+                }
+                return lastError;
+            }
             const {message} = lastError;
-            return new Error(typeof message === 'string' ? message : 'An unknown web extension error occured');
+            const error = new Error(typeof message === 'string' ? message : 'An unknown web extension error occured');
+            if (this._shouldTriggerUnloadedForError(error)) {
+                this.triggerUnloaded();
+            }
+            return error;
         }
         return null;
     }
@@ -124,6 +159,19 @@ export class WebExtension extends EventDispatcher {
         if (this._unloaded) { return; }
         this._unloaded = true;
         this.trigger('unloaded', {});
+    }
+
+    /**
+     * @param {Error} error
+     * @returns {boolean}
+     */
+    _shouldTriggerUnloadedForError(error) {
+        const {message} = error;
+        return (
+            message.includes('Receiving end does not exist') ||
+            message.includes('Could not establish connection') ||
+            message.includes('The message port closed before a response was received')
+        );
     }
 
     /**

@@ -210,7 +210,7 @@ describe('TermRecordOpfsStore', () => {
         shardStateByFileName.set(newFileName, newShardState);
         activeAppendShardStateByKey.set(oldLogicalKey, oldShardState);
         activeAppendShardStateByKey.set(newLogicalKey, newShardState);
-        indexByDictionary.set('JMdict [2026-02-26]', new Set([2]));
+        indexByDictionary.set('JMdict [2026-02-26]', /** @type {any} */ (new Set([2])));
         recordsById.set(1, {
             id: 1,
             dictionary: 'JMdict staging',

@@ -17,6 +17,7 @@
  */
 
 import {isObjectNotArray} from '../../core/object-utilities.js';
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 export class PersistentStorageController {
@@ -37,7 +38,7 @@ export class PersistentStorageController {
 
     /** */
     async prepare() {
-        this._persistentStorageCheckbox.addEventListener('change', this._onPersistentStorageCheckboxChange.bind(this), false);
+        this._persistentStorageCheckbox.addEventListener('change', this._onPersistentStorageCheckboxChangeEvent.bind(this), false);
 
         if (!this._isPersistentStorageSupported()) { return; }
 
@@ -70,9 +71,22 @@ export class PersistentStorageController {
         const node = /** @type {HTMLInputElement} */ (e.currentTarget);
         if (node.checked) {
             node.checked = false;
-            void this._attemptPersistStorage();
+            void this._attemptPersistStorage().catch((error) => {
+                log.error(error);
+            });
         } else {
             node.checked = true;
+        }
+    }
+
+    /**
+     * @param {Event} e
+     */
+    _onPersistentStorageCheckboxChangeEvent(e) {
+        try {
+            this._onPersistentStorageCheckboxChange(e);
+        } catch (error) {
+            log.error(error);
         }
     }
 

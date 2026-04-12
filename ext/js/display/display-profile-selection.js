@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {log} from '../core/log.js';
 import {generateId} from '../core/utilities.js';
 import {PanelElement} from '../dom/panel-element.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
@@ -44,11 +45,13 @@ export class DisplayProfileSelection {
         this._source = generateId(16);
         /** @type {HTMLElement} */
         this._profileName = querySelectorNotNull(document, '#profile-name');
+        /** @type {number} */
+        this._optionsRefreshGeneration = 0;
     }
 
     /** */
     async prepare() {
-        this._display.application.on('optionsUpdated', this._onOptionsUpdated.bind(this));
+        this._display.application.on('optionsUpdated', this._onOptionsUpdatedEvent.bind(this));
         this._profileButton.addEventListener('click', this._onProfileButtonClick.bind(this), false);
         this._profileListNeedsUpdate = true;
         await this._updateCurrentProfileName();
@@ -58,14 +61,26 @@ export class DisplayProfileSelection {
 
     /**
      * @param {{source: string}} details
+     * @returns {void}
+     */
+    _onOptionsUpdatedEvent(details) {
+        void this._onOptionsUpdated(details);
+    }
+
+    /**
+     * @param {{source: string}} details
      */
     async _onOptionsUpdated({source}) {
         if (source === this._source) { return; }
-        this._profileListNeedsUpdate = true;
-        if (this._profilePanel.isVisible()) {
-            void this._updateProfileList();
+        try {
+            this._profileListNeedsUpdate = true;
+            if (this._profilePanel.isVisible()) {
+                await this._updateProfileList();
+            }
+            await this._updateCurrentProfileName();
+        } catch (error) {
+            log.error(error);
         }
-        await this._updateCurrentProfileName();
     }
 
     /**
@@ -91,7 +106,9 @@ export class DisplayProfileSelection {
 
     /** */
     async _updateCurrentProfileName() {
+        const refreshGeneration = ++this._optionsRefreshGeneration;
         const {profileCurrent, profiles} = await this._display.application.api.optionsGetFull();
+        if (refreshGeneration !== this._optionsRefreshGeneration) { return; }
         if (profiles.length === 1) {
             this._profileButton.style.display = 'none';
             return;
@@ -103,7 +120,9 @@ export class DisplayProfileSelection {
     /** */
     async _updateProfileList() {
         this._profileListNeedsUpdate = false;
+        const refreshGeneration = ++this._optionsRefreshGeneration;
         const options = await this._display.application.api.optionsGetFull();
+        if (refreshGeneration !== this._optionsRefreshGeneration) { return; }
 
         this._eventListeners.removeAllEventListeners();
         const displayGenerator = this._display.displayGenerator;
@@ -133,7 +152,15 @@ export class DisplayProfileSelection {
     _onProfileRadioChange(index, e) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
         if (element.checked) {
-            void this._setProfileCurrent(index);
+            void this._setProfileCurrent(index).catch(async (error) => {
+                try {
+                    await this._updateProfileList();
+                    await this._updateCurrentProfileName();
+                } catch (refreshError) {
+                    log.error(refreshError);
+                }
+                log.error(error);
+            });
         }
     }
 

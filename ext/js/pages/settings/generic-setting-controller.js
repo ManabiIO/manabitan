@@ -18,6 +18,7 @@
 
 import {ExtensionError} from '../../core/extension-error.js';
 import {parseJson} from '../../core/json.js';
+import {log} from '../../core/log.js';
 import {convertElementValueToNumber} from '../../dom/document-util.js';
 import {DOMDataBinder} from '../../dom/dom-data-binder.js';
 
@@ -66,7 +67,9 @@ export class GenericSettingController {
 
     /** */
     _onOptionsChanged() {
-        void this._dataBinder.refresh();
+        void this._dataBinder.refresh().catch((error) => {
+            log.error(error);
+        });
     }
 
     /**

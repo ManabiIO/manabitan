@@ -18,6 +18,7 @@
 
 import {getAllPermissions, hasPermissions, setPermissionsGranted} from '../../data/permissions-util.js';
 import {ObjectPropertyAccessor} from '../../general/object-property-accessor.js';
+import {log} from '../../core/log.js';
 
 export class PermissionsToggleController {
     /**
@@ -35,7 +36,7 @@ export class PermissionsToggleController {
         this._toggles = document.querySelectorAll('.permissions-toggle');
 
         for (const toggle of this._toggles) {
-            toggle.addEventListener('change', this._onPermissionsToggleChange.bind(this), false);
+            toggle.addEventListener('change', this._onPermissionsToggleChangeEvent.bind(this), false);
         }
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
         this._settingsController.on('permissionsChanged', this._onPermissionsChanged.bind(this));
@@ -100,8 +101,23 @@ export class PermissionsToggleController {
 
         if (hasPermissionsSetting) {
             this._setToggleValid(toggle, true);
-            await this._settingsController.setProfileSetting(permissionsSetting, value);
+            try {
+                await this._settingsController.setProfileSetting(permissionsSetting, value);
+            } catch (error) {
+                toggle.checked = valuePre;
+                this._setToggleValid(toggle, !valuePre || await hasPermissions({permissions: this._getRequiredPermissions(toggle)}));
+                throw error;
+            }
         }
+    }
+
+    /**
+     * @param {Event} e
+     */
+    _onPermissionsToggleChangeEvent(e) {
+        void this._onPermissionsToggleChange(e).catch((error) => {
+            log.error(error);
+        });
     }
 
     /**

@@ -112,7 +112,7 @@ export class ScanInputsSimpleController {
     onMiddleMouseButtonScanChange(e) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
         const middleMouseSupported = element.checked;
-        void this._setMiddleMouseSuppported(middleMouseSupported);
+        void this._handleMiddleMouseButtonScanChange(element, middleMouseSupported);
     }
 
     /**
@@ -123,7 +123,7 @@ export class ScanInputsSimpleController {
         const mainScanKey = element.value;
         if (mainScanKey === 'other') { return; }
         const mainScanInputs = (mainScanKey === 'none' ? [] : [mainScanKey]);
-        void this._setMainScanInputs(mainScanInputs);
+        void this._handleMainScanModifierKeyInputChange(element, mainScanInputs);
     }
 
     /**
@@ -208,8 +208,6 @@ export class ScanInputsSimpleController {
         const {scanning: {inputs}} = options;
         const index = this._getIndexOfMainScanInput(inputs);
 
-        this._setHasMainScanInput(true);
-
         if (index < 0) {
             // Add new
             const input = ScanInputsController.createDefaultMouseInput(value2, 'mouse0');
@@ -238,6 +236,48 @@ export class ScanInputsSimpleController {
         /** @type {import('settings-controller').EventArgument<'scanInputsChanged'>} */
         const event = {source: this};
         this._settingsController.trigger('scanInputsChanged', event);
+    }
+
+    /**
+     * @param {HTMLInputElement} element
+     * @param {boolean} middleMouseSupported
+     */
+    async _handleMiddleMouseButtonScanChange(element, middleMouseSupported) {
+        const options = await this._settingsController.getOptions();
+        const {scanning: {inputs}} = options;
+        const previousValue = (this._getIndexOfMiddleMouseButtonScanInput(inputs) >= 0);
+        try {
+            await this._setMiddleMouseSuppported(middleMouseSupported);
+        } catch {
+            element.checked = previousValue;
+        }
+    }
+
+    /**
+     * @param {HTMLSelectElement} element
+     * @param {string[]} mainScanInputs
+     */
+    async _handleMainScanModifierKeyInputChange(element, mainScanInputs) {
+        const options = await this._settingsController.getOptions();
+        const {scanning: {inputs}} = options;
+        const previousIndex = this._getIndexOfMainScanInput(inputs);
+        const previousHasOther = (previousIndex < 0);
+        let previousValue = 'none';
+        if (previousIndex >= 0) {
+            const includeValues = this._splitValue(inputs[previousIndex].include);
+            previousValue = (includeValues.length > 0 ? includeValues[0] : 'none');
+        } else {
+            previousValue = 'other';
+        }
+        try {
+            await this._setMainScanInputs(mainScanInputs);
+        } catch {
+            if (this._mainScanModifierKeyInputHasOther !== previousHasOther) {
+                this._mainScanModifierKeyInputHasOther = previousHasOther;
+                this._populateSelect(element, previousHasOther);
+            }
+            element.value = previousValue;
+        }
     }
 
     /**

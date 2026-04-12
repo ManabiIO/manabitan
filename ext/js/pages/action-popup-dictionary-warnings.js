@@ -1,0 +1,36 @@
+/*
+ * Copyright (C) 2026  Yomitan Authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @param {NodeListOf<HTMLElement>|HTMLElement[]} tooltips
+ * @param {boolean} hasEnabledDictionaries
+ * @param {() => void} restoreDefaultTooltips
+ */
+export function updateDictionaryWarningTooltips(tooltips, hasEnabledDictionaries, restoreDefaultTooltips) {
+    if (hasEnabledDictionaries) {
+        for (const tooltip of tooltips) {
+            tooltip.classList.remove('enable-dictionary-tooltip');
+        }
+        restoreDefaultTooltips();
+        return;
+    }
+
+    for (const tooltip of tooltips) {
+        tooltip.textContent = 'No dictionary enabled';
+        tooltip.classList.add('enable-dictionary-tooltip');
+    }
+}

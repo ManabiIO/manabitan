@@ -78,6 +78,7 @@ const ZIP_COMPRESSION_METHOD_STORE = 0;
 const HEX_BYTE_TABLE = Array.from({length: 256}, (_, i) => i.toString(16).padStart(2, '0'));
 /** @type {import('dictionary-data').TermGlossary[]} */
 const EMPTY_TERM_GLOSSARY = [];
+/** @typedef {import('dictionary-importer').ImportFileEntry} ImportFileEntry */
 const EMPTY_ARRAY_BUFFER = new ArrayBuffer(0);
 Object.freeze(EMPTY_TERM_GLOSSARY);
 
@@ -926,7 +927,7 @@ export class DictionaryImporter {
                 !this._skipMediaImport &&
                 (hasArchiveImageMediaFiles || hasUsableArtifactMediaFiles)
             );
-            /** @type {Array<{path: string, mediaType: string, packedOffset?: number, packedLength?: number, compressionMethod?: number, uncompressedLength?: number, fileEntry?: import('dictionary-importer').ImportFileEntry}>} */
+            /** @type {Array<{path: string, mediaType: string, packedOffset?: number, packedLength?: number, compressionMethod?: number, uncompressedLength?: number, fileEntry?: ImportFileEntry}>} */
             const artifactArchiveImageFileEntries = (() => {
                 if (
                     !useMediaPipeline ||
@@ -1260,11 +1261,7 @@ export class DictionaryImporter {
                     /** @type {import('dictionary-importer').ImportRequirement[]} */
                     const notAddedRequirements = [];
                     for (const requirement of requirements) {
-                        const mediaPath = (
-                            requirement.type === 'structured-content-media-link' ?
-                                requirement.source.href :
-                                requirement.source.path
-                        );
+                        const mediaPath = /** @type {{path: string}} */ (requirement.source).path;
                         if (uniqueMediaPaths.has(mediaPath)) {
                             alreadyAddedRequirements.push(requirement);
                             continue;
@@ -1607,7 +1604,7 @@ export class DictionaryImporter {
                     updateStreamedTermFileProgress(streamedProgressStartIndex, 1, 1, true);
                 } else {
                     const tTermParseStart = Date.now();
-                    const termFileEntry = /** @type {import('dictionary-importer').ImportFileEntry} */ (termFile);
+                    const termFileEntry = /** @type {import('@zip.js/zip.js').Entry} */ (termFile);
                     const termReadResult = await this._readTermBankFile(
                         termFileEntry,
                         version,
@@ -2249,11 +2246,7 @@ export class DictionaryImporter {
      * @returns {boolean}
      */
     _tryResolveRequirementFromCachedImageMetadata(requirement) {
-        const sourcePath = (
-            requirement.type === 'structured-content-media-link' ?
-                requirement.source.href :
-                requirement.source.path
-        );
+        const sourcePath = /** @type {{path: string}} */ (requirement.source).path;
         const cachedMetadata = this._imageMetadataByPath.get(sourcePath);
         if (typeof cachedMetadata === 'undefined') {
             return false;
@@ -2755,7 +2748,7 @@ export class DictionaryImporter {
         let manifest;
         try {
             manifest = /** @type {{termBanks?: Array<{artifact?: unknown, packedOffset?: unknown, packedLength?: unknown, rows?: unknown}>, packedTermArtifact?: {file?: unknown}|null, mediaArtifact?: {file?: unknown, entries?: Array<{path?: unknown, packedOffset?: unknown, packedLength?: unknown, mediaType?: unknown, compressionMethod?: unknown, uncompressedLength?: unknown}>|null}|null, sharedGlossaryArtifact?: {file?: unknown, packedOffset?: unknown, packedLength?: unknown, compression?: unknown, uncompressedBytes?: unknown}|null, termContentMode?: unknown, prunedAuxFiles?: unknown, includesMediaFiles?: unknown}|null} */ (
-                parseJson(await this._getData(manifestEntry, new TextWriter()))
+                parseJson(await this._getData(/** @type {import('@zip.js/zip.js').Entry} */ (manifestEntry), new TextWriter()))
             );
         } catch (_) {
             return null;
@@ -2865,7 +2858,7 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {import('dictionary-importer').ImportFileEntry[]} termArtifactFiles
+     * @param {ImportFileEntry[]} termArtifactFiles
      * @returns {Promise<Map<string, Uint8Array>>}
      */
     async _preloadTermArtifactFiles(termArtifactFiles) {
@@ -2889,7 +2882,7 @@ export class DictionaryImporter {
      * @param {Uint8Array|null} sharedGlossaryArtifactBytes
      * @param {{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>}|null} termArtifactManifest
      * @param {Map<string, Uint8Array>|null} preloadedTermArtifactBytes
-     * @param {import('dictionary-importer').ImportFileEntry[]} termArtifactFiles
+     * @param {ImportFileEntry[]} termArtifactFiles
      * @returns {number|null}
      */
     _estimateExpectedTermContentImportBytes(
@@ -2912,7 +2905,9 @@ export class DictionaryImporter {
             }
         } else {
             for (const termArtifactFile of termArtifactFiles) {
-                const uncompressedSize = /** @type {unknown} */ (Reflect.get(/** @type {Record<string, unknown>} */ (/** @type {unknown} */ (termArtifactFile)), 'uncompressedSize'));
+                const uncompressedSize = typeof Reflect.get(termArtifactFile, 'uncompressedSize') === 'number' ?
+                    Reflect.get(termArtifactFile, 'uncompressedSize') :
+                    (typeof Reflect.get(termArtifactFile, 'bytes') !== 'undefined' ? Reflect.get(/** @type {{bytes: Uint8Array}} */ (termArtifactFile), 'bytes').byteLength : 0);
                 const size = typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) ?
                     Math.max(0, Math.trunc(uncompressedSize)) :
                     0;
@@ -2947,7 +2942,7 @@ export class DictionaryImporter {
     /**
      * @template [TEntry=unknown]
      * @template [TResult=unknown]
-     * @param {import('dictionary-importer').ImportFileEntry[]} files
+     * @param {ImportFileEntry[]} files
      * @param {(entry: TEntry, dictionaryTitle: string) => TResult} convertEntry
      * @param {string} dictionaryTitle
      * @returns {Promise<TResult[]>}
@@ -2977,7 +2972,7 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {import('dictionary-importer').ImportFileEntry} termFile
+     * @param {import('@zip.js/zip.js').Entry} termFile
      * @param {import('dictionary-data').IndexVersion} version
      * @param {string} dictionaryTitle
      * @param {boolean} prefixWildcardsSupported
@@ -3056,7 +3051,7 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {import('dictionary-importer').ImportFileEntry} termFile
+     * @param {import('@zip.js/zip.js').Entry} termFile
      * @param {import('dictionary-data').IndexVersion} version
      * @param {string} dictionaryTitle
      * @param {boolean} prefixWildcardsSupported
@@ -3305,7 +3300,7 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {import('dictionary-importer').ImportFileEntry} termFile
+     * @param {import('@zip.js/zip.js').Entry} termFile
      * @param {string} dictionaryTitle
      * @param {boolean} prefixWildcardsSupported
      * @param {'baseline'|'raw-bytes'} termContentStorageMode
@@ -3994,30 +3989,29 @@ export class DictionaryImporter {
 
     /**
      * @template [T=unknown]
-     * @param {import('dictionary-importer').ImportFileEntry} entry
+     * @param {ImportFileEntry} entry
      * @param {import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter} writer
      * @returns {Promise<T>}
      */
     async _getData(entry, writer) {
-        const getData = /** @type {unknown} */ (Reflect.get(/** @type {Record<string, unknown>} */ (/** @type {unknown} */ (entry)), 'getData'));
-        if (typeof getData === 'function') {
-            return await /** @type {(writer: import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter) => Promise<T>} */ (getData).call(entry, writer);
+        const bytes = /** @type {Uint8Array|undefined} */ (Reflect.get(entry, 'bytes'));
+        if (bytes instanceof Uint8Array) {
+            if (writer instanceof Uint8ArrayWriter) {
+                return /** @type {T} */ (bytes);
+            }
+            if (writer instanceof TextWriter) {
+                return /** @type {T} */ (new TextDecoder().decode(bytes));
+            }
+            if (writer instanceof BlobWriter) {
+                return /** @type {T} */ (new Blob([bytes]));
+            }
+            throw new Error(`Unsupported writer for ${entry.filename}`);
         }
-        const bytes = /** @type {unknown} */ (Reflect.get(/** @type {Record<string, unknown>} */ (/** @type {unknown} */ (entry)), 'bytes'));
-        const filename = String(Reflect.get(/** @type {Record<string, unknown>} */ (/** @type {unknown} */ (entry)), 'filename') ?? 'unknown-file');
-        if (!(bytes instanceof Uint8Array)) {
-            throw new Error(`Cannot read ${filename}`);
+        const getData = Reflect.get(entry, 'getData');
+        if (typeof getData !== 'function') {
+            throw new Error(`Cannot read ${entry.filename}`);
         }
-        if (writer instanceof TextWriter) {
-            return /** @type {T} */ (new TextDecoder().decode(bytes));
-        }
-        if (writer instanceof Uint8ArrayWriter) {
-            return /** @type {T} */ (bytes.slice());
-        }
-        if (writer instanceof BlobWriter) {
-            return /** @type {T} */ (new Blob([bytes]));
-        }
-        throw new Error(`Unsupported writer for ${filename}`);
+        return await getData.call(entry, writer);
     }
 
 }

@@ -16,6 +16,7 @@
  */
 
 import {querySelectorNotNull} from '../../dom/query-selector.js';
+import {log} from '../../core/log.js';
 import {getDataTransmissionConsentUpdateTargets} from '../../data/data-transmission-consent-util.js';
 import {ModalController} from './modal-controller.js';
 
@@ -43,8 +44,8 @@ export class DataTransmissionConsentController {
             this._acceptDataTransmissionButton = /** @type {HTMLButtonElement} */ (querySelectorNotNull(document, '#accept-data-transmission'));
             this._declineDataTransmissionButton = /** @type {HTMLButtonElement} */ (querySelectorNotNull(document, '#decline-data-transmission'));
 
-            this._acceptDataTransmissionButton.addEventListener('click', this._onAccept.bind(this));
-            this._declineDataTransmissionButton.addEventListener('click', this._onDecline.bind(this));
+            this._acceptDataTransmissionButton.addEventListener('click', this._onAcceptEvent.bind(this));
+            this._declineDataTransmissionButton.addEventListener('click', this._onDeclineEvent.bind(this));
         }
     }
 
@@ -57,10 +58,28 @@ export class DataTransmissionConsentController {
         );
     }
 
+    /**
+     * @param {MouseEvent} _e
+     */
+    _onAcceptEvent(_e) {
+        void this._onAccept().catch((error) => {
+            log.error(error);
+        });
+    }
+
     /** */
     async _onDecline() {
         await this._settingsController.modifySettings(
             getDataTransmissionConsentUpdateTargets('declined', false, this._settingsController.getOptionsContext()),
         );
+    }
+
+    /**
+     * @param {MouseEvent} _e
+     */
+    _onDeclineEvent(_e) {
+        void this._onDecline().catch((error) => {
+            log.error(error);
+        });
     }
 }

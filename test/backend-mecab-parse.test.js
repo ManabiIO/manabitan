@@ -49,13 +49,16 @@ describe('Backend._onApiParseText', () => {
 
         const expectedContent = [
             [
-                {text: '思', reading: 'おも', lemma: '思い出す', lemmaReading: 'おもいだす'},
+                {text: '思', reading: 'おも'},
                 {text: 'い', reading: ''},
                 {text: '出', reading: 'だ'},
                 {text: 'せなく', reading: ''},
             ],
             [
-                {text: 'なった', reading: '', lemma: '成る', lemmaReading: 'なる'},
+                {text: 'なった', reading: ''},
+            ],
+            [
+                {text: '\n', reading: ''},
             ],
         ];
         expect(results).toStrictEqual([

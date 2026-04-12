@@ -39,7 +39,7 @@ export class RecommendedSettingsController {
     /** */
     async prepare() {
         this._languageSelect.addEventListener('change', this._onLanguageSelectChanged.bind(this), false);
-        this._applyButton.addEventListener('click', this._onApplyButtonClicked.bind(this), false);
+        this._applyButton.addEventListener('click', this._onApplyButtonClickedEvent.bind(this), false);
     }
 
     /**
@@ -50,34 +50,39 @@ export class RecommendedSettingsController {
         if (typeof setLanguage !== 'string') { return; }
 
         const recommendedSettings = await this._getRecommendedSettings(setLanguage);
-        if (typeof recommendedSettings !== 'undefined') {
-            const settingsList = querySelectorNotNull(document, '#recommended-settings-list');
-            settingsList.innerHTML = '';
-            this._recommendedSettings = new Map();
+        const settingsList = querySelectorNotNull(document, '#recommended-settings-list');
+        settingsList.innerHTML = '';
+        this._recommendedSettings = new Map();
 
-            for (const [index, setting] of recommendedSettings.entries()) {
-                this._recommendedSettings.set(index.toString(), setting);
-
-                const {description} = setting;
-                const template = this._settingsController.instantiateTemplate('recommended-settings-list-item');
-
-                // Render label
-                this._renderLabel(template, setting);
-
-                // Render description
-                const descriptionElement = querySelectorNotNull(template, '.settings-item-description');
-                if (description !== 'undefined') {
-                    descriptionElement.textContent = description;
-                }
-
-                // Render checkbox
-                const checkbox = /** @type {HTMLInputElement} */ (querySelectorNotNull(template, 'input[type="checkbox"]'));
-                checkbox.value = index.toString();
-
-                settingsList.append(template);
-            }
-            this._recommendedSettingsModal.hidden = false;
+        if (!Array.isArray(recommendedSettings) || recommendedSettings.length === 0) {
+            this._recommendedSettingsModal.hidden = true;
+            return;
         }
+
+        for (const [index, setting] of recommendedSettings.entries()) {
+            this._recommendedSettings.set(index.toString(), setting);
+
+            const {description} = setting;
+            const template = this._settingsController.instantiateTemplate('recommended-settings-list-item');
+
+            // Render label
+            this._renderLabel(template, setting);
+
+            // Render description
+            const descriptionElement = querySelectorNotNull(template, '.settings-item-description');
+            if (typeof description === 'string') {
+                descriptionElement.textContent = description;
+            } else {
+                descriptionElement.textContent = '';
+            }
+
+            // Render checkbox
+            const checkbox = /** @type {HTMLInputElement} */ (querySelectorNotNull(template, 'input[type="checkbox"]'));
+            checkbox.value = index.toString();
+
+            settingsList.append(template);
+        }
+        this._recommendedSettingsModal.hidden = false;
     }
 
     /**
@@ -97,30 +102,44 @@ export class RecommendedSettingsController {
     /**
      * @param {MouseEvent} e
      */
-    _onApplyButtonClicked(e) {
+    async _onApplyButtonClicked(e) {
         e.preventDefault();
         /** @type {NodeListOf<HTMLInputElement>} */
         const enabledCheckboxes = querySelectorNotNull(document, '#recommended-settings-list').querySelectorAll('input[type="checkbox"]:checked');
-        if (enabledCheckboxes.length > 0) {
-            const modifications = [];
-            for (const checkbox of enabledCheckboxes) {
-                const index = checkbox.value;
-                const setting = this._recommendedSettings.get(index);
-                if (typeof setting === 'undefined') { continue; }
-                modifications.push(setting.modification);
-            }
-            void this._settingsController.modifyProfileSettings(modifications).then(
-                (results) => {
-                    for (const result of results) {
-                        if (Object.hasOwn(result, 'error')) {
-                            log.error(new Error(`Failed to apply recommended setting: ${JSON.stringify(result)}`));
-                        }
-                    }
-                },
-            );
-            void this._settingsController.refresh();
+        if (enabledCheckboxes.length === 0) {
+            this._recommendedSettingsModal.hidden = true;
+            return;
         }
-        this._recommendedSettingsModal.hidden = true;
+
+        const modifications = [];
+        for (const checkbox of enabledCheckboxes) {
+            const index = checkbox.value;
+            const setting = this._recommendedSettings.get(index);
+            if (typeof setting === 'undefined') { continue; }
+            modifications.push(setting.modification);
+        }
+
+        try {
+            const results = await this._settingsController.modifyProfileSettings(modifications);
+            for (const result of results) {
+                if (Object.hasOwn(result, 'error')) {
+                    log.error(new Error(`Failed to apply recommended setting: ${JSON.stringify(result)}`));
+                }
+            }
+            await this._settingsController.refresh();
+            this._recommendedSettingsModal.hidden = true;
+        } catch (error) {
+            log.error(error);
+        }
+    }
+
+    /**
+     * @param {MouseEvent} e
+     */
+    _onApplyButtonClickedEvent(e) {
+        void this._onApplyButtonClicked(e).catch((error) => {
+            log.error(error);
+        });
     }
 
     /**

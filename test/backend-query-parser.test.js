@@ -58,8 +58,8 @@ describe('Backend query parser segmentation', () => {
     const textParseScanning = getTextParseScanningMethod();
 
     test.each([
-        ['カタかな', [[{text: 'カタ', reading: ''}], [{text: 'かな', reading: ''}]]],
-        ['かなカナ', [[{text: 'かな', reading: ''}], [{text: 'カナ', reading: ''}]]],
+        ['カタかな', [[{text: 'カタかな', reading: ''}]]],
+        ['かなカナ', [[{text: 'かなカナ', reading: ''}]]],
         ['カタカナ', [[{text: 'カタカナ', reading: ''}]]],
         ['ひらがな', [[{text: 'ひらがな', reading: ''}]]],
     ])('splits unmatched text for %s', async (text, expected) => {

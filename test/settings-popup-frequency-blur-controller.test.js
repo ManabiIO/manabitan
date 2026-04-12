@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {describe, expect} from 'vitest';
+import {describe, expect, test as vitestTest, vi} from 'vitest';
 import {EventDispatcher} from '../ext/js/core/event-dispatcher.js';
 import {PopupFrequencyBlurController} from '../ext/js/pages/settings/popup-frequency-blur-controller.js';
 import {createDomTest} from './fixtures/dom-test.js';
@@ -146,5 +146,24 @@ describe('PopupFrequencyBlurController (settings)', () => {
 
         expect(optionValues).toStrictEqual(['', 'Test Dictionary']);
         expect(dictionarySelect.value).toBe('Test Dictionary');
+    });
+
+    test('refresh clears the dictionary-info token when getDictionaryInfo fails', async ({window}) => {
+        setupSettingsDom(window);
+        const controller = /** @type {PopupFrequencyBlurController} */ (Object.create(PopupFrequencyBlurController.prototype));
+        Reflect.set(controller, '_settingsController', {
+            getDictionaryInfo: vi.fn().mockRejectedValue(new Error('lookup failed')),
+            getOptions: vi.fn(),
+            getOptionsContext: vi.fn(),
+        });
+        Reflect.set(controller, '_popupFrequencyBlurDictionarySelect', window.document.querySelector('#popup-frequency-blur-dictionary'));
+        Reflect.set(controller, '_getDictionaryInfoToken', null);
+
+        const onDatabaseUpdated = /** @type {(this: PopupFrequencyBlurController) => Promise<void>} */ (
+            Reflect.get(PopupFrequencyBlurController.prototype, '_onDatabaseUpdated')
+        );
+
+        await expect(onDatabaseUpdated.call(controller)).rejects.toThrow('lookup failed');
+        expect(Reflect.get(controller, '_getDictionaryInfoToken')).toBeNull();
     });
 });

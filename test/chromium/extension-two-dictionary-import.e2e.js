@@ -515,7 +515,16 @@ async function addReportPhase(report, page, name, details, startMs, endMs, profi
     if (processSampler !== null && typeof processSampler.sampleNow === 'function') {
         try { await processSampler.sampleNow(); } catch (_) {}
     }
-    const screenshotBuffer = await page.screenshot({fullPage: true});
+    let screenshotBase64 = '';
+    try {
+        const screenshotBuffer = await page.screenshot({fullPage: true});
+        screenshotBase64 = screenshotBuffer.toString('base64');
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (!message.includes('page.screenshot: Timeout')) {
+            throw error;
+        }
+    }
     const resourceUsage = processSampler?.summarize(startMs, endMs) ?? null;
     report.phases.push({
         name,
@@ -526,7 +535,7 @@ async function addReportPhase(report, page, name, details, startMs, endMs, profi
         resourceUsage,
         hotspots: profileData?.hotspots ?? [],
         perfMetrics: profileData?.perfMetrics ?? null,
-        screenshotBase64: screenshotBuffer.toString('base64'),
+        screenshotBase64,
         screenshotMimeType: 'image/png',
     });
 }

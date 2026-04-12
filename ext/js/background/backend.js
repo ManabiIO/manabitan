@@ -132,6 +132,8 @@ export class Backend {
         this._searchPopupTabCreatePromise = null;
         /** @type {?Promise<void>} */
         this._dictionaryRefreshPromise = null;
+        /** @type {?Promise<void>} */
+        this._dictionaryMutationPromise = null;
         /** @type {boolean} */
         this._dictionaryRefreshQueued = false;
         /** @type {?Promise<void>} */
@@ -199,6 +201,7 @@ export class Backend {
             ['verifyDictionaryVisibility',   this._onApiVerifyDictionaryVisibility.bind(this)],
             ['debugDictionaryLookupState',   this._onApiDebugDictionaryLookupState.bind(this)],
             ['debugDictionaryStorageState',  this._onApiDebugDictionaryStorageState.bind(this)],
+            ['downloadDictionaryArchive',    this._onApiDownloadDictionaryArchive.bind(this)],
             ['setDictionaryImportMode',      this._onApiSetDictionaryImportMode.bind(this)],
             ['purgeDatabase',                this._onApiPurgeDatabase.bind(this)],
             ['exportDictionaryDatabase',     this._onApiExportDictionaryDatabase.bind(this)],
@@ -227,6 +230,7 @@ export class Backend {
         this._pmApiMap = createApiMap([
             ['connectToDatabaseWorker', this._onPmConnectToDatabaseWorker.bind(this)],
             ['importDictionaryOffscreen', this._onPmImportDictionaryOffscreen.bind(this)],
+            ['importDictionaryUrlOffscreen', this._onPmImportDictionaryUrlOffscreen.bind(this)],
             ['registerOffscreenPort',   this._onPmApiRegisterOffscreenPort.bind(this)],
         ]);
         /* eslint-enable @stylistic/no-multi-spaces */
@@ -250,8 +254,16 @@ export class Backend {
         this._dictionaryImportModeActive = false;
         /** @type {boolean} */
         this._deferredDictionaryRefreshDuringImport = false;
+        /** @type {{type: import('backend').DatabaseUpdateType, cause: import('backend').DatabaseUpdateCause}[]} */
+        this._pendingDatabaseUpdatedNotifications = [];
         /** @type {Promise<void>|null} */
         this._setDictionaryImportModePromise = null;
+        /** @type {Record<string, unknown>|null} */
+        this._lastDictionaryUrlImportDebug = null;
+        /** @type {SharedWorker|null} */
+        this._sharedWorkerBridge = null;
+        /** @type {boolean} */
+        this._sharedWorkerBridgeReconnectScheduled = false;
     }
 
     /**
@@ -324,25 +336,146 @@ export class Backend {
             if (responsePort === null) {
                 throw new Error('Offscreen import response port missing');
             }
-            if (this._offscreen !== null) {
-                await this._offscreen.prepare();
-                await this._offscreen.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, [responsePort]);
-                return;
-            }
-            if (this._localDictionaryRuntime !== null) {
-                await this._localDictionaryRuntime.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, [responsePort]);
-                return;
-            }
-            throw new Error('Dictionary runtime import is unavailable');
+            await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort);
         } catch (error) {
             try {
                 responsePort?.postMessage({type: 'error', error: ExtensionError.serialize(error)});
-            } catch (postMessageError) {
-                log.error(postMessageError);
+            } catch (_) {
+                // Best effort error delivery to the import caller.
             } finally {
                 responsePort?.close();
             }
         }
+    }
+
+    /** @type {import('api').PmApiHandler<'importDictionaryUrlOffscreen'>} */
+    async _onPmImportDictionaryUrlOffscreen({url, details}, ports) {
+        const responsePort = ports !== null && ports.length > 0 ? ports[0] : null;
+        try {
+            if (responsePort === null) {
+                throw new Error('Offscreen import response port missing');
+            }
+            const normalizedUrl = typeof url === 'string' ? url.trim() : '';
+            if (normalizedUrl.length === 0) {
+                throw new Error('Dictionary import URL is required');
+            }
+            this._lastDictionaryUrlImportDebug = {
+                stage: 'begin',
+                url: normalizedUrl,
+                startedAtIso: new Date().toISOString(),
+            };
+            const downloadTimeoutMs = 120_000;
+            try {
+                const archiveContent = await this._downloadDictionaryArchiveBlobViaXhr(normalizedUrl, downloadTimeoutMs, (phase) => {
+                    this._lastDictionaryUrlImportDebug = {
+                        ...this._lastDictionaryUrlImportDebug,
+                        ...phase,
+                    };
+                });
+                this._lastDictionaryUrlImportDebug = {
+                    ...this._lastDictionaryUrlImportDebug,
+                    stage: 'blob-ready',
+                    sizeBytes: archiveContent.size,
+                    blobReadyAtIso: new Date().toISOString(),
+                };
+                this._lastDictionaryUrlImportDebug = {
+                    ...this._lastDictionaryUrlImportDebug,
+                    stage: 'forward-to-runtime',
+                    forwardedAtIso: new Date().toISOString(),
+                };
+                await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort);
+                this._lastDictionaryUrlImportDebug = {
+                    ...this._lastDictionaryUrlImportDebug,
+                    stage: 'runtime-forwarded',
+                    runtimeForwardedAtIso: new Date().toISOString(),
+                };
+            } catch (error) {
+                const normalizedError = toError(error);
+                this._lastDictionaryUrlImportDebug = {
+                    ...this._lastDictionaryUrlImportDebug,
+                    stage: 'error',
+                    errorMessage: normalizedError.message,
+                    failedAtIso: new Date().toISOString(),
+                };
+                throw normalizedError;
+            }
+        } catch (error) {
+            const normalizedError = toError(error);
+            this._lastDictionaryUrlImportDebug = {
+                ...this._lastDictionaryUrlImportDebug,
+                stage: 'error',
+                errorMessage: normalizedError.message,
+                failedAtIso: new Date().toISOString(),
+            };
+            try {
+                responsePort?.postMessage({type: 'error', error: ExtensionError.serialize(normalizedError)});
+            } catch (_) {
+                // Best effort error delivery to the import caller.
+            } finally {
+                responsePort?.close();
+            }
+        }
+    }
+
+    /**
+     * @param {string} url
+     * @param {number} timeoutMs
+     * @param {(details: Record<string, string|number|null>) => void} onPhase
+     * @returns {Promise<Blob>}
+     */
+    async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase) {
+        return await new Promise((resolve, reject) => {
+            const request = new XMLHttpRequest();
+            const cleanup = () => {
+                request.onload = null;
+                request.onerror = null;
+                request.onabort = null;
+                request.ontimeout = null;
+                request.onprogress = null;
+                request.onreadystatechange = null;
+            };
+            const fail = (error) => {
+                cleanup();
+                reject(toError(error));
+            };
+            request.open('GET', url, true);
+            request.responseType = 'blob';
+            request.timeout = timeoutMs;
+            request.onreadystatechange = () => {
+                if (request.readyState < XMLHttpRequest.HEADERS_RECEIVED) { return; }
+                onPhase({
+                    stage: 'fetch-response',
+                    status: request.status,
+                    contentType: request.getResponseHeader('Content-Type'),
+                    contentLength: request.getResponseHeader('Content-Length'),
+                    respondedAtIso: new Date().toISOString(),
+                });
+            };
+            request.onload = () => {
+                if (!(request.status >= 200 && request.status < 300)) {
+                    fail(new Error(`Failed to fetch dictionary archive: ${url} (status=${String(request.status)})`));
+                    return;
+                }
+                const response = request.response;
+                const content = response instanceof Blob ? response : new Blob([]);
+                if (content.size === 0) {
+                    fail(new Error(`Fetched dictionary archive had no content: ${url}`));
+                    return;
+                }
+                cleanup();
+                resolve(content);
+            };
+            request.onerror = () => {
+                fail(new Error(`Failed to fetch dictionary archive: ${url}`));
+            };
+            request.onabort = () => {
+                fail(new Error(`Aborted fetching dictionary archive: ${url}`));
+            };
+            request.ontimeout = () => {
+                fail(new Error(`Timed out fetching dictionary archive after ${String(timeoutMs)}ms: ${url}`));
+            };
+            request.send();
+        });
     }
 
     /** @type {import('api').PmApiHandler<'registerOffscreenPort'>} */
@@ -350,6 +483,25 @@ export class Backend {
         if (ports !== null && ports.length > 0) {
             await this._offscreen?.registerOffscreenPort(ports[0]);
         }
+    }
+
+    /**
+     * @param {Blob} archiveContent
+     * @param {import('dictionary-importer').ImportDetails} details
+     * @param {MessagePort} responsePort
+     * @returns {Promise<void>}
+     */
+    async _forwardDictionaryImportToRuntime(archiveContent, details, responsePort) {
+        if (this._offscreen !== null) {
+            await this._offscreen.prepare();
+            await this._offscreen.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, [responsePort]);
+            return;
+        }
+        if (this._localDictionaryRuntime !== null) {
+            await this._localDictionaryRuntime.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, [responsePort]);
+            return;
+        }
+        throw new Error('Dictionary runtime import is unavailable');
     }
 
     /**
@@ -431,22 +583,17 @@ export class Backend {
             this._clipboardReader.browser = this._environment.getInfo().browser;
 
             // if this is Firefox and therefore not running in Service Worker, we need to use a SharedWorker to setup a MessageChannel to postMessage with the popup
-            if (self.constructor.name === 'Window') {
+            if (this._isWindowBackgroundRuntime()) {
                 const startedAt = safePerformance.now();
-                const sharedWorkerBridge = new SharedWorker(new URL('../comm/shared-worker-bridge.js', import.meta.url), {type: 'module'});
-                sharedWorkerBridge.port.postMessage({action: 'registerBackendPort'});
-                sharedWorkerBridge.port.addEventListener('message', (/** @type {MessageEvent} */ e) => {
-                    // connectToBackend2
-                    e.ports[0].onmessage = this._onPmMessage.bind(this);
-                });
-                sharedWorkerBridge.port.addEventListener('messageerror', this._onPmMessageError.bind(this));
-                sharedWorkerBridge.port.start();
+                this._setupSharedWorkerBridge();
                 recordPhase('sharedWorkerBridge.setup', startedAt);
             }
-            {
+            try {
                 const startedAt = safePerformance.now();
                 await this._ensureDictionaryDatabaseReady();
                 recordPhase('dictionaryDatabase.prepare', startedAt);
+            } catch (e) {
+                throw e;
             }
 
             void this._translator.prepare();
@@ -663,6 +810,83 @@ export class Backend {
         log.error(error);
     }
 
+    /**
+     * @returns {void}
+     */
+    _setupSharedWorkerBridge() {
+        const sharedWorkerBridge = new SharedWorker(new URL('../comm/shared-worker-bridge.js', import.meta.url), {type: 'module'});
+        this._sharedWorkerBridge = sharedWorkerBridge;
+        sharedWorkerBridge.port.addEventListener('message', (/** @type {MessageEvent} */ e) => {
+            // connectToBackend2
+            e.ports[0].onmessage = this._onPmMessage.bind(this);
+        });
+        sharedWorkerBridge.port.addEventListener('messageerror', (/** @type {MessageEvent} */ event) => {
+            this._onPmMessageError(event);
+            this._resetSharedWorkerBridge(sharedWorkerBridge, 'messageerror', new Error('Shared worker backend bridge message deserialization failed'));
+        });
+        sharedWorkerBridge.onerror = (event) => {
+            const message = typeof event.message === 'string' && event.message.length > 0 ? event.message : 'unknown shared worker failure';
+            this._resetSharedWorkerBridge(sharedWorkerBridge, 'error', new Error(message));
+        };
+        sharedWorkerBridge.port.start();
+        try {
+            sharedWorkerBridge.port.postMessage({action: 'registerBackendPort'});
+        } catch (error) {
+            this._resetSharedWorkerBridge(
+                sharedWorkerBridge,
+                'registerBackendPort',
+                error instanceof Error ? error : new Error(String(error)),
+            );
+            throw error;
+        }
+    }
+
+    /**
+     * @param {SharedWorker} sharedWorkerBridge
+     * @param {string} stage
+     * @param {Error} error
+     * @returns {void}
+     */
+    _resetSharedWorkerBridge(sharedWorkerBridge, stage, error) {
+        if (this._sharedWorkerBridge !== sharedWorkerBridge) {
+            return;
+        }
+        this._sharedWorkerBridge = null;
+        try {
+            sharedWorkerBridge.port.close();
+        } catch (_) {
+            // Ignore close failures for broken shared worker bridge ports.
+        }
+        reportDiagnostics('shared-worker-bridge-reset', {
+            stage,
+            message: error.message,
+        });
+        log.error(error);
+        if (this._sharedWorkerBridgeReconnectScheduled || !this._isWindowBackgroundRuntime()) {
+            return;
+        }
+        this._sharedWorkerBridgeReconnectScheduled = true;
+        queueMicrotask(() => {
+            this._sharedWorkerBridgeReconnectScheduled = false;
+            try {
+                this._setupSharedWorkerBridge();
+            } catch (reconnectError) {
+                const normalizedError = reconnectError instanceof Error ? reconnectError : new Error(String(reconnectError));
+                reportDiagnostics('shared-worker-bridge-reconnect-failed', {
+                    message: normalizedError.message,
+                });
+                log.error(normalizedError);
+            }
+        });
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    _isWindowBackgroundRuntime() {
+        return typeof self !== 'undefined' && self !== null && self.constructor?.name === 'Window';
+    }
+
 
     /**
      * @param {chrome.tabs.ZoomChangeInfo} event
@@ -732,6 +956,8 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'kanjiFind'>} */
     async _onApiKanjiFind({text, optionsContext}) {
+        await this._awaitDictionaryMutationSettled();
+        await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {maxResults}} = options;
@@ -743,6 +969,8 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'termsFind'>} */
     async _onApiTermsFind({text, details, optionsContext}) {
+        await this._awaitDictionaryMutationSettled();
+        await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {resultOutputMode: mode, maxResults}} = options;
@@ -914,7 +1142,7 @@ export class Backend {
     }
 
     /** @type {import('api').ApiHandler<'getAnkiNoteInfo'>} */
-    async _onApiGetAnkiNoteInfo({notes, fetchAdditionalInfo, fetchDuplicateNoteIds = true}) {
+    async _onApiGetAnkiNoteInfo({notes, fetchAdditionalInfo}) {
         const canAddArray = await this.partitionAddibleNotes(notes);
 
         /** @type {import('anki').NoteInfoWrapper[]} */
@@ -935,7 +1163,7 @@ export class Backend {
         }
 
         const duplicateNoteIds =
-            fetchDuplicateNoteIds && duplicateNotes.length > 0 ?
+            duplicateNotes.length > 0 ?
                 await this._anki.findNoteIds(duplicateNotes) :
                 [];
 
@@ -1139,6 +1367,7 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'getDictionaryInfo'>} */
     async _onApiGetDictionaryInfo() {
+        await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         return await this._dictionaryDatabase.getDictionaryInfo();
@@ -1146,25 +1375,32 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'deleteDictionaryByTitle'>} */
     async _onApiDeleteDictionaryByTitle({dictionaryTitle}) {
-        await this._ensureDictionaryDatabaseReady();
-        await this._dictionaryDatabase.deleteDictionary(dictionaryTitle, 1000, () => {});
+        await this._runDictionaryMutation(async () => {
+            await this._ensureDictionaryDatabaseReady();
+            await this._dictionaryDatabase.deleteDictionary(dictionaryTitle, 1000, () => {});
+            await this._refreshDictionaryDatabaseAfterUpdate();
+        });
     }
 
     /**
      * @param {import('api').ApiParams<'replaceDictionaryTitle'>} params
      */
     async _onApiReplaceDictionaryTitle({fromDictionaryTitle, toDictionaryTitle, summary, replacedDictionaryTitle}) {
-        await this._ensureDictionaryDatabaseReady();
-        await this._dictionaryDatabase.replaceDictionaryTitle(
-            fromDictionaryTitle,
-            toDictionaryTitle,
-            (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) ? summary : null,
-            typeof replacedDictionaryTitle === 'string' ? replacedDictionaryTitle : null,
-        );
+        await this._runDictionaryMutation(async () => {
+            await this._ensureDictionaryDatabaseReady();
+            await this._dictionaryDatabase.replaceDictionaryTitle(
+                fromDictionaryTitle,
+                toDictionaryTitle,
+                (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) ? summary : null,
+                typeof replacedDictionaryTitle === 'string' ? replacedDictionaryTitle : null,
+            );
+            await this._refreshDictionaryDatabaseAfterUpdate();
+        });
     }
 
     /** @type {import('api').ApiHandler<'getDictionaryCounts'>} */
     async _onApiGetDictionaryCounts({dictionaryNames, getTotal}) {
+        await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         return await this._dictionaryDatabase.getDictionaryCounts(dictionaryNames, getTotal);
@@ -1179,6 +1415,7 @@ export class Backend {
      * @param {{text: string, dictionaryNames: string[]}} params
      */
     async _onApiDebugDictionaryLookupState({text, dictionaryNames}) {
+        await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         if (this._offscreen !== null) {
@@ -1209,27 +1446,34 @@ export class Backend {
     }
 
     async _onApiDebugDictionaryStorageState() {
+        await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
-        const getOpenStorageDiagnostics = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'getOpenStorageDiagnostics'));
-        const openStorageDiagnostics = (typeof getOpenStorageDiagnostics === 'function') ?
-            await /** @type {() => Promise<unknown>} */ (getOpenStorageDiagnostics).call(this._dictionaryDatabase) :
-            null;
+        const usesFallbackStorageValue = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'usesFallbackStorage'));
+        const getOpenStorageDiagnosticsValue = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'getOpenStorageDiagnostics'));
         const rowsMethod = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'debugGetDictionaryRows'));
         const dictionaryRows = (typeof rowsMethod === 'function') ?
             await /** @type {() => Promise<unknown>} */ (rowsMethod).call(this._dictionaryDatabase) :
             null;
-            const offscreenDictionaryRows = (this._offscreen !== null) ? (() => this._offscreen.sendMessagePromise({
-                action: 'debugDictionaryStorageStateOffscreen',
-            }))() : null;
+        const offscreenDictionaryRows = (this._offscreen !== null) ? (() => this._offscreen.sendMessagePromise({
+            action: 'debugDictionaryStorageStateOffscreen',
+        }))() : null;
         const offscreenDictionaryRowsResult = (offscreenDictionaryRows !== null) ? await offscreenDictionaryRows : null;
+        const usesFallbackStorage = typeof usesFallbackStorageValue === 'function' ?
+            /** @type {() => boolean} */ (usesFallbackStorageValue).call(this._dictionaryDatabase) :
+            null;
+        const openStorageDiagnostics = typeof getOpenStorageDiagnosticsValue === 'function' ?
+            /** @type {() => unknown} */ (getOpenStorageDiagnosticsValue).call(this._dictionaryDatabase) :
+            null;
         return {
-            startupDiagnosticsSnapshot: this._startupDiagnosticsSnapshot,
+            usesFallbackStorage: typeof usesFallbackStorage === 'boolean' ? usesFallbackStorage : null,
             openStorageDiagnostics: (
                 typeof openStorageDiagnostics === 'object' &&
                 openStorageDiagnostics !== null &&
                 !Array.isArray(openStorageDiagnostics)
             ) ? openStorageDiagnostics : null,
+            startupDiagnosticsSnapshot: this._startupDiagnosticsSnapshot,
+            lastDictionaryUrlImportDebug: this._lastDictionaryUrlImportDebug,
             dictionaryRows: Array.isArray(dictionaryRows) ? dictionaryRows : [],
             offscreenDictionaryRows: Array.isArray(offscreenDictionaryRowsResult?.dictionaryRows) ? offscreenDictionaryRowsResult.dictionaryRows : [],
             offscreenLastReplaceDictionaryTitleDebug: (
@@ -1266,6 +1510,94 @@ export class Backend {
         }
     }
 
+    async _awaitDictionaryMutationSettled() {
+        while (this._dictionaryMutationPromise !== null) {
+            try {
+                await this._dictionaryMutationPromise;
+            } catch (_) {
+                // NOP
+            }
+        }
+    }
+
+    /**
+     * @param {() => Promise<void>} task
+     * @returns {Promise<void>}
+     */
+    async _runDictionaryMutation(task) {
+        await this._awaitDictionaryMutationSettled();
+        this._dictionaryMutationPromise = (async () => {
+            await task();
+        })();
+        try {
+            await this._dictionaryMutationPromise;
+        } finally {
+            this._dictionaryMutationPromise = null;
+        }
+    }
+
+    /** @type {import('api').ApiHandler<'downloadDictionaryArchive'>} */
+    async _onApiDownloadDictionaryArchive({url}) {
+        const normalizedUrl = typeof url === 'string' ? url.trim() : '';
+        if (normalizedUrl.length === 0) {
+            throw new Error('Dictionary archive download URL is required');
+        }
+        const downloadTimeoutMs = 120_000;
+        const abortController = new AbortController();
+        const timeoutId = globalThis.setTimeout(() => {
+            abortController.abort(new Error(`Timed out fetching dictionary archive after ${String(downloadTimeoutMs)}ms: ${normalizedUrl}`));
+        }, downloadTimeoutMs);
+        let response;
+        try {
+            response = await fetch(normalizedUrl, {
+                method: 'GET',
+                cache: 'no-store',
+                credentials: 'omit',
+                redirect: 'follow',
+                referrerPolicy: 'no-referrer',
+                signal: abortController.signal,
+            });
+        } catch (error) {
+            const abortReason = /** @type {unknown} */ (abortController.signal.reason);
+            if (abortController.signal.aborted && abortReason instanceof Error) {
+                throw abortReason;
+            }
+            throw toError(error);
+        } finally {
+            globalThis.clearTimeout(timeoutId);
+        }
+        if (!response.ok) {
+            throw new Error(`Failed to fetch dictionary archive: ${normalizedUrl} (status=${String(response.status)})`);
+        }
+        const content = await RequestBuilder.readFetchResponseArrayBuffer(response, null);
+        const fileName = (() => {
+            const contentDisposition = response.headers.get('Content-Disposition') || '';
+            const match = /filename\\*?=(?:UTF-8''|\"?)([^\";]+)/i.exec(contentDisposition);
+            if (match) {
+                try {
+                    return decodeURIComponent(match[1].replace(/^\"|\"$/g, ''));
+                } catch (_) {
+                    return match[1].replace(/^\"|\"$/g, '');
+                }
+            }
+            try {
+                const parsed = new URL(normalizedUrl);
+                const pathPart = parsed.pathname.split('/').filter((part) => part.length > 0).pop();
+                if (typeof pathPart === 'string' && pathPart.length > 0) {
+                    return pathPart;
+                }
+            } catch (_) {
+                // Ignore malformed URL parsing here; we already attempted the request.
+            }
+            return 'fileFromURL.zip';
+        })();
+        return {
+            contentBase64: arrayBufferToBase64(content),
+            fileName,
+            contentType: response.headers.get('Content-Type'),
+        };
+    }
+
     /** @type {import('api').ApiHandler<'setDictionaryImportMode'>} */
     async _onApiSetDictionaryImportMode({active}) {
         await this._setDictionaryImportMode(active);
@@ -1273,20 +1605,24 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'purgeDatabase'>} */
     async _onApiPurgeDatabase() {
-        if (this._offscreen !== null) {
-            try {
-                await this._offscreen.sendMessagePromise({action: 'databasePurgeOffscreen'});
-            } catch (e) {
-                log.error(e);
+        await this._runDictionaryMutation(async () => {
+            if (this._offscreen !== null) {
+                try {
+                    await this._offscreen.sendMessagePromise({action: 'databasePurgeOffscreen'});
+                } catch (e) {
+                    log.error(e);
+                }
             }
-        }
-        await this._ensureDictionaryDatabaseReady();
-        await this._dictionaryDatabase.purge();
-        await this._triggerDatabaseUpdated('dictionary', 'purge');
+            await this._ensureDictionaryDatabaseReady();
+            await this._dictionaryDatabase.purge();
+            await this._triggerDatabaseUpdated('dictionary', 'purge');
+        });
     }
 
     /** @type {import('api').ApiHandler<'exportDictionaryDatabase'>} */
     async _onApiExportDictionaryDatabase() {
+        await this._awaitDictionaryMutationSettled();
+        await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const content = await this._dictionaryDatabase.exportDatabase();
         return arrayBufferToBase64(content);
@@ -1294,9 +1630,11 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'importDictionaryDatabase'>} */
     async _onApiImportDictionaryDatabase({content}) {
-        await this._ensureDictionaryDatabaseReady();
-        await this._dictionaryDatabase.importDatabase(base64ToArrayBuffer(content));
-        await this._triggerDatabaseUpdated('dictionary', 'import');
+        await this._runDictionaryMutation(async () => {
+            await this._ensureDictionaryDatabaseReady();
+            await this._dictionaryDatabase.importDatabase(base64ToArrayBuffer(content));
+            await this._triggerDatabaseUpdated('dictionary', 'import');
+        });
     }
 
     /** @type {import('api').ApiHandler<'getMedia'>} */
@@ -1457,6 +1795,8 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'getTermFrequencies'>} */
     async _onApiGetTermFrequencies({termReadingList, dictionaries}) {
+        await this._awaitDictionaryMutationSettled();
+        await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         return await this._translator.getTermFrequencies(termReadingList, dictionaries);
     }
@@ -3025,12 +3365,39 @@ export class Backend {
         if (type === 'dictionary') {
             if (this._dictionaryImportModeActive) {
                 this._deferredDictionaryRefreshDuringImport = true;
+                this._queueDeferredDatabaseUpdatedNotification(type, cause);
                 reportDiagnostics('dictionary-refresh-deferred-during-import', {cause});
+                return;
             } else {
                 await this._refreshDictionaryDatabaseAfterUpdate();
             }
         }
+        this._sendApplicationDatabaseUpdated(type, cause);
+    }
+
+    /**
+     * @param {import('backend').DatabaseUpdateType} type
+     * @param {import('backend').DatabaseUpdateCause} cause
+     * @returns {void}
+     */
+    _sendApplicationDatabaseUpdated(type, cause) {
         this._sendMessageAllTabsIgnoreResponse({action: 'applicationDatabaseUpdated', params: {type, cause}});
+    }
+
+    /**
+     * @param {import('backend').DatabaseUpdateType} type
+     * @param {import('backend').DatabaseUpdateCause} cause
+     * @returns {void}
+     */
+    _queueDeferredDatabaseUpdatedNotification(type, cause) {
+        const pendingNotifications = this._pendingDatabaseUpdatedNotifications;
+        for (let i = pendingNotifications.length - 1; i >= 0; --i) {
+            const pendingNotification = pendingNotifications[i];
+            if (pendingNotification.type !== type) { continue; }
+            pendingNotifications[i] = {type, cause};
+            return;
+        }
+        pendingNotifications.push({type, cause});
     }
 
     /**
@@ -3101,6 +3468,7 @@ export class Backend {
      * @returns {Promise<boolean>}
      */
     async _hasInstalledDictionaries() {
+        await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
@@ -3176,6 +3544,7 @@ export class Backend {
                 reason: 'missing-dictionary-title',
             };
         }
+        await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const [dictionaryInfo, dictionaryCounts] = await Promise.all([
@@ -3245,22 +3614,8 @@ export class Backend {
         }
         /** @type {string[]} */
         const failedBeforeRefresh = [];
-        /** @type {Array<{title: string, stage: 'before-refresh'|'after-refresh', message: string}>} */
-        const verificationErrors = [];
         for (const title of enabledTitles) {
-            let result;
-            try {
-                result = await this._verifyDictionaryVisibilityInternal(title, true);
-            } catch (error) {
-                const normalizedError = error instanceof Error ? error : new Error(String(error));
-                verificationErrors.push({
-                    title,
-                    stage: 'before-refresh',
-                    message: normalizedError.message,
-                });
-                failedBeforeRefresh.push(title);
-                continue;
-            }
+            const result = await this._verifyDictionaryVisibilityInternal(title, true);
             if (!result.ok) {
                 failedBeforeRefresh.push(title);
             }
@@ -3268,34 +3623,14 @@ export class Backend {
         /** @type {string[]} */
         let failedAfterRefresh = [];
         let refreshed = false;
-        /** @type {string|null} */
-        let refreshError = null;
         if (failedBeforeRefresh.length > 0) {
             refreshed = true;
-            try {
-                await this._refreshDictionaryDatabaseAfterUpdate();
-                for (const title of enabledTitles) {
-                    let result;
-                    try {
-                        result = await this._verifyDictionaryVisibilityInternal(title, true);
-                    } catch (error) {
-                        const normalizedError = error instanceof Error ? error : new Error(String(error));
-                        verificationErrors.push({
-                            title,
-                            stage: 'after-refresh',
-                            message: normalizedError.message,
-                        });
-                        failedAfterRefresh.push(title);
-                        continue;
-                    }
-                    if (!result.ok) {
-                        failedAfterRefresh.push(title);
-                    }
+            await this._refreshDictionaryDatabaseAfterUpdate();
+            for (const title of enabledTitles) {
+                const result = await this._verifyDictionaryVisibilityInternal(title, true);
+                if (!result.ok) {
+                    failedAfterRefresh.push(title);
                 }
-            } catch (error) {
-                const normalizedError = error instanceof Error ? error : new Error(String(error));
-                refreshError = normalizedError.message;
-                failedAfterRefresh = [...enabledTitles];
             }
         }
         reportDiagnostics('dictionary-startup-visibility-reconcile-summary', {
@@ -3304,8 +3639,6 @@ export class Backend {
             refreshed,
             failedBeforeRefresh,
             failedAfterRefresh,
-            refreshError,
-            verificationErrors,
         });
     }
 
@@ -3907,6 +4240,8 @@ export class Backend {
      * @returns {Promise<import('dictionary-database').MediaDataStringContent[]>}
      */
     async _getNormalizedDictionaryDatabaseMedia(targets) {
+        await this._awaitDictionaryMutationSettled();
+        await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         const results = [];
         for (const item of await this._dictionaryDatabase.getMedia(targets)) {
@@ -4092,6 +4427,14 @@ export class Backend {
             this._deferredDictionaryRefreshDuringImport = false;
             reportDiagnostics('dictionary-refresh-on-import-mode-exit', {hadDeferredRefresh});
             await this._refreshDictionaryDatabaseAfterUpdate();
+            if (hadDeferredRefresh) {
+                const pendingNotifications = this._pendingDatabaseUpdatedNotifications.splice(0, this._pendingDatabaseUpdatedNotifications.length);
+                for (const {type, cause} of pendingNotifications) {
+                    this._sendApplicationDatabaseUpdated(type, cause);
+                }
+            } else {
+                this._pendingDatabaseUpdatedNotifications.length = 0;
+            }
         })();
         try {
             await this._setDictionaryImportModePromise;
