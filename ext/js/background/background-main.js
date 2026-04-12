@@ -21,6 +21,30 @@ import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {WebExtension} from '../extension/web-extension.js';
 import {Backend} from './backend.js';
 
+const backendStartupFailureStorageKey = 'manabitanLastBackendStartupError';
+
+/**
+ * @param {Record<string, unknown>|null} value
+ * @returns {Promise<void>}
+ */
+async function persistBackendStartupFailure(value) {
+    try {
+        if (chrome.storage?.session && typeof chrome.storage.session.set === 'function') {
+            await chrome.storage.session.set({[backendStartupFailureStorageKey]: value});
+            return;
+        }
+    } catch (_) {
+        // NOP
+    }
+    try {
+        if (chrome.storage?.local && typeof chrome.storage.local.set === 'function') {
+            await chrome.storage.local.set({[backendStartupFailureStorageKey]: value});
+        }
+    } catch (_) {
+        // NOP
+    }
+}
+
 /** Entry point. */
 async function main() {
     const webExtension = new WebExtension();
@@ -41,7 +65,33 @@ async function main() {
     });
 
     const backend = new Backend(webExtension);
-    await backend.prepare();
+    try {
+        await backend.prepare();
+        await persistBackendStartupFailure(null);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const name = error instanceof Error && typeof error.name === 'string' ? error.name : 'Error';
+        const stack = error instanceof Error && typeof error.stack === 'string' ? error.stack : '';
+        reportDiagnostics('extension-startup-failure', {
+            extensionName: webExtension.extensionName,
+            manifestVersion,
+            runtimeId,
+            errorName: name,
+            errorMessage: message,
+            errorStack: stack,
+        });
+        await persistBackendStartupFailure({
+            atIso: new Date().toISOString(),
+            extensionName: webExtension.extensionName,
+            manifestVersion,
+            runtimeId,
+            errorName: name,
+            errorMessage: message,
+            errorStack: stack,
+        });
+        log.error(error);
+        throw error;
+    }
 }
 
 void main();

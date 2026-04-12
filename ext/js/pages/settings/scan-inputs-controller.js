@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {log} from '../../core/log.js';
 import {normalizeModifier} from '../../dom/document-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {KeyboardMouseInputField} from './keyboard-mouse-input-field.js';
@@ -73,7 +74,9 @@ export class ScanInputsController {
             start: index,
             deleteCount: 1,
             items: [],
-        }]);
+        }]).catch(() => {
+            void this.refresh();
+        });
         return true;
     }
 
@@ -150,7 +153,9 @@ export class ScanInputsController {
             start: index,
             deleteCount: 0,
             items: [scanningInput],
-        }]);
+        }]).catch(() => {
+            void this.refresh();
+        });
 
         // Scroll to bottom
         const button = /** @type {HTMLElement} */ (e.currentTarget);
@@ -167,8 +172,14 @@ export class ScanInputsController {
     _addOption(index, scanningInput) {
         if (this._os === null || this._container === null) { return; }
         const field = new ScanInputField(this, index, this._os);
+        try {
+            field.prepare(this._container, scanningInput);
+        } catch (e) {
+            log.error(e);
+            field.cleanup();
+            return;
+        }
         this._entries.push(field);
-        field.prepare(this._container, scanningInput);
     }
 
     /** */
@@ -302,6 +313,10 @@ class ScanInputField {
         if (this._includeInputField !== null) {
             this._includeInputField.cleanup();
             this._includeInputField = null;
+        }
+        if (this._excludeInputField !== null) {
+            this._excludeInputField.cleanup();
+            this._excludeInputField = null;
         }
         if (this._node !== null) {
             const parent = this._node.parentNode;

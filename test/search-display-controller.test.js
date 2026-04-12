@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {afterAll, describe, expect, test, vi} from 'vitest';
+import {afterAll, afterEach, describe, expect, test, vi} from 'vitest';
 import {Application} from '../ext/js/application.js';
 import {API} from '../ext/js/comm/api.js';
 import {CrossFrameAPI} from '../ext/js/comm/cross-frame-api.js';
@@ -66,6 +66,9 @@ const focusSpy = vi.spyOn(queryInput, 'focus');
 
 describe('Keyboard Event Handling', () => {
     afterAll(() => teardown(global));
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
 
     const validKeypressEvents = [
         new KeyboardEvent('keydown', {key: 'a', ctrlKey: false, metaKey: false, altKey: false}),
@@ -142,5 +145,145 @@ describe('Keyboard Event Handling', () => {
         expect(searchSpy).toHaveBeenCalledWith(true, 'new', true, null);
         blurSpy.mockRestore();
         searchSpy.mockRestore();
+    });
+
+    test('dictionary database updates refresh options and rerun the active display search', async () => {
+        const updateOptionsSpy = vi.spyOn(display, 'updateOptions').mockResolvedValue(void 0);
+        const searchLastSpy = vi.spyOn(display, 'searchLast').mockImplementation(() => {});
+        queryInput.value = '暗記';
+
+        await searchDisplayController._onDatabaseUpdated({type: 'dictionary', cause: 'import'});
+
+        expect(updateOptionsSpy).toHaveBeenCalledTimes(1);
+        expect(searchLastSpy).toHaveBeenCalledTimes(1);
+        expect(searchLastSpy).toHaveBeenCalledWith(false);
+    });
+
+    test('options updates rerun visible results even if the textbox has been cleared locally', async () => {
+        const updateOptionsSpy = vi.spyOn(display, 'updateOptions').mockResolvedValue(void 0);
+        const searchLastSpy = vi.spyOn(display, 'searchLast').mockImplementation(() => {});
+        Reflect.set(display, '_contentType', 'terms');
+        queryInput.value = '';
+
+        await searchDisplayController._refreshAfterOptionsUpdate();
+
+        expect(updateOptionsSpy).toHaveBeenCalledTimes(1);
+        expect(searchLastSpy).toHaveBeenCalledTimes(1);
+        expect(searchLastSpy).toHaveBeenCalledWith(false);
+    });
+
+    test('options updates do not invent a rerun when no search results are currently shown', async () => {
+        const updateOptionsSpy = vi.spyOn(display, 'updateOptions').mockResolvedValue(void 0);
+        const searchLastSpy = vi.spyOn(display, 'searchLast').mockImplementation(() => {});
+        Reflect.set(display, '_contentType', 'clear');
+        queryInput.value = 'unsent query';
+
+        await searchDisplayController._refreshAfterOptionsUpdate();
+
+        expect(updateOptionsSpy).toHaveBeenCalledTimes(1);
+        expect(searchLastSpy).not.toHaveBeenCalled();
+    });
+
+    test('options updates do not touch the dedicated search page while it is showing unloaded state', async () => {
+        const updateOptionsSpy = vi.spyOn(display, 'updateOptions').mockResolvedValue(void 0);
+        const searchLastSpy = vi.spyOn(display, 'searchLast').mockImplementation(() => {});
+        Reflect.set(display, '_contentType', 'unloaded');
+
+        await searchDisplayController._refreshAfterOptionsUpdate();
+
+        expect(updateOptionsSpy).not.toHaveBeenCalled();
+        expect(searchLastSpy).not.toHaveBeenCalled();
+    });
+
+    test('options update refresh failures are logged instead of escaping', async () => {
+        const updateOptionsSpy = vi.spyOn(display, 'updateOptions').mockRejectedValue(new Error('refresh failed'));
+        const searchLastSpy = vi.spyOn(display, 'searchLast').mockImplementation(() => {});
+        const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        Reflect.set(display, '_contentType', 'terms');
+
+        searchDisplayController._onOptionsUpdated();
+        await new Promise((resolve) => {
+            setTimeout(resolve, 0);
+        });
+
+        expect(updateOptionsSpy).toHaveBeenCalledTimes(1);
+        expect(searchLastSpy).not.toHaveBeenCalled();
+        expect(logErrorSpy).toHaveBeenCalled();
+    });
+
+    test('dictionary database update refresh failures are logged instead of escaping', async () => {
+        const updateOptionsSpy = vi.spyOn(display, 'updateOptions').mockRejectedValue(new Error('refresh failed'));
+        const searchLastSpy = vi.spyOn(display, 'searchLast').mockImplementation(() => {});
+        const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        searchDisplayController._onDatabaseUpdated({type: 'dictionary', cause: 'import'});
+        await new Promise((resolve) => {
+            setTimeout(resolve, 0);
+        });
+
+        expect(updateOptionsSpy).toHaveBeenCalledTimes(1);
+        expect(searchLastSpy).not.toHaveBeenCalled();
+        expect(logErrorSpy).toHaveBeenCalled();
+    });
+
+    test('failed search-page profile selection refreshes the persisted selection and logs the error', async () => {
+        const updateProfileSelectSpy = vi.spyOn(searchDisplayController, '_updateProfileSelect').mockResolvedValue(void 0);
+        const setDefaultProfileIndexSpy = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex').mockRejectedValue(new Error('profile save failed'));
+        const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue({
+            profileCurrent: 0,
+            profiles: [{name: 'Default'}, {name: 'Mining'}],
+        });
+
+        searchDisplayController._onProfileSelectChangeEvent(/** @type {Event} */ (/** @type {unknown} */ ({
+            currentTarget: {value: '1'},
+        })));
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(setDefaultProfileIndexSpy).toHaveBeenCalledWith(1);
+        expect(updateProfileSelectSpy).toHaveBeenCalledOnce();
+        expect(logErrorSpy).toHaveBeenCalled();
+    });
+
+    test('search-page profile selection ignores out-of-range indices', async () => {
+        const setDefaultProfileIndexSpy = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex').mockResolvedValue(void 0);
+        vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue({
+            profileCurrent: 0,
+            profiles: [{name: 'Default'}, {name: 'Mining'}],
+        });
+
+        await searchDisplayController._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({
+            currentTarget: {value: '2'},
+        })));
+
+        expect(setDefaultProfileIndexSpy).not.toHaveBeenCalled();
+    });
+
+    test('stale search-page profile-select refresh does not overwrite newer options', async () => {
+        let resolveFirst;
+        let resolveSecond;
+        Reflect.set(searchDisplayController, '_profileSelectRefreshGeneration', 0);
+        vi.spyOn(display.application.api, 'optionsGetFull')
+            .mockImplementationOnce(() => new Promise((resolve) => {
+                resolveFirst = resolve;
+            }))
+            .mockImplementationOnce(() => new Promise((resolve) => {
+                resolveSecond = resolve;
+            }));
+
+        const firstRefresh = searchDisplayController._updateProfileSelect();
+        const secondRefresh = searchDisplayController._updateProfileSelect();
+        resolveSecond({
+            profileCurrent: 1,
+            profiles: [{name: 'Default'}, {name: 'Mining'}],
+        });
+        await secondRefresh;
+        resolveFirst({
+            profileCurrent: 0,
+            profiles: [{name: 'Default'}, {name: 'Mining'}],
+        });
+        await firstRefresh;
+
+        expect(searchDisplayController._profileSelect.value).toBe('1');
     });
 });

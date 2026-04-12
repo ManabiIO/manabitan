@@ -18,6 +18,8 @@
 
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
+const backendStartupFailureStorageKey = 'manabitanLastBackendStartupError';
+
 export class StorageController {
     /**
      * @param {import('./persistent-storage-controller.js').PersistentStorageController} persistentStorageController
@@ -47,8 +49,6 @@ export class StorageController {
         this._storageUseInvalidNodes = null;
         /** @type {HTMLElement|null} */
         this._storageRuntimeCheckNode = null;
-        /** @type {string|null} */
-        this._dictionaryBackendRuntimeError = null;
     }
 
     /** */
@@ -139,58 +139,66 @@ export class StorageController {
                 'createSyncAccessHandle',
             ) === 'function'
         );
-        let dictionaryBackendUsable = false;
-        let backendMode = null;
-        let backendStartupError = null;
-        let backendOpenFailureClass = null;
+        const application = this._persistentStorageController.application;
+        let backendSummary = null;
+        let backendError = null;
         try {
-            const storageState = /** @type {unknown} */ (await this._persistentStorageController.application.api.debugDictionaryStorageState());
-            const storageStateRecord = (
-                typeof storageState === 'object' &&
-                storageState !== null &&
-                !Array.isArray(storageState)
-            ) ? /** @type {Record<string, unknown>} */ (storageState) : null;
-            const rawOpenStorageDiagnostics = storageStateRecord !== null ? Reflect.get(storageStateRecord, 'openStorageDiagnostics') : null;
-            const rawStartupDiagnosticsSnapshot = storageStateRecord !== null ? Reflect.get(storageStateRecord, 'startupDiagnosticsSnapshot') : null;
-            /** @type {Record<string, unknown>|null} */
-            let openStorageDiagnostics = null;
-            if (
-                typeof rawOpenStorageDiagnostics === 'object' &&
-                rawOpenStorageDiagnostics !== null &&
-                !Array.isArray(rawOpenStorageDiagnostics)
-            ) {
-                openStorageDiagnostics = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (rawOpenStorageDiagnostics));
-            }
-            /** @type {Record<string, unknown>|null} */
-            let startupDiagnosticsSnapshot = null;
-            if (
-                typeof rawStartupDiagnosticsSnapshot === 'object' &&
-                rawStartupDiagnosticsSnapshot !== null &&
-                !Array.isArray(rawStartupDiagnosticsSnapshot)
-            ) {
-                startupDiagnosticsSnapshot = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (rawStartupDiagnosticsSnapshot));
-            }
-            dictionaryBackendUsable = true;
-            backendMode = typeof openStorageDiagnostics?.mode === 'string' ? openStorageDiagnostics.mode : null;
-            backendOpenFailureClass = typeof openStorageDiagnostics?.openFailureClass === 'string' ? openStorageDiagnostics.openFailureClass : null;
-            backendStartupError = (
-                typeof startupDiagnosticsSnapshot?.dictionaryPrepareError === 'string' &&
-                startupDiagnosticsSnapshot.dictionaryPrepareError.length > 0
-            ) ? startupDiagnosticsSnapshot.dictionaryPrepareError : null;
-            this._dictionaryBackendRuntimeError = backendStartupError;
-        } catch (error) {
-            const normalizedError = error instanceof Error ? error : new Error(String(error));
-            this._dictionaryBackendRuntimeError = normalizedError.message;
-            backendStartupError = normalizedError.message;
+            backendSummary = await application.api.debugDictionaryStorageState();
+        } catch (e) {
+            backendError = e instanceof Error ? e.message : String(e);
         }
+        const startupFailure = await this._getStoredBackendStartupFailure();
+        if (backendSummary !== null && typeof backendSummary === 'object' && !Array.isArray(backendSummary)) {
+            const summary = /** @type {Record<string, unknown>} */ (backendSummary);
+            const openStorageDiagnostics = (
+                typeof summary.openStorageDiagnostics === 'object' &&
+                summary.openStorageDiagnostics !== null &&
+                !Array.isArray(summary.openStorageDiagnostics)
+            ) ? /** @type {Record<string, unknown>} */ (summary.openStorageDiagnostics) : null;
+            const startupDiagnosticsSnapshot = (
+                typeof summary.startupDiagnosticsSnapshot === 'object' &&
+                summary.startupDiagnosticsSnapshot !== null &&
+                !Array.isArray(summary.startupDiagnosticsSnapshot)
+            ) ? /** @type {Record<string, unknown>} */ (summary.startupDiagnosticsSnapshot) : null;
+            const mode = typeof openStorageDiagnostics?.mode === 'string' ? openStorageDiagnostics.mode : 'unknown';
+            const dictionaryBackendUsable = (
+                mode !== 'opfs-unavailable' &&
+                mode !== 'fallback-memory' &&
+                mode !== 'fallback-memory-open-failed'
+            );
+            const startupError = typeof startupDiagnosticsSnapshot?.dictionaryPrepareError === 'string' ? startupDiagnosticsSnapshot.dictionaryPrepareError : '';
+            const dictionaryRows = Array.isArray(summary.dictionaryRows) ? summary.dictionaryRows.length : 0;
+            const offscreenDictionaryRows = Array.isArray(summary.offscreenDictionaryRows) ? summary.offscreenDictionaryRows.length : 0;
+            const usesFallbackStorage = summary.usesFallbackStorage === true;
+            this._storageRuntimeCheckNode.textContent = (
+                `${browserLabel} check:\n` +
+                `backend reachable=true\n` +
+                `dictionary backend usable=${String(dictionaryBackendUsable)}\n` +
+                `storage.getDirectory=${String(hasStorageGetDirectory)}\n` +
+                `createSyncAccessHandle=${String(hasCreateSyncAccessHandle)}\n` +
+                `backend mode=${mode}\n` +
+                `usesFallbackStorage=${String(usesFallbackStorage)}\n` +
+                `dictionaryRows=${String(dictionaryRows)}\n` +
+                `offscreenDictionaryRows=${String(offscreenDictionaryRows)}\n` +
+                `startupError=${startupError.length > 0 ? startupError : 'none'}`
+            );
+            return;
+        }
+
+        const startupFailureMessage = (
+            startupFailure !== null &&
+            typeof startupFailure === 'object' &&
+            !Array.isArray(startupFailure) &&
+            typeof startupFailure.errorMessage === 'string'
+        ) ? startupFailure.errorMessage : '';
         this._storageRuntimeCheckNode.textContent = (
             `${browserLabel} check:\n` +
-            `dictionary backend usable=${String(dictionaryBackendUsable)}\n` +
-            `backend mode=${String(backendMode)}\n` +
-            `backend startup error=${String(backendStartupError)}\n` +
-            `backend open failure class=${String(backendOpenFailureClass)}\n` +
-            `page storage.getDirectory=${String(hasStorageGetDirectory)}\n` +
-            `page createSyncAccessHandle=${String(hasCreateSyncAccessHandle)}`
+            `backend reachable=false\n` +
+            `dictionary backend usable=false\n` +
+            `storage.getDirectory=${String(hasStorageGetDirectory)}\n` +
+            `createSyncAccessHandle=${String(hasCreateSyncAccessHandle)}\n` +
+            `backendError=${backendError ?? 'unknown'}\n` +
+            `startupError=${startupFailureMessage.length > 0 ? startupFailureMessage : 'none'}`
         );
     }
 
@@ -209,6 +217,28 @@ export class StorageController {
             return value;
         } catch (e) {
             this._storageEstimateFailed = true;
+        }
+        return null;
+    }
+
+    /**
+     * @returns {Promise<Record<string, unknown>|null>}
+     */
+    async _getStoredBackendStartupFailure() {
+        for (const storageArea of [chrome.storage?.session, chrome.storage?.local]) {
+            if (!(storageArea && typeof storageArea.get === 'function')) { continue; }
+            try {
+                const result = await storageArea.get(backendStartupFailureStorageKey);
+                const value = /** @type {unknown} */ (Reflect.get(result, backendStartupFailureStorageKey));
+                if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                    return /** @type {Record<string, unknown>} */ (value);
+                }
+                if (value === null) {
+                    return null;
+                }
+            } catch (_) {
+                // NOP
+            }
         }
         return null;
     }

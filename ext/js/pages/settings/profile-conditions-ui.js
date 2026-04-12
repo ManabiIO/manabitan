@@ -18,6 +18,7 @@
 
 import {EventDispatcher} from '../../core/event-dispatcher.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {log} from '../../core/log.js';
 import {normalizeModifier} from '../../dom/document-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {KeyboardMouseInputField} from './keyboard-mouse-input-field.js';
@@ -351,9 +352,15 @@ export class ProfileConditionsUI extends EventDispatcher {
      */
     _addConditionGroup(conditionGroup, index) {
         const child = new ProfileConditionGroupUI(this, index);
-        child.prepare(conditionGroup);
+        try {
+            child.prepare(conditionGroup);
+            this._conditionGroupsContainer.appendChild(child.node);
+        } catch (e) {
+            log.error(e);
+            child.cleanup();
+            return child;
+        }
         this._children.push(child);
-        this._conditionGroupsContainer.appendChild(child.node);
         return child;
     }
 
@@ -597,9 +604,15 @@ class ProfileConditionGroupUI {
      */
     _addCondition(condition, index) {
         const child = new ProfileConditionUI(this, index);
-        child.prepare(condition);
+        try {
+            child.prepare(condition);
+            this._conditionContainer.appendChild(child.node);
+        } catch (e) {
+            log.error(e);
+            child.cleanup();
+            return child;
+        }
         this._children.push(child);
-        this._conditionContainer.appendChild(child.node);
         return child;
     }
 }

@@ -17,9 +17,8 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
-import {isObjectNotArray} from '../core/object-utilities.js';
 import {log} from '../core/log.js';
-import {reportDiagnostics} from '../core/diagnostics-reporter.js';
+import {isObjectNotArray} from '../core/object-utilities.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
 
 /**
@@ -65,13 +64,12 @@ export class OffscreenProxy {
         /** @type {?MessagePort} */
         this._currentOffscreenPort = null;
         /** @type {?Promise<void>} */
-        this._offscreenPortReadyPromise = null;
-        /** @type {(() => void) | null} */
+        this._registeringOffscreenPort = null;
+        /** @type {Promise<void>} */
+        this._offscreenPortReadyPromise = Promise.resolve();
+        /** @type {null|(() => void)} */
         this._resolveOffscreenPortReady = null;
-        /** @type {((reason?: unknown) => void) | null} */
-        this._rejectOffscreenPortReady = null;
-        /** @type {ReturnType<typeof setTimeout> | null} */
-        this._offscreenPortReadyTimeout = null;
+        this._resetOffscreenPortReadyPromise();
     }
 
     /**
@@ -79,28 +77,80 @@ export class OffscreenProxy {
      */
     async prepare() {
         if (await this._hasOffscreenDocument()) {
-            void this.sendMessagePromise({action: 'createAndRegisterPortOffscreen'}).catch((error) => {
-                this._currentOffscreenPort = null;
-                log.error(error);
-            });
+            await this._ensureOffscreenPort();
             return;
         }
         if (this._creatingOffscreen) {
             await this._creatingOffscreen;
             return;
         }
-
-        this._creatingOffscreen = chrome.offscreen.createDocument({
-            url: 'offscreen.html',
-            reasons: [
-                /** @type {chrome.offscreen.Reason} */ ('CLIPBOARD'),
-            ],
-            justification: 'Access to the clipboard',
-        });
+        this._creatingOffscreen = (async () => {
+            await chrome.offscreen.createDocument({
+                url: 'offscreen.html',
+                reasons: [
+                    /** @type {chrome.offscreen.Reason} */ ('CLIPBOARD'),
+                ],
+                justification: 'Access to the clipboard',
+            });
+            await this._ensureOffscreenPort();
+        })();
         try {
             await this._creatingOffscreen;
         } finally {
             this._creatingOffscreen = null;
+        }
+    }
+
+    /**
+     * @returns {void}
+     */
+    _resetOffscreenPortReadyPromise() {
+        this._offscreenPortReadyPromise = new Promise((resolve) => {
+            this._resolveOffscreenPortReady = resolve;
+        });
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _ensureOffscreenPort() {
+        if (this._currentOffscreenPort !== null) {
+            return;
+        }
+        if (this._registeringOffscreenPort !== null) {
+            await this._registeringOffscreenPort;
+            return;
+        }
+        this._registeringOffscreenPort = (async () => {
+            await this.sendMessagePromise({action: 'createAndRegisterPortOffscreen'});
+            await Promise.race([
+                this._offscreenPortReadyPromise,
+                new Promise((resolve, reject) => {
+                    setTimeout(() => reject(new Error('Timed out waiting for offscreen control port registration')), 5000);
+                }),
+            ]);
+        })();
+        try {
+            await this._registeringOffscreenPort;
+        } finally {
+            this._registeringOffscreenPort = null;
+        }
+    }
+
+    /**
+     * @param {MessagePort} port
+     * @returns {void}
+     */
+    _clearCurrentOffscreenPort(port) {
+        if (this._currentOffscreenPort !== port) {
+            return;
+        }
+        this._currentOffscreenPort = null;
+        this._resetOffscreenPortReadyPromise();
+        try {
+            port.close();
+        } catch (_) {
+            // Ignore close failures for dead ports.
         }
     }
 
@@ -162,76 +212,19 @@ export class OffscreenProxy {
      * @param {MessagePort} port
      */
     async registerOffscreenPort(port) {
-        const previousPort = this._currentOffscreenPort;
-        this._currentOffscreenPort = port;
         port.onmessageerror = () => {
-            if (this._currentOffscreenPort === port) {
-                this._currentOffscreenPort = null;
-            }
-            try {
-                port.close();
-            } catch (error) {
-                log.error(error);
-            }
-            log.error(new Error('Offscreen port message deserialization failed'));
+            this._clearCurrentOffscreenPort(port);
         };
-        if (previousPort) {
+        if (this._currentOffscreenPort && this._currentOffscreenPort !== port) {
             try {
-                previousPort.close();
-            } catch (error) {
-                log.error(error);
+                this._currentOffscreenPort.close();
+            } catch (_) {
+                // Ignore close failures while rotating the control port.
             }
         }
-        if (this._offscreenPortReadyTimeout !== null) {
-            clearTimeout(this._offscreenPortReadyTimeout);
-            this._offscreenPortReadyTimeout = null;
-        }
-        const resolve = this._resolveOffscreenPortReady;
-        this._offscreenPortReadyPromise = null;
+        this._currentOffscreenPort = port;
+        this._resolveOffscreenPortReady?.();
         this._resolveOffscreenPortReady = null;
-        this._rejectOffscreenPortReady = null;
-        resolve?.();
-    }
-
-    /**
-     * @returns {Promise<void>}
-     */
-    async _ensureOffscreenPort() {
-        if (this._currentOffscreenPort !== null) {
-            return;
-        }
-        if (this._offscreenPortReadyPromise === null) {
-            this._offscreenPortReadyPromise = new Promise((resolve, reject) => {
-                this._resolveOffscreenPortReady = resolve;
-                this._rejectOffscreenPortReady = reject;
-            });
-            this._offscreenPortReadyTimeout = setTimeout(() => {
-                const reject = this._rejectOffscreenPortReady;
-                this._offscreenPortReadyPromise = null;
-                this._resolveOffscreenPortReady = null;
-                this._rejectOffscreenPortReady = null;
-                this._offscreenPortReadyTimeout = null;
-                reject?.(new Error('Timed out waiting for offscreen port registration'));
-            }, 5000);
-            try {
-                await this.sendMessagePromise({action: 'createAndRegisterPortOffscreen'});
-            } catch (error) {
-                if (this._offscreenPortReadyTimeout !== null) {
-                    clearTimeout(this._offscreenPortReadyTimeout);
-                    this._offscreenPortReadyTimeout = null;
-                }
-                const reject = this._rejectOffscreenPortReady;
-                this._offscreenPortReadyPromise = null;
-                this._resolveOffscreenPortReady = null;
-                this._rejectOffscreenPortReady = null;
-                reject?.(error);
-                throw error;
-            }
-        }
-        await this._offscreenPortReadyPromise;
-        if (this._currentOffscreenPort === null) {
-            throw new Error('Offscreen port registration completed without a port');
-        }
     }
 
     /**
@@ -244,15 +237,18 @@ export class OffscreenProxy {
         await this._ensureOffscreenPort();
         const port = this._currentOffscreenPort;
         if (port === null) {
-            throw new Error('Offscreen port is unavailable');
+            throw new Error('Offscreen control port is unavailable');
         }
         try {
             port.postMessage(message, transfers);
-        } catch (error) {
-            if (this._currentOffscreenPort === port) {
-                this._currentOffscreenPort = null;
+        } catch (_) {
+            this._clearCurrentOffscreenPort(port);
+            await this._ensureOffscreenPort();
+            const retriedPort = this._currentOffscreenPort;
+            if (retriedPort === null) {
+                throw new Error('Offscreen control port is unavailable');
             }
-            throw error;
+            retriedPort.postMessage(message, transfers);
         }
     }
 }
@@ -283,14 +279,33 @@ export class DictionaryRuntimeWorkerProxy {
     }
 
     /**
+     * @param {Error} error
+     * @returns {void}
+     */
+    _setFatalError(error) {
+        if (this._fatalError !== null) {
+            return;
+        }
+        this._fatalError = error;
+        for (const [, handler] of this._responseHandlers) {
+            handler.reject(error);
+        }
+        this._responseHandlers.clear();
+        try {
+            this._worker.terminate();
+        } catch (_) {
+            // Ignore termination failures after a fatal worker error.
+        }
+    }
+
+    /**
      * @template [TReturn=unknown]
      * @param {import('offscreen').ApiMessageAny} message
      * @returns {Promise<TReturn>}
      */
     async sendMessagePromise(message) {
-        const fatalError = this._fatalError;
-        if (fatalError !== null) {
-            throw fatalError;
+        if (this._fatalError !== null) {
+            throw this._fatalError;
         }
         const id = ++this._requestId;
         return await new Promise((resolve, reject) => {
@@ -305,10 +320,9 @@ export class DictionaryRuntimeWorkerProxy {
                 this._worker.postMessage({id, action: payload.action ?? '', params: payload.params ?? {}});
             } catch (error) {
                 this._responseHandlers.delete(id);
-                const fatalError = error instanceof Error ? error : new Error(String(error));
-                this._fatalError = fatalError;
-                this._rejectPendingRequests(fatalError);
-                reject(fatalError);
+                const normalizedError = error instanceof Error ? error : new Error(String(error));
+                this._setFatalError(normalizedError);
+                reject(normalizedError);
             }
         });
     }
@@ -318,9 +332,8 @@ export class DictionaryRuntimeWorkerProxy {
      * @param {Transferable[]} transfers
      */
     async sendMessageViaPort(message, transfers) {
-        const fatalError = this._fatalError;
-        if (fatalError !== null) {
-            throw fatalError;
+        if (this._fatalError !== null) {
+            throw this._fatalError;
         }
         const payload = /** @type {{action?: string, params?: unknown}} */ (
             typeof message === 'object' && message !== null && !Array.isArray(message) ? message : {}
@@ -328,25 +341,10 @@ export class DictionaryRuntimeWorkerProxy {
         try {
             this._worker.postMessage({id: ++this._requestId, action: payload.action ?? '', params: payload.params ?? {}}, transfers);
         } catch (error) {
-            const fatalError = error instanceof Error ? error : new Error(String(error));
-            this._fatalError = fatalError;
-            this._rejectPendingRequests(fatalError);
-            throw fatalError;
+            const normalizedError = error instanceof Error ? error : new Error(String(error));
+            this._setFatalError(normalizedError);
+            throw normalizedError;
         }
-    }
-
-    /**
-     * @param {Error} error
-     * @returns {void}
-     */
-    _rejectPendingRequests(error) {
-        if (this._responseHandlers.size === 0) {
-            return;
-        }
-        for (const [, handler] of this._responseHandlers) {
-            handler.reject(error);
-        }
-        this._responseHandlers.clear();
     }
 
     /**
@@ -354,22 +352,9 @@ export class DictionaryRuntimeWorkerProxy {
      */
     _onMessage(event) {
         const id = typeof event.data?.id === 'number' ? event.data.id : null;
-        if (id === null) {
-            reportDiagnostics('offscreen-proxy-unmatched-response', {
-                reason: 'missing-id',
-                hasError: typeof event.data?.error !== 'undefined',
-            });
-            return;
-        }
+        if (id === null) { return; }
         const handler = this._responseHandlers.get(id);
-        if (typeof handler === 'undefined') {
-            reportDiagnostics('offscreen-proxy-unmatched-response', {
-                reason: 'unknown-id',
-                id,
-                hasError: typeof event.data?.error !== 'undefined',
-            });
-            return;
-        }
+        if (typeof handler === 'undefined') { return; }
         this._responseHandlers.delete(id);
         if (typeof event.data?.error !== 'undefined') {
             handler.reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (event.data.error)));
@@ -382,10 +367,7 @@ export class DictionaryRuntimeWorkerProxy {
      * @param {MessageEvent} _event
      */
     _onMessageError(_event) {
-        const error = new Error('Dictionary runtime worker message deserialization failed');
-        this._fatalError = error;
-        this._rejectPendingRequests(error);
-        this._worker.terminate();
+        this._setFatalError(new Error('Dictionary runtime worker message deserialization failed'));
     }
 
     /**
@@ -393,10 +375,7 @@ export class DictionaryRuntimeWorkerProxy {
      */
     _onError(event) {
         const message = event.message ? `: ${event.message}` : '';
-        const error = new Error(`Dictionary runtime worker failed${message}`);
-        this._fatalError = error;
-        this._rejectPendingRequests(error);
-        this._worker.terminate();
+        this._setFatalError(new Error(`Dictionary runtime worker failed${message}`));
     }
 }
 
@@ -671,7 +650,9 @@ export class ClipboardReaderProxy {
     set browser(value) {
         if (this._browser === value) { return; }
         this._browser = value;
-        void this._offscreen.sendMessagePromise({action: 'clipboardSetBrowserOffscreen', params: {value}});
+        void this._offscreen.sendMessagePromise({action: 'clipboardSetBrowserOffscreen', params: {value}}).catch((error) => {
+            log.error(error);
+        });
     }
 
     /**

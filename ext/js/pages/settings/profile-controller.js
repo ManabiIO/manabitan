@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {log} from '../../core/log.js';
 import {clone, generateId} from '../../core/utilities.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {ProfileConditionsUI} from './profile-conditions-ui.js';
@@ -403,18 +404,21 @@ export class ProfileController {
     /**
      * @param {number} profileIndex
      */
-    openProfileConditionsModal(profileIndex) {
+    async openProfileConditionsModal(profileIndex) {
         const profile = this._getProfile(profileIndex);
         if (profile === null) { return; }
 
         if (this._profileConditionsModal === null) { return; }
-        this._profileConditionsModal.setVisible(true);
-
-        this._profileConditionsUI.cleanup();
-        this._profileConditionsIndex = profileIndex;
-        void this._profileConditionsUI.prepare(profileIndex);
-        if (this._profileConditionsProfileName !== null) {
-            this._profileConditionsProfileName.textContent = profile.name;
+        try {
+            this._profileConditionsUI.cleanup();
+            await this._profileConditionsUI.prepare(profileIndex);
+            if (this._profileConditionsProfileName !== null) {
+                this._profileConditionsProfileName.textContent = profile.name;
+            }
+            this._profileConditionsIndex = profileIndex;
+            this._profileConditionsModal.setVisible(true);
+        } catch (error) {
+            log.error(error);
         }
     }
 
@@ -439,7 +443,7 @@ export class ProfileController {
         this._profileConditionsUI.cleanup();
         const conditionsProfile = this._getProfile(this._profileConditionsIndex !== null ? this._profileConditionsIndex : settingsProfileIndex);
         if (conditionsProfile !== null) {
-            void this._profileConditionsUI.prepare(settingsProfileIndex);
+            void this._profileConditionsUI.prepare(this._profileConditionsIndex !== null ? this._profileConditionsIndex : settingsProfileIndex);
         }
 
         // Update profile entries
@@ -530,10 +534,17 @@ export class ProfileController {
     _addProfileEntry(profileIndex) {
         const profile = this._profiles[profileIndex];
         const node = /** @type {HTMLElement} */ (this._settingsController.instantiateTemplate('profile-entry'));
-        const entry = new ProfileEntry(this, node, profile, profileIndex);
-        this._profileEntryList.push(entry);
-        entry.prepare();
-        /** @type {HTMLElement} */ (this._profileEntryListContainer).appendChild(node);
+        try {
+            const entry = new ProfileEntry(this, node, profile, profileIndex);
+            this._profileEntryList.push(entry);
+            entry.prepare();
+            /** @type {HTMLElement} */ (this._profileEntryListContainer).appendChild(node);
+        } catch (error) {
+            log.error(error);
+            if (node.parentNode !== null) {
+                node.parentNode.removeChild(node);
+            }
+        }
     }
 
     /** */
@@ -791,7 +802,7 @@ class ProfileEntry {
 
     /** */
     _onConditionsCountLinkClick() {
-        this._profileController.openProfileConditionsModal(this._index);
+        void this._profileController.openProfileConditionsModal(this._index);
     }
 
     /**
@@ -821,7 +832,7 @@ class ProfileEntry {
                 this._profileController.openCopyProfileModal(this._index);
                 break;
             case 'editConditions':
-                this._profileController.openProfileConditionsModal(this._index);
+                void this._profileController.openProfileConditionsModal(this._index);
                 break;
             case 'duplicate':
                 void this._profileController.duplicateProfile(this._index);

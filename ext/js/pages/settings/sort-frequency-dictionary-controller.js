@@ -55,16 +55,21 @@ export class SortFrequencyDictionaryController {
         /** @type {?import('core').TokenObject} */
         const token = {};
         this._getDictionaryInfoToken = token;
-        const dictionaries = await this._settingsController.getDictionaryInfo();
-        if (this._getDictionaryInfoToken !== token) { return; }
+        try {
+            const dictionaries = await this._settingsController.getDictionaryInfo();
+            if (this._getDictionaryInfoToken !== token) { return; }
 
-        this._updateDictionaryOptions(dictionaries);
+            this._updateDictionaryOptions(dictionaries);
 
-        const options = await this._settingsController.getOptions();
-        if (this._getDictionaryInfoToken !== token) { return; }
-        this._getDictionaryInfoToken = null;
-        const optionsContext = this._settingsController.getOptionsContext();
-        this._onOptionsChanged({options, optionsContext});
+            const options = await this._settingsController.getOptions();
+            if (this._getDictionaryInfoToken !== token) { return; }
+            const optionsContext = this._settingsController.getOptionsContext();
+            this._onOptionsChanged({options, optionsContext});
+        } finally {
+            if (this._getDictionaryInfoToken === token) {
+                this._getDictionaryInfoToken = null;
+            }
+        }
     }
 
     /**
@@ -124,8 +129,16 @@ export class SortFrequencyDictionaryController {
      * @param {?string} value
      */
     async _setSortFrequencyDictionaryValue(value) {
+        const previousValue = this._sortFrequencyDictionarySelect.value;
+        const previousHidden = this._sortFrequencyDictionaryOrderContainerNode.hidden;
         /** @type {HTMLElement} */ (this._sortFrequencyDictionaryOrderContainerNode).hidden = (value === null);
-        await this._settingsController.setProfileSetting('general.sortFrequencyDictionary', value);
+        try {
+            await this._settingsController.setProfileSetting('general.sortFrequencyDictionary', value);
+        } catch (e) {
+            this._sortFrequencyDictionarySelect.value = previousValue;
+            /** @type {HTMLElement} */ (this._sortFrequencyDictionaryOrderContainerNode).hidden = previousHidden;
+            throw e;
+        }
         if (value !== null) {
             await this._autoUpdateOrder(value);
         }
@@ -135,7 +148,13 @@ export class SortFrequencyDictionaryController {
      * @param {import('settings').SortFrequencyDictionaryOrder} value
      */
     async _setSortFrequencyDictionaryOrderValue(value) {
-        await this._settingsController.setProfileSetting('general.sortFrequencyDictionaryOrder', value);
+        const previousValue = this._sortFrequencyDictionaryOrderSelect.value;
+        try {
+            await this._settingsController.setProfileSetting('general.sortFrequencyDictionaryOrder', value);
+        } catch (e) {
+            this._sortFrequencyDictionaryOrderSelect.value = previousValue;
+            throw e;
+        }
     }
 
     /**
@@ -144,8 +163,14 @@ export class SortFrequencyDictionaryController {
     async _autoUpdateOrder(dictionary) {
         const order = await this._getFrequencyOrder(dictionary);
         if (order === null) { return; }
+        const previousValue = this._sortFrequencyDictionaryOrderSelect.value;
         /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect).value = order;
-        await this._setSortFrequencyDictionaryOrderValue(order);
+        try {
+            await this._setSortFrequencyDictionaryOrderValue(order);
+        } catch (e) {
+            this._sortFrequencyDictionaryOrderSelect.value = previousValue;
+            throw e;
+        }
     }
 
     /**

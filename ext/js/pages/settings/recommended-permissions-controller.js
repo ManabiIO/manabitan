@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {log} from '../../core/log.js';
 import {toError} from '../../core/to-error.js';
 import {getAllPermissions, setPermissionsGranted} from '../../data/permissions-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
@@ -41,8 +42,8 @@ export class RecommendedPermissionsController {
     /** */
     async prepare() {
         this._errorContainer = document.querySelector('#recommended-permissions-error');
-        this._originToggleNode.addEventListener('change', this._onOriginToggleChange.bind(this), false);
-        this._optionalPermissionsToggleNode.addEventListener('change', this._onOptionalPermissionsToggleChange.bind(this), false);
+        this._originToggleNode.addEventListener('change', this._onOriginToggleChangeEvent.bind(this), false);
+        this._optionalPermissionsToggleNode.addEventListener('change', this._onOptionalPermissionsToggleChangeEvent.bind(this), false);
 
         this._settingsController.on('permissionsChanged', this._onPermissionsChanged.bind(this));
         await this._updatePermissions();
@@ -60,6 +61,10 @@ export class RecommendedPermissionsController {
         this._originToggleNode.checked = typeof origin === 'string' && originsSet.has(origin);
 
         this._optionalPermissionsToggleNode.checked = Array.isArray(permissions.permissions) && permissions.permissions.includes('clipboardRead') && permissions.permissions.includes('nativeMessaging');
+        if (this._errorContainer !== null) {
+            this._errorContainer.hidden = true;
+            this._errorContainer.textContent = '';
+        }
     }
 
     /**
@@ -78,19 +83,50 @@ export class RecommendedPermissionsController {
     /**
      * @param {Event} e
      */
+    _onOriginToggleChangeEvent(e) {
+        try {
+            this._onOriginToggleChange(e);
+        } catch (error) {
+            log.error(error);
+        }
+    }
+
+    /**
+     * @param {Event} e
+     */
     async _onOptionalPermissionsToggleChange(e) {
         const node = /** @type {HTMLInputElement} */ (e.currentTarget);
         const value = node.checked;
+        node.checked = !value;
         const permissions = ['clipboardRead', 'nativeMessaging'];
-        await setPermissionsGranted({permissions}, value);
+        try {
+            await setPermissionsGranted({permissions}, value);
+        } catch (e2) {
+            if (this._errorContainer !== null) {
+                this._errorContainer.hidden = false;
+                this._errorContainer.textContent = toError(e2).message;
+            }
+            return;
+        }
         await this._updatePermissions();
+    }
+
+    /**
+     * @param {Event} e
+     */
+    _onOptionalPermissionsToggleChangeEvent(e) {
+        void this._onOptionalPermissionsToggleChange(e).catch((error) => {
+            log.error(error);
+        });
     }
 
     /** */
     async _updatePermissions() {
         const permissions = await getAllPermissions();
         this._onPermissionsChanged({permissions});
-        void this._setWelcomePageText();
+        void this._setWelcomePageText().catch((error) => {
+            log.error(error);
+        });
     }
 
     /**

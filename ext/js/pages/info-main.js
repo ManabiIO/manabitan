@@ -18,9 +18,11 @@
 
 import {ThemeController} from '../app/theme-controller.js';
 import {Application} from '../application.js';
+import {log} from '../core/log.js';
 import {promiseTimeout} from '../core/utilities.js';
 import {DocumentFocusController} from '../dom/document-focus-controller.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
+import {DictionaryInfoController} from './info-dictionary-info.js';
 import {BackupController} from './settings/backup-controller.js';
 import {SettingsController} from './settings/settings-controller.js';
 
@@ -80,42 +82,6 @@ async function showAnkiConnectInfo(api) {
     ankiVersionUnknownElement.hidden = (ankiConnectVersion !== null);
 }
 
-/**
- * @param {import('../comm/api.js').API} api
- */
-async function showDictionaryInfo(api) {
-    let dictionaryInfos;
-    try {
-        dictionaryInfos = await api.getDictionaryInfo();
-    } catch (e) {
-        return;
-    }
-
-    const fragment = document.createDocumentFragment();
-    let first = true;
-    for (const {title} of dictionaryInfos) {
-        if (first) {
-            first = false;
-        } else {
-            fragment.appendChild(document.createTextNode(', '));
-        }
-
-        const node = document.createElement('span');
-        node.className = 'installed-dictionary';
-        node.textContent = title;
-        fragment.appendChild(node);
-    }
-
-    /** @type {HTMLElement} */
-    const noneElement = querySelectorNotNull(document, '#installed-dictionaries-none');
-
-    noneElement.hidden = (dictionaryInfos.length > 0);
-    /** @type {HTMLElement} */
-    const container = querySelectorNotNull(document, '#installed-dictionaries');
-    container.textContent = '';
-    container.appendChild(fragment);
-}
-
 await Application.main(true, async (application) => {
     const settingsController = new SettingsController(application);
     await settingsController.prepare();
@@ -168,7 +134,14 @@ await Application.main(true, async (application) => {
     userAgentElement.textContent = userAgent;
 
     void showAnkiConnectInfo(application.api);
-    void showDictionaryInfo(application.api);
+    const dictionaryInfoController = new DictionaryInfoController(application.api);
+    void dictionaryInfoController.refresh();
+    application.on('databaseUpdated', ({type}) => {
+        if (type !== 'dictionary') { return; }
+        void dictionaryInfoController.refresh().catch((error) => {
+            log.error(error);
+        });
+    });
 
     const backupController = new BackupController(settingsController, null);
     await backupController.prepare();

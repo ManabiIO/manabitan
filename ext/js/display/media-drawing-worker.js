@@ -74,9 +74,14 @@ export class MediaDrawingWorker {
         this._cleanOldGenerations();
         const newRequests = requests.map((request, index) => ({...request, canvas: null, generation: this._generation, canvasIndex: index, canvasWidth: request.canvas.width, canvasHeight: request.canvas.height}));
         if (this._dbPort !== null) {
-            this._dbPort.postMessage({action: 'drawMedia', params: {requests: newRequests}});
+            try {
+                this._dbPort.postMessage({action: 'drawMedia', params: {requests: newRequests}});
+            } catch (error) {
+                this._handleDatabasePortClosed(error instanceof Error ? error : new Error(String(error)));
+            }
         } else {
             log.error('no database port available');
+            this._notifyDatabasePortClosed();
         }
     }
 
@@ -127,9 +132,30 @@ export class MediaDrawingWorker {
         dbPort.addEventListener('messageerror', (event) => {
             const error = new ExtensionError('MediaDrawingWorker: Error receiving message from database worker');
             error.data = event;
-            log.error(error);
+            this._handleDatabasePortClosed(error);
         });
         dbPort.start();
+    }
+
+    /**
+     * @param {Error} error
+     * @returns {void}
+     */
+    _handleDatabasePortClosed(error) {
+        this._dbPort = null;
+        log.error(error);
+        this._notifyDatabasePortClosed();
+    }
+
+    /**
+     * @returns {void}
+     */
+    _notifyDatabasePortClosed() {
+        try {
+            self.postMessage({action: 'mediaDrawingWorkerDatabasePortClosed'});
+        } catch (_) {
+            // Ignore notification failures; the draw failure is already logged.
+        }
     }
 
     /**

@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 export class TranslationTextReplacementsController {
@@ -126,7 +127,13 @@ export class TranslationTextReplacementsController {
                 /** @type {HTMLElement} */ (this._entryContainer).appendChild(node);
                 const entry = new TranslationTextReplacementsEntry(this, node, i);
                 this._entries.push(entry);
-                entry.prepare();
+                try {
+                    entry.prepare();
+                } catch (error) {
+                    log.error(error);
+                    entry.cleanup();
+                    this._entries.pop();
+                }
             }
         }
     }

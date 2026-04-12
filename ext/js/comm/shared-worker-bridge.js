@@ -58,24 +58,6 @@ export class SharedWorkerBridge {
     }
 
     /**
-     * @param {MessagePort} port
-     * @returns {boolean}
-     */
-    _postBackendConnectionPort(port) {
-        if (this._backendPort === null) {
-            return false;
-        }
-        try {
-            this._backendPort.postMessage(void 0, [port]); // connectToBackend2
-            return true;
-        } catch (error) {
-            this._backendPort = null;
-            log.error(error instanceof Error ? error : new Error(String(error)));
-            return false;
-        }
-    }
-
-    /**
      *
      */
     prepare() {
@@ -96,35 +78,65 @@ export class SharedWorkerBridge {
 
     /** @type {import('shared-worker').ApiHandler<'registerBackendPort'>} */
     _onRegisterBackendPort(_params, interlocutorPort, _ports) {
-        this._backendPort = interlocutorPort;
-        interlocutorPort.addEventListener('messageerror', (event) => {
+        interlocutorPort.addEventListener('messageerror', () => {
             if (this._backendPort === interlocutorPort) {
                 this._backendPort = null;
             }
-            const error = new ExtensionError('SharedWorkerBridge: backend port message deserialization failed');
-            error.data = event;
-            log.error(error);
+            log.error(new ExtensionError('SharedWorkerBridge: backend port message deserialization failed'));
         });
-        if (this._pendingBackendConnectionPorts.length === 0) {
-            return;
-        }
-        const pendingPorts = this._pendingBackendConnectionPorts.splice(0, this._pendingBackendConnectionPorts.length);
-        for (const pendingPort of pendingPorts) {
-            if (!this._postBackendConnectionPort(pendingPort)) {
-                break;
-            }
-        }
+        this._backendPort = interlocutorPort;
+        this._flushPendingBackendConnections();
     }
 
     /** @type {import('shared-worker').ApiHandler<'connectToBackend1'>} */
     _onConnectToBackend1(_params, _interlocutorPort, ports) {
         if (ports.length === 0) {
-            log.warn('SharedWorkerBridge: missing backend connection port from interlocutor');
             return;
         }
-        if (!this._postBackendConnectionPort(ports[0])) {
-            this._pendingBackendConnectionPorts.push(ports[0]);
-            log.warn('SharedWorkerBridge: backend port is not registered yet; queued backend connection port');
+        const backendConnectionPort = ports[0];
+        if (this._backendPort !== null) {
+            if (!this._forwardConnectionPort(backendConnectionPort)) {
+                this._pendingBackendConnectionPorts.push(backendConnectionPort);
+            }
+        } else {
+            this._pendingBackendConnectionPorts.push(backendConnectionPort);
+            log.warn('SharedWorkerBridge: backend port is not registered yet; queuing frontend backend connection');
+        }
+    }
+
+    /**
+     * @param {MessagePort} port
+     * @returns {boolean}
+     */
+    _forwardConnectionPort(port) {
+        if (this._backendPort === null) {
+            return false;
+        }
+        try {
+            this._backendPort.postMessage(void 0, [port]); // connectToBackend2
+            return true;
+        } catch (error) {
+            this._backendPort = null;
+            log.error(new ExtensionError(
+                `SharedWorkerBridge: failed to forward frontend backend connection: ${String(error)}`,
+            ));
+            return false;
+        }
+    }
+
+    /**
+     * @returns {void}
+     */
+    _flushPendingBackendConnections() {
+        if (this._backendPort === null || this._pendingBackendConnectionPorts.length === 0) {
+            return;
+        }
+        const pendingPorts = this._pendingBackendConnectionPorts.splice(0);
+        for (const port of pendingPorts) {
+            if (!this._forwardConnectionPort(port)) {
+                this._pendingBackendConnectionPorts.unshift(port, ...pendingPorts.slice(pendingPorts.indexOf(port) + 1));
+                return;
+            }
         }
     }
 }

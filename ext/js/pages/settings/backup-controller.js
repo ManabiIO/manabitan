@@ -345,16 +345,21 @@ export class BackupController {
         /** @type {?import('core').TokenObject} */
         const token = {};
         this._settingsExportToken = token;
-        const data = await this._getSettingsExportData(date);
-        if (this._settingsExportToken !== token) {
-            // A new export has been started
-            return;
-        }
-        this._settingsExportToken = null;
+        try {
+            const data = await this._getSettingsExportData(date);
+            if (this._settingsExportToken !== token) {
+                // A new export has been started
+                return;
+            }
 
-        const fileName = `yomitan-settings-${this._getSettingsExportDateString(date, '-', '-', '-', 6)}.json`;
-        const blob = new Blob([JSON.stringify(data, null, 4)], {type: 'application/json'});
-        this._saveBlob(blob, fileName);
+            const fileName = `yomitan-settings-${this._getSettingsExportDateString(date, '-', '-', '-', 6)}.json`;
+            const blob = new Blob([JSON.stringify(data, null, 4)], {type: 'application/json'});
+            this._saveBlob(blob, fileName);
+        } finally {
+            if (this._settingsExportToken === token) {
+                this._settingsExportToken = null;
+            }
+        }
     }
 
     /**

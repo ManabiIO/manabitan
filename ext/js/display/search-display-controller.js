@@ -19,6 +19,7 @@
 import {ClipboardMonitor} from '../comm/clipboard-monitor.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {log} from '../core/log.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {isComposing} from '../language/ime-utilities.js';
 import {convertToKana, convertToKanaIME} from '../language/ja/japanese-wanakana.js';
@@ -97,6 +98,8 @@ export class SearchDisplayController {
             ['searchDisplayControllerSetMode', this._onMessageSetMode.bind(this)],
             ['searchDisplayControllerUpdateSearchQuery', this._onExternalSearchUpdate.bind(this)],
         ]);
+        /** @type {number} */
+        this._profileSelectRefreshGeneration = 0;
     }
 
     /** */
@@ -164,6 +167,7 @@ export class SearchDisplayController {
 
         chrome.runtime.onMessage.addListener(this._onMessage.bind(this));
         this._display.application.on('optionsUpdated', this._onOptionsUpdated.bind(this));
+        this._display.application.on('databaseUpdated', this._onDatabaseUpdated.bind(this));
 
         this._display.on('optionsUpdated', this._onDisplayOptionsUpdated.bind(this));
         this._display.on('contentUpdateStart', this._onContentUpdateStart.bind(this));
@@ -190,7 +194,7 @@ export class SearchDisplayController {
         this._stickyHeaderEnableCheckbox.addEventListener('change', this._onStickyHeaderEnableChange.bind(this));
         this._display.hotkeyHandler.on('keydownNonHotkey', this._onKeyDown.bind(this));
 
-        this._profileSelect.addEventListener('change', this._onProfileSelectChange.bind(this), false);
+        this._profileSelect.addEventListener('change', this._onProfileSelectChangeEvent.bind(this), false);
 
         const displayOptions = this._display.getOptions();
         if (displayOptions !== null) {
@@ -260,11 +264,47 @@ export class SearchDisplayController {
     }
 
     /** */
-    async _onOptionsUpdated() {
-        await this._display.updateOptions();
-        const query = this._queryInput.value;
-        if (query) {
+    _onOptionsUpdated() {
+        void this._refreshAfterOptionsUpdate();
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _refreshAfterOptionsUpdate() {
+        const contentType = Reflect.get(this._display, '_contentType');
+        if (contentType === 'unloaded') { return; }
+        try {
+            await this._display.updateOptions();
+            if (contentType !== 'clear') {
+                this._display.searchLast(false);
+            }
+        } catch (error) {
+            if (!this._display.application.webExtension.unloaded) {
+                log.error(error);
+            }
+        }
+    }
+
+    /**
+     * @param {import('application').EventArgument<'databaseUpdated'>} details
+     */
+    _onDatabaseUpdated({type}) {
+        if (type !== 'dictionary') { return; }
+        void this._refreshAfterDictionaryDatabaseUpdate();
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _refreshAfterDictionaryDatabaseUpdate() {
+        try {
+            await this._display.updateOptions();
             this._display.searchLast(false);
+        } catch (error) {
+            if (!this._display.application.webExtension.unloaded) {
+                log.error(error);
+            }
         }
     }
 
@@ -525,12 +565,26 @@ export class SearchDisplayController {
     /**
      * @param {Event} event
      */
+    _onProfileSelectChangeEvent(event) {
+        void this._onProfileSelectChange(event).catch((error) => {
+            log.error(error);
+        });
+    }
+
+    /**
+     * @param {Event} event
+     */
     async _onProfileSelectChange(event) {
         const node = /** @type {HTMLInputElement} */ (event.currentTarget);
         const value = Number.parseInt(node.value, 10);
         const optionsFull = await this._display.application.api.optionsGetFull();
-        if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= optionsFull.profiles.length) {
-            await this._setDefaultProfileIndex(value);
+        if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value < optionsFull.profiles.length) {
+            try {
+                await this._setDefaultProfileIndex(value);
+            } catch (error) {
+                await this._updateProfileSelect();
+                throw error;
+            }
         }
     }
 
@@ -796,7 +850,9 @@ export class SearchDisplayController {
 
     /** */
     async _updateProfileSelect() {
+        const refreshGeneration = ++this._profileSelectRefreshGeneration;
         const {profiles, profileCurrent} = await this._display.application.api.optionsGetFull();
+        if (refreshGeneration !== this._profileSelectRefreshGeneration) { return; }
 
         /** @type {HTMLElement} */
         const optionGroup = querySelectorNotNull(document, '#profile-select-option-group');

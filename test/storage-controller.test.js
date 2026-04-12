@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Manabitan authors
+ * Copyright (C) 2026  Yomitan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,91 +15,113 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {afterAll, afterEach, describe, expect, test, vi} from 'vitest';
+// @vitest-environment jsdom
+
+import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
 import {StorageController} from '../ext/js/pages/settings/storage-controller.js';
-import {setupDomTest} from './fixtures/dom-test.js';
-
-const testEnv = await setupDomTest();
-afterAll(async () => {
-    await testEnv.teardown(global);
-});
-
-/**
- * @param {Document} document
- * @returns {HTMLElement}
- */
-function setupStorageRuntimeDom(document) {
-    document.body.innerHTML = `
-        <button id="storage-refresh"></button>
-        <div id="storage-runtime-check"></div>
-    `;
-    return /** @type {HTMLElement} */ (document.querySelector('#storage-runtime-check'));
-}
-
-/**
- * @returns {StorageController}
- */
-function createControllerForInternalTests() {
-    return /** @type {StorageController} */ (Object.create(StorageController.prototype));
-}
 
 describe('StorageController runtime check', () => {
-    const {window} = testEnv;
+    /** @type {import('../ext/js/pages/settings/storage-controller.js').StorageController} */
+    let controller;
+    /** @type {{persisted: ReturnType<typeof vi.fn>, estimate: ReturnType<typeof vi.fn>}} */
+    let storageMock;
+    /** @type {{session: {get: ReturnType<typeof vi.fn>}, local: {get: ReturnType<typeof vi.fn>}}} */
+    let chromeStorageMock;
+
+    beforeEach(() => {
+        document.body.innerHTML = `
+            <button id="storage-refresh"></button>
+            <div id="storage-runtime-check"></div>
+        `;
+        storageMock = {
+            persisted: vi.fn(async () => false),
+            estimate: vi.fn(async () => ({usage: 1024, quota: 4096})),
+        };
+        Object.defineProperty(globalThis.navigator, 'storage', {
+            configurable: true,
+            value: storageMock,
+        });
+        class MockFileSystemFileHandle {}
+        MockFileSystemFileHandle.prototype.createSyncAccessHandle = () => {};
+        vi.stubGlobal('FileSystemFileHandle', MockFileSystemFileHandle);
+        chromeStorageMock = {
+            session: {
+                get: vi.fn(async () => ({manabitanLastBackendStartupError: null})),
+            },
+            local: {
+                get: vi.fn(async () => ({manabitanLastBackendStartupError: null})),
+            },
+        };
+        vi.stubGlobal('chrome', {storage: chromeStorageMock});
+    });
 
     afterEach(() => {
-        vi.restoreAllMocks();
+        controller = undefined;
         vi.unstubAllGlobals();
-        window.document.body.innerHTML = '';
+        document.body.innerHTML = '';
     });
 
-    test('shows backend runtime health even when the page itself lacks SyncAccessHandle', async () => {
-        const controller = createControllerForInternalTests();
-        const runtimeCheckNode = setupStorageRuntimeDom(window.document);
-        vi.stubGlobal('navigator', {
-            userAgent: 'Mozilla/5.0 Firefox/999.0',
-            storage: {
-                getDirectory: async () => ({}),
+    test('shows backend storage state when backend is reachable', async () => {
+        const application = {
+            api: {
+                debugDictionaryStorageState: vi.fn(async () => ({
+                    usesFallbackStorage: false,
+                    openStorageDiagnostics: {mode: 'opfs-sahpool'},
+                    startupDiagnosticsSnapshot: {dictionaryPrepareError: ''},
+                    dictionaryRows: [{title: 'Jitendex'}],
+                    offscreenDictionaryRows: [{title: 'Jitendex'}],
+                })),
             },
-        });
-        vi.stubGlobal('FileSystemFileHandle', function FileSystemFileHandle() {});
-        Reflect.set(controller, '_persistentStorageController', {
-            application: {
-                api: {
-                    debugDictionaryStorageState: vi.fn().mockResolvedValue({
-                        openStorageDiagnostics: {mode: 'opfs-sahpool', openFailureClass: null},
-                        startupDiagnosticsSnapshot: null,
-                    }),
-                },
-            },
-        });
-        Reflect.set(controller, '_storageRuntimeCheckNode', runtimeCheckNode);
+            on: vi.fn(),
+        };
+        const persistentStorageController = {
+            application,
+            isStoragePeristent: vi.fn(async () => false),
+        };
 
-        await controller._updateRuntimeCheck();
+        controller = new StorageController(/** @type {any} */ (persistentStorageController));
+        controller.prepare();
+        await vi.waitFor(() => {
+            expect((/** @type {HTMLElement} */ (document.querySelector('#storage-runtime-check')).textContent || '').length).toBeGreaterThan(0);
+        });
 
-        expect(runtimeCheckNode.textContent).toContain('dictionary backend usable=true');
-        expect(runtimeCheckNode.textContent).toContain('backend mode=opfs-sahpool');
-        expect(runtimeCheckNode.textContent).toContain('page createSyncAccessHandle=false');
+        const text = /** @type {HTMLElement} */ (document.querySelector('#storage-runtime-check')).textContent || '';
+        expect(text).toContain('backend reachable=true');
+        expect(text).toContain('dictionary backend usable=true');
+        expect(text).toContain('backend mode=opfs-sahpool');
+        expect(text).toContain('dictionaryRows=1');
+        expect(text).toContain('offscreenDictionaryRows=1');
     });
 
-    test('surfaces backend startup failure in settings runtime check text', async () => {
-        const controller = createControllerForInternalTests();
-        const runtimeCheckNode = setupStorageRuntimeDom(window.document);
-        vi.stubGlobal('navigator', {
-            userAgent: 'Mozilla/5.0 Chrome/999.0',
-            storage: {},
-        });
-        Reflect.set(controller, '_persistentStorageController', {
-            application: {
-                api: {
-                    debugDictionaryStorageState: vi.fn().mockRejectedValue(new Error('opfs-sahpool requires a DedicatedWorkerGlobalScope')),
-                },
+    test('shows stored startup failure when backend API is unreachable', async () => {
+        chromeStorageMock.session.get.mockResolvedValue({
+            manabitanLastBackendStartupError: {
+                errorMessage: 'Failed to initialize OPFS runtime',
             },
         });
-        Reflect.set(controller, '_storageRuntimeCheckNode', runtimeCheckNode);
+        const application = {
+            api: {
+                debugDictionaryStorageState: vi.fn(async () => {
+                    throw new Error('Receiving end does not exist.');
+                }),
+            },
+            on: vi.fn(),
+        };
+        const persistentStorageController = {
+            application,
+            isStoragePeristent: vi.fn(async () => false),
+        };
 
-        await controller._updateRuntimeCheck();
+        controller = new StorageController(/** @type {any} */ (persistentStorageController));
+        controller.prepare();
+        await vi.waitFor(() => {
+            expect((/** @type {HTMLElement} */ (document.querySelector('#storage-runtime-check')).textContent || '').length).toBeGreaterThan(0);
+        });
 
-        expect(runtimeCheckNode.textContent).toContain('dictionary backend usable=false');
-        expect(runtimeCheckNode.textContent).toContain('backend startup error=opfs-sahpool requires a DedicatedWorkerGlobalScope');
+        const text = /** @type {HTMLElement} */ (document.querySelector('#storage-runtime-check')).textContent || '';
+        expect(text).toContain('backend reachable=false');
+        expect(text).toContain('dictionary backend usable=false');
+        expect(text).toContain('backendError=Receiving end does not exist.');
+        expect(text).toContain('startupError=Failed to initialize OPFS runtime');
     });
 });

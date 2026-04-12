@@ -43,11 +43,20 @@ export class LanguagesController {
      */
     _fillSelect(languages) {
         const selectElement = querySelectorNotNull(document, '#language-select');
+        const previousValue = selectElement.value;
+        selectElement.textContent = '';
+        let hasPreviousValue = false;
         for (const {iso, name} of languages) {
             const option = document.createElement('option');
             option.value = iso;
             option.text = `${name} (${iso})`;
             selectElement.appendChild(option);
+            if (iso === previousValue) {
+                hasPreviousValue = true;
+            }
+        }
+        if (hasPreviousValue) {
+            selectElement.value = previousValue;
         }
     }
 }
