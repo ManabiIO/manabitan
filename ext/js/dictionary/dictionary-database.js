@@ -1618,6 +1618,13 @@ export class DictionaryDatabase {
         /** @type {import('dictionary-database').TermEntry[]} */
         const results = [];
         const dictionaryNames = this._getDictionaryNames(dictionaries);
+        reportDiagnostics('dictionary-lookup-db-query', {
+            stage: 'findTermsBulk-start',
+            matchType,
+            termCount: termList.length,
+            termsSample: termList.slice(0, 12),
+            dictionaryNames,
+        });
         await this._ensureDirectTermIndexesLoaded(dictionaryNames);
 
         /** @type {('expression'|'reading'|'expressionReverse'|'readingReverse')[]} */
@@ -1629,6 +1636,8 @@ export class DictionaryDatabase {
             /** @type {Map<number, {matchSource: import('dictionary-database').MatchSource, itemIndex: number}[]>} */
             const idMatches = new Map();
             const dictionaryCacheKey = this._getDictionaryCacheKey(dictionaryNames);
+            /** @type {Map<string, {expressionHits: number, readingHits: number}>} */
+            const dictionaryExactHitCounts = new Map();
             for (let i = 0; i < termList.length; ++i) {
                 const term = termList[i];
                 const termPresenceKey = this._createTermExactPresenceCacheKey(dictionaryCacheKey, term);
@@ -1654,6 +1663,9 @@ export class DictionaryDatabase {
                     const expressionIds = index.expression.get(term);
                     if (typeof expressionIds !== 'undefined') {
                         found = true;
+                        const hitCounts = dictionaryExactHitCounts.get(dictionaryName) || {expressionHits: 0, readingHits: 0};
+                        hitCounts.expressionHits += expressionIds.length;
+                        dictionaryExactHitCounts.set(dictionaryName, hitCounts);
                         for (const id of expressionIds) {
                             if (id <= 0 || visited.has(id)) { continue; }
                             visited.add(id);
@@ -1673,6 +1685,9 @@ export class DictionaryDatabase {
                     const readingIds = index.reading.get(term);
                     if (typeof readingIds !== 'undefined') {
                         found = true;
+                        const hitCounts = dictionaryExactHitCounts.get(dictionaryName) || {expressionHits: 0, readingHits: 0};
+                        hitCounts.readingHits += readingIds.length;
+                        dictionaryExactHitCounts.set(dictionaryName, hitCounts);
                         for (const id of readingIds) {
                             if (id <= 0 || visited.has(id)) { continue; }
                             visited.add(id);
@@ -1692,10 +1707,33 @@ export class DictionaryDatabase {
             }
 
             if (idMatches.size === 0) {
+                reportDiagnostics('dictionary-lookup-db-query', {
+                    stage: 'findTermsBulk-exact',
+                    termCount: termList.length,
+                    termsSample: termList.slice(0, 12),
+                    dictionaryNames,
+                    matchedRowCount: 0,
+                    dictionaryHitCounts: dictionaryNames.map((dictionaryName) => {
+                        const hitCounts = dictionaryExactHitCounts.get(dictionaryName) || {expressionHits: 0, readingHits: 0};
+                        return {dictionary: dictionaryName, ...hitCounts};
+                    }),
+                });
                 return [];
             }
 
             const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
+            reportDiagnostics('dictionary-lookup-db-query', {
+                stage: 'findTermsBulk-exact',
+                termCount: termList.length,
+                termsSample: termList.slice(0, 12),
+                dictionaryNames,
+                matchedIdCount: idMatches.size,
+                matchedRowCount: rowsById.size,
+                dictionaryHitCounts: dictionaryNames.map((dictionaryName) => {
+                    const hitCounts = dictionaryExactHitCounts.get(dictionaryName) || {expressionHits: 0, readingHits: 0};
+                    return {dictionary: dictionaryName, ...hitCounts};
+                }),
+            });
             for (const [id, matches] of idMatches) {
                 const row = rowsById.get(id);
                 if (typeof row === 'undefined') { continue; }
@@ -1776,10 +1814,30 @@ export class DictionaryDatabase {
         }
 
         const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
+        reportDiagnostics('dictionary-lookup-db-query', {
+            stage: 'findTermsBulk-prefix',
+            matchType,
+            termCount: termList.length,
+            termsSample: termList.slice(0, 12),
+            dictionaryNames,
+            matchedIdCount: idMatches.size,
+            matchedRowCount: rowsById.size,
+        });
         for (const [id, {matchSource, matchType: matchType2, itemIndex}] of idMatches) {
             const row = rowsById.get(id);
             if (typeof row === 'undefined') { continue; }
             results.push(this._createTerm(matchSource, matchType2, row, itemIndex));
+        }
+        if (results.length === 0) {
+            reportDiagnostics('dictionary-lookup-db-query', {
+                stage: 'findTermsBulk-prefix-zero-result',
+                matchType,
+                termCount: termList.length,
+                termsSample: termList.slice(0, 12),
+                dictionaryNames,
+                matchedIdCount: idMatches.size,
+                matchedRowCount: rowsById.size,
+            });
         }
         return results;
     }

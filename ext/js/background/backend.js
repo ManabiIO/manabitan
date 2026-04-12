@@ -366,11 +366,16 @@ export class Backend {
             };
             const downloadTimeoutMs = 120_000;
             try {
+                // Without an explicit download progress phase here, fallback URL imports
+                // mislabel long download time as the later archive-loading step.
+                responsePort.postMessage({type: 'progress', progress: {nextStep: true, index: 0, count: 0}});
                 const archiveContent = await this._downloadDictionaryArchiveBlobViaXhr(normalizedUrl, downloadTimeoutMs, (phase) => {
                     this._lastDictionaryUrlImportDebug = {
                         ...this._lastDictionaryUrlImportDebug,
                         ...phase,
                     };
+                }, (loaded, total) => {
+                    responsePort.postMessage({type: 'progress', progress: {nextStep: false, index: loaded, count: total}});
                 });
                 this._lastDictionaryUrlImportDebug = {
                     ...this._lastDictionaryUrlImportDebug,
@@ -421,9 +426,10 @@ export class Backend {
      * @param {string} url
      * @param {number} timeoutMs
      * @param {(details: Record<string, string|number|null>) => void} onPhase
+     * @param {(loaded: number, total: number) => void} [onProgress]
      * @returns {Promise<Blob>}
      */
-    async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase) {
+    async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase, onProgress = null) {
         return await new Promise((resolve, reject) => {
             const request = new XMLHttpRequest();
             const cleanup = () => {
@@ -473,6 +479,10 @@ export class Backend {
             };
             request.ontimeout = () => {
                 fail(new Error(`Timed out fetching dictionary archive after ${String(timeoutMs)}ms: ${url}`));
+            };
+            request.onprogress = (event) => {
+                if (typeof onProgress !== 'function' || !event.lengthComputable) { return; }
+                onProgress(event.loaded, event.total);
             };
             request.send();
         });
@@ -976,10 +986,34 @@ export class Backend {
         const {general: {resultOutputMode: mode, maxResults}} = options;
         let findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
         let {dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions);
+        let installedDictionaryCount = null;
+        let installedDictionaryTitles = null;
+        /** @type {unknown|null} */
+        let debugLookupState = null;
+        try {
+            const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
+            if (Array.isArray(dictionaryInfo)) {
+                installedDictionaryCount = dictionaryInfo.length;
+                installedDictionaryTitles = dictionaryInfo
+                    .map((dictionary) => (typeof dictionary?.title === 'string' ? dictionary.title : null))
+                    .filter((title) => typeof title === 'string' && title.length > 0);
+            }
+        } catch (e) {
+            installedDictionaryCount = null;
+            installedDictionaryTitles = null;
+            reportDiagnostics('dictionary-lookup-installed-dictionary-info-failed', {
+                textLength: text.length,
+                mode,
+                error: toError(e).message,
+            });
+        }
+        const hasInstalledDictionaries = installedDictionaryCount === null ?
+            await this._hasInstalledDictionaries() :
+            installedDictionaryCount > 0;
         if (
             dictionaryEntries.length === 0 &&
             findTermsOptions.enabledDictionaryMap.size > 0 &&
-            await this._hasInstalledDictionaries()
+            hasInstalledDictionaries
         ) {
             reportDiagnostics('dictionary-lookup-self-heal-begin', {
                 textLength: text.length,
@@ -990,6 +1024,20 @@ export class Backend {
             void this._translator.clearDatabaseCaches();
             findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
             ({dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions));
+            if (dictionaryEntries.length === 0) {
+                try {
+                    debugLookupState = await this._debugDictionaryLookupState(
+                        text,
+                        [...findTermsOptions.enabledDictionaryMap.keys()],
+                    );
+                } catch (e) {
+                    debugLookupState = {
+                        ok: false,
+                        reason: 'debug lookup capture failed',
+                        error: toError(e).message,
+                    };
+                }
+            }
             reportDiagnostics('dictionary-lookup-self-heal-complete', {
                 textLength: text.length,
                 enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
@@ -997,6 +1045,85 @@ export class Backend {
                 recovered: dictionaryEntries.length > 0,
             });
         }
+        if (
+            dictionaryEntries.length === 0 &&
+            findTermsOptions.enabledDictionaryMap.size > 0 &&
+            debugLookupState === null
+        ) {
+            try {
+                debugLookupState = await this._debugDictionaryLookupState(
+                    text,
+                    [...findTermsOptions.enabledDictionaryMap.keys()],
+                );
+            } catch (e) {
+                debugLookupState = {
+                    ok: false,
+                    reason: 'debug lookup capture failed',
+                    error: toError(e).message,
+                };
+            }
+        }
+        reportDiagnostics('dictionary-lookup-snapshot', {
+            text,
+            textLength: text.length,
+            mode,
+            profileIndex: optionsContext.index,
+            optionsContext: {
+                depth: optionsContext.depth,
+                index: optionsContext.index,
+                url: optionsContext.url,
+            },
+            enabledDictionaryMap: [...findTermsOptions.enabledDictionaryMap.entries()].map(([name, value]) => ({
+                name,
+                index: value.index,
+                alias: value.alias,
+                allowSecondarySearches: value.allowSecondarySearches,
+                partsOfSpeechFilter: value.partsOfSpeechFilter,
+                useDeinflections: value.useDeinflections,
+            })),
+            profileDictionarySettings: options.dictionaries.map(({name, alias, enabled, allowSecondarySearches, partsOfSpeechFilter, useDeinflections}) => ({
+                name,
+                alias,
+                enabled,
+                allowSecondarySearches,
+                partsOfSpeechFilter,
+                useDeinflections,
+            })),
+            installedDictionaryCount,
+            installedDictionaryTitles,
+            resultDictionaryCount: dictionaryEntries.length,
+            resultDictionaries: [...new Set(dictionaryEntries.flatMap((entry) => (
+                entry.type === 'term' ?
+                    entry.definitions.map(({dictionary}) => dictionary) :
+                    [entry.dictionary]
+            )))],
+            resultDictionaryAliases: [...new Set(dictionaryEntries.flatMap((entry) => (
+                entry.type === 'term' ?
+                    entry.definitions.map(({dictionaryAlias}) => dictionaryAlias) :
+                    [entry.dictionaryAlias]
+            )))],
+            debugLookupState,
+            resultEntries: dictionaryEntries.map((entry) => (
+                entry.type === 'term' ?
+                    {
+                        type: entry.type,
+                        dictionaryIndex: entry.dictionaryIndex,
+                        dictionaryAlias: entry.dictionaryAlias,
+                        headwords: entry.headwords.map(({term, reading}) => ({term, reading})),
+                        definitions: entry.definitions.map(({dictionary, dictionaryAlias, sequences, isPrimary}) => ({
+                            dictionary,
+                            dictionaryAlias,
+                            sequences,
+                            isPrimary,
+                        })),
+                    } :
+                    {
+                        type: entry.type,
+                        dictionary: entry.dictionary,
+                        dictionaryAlias: entry.dictionaryAlias,
+                    }
+            )),
+        });
         dictionaryEntries.splice(maxResults);
         return {dictionaryEntries, originalTextLength};
     }
@@ -1418,31 +1545,57 @@ export class Backend {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
+        return await this._debugDictionaryLookupState(
+            typeof text === 'string' ? text : '',
+            Array.isArray(dictionaryNames) ? dictionaryNames : [],
+        );
+    }
+
+    /**
+     * @param {string} text
+     * @param {string[]} dictionaryNames
+     * @returns {Promise<unknown>}
+     */
+    async _debugDictionaryLookupState(text, dictionaryNames) {
         if (this._offscreen !== null) {
-            const normalizedText = typeof text === 'string' ? text : '';
-            const normalizedDictionaryNames = Array.isArray(dictionaryNames) ? dictionaryNames : [];
             const [localState, offscreenState] = await Promise.all([
                 this._debugDictionaryLookupStateLocal(
-                    normalizedText,
-                    normalizedDictionaryNames,
+                    text,
+                    dictionaryNames,
                 ),
                 this._offscreen.sendMessagePromise({
                     action: 'debugDictionaryLookupStateOffscreen',
-                    params: {text: normalizedText, dictionaryNames: normalizedDictionaryNames},
+                    params: {text, dictionaryNames},
                 }),
             ]);
             return {
                 ok: Boolean((/** @type {{ok?: unknown}|null|undefined} */ (localState))?.ok) && Boolean((/** @type {{ok?: unknown}|null|undefined} */ (offscreenState))?.ok),
-                text: normalizedText,
-                dictionaryNames: normalizedDictionaryNames,
+                text,
+                dictionaryNames,
                 localState,
                 offscreenState,
             };
         }
-        return await this._debugDictionaryLookupStateLocal(
-            typeof text === 'string' ? text : '',
-            Array.isArray(dictionaryNames) ? dictionaryNames : [],
-        );
+        if (this._localDictionaryRuntime !== null) {
+            const [localState, workerState] = await Promise.all([
+                this._debugDictionaryLookupStateLocal(
+                    text,
+                    dictionaryNames,
+                ),
+                this._localDictionaryRuntime.sendMessagePromise({
+                    action: 'debugDictionaryLookupStateOffscreen',
+                    params: {text, dictionaryNames},
+                }),
+            ]);
+            return {
+                ok: Boolean((/** @type {{ok?: unknown}|null|undefined} */ (localState))?.ok) && Boolean((/** @type {{ok?: unknown}|null|undefined} */ (workerState))?.ok),
+                text,
+                dictionaryNames,
+                localState,
+                workerState,
+            };
+        }
+        return await this._debugDictionaryLookupStateLocal(text, dictionaryNames);
     }
 
     async _onApiDebugDictionaryStorageState() {
