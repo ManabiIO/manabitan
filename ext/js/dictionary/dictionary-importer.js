@@ -80,6 +80,7 @@ const HEX_BYTE_TABLE = Array.from({length: 256}, (_, i) => i.toString(16).padSta
 const EMPTY_TERM_GLOSSARY = [];
 /** @typedef {import('dictionary-importer').ImportFileEntry} ImportFileEntry */
 const EMPTY_ARRAY_BUFFER = new ArrayBuffer(0);
+const UTF8_TEXT_DECODER = new TextDecoder('utf-8', {fatal: true});
 Object.freeze(EMPTY_TERM_GLOSSARY);
 
 /**
@@ -217,6 +218,31 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
             };
         },
     };
+}
+
+/**
+ * @param {import('@zip.js/zip.js').Entry} entry
+ * @returns {?string}
+ */
+function getArchiveEntryUtf8Alias(entry) {
+    const {rawFilename, filename} = entry;
+    if (!(rawFilename instanceof Uint8Array) || rawFilename.byteLength === 0) {
+        return null;
+    }
+    let decoded;
+    try {
+        decoded = UTF8_TEXT_DECODER.decode(rawFilename);
+    } catch {
+        return null;
+    }
+    if (
+        decoded.length === 0 ||
+        decoded === filename ||
+        decoded.includes('\u0000')
+    ) {
+        return null;
+    }
+    return decoded;
 }
 
 /**
@@ -1884,6 +1910,10 @@ export class DictionaryImporter {
         const fileMap = new Map();
         for (const entry of zipEntries) {
             fileMap.set(entry.filename, entry);
+            const utf8Alias = getArchiveEntryUtf8Alias(entry);
+            if (typeof utf8Alias === 'string' && !fileMap.has(utf8Alias)) {
+                fileMap.set(utf8Alias, entry);
+            }
         }
         return {fileMap, zipReader};
     }

@@ -42,6 +42,9 @@ const BASIC_DIAGNOSTICS_EVENTS = new Set([
     'dictionary-import-step-final',
     'dictionary-import-zip-complete',
     'dictionary-import-worker-phase-summary',
+    'dictionary-lookup-db-query',
+    'dictionary-lookup-snapshot',
+    'dictionary-lookup-translator-stage',
 ]);
 /** @type {Promise<DiagnosticsConfig>|null} */
 let diagnosticsConfigPromise = null;

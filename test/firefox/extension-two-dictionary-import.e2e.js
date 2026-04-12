@@ -39,10 +39,39 @@ const fallbackJmdictUrl = 'https://github.com/yomidevs/jmdict-yomitan/releases/l
 const execFileAsync = promisify(execFile);
 const expectedLookupDictionaries = ['Jitendex', 'JMdict'];
 const extendedLookupDictionaries = ['Jitendex', 'JMdict', 'JMnedict'];
-const lookupWords = ['暗記', '名前', '日本', '学生', '食べる', '見る', '言う', '行く', '水', '猫'];
+const lookupWords = ['暗記', '食う', '名前', '日本', '学生', '食べる', '見る', '言う', '行く', '水', '猫'];
 const jmdictProbeTerms = ['打', '日本', '食べる', '見る', '水', '猫', '名前'];
 const firefoxDevGeckoId = '{accbebce-862b-48a9-bb9a-1da9ad1f8702}';
 const firefoxDevExtensionUuid = '6d1d0bf0-9b57-4ff8-9d93-64e13ae0f5da';
+const focusedSecondaryDictionary = String(process.env.MANABITAN_FIREFOX_RECOMMENDED_SECONDARY || '').trim();
+const focusedBaselineOnly = /^(1|true|yes)$/i.test(String(process.env.MANABITAN_FIREFOX_FOCUSED_BASELINE_ONLY || ''));
+const existingProfileOnly = /^(1|true|yes)$/i.test(String(process.env.MANABITAN_FIREFOX_EXISTING_PROFILE_ONLY || ''));
+const profileCycle = /^(1|true|yes)$/i.test(String(process.env.MANABITAN_FIREFOX_PROFILE_CYCLE || ''));
+
+/**
+ * @param {'JMdict'|'JMnedict'} name
+ * @param {{baseUrl: string}} localServer
+ * @returns {{name: string, description: string, homepage: string, downloadUrl: string}}
+ */
+function createFocusedRecommendedTermsDictionary(name, localServer) {
+    switch (name) {
+        case 'JMnedict':
+            return {
+                name: 'JMnedict',
+                description: 'Real JMnedict from recommended dictionaries',
+                homepage: '',
+                downloadUrl: `${localServer.baseUrl}/dictionaries/jmnedict.zip`,
+            };
+        case 'JMdict':
+        default:
+            return {
+                name: 'JMdict',
+                description: 'Real JMdict from recommended dictionaries',
+                homepage: '',
+                downloadUrl: `${localServer.baseUrl}/dictionaries/jmdict-slow.zip`,
+            };
+    }
+}
 
 /**
  * @param {string} observedName
@@ -144,6 +173,53 @@ function startFirefoxResourceSampler(firefoxPid) {
             };
         },
     };
+}
+
+/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @param {string} pageUrl
+ * @param {By} readyLocator
+ * @param {{attempts?: number, pageLoadTimeoutMs?: number, readyTimeoutMs?: number}|undefined} [options]
+ * @returns {Promise<void>}
+ */
+async function navigateToExtensionPage(driver, pageUrl, readyLocator, options = undefined) {
+    const attempts = Math.max(1, Number(options?.attempts ?? 3));
+    const pageLoadTimeoutMs = Math.max(1_000, Number(options?.pageLoadTimeoutMs ?? 15_000));
+    const readyTimeoutMs = Math.max(1_000, Number(options?.readyTimeoutMs ?? 30_000));
+    let lastError = null;
+    const originalTimeouts = await driver.manage().getTimeouts();
+    try {
+        await driver.manage().setTimeouts({...originalTimeouts, pageLoad: pageLoadTimeoutMs});
+        for (let attempt = 1; attempt <= attempts; ++attempt) {
+            try {
+                await driver.get('about:blank');
+            } catch (_) {
+                // Best-effort reset before the real navigation.
+            }
+            try {
+                await driver.get(pageUrl);
+            } catch (error) {
+                lastError = error;
+            }
+            try {
+                await driver.wait(async () => {
+                    try {
+                        const currentUrl = await driver.getCurrentUrl();
+                        return currentUrl.startsWith(pageUrl);
+                    } catch (_) {
+                        return false;
+                    }
+                }, Math.min(5_000, pageLoadTimeoutMs));
+                await driver.wait(until.elementLocated(readyLocator), readyTimeoutMs);
+                return;
+            } catch (error) {
+                lastError = error;
+            }
+        }
+    } finally {
+        await driver.manage().setTimeouts(originalTimeouts);
+    }
+    throw lastError ?? new Error(`Failed to navigate to extension page: ${pageUrl}`);
 }
 
 /**
@@ -581,6 +657,33 @@ function isIgnorableDriverQuitError(value) {
 async function recoverExtensionSearchContext(driver, extensionBaseUrl, query = '暗記') {
     await driver.get(`${extensionBaseUrl}/search.html?query=${encodeURIComponent(query)}&type=terms&wildcards=off`);
     await driver.wait(until.elementLocated(By.css('#search-textbox')), 30_000);
+}
+
+/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @param {string} extensionBaseUrl
+ * @returns {Promise<void>}
+ */
+async function reloadExtensionRuntime(driver, extensionBaseUrl) {
+    try {
+        await driver.executeScript(`
+            try {
+                chrome.runtime.reload();
+            } catch (_) {
+                // Ignore runtime access failures; page context may already be tearing down.
+            }
+        `);
+    } catch (_) {
+        // Expected when the current extension context is discarded during reload.
+    }
+    await driver.sleep(2_000);
+    await waitForExtensionBaseUrl(driver, firefoxDevExtensionUuid);
+    await navigateToExtensionPage(
+        driver,
+        `${extensionBaseUrl}/settings.html`,
+        By.css('#dictionary-import-file-input'),
+        {attempts: 3, pageLoadTimeoutMs: 15_000, readyTimeoutMs: 30_000},
+    );
 }
 
 /**
@@ -2301,6 +2404,37 @@ async function getBackendStorageDiagnostics(driver) {
 }
 
 /**
+ * @param {Record<string, unknown>|null} diagnostics
+ * @returns {string}
+ */
+function summarizeBackendStorageDiagnostics(diagnostics) {
+    if (diagnostics === null) { return 'storage=null'; }
+    const dictionaryRows = Array.isArray(diagnostics.dictionaryRows) ? diagnostics.dictionaryRows : [];
+    const offscreenDictionaryRows = Array.isArray(diagnostics.offscreenDictionaryRows) ? diagnostics.offscreenDictionaryRows : [];
+    const dictionaryRowTitles = dictionaryRows
+        .map((row) => typeof row?.title === 'string' ? row.title : null)
+        .filter((value) => typeof value === 'string' && value.length > 0);
+    const offscreenDictionaryRowTitles = offscreenDictionaryRows
+        .map((row) => typeof row?.title === 'string' ? row.title : null)
+        .filter((value) => typeof value === 'string' && value.length > 0);
+    const lastDictionaryUrlImportDebug = diagnostics.lastDictionaryUrlImportDebug;
+    const lastDictionaryUrlImportStage = (typeof lastDictionaryUrlImportDebug === 'object' && lastDictionaryUrlImportDebug !== null && !Array.isArray(lastDictionaryUrlImportDebug) && typeof lastDictionaryUrlImportDebug.stage === 'string') ?
+        lastDictionaryUrlImportDebug.stage :
+        null;
+    return JSON.stringify({
+        usesFallbackStorage: diagnostics.usesFallbackStorage ?? null,
+        dictionaryRowsCount: dictionaryRows.length,
+        dictionaryRowTitles,
+        offscreenDictionaryRowsCount: offscreenDictionaryRows.length,
+        offscreenDictionaryRowTitles,
+        lastDictionaryUrlImportStage,
+        startupCleanupIncompleteImportsSummary: diagnostics.offscreenStartupCleanupIncompleteImportsSummary ?? null,
+        startupCleanupMissingTermRecordShardsSummary: diagnostics.offscreenStartupCleanupMissingTermRecordShardsSummary ?? null,
+        offscreenTermRecordShardFileNames: Array.isArray(diagnostics.offscreenTermRecordShardFileNames) ? diagnostics.offscreenTermRecordShardFileNames : [],
+    });
+}
+
+/**
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
  * @param {string} dictionaryTitle
  * @returns {Promise<{ok: boolean, error: string|null}>}
@@ -2436,6 +2570,7 @@ async function main() {
     const defaultFirefoxXpiPath = path.join(root, 'builds', 'manabitan-firefox-dev.xpi');
     const defaultFirefoxZipPath = path.join(root, 'builds', 'manabitan-firefox-dev.zip');
     let xpiPath = process.env.MANABITAN_FIREFOX_XPI ?? defaultFirefoxXpiPath;
+    const configuredFirefoxProfileDir = String(process.env.MANABITAN_FIREFOX_PROFILE_DIR || '').trim();
     const reportPath = process.env.MANABITAN_FIREFOX_E2E_REPORT ?? path.join(root, 'builds', 'firefox-e2e-import-report.html');
     const reportJsonPath = reportPath.replace(/\.html$/i, '.json');
     const diagnosticsArtifactPaths = createDiagnosticsArtifactPaths(reportJsonPath);
@@ -2515,8 +2650,11 @@ async function main() {
             // Use default Firefox binary when Developer Edition is unavailable.
         }
     }
-    firefoxOptions.addExtensions(xpiPath);
-    console.log(`[firefox-e2e] addon package: path=${xpiPath} sizeBytes=${String(extensionPackageStats.size)} installMode=profile headless=${String(headless)} binary=${configuredFirefoxBinary || 'default'}`);
+    if (configuredFirefoxProfileDir.length > 0) {
+        await mkdir(configuredFirefoxProfileDir, {recursive: true});
+        firefoxOptions.setProfile(configuredFirefoxProfileDir);
+    }
+    console.log(`[firefox-e2e] addon package: path=${xpiPath} sizeBytes=${String(extensionPackageStats.size)} installMode=webdriver-addon headless=${String(headless)} binary=${configuredFirefoxBinary || 'default'} profileDir=${configuredFirefoxProfileDir || 'temporary'}`);
     await mkdir(diagnosticsArtifactPaths.crashDumpDir, {recursive: true});
     geckodriverLogFd = openSync(diagnosticsArtifactPaths.geckodriverLogPath, 'a');
     const firefoxService = new firefox.ServiceBuilder();
@@ -2538,6 +2676,8 @@ async function main() {
     );
     /** @type {null|{close: () => Promise<void>, baseUrl: string}} */
     let localServer = null;
+    /** @type {string} */
+    let installedAddonId = '';
     try {
         heartbeat.setActiveOperation('cache warmup');
         const cacheWarmupStart = safePerformance.now();
@@ -2557,36 +2697,52 @@ async function main() {
 
         const baseUrlStart = safePerformance.now();
         heartbeat.setActiveOperation('wait for extension base URL');
-        const extensionBaseUrl = await waitForExtensionBaseUrl(driver, firefoxDevExtensionUuid);
+        installedAddonId = await driver.installAddon(xpiPath, true);
+        const extensionBaseUrl = await waitForExtensionBaseUrl(driver, installedAddonId);
         const baseUrlEnd = safePerformance.now();
-        await addReportPhase(report, driver, 'Install extension and discover base URL', 'Extension installed and moz-extension base URL discovered', baseUrlStart, baseUrlEnd);
+        await addReportPhase(report, driver, 'Install extension and discover base URL', `Extension installed via webdriver addon API and moz-extension base URL discovered; addonId=${installedAddonId}`, baseUrlStart, baseUrlEnd);
         const firefoxPidStart = safePerformance.now();
         const firefoxPidEnd = safePerformance.now();
         await addReportPhase(report, driver, 'Firefox process detection', `Detected Firefox browser PID for profiling: ${firefoxPid !== null ? String(firefoxPid) : 'unavailable'}`, firefoxPidStart, firefoxPidEnd);
 
         const settingsOpenStart = safePerformance.now();
         heartbeat.setActiveOperation('open settings page');
-        await driver.get(`${extensionBaseUrl}/settings.html`);
-        await driver.wait(until.elementLocated(By.css('#dictionary-import-file-input')), 30_000);
+        await navigateToExtensionPage(
+            driver,
+            `${extensionBaseUrl}/settings.html`,
+            By.css('#dictionary-import-file-input'),
+            {attempts: 3, pageLoadTimeoutMs: 15_000, readyTimeoutMs: 30_000},
+        );
         await ensurePageProfiler(driver);
         const settingsOpenEnd = safePerformance.now();
         await addReportPhase(report, driver, 'Open settings page', 'Settings loaded and dictionary import controls visible', settingsOpenStart, settingsOpenEnd);
-        const resetStateStart = safePerformance.now();
-        heartbeat.setActiveOperation('purge backend database');
-        const resetState = await purgeBackendDatabase(driver);
-        const resetStateEnd = safePerformance.now();
-        await addReportPhase(
-            report,
-            driver,
-            'Reset dictionary settings',
-            resetState.ok ?
-                'Purged backend dictionary database and cleared profile dictionary enablement state before import' :
-                `Backend purge failed: ${String(resetState.error || 'unknown error')}`,
-            resetStateStart,
-            resetStateEnd,
-        );
-        if (!resetState.ok) {
-            fail(`Backend purge failed before Firefox import flow: ${String(resetState.error || 'unknown error')}`);
+        if (!existingProfileOnly) {
+            const resetStateStart = safePerformance.now();
+            heartbeat.setActiveOperation('purge backend database');
+            const resetState = await purgeBackendDatabase(driver);
+            const resetStateEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                driver,
+                'Reset dictionary settings',
+                resetState.ok ?
+                    'Purged backend dictionary database and cleared profile dictionary enablement state before import' :
+                    `Backend purge failed: ${String(resetState.error || 'unknown error')}`,
+                resetStateStart,
+                resetStateEnd,
+            );
+            if (!resetState.ok) {
+                fail(`Backend purge failed before Firefox import flow: ${String(resetState.error || 'unknown error')}`);
+            }
+        } else {
+            await addReportPhase(
+                report,
+                driver,
+                'Preserve existing dictionary settings',
+                'Skipped backend purge so the current Firefox profile state can be validated across build transitions.',
+                settingsOpenEnd,
+                settingsOpenEnd,
+            );
         }
         // Selenium executeScript return value is untyped (`any`).
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -2672,6 +2828,171 @@ async function main() {
             fail(`Backend preflight failed: ${String(backendPreflight.error || 'unknown error')}`);
         }
 
+        if (existingProfileOnly && focusedBaselineOnly && focusedSecondaryDictionary === 'JMnedict') {
+            const existingSearchTabOpenStart = safePerformance.now();
+            await openSearchPageInNewTab(driver, extensionBaseUrl);
+            const existingSearchTabOpenEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                driver,
+                'Open dedicated search tab from existing profile',
+                'Opened search.html using the persisted Firefox profile without reimporting dictionaries.',
+                existingSearchTabOpenStart,
+                existingSearchTabOpenEnd,
+            );
+            const existingKuuSearchStart = safePerformance.now();
+            const existingKuuSearchCounts = await searchTermAndGetDictionaryHitCounts(driver, '食う', ['Jitendex'], 20_000);
+            const existingKuuSearchEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                driver,
+                'Verify Jitendex 食う lookup from existing profile',
+                `Dedicated search tab returned counts for 食う from the persisted profile: ${JSON.stringify(existingKuuSearchCounts)}`,
+                existingKuuSearchStart,
+                existingKuuSearchEnd,
+            );
+            if ((existingKuuSearchCounts.Jitendex ?? 0) < 1) {
+                const backendDiagnostics = await getBackendLookupDiagnostics(driver, '食う');
+                const searchDiagnostics = await getSearchPageDiagnostics(driver);
+                fail(`Expected Jitendex lookup for 食う from the persisted profile; saw ${JSON.stringify(existingKuuSearchCounts)} backend=${JSON.stringify(backendDiagnostics)} diagnostics=${JSON.stringify(searchDiagnostics)}`);
+            }
+            const existingNameSearchStart = safePerformance.now();
+            const existingNameSearchCounts = await searchTermAndGetDictionaryHitCounts(driver, 'はじめ', ['JMnedict'], 20_000);
+            const existingNameSearchEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                driver,
+                'Verify JMnedict はじめ lookup from existing profile',
+                `Dedicated search tab returned counts for はじめ from the persisted profile: ${JSON.stringify(existingNameSearchCounts)}`,
+                existingNameSearchStart,
+                existingNameSearchEnd,
+            );
+            if ((existingNameSearchCounts.JMnedict ?? 0) < 1) {
+                const backendDiagnostics = await getBackendLookupDiagnostics(driver, 'はじめ');
+                const searchDiagnostics = await getSearchPageDiagnostics(driver);
+                fail(`Expected JMnedict lookup for はじめ from the persisted profile; saw ${JSON.stringify(existingNameSearchCounts)} backend=${JSON.stringify(backendDiagnostics)} diagnostics=${JSON.stringify(searchDiagnostics)}`);
+            }
+            if (profileCycle) {
+                await driver.switchTo().window(settingsWindowHandle);
+                const deleteJitendexStart = safePerformance.now();
+                const deleteJitendexResult = await deleteBackendDictionaryByExpectedName(driver, 'Jitendex');
+                const deleteJitendexEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Delete Jitendex from persisted profile',
+                    `Deleted Jitendex from the persisted Firefox profile: ${JSON.stringify(deleteJitendexResult)}`,
+                    deleteJitendexStart,
+                    deleteJitendexEnd,
+                );
+                if (!deleteJitendexResult.ok) {
+                    fail(`Failed to delete Jitendex from persisted profile: ${JSON.stringify(deleteJitendexResult)}`);
+                }
+                await driver.sleep(1_000);
+                const reinstallFeedStart = safePerformance.now();
+                await installRecommendedDictionariesMock(driver, {
+                    ja: {
+                        terms: [
+                            {
+                                name: 'Jitendex',
+                                description: 'Real Jitendex from recommended dictionaries',
+                                homepage: '',
+                                downloadUrl: `${localServer.baseUrl}/dictionaries/jitendex.zip`,
+                            },
+                            createFocusedRecommendedTermsDictionary('JMnedict', localServer),
+                        ],
+                        kanji: [],
+                        frequency: [],
+                        grammar: [],
+                        pronunciation: [],
+                    },
+                });
+                const reinstallFeedEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Reinstall mocked recommended dictionary feed',
+                    'Reinstalled the mocked recommended feed after deleting Jitendex from the persisted profile.',
+                    reinstallFeedStart,
+                    reinstallFeedEnd,
+                );
+                const reinstallJitendexClickStart = safePerformance.now();
+                const reinstallJitendexImportUrl = await installRecommendedDictionary(driver, 'Jitendex');
+                const reinstallJitendexClickEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Click Jitendex download after delete',
+                    `Triggered recommended Jitendex import via URL after delete: ${reinstallJitendexImportUrl}`,
+                    reinstallJitendexClickStart,
+                    reinstallJitendexClickEnd,
+                );
+                const reinstallJitendexProfileStart = safePerformance.now();
+                await beginPageProfilePhase(driver);
+                const reinstallJitendexSampler = startFirefoxResourceSampler(firefoxPid);
+                await waitForImportWithPhaseScreenshots(driver, report, 'Jitendex', '2 installed, 2 enabled', 300_000);
+                const reinstallJitendexResourceSummary = await reinstallJitendexSampler.stop();
+                const reinstallJitendexPageSummary = await endPageProfilePhase(driver);
+                const reinstallJitendexProfileEnd = safePerformance.now();
+                const reinstallJitendexImportDebug = await getLastImportDebug(driver);
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Jitendex reimport resource profile',
+                    `${formatResourceSummary(reinstallJitendexResourceSummary)} longTasks={count:${String(reinstallJitendexPageSummary.longTaskCount)},totalMs:${reinstallJitendexPageSummary.longTaskTotalMs.toFixed(1)},peakMs:${reinstallJitendexPageSummary.longTaskPeakMs.toFixed(1)}} importDebug=${JSON.stringify(reinstallJitendexImportDebug)}`,
+                    reinstallJitendexProfileStart,
+                    reinstallJitendexProfileEnd,
+                );
+                await driver.switchTo().window(searchWindowHandle);
+                const postCycleSearchTabStart = safePerformance.now();
+                const postCycleSearchWindowHandle = /** @type {string} */ (await openSearchPageInNewTab(driver, extensionBaseUrl));
+                const postCycleSearchTabEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Open dedicated search tab after delete and reinstall',
+                    'Opened a fresh search.html tab after Jitendex was deleted and reinstalled, instead of reusing the pre-delete tab.',
+                    postCycleSearchTabStart,
+                    postCycleSearchTabEnd,
+                );
+                await driver.switchTo().window(postCycleSearchWindowHandle);
+                const postCycleKuuSearchStart = safePerformance.now();
+                const postCycleKuuSearchCounts = await searchTermAndGetDictionaryHitCounts(driver, '食う', ['Jitendex'], 20_000);
+                const postCycleKuuSearchEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Verify Jitendex 食う lookup after delete and reinstall',
+                    `Dedicated search tab returned counts for 食う after delete/reinstall: ${JSON.stringify(postCycleKuuSearchCounts)}`,
+                    postCycleKuuSearchStart,
+                    postCycleKuuSearchEnd,
+                );
+                if ((postCycleKuuSearchCounts.Jitendex ?? 0) < 1) {
+                    const backendDiagnostics = await getBackendLookupDiagnostics(driver, '食う');
+                    const searchDiagnostics = await getSearchPageDiagnostics(driver);
+                    fail(`Expected Jitendex lookup for 食う after delete/reinstall; saw ${JSON.stringify(postCycleKuuSearchCounts)} backend=${JSON.stringify(backendDiagnostics)} diagnostics=${JSON.stringify(searchDiagnostics)}`);
+                }
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Focused profile-cycle verification complete',
+                    'Verified Jitendex + JMnedict lookups survive delete and reinstall in the persisted Firefox profile.',
+                    postCycleKuuSearchEnd,
+                    postCycleKuuSearchEnd,
+                );
+                return;
+            }
+            await addReportPhase(
+                report,
+                driver,
+                'Focused existing-profile verification complete',
+                'Verified Jitendex + JMnedict lookups from a persisted Firefox profile without reimporting dictionaries.',
+                existingNameSearchEnd,
+                existingNameSearchEnd,
+            );
+            return;
+        }
+
         await addReportPhase(
             report,
             driver,
@@ -2690,12 +3011,10 @@ async function main() {
                         homepage: '',
                         downloadUrl: `${localServer.baseUrl}/dictionaries/jitendex.zip`,
                     },
-                    {
-                        name: 'JMdict',
-                        description: 'Real JMdict from recommended dictionaries',
-                        homepage: '',
-                        downloadUrl: `${localServer.baseUrl}/dictionaries/jmdict-slow.zip`,
-                    },
+                    createFocusedRecommendedTermsDictionary(
+                        (focusedSecondaryDictionary === 'JMnedict') ? 'JMnedict' : 'JMdict',
+                        localServer,
+                    ),
                 ],
                 kanji: [],
                 frequency: [],
@@ -2762,6 +3081,48 @@ async function main() {
         const jitendexSettleEnd = safePerformance.now();
         await addReportPhase(report, driver, 'Jitendex: settle after progress clear', 'Waited 2000ms after progress text cleared before starting next import', jitendexSettleStart, jitendexSettleEnd);
 
+        if (focusedBaselineOnly && focusedSecondaryDictionary === 'JMnedict') {
+            const jmnedictClickStart = safePerformance.now();
+            const jmnedictImportUrl = await installRecommendedDictionary(driver, 'JMnedict');
+            const jmnedictClickEnd = safePerformance.now();
+            await addReportPhase(report, driver, 'Click JMnedict download', `Triggered recommended JMnedict import via URL: ${jmnedictImportUrl}`, jmnedictClickStart, jmnedictClickEnd);
+            const jmnedictProfileStart = safePerformance.now();
+            await beginPageProfilePhase(driver);
+            const jmnedictSampler = startFirefoxResourceSampler(firefoxPid);
+            await waitForImportWithPhaseScreenshots(driver, report, 'JMnedict', '2 installed, 2 enabled', 300_000);
+            const jmnedictResourceSummary = await jmnedictSampler.stop();
+            const jmnedictPageSummary = await endPageProfilePhase(driver);
+            const jmnedictProfileEnd = safePerformance.now();
+            const jmnedictImportDebug = await getLastImportDebug(driver);
+            await addReportPhase(
+                report,
+                driver,
+                'JMnedict import resource profile',
+                `${formatResourceSummary(jmnedictResourceSummary)} longTasks={count:${String(jmnedictPageSummary.longTaskCount)},totalMs:${jmnedictPageSummary.longTaskTotalMs.toFixed(1)},peakMs:${jmnedictPageSummary.longTaskPeakMs.toFixed(1)}} topMeasures=${JSON.stringify(jmnedictPageSummary.topMeasures)} topLongTasks=${JSON.stringify(jmnedictPageSummary.topLongTasks)} importDebug=${JSON.stringify(jmnedictImportDebug)}`,
+                jmnedictProfileStart,
+                jmnedictProfileEnd,
+            );
+            const verifyJmnedictContentStart = safePerformance.now();
+            const verifyJmnedictContentProfile = await waitForBackendDictionaryContentIntegrity(
+                driver,
+                ['JMnedict'],
+                extendedLookupProbeCandidates,
+                15_000,
+            );
+            const verifyJmnedictContentEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                driver,
+                'Verify JMnedict backend content integrity after import',
+                `Checked that imported JMnedict term-content spans are readable and in bounds before focused baseline search checks: ${JSON.stringify(verifyJmnedictContentProfile)}`,
+                verifyJmnedictContentStart,
+                verifyJmnedictContentEnd,
+            );
+            if (!(verifyJmnedictContentProfile.ok === true)) {
+                fail(`JMnedict backend content integrity failed after import. diagnostics=${JSON.stringify(verifyJmnedictContentProfile)}`);
+            }
+        }
+
         // Selenium return values are untyped (`any`).
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const settingsWindowHandle = /** @type {string} */ (await driver.getWindowHandle());
@@ -2783,6 +3144,289 @@ async function main() {
         );
         if ((initialSearchWhileIdleCounts.Jitendex ?? 0) < 1) {
             fail(`Expected baseline Jitendex lookup to work before concurrent import; saw ${JSON.stringify(initialSearchWhileIdleCounts)}`);
+        }
+
+        const baselineKuuSearchStart = safePerformance.now();
+        const baselineKuuSearchCounts = await searchTermAndGetDictionaryHitCounts(driver, '食う', ['Jitendex'], 20_000);
+        const baselineKuuSearchEnd = safePerformance.now();
+        await addReportPhase(
+            report,
+            driver,
+            'Verify baseline Jitendex 食う lookup after import',
+            `Dedicated search tab returned counts for 食う: ${JSON.stringify(baselineKuuSearchCounts)}`,
+            baselineKuuSearchStart,
+            baselineKuuSearchEnd,
+        );
+        if ((baselineKuuSearchCounts.Jitendex ?? 0) < 1) {
+            const backendDiagnostics = await getBackendLookupDiagnostics(driver, '食う');
+            const searchDiagnostics = await getSearchPageDiagnostics(driver);
+            fail(`Expected baseline Jitendex lookup for 食う after import; saw ${JSON.stringify(baselineKuuSearchCounts)} backend=${JSON.stringify(backendDiagnostics)} diagnostics=${JSON.stringify(searchDiagnostics)}`);
+        }
+
+        if (focusedBaselineOnly && focusedSecondaryDictionary === 'JMnedict') {
+            const baselineNameSearchStart = safePerformance.now();
+            const baselineNameSearchCounts = await searchTermAndGetDictionaryHitCounts(driver, 'はじめ', ['JMnedict'], 20_000);
+            const baselineNameSearchEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                driver,
+                'Verify baseline JMnedict はじめ lookup after import',
+                `Dedicated search tab returned counts for はじめ: ${JSON.stringify(baselineNameSearchCounts)}`,
+                baselineNameSearchStart,
+                baselineNameSearchEnd,
+            );
+            if ((baselineNameSearchCounts.JMnedict ?? 0) < 1) {
+                const backendDiagnostics = await getBackendLookupDiagnostics(driver, 'はじめ');
+                const searchDiagnostics = await getSearchPageDiagnostics(driver);
+                fail(`Expected baseline JMnedict lookup for はじめ after import; saw ${JSON.stringify(baselineNameSearchCounts)} backend=${JSON.stringify(backendDiagnostics)} diagnostics=${JSON.stringify(searchDiagnostics)}`);
+            }
+            if (profileCycle) {
+                await driver.switchTo().window(settingsWindowHandle);
+                const uninstallExtensionStart = safePerformance.now();
+                await driver.uninstallAddon(installedAddonId);
+                const uninstallExtensionEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Remove extension before reinstalling',
+                    'Uninstalled the Firefox add-on from the active profile before loading a fresh copy.',
+                    uninstallExtensionStart,
+                    uninstallExtensionEnd,
+                );
+                const uninstallStorageDiagnostics = await getBackendStorageDiagnostics(driver);
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Capture storage state after extension removal',
+                    `Storage after add-on removal: ${summarizeBackendStorageDiagnostics(uninstallStorageDiagnostics)}`,
+                    uninstallExtensionEnd,
+                    uninstallExtensionEnd,
+                );
+                await driver.sleep(1_000);
+                const reinstallExtensionStart = safePerformance.now();
+                const reinstalledAddonId = await driver.installAddon(xpiPath, true);
+                const reinstalledExtensionBaseUrl = await waitForExtensionBaseUrl(driver, reinstalledAddonId);
+                const reinstallExtensionEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Reinstall extension after removal',
+                    `Reinstalled the Firefox add-on and discovered base URL ${reinstalledExtensionBaseUrl} using addonId=${String(reinstalledAddonId)}`,
+                    reinstallExtensionStart,
+                    reinstallExtensionEnd,
+                );
+                const reopenSettingsStart = safePerformance.now();
+                await navigateToExtensionPage(
+                    driver,
+                    `${reinstalledExtensionBaseUrl}/settings.html`,
+                    By.css('#dictionary-import-file-input'),
+                    {attempts: 3, pageLoadTimeoutMs: 15_000, readyTimeoutMs: 30_000},
+                );
+                await ensurePageProfiler(driver);
+                const reopenSettingsEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Reopen settings page after reinstall',
+                    'Opened a fresh settings.html page after extension removal and reinstall.',
+                    reopenSettingsStart,
+                    reopenSettingsEnd,
+                );
+                const reinstallStorageDiagnostics = await getBackendStorageDiagnostics(driver);
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Capture storage state after extension reinstall',
+                    `Storage after add-on reinstall before reimport: ${summarizeBackendStorageDiagnostics(reinstallStorageDiagnostics)}`,
+                    reopenSettingsEnd,
+                    reopenSettingsEnd,
+                );
+                const reinstallFeedStart = safePerformance.now();
+                await installRecommendedDictionariesMock(driver, {
+                    ja: {
+                        terms: [
+                            {
+                                name: 'Jitendex',
+                                description: 'Real Jitendex from recommended dictionaries',
+                                homepage: '',
+                                downloadUrl: `${localServer.baseUrl}/dictionaries/jitendex.zip`,
+                            },
+                            createFocusedRecommendedTermsDictionary('JMnedict', localServer),
+                        ],
+                        kanji: [],
+                        frequency: [],
+                        grammar: [],
+                        pronunciation: [],
+                    },
+                });
+                const reinstallFeedEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Reload mocked recommended dictionary feed after reinstall',
+                    'Reloaded the mocked recommended feed after reinstalling the extension.',
+                    reinstallFeedStart,
+                    reinstallFeedEnd,
+                );
+                const reinstallJitendexClickStart = safePerformance.now();
+                const reinstallJitendexImportUrl = await installRecommendedDictionary(driver, 'Jitendex');
+                const reinstallJitendexClickEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Click Jitendex download after reinstall',
+                    `Triggered recommended Jitendex import via URL after reinstall: ${reinstallJitendexImportUrl}`,
+                    reinstallJitendexClickStart,
+                    reinstallJitendexClickEnd,
+                );
+                const reinstallJitendexProfileStart = safePerformance.now();
+                await beginPageProfilePhase(driver);
+                const reinstallJitendexSampler = startFirefoxResourceSampler(firefoxPid);
+                await waitForImportWithPhaseScreenshots(driver, report, 'Jitendex', '1 installed, 1 enabled', 300_000);
+                const reinstallJitendexResourceSummary = await reinstallJitendexSampler.stop();
+                const reinstallJitendexPageSummary = await endPageProfilePhase(driver);
+                const reinstallJitendexProfileEnd = safePerformance.now();
+                const reinstallJitendexImportDebug = await getLastImportDebug(driver);
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Jitendex reinstall resource profile',
+                    `${formatResourceSummary(reinstallJitendexResourceSummary)} longTasks={count:${String(reinstallJitendexPageSummary.longTaskCount)},totalMs:${reinstallJitendexPageSummary.longTaskTotalMs.toFixed(1)},peakMs:${reinstallJitendexPageSummary.longTaskPeakMs.toFixed(1)}} importDebug=${JSON.stringify(reinstallJitendexImportDebug)}`,
+                    reinstallJitendexProfileStart,
+                    reinstallJitendexProfileEnd,
+                );
+                const postJitendexStorageDiagnostics = await getBackendStorageDiagnostics(driver);
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Capture storage state after Jitendex reinstall import',
+                    `Storage after Jitendex import: ${summarizeBackendStorageDiagnostics(postJitendexStorageDiagnostics)}`,
+                    reinstallJitendexProfileEnd,
+                    reinstallJitendexProfileEnd,
+                );
+                const reinstallJmnedictClickStart = safePerformance.now();
+                const reinstallJmnedictImportUrl = await installRecommendedDictionary(driver, 'JMnedict');
+                const reinstallJmnedictClickEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Click JMnedict download after reinstall',
+                    `Triggered recommended JMnedict import via URL after reinstall: ${reinstallJmnedictImportUrl}`,
+                    reinstallJmnedictClickStart,
+                    reinstallJmnedictClickEnd,
+                );
+                const reinstallJmnedictProfileStart = safePerformance.now();
+                await beginPageProfilePhase(driver);
+                const reinstallJmnedictSampler = startFirefoxResourceSampler(firefoxPid);
+                await waitForImportWithPhaseScreenshots(driver, report, 'JMnedict', '2 installed, 2 enabled', 300_000);
+                const reinstallJmnedictResourceSummary = await reinstallJmnedictSampler.stop();
+                const reinstallJmnedictPageSummary = await endPageProfilePhase(driver);
+                const reinstallJmnedictProfileEnd = safePerformance.now();
+                const reinstallJmnedictImportDebug = await getLastImportDebug(driver);
+                await addReportPhase(
+                    report,
+                    driver,
+                    'JMnedict reinstall resource profile',
+                    `${formatResourceSummary(reinstallJmnedictResourceSummary)} longTasks={count:${String(reinstallJmnedictPageSummary.longTaskCount)},totalMs:${reinstallJmnedictPageSummary.longTaskTotalMs.toFixed(1)},peakMs:${reinstallJmnedictPageSummary.longTaskPeakMs.toFixed(1)}} importDebug=${JSON.stringify(reinstallJmnedictImportDebug)}`,
+                    reinstallJmnedictProfileStart,
+                    reinstallJmnedictProfileEnd,
+                );
+                const postJmnedictStorageDiagnostics = await getBackendStorageDiagnostics(driver);
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Capture storage state after JMnedict reinstall import',
+                    `Storage after JMnedict import: ${summarizeBackendStorageDiagnostics(postJmnedictStorageDiagnostics)}`,
+                    reinstallJmnedictProfileEnd,
+                    reinstallJmnedictProfileEnd,
+                );
+                const postCycleSearchTabStart = safePerformance.now();
+                const postCycleSearchWindowHandle = /** @type {string} */ (await openSearchPageInNewTab(driver, reinstalledExtensionBaseUrl));
+                const postCycleSearchTabEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Open dedicated search tab after extension reinstall',
+                    'Opened a fresh search.html tab after the add-on was removed and reinstalled, instead of reusing the pre-removal tab.',
+                    postCycleSearchTabStart,
+                    postCycleSearchTabEnd,
+                );
+                await driver.switchTo().window(postCycleSearchWindowHandle);
+                const postCycleKuuSearchStart = safePerformance.now();
+                const postCycleKuuSearchCounts = await searchTermAndGetDictionaryHitCounts(driver, '食う', ['Jitendex'], 20_000);
+                const postCycleKuuSearchEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Verify Jitendex 食う lookup after extension reinstall',
+                    `Dedicated search tab returned counts for 食う after add-on removal/reinstall: ${JSON.stringify(postCycleKuuSearchCounts)}`,
+                    postCycleKuuSearchStart,
+                    postCycleKuuSearchEnd,
+                );
+                if ((postCycleKuuSearchCounts.Jitendex ?? 0) < 1) {
+                    const backendDiagnostics = await getBackendLookupDiagnostics(driver, '食う');
+                    const searchDiagnostics = await getSearchPageDiagnostics(driver);
+                    const storageDiagnostics = await getBackendStorageDiagnostics(driver);
+                    fail(`Expected Jitendex lookup for 食う after extension reinstall; saw ${JSON.stringify(postCycleKuuSearchCounts)} backend=${JSON.stringify(backendDiagnostics)} storage=${summarizeBackendStorageDiagnostics(storageDiagnostics)} diagnostics=${JSON.stringify(searchDiagnostics)}`);
+                }
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Focused extension-cycle verification complete',
+                    'Verified Jitendex + JMnedict lookups survive extension removal and reinstall in the active Firefox session.',
+                    postCycleKuuSearchEnd,
+                    postCycleKuuSearchEnd,
+                );
+                return;
+            }
+            await driver.switchTo().window(settingsWindowHandle);
+            const reloadExtensionStart = safePerformance.now();
+            await reloadExtensionRuntime(driver, extensionBaseUrl);
+            const reloadExtensionEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                driver,
+                'Reload extension runtime with persisted dictionaries',
+                'Reloaded the installed Firefox extension in-place after Jitendex + JMnedict import to verify startup/runtime state recovery.',
+                reloadExtensionStart,
+                reloadExtensionEnd,
+            );
+            const postReloadSearchTabStart = safePerformance.now();
+            await openSearchPageInNewTab(driver, extensionBaseUrl);
+            const postReloadSearchTabEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                driver,
+                'Open dedicated search tab after extension reload',
+                'Opened a fresh search tab after extension reload instead of reusing potentially discarded pre-reload contexts.',
+                postReloadSearchTabStart,
+                postReloadSearchTabEnd,
+            );
+            const postReloadKuuSearchStart = safePerformance.now();
+            const postReloadKuuSearchCounts = await searchTermAndGetDictionaryHitCounts(driver, '食う', ['Jitendex'], 20_000);
+            const postReloadKuuSearchEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                driver,
+                'Verify Jitendex 食う lookup after extension reload',
+                `Dedicated search tab returned counts for 食う after extension reload: ${JSON.stringify(postReloadKuuSearchCounts)}`,
+                postReloadKuuSearchStart,
+                postReloadKuuSearchEnd,
+            );
+            if ((postReloadKuuSearchCounts.Jitendex ?? 0) < 1) {
+                const backendDiagnostics = await getBackendLookupDiagnostics(driver, '食う');
+                const searchDiagnostics = await getSearchPageDiagnostics(driver);
+                fail(`Expected Jitendex lookup for 食う to survive extension reload; saw ${JSON.stringify(postReloadKuuSearchCounts)} backend=${JSON.stringify(backendDiagnostics)} diagnostics=${JSON.stringify(searchDiagnostics)}`);
+            }
+            await addReportPhase(
+                report,
+                driver,
+                'Focused baseline complete',
+                'Focused Firefox baseline for Jitendex + JMnedict completed, including extension reload verification; skipping the longer JMdict/update/multi-import path.',
+                postReloadKuuSearchEnd,
+                postReloadKuuSearchEnd,
+            );
+            return;
         }
 
         await driver.switchTo().window(settingsWindowHandle);
@@ -3141,7 +3785,12 @@ async function main() {
 
         const multiImportOpenStart = safePerformance.now();
         heartbeat.setActiveOperation('return to settings for multi-file import');
-        await driver.get(`${extensionBaseUrl}/settings.html?popup-preview=false`);
+        await navigateToExtensionPage(
+            driver,
+            `${extensionBaseUrl}/settings.html?popup-preview=false`,
+            By.css('#dictionary-import-file-input'),
+            {attempts: 3, pageLoadTimeoutMs: 15_000, readyTimeoutMs: 30_000},
+        );
         await driver.wait(until.elementLocated(By.css('#dictionary-import-file-input')), 30_000);
         const multiImportOpenEnd = safePerformance.now();
         await addReportPhase(
