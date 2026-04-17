@@ -600,7 +600,7 @@ export class TermRecordOpfsStore {
         if (recordsByShard === null) {
             const state = await this._getOrCreateShardState(singleDictionaryName, singleContentDictName);
             if (state !== null) {
-                await this._appendEncodedChunk(state, await this._encodeRecords(singleDictionaryRecords), singleDictionaryRecords[0]?.id ?? 0, singleDictionaryRecords.length);
+                await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
             }
             return;
         }
@@ -608,7 +608,7 @@ export class TermRecordOpfsStore {
             const firstRecord = dictionaryRecords[0];
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            await this._appendEncodedChunk(state, await this._encodeRecords(dictionaryRecords), dictionaryRecords[0]?.id ?? 0, dictionaryRecords.length);
+            await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan);
         }
     }
 
@@ -643,7 +643,7 @@ export class TermRecordOpfsStore {
             const row = /** @type {{dictionary: string, expression: string, reading: string, readingEqualsExpression?: boolean, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, expressionReverse?: string, readingReverse?: string, score: number, sequence?: number}} */ (rows[i]);
             const id = this._nextId++;
             const dictionary = row.dictionary;
-            const readingEqualsExpression = row.readingEqualsExpression === true || row.reading === row.expression;
+            const readingEqualsExpression = row.readingEqualsExpression ?? (row.reading === row.expression);
             const useLazyArtifactStrings = preinternedPlan !== null;
             /** @type {TermRecord} */
             const record = {
@@ -706,7 +706,7 @@ export class TermRecordOpfsStore {
         if (recordsByShard === null) {
             const state = await this._getOrCreateShardState(singleDictionaryName, singleContentDictName);
             if (state !== null) {
-                const metrics = await this._encodeAndAppendChunkForState(state, singleDictionaryRecords, preinternedPlan);
+                const metrics = await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
                 encodeMs += metrics.encodeMs;
                 appendWriteMs += metrics.appendWriteMs;
             }
@@ -716,7 +716,7 @@ export class TermRecordOpfsStore {
             const firstRecord = dictionaryRecords[0];
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            const metrics = await this._encodeAndAppendChunkForState(state, dictionaryRecords, selectTermRecordPreinternedPlan(preinternedPlan, indexes));
+            const metrics = await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan, indexes);
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
         }
@@ -799,7 +799,7 @@ export class TermRecordOpfsStore {
         if (recordsByShard === null) {
             const state = await this._getOrCreateShardState(singleDictionaryName, singleContentDictName);
             if (state !== null) {
-                await this._encodeAndAppendChunkForState(state, singleDictionaryRecords);
+                await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords);
             }
             return;
         }
@@ -807,7 +807,7 @@ export class TermRecordOpfsStore {
             const firstRecord = dictionaryRecords[0];
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            await this._encodeAndAppendChunkForState(state, dictionaryRecords);
+            await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords);
         }
     }
 
@@ -901,7 +901,7 @@ export class TermRecordOpfsStore {
         if (recordsByShard === null) {
             const state = await this._getOrCreateShardState(firstDictionaryName, normalizedContentDictName);
             if (state !== null) {
-                const metrics = await this._encodeAndAppendChunkForState(state, singleDictionaryRecords, preinternedPlan);
+                const metrics = await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
                 encodeMs += metrics.encodeMs;
                 appendWriteMs += metrics.appendWriteMs;
             }
@@ -911,7 +911,7 @@ export class TermRecordOpfsStore {
             const firstRecord = dictionaryRecords[0];
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            const metrics = await this._encodeAndAppendChunkForState(state, dictionaryRecords, preinternedPlan);
+            const metrics = await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan);
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
         }
@@ -1081,6 +1081,37 @@ export class TermRecordOpfsStore {
         const tAppendStart = safePerformance.now();
         await this._appendEncodedChunk(state, chunk, records[0]?.id ?? 0, records.length);
         const appendWriteMs = safePerformance.now() - tAppendStart;
+        return {encodeMs, appendWriteMs};
+    }
+
+    /**
+     * The current shard format stores `firstId` and `count` per chunk, so the
+     * records written in a single chunk must have contiguous IDs.
+     * @param {TermRecordShardState} state
+     * @param {TermRecord[]} records
+     * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
+     * @param {number[]|null} [recordIndexes=null]
+     * @returns {Promise<{encodeMs: number, appendWriteMs: number}>}
+     */
+    async _encodeAndAppendChunkRunsForState(state, records, preinternedPlan = null, recordIndexes = null) {
+        let encodeMs = 0;
+        let appendWriteMs = 0;
+        for (let runStart = 0; runStart < records.length;) {
+            let runEnd = runStart + 1;
+            while (runEnd < records.length && records[runEnd].id === (records[runEnd - 1].id + 1)) {
+                ++runEnd;
+            }
+            const runRecords = records.slice(runStart, runEnd);
+            const runPlan = (
+                recordIndexes !== null ?
+                    selectTermRecordPreinternedPlan(preinternedPlan, recordIndexes.slice(runStart, runEnd)) :
+                    preinternedPlan
+            );
+            const metrics = await this._encodeAndAppendChunkForState(state, runRecords, runPlan);
+            encodeMs += metrics.encodeMs;
+            appendWriteMs += metrics.appendWriteMs;
+            runStart = runEnd;
+        }
         return {encodeMs, appendWriteMs};
     }
 
@@ -2120,12 +2151,15 @@ export class TermRecordOpfsStore {
         for (const record of records) {
             const expression = record.expression ?? '';
             const reading = record.reading ?? expression;
+            const readingEqualsExpression = record.readingEqualsExpression ?? (reading === expression);
             const expressionBytes = record.expressionBytes instanceof Uint8Array ? record.expressionBytes : this._textEncoder.encode(expression);
             const readingBytes = record.readingBytes instanceof Uint8Array ? record.readingBytes : this._textEncoder.encode(reading);
-            const expressionIndex = internStringBytes(expression, expressionBytes);
-            const readingIndex = reading === expression ?
+            const expressionKey = expression.length > 0 ? expression : this._decodeString(expressionBytes, 0, expressionBytes.byteLength);
+            const readingKey = reading.length > 0 ? reading : this._decodeString(readingBytes, 0, readingBytes.byteLength);
+            const expressionIndex = internStringBytes(expressionKey, expressionBytes);
+            const readingIndex = readingEqualsExpression ?
                 READING_EQUALS_EXPRESSION_U32 :
-                internStringBytes(reading, readingBytes);
+                internStringBytes(readingKey, readingBytes);
             totalBytes +=
                 RECORD_HEADER_BYTES +
                 ((record.entryContentLength >= 0 && record.entryContentLength > 0xfffd) ? 4 : 0);

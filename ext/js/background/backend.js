@@ -1045,8 +1045,26 @@ export class Backend {
                 recovered: dictionaryEntries.length > 0,
             });
         }
+        const hasExactHeadwordMatch = (
+            text.length > 0 &&
+            dictionaryEntries.some((entry) => (
+                entry.type === 'term' &&
+                entry.headwords.some(({term, reading}) => term === text || reading === text)
+            ))
+        );
+        const shouldCaptureSuspiciousResultDebugState = (
+            debugLookupState === null &&
+            text.length > 0 &&
+            dictionaryEntries.length > 0 &&
+            dictionaryEntries.length <= 20 &&
+            findTermsOptions.enabledDictionaryMap.size > 0 &&
+            !hasExactHeadwordMatch
+        );
         if (
-            dictionaryEntries.length === 0 &&
+            (
+                dictionaryEntries.length === 0 ||
+                shouldCaptureSuspiciousResultDebugState
+            ) &&
             findTermsOptions.enabledDictionaryMap.size > 0 &&
             debugLookupState === null
         ) {
@@ -1091,6 +1109,7 @@ export class Backend {
             })),
             installedDictionaryCount,
             installedDictionaryTitles,
+            hasExactHeadwordMatch,
             resultDictionaryCount: dictionaryEntries.length,
             resultDictionaries: [...new Set(dictionaryEntries.flatMap((entry) => (
                 entry.type === 'term' ?

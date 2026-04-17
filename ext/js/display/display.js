@@ -23,6 +23,7 @@ import {DynamicProperty} from '../core/dynamic-property.js';
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
+import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {log} from '../core/log.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -1348,8 +1349,10 @@ export class Display extends EventDispatcher {
             if (dictionaryEntries.length > 0) { return dictionaryEntries; }
 
             dictionaryEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
+            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, dictionaryEntries);
         } else {
             dictionaryEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
+            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, dictionaryEntries);
             if (dictionaryEntries.length > 0) { return dictionaryEntries; }
 
             dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
@@ -1380,6 +1383,33 @@ export class Display extends EventDispatcher {
             }
         }
         return {findDetails, source};
+    }
+
+    /**
+     * @param {string} source
+     * @param {string} normalizedSource
+     * @param {boolean} isKanji
+     * @param {import('api').FindTermsDetails} findDetails
+     * @param {import('settings').OptionsContext} optionsContext
+     * @param {import('dictionary').DictionaryEntry[]} dictionaryEntries
+     * @returns {void}
+     */
+    _reportTermsFindSnapshot(source, normalizedSource, isKanji, findDetails, optionsContext, dictionaryEntries) {
+        try {
+            const resultDictionaries = [...new Set(dictionaryEntries.flatMap((dictionaryEntry) => dictionaryEntry.definitions.map(({dictionary}) => dictionary)))];
+            reportDiagnostics('display-terms-find-snapshot', {
+                pageType: this._pageType,
+                isKanji,
+                source,
+                normalizedSource,
+                optionsContext,
+                findDetails,
+                resultDictionaryCount: dictionaryEntries.length,
+                resultDictionaries,
+            });
+        } catch (error) {
+            log.error(error);
+        }
     }
 
     /**
