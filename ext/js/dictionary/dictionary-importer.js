@@ -44,7 +44,13 @@ import {
 } from './zstd-term-content.js';
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
 import {compareRevisions} from './dictionary-data-util.js';
-import {consumeLastTermBankWasmParseProfile, parseTermBankWithWasmChunks} from './term-bank-wasm-parser.js';
+import {
+    consumeLastTermBankWasmParseProfile,
+    decodeParsedTermRowDirectFromRawChunk,
+    decodeParsedTermRowFromRawChunk,
+    parseTermBankWithWasmChunks,
+    parseTermBankWithWasmRawChunks,
+} from './term-bank-wasm-parser.js';
 
 const BlobReader = /** @type {typeof import('@zip.js/zip.js').BlobReader} */ (/** @type {unknown} */ (BlobReader0));
 const BlobWriter = /** @type {typeof import('@zip.js/zip.js').BlobWriter} */ (/** @type {unknown} */ (BlobWriter0));
@@ -65,6 +71,7 @@ const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_UPPER_BOUND_BYTES = 128 * 1024 * 1024;
 const ADAPTIVE_TERM_BANK_WASM_INITIAL_META_CAPACITY_DIVISOR = 18;
 const ADAPTIVE_TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW = 128;
+const DEFAULT_MEDIA_RESOLUTION_CONCURRENCY = 12;
 const REVERSE_STRING_CACHE_MAX_ENTRIES = 4096;
 const TERM_BANK_ARTIFACT_MAGIC_V1 = 'MBTB0001';
 const TERM_BANK_ARTIFACT_MAGIC_V2 = 'MBTB0002';
@@ -343,6 +350,9 @@ function hasPrecomputedTermEntryContent(entry) {
  * @typedef {object} ParsedTermBankChunkRow
  * @property {string} expression
  * @property {string} reading
+ * @property {Uint8Array} [expressionBytes]
+ * @property {Uint8Array} [readingBytes]
+ * @property {boolean} [readingEqualsExpression]
  * @property {string} definitionTags
  * @property {string} rules
  * @property {number} score
@@ -392,7 +402,7 @@ export class DictionaryImporter {
         /** @type {boolean} */
         this._skipMediaImport = false;
         /** @type {number} */
-        this._mediaResolutionConcurrency = 8;
+        this._mediaResolutionConcurrency = DEFAULT_MEDIA_RESOLUTION_CONCURRENCY;
         /** @type {Map<string, Promise<import('dictionary-database').MediaDataArrayBufferContent>>} */
         this._pendingImageMediaByPath = new Map();
         /** @type {Map<string, {mediaType: string, width: number, height: number}>} */
@@ -484,7 +494,7 @@ export class DictionaryImporter {
             'raw-bytes';
         this._skipImageMetadata = details.skipImageMetadata === true;
         this._skipMediaImport = details.skipMediaImport === true;
-        this._mediaResolutionConcurrency = Math.max(1, Math.min(32, Math.trunc(details.mediaResolutionConcurrency ?? 8)));
+        this._mediaResolutionConcurrency = Math.max(1, Math.min(32, Math.trunc(details.mediaResolutionConcurrency ?? DEFAULT_MEDIA_RESOLUTION_CONCURRENCY)));
         this._debugImportLogging = details.debugImportLogging === true;
         this._pendingImageMediaByPath.clear();
         this._imageMetadataByPath.clear();
@@ -3132,13 +3142,17 @@ export class DictionaryImporter {
         /** @type {import('dictionary-database').DatabaseTermEntry[]} */
         const termList = [];
         const useRawBytesDirectContent = (termContentStorageMode === 'raw-bytes' && !useMediaPipeline);
+        const allowWholeChunkDirectImport = streamToChunkHandler && this._wasmPassThroughTermContent;
+        const usePrecomputedContentForMediaRows = useMediaPipeline && this._wasmPassThroughTermContent && this._usePrecomputedContentForMediaRows;
         const includeContentMetadata = useRawBytesDirectContent ? false : (this._wasmPassThroughTermContent || !this._wasmSkipUnusedTermContentEncoding);
         const minimalDecode = (
             this._wasmCanonicalRowsFastPath &&
-            !useMediaPipeline &&
-            includeContentMetadata
+            includeContentMetadata &&
+            (
+                !useMediaPipeline ||
+                usePrecomputedContentForMediaRows
+            )
         );
-        const usePrecomputedContentForMediaRows = useMediaPipeline && this._wasmPassThroughTermContent && this._usePrecomputedContentForMediaRows;
         const useLazyGlossaryDecode = useRawBytesDirectContent || (useMediaPipeline && (this._lazyGlossaryDecodeForMedia || this._glossaryMediaFastScan || usePrecomputedContentForMediaRows));
         const useMediaHintFastScan = useMediaPipeline && (
             this._wasmPassThroughTermContent ||
@@ -3146,17 +3160,178 @@ export class DictionaryImporter {
             this._glossaryMediaFastScan ||
             usePrecomputedContentForMediaRows
         );
+        const useRawWasmChunkPath = allowWholeChunkDirectImport && useMediaPipeline;
+        const rawChunkDecodeOptions = {
+            copyContentBytes: false,
+            includeContentMetadata,
+            reuseExpressionForReadingDecode: this._wasmReuseExpressionForReadingDecode,
+            skipTagRuleDecode: usePrecomputedContentForMediaRows,
+            lazyGlossaryDecode: useLazyGlossaryDecode,
+            mediaHintFastScan: useMediaHintFastScan,
+            minimalDecode: false,
+        };
+        const rawDirectChunkDecodeOptions = {
+            copyContentBytes: false,
+            includeContentMetadata,
+            reuseExpressionForReadingDecode: this._wasmReuseExpressionForReadingDecode,
+            mediaHintFastScan: useMediaHintFastScan,
+        };
         try {
             let importerMaterializationMs = 0;
             let importerChunkSinkMs = 0;
             let importerChunkCount = 0;
             let importerTotalRows = 0;
-            await parseTermBankWithWasmChunks(
+            const directStreamFlushRowThreshold = Math.max(wasmRowChunkSize * 4, 8192);
+            const directStreamFlushContentBytesThreshold = 32 * 1024 * 1024;
+            /** @type {{dictionary: string, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentHash1List: number[], contentHash2List: number[], planStringLengths: number[], planStringBuffers: Uint8Array[], expressionIndexes: number[], readingIndexes: number[], planStringCount: number, contentBytesTotal: number, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}}|null} */
+            let pendingDirectStreamBatch = null;
+            /**
+             * @param {unknown} payload
+             * @returns {payload is {dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}}
+             */
+            const isDirectTermChunkPayload = (payload) => (
+                typeof payload === 'object' &&
+                payload !== null &&
+                !Array.isArray(payload) &&
+                Array.isArray(Reflect.get(payload, 'expressionBytesList')) &&
+                Array.isArray(Reflect.get(payload, 'readingBytesList')) &&
+                Array.isArray(Reflect.get(payload, 'contentBytesList'))
+            );
+            /**
+             * @returns {Promise<void>}
+             */
+            const flushPendingDirectStreamBatch = async () => {
+                if (!streamToChunkHandler || pendingDirectStreamBatch === null) { return; }
+                const batch = pendingDirectStreamBatch;
+                pendingDirectStreamBatch = null;
+                const rowCount = batch.expressionBytesList.length;
+                const stringLengths = Uint16Array.from(batch.planStringLengths);
+                let stringsByteLength = 0;
+                for (const bytes of batch.planStringBuffers) {
+                    stringsByteLength += bytes.byteLength;
+                }
+                const stringsBuffer = new Uint8Array(stringsByteLength);
+                let stringsCursor = 0;
+                for (const bytes of batch.planStringBuffers) {
+                    stringsBuffer.set(bytes, stringsCursor);
+                    stringsCursor += bytes.byteLength;
+                }
+                await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(
+                    {
+                        dictionary: batch.dictionary,
+                        rowCount,
+                        dictionaryTotalRows: batch.dictionaryTotalRows,
+                        expressionBytesList: batch.expressionBytesList,
+                        readingBytesList: batch.readingBytesList,
+                        readingEqualsExpressionList: batch.readingEqualsExpressionList,
+                        scoreList: batch.scoreList,
+                        sequenceList: batch.sequenceList,
+                        contentBytesList: batch.contentBytesList,
+                        contentHash1List: batch.contentHash1List,
+                        contentHash2List: batch.contentHash2List,
+                        contentDictNameList: null,
+                        termRecordPreinternedPlan: {
+                            stringLengths,
+                            stringsBuffer,
+                            expressionIndexes: Uint32Array.from(batch.expressionIndexes),
+                            readingIndexes: Uint32Array.from(batch.readingIndexes),
+                        },
+                    },
+                    null,
+                    batch.progress,
+                );
+            };
+            /**
+             * @param {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} payload
+             * @param {import('dictionary-importer').ImportRequirement[]|null} payloadRequirements
+             * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}} payloadProgress
+             * @returns {Promise<void>}
+             */
+            const emitStreamedPayload = async (payload, payloadRequirements, payloadProgress) => {
+                if (!streamToChunkHandler) { return; }
+                if (isDirectTermChunkPayload(payload) && payloadRequirements === null) {
+                    if (pendingDirectStreamBatch === null || pendingDirectStreamBatch.dictionary !== payload.dictionary) {
+                        await flushPendingDirectStreamBatch();
+                        pendingDirectStreamBatch = {
+                            dictionary: payload.dictionary,
+                            dictionaryTotalRows: payload.dictionaryTotalRows,
+                            expressionBytesList: [],
+                            readingBytesList: [],
+                            readingEqualsExpressionList: [],
+                            scoreList: [],
+                            sequenceList: [],
+                            contentBytesList: [],
+                            contentHash1List: [],
+                            contentHash2List: [],
+                            planStringLengths: [],
+                            planStringBuffers: [],
+                            expressionIndexes: [],
+                            readingIndexes: [],
+                            planStringCount: 0,
+                            contentBytesTotal: 0,
+                            progress: payloadProgress,
+                        };
+                    }
+                    const batch = pendingDirectStreamBatch;
+                    const payloadPlan = payload.termRecordPreinternedPlan ?? null;
+                    const payloadPlanStringBase = batch.planStringCount;
+                    if (payloadPlan !== null) {
+                        for (const length of payloadPlan.stringLengths) {
+                            batch.planStringLengths.push(length);
+                        }
+                        batch.planStringBuffers.push(payloadPlan.stringsBuffer);
+                        batch.planStringCount += payloadPlan.stringLengths.length;
+                    }
+                    for (let i = 0; i < payload.rowCount; ++i) {
+                        const contentBytes = payload.contentBytesList[i];
+                        const expressionBytes = payload.expressionBytesList[i];
+                        const readingBytes = payload.readingBytesList[i];
+                        const readingEqualsExpression = Boolean(payload.readingEqualsExpressionList[i]);
+                        batch.expressionBytesList.push(expressionBytes);
+                        batch.readingBytesList.push(readingBytes);
+                        batch.readingEqualsExpressionList.push(readingEqualsExpression);
+                        batch.scoreList.push(payload.scoreList[i]);
+                        batch.sequenceList.push(payload.sequenceList[i]);
+                        batch.contentBytesList.push(contentBytes);
+                        batch.contentHash1List.push(payload.contentHash1List?.[i] ?? 0);
+                        batch.contentHash2List.push(payload.contentHash2List?.[i] ?? 0);
+                        const expressionIndex = payloadPlan !== null ?
+                            (payloadPlan.expressionIndexes[i] + payloadPlanStringBase) :
+                            (batch.expressionIndexes.length >>> 0);
+                        const readingIndex = payloadPlan !== null ?
+                            (payloadPlan.readingIndexes[i] + payloadPlanStringBase) :
+                            expressionIndex;
+                        batch.expressionIndexes.push(expressionIndex >>> 0);
+                        batch.readingIndexes.push(readingIndex >>> 0);
+                        batch.contentBytesTotal += contentBytes.byteLength;
+                    }
+                    batch.dictionaryTotalRows = payload.dictionaryTotalRows;
+                    batch.progress = payloadProgress;
+                    if (
+                        batch.expressionBytesList.length >= directStreamFlushRowThreshold ||
+                        batch.contentBytesTotal >= directStreamFlushContentBytesThreshold
+                    ) {
+                        await flushPendingDirectStreamBatch();
+                    }
+                    return;
+                }
+                await flushPendingDirectStreamBatch();
+                await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(
+                    payload,
+                    payloadRequirements,
+                    payloadProgress,
+                );
+            };
+            const parseTermBankChunks = useRawWasmChunkPath ? parseTermBankWithWasmRawChunks : parseTermBankWithWasmChunks;
+            await parseTermBankChunks(
                 bytes,
                 version,
-                async (parsedRows, chunkProgress) => {
+                async (parsedChunk, chunkProgress) => {
                     ++importerChunkCount;
                     importerTotalRows = chunkProgress.processedRows;
+                    const parsedRows = Array.isArray(parsedChunk) ? parsedChunk : null;
+                    const rawChunk = parsedRows === null ? parsedChunk : null;
+                    const chunkRowCount = parsedRows !== null ? parsedRows.length : (rawChunk.endIndex - rawChunk.startIndex);
                     /** @type {import('dictionary-importer').ImportRequirement[]|null} */
                     const requirementsForChunk = useMediaPipeline ? [] : null;
                     if (requirementsForChunk !== null) {
@@ -3164,17 +3339,293 @@ export class DictionaryImporter {
                     }
                     /** @type {import('dictionary-database').DatabaseTermEntry[]} */
                     const termListChunk = [];
-                    termListChunk.length = parsedRows.length;
+                    /**
+                     * @param {ParsedTermBankChunkRow} row
+                     * @returns {boolean}
+                     */
+                    const shouldSkipGlossaryParse = (row) => (
+                        typeof row.glossaryMayContainMedia === 'boolean' ?
+                            !row.glossaryMayContainMedia :
+                            !this._glossaryJsonLikelyContainsMedia(this._getFastRowGlossaryJson(row))
+                    );
+                    /** @type {ReturnType<typeof decodeParsedTermRowDirectFromRawChunk>[]|null} */
+                    let rawDirectRows = null;
+                    /** @type {Uint8Array|null} */
+                    let rawDirectRowEligibility = null;
+                    let directEligibleRowCount = 0;
+                    if (rawChunk !== null && allowWholeChunkDirectImport && requirementsForChunk !== null) {
+                        rawDirectRows = createSparseArray(chunkRowCount);
+                        rawDirectRowEligibility = new Uint8Array(chunkRowCount);
+                        for (let i = 0; i < chunkRowCount; ++i) {
+                            const directRow = decodeParsedTermRowDirectFromRawChunk(rawChunk, rawChunk.startIndex + i, rawDirectChunkDecodeOptions);
+                            const directEligible = (hasPrecomputedTermEntryContent(directRow) && directRow.glossaryMayContainMedia === false);
+                            rawDirectRows[i] = directRow;
+                            rawDirectRowEligibility[i] = directEligible ? 1 : 0;
+                            if (directEligible) {
+                                ++directEligibleRowCount;
+                            }
+                        }
+                    }
+                    const useDirectChunkImport = (
+                        allowWholeChunkDirectImport &&
+                        requirementsForChunk !== null &&
+                        (
+                            rawChunk !== null ?
+                                directEligibleRowCount === chunkRowCount :
+                                parsedRows !== null &&
+                                parsedRows.every((row) => hasPrecomputedTermEntryContent(row) && shouldSkipGlossaryParse(row))
+                        )
+                    );
+                    const useMixedDirectChunkRuns = (
+                        !useDirectChunkImport &&
+                        allowWholeChunkDirectImport &&
+                        requirementsForChunk !== null &&
+                        (
+                            rawChunk === null ||
+                            directEligibleRowCount > 0
+                        )
+                    );
+                    if (!useMixedDirectChunkRuns) {
+                        termListChunk.length = chunkRowCount;
+                    }
+                    /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}|null} */
+                    let directChunkPayload = null;
+                    /** @type {{internStringBytes: (bytes: Uint8Array) => number, buildPlan: (expressionIndexes: number[]|Uint32Array, readingIndexes: number[]|Uint32Array, count?: number) => import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}|null} */
+                    let directChunkPlanBuilder = null;
+                    /** @type {Uint8Array[]|null} */
+                    let directExpressionBytesList = null;
+                    /** @type {Uint8Array[]|null} */
+                    let directReadingBytesList = null;
+                    /** @type {Uint8Array|boolean[]|null} */
+                    let directReadingEqualsExpressionList = null;
+                    /** @type {Int32Array|number[]|null} */
+                    let directScoreList = null;
+                    /** @type {Int32Array|(number|undefined)[]|null} */
+                    let directSequenceList = null;
+                    /** @type {Uint8Array[]|null} */
+                    let directContentBytesList = null;
+                    /** @type {Uint32Array|number[]|null} */
+                    let directContentHash1List = null;
+                    /** @type {Uint32Array|number[]|null} */
+                    let directContentHash2List = null;
+                    /** @type {Uint32Array|null} */
+                    let directExpressionIndexes = null;
+                    /** @type {Uint32Array|null} */
+                    let directReadingIndexes = null;
+                    /** @type {Array<{payload: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}}>|null} */
+                    let mixedChunkRuns = null;
+                    /** @type {import('dictionary-database').DatabaseTermEntry[]|null} */
+                    let pendingObjectEntries = null;
+                    /** @type {number} */
+                    let pendingObjectRequirementsStart = 0;
+                    /** @type {{expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentHash1List: number[], contentHash2List: number[], expressionIndexes: number[], readingIndexes: number[], planBuilder: ReturnType<typeof createArtifactTermRecordPreinternedPlanBuilder>}|null} */
+                    let pendingDirectRun = null;
+                    if (useDirectChunkImport) {
+                        const rowCount = chunkRowCount;
+                        directExpressionBytesList = createSparseArray(rowCount);
+                        directReadingBytesList = createSparseArray(rowCount);
+                        directReadingEqualsExpressionList = new Uint8Array(rowCount);
+                        directScoreList = new Int32Array(rowCount);
+                        directSequenceList = new Int32Array(rowCount);
+                        directSequenceList.fill(-1);
+                        directContentBytesList = createSparseArray(rowCount);
+                        directContentHash1List = new Uint32Array(rowCount);
+                        directContentHash2List = new Uint32Array(rowCount);
+                        directExpressionIndexes = new Uint32Array(rowCount);
+                        directReadingIndexes = new Uint32Array(rowCount);
+                        directChunkPlanBuilder = createArtifactTermRecordPreinternedPlanBuilder();
+                    } else if (useMixedDirectChunkRuns) {
+                        mixedChunkRuns = [];
+                    }
+                    /**
+                     * @param {number} endIndexExclusive
+                     * @returns {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}}
+                     */
+                    const createRunProgress = (endIndexExclusive) => ({
+                        processedRows: chunkProgress.processedRows - (chunkRowCount - endIndexExclusive),
+                        totalRows: chunkProgress.totalRows,
+                        chunkIndex: chunkProgress.chunkIndex,
+                        chunkCount: chunkProgress.chunkCount,
+                    });
+                    /**
+                     * @param {number} endIndexExclusive
+                     * @returns {void}
+                     */
+                    const finalizePendingObjectRun = (endIndexExclusive) => {
+                        if (mixedChunkRuns === null || pendingObjectEntries === null || requirementsForChunk === null) { return; }
+                        const requirementsForRun = requirementsForChunk.slice(pendingObjectRequirementsStart);
+                        mixedChunkRuns.push({
+                            payload: pendingObjectEntries,
+                            requirements: requirementsForRun.length > 0 ? requirementsForRun : null,
+                            progress: createRunProgress(endIndexExclusive),
+                        });
+                        pendingObjectEntries = null;
+                        pendingObjectRequirementsStart = requirementsForChunk.length;
+                    };
+                    /**
+                     * @param {number} endIndexExclusive
+                     * @returns {void}
+                     */
+                    const finalizePendingDirectRun = (endIndexExclusive) => {
+                        if (mixedChunkRuns === null || pendingDirectRun === null) { return; }
+                        const rowCount = pendingDirectRun.expressionBytesList.length;
+                        mixedChunkRuns.push({
+                            payload: {
+                                dictionary: dictionaryTitle,
+                                rowCount,
+                                dictionaryTotalRows: chunkProgress.totalRows,
+                                expressionBytesList: pendingDirectRun.expressionBytesList,
+                                readingBytesList: pendingDirectRun.readingBytesList,
+                                readingEqualsExpressionList: pendingDirectRun.readingEqualsExpressionList,
+                                scoreList: pendingDirectRun.scoreList,
+                                sequenceList: pendingDirectRun.sequenceList,
+                                contentBytesList: pendingDirectRun.contentBytesList,
+                                contentHash1List: pendingDirectRun.contentHash1List,
+                                contentHash2List: pendingDirectRun.contentHash2List,
+                                contentDictNameList: null,
+                                termRecordPreinternedPlan: pendingDirectRun.planBuilder.buildPlan(
+                                    pendingDirectRun.expressionIndexes,
+                                    pendingDirectRun.readingIndexes,
+                                    rowCount,
+                                ),
+                            },
+                            requirements: null,
+                            progress: createRunProgress(endIndexExclusive),
+                        });
+                        pendingDirectRun = null;
+                    };
                     const tMaterializationStart = Date.now();
-                    for (let i = 0, ii = parsedRows.length; i < ii; ++i) {
-                        const row = /** @type {ParsedTermBankChunkRow} */ (parsedRows[i]);
-                        const expression = row.expression;
-                        const reading = row.reading.length > 0 ? row.reading : expression;
-                        const hasPrecomputedTermContent = hasPrecomputedTermEntryContent(row);
+                    for (let i = 0, ii = chunkRowCount; i < ii; ++i) {
+                        const row = rawChunk !== null ?
+                            null :
+                            /** @type {ParsedTermBankChunkRow} */ (/** @type {ParsedTermBankChunkRow[]} */ (parsedRows)[i]);
+                        const directRow = rawDirectRows?.[i] ?? null;
+                        const rowExpression = row?.expression ?? '';
+                        const rowReading = row?.reading ?? '';
+                        const rowReadingEqualsExpression = (
+                            directRow !== null ?
+                                directRow.readingEqualsExpression :
+                                (
+                                    row.readingEqualsExpression === true ||
+                                    (
+                                        row.readingEqualsExpression !== false &&
+                                        (
+                                            rowReading === rowExpression ||
+                                            rowReading.length === 0 ||
+                                            (
+                                                row.readingBytes instanceof Uint8Array &&
+                                                row.readingBytes.byteLength === 0
+                                            )
+                                        )
+                                    )
+                                )
+                        );
+                        const hasPrecomputedTermContent = directRow !== null ?
+                            hasPrecomputedTermEntryContent(directRow) :
+                            hasPrecomputedTermEntryContent(/** @type {ParsedTermBankChunkRow} */ (row));
+                        const skipGlossaryParse = requirementsForChunk !== null ? (
+                            directRow !== null ?
+                                directRow.glossaryMayContainMedia === false :
+                                shouldSkipGlossaryParse(/** @type {ParsedTermBankChunkRow} */ (row))
+                        ) : false;
+                        const canUseLeanMediaSkipEntry = (
+                            requirementsForChunk !== null &&
+                            hasPrecomputedTermContent &&
+                            skipGlossaryParse
+                        );
+                        if (
+                            useDirectChunkImport &&
+                            directRow !== null &&
+                            directChunkPlanBuilder !== null &&
+                            directExpressionBytesList !== null &&
+                            directReadingBytesList !== null &&
+                            directReadingEqualsExpressionList instanceof Uint8Array &&
+                            directScoreList instanceof Int32Array &&
+                            directSequenceList instanceof Int32Array &&
+                            directContentBytesList !== null &&
+                            directContentHash1List instanceof Uint32Array &&
+                            directContentHash2List instanceof Uint32Array &&
+                            directExpressionIndexes instanceof Uint32Array &&
+                            directReadingIndexes instanceof Uint32Array
+                        ) {
+                            const expressionBytes = directRow.expressionBytes;
+                            const readingEqualsExpression = directRow.readingEqualsExpression;
+                            const readingBytes = directRow.readingBytes;
+                            let hash1 = Number.isInteger(directRow.termEntryContentHash1) ? /** @type {number} */ (directRow.termEntryContentHash1) : 0;
+                            let hash2 = Number.isInteger(directRow.termEntryContentHash2) ? /** @type {number} */ (directRow.termEntryContentHash2) : 0;
+                            if (!(hash1 !== 0 || hash2 !== 0)) {
+                                [hash1, hash2] = this._hashEntryContentBytesPair(directRow.termEntryContentBytes);
+                            }
+                            directExpressionBytesList[i] = expressionBytes;
+                            directReadingBytesList[i] = readingBytes;
+                            directReadingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
+                            directScoreList[i] = directRow.score | 0;
+                            directSequenceList[i] = typeof directRow.sequence === 'number' ? directRow.sequence : -1;
+                            directContentBytesList[i] = directRow.termEntryContentBytes;
+                            directContentHash1List[i] = hash1 >>> 0;
+                            directContentHash2List[i] = hash2 >>> 0;
+                            const expressionIndex = directChunkPlanBuilder.internStringBytes(expressionBytes);
+                            const readingIndex = readingEqualsExpression ? expressionIndex : directChunkPlanBuilder.internStringBytes(readingBytes);
+                            directExpressionIndexes[i] = expressionIndex >>> 0;
+                            directReadingIndexes[i] = readingIndex >>> 0;
+                            continue;
+                        }
+                        if (useMixedDirectChunkRuns && rawDirectRowEligibility?.[i] === 1 && directRow !== null) {
+                            finalizePendingObjectRun(i);
+                            if (pendingDirectRun === null) {
+                                pendingDirectRun = {
+                                    expressionBytesList: [],
+                                    readingBytesList: [],
+                                    readingEqualsExpressionList: [],
+                                    scoreList: [],
+                                    sequenceList: [],
+                                    contentBytesList: [],
+                                    contentHash1List: [],
+                                    contentHash2List: [],
+                                    expressionIndexes: [],
+                                    readingIndexes: [],
+                                    planBuilder: createArtifactTermRecordPreinternedPlanBuilder(),
+                                };
+                            }
+                            const expressionBytes = directRow.expressionBytes;
+                            const readingEqualsExpression = directRow.readingEqualsExpression;
+                            const readingBytes = directRow.readingBytes;
+                            let hash1 = Number.isInteger(directRow.termEntryContentHash1) ? /** @type {number} */ (directRow.termEntryContentHash1) : 0;
+                            let hash2 = Number.isInteger(directRow.termEntryContentHash2) ? /** @type {number} */ (directRow.termEntryContentHash2) : 0;
+                            if (!(hash1 !== 0 || hash2 !== 0)) {
+                                [hash1, hash2] = this._hashEntryContentBytesPair(directRow.termEntryContentBytes);
+                            }
+                            pendingDirectRun.expressionBytesList.push(expressionBytes);
+                            pendingDirectRun.readingBytesList.push(readingBytes);
+                            pendingDirectRun.readingEqualsExpressionList.push(readingEqualsExpression);
+                            pendingDirectRun.scoreList.push(directRow.score | 0);
+                            pendingDirectRun.sequenceList.push(typeof directRow.sequence === 'number' ? directRow.sequence : void 0);
+                            pendingDirectRun.contentBytesList.push(directRow.termEntryContentBytes);
+                            pendingDirectRun.contentHash1List.push(hash1 >>> 0);
+                            pendingDirectRun.contentHash2List.push(hash2 >>> 0);
+                            const expressionIndex = pendingDirectRun.planBuilder.internStringBytes(expressionBytes);
+                            const readingIndex = readingEqualsExpression ? expressionIndex : pendingDirectRun.planBuilder.internStringBytes(readingBytes);
+                            pendingDirectRun.expressionIndexes.push(expressionIndex >>> 0);
+                            pendingDirectRun.readingIndexes.push(readingIndex >>> 0);
+                            continue;
+                        }
+                        if (useMixedDirectChunkRuns) {
+                            finalizePendingDirectRun(i);
+                            if (pendingObjectEntries === null && requirementsForChunk !== null) {
+                                pendingObjectEntries = [];
+                                pendingObjectRequirementsStart = requirementsForChunk.length;
+                            }
+                        }
+                        const decodedRow = row ?? decodeParsedTermRowFromRawChunk(rawChunk, rawChunk.startIndex + i, rawChunkDecodeOptions);
+                        const expression = decodedRow.expression;
+                        const reading = decodedRow.reading.length > 0 ? decodedRow.reading : expression;
                         let usePrecomputedTermContent = false;
                         const useLeanTermEntryObject = (
                             this._leanCanonicalTermEntryObjects &&
-                            requirementsForChunk === null &&
+                            (
+                                requirementsForChunk === null ||
+                                canUseLeanMediaSkipEntry
+                            ) &&
                             hasPrecomputedTermContent
                         );
                         /** @type {import('dictionary-database').DatabaseTermEntry} */
@@ -3184,7 +3635,7 @@ export class DictionaryImporter {
                                 reading,
                                 definitionTags: '',
                                 rules: '',
-                                score: row.score,
+                                score: decodedRow.score,
                                 glossary: [],
                                 termTags: '',
                                 dictionary: dictionaryTitle,
@@ -3192,15 +3643,15 @@ export class DictionaryImporter {
                             {
                                 expression,
                                 reading,
-                                definitionTags: row.definitionTags ?? '',
-                                rules: row.rules ?? '',
-                                score: row.score,
+                                definitionTags: decodedRow.definitionTags ?? '',
+                                rules: decodedRow.rules ?? '',
+                                score: decodedRow.score,
                                 glossary: [],
-                                termTags: row.termTags ?? '',
+                                termTags: decodedRow.termTags ?? '',
                                 dictionary: dictionaryTitle,
                             };
                         if (requirementsForChunk === null) {
-                            const rowGlossaryJson = this._getFastRowGlossaryJson(row);
+                            const rowGlossaryJson = this._getFastRowGlossaryJson(decodedRow);
                             if (rowGlossaryJson.length > 0) {
                                 entry.glossaryJson = rowGlossaryJson;
                             }
@@ -3208,26 +3659,21 @@ export class DictionaryImporter {
                                 hasPrecomputedTermContent :
                                 true;
                         } else {
-                            const skipGlossaryParse = (
-                                typeof row.glossaryMayContainMedia === 'boolean' ?
-                                    !row.glossaryMayContainMedia :
-                                    !this._glossaryJsonLikelyContainsMedia(this._getFastRowGlossaryJson(row))
-                            );
                             if (skipGlossaryParse) {
                                 if (!this._wasmPassThroughTermContent) {
-                                    entry.glossaryJson = this._getFastRowGlossaryJson(row);
+                                    entry.glossaryJson = this._getFastRowGlossaryJson(decodedRow);
                                 }
                                 usePrecomputedTermContent = true;
                             } else {
                                 let glossaryList;
                                 if (usePrecomputedContentForMediaRows && hasPrecomputedTermContent) {
-                                    const contentPayload = this._parseTermEntryContentFromFastRow(row, termFile.filename);
+                                    const contentPayload = this._parseTermEntryContentFromFastRow(decodedRow, termFile.filename);
                                     entry.rules = contentPayload.rules;
                                     entry.definitionTags = contentPayload.definitionTags;
                                     entry.termTags = contentPayload.termTags;
                                     glossaryList = contentPayload.glossary;
                                 } else {
-                                    const rowGlossaryJson = this._getFastRowGlossaryJson(row);
+                                    const rowGlossaryJson = this._getFastRowGlossaryJson(decodedRow);
                                     glossaryList = this._parseGlossaryJsonFromFastRow(rowGlossaryJson, termFile.filename);
                                 }
                                 for (let j = 0, jj = glossaryList.length; j < jj; ++j) {
@@ -3238,8 +3684,8 @@ export class DictionaryImporter {
                                 entry.glossary = glossaryList;
                             }
                         }
-                        if (typeof row.sequence === 'number') {
-                            entry.sequence = row.sequence;
+                        if (typeof decodedRow.sequence === 'number') {
+                            entry.sequence = decodedRow.sequence;
                         }
                         this._assignPrefixReverseFields(entry, prefixWildcardsSupported);
                         if (
@@ -3247,14 +3693,14 @@ export class DictionaryImporter {
                             this._wasmPassThroughTermContent &&
                             hasPrecomputedTermContent
                         ) {
-                            if (typeof row.termEntryContentHash === 'string' && row.termEntryContentHash.length > 0) {
-                                entry.termEntryContentHash = row.termEntryContentHash;
+                            if (typeof decodedRow.termEntryContentHash === 'string' && decodedRow.termEntryContentHash.length > 0) {
+                                entry.termEntryContentHash = decodedRow.termEntryContentHash;
                             }
-                            if (Number.isInteger(row.termEntryContentHash1) && Number.isInteger(row.termEntryContentHash2)) {
-                                entry.termEntryContentHash1 = /** @type {number} */ (row.termEntryContentHash1);
-                                entry.termEntryContentHash2 = /** @type {number} */ (row.termEntryContentHash2);
+                            if (Number.isInteger(decodedRow.termEntryContentHash1) && Number.isInteger(decodedRow.termEntryContentHash2)) {
+                                entry.termEntryContentHash1 = /** @type {number} */ (decodedRow.termEntryContentHash1);
+                                entry.termEntryContentHash2 = /** @type {number} */ (decodedRow.termEntryContentHash2);
                             }
-                            entry.termEntryContentBytes = row.termEntryContentBytes;
+                            entry.termEntryContentBytes = decodedRow.termEntryContentBytes;
                         }
                         // Keep serialization canonical with the runtime deserializer.
                         if (
@@ -3273,7 +3719,7 @@ export class DictionaryImporter {
                                     !hasPrecomputedTermEntryContent(entry)
                                 )
                             ) {
-                                entry.glossaryJson = this._getFastRowGlossaryJson(row);
+                                entry.glossaryJson = this._getFastRowGlossaryJson(decodedRow);
                             }
                             this._prepareTermEntrySerialization(
                                 entry,
@@ -3281,17 +3727,61 @@ export class DictionaryImporter {
                                 null,
                             );
                         }
-                        termListChunk[i] = entry;
+                        if (useMixedDirectChunkRuns && pendingObjectEntries !== null) {
+                            pendingObjectEntries.push(entry);
+                        } else {
+                            termListChunk[i] = entry;
+                        }
+                    }
+                    if (useMixedDirectChunkRuns) {
+                        finalizePendingDirectRun(chunkRowCount);
+                        finalizePendingObjectRun(chunkRowCount);
+                    }
+                    if (
+                        useDirectChunkImport &&
+                        directChunkPlanBuilder !== null &&
+                        directExpressionBytesList !== null &&
+                        directReadingBytesList !== null &&
+                        directReadingEqualsExpressionList !== null &&
+                        directScoreList !== null &&
+                        directSequenceList !== null &&
+                        directContentBytesList !== null &&
+                        directContentHash1List !== null &&
+                        directContentHash2List !== null &&
+                        directExpressionIndexes !== null &&
+                        directReadingIndexes !== null
+                    ) {
+                        directChunkPayload = {
+                            dictionary: dictionaryTitle,
+                            rowCount: chunkRowCount,
+                            dictionaryTotalRows: chunkProgress.totalRows,
+                            expressionBytesList: directExpressionBytesList,
+                            readingBytesList: directReadingBytesList,
+                            readingEqualsExpressionList: directReadingEqualsExpressionList,
+                            scoreList: directScoreList,
+                            sequenceList: directSequenceList,
+                            contentBytesList: directContentBytesList,
+                            contentHash1List: directContentHash1List,
+                            contentHash2List: directContentHash2List,
+                            contentDictNameList: null,
+                            termRecordPreinternedPlan: directChunkPlanBuilder.buildPlan(directExpressionIndexes, directReadingIndexes, chunkRowCount),
+                        };
                     }
                     importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
 
                     const tChunkSinkStart = Date.now();
                     if (streamToChunkHandler) {
-                        await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(
-                            termListChunk,
-                            requirementsForChunk,
-                            chunkProgress,
-                        );
+                        if (mixedChunkRuns !== null) {
+                            for (const run of mixedChunkRuns) {
+                                await emitStreamedPayload(run.payload, run.requirements, run.progress);
+                            }
+                        } else {
+                            await emitStreamedPayload(
+                                directChunkPayload ?? termListChunk,
+                                directChunkPayload === null ? requirementsForChunk : null,
+                                chunkProgress,
+                            );
+                        }
                     } else {
                         termList.push(...termListChunk);
                         if (requirements !== null && requirementsForChunk !== null) {
@@ -3302,7 +3792,7 @@ export class DictionaryImporter {
                 },
                 wasmRowChunkSize,
                 {
-                    copyContentBytes: this._wasmPassThroughTermContent && !streamToChunkHandler,
+                    copyContentBytes: this._wasmPassThroughTermContent && !streamToChunkHandler && !useRawWasmChunkPath,
                     includeContentMetadata,
                     initialMetaCapacityDivisor: wasmInitialMetaCapacityDivisor,
                     initialContentBytesPerRow: wasmInitialContentBytesPerRow,
@@ -3314,6 +3804,9 @@ export class DictionaryImporter {
                     mediaHintFastScan: useMediaHintFastScan,
                 },
             );
+            const tFinalChunkSinkStart = Date.now();
+            await flushPendingDirectStreamBatch();
+            importerChunkSinkMs += Math.max(0, Date.now() - tFinalChunkSinkStart);
             const parserProfile = consumeLastTermBankWasmParseProfile();
             this._lastFastTermBankReadProfile = {
                 parserProfile,

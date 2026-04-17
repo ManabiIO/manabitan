@@ -28,6 +28,7 @@ import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {DictionaryController} from './dictionary-controller.js';
 
 const OPFS_REQUIRED_USER_MESSAGE = 'Manabitan requires OPFS storage support.';
+const DEFAULT_MEDIA_RESOLUTION_CONCURRENCY = 12;
 
 /**
  * @param {number} valueMs
@@ -1797,7 +1798,7 @@ export class DictionaryImportController {
         if (typeof flags !== 'object' || flags === null || Array.isArray(flags)) {
             return {
                 skipImageMetadata: false,
-                mediaResolutionConcurrency: 8,
+                mediaResolutionConcurrency: DEFAULT_MEDIA_RESOLUTION_CONCURRENCY,
                 debugImportLogging: false,
                 enableTermEntryContentDedup: true,
                 termContentStorageMode: 'raw-bytes',
@@ -1805,7 +1806,7 @@ export class DictionaryImportController {
             };
         }
         const flagsRecord = /** @type {Record<string, unknown>} */ (flags);
-        const mediaResolutionConcurrency = Number.isFinite(flagsRecord.mediaResolutionConcurrency) ? Math.trunc(/** @type {number} */ (flagsRecord.mediaResolutionConcurrency)) : 8;
+        const mediaResolutionConcurrency = Number.isFinite(flagsRecord.mediaResolutionConcurrency) ? Math.trunc(/** @type {number} */ (flagsRecord.mediaResolutionConcurrency)) : DEFAULT_MEDIA_RESOLUTION_CONCURRENCY;
         const termContentStorageModeRaw = flagsRecord.termContentStorageMode;
         const termContentStorageMode = (termContentStorageModeRaw === 'raw-bytes') ?
             termContentStorageModeRaw :

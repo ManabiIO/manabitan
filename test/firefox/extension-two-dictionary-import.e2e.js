@@ -47,6 +47,24 @@ const focusedSecondaryDictionary = String(process.env.MANABITAN_FIREFOX_RECOMMEN
 const focusedBaselineOnly = /^(1|true|yes)$/i.test(String(process.env.MANABITAN_FIREFOX_FOCUSED_BASELINE_ONLY || ''));
 const existingProfileOnly = /^(1|true|yes)$/i.test(String(process.env.MANABITAN_FIREFOX_EXISTING_PROFILE_ONLY || ''));
 const profileCycle = /^(1|true|yes)$/i.test(String(process.env.MANABITAN_FIREFOX_PROFILE_CYCLE || ''));
+const e2eImportFlagsJsonRaw = process.env.MANABITAN_E2E_IMPORT_FLAGS_JSON;
+let e2eImportFlags = null;
+if (typeof e2eImportFlagsJsonRaw === 'string') {
+    const normalizedImportFlagsJson = e2eImportFlagsJsonRaw.trim();
+    if (normalizedImportFlagsJson.length > 0) {
+        try {
+            const parsedImportFlags = parseJson(normalizedImportFlagsJson);
+            if (typeof parsedImportFlags === 'object' && parsedImportFlags !== null && !Array.isArray(parsedImportFlags)) {
+                e2eImportFlags = /** @type {Record<string, unknown>} */ (parsedImportFlags);
+            } else {
+                throw new Error(`MANABITAN_E2E_IMPORT_FLAGS_JSON must be a JSON object, got: ${normalizedImportFlagsJson}`);
+            }
+        } catch (e) {
+            const message = (e instanceof Error && typeof e.message === 'string') ? e.message : String(e);
+            throw new Error(`MANABITAN_E2E_IMPORT_FLAGS_JSON parse failed: ${message}`);
+        }
+    }
+}
 
 /**
  * @param {'JMdict'|'JMnedict'} name
@@ -2240,9 +2258,11 @@ function diagnosticsShowExpectedDictionaryCoverage(diagnostics, expectedDictiona
 async function installRecommendedDictionariesMock(driver, recommendedDictionaries) {
     await driver.executeScript(`
         const data = structuredClone(arguments[0]);
+        const importFlags = arguments[1];
         // Force per-dictionary imports for Firefox E2E to avoid session-final export failures
         // that can leave settings populated while term data is missing.
         globalThis.manabitanImportUseSession = false;
+        globalThis.manabitanImportPerformanceFlags = (importFlags && typeof importFlags === 'object') ? {...importFlags} : {};
 
         const originalFetch = window.fetch.bind(window);
         globalThis.__manabitanMockSeenUrls = [];
@@ -2262,7 +2282,7 @@ async function installRecommendedDictionariesMock(driver, recommendedDictionarie
             }
             return originalFetch(input, init);
         };
-    `, recommendedDictionaries);
+    `, recommendedDictionaries, e2eImportFlags);
 }
 
 /**

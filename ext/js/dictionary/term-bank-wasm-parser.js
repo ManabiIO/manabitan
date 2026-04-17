@@ -34,6 +34,8 @@ let wasmPromise = null;
 
 /** @type {TextDecoder} */
 const textDecoder = new TextDecoder();
+/** @type {TextEncoder} */
+const textEncoder = new TextEncoder();
 /** @type {{bufferSetupMs: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, rowDecodeMs: number, chunkDispatchMs: number, rowCount: number, chunkCount: number, chunkSize: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean}|null} */
 let lastTermBankWasmParseProfile = null;
 /** @type {number} */
@@ -104,6 +106,32 @@ function decodeJsonStringToken(source, start, length) {
     }
     const quoted = textDecoder.decode(source.subarray(start, start + length));
     return /** @type {string} */ (parseJson(quoted));
+}
+
+/**
+ * @param {Uint8Array} source
+ * @param {number} start
+ * @param {number} length
+ * @param {string} [decodedValue]
+ * @returns {Uint8Array}
+ */
+function decodeJsonStringTokenBytes(source, start, length, decodedValue = '') {
+    if (length < 2 || source[start] !== U8_QUOTE || source[start + length - 1] !== U8_QUOTE) {
+        return EMPTY_UINT8_ARRAY;
+    }
+    if (length === 2) {
+        return EMPTY_UINT8_ARRAY;
+    }
+    const valueStart = start + 1;
+    const valueEnd = start + length - 1;
+    const valueBytes = source.subarray(valueStart, valueEnd);
+    if (!valueBytes.includes(U8_BACKSLASH)) {
+        return valueBytes;
+    }
+    if (decodedValue.length === 0) {
+        decodedValue = decodeJsonStringToken(source, start, length);
+    }
+    return textEncoder.encode(decodedValue);
 }
 
 /**
@@ -472,9 +500,10 @@ function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, v
  * @param {boolean} copyContentBytes
  * @param {boolean} includeContentMetadata
  * @param {boolean} reuseExpressionForReadingDecode
+ * @param {boolean} mediaHintFastScan
  * @returns {{expression: string, reading: string, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
  */
-function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode) {
+function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, mediaHintFastScan) {
     const o = i * META_U32_FIELDS;
     const c = i * CONTENT_META_U32_FIELDS;
     const expressionStart = metas[o + 0];
@@ -490,6 +519,9 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
         expression :
         decodeJsonStringToken(source, readingStart, readingLength);
     const score = decodeNumberToken(source, metas[o + 8], metas[o + 9], 0);
+    const glossaryStart = metas[o + 10];
+    const glossaryLength = metas[o + 11];
+    const glossaryMayContainMedia = mediaHintFastScan ? glossaryTokenLikelyContainsMedia(source, glossaryStart, glossaryLength) : void 0;
     const sequence = version >= 3 ? (isNullToken(source, metas[o + 12], metas[o + 13]) ? null : decodeNumberToken(source, metas[o + 12], metas[o + 13], 0)) : null;
     let termEntryContentHash1;
     let termEntryContentHash2;
@@ -513,6 +545,7 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
         rules: '',
         score,
         glossaryJson: '[]',
+        glossaryMayContainMedia,
         sequence,
         termTags: '',
         termEntryContentHash1,
@@ -597,7 +630,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
     for (let i = 0; i < rowCount; ++i) {
         const tDecodeStart = Date.now();
         const row = minimalDecode ?
-            decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode) :
+            decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, mediaHintFastScan) :
             decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, skipTagRuleDecode, lazyGlossaryDecode, mediaHintFastScan);
         rowDecodeMs += Math.max(0, Date.now() - tDecodeStart);
         if (preallocateChunkRows) {
@@ -654,6 +687,187 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
         skipTagRuleDecode,
         lazyGlossaryDecode,
         mediaHintFastScan,
+    };
+}
+
+/**
+ * @param {Uint8Array} contentBytes
+ * @param {number} version
+ * @param {(chunk: {source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, heap: Uint8Array, contentOutPtr: number, version: number, startIndex: number, endIndex: number}, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {number} [chunkSize]
+ * @param {{includeContentMetadata?: boolean, initialMetaCapacityDivisor?: number, initialContentBytesPerRow?: number}} [options]
+ * @returns {Promise<void>}
+ */
+export async function parseTermBankWithWasmRawChunks(contentBytes, version, onChunk, chunkSize = DEFAULT_ROW_CHUNK_SIZE, options = {}) {
+    const includeContentMetadata = options.includeContentMetadata !== false;
+    const initialMetaCapacityDivisor = Number.isFinite(options.initialMetaCapacityDivisor) ? /** @type {number} */ (options.initialMetaCapacityDivisor) : 24;
+    const initialContentBytesPerRow = Number.isFinite(options.initialContentBytesPerRow) ? /** @type {number} */ (options.initialContentBytesPerRow) : 96;
+    const tBufferSetupStart = Date.now();
+    const {
+        heap,
+        source,
+        metas,
+        contentMetas,
+        contentOutPtr,
+        rowCount,
+        allocationMs,
+        copyJsonMs,
+        parseBankMs,
+        encodeContentMs,
+    } = await parseTermBankWasmBuffers(
+        contentBytes,
+        includeContentMetadata,
+        initialMetaCapacityDivisor,
+        initialContentBytesPerRow,
+    );
+    const bufferSetupMs = Math.max(0, Date.now() - tBufferSetupStart);
+    if (rowCount === 0) {
+        lastTermBankWasmParseProfile = {
+            bufferSetupMs,
+            allocationMs,
+            copyJsonMs,
+            parseBankMs,
+            encodeContentMs,
+            rowDecodeMs: 0,
+            chunkDispatchMs: 0,
+            rowCount: 0,
+            chunkCount: 0,
+            chunkSize: 0,
+            minimalDecode: false,
+            includeContentMetadata,
+            copyContentBytes: false,
+            reuseExpressionForReadingDecode: false,
+            skipTagRuleDecode: false,
+            lazyGlossaryDecode: false,
+            mediaHintFastScan: false,
+        };
+        return;
+    }
+    const normalizedChunkSize = Number.isFinite(chunkSize) ? Math.max(1, Math.trunc(chunkSize)) : DEFAULT_ROW_CHUNK_SIZE;
+    const chunkCount = Math.max(1, Math.ceil(rowCount / normalizedChunkSize));
+    let chunkDispatchMs = 0;
+    let chunkIndex = 0;
+    for (let startIndex = 0; startIndex < rowCount; startIndex += normalizedChunkSize) {
+        const endIndex = Math.min(startIndex + normalizedChunkSize, rowCount);
+        ++chunkIndex;
+        const tDispatchStart = Date.now();
+        await onChunk(
+            {
+                source,
+                metas,
+                contentMetas,
+                heap,
+                contentOutPtr,
+                version,
+                startIndex,
+                endIndex,
+            },
+            {
+                processedRows: endIndex,
+                totalRows: rowCount,
+                chunkIndex,
+                chunkCount,
+            },
+        );
+        chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
+    }
+    lastTermBankWasmParseProfile = {
+        bufferSetupMs,
+        allocationMs,
+        copyJsonMs,
+        parseBankMs,
+        encodeContentMs,
+        rowDecodeMs: 0,
+        chunkDispatchMs,
+        rowCount,
+        chunkCount,
+        chunkSize: normalizedChunkSize,
+        minimalDecode: false,
+        includeContentMetadata,
+        copyContentBytes: false,
+        reuseExpressionForReadingDecode: false,
+        skipTagRuleDecode: false,
+        lazyGlossaryDecode: false,
+        mediaHintFastScan: false,
+    };
+}
+
+/**
+ * @param {{source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, heap: Uint8Array, contentOutPtr: number, version: number}} rawChunk
+ * @param {number} i
+ * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, reuseExpressionForReadingDecode?: boolean, skipTagRuleDecode?: boolean, lazyGlossaryDecode?: boolean, mediaHintFastScan?: boolean, minimalDecode?: boolean}} [options]
+ * @returns {{expression: string, reading: string, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
+ */
+export function decodeParsedTermRowFromRawChunk(rawChunk, i, options = {}) {
+    const copyContentBytes = options.copyContentBytes === true;
+    const includeContentMetadata = options.includeContentMetadata !== false;
+    const reuseExpressionForReadingDecode = options.reuseExpressionForReadingDecode === true;
+    const skipTagRuleDecode = options.skipTagRuleDecode === true;
+    const lazyGlossaryDecode = options.lazyGlossaryDecode === true;
+    const mediaHintFastScan = options.mediaHintFastScan === true;
+    const minimalDecode = options.minimalDecode === true;
+    return minimalDecode ?
+        decodeParsedTermRowMinimal(rawChunk.source, rawChunk.metas, rawChunk.contentMetas, rawChunk.heap, rawChunk.contentOutPtr, rawChunk.version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, mediaHintFastScan) :
+        decodeParsedTermRow(rawChunk.source, rawChunk.metas, rawChunk.contentMetas, rawChunk.heap, rawChunk.contentOutPtr, rawChunk.version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, skipTagRuleDecode, lazyGlossaryDecode, mediaHintFastScan);
+}
+
+/**
+ * @param {{source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, heap: Uint8Array, contentOutPtr: number, version: number}} rawChunk
+ * @param {number} i
+ * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, reuseExpressionForReadingDecode?: boolean, mediaHintFastScan?: boolean}} [options]
+ * @returns {{expressionBytes: Uint8Array, readingBytes: Uint8Array, readingEqualsExpression: boolean, score: number, glossaryMayContainMedia?: boolean, sequence: number|null, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
+ */
+export function decodeParsedTermRowDirectFromRawChunk(rawChunk, i, options = {}) {
+    const copyContentBytes = options.copyContentBytes === true;
+    const includeContentMetadata = options.includeContentMetadata !== false;
+    const reuseExpressionForReadingDecode = options.reuseExpressionForReadingDecode === true;
+    const mediaHintFastScan = options.mediaHintFastScan === true;
+    const {source, metas, contentMetas, heap, contentOutPtr, version} = rawChunk;
+    const o = i * META_U32_FIELDS;
+    const c = i * CONTENT_META_U32_FIELDS;
+    const expressionStart = metas[o + 0];
+    const expressionLength = metas[o + 1];
+    const readingStart = metas[o + 2];
+    const readingLength = metas[o + 3];
+    const expression = decodeJsonStringToken(source, expressionStart, expressionLength);
+    const expressionBytes = decodeJsonStringTokenBytes(source, expressionStart, expressionLength, expression);
+    const readingEqualsExpression = (
+        reuseExpressionForReadingDecode &&
+        tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
+    ) || readingLength === 2;
+    const readingBytes = readingEqualsExpression ?
+        expressionBytes :
+        decodeJsonStringTokenBytes(source, readingStart, readingLength);
+    const glossaryStart = metas[o + 10];
+    const glossaryLength = metas[o + 11];
+    const glossaryMayContainMedia = mediaHintFastScan ? glossaryTokenLikelyContainsMedia(source, glossaryStart, glossaryLength) : void 0;
+    const score = decodeNumberToken(source, metas[o + 8], metas[o + 9], 0);
+    const sequence = version >= 3 ? (isNullToken(source, metas[o + 12], metas[o + 13]) ? null : decodeNumberToken(source, metas[o + 12], metas[o + 13], 0)) : null;
+    let termEntryContentHash1;
+    let termEntryContentHash2;
+    let termEntryContentBytes = EMPTY_UINT8_ARRAY;
+    if (includeContentMetadata) {
+        const contentOffset = contentMetas[c + 0];
+        const contentLength = contentMetas[c + 1];
+        const hash1 = contentMetas[c + 2];
+        const hash2 = contentMetas[c + 3];
+        const contentStart = contentOutPtr + contentOffset;
+        const contentEnd = contentStart + contentLength;
+        const contentSlice = heap.subarray(contentStart, contentEnd);
+        termEntryContentBytes = copyContentBytes ? Uint8Array.from(contentSlice) : contentSlice;
+        termEntryContentHash1 = hash1 >>> 0;
+        termEntryContentHash2 = hash2 >>> 0;
+    }
+    return {
+        expressionBytes,
+        readingBytes,
+        readingEqualsExpression,
+        score,
+        glossaryMayContainMedia,
+        sequence,
+        termEntryContentHash1,
+        termEntryContentHash2,
+        termEntryContentBytes,
     };
 }
 

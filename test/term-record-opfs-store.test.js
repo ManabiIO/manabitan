@@ -462,4 +462,66 @@ describe('TermRecordOpfsStore', () => {
         expect(taberuRecord?.expression).toBe('食べる');
         expect(taberuRecord?.reading).toBe('たべる');
     });
+
+    test('preserves explicit readingEqualsExpression semantics for byte-backed import rows with empty placeholders', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Jitendex.org [2026-04-04]';
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        await writerStore.appendBatchFromResolvedImportTermEntries(
+            [
+                {
+                    dictionary: dictionaryName,
+                    expression: '',
+                    reading: '',
+                    expressionBytes: textEncoder.encode('読'),
+                    readingBytes: textEncoder.encode('読'),
+                    readingEqualsExpression: true,
+                    expressionReverse: null,
+                    readingReverse: null,
+                    score: 0,
+                    sequence: 1,
+                },
+                {
+                    dictionary: dictionaryName,
+                    expression: '',
+                    reading: '',
+                    expressionBytes: textEncoder.encode('食う'),
+                    readingBytes: textEncoder.encode('くう'),
+                    readingEqualsExpression: false,
+                    expressionReverse: null,
+                    readingReverse: null,
+                    score: 0,
+                    sequence: 2,
+                },
+            ],
+            0,
+            2,
+            [0, 128],
+            [128, 256],
+            ['raw', 'raw'],
+        );
+        await writerStore._closeAllWritables();
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(true);
+
+        const index = readerStore.getDictionaryIndex(dictionaryName);
+        expect(index.expression.get('読')).toHaveLength(1);
+        expect(index.reading.get('読')).toHaveLength(1);
+        expect(index.expression.get('食う')).toHaveLength(1);
+        expect(index.reading.get('くう')).toHaveLength(1);
+
+        const yomuRecord = readerStore.getById(index.expression.get('読')?.[0] ?? -1);
+        const kuuRecord = readerStore.getById(index.expression.get('食う')?.[0] ?? -1);
+        expect(yomuRecord?.expression).toBe('読');
+        expect(yomuRecord?.reading).toBe('読');
+        expect(kuuRecord?.expression).toBe('食う');
+        expect(kuuRecord?.reading).toBe('くう');
+    });
 });
