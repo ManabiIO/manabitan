@@ -44,6 +44,7 @@ const BASIC_DIAGNOSTICS_EVENTS = new Set([
     'dictionary-import-worker-phase-summary',
     'dictionary-lookup-db-query',
     'dictionary-lookup-snapshot',
+    'display-terms-find-snapshot',
     'dictionary-lookup-translator-stage',
 ]);
 /** @type {Promise<DiagnosticsConfig>|null} */

@@ -19,6 +19,7 @@ const META_U32_FIELDS = 6;
 const META_BYTES = META_U32_FIELDS * 4;
 const U16_NULL = 0xffff;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
+const UTF8_TEXT_DECODER = new TextDecoder('utf-8', {fatal: true});
 
 /** @type {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, calc_encoded_size: (count: number, stringCount: number, lengthsPtr: number, stringsByteLength: number, metasPtr: number) => number, encode_records: (count: number, stringCount: number, lengthsPtr: number, stringsPtr: number, stringsByteLength: number, metasPtr: number, outPtr: number) => number}>|null} */
 let wasmPromise = null;
@@ -116,6 +117,21 @@ function createStringInterner(textEncoder) {
 }
 
 /**
+ * When callers provide byte-backed strings with placeholder `''` values, use
+ * the decoded UTF-8 bytes as the cache key so distinct terms do not collapse
+ * into one interned string-table entry.
+ * @param {string} value
+ * @param {Uint8Array|undefined} bytes
+ * @returns {string}
+ */
+function getInternKey(value, bytes) {
+    if (!(bytes instanceof Uint8Array) || bytes.byteLength === 0 || value.length > 0) {
+        return value;
+    }
+    return UTF8_TEXT_DECODER.decode(bytes);
+}
+
+/**
  * @returns {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, calc_encoded_size: (count: number, stringCount: number, lengthsPtr: number, stringsByteLength: number, metasPtr: number) => number, encode_records: (count: number, stringCount: number, lengthsPtr: number, stringsPtr: number, stringsByteLength: number, metasPtr: number, outPtr: number) => number}>}
  */
 async function getWasm() {
@@ -173,11 +189,13 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
     for (const record of records) {
         const expression = record.expression ?? '';
         const reading = record.reading ?? expression;
+        const expressionInternKey = getInternKey(expression, record.expressionBytes);
+        const readingInternKey = getInternKey(reading, record.readingBytes);
         let expressionIndex;
         if (planExpressionIndexes instanceof Uint32Array) {
             expressionIndex = planExpressionIndexes[recordIndex];
         } else if (record.expressionBytes instanceof Uint8Array) {
-            expressionIndex = internStringBytes(expression, record.expressionBytes);
+            expressionIndex = internStringBytes(expressionInternKey, record.expressionBytes);
         } else {
             expressionIndex = internString(expression);
         }
@@ -188,7 +206,7 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
         } else if (readingEqualsExpression) {
             readingIndex = expressionIndex;
         } else if (record.readingBytes instanceof Uint8Array) {
-            readingIndex = internStringBytes(reading, record.readingBytes);
+            readingIndex = internStringBytes(readingInternKey, record.readingBytes);
         } else {
             readingIndex = internString(reading);
         }
@@ -268,7 +286,7 @@ export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, co
     for (let i = 0; i < count; ++i) {
         const expressionBytes = chunk.expressionBytesList[i];
         const readingEqualsExpression = chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1;
-        const expressionIndex = planExpressionIndexes instanceof Uint32Array ? planExpressionIndexes[i] : internStringBytes('', expressionBytes);
+        const expressionIndex = planExpressionIndexes instanceof Uint32Array ? planExpressionIndexes[i] : internStringBytes(getInternKey('', expressionBytes), expressionBytes);
         let readingIndex;
         if (planReadingIndexes instanceof Uint32Array) {
             readingIndex = planReadingIndexes[i];
@@ -276,7 +294,7 @@ export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, co
             readingIndex = expressionIndex;
         } else {
             const readingBytes = chunk.readingBytesList[i];
-            readingIndex = readingBytes instanceof Uint8Array ? internStringBytes('', readingBytes) : internString('');
+            readingIndex = readingBytes instanceof Uint8Array ? internStringBytes(getInternKey('', readingBytes), readingBytes) : internString('');
         }
         if (
             !(preinternedPlan instanceof Object) &&

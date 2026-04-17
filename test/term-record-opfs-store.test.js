@@ -53,17 +53,32 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
                 },
                 async createWritable() {
                     let nextBytes = fileBytesByName.get(name) ?? new Uint8Array();
+                    let cursor = nextBytes.byteLength;
                     return {
+                        async seek(/** @type {number} */ position) {
+                            cursor = Math.max(0, position);
+                        },
                         async truncate(/** @type {number} */ length) {
                             nextBytes = nextBytes.slice(0, Math.max(0, length));
+                            cursor = Math.min(cursor, nextBytes.byteLength);
                         },
                         async write(/** @type {FileSystemWriteChunkType} */ value) {
+                            /** @type {Uint8Array|null} */
+                            let bytes = null;
                             if (value instanceof ArrayBuffer) {
-                                nextBytes = new Uint8Array(value.slice(0));
-                                return;
+                                bytes = new Uint8Array(value.slice(0));
+                            } else if (ArrayBuffer.isView(value)) {
+                                bytes = new Uint8Array(value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength));
                             }
-                            if (ArrayBuffer.isView(value)) {
-                                nextBytes = new Uint8Array(value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength));
+                            if (bytes !== null) {
+                                const requiredLength = cursor + bytes.byteLength;
+                                if (requiredLength > nextBytes.byteLength) {
+                                    const expanded = new Uint8Array(requiredLength);
+                                    expanded.set(nextBytes, 0);
+                                    nextBytes = expanded;
+                                }
+                                nextBytes.set(bytes, cursor);
+                                cursor += bytes.byteLength;
                                 return;
                             }
                             throw new Error(`Unsupported write value: ${String(value)}`);
@@ -85,7 +100,7 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
         },
         async *entries() {
             for (const name of fileBytesByName.keys()) {
-                yield [name, {kind: 'file'}];
+                yield [name, await this.getFileHandle(name, {create: false})];
             }
         },
     }));
@@ -346,5 +361,105 @@ describe('TermRecordOpfsStore', () => {
         expect(recordsById.get(1)).toBeUndefined();
         expect(recordsById.get(2)?.dictionary).toBe('JMdict');
         expect(indexByDictionary.size).toBe(0);
+    });
+
+    test('round-trips artifact chunk records into the exact expression index', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Jitendex.org [2026-04-04]';
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        await writerStore.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: dictionaryName,
+                rowCount: 2,
+                expressionBytesList: [textEncoder.encode('食う'), textEncoder.encode('食べる')],
+                readingBytesList: [textEncoder.encode('くう'), textEncoder.encode('たべる')],
+                readingEqualsExpressionList: new Uint8Array([0, 0]),
+                scoreList: new Int32Array([0, 0]),
+                sequenceList: new Int32Array([1, 2]),
+            },
+            [0, 128],
+            [128, 256],
+            'raw',
+        );
+        await writerStore._closeAllWritables();
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(true);
+
+        const index = readerStore.getDictionaryIndex(dictionaryName);
+        expect(index.expression.get('食う')).toHaveLength(1);
+        expect(index.reading.get('くう')).toHaveLength(1);
+
+        const loadedRecord = readerStore.getById(index.expression.get('食う')?.[0] ?? -1);
+        expect(loadedRecord?.expression).toBe('食う');
+        expect(loadedRecord?.reading).toBe('くう');
+    });
+
+    test('preserves distinct byte-backed import rows when placeholder strings are empty', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Jitendex.org [2026-04-04]';
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        await writerStore.appendBatchFromResolvedImportTermEntries(
+            [
+                {
+                    dictionary: dictionaryName,
+                    expression: '',
+                    reading: '',
+                    expressionBytes: textEncoder.encode('食う'),
+                    readingBytes: textEncoder.encode('くう'),
+                    readingEqualsExpression: false,
+                    expressionReverse: null,
+                    readingReverse: null,
+                    score: 0,
+                    sequence: 1,
+                },
+                {
+                    dictionary: dictionaryName,
+                    expression: '',
+                    reading: '',
+                    expressionBytes: textEncoder.encode('食べる'),
+                    readingBytes: textEncoder.encode('たべる'),
+                    readingEqualsExpression: false,
+                    expressionReverse: null,
+                    readingReverse: null,
+                    score: 0,
+                    sequence: 2,
+                },
+            ],
+            0,
+            2,
+            [0, 128],
+            [128, 256],
+            ['raw', 'raw'],
+        );
+        await writerStore._closeAllWritables();
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(true);
+
+        const index = readerStore.getDictionaryIndex(dictionaryName);
+        expect(index.expression.get('食う')).toHaveLength(1);
+        expect(index.expression.get('食べる')).toHaveLength(1);
+        expect(index.reading.get('くう')).toHaveLength(1);
+        expect(index.reading.get('たべる')).toHaveLength(1);
+
+        const kuuRecord = readerStore.getById(index.expression.get('食う')?.[0] ?? -1);
+        const taberuRecord = readerStore.getById(index.expression.get('食べる')?.[0] ?? -1);
+        expect(kuuRecord?.expression).toBe('食う');
+        expect(kuuRecord?.reading).toBe('くう');
+        expect(taberuRecord?.expression).toBe('食べる');
+        expect(taberuRecord?.reading).toBe('たべる');
     });
 });
