@@ -467,6 +467,7 @@ export class Display extends EventDispatcher {
         const options = await this._application.api.optionsGet(this.getOptionsContext());
         const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
         this._options = options;
+        const searchPageWildcardsEnabled = this._pageType === 'search' && scanningOptions.matchTypePrefix;
 
         this._updateHotkeys(options);
         this._updateDocumentOptions(options);
@@ -497,7 +498,7 @@ export class Display extends EventDispatcher {
                 preventMiddleMouseOnTextHover: scanningOptions.preventMiddleMouse.onTextHover,
                 preventBackForwardOnPage: scanningOptions.preventBackForward.onSearchQuery,
                 preventBackForwardOnTextHover: scanningOptions.preventBackForward.onTextHover,
-                matchTypePrefix: false,
+                matchTypePrefix: searchPageWildcardsEnabled,
                 sentenceParsingOptions,
                 scanWithoutMousemove: scanningOptions.scanWithoutMousemove,
                 scanResolution: scanningOptions.scanResolution,
@@ -897,7 +898,7 @@ export class Display extends EventDispatcher {
         const details = {
             focus: false,
             historyMode,
-            params: this._createSearchParams(type, query, false, sentenceOffset),
+            params: this._createSearchParams(type, query, this._pageType === 'search' && this._getSearchPageWildcardSetting(), sentenceOffset),
             state: {
                 sentence,
                 optionsContext,
@@ -1419,7 +1420,8 @@ export class Display extends EventDispatcher {
      */
     async _setContentTermsOrKanji(type, urlSearchParams, token) {
         const lookup = (urlSearchParams.get('lookup') !== 'false');
-        const wildcardsEnabled = (urlSearchParams.get('wildcards') !== 'off');
+        const hasWildcardOverride = urlSearchParams.has('wildcards');
+        const wildcardsEnabled = hasWildcardOverride ? (urlSearchParams.get('wildcards') !== 'off') : this._getSearchPageWildcardSetting();
         this._lookup = lookup;
         this._wildcardsEnabled = wildcardsEnabled;
 
@@ -1967,6 +1969,13 @@ export class Display extends EventDispatcher {
     /**
      * @returns {boolean}
      */
+    _getSearchPageWildcardSetting() {
+        return this._pageType === 'search' && this._options !== null && this._options.scanning.matchTypePrefix === true;
+    }
+
+    /**
+     * @returns {boolean}
+     */
     _isQueryParserVisible() {
         return (
             this._queryParserVisibleOverride !== null ?
@@ -2214,7 +2223,6 @@ export class Display extends EventDispatcher {
             preventBackForwardOnPage: false,
             preventBackForwardOnTextHover: false,
             sentenceParsingOptions,
-            pageType: this._pageType,
         });
 
         this._contentTextScanner.setEnabled(true);

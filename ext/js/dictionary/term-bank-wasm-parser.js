@@ -151,6 +151,19 @@ function decodeNullableJsonStringToken(source, start, length) {
  * @param {Uint8Array} source
  * @param {number} start
  * @param {number} length
+ * @returns {Uint8Array|null}
+ */
+function decodeNullableJsonStringTokenBytes(source, start, length) {
+    if (length === 4 && source[start] === U8_N && source[start + 1] === U8_U && source[start + 2] === U8_L && source[start + 3] === U8_L) {
+        return null;
+    }
+    return decodeJsonStringTokenBytes(source, start, length);
+}
+
+/**
+ * @param {Uint8Array} source
+ * @param {number} start
+ * @param {number} length
  * @returns {boolean}
  */
 function isNullToken(source, start, length) {
@@ -510,11 +523,11 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
     const expressionLength = metas[o + 1];
     const readingStart = metas[o + 2];
     const readingLength = metas[o + 3];
-    const expression = decodeJsonStringToken(source, expressionStart, expressionLength);
     const reuseExpressionReading = (
         reuseExpressionForReadingDecode &&
         tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
     );
+    const expression = decodeJsonStringToken(source, expressionStart, expressionLength);
     const reading = reuseExpressionReading ?
         expression :
         decodeJsonStringToken(source, readingStart, readingLength);
@@ -627,12 +640,11 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
     let chunkIndex = 0;
     let rowDecodeMs = 0;
     let chunkDispatchMs = 0;
+    let tChunkDecodeStart = Date.now();
     for (let i = 0; i < rowCount; ++i) {
-        const tDecodeStart = Date.now();
         const row = minimalDecode ?
             decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, mediaHintFastScan) :
             decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, skipTagRuleDecode, lazyGlossaryDecode, mediaHintFastScan);
-        rowDecodeMs += Math.max(0, Date.now() - tDecodeStart);
         if (preallocateChunkRows) {
             rows[rowsIndex] = row;
             ++rowsIndex;
@@ -641,6 +653,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
             rowsIndex = rows.length;
         }
         if (rowsIndex >= normalizedChunkSize) {
+            rowDecodeMs += Math.max(0, Date.now() - tChunkDecodeStart);
             const chunk = rows;
             rows = preallocateChunkRows ? createRowBuffer(Math.min(normalizedChunkSize, rowCount - (i + 1))) : [];
             rowsIndex = 0;
@@ -653,9 +666,11 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
                 chunkCount,
             });
             chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
+            tChunkDecodeStart = Date.now();
         }
     }
     if (rowsIndex > 0) {
+        rowDecodeMs += Math.max(0, Date.now() - tChunkDecodeStart);
         if (preallocateChunkRows) {
             rows.length = rowsIndex;
         }
@@ -829,8 +844,7 @@ export function decodeParsedTermRowDirectFromRawChunk(rawChunk, i, options = {})
     const expressionLength = metas[o + 1];
     const readingStart = metas[o + 2];
     const readingLength = metas[o + 3];
-    const expression = decodeJsonStringToken(source, expressionStart, expressionLength);
-    const expressionBytes = decodeJsonStringTokenBytes(source, expressionStart, expressionLength, expression);
+    const expressionBytes = decodeJsonStringTokenBytes(source, expressionStart, expressionLength);
     const readingEqualsExpression = (
         reuseExpressionForReadingDecode &&
         tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
@@ -868,6 +882,66 @@ export function decodeParsedTermRowDirectFromRawChunk(rawChunk, i, options = {})
         termEntryContentHash1,
         termEntryContentHash2,
         termEntryContentBytes,
+    };
+}
+
+/**
+ * @param {{source: Uint8Array, metas: Uint32Array, version: number}} rawChunk
+ * @param {number} i
+ * @param {{reuseExpressionForReadingDecode?: boolean}} [options]
+ * @returns {{expressionBytes: Uint8Array, readingBytes: Uint8Array, readingEqualsExpression: boolean, score: number, sequence: number|null, definitionTagsBytes: Uint8Array, rulesBytes: Uint8Array, termTagsBytes: Uint8Array, glossaryJsonBytes: Uint8Array}}
+ */
+export function decodeParsedTermRowDirectRawBytesContentFromRawChunk(rawChunk, i, options = {}) {
+    const reuseExpressionForReadingDecode = options.reuseExpressionForReadingDecode === true;
+    const {source, metas, version} = rawChunk;
+    const o = i * META_U32_FIELDS;
+    const expressionStart = metas[o + 0];
+    const expressionLength = metas[o + 1];
+    const readingStart = metas[o + 2];
+    const readingLength = metas[o + 3];
+    const expressionBytes = decodeJsonStringTokenBytes(source, expressionStart, expressionLength);
+    const readingEqualsExpression = (
+        reuseExpressionForReadingDecode &&
+        tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
+    ) || readingLength === 2;
+    const readingBytes = readingEqualsExpression ?
+        expressionBytes :
+        decodeJsonStringTokenBytes(source, readingStart, readingLength);
+    const score = decodeNumberToken(source, metas[o + 8], metas[o + 9], 0);
+    const sequence = version >= 3 ? (isNullToken(source, metas[o + 12], metas[o + 13]) ? null : decodeNumberToken(source, metas[o + 12], metas[o + 13], 0)) : null;
+    const glossaryStart = metas[o + 10];
+    const glossaryLength = metas[o + 11];
+    return {
+        expressionBytes,
+        readingBytes,
+        readingEqualsExpression,
+        score,
+        sequence,
+        definitionTagsBytes: decodeNullableJsonStringTokenBytes(source, metas[o + 4], metas[o + 5]) ?? EMPTY_UINT8_ARRAY,
+        rulesBytes: decodeJsonStringTokenBytes(source, metas[o + 6], metas[o + 7]),
+        termTagsBytes: version >= 3 ? (decodeNullableJsonStringTokenBytes(source, metas[o + 14], metas[o + 15]) ?? EMPTY_UINT8_ARRAY) : EMPTY_UINT8_ARRAY,
+        glossaryJsonBytes: source.subarray(glossaryStart, glossaryStart + glossaryLength),
+    };
+}
+
+/**
+ * @param {{source: Uint8Array, metas: Uint32Array, version: number}} rawChunk
+ * @param {number} i
+ * @returns {{definitionTagsBytes: Uint8Array, rulesBytes: Uint8Array, termTagsBytes: Uint8Array, glossaryJsonBytes: Uint8Array}}
+ */
+export function decodeParsedTermRowContentTokensFromRawChunk(rawChunk, i) {
+    const {source, metas, version} = rawChunk;
+    const o = i * META_U32_FIELDS;
+    const definitionTagsBytes = decodeNullableJsonStringTokenBytes(source, metas[o + 4], metas[o + 5]) ?? EMPTY_UINT8_ARRAY;
+    const rulesBytes = decodeJsonStringTokenBytes(source, metas[o + 6], metas[o + 7]);
+    const glossaryStart = metas[o + 10];
+    const glossaryLength = metas[o + 11];
+    const termTagsBytes = version >= 3 ? (decodeNullableJsonStringTokenBytes(source, metas[o + 14], metas[o + 15]) ?? EMPTY_UINT8_ARRAY) : EMPTY_UINT8_ARRAY;
+    return {
+        definitionTagsBytes,
+        rulesBytes,
+        termTagsBytes,
+        glossaryJsonBytes: source.subarray(glossaryStart, glossaryStart + glossaryLength),
     };
 }
 

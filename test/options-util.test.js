@@ -311,7 +311,7 @@ function createProfileOptionsUpdatedTestData1() {
             termDisplayMode: 'ruby',
             sortFrequencyDictionary: null,
             sortFrequencyDictionaryOrder: 'descending',
-            stickySearchHeader: false,
+            stickySearchHeader: true,
             enableYomitanApi: false,
             yomitanApiAllowCssSanitizationBypass: false,
         },

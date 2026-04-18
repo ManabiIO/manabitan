@@ -1410,7 +1410,7 @@ export class OptionsUtil {
      */
     _updateVersion43(options) {
         for (const profile of options.profiles) {
-            profile.options.general.stickySearchHeader = false;
+            profile.options.general.stickySearchHeader = true;
         }
     }
 

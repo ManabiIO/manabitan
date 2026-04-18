@@ -35,7 +35,7 @@ let wasmPromise = null;
 
 /**
  * @param {TextEncoder} textEncoder
- * @returns {{stringOffsets: number[], stringLengths: number[], internString: (value: string) => number, internStringBytes: (value: string, bytes: Uint8Array) => number, buildStringsBuffer: () => Uint8Array}}
+ * @returns {{stringCount: number, getStringLength: (index: number) => number, internString: (value: string) => number, internStringBytes: (value: string, bytes: Uint8Array) => number, buildStringsBuffer: () => Uint8Array, buildStringLengths: () => Uint16Array}}
  */
 function createStringInterner(textEncoder) {
     let stringsTotal = 0;
@@ -43,10 +43,9 @@ function createStringInterner(textEncoder) {
     let stringsBuffer = new Uint8Array(stringsCapacity);
     /** @type {Map<string, number>} */
     const encodedStringIndexByValue = new Map();
-    /** @type {number[]} */
-    const stringOffsets = [];
-    /** @type {number[]} */
-    const stringLengths = [];
+    let stringCount = 0;
+    let stringLengthsCapacity = 1024;
+    let stringLengths = new Uint16Array(stringLengthsCapacity);
 
     /**
      * @param {number} requiredCapacity
@@ -67,6 +66,24 @@ function createStringInterner(textEncoder) {
     };
 
     /**
+     * @param {number} requiredCount
+     * @returns {void}
+     */
+    const ensureStringLengthsCapacity = (requiredCount) => {
+        if (requiredCount <= stringLengthsCapacity) {
+            return;
+        }
+        let nextCapacity = stringLengthsCapacity;
+        while (nextCapacity < requiredCount) {
+            nextCapacity *= 2;
+        }
+        const nextLengths = new Uint16Array(nextCapacity);
+        nextLengths.set(stringLengths.subarray(0, stringCount));
+        stringLengths = nextLengths;
+        stringLengthsCapacity = nextCapacity;
+    };
+
+    /**
      * @param {string} value
      * @returns {number}
      */
@@ -75,13 +92,14 @@ function createStringInterner(textEncoder) {
         if (typeof cachedIndex === 'number') {
             return cachedIndex;
         }
-        const index = stringOffsets.length;
+        const index = stringCount;
         const offset = stringsTotal;
         ensureCapacity(offset + (value.length * 3));
+        ensureStringLengthsCapacity(index + 1);
         const {written = 0} = textEncoder.encodeInto(value, stringsBuffer.subarray(offset));
-        stringOffsets.push(stringsTotal);
-        stringLengths.push(written);
+        stringLengths[index] = written;
         stringsTotal += written;
+        ++stringCount;
         encodedStringIndexByValue.set(value, index);
         return index;
     };
@@ -96,23 +114,25 @@ function createStringInterner(textEncoder) {
         if (typeof cachedIndex === 'number') {
             return cachedIndex;
         }
-        const index = stringOffsets.length;
+        const index = stringCount;
         const offset = stringsTotal;
         ensureCapacity(offset + bytes.byteLength);
+        ensureStringLengthsCapacity(index + 1);
         stringsBuffer.set(bytes, offset);
-        stringOffsets.push(stringsTotal);
-        stringLengths.push(bytes.byteLength);
+        stringLengths[index] = bytes.byteLength;
         stringsTotal += bytes.byteLength;
+        ++stringCount;
         encodedStringIndexByValue.set(value, index);
         return index;
     };
 
     return {
-        stringOffsets,
-        stringLengths,
+        get stringCount() { return stringCount; },
+        getStringLength: (index) => stringLengths[index],
         internString,
         internStringBytes,
         buildStringsBuffer: () => stringsBuffer.subarray(0, stringsTotal),
+        buildStringLengths: () => stringLengths.subarray(0, stringCount),
     };
 }
 
@@ -129,6 +149,36 @@ function getInternKey(value, bytes) {
         return value;
     }
     return UTF8_TEXT_DECODER.decode(bytes);
+}
+
+/**
+ * @param {{expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array}} chunk
+ * @param {number} index
+ * @returns {Uint8Array}
+ */
+function getChunkExpressionBytes(chunk, index) {
+    if (Array.isArray(chunk.expressionBytesList)) {
+        return chunk.expressionBytesList[index];
+    }
+    return chunk.expressionBytesBuffer.subarray(
+        chunk.expressionOffsets[index],
+        chunk.expressionOffsets[index] + chunk.expressionLengths[index],
+    );
+}
+
+/**
+ * @param {{readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array}} chunk
+ * @param {number} index
+ * @returns {Uint8Array}
+ */
+function getChunkReadingBytes(chunk, index) {
+    if (Array.isArray(chunk.readingBytesList)) {
+        return chunk.readingBytesList[index];
+    }
+    return chunk.readingBytesBuffer.subarray(
+        chunk.readingOffsets[index],
+        chunk.readingOffsets[index] + chunk.readingLengths[index],
+    );
 }
 
 /**
@@ -182,7 +232,7 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
     const metasBuffer = new ArrayBuffer(records.length * META_BYTES);
     const metasU32 = new Uint32Array(metasBuffer);
     const metasI32 = new Int32Array(metasBuffer);
-    const {stringLengths, internString, internStringBytes, buildStringsBuffer} = createStringInterner(textEncoder);
+    const {getStringLength, internString, internStringBytes, buildStringsBuffer, buildStringLengths} = createStringInterner(textEncoder);
     const planExpressionIndexes = preinternedPlan?.expressionIndexes ?? null;
     const planReadingIndexes = preinternedPlan?.readingIndexes ?? null;
     let recordIndex = 0;
@@ -213,8 +263,8 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
         if (
             !(preinternedPlan instanceof Object) &&
             (
-                stringLengths[expressionIndex] > U16_NULL ||
-                stringLengths[readingIndex] > U16_NULL
+                getStringLength(expressionIndex) > U16_NULL ||
+                getStringLength(readingIndex) > U16_NULL
             )
         ) {
             return null;
@@ -228,7 +278,7 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
         metasI32[metaIndex + 5] = record.sequence ?? -1;
         ++recordIndex;
     }
-    const stringLengthsU16 = preinternedPlan?.stringLengths ?? Uint16Array.from(stringLengths);
+    const stringLengthsU16 = preinternedPlan?.stringLengths ?? buildStringLengths();
     const stringLengthsBuffer = new Uint8Array(
         stringLengthsU16.buffer,
         stringLengthsU16.byteOffset,
@@ -264,7 +314,7 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
 }
 
 /**
- * @param {{rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
+ * @param {{rowCount: number, expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array, readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
  * @param {number[]} contentOffsets
  * @param {number[]} contentLengths
  * @param {TextEncoder} textEncoder
@@ -280,11 +330,11 @@ export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, co
     const metasBuffer = new ArrayBuffer(count * META_BYTES);
     const metasU32 = new Uint32Array(metasBuffer);
     const metasI32 = new Int32Array(metasBuffer);
-    const {stringLengths, internString, internStringBytes, buildStringsBuffer} = createStringInterner(textEncoder);
+    const {getStringLength, internString, internStringBytes, buildStringsBuffer, buildStringLengths} = createStringInterner(textEncoder);
     const planExpressionIndexes = preinternedPlan?.expressionIndexes ?? null;
     const planReadingIndexes = preinternedPlan?.readingIndexes ?? null;
     for (let i = 0; i < count; ++i) {
-        const expressionBytes = chunk.expressionBytesList[i];
+        const expressionBytes = getChunkExpressionBytes(chunk, i);
         const readingEqualsExpression = chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1;
         const expressionIndex = planExpressionIndexes instanceof Uint32Array ? planExpressionIndexes[i] : internStringBytes(getInternKey('', expressionBytes), expressionBytes);
         let readingIndex;
@@ -293,14 +343,14 @@ export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, co
         } else if (readingEqualsExpression) {
             readingIndex = expressionIndex;
         } else {
-            const readingBytes = chunk.readingBytesList[i];
+            const readingBytes = getChunkReadingBytes(chunk, i);
             readingIndex = readingBytes instanceof Uint8Array ? internStringBytes(getInternKey('', readingBytes), readingBytes) : internString('');
         }
         if (
             !(preinternedPlan instanceof Object) &&
             (
-                stringLengths[expressionIndex] > U16_NULL ||
-                stringLengths[readingIndex] > U16_NULL
+                getStringLength(expressionIndex) > U16_NULL ||
+                getStringLength(readingIndex) > U16_NULL
             )
         ) {
             return null;
@@ -313,7 +363,7 @@ export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, co
         metasI32[metaIndex + 4] = (chunk.scoreList[i] ?? 0) | 0;
         metasI32[metaIndex + 5] = chunk.sequenceList[i] ?? -1;
     }
-    const stringLengthsU16 = preinternedPlan?.stringLengths ?? Uint16Array.from(stringLengths);
+    const stringLengthsU16 = preinternedPlan?.stringLengths ?? buildStringLengths();
     const stringLengthsBuffer = new Uint8Array(
         stringLengthsU16.buffer,
         stringLengthsU16.byteOffset,

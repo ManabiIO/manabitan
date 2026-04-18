@@ -67,6 +67,7 @@ const focusSpy = vi.spyOn(queryInput, 'focus');
 describe('Keyboard Event Handling', () => {
     afterAll(() => teardown(global));
     afterEach(() => {
+        vi.useRealTimers();
         vi.restoreAllMocks();
     });
 
@@ -124,6 +125,7 @@ describe('Keyboard Event Handling', () => {
 
     test('enter keydown dispatches search and prevents default behavior', () => {
         const searchSpy = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
+        const clearRealtimeSearchTimerSpy = vi.spyOn(searchDisplayController, '_clearRealtimeSearchTimer').mockImplementation(() => {});
         const blurSpy = vi.spyOn(display, 'blurElement').mockImplementation(() => {});
         const preventDefault = vi.fn();
         const stopImmediatePropagation = vi.fn();
@@ -140,11 +142,52 @@ describe('Keyboard Event Handling', () => {
         onSearchKeydownMethod(event);
         expect(preventDefault).toHaveBeenCalledTimes(1);
         expect(stopImmediatePropagation).toHaveBeenCalledTimes(1);
+        expect(clearRealtimeSearchTimerSpy).toHaveBeenCalledTimes(1);
         expect(blurSpy).toHaveBeenCalledTimes(1);
         expect(searchSpy).toHaveBeenCalledTimes(1);
         expect(searchSpy).toHaveBeenCalledWith(true, 'new', true, null);
         blurSpy.mockRestore();
         searchSpy.mockRestore();
+        clearRealtimeSearchTimerSpy.mockRestore();
+    });
+
+    test('typing dispatches realtime search after debounce using overwrite history', async () => {
+        vi.useFakeTimers();
+        const searchSpy = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
+        queryInput.value = '食う';
+
+        searchDisplayController._onSearchInput(new InputEvent('input', {data: 'う'}));
+        expect(searchSpy).not.toHaveBeenCalled();
+
+        await vi.advanceTimersByTimeAsync(149);
+        expect(searchSpy).not.toHaveBeenCalled();
+
+        await vi.advanceTimersByTimeAsync(1);
+        expect(searchSpy).toHaveBeenCalledTimes(1);
+        expect(searchSpy).toHaveBeenCalledWith(false, 'overwrite', true, null);
+    });
+
+    test('typing clears search results when the textbox becomes blank', async () => {
+        vi.useFakeTimers();
+        const clearSearchResultsSpy = vi.spyOn(searchDisplayController, '_clearSearchResults').mockImplementation(() => {});
+        queryInput.value = '   ';
+
+        searchDisplayController._onSearchInput(new InputEvent('input'));
+        await vi.runAllTimersAsync();
+
+        expect(clearSearchResultsSpy).toHaveBeenCalledTimes(1);
+        expect(clearSearchResultsSpy).toHaveBeenCalledWith('overwrite');
+    });
+
+    test('composing input does not dispatch realtime search', async () => {
+        vi.useFakeTimers();
+        const searchSpy = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
+        queryInput.value = 'よ';
+
+        searchDisplayController._onSearchInput(new InputEvent('input', {isComposing: true}));
+        await vi.runAllTimersAsync();
+
+        expect(searchSpy).not.toHaveBeenCalled();
     });
 
     test('dictionary database updates refresh options and rerun the active display search', async () => {
@@ -157,6 +200,36 @@ describe('Keyboard Event Handling', () => {
         expect(updateOptionsSpy).toHaveBeenCalledTimes(1);
         expect(searchLastSpy).toHaveBeenCalledTimes(1);
         expect(searchLastSpy).toHaveBeenCalledWith(false);
+    });
+
+    test('search requests disable wildcards when the search-page wildcard setting is off', () => {
+        vi.spyOn(display, 'getOptions').mockReturnValue({
+            scanning: {
+                matchTypePrefix: false,
+            },
+        });
+        const setContentSpy = vi.spyOn(display, 'setContent').mockImplementation(() => {});
+        queryInput.value = '読み';
+
+        searchDisplayController._search(false, 'overwrite', true, null);
+
+        expect(setContentSpy).toHaveBeenCalledTimes(1);
+        expect(setContentSpy.mock.calls[0][0].params.wildcards).toBe('off');
+    });
+
+    test('search requests keep wildcards enabled when the search-page wildcard setting is on', () => {
+        vi.spyOn(display, 'getOptions').mockReturnValue({
+            scanning: {
+                matchTypePrefix: true,
+            },
+        });
+        const setContentSpy = vi.spyOn(display, 'setContent').mockImplementation(() => {});
+        queryInput.value = '読み';
+
+        searchDisplayController._search(false, 'overwrite', true, null);
+
+        expect(setContentSpy).toHaveBeenCalledTimes(1);
+        expect(setContentSpy.mock.calls[0][0].params.wildcards).toBeUndefined();
     });
 
     test('options updates rerun visible results even if the textbox has been cleared locally', async () => {

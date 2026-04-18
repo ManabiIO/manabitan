@@ -24,6 +24,8 @@ import {querySelectorNotNull} from '../dom/query-selector.js';
 import {isComposing} from '../language/ime-utilities.js';
 import {convertToKana, convertToKanaIME} from '../language/ja/japanese-wanakana.js';
 
+const SEARCH_INPUT_LOOKUP_DEBOUNCE_MS = 150;
+
 /**
  * @param {Record<string, unknown>} patch
  */
@@ -100,6 +102,8 @@ export class SearchDisplayController {
         ]);
         /** @type {number} */
         this._profileSelectRefreshGeneration = 0;
+        /** @type {?import('core').Timeout} */
+        this._searchInputTimer = null;
     }
 
     /** */
@@ -380,9 +384,12 @@ export class SearchDisplayController {
         this._updateSearchHeight(true);
 
         const element = /** @type {HTMLTextAreaElement} */ (e.currentTarget);
+        const inputComposing = this._isInputComposing(e);
         if (this._wanakanaEnabled) {
             this._searchTextKanaConversion(element, e);
         }
+        if (inputComposing) { return; }
+        this._scheduleRealtimeSearch();
     }
 
     /**
@@ -412,6 +419,7 @@ export class SearchDisplayController {
         const element = /** @type {HTMLElement} */ (e.currentTarget);
         e.preventDefault();
         e.stopImmediatePropagation();
+        this._clearRealtimeSearchTimer();
         this._display.blurElement(element);
         this._search(true, 'new', true, null);
     }
@@ -421,6 +429,7 @@ export class SearchDisplayController {
      */
     _onSearch(e) {
         e.preventDefault();
+        this._clearRealtimeSearchTimer();
         updateSearchDebugState({
             lastSearchTrigger: 'button',
             lastSearchTriggerAt: Date.now(),
@@ -433,9 +442,11 @@ export class SearchDisplayController {
      */
     _onClear(e) {
         e.preventDefault();
+        this._clearRealtimeSearchTimer();
         this._queryInput.value = '';
         this._queryInput.focus();
         this._updateSearchHeight(true);
+        this._clearSearchResults('overwrite');
     }
 
     /** */
@@ -463,6 +474,7 @@ export class SearchDisplayController {
             return;
         }
         if (this._queryInput.value !== text) {
+            this._clearRealtimeSearchTimer();
             this._queryInput.value = text;
             this._updateSearchHeight(true);
             this._search(true, 'new', true, null);
@@ -555,6 +567,63 @@ export class SearchDisplayController {
      */
     _setStickyHeaderEnabled(stickySearchHeaderEnabled) {
         this._stickyHeaderEnableCheckbox.checked = stickySearchHeaderEnabled;
+    }
+
+    /**
+     * @param {InputEvent} event
+     * @returns {boolean}
+     */
+    _isInputComposing(event) {
+        const platform = document.documentElement.dataset.platform ?? 'unknown';
+        const browser = document.documentElement.dataset.browser ?? 'unknown';
+        return isComposing(event, platform, browser);
+    }
+
+    /** */
+    _scheduleRealtimeSearch() {
+        this._clearRealtimeSearchTimer();
+        this._searchInputTimer = setTimeout(() => {
+            this._searchInputTimer = null;
+            this._performRealtimeSearch();
+        }, SEARCH_INPUT_LOOKUP_DEBOUNCE_MS);
+    }
+
+    /** */
+    _clearRealtimeSearchTimer() {
+        if (this._searchInputTimer === null) { return; }
+        clearTimeout(this._searchInputTimer);
+        this._searchInputTimer = null;
+    }
+
+    /** */
+    _performRealtimeSearch() {
+        const query = this._queryInput.value;
+        if (query.trim().length === 0) {
+            this._clearSearchResults('overwrite');
+            return;
+        }
+        updateSearchDebugState({
+            lastSearchTrigger: 'realtime-input',
+            lastSearchTriggerAt: Date.now(),
+        });
+        this._search(false, 'overwrite', true, null);
+    }
+
+    /**
+     * @param {import('display').HistoryMode} historyMode
+     */
+    _clearSearchResults(historyMode) {
+        this._display.setContent({
+            focus: false,
+            historyMode,
+            params: {},
+            state: {
+                cause: 'searchInput',
+            },
+            content: {
+                animate: false,
+            },
+        });
     }
 
     /** */
@@ -798,6 +867,10 @@ export class SearchDisplayController {
                 contentOrigin: {tabId, frameId},
             },
         };
+        const options = this._display.getOptions();
+        if (!(options !== null && options.scanning.matchTypePrefix)) {
+            details.params.wildcards = 'off';
+        }
         if (!lookup) { details.params.lookup = 'false'; }
         this._display.setContent(details);
     }

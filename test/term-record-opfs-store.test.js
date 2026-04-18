@@ -524,4 +524,66 @@ describe('TermRecordOpfsStore', () => {
         expect(kuuRecord?.expression).toBe('食う');
         expect(kuuRecord?.reading).toBe('くう');
     });
+
+    test('lazily rebuilds reverse lookup indexes when imported rows omit reverse fields', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Jitendex.org [2026-04-04]';
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        await writerStore.appendBatchFromResolvedImportTermEntries(
+            [
+                {
+                    dictionary: dictionaryName,
+                    expression: '',
+                    reading: '',
+                    expressionBytes: textEncoder.encode('食う'),
+                    readingBytes: textEncoder.encode('くう'),
+                    readingEqualsExpression: false,
+                    expressionReverse: null,
+                    readingReverse: null,
+                    score: 0,
+                    sequence: 1,
+                },
+                {
+                    dictionary: dictionaryName,
+                    expression: '',
+                    reading: '',
+                    expressionBytes: textEncoder.encode('読'),
+                    readingBytes: textEncoder.encode('読'),
+                    readingEqualsExpression: true,
+                    expressionReverse: null,
+                    readingReverse: null,
+                    score: 0,
+                    sequence: 2,
+                },
+            ],
+            0,
+            2,
+            [0, 128],
+            [128, 256],
+            ['raw', 'raw'],
+        );
+        await writerStore._closeAllWritables();
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(true);
+
+        const index = readerStore.getDictionaryIndex(dictionaryName);
+        expect(index.expressionReverse.get('う食')).toHaveLength(1);
+        expect(index.readingReverse.get('うく')).toHaveLength(1);
+        expect(index.expressionReverse.get('読')).toHaveLength(1);
+        expect(index.readingReverse.get('読')).toHaveLength(1);
+
+        const kuuRecord = readerStore.getById(index.expressionReverse.get('う食')?.[0] ?? -1);
+        const yomuRecord = readerStore.getById(index.expressionReverse.get('読')?.[0] ?? -1);
+        expect(kuuRecord?.expression).toBe('食う');
+        expect(kuuRecord?.reading).toBe('くう');
+        expect(yomuRecord?.expression).toBe('読');
+        expect(yomuRecord?.reading).toBe('読');
+    });
 });

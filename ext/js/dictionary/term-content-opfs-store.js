@@ -386,8 +386,8 @@ export class TermContentOpfsStore {
 
     /**
      * @param {Uint8Array[]} chunks
-     * @param {number[]} offsets
-     * @param {number[]} lengths
+     * @param {ArrayLike<number> & {length: number}} offsets
+     * @param {ArrayLike<number> & {length: number}} lengths
      * @returns {Promise<void>}
      */
     async appendBatchToArrays(chunks, offsets, lengths) {
@@ -399,19 +399,58 @@ export class TermContentOpfsStore {
     }
 
     /**
+     * @param {Uint8Array} bytesBuffer
+     * @param {Uint32Array} byteOffsets
+     * @param {Uint32Array} byteLengths
+     * @param {ArrayLike<number> & {length: number}} offsets
+     * @param {ArrayLike<number> & {length: number}} lengths
+     * @returns {Promise<void>}
+     */
+    async appendPackedBatchToArrays(bytesBuffer, byteOffsets, byteLengths, offsets, lengths) {
+        await this._runMutationExclusive(async () => {
+            const count = Math.min(byteOffsets.length, byteLengths.length, offsets.length, lengths.length);
+            if (count <= 0 || bytesBuffer.byteLength <= 0) { return; }
+            /** @type {number[]} */
+            const baseOffsets = [];
+            /** @type {number[]} */
+            const baseLengths = [];
+            this._appendBatchInternal([bytesBuffer], baseOffsets, baseLengths);
+            const baseOffset = baseOffsets[0] ?? this._getBufferedLength();
+            for (let i = 0; i < count; ++i) {
+                offsets[i] = baseOffset + (byteOffsets[i] >>> 0);
+                lengths[i] = byteLengths[i] >>> 0;
+            }
+            await this._finalizeAppendBatch([bytesBuffer]);
+        });
+    }
+
+    /**
      * @param {Uint8Array[]} chunks
-     * @param {number[]} offsets
-     * @param {number[]} lengths
+     * @param {ArrayLike<number> & {length: number}} offsets
+     * @param {ArrayLike<number> & {length: number}} lengths
      * @returns {void}
      */
     _appendBatchInternal(chunks, offsets, lengths) {
-        offsets.length = 0;
-        lengths.length = 0;
+        const usePush = Array.isArray(offsets) && Array.isArray(lengths);
+        const count = usePush ? chunks.length : Math.min(chunks.length, offsets.length, lengths.length);
+        if (!usePush && (offsets.length < chunks.length || lengths.length < chunks.length)) {
+            throw new Error('appendBatchToArrays output arrays are smaller than chunk count');
+        }
+        if (usePush) {
+            offsets.length = 0;
+            lengths.length = 0;
+        }
         let nextOffset = this._getBufferedLength();
-        for (const chunk of chunks) {
+        for (let i = 0; i < count; ++i) {
+            const chunk = chunks[i];
             const length = chunk.byteLength;
-            offsets.push(nextOffset);
-            lengths.push(length);
+            if (usePush) {
+                offsets.push(nextOffset);
+                lengths.push(length);
+            } else {
+                offsets[i] = nextOffset;
+                lengths[i] = length;
+            }
             if (length > 0) {
                 if (this._fileHandle === null) {
                     this._chunkOffsets.push(nextOffset);

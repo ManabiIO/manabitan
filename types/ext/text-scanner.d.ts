@@ -23,7 +23,6 @@ import type * as Input from './input';
 import type * as Settings from './settings';
 import type * as TextSource from './text-source';
 import type {EventNames, EventArgument as BaseEventArgument} from './core';
-import {PageType} from 'frontend';
 
 export type SearchResultDetail = {
     documentTitle: string;
@@ -45,7 +44,6 @@ export type Options = {
     sentenceParsingOptions?: SentenceParsingOptions;
     scanWithoutMousemove?: boolean;
     scanResolution?: string;
-    pageType?: PageType;
 };
 
 export type InputOptionsOuter = {

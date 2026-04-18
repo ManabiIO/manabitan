@@ -112,6 +112,106 @@ function sliceTermRecordPreinternedPlan(plan, start, count) {
         readingIndexes: plan.readingIndexes.subarray(start, end),
     };
 }
+
+/**
+ * @param {unknown} chunk
+ * @returns {chunk is {expressionBytesBuffer: Uint8Array, expressionOffsets: Uint32Array, expressionLengths: Uint32Array, readingBytesBuffer: Uint8Array, readingOffsets: Uint32Array, readingLengths: Uint32Array}}
+ */
+function isPackedArtifactChunk(chunk) {
+    return (
+        typeof chunk === 'object' &&
+        chunk !== null &&
+        Reflect.get(chunk, 'expressionBytesBuffer') instanceof Uint8Array &&
+        Reflect.get(chunk, 'expressionOffsets') instanceof Uint32Array &&
+        Reflect.get(chunk, 'expressionLengths') instanceof Uint32Array &&
+        Reflect.get(chunk, 'readingBytesBuffer') instanceof Uint8Array &&
+        Reflect.get(chunk, 'readingOffsets') instanceof Uint32Array &&
+        Reflect.get(chunk, 'readingLengths') instanceof Uint32Array
+    );
+}
+
+/**
+ * @param {{expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array}} chunk
+ * @param {number} index
+ * @returns {Uint8Array}
+ */
+function getArtifactChunkExpressionBytes(chunk, index) {
+    if (Array.isArray(chunk.expressionBytesList)) {
+        return chunk.expressionBytesList[index];
+    }
+    return chunk.expressionBytesBuffer.subarray(
+        chunk.expressionOffsets[index],
+        chunk.expressionOffsets[index] + chunk.expressionLengths[index],
+    );
+}
+
+/**
+ * @param {{readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array}} chunk
+ * @param {number} index
+ * @returns {Uint8Array}
+ */
+function getArtifactChunkReadingBytes(chunk, index) {
+    if (Array.isArray(chunk.readingBytesList)) {
+        return chunk.readingBytesList[index];
+    }
+    return chunk.readingBytesBuffer.subarray(
+        chunk.readingOffsets[index],
+        chunk.readingOffsets[index] + chunk.readingLengths[index],
+    );
+}
+
+/**
+ * @template {ArrayLike<unknown>} T
+ * @param {T} values
+ * @param {number} start
+ * @param {number} end
+ * @returns {T}
+ */
+function sliceArrayLike(values, start, end) {
+    return /** @type {T} */ (
+        ArrayBuffer.isView(values) ?
+            values.subarray(start, end) :
+            values.slice(start, end)
+    );
+}
+
+/**
+ * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array, readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+ * @param {number} start
+ * @param {number} count
+ * @returns {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array, readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}}
+ */
+function sliceArtifactChunk(chunk, start, count) {
+    const end = start + count;
+    if (isPackedArtifactChunk(chunk)) {
+        return {
+            dictionary: chunk.dictionary,
+            rowCount: count,
+            dictionaryTotalRows: chunk.dictionaryTotalRows,
+            expressionBytesBuffer: chunk.expressionBytesBuffer,
+            expressionOffsets: chunk.expressionOffsets.subarray(start, end),
+            expressionLengths: chunk.expressionLengths.subarray(start, end),
+            readingBytesBuffer: chunk.readingBytesBuffer,
+            readingOffsets: chunk.readingOffsets.subarray(start, end),
+            readingLengths: chunk.readingLengths.subarray(start, end),
+            readingEqualsExpressionList: sliceArrayLike(chunk.readingEqualsExpressionList, start, end),
+            scoreList: sliceArrayLike(chunk.scoreList, start, end),
+            sequenceList: sliceArrayLike(chunk.sequenceList, start, end),
+            termRecordPreinternedPlan: sliceTermRecordPreinternedPlan(chunk.termRecordPreinternedPlan ?? null, start, count),
+        };
+    }
+    return {
+        dictionary: chunk.dictionary,
+        rowCount: count,
+        dictionaryTotalRows: chunk.dictionaryTotalRows,
+        expressionBytesList: chunk.expressionBytesList.slice(start, end),
+        readingBytesList: chunk.readingBytesList.slice(start, end),
+        readingEqualsExpressionList: sliceArrayLike(chunk.readingEqualsExpressionList, start, end),
+        scoreList: sliceArrayLike(chunk.scoreList, start, end),
+        sequenceList: sliceArrayLike(chunk.sequenceList, start, end),
+        termRecordPreinternedPlan: sliceTermRecordPreinternedPlan(chunk.termRecordPreinternedPlan ?? null, start, count),
+    };
+}
 const ENTRY_CONTENT_DICT_NAME_CODE_RAW = 0;
 const ENTRY_CONTENT_DICT_NAME_CODE_RAW_V2 = 1;
 const ENTRY_CONTENT_DICT_NAME_CODE_RAW_V3 = 2;
@@ -250,8 +350,14 @@ class DenseIdRecordStore {
  * @property {string} dictionary
  * @property {number} firstId
  * @property {number} rowCount
- * @property {Uint8Array[]} expressionBytesList
- * @property {Uint8Array[]} readingBytesList
+ * @property {Uint8Array[]} [expressionBytesList]
+ * @property {Uint8Array} [expressionBytesBuffer]
+ * @property {Uint32Array} [expressionOffsets]
+ * @property {Uint32Array} [expressionLengths]
+ * @property {Uint8Array[]} [readingBytesList]
+ * @property {Uint8Array} [readingBytesBuffer]
+ * @property {Uint32Array} [readingOffsets]
+ * @property {Uint32Array} [readingLengths]
  * @property {boolean[]|Uint8Array} readingEqualsExpressionList
  * @property {number[]} contentOffsets
  * @property {number[]} contentLengths
@@ -919,7 +1025,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array, readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
      * @param {number[]} contentOffsets
      * @param {number[]} contentLengths
      * @param {string | (string|null)[]} contentDictNames
@@ -960,8 +1066,8 @@ export class TermRecordOpfsStore {
                     id,
                     dictionary: chunk.dictionary,
                     readingEqualsExpression: chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1,
-                    expressionBytes: chunk.expressionBytesList[i],
-                    readingBytes: (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ? void 0 : chunk.readingBytesList[i],
+                    expressionBytes: getArtifactChunkExpressionBytes(chunk, i),
+                    readingBytes: (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ? void 0 : getArtifactChunkReadingBytes(chunk, i),
                     entryContentOffset: contentOffsets[i],
                     entryContentLength: contentLengths[i],
                     entryContentDictName,
@@ -1041,23 +1147,13 @@ export class TermRecordOpfsStore {
                 runStart = runEnd;
                 continue;
             }
-            /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} */
-            const chunkSlice = {
-                dictionary: chunk.dictionary,
-                rowCount: runCount,
-                expressionBytesList: chunk.expressionBytesList.slice(runStart, runEnd),
-                readingBytesList: chunk.readingBytesList.slice(runStart, runEnd),
-                readingEqualsExpressionList: chunk.readingEqualsExpressionList.slice(runStart, runEnd),
-                scoreList: chunk.scoreList.slice(runStart, runEnd),
-                sequenceList: chunk.sequenceList.slice(runStart, runEnd),
-                termRecordPreinternedPlan: sliceTermRecordPreinternedPlan(chunk.termRecordPreinternedPlan ?? null, runStart, runCount),
-            };
+            const chunkSlice = sliceArtifactChunk(chunk, runStart, runCount);
             const metrics = await this._encodeAndAppendArtifactChunkForState(
                 state,
                 chunkSlice,
                 firstId + runStart,
-                contentOffsets.slice(runStart, runEnd),
-                contentLengths.slice(runStart, runEnd),
+                sliceArrayLike(contentOffsets, runStart, runEnd),
+                sliceArrayLike(contentLengths, runStart, runEnd),
                 chunkSlice.termRecordPreinternedPlan ?? null,
                 contentDictName,
             );
@@ -1117,7 +1213,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {TermRecordShardState} state
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array, readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
      * @param {number} firstId
      * @param {number[]} contentOffsets
      * @param {number[]} contentLengths
@@ -2203,7 +2299,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array, readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
      * @param {number[]} contentOffsets
      * @param {number[]} contentLengths
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
@@ -2240,8 +2336,8 @@ export class TermRecordOpfsStore {
                 expression: '',
                 reading: '',
                 readingEqualsExpression: chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1,
-                expressionBytes: chunk.expressionBytesList[i],
-                readingBytes: (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ? void 0 : chunk.readingBytesList[i],
+                expressionBytes: getArtifactChunkExpressionBytes(chunk, i),
+                readingBytes: (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ? void 0 : getArtifactChunkReadingBytes(chunk, i),
                 expressionReverse: null,
                 readingReverse: null,
                 entryContentOffset: contentOffsets[i],
@@ -3253,8 +3349,8 @@ export class TermRecordOpfsStore {
                     id,
                     dictionary,
                     readingEqualsExpression: plan.readingEqualsExpressionList[i] === true || plan.readingEqualsExpressionList[i] === 1,
-                    expressionBytes: plan.expressionBytesList[i],
-                    readingBytes: (plan.readingEqualsExpressionList[i] === true || plan.readingEqualsExpressionList[i] === 1) ? void 0 : plan.readingBytesList[i],
+                    expressionBytes: getArtifactChunkExpressionBytes(plan, i),
+                    readingBytes: (plan.readingEqualsExpressionList[i] === true || plan.readingEqualsExpressionList[i] === 1) ? void 0 : getArtifactChunkReadingBytes(plan, i),
                     entryContentOffset: plan.contentOffsets[i],
                     entryContentLength: plan.contentLengths[i],
                     entryContentDictName,

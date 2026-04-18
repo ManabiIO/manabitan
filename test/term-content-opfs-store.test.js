@@ -50,6 +50,36 @@ function createReadableFile(bytes) {
 }
 
 describe('TermContentOpfsStore', () => {
+    test('appendBatchToArrays fills typed output arrays', async () => {
+        const store = new TermContentOpfsStore();
+        const chunks = [new Uint8Array([1, 2]), new Uint8Array([3]), new Uint8Array([4, 5, 6])];
+        const offsets = new Int32Array(3);
+        const lengths = new Int32Array(3);
+
+        await store.appendBatchToArrays(chunks, offsets, lengths);
+
+        expect(offsets).toStrictEqual(new Int32Array([0, 2, 3]));
+        expect(lengths).toStrictEqual(new Int32Array([2, 1, 3]));
+        expect(Reflect.get(store, '_length')).toBe(6);
+        await expect(store.readSlice(0, 6)).resolves.toStrictEqual(new Uint8Array([1, 2, 3, 4, 5, 6]));
+    });
+
+    test('appendPackedBatchToArrays appends one packed buffer and returns per-row spans', async () => {
+        const store = new TermContentOpfsStore();
+        const bytes = new Uint8Array([10, 11, 20, 21, 22, 30]);
+        const byteOffsets = new Uint32Array([0, 2, 5]);
+        const byteLengths = new Uint32Array([2, 3, 1]);
+        const offsets = new Int32Array(3);
+        const lengths = new Int32Array(3);
+
+        await store.appendPackedBatchToArrays(bytes, byteOffsets, byteLengths, offsets, lengths);
+
+        expect(offsets).toStrictEqual(new Int32Array([0, 2, 5]));
+        expect(lengths).toStrictEqual(new Int32Array([2, 3, 1]));
+        expect(Reflect.get(store, '_length')).toBe(6);
+        await expect(store.readSlice(0, 6)).resolves.toStrictEqual(bytes);
+    });
+
     test('readSlice recovers after transient NotReadableError and returns bytes', async () => {
         const bytes = new Uint8Array([11, 12, 13, 14, 15, 16]);
         const store = new TermContentOpfsStore();

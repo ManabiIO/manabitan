@@ -110,15 +110,13 @@ function parseContentHashHexPair(value) {
 /**
  * @param {Uint8Array[]} chunks
  * @param {number} targetBytes
- * @returns {{packedChunks: Uint8Array[], sourceChunkIndices: number[], sourceChunkLocalOffsets: number[]}}
+ * @returns {{packedChunks: Uint8Array[], sourceChunkIndices: Uint32Array, sourceChunkLocalOffsets: Uint32Array}}
  */
 function packContentChunksIntoSlabs(chunks, targetBytes) {
     /** @type {Uint8Array[]} */
     const packedChunks = [];
-    /** @type {number[]} */
-    const sourceChunkIndices = new Array(chunks.length);
-    /** @type {number[]} */
-    const sourceChunkLocalOffsets = new Array(chunks.length);
+    const sourceChunkIndices = new Uint32Array(chunks.length);
+    const sourceChunkLocalOffsets = new Uint32Array(chunks.length);
     let startIndex = 0;
     while (startIndex < chunks.length) {
         let totalBytes = 0;
@@ -188,13 +186,14 @@ function isRecognizedTransientUpdateTitle(title, summary) {
  * @param {Uint8Array[]} chunks
  * @param {number} targetBytes
  * @param {number} fixedChunkBytes
- * @returns {{packedChunks: Uint8Array[], packedRowStarts: number[], packedRowCounts: number[]}}
+ * @returns {{packedChunks: Uint8Array[], packedRowStarts: Uint32Array, packedRowCounts: Uint32Array}}
  */
 function packFixedSizeContentChunksIntoSlabs(chunks, targetBytes, fixedChunkBytes) {
     /** @type {Uint8Array[]} */
     const packedChunks = [];
-    const packedRowStarts = [];
-    const packedRowCounts = [];
+    const packedRowStarts = new Uint32Array(chunks.length);
+    const packedRowCounts = new Uint32Array(chunks.length);
+    let packedChunkCount = 0;
     if (chunks.length === 0 || fixedChunkBytes <= 0) {
         return {packedChunks, packedRowStarts, packedRowCounts};
     }
@@ -209,11 +208,118 @@ function packFixedSizeContentChunksIntoSlabs(chunks, targetBytes, fixedChunkByte
             offset += fixedChunkBytes;
         }
         packedChunks.push(packed);
-        packedRowStarts.push(startIndex);
-        packedRowCounts.push(rowCount);
+        packedRowStarts[packedChunkCount] = startIndex;
+        packedRowCounts[packedChunkCount] = rowCount;
+        ++packedChunkCount;
         startIndex = endIndex;
     }
-    return {packedChunks, packedRowStarts, packedRowCounts};
+    return {
+        packedChunks,
+        packedRowStarts: packedRowStarts.subarray(0, packedChunkCount),
+        packedRowCounts: packedRowCounts.subarray(0, packedChunkCount),
+    };
+}
+
+/**
+ * @param {number} [initialCapacity=1024]
+ * @returns {{
+ *   readonly length: number,
+ *   push: (value: number) => void,
+ *   get: (index: number) => number,
+ *   set: (index: number, value: number) => void,
+ *   clear: () => void,
+ *   buildView: () => Int32Array,
+ * }}
+ */
+function createInt32Accumulator(initialCapacity = 1024) {
+    let capacity = Math.max(1, initialCapacity | 0);
+    let buffer = new Int32Array(capacity);
+    let size = 0;
+
+    /**
+     * @param {number} required
+     * @returns {void}
+     */
+    const ensureCapacity = (required) => {
+        if (required <= capacity) { return; }
+        let nextCapacity = capacity;
+        while (nextCapacity < required) {
+            nextCapacity *= 2;
+        }
+        const nextBuffer = new Int32Array(nextCapacity);
+        nextBuffer.set(buffer.subarray(0, size));
+        buffer = nextBuffer;
+        capacity = nextCapacity;
+    };
+
+    return {
+        get length() { return size; },
+        push(value) {
+            ensureCapacity(size + 1);
+            buffer[size++] = value;
+        },
+        get(index) {
+            return buffer[index];
+        },
+        set(index, value) {
+            buffer[index] = value;
+        },
+        clear() {
+            size = 0;
+        },
+        buildView() {
+            return buffer.subarray(0, size);
+        },
+    };
+}
+
+/**
+ * @param {number} [initialCapacity=1024]
+ * @returns {{
+ *   readonly length: number,
+ *   push: (value: number) => void,
+ *   get: (index: number) => number,
+ *   clear: () => void,
+ *   buildView: () => Uint32Array,
+ * }}
+ */
+function createUint32Accumulator(initialCapacity = 1024) {
+    let capacity = Math.max(1, initialCapacity | 0);
+    let buffer = new Uint32Array(capacity);
+    let size = 0;
+
+    /**
+     * @param {number} required
+     * @returns {void}
+     */
+    const ensureCapacity = (required) => {
+        if (required <= capacity) { return; }
+        let nextCapacity = capacity;
+        while (nextCapacity < required) {
+            nextCapacity *= 2;
+        }
+        const nextBuffer = new Uint32Array(nextCapacity);
+        nextBuffer.set(buffer.subarray(0, size));
+        buffer = nextBuffer;
+        capacity = nextCapacity;
+    };
+
+    return {
+        get length() { return size; },
+        push(value) {
+            ensureCapacity(size + 1);
+            buffer[size++] = value >>> 0;
+        },
+        get(index) {
+            return buffer[index];
+        },
+        clear() {
+            size = 0;
+        },
+        buildView() {
+            return buffer.subarray(0, size);
+        },
+    };
 }
 
 /**
@@ -239,6 +345,100 @@ function sliceTermRecordPreinternedPlan(plan, start, count) {
         expressionIndexes: plan.expressionIndexes.subarray(start, start + count),
         readingIndexes: plan.readingIndexes.subarray(start, start + count),
     };
+}
+
+/**
+ * @param {unknown} chunk
+ * @returns {chunk is {expressionBytesBuffer: Uint8Array, expressionOffsets: Uint32Array, expressionLengths: Uint32Array, readingBytesBuffer: Uint8Array, readingOffsets: Uint32Array, readingLengths: Uint32Array, contentBytesBuffer: Uint8Array, contentOffsets: Uint32Array, contentLengths: Uint32Array}}
+ */
+function isPackedArtifactChunk(chunk) {
+    return (
+        typeof chunk === 'object' &&
+        chunk !== null &&
+        Reflect.get(chunk, 'expressionBytesBuffer') instanceof Uint8Array &&
+        Reflect.get(chunk, 'expressionOffsets') instanceof Uint32Array &&
+        Reflect.get(chunk, 'expressionLengths') instanceof Uint32Array &&
+        Reflect.get(chunk, 'readingBytesBuffer') instanceof Uint8Array &&
+        Reflect.get(chunk, 'readingOffsets') instanceof Uint32Array &&
+        Reflect.get(chunk, 'readingLengths') instanceof Uint32Array &&
+        Reflect.get(chunk, 'contentBytesBuffer') instanceof Uint8Array &&
+        Reflect.get(chunk, 'contentOffsets') instanceof Uint32Array &&
+        Reflect.get(chunk, 'contentLengths') instanceof Uint32Array
+    );
+}
+
+/**
+ * @param {{expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array}} chunk
+ * @param {number} index
+ * @returns {Uint8Array}
+ */
+function getArtifactChunkExpressionBytes(chunk, index) {
+    if (Array.isArray(chunk.expressionBytesList)) {
+        return chunk.expressionBytesList[index];
+    }
+    return chunk.expressionBytesBuffer.subarray(
+        chunk.expressionOffsets[index],
+        chunk.expressionOffsets[index] + chunk.expressionLengths[index],
+    );
+}
+
+/**
+ * @param {{readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array}} chunk
+ * @param {number} index
+ * @returns {Uint8Array}
+ */
+function getArtifactChunkReadingBytes(chunk, index) {
+    if (Array.isArray(chunk.readingBytesList)) {
+        return chunk.readingBytesList[index];
+    }
+    return chunk.readingBytesBuffer.subarray(
+        chunk.readingOffsets[index],
+        chunk.readingOffsets[index] + chunk.readingLengths[index],
+    );
+}
+
+/**
+ * @param {{contentBytesList?: Uint8Array[], contentBytesBuffer?: Uint8Array, contentOffsets?: Uint32Array, contentLengths?: Uint32Array}} chunk
+ * @param {number} index
+ * @returns {Uint8Array}
+ */
+function getArtifactChunkContentBytes(chunk, index) {
+    if (Array.isArray(chunk.contentBytesList)) {
+        return chunk.contentBytesList[index];
+    }
+    return chunk.contentBytesBuffer.subarray(
+        chunk.contentOffsets[index],
+        chunk.contentOffsets[index] + chunk.contentLengths[index],
+    );
+}
+
+/**
+ * @param {{contentBytesBuffer: Uint8Array, contentOffsets: Uint32Array, contentLengths: Uint32Array}} chunk
+ * @param {number[]} rowIndexes
+ * @returns {{bytesBuffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}}
+ */
+function packArtifactChunkContentSelection(chunk, rowIndexes) {
+    const count = rowIndexes.length;
+    const offsets = new Uint32Array(count);
+    const lengths = new Uint32Array(count);
+    let totalBytes = 0;
+    for (let i = 0; i < count; ++i) {
+        const rowIndex = rowIndexes[i];
+        const length = chunk.contentLengths[rowIndex];
+        lengths[i] = length;
+        totalBytes += length;
+    }
+    const bytesBuffer = new Uint8Array(totalBytes);
+    let writeOffset = 0;
+    for (let i = 0; i < count; ++i) {
+        const rowIndex = rowIndexes[i];
+        const start = chunk.contentOffsets[rowIndex];
+        const end = start + chunk.contentLengths[rowIndex];
+        offsets[i] = writeOffset;
+        bytesBuffer.set(chunk.contentBytesBuffer.subarray(start, end), writeOffset);
+        writeOffset += end - start;
+    }
+    return {bytesBuffer, offsets, lengths};
 }
 
 
@@ -2668,7 +2868,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array, readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList?: Uint8Array[], contentBytesBuffer?: Uint8Array, contentOffsets?: Uint32Array, contentLengths?: Uint32Array, contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
      * @returns {Promise<void>}
      */
     async bulkAddArtifactTermsChunk(chunk) {
@@ -2707,7 +2907,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null)}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array, readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array, readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList?: Uint8Array[], contentBytesBuffer?: Uint8Array, contentOffsets?: Uint32Array, contentLengths?: Uint32Array, contentDictNameList: ((string|null)[]|null)}} chunk
      * @returns {import('dictionary-database').DatabaseTermEntry[]}
      */
     _materializeArtifactChunkTermEntries(chunk) {
@@ -2715,9 +2915,9 @@ export class DictionaryDatabase {
         /** @type {import('dictionary-database').DatabaseTermEntry[]} */
         const rows = new Array(count);
         for (let i = 0; i < count; ++i) {
-            const expressionBytes = chunk.expressionBytesList[i];
+            const expressionBytes = getArtifactChunkExpressionBytes(chunk, i);
             const readingEqualsExpression = chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1;
-            const readingBytes = readingEqualsExpression ? expressionBytes : chunk.readingBytesList[i];
+            const readingBytes = readingEqualsExpression ? expressionBytes : getArtifactChunkReadingBytes(chunk, i);
             const expression = this._textDecoder.decode(expressionBytes);
             const reading = readingEqualsExpression ? expression : this._textDecoder.decode(readingBytes);
             const sequenceValue = chunk.sequenceList[i];
@@ -2736,7 +2936,7 @@ export class DictionaryDatabase {
                 glossary: [],
                 score: chunk.scoreList[i] ?? 0,
                 sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
-                termEntryContentBytes: chunk.contentBytesList[i],
+                termEntryContentBytes: getArtifactChunkContentBytes(chunk, i),
                 termEntryContentDictName: Array.isArray(chunk.contentDictNameList) ? (chunk.contentDictNameList[i] ?? null) : null,
             };
         }
@@ -3183,6 +3383,8 @@ export class DictionaryDatabase {
         let insertContentSqlMs = 0;
         let insertTermsSqlMs = 0;
         let insertTermRecordAppendMs = 0;
+        let insertTermRecordEncodeMs = 0;
+        let insertTermRecordWriteMs = 0;
         let insertTermsVtabMs = 0;
         let commitMs = 0;
         let appendedContentBytes = 0;
@@ -3209,20 +3411,17 @@ export class DictionaryDatabase {
 
         /** @type {import('dictionary-database').DatabaseTermEntry[]} */
         let stagedRows = [];
-        /** @type {number[]} */
-        let stagedPendingContentIndexes = [];
-        /** @type {number[]} */
-        let stagedContentOffsets = [];
-        /** @type {number[]} */
-        let stagedContentLengths = [];
+        let stagedPendingContentIndexes = createInt32Accumulator();
+        let stagedContentOffsets = createInt32Accumulator();
+        let stagedContentLengths = createInt32Accumulator();
         /** @type {(string|null)[]} */
         let stagedContentDictNames = [];
         /** @type {(string|null)[]} */
         let pendingContentHashes = [];
-        /** @type {number[]} */
-        let pendingContentHash1s = [];
-        /** @type {number[]} */
-        let pendingContentHash2s = [];
+        let pendingContentHash1s = createUint32Accumulator();
+        let pendingContentHash2s = createUint32Accumulator();
+        /** @type {(string|null)[]} */
+        let pendingContentDictNames = [];
         /** @type {Uint8Array[]} */
         let pendingContentBytes = [];
         /** @type {Map<string, number>|null} */
@@ -3236,13 +3435,14 @@ export class DictionaryDatabase {
         try {
             const flushStagedRows = async () => {
                 if (stagedRows.length === 0) {
-                    stagedPendingContentIndexes = [];
-                    stagedContentOffsets = [];
-                    stagedContentLengths = [];
+                    stagedPendingContentIndexes.clear();
+                    stagedContentOffsets.clear();
+                    stagedContentLengths.clear();
                     stagedContentDictNames = [];
                     pendingContentHashes = [];
-                    pendingContentHash1s = [];
-                    pendingContentHash2s = [];
+                    pendingContentHash1s.clear();
+                    pendingContentHash2s.clear();
+                    pendingContentDictNames = [];
                     pendingContentBytes = [];
                     if (pendingContentRowIndexByHash !== null) {
                         pendingContentRowIndexByHash.clear();
@@ -3259,10 +3459,7 @@ export class DictionaryDatabase {
                     const storageChunks = this._createTermContentStorageChunks(
                         pendingContentBytes,
                         compressionDictName,
-                        stagedRows.map((row, index) => {
-                            const pendingIndex = stagedPendingContentIndexes[index];
-                            return pendingIndex >= 0 ? (row.termEntryContentDictName ?? null) : null;
-                        }),
+                        pendingContentDictNames,
                     );
                     compressContentMs += safePerformance.now() - tCompressStart;
                     if (this._importDebugLogging) {
@@ -3273,7 +3470,13 @@ export class DictionaryDatabase {
                         );
                     }
                     const tAppendStart = safePerformance.now();
-                    const spans = await this._termContentStore.appendBatch(storageChunks.storedChunks);
+                    const storedOffsets = new Int32Array(storageChunks.storedChunks.length);
+                    const storedLengths = new Int32Array(storageChunks.storedChunks.length);
+                    await this._termContentStore.appendBatchToArrays(
+                        storageChunks.storedChunks,
+                        storedOffsets,
+                        storedLengths,
+                    );
                     for (const chunk of storageChunks.storedChunks) {
                         appendedContentBytes += chunk.byteLength;
                     }
@@ -3287,21 +3490,20 @@ export class DictionaryDatabase {
                     }
 
                     for (let i = 0, ii = stagedRows.length; i < ii; ++i) {
-                        const pendingIndex = stagedPendingContentIndexes[i];
+                        const pendingIndex = stagedPendingContentIndexes.get(i);
                         if (pendingIndex < 0) { continue; }
-                        const span = spans[storageChunks.entryToStoredChunkIndexes[pendingIndex]];
-                        if (typeof span === 'undefined') {
-                            throw new Error('Failed to resolve staged term entry content span for bulk term insert');
-                        }
-                        stagedPendingContentIndexes[i] = -1;
-                        stagedContentOffsets[i] = span.offset;
-                        stagedContentLengths[i] = span.length;
+                        const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[pendingIndex];
+                        const offset = storedOffsets[storedChunkIndex];
+                        const length = storedLengths[storedChunkIndex];
+                        stagedPendingContentIndexes.set(i, -1);
+                        stagedContentOffsets.set(i, offset);
+                        stagedContentLengths.set(i, length);
                         stagedContentDictNames[i] = storageChunks.contentDictNames[pendingIndex] ?? 'raw';
-                        if (span.length > 0) {
-                            if (span.offset < minAssignedContentOffset) {
-                                minAssignedContentOffset = span.offset;
+                        if (length > 0) {
+                            if (offset < minAssignedContentOffset) {
+                                minAssignedContentOffset = offset;
                             }
-                            const spanEnd = span.offset + span.length;
+                            const spanEnd = offset + length;
                             if (spanEnd > maxAssignedContentEnd) {
                                 maxAssignedContentEnd = spanEnd;
                             }
@@ -3312,16 +3514,16 @@ export class DictionaryDatabase {
                         const chunkCount = Math.min(contentBatchSize, ii - i);
                         const tContentSqlStart = safePerformance.now();
                         for (let j = i, jj = i + chunkCount; j < jj; ++j) {
-                            const span = spans[storageChunks.entryToStoredChunkIndexes[j]];
+                            const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[j];
                             const contentDictName = storageChunks.contentDictNames[j];
                             this._cacheTermEntryContentMeta(
                                 pendingContentHashes[j],
-                                span.offset,
-                                span.length,
+                                storedOffsets[storedChunkIndex],
+                                storedLengths[storedChunkIndex],
                                 contentDictName,
                                 0,
-                                pendingContentHash1s[j],
-                                pendingContentHash2s[j],
+                                pendingContentHash1s.get(j),
+                                pendingContentHash2s.get(j),
                             );
                         }
                         const contentBatchMs = safePerformance.now() - tContentSqlStart;
@@ -3333,10 +3535,19 @@ export class DictionaryDatabase {
                 for (let i = 0, ii = stagedRows.length; i < ii; i += termBatchSize) {
                     const chunkCount = Math.min(termBatchSize, ii - i);
                     const tTermSqlStart = safePerformance.now();
-                    const split = await this._insertResolvedImportTermEntries(stagedRows, stagedContentOffsets, stagedContentLengths, stagedContentDictNames, i, chunkCount);
+                    const split = await this._insertResolvedImportTermEntries(
+                        stagedRows,
+                        stagedContentOffsets.buildView(),
+                        stagedContentLengths.buildView(),
+                        stagedContentDictNames,
+                        i,
+                        chunkCount,
+                    );
                     const termBatchMs = safePerformance.now() - tTermSqlStart;
                     insertTermsSqlMs += termBatchMs;
                     insertTermRecordAppendMs += split.termRecordAppendMs;
+                    insertTermRecordEncodeMs += split.termRecordEncodeMs;
+                    insertTermRecordWriteMs += split.termRecordWriteMs;
                     insertTermsVtabMs += split.termsVtabInsertMs;
                     termBatchDurationsMs.push(termBatchMs);
 
@@ -3366,13 +3577,14 @@ export class DictionaryDatabase {
                 }
 
                 stagedRows = [];
-                stagedPendingContentIndexes = [];
-                stagedContentOffsets = [];
-                stagedContentLengths = [];
+                stagedPendingContentIndexes.clear();
+                stagedContentOffsets.clear();
+                stagedContentLengths.clear();
                 stagedContentDictNames = [];
                 pendingContentHashes = [];
-                pendingContentHash1s = [];
-                pendingContentHash2s = [];
+                pendingContentHash1s.clear();
+                pendingContentHash2s.clear();
+                pendingContentDictNames = [];
                 pendingContentBytes = [];
                 pendingContentRowIndexByHash = shouldDedupWithinBatch ? new Map() : null;
                 pendingContentRowIndexByHashPair = shouldDedupWithinBatch ? new Map() : null;
@@ -3457,6 +3669,7 @@ export class DictionaryDatabase {
                     pendingContentHashes.push(contentHash);
                     pendingContentHash1s.push(contentHash1);
                     pendingContentHash2s.push(contentHash2);
+                    pendingContentDictNames.push(row.termEntryContentDictName ?? null);
                     pendingContentBytes.push(contentBytes);
                 }
 
@@ -3485,6 +3698,16 @@ export class DictionaryDatabase {
                 db.exec('COMMIT');
                 commitMs = safePerformance.now() - tCommitStart;
             }
+            this._lastBulkAddTermsMetrics = {
+                contentAppendMs: appendContentMs + insertContentSqlMs,
+                termRecordBuildMs: computeContentMs + compressContentMs,
+                termRecordEncodeMs: insertTermRecordEncodeMs,
+                termRecordWriteMs: insertTermRecordWriteMs,
+                termsVtabInsertMs: insertTermsVtabMs,
+                termContentComputeMs: computeContentMs,
+                termContentCompressMs: compressContentMs,
+                termContentSqlMs: insertContentSqlMs,
+            };
             if (this._importDebugLogging) {
                 const totalMs = safePerformance.now() - tBulkStart;
                 const rowsPerSecond = totalMs > 0 ? ((count * 1000) / totalMs) : 0;
@@ -3799,10 +4022,8 @@ export class DictionaryDatabase {
                 const chunkCount = Math.min(batchSize, ii - i);
                 /** @type {Uint8Array[]} */
                 const contentChunks = new Array(chunkCount);
-                /** @type {number[]} */
-                const contentOffsets = new Array(chunkCount);
-                /** @type {number[]} */
-                const contentLengths = new Array(chunkCount);
+                const contentOffsets = new Int32Array(chunkCount);
+                const contentLengths = new Int32Array(chunkCount);
                 for (let j = 0; j < chunkCount; ++j) {
                     const row = /** @type {import('dictionary-database').DatabaseTermEntry} */ (items[i + j]);
                     const precomputedContentBytes = row.termEntryContentBytes instanceof Uint8Array ? row.termEntryContentBytes : this._getRawTermContentBytesIfAvailable(row);
@@ -3831,10 +4052,8 @@ export class DictionaryDatabase {
                         this._rawTermContentPackTargetBytes,
                     );
                     chunksToAppend = packedChunks;
-                    /** @type {number[]} */
-                    const packedOffsets = new Array(packedChunks.length);
-                    /** @type {number[]} */
-                    const packedLengths = new Array(packedChunks.length);
+                    const packedOffsets = new Int32Array(packedChunks.length);
+                    const packedLengths = new Int32Array(packedChunks.length);
                     await this._termContentStore.appendBatchToArrays(packedChunks, packedOffsets, packedLengths);
                     for (let j = 0; j < chunkCount; ++j) {
                         const packedIndex = sourceChunkIndices[j];
@@ -3938,6 +4157,7 @@ export class DictionaryDatabase {
     async _bulkAddArtifactTermsChunkWithoutContentDedup(chunk) {
         const useLocalTransaction = !this._bulkImportTransactionOpen;
         const count = chunk.rowCount;
+        const contentIsPacked = isPackedArtifactChunk(chunk);
         if (count <= 0) {
             this._lastBulkAddTermsMetrics = {
                 contentAppendMs: 0,
@@ -3966,66 +4186,80 @@ export class DictionaryDatabase {
             await this._beginImmediateTransaction(this._requireDb());
         }
         try {
-            /** @type {number[]} */
-            const contentOffsets = new Array(count);
-            /** @type {number[]} */
-            const contentLengths = new Array(count);
+            const contentOffsets = new Int32Array(count);
+            const contentLengths = new Int32Array(count);
             /** @type {string | null} */
                 let uniformContentDictName = null;
                 /** @type {(string|null)[] | null} */
                 let contentDictNames = null;
-                const contentChunks = chunk.contentBytesList;
             const tContentAppendStart = safePerformance.now();
             if (this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES) {
-                const firstContentLength = contentChunks[0]?.byteLength ?? 0;
-                let useFixedSizePacking = (
-                    firstContentLength > 0 &&
-                    (chunk.dictionaryTotalRows ?? 0) >= LARGE_ARTIFACT_FIXED_PACK_MIN_TOTAL_ROWS
-                );
-                for (let i = 1; i < count && useFixedSizePacking; ++i) {
-                    if (contentChunks[i].byteLength !== firstContentLength) {
-                        useFixedSizePacking = false;
-                    }
-                }
-                if (useFixedSizePacking) {
-                    const {packedChunks, packedRowStarts, packedRowCounts} = packFixedSizeContentChunksIntoSlabs(
-                        contentChunks,
-                        this._rawTermContentPackTargetBytes,
-                        firstContentLength,
+                if (contentIsPacked) {
+                    await this._termContentStore.appendPackedBatchToArrays(
+                        chunk.contentBytesBuffer,
+                        chunk.contentOffsets,
+                        chunk.contentLengths,
+                        contentOffsets,
+                        contentLengths,
                     );
-                    /** @type {number[]} */
-                    const packedOffsets = new Array(packedChunks.length);
-                    /** @type {number[]} */
-                    const packedLengths = new Array(packedChunks.length);
-                    await this._termContentStore.appendBatchToArrays(packedChunks, packedOffsets, packedLengths);
-                    for (let packedIndex = 0; packedIndex < packedChunks.length; ++packedIndex) {
-                        const baseOffset = packedOffsets[packedIndex];
-                        const rowStart = packedRowStarts[packedIndex];
-                        const rowCount = packedRowCounts[packedIndex];
-                        for (let localIndex = 0; localIndex < rowCount; ++localIndex) {
-                            const rowIndex = rowStart + localIndex;
-                            contentOffsets[rowIndex] = baseOffset + (localIndex * firstContentLength);
-                            contentLengths[rowIndex] = firstContentLength;
+                } else {
+                    const contentChunks = chunk.contentBytesList;
+                    const firstContentLength = contentChunks[0]?.byteLength ?? 0;
+                    let useFixedSizePacking = (
+                        firstContentLength > 0 &&
+                        (chunk.dictionaryTotalRows ?? 0) >= LARGE_ARTIFACT_FIXED_PACK_MIN_TOTAL_ROWS
+                    );
+                    for (let i = 1; i < count && useFixedSizePacking; ++i) {
+                        if (contentChunks[i].byteLength !== firstContentLength) {
+                            useFixedSizePacking = false;
                         }
                     }
-                } else {
-                    const {packedChunks, sourceChunkIndices, sourceChunkLocalOffsets} = packContentChunksIntoSlabs(
-                        contentChunks,
-                        this._rawTermContentPackTargetBytes,
-                    );
-                    /** @type {number[]} */
-                    const packedOffsets = new Array(packedChunks.length);
-                    /** @type {number[]} */
-                    const packedLengths = new Array(packedChunks.length);
-                    await this._termContentStore.appendBatchToArrays(packedChunks, packedOffsets, packedLengths);
-                    for (let i = 0; i < count; ++i) {
-                        const packedIndex = sourceChunkIndices[i];
-                        contentOffsets[i] = packedOffsets[packedIndex] + sourceChunkLocalOffsets[i];
-                        contentLengths[i] = contentChunks[i].byteLength;
+                    if (useFixedSizePacking) {
+                        const {packedChunks, packedRowStarts, packedRowCounts} = packFixedSizeContentChunksIntoSlabs(
+                            contentChunks,
+                            this._rawTermContentPackTargetBytes,
+                            firstContentLength,
+                        );
+                        const packedOffsets = new Int32Array(packedChunks.length);
+                        const packedLengths = new Int32Array(packedChunks.length);
+                        await this._termContentStore.appendBatchToArrays(packedChunks, packedOffsets, packedLengths);
+                        for (let packedIndex = 0; packedIndex < packedChunks.length; ++packedIndex) {
+                            const baseOffset = packedOffsets[packedIndex];
+                            const rowStart = packedRowStarts[packedIndex];
+                            const rowCount = packedRowCounts[packedIndex];
+                            for (let localIndex = 0; localIndex < rowCount; ++localIndex) {
+                                const rowIndex = rowStart + localIndex;
+                                contentOffsets[rowIndex] = baseOffset + (localIndex * firstContentLength);
+                                contentLengths[rowIndex] = firstContentLength;
+                            }
+                        }
+                    } else {
+                        const {packedChunks, sourceChunkIndices, sourceChunkLocalOffsets} = packContentChunksIntoSlabs(
+                            contentChunks,
+                            this._rawTermContentPackTargetBytes,
+                        );
+                        const packedOffsets = new Int32Array(packedChunks.length);
+                        const packedLengths = new Int32Array(packedChunks.length);
+                        await this._termContentStore.appendBatchToArrays(packedChunks, packedOffsets, packedLengths);
+                        for (let i = 0; i < count; ++i) {
+                            const packedIndex = sourceChunkIndices[i];
+                            contentOffsets[i] = packedOffsets[packedIndex] + sourceChunkLocalOffsets[i];
+                            contentLengths[i] = contentChunks[i].byteLength;
+                        }
                     }
                 }
             } else {
-                await this._termContentStore.appendBatchToArrays(contentChunks, contentOffsets, contentLengths);
+                if (contentIsPacked) {
+                    await this._termContentStore.appendPackedBatchToArrays(
+                        chunk.contentBytesBuffer,
+                        chunk.contentOffsets,
+                        chunk.contentLengths,
+                        contentOffsets,
+                        contentLengths,
+                    );
+                } else {
+                    await this._termContentStore.appendBatchToArrays(chunk.contentBytesList, contentOffsets, contentLengths);
+                }
             }
             if (typeof chunk.uniformContentDictName !== 'undefined') {
                 uniformContentDictName = chunk.uniformContentDictName ?? 'raw';
@@ -4042,7 +4276,7 @@ export class DictionaryDatabase {
                         resolvedContentDictName = explicitContentDictName;
                     } else if (
                         this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES &&
-                        isRawTermContentBinary(contentChunks[i])
+                        isRawTermContentBinary(getArtifactChunkContentBytes(chunk, i))
                     ) {
                         resolvedContentDictName = RAW_TERM_CONTENT_DICT_NAME;
                     } else {
@@ -4106,7 +4340,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentHash1List: number[], contentHash2List: number[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array, readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array, readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList?: Uint8Array[], contentBytesBuffer?: Uint8Array, contentOffsets?: Uint32Array, contentLengths?: Uint32Array, contentHash1List: number[], contentHash2List: number[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
      * @returns {Promise<void>}
      */
     async _bulkAddArtifactTermsChunkWithContentDedup(chunk) {
@@ -4151,14 +4385,19 @@ export class DictionaryDatabase {
             let resolvedContentDictNames = explicitContentDictNames !== null ? new Array(count) : (uniformContentDictName ?? 'raw');
             /** @type {Map<number, Map<number, number>>} */
             const pendingContentIndexByHashPair = new Map();
-            /** @type {Uint8Array[]} */
-            const pendingContentBytes = [];
+            /** @type {Uint8Array[]|null} */
+            const pendingContentBytes = (
+                this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES &&
+                isPackedArtifactChunk(chunk)
+            ) ? null : [];
             /** @type {number[]} */
             const pendingContentHash1s = [];
             /** @type {number[]} */
             const pendingContentHash2s = [];
             /** @type {(string|null)[]} */
             const pendingContentDictNames = [];
+            /** @type {number[]|null} */
+            const pendingPackedContentRowIndexes = pendingContentBytes === null ? [] : null;
             const pendingRowToUniqueIndex = new Int32Array(count);
             pendingRowToUniqueIndex.fill(-1);
             const ensureResolvedContentDictNamesArray = (fillUntil) => {
@@ -4195,9 +4434,13 @@ export class DictionaryDatabase {
                 }
                 let pendingIndex = byHash2.get(hash2);
                 if (typeof pendingIndex !== 'number') {
-                    pendingIndex = pendingContentBytes.length;
+                    pendingIndex = pendingContentHash1s.length;
                     byHash2.set(hash2, pendingIndex);
-                    pendingContentBytes.push(chunk.contentBytesList[i]);
+                    if (pendingContentBytes !== null) {
+                        pendingContentBytes.push(getArtifactChunkContentBytes(chunk, i));
+                    } else {
+                        pendingPackedContentRowIndexes.push(i);
+                    }
                     pendingContentHash1s.push(hash1);
                     pendingContentHash2s.push(hash2);
                     pendingContentDictNames.push(
@@ -4208,48 +4451,86 @@ export class DictionaryDatabase {
                 }
                 pendingRowToUniqueIndex[i] = pendingIndex;
             }
-            if (pendingContentBytes.length > 0) {
-                const compressionDictName = resolveTermContentZstdDictName(chunk.dictionary);
-                const storageChunks = this._createTermContentStorageChunks(
-                    pendingContentBytes,
-                    compressionDictName,
-                    pendingContentDictNames,
-                );
-                /** @type {number[]} */
-                const storedOffsets = [];
-                /** @type {number[]} */
-                const storedLengths = [];
-                await this._termContentStore.appendBatchToArrays(
-                    storageChunks.storedChunks,
-                    storedOffsets,
-                    storedLengths,
-                );
-                for (let i = 0; i < count; ++i) {
-                    const pendingIndex = pendingRowToUniqueIndex[i];
-                    if (pendingIndex < 0) { continue; }
-                    const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[pendingIndex];
-                    const storedOffset = storedOffsets[storedChunkIndex];
-                    const storedLength = storedLengths[storedChunkIndex];
-                    contentOffsets[i] = storedOffset;
-                    contentLengths[i] = storedLength;
-                    const resolvedContentDictName = storageChunks.contentDictNames[pendingIndex] ?? 'raw';
-                    if (Array.isArray(resolvedContentDictNames)) {
-                        resolvedContentDictNames[i] = resolvedContentDictName;
-                    } else if (resolvedContentDictName !== resolvedContentDictNames) {
-                        ensureResolvedContentDictNamesArray(i)[i] = resolvedContentDictName;
-                    }
-                }
-                for (let i = 0; i < pendingContentBytes.length; ++i) {
-                    const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[i];
-                    this._cacheTermEntryContentMeta(
-                        null,
-                        storedOffsets[storedChunkIndex],
-                        storedLengths[storedChunkIndex],
-                        storageChunks.contentDictNames[i],
-                        0,
-                        pendingContentHash1s[i],
-                        pendingContentHash2s[i],
+            if (pendingContentHash1s.length > 0) {
+                if (pendingContentBytes === null) {
+                    const packedSelection = packArtifactChunkContentSelection(chunk, pendingPackedContentRowIndexes);
+                    const storedOffsets = new Int32Array(pendingContentHash1s.length);
+                    const storedLengths = new Int32Array(pendingContentHash1s.length);
+                    await this._termContentStore.appendPackedBatchToArrays(
+                        packedSelection.bytesBuffer,
+                        packedSelection.offsets,
+                        packedSelection.lengths,
+                        storedOffsets,
+                        storedLengths,
                     );
+                    for (let i = 0; i < count; ++i) {
+                        const pendingIndex = pendingRowToUniqueIndex[i];
+                        if (pendingIndex < 0) { continue; }
+                        const storedOffset = storedOffsets[pendingIndex];
+                        const storedLength = storedLengths[pendingIndex];
+                        contentOffsets[i] = storedOffset;
+                        contentLengths[i] = storedLength;
+                        const resolvedContentDictName = pendingContentDictNames[pendingIndex] ?? 'raw';
+                        if (Array.isArray(resolvedContentDictNames)) {
+                            resolvedContentDictNames[i] = resolvedContentDictName;
+                        } else if (resolvedContentDictName !== resolvedContentDictNames) {
+                            ensureResolvedContentDictNamesArray(i)[i] = resolvedContentDictName;
+                        }
+                    }
+                    for (let i = 0; i < pendingContentHash1s.length; ++i) {
+                        this._cacheTermEntryContentMeta(
+                            null,
+                            storedOffsets[i],
+                            storedLengths[i],
+                            pendingContentDictNames[i],
+                            0,
+                            pendingContentHash1s[i],
+                            pendingContentHash2s[i],
+                        );
+                    }
+                } else {
+                    const compressionDictName = resolveTermContentZstdDictName(chunk.dictionary);
+                    const storageChunks = this._createTermContentStorageChunks(
+                        pendingContentBytes,
+                        compressionDictName,
+                        pendingContentDictNames,
+                    );
+                    /** @type {number[]} */
+                    const storedOffsets = [];
+                    /** @type {number[]} */
+                    const storedLengths = [];
+                    await this._termContentStore.appendBatchToArrays(
+                        storageChunks.storedChunks,
+                        storedOffsets,
+                        storedLengths,
+                    );
+                    for (let i = 0; i < count; ++i) {
+                        const pendingIndex = pendingRowToUniqueIndex[i];
+                        if (pendingIndex < 0) { continue; }
+                        const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[pendingIndex];
+                        const storedOffset = storedOffsets[storedChunkIndex];
+                        const storedLength = storedLengths[storedChunkIndex];
+                        contentOffsets[i] = storedOffset;
+                        contentLengths[i] = storedLength;
+                        const resolvedContentDictName = storageChunks.contentDictNames[pendingIndex] ?? 'raw';
+                        if (Array.isArray(resolvedContentDictNames)) {
+                            resolvedContentDictNames[i] = resolvedContentDictName;
+                        } else if (resolvedContentDictName !== resolvedContentDictNames) {
+                            ensureResolvedContentDictNamesArray(i)[i] = resolvedContentDictName;
+                        }
+                    }
+                    for (let i = 0; i < pendingContentBytes.length; ++i) {
+                        const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[i];
+                        this._cacheTermEntryContentMeta(
+                            null,
+                            storedOffsets[storedChunkIndex],
+                            storedLengths[storedChunkIndex],
+                            storageChunks.contentDictNames[i],
+                            0,
+                            pendingContentHash1s[i],
+                            pendingContentHash2s[i],
+                        );
+                    }
                 }
             }
             contentAppendMs += safePerformance.now() - tContentAppendStart;
@@ -6185,16 +6466,24 @@ export class DictionaryDatabase {
      * @param {string|null} compressionDictName
      * @param {(string|null)[]} [contentDictNameOverrides]
      * @param {string|null} [uniformRawContentDictName]
-     * @returns {{storedChunks: Uint8Array[], contentDictNames: string[], entryToStoredChunkIndexes: number[]}}
+     * @returns {{storedChunks: Uint8Array[], contentDictNames: string[], entryToStoredChunkIndexes: Uint32Array}}
      */
     _createTermContentStorageChunks(contentBytesList, compressionDictName, contentDictNameOverrides = [], uniformRawContentDictName = null) {
         if (this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES) {
             if (typeof uniformRawContentDictName === 'string' && uniformRawContentDictName.length > 0) {
+                const entryToStoredChunkIndexes = new Uint32Array(contentBytesList.length);
+                for (let index = 0; index < entryToStoredChunkIndexes.length; ++index) {
+                    entryToStoredChunkIndexes[index] = index;
+                }
                 return {
                     storedChunks: contentBytesList,
                     contentDictNames: Array(contentBytesList.length).fill(uniformRawContentDictName),
-                    entryToStoredChunkIndexes: contentBytesList.map((_, index) => index),
+                    entryToStoredChunkIndexes,
                 };
+            }
+            const entryToStoredChunkIndexes = new Uint32Array(contentBytesList.length);
+            for (let index = 0; index < entryToStoredChunkIndexes.length; ++index) {
+                entryToStoredChunkIndexes[index] = index;
             }
             return {
                 storedChunks: contentBytesList,
@@ -6207,7 +6496,7 @@ export class DictionaryDatabase {
                         RAW_TERM_CONTENT_DICT_NAME :
                         (isRawTermContentSharedGlossaryBinary(contentBytes) ? RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME : 'raw');
                 }),
-                entryToStoredChunkIndexes: contentBytesList.map((_, index) => index),
+                entryToStoredChunkIndexes,
             };
         }
         /** @type {Uint8Array[]} */
@@ -6225,12 +6514,16 @@ export class DictionaryDatabase {
                 }
             }
             storedChunks.push(storedBytes);
-            contentDictNames.push(effectiveDictName);
+                contentDictNames.push(effectiveDictName);
+        }
+        const entryToStoredChunkIndexes = new Uint32Array(storedChunks.length);
+        for (let index = 0; index < entryToStoredChunkIndexes.length; ++index) {
+            entryToStoredChunkIndexes[index] = index;
         }
         return {
             storedChunks,
             contentDictNames,
-            entryToStoredChunkIndexes: storedChunks.map((_, index) => index),
+            entryToStoredChunkIndexes,
         };
     }
 
