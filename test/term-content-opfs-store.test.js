@@ -17,6 +17,7 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
+import {decodeRawTermContentSharedGlossaryHeader, encodeRawTermContentSharedGlossaryBinary} from '../ext/js/dictionary/raw-term-content.js';
 import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
 
 /**
@@ -78,6 +79,35 @@ describe('TermContentOpfsStore', () => {
         expect(lengths).toStrictEqual(new Int32Array([2, 3, 1]));
         expect(Reflect.get(store, '_length')).toBe(6);
         await expect(store.readSlice(0, 6)).resolves.toStrictEqual(bytes);
+    });
+
+    test('appendPackedBatchToArrays can rebase packed raw-v4 shared glossary rows during append', async () => {
+        const textEncoder = new TextEncoder();
+        const textDecoder = new TextDecoder();
+        const rowA = encodeRawTermContentSharedGlossaryBinary('v1', 'tag', 'P', 10, 20, textEncoder);
+        const rowB = encodeRawTermContentSharedGlossaryBinary('v5', '', '', 30, 40, textEncoder);
+        const bytes = new Uint8Array(rowA.byteLength + rowB.byteLength);
+        bytes.set(rowA, 0);
+        bytes.set(rowB, rowA.byteLength);
+        const byteOffsets = new Uint32Array([0, rowA.byteLength]);
+        const byteLengths = new Uint32Array([rowA.byteLength, rowB.byteLength]);
+        const offsets = new Int32Array(2);
+        const lengths = new Int32Array(2);
+        const store = new TermContentOpfsStore();
+
+        await store.appendPackedBatchToArrays(bytes, byteOffsets, byteLengths, offsets, lengths, {
+            contentDictName: 'raw-v4',
+            sharedGlossaryBaseOffset: 500,
+        });
+
+        const stored = await store.readSlice(0, bytes.byteLength);
+        expect(stored).not.toStrictEqual(bytes);
+        const headerA = decodeRawTermContentSharedGlossaryHeader(stored.subarray(0, rowA.byteLength), textDecoder);
+        const headerB = decodeRawTermContentSharedGlossaryHeader(stored.subarray(rowA.byteLength), textDecoder);
+        expect(headerA?.glossaryOffset).toBe(510);
+        expect(headerB?.glossaryOffset).toBe(530);
+        expect(offsets).toStrictEqual(new Int32Array([0, rowA.byteLength]));
+        expect(lengths).toStrictEqual(new Int32Array([rowA.byteLength, rowB.byteLength]));
     });
 
     test('readSlice recovers after transient NotReadableError and returns bytes', async () => {

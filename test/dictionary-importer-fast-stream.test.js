@@ -289,6 +289,9 @@ describe('DictionaryImporter fast streamed term-bank path', () => {
         const prepareResolvedMediaTermEntrySerialization = /** @type {(entry: import('../ext/js/dictionary/dictionary-database.js').DatabaseTermEntry, enableTermEntryContentDedup: boolean, termContentStorageMode: 'baseline'|'raw-bytes') => void} */ (
             Reflect.get(importer, '_prepareResolvedMediaTermEntrySerialization')
         );
+        const resolvedMediaTermContentByHash = /** @type {Map<string, {glossaryJson: string}>} */ (
+            Reflect.get(importer, '_resolvedMediaTermContentByHash')
+        );
         /** @type {import('../ext/js/dictionary/dictionary-database.js').DatabaseTermEntry} */
         const entry = {
             expression: '見る',
@@ -300,6 +303,7 @@ describe('DictionaryImporter fast streamed term-bank path', () => {
             termTags: 'P E1',
             dictionary: 'Test Dictionary',
         };
+        Reflect.set(entry, '__manabitanResolvedMediaTermContentCacheKey', 'media-row-key');
 
         prepareResolvedMediaTermEntrySerialization.call(importer, entry, true, 'raw-bytes');
 
@@ -312,5 +316,49 @@ describe('DictionaryImporter fast streamed term-bank path', () => {
         expect(glossaryJson).toContain('"foo.png"');
         expect(glossaryJson).toContain('"width":100');
         expect(glossaryJson).toContain('"height":50');
+        expect(resolvedMediaTermContentByHash.get('media-row-key')?.glossaryJson).toBe(glossaryJson);
     });
+
+    test('resolved media row import serialization reuses cached content for later rows in the same chunk', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const prepareResolvedMediaTermImportSerialization = /** @type {(entries: import('../ext/js/dictionary/dictionary-database.js').DatabaseTermEntry[], enableTermEntryContentDedup: boolean, termContentStorageMode: 'baseline'|'raw-bytes') => void} */ (
+            Reflect.get(importer, '_prepareResolvedMediaTermImportSerialization')
+        );
+        /** @type {import('../ext/js/dictionary/dictionary-database.js').DatabaseTermEntry[]} */
+        const entries = [
+            {
+                expression: '見る',
+                reading: 'みる',
+                definitionTags: 'vt',
+                rules: 'v1',
+                score: 3,
+                glossary: [{type: 'image', path: 'foo.png', width: 100, height: 50}],
+                termTags: 'P E1',
+                dictionary: 'Test Dictionary',
+            },
+            {
+                expression: '観る',
+                reading: 'みる',
+                definitionTags: 'vt',
+                rules: 'v1',
+                score: 4,
+                glossary: [{type: 'image', path: 'foo.png', width: 100, height: 50}],
+                termTags: 'P E1',
+                dictionary: 'Test Dictionary',
+            },
+        ];
+        Reflect.set(entries[0], '__manabitanResolvedMediaTermContentCacheKey', 'media-row-key');
+        Reflect.set(entries[1], '__manabitanResolvedMediaTermContentCacheKey', 'media-row-key');
+
+        prepareResolvedMediaTermImportSerialization.call(importer, entries, true, 'raw-bytes');
+
+        expect(entries[0].termEntryContentBytes).toBeUndefined();
+        expect(entries[1].termEntryContentBytes).toBeUndefined();
+        expect(entries[0].termEntryContentRawGlossaryJsonBytes).toBeInstanceOf(Uint8Array);
+        expect(entries[1].termEntryContentRawGlossaryJsonBytes).toBe(entries[0].termEntryContentRawGlossaryJsonBytes);
+        expect(entries[1].termEntryContentHash).toBe(entries[0].termEntryContentHash);
+        expect(entries[1].termEntryContentHash1).toBe(entries[0].termEntryContentHash1);
+        expect(entries[1].termEntryContentHash2).toBe(entries[0].termEntryContentHash2);
+    });
+
 });

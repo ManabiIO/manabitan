@@ -406,22 +406,73 @@ export class TermContentOpfsStore {
      * @param {ArrayLike<number> & {length: number}} lengths
      * @returns {Promise<void>}
      */
-    async appendPackedBatchToArrays(bytesBuffer, byteOffsets, byteLengths, offsets, lengths) {
+    async appendPackedBatchToArrays(bytesBuffer, byteOffsets, byteLengths, offsets, lengths, options = null) {
         await this._runMutationExclusive(async () => {
             const count = Math.min(byteOffsets.length, byteLengths.length, offsets.length, lengths.length);
             if (count <= 0 || bytesBuffer.byteLength <= 0) { return; }
+            const sharedGlossaryBaseOffset = (
+                options !== null &&
+                typeof options.sharedGlossaryBaseOffset === 'number' &&
+                Number.isFinite(options.sharedGlossaryBaseOffset)
+            ) ? Math.max(0, Math.trunc(options.sharedGlossaryBaseOffset)) : 0;
+            const rebaseRawV4SharedGlossary = sharedGlossaryBaseOffset > 0 && options?.contentDictName === 'raw-v4';
+            const appendBytesBuffer = rebaseRawV4SharedGlossary ?
+                this._rebasePackedRawV4SharedGlossaryBuffer(
+                    bytesBuffer,
+                    byteOffsets,
+                    byteLengths,
+                    sharedGlossaryBaseOffset,
+                ) :
+                bytesBuffer;
             /** @type {number[]} */
             const baseOffsets = [];
             /** @type {number[]} */
             const baseLengths = [];
-            this._appendBatchInternal([bytesBuffer], baseOffsets, baseLengths);
+            this._appendBatchInternal([appendBytesBuffer], baseOffsets, baseLengths);
             const baseOffset = baseOffsets[0] ?? this._getBufferedLength();
             for (let i = 0; i < count; ++i) {
                 offsets[i] = baseOffset + (byteOffsets[i] >>> 0);
                 lengths[i] = byteLengths[i] >>> 0;
             }
-            await this._finalizeAppendBatch([bytesBuffer]);
+            await this._finalizeAppendBatch([appendBytesBuffer]);
         });
+    }
+
+    /**
+     * @param {Uint8Array} bytesBuffer
+     * @param {Uint32Array} byteOffsets
+     * @param {Uint32Array} byteLengths
+     * @param {number} sharedGlossaryBaseOffset
+     * @returns {Uint8Array}
+     */
+    _rebasePackedRawV4SharedGlossaryBuffer(bytesBuffer, byteOffsets, byteLengths, sharedGlossaryBaseOffset) {
+        const rebasedBytes = Uint8Array.from(bytesBuffer);
+        const view = new DataView(rebasedBytes.buffer, rebasedBytes.byteOffset, rebasedBytes.byteLength);
+        const count = Math.min(byteOffsets.length, byteLengths.length);
+        for (let i = 0; i < count; ++i) {
+            const start = byteOffsets[i] >>> 0;
+            const length = byteLengths[i] >>> 0;
+            if (
+                length < 28 ||
+                (start + length) > rebasedBytes.byteLength ||
+                rebasedBytes[start] !== 0x4d ||
+                rebasedBytes[start + 1] !== 0x42 ||
+                rebasedBytes[start + 2] !== 0x52 ||
+                rebasedBytes[start + 3] !== 0x32
+            ) {
+                continue;
+            }
+            const rulesLength = view.getUint32(start + 4, true);
+            const definitionTagsLength = view.getUint32(start + 8, true);
+            const termTagsLength = view.getUint32(start + 12, true);
+            const expectedLength = 28 + rulesLength + definitionTagsLength + termTagsLength;
+            if (expectedLength !== length) {
+                continue;
+            }
+            const glossaryOffset = Number(view.getBigUint64(start + 16, true));
+            view.setBigUint64(start + 16, BigInt(glossaryOffset + sharedGlossaryBaseOffset), true);
+        }
+        return rebasedBytes;
     }
 
     /**

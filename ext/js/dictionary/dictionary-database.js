@@ -421,12 +421,15 @@ function packArtifactChunkContentSelection(chunk, rowIndexes) {
     const count = rowIndexes.length;
     const offsets = new Uint32Array(count);
     const lengths = new Uint32Array(count);
+    if (count <= 0) {
+        return {bytesBuffer: new Uint8Array(0), offsets, lengths};
+    }
     let totalBytes = 0;
     for (let i = 0; i < count; ++i) {
         const rowIndex = rowIndexes[i];
         const length = chunk.contentLengths[rowIndex];
         lengths[i] = length;
-        totalBytes += length;
+        totalBytes += lengths[i];
     }
     const bytesBuffer = new Uint8Array(totalBytes);
     let writeOffset = 0;
@@ -4151,7 +4154,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, sharedGlossaryBaseOffset?: number, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
      * @returns {Promise<void>}
      */
     async _bulkAddArtifactTermsChunkWithoutContentDedup(chunk) {
@@ -4201,6 +4204,14 @@ export class DictionaryDatabase {
                         chunk.contentLengths,
                         contentOffsets,
                         contentLengths,
+                        (
+                            typeof chunk.sharedGlossaryBaseOffset === 'number' &&
+                            chunk.sharedGlossaryBaseOffset > 0 &&
+                            chunk.uniformContentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME
+                        ) ? {
+                            sharedGlossaryBaseOffset: chunk.sharedGlossaryBaseOffset,
+                            contentDictName: chunk.uniformContentDictName,
+                        } : null,
                     );
                 } else {
                     const contentChunks = chunk.contentBytesList;
@@ -4256,6 +4267,14 @@ export class DictionaryDatabase {
                         chunk.contentLengths,
                         contentOffsets,
                         contentLengths,
+                        (
+                            typeof chunk.sharedGlossaryBaseOffset === 'number' &&
+                            chunk.sharedGlossaryBaseOffset > 0 &&
+                            chunk.uniformContentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME
+                        ) ? {
+                            sharedGlossaryBaseOffset: chunk.sharedGlossaryBaseOffset,
+                            contentDictName: chunk.uniformContentDictName,
+                        } : null,
                     );
                 } else {
                     await this._termContentStore.appendBatchToArrays(chunk.contentBytesList, contentOffsets, contentLengths);
@@ -4340,7 +4359,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array, readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array, readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList?: Uint8Array[], contentBytesBuffer?: Uint8Array, contentOffsets?: Uint32Array, contentLengths?: Uint32Array, contentHash1List: number[], contentHash2List: number[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList?: Uint8Array[], expressionBytesBuffer?: Uint8Array, expressionOffsets?: Uint32Array, expressionLengths?: Uint32Array, readingBytesList?: Uint8Array[], readingBytesBuffer?: Uint8Array, readingOffsets?: Uint32Array, readingLengths?: Uint32Array, readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList?: Uint8Array[], contentBytesBuffer?: Uint8Array, contentOffsets?: Uint32Array, contentLengths?: Uint32Array, contentHash1List: number[], contentHash2List: number[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, sharedGlossaryBaseOffset?: number, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
      * @returns {Promise<void>}
      */
     async _bulkAddArtifactTermsChunkWithContentDedup(chunk) {
@@ -4462,6 +4481,14 @@ export class DictionaryDatabase {
                         packedSelection.lengths,
                         storedOffsets,
                         storedLengths,
+                        (
+                            typeof chunk.sharedGlossaryBaseOffset === 'number' &&
+                            chunk.sharedGlossaryBaseOffset > 0 &&
+                            uniformContentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME
+                        ) ? {
+                            sharedGlossaryBaseOffset: chunk.sharedGlossaryBaseOffset,
+                            contentDictName: uniformContentDictName,
+                        } : null,
                     );
                     for (let i = 0; i < count; ++i) {
                         const pendingIndex = pendingRowToUniqueIndex[i];
