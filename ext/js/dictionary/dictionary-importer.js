@@ -811,6 +811,8 @@ export class DictionaryImporter {
         this._jsonQuotedStringCache = new Map();
         /** @type {Map<string, Uint8Array>} */
         this._utf8StringBytesCache = new Map();
+        /** @type {Map<string, {glossaryJson: string, glossaryJsonBytes: Uint8Array, hash1: number, hash2: number, hash: string}>} */
+        this._resolvedMediaTermContentByHash = new Map();
         /** @type {number} */
         this._progressMinIntervalMs = 1000;
         /** @type {boolean} */
@@ -898,6 +900,7 @@ export class DictionaryImporter {
         this._imageMetadataByPath.clear();
         this._jsonQuotedStringCache.clear();
         this._utf8StringBytesCache.clear();
+        this._resolvedMediaTermContentByHash.clear();
         this._reverseStringCache.clear();
         dictionaryDatabase.setImportOptimizationFlags({
             termContentStorageMode,
@@ -3131,6 +3134,17 @@ export class DictionaryImporter {
         }
         entry.termEntryContentBytes = void 0;
         entry.termEntryContentRawGlossaryJsonBytes = glossaryJsonBytes;
+        const cacheKey = getResolvedMediaTermContentCacheKey(entry);
+        if (typeof cacheKey === 'string' && cacheKey.length > 0) {
+            this._resolvedMediaTermContentByHash.set(cacheKey, {
+                glossaryJson,
+                glossaryJsonBytes,
+                hash1: entry.termEntryContentHash1 ?? 0,
+                hash2: entry.termEntryContentHash2 ?? 0,
+                hash: entry.termEntryContentHash ?? '',
+            });
+            clearResolvedMediaTermContentCacheKey(entry);
+        }
     }
 
     /**
