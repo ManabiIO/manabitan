@@ -79,6 +79,7 @@ const ADAPTIVE_TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW = 128;
 const DEFAULT_MEDIA_RESOLUTION_CONCURRENCY = 12;
 const REVERSE_STRING_CACHE_MAX_ENTRIES = 4096;
 const TERM_BANK_ARTIFACT_MAGIC_V1 = 'MBTB0001';
+const RESOLVED_MEDIA_TERM_CONTENT_CACHE_KEY = '__manabitanResolvedMediaTermContentCacheKey';
 const TERM_BANK_ARTIFACT_MAGIC_V2 = 'MBTB0002';
 const TERM_BANK_ARTIFACT_MAGIC_BYTES = TERM_BANK_ARTIFACT_MAGIC_V1.length;
 const TERM_BANK_ARTIFACT_MANIFEST_FILE = 'manabitan-import-artifact.json';
@@ -712,6 +713,31 @@ function hasPrecomputedTermEntryContent(entry) {
             Number.isInteger(entry.termEntryContentHash2)
         )
     ) && entry.termEntryContentBytes instanceof Uint8Array;
+}
+
+/**
+ * @param {import('dictionary-database').DatabaseTermEntry} entry
+ * @param {string} cacheKey
+ * @returns {void}
+ */
+function setResolvedMediaTermContentCacheKey(entry, cacheKey) {
+    /** @type {{[RESOLVED_MEDIA_TERM_CONTENT_CACHE_KEY]?: string}} */ (/** @type {unknown} */ (entry))[RESOLVED_MEDIA_TERM_CONTENT_CACHE_KEY] = cacheKey;
+}
+
+/**
+ * @param {import('dictionary-database').DatabaseTermEntry} entry
+ * @returns {string|undefined}
+ */
+function getResolvedMediaTermContentCacheKey(entry) {
+    return /** @type {{[RESOLVED_MEDIA_TERM_CONTENT_CACHE_KEY]?: string}} */ (/** @type {unknown} */ (entry))[RESOLVED_MEDIA_TERM_CONTENT_CACHE_KEY];
+}
+
+/**
+ * @param {import('dictionary-database').DatabaseTermEntry} entry
+ * @returns {void}
+ */
+function clearResolvedMediaTermContentCacheKey(entry) {
+    delete /** @type {{[RESOLVED_MEDIA_TERM_CONTENT_CACHE_KEY]?: string}} */ (/** @type {unknown} */ (entry))[RESOLVED_MEDIA_TERM_CONTENT_CACHE_KEY];
 }
 
 /**
