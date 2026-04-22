@@ -460,7 +460,7 @@ export class Translator {
         const uniqueDeinflectionTerms = [...uniqueDeinflectionsMap.keys()];
 
         const databaseEntries = await this._database.findTermsBulk(uniqueDeinflectionTerms, enabledDictionaryMap, matchType);
-        reportDiagnostics('dictionary-lookup-translator-stage', {
+        reportDiagnostics('dictionary-lookup-translator-stage', () => ({
             stage: 'findTermsBulk',
             language,
             matchType,
@@ -472,9 +472,9 @@ export class Translator {
                 map.set(dictionary, (map.get(dictionary) || 0) + 1);
                 return map;
             }, new Map()).entries()].map(([dictionary, count]) => ({dictionary, count})),
-        });
+        }));
         this._matchEntriesToDeinflections(language, databaseEntries, uniqueDeinflectionArrays, enabledDictionaryMap);
-        reportDiagnostics('dictionary-lookup-translator-stage', {
+        reportDiagnostics('dictionary-lookup-translator-stage', () => ({
             stage: 'matchEntriesToDeinflections',
             language,
             matchType,
@@ -486,7 +486,7 @@ export class Translator {
                 }
                 return map;
             }, new Map()).entries()].map(([dictionary, count]) => ({dictionary, count})),
-        });
+        }));
     }
 
     /**

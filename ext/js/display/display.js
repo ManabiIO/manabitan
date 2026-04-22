@@ -980,8 +980,16 @@ export class Display extends EventDispatcher {
      * @param {MouseEvent} e
      */
     async _onKanjiLookup(e) {
+        await this._onKanjiLookupFromElement(/** @type {Element} */ (e.currentTarget), e);
+    }
+
+    /**
+     * @param {Element} element
+     * @param {?MouseEvent} e
+     */
+    async _onKanjiLookupFromElement(element, e = null) {
         try {
-            e.preventDefault();
+            e?.preventDefault();
             const {state} = this._history;
             if (!(typeof state === 'object' && state !== null)) { return; }
 
@@ -989,7 +997,6 @@ export class Display extends EventDispatcher {
             if (typeof url !== 'string') { url = window.location.href; }
             if (typeof documentTitle !== 'string') { documentTitle = document.title; }
             const optionsContext = this.getOptionsContext();
-            const element = /** @type {Element} */ (e.currentTarget);
             let query = element.textContent;
             if (query === null) { query = ''; }
             const dictionaryEntries = await this._application.api.kanjiFind(query, optionsContext);
@@ -1173,7 +1180,6 @@ export class Display extends EventDispatcher {
      */
     _onMenuButtonClick(e) {
         const node = /** @type {HTMLElement} */ (e.currentTarget);
-
         const menuContainerNode = /** @type {HTMLElement} */ (this._displayGenerator.instantiateTemplate('dictionary-entry-popup-menu'));
         /** @type {HTMLElement} */
         const menuBodyNode = querySelectorNotNull(menuContainerNode, '.popup-menu-body');
@@ -1523,12 +1529,24 @@ export class Display extends EventDispatcher {
         safePerformance.mark('display:contentUpdate:start');
         this._triggerContentUpdateStart();
 
+        const renderYieldAfterEntries = 32;
+        const renderYieldAfterMs = 12;
         let i = 0;
+        let entriesSinceYield = 0;
+        let nextRenderYieldTime = safePerformance.now() + renderYieldAfterMs;
         for (const dictionaryEntry of dictionaryEntries) {
             safePerformance.mark('display:createEntry:start');
 
-            if (i > 0) {
+            if (
+                i > 0 &&
+                (
+                    entriesSinceYield >= renderYieldAfterEntries ||
+                    safePerformance.now() >= nextRenderYieldTime
+                )
+            ) {
                 await promiseTimeout(1);
+                entriesSinceYield = 0;
+                nextRenderYieldTime = safePerformance.now() + renderYieldAfterMs;
                 if (this._setContentToken !== token) { return; }
             }
 
@@ -1558,9 +1576,7 @@ export class Display extends EventDispatcher {
             safePerformance.mark('display:createEntry:end');
             safePerformance.measure('display:createEntry', 'display:createEntry:start', 'display:createEntry:end');
 
-            if (i === 0) {
-                void this._contentManager.executeMediaRequests(); // prioritize loading media for first entry since it is visible
-            }
+            ++entriesSinceYield;
             ++i;
         }
         if (this._setContentToken !== token) { return; }

@@ -87,6 +87,63 @@ describe('Display lookup refresh', () => {
         expect(display.setContent.mock.calls[0][0].params.wildcards).toBe('off');
     });
 
+    test('large result rendering yields in batches instead of once per entry', async ({window}) => {
+        const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout').mockImplementation((handler, _timeout, ...args) => {
+            if (typeof handler === 'function') {
+                handler(...args);
+            }
+            return /** @type {ReturnType<typeof setTimeout>} */ (0);
+        });
+        const performanceNowSpy = vi.spyOn(window.performance, 'now').mockReturnValue(0);
+
+        try {
+            window.document.body.innerHTML = `
+                <div id="no-results" hidden></div>
+                <div id="no-dictionaries" hidden></div>
+            `;
+
+            const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
+            display._options = {dictionaries: [{enabled: true}]};
+            display._history = {state: {}, content: {}};
+            display._setContentToken = 'token';
+            display._container = window.document.createElement('div');
+            display._dictionaryEntryNodes = [];
+            display._windowScroll = {stop() {}, to() {}};
+            display._contentManager = {executeMediaRequests() {}};
+            display._elementOverflowController = {addElements() {}};
+            display._displayGenerator = {
+                createTermEntry: vi.fn(() => window.document.createElement('div')),
+                createKanjiEntry: vi.fn(() => window.document.createElement('div')),
+            };
+            display._dictionaryInfo = [];
+            display._setQuery = vi.fn();
+            display._setOptionsContextIfDifferent = vi.fn().mockResolvedValue(void 0);
+            display.updateOptions = vi.fn().mockResolvedValue(void 0);
+            display._findDictionaryEntries = vi.fn().mockResolvedValue(
+                Array.from({length: 100}, () => ({type: 'term'})),
+            );
+            display._replaceHistoryStateNoNavigate = vi.fn();
+            display.getOptionsContext = vi.fn(() => ({depth: 0}));
+            display.getContentOrigin = vi.fn(() => ({tabId: null, frameId: null}));
+            display._updateNavigationAuto = vi.fn();
+            display._setNoContentVisible = vi.fn();
+            display._setNoDictionariesVisible = vi.fn();
+            display._triggerContentUpdateStart = vi.fn();
+            display._triggerContentUpdateComplete = vi.fn();
+            display._triggerContentUpdateEntry = vi.fn();
+            display._addEntryEventListeners = vi.fn();
+            display._focusEntry = vi.fn();
+            const urlSearchParams = new URLSearchParams({query: '言'});
+            await display._setContentTermsOrKanji('terms', urlSearchParams, 'token');
+
+            expect(display._container.childElementCount).toBe(100);
+            expect(setTimeoutSpy).toHaveBeenCalledTimes(3);
+        } finally {
+            performanceNowSpy.mockRestore();
+            setTimeoutSpy.mockRestore();
+        }
+    });
+
     test('searchLast preserves primary reading across refreshes', async ({window}) => {
         const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
         display._contentType = 'terms';

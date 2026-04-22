@@ -81,7 +81,7 @@ export class ElementOverflowController {
     addElements(entry) {
         if (this._dictionaries.size === 0) { return; }
 
-
+        let shouldScheduleUpdate = false;
         /** @type {Element[]} */
         const elements = [
             ...entry.querySelectorAll('.definition-item-inner'),
@@ -98,8 +98,8 @@ export class ElementOverflowController {
             if (dictionaryInfo.force) {
                 element.classList.add('collapsible', 'collapsible-forced');
             } else {
-                this._updateElement(element);
                 this._elements.push(element);
+                shouldScheduleUpdate = true;
             }
 
             if (dictionaryInfo.collapsed) {
@@ -110,6 +110,10 @@ export class ElementOverflowController {
             if (button !== null) {
                 this._eventListeners.addEventListener(button, 'click', this._onToggleButtonClickBind, false);
             }
+        }
+
+        if (shouldScheduleUpdate) {
+            this._scheduleUpdate(1);
         }
 
         if (this._elements.length > 0 && this._windowEventListeners.size === 0) {
@@ -128,10 +132,7 @@ export class ElementOverflowController {
 
     /** */
     _onWindowResize() {
-        if (this._checkTimer !== null) {
-            this._cancelIdleCallback(this._checkTimer);
-        }
-        this._checkTimer = this._requestIdleCallback(this._updateBind, 100);
+        this._scheduleUpdate(100);
     }
 
     /**
@@ -155,9 +156,20 @@ export class ElementOverflowController {
 
     /** */
     _update() {
+        this._checkTimer = null;
         for (const element of this._elements) {
             this._updateElement(element);
         }
+    }
+
+    /**
+     * @param {number} timeout
+     */
+    _scheduleUpdate(timeout) {
+        if (this._checkTimer !== null) {
+            this._cancelIdleCallback(this._checkTimer);
+        }
+        this._checkTimer = this._requestIdleCallback(this._updateBind, timeout);
     }
 
     /**

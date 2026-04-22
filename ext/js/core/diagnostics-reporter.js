@@ -374,7 +374,7 @@ export async function clearDiagnosticsLogSnapshot() {
 
 /**
  * @param {string} event
- * @param {Record<string, unknown>} payload
+ * @param {Record<string, unknown>|(() => Record<string, unknown>)} payload
  * @returns {void}
  */
 export function reportDiagnostics(event, payload = {}) {
@@ -416,7 +416,7 @@ export function reportDiagnostics(event, payload = {}) {
             extensionId,
             manifest: manifestInfo,
             contextUrl,
-            payload,
+            payload: typeof payload === 'function' ? payload() : payload,
         };
         await appendDiagnosticsLogEntry(body);
         if (endpoint === null) { return; }
