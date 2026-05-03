@@ -873,22 +873,25 @@ export class Frontend {
         if (sentence !== null) { detailsState.sentence = sentence; }
         if (documentTitle !== null) { detailsState.documentTitle = documentTitle; }
         const {tabId, frameId} = this._application;
+        /** @type {import('display').HistoryParams} */
+        const params = {
+            type,
+            query,
+            wildcards: 'off',
+        };
         /** @type {import('display').HistoryContent} */
         const detailsContent = {
             contentOrigin: {tabId, frameId},
         };
         if (dictionaryEntries !== null) {
             detailsContent.dictionaryEntries = dictionaryEntries;
+            params.lookup = 'false';
         }
         /** @type {import('display').ContentDetails} */
         const details = {
             focus,
             historyMode: 'clear',
-            params: {
-                type,
-                query,
-                wildcards: 'off',
-            },
+            params,
             state: detailsState,
             content: detailsContent,
         };
