@@ -83,6 +83,8 @@ export class Frontend {
         this._contentScale = 1;
         /** @type {Promise<void>} */
         this._lastShowPromise = Promise.resolve();
+        /** @type {?Promise<void>} */
+        this._popupPrewarmPromise = null;
         /** @type {TextSourceGenerator} */
         this._textSourceGenerator = new TextSourceGenerator();
         /** @type {TextScanner} */
@@ -176,7 +178,7 @@ export class Frontend {
         }
 
         this._textScanner.prepare();
-        await this._prewarmPopupForHover();
+        this._startPopupPrewarmForHover();
 
         window.addEventListener('resize', this._onResize.bind(this), false);
         addFullscreenChangeEventListener(this._updatePopup.bind(this));
@@ -666,11 +668,22 @@ export class Frontend {
         }
 
         this._updateContentScale();
-        await this._prewarmPopupForHover();
+        this._startPopupPrewarmForHover();
 
         if (!suppressSearchLast) {
             await this._textScanner.searchLast();
         }
+    }
+
+    /**
+     * @returns {void}
+     */
+    _startPopupPrewarmForHover() {
+        if (this._popupPrewarmPromise !== null) { return; }
+        this._popupPrewarmPromise = this._prewarmPopupForHover();
+        void this._popupPrewarmPromise.finally(() => {
+            this._popupPrewarmPromise = null;
+        });
     }
 
     /**

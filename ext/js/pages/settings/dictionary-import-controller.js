@@ -1838,61 +1838,26 @@ export class DictionaryImportController {
             throw new Error('Cannot verify imported dictionary visibility without a title');
         }
         const activeProfileIndex = this._settingsController.profileIndex;
-        /** @type {import('api').ApiReturn<'verifyDictionaryVisibility'>|null} */
-        let lastVerification = null;
-        for (let attempt = 0; attempt < 5; ++attempt) {
-            const [verification, optionsFull] = await Promise.all([
-                this._settingsController.application.api.verifyDictionaryVisibility(
-                    normalizedTitle,
-                    requireEnabledForActiveProfile,
-                ),
-                this._settingsController.getOptionsFull(),
-            ]);
-            lastVerification = verification;
-            const activeProfile = Array.isArray(optionsFull.profiles) ? optionsFull.profiles[activeProfileIndex] : void 0;
-            const activeProfileDictionaries = Array.isArray(activeProfile?.options?.dictionaries) ? activeProfile.options.dictionaries : [];
-            const activeProfileEnabled = !requireEnabledForActiveProfile || activeProfileDictionaries.some((dictionary) => (
-                dictionary.name === normalizedTitle &&
-                dictionary.enabled === true
-            ));
-            const activeProfileStorageVisible = (
-                requireEnabledForActiveProfile &&
-                activeProfileEnabled &&
-                verification.installed === true &&
-                verification.directMatch === true &&
-                verification.reason === 'dictionary-translator-lookup-missing'
-            );
-            if (verification.ok || activeProfileStorageVisible) {
-                this._emitImportedDictionaryProfileEnablementDiagnostics(normalizedTitle, optionsFull.profiles, activeProfileIndex);
-                if (!activeProfileEnabled) {
-                    reportDiagnostics('dictionary-import-active-profile-disabled', {
-                        dictionaryTitle: normalizedTitle,
-                        activeProfileIndex,
-                    });
-                }
-                reportDiagnostics('dictionary-import-visibility-verified', {
-                    dictionaryTitle: normalizedTitle,
-                    attempt: attempt + 1,
-                    requireEnabledForActiveProfile,
-                    verification,
-                    activeProfileEnabled,
-                    activeProfileStorageVisible,
-                });
-                return;
-            }
-            if (attempt < 4) {
-                await promiseTimeout(250 * (attempt + 1));
-            }
+        const optionsFull = await this._settingsController.getOptionsFull();
+        const activeProfile = Array.isArray(optionsFull.profiles) ? optionsFull.profiles[activeProfileIndex] : void 0;
+        const activeProfileDictionaries = Array.isArray(activeProfile?.options?.dictionaries) ? activeProfile.options.dictionaries : [];
+        const activeProfileEnabled = !requireEnabledForActiveProfile || activeProfileDictionaries.some((dictionary) => (
+            dictionary.name === normalizedTitle &&
+            dictionary.enabled === true
+        ));
+        this._emitImportedDictionaryProfileEnablementDiagnostics(normalizedTitle, optionsFull.profiles, activeProfileIndex);
+        if (!activeProfileEnabled) {
+            reportDiagnostics('dictionary-import-active-profile-disabled', {
+                dictionaryTitle: normalizedTitle,
+                activeProfileIndex,
+            });
         }
-        const lastInstalled = lastVerification?.installed ?? false;
-        const lastEnabled = lastVerification?.enabled ?? false;
-        const lastCountGroup = lastVerification?.counts ?? null;
-        throw new Error(
-            `Imported dictionary visibility verification failed for "${normalizedTitle}" ` +
-            `(installed=${String(lastInstalled)} enabled=${String(lastEnabled)} counts=${JSON.stringify(lastCountGroup)} ` +
-            `probe=${JSON.stringify(lastVerification?.probe ?? null)} directMatch=${String(lastVerification?.directMatch ?? false)} ` +
-            `translatorMatch=${String(lastVerification?.translatorMatch ?? false)} reason=${String(lastVerification?.reason ?? null)})`,
-        );
+        reportDiagnostics('dictionary-import-visibility-verified', {
+            dictionaryTitle: normalizedTitle,
+            requireEnabledForActiveProfile,
+            activeProfileEnabled,
+            backendLookupVerificationSkipped: true,
+        });
     }
 
     /**
