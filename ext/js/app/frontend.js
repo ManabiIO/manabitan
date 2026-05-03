@@ -1010,6 +1010,7 @@ export class Frontend {
         }
         if (enabled) {
             this._textScannerHasBeenEnabled = true;
+            this._startPopupPrewarmForHover();
         }
     }
 
