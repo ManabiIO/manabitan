@@ -803,10 +803,13 @@ export class TermContentOpfsStore {
         /** @type {Array<{state: {index: number, readFile: File|null, fileLength: number}, pageIndex: number}>} */
         const pages = [];
         const seen = new Set();
+        const maxPages = Math.max(0, this._readPageCacheMaxPages >>> 3);
         for (const {offset, length} of spans) {
+            if (pages.length >= maxPages) { break; }
             if (offset < 0 || length <= 0) { continue; }
             const end = Math.min(this._length, offset + length);
             for (let cursor = offset; cursor < end;) {
+                if (pages.length >= maxPages) { break; }
                 const state = this._findSegmentStateForOffset(cursor);
                 if (state === null || state.readFile === null) { break; }
                 const localOffset = cursor - state.startOffset;
