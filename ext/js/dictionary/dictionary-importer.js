@@ -3229,12 +3229,26 @@ export class DictionaryImporter {
                         const termRecordPlanBuilder = createArtifactTermRecordPreinternedPlanBuilder();
                         const termRecordExpressionIndexes = new Uint32Array(rowCount);
                         const termRecordReadingIndexes = new Uint32Array(rowCount);
+                        /** @type {Map<string, Uint8Array>} */
+                        const encodedStringBytesCache = new Map();
+                        /**
+                         * @param {string} value
+                         * @returns {Uint8Array}
+                         */
+                        const getEncodedStringBytes = (value) => {
+                            let bytes = encodedStringBytesCache.get(value);
+                            if (typeof bytes === 'undefined') {
+                                bytes = this._textEncoder.encode(value);
+                                encodedStringBytesCache.set(value, bytes);
+                            }
+                            return bytes;
+                        };
                         for (let i = 0; i < rowCount; ++i) {
                             const row = /** @type {ParsedTermBankChunkRow} */ (parsedRows[i]);
                             const expression = row.expression;
                             const reading = row.reading.length > 0 ? row.reading : expression;
                             const readingEqualsExpression = reading === expression;
-                            const expressionBytes = this._textEncoder.encode(expression);
+                            const expressionBytes = getEncodedStringBytes(expression);
                             expressionBytesList[i] = expressionBytes;
                             readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
                             termRecordExpressionIndexes[i] = termRecordPlanBuilder.internStringBytes(expressionBytes);
@@ -3242,7 +3256,7 @@ export class DictionaryImporter {
                                 readingBytesList[i] = EMPTY_UINT8_ARRAY;
                                 termRecordReadingIndexes[i] = termRecordExpressionIndexes[i];
                             } else {
-                                const readingBytes = this._textEncoder.encode(reading);
+                                const readingBytes = getEncodedStringBytes(reading);
                                 readingBytesList[i] = readingBytes;
                                 termRecordReadingIndexes[i] = termRecordPlanBuilder.internStringBytes(readingBytes);
                             }
