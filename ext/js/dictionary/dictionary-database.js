@@ -5618,6 +5618,13 @@ export class DictionaryDatabase {
         /** @type {Map<number, import('dictionary-database').DatabaseTermEntryWithId>} */
         const rowsById = new Map();
         const recordsById = this._termRecordStore.getByIds(ids);
+        const warmSlices = /** @type {unknown} */ (Reflect.get(this._termContentStore, 'warmSlices'));
+        if (typeof warmSlices === 'function') {
+            await /** @type {(spans: Iterable<{offset: number, length: number}>) => Promise<void>} */ (warmSlices).call(
+                this._termContentStore,
+                [...recordsById.values()].map(({entryContentOffset: offset, entryContentLength: length}) => ({offset, length})),
+            );
+        }
         for (const [id, record] of recordsById) {
             const row = await this._deserializeTermRow({
                 id,

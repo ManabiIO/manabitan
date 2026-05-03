@@ -790,6 +790,44 @@ export class TermContentOpfsStore {
     }
 
     /**
+     * @param {Iterable<{offset: number, length: number}>} spans
+     * @returns {Promise<void>}
+     */
+    async warmSlices(spans) {
+        if (this._fileHandle === null) {
+            return;
+        }
+        if (!this._loadedForRead) {
+            await this.ensureLoadedForRead();
+        }
+        /** @type {Array<{state: {index: number, readFile: File|null, fileLength: number}, pageIndex: number}>} */
+        const pages = [];
+        const seen = new Set();
+        for (const {offset, length} of spans) {
+            if (offset < 0 || length <= 0) { continue; }
+            const end = Math.min(this._length, offset + length);
+            for (let cursor = offset; cursor < end;) {
+                const state = this._findSegmentStateForOffset(cursor);
+                if (state === null || state.readFile === null) { break; }
+                const localOffset = cursor - state.startOffset;
+                const pageIndex = Math.floor(localOffset / READ_PAGE_SIZE_BYTES);
+                const cacheKey = `${state.index}:${pageIndex}`;
+                if (!seen.has(cacheKey) && !this._readPageCache.has(cacheKey)) {
+                    seen.add(cacheKey);
+                    pages.push({state, pageIndex});
+                }
+                const nextPageOffset = Math.min(state.fileLength, (pageIndex + 1) * READ_PAGE_SIZE_BYTES);
+                const nextCursor = state.startOffset + nextPageOffset;
+                cursor = nextCursor > cursor ? nextCursor : end;
+            }
+        }
+        const concurrency = 8;
+        for (let i = 0; i < pages.length; i += concurrency) {
+            await Promise.all(pages.slice(i, i + concurrency).map(({state, pageIndex}) => this._getReadPage(state, pageIndex)));
+        }
+    }
+
+    /**
      * Refreshes file snapshots once when another context may have appended data.
      * @returns {Promise<boolean>}
      */
