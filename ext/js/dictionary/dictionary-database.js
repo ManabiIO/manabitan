@@ -318,6 +318,8 @@ export class DictionaryDatabase {
         this._termIndexSortedKeysByLookup = new WeakMap();
         /** @type {Map<string, Promise<void>>} */
         this._directTermIndexLoadPromiseByDictionary = new Map();
+        /** @type {number} */
+        this._directTermIndexGeneration = 0;
         /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
         this._directTermIndexByDictionary = new Map();
         /** @type {import('@sqlite.org/sqlite-wasm').sqlite3_module|null} */
@@ -457,7 +459,7 @@ export class DictionaryDatabase {
         this._termEntryContentIdByHash.clear();
         this._termExactPresenceCache.clear();
         this._termPrefixNegativeCache.clear();
-        this._directTermIndexByDictionary.clear();
+        this._clearDirectTermIndexCaches();
         this._clearTermsVtabCursorState();
         this._termsVtabModuleRegistered = false;
         this._db.close();
@@ -606,7 +608,7 @@ export class DictionaryDatabase {
             this._termEntryContentCache.clear();
             this._termExactPresenceCache.clear();
             this._termPrefixNegativeCache.clear();
-            this._directTermIndexByDictionary.clear();
+            this._clearDirectTermIndexCaches();
             await this._beginImmediateTransaction(db);
             this._bulkImportTransactionOpen = true;
         }
@@ -738,7 +740,7 @@ export class DictionaryDatabase {
                 this._termEntryContentCache.clear();
                 this._termExactPresenceCache.clear();
                 this._termPrefixNegativeCache.clear();
-                this._directTermIndexByDictionary.clear();
+                this._clearDirectTermIndexCaches();
                 cacheResetMs = safePerformance.now() - tCacheResetStart;
                 this._deferTermsVirtualTableSync = false;
                 const tRuntimePragmasStart = safePerformance.now();
@@ -896,7 +898,7 @@ export class DictionaryDatabase {
         this._clearTermEntryContentMetaCaches();
         this._termExactPresenceCache.clear();
         this._termPrefixNegativeCache.clear();
-        this._directTermIndexByDictionary.clear();
+        this._clearDirectTermIndexCaches();
         return result;
     }
 
@@ -988,7 +990,7 @@ export class DictionaryDatabase {
         this._clearTermEntryContentMetaCaches();
         this._termExactPresenceCache.clear();
         this._termPrefixNegativeCache.clear();
-        this._directTermIndexByDictionary.clear();
+        this._clearDirectTermIndexCaches();
     }
 
     /**
@@ -1066,7 +1068,7 @@ export class DictionaryDatabase {
         this._clearTermEntryContentMetaCaches();
         this._termExactPresenceCache.clear();
         this._termPrefixNegativeCache.clear();
-        this._directTermIndexByDictionary.clear();
+        this._clearDirectTermIndexCaches();
         this._termEntryContentIdByKey.clear();
         this._sharedGlossaryArtifactMetaByDictionary.clear();
         this._sharedGlossaryArtifactInflatedByDictionary.clear();
@@ -1374,7 +1376,7 @@ export class DictionaryDatabase {
         this._clearTermEntryContentMetaCaches();
         this._termExactPresenceCache.clear();
         this._termPrefixNegativeCache.clear();
-        this._directTermIndexByDictionary.clear();
+        this._clearDirectTermIndexCaches();
         this._termEntryContentIdByKey.clear();
         this._sharedGlossaryArtifactMetaByDictionary.clear();
         this._sharedGlossaryArtifactInflatedByDictionary.clear();
@@ -1467,7 +1469,7 @@ export class DictionaryDatabase {
         this._clearTermEntryContentMetaCaches();
         this._termExactPresenceCache.clear();
         this._termPrefixNegativeCache.clear();
-        this._directTermIndexByDictionary.clear();
+        this._clearDirectTermIndexCaches();
     }
 
     /**
@@ -1543,6 +1545,14 @@ export class DictionaryDatabase {
         return [...dictionaryNames].sort().join('\u001f');
     }
 
+    /** */
+    _clearDirectTermIndexCaches() {
+        this._directTermIndexByDictionary.clear();
+        this._directTermIndexLoadPromiseByDictionary.clear();
+        this._termIndexSortedKeysByLookup = new WeakMap();
+        ++this._directTermIndexGeneration;
+    }
+
     /**
      * @param {string} dictionaryCacheKey
      * @param {string} term
@@ -1580,15 +1590,27 @@ export class DictionaryDatabase {
                 promises.push(existing);
                 continue;
             }
+            const generation = this._directTermIndexGeneration;
             const promise = (async () => {
                 await this._termRecordStore.ensureDictionariesLoaded([dictionaryName]);
+                if (generation !== this._directTermIndexGeneration) {
+                    return;
+                }
                 this._ensureDirectTermIndex(dictionaryName);
             })();
             this._directTermIndexLoadPromiseByDictionary.set(dictionaryName, promise);
             promises.push(promise);
             promise.then(
-                () => { this._directTermIndexLoadPromiseByDictionary.delete(dictionaryName); },
-                () => { this._directTermIndexLoadPromiseByDictionary.delete(dictionaryName); },
+                () => {
+                    if (this._directTermIndexLoadPromiseByDictionary.get(dictionaryName) === promise) {
+                        this._directTermIndexLoadPromiseByDictionary.delete(dictionaryName);
+                    }
+                },
+                () => {
+                    if (this._directTermIndexLoadPromiseByDictionary.get(dictionaryName) === promise) {
+                        this._directTermIndexLoadPromiseByDictionary.delete(dictionaryName);
+                    }
+                },
             );
         }
         await Promise.all(promises);
@@ -2732,7 +2754,7 @@ export class DictionaryDatabase {
             }
             this._termExactPresenceCache.clear();
             this._termPrefixNegativeCache.clear();
-            this._directTermIndexByDictionary.clear();
+            this._clearDirectTermIndexCaches();
         }
 
         if (objectStoreName === 'terms') {
@@ -2772,7 +2794,7 @@ export class DictionaryDatabase {
         }
         this._termExactPresenceCache.clear();
         this._termPrefixNegativeCache.clear();
-        this._directTermIndexByDictionary.clear();
+        this._clearDirectTermIndexCaches();
         if (this._enableTermEntryContentDedup) {
             const hasHashArrays = (
                 (Array.isArray(chunk.contentHash1List) || chunk.contentHash1List instanceof Uint32Array) &&
@@ -4726,7 +4748,7 @@ export class DictionaryDatabase {
         this._clearTermEntryContentMetaCaches();
         this._termExactPresenceCache.clear();
         this._termPrefixNegativeCache.clear();
-        this._directTermIndexByDictionary.clear();
+        this._clearDirectTermIndexCaches();
         this._termEntryContentIdByKey.clear();
         this._sharedGlossaryArtifactMetaByDictionary.clear();
         this._sharedGlossaryArtifactInflatedByDictionary.clear();
