@@ -725,20 +725,21 @@ export class Frontend {
             const optionsContext = await this._getOptionsContext();
             const prewarmTerms = await this._getLookupPrewarmTerms(options);
             let resultCount = 0;
-            let matchedTerm = '';
+            /** @type {string[]} */
+            const matchedTerms = [];
             for (const term of prewarmTerms) {
-                const {dictionaryEntries} = await this._application.api.termsFind(term, {matchType: 'exact', deinflect: false}, optionsContext);
-                resultCount = dictionaryEntries.length;
-                if (resultCount > 0) {
-                    matchedTerm = term;
-                    break;
+                const {dictionaryEntries} = await this._application.api.termsFind(term, {}, optionsContext);
+                resultCount += dictionaryEntries.length;
+                if (dictionaryEntries.length > 0) {
+                    matchedTerms.push(term);
                 }
             }
             this._updatePageDebugState({
                 lookupPrewarmReady: resultCount > 0,
                 lookupPrewarmResultCount: resultCount,
                 lookupPrewarmTermCount: prewarmTerms.length,
-                lookupPrewarmMatchedTerm: matchedTerm,
+                lookupPrewarmMatchedTerm: matchedTerms[0] || '',
+                lookupPrewarmMatchedTermCount: matchedTerms.length,
                 lookupPrewarmSettled: true,
                 lookupPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
             });

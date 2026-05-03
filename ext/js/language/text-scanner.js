@@ -95,8 +95,10 @@ export class TextScanner extends EventDispatcher {
         this._queuedLookup = null;
         /** @type {?{x: number, y: number, inputInfo: import('text-scanner').InputInfo}} */
         this._queuedMouseMoveLookup = null;
-        /** @type {boolean} */
-        this._mouseMoveLookupScheduled = false;
+        /** @type {?import('core').Timeout} */
+        this._mouseMoveLookupTimer = null;
+        /** @type {number} */
+        this._mouseMoveLookupCoalesceDelay = 35;
         /** @type {number} */
         this._lookupTimeoutMs = 10_000;
         /** @type {number} */
@@ -1450,16 +1452,23 @@ export class TextScanner extends EventDispatcher {
         }
 
         this._queuedMouseMoveLookup = {x, y, inputInfo};
-        if (this._mouseMoveLookupScheduled) { return; }
-        this._mouseMoveLookupScheduled = true;
-        await new Promise((resolve) => {
-            requestAnimationFrame(resolve);
-        });
-        this._mouseMoveLookupScheduled = false;
+        if (this._mouseMoveLookupTimer !== null) {
+            clearTimeout(this._mouseMoveLookupTimer);
+        }
+        this._mouseMoveLookupTimer = setTimeout(() => {
+            this._mouseMoveLookupTimer = null;
+            this._flushQueuedMouseMoveLookup();
+        }, this._mouseMoveLookupCoalesceDelay);
+    }
+
+    /**
+     * @returns {void}
+     */
+    _flushQueuedMouseMoveLookup() {
         const lookup = this._queuedMouseMoveLookup;
         this._queuedMouseMoveLookup = null;
         if (lookup === null) { return; }
-        await this._searchAt(lookup.x, lookup.y, lookup.inputInfo);
+        void this._searchAt(lookup.x, lookup.y, lookup.inputInfo);
     }
 
     /**
