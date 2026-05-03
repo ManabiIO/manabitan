@@ -1428,6 +1428,9 @@ export class DictionaryImporter {
                 }
                 return promise;
             };
+            /**
+             * @param {number} startIndex
+             */
             const prefetchNextTermFileBytes = (startIndex) => {
                 let prefetchedCount = 0;
                 for (let i = startIndex; i < activeTermFiles.length; ++i) {
@@ -3304,7 +3307,7 @@ export class DictionaryImporter {
                         }
                         importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
                         const tChunkSinkStart = Date.now();
-                        await /** @type {(termList: {dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentDictNameList: null, uniformContentDictName: string}, requirements: null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(
+                        await /** @type {(termList: {dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentDictNameList: null, uniformContentDictName: string, termRecordPreinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}, requirements: null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (/** @type {unknown} */ (onChunk))(
                             {
                                 dictionary: dictionaryTitle,
                                 rowCount,
@@ -3406,7 +3409,6 @@ export class DictionaryImporter {
                         if (typeof row.sequence === 'number') {
                             entry.sequence = row.sequence;
                         }
-                        this._assignPrefixReverseFields(entry, prefixWildcardsSupported);
                         if (
                             usePrecomputedTermContent &&
                             this._wasmPassThroughTermContent &&
