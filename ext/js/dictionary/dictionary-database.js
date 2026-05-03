@@ -296,6 +296,8 @@ export class DictionaryDatabase {
         this._sharedGlossaryArtifactMetaByDictionary = new Map();
         /** @type {Map<string, Uint8Array>} */
         this._sharedGlossaryArtifactInflatedByDictionary = new Map();
+        /** @type {Map<string, Promise<Uint8Array>>} */
+        this._sharedGlossaryArtifactInflatePromiseByDictionary = new Map();
         /** @type {Record<string, unknown>|null} */
         this._lastReplaceDictionaryTitleDebug = null;
         /** @type {number} */
@@ -1072,6 +1074,7 @@ export class DictionaryDatabase {
         this._termEntryContentIdByKey.clear();
         this._sharedGlossaryArtifactMetaByDictionary.clear();
         this._sharedGlossaryArtifactInflatedByDictionary.clear();
+        this._sharedGlossaryArtifactInflatePromiseByDictionary.clear();
         try {
             this._requireDb().exec('PRAGMA wal_checkpoint(TRUNCATE)');
         } catch (_) {
@@ -1380,6 +1383,7 @@ export class DictionaryDatabase {
         this._termEntryContentIdByKey.clear();
         this._sharedGlossaryArtifactMetaByDictionary.clear();
         this._sharedGlossaryArtifactInflatedByDictionary.clear();
+        this._sharedGlossaryArtifactInflatePromiseByDictionary.clear();
     }
 
     /**
@@ -1634,6 +1638,7 @@ export class DictionaryDatabase {
             this._getSortedTermIndexKeys(index.expressionReverse);
             this._getSortedTermIndexKeys(index.readingReverse);
         }
+        await this._warmSharedGlossaryArtifacts(names);
     }
 
     /**
@@ -2894,6 +2899,54 @@ export class DictionaryDatabase {
         if (cached instanceof Uint8Array) {
             return cached.subarray(glossaryOffset, glossaryOffset + glossaryLength);
         }
+        const existingPromise = this._sharedGlossaryArtifactInflatePromiseByDictionary.get(dictionary);
+        if (typeof existingPromise !== 'undefined') {
+            const inflatedBytes = await existingPromise;
+            return inflatedBytes.subarray(glossaryOffset, glossaryOffset + glossaryLength);
+        }
+        const promise = this._inflateSharedGlossaryArtifact(dictionary);
+        this._sharedGlossaryArtifactInflatePromiseByDictionary.set(dictionary, promise);
+        try {
+            const inflatedBytes = await promise;
+            this._sharedGlossaryArtifactInflatedByDictionary.set(dictionary, inflatedBytes);
+            return inflatedBytes.subarray(glossaryOffset, glossaryOffset + glossaryLength);
+        } finally {
+            if (this._sharedGlossaryArtifactInflatePromiseByDictionary.get(dictionary) === promise) {
+                this._sharedGlossaryArtifactInflatePromiseByDictionary.delete(dictionary);
+            }
+        }
+    }
+
+    /**
+     * @param {Iterable<string>} dictionaries
+     * @returns {Promise<void>}
+     */
+    async _warmSharedGlossaryArtifacts(dictionaries) {
+        for (const dictionary of dictionaries) {
+            const meta = this._getSharedGlossaryArtifactMeta(dictionary);
+            if (
+                meta === null ||
+                meta.contentDictName !== RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME ||
+                this._sharedGlossaryArtifactInflatedByDictionary.has(dictionary)
+            ) {
+                continue;
+            }
+            try {
+                await this._readCompressedSharedGlossarySlice(dictionary, 0, 0);
+            } catch (error) {
+                reportDiagnostics('dictionary-shared-glossary-warm-error', {
+                    dictionary,
+                    error: `${error}`,
+                });
+            }
+        }
+    }
+
+    /**
+     * @param {string} dictionary
+     * @returns {Promise<Uint8Array>}
+     */
+    async _inflateSharedGlossaryArtifact(dictionary) {
         const meta = this._getSharedGlossaryArtifactMeta(dictionary);
         if (meta === null || meta.contentOffset < 0 || meta.contentLength <= 0) {
             return new Uint8Array(0);
@@ -2904,8 +2957,7 @@ export class DictionaryDatabase {
             const defaultHeapSize = meta.uncompressedLength > 0 ? meta.uncompressedLength : (compressedBytes.byteLength * 16);
             inflatedBytes = zstdDecompress(compressedBytes, {defaultHeapSize});
         }
-        this._sharedGlossaryArtifactInflatedByDictionary.set(dictionary, inflatedBytes);
-        return inflatedBytes.subarray(glossaryOffset, glossaryOffset + glossaryLength);
+        return inflatedBytes;
     }
 
     /**
@@ -2944,6 +2996,7 @@ export class DictionaryDatabase {
             uncompressedLength: Math.max(0, uncompressedLength),
         });
         this._sharedGlossaryArtifactInflatedByDictionary.delete(dictionary);
+        this._sharedGlossaryArtifactInflatePromiseByDictionary.delete(dictionary);
         return span;
     }
 
@@ -4752,6 +4805,7 @@ export class DictionaryDatabase {
         this._termEntryContentIdByKey.clear();
         this._sharedGlossaryArtifactMetaByDictionary.clear();
         this._sharedGlossaryArtifactInflatedByDictionary.clear();
+        this._sharedGlossaryArtifactInflatePromiseByDictionary.clear();
         this._termsVirtualTableDirty = false;
         this._deferTermsVirtualTableSync = false;
 
