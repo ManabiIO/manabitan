@@ -524,6 +524,14 @@ export class DictionaryDatabaseProxy {
     }
 
     /**
+     * @param {Iterable<string>} dictionaryNames
+     * @returns {Promise<void>}
+     */
+    async warmTermLookupCaches(dictionaryNames) {
+        await this._offscreen.sendMessagePromise({action: 'warmTermLookupCachesOffscreen', params: {dictionaryNames: [...dictionaryNames]}});
+    }
+
+    /**
      * @returns {Promise<boolean>}
      */
     async purge() {

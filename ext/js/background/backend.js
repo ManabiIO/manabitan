@@ -133,6 +133,8 @@ export class Backend {
         /** @type {?Promise<void>} */
         this._dictionaryRefreshPromise = null;
         /** @type {?Promise<void>} */
+        this._dictionaryLookupWarmPromise = null;
+        /** @type {?Promise<void>} */
         this._dictionaryMutationPromise = null;
         /** @type {boolean} */
         this._dictionaryRefreshQueued = false;
@@ -3634,6 +3636,7 @@ export class Backend {
                 this._dictionaryRefreshQueued = false;
             }
         } while (rerunRefresh);
+        this._warmEnabledDictionaryLookupCaches('dictionary-refresh-after-update');
     }
 
     /**
@@ -3812,6 +3815,49 @@ export class Backend {
             failedBeforeRefresh,
             failedAfterRefresh,
         });
+        this._warmEnabledDictionaryLookupCaches('startup-visibility-reconcile');
+    }
+
+    /**
+     * @param {string} reason
+     * @returns {void}
+     */
+    _warmEnabledDictionaryLookupCaches(reason) {
+        if (this._options === null || this._dictionaryLookupWarmPromise !== null) {
+            return;
+        }
+        const options = this._getProfileOptions({current: true}, false);
+        const enabledTitles = options.dictionaries
+            .filter((dictionary) => dictionary.enabled)
+            .map((dictionary) => dictionary.name)
+            .filter((value, index, array) => value.length > 0 && array.indexOf(value) === index);
+        if (enabledTitles.length === 0) { return; }
+        const startedAt = safePerformance.now();
+        this._dictionaryLookupWarmPromise = (async () => {
+            await this._awaitDictionaryRefreshSettled();
+            await this._ensureDictionaryDatabaseReady();
+            const warmMethod = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'warmTermLookupCaches'));
+            if (typeof warmMethod !== 'function') { return; }
+            await /** @type {(dictionaryNames: string[]) => Promise<void>} */ (warmMethod).call(this._dictionaryDatabase, enabledTitles);
+        })();
+        this._dictionaryLookupWarmPromise
+            .then(() => {
+                reportDiagnostics('dictionary-lookup-cache-warm-summary', {
+                    reason,
+                    dictionaryNames: enabledTitles,
+                    elapsedMs: safePerformance.now() - startedAt,
+                });
+            })
+            .catch((error) => {
+                reportDiagnostics('dictionary-lookup-cache-warm-error', {
+                    reason,
+                    dictionaryNames: enabledTitles,
+                    error: `${error}`,
+                });
+            })
+            .finally(() => {
+                this._dictionaryLookupWarmPromise = null;
+            });
     }
 
     /**

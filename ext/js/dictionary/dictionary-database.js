@@ -314,6 +314,8 @@ export class DictionaryDatabase {
         this._termExactPresenceCacheMaxEntries = this._computeTermExactPresenceCacheMaxEntries();
         /** @type {Map<string, boolean>} */
         this._termPrefixNegativeCache = new Map();
+        /** @type {WeakMap<Map<string, number[]>, {size: number, keys: string[]}>} */
+        this._termIndexSortedKeysByLookup = new WeakMap();
         /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
         this._directTermIndexByDictionary = new Map();
         /** @type {import('@sqlite.org/sqlite-wasm').sqlite3_module|null} */
@@ -1574,6 +1576,19 @@ export class DictionaryDatabase {
     }
 
     /**
+     * Warms the storage and direct term indexes needed by the first visible
+     * search or hover lookup after startup/import refresh.
+     * @param {Iterable<string>} dictionaryNames
+     * @returns {Promise<void>}
+     */
+    async warmTermLookupCaches(dictionaryNames) {
+        const names = [...dictionaryNames].filter((value, index, array) => value.length > 0 && array.indexOf(value) === index);
+        if (names.length === 0) { return; }
+        await this._termContentStore.ensureLoadedForRead();
+        await this._ensureDirectTermIndexesLoaded(names);
+    }
+
+    /**
      * @param {import('dictionary-database').DictionarySet} dictionaries
      * @returns {string[]}
      */
@@ -1601,6 +1616,57 @@ export class DictionaryDatabase {
             }
         }
         return result;
+    }
+
+    /**
+     * @param {Map<string, number[]>} lookup
+     * @returns {string[]}
+     */
+    _getSortedTermIndexKeys(lookup) {
+        const existing = this._termIndexSortedKeysByLookup.get(lookup);
+        if (typeof existing !== 'undefined' && existing.size === lookup.size) {
+            return existing.keys;
+        }
+        const keys = [...lookup.keys()].sort();
+        this._termIndexSortedKeysByLookup.set(lookup, {size: lookup.size, keys});
+        return keys;
+    }
+
+    /**
+     * @param {string[]} keys
+     * @param {string} query
+     * @returns {number}
+     */
+    _findSortedTermIndexLowerBound(keys, query) {
+        let low = 0;
+        let high = keys.length;
+        while (low < high) {
+            const mid = (low + high) >>> 1;
+            if (keys[mid] < query) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+        return low;
+    }
+
+    /**
+     * @param {Map<string, number[]>} lookup
+     * @param {string} query
+     * @yields {[string, number[]]}
+     * @returns {IterableIterator<[string, number[]]>}
+     */
+    *_findTermIndexPrefixMatches(lookup, query) {
+        const keys = this._getSortedTermIndexKeys(lookup);
+        for (let i = this._findSortedTermIndexLowerBound(keys, query); i < keys.length; ++i) {
+            const value = keys[i];
+            if (!value.startsWith(query)) { break; }
+            const ids = lookup.get(value);
+            if (typeof ids !== 'undefined') {
+                yield [value, ids];
+            }
+        }
     }
 
     /**
@@ -1787,8 +1853,7 @@ export class DictionaryDatabase {
                             break;
                     }
                     if (lookup === null) { continue; }
-                    for (const [value, ids] of lookup.entries()) {
-                        if (!value.startsWith(queryData.query)) { continue; }
+                    for (const [value, ids] of this._findTermIndexPrefixMatches(lookup, queryData.query)) {
                         foundQueries.add(queryData.query);
                         for (const id of ids) {
                             if (id <= 0 || visited.has(id)) { continue; }

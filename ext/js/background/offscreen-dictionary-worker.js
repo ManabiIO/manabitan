@@ -273,6 +273,13 @@ class OffscreenDictionaryWorkerHandler {
                     new Set(/** @type {string[]} */ (params.dictionaryNames ?? [])),
                     /** @type {import('dictionary-database').MatchType} */ (params.matchType ?? 'exact'),
                 );
+            case 'warmTermLookupCachesOffscreen':
+                this._assertDatabaseAvailable(action);
+                await this._ensureDatabasePrepared();
+                await this._dictionaryDatabase.warmTermLookupCaches(
+                    /** @type {string[]} */ (params.dictionaryNames ?? []),
+                );
+                return;
             case 'debugDictionaryStorageStateOffscreen':
                 this._assertDatabaseAvailable(action);
                 await this._ensureDatabasePrepared();
