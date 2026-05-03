@@ -1637,6 +1637,54 @@ export class DictionaryDatabase {
             this._getSortedTermIndexKeys(index.reading);
         }
         await this._warmSharedGlossaryArtifacts(names);
+        await this._warmLookupProbeTerms(names);
+    }
+
+    /**
+     * Runs a small exact lookup in the background warm path so the first visible
+     * hover/search does not pay every row-content cache miss.
+     * @param {string[]} dictionaryNames
+     * @returns {Promise<void>}
+     */
+    async _warmLookupProbeTerms(dictionaryNames) {
+        const terms = [
+            '日本',
+            'する',
+            'ある',
+            '見る',
+            '言う',
+            '食べる',
+            '猫',
+            '吾輩',
+        ];
+        for (const dictionaryName of dictionaryNames) {
+            try {
+                const probe = await this.getDictionaryTermProbe(dictionaryName);
+                if (probe !== null) {
+                    terms.push(probe.expression, probe.reading);
+                }
+            } catch (_) {
+                // Probe warming is best-effort; lookup correctness does not depend on it.
+            }
+        }
+        const uniqueTerms = [...new Set(terms.map((term) => `${term}`.trim()).filter((term) => term.length > 0))];
+        if (uniqueTerms.length === 0) { return; }
+        const startedAt = safePerformance.now();
+        try {
+            const entries = await this.findTermsBulk(uniqueTerms, new Set(dictionaryNames), 'exact');
+            reportDiagnostics('dictionary-lookup-probe-warm-summary', {
+                dictionaryNames,
+                termCount: uniqueTerms.length,
+                matchedEntryCount: entries.length,
+                elapsedMs: safePerformance.now() - startedAt,
+            });
+        } catch (error) {
+            reportDiagnostics('dictionary-lookup-probe-warm-error', {
+                dictionaryNames,
+                termCount: uniqueTerms.length,
+                error: `${error}`,
+            });
+        }
     }
 
     /**
@@ -5629,27 +5677,36 @@ export class DictionaryDatabase {
                 [...recordsById.values()].map(({entryContentOffset: offset, entryContentLength: length}) => ({offset, length})),
             );
         }
-        for (const [id, record] of recordsById) {
-            const row = await this._deserializeTermRow({
-                id,
-                dictionary: record.dictionary,
-                expression: record.expression,
-                reading: record.reading,
-                expressionReverse: record.expressionReverse,
-                readingReverse: record.readingReverse,
-                entryContentId: null,
-                entryContentOffset: record.entryContentOffset,
-                entryContentLength: record.entryContentLength,
-                entryContentDictName: record.entryContentDictName,
-                definitionTags: '',
-                termTags: '',
-                rules: '',
-                score: record.score,
-                glossaryJson: '[]',
-                sequence: record.sequence,
-            });
-            rowsById.set(id, row);
-        }
+        const entries = [...recordsById];
+        const concurrency = Math.min(8, Math.max(1, entries.length));
+        let nextIndex = 0;
+        const deserializeNext = async () => {
+            while (true) {
+                const entryIndex = nextIndex++;
+                if (entryIndex >= entries.length) { return; }
+                const [id, record] = entries[entryIndex];
+                const row = await this._deserializeTermRow({
+                    id,
+                    dictionary: record.dictionary,
+                    expression: record.expression,
+                    reading: record.reading,
+                    expressionReverse: record.expressionReverse,
+                    readingReverse: record.readingReverse,
+                    entryContentId: null,
+                    entryContentOffset: record.entryContentOffset,
+                    entryContentLength: record.entryContentLength,
+                    entryContentDictName: record.entryContentDictName,
+                    definitionTags: '',
+                    termTags: '',
+                    rules: '',
+                    score: record.score,
+                    glossaryJson: '[]',
+                    sequence: record.sequence,
+                });
+                rowsById.set(id, row);
+            }
+        };
+        await Promise.all(Array.from({length: concurrency}, () => deserializeNext()));
         return rowsById;
     }
 
