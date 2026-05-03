@@ -984,6 +984,7 @@ export class Backend {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
+        await this._awaitDictionaryLookupWarmSettled();
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {resultOutputMode: mode, maxResults}} = options;
         let findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
@@ -1699,6 +1700,16 @@ export class Backend {
                 await this._dictionaryMutationPromise;
             } catch (_) {
                 // NOP
+            }
+        }
+    }
+
+    async _awaitDictionaryLookupWarmSettled() {
+        while (this._dictionaryLookupWarmPromise !== null) {
+            try {
+                await this._dictionaryLookupWarmPromise;
+            } catch (_) {
+                // Lookup correctness must not depend on best-effort warmup.
             }
         }
     }
