@@ -992,60 +992,62 @@ export class Backend {
         let installedDictionaryTitles = null;
         /** @type {unknown|null} */
         let debugLookupState = null;
-        try {
-            const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
-            if (Array.isArray(dictionaryInfo)) {
-                installedDictionaryCount = dictionaryInfo.length;
-                installedDictionaryTitles = dictionaryInfo
-                    .map((dictionary) => (typeof dictionary?.title === 'string' ? dictionary.title : null))
-                    .filter((title) => typeof title === 'string' && title.length > 0);
-            }
-        } catch (e) {
-            installedDictionaryCount = null;
-            installedDictionaryTitles = null;
-            reportDiagnostics('dictionary-lookup-installed-dictionary-info-failed', {
-                textLength: text.length,
-                mode,
-                error: toError(e).message,
-            });
-        }
-        const hasInstalledDictionaries = installedDictionaryCount === null ?
-            await this._hasInstalledDictionaries() :
-            installedDictionaryCount > 0;
+        let hasInstalledDictionaries = true;
         if (
             dictionaryEntries.length === 0 &&
-            findTermsOptions.enabledDictionaryMap.size > 0 &&
-            hasInstalledDictionaries
+            findTermsOptions.enabledDictionaryMap.size > 0
         ) {
-            reportDiagnostics('dictionary-lookup-self-heal-begin', {
-                textLength: text.length,
-                enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
-                mode,
-            });
-            await this._refreshDictionaryDatabaseAfterUpdate();
-            void this._translator.clearDatabaseCaches();
-            findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
-            ({dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions));
-            if (dictionaryEntries.length === 0) {
-                try {
-                    debugLookupState = await this._debugDictionaryLookupState(
-                        text,
-                        [...findTermsOptions.enabledDictionaryMap.keys()],
-                    );
-                } catch (e) {
-                    debugLookupState = {
-                        ok: false,
-                        reason: 'debug lookup capture failed',
-                        error: toError(e).message,
-                    };
+            try {
+                const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
+                if (Array.isArray(dictionaryInfo)) {
+                    installedDictionaryCount = dictionaryInfo.length;
+                    installedDictionaryTitles = dictionaryInfo
+                        .map((dictionary) => (typeof dictionary?.title === 'string' ? dictionary.title : null))
+                        .filter((title) => typeof title === 'string' && title.length > 0);
                 }
+            } catch (e) {
+                installedDictionaryCount = null;
+                installedDictionaryTitles = null;
+                reportDiagnostics('dictionary-lookup-installed-dictionary-info-failed', {
+                    textLength: text.length,
+                    mode,
+                    error: toError(e).message,
+                });
             }
-            reportDiagnostics('dictionary-lookup-self-heal-complete', {
-                textLength: text.length,
-                enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
-                mode,
-                recovered: dictionaryEntries.length > 0,
-            });
+            hasInstalledDictionaries = installedDictionaryCount === null ?
+                await this._hasInstalledDictionaries() :
+                installedDictionaryCount > 0;
+            if (hasInstalledDictionaries) {
+                reportDiagnostics('dictionary-lookup-self-heal-begin', {
+                    textLength: text.length,
+                    enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
+                    mode,
+                });
+                await this._refreshDictionaryDatabaseAfterUpdate();
+                void this._translator.clearDatabaseCaches();
+                findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
+                ({dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions));
+                if (dictionaryEntries.length === 0) {
+                    try {
+                        debugLookupState = await this._debugDictionaryLookupState(
+                            text,
+                            [...findTermsOptions.enabledDictionaryMap.keys()],
+                        );
+                    } catch (e) {
+                        debugLookupState = {
+                            ok: false,
+                            reason: 'debug lookup capture failed',
+                            error: toError(e).message,
+                        };
+                    }
+                }
+                reportDiagnostics('dictionary-lookup-self-heal-complete', {
+                    textLength: text.length,
+                    enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
+                    mode,
+                    recovered: dictionaryEntries.length > 0,
+                });
+            }
         }
         const hasExactHeadwordMatch = (
             text.length > 0 &&
