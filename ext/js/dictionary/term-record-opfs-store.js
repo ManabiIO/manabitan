@@ -1814,8 +1814,6 @@ export class TermRecordOpfsStore {
             }
             /** @type {string[]|null} */
             let chunkStrings = null;
-            /** @type {string[]|null} */
-            let chunkStringReverses = null;
             if (isCurrent) {
                 if ((cursor + STRING_TABLE_HEADER_BYTES) > content.byteLength) { return; }
                 const stringCount = view.getUint32(cursor, true); cursor += 4;
@@ -1823,7 +1821,6 @@ export class TermRecordOpfsStore {
                 const stringLengthsBytes = stringCount * 2;
                 if ((cursor + stringLengthsBytes + stringBytesLength) > content.byteLength) { return; }
                 chunkStrings = new Array(stringCount);
-                chunkStringReverses = new Array(stringCount);
                 let stringsCursor = cursor + stringLengthsBytes;
                 for (let i = 0; i < stringCount; ++i) {
                     const stringLength = view.getUint16(cursor, true); cursor += 2;
@@ -1831,7 +1828,6 @@ export class TermRecordOpfsStore {
                     const value = this._decodeString(content, stringsCursor, stringLength);
                     stringsCursor += stringLength;
                     chunkStrings[i] = value;
-                    chunkStringReverses[i] = this._reverseString(value);
                 }
                 cursor = stringsCursor;
             }
@@ -1943,10 +1939,8 @@ export class TermRecordOpfsStore {
                 let readingReverse;
                 if (isCurrent || isPrevious) {
                     if (isCurrent) {
-                        expressionReverse = chunkStringReverses !== null ? chunkStringReverses[expressionIndex] : this._reverseString(expression);
-                        readingReverse = reading === expression ?
-                            expressionReverse :
-                            (chunkStringReverses !== null ? chunkStringReverses[readingIndexRaw] : this._reverseString(reading));
+                        expressionReverse = null;
+                        readingReverse = null;
                     } else {
                         expressionReverse = this._reverseString(expression);
                         readingReverse = reading === expression ? expressionReverse : this._reverseString(reading);
