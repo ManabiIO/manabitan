@@ -984,7 +984,7 @@ export class Backend {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
-        await this._awaitDictionaryLookupWarmSettled();
+        await this._awaitDictionaryLookupWarmSettled(750);
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {resultOutputMode: mode, maxResults}} = options;
         let findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
@@ -1704,10 +1704,26 @@ export class Backend {
         }
     }
 
-    async _awaitDictionaryLookupWarmSettled() {
+    /**
+     * @param {number} timeoutMs
+     * @returns {Promise<void>}
+     */
+    async _awaitDictionaryLookupWarmSettled(timeoutMs = 0) {
         while (this._dictionaryLookupWarmPromise !== null) {
+            const promise = this._dictionaryLookupWarmPromise;
             try {
-                await this._dictionaryLookupWarmPromise;
+                if (timeoutMs > 0) {
+                    const result = await Promise.race([
+                        promise.then(() => true, () => true),
+                        promiseTimeout(timeoutMs).then(() => false),
+                    ]);
+                    if (!result && this._dictionaryLookupWarmPromise === promise) {
+                        reportDiagnostics('dictionary-lookup-cache-warm-awaited-timeout', {timeoutMs});
+                        return;
+                    }
+                } else {
+                    await promise;
+                }
             } catch (_) {
                 // Lookup correctness must not depend on best-effort warmup.
             }
