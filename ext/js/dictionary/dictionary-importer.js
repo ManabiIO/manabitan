@@ -78,6 +78,7 @@ const ZIP_COMPRESSION_METHOD_STORE = 0;
 const HEX_BYTE_TABLE = Array.from({length: 256}, (_, i) => i.toString(16).padStart(2, '0'));
 /** @type {import('dictionary-data').TermGlossary[]} */
 const EMPTY_TERM_GLOSSARY = [];
+const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {import('dictionary-importer').ImportFileEntry} ImportFileEntry */
 const EMPTY_ARRAY_BUFFER = new ArrayBuffer(0);
 const UTF8_TEXT_DECODER = new TextDecoder('utf-8', {fatal: true});
@@ -3140,7 +3141,8 @@ export class DictionaryImporter {
         /** @type {import('dictionary-database').DatabaseTermEntry[]} */
         const termList = [];
         const useRawBytesDirectContent = (termContentStorageMode === 'raw-bytes' && !useMediaPipeline);
-        const includeContentMetadata = useRawBytesDirectContent ? false : (this._wasmPassThroughTermContent || !this._wasmSkipUnusedTermContentEncoding);
+        const useDirectNoMediaChunkImport = streamToChunkHandler && useRawBytesDirectContent && !useMediaPipeline;
+        const includeContentMetadata = useDirectNoMediaChunkImport ? true : (useRawBytesDirectContent ? false : (this._wasmPassThroughTermContent || !this._wasmSkipUnusedTermContentEncoding));
         const minimalDecode = (
             this._wasmCanonicalRowsFastPath &&
             !useMediaPipeline &&
@@ -3169,6 +3171,58 @@ export class DictionaryImporter {
                     const requirementsForChunk = useMediaPipeline ? [] : null;
                     if (requirementsForChunk !== null) {
                         requirementsForChunk.length = 0;
+                    }
+                    if (useDirectNoMediaChunkImport) {
+                        const tMaterializationStart = Date.now();
+                        const rowCount = parsedRows.length;
+                        /** @type {Uint8Array[]} */
+                        const expressionBytesList = new Array(rowCount);
+                        /** @type {Uint8Array[]} */
+                        const readingBytesList = new Array(rowCount);
+                        const readingEqualsExpressionList = new Uint8Array(rowCount);
+                        const scoreList = new Int32Array(rowCount);
+                        const sequenceList = new Int32Array(rowCount);
+                        /** @type {Uint8Array[]} */
+                        const contentBytesList = new Array(rowCount);
+                        const contentHash1List = new Uint32Array(rowCount);
+                        const contentHash2List = new Uint32Array(rowCount);
+                        for (let i = 0; i < rowCount; ++i) {
+                            const row = /** @type {ParsedTermBankChunkRow} */ (parsedRows[i]);
+                            const expression = row.expression;
+                            const reading = row.reading.length > 0 ? row.reading : expression;
+                            const readingEqualsExpression = reading === expression;
+                            expressionBytesList[i] = this._textEncoder.encode(expression);
+                            readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
+                            readingBytesList[i] = readingEqualsExpression ? EMPTY_UINT8_ARRAY : this._textEncoder.encode(reading);
+                            scoreList[i] = row.score | 0;
+                            sequenceList[i] = typeof row.sequence === 'number' ? row.sequence : -1;
+                            contentBytesList[i] = row.termEntryContentBytes;
+                            contentHash1List[i] = row.termEntryContentHash1 ?? 0;
+                            contentHash2List[i] = row.termEntryContentHash2 ?? 0;
+                        }
+                        importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
+                        const tChunkSinkStart = Date.now();
+                        await /** @type {(termList: {dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentDictNameList: null, uniformContentDictName: string}, requirements: null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(
+                            {
+                                dictionary: dictionaryTitle,
+                                rowCount,
+                                dictionaryTotalRows: chunkProgress.totalRows,
+                                expressionBytesList,
+                                readingBytesList,
+                                readingEqualsExpressionList,
+                                scoreList,
+                                sequenceList,
+                                contentBytesList,
+                                contentHash1List,
+                                contentHash2List,
+                                contentDictNameList: null,
+                                uniformContentDictName: 'raw',
+                            },
+                            null,
+                            chunkProgress,
+                        );
+                        importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
+                        return;
                     }
                     /** @type {import('dictionary-database').DatabaseTermEntry[]} */
                     const termListChunk = [];

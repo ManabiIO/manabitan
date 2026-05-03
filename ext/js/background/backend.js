@@ -1851,12 +1851,17 @@ export class Backend {
     async _onApiSetAllSettings({value, source}) {
         this._optionsUtil.validate(value);
         const previousOptions = this._options;
+        const previousEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(previousOptions);
         this._options = clone(value);
         try {
             await this._saveOptions(source);
         } catch (e) {
             this._options = previousOptions;
             throw e;
+        }
+        const nextEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(this._options);
+        if (!this._areStringArraysEqual(previousEnabledDictionaries, nextEnabledDictionaries)) {
+            this._warmEnabledDictionaryLookupCaches('settings-enabled-dictionaries-changed');
         }
     }
 
@@ -3858,6 +3863,35 @@ export class Backend {
             .finally(() => {
                 this._dictionaryLookupWarmPromise = null;
             });
+    }
+
+    /**
+     * @param {import('settings').Options|null} options
+     * @returns {string[]}
+     */
+    _getCurrentProfileEnabledDictionaryNames(options) {
+        if (options === null) { return []; }
+        const {profiles, profileCurrent} = options;
+        const profile = Array.isArray(profiles) ? profiles[profileCurrent] : null;
+        const dictionaries = Array.isArray(profile?.options?.dictionaries) ? profile.options.dictionaries : [];
+        return dictionaries
+            .filter((dictionary) => dictionary.enabled)
+            .map((dictionary) => dictionary.name)
+            .filter((value, index, array) => value.length > 0 && array.indexOf(value) === index)
+            .sort();
+    }
+
+    /**
+     * @param {string[]} a
+     * @param {string[]} b
+     * @returns {boolean}
+     */
+    _areStringArraysEqual(a, b) {
+        if (a.length !== b.length) { return false; }
+        for (let i = 0, ii = a.length; i < ii; ++i) {
+            if (a[i] !== b[i]) { return false; }
+        }
+        return true;
     }
 
     /**
