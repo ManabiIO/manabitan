@@ -3760,7 +3760,11 @@ export class Backend {
         const requiresTermProbe = termCount > 0;
         const probe = (installed && requiresTermProbe) ? await this._dictionaryDatabase.getDictionaryTermProbe(normalizedTitle) : null;
         const directMatch = (probe !== null && requiresTermProbe) ? await this._probeDictionaryVisibilityDirect(normalizedTitle, probe) : !requiresTermProbe;
-        const translatorMatch = (probe !== null && directMatch && requiresTermProbe) ? await this._probeDictionaryVisibilityTranslator(normalizedTitle, probe, options) : !requiresTermProbe;
+        const translatorMatch = (
+            !requireEnabledForActiveProfile ?
+                directMatch :
+                ((probe !== null && directMatch && requiresTermProbe) ? await this._probeDictionaryVisibilityTranslator(normalizedTitle, probe, options) : !requiresTermProbe)
+        );
         let reason = null;
         if (!installed) {
             reason = 'dictionary-not-installed';
