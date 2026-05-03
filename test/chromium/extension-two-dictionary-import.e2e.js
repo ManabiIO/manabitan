@@ -2422,8 +2422,47 @@ async function waitForPageFrontendScanReady(page, timeoutMs = 10000) {
     return await getPageFrontendDebugState(page);
 }
 
+async function waitForPageFrontendHoverPrewarmReady(page, timeoutMs = 5000) {
+    await waitForPageFrontendScanReady(page, timeoutMs);
+    await page.waitForFunction(() => {
+        const data = document.documentElement?.dataset ?? {};
+        return (
+            data.manabitanPopupPrewarmReady === 'true' ||
+            data.manabitanPopupPrewarmSettled === 'true' ||
+            data.manabitanPopupPrewarmTimedOut === 'true'
+        );
+    }, undefined, {timeout: timeoutMs});
+    return await getPageFrontendDebugState(page);
+}
+
+async function waitForPopupContentState(popupFrame, timeoutMs = 5000) {
+    const startedAt = safePerformance.now();
+    while (safePerformance.now() - startedAt < timeoutMs) {
+        const state = await popupFrame.evaluate(() => {
+            const entriesNode = document.querySelector('#dictionary-entries');
+            const noResultsNode = document.querySelector('#no-results');
+            const noDictionariesNode = document.querySelector('#no-dictionaries');
+            const entriesText = entriesNode instanceof HTMLElement ? (entriesNode.textContent || '').replaceAll(/\s+/g, ' ').trim() : '';
+            return {
+                ready: (
+                    entriesText.length > 0 ||
+                    (noResultsNode instanceof HTMLElement && !noResultsNode.hidden) ||
+                    (noDictionariesNode instanceof HTMLElement && !noDictionariesNode.hidden)
+                ),
+            };
+        });
+        if (state.ready === true) { return; }
+        await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    throw new Error(`Timed out waiting ${timeoutMs}ms for popup content state`);
+}
+
 async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) {
+    const timing = {};
+    let markStart = safePerformance.now();
     await waitForPageFrontendScanReady(page);
+    timing.waitFrontendReadyMs = Math.max(0, safePerformance.now() - markStart);
+    markStart = safePerformance.now();
     const target = page.locator(targetSelector).first();
     await target.waitFor({state: 'visible', timeout: 10000});
     await target.scrollIntoViewIfNeeded();
@@ -2433,6 +2472,8 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
     if (!pageHasFocus) {
         await page.mouse.click(2, 2);
     }
+    timing.focusAndTargetMs = Math.max(0, safePerformance.now() - markStart);
+    markStart = safePerformance.now();
     const box = await target.boundingBox();
     if (box === null) {
         throw new Error(`Unable to resolve bounding box for selector ${targetSelector}`);
@@ -2471,6 +2512,7 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
             root.dataset.manabitanE2eHoverRangeError = e instanceof Error ? e.message : `${e}`;
         }
     }, {hoverX, hoverY});
+    timing.hoverProbeSetupMs = Math.max(0, safePerformance.now() - markStart);
     const modifierCandidates = [null, 'Shift', 'Alt', 'Control'];
     for (const modifier of modifierCandidates) {
         if (modifier !== null) {
@@ -2478,22 +2520,37 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
         }
         try {
             for (let attempt = 0; attempt < 3; ++attempt) {
+                const attemptTiming = {attempt: attempt + 1};
+                let attemptMarkStart = safePerformance.now();
                 await page.mouse.move(resetX, hoverY, {steps: moveAwaySteps});
                 await page.waitForTimeout(settleDelayMs);
                 await page.mouse.move(hoverX, hoverY, {steps: hoverSteps});
+                attemptTiming.pointerMoveMs = Math.max(0, safePerformance.now() - attemptMarkStart);
+                attemptMarkStart = safePerformance.now();
                 const popupFrameHandle = await waitForVisiblePopupFrameHandle(page, popupTimeoutMs);
+                attemptTiming.popupFrameWaitMs = Math.max(0, safePerformance.now() - attemptMarkStart);
                 if (popupFrameHandle === null) {
+                    timing.lastAttempt = attemptTiming;
                     continue;
                 }
+                attemptMarkStart = safePerformance.now();
                 const popupFrame = await popupFrameHandle.contentFrame();
+                attemptTiming.contentFrameMs = Math.max(0, safePerformance.now() - attemptMarkStart);
                 if (popupFrame === null) {
+                    timing.lastAttempt = attemptTiming;
                     continue;
                 }
-                await popupFrame.waitForSelector('#dictionary-entries, #no-results, #no-dictionaries', {timeout: 5000});
+                attemptMarkStart = safePerformance.now();
+                await waitForPopupContentState(popupFrame, 5000);
+                attemptTiming.popupSelectorWaitMs = Math.max(0, safePerformance.now() - attemptMarkStart);
+                attemptMarkStart = safePerformance.now();
                 const popupText = (await popupFrame.locator('body').textContent()) ?? '';
+                attemptTiming.popupTextReadMs = Math.max(0, safePerformance.now() - attemptMarkStart);
                 if (popupText.trim().length === 0) {
+                    timing.lastAttempt = attemptTiming;
                     continue;
                 }
+                attemptMarkStart = safePerformance.now();
                 const popupState = await popupFrame.evaluate(() => {
                     const entriesNode = document.querySelector('#dictionary-entries');
                     const noResultsNode = document.querySelector('#no-results');
@@ -2506,6 +2563,8 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
                         entriesTextPreview: entriesText.slice(0, 200),
                     };
                 });
+                attemptTiming.popupStateReadMs = Math.max(0, safePerformance.now() - attemptMarkStart);
+                timing.lastAttempt = attemptTiming;
                 return {
                     popupText,
                     usedModifier: modifier,
@@ -2513,6 +2572,7 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
                     noResultsVisible: popupState?.noResultsVisible === true,
                     noDictionariesVisible: popupState?.noDictionariesVisible === true,
                     entriesTextPreview: String(popupState?.entriesTextPreview || ''),
+                    timing,
                 };
             }
         } finally {
@@ -4377,7 +4437,7 @@ async function main() {
                     }
                     await page.goto(`${localServer.baseUrl}/wagahai-neko.html`);
                     await setWagahaiHoverFixtureTerms(page, [searchVerificationTerm]);
-                    await waitForPageFrontendScanReady(page);
+                    const prewarmDebugState = await waitForPageFrontendHoverPrewarmReady(page);
                     const scanTargets = [
                         '#target-cat',
                         '#target-name',
@@ -4410,6 +4470,7 @@ async function main() {
                             noDictionariesVisible: hoverResult.noDictionariesVisible === true,
                             hasDictionaryResult,
                             entriesTextPreview: hoverResult.entriesTextPreview,
+                            timing: hoverResult.timing,
                         });
                         if (!hasDictionaryResult) {
                             throw new Error(
@@ -4424,6 +4485,7 @@ async function main() {
                     return {
                         iterationCount: iterations.length,
                         iterations,
+                        prewarmDebugState,
                     };
                 });
                 hoverSpeedStressResult = hoverSpeedStressProfile.result;
