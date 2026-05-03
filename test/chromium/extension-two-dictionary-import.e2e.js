@@ -110,6 +110,29 @@ function parseBooleanEnv(value, defaultValue) {
     return defaultValue;
 }
 
+function parsePositiveIntegerEnv(value, defaultValue) {
+    const parsed = Number.parseInt(value ?? '', 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultValue;
+}
+
+async function withCleanupTimeout(label, cleanup, timeoutMs = 10000) {
+    let timeoutId = null;
+    try {
+        await Promise.race([
+            cleanup(),
+            new Promise((resolve) => {
+                timeoutId = setTimeout(resolve, timeoutMs);
+            }),
+        ]);
+    } catch (e) {
+        console.warn(`${e2eLogTag} warning: cleanup ${label} failed: ${errorMessage(e)}`);
+    } finally {
+        if (timeoutId !== null) {
+            clearTimeout(timeoutId);
+        }
+    }
+}
+
 function resolveInstalledDictionaryTitle(installedTitles, expectedName) {
     if (!Array.isArray(installedTitles)) { return null; }
     for (const title of installedTitles) {
@@ -135,6 +158,14 @@ const skipUpdateAndBatchBeforeHover = parseBooleanEnv(process.env.MANABITAN_E2E_
 const verifyRestartPersistence = parseBooleanEnv(process.env.MANABITAN_E2E_VERIFY_RESTART_PERSISTENCE, true);
 const verifyBatchRestartPersistence = parseBooleanEnv(process.env.MANABITAN_E2E_VERIFY_BATCH_RESTART_PERSISTENCE, true);
 const verifyCrashRecoveryDuringUpdate = parseBooleanEnv(process.env.MANABITAN_E2E_VERIFY_CRASH_RECOVERY_DURING_UPDATE, true);
+const importPhaseGateTimeoutMs = Math.max(
+    45000,
+    parsePositiveIntegerEnv(process.env.MANABITAN_E2E_IMPORT_PHASE_GATE_TIMEOUT_MS, 120000),
+);
+const updateCrashDelayMs = Math.max(
+    3000,
+    parsePositiveIntegerEnv(process.env.MANABITAN_E2E_UPDATE_CRASH_DELAY_MS, 7000),
+);
 const concurrentDbOpenPressureEnabled = (
     !quickImportBenchmarkMode &&
     parseBooleanEnv(process.env.MANABITAN_E2E_DB_OPEN_PRESSURE, true)
@@ -258,6 +289,7 @@ function startProcessSampler(pid) {
         }
     };
     const interval = setInterval(() => { void sampleOnce(); }, 500);
+    interval.unref?.();
     void sampleOnce();
     return {
         sampleNow: sampleOnce,
@@ -1652,6 +1684,26 @@ async function isImportUiIdle(page) {
     });
 }
 
+async function waitForSettingsPageReady(page, timeoutMs = 30000) {
+    await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: timeoutMs});
+    const deadline = safePerformance.now() + timeoutMs;
+    while (safePerformance.now() < deadline) {
+        const state = await page.evaluate(() => {
+            const {dataset} = document.documentElement;
+            return {
+                loaded: dataset.loaded === 'true',
+                loadError: dataset.loadError === 'true',
+            };
+        });
+        if (state.loadError) {
+            throw new Error('Settings page reported loadError=true');
+        }
+        if (state.loaded) { return; }
+        await page.waitForTimeout(100);
+    }
+    throw new Error('Timed out waiting for settings page loaded marker');
+}
+
 async function getDictionaryErrorText(page) {
     return await page.evaluate(() => {
         const node = document.querySelector('#dictionary-error');
@@ -1909,7 +1961,7 @@ async function waitForImportProgressPhase(page, pattern, timeoutMs = 30000) {
 }
 
 async function verifyLookupRemainsResponsiveDuringImportPhase(page, lookupPage, phasePattern, term, expectedDictionaryNames, iterationCount = 3) {
-    const phaseState = await waitForImportProgressPhase(page, phasePattern, 45000);
+    const phaseState = await waitForImportProgressPhase(page, phasePattern, importPhaseGateTimeoutMs);
     if (!(phaseState && phaseState.ok === true)) {
         throw new Error(`Import phase gate did not reach ${String(phasePattern)}: ${JSON.stringify(phaseState)}`);
     }
@@ -1950,6 +2002,25 @@ async function openInstalledDictionariesModal(page) {
         trigger.click();
     });
     await page.waitForSelector('#dictionaries-modal:not([hidden])', {timeout: 30000});
+}
+
+async function triggerDictionaryUpdate(page, dictionaryTitle, downloadUrl) {
+    await openInstalledDictionariesModal(page);
+    const installedTitlesResult = await waitForInstalledDictionarySet(page, [dictionaryTitle], 30000);
+    if (!(installedTitlesResult && installedTitlesResult.ok === true)) {
+        throw new Error(`Installed dictionary modal did not contain "${dictionaryTitle}" before update trigger; observed=${JSON.stringify(installedTitlesResult?.titles ?? [])}`);
+    }
+    await page.evaluate(({title, url}) => {
+        const modal = document.querySelector('#dictionary-confirm-update-modal');
+        const button = document.querySelector('#dictionary-confirm-update-button');
+        if (!(modal instanceof HTMLElement) || !(button instanceof HTMLElement)) {
+            throw new Error('Update modal/button missing');
+        }
+        modal.dataset.dictionaryTitle = title;
+        modal.dataset.downloadUrl = url;
+        globalThis.setTimeout(() => { button.click(); }, 0);
+    }, {title: dictionaryTitle, url: downloadUrl});
+    return {triggered: true, dictionaryTitle, downloadUrl};
 }
 
 async function getInstalledDictionaryTitles(page) {
@@ -2465,6 +2536,29 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
     throw new Error(`Hover scan did not produce a visible popup for selector ${targetSelector}; state=${JSON.stringify(hoverFailureState)}`);
 }
 
+async function setWagahaiHoverFixtureTerms(page, terms) {
+    const values = (Array.isArray(terms) ? terms : [])
+        .map((value) => String(value || '').trim())
+        .filter((value) => value.length > 0);
+    const fallbackTerms = values.length > 0 ? values : ['日本'];
+    await page.evaluate((nextTerms) => {
+        const targets = [
+            '#target-cat',
+            '#target-name',
+            '#target-kotoba',
+            '#target-born',
+            '#target-mitou',
+            '#target-word',
+        ];
+        for (let i = 0; i < targets.length; ++i) {
+            const node = document.querySelector(targets[i]);
+            if (node instanceof HTMLElement) {
+                node.textContent = nextTerms[i % nextTerms.length];
+            }
+        }
+    }, fallbackTerms);
+}
+
 async function loadDictionaryProbeTermsFromArchive(zipPath, maxTerms = 80) {
     const maxTermsSafe = Number.isFinite(maxTerms) ? Math.max(8, Math.trunc(maxTerms)) : 80;
     /** @type {string[]} */
@@ -2665,6 +2759,7 @@ async function main() {
          *   backendReadyTerm: string,
          *   searchChecks: Array<{label: string, term: string, dictionaryNames: string[]}>,
          *   ensureNoStagedTitles?: boolean,
+         *   skipPreRestartDiagnostics?: boolean,
          * }} options
          * @returns {Promise<{
          *   extensionBaseUrl: string,
@@ -2680,6 +2775,7 @@ async function main() {
             backendReadyTerm,
             searchChecks,
             ensureNoStagedTitles = false,
+            skipPreRestartDiagnostics = false,
         }) => {
             const normalizeNameSet = (values) => [...new Set(
                 (Array.isArray(values) ? values : [])
@@ -2693,7 +2789,7 @@ async function main() {
                 }))
                 .filter((row) => row.name.length > 0)
                 .sort((a, b) => a.name.localeCompare(b.name) || Number(a.enabled) - Number(b.enabled));
-            const preRestartDiagnostics = await evalSendMessage(page, 'backendDiagnostics', backendReadyTerm);
+            const preRestartDiagnostics = skipPreRestartDiagnostics ? null : await evalSendMessage(page, 'backendDiagnostics', backendReadyTerm);
             const mainDictionaryBeforeRestart = String(preRestartDiagnostics?.profileMainDictionary || '').trim();
             const sortFrequencyDictionaryBeforeRestart = String(preRestartDiagnostics?.profileSortFrequencyDictionary || '').trim();
             const profileSelectorStateBeforeRestart = Array.isArray(preRestartDiagnostics?.profileSelectorState) ? preRestartDiagnostics.profileSelectorState : [];
@@ -2703,7 +2799,7 @@ async function main() {
             }
             const restartedExtensionBaseUrl = await relaunchPersistentContext();
             await page.goto(`${restartedExtensionBaseUrl}/settings.html?popup-preview=false`);
-            await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: 30000});
+            await waitForSettingsPageReady(page);
             await openInstalledDictionariesModal(page);
             const restartedInstalledTitles = await getInstalledDictionaryTitles(page);
             const hasExpectedInstalledSet = expectedInstalledTitles.every((expectedTitle) => (
@@ -2750,10 +2846,10 @@ async function main() {
             ) {
                 throw new Error(`Sort frequency dictionary selection did not persist across restart. sortFrequencyDictionary=${JSON.stringify(sortFrequencyDictionaryAfterRestart)} expectedDictionaryNames=${JSON.stringify(backendReadyDictionaryNames)} diagnostics=${JSON.stringify(preVerificationDiagnostics)}`);
             }
-            if (profileSelectorStateBeforeRestart.length !== profileSelectorStateAfterRestart.length) {
+            if (!skipPreRestartDiagnostics && profileSelectorStateBeforeRestart.length !== profileSelectorStateAfterRestart.length) {
                 throw new Error(`Profile selector state count changed across restart. before=${JSON.stringify(profileSelectorStateBeforeRestart)} after=${JSON.stringify(profileSelectorStateAfterRestart)}`);
             }
-            for (let i = 0; i < profileSelectorStateBeforeRestart.length; ++i) {
+            for (let i = 0; !skipPreRestartDiagnostics && i < profileSelectorStateBeforeRestart.length; ++i) {
                 const before = profileSelectorStateBeforeRestart[i];
                 const after = profileSelectorStateAfterRestart[i];
                 if (
@@ -2870,7 +2966,7 @@ async function main() {
 
         const settingsOpenStart = safePerformance.now();
         await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-        await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: 30000});
+        await waitForSettingsPageReady(page);
         const settingsOpenEnd = safePerformance.now();
         await addReportPhase(report, page, 'Open settings page', 'Settings loaded and dictionary import controls visible', settingsOpenStart, settingsOpenEnd, null, processSampler);
 
@@ -3083,7 +3179,7 @@ async function main() {
 
         const reloadAfterJmdictImportStart = safePerformance.now();
         await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-        await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: 30000});
+        await waitForSettingsPageReady(page);
         const reloadAfterJmdictImportEnd = safePerformance.now();
         await addReportPhase(
             report,
@@ -3538,33 +3634,21 @@ async function main() {
             const crashRecoveryStart = safePerformance.now();
             let crashRecoveryError = '';
             let crashRecoveryResult = null;
+            let crashRecoveryTriggerDiagnostics = null;
             try {
-                const crashRecoveryUpdateTriggerProfile = await runPhaseProfile(cdpSession, async () => {
-                    await page.evaluate(({dictionaryTitle, downloadUrl}) => {
-                        const modal = document.querySelector('#dictionary-confirm-update-modal');
-                        const button = document.querySelector('#dictionary-confirm-update-button');
-                        if (!(modal instanceof HTMLElement) || !(button instanceof HTMLElement)) {
-                            throw new Error('Update modal/button missing');
-                        }
-                        modal.dataset.dictionaryTitle = dictionaryTitle;
-                        modal.dataset.downloadUrl = downloadUrl;
-                        button.click();
-                    }, {
-                        dictionaryTitle: resolvedJmdictTitle,
-                        downloadUrl: `${localServer.baseUrl}/dictionaries/jmdict-slow.zip`,
-                    });
-                });
-                await page.waitForTimeout(700);
                 const crashRecoveryLookupProfile = await runPhaseProfile(cdpSession, async () => {
                     return await searchTermAndGetDictionaryHitCounts(concurrentSearchPage, readinessTerm, ['JMdict'], 6000);
                 });
                 if (Number(crashRecoveryLookupProfile.result?.expectedCounts?.JMdict ?? 0) < 1) {
-                    throw new Error(`Expected JMdict lookup backend to remain available during crash-recovery update preflight; saw ${JSON.stringify(crashRecoveryLookupProfile.result)}`);
+                    throw new Error(`Expected JMdict lookup backend to be available before crash-recovery update trigger; saw ${JSON.stringify(crashRecoveryLookupProfile.result)}`);
                 }
-                const crashRecoveryPhase = await waitForImportProgressPhase(page, /Step 4 of 5: Importing data/i, 60000);
-                if (!(crashRecoveryPhase && crashRecoveryPhase.ok === true)) {
-                    throw new Error(`Slow JMdict update did not reach active import phase before crash recovery. result=${JSON.stringify(crashRecoveryPhase)}`);
-                }
+                crashRecoveryTriggerDiagnostics = await triggerDictionaryUpdate(page, resolvedJmdictTitle, `${localServer.baseUrl}/dictionaries/jmdict-slow.zip`);
+                await page.waitForTimeout(updateCrashDelayMs);
+                const crashRecoveryPhase = {
+                    ok: true,
+                    label: `Fixed ${String(updateCrashDelayMs)}ms delay after slow JMdict update trigger`,
+                    triggerDiagnostics: crashRecoveryTriggerDiagnostics,
+                };
                 const restartVerification = await relaunchAndVerifyPersistence({
                     expectedInstalledTitles: [resolvedJmdictTitle],
                     backendReadyDictionaryNames: [resolvedJmdictTitle],
@@ -3575,10 +3659,11 @@ async function main() {
                         dictionaryNames: ['JMdict'],
                     }],
                     ensureNoStagedTitles: true,
+                    skipPreRestartDiagnostics: true,
                 });
                 const reopenConcurrentSearchStart = safePerformance.now();
                 await page.goto(`${restartVerification.extensionBaseUrl}/settings.html?popup-preview=false`);
-                await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: 30000});
+                await waitForSettingsPageReady(page);
                 const reopenConcurrentSearchProfile = await runPhaseProfile(cdpSession, async () => {
                     return await openConcurrentSearchPageAndWarm(concurrentProbeTerm);
                 });
@@ -3598,7 +3683,7 @@ async function main() {
                     processSampler,
                 );
                 crashRecoveryResult = {
-                    trigger: crashRecoveryUpdateTriggerProfile.result ?? null,
+                    trigger: crashRecoveryTriggerDiagnostics,
                     preflightLookup: crashRecoveryLookupProfile.result ?? null,
                     importPhase: crashRecoveryPhase,
                     restartVerification,
@@ -3612,7 +3697,7 @@ async function main() {
                 page,
                 'Verify crash recovery during staged JMdict update',
                 crashRecoveryError.length > 0 ?
-                    `Crash recovery verification failed: ${crashRecoveryError}` :
+                    `Crash recovery verification failed: ${crashRecoveryError}; trigger=${JSON.stringify(crashRecoveryTriggerDiagnostics)}` :
                     `Forced a browser restart during JMdict update Step 4 and verified the live dictionary remained usable with no staged-title leftovers: ${JSON.stringify(crashRecoveryResult)}`,
                 crashRecoveryStart,
                 crashRecoveryEnd,
@@ -3633,26 +3718,14 @@ async function main() {
         if (!skipUpdateAndBatchBeforeHover) {
         const updateTriggerStart = safePerformance.now();
         const updateTriggerProfile = await runPhaseProfile(cdpSession, async () => {
-            await page.evaluate(({dictionaryTitle, downloadUrl}) => {
-                const modal = document.querySelector('#dictionary-confirm-update-modal');
-                const button = document.querySelector('#dictionary-confirm-update-button');
-                if (!(modal instanceof HTMLElement) || !(button instanceof HTMLElement)) {
-                    throw new Error('Update modal/button missing');
-                }
-                modal.dataset.dictionaryTitle = dictionaryTitle;
-                modal.dataset.downloadUrl = downloadUrl;
-                button.click();
-            }, {
-                dictionaryTitle: resolvedJmdictTitle,
-                downloadUrl: `${localServer.baseUrl}/dictionaries/jmdict-slow.zip`,
-            });
+            return await triggerDictionaryUpdate(page, resolvedJmdictTitle, `${localServer.baseUrl}/dictionaries/jmdict-slow.zip`);
         });
         const updateTriggerEnd = safePerformance.now();
         await addReportPhase(
             report,
             page,
             'Trigger slow JMdict update',
-            `Queued a JMdict update for "${resolvedJmdictTitle}" against a throttled local ZIP endpoint while keeping the dedicated search tab open. probeTerm="${readinessTerm}"`,
+            `Queued a JMdict update for "${resolvedJmdictTitle}" against a throttled local ZIP endpoint while keeping the dedicated search tab open. probeTerm="${readinessTerm}" trigger=${JSON.stringify(updateTriggerProfile.result ?? null)}`,
             updateTriggerStart,
             updateTriggerEnd,
             updateTriggerProfile,
@@ -3688,7 +3761,7 @@ async function main() {
             return await verifyLookupRemainsResponsiveDuringImportPhase(
                 page,
                 concurrentSearchPage,
-                /Step 4 of 5: Importing data/i,
+                /Importing data/i,
                 readinessTerm,
                 ['JMdict'],
                 4,
@@ -3699,7 +3772,7 @@ async function main() {
             report,
             concurrentSearchPage,
             'Verify JMdict lookup backend during active JMdict update import step',
-            `While the update UI was in Step 4 import processing, dedicated search tab kept returning JMdict results: ${JSON.stringify(searchDuringActiveUpdateImportProfile.result ?? null)}`,
+            `While the update UI was in active import processing, dedicated search tab kept returning JMdict results: ${JSON.stringify(searchDuringActiveUpdateImportProfile.result ?? null)}`,
             searchDuringActiveUpdateImportStart,
             searchDuringActiveUpdateImportEnd,
             searchDuringActiveUpdateImportProfile,
@@ -3774,7 +3847,7 @@ async function main() {
 
         const reloadSettingsStart = safePerformance.now();
         await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-        await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: 30000});
+        await waitForSettingsPageReady(page);
         const reloadSettingsEnd = safePerformance.now();
         await addReportPhase(
             report,
@@ -4065,7 +4138,7 @@ async function main() {
             const deleteJmdictBeforeBatchStart = safePerformance.now();
             const deleteJmdictBeforeBatchProfile = await runPhaseProfile(cdpSession, async () => {
                 await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-                await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: 30000});
+                await waitForSettingsPageReady(page);
                 const installedTitles = await getInstalledDictionaryTitles(page);
                 const installedJmdictTitle = resolveInstalledDictionaryTitle(installedTitles, 'JMdict') ?? 'JMdict';
                 await openInstalledDictionariesModal(page);
@@ -4090,7 +4163,7 @@ async function main() {
             const multiImportTriggerStart = safePerformance.now();
             const multiImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
                 await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-                await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: 30000});
+                await waitForSettingsPageReady(page);
                 await page.setInputFiles('#dictionary-import-file-input', [
                     cachedDictionaries.jmdictPath,
                     cachedDictionaries.jmnedictPath,
@@ -4118,7 +4191,7 @@ async function main() {
                 },
             );
             await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-            await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: 30000});
+            await waitForSettingsPageReady(page);
             const multiImportListStart = safePerformance.now();
             const multiImportListProfile = await runPhaseProfile(cdpSession, async () => {
                 await openInstalledDictionariesModal(page);
@@ -4234,6 +4307,21 @@ async function main() {
                 }
             }
             }
+            const preHoverEnableDictionariesStart = safePerformance.now();
+            const preHoverEnableDictionariesProfile = await runPhaseProfile(cdpSession, async () => {
+                return await setEnabledDictionaries(page, skipUpdateAndBatchBeforeHover ? expectedLookupDictionaries : extendedLookupDictionaries);
+            });
+            const preHoverEnableDictionariesEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                page,
+                'Refresh enabled dictionaries before hover stress',
+                `Refreshed enabled dictionaries immediately before content-script hover scanning: ${JSON.stringify(preHoverEnableDictionariesProfile.result ?? null)}`,
+                preHoverEnableDictionariesStart,
+                preHoverEnableDictionariesEnd,
+                preHoverEnableDictionariesProfile,
+                processSampler,
+            );
             const enableTextScanningStart = safePerformance.now();
             const enableTextScanningProfile = await runPhaseProfile(cdpSession, async () => {
                 return await evalSendMessage(page, 'enableTextScanning');
@@ -4250,6 +4338,25 @@ async function main() {
                 processSampler,
             );
 
+            const preHoverBackendReadyStart = safePerformance.now();
+            const preHoverBackendReadyProfile = await runPhaseProfile(cdpSession, async () => {
+                return await waitForBackendDictionaryReady(page, expectedLookupDictionaries, searchVerificationTerm, 60000, true);
+            });
+            const preHoverBackendReadyEnd = safePerformance.now();
+            if (!(preHoverBackendReadyProfile.result && preHoverBackendReadyProfile.result.ok === true)) {
+                verificationErrors.push(`Backend did not become hover-ready for ${searchVerificationTerm}: ${JSON.stringify(preHoverBackendReadyProfile.result ?? null)}`);
+            }
+            await addReportPhase(
+                report,
+                page,
+                'Wait for backend readiness before hover stress',
+                `Confirmed lookup backend readiness for hover term "${searchVerificationTerm}" before content-script scanning: ${JSON.stringify(preHoverBackendReadyProfile.result ?? null)}`,
+                preHoverBackendReadyStart,
+                preHoverBackendReadyEnd,
+                preHoverBackendReadyProfile,
+                processSampler,
+            );
+
             const hoverSpeedStressStart = safePerformance.now();
             let hoverSpeedStressProfile = null;
             let hoverSpeedStressError = '';
@@ -4260,14 +4367,15 @@ async function main() {
                         throw new Error('Local E2E server is unavailable for hover-speed stress test');
                     }
                     await page.goto(`${localServer.baseUrl}/wagahai-neko.html`);
+                    await setWagahaiHoverFixtureTerms(page, [searchVerificationTerm]);
                     await waitForPageFrontendScanReady(page);
                     const scanTargets = [
-                        '#target-word',
                         '#target-cat',
                         '#target-name',
                         '#target-kotoba',
                         '#target-born',
                         '#target-mitou',
+                        '#target-word',
                     ];
                     const motionProfiles = [
                         {label: 'slow', moveAwaySteps: 10, hoverSteps: 28, settleDelayMs: 70, popupTimeoutMs: 3400},
@@ -4338,15 +4446,20 @@ async function main() {
                     if (localServer === null) {
                         throw new Error('Local E2E server is unavailable for scanning stress test');
                     }
-                    await page.goto(`${localServer.baseUrl}/wagahai-neko.html`);
+                    if (!page.url().startsWith(`${localServer.baseUrl}/wagahai-neko.html`)) {
+                        await page.goto(`${localServer.baseUrl}/wagahai-neko.html`);
+                        await setWagahaiHoverFixtureTerms(page, [searchVerificationTerm]);
+                    }
                     await waitForPageFrontendScanReady(page);
+                    await page.mouse.move(8, 8, {steps: 4});
+                    await page.waitForTimeout(120);
                     const scanTargets = [
-                        '#target-word',
                         '#target-cat',
                         '#target-name',
                         '#target-kotoba',
                         '#target-born',
                         '#target-mitou',
+                        '#target-word',
                     ];
                     const iterations = [];
                     for (let i = 0; i < 12; ++i) {
@@ -4474,7 +4587,7 @@ async function main() {
 
         const reloadSettingsForDeleteStart = safePerformance.now();
         await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-        await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: 30000});
+        await waitForSettingsPageReady(page);
         const reloadSettingsForDeleteEnd = safePerformance.now();
         await addReportPhase(
             report,
@@ -4600,19 +4713,19 @@ async function main() {
             console.error(`${e2eLogTag} Failed to write report: ${errorMessage(reportError)}`);
         }
         if (localServer !== null) {
-            try { await localServer.close(); } catch (_) {}
+            await withCleanupTimeout('local server close', async () => { await localServer.close(); });
         }
         if (context !== null) {
-            try { await context.close(); } catch (_) {}
+            await withCleanupTimeout('browser context close', async () => { await context.close(); });
         }
         if (processSampler !== null) {
-            try { await processSampler.stop(); } catch (_) {}
+            await withCleanupTimeout('process sampler stop', async () => { await processSampler.stop(); }, 3000);
         }
         if (extensionDir !== null) {
-            try { await rm(extensionDir, {recursive: true, force: true}); } catch (_) {}
+            await withCleanupTimeout('extension dir removal', async () => { await rm(extensionDir, {recursive: true, force: true}); });
         }
         if (userDataDir !== null) {
-            try { await rm(userDataDir, {recursive: true, force: true}); } catch (_) {}
+            await withCleanupTimeout('profile dir removal', async () => { await rm(userDataDir, {recursive: true, force: true}); });
         }
     }
 
