@@ -3186,14 +3186,26 @@ export class DictionaryImporter {
                         const contentBytesList = new Array(rowCount);
                         const contentHash1List = new Uint32Array(rowCount);
                         const contentHash2List = new Uint32Array(rowCount);
+                        const termRecordPlanBuilder = createArtifactTermRecordPreinternedPlanBuilder();
+                        const termRecordExpressionIndexes = new Uint32Array(rowCount);
+                        const termRecordReadingIndexes = new Uint32Array(rowCount);
                         for (let i = 0; i < rowCount; ++i) {
                             const row = /** @type {ParsedTermBankChunkRow} */ (parsedRows[i]);
                             const expression = row.expression;
                             const reading = row.reading.length > 0 ? row.reading : expression;
                             const readingEqualsExpression = reading === expression;
-                            expressionBytesList[i] = this._textEncoder.encode(expression);
+                            const expressionBytes = this._textEncoder.encode(expression);
+                            expressionBytesList[i] = expressionBytes;
                             readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
-                            readingBytesList[i] = readingEqualsExpression ? EMPTY_UINT8_ARRAY : this._textEncoder.encode(reading);
+                            termRecordExpressionIndexes[i] = termRecordPlanBuilder.internStringBytes(expressionBytes);
+                            if (readingEqualsExpression) {
+                                readingBytesList[i] = EMPTY_UINT8_ARRAY;
+                                termRecordReadingIndexes[i] = termRecordExpressionIndexes[i];
+                            } else {
+                                const readingBytes = this._textEncoder.encode(reading);
+                                readingBytesList[i] = readingBytes;
+                                termRecordReadingIndexes[i] = termRecordPlanBuilder.internStringBytes(readingBytes);
+                            }
                             scoreList[i] = row.score | 0;
                             sequenceList[i] = typeof row.sequence === 'number' ? row.sequence : -1;
                             contentBytesList[i] = row.termEntryContentBytes;
@@ -3217,6 +3229,7 @@ export class DictionaryImporter {
                                 contentHash2List,
                                 contentDictNameList: null,
                                 uniformContentDictName: 'raw',
+                                termRecordPreinternedPlan: termRecordPlanBuilder.buildPlan(termRecordExpressionIndexes, termRecordReadingIndexes, rowCount),
                             },
                             null,
                             chunkProgress,
