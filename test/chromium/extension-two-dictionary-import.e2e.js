@@ -2432,6 +2432,10 @@ async function waitForPageFrontendHoverPrewarmReady(page, timeoutMs = 5000) {
             data.manabitanPopupPrewarmTimedOut === 'true'
         );
     }, undefined, {timeout: timeoutMs});
+    await page.waitForFunction(() => {
+        const data = document.documentElement?.dataset ?? {};
+        return data.manabitanLookupPrewarmReady === 'true';
+    }, undefined, {timeout: timeoutMs});
     return await getPageFrontendDebugState(page);
 }
 
@@ -2529,6 +2533,7 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
                 attemptMarkStart = safePerformance.now();
                 const popupFrameHandle = await waitForVisiblePopupFrameHandle(page, popupTimeoutMs);
                 attemptTiming.popupFrameWaitMs = Math.max(0, safePerformance.now() - attemptMarkStart);
+                attemptTiming.hostDebugAfterPopupFrame = await getPageFrontendDebugState(page);
                 if (popupFrameHandle === null) {
                     timing.lastAttempt = attemptTiming;
                     continue;
@@ -2543,6 +2548,7 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
                 attemptMarkStart = safePerformance.now();
                 await waitForPopupContentState(popupFrame, 5000);
                 attemptTiming.popupSelectorWaitMs = Math.max(0, safePerformance.now() - attemptMarkStart);
+                attemptTiming.hostDebugAfterPopupContent = await getPageFrontendDebugState(page);
                 attemptMarkStart = safePerformance.now();
                 const popupText = (await popupFrame.locator('body').textContent()) ?? '';
                 attemptTiming.popupTextReadMs = Math.max(0, safePerformance.now() - attemptMarkStart);

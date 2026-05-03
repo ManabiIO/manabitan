@@ -85,6 +85,8 @@ export class Frontend {
         this._lastShowPromise = Promise.resolve();
         /** @type {?Promise<void>} */
         this._popupPrewarmPromise = null;
+        /** @type {?Promise<void>} */
+        this._lookupPrewarmPromise = null;
         /** @type {TextSourceGenerator} */
         this._textSourceGenerator = new TextSourceGenerator();
         /** @type {TextScanner} */
@@ -449,11 +451,13 @@ export class Frontend {
      */
     _onSearchSuccess({type, dictionaryEntries, sentence, inputInfo: {eventType, detail: inputInfoDetail}, textSource, optionsContext, detail, pageTheme}) {
         this._debugSearchSuccessCount += 1;
+        const searchSuccessAt = safePerformance.now();
         this._updatePageDebugState({
             lastSearchState: 'success',
             lastSearchEventType: eventType,
             lastSearchResultCount: dictionaryEntries.length,
             searchSuccessCount: this._debugSearchSuccessCount,
+            lastSearchSuccessAt: Math.round(searchSuccessAt),
         });
         this._stopClearSelectionDelayed();
         let focus = (eventType === 'mouseMove');
@@ -461,7 +465,7 @@ export class Frontend {
             const focus2 = inputInfoDetail.focus;
             if (typeof focus2 === 'boolean') { focus = focus2; }
         }
-        this._showContent(textSource, focus, dictionaryEntries, type, sentence, detail !== null ? detail.documentTitle : null, optionsContext, pageTheme);
+        this._showContent(textSource, focus, dictionaryEntries, type, sentence, detail !== null ? detail.documentTitle : null, optionsContext, pageTheme, searchSuccessAt);
     }
 
     /** */
@@ -679,11 +683,62 @@ export class Frontend {
      * @returns {void}
      */
     _startPopupPrewarmForHover() {
+        this._startLookupPrewarmForHover();
         if (this._popupPrewarmPromise !== null) { return; }
         this._popupPrewarmPromise = this._prewarmPopupForHover();
         void this._popupPrewarmPromise.finally(() => {
             this._popupPrewarmPromise = null;
         });
+    }
+
+    /**
+     * @returns {void}
+     */
+    _startLookupPrewarmForHover() {
+        if (this._lookupPrewarmPromise !== null) { return; }
+        this._lookupPrewarmPromise = this._prewarmLookupForHover();
+        void this._lookupPrewarmPromise.finally(() => {
+            this._lookupPrewarmPromise = null;
+        });
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _prewarmLookupForHover() {
+        const options = this._options;
+        if (
+            options === null ||
+            !options.general.enable ||
+            !this._textScanner.isEnabled()
+        ) {
+            return;
+        }
+
+        const startedAt = safePerformance.now();
+        this._updatePageDebugState({
+            lookupPrewarmRequested: true,
+            lookupPrewarmSettled: false,
+            lookupPrewarmLastError: null,
+        });
+        try {
+            const optionsContext = await this._getOptionsContext();
+            const {dictionaryEntries} = await this._application.api.termsFind('日本', {}, optionsContext);
+            this._updatePageDebugState({
+                lookupPrewarmReady: dictionaryEntries.length > 0,
+                lookupPrewarmResultCount: dictionaryEntries.length,
+                lookupPrewarmSettled: true,
+                lookupPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
+            });
+        } catch (e) {
+            this._updatePageDebugState({
+                lookupPrewarmReady: false,
+                lookupPrewarmSettled: true,
+                lookupPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
+                lookupPrewarmLastError: e instanceof Error ? e.message : `${e}`,
+            });
+            log.error(e);
+        }
     }
 
     /**
@@ -925,7 +980,7 @@ export class Frontend {
      * @param {import('settings').OptionsContext} optionsContext
      * @param {'dark' | 'light'} pageTheme
      */
-    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme) {
+    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme, searchSuccessAt = safePerformance.now()) {
         const query = textSource.text();
         const {url} = optionsContext;
         /** @type {import('display').HistoryState} */
@@ -964,7 +1019,7 @@ export class Frontend {
             details.params.full = textSource.fullContent;
             details.params['full-visible'] = 'true';
         }
-        void this._showPopupContent(textSource, optionsContext, details);
+        void this._showPopupContent(textSource, optionsContext, details, searchSuccessAt);
     }
 
     /**
@@ -973,7 +1028,14 @@ export class Frontend {
      * @param {?import('display').ContentDetails} details
      * @returns {Promise<void>}
      */
-    _showPopupContent(textSource, optionsContext, details) {
+    _showPopupContent(textSource, optionsContext, details, searchSuccessAt = safePerformance.now()) {
+        const showRequestedAt = safePerformance.now();
+        this._updatePageDebugState({
+            popupShowRequestedAt: Math.round(showRequestedAt),
+            popupShowRequestDelayMs: Math.round(showRequestedAt - searchSuccessAt),
+            popupShowSettled: false,
+            popupShowDurationMs: null,
+        });
         const sourceRects = [];
         for (const {left, top, right, bottom} of textSource.getRects()) {
             sourceRects.push({left, top, right, bottom});
@@ -990,6 +1052,12 @@ export class Frontend {
             ) :
             Promise.resolve()
         );
+        void this._lastShowPromise.then(() => {
+            this._updatePageDebugState({
+                popupShowSettled: true,
+                popupShowDurationMs: Math.round(safePerformance.now() - showRequestedAt),
+            });
+        });
         this._lastShowPromise.catch((error) => {
             if (this._application.webExtension.unloaded) { return; }
             log.error(error);
