@@ -1435,7 +1435,7 @@ export class DictionaryImporter {
                     if (!canPrefetchTermFileBytes(candidate)) { continue; }
                     void prefetchTermFileBytes(candidate);
                     ++prefetchedCount;
-                    if (prefetchedCount >= 2) { return; }
+                    if (prefetchedCount >= 3) { return; }
                 }
             };
             for (let termFileIndex = 0; termFileIndex < activeTermFiles.length; ++termFileIndex) {
