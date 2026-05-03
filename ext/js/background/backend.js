@@ -1085,6 +1085,11 @@ export class Backend {
                 };
             }
         }
+        const includeDetailedLookupSnapshot = (
+            debugLookupState !== null ||
+            dictionaryEntries.length === 0 ||
+            !hasExactHeadwordMatch
+        );
         reportDiagnostics('dictionary-lookup-snapshot', {
             text,
             textLength: text.length,
@@ -1123,29 +1128,31 @@ export class Backend {
             resultDictionaryAliases: [...new Set(dictionaryEntries.flatMap((entry) => (
                 entry.type === 'term' ?
                     entry.definitions.map(({dictionaryAlias}) => dictionaryAlias) :
-                    [entry.dictionaryAlias]
+                [entry.dictionaryAlias]
             )))],
             debugLookupState,
-            resultEntries: dictionaryEntries.map((entry) => (
-                entry.type === 'term' ?
-                    {
-                        type: entry.type,
-                        dictionaryIndex: entry.dictionaryIndex,
-                        dictionaryAlias: entry.dictionaryAlias,
-                        headwords: entry.headwords.map(({term, reading}) => ({term, reading})),
-                        definitions: entry.definitions.map(({dictionary, dictionaryAlias, sequences, isPrimary}) => ({
-                            dictionary,
-                            dictionaryAlias,
-                            sequences,
-                            isPrimary,
-                        })),
-                    } :
-                    {
-                        type: entry.type,
-                        dictionary: entry.dictionary,
-                        dictionaryAlias: entry.dictionaryAlias,
-                    }
-            )),
+            resultEntries: includeDetailedLookupSnapshot ?
+                dictionaryEntries.map((entry) => (
+                    entry.type === 'term' ?
+                        {
+                            type: entry.type,
+                            dictionaryIndex: entry.dictionaryIndex,
+                            dictionaryAlias: entry.dictionaryAlias,
+                            headwords: entry.headwords.map(({term, reading}) => ({term, reading})),
+                            definitions: entry.definitions.map(({dictionary, dictionaryAlias, sequences, isPrimary}) => ({
+                                dictionary,
+                                dictionaryAlias,
+                                sequences,
+                                isPrimary,
+                            })),
+                        } :
+                        {
+                            type: entry.type,
+                            dictionary: entry.dictionary,
+                            dictionaryAlias: entry.dictionaryAlias,
+                        }
+                )) :
+                void 0,
         });
         dictionaryEntries.splice(maxResults);
         return {dictionaryEntries, originalTextLength};
