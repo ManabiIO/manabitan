@@ -129,6 +129,13 @@ export class PopupWindow extends EventDispatcher {
     }
 
     /**
+     * @returns {Promise<boolean>}
+     */
+    async prepareFrame() {
+        return false;
+    }
+
+    /**
      * Hides the popup. This does nothing for `PopupWindow`.
      * @param {boolean} _changeFocus Whether or not the parent popup or host frame should be focused.
      */

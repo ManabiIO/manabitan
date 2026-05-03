@@ -232,6 +232,43 @@ export class Popup extends EventDispatcher {
     }
 
     /**
+     * Connects and configures the popup frame before the first visible lookup.
+     * @returns {Promise<boolean>} `true` if the popup frame is ready, `false` otherwise.
+     */
+    async prepareFrame() {
+        if (this._frameConnected) {
+            this._updateHostPageDebugState({popupPrewarmReady: true});
+            return true;
+        }
+
+        const startedAt = safePerformance.now();
+        this._updateHostPageDebugState({
+            popupPrewarmStarted: true,
+            popupPrewarmReady: false,
+            popupPrewarmLastError: null,
+        });
+        try {
+            const result = await this._inject();
+            if (result) {
+                this._setFrameSize(this._initialWidth, this._initialHeight);
+            }
+            this._updateHostPageDebugState({
+                popupPrewarmReady: result,
+                popupPrewarmDurationMs: Math.round(safePerformance.now() - startedAt),
+                popupPrewarmLastError: null,
+            });
+            return result;
+        } catch (e) {
+            this._updateHostPageDebugState({
+                popupPrewarmReady: false,
+                popupPrewarmDurationMs: Math.round(safePerformance.now() - startedAt),
+                popupPrewarmLastError: e instanceof Error ? e.message : `${e}`,
+            });
+            throw e;
+        }
+    }
+
+    /**
      * Hides the popup.
      * @param {boolean} changeFocus Whether or not the parent popup or host frame should be focused.
      */

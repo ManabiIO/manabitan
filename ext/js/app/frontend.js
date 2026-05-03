@@ -176,6 +176,7 @@ export class Frontend {
         }
 
         this._textScanner.prepare();
+        await this._prewarmPopupForHover();
 
         window.addEventListener('resize', this._onResize.bind(this), false);
         addFullscreenChangeEventListener(this._updatePopup.bind(this));
@@ -665,9 +666,60 @@ export class Frontend {
         }
 
         this._updateContentScale();
+        await this._prewarmPopupForHover();
 
         if (!suppressSearchLast) {
             await this._textScanner.searchLast();
+        }
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _prewarmPopupForHover() {
+        const popup = this._popup;
+        const options = this._options;
+        if (
+            popup === null ||
+            options === null ||
+            !options.general.enable ||
+            options.general.usePopupWindow ||
+            !this._textScanner.isEnabled() ||
+            typeof popup.prepareFrame !== 'function'
+        ) {
+            return;
+        }
+
+        const timeout = 3000;
+        const startedAt = safePerformance.now();
+        this._updatePageDebugState({
+            popupPrewarmRequested: true,
+            popupPrewarmSettled: false,
+            popupPrewarmTimedOut: false,
+            popupPrewarmLastError: null,
+        });
+        try {
+            /** @type {Promise<boolean>} */
+            const timeoutPromise = new Promise((resolve) => {
+                setTimeout(() => { resolve(true); }, timeout);
+            });
+            const timedOut = await Promise.race([
+                popup.prepareFrame().then(() => false),
+                timeoutPromise,
+            ]);
+            this._updatePageDebugState({
+                popupPrewarmSettled: !timedOut,
+                popupPrewarmTimedOut: timedOut,
+                popupPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
+            });
+        } catch (e) {
+            this._updatePageDebugState({
+                popupPrewarmSettled: true,
+                popupPrewarmTimedOut: false,
+                popupPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
+                popupPrewarmLastError: e instanceof Error ? e.message : `${e}`,
+            });
+            log.error(e);
         }
     }
 
