@@ -1278,10 +1278,6 @@ export class DictionaryImporter {
                 let termRecordEncodeMs = 0;
                 let termRecordWriteMs = 0;
                 let termsVtabInsertMs = 0;
-                if (directArtifactChunk !== null && useTermMediaRequirements) {
-                    throw new Error('Direct artifact chunk import does not support media requirements');
-                }
-
                 if (useTermMediaRequirements && requirements !== null && uniqueMediaPaths !== null) {
                     /** @type {import('dictionary-importer').ImportRequirement[]} */
                     const alreadyAddedRequirements = [];
@@ -1342,7 +1338,7 @@ export class DictionaryImporter {
                     media = [];
                 }
 
-                if (useTermMediaRequirements) {
+                if (useTermMediaRequirements && directArtifactChunk === null) {
                     const tSerializationStart = Date.now();
                     this._prepareTermImportSerialization(termList, enableTermEntryContentDedup);
                     serializationMs += Math.max(0, Date.now() - tSerializationStart);
@@ -3141,8 +3137,8 @@ export class DictionaryImporter {
         /** @type {import('dictionary-database').DatabaseTermEntry[]} */
         const termList = [];
         const useRawBytesDirectContent = (termContentStorageMode === 'raw-bytes' && !useMediaPipeline);
-        const useDirectNoMediaChunkImport = streamToChunkHandler && useRawBytesDirectContent && !useMediaPipeline;
-        const includeContentMetadata = useDirectNoMediaChunkImport ? true : (useRawBytesDirectContent ? false : (this._wasmPassThroughTermContent || !this._wasmSkipUnusedTermContentEncoding));
+        const useDirectArtifactChunkImport = streamToChunkHandler && useRawBytesDirectContent;
+        const includeContentMetadata = useDirectArtifactChunkImport ? true : (useRawBytesDirectContent ? false : (this._wasmPassThroughTermContent || !this._wasmSkipUnusedTermContentEncoding));
         const minimalDecode = (
             this._wasmCanonicalRowsFastPath &&
             !useMediaPipeline &&
@@ -3172,7 +3168,7 @@ export class DictionaryImporter {
                     if (requirementsForChunk !== null) {
                         requirementsForChunk.length = 0;
                     }
-                    if (useDirectNoMediaChunkImport) {
+                    if (useDirectArtifactChunkImport) {
                         const tMaterializationStart = Date.now();
                         const rowCount = parsedRows.length;
                         /** @type {Uint8Array[]} */
@@ -3211,6 +3207,42 @@ export class DictionaryImporter {
                             contentBytesList[i] = row.termEntryContentBytes;
                             contentHash1List[i] = row.termEntryContentHash1 ?? 0;
                             contentHash2List[i] = row.termEntryContentHash2 ?? 0;
+                            if (requirementsForChunk !== null) {
+                                const skipGlossaryParse = (
+                                    typeof row.glossaryMayContainMedia === 'boolean' ?
+                                        !row.glossaryMayContainMedia :
+                                        !this._glossaryJsonLikelyContainsMedia(this._getFastRowGlossaryJson(row))
+                                );
+                                if (!skipGlossaryParse) {
+                                    /** @type {import('dictionary-database').DatabaseTermEntry} */
+                                    const entry = {
+                                        expression,
+                                        reading,
+                                        definitionTags: row.definitionTags ?? '',
+                                        rules: row.rules ?? '',
+                                        score: row.score,
+                                        glossary: [],
+                                        termTags: row.termTags ?? '',
+                                        dictionary: dictionaryTitle,
+                                    };
+                                    let glossaryList;
+                                    if (usePrecomputedContentForMediaRows && hasPrecomputedTermEntryContent(row)) {
+                                        const contentPayload = this._parseTermEntryContentFromFastRow(row, termFile.filename);
+                                        entry.rules = contentPayload.rules;
+                                        entry.definitionTags = contentPayload.definitionTags;
+                                        entry.termTags = contentPayload.termTags;
+                                        glossaryList = contentPayload.glossary;
+                                    } else {
+                                        const rowGlossaryJson = this._getFastRowGlossaryJson(row);
+                                        glossaryList = this._parseGlossaryJsonFromFastRow(rowGlossaryJson, termFile.filename);
+                                    }
+                                    for (let j = 0, jj = glossaryList.length; j < jj; ++j) {
+                                        const glossary = glossaryList[j];
+                                        if (typeof glossary !== 'object' || glossary === null || Array.isArray(glossary)) { continue; }
+                                        this._formatDictionaryTermGlossaryObject(glossary, entry, requirementsForChunk);
+                                    }
+                                }
+                            }
                         }
                         importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
                         const tChunkSinkStart = Date.now();
