@@ -1855,7 +1855,14 @@ export class DictionaryImportController {
                 dictionary.name === normalizedTitle &&
                 dictionary.enabled === true
             ));
-            if (verification.ok) {
+            const activeProfileStorageVisible = (
+                requireEnabledForActiveProfile &&
+                activeProfileEnabled &&
+                verification.installed === true &&
+                verification.directMatch === true &&
+                verification.reason === 'dictionary-translator-lookup-missing'
+            );
+            if (verification.ok || activeProfileStorageVisible) {
                 this._emitImportedDictionaryProfileEnablementDiagnostics(normalizedTitle, optionsFull.profiles, activeProfileIndex);
                 if (!activeProfileEnabled) {
                     reportDiagnostics('dictionary-import-active-profile-disabled', {
@@ -1869,6 +1876,7 @@ export class DictionaryImportController {
                     requireEnabledForActiveProfile,
                     verification,
                     activeProfileEnabled,
+                    activeProfileStorageVisible,
                 });
                 return;
             }
