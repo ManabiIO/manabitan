@@ -447,7 +447,7 @@ export class DictionaryImporter {
         /** @type {boolean} */
         this._wasmPreallocateChunkRows = false;
         /** @type {boolean} */
-        this._usePrecomputedContentForMediaRows = false;
+        this._usePrecomputedContentForMediaRows = true;
         /** @type {boolean} */
         this._leanCanonicalTermEntryObjects = false;
         /** @type {boolean} */
@@ -1429,11 +1429,13 @@ export class DictionaryImporter {
                 return promise;
             };
             const prefetchNextTermFileBytes = (startIndex) => {
+                let prefetchedCount = 0;
                 for (let i = startIndex; i < activeTermFiles.length; ++i) {
                     const candidate = activeTermFiles[i];
                     if (!canPrefetchTermFileBytes(candidate)) { continue; }
                     void prefetchTermFileBytes(candidate);
-                    return;
+                    ++prefetchedCount;
+                    if (prefetchedCount >= 2) { return; }
                 }
             };
             for (let termFileIndex = 0; termFileIndex < activeTermFiles.length; ++termFileIndex) {
