@@ -1401,6 +1401,41 @@ export class DictionaryImporter {
                 packedMediaArtifactBytes = null;
                 packedMediaArtifactBlob = null;
             }
+            /** @type {Map<string, Promise<Uint8Array>>} */
+            const termFileBytePrefetches = new Map();
+            /**
+             * @param {import('@zip.js/zip.js').Entry|{filename: string}} termFile
+             * @returns {boolean}
+             */
+            const canPrefetchTermFileBytes = (termFile) => (
+                !this._disableTermBankWasmFastPath &&
+                !useTermArtifactFiles &&
+                !usePackedTermArtifact &&
+                /\.json$/i.test(termFile.filename) &&
+                termFile instanceof Object &&
+                'getData' in termFile
+            );
+            /**
+             * @param {import('@zip.js/zip.js').Entry|{filename: string}} termFile
+             * @returns {Promise<Uint8Array>}
+             */
+            const prefetchTermFileBytes = (termFile) => {
+                let promise = termFileBytePrefetches.get(termFile.filename);
+                if (typeof promise === 'undefined') {
+                    promise = this._getData(/** @type {import('@zip.js/zip.js').Entry} */ (termFile), new Uint8ArrayWriter());
+                    termFileBytePrefetches.set(termFile.filename, promise);
+                    void promise.catch(() => {});
+                }
+                return promise;
+            };
+            const prefetchNextTermFileBytes = (startIndex) => {
+                for (let i = startIndex; i < activeTermFiles.length; ++i) {
+                    const candidate = activeTermFiles[i];
+                    if (!canPrefetchTermFileBytes(candidate)) { continue; }
+                    void prefetchTermFileBytes(candidate);
+                    return;
+                }
+            };
             for (let termFileIndex = 0; termFileIndex < activeTermFiles.length; ++termFileIndex) {
                 const termFile = activeTermFiles[termFileIndex];
                 const tTermFile = Date.now();
@@ -1546,6 +1581,10 @@ export class DictionaryImporter {
                 } else if (!this._disableTermBankWasmFastPath) {
                     try {
                         const termFileEntry = /** @type {import('@zip.js/zip.js').Entry} */ (termFile);
+                        const preloadedTermFileBytes = canPrefetchTermFileBytes(termFile) ?
+                            prefetchTermFileBytes(termFile) :
+                            null;
+                        prefetchNextTermFileBytes(termFileIndex + 1);
                         await this._readTermBankFileFast(
                             termFileEntry,
                             version,
@@ -1563,7 +1602,9 @@ export class DictionaryImporter {
                                     requirementsChunk.length = 0;
                                 }
                             },
+                            preloadedTermFileBytes,
                         );
+                        termFileBytePrefetches.delete(termFile.filename);
                         lastFastTermBankReadProfile = this._lastFastTermBankReadProfile ?? null;
                         streamedImportCompleted = true;
                     } catch (error) {
@@ -3094,11 +3135,12 @@ export class DictionaryImporter {
      * @param {boolean} enableTermEntryContentDedup
      * @param {'baseline'|'raw-bytes'} termContentStorageMode
      * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} [onChunk]
+     * @param {Uint8Array|Promise<Uint8Array>|null} [preloadedBytes]
      * @returns {Promise<{termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null}>}
      */
-    async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0) {
+    async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null) {
         this._lastFastTermBankReadProfile = null;
-        const bytes = await this._getData(termFile, new Uint8ArrayWriter());
+        const bytes = preloadedBytes !== null ? await preloadedBytes : await this._getData(termFile, new Uint8ArrayWriter());
         let wasmRowChunkSize = this._termBankWasmRowChunkSize;
         if (this._adaptiveTermBankWasmRowChunkSizeTiered) {
             if (
