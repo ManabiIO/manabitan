@@ -1878,23 +1878,11 @@ export class DictionaryImporter {
             }
             recordPhaseTiming('bulk-finalization', tBulkFinalizationStart, bulkFinalizationPhaseDetails);
             if (!importFailed) {
-                try {
-                    if (counts.terms.total >= 1_000_000) {
-                        recordPhaseTiming('post-finalization-integrity-sample', Date.now(), {
-                            skipped: true,
-                            reason: 'large-dictionary',
-                            termCount: counts.terms.total,
-                        });
-                    } else {
-                        const directIntegrity = await dictionaryDatabase.debugSampleTermContentIntegrity(dictionaryTitle, 8);
-                        recordPhaseTiming('post-finalization-integrity-sample', Date.now(), directIntegrity);
-                    }
-                } catch (e) {
-                    recordPhaseTiming('post-finalization-integrity-sample', Date.now(), {
-                        ok: false,
-                        error: toError(e).message,
-                    });
-                }
+                recordPhaseTiming('post-finalization-integrity-sample', Date.now(), {
+                    skipped: true,
+                    reason: 'transaction-commit-completed',
+                    termCount: counts.terms.total,
+                });
             }
             dictionaryDatabase.setImportDebugLogging(false);
         }

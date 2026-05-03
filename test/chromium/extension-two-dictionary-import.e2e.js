@@ -215,6 +215,24 @@ function formatDuration(valueMs) {
     return `${valueMs.toFixed(1)} ms`;
 }
 
+function summarizeDurationsMs(values) {
+    const sorted = values
+        .map((value) => Number(value))
+        .filter((value) => Number.isFinite(value))
+        .sort((a, b) => a - b);
+    if (sorted.length === 0) {
+        return {count: 0, min: 0, median: 0, p95: 0, max: 0};
+    }
+    const percentile = (p) => sorted[Math.min(sorted.length - 1, Math.max(0, Math.ceil(sorted.length * p) - 1))];
+    return {
+        count: sorted.length,
+        min: sorted[0],
+        median: percentile(0.5),
+        p95: percentile(0.95),
+        max: sorted[sorted.length - 1],
+    };
+}
+
 function formatMemoryMb(value) {
     return `${value.toFixed(1)} MB`;
 }
@@ -4488,9 +4506,21 @@ async function main() {
                         await page.mouse.move(8, 8, {steps: 4});
                         await page.waitForTimeout(25);
                     }
+                    const durationSummary = summarizeDurationsMs(iterations.map(({durationMs}) => durationMs));
+                    const steadyDurationSummary = summarizeDurationsMs(iterations.slice(1).map(({durationMs}) => durationMs));
+                    const firstHoverMs = iterations.length > 0 ? iterations[0].durationMs : 0;
+                    if (firstHoverMs > 6000 || steadyDurationSummary.median > 900 || steadyDurationSummary.p95 > 1800) {
+                        throw new Error(
+                            `Hover latency regression: first=${formatDuration(firstHoverMs)} ` +
+                            `steadyMedian=${formatDuration(steadyDurationSummary.median)} steadyP95=${formatDuration(steadyDurationSummary.p95)} ` +
+                            `max=${formatDuration(durationSummary.max)}`,
+                        );
+                    }
                     return {
                         iterationCount: iterations.length,
                         iterations,
+                        durationSummary,
+                        steadyDurationSummary,
                         prewarmDebugState,
                     };
                 });
@@ -4559,9 +4589,17 @@ async function main() {
                         await page.mouse.move(8, 8, {steps: 4});
                         await page.waitForTimeout(80);
                     }
+                    const durationSummary = summarizeDurationsMs(iterations.map(({durationMs}) => durationMs));
+                    if (durationSummary.median > 900 || durationSummary.p95 > 1800) {
+                        throw new Error(
+                            `Repeated hover latency regression: median=${formatDuration(durationSummary.median)} ` +
+                            `p95=${formatDuration(durationSummary.p95)} max=${formatDuration(durationSummary.max)}`,
+                        );
+                    }
                     return {
                         iterationCount: iterations.length,
                         iterations,
+                        durationSummary,
                     };
                 });
                 scanningStressResult = scanningStressProfile.result;

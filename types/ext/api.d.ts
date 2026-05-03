@@ -312,6 +312,12 @@ type ApiSurface = {
         };
         return: DictionaryDatabase.DictionaryCounts;
     };
+    getDictionaryTermProbe: {
+        params: {
+            dictionaryTitle: string;
+        };
+        return: DictionaryDatabase.DictionaryTermProbe | null;
+    };
     verifyDictionaryVisibility: {
         params: {
             dictionaryTitle: string;

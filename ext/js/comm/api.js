@@ -343,6 +343,14 @@ export class API {
     }
 
     /**
+     * @param {import('api').ApiParam<'getDictionaryTermProbe', 'dictionaryTitle'>} dictionaryTitle
+     * @returns {Promise<import('api').ApiReturn<'getDictionaryTermProbe'>>}
+     */
+    getDictionaryTermProbe(dictionaryTitle) {
+        return this._invoke('getDictionaryTermProbe', {dictionaryTitle});
+    }
+
+    /**
      * @returns {Promise<import('api').ApiReturn<'debugDictionaryStorageState'>>}
      */
     debugDictionaryStorageState() {

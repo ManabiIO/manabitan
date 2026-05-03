@@ -200,6 +200,7 @@ export class Backend {
             ['deleteDictionaryByTitle',      this._onApiDeleteDictionaryByTitle.bind(this)],
             ['replaceDictionaryTitle',       this._onApiReplaceDictionaryTitle.bind(this)],
             ['getDictionaryCounts',          this._onApiGetDictionaryCounts.bind(this)],
+            ['getDictionaryTermProbe',       this._onApiGetDictionaryTermProbe.bind(this)],
             ['verifyDictionaryVisibility',   this._onApiVerifyDictionaryVisibility.bind(this)],
             ['debugDictionaryLookupState',   this._onApiDebugDictionaryLookupState.bind(this)],
             ['debugDictionaryStorageState',  this._onApiDebugDictionaryStorageState.bind(this)],
@@ -1562,6 +1563,16 @@ export class Backend {
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         return await this._dictionaryDatabase.getDictionaryCounts(dictionaryNames, getTotal);
+    }
+
+    /** @type {import('api').ApiHandler<'getDictionaryTermProbe'>} */
+    async _onApiGetDictionaryTermProbe({dictionaryTitle}) {
+        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle.trim() : '';
+        if (normalizedTitle.length === 0) { return null; }
+        await this._awaitDictionaryMutationSettled();
+        await this._awaitDictionaryRefreshSettled();
+        await this._ensureDictionaryDatabaseReady();
+        return await this._dictionaryDatabase.getDictionaryTermProbe(normalizedTitle);
     }
 
     /** @type {import('api').ApiHandler<'verifyDictionaryVisibility'>} */

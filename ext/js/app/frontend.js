@@ -723,10 +723,22 @@ export class Frontend {
         });
         try {
             const optionsContext = await this._getOptionsContext();
-            const {dictionaryEntries} = await this._application.api.termsFind('日本', {}, optionsContext);
+            const prewarmTerms = await this._getLookupPrewarmTerms(options);
+            let resultCount = 0;
+            let matchedTerm = '';
+            for (const term of prewarmTerms) {
+                const {dictionaryEntries} = await this._application.api.termsFind(term, {matchType: 'exact', deinflect: false}, optionsContext);
+                resultCount = dictionaryEntries.length;
+                if (resultCount > 0) {
+                    matchedTerm = term;
+                    break;
+                }
+            }
             this._updatePageDebugState({
-                lookupPrewarmReady: dictionaryEntries.length > 0,
-                lookupPrewarmResultCount: dictionaryEntries.length,
+                lookupPrewarmReady: resultCount > 0,
+                lookupPrewarmResultCount: resultCount,
+                lookupPrewarmTermCount: prewarmTerms.length,
+                lookupPrewarmMatchedTerm: matchedTerm,
                 lookupPrewarmSettled: true,
                 lookupPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
             });
@@ -739,6 +751,28 @@ export class Frontend {
             });
             log.error(e);
         }
+    }
+
+    /**
+     * @param {import('settings').ProfileOptions} options
+     * @returns {Promise<string[]>}
+     */
+    async _getLookupPrewarmTerms(options) {
+        /** @type {string[]} */
+        const terms = [];
+        for (const {name, enabled} of options.dictionaries) {
+            if (!enabled || name.length === 0) { continue; }
+            try {
+                const probe = await this._application.api.getDictionaryTermProbe(name);
+                if (probe !== null) {
+                    terms.push(probe.expression, probe.reading);
+                }
+            } catch (_) {
+                // Best-effort prewarm; visible lookup correctness does not depend on probes.
+            }
+        }
+        terms.push('日本', 'する', 'ある', '見る');
+        return [...new Set(terms.map((term) => `${term}`.trim()).filter((term) => term.length > 0))];
     }
 
     /**
