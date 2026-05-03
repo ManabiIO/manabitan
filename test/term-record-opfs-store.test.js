@@ -401,6 +401,49 @@ describe('TermRecordOpfsStore', () => {
         expect(loadedRecord?.reading).toBe('くう');
     });
 
+    test('builds reverse suffix indexes lazily after exact artifact index load', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Jitendex.org [2026-04-04]';
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        await writerStore.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: dictionaryName,
+                rowCount: 2,
+                expressionBytesList: [textEncoder.encode('食う'), textEncoder.encode('食べる')],
+                readingBytesList: [textEncoder.encode('くう'), textEncoder.encode('たべる')],
+                readingEqualsExpressionList: new Uint8Array([0, 0]),
+                scoreList: new Int32Array([0, 0]),
+                sequenceList: new Int32Array([1, 2]),
+            },
+            [0, 128],
+            [128, 256],
+            'raw',
+        );
+        await writerStore._closeAllWritables();
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(true);
+
+        const index = readerStore.getDictionaryIndex(dictionaryName);
+        expect(index.expression.get('食う')).toHaveLength(1);
+        expect(index.reading.get('くう')).toHaveLength(1);
+        expect(index.expressionReverse.size).toBe(0);
+        expect(index.readingReverse.size).toBe(0);
+
+        const reverseIndex = readerStore.ensureDictionaryReverseIndex(dictionaryName, index);
+        expect(reverseIndex).toBe(index);
+        expect(index.expressionReverse.get('う食')).toHaveLength(1);
+        expect(index.expressionReverse.get('るべ食')).toHaveLength(1);
+        expect(index.readingReverse.get('うく')).toHaveLength(1);
+        expect(index.readingReverse.get('るべた')).toHaveLength(1);
+    });
+
     test('preserves distinct byte-backed import rows when placeholder strings are empty', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Jitendex.org [2026-04-04]';

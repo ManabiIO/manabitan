@@ -1635,8 +1635,6 @@ export class DictionaryDatabase {
             const index = this._ensureDirectTermIndex(name);
             this._getSortedTermIndexKeys(index.expression);
             this._getSortedTermIndexKeys(index.reading);
-            this._getSortedTermIndexKeys(index.expressionReverse);
-            this._getSortedTermIndexKeys(index.readingReverse);
         }
         await this._warmSharedGlossaryArtifacts(names);
     }
@@ -1880,6 +1878,12 @@ export class DictionaryDatabase {
         const queriesToCheck = [...uniqueQueryMap.values()].filter(({query}) => !this._termPrefixNegativeCache.has(`${negativeCachePrefix}${query}`));
         /** @type {Set<string>} */
         const foundQueries = new Set();
+        if (matchType === 'suffix') {
+            for (const dictionaryName of dictionaryNames) {
+                const index = this._ensureDirectTermIndex(dictionaryName);
+                this._termRecordStore.ensureDictionaryReverseIndex(dictionaryName, index);
+            }
+        }
 
         for (let indexIndex = 0; indexIndex < columns.length; ++indexIndex) {
             const column = columns[indexIndex];

@@ -282,6 +282,8 @@ export class TermRecordOpfsStore {
         this._nextId = 1;
         /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
         this._indexByDictionary = new Map();
+        /** @type {WeakSet<{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
+        this._reverseIndexReady = new WeakSet();
         /** @type {boolean} */
         this._deferIndexBuild = false;
         /** @type {boolean} */
@@ -1484,6 +1486,25 @@ export class TermRecordOpfsStore {
         }
         this._indexByDictionary.set(dictionaryName, created);
         return created;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} [index]
+     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}}
+     */
+    ensureDictionaryReverseIndex(dictionaryName, index = this.getDictionaryIndex(dictionaryName)) {
+        if (this._reverseIndexReady.has(index)) {
+            return index;
+        }
+        index.expressionReverse.clear();
+        index.readingReverse.clear();
+        for (const record of this._recordsById.values()) {
+            if (record.dictionary !== dictionaryName) { continue; }
+            this._addRecordReverseToDictionaryIndex(index, record);
+        }
+        this._reverseIndexReady.add(index);
+        return index;
     }
 
     /**
@@ -3289,23 +3310,10 @@ export class TermRecordOpfsStore {
      * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} index
      * @param {TermRecord} record
      */
-    _addRecordToDictionaryIndex(index, record) {
+    _addRecordReverseToDictionaryIndex(index, record) {
         this._ensureDecodedRecordStrings(record);
         const expression = record.expression ?? '';
         const reading = record.reading ?? expression;
-        const expressionList = index.expression.get(expression);
-        if (typeof expressionList === 'undefined') {
-            index.expression.set(expression, [record.id]);
-        } else {
-            expressionList.push(record.id);
-        }
-
-        const readingList = index.reading.get(reading);
-        if (typeof readingList === 'undefined') {
-            index.reading.set(reading, [record.id]);
-        } else {
-            readingList.push(record.id);
-        }
         if (record.expressionReverse === null || typeof record.expressionReverse === 'undefined') {
             record.expressionReverse = this._reverseString(expression);
         }
@@ -3329,6 +3337,32 @@ export class TermRecordOpfsStore {
             } else {
                 readingReverseList.push(record.id);
             }
+        }
+    }
+
+    /**
+     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} index
+     * @param {TermRecord} record
+     */
+    _addRecordToDictionaryIndex(index, record) {
+        this._ensureDecodedRecordStrings(record);
+        const expression = record.expression ?? '';
+        const reading = record.reading ?? expression;
+        const expressionList = index.expression.get(expression);
+        if (typeof expressionList === 'undefined') {
+            index.expression.set(expression, [record.id]);
+        } else {
+            expressionList.push(record.id);
+        }
+
+        const readingList = index.reading.get(reading);
+        if (typeof readingList === 'undefined') {
+            index.reading.set(reading, [record.id]);
+        } else {
+            readingList.push(record.id);
+        }
+        if (this._reverseIndexReady.has(index)) {
+            this._addRecordReverseToDictionaryIndex(index, record);
         }
 
         const pairKey = `${record.expression}\u001f${record.reading}`;
