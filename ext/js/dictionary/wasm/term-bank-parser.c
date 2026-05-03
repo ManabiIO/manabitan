@@ -25,6 +25,14 @@ extern unsigned char __heap_base;
 
 static uint32_t heap_ptr = 0u;
 
+void* memset(void* dest, int value, unsigned long count) {
+    unsigned char* bytes = (unsigned char*)dest;
+    for (unsigned long i = 0u; i < count; ++i) {
+        bytes[i] = (unsigned char)value;
+    }
+    return dest;
+}
+
 typedef struct {
     uint32_t expression_start;
     uint32_t expression_length;
@@ -42,6 +50,7 @@ typedef struct {
     uint32_t sequence_length;
     uint32_t term_tags_start;
     uint32_t term_tags_length;
+    uint32_t glossary_may_contain_media;
 } TermRowMeta;
 
 static uint32_t align8(uint32_t value) {
@@ -176,7 +185,34 @@ static void set_field(TermRowMeta* meta, uint32_t field_index, uint32_t start, u
     }
 }
 
-static int parse_row(const uint8_t* src, uint32_t len, uint32_t row_start, uint32_t row_end, TermRowMeta* out_meta) {
+static int token_contains_literal(
+    const uint8_t* src,
+    uint32_t start,
+    uint32_t length,
+    const uint8_t* literal,
+    uint32_t literal_length
+) {
+    if (literal_length == 0u || length < literal_length) { return 0; }
+    const uint32_t end = start + length - literal_length;
+    for (uint32_t i = start; i <= end; ++i) {
+        uint32_t j = 0u;
+        while (j < literal_length && src[i + j] == literal[j]) {
+            ++j;
+        }
+        if (j == literal_length) { return 1; }
+    }
+    return 0;
+}
+
+static int glossary_may_contain_media_marker(const uint8_t* src, uint32_t start, uint32_t length) {
+    static const uint8_t VALUE_IMAGE[] = "\"image\"";
+    static const uint8_t VALUE_IMG[] = "\"img\"";
+    return
+        token_contains_literal(src, start, length, VALUE_IMAGE, sizeof(VALUE_IMAGE) - 1u) ||
+        token_contains_literal(src, start, length, VALUE_IMG, sizeof(VALUE_IMG) - 1u);
+}
+
+static int parse_row(const uint8_t* src, uint32_t len, uint32_t row_start, uint32_t row_end, TermRowMeta* out_meta, int media_hints) {
     if (row_end <= row_start + 1u || src[row_start] != '[') { return 0; }
     out_meta->expression_start = 0u; out_meta->expression_length = 0u;
     out_meta->reading_start = 0u; out_meta->reading_length = 0u;
@@ -186,6 +222,7 @@ static int parse_row(const uint8_t* src, uint32_t len, uint32_t row_start, uint3
     out_meta->glossary_start = 0u; out_meta->glossary_length = 0u;
     out_meta->sequence_start = 0u; out_meta->sequence_length = 0u;
     out_meta->term_tags_start = 0u; out_meta->term_tags_length = 0u;
+    out_meta->glossary_may_contain_media = 0u;
 
     uint32_t i = row_start + 1u;
     uint32_t field_index = 0u;
@@ -196,6 +233,9 @@ static int parse_row(const uint8_t* src, uint32_t len, uint32_t row_start, uint3
         if (!parse_value_span(src, len, i, &value_end)) { return 0; }
         if (field_index < 8u) {
             set_field(out_meta, field_index, i, value_end);
+            if (media_hints && field_index == 5u) {
+                out_meta->glossary_may_contain_media = (uint32_t)glossary_may_contain_media_marker(src, i, value_end - i);
+            }
         }
         ++field_index;
         i = skip_ws(src, len, value_end);
@@ -457,8 +497,7 @@ static int encode_term_content_row(
     return 1;
 }
 
-__attribute__((visibility("default")))
-int32_t parse_term_bank(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity) {
+static int32_t parse_term_bank_impl(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity, int media_hints) {
     if (json_ptr == 0u || json_len == 0u || out_ptr == 0u || out_capacity == 0u) {
         return -1;
     }
@@ -483,7 +522,7 @@ int32_t parse_term_bank(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, 
         if (row_count >= out_capacity) {
             return -2;
         }
-        if (!parse_row(src, json_len, i, row_end, &rows[row_count])) {
+        if (!parse_row(src, json_len, i, row_end, &rows[row_count], media_hints)) {
             return -1;
         }
         ++row_count;
@@ -493,6 +532,16 @@ int32_t parse_term_bank(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, 
         }
     }
     return -1;
+}
+
+__attribute__((visibility("default")))
+int32_t parse_term_bank(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity) {
+    return parse_term_bank_impl(json_ptr, json_len, out_ptr, out_capacity, 0);
+}
+
+__attribute__((visibility("default")))
+int32_t parse_term_bank_with_media_hints(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity) {
+    return parse_term_bank_impl(json_ptr, json_len, out_ptr, out_capacity, 1);
 }
 
 __attribute__((visibility("default")))

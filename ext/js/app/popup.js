@@ -381,12 +381,14 @@ export class Popup extends EventDispatcher {
         // If there's already a timer running on the same popup from a previous lookup, reset it
         this.stopHideDelayed();
 
-        await this._show(sourceRects, writingMode);
-
         if (displayDetails !== null) {
             safePerformance.mark('invokeDisplaySetContent:start');
-            void this._invokeSafe('displaySetContent', {details: displayDetails});
+            const injected = await this._inject();
+            if (!injected) { return; }
+            await this._invokeSafe('displaySetContent', {details: displayDetails});
         }
+
+        await this._show(sourceRects, writingMode);
     }
 
     /**

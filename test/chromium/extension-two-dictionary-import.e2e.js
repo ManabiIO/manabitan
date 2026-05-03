@@ -2377,7 +2377,16 @@ async function waitForVisiblePopupFrameHandle(page, timeoutMs = 6000) {
         for (const frameHandle of frameHandles) {
             fallbackFrameHandle = frameHandle;
             const box = await frameHandle.boundingBox();
-            if (box !== null && box.width > 0 && box.height > 0) {
+            const isRenderedVisible = await frameHandle.evaluate((frame) => {
+                const style = getComputedStyle(frame);
+                return (
+                    style.visibility !== 'hidden' &&
+                    style.display !== 'none' &&
+                    Number.parseFloat(style.opacity || '1') > 0 &&
+                    frame.hidden !== true
+                );
+            });
+            if (box !== null && box.width > 0 && box.height > 0 && isRenderedVisible) {
                 return frameHandle;
             }
         }

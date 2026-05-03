@@ -98,6 +98,8 @@ export class Display extends EventDispatcher {
         this._historyChangeIgnore = false;
         /** @type {boolean} */
         this._historyHasChanged = false;
+        /** @type {Array<() => void>} */
+        this._stateChangeCompleteResolvers = [];
         /** @type {?Element} */
         this._aboveStickyHeader = document.querySelector('#above-sticky-header');
         /** @type {?Element} */
@@ -513,8 +515,10 @@ export class Display extends EventDispatcher {
     /**
      * Updates the content of the display.
      * @param {import('display').ContentDetails} details Information about the content to show.
+     * @returns {Promise<void>}
      */
     setContent(details) {
+        const stateChangeCompletePromise = this._waitForStateChangeComplete(5000);
         const {focus, params, state, content} = details;
         const historyMode = this._historyHasChanged ? details.historyMode : 'clear';
 
@@ -546,6 +550,7 @@ export class Display extends EventDispatcher {
         if (this._options) {
             this._setTheme(this._options);
         }
+        return stateChangeCompletePromise;
     }
 
     /**
@@ -645,7 +650,7 @@ export class Display extends EventDispatcher {
                 contentOrigin: this.getContentOrigin(),
             },
         };
-        this.setContent(details);
+        void this.setContent(details);
     }
 
     /**
@@ -765,9 +770,9 @@ export class Display extends EventDispatcher {
     }
 
     /** @type {import('display').DirectApiHandler<'displaySetContent'>} */
-    _onMessageSetContent({details}) {
+    async _onMessageSetContent({details}) {
         safePerformance.mark('invokeDisplaySetContent:end');
-        this.setContent(details);
+        await this.setContent(details);
     }
 
     /** @type {import('display').DirectApiHandler<'displaySetCustomCss'>} */
@@ -878,6 +883,7 @@ export class Display extends EventDispatcher {
         }
         safePerformance.mark('display:_onStateChanged:end');
         safePerformance.measure('display:_onStateChanged', 'display:_onStateChanged:start', 'display:_onStateChanged:end');
+        this._resolveStateChangeCompleteWaiters();
     }
 
     /**
@@ -908,7 +914,7 @@ export class Display extends EventDispatcher {
                 contentOrigin: this.getContentOrigin(),
             },
         };
-        this.setContent(details);
+        void this.setContent(details);
     }
 
     /** */
@@ -926,7 +932,7 @@ export class Display extends EventDispatcher {
                 contentOrigin: {tabId, frameId},
             },
         };
-        this.setContent(details);
+        void this.setContent(details);
     }
 
     /**
@@ -1009,7 +1015,7 @@ export class Display extends EventDispatcher {
                     contentOrigin: this.getContentOrigin(),
                 },
             };
-            this.setContent(details);
+            void this.setContent(details);
         } catch (error) {
             this.onError(toError(error));
         }
@@ -2255,7 +2261,7 @@ export class Display extends EventDispatcher {
             },
         };
         /** @type {TextScanner} */ (this._contentTextScanner).clearSelection();
-        this.setContent(details);
+        void this.setContent(details);
     }
 
     /**
@@ -2488,6 +2494,42 @@ export class Display extends EventDispatcher {
     /** */
     _triggerContentUpdateComplete() {
         this.trigger('contentUpdateComplete', {type: this._contentType});
+    }
+
+    /**
+     * @param {number} timeoutMs
+     * @returns {Promise<void>}
+     */
+    _waitForStateChangeComplete(timeoutMs) {
+        /** @type {import('core').Timeout|null} */
+        let timeout = null;
+        /** @type {(value?: void) => void} */
+        let resolvePromise;
+        const promise = new Promise((resolve) => {
+            resolvePromise = resolve;
+        });
+        const finish = () => {
+            const index = this._stateChangeCompleteResolvers.indexOf(finish);
+            if (index >= 0) {
+                this._stateChangeCompleteResolvers.splice(index, 1);
+            }
+            if (timeout !== null) {
+                clearTimeout(timeout);
+                timeout = null;
+            }
+            resolvePromise();
+        };
+        this._stateChangeCompleteResolvers.push(finish);
+        timeout = setTimeout(finish, timeoutMs);
+        return promise;
+    }
+
+    /** */
+    _resolveStateChangeCompleteWaiters() {
+        const resolvers = this._stateChangeCompleteResolvers.splice(0);
+        for (const resolve of resolvers) {
+            resolve();
+        }
     }
 
     /**

@@ -3239,12 +3239,12 @@ export class DictionaryImporter {
                          * @returns {Uint8Array}
                          */
                         const getEncodedStringBytes = (value) => {
-                            let bytes = encodedStringBytesCache.get(value);
-                            if (typeof bytes === 'undefined') {
-                                bytes = this._textEncoder.encode(value);
-                                encodedStringBytesCache.set(value, bytes);
+                            let stringBytes = encodedStringBytesCache.get(value);
+                            if (typeof stringBytes === 'undefined') {
+                                stringBytes = this._textEncoder.encode(value);
+                                encodedStringBytesCache.set(value, stringBytes);
                             }
-                            return bytes;
+                            return stringBytes;
                         };
                         for (let i = 0; i < rowCount; ++i) {
                             const row = /** @type {ParsedTermBankChunkRow} */ (parsedRows[i]);
