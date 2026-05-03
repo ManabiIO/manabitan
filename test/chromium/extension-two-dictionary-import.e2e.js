@@ -131,6 +131,7 @@ const stopAfterIsolatedProbes = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_A
 const stopAfterUpdate = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_UPDATE, false);
 const stopAfterCrashRecovery = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_CRASH_RECOVERY, false);
 const focusedUpdateOnlyMode = stopAfterUpdate || stopAfterCrashRecovery;
+const skipUpdateAndBatchBeforeHover = parseBooleanEnv(process.env.MANABITAN_E2E_SKIP_UPDATE_AND_BATCH_BEFORE_HOVER, false);
 const verifyRestartPersistence = parseBooleanEnv(process.env.MANABITAN_E2E_VERIFY_RESTART_PERSISTENCE, true);
 const verifyBatchRestartPersistence = parseBooleanEnv(process.env.MANABITAN_E2E_VERIFY_BATCH_RESTART_PERSISTENCE, true);
 const verifyCrashRecoveryDuringUpdate = parseBooleanEnv(process.env.MANABITAN_E2E_VERIFY_CRASH_RECOVERY_DURING_UPDATE, true);
@@ -2347,7 +2348,11 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
     await target.waitFor({state: 'visible', timeout: 10000});
     await target.scrollIntoViewIfNeeded();
     await page.bringToFront();
-    await page.locator('body').click({position: {x: 12, y: 12}});
+    await page.evaluate(() => window.focus());
+    const pageHasFocus = await page.evaluate(() => document.hasFocus());
+    if (!pageHasFocus) {
+        await page.mouse.click(2, 2);
+    }
     const box = await target.boundingBox();
     if (box === null) {
         throw new Error(`Unable to resolve bounding box for selector ${targetSelector}`);
@@ -2359,7 +2364,34 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
     const hoverSteps = Math.max(4, Number(motionProfile?.hoverSteps ?? 16) || 16);
     const settleDelayMs = Math.max(0, Number(motionProfile?.settleDelayMs ?? 35) || 35);
     const popupTimeoutMs = Math.max(800, Number(motionProfile?.popupTimeoutMs ?? 3000) || 3000);
-    const modifierCandidates = ['Shift', 'Alt', 'Control', null];
+    await page.evaluate(({hoverX, hoverY}) => {
+        const root = document.documentElement;
+        const element = document.elementFromPoint(hoverX, hoverY);
+        root.dataset.manabitanE2eHoverElement =
+            element instanceof HTMLElement ? `${element.tagName.toLowerCase()}${element.id.length > 0 ? `#${element.id}` : ''}` : '';
+        root.dataset.manabitanE2eHoverText = element instanceof HTMLElement ? (element.textContent || '').trim().slice(0, 80) : '';
+        try {
+            const caretPositionFromPoint = Reflect.get(document, 'caretPositionFromPoint');
+            const caretRangeFromPoint = Reflect.get(document, 'caretRangeFromPoint');
+            let node = null;
+            let offset = null;
+            if (typeof caretPositionFromPoint === 'function') {
+                const position = caretPositionFromPoint.call(document, hoverX, hoverY);
+                node = position?.offsetNode ?? null;
+                offset = position?.offset ?? null;
+            } else if (typeof caretRangeFromPoint === 'function') {
+                const range = caretRangeFromPoint.call(document, hoverX, hoverY);
+                node = range?.startContainer ?? null;
+                offset = range?.startOffset ?? null;
+            }
+            root.dataset.manabitanE2eHoverRangeNode = node !== null ? node.nodeName : '';
+            root.dataset.manabitanE2eHoverRangeText = node !== null ? (node.textContent || '').trim().slice(0, 80) : '';
+            root.dataset.manabitanE2eHoverRangeOffset = offset !== null ? `${offset}` : '';
+        } catch (e) {
+            root.dataset.manabitanE2eHoverRangeError = e instanceof Error ? e.message : `${e}`;
+        }
+    }, {hoverX, hoverY});
+    const modifierCandidates = [null, 'Shift', 'Alt', 'Control'];
     for (const modifier of modifierCandidates) {
         if (modifier !== null) {
             await page.keyboard.down(modifier);
@@ -3501,7 +3533,8 @@ async function main() {
             processSampler,
         );
 
-        if (verifyCrashRecoveryDuringUpdate) {
+        let updatedJmdictTitle = resolvedJmdictTitle;
+        if (!skipUpdateAndBatchBeforeHover && verifyCrashRecoveryDuringUpdate) {
             const crashRecoveryStart = safePerformance.now();
             let crashRecoveryError = '';
             let crashRecoveryResult = null;
@@ -3597,6 +3630,7 @@ async function main() {
             }
         }
 
+        if (!skipUpdateAndBatchBeforeHover) {
         const updateTriggerStart = safePerformance.now();
         const updateTriggerProfile = await runPhaseProfile(cdpSession, async () => {
             await page.evaluate(({dictionaryTitle, downloadUrl}) => {
@@ -3682,7 +3716,7 @@ async function main() {
         if (!(updateImportDebug && updateImportDebug.hasResult === true && typeof updateImportDebug.resultTitle === 'string' && updateImportDebug.resultTitle.includes('JMdict'))) {
             fail(`JMdict update did not finish with expected debug payload: ${JSON.stringify(updateImportDebug)}`);
         }
-        const updatedJmdictTitle = String(updateImportDebug.resultTitle || '').trim();
+        updatedJmdictTitle = String(updateImportDebug.resultTitle || '').trim();
         const backendReadyAfterUpdateStart = safePerformance.now();
         const backendReadyAfterUpdateProfile = await runPhaseProfile(cdpSession, async () => {
             return await waitForBackendDictionaryReady(page, [updatedJmdictTitle], readinessTerm, 60000, false);
@@ -3733,6 +3767,9 @@ async function main() {
         );
         if (!(verifyUpdatedJmdictContentProfile.result && verifyUpdatedJmdictContentProfile.result.ok === true)) {
             fail(`JMdict backend content integrity failed after update. diagnostics=${JSON.stringify(verifyUpdatedJmdictContentProfile.result ?? null)}`);
+        }
+        } else {
+            appendLog(report, 'info', 'Skipped update and batch import sections before hover by MANABITAN_E2E_SKIP_UPDATE_AND_BATCH_BEFORE_HOVER=1.');
         }
 
         const reloadSettingsStart = safePerformance.now();
@@ -4024,6 +4061,7 @@ async function main() {
                 processSampler,
             );
 
+            if (!skipUpdateAndBatchBeforeHover) {
             const deleteJmdictBeforeBatchStart = safePerformance.now();
             const deleteJmdictBeforeBatchProfile = await runPhaseProfile(cdpSession, async () => {
                 await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
@@ -4194,6 +4232,7 @@ async function main() {
                 if (batchRestartPersistenceError.length > 0) {
                     fail(`Batch restart persistence verification failed: ${batchRestartPersistenceError}`);
                 }
+            }
             }
             const enableTextScanningStart = safePerformance.now();
             const enableTextScanningProfile = await runPhaseProfile(cdpSession, async () => {
