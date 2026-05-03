@@ -316,6 +316,8 @@ export class DictionaryDatabase {
         this._termPrefixNegativeCache = new Map();
         /** @type {WeakMap<Map<string, number[]>, {size: number, keys: string[]}>} */
         this._termIndexSortedKeysByLookup = new WeakMap();
+        /** @type {Map<string, Promise<void>>} */
+        this._directTermIndexLoadPromiseByDictionary = new Map();
         /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
         this._directTermIndexByDictionary = new Map();
         /** @type {import('@sqlite.org/sqlite-wasm').sqlite3_module|null} */
@@ -1569,10 +1571,27 @@ export class DictionaryDatabase {
      * @returns {Promise<void>}
      */
     async _ensureDirectTermIndexesLoaded(dictionaryNames) {
-        await this._termRecordStore.ensureDictionariesLoaded(dictionaryNames);
-        for (const dictionaryName of dictionaryNames) {
-            this._ensureDirectTermIndex(dictionaryName);
+        const names = [...dictionaryNames].filter((value, index, array) => value.length > 0 && array.indexOf(value) === index);
+        /** @type {Promise<void>[]} */
+        const promises = [];
+        for (const dictionaryName of names) {
+            const existing = this._directTermIndexLoadPromiseByDictionary.get(dictionaryName);
+            if (typeof existing !== 'undefined') {
+                promises.push(existing);
+                continue;
+            }
+            const promise = (async () => {
+                await this._termRecordStore.ensureDictionariesLoaded([dictionaryName]);
+                this._ensureDirectTermIndex(dictionaryName);
+            })();
+            this._directTermIndexLoadPromiseByDictionary.set(dictionaryName, promise);
+            promises.push(promise);
+            promise.then(
+                () => { this._directTermIndexLoadPromiseByDictionary.delete(dictionaryName); },
+                () => { this._directTermIndexLoadPromiseByDictionary.delete(dictionaryName); },
+            );
         }
+        await Promise.all(promises);
     }
 
     /**
@@ -1586,6 +1605,13 @@ export class DictionaryDatabase {
         if (names.length === 0) { return; }
         await this._termContentStore.ensureLoadedForRead();
         await this._ensureDirectTermIndexesLoaded(names);
+        for (const name of names) {
+            const index = this._ensureDirectTermIndex(name);
+            this._getSortedTermIndexKeys(index.expression);
+            this._getSortedTermIndexKeys(index.reading);
+            this._getSortedTermIndexKeys(index.expressionReverse);
+            this._getSortedTermIndexKeys(index.readingReverse);
+        }
     }
 
     /**
