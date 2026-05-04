@@ -65,6 +65,7 @@ const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_UPPER_BOUND_BYTES = 128 * 1024 * 1024;
 const ADAPTIVE_TERM_BANK_WASM_INITIAL_META_CAPACITY_DIVISOR = 18;
 const ADAPTIVE_TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW = 128;
+const TERM_BANK_BYTE_PREFETCH_COUNT = 8;
 const REVERSE_STRING_CACHE_MAX_ENTRIES = 4096;
 const TERM_BANK_ARTIFACT_MAGIC_V1 = 'MBTB0001';
 const TERM_BANK_ARTIFACT_MAGIC_V2 = 'MBTB0002';
@@ -1438,7 +1439,7 @@ export class DictionaryImporter {
                     if (!canPrefetchTermFileBytes(candidate)) { continue; }
                     void prefetchTermFileBytes(candidate);
                     ++prefetchedCount;
-                    if (prefetchedCount >= 3) { return; }
+                    if (prefetchedCount >= TERM_BANK_BYTE_PREFETCH_COUNT) { return; }
                 }
             };
             for (let termFileIndex = 0; termFileIndex < activeTermFiles.length; ++termFileIndex) {

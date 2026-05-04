@@ -63,6 +63,7 @@ const LOW_MEMORY_WRITE_COALESCE_TARGET_BYTES = 1024 * 1024;
 const HIGH_MEMORY_WRITE_COALESCE_TARGET_BYTES = 8 * 1024 * 1024;
 const WRITE_COALESCE_MAX_CHUNKS = 512;
 const MAX_SHARD_SEGMENT_FILE_BYTES = 1024 * 1024 * 1024;
+const SHARD_LOAD_CONCURRENCY = 3;
 
 /**
  * @param {unknown[]} rows
@@ -1566,9 +1567,7 @@ export class TermRecordOpfsStore {
             }
         }
         statesToLoad.sort((a, b) => a.fileName.localeCompare(b.fileName));
-        for (const state of statesToLoad) {
-            await this._loadShardStateContents(state);
-        }
+        await this._loadShardStatesContents(statesToLoad);
         for (const dictionaryName of pending) {
             this._loadedDictionaryNames.add(dictionaryName);
         }
@@ -1584,9 +1583,7 @@ export class TermRecordOpfsStore {
         }
         /** @type {TermRecordShardState[]} */
         const statesToLoad = [...this._shardStateByFileName.values()].sort((a, b) => a.fileName.localeCompare(b.fileName));
-        for (const state of statesToLoad) {
-            await this._loadShardStateContents(state);
-        }
+        await this._loadShardStatesContents(statesToLoad);
         for (const state of this._shardStateByFileName.values()) {
             const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
             if (dictionaryName !== null && dictionaryName.length > 0) {
@@ -1986,6 +1983,9 @@ export class TermRecordOpfsStore {
                     sequence: rawSequence >= 0 ? rawSequence : null,
                 };
                 this._recordsById.set(id, record);
+                if (!this._deferIndexBuild) {
+                    this._addToIndex(record);
+                }
                 if (id >= this._nextId) {
                     this._nextId = id + 1;
                 }
@@ -2073,6 +2073,9 @@ export class TermRecordOpfsStore {
                 sequence: this._asNullableNumber(raw[10]),
             };
             this._recordsById.set(id, record);
+            if (!this._deferIndexBuild) {
+                this._addToIndex(record);
+            }
             if (id >= this._nextId) {
                 this._nextId = id + 1;
             }
@@ -2558,6 +2561,28 @@ export class TermRecordOpfsStore {
                 // NOP
             }
         }
+    }
+
+    /**
+     * @param {TermRecordShardState[]} states
+     * @returns {Promise<void>}
+     */
+    async _loadShardStatesContents(states) {
+        if (states.length === 0) {
+            return;
+        }
+        let nextIndex = 0;
+        const workerCount = Math.min(SHARD_LOAD_CONCURRENCY, states.length);
+        const workers = [];
+        for (let i = 0; i < workerCount; ++i) {
+            workers.push((async () => {
+                while (nextIndex < states.length) {
+                    const state = states[nextIndex++];
+                    await this._loadShardStateContents(state);
+                }
+            })());
+        }
+        await Promise.all(workers);
     }
 
     /**
