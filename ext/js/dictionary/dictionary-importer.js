@@ -3786,7 +3786,7 @@ export class DictionaryImporter {
         let chunkContentHash2 = [];
         /** @type {(string|null)[]|null} */
         let chunkContentDictNames = null;
-        let termRecordPlanBuilder = directArtifactChunkImport ? null : createArtifactTermRecordPreinternedPlanBuilder();
+        let termRecordPlanBuilder = createArtifactTermRecordPreinternedPlanBuilder();
         const chunkSize = TERM_ARTIFACT_ROW_CHUNK_SIZE;
         /** @type {number[]|Uint32Array} */
         let termRecordExpressionIndexes = [];
@@ -4024,7 +4024,7 @@ export class DictionaryImporter {
                     } else {
                         termList.length = 0;
                     }
-                    termRecordPlanBuilder = directArtifactChunkImport ? null : createArtifactTermRecordPreinternedPlanBuilder();
+                    termRecordPlanBuilder = createArtifactTermRecordPreinternedPlanBuilder();
                     if (usePreallocatedTermRecordIndexes) {
                         termRecordExpressionIndexes = new Uint32Array(chunkSize);
                         termRecordReadingIndexes = new Uint32Array(chunkSize);
