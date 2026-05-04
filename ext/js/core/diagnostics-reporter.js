@@ -459,13 +459,11 @@ export async function clearDiagnosticsLogSnapshot() {
 /**
  * @param {string} event
  * @param {Record<string, unknown>} payload
+ * @param {string|null} endpoint
  * @returns {void}
  */
-export function reportDiagnostics(event, payload = {}) {
+function submitDiagnostics(event, payload, endpoint) {
     void (async () => {
-        const {enabled, endpoint, verbosity} = await getDiagnosticsConfig();
-        if (!enabled) { return; }
-        if (!shouldReportDiagnosticsEvent(event, verbosity)) { return; }
         const manifest = getManifestOrNull();
         const chromeValue = Reflect.get(globalThis, 'chrome');
         const runtimeId = /** @type {{runtime?: {id?: string}}} */ (chromeValue)?.runtime?.id;
@@ -519,5 +517,41 @@ export function reportDiagnostics(event, payload = {}) {
         } catch (_) {
             // Best-effort diagnostics channel.
         }
+    })();
+}
+
+/**
+ * @param {string} event
+ * @param {Record<string, unknown>} payload
+ * @returns {void}
+ */
+export function reportDiagnostics(event, payload = {}) {
+    void (async () => {
+        const {enabled, endpoint, verbosity} = await getDiagnosticsConfig();
+        if (!enabled) { return; }
+        if (!shouldReportDiagnosticsEvent(event, verbosity)) { return; }
+        submitDiagnostics(event, payload, endpoint);
+    })();
+}
+
+/**
+ * @param {string} event
+ * @param {() => Record<string, unknown>} createPayload
+ * @returns {void}
+ */
+export function reportDiagnosticsLazy(event, createPayload) {
+    void (async () => {
+        const {enabled, endpoint, verbosity} = await getDiagnosticsConfig();
+        if (!enabled) { return; }
+        if (!shouldReportDiagnosticsEvent(event, verbosity)) { return; }
+        let payload;
+        try {
+            payload = createPayload();
+        } catch (e) {
+            payload = {
+                diagnosticsPayloadError: e instanceof Error ? e.message : `${e}`,
+            };
+        }
+        submitDiagnostics(event, payload, endpoint);
     })();
 }

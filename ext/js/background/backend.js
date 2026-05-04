@@ -28,7 +28,7 @@ import {readResponseJson} from '../core/json.js';
 import {logErrorLevelToNumber} from '../core/log-utilities.js';
 import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
-import {reportDiagnostics} from '../core/diagnostics-reporter.js';
+import {reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {clone, deferPromise, promiseTimeout} from '../core/utilities.js';
 import {generateAnkiNoteMediaFileName, INVALID_NOTE_ID, isNoteDataValid} from '../data/anki-util.js';
@@ -1092,7 +1092,8 @@ export class Backend {
             dictionaryEntries.length === 0 ||
             !hasExactHeadwordMatch
         );
-        reportDiagnostics('dictionary-lookup-snapshot', {
+        dictionaryEntries.splice(maxResults);
+        reportDiagnosticsLazy('dictionary-lookup-snapshot', () => ({
             text,
             textLength: text.length,
             mode,
@@ -1155,8 +1156,7 @@ export class Backend {
                         }
                 )) :
                 void 0,
-        });
-        dictionaryEntries.splice(maxResults);
+        }));
         return {dictionaryEntries, originalTextLength};
     }
 

@@ -26,6 +26,7 @@ import {anyNodeMatchesSelector, everyNodeMatchesSelector, getActiveModifiers, ge
 import {TextSourceElement} from '../dom/text-source-element.js';
 
 const SCAN_RESOLUTION_EXCLUDED_LANGUAGES = new Set(['ja', 'zh', 'yue', 'ko']);
+const TERM_SEARCH_SEGMENT_TERMINATOR_PATTERN = /[。．.!?！？\n\r\t,、，;；:：]/;
 
 /**
  * @augments EventDispatcher<import('text-scanner').Events>
@@ -488,6 +489,9 @@ export class TextScanner extends EventDispatcher {
      * @returns {Promise<?boolean>}
      */
     async _search(textSource, searchTerms, searchKanji, inputInfo, showEmpty = false, disallowExpandStartOffset = false, lookupSequence = null) {
+        const searchStartedAt = safePerformance.now();
+        let contextDurationMs = 0;
+        let findDurationMs = 0;
         try {
             safePerformance.mark('scanner:_search:start');
             if (this._isLookupStale(lookupSequence)) { return null; }
@@ -522,8 +526,10 @@ export class TextScanner extends EventDispatcher {
                 return null;
             }
 
+            let phaseStartedAt = safePerformance.now();
             const getSearchContextPromise = this._getSearchContext();
             const getSearchContextResult = getSearchContextPromise instanceof Promise ? await getSearchContextPromise : getSearchContextPromise;
+            contextDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
             if (this._isLookupStale(lookupSequence)) { return null; }
             const {detail} = getSearchContextResult;
             const optionsContext = this._createOptionsContextForInput(getSearchContextResult.optionsContext, inputInfo);
@@ -534,7 +540,9 @@ export class TextScanner extends EventDispatcher {
             let sentence = null;
             /** @type {'terms'|'kanji'} */
             let type = 'terms';
+            phaseStartedAt = safePerformance.now();
             const result = await this._findDictionaryEntries(textSource, searchTerms, searchKanji, optionsContext);
+            findDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
             if (this._isLookupStale(lookupSequence)) { return null; }
             if (result !== null) {
                 ({dictionaryEntries, sentence, type} = result);
@@ -564,11 +572,27 @@ export class TextScanner extends EventDispatcher {
                     detail,
                     pageTheme,
                 });
+                this._updateDebugState({
+                    scannerSearchDurationMs: Math.round(safePerformance.now() - searchStartedAt),
+                    scannerSearchContextDurationMs: Math.round(contextDurationMs),
+                    scannerFindDurationMs: Math.round(findDurationMs),
+                    scannerSearchResultCount: dictionaryEntries.length,
+                    scannerSearchType: type,
+                    scannerSearchTextSample: this.getTextSourceContent(textSource, Math.min(this._scanLength, 24), this._layoutAwareScan, optionsContext.pointerType).slice(0, 24),
+                });
                 safePerformance.mark('scanner:_search:end');
                 safePerformance.measure('scanner:_search', 'scanner:_search:start', 'scanner:_search:end');
                 return true;
             } else {
                 this._triggerSearchEmpty(inputInfo);
+                this._updateDebugState({
+                    scannerSearchDurationMs: Math.round(safePerformance.now() - searchStartedAt),
+                    scannerSearchContextDurationMs: Math.round(contextDurationMs),
+                    scannerFindDurationMs: Math.round(findDurationMs),
+                    scannerSearchResultCount: 0,
+                    scannerSearchType: 'empty',
+                    scannerSearchTextSample: this.getTextSourceContent(textSource, Math.min(this._scanLength, 24), this._layoutAwareScan, optionsContext.pointerType).slice(0, 24),
+                });
                 safePerformance.mark('scanner:_search:end');
                 safePerformance.measure('scanner:_search', 'scanner:_search:start', 'scanner:_search:end');
                 return false;
@@ -589,6 +613,23 @@ export class TextScanner extends EventDispatcher {
      */
     _triggerSearchEmpty(inputInfo) {
         this.trigger('searchEmpty', {inputInfo});
+    }
+
+    /**
+     * @param {Record<string, string|number|boolean|null|undefined>} values
+     * @returns {void}
+     */
+    _updateDebugState(values) {
+        const {documentElement} = document;
+        if (documentElement === null) { return; }
+        for (const [key, value] of Object.entries(values)) {
+            const datasetKey = `manabitan${key.slice(0, 1).toUpperCase()}${key.slice(1)}`;
+            if (value === null || typeof value === 'undefined') {
+                delete documentElement.dataset[datasetKey];
+            } else {
+                documentElement.dataset[datasetKey] = `${value}`;
+            }
+        }
     }
 
     /** */
@@ -1287,7 +1328,11 @@ export class TextScanner extends EventDispatcher {
 
         /** @type {import('api').FindTermsDetails} */
         const details = {};
-        const {dictionaryEntries, originalTextLength} = await this._api.termsFind(searchText, details, optionsContext);
+        const searchTextPrimary = this._getPrimaryTermSearchText(searchText);
+        let {dictionaryEntries, originalTextLength} = await this._api.termsFind(searchTextPrimary, details, optionsContext);
+        if (dictionaryEntries.length === 0 && searchTextPrimary !== searchText) {
+            ({dictionaryEntries, originalTextLength} = await this._api.termsFind(searchText, details, optionsContext));
+        }
         if (dictionaryEntries.length === 0) { return null; }
 
         textSource.setEndOffset(originalTextLength, false, layoutAwareScan);
@@ -1302,6 +1347,18 @@ export class TextScanner extends EventDispatcher {
         );
 
         return {dictionaryEntries, sentence, type: 'terms'};
+    }
+
+    /**
+     * @param {string} text
+     * @returns {string}
+     */
+    _getPrimaryTermSearchText(text) {
+        const match = TERM_SEARCH_SEGMENT_TERMINATOR_PATTERN.exec(text);
+        if (match === null || typeof match.index !== 'number' || match.index <= 0) {
+            return text;
+        }
+        return text.slice(0, match.index);
     }
 
     /**

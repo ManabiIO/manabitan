@@ -392,6 +392,17 @@ export class Popup extends EventDispatcher {
     }
 
     /**
+     * Warms the display frame with real dictionary content while keeping the popup hidden.
+     * @param {import('display').ContentDetails} displayDetails The details parameter passed to `Display.setContent`.
+     * @returns {Promise<void>}
+     */
+    async prewarmContent(displayDetails) {
+        const injected = await this._inject();
+        if (!injected) { return; }
+        await this._invokeSafe('displaySetContent', {details: displayDetails});
+    }
+
+    /**
      * Sets the custom styles for the popup content.
      * @param {string} css The CSS rules.
      */

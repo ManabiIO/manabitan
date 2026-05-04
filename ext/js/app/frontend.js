@@ -28,6 +28,8 @@ import {TextSourceGenerator} from '../dom/text-source-generator.js';
 import {TextSourceRange} from '../dom/text-source-range.js';
 import {TextScanner} from '../language/text-scanner.js';
 
+const JAPANESE_TEXT_PATTERN = /[\u3040-\u30ff\u3400-\u9fff]+/g;
+
 /**
  * This is the main class responsible for scanning and handling webpage content.
  */
@@ -87,6 +89,8 @@ export class Frontend {
         this._popupPrewarmPromise = null;
         /** @type {?Promise<void>} */
         this._lookupPrewarmPromise = null;
+        /** @type {?string} */
+        this._popupContentPrewarmTerm = null;
         /** @type {TextSourceGenerator} */
         this._textSourceGenerator = new TextSourceGenerator();
         /** @type {TextScanner} */
@@ -727,12 +731,20 @@ export class Frontend {
             let resultCount = 0;
             /** @type {string[]} */
             const matchedTerms = [];
+            /** @type {?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}} */
+            let firstMatchedResult = null;
             for (const term of prewarmTerms) {
                 const {dictionaryEntries} = await this._application.api.termsFind(term, {}, optionsContext);
                 resultCount += dictionaryEntries.length;
                 if (dictionaryEntries.length > 0) {
                     matchedTerms.push(term);
+                    if (firstMatchedResult === null) {
+                        firstMatchedResult = {term, dictionaryEntries};
+                    }
                 }
+            }
+            if (firstMatchedResult !== null) {
+                await this._prewarmPopupContentForHover(firstMatchedResult.term, firstMatchedResult.dictionaryEntries, optionsContext);
             }
             this._updatePageDebugState({
                 lookupPrewarmReady: resultCount > 0,
@@ -760,7 +772,7 @@ export class Frontend {
      */
     async _getLookupPrewarmTerms(options) {
         /** @type {string[]} */
-        const terms = [];
+        const terms = this._getPageLookupPrewarmTerms();
         for (const {name, enabled} of options.dictionaries) {
             if (!enabled || name.length === 0) { continue; }
             try {
@@ -774,6 +786,100 @@ export class Frontend {
         }
         terms.push('日本', 'する', 'ある', '見る');
         return [...new Set(terms.map((term) => `${term}`.trim()).filter((term) => term.length > 0))];
+    }
+
+    /**
+     * @returns {string[]}
+     */
+    _getPageLookupPrewarmTerms() {
+        /** @type {string[]} */
+        const terms = [];
+        const ignoredParentNames = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT', 'SELECT', 'OPTION']);
+        const walker = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT);
+        while (terms.length < 6) {
+            const node = walker.nextNode();
+            if (node === null) { break; }
+            const parent = node.parentElement;
+            if (parent === null || ignoredParentNames.has(parent.tagName) || parent.closest('[hidden],[aria-hidden="true"]') !== null) {
+                continue;
+            }
+            const text = node.textContent || '';
+            JAPANESE_TEXT_PATTERN.lastIndex = 0;
+            for (const match of text.matchAll(JAPANESE_TEXT_PATTERN)) {
+                const term = match[0].slice(0, 12);
+                if (term.length > 0) {
+                    terms.push(term);
+                    if (terms.length >= 6) { break; }
+                }
+            }
+        }
+        return terms;
+    }
+
+    /**
+     * @param {string} term
+     * @param {import('dictionary').DictionaryEntry[]} dictionaryEntries
+     * @param {import('settings').OptionsContext} optionsContext
+     * @returns {Promise<void>}
+     */
+    async _prewarmPopupContentForHover(term, dictionaryEntries, optionsContext) {
+        const popup = this._popup;
+        if (
+            this._popupContentPrewarmTerm === term ||
+            popup === null ||
+            dictionaryEntries.length === 0 ||
+            typeof Reflect.get(popup, 'prewarmContent') !== 'function'
+        ) {
+            return;
+        }
+
+        const startedAt = safePerformance.now();
+        this._updatePageDebugState({
+            popupContentPrewarmRequested: true,
+            popupContentPrewarmSettled: false,
+            popupContentPrewarmLastError: null,
+        });
+        try {
+            const {tabId, frameId} = this._application;
+            /** @type {import('display').ContentDetails} */
+            const details = {
+                focus: false,
+                historyMode: 'clear',
+                params: {
+                    type: 'terms',
+                    query: term,
+                    wildcards: 'off',
+                    lookup: 'false',
+                },
+                state: {
+                    focusEntry: 0,
+                    optionsContext,
+                    url: optionsContext.url,
+                    pageTheme: 'light',
+                },
+                content: {
+                    dictionaryEntries,
+                    contentOrigin: {tabId, frameId},
+                },
+            };
+            await /** @type {{prewarmContent: (details: import('display').ContentDetails) => Promise<void>}} */ (popup).prewarmContent(details);
+            this._popupContentPrewarmTerm = term;
+            this._updatePageDebugState({
+                popupContentPrewarmReady: true,
+                popupContentPrewarmSettled: true,
+                popupContentPrewarmTerm: term,
+                popupContentPrewarmResultCount: dictionaryEntries.length,
+                popupContentPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
+            });
+        } catch (e) {
+            this._updatePageDebugState({
+                popupContentPrewarmReady: false,
+                popupContentPrewarmSettled: true,
+                popupContentPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
+                popupContentPrewarmLastError: e instanceof Error ? e.message : `${e}`,
+            });
+            log.error(e);
+        }
     }
 
     /**
@@ -793,7 +899,7 @@ export class Frontend {
             return;
         }
 
-        const timeout = 3000;
+        const timeout = 8000;
         const startedAt = safePerformance.now();
         this._updatePageDebugState({
             popupPrewarmRequested: true,

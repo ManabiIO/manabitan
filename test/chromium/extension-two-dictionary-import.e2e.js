@@ -2440,7 +2440,7 @@ async function waitForPageFrontendScanReady(page, timeoutMs = 10000) {
     return await getPageFrontendDebugState(page);
 }
 
-async function waitForPageFrontendHoverPrewarmReady(page, timeoutMs = 5000) {
+async function waitForPageFrontendHoverPrewarmReady(page, timeoutMs = 10000) {
     await waitForPageFrontendScanReady(page, timeoutMs);
     await page.waitForFunction(() => {
         const data = document.documentElement?.dataset ?? {};
