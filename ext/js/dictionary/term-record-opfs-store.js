@@ -132,6 +132,46 @@ function hasCompleteTermRecordPreinternedPlan(plan, count) {
 }
 
 /**
+ * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
+ * @param {number} count
+ * @returns {boolean}
+ */
+function hasFixedContentSpan(chunk, count) {
+    return (
+        count > 0 &&
+        typeof chunk.fixedContentOffsetBase === 'number' &&
+        Number.isFinite(chunk.fixedContentOffsetBase) &&
+        chunk.fixedContentOffsetBase >= 0 &&
+        typeof chunk.fixedContentLength === 'number' &&
+        Number.isFinite(chunk.fixedContentLength) &&
+        chunk.fixedContentLength >= 0
+    );
+}
+
+/**
+ * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
+ * @param {number[]|Uint32Array} contentOffsets
+ * @param {number} index
+ * @returns {number}
+ */
+function getArtifactContentOffset(chunk, contentOffsets, index) {
+    if (hasFixedContentSpan(chunk, index + 1)) {
+        return /** @type {number} */ (chunk.fixedContentOffsetBase) + (index * /** @type {number} */ (chunk.fixedContentLength));
+    }
+    return contentOffsets[index];
+}
+
+/**
+ * @param {{fixedContentLength?: number}} chunk
+ * @param {number[]|Uint32Array} contentLengths
+ * @param {number} index
+ * @returns {number}
+ */
+function getArtifactContentLength(chunk, contentLengths, index) {
+    return typeof chunk.fixedContentLength === 'number' ? chunk.fixedContentLength : contentLengths[index];
+}
+
+/**
  * @param {Uint8Array} output
  * @param {number} offset
  * @param {number} value
@@ -965,18 +1005,18 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
-     * @param {number[]} contentOffsets
-     * @param {number[]} contentLengths
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array} contentLengths
      * @param {string | (string|null)[]} contentDictNames
      * @returns {Promise<{buildRecordsMs: number, encodeMs: number, appendWriteMs: number}>}
      */
     async appendBatchFromArtifactChunkResolvedContent(chunk, contentOffsets, contentLengths, contentDictNames) {
         const count = chunk.rowCount;
         if (count <= 0) { return {buildRecordsMs: 0, encodeMs: 0, appendWriteMs: 0}; }
+        const fixedContentSpan = hasFixedContentSpan(chunk, count);
         if (
-            contentOffsets.length < count ||
-            contentLengths.length < count ||
+            (!fixedContentSpan && (contentOffsets.length < count || contentLengths.length < count)) ||
             (Array.isArray(contentDictNames) && contentDictNames.length < count)
         ) {
             throw new Error('appendBatchFromArtifactChunkResolvedContent content arrays are smaller than row count');
@@ -1008,8 +1048,8 @@ export class TermRecordOpfsStore {
                     readingEqualsExpression: chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1,
                     expressionBytes: chunk.expressionBytesList[i],
                     readingBytes: (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ? void 0 : chunk.readingBytesList[i],
-                    entryContentOffset: contentOffsets[i],
-                    entryContentLength: contentLengths[i],
+                    entryContentOffset: getArtifactContentOffset(chunk, contentOffsets, i),
+                    entryContentLength: getArtifactContentLength(chunk, contentLengths, i),
                     entryContentDictName,
                     score: chunk.scoreList[i] ?? 0,
                     sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
@@ -2264,9 +2304,9 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
-     * @param {number[]} contentOffsets
-     * @param {number[]} contentLengths
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
+     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @returns {Promise<Uint8Array>}
      */
@@ -2274,7 +2314,8 @@ export class TermRecordOpfsStore {
         if (chunk.rowCount === 0) {
             return new Uint8Array(0);
         }
-        if (preinternedPlan !== null && !this._wasmEncoderUnavailable) {
+        const fixedContentSpan = hasFixedContentSpan(chunk, chunk.rowCount);
+        if (preinternedPlan !== null && !fixedContentSpan && !this._wasmEncoderUnavailable) {
             try {
                 const encoded = await encodeTermRecordArtifactChunkWithWasmPreinterned(
                     chunk,
@@ -2308,8 +2349,8 @@ export class TermRecordOpfsStore {
                 readingBytes: (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ? void 0 : chunk.readingBytesList[i],
                 expressionReverse: null,
                 readingReverse: null,
-                entryContentOffset: contentOffsets[i],
-                entryContentLength: contentLengths[i],
+                entryContentOffset: getArtifactContentOffset(chunk, contentOffsets, i),
+                entryContentLength: getArtifactContentLength(chunk, contentLengths, i),
                 entryContentDictName: 'raw',
                 score: chunk.scoreList[i] ?? 0,
                 sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
@@ -2319,9 +2360,9 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
-     * @param {number[]} contentOffsets
-     * @param {number[]} contentLengths
+     * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
+     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} preinternedPlan
      * @returns {Uint8Array}
      */
@@ -2331,9 +2372,13 @@ export class TermRecordOpfsStore {
         const stringsBuffer = preinternedPlan.stringsBuffer;
         const expressionIndexes = preinternedPlan.expressionIndexes;
         const readingIndexes = preinternedPlan.readingIndexes;
+        const fixedContentSpan = hasFixedContentSpan(chunk, count);
+        const fixedContentOffsetBase = fixedContentSpan ? /** @type {number} */ (chunk.fixedContentOffsetBase) : 0;
+        const fixedContentLength = fixedContentSpan ? /** @type {number} */ (chunk.fixedContentLength) : 0;
         let totalBytes = STRING_TABLE_HEADER_BYTES + (stringLengths.length * 2) + stringsBuffer.byteLength;
         for (let i = 0; i < count; ++i) {
-            totalBytes += RECORD_HEADER_BYTES + ((contentLengths[i] >= 0 && contentLengths[i] > 0xfffd) ? 4 : 0);
+            const entryContentLength = fixedContentSpan ? fixedContentLength : contentLengths[i];
+            totalBytes += RECORD_HEADER_BYTES + ((entryContentLength >= 0 && entryContentLength > 0xfffd) ? 4 : 0);
         }
 
         const output = new Uint8Array(totalBytes);
@@ -2346,7 +2391,7 @@ export class TermRecordOpfsStore {
         output.set(stringsBuffer, cursor);
         cursor += stringsBuffer.byteLength;
         for (let i = 0; i < count; ++i) {
-            const entryContentLength = contentLengths[i];
+            const entryContentLength = fixedContentSpan ? fixedContentLength : contentLengths[i];
             cursor = writeU32Le(output, cursor, expressionIndexes[i] >>> 0);
             cursor = writeU32Le(
                 output,
@@ -2355,7 +2400,8 @@ export class TermRecordOpfsStore {
                     READING_EQUALS_EXPRESSION_U32 :
                     (readingIndexes[i] >>> 0)
             );
-            cursor = writeU32Le(output, cursor, contentOffsets[i] >= 0 ? contentOffsets[i] : U32_NULL);
+            const entryContentOffset = fixedContentSpan ? fixedContentOffsetBase + (i * fixedContentLength) : contentOffsets[i];
+            cursor = writeU32Le(output, cursor, entryContentOffset >= 0 ? entryContentOffset : U32_NULL);
             if (entryContentLength < 0) {
                 cursor = writeU16Le(output, cursor, ENTRY_CONTENT_LENGTH_U16_NULL);
             } else if (entryContentLength <= 0xfffd) {

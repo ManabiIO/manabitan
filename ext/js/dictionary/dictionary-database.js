@@ -4199,7 +4199,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
      * @returns {Promise<void>}
      */
     async _bulkAddArtifactTermsChunkWithoutContentDedup(chunk) {
@@ -4267,14 +4267,22 @@ export class DictionaryDatabase {
                     /** @type {number[]} */
                     const packedLengths = new Array(packedChunks.length);
                     await this._termContentStore.appendBatchToArrays(packedChunks, packedOffsets, packedLengths);
-                    contentLengths.fill(firstContentLength);
-                    for (let packedIndex = 0; packedIndex < packedChunks.length; ++packedIndex) {
-                        const baseOffset = packedOffsets[packedIndex];
-                        const rowStart = packedRowStarts[packedIndex];
-                        const rowCount = packedRowCounts[packedIndex];
-                        for (let localIndex = 0; localIndex < rowCount; ++localIndex) {
-                            const rowIndex = rowStart + localIndex;
-                            contentOffsets[rowIndex] = baseOffset + (localIndex * firstContentLength);
+                    if (
+                        packedChunks.length === 1 &&
+                        (chunk.dictionaryTotalRows ?? 0) >= 1_000_000
+                    ) {
+                        chunk.fixedContentOffsetBase = packedOffsets[0] ?? 0;
+                        chunk.fixedContentLength = firstContentLength;
+                    } else {
+                        contentLengths.fill(firstContentLength);
+                        for (let packedIndex = 0; packedIndex < packedChunks.length; ++packedIndex) {
+                            const baseOffset = packedOffsets[packedIndex];
+                            const rowStart = packedRowStarts[packedIndex];
+                            const rowCount = packedRowCounts[packedIndex];
+                            for (let localIndex = 0; localIndex < rowCount; ++localIndex) {
+                                const rowIndex = rowStart + localIndex;
+                                contentOffsets[rowIndex] = baseOffset + (localIndex * firstContentLength);
+                            }
                         }
                     }
                 } else {

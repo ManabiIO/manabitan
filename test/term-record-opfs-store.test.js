@@ -454,6 +454,62 @@ describe('TermRecordOpfsStore', () => {
         expect(secondRecord).toMatchObject({expression: '食べる', reading: 'たべる', entryContentOffset: 128, entryContentLength: 256, score: 20, sequence: 200});
     });
 
+    test('round-trips fixed-span preinterned artifact chunk records without content offset arrays', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'VNDB Characters by Bee';
+        const expression0 = textEncoder.encode('春日野穹');
+        const reading0 = textEncoder.encode('かすがのそら');
+        const expression1 = textEncoder.encode('遠野美凪');
+        const reading1 = textEncoder.encode('とおのみなぎ');
+        const stringsBuffer = new Uint8Array(expression0.byteLength + reading0.byteLength + expression1.byteLength + reading1.byteLength);
+        let cursor = 0;
+        for (const bytes of [expression0, reading0, expression1, reading1]) {
+            stringsBuffer.set(bytes, cursor);
+            cursor += bytes.byteLength;
+        }
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
+
+        await writerStore.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: dictionaryName,
+                dictionaryTotalRows: 1_000_000,
+                rowCount: 2,
+                expressionBytesList: [expression0, expression1],
+                readingBytesList: [reading0, reading1],
+                readingEqualsExpressionList: new Uint8Array([0, 0]),
+                scoreList: new Int32Array([30, 40]),
+                sequenceList: new Int32Array([300, 400]),
+                fixedContentOffsetBase: 1024,
+                fixedContentLength: 32,
+                termRecordPreinternedPlan: {
+                    stringLengths: Uint16Array.from([expression0.byteLength, reading0.byteLength, expression1.byteLength, reading1.byteLength]),
+                    stringsBuffer,
+                    expressionIndexes: Uint32Array.from([0, 2]),
+                    readingIndexes: Uint32Array.from([1, 3]),
+                },
+            },
+            new Uint32Array(0),
+            new Uint32Array(0),
+            RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+        );
+        await writerStore._closeAllWritables();
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(true);
+
+        const index = readerStore.getDictionaryIndex(dictionaryName);
+        const firstRecord = readerStore.getById(index.expression.get('春日野穹')?.[0] ?? -1);
+        const secondRecord = readerStore.getById(index.reading.get('とおのみなぎ')?.[0] ?? -1);
+        expect(firstRecord).toMatchObject({expression: '春日野穹', reading: 'かすがのそら', entryContentOffset: 1024, entryContentLength: 32, score: 30, sequence: 300});
+        expect(secondRecord).toMatchObject({expression: '遠野美凪', reading: 'とおのみなぎ', entryContentOffset: 1056, entryContentLength: 32, score: 40, sequence: 400});
+    });
+
     test('builds reverse suffix indexes lazily after exact artifact index load', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Jitendex.org [2026-04-04]';
