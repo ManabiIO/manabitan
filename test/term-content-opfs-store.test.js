@@ -50,6 +50,65 @@ function createReadableFile(bytes) {
 }
 
 describe('TermContentOpfsStore', () => {
+    test('import append offsets include bytes in active queued writes', async () => {
+        const store = new TermContentOpfsStore();
+        /** @type {(() => void)|null} */
+        let releaseWrite = null;
+        let writeCount = 0;
+        const writeStarted = new Promise((resolve) => {
+            const writable = {
+                seek: vi.fn(async () => {}),
+                close: vi.fn(async () => {}),
+                write: vi.fn(async () => {
+                    ++writeCount;
+                    if (writeCount === 1) {
+                        resolve(void 0);
+                        await new Promise((writeResolve) => {
+                            releaseWrite = writeResolve;
+                        });
+                    }
+                }),
+            };
+            const fileHandle = {
+                createWritable: vi.fn(async () => writable),
+                getFile: vi.fn(async () => createReadableFile(new Uint8Array(0))),
+            };
+            Reflect.set(store, '_fileHandle', fileHandle);
+            Reflect.set(store, '_segmentStates', [{
+                index: 0,
+                fileName: 'manabitan-term-content.bin',
+                fileHandle,
+                fileLength: 0,
+                startOffset: 0,
+                readFile: null,
+            }]);
+            Reflect.set(store, '_importSessionActive', true);
+            Reflect.set(store, '_flushThresholdBytes', 1);
+            store.setQueueImportWritesEnabled(true);
+        });
+
+        /** @type {number[]} */
+        const firstOffsets = [];
+        /** @type {number[]} */
+        const firstLengths = [];
+        await store.appendBatchToArrays([new Uint8Array([1, 2, 3])], firstOffsets, firstLengths);
+        await writeStarted;
+
+        /** @type {number[]} */
+        const secondOffsets = [];
+        /** @type {number[]} */
+        const secondLengths = [];
+        await store.appendBatchToArrays([new Uint8Array([4, 5])], secondOffsets, secondLengths);
+
+        expect(firstOffsets).toStrictEqual([0]);
+        expect(firstLengths).toStrictEqual([3]);
+        expect(secondOffsets).toStrictEqual([3]);
+        expect(secondLengths).toStrictEqual([2]);
+
+        releaseWrite?.();
+        await store.endImportSession();
+    });
+
     test('readSlice recovers after transient NotReadableError and returns bytes', async () => {
         const bytes = new Uint8Array([11, 12, 13, 14, 15, 16]);
         const store = new TermContentOpfsStore();

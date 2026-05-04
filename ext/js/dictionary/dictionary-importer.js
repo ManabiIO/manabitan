@@ -496,6 +496,12 @@ export class DictionaryImporter {
         const artifactFixedPackMinTotalRows = Number.isFinite(details.artifactFixedPackMinTotalRows) ?
             Math.max(0, Math.min(4_000_000, Math.trunc(/** @type {number} */ (details.artifactFixedPackMinTotalRows)))) :
             null;
+        const isStagedDictionaryUpdate = (
+            typeof details.dictionaryTitleOverride === 'string' &&
+            /\[update-staging [^\]]+\]$/.test(details.dictionaryTitleOverride) &&
+            typeof details.updateSessionToken === 'string' &&
+            details.updateSessionToken.trim().length > 0
+        );
         this._wasmPreallocateChunkRows = details.wasmPreallocateChunkRows !== false;
         this._pendingImageMediaByPath.clear();
         this._imageMetadataByPath.clear();
@@ -506,6 +512,7 @@ export class DictionaryImporter {
             termContentStorageMode,
             expectedTermContentImportBytes: void 0,
             artifactFixedPackMinTotalRows,
+            queueTermContentWrites: !isStagedDictionaryUpdate,
         });
         const tImportStart = Date.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, unknown>}>} */
@@ -862,15 +869,15 @@ export class DictionaryImporter {
                 termArtifactFiles,
             ) :
             null;
-        dictionaryDatabase.setImportOptimizationFlags(
-            expectedTermContentImportBytes === null ?
-                {termContentStorageMode: effectiveTermContentStorageMode, artifactFixedPackMinTotalRows} :
-                {
-                    termContentStorageMode: effectiveTermContentStorageMode,
-                    expectedTermContentImportBytes,
-                    artifactFixedPackMinTotalRows,
-                },
-        );
+        const importOptimizationOptions = {
+            termContentStorageMode: effectiveTermContentStorageMode,
+            artifactFixedPackMinTotalRows,
+            queueTermContentWrites: !isStagedDictionaryUpdate,
+        };
+        if (expectedTermContentImportBytes !== null) {
+            importOptimizationOptions.expectedTermContentImportBytes = expectedTermContentImportBytes;
+        }
+        dictionaryDatabase.setImportOptimizationFlags(importOptimizationOptions);
         /** @type {Array<import('@zip.js/zip.js').Entry|{filename: string}>} */
         const activeTermFiles = packedTermArtifactManifest !== null ?
             this._createPackedTermArtifactFiles(packedTermArtifactManifest.termBanksByArtifact) :
@@ -914,12 +921,7 @@ export class DictionaryImporter {
         if (sourceDictionaryTitle !== dictionaryTitle) {
             summary.sourceTitle = sourceDictionaryTitle;
         }
-        if (
-            typeof details.dictionaryTitleOverride === 'string' &&
-            /\[update-staging [^\]]+\]$/.test(details.dictionaryTitleOverride) &&
-            typeof details.updateSessionToken === 'string' &&
-            details.updateSessionToken.trim().length > 0
-        ) {
+        if (isStagedDictionaryUpdate) {
             summary.transientUpdateStage = 'update-staging';
             summary.updateSessionToken = details.updateSessionToken.trim();
         }

@@ -62,9 +62,13 @@ export class TermContentOpfsStore {
         /** @type {Uint8Array[]} */
         this._queuedWriteChunks = [];
         /** @type {number} */
+        this._inFlightWriteBytes = 0;
+        /** @type {number} */
         this._flushThresholdBytes = this._computeWriteFlushThresholdBytes();
         /** @type {boolean} */
         this._importSessionActive = false;
+        /** @type {boolean} */
+        this._queueImportWritesEnabled = false;
         /** @type {boolean} */
         this._loadedForRead = false;
         /** @type {Map<string, Uint8Array>} */
@@ -143,6 +147,7 @@ export class TermContentOpfsStore {
             this._pendingWriteChunks = [];
             this._queuedWritePromise = null;
             this._queuedWriteChunks = [];
+            this._inFlightWriteBytes = 0;
             this._importSessionActive = false;
             this._lastEndImportSessionMetrics = null;
             this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
@@ -166,6 +171,7 @@ export class TermContentOpfsStore {
             this._pendingWriteChunks = [];
             this._queuedWritePromise = null;
             this._queuedWriteChunks = [];
+            this._inFlightWriteBytes = 0;
             this._lastEndImportSessionMetrics = null;
             this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
             if (this._fileHandle === null) {
@@ -272,6 +278,13 @@ export class TermContentOpfsStore {
     /**
      * @param {boolean} value
      */
+    setQueueImportWritesEnabled(value) {
+        this._queueImportWritesEnabled = value;
+    }
+
+    /**
+     * @param {boolean} value
+     */
     setExactSliceCacheEnabled(value) {
         this._exactSliceCacheEnabled = value;
         if (!value) {
@@ -295,6 +308,7 @@ export class TermContentOpfsStore {
                 this._pendingWriteChunks = [];
                 this._queuedWritePromise = null;
                 this._queuedWriteChunks = [];
+                this._inFlightWriteBytes = 0;
                 this._importSessionActive = false;
                 this._lastEndImportSessionMetrics = null;
                 this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
@@ -323,6 +337,7 @@ export class TermContentOpfsStore {
             this._pendingWriteChunks = [];
             this._queuedWritePromise = null;
             this._queuedWriteChunks = [];
+            this._inFlightWriteBytes = 0;
             this._importSessionActive = false;
             this._lastEndImportSessionMetrics = null;
             this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
@@ -434,6 +449,7 @@ export class TermContentOpfsStore {
         }
         let total = this._computeSegmentedLength();
         total += this._pendingWriteBytes;
+        total += this._inFlightWriteBytes;
         if (this._queuedWriteChunks.length > 0) {
             for (const chunk of this._queuedWriteChunks) {
                 total += chunk.byteLength;
@@ -460,10 +476,14 @@ export class TermContentOpfsStore {
                     this._pendingWriteChunks.push(chunk);
                 }
                 if (this._importSessionActive) {
-                    // Chromium can misalign reserved term-content offsets from persisted OPFS bytes when
-                    // large imports accumulate buffered writes across many append batches. Drain each
-                    // import append synchronously so subsequent offsets are based on actual file state.
-                    await this._flushPendingWrites();
+                    if (!this._queueImportWritesEnabled) {
+                        await this._flushPendingWrites();
+                    } else if (
+                        this._pendingWriteBytes >= this._flushThresholdBytes ||
+                        this._pendingWriteChunks.length >= this._writeCoalesceMaxChunks
+                    ) {
+                        await this._flushPendingWrites();
+                    }
                 } else if (this._pendingWriteBytes >= this._flushThresholdBytes) {
                     await this._flushPendingWrites();
                     await this._awaitQueuedWrites();
@@ -529,12 +549,14 @@ export class TermContentOpfsStore {
         this._pendingWriteBytes = 0;
         this._pendingWriteChunks = [];
         if (this._importSessionActive) {
-            // Import-time content offsets are assigned before the bytes are drained to OPFS.
-            // Keep the drain synchronous here so reserved offsets cannot outrun actual file state.
-            if (this._queuedWritePromise !== null) {
-                await this._awaitQueuedWrites();
+            if (this._queueImportWritesEnabled) {
+                this._queueWriteChunks(chunks);
+            } else {
+                if (this._queuedWritePromise !== null) {
+                    await this._awaitQueuedWrites();
+                }
+                await this._writePendingChunksCoalesced(chunks);
             }
-            await this._writePendingChunksCoalesced(chunks);
             return;
         }
         if (this._queuedWritePromise !== null) {
@@ -581,7 +603,16 @@ export class TermContentOpfsStore {
             while (this._queuedWriteChunks.length > 0) {
                 const chunks = this._queuedWriteChunks;
                 this._queuedWriteChunks = [];
-                await this._writePendingChunksCoalesced(chunks);
+                let inFlightBytes = 0;
+                for (const chunk of chunks) {
+                    inFlightBytes += chunk.byteLength;
+                }
+                this._inFlightWriteBytes += inFlightBytes;
+                try {
+                    await this._writePendingChunksCoalesced(chunks);
+                } finally {
+                    this._inFlightWriteBytes = Math.max(0, this._inFlightWriteBytes - inFlightBytes);
+                }
             }
         } finally {
             this._queuedWritePromise = null;
