@@ -382,7 +382,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
  * @param {boolean} skipTagRuleDecode
  * @param {boolean} lazyGlossaryDecode
  * @param {boolean} mediaHintFastScan
- * @returns {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
+ * @returns {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
  */
 function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, skipTagRuleDecode, lazyGlossaryDecode, mediaHintFastScan) {
     const o = i * META_U32_FIELDS;
@@ -392,9 +392,13 @@ function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, v
     const readingStart = metas[o + 2];
     const readingLength = metas[o + 3];
     const expression = decodeJsonStringToken(source, expressionStart, expressionLength);
+    const readingIsEmpty = readingLength === 2 && source[readingStart] === U8_QUOTE && source[readingStart + 1] === U8_QUOTE;
     const reuseExpressionReading = (
         reuseExpressionForReadingDecode &&
-        tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
+        (
+            readingIsEmpty ||
+            tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
+        )
     );
     const reading = reuseExpressionReading ?
         expression :
@@ -452,7 +456,7 @@ function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, v
  * @param {boolean} copyContentBytes
  * @param {boolean} includeContentMetadata
  * @param {boolean} reuseExpressionForReadingDecode
- * @returns {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
+ * @returns {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
  */
 function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode) {
     const o = i * META_U32_FIELDS;
@@ -461,18 +465,18 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
     const expressionLength = metas[o + 1];
     const readingStart = metas[o + 2];
     const readingLength = metas[o + 3];
-    const expression = decodeJsonStringToken(source, expressionStart, expressionLength);
     const reuseExpressionReading = (
         reuseExpressionForReadingDecode &&
         tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
     );
-    const reading = reuseExpressionReading ?
-        expression :
-        decodeJsonStringToken(source, readingStart, readingLength);
     const expressionBytes = getUnescapedJsonStringTokenBytes(source, expressionStart, expressionLength) ?? void 0;
     const readingBytes = reuseExpressionReading ?
         expressionBytes :
         (getUnescapedJsonStringTokenBytes(source, readingStart, readingLength) ?? void 0);
+    const expression = typeof expressionBytes === 'undefined' ? decodeJsonStringToken(source, expressionStart, expressionLength) : '';
+    const reading = reuseExpressionReading ?
+        expression :
+        (typeof readingBytes === 'undefined' ? decodeJsonStringToken(source, readingStart, readingLength) : '');
     const score = decodeNumberToken(source, metas[o + 8], metas[o + 9], 0);
     const sequence = version >= 3 ? (isNullToken(source, metas[o + 12], metas[o + 13]) ? null : decodeNumberToken(source, metas[o + 12], metas[o + 13], 0)) : null;
     let termEntryContentHash1;
@@ -495,6 +499,7 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
         reading,
         expressionBytes,
         readingBytes,
+        readingEqualsExpression: reuseExpressionReading,
         definitionTags: '',
         rules: '',
         score,
@@ -510,7 +515,7 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
 /**
  * @param {Uint8Array} contentBytes
  * @param {number} version
- * @param {(rows: {expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[], progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {(rows: {expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[], progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
  * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, initialMetaCapacityDivisor?: number, initialContentBytesPerRow?: number, minimalDecode?: boolean, reuseExpressionForReadingDecode?: boolean, skipTagRuleDecode?: boolean, lazyGlossaryDecode?: boolean, mediaHintFastScan?: boolean, preallocateChunkRows?: boolean}} [options]
  * @returns {Promise<void>}
@@ -572,10 +577,10 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
     const chunkCount = Math.max(1, Math.ceil(rowCount / normalizedChunkSize));
     /**
      * @param {number} size
-     * @returns {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[]}
+     * @returns {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[]}
      */
-    const createRowBuffer = (size) => /** @type {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[]} */ (new Array(size));
-    /** @type {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[]} */
+    const createRowBuffer = (size) => /** @type {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[]} */ (new Array(size));
+    /** @type {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[]} */
     let rows = preallocateChunkRows ? createRowBuffer(Math.min(normalizedChunkSize, rowCount)) : [];
     let rowsIndex = 0;
     let chunkIndex = 0;

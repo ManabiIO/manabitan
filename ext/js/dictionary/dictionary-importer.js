@@ -347,6 +347,7 @@ function hasPrecomputedTermEntryContent(entry) {
  * @property {string} reading
  * @property {Uint8Array} [expressionBytes]
  * @property {Uint8Array} [readingBytes]
+ * @property {boolean} [readingEqualsExpression]
  * @property {string} definitionTags
  * @property {string} rules
  * @property {number} score
@@ -3252,12 +3253,12 @@ export class DictionaryImporter {
                         };
                         for (let i = 0; i < rowCount; ++i) {
                             const row = /** @type {ParsedTermBankChunkRow} */ (parsedRows[i]);
-                            const expression = row.expression;
-                            const reading = row.reading.length > 0 ? row.reading : expression;
-                            const readingEqualsExpression = reading === expression;
                             const expressionBytes = row.expressionBytes instanceof Uint8Array ?
                                 Uint8Array.from(row.expressionBytes) :
-                                getEncodedStringBytes(expression);
+                                getEncodedStringBytes(row.expression);
+                            const readingEqualsExpression = typeof row.readingEqualsExpression === 'boolean' ?
+                                row.readingEqualsExpression :
+                                (row.reading.length === 0 || row.reading === row.expression);
                             expressionBytesList[i] = expressionBytes;
                             readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
                             termRecordExpressionIndexes[i] = termRecordPlanBuilder.internStringBytes(expressionBytes);
@@ -3267,7 +3268,7 @@ export class DictionaryImporter {
                             } else {
                                 const readingBytes = row.readingBytes instanceof Uint8Array ?
                                     Uint8Array.from(row.readingBytes) :
-                                    getEncodedStringBytes(reading);
+                                    getEncodedStringBytes(row.reading);
                                 readingBytesList[i] = readingBytes;
                                 termRecordReadingIndexes[i] = termRecordPlanBuilder.internStringBytes(readingBytes);
                             }
