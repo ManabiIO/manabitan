@@ -729,23 +729,24 @@ export class Frontend {
         try {
             const optionsContext = await this._getOptionsContext();
             const prewarmTerms = await this._getLookupPrewarmTerms(options);
+            const {firstMatchedResultPromise, resultsPromise} = this._runLookupPrewarmTerms(prewarmTerms, optionsContext);
+            const firstMatchedResult = await firstMatchedResultPromise;
+            if (firstMatchedResult !== null) {
+                const popupPrewarmPromise = this._popupPrewarmPromise;
+                if (popupPrewarmPromise !== null) {
+                    await popupPrewarmPromise;
+                }
+                await this._prewarmPopupContentForHover(firstMatchedResult.term, firstMatchedResult.dictionaryEntries, optionsContext);
+            }
+            const lookupResults = await resultsPromise;
             let resultCount = 0;
             /** @type {string[]} */
             const matchedTerms = [];
-            /** @type {?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}} */
-            let firstMatchedResult = null;
-            for (const term of prewarmTerms) {
-                const {dictionaryEntries} = await this._application.api.termsFind(term, {}, optionsContext);
+            for (const {term, dictionaryEntries} of lookupResults) {
                 resultCount += dictionaryEntries.length;
                 if (dictionaryEntries.length > 0) {
                     matchedTerms.push(term);
-                    if (firstMatchedResult === null) {
-                        firstMatchedResult = {term, dictionaryEntries};
-                    }
                 }
-            }
-            if (firstMatchedResult !== null) {
-                await this._prewarmPopupContentForHover(firstMatchedResult.term, firstMatchedResult.dictionaryEntries, optionsContext);
             }
             this._updatePageDebugState({
                 lookupPrewarmReady: resultCount > 0,
@@ -765,6 +766,54 @@ export class Frontend {
             });
             log.error(e);
         }
+    }
+
+    /**
+     * @param {string[]} terms
+     * @param {import('settings').OptionsContext} optionsContext
+     * @returns {{firstMatchedResultPromise: Promise<?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>, resultsPromise: Promise<Array<{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>>}}
+     */
+    _runLookupPrewarmTerms(terms, optionsContext) {
+        const concurrency = 4;
+        /** @type {Array<{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>} */
+        const results = new Array(terms.length);
+        let nextIndex = 0;
+        let firstMatchedResultResolved = false;
+        /** @type {(value: ?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}) => void} */
+        let resolveFirstMatchedResult = () => {};
+        const firstMatchedResultPromise = new Promise((resolve) => {
+            resolveFirstMatchedResult = resolve;
+        });
+        const workers = [];
+        const workerCount = Math.min(concurrency, terms.length);
+        for (let i = 0; i < workerCount; ++i) {
+            workers.push((async () => {
+                while (true) {
+                    const index = nextIndex++;
+                    if (index >= terms.length) { return; }
+                    const term = terms[index];
+                    let dictionaryEntries = [];
+                    try {
+                        ({dictionaryEntries} = await this._application.api.termsFind(term, {}, optionsContext));
+                    } catch (_) {
+                        // Best-effort prewarm; visible lookup correctness does not depend on probes.
+                    }
+                    results[index] = {term, dictionaryEntries};
+                    if (dictionaryEntries.length > 0 && !firstMatchedResultResolved) {
+                        firstMatchedResultResolved = true;
+                        resolveFirstMatchedResult({term, dictionaryEntries});
+                    }
+                }
+            })());
+        }
+        const resultsPromise = Promise.all(workers).then(() => {
+            if (!firstMatchedResultResolved) {
+                firstMatchedResultResolved = true;
+                resolveFirstMatchedResult(null);
+            }
+            return results;
+        });
+        return {firstMatchedResultPromise, resultsPromise};
     }
 
     /**
