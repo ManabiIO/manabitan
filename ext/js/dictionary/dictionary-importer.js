@@ -345,6 +345,8 @@ function hasPrecomputedTermEntryContent(entry) {
  * @typedef {object} ParsedTermBankChunkRow
  * @property {string} expression
  * @property {string} reading
+ * @property {Uint8Array} [expressionBytes]
+ * @property {Uint8Array} [readingBytes]
  * @property {string} definitionTags
  * @property {string} rules
  * @property {number} score
@@ -3253,7 +3255,9 @@ export class DictionaryImporter {
                             const expression = row.expression;
                             const reading = row.reading.length > 0 ? row.reading : expression;
                             const readingEqualsExpression = reading === expression;
-                            const expressionBytes = getEncodedStringBytes(expression);
+                            const expressionBytes = row.expressionBytes instanceof Uint8Array ?
+                                Uint8Array.from(row.expressionBytes) :
+                                getEncodedStringBytes(expression);
                             expressionBytesList[i] = expressionBytes;
                             readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
                             termRecordExpressionIndexes[i] = termRecordPlanBuilder.internStringBytes(expressionBytes);
@@ -3261,7 +3265,9 @@ export class DictionaryImporter {
                                 readingBytesList[i] = EMPTY_UINT8_ARRAY;
                                 termRecordReadingIndexes[i] = termRecordExpressionIndexes[i];
                             } else {
-                                const readingBytes = getEncodedStringBytes(reading);
+                                const readingBytes = row.readingBytes instanceof Uint8Array ?
+                                    Uint8Array.from(row.readingBytes) :
+                                    getEncodedStringBytes(reading);
                                 readingBytesList[i] = readingBytes;
                                 termRecordReadingIndexes[i] = termRecordPlanBuilder.internStringBytes(readingBytes);
                             }
