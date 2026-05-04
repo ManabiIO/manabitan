@@ -212,23 +212,38 @@ static int glossary_may_contain_media_marker(const uint8_t* src, uint32_t start,
         token_contains_literal(src, start, length, VALUE_IMG, sizeof(VALUE_IMG) - 1u);
 }
 
-static int parse_row(const uint8_t* src, uint32_t len, uint32_t row_start, uint32_t row_end, TermRowMeta* out_meta, int media_hints) {
-    if (row_end <= row_start + 1u || src[row_start] != '[') { return 0; }
-    out_meta->expression_start = 0u; out_meta->expression_length = 0u;
-    out_meta->reading_start = 0u; out_meta->reading_length = 0u;
-    out_meta->definition_tags_start = 0u; out_meta->definition_tags_length = 0u;
-    out_meta->rules_start = 0u; out_meta->rules_length = 0u;
-    out_meta->score_start = 0u; out_meta->score_length = 0u;
-    out_meta->glossary_start = 0u; out_meta->glossary_length = 0u;
-    out_meta->sequence_start = 0u; out_meta->sequence_length = 0u;
-    out_meta->term_tags_start = 0u; out_meta->term_tags_length = 0u;
-    out_meta->glossary_may_contain_media = 0u;
+static void clear_term_row_meta(TermRowMeta* meta) {
+    meta->expression_start = 0u; meta->expression_length = 0u;
+    meta->reading_start = 0u; meta->reading_length = 0u;
+    meta->definition_tags_start = 0u; meta->definition_tags_length = 0u;
+    meta->rules_start = 0u; meta->rules_length = 0u;
+    meta->score_start = 0u; meta->score_length = 0u;
+    meta->glossary_start = 0u; meta->glossary_length = 0u;
+    meta->sequence_start = 0u; meta->sequence_length = 0u;
+    meta->term_tags_start = 0u; meta->term_tags_length = 0u;
+    meta->glossary_may_contain_media = 0u;
+}
+
+static int parse_row_single_pass(
+    const uint8_t* src,
+    uint32_t len,
+    uint32_t row_start,
+    TermRowMeta* out_meta,
+    int media_hints,
+    uint32_t* out_next
+) {
+    if (row_start >= len || src[row_start] != '[') { return 0; }
+    clear_term_row_meta(out_meta);
 
     uint32_t i = row_start + 1u;
     uint32_t field_index = 0u;
-    while (i < row_end) {
+    while (i < len) {
         i = skip_ws(src, len, i);
-        if (i >= row_end || src[i] == ']') { break; }
+        if (i >= len) { return 0; }
+        if (src[i] == ']') {
+            *out_next = i + 1u;
+            return out_meta->expression_length > 0u;
+        }
         uint32_t value_end = 0u;
         if (!parse_value_span(src, len, i, &value_end)) { return 0; }
         if (field_index < 8u) {
@@ -239,11 +254,11 @@ static int parse_row(const uint8_t* src, uint32_t len, uint32_t row_start, uint3
         }
         ++field_index;
         i = skip_ws(src, len, value_end);
-        if (i < row_end && src[i] == ',') {
+        if (i < len && src[i] == ',') {
             ++i;
         }
     }
-    return out_meta->expression_length > 0u;
+    return 0;
 }
 
 static int is_null_token(const uint8_t* src, uint32_t start, uint32_t length) {
@@ -284,11 +299,15 @@ static inline int write_bytes_and_hash(
     uint32_t* h1,
     uint32_t* h2
 ) {
+    const uint32_t start = *cursor;
+    const uint32_t end = start + length;
+    if (end < start || end > out_capacity) { return 0; }
     for (uint32_t i = 0u; i < length; ++i) {
-        if (!write_byte_and_hash(out, out_capacity, cursor, src[i], h1, h2)) {
-            return 0;
-        }
+        const uint8_t value = src[i];
+        out[start + i] = value;
+        hash_byte(h1, h2, value);
     }
+    *cursor = end;
     return 1;
 }
 
@@ -515,14 +534,11 @@ static int32_t parse_term_bank_impl(uint32_t json_ptr, uint32_t json_len, uint32
         if (src[i] == ']') {
             return (int32_t)row_count;
         }
-        uint32_t row_end = 0u;
-        if (!parse_composite_span(src, json_len, i, &row_end)) {
-            return -1;
-        }
         if (row_count >= out_capacity) {
             return -2;
         }
-        if (!parse_row(src, json_len, i, row_end, &rows[row_count], media_hints)) {
+        uint32_t row_end = 0u;
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end)) {
             return -1;
         }
         ++row_count;
