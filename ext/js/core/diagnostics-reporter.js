@@ -362,6 +362,14 @@ async function getDiagnosticsConfig() {
         return await diagnosticsConfigPromise;
     }
     diagnosticsConfigPromise = (async () => {
+        const manifest = getManifestOrNull();
+        if (manifest === null || !isDevBuildManifest(manifest)) {
+            return {
+                enabled: false,
+                endpoint: null,
+                verbosity: 'off',
+            };
+        }
         const endpoint = await getDiagnosticsEndpoint();
         let enabled = true;
         /** @type {DiagnosticsVerbosity} */
