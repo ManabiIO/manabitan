@@ -29,6 +29,7 @@ import {TextSourceRange} from '../dom/text-source-range.js';
 import {TextScanner} from '../language/text-scanner.js';
 
 const JAPANESE_TEXT_PATTERN = /[\u3040-\u30ff\u3400-\u9fff]+/g;
+const JAPANESE_PARTICLE_BOUNDARY_PATTERN = /[はがをにへでとものや]/u;
 
 /**
  * This is the main class responsible for scanning and handling webpage content.
@@ -806,7 +807,7 @@ export class Frontend {
             const text = node.textContent || '';
             JAPANESE_TEXT_PATTERN.lastIndex = 0;
             for (const match of text.matchAll(JAPANESE_TEXT_PATTERN)) {
-                const term = match[0].slice(0, 12);
+                const term = this._getPrimaryPageLookupPrewarmTerm(match[0].slice(0, 12));
                 if (term.length > 0) {
                     terms.push(term);
                     if (terms.length >= 6) { break; }
@@ -814,6 +815,19 @@ export class Frontend {
             }
         }
         return terms;
+    }
+
+    /**
+     * @param {string} text
+     * @returns {string}
+     */
+    _getPrimaryPageLookupPrewarmTerm(text) {
+        for (let i = 2; i < text.length; ++i) {
+            if (JAPANESE_PARTICLE_BOUNDARY_PATTERN.test(text[i])) {
+                return text.slice(0, i);
+            }
+        }
+        return text;
     }
 
     /**

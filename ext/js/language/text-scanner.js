@@ -27,6 +27,7 @@ import {TextSourceElement} from '../dom/text-source-element.js';
 
 const SCAN_RESOLUTION_EXCLUDED_LANGUAGES = new Set(['ja', 'zh', 'yue', 'ko']);
 const TERM_SEARCH_SEGMENT_TERMINATOR_PATTERN = /[。．.!?！？\n\r\t,、，;；:：]/;
+const TERM_SEARCH_PARTICLE_BOUNDARY_PATTERN = /[はがをにへでとものや]/u;
 
 /**
  * @augments EventDispatcher<import('text-scanner').Events>
@@ -1354,11 +1355,18 @@ export class TextScanner extends EventDispatcher {
      * @returns {string}
      */
     _getPrimaryTermSearchText(text) {
+        let end = text.length;
         const match = TERM_SEARCH_SEGMENT_TERMINATOR_PATTERN.exec(text);
-        if (match === null || typeof match.index !== 'number' || match.index <= 0) {
-            return text;
+        if (match !== null && typeof match.index === 'number' && match.index > 0) {
+            end = match.index;
         }
-        return text.slice(0, match.index);
+        const segment = text.slice(0, end);
+        for (let i = 2; i < segment.length; ++i) {
+            if (TERM_SEARCH_PARTICLE_BOUNDARY_PATTERN.test(segment[i])) {
+                return segment.slice(0, i);
+            }
+        }
+        return segment;
     }
 
     /**
