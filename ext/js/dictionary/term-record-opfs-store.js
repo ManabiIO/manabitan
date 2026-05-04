@@ -113,6 +113,49 @@ function sliceTermRecordPreinternedPlan(plan, start, count) {
         readingIndexes: plan.readingIndexes.subarray(start, end),
     };
 }
+
+/**
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
+ * @param {number} count
+ * @returns {plan is import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}
+ */
+function hasCompleteTermRecordPreinternedPlan(plan, count) {
+    return (
+        plan !== null &&
+        plan.stringLengths instanceof Uint16Array &&
+        plan.stringsBuffer instanceof Uint8Array &&
+        plan.expressionIndexes instanceof Uint32Array &&
+        plan.readingIndexes instanceof Uint32Array &&
+        plan.expressionIndexes.length >= count &&
+        plan.readingIndexes.length >= count
+    );
+}
+
+/**
+ * @param {Uint8Array} output
+ * @param {number} offset
+ * @param {number} value
+ * @returns {number}
+ */
+function writeU16Le(output, offset, value) {
+    output[offset] = value & 0xff;
+    output[offset + 1] = (value >>> 8) & 0xff;
+    return offset + 2;
+}
+
+/**
+ * @param {Uint8Array} output
+ * @param {number} offset
+ * @param {number} value
+ * @returns {number}
+ */
+function writeU32Le(output, offset, value) {
+    output[offset] = value & 0xff;
+    output[offset + 1] = (value >>> 8) & 0xff;
+    output[offset + 2] = (value >>> 16) & 0xff;
+    output[offset + 3] = (value >>> 24) & 0xff;
+    return offset + 4;
+}
 const ENTRY_CONTENT_DICT_NAME_CODE_RAW = 0;
 const ENTRY_CONTENT_DICT_NAME_CODE_RAW_V2 = 1;
 const ENTRY_CONTENT_DICT_NAME_CODE_RAW_V3 = 2;
@@ -2247,6 +2290,9 @@ export class TermRecordOpfsStore {
                 this._wasmEncoderUnavailable = true;
             }
         }
+        if (hasCompleteTermRecordPreinternedPlan(preinternedPlan, chunk.rowCount)) {
+            return this._encodePreinternedArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan);
+        }
         /** @type {TermRecord[]} */
         const records = new Array(chunk.rowCount);
         for (let i = 0; i < chunk.rowCount; ++i) {
@@ -2273,6 +2319,58 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
+     * @param {number[]} contentOffsets
+     * @param {number[]} contentLengths
+     * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} preinternedPlan
+     * @returns {Uint8Array}
+     */
+    _encodePreinternedArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan) {
+        const count = chunk.rowCount;
+        const stringLengths = preinternedPlan.stringLengths;
+        const stringsBuffer = preinternedPlan.stringsBuffer;
+        const expressionIndexes = preinternedPlan.expressionIndexes;
+        const readingIndexes = preinternedPlan.readingIndexes;
+        let totalBytes = STRING_TABLE_HEADER_BYTES + (stringLengths.length * 2) + stringsBuffer.byteLength;
+        for (let i = 0; i < count; ++i) {
+            totalBytes += RECORD_HEADER_BYTES + ((contentLengths[i] >= 0 && contentLengths[i] > 0xfffd) ? 4 : 0);
+        }
+
+        const output = new Uint8Array(totalBytes);
+        let cursor = 0;
+        cursor = writeU32Le(output, cursor, stringLengths.length);
+        cursor = writeU32Le(output, cursor, stringsBuffer.byteLength);
+        for (let i = 0, ii = stringLengths.length; i < ii; ++i) {
+            cursor = writeU16Le(output, cursor, stringLengths[i]);
+        }
+        output.set(stringsBuffer, cursor);
+        cursor += stringsBuffer.byteLength;
+        for (let i = 0; i < count; ++i) {
+            const entryContentLength = contentLengths[i];
+            cursor = writeU32Le(output, cursor, expressionIndexes[i] >>> 0);
+            cursor = writeU32Le(
+                output,
+                cursor,
+                (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ?
+                    READING_EQUALS_EXPRESSION_U32 :
+                    (readingIndexes[i] >>> 0)
+            );
+            cursor = writeU32Le(output, cursor, contentOffsets[i] >= 0 ? contentOffsets[i] : U32_NULL);
+            if (entryContentLength < 0) {
+                cursor = writeU16Le(output, cursor, ENTRY_CONTENT_LENGTH_U16_NULL);
+            } else if (entryContentLength <= 0xfffd) {
+                cursor = writeU16Le(output, cursor, entryContentLength);
+            } else {
+                cursor = writeU16Le(output, cursor, ENTRY_CONTENT_LENGTH_EXTENDED_U16);
+                cursor = writeU32Le(output, cursor, entryContentLength);
+            }
+            cursor = writeU32Le(output, cursor, chunk.scoreList[i] ?? 0);
+            cursor = writeU32Le(output, cursor, chunk.sequenceList[i] ?? -1);
+        }
+        return output;
+    }
+
+    /**
      * @param {TermRecordShardState} state
      * @param {Uint8Array} chunk
      * @param {number} firstId
@@ -2290,12 +2388,24 @@ export class TermRecordOpfsStore {
             throw new Error(`Mixed entryContentDictName values are not supported within shard ${state.fileName}`);
         }
 
-        const withHeader = state.fileLength === 0 ?
-            this._withBinaryHeader(this._withChunkHeader(chunk, firstId, count), state.sharedContentDictName) :
-            this._withChunkHeader(chunk, firstId, count);
-        state.pendingWriteChunks.push(withHeader);
-        state.pendingWriteBytes += withHeader.byteLength;
-        state.fileLength += withHeader.byteLength;
+        /** @type {Uint8Array[]} */
+        const chunks = state.fileLength === 0 ?
+            [
+                this._createBinaryHeader(state.sharedContentDictName),
+                this._createChunkHeader(firstId, count),
+                chunk,
+            ] :
+            [
+                this._createChunkHeader(firstId, count),
+                chunk,
+            ];
+        let totalBytes = 0;
+        for (const pendingChunk of chunks) {
+            totalBytes += pendingChunk.byteLength;
+        }
+        state.pendingWriteChunks.push(...chunks);
+        state.pendingWriteBytes += totalBytes;
+        state.fileLength += totalBytes;
 
         if (!this._importSessionActive || state.pendingWriteBytes >= this._flushThresholdBytes) {
             await this._flushPendingWritesForShard(state);
@@ -2311,6 +2421,18 @@ export class TermRecordOpfsStore {
      * @returns {Uint8Array}
      */
     _withBinaryHeader(payload, contentDictName = 'raw') {
+        const header = this._createBinaryHeader(contentDictName);
+        const output = new Uint8Array(header.byteLength + payload.byteLength);
+        output.set(header, 0);
+        output.set(payload, header.byteLength);
+        return output;
+    }
+
+    /**
+     * @param {string} [contentDictName]
+     * @returns {Uint8Array}
+     */
+    _createBinaryHeader(contentDictName = 'raw') {
         const header = this._textEncoder.encode(BINARY_MAGIC_TEXT);
         const {meta: entryContentDictNameMeta, bytes: entryContentDictNameBytes} = this._encodeEntryContentDictNameMeta(contentDictName);
         const hasExtendedMeta = entryContentDictNameMeta > ENTRY_CONTENT_DICT_NAME_VALUE_MASK;
@@ -2318,8 +2440,7 @@ export class TermRecordOpfsStore {
             header.byteLength +
             2 +
             (hasExtendedMeta ? 4 : 0) +
-            (entryContentDictNameBytes?.byteLength ?? 0) +
-            payload.byteLength,
+            (entryContentDictNameBytes?.byteLength ?? 0),
         );
         output.set(header, 0);
         const view = new DataView(output.buffer, output.byteOffset, output.byteLength);
@@ -2332,9 +2453,7 @@ export class TermRecordOpfsStore {
         }
         if (entryContentDictNameBytes !== null) {
             output.set(entryContentDictNameBytes, cursor);
-            cursor += entryContentDictNameBytes.byteLength;
         }
-        output.set(payload, cursor);
         return output;
     }
 
@@ -2345,11 +2464,23 @@ export class TermRecordOpfsStore {
      * @returns {Uint8Array}
      */
     _withChunkHeader(payload, firstId, count) {
-        const output = new Uint8Array(CHUNK_HEADER_BYTES + payload.byteLength);
+        const header = this._createChunkHeader(firstId, count);
+        const output = new Uint8Array(header.byteLength + payload.byteLength);
+        output.set(header, 0);
+        output.set(payload, header.byteLength);
+        return output;
+    }
+
+    /**
+     * @param {number} firstId
+     * @param {number} count
+     * @returns {Uint8Array}
+     */
+    _createChunkHeader(firstId, count) {
+        const output = new Uint8Array(CHUNK_HEADER_BYTES);
         const view = new DataView(output.buffer, output.byteOffset, output.byteLength);
         view.setUint32(0, firstId >>> 0, true);
         view.setUint32(4, count >>> 0, true);
-        output.set(payload, CHUNK_HEADER_BYTES);
         return output;
     }
 

@@ -401,6 +401,59 @@ describe('TermRecordOpfsStore', () => {
         expect(loadedRecord?.reading).toBe('くう');
     });
 
+    test('round-trips preinterned artifact chunk records through JS fallback', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Jitendex.org [2026-04-04]';
+        const expression0 = textEncoder.encode('為る');
+        const reading0 = textEncoder.encode('する');
+        const expression1 = textEncoder.encode('食べる');
+        const reading1 = textEncoder.encode('たべる');
+        const stringsBuffer = new Uint8Array(expression0.byteLength + reading0.byteLength + expression1.byteLength + reading1.byteLength);
+        let cursor = 0;
+        for (const bytes of [expression0, reading0, expression1, reading1]) {
+            stringsBuffer.set(bytes, cursor);
+            cursor += bytes.byteLength;
+        }
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
+
+        await writerStore.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: dictionaryName,
+                rowCount: 2,
+                expressionBytesList: [expression0, expression1],
+                readingBytesList: [reading0, reading1],
+                readingEqualsExpressionList: new Uint8Array([0, 0]),
+                scoreList: new Int32Array([10, 20]),
+                sequenceList: new Int32Array([100, 200]),
+                termRecordPreinternedPlan: {
+                    stringLengths: Uint16Array.from([expression0.byteLength, reading0.byteLength, expression1.byteLength, reading1.byteLength]),
+                    stringsBuffer,
+                    expressionIndexes: Uint32Array.from([0, 2]),
+                    readingIndexes: Uint32Array.from([1, 3]),
+                },
+            },
+            [16, 128],
+            [64, 256],
+            'raw',
+        );
+        await writerStore._closeAllWritables();
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(true);
+
+        const index = readerStore.getDictionaryIndex(dictionaryName);
+        const firstRecord = readerStore.getById(index.expression.get('為る')?.[0] ?? -1);
+        const secondRecord = readerStore.getById(index.reading.get('たべる')?.[0] ?? -1);
+        expect(firstRecord).toMatchObject({expression: '為る', reading: 'する', entryContentOffset: 16, entryContentLength: 64, score: 10, sequence: 100});
+        expect(secondRecord).toMatchObject({expression: '食べる', reading: 'たべる', entryContentOffset: 128, entryContentLength: 256, score: 20, sequence: 200});
+    });
+
     test('builds reverse suffix indexes lazily after exact artifact index load', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Jitendex.org [2026-04-04]';
