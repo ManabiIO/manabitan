@@ -77,6 +77,7 @@ const TERM_BANK_SHARED_GLOSSARY_ARTIFACT_FILE = 'manabitan-term-glossary-shared.
 const TERM_ARTIFACT_PRELOAD_CONCURRENCY = 4;
 const ZIP_COMPRESSION_METHOD_STORE = 0;
 const HEX_BYTE_TABLE = Array.from({length: 256}, (_, i) => i.toString(16).padStart(2, '0'));
+const GLOSSARY_IMAGE_PATH_PATTERN = /"path"\s*:\s*"((?:\\.|[^"\\])*)"/g;
 /** @type {import('dictionary-data').TermGlossary[]} */
 const EMPTY_TERM_GLOSSARY = [];
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
@@ -2230,6 +2231,36 @@ export class DictionaryImporter {
     }
 
     /**
+     * @param {string} glossaryJson
+     * @param {import('dictionary-database').DatabaseTermEntry} entry
+     * @param {import('dictionary-importer').ImportRequirement[]} requirements
+     * @returns {boolean}
+     */
+    _tryAddFastMediaRequirementsFromGlossaryJson(glossaryJson, entry, requirements) {
+        let found = false;
+        GLOSSARY_IMAGE_PATH_PATTERN.lastIndex = 0;
+        for (const match of glossaryJson.matchAll(GLOSSARY_IMAGE_PATH_PATTERN)) {
+            let path;
+            try {
+                path = /** @type {string} */ (parseJson(`"${match[1]}"`));
+            } catch (_) {
+                return false;
+            }
+            if (typeof path !== 'string' || getImageMediaTypeFromFileName(path) === null) {
+                continue;
+            }
+            found = true;
+            requirements.push({
+                type: 'structured-content-image',
+                target: {tag: 'img', path: ''},
+                source: {tag: 'img', path},
+                entry,
+            });
+        }
+        return found;
+    }
+
+    /**
      * @param {import('structured-content').Content} content
      * @param {import('dictionary-database').DatabaseTermEntry} entry
      * @param {import('dictionary-importer').ImportRequirement[]} requirements
@@ -3396,8 +3427,18 @@ export class DictionaryImporter {
                                 }
                                 usePrecomputedTermContent = true;
                             } else {
-                                let glossaryList;
-                                if (usePrecomputedContentForMediaRows && hasPrecomputedTermContent) {
+                                let glossaryList = null;
+                                if (
+                                    this._skipImageMetadata &&
+                                    hasPrecomputedTermContent &&
+                                    this._tryAddFastMediaRequirementsFromGlossaryJson(
+                                        this._getFastRowGlossaryJson(row),
+                                        entry,
+                                        requirementsForChunk,
+                                    )
+                                ) {
+                                    usePrecomputedTermContent = true;
+                                } else if (usePrecomputedContentForMediaRows && hasPrecomputedTermContent) {
                                     const contentPayload = this._parseTermEntryContentFromFastRow(row, termFile.filename);
                                     entry.rules = contentPayload.rules;
                                     entry.definitionTags = contentPayload.definitionTags;
@@ -3407,12 +3448,14 @@ export class DictionaryImporter {
                                     const rowGlossaryJson = this._getFastRowGlossaryJson(row);
                                     glossaryList = this._parseGlossaryJsonFromFastRow(rowGlossaryJson, termFile.filename);
                                 }
-                                for (let j = 0, jj = glossaryList.length; j < jj; ++j) {
-                                    const glossary = glossaryList[j];
-                                    if (typeof glossary !== 'object' || glossary === null || Array.isArray(glossary)) { continue; }
-                                    glossaryList[j] = this._formatDictionaryTermGlossaryObject(glossary, entry, requirementsForChunk);
+                                if (glossaryList !== null) {
+                                    for (let j = 0, jj = glossaryList.length; j < jj; ++j) {
+                                        const glossary = glossaryList[j];
+                                        if (typeof glossary !== 'object' || glossary === null || Array.isArray(glossary)) { continue; }
+                                        glossaryList[j] = this._formatDictionaryTermGlossaryObject(glossary, entry, requirementsForChunk);
+                                    }
+                                    entry.glossary = glossaryList;
                                 }
-                                entry.glossary = glossaryList;
                             }
                         }
                         if (typeof row.sequence === 'number') {

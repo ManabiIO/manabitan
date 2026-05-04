@@ -1804,7 +1804,7 @@ export class DictionaryImportController {
         const flags = /** @type {unknown} */ (Reflect.get(globalThis, 'manabitanImportPerformanceFlags'));
         if (typeof flags !== 'object' || flags === null || Array.isArray(flags)) {
             return {
-                skipImageMetadata: false,
+                skipImageMetadata: true,
                 mediaResolutionConcurrency: 8,
                 debugImportLogging: false,
                 enableTermEntryContentDedup: null,
@@ -1826,7 +1826,7 @@ export class DictionaryImportController {
             termContentStorageModeRaw :
             'raw-bytes';
         return {
-            skipImageMetadata: flagsRecord.skipImageMetadata === true,
+            skipImageMetadata: flagsRecord.skipImageMetadata !== false,
             mediaResolutionConcurrency: Math.max(1, Math.min(32, mediaResolutionConcurrency)),
             debugImportLogging: flagsRecord.debugImportLogging === true,
             enableTermEntryContentDedup: typeof flagsRecord.enableTermEntryContentDedup === 'boolean' ? flagsRecord.enableTermEntryContentDedup : null,
