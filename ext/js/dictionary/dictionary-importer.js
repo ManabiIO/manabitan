@@ -444,7 +444,7 @@ export class DictionaryImporter {
         /** @type {boolean} */
         this._wasmReuseExpressionForReadingDecode = true;
         /** @type {boolean} */
-        this._wasmPreallocateChunkRows = false;
+        this._wasmPreallocateChunkRows = true;
         /** @type {boolean} */
         this._usePrecomputedContentForMediaRows = true;
         /** @type {boolean} */
@@ -491,6 +491,7 @@ export class DictionaryImporter {
         const artifactFixedPackMinTotalRows = Number.isFinite(details.artifactFixedPackMinTotalRows) ?
             Math.max(0, Math.min(4_000_000, Math.trunc(/** @type {number} */ (details.artifactFixedPackMinTotalRows)))) :
             null;
+        this._wasmPreallocateChunkRows = details.wasmPreallocateChunkRows !== false;
         this._pendingImageMediaByPath.clear();
         this._imageMetadataByPath.clear();
         this._jsonQuotedStringCache.clear();

@@ -1611,6 +1611,7 @@ export class DictionaryImportController {
                 zipMaxWorkers,
                 zipChunkSize,
                 artifactFixedPackMinTotalRows,
+                wasmPreallocateChunkRows,
             } = this._getImportPerformanceFlags();
             const importDetails = {
                 prefixWildcardsSupported: optionsFull.global.database.prefixWildcardsSupported,
@@ -1623,6 +1624,7 @@ export class DictionaryImportController {
                 zipMaxWorkers,
                 zipChunkSize,
                 artifactFixedPackMinTotalRows,
+                wasmPreallocateChunkRows,
                 ...(importDetailsOverrides && typeof importDetailsOverrides === 'object' && !Array.isArray(importDetailsOverrides) ? importDetailsOverrides : {}),
             };
 
@@ -1796,7 +1798,7 @@ export class DictionaryImportController {
     }
 
     /**
-     * @returns {{skipImageMetadata: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, artifactFixedPackMinTotalRows: number|null}}
+     * @returns {{skipImageMetadata: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean}}
      */
     _getImportPerformanceFlags() {
         const flags = /** @type {unknown} */ (Reflect.get(globalThis, 'manabitanImportPerformanceFlags'));
@@ -1811,6 +1813,7 @@ export class DictionaryImportController {
                 zipMaxWorkers: null,
                 zipChunkSize: null,
                 artifactFixedPackMinTotalRows: null,
+                wasmPreallocateChunkRows: true,
             };
         }
         const flagsRecord = /** @type {Record<string, unknown>} */ (flags);
@@ -1832,6 +1835,7 @@ export class DictionaryImportController {
             zipMaxWorkers: zipMaxWorkers === null ? null : Math.max(1, Math.min(32, zipMaxWorkers)),
             zipChunkSize: zipChunkSize === null ? null : Math.max(16 * 1024, Math.min(8 * 1024 * 1024, zipChunkSize)),
             artifactFixedPackMinTotalRows: artifactFixedPackMinTotalRows === null ? null : Math.max(0, Math.min(4_000_000, artifactFixedPackMinTotalRows)),
+            wasmPreallocateChunkRows: flagsRecord.wasmPreallocateChunkRows !== false,
         };
     }
 

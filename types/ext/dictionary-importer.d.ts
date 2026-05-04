@@ -70,6 +70,7 @@ export type ImportDetails = {
     zipMaxWorkers?: number | null;
     zipChunkSize?: number | null;
     artifactFixedPackMinTotalRows?: number | null;
+    wasmPreallocateChunkRows?: boolean;
     updateSessionToken?: string | null;
 };
 
