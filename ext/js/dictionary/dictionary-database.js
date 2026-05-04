@@ -110,15 +110,13 @@ function parseContentHashHexPair(value) {
 /**
  * @param {Uint8Array[]} chunks
  * @param {number} targetBytes
- * @returns {{packedChunks: Uint8Array[], sourceChunkIndices: number[], sourceChunkLocalOffsets: number[]}}
+ * @returns {{packedChunks: Uint8Array[], sourceChunkIndices: Uint32Array, sourceChunkLocalOffsets: Uint32Array}}
  */
 function packContentChunksIntoSlabs(chunks, targetBytes) {
     /** @type {Uint8Array[]} */
     const packedChunks = [];
-    /** @type {number[]} */
-    const sourceChunkIndices = new Array(chunks.length);
-    /** @type {number[]} */
-    const sourceChunkLocalOffsets = new Array(chunks.length);
+    const sourceChunkIndices = new Uint32Array(chunks.length);
+    const sourceChunkLocalOffsets = new Uint32Array(chunks.length);
     let startIndex = 0;
     while (startIndex < chunks.length) {
         let totalBytes = 0;
@@ -188,18 +186,23 @@ function isRecognizedTransientUpdateTitle(title, summary) {
  * @param {Uint8Array[]} chunks
  * @param {number} targetBytes
  * @param {number} fixedChunkBytes
- * @returns {{packedChunks: Uint8Array[], packedRowStarts: number[], packedRowCounts: number[]}}
+ * @returns {{packedChunks: Uint8Array[], packedRowStarts: Uint32Array, packedRowCounts: Uint32Array}}
  */
 function packFixedSizeContentChunksIntoSlabs(chunks, targetBytes, fixedChunkBytes) {
     /** @type {Uint8Array[]} */
     const packedChunks = [];
-    const packedRowStarts = [];
-    const packedRowCounts = [];
     if (chunks.length === 0 || fixedChunkBytes <= 0) {
-        return {packedChunks, packedRowStarts, packedRowCounts};
+        return {
+            packedChunks,
+            packedRowStarts: new Uint32Array(0),
+            packedRowCounts: new Uint32Array(0),
+        };
     }
     const rowsPerPackedChunk = Math.max(1, Math.floor(targetBytes / fixedChunkBytes));
-    for (let startIndex = 0; startIndex < chunks.length;) {
+    const packedChunkCount = Math.ceil(chunks.length / rowsPerPackedChunk);
+    const packedRowStarts = new Uint32Array(packedChunkCount);
+    const packedRowCounts = new Uint32Array(packedChunkCount);
+    for (let startIndex = 0, packedIndex = 0; startIndex < chunks.length; ++packedIndex) {
         const endIndex = Math.min(chunks.length, startIndex + rowsPerPackedChunk);
         const rowCount = endIndex - startIndex;
         const packed = new Uint8Array(rowCount * fixedChunkBytes);
@@ -209,8 +212,8 @@ function packFixedSizeContentChunksIntoSlabs(chunks, targetBytes, fixedChunkByte
             offset += fixedChunkBytes;
         }
         packedChunks.push(packed);
-        packedRowStarts.push(startIndex);
-        packedRowCounts.push(rowCount);
+        packedRowStarts[packedIndex] = startIndex;
+        packedRowCounts[packedIndex] = rowCount;
         startIndex = endIndex;
     }
     return {packedChunks, packedRowStarts, packedRowCounts};
