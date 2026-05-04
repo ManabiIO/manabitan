@@ -106,7 +106,7 @@ function createSparseArray(length) {
  * }}
  */
 function createArtifactTermRecordPreinternedPlanBuilder() {
-    /** @type {Map<number, Map<number, Map<number, number[]>>>} */
+    /** @type {Map<number, number[]>} */
     const stringIndexesByHash = new Map();
     /** @type {number[]} */
     const stringLengths = [];
@@ -115,20 +115,12 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
 
     /**
      * @param {number} h1
-     * @param {number} h2
      * @param {number} byteLength
      * @returns {number[]|undefined}
      */
     const getCachedIndexes = (h1, h2, byteLength) => {
-        const byH2 = stringIndexesByHash.get(h1 >>> 0);
-        if (!(byH2 instanceof Map)) {
-            return void 0;
-        }
-        const byLength = byH2.get(h2 >>> 0);
-        if (!(byLength instanceof Map)) {
-            return void 0;
-        }
-        return byLength.get(byteLength >>> 0);
+        const key = (((h1 >>> 0) ^ Math.imul(h2 >>> 0, 0x9e3779b1) ^ Math.imul(byteLength >>> 0, 0x85ebca6b)) >>> 0);
+        return stringIndexesByHash.get(key);
     };
 
     /**
@@ -139,24 +131,12 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
      * @returns {void}
      */
     const cacheIndex = (h1, h2, byteLength, index) => {
-        h1 >>>= 0;
-        h2 >>>= 0;
-        byteLength >>>= 0;
-        let byH2 = stringIndexesByHash.get(h1);
-        if (!(byH2 instanceof Map)) {
-            byH2 = new Map();
-            stringIndexesByHash.set(h1, byH2);
-        }
-        let byLength = byH2.get(h2);
-        if (!(byLength instanceof Map)) {
-            byLength = new Map();
-            byH2.set(h2, byLength);
-        }
-        const cachedIndexes = byLength.get(byteLength);
+        const key = (((h1 >>> 0) ^ Math.imul(h2 >>> 0, 0x9e3779b1) ^ Math.imul(byteLength >>> 0, 0x85ebca6b)) >>> 0);
+        const cachedIndexes = stringIndexesByHash.get(key);
         if (Array.isArray(cachedIndexes)) {
             cachedIndexes.push(index);
         } else {
-            byLength.set(byteLength, [index]);
+            stringIndexesByHash.set(key, [index]);
         }
     };
 
