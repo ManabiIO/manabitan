@@ -2865,8 +2865,7 @@ export class DictionaryDatabase {
             await this._bulkAddTerms(rows, 0, rows.length);
             return;
         }
-        const rows = this._materializeArtifactChunkTermEntries(chunk);
-        await this._bulkAddTermsWithoutContentDedup(rows, 0, rows.length);
+        await this._bulkAddArtifactTermsChunkWithoutContentDedup(chunk);
     }
 
     /**
@@ -3511,15 +3510,16 @@ export class DictionaryDatabase {
                         if (typeof span === 'undefined') {
                             throw new Error('Failed to resolve staged term entry content span for bulk term insert');
                         }
+                        const localOffset = storageChunks.entryToStoredChunkOffsets[pendingIndex] ?? 0;
                         stagedPendingContentIndexes[i] = -1;
-                        stagedContentOffsets[i] = span.offset;
-                        stagedContentLengths[i] = span.length;
+                        stagedContentOffsets[i] = span.offset + localOffset;
+                        stagedContentLengths[i] = pendingContentBytes[pendingIndex].byteLength;
                         stagedContentDictNames[i] = storageChunks.contentDictNames[pendingIndex] ?? 'raw';
-                        if (span.length > 0) {
-                            if (span.offset < minAssignedContentOffset) {
-                                minAssignedContentOffset = span.offset;
+                        if (stagedContentLengths[i] > 0) {
+                            if (stagedContentOffsets[i] < minAssignedContentOffset) {
+                                minAssignedContentOffset = stagedContentOffsets[i];
                             }
-                            const spanEnd = span.offset + span.length;
+                            const spanEnd = stagedContentOffsets[i] + stagedContentLengths[i];
                             if (spanEnd > maxAssignedContentEnd) {
                                 maxAssignedContentEnd = spanEnd;
                             }
@@ -3531,11 +3531,12 @@ export class DictionaryDatabase {
                         const tContentSqlStart = safePerformance.now();
                         for (let j = i, jj = i + chunkCount; j < jj; ++j) {
                             const span = spans[storageChunks.entryToStoredChunkIndexes[j]];
+                            const localOffset = storageChunks.entryToStoredChunkOffsets[j] ?? 0;
                             const contentDictName = storageChunks.contentDictNames[j];
                             this._cacheTermEntryContentMeta(
                                 pendingContentHashes[j],
-                                span.offset,
-                                span.length,
+                                span.offset + localOffset,
+                                pendingContentBytes[j].byteLength,
                                 contentDictName,
                                 0,
                                 pendingContentHash1s[j],
@@ -4189,10 +4190,10 @@ export class DictionaryDatabase {
             /** @type {number[]} */
             const contentLengths = new Array(count);
             /** @type {string | null} */
-                let uniformContentDictName = null;
-                /** @type {(string|null)[] | null} */
-                let contentDictNames = null;
-                const contentChunks = chunk.contentBytesList;
+            let uniformContentDictName = null;
+            /** @type {(string|null)[] | null} */
+            let contentDictNames = null;
+            const contentChunks = chunk.contentBytesList;
             const tContentAppendStart = safePerformance.now();
             if (this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES) {
                 const firstContentLength = contentChunks[0]?.byteLength ?? 0;
@@ -4421,7 +4422,7 @@ export class DictionaryDatabase {
                     pendingContentDictNames.push(
                         explicitContentDictNames !== null ?
                             (explicitContentDictNames[i] ?? null) :
-                            uniformContentDictName
+                            uniformContentDictName,
                     );
                 }
                 pendingRowToUniqueIndex[i] = pendingIndex;
@@ -4447,9 +4448,8 @@ export class DictionaryDatabase {
                     if (pendingIndex < 0) { continue; }
                     const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[pendingIndex];
                     const storedOffset = storedOffsets[storedChunkIndex];
-                    const storedLength = storedLengths[storedChunkIndex];
-                    contentOffsets[i] = storedOffset;
-                    contentLengths[i] = storedLength;
+                    contentOffsets[i] = storedOffset + (storageChunks.entryToStoredChunkOffsets[pendingIndex] ?? 0);
+                    contentLengths[i] = pendingContentBytes[pendingIndex].byteLength;
                     const resolvedContentDictName = storageChunks.contentDictNames[pendingIndex] ?? 'raw';
                     if (Array.isArray(resolvedContentDictNames)) {
                         resolvedContentDictNames[i] = resolvedContentDictName;
@@ -4461,8 +4461,8 @@ export class DictionaryDatabase {
                     const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[i];
                     this._cacheTermEntryContentMeta(
                         null,
-                        storedOffsets[storedChunkIndex],
-                        storedLengths[storedChunkIndex],
+                        storedOffsets[storedChunkIndex] + (storageChunks.entryToStoredChunkOffsets[i] ?? 0),
+                        pendingContentBytes[i].byteLength,
                         storageChunks.contentDictNames[i],
                         0,
                         pendingContentHash1s[i],
@@ -6420,19 +6420,23 @@ export class DictionaryDatabase {
      * @param {string|null} compressionDictName
      * @param {(string|null)[]} [contentDictNameOverrides]
      * @param {string|null} [uniformRawContentDictName]
-     * @returns {{storedChunks: Uint8Array[], contentDictNames: string[], entryToStoredChunkIndexes: number[]}}
+     * @returns {{storedChunks: Uint8Array[], contentDictNames: string[], entryToStoredChunkIndexes: number[], entryToStoredChunkOffsets: number[]}}
      */
     _createTermContentStorageChunks(contentBytesList, compressionDictName, contentDictNameOverrides = [], uniformRawContentDictName = null) {
         if (this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES) {
+            const packed = packContentChunksIntoSlabs(contentBytesList, this._rawTermContentPackTargetBytes);
+            const entryToStoredChunkIndexes = packed.sourceChunkIndices;
+            const entryToStoredChunkOffsets = packed.sourceChunkLocalOffsets;
             if (typeof uniformRawContentDictName === 'string' && uniformRawContentDictName.length > 0) {
                 return {
-                    storedChunks: contentBytesList,
-                    contentDictNames: Array(contentBytesList.length).fill(uniformRawContentDictName),
-                    entryToStoredChunkIndexes: contentBytesList.map((_, index) => index),
+                    storedChunks: packed.packedChunks,
+                    contentDictNames: new Array(contentBytesList.length).fill(uniformRawContentDictName),
+                    entryToStoredChunkIndexes,
+                    entryToStoredChunkOffsets,
                 };
             }
             return {
-                storedChunks: contentBytesList,
+                storedChunks: packed.packedChunks,
                 contentDictNames: contentBytesList.map((contentBytes, index) => {
                     const override = contentDictNameOverrides[index];
                     if (typeof override === 'string' && override.length > 0) {
@@ -6442,7 +6446,8 @@ export class DictionaryDatabase {
                         RAW_TERM_CONTENT_DICT_NAME :
                         (isRawTermContentSharedGlossaryBinary(contentBytes) ? RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME : 'raw');
                 }),
-                entryToStoredChunkIndexes: contentBytesList.map((_, index) => index),
+                entryToStoredChunkIndexes,
+                entryToStoredChunkOffsets,
             };
         }
         /** @type {Uint8Array[]} */
@@ -6466,6 +6471,7 @@ export class DictionaryDatabase {
             storedChunks,
             contentDictNames,
             entryToStoredChunkIndexes: storedChunks.map((_, index) => index),
+            entryToStoredChunkOffsets: storedChunks.map(() => 0),
         };
     }
 

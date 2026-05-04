@@ -479,7 +479,7 @@ export class DictionaryImporter {
         const errors = [];
         const maxTransactionLength = 262144;
         const bulkAddProgressAllowance = 1000;
-        const enableTermEntryContentDedup = details.enableTermEntryContentDedup !== false;
+        const requestedTermEntryContentDedup = typeof details.enableTermEntryContentDedup === 'boolean' ? details.enableTermEntryContentDedup : null;
         const preserveCompressedMedia = details.preserveCompressedMedia === true;
         const termContentStorageMode = (details.termContentStorageMode === 'raw-bytes') ?
             details.termContentStorageMode :
@@ -488,6 +488,8 @@ export class DictionaryImporter {
         this._skipMediaImport = details.skipMediaImport === true;
         this._mediaResolutionConcurrency = Math.max(1, Math.min(32, Math.trunc(details.mediaResolutionConcurrency ?? 8)));
         this._debugImportLogging = details.debugImportLogging === true;
+        const zipMaxWorkers = Number.isFinite(details.zipMaxWorkers) ? Math.max(1, Math.min(32, Math.trunc(/** @type {number} */ (details.zipMaxWorkers)))) : null;
+        const zipChunkSize = Number.isFinite(details.zipChunkSize) ? Math.max(16 * 1024, Math.min(8 * 1024 * 1024, Math.trunc(/** @type {number} */ (details.zipChunkSize)))) : null;
         this._pendingImageMediaByPath.clear();
         this._imageMetadataByPath.clear();
         this._jsonQuotedStringCache.clear();
@@ -576,6 +578,8 @@ export class DictionaryImporter {
                 deflate: ['../../lib/z-worker.js'],
                 inflate: ['../../lib/z-worker.js'],
             },
+            ...(zipMaxWorkers !== null ? {maxWorkers: zipMaxWorkers} : {}),
+            ...(zipChunkSize !== null ? {chunkSize: zipChunkSize} : {}),
         });
 
         // Read archive
@@ -604,6 +608,8 @@ export class DictionaryImporter {
             ok: true,
             fileCount: fileMap.size,
             indexVersion: typeof index.version === 'number' ? index.version : null,
+            zipMaxWorkers,
+            zipChunkSize,
         });
         this._logImport(`archive+index ${Date.now() - tArchiveStart}ms files=${fileMap.size}`);
 
@@ -625,7 +631,6 @@ export class DictionaryImporter {
                 debug: {phaseTimings},
             };
         }
-        dictionaryDatabase.setTermEntryContentDedupEnabled(enableTermEntryContentDedup);
         dictionaryDatabase.setImportDebugLogging(this._debugImportLogging);
 
         let termArtifactManifest = null;
@@ -656,6 +661,9 @@ export class DictionaryImporter {
         const kanjiMetaFiles = archiveFiles.kanjiMetaFiles ?? [];
         const tagFiles = archiveFiles.tagFiles ?? [];
         const useTermArtifactFiles = termArtifactFiles.length > 0;
+        const useTermArtifactImport = useTermArtifactFiles || termArtifactManifest !== null;
+        const enableTermEntryContentDedup = requestedTermEntryContentDedup ?? !useTermArtifactImport;
+        dictionaryDatabase.setTermEntryContentDedupEnabled(enableTermEntryContentDedup);
         const effectiveTermContentStorageMode = (
             termArtifactManifest !== null &&
             (

@@ -1608,6 +1608,8 @@ export class DictionaryImportController {
                 debugImportLogging,
                 enableTermEntryContentDedup,
                 termContentStorageMode,
+                zipMaxWorkers,
+                zipChunkSize,
             } = this._getImportPerformanceFlags();
             const importDetails = {
                 prefixWildcardsSupported: optionsFull.global.database.prefixWildcardsSupported,
@@ -1617,6 +1619,8 @@ export class DictionaryImportController {
                 debugImportLogging,
                 enableTermEntryContentDedup,
                 termContentStorageMode,
+                zipMaxWorkers,
+                zipChunkSize,
                 ...(importDetailsOverrides && typeof importDetailsOverrides === 'object' && !Array.isArray(importDetailsOverrides) ? importDetailsOverrides : {}),
             };
 
@@ -1790,7 +1794,7 @@ export class DictionaryImportController {
     }
 
     /**
-     * @returns {{skipImageMetadata: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean}}
+     * @returns {{skipImageMetadata: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null}}
      */
     _getImportPerformanceFlags() {
         const flags = /** @type {unknown} */ (Reflect.get(globalThis, 'manabitanImportPerformanceFlags'));
@@ -1799,13 +1803,17 @@ export class DictionaryImportController {
                 skipImageMetadata: false,
                 mediaResolutionConcurrency: 8,
                 debugImportLogging: false,
-                enableTermEntryContentDedup: true,
+                enableTermEntryContentDedup: null,
                 termContentStorageMode: 'raw-bytes',
                 preserveCompressedMedia: false,
+                zipMaxWorkers: null,
+                zipChunkSize: null,
             };
         }
         const flagsRecord = /** @type {Record<string, unknown>} */ (flags);
         const mediaResolutionConcurrency = Number.isFinite(flagsRecord.mediaResolutionConcurrency) ? Math.trunc(/** @type {number} */ (flagsRecord.mediaResolutionConcurrency)) : 8;
+        const zipMaxWorkers = Number.isFinite(flagsRecord.zipMaxWorkers) ? Math.trunc(/** @type {number} */ (flagsRecord.zipMaxWorkers)) : null;
+        const zipChunkSize = Number.isFinite(flagsRecord.zipChunkSize) ? Math.trunc(/** @type {number} */ (flagsRecord.zipChunkSize)) : null;
         const termContentStorageModeRaw = flagsRecord.termContentStorageMode;
         const termContentStorageMode = (termContentStorageModeRaw === 'raw-bytes') ?
             termContentStorageModeRaw :
@@ -1814,9 +1822,11 @@ export class DictionaryImportController {
             skipImageMetadata: flagsRecord.skipImageMetadata === true,
             mediaResolutionConcurrency: Math.max(1, Math.min(32, mediaResolutionConcurrency)),
             debugImportLogging: flagsRecord.debugImportLogging === true,
-            enableTermEntryContentDedup: flagsRecord.enableTermEntryContentDedup !== false,
+            enableTermEntryContentDedup: typeof flagsRecord.enableTermEntryContentDedup === 'boolean' ? flagsRecord.enableTermEntryContentDedup : null,
             termContentStorageMode,
             preserveCompressedMedia: flagsRecord.preserveCompressedMedia === true,
+            zipMaxWorkers: zipMaxWorkers === null ? null : Math.max(1, Math.min(32, zipMaxWorkers)),
+            zipChunkSize: zipChunkSize === null ? null : Math.max(16 * 1024, Math.min(8 * 1024 * 1024, zipChunkSize)),
         };
     }
 
