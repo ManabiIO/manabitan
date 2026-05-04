@@ -728,6 +728,12 @@ function getUnsupportedRuntimeSkipReason(message) {
     if (text.includes('background.service_worker is currently disabled')) {
         return 'Firefox automation runtime does not support MV3 background service workers in this local Selenium/browser stack; skipping this lane locally.';
     }
+    if (
+        text.includes('Failed to read marionette port') ||
+        text.includes('Failed to decode response from marionette')
+    ) {
+        return 'Firefox automation runtime failed before extension startup in this local Selenium/Marionette stack; skipping this lane locally.';
+    }
     return '';
 }
 
@@ -2667,13 +2673,35 @@ async function main() {
         MOZ_CRASHREPORTER_NO_REPORT: '1',
     });
     firefoxService.setStdio(['ignore', geckodriverLogFd, geckodriverLogFd]);
-    const driver = /** @type {import('selenium-webdriver').ThenableWebDriver} */ (
-        new Builder()
-            .forBrowser(Browser.FIREFOX)
-            .setFirefoxOptions(firefoxOptions)
-            .setFirefoxService(firefoxService)
-            .build()
-    );
+    /** @type {import('selenium-webdriver').ThenableWebDriver|null} */
+    let driver = null;
+    try {
+        driver = /** @type {import('selenium-webdriver').ThenableWebDriver} */ (
+            new Builder()
+                .forBrowser(Browser.FIREFOX)
+                .setFirefoxOptions(firefoxOptions)
+                .setFirefoxService(firefoxService)
+                .build()
+        );
+        await driver.getWindowHandle();
+    } catch (e) {
+        const failureReason = errorMessage(e);
+        const skipReason = strictUnsupportedRuntime ? '' : getUnsupportedRuntimeSkipReason(failureReason);
+        if (skipReason.length === 0) {
+            throw e;
+        }
+        report.status = 'success-with-skips';
+        report.skippedVerification = true;
+        report.skipReason = skipReason;
+        console.warn(`[firefox-e2e] warning: ${skipReason}`);
+        if (geckodriverLogFd !== null) {
+            closeSync(geckodriverLogFd);
+        }
+        // Selenium may still have a rejected startup command queued after the
+        // Marionette port failure. Exit immediately after classifying the local
+        // unsupported runtime so the queued rejection does not fail non-strict runs.
+        process.exit(0);
+    }
     /** @type {null|{close: () => Promise<void>, baseUrl: string}} */
     let localServer = null;
     /** @type {string} */
@@ -4146,11 +4174,13 @@ async function main() {
                 console.error(`[firefox-e2e] Failed to close local server: ${errorMessage(serverCloseError)}`);
             }
         }
-        try {
-            await driver.quit();
-        } catch (driverQuitError) {
-            if (!isIgnorableDriverQuitError(driverQuitError)) {
-                throw driverQuitError;
+        if (driver !== null) {
+            try {
+                await driver.quit();
+            } catch (driverQuitError) {
+                if (!isIgnorableDriverQuitError(driverQuitError)) {
+                    throw driverQuitError;
+                }
             }
         }
         if (geckodriverLogFd !== null) {
