@@ -106,7 +106,7 @@ function createSparseArray(length) {
  * }}
  */
 function createArtifactTermRecordPreinternedPlanBuilder() {
-    /** @type {Map<number, number[]>} */
+    /** @type {Map<number, number|number[]>} */
     const stringIndexesByHash = new Map();
     let stringLengthsCapacity = TERM_ARTIFACT_ROW_CHUNK_SIZE * 2;
     let stringLengths = new Uint16Array(stringLengthsCapacity);
@@ -141,7 +141,7 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
     /**
      * @param {number} h1
      * @param {number} byteLength
-     * @returns {number[]|undefined}
+     * @returns {number|number[]|undefined}
      */
     const getCachedIndexes = (h1, h2, byteLength) => {
         const key = (((h1 >>> 0) ^ Math.imul(h2 >>> 0, 0x9e3779b1) ^ Math.imul(byteLength >>> 0, 0x85ebca6b)) >>> 0);
@@ -157,11 +157,13 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
      */
     const cacheIndex = (h1, h2, byteLength, index) => {
         const key = (((h1 >>> 0) ^ Math.imul(h2 >>> 0, 0x9e3779b1) ^ Math.imul(byteLength >>> 0, 0x85ebca6b)) >>> 0);
-        const cachedIndexes = stringIndexesByHash.get(key);
-        if (Array.isArray(cachedIndexes)) {
-            cachedIndexes.push(index);
+        const cachedIndexOrIndexes = stringIndexesByHash.get(key);
+        if (typeof cachedIndexOrIndexes === 'number') {
+            stringIndexesByHash.set(key, [cachedIndexOrIndexes, index]);
+        } else if (Array.isArray(cachedIndexOrIndexes)) {
+            cachedIndexOrIndexes.push(index);
         } else {
-            stringIndexesByHash.set(key, [index]);
+            stringIndexesByHash.set(key, index);
         }
     };
 
@@ -189,9 +191,14 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
                 h2 = Math.imul((h2 ^ code) >>> 0, 0x85ebca6b);
                 h2 = (h2 ^ (h2 >>> 13)) >>> 0;
             }
-            const cachedIndexes = getCachedIndexes(h1, h2, bytes.byteLength);
-            if (Array.isArray(cachedIndexes)) {
-                for (const cachedIndex of cachedIndexes) {
+            const cachedIndexOrIndexes = getCachedIndexes(h1, h2, bytes.byteLength);
+            if (typeof cachedIndexOrIndexes === 'number') {
+                const cachedBytes = stringBytesList[cachedIndexOrIndexes];
+                if (cachedBytes instanceof Uint8Array && bytesEqual(cachedBytes, bytes)) {
+                    return cachedIndexOrIndexes;
+                }
+            } else if (Array.isArray(cachedIndexOrIndexes)) {
+                for (const cachedIndex of cachedIndexOrIndexes) {
                     const cachedBytes = stringBytesList[cachedIndex];
                     if (cachedBytes instanceof Uint8Array && bytesEqual(cachedBytes, bytes)) {
                         return cachedIndex;
