@@ -1610,6 +1610,7 @@ export class DictionaryImportController {
                 termContentStorageMode,
                 zipMaxWorkers,
                 zipChunkSize,
+                artifactFixedPackMinTotalRows,
             } = this._getImportPerformanceFlags();
             const importDetails = {
                 prefixWildcardsSupported: optionsFull.global.database.prefixWildcardsSupported,
@@ -1621,6 +1622,7 @@ export class DictionaryImportController {
                 termContentStorageMode,
                 zipMaxWorkers,
                 zipChunkSize,
+                artifactFixedPackMinTotalRows,
                 ...(importDetailsOverrides && typeof importDetailsOverrides === 'object' && !Array.isArray(importDetailsOverrides) ? importDetailsOverrides : {}),
             };
 
@@ -1794,7 +1796,7 @@ export class DictionaryImportController {
     }
 
     /**
-     * @returns {{skipImageMetadata: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null}}
+     * @returns {{skipImageMetadata: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, artifactFixedPackMinTotalRows: number|null}}
      */
     _getImportPerformanceFlags() {
         const flags = /** @type {unknown} */ (Reflect.get(globalThis, 'manabitanImportPerformanceFlags'));
@@ -1808,12 +1810,14 @@ export class DictionaryImportController {
                 preserveCompressedMedia: false,
                 zipMaxWorkers: null,
                 zipChunkSize: null,
+                artifactFixedPackMinTotalRows: null,
             };
         }
         const flagsRecord = /** @type {Record<string, unknown>} */ (flags);
         const mediaResolutionConcurrency = Number.isFinite(flagsRecord.mediaResolutionConcurrency) ? Math.trunc(/** @type {number} */ (flagsRecord.mediaResolutionConcurrency)) : 8;
         const zipMaxWorkers = Number.isFinite(flagsRecord.zipMaxWorkers) ? Math.trunc(/** @type {number} */ (flagsRecord.zipMaxWorkers)) : null;
         const zipChunkSize = Number.isFinite(flagsRecord.zipChunkSize) ? Math.trunc(/** @type {number} */ (flagsRecord.zipChunkSize)) : null;
+        const artifactFixedPackMinTotalRows = Number.isFinite(flagsRecord.artifactFixedPackMinTotalRows) ? Math.trunc(/** @type {number} */ (flagsRecord.artifactFixedPackMinTotalRows)) : null;
         const termContentStorageModeRaw = flagsRecord.termContentStorageMode;
         const termContentStorageMode = (termContentStorageModeRaw === 'raw-bytes') ?
             termContentStorageModeRaw :
@@ -1827,6 +1831,7 @@ export class DictionaryImportController {
             preserveCompressedMedia: flagsRecord.preserveCompressedMedia === true,
             zipMaxWorkers: zipMaxWorkers === null ? null : Math.max(1, Math.min(32, zipMaxWorkers)),
             zipChunkSize: zipChunkSize === null ? null : Math.max(16 * 1024, Math.min(8 * 1024 * 1024, zipChunkSize)),
+            artifactFixedPackMinTotalRows: artifactFixedPackMinTotalRows === null ? null : Math.max(0, Math.min(4_000_000, artifactFixedPackMinTotalRows)),
         };
     }
 

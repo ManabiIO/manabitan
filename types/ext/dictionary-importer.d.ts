@@ -69,6 +69,7 @@ export type ImportDetails = {
     skipMediaImport?: boolean;
     zipMaxWorkers?: number | null;
     zipChunkSize?: number | null;
+    artifactFixedPackMinTotalRows?: number | null;
     updateSessionToken?: string | null;
 };
 

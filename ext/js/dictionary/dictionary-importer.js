@@ -439,8 +439,6 @@ export class DictionaryImporter {
         this._adaptiveTermBankWasmInitialCapacity = false;
         /** @type {boolean} */
         this._streamTermArtifactChunks = true;
-        /** @type {number} */
-        this._termArtifactRowChunkSize = TERM_ARTIFACT_ROW_CHUNK_SIZE;
         /** @type {boolean} */
         this._wasmSkipUnusedTermContentEncoding = true;
         /** @type {boolean} */
@@ -490,6 +488,9 @@ export class DictionaryImporter {
         this._debugImportLogging = details.debugImportLogging === true;
         const zipMaxWorkers = Number.isFinite(details.zipMaxWorkers) ? Math.max(1, Math.min(32, Math.trunc(/** @type {number} */ (details.zipMaxWorkers)))) : null;
         const zipChunkSize = Number.isFinite(details.zipChunkSize) ? Math.max(16 * 1024, Math.min(8 * 1024 * 1024, Math.trunc(/** @type {number} */ (details.zipChunkSize)))) : null;
+        const artifactFixedPackMinTotalRows = Number.isFinite(details.artifactFixedPackMinTotalRows) ?
+            Math.max(0, Math.min(4_000_000, Math.trunc(/** @type {number} */ (details.artifactFixedPackMinTotalRows)))) :
+            null;
         this._pendingImageMediaByPath.clear();
         this._imageMetadataByPath.clear();
         this._jsonQuotedStringCache.clear();
@@ -498,6 +499,7 @@ export class DictionaryImporter {
         dictionaryDatabase.setImportOptimizationFlags({
             termContentStorageMode,
             expectedTermContentImportBytes: void 0,
+            artifactFixedPackMinTotalRows,
         });
         const tImportStart = Date.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, unknown>}>} */
@@ -677,6 +679,7 @@ export class DictionaryImporter {
             dictionaryDatabase.setImportOptimizationFlags({
                 termContentStorageMode: effectiveTermContentStorageMode,
                 expectedTermContentImportBytes: void 0,
+                artifactFixedPackMinTotalRows,
             });
         }
         const packedTermArtifactEntry = (
@@ -855,10 +858,11 @@ export class DictionaryImporter {
             null;
         dictionaryDatabase.setImportOptimizationFlags(
             expectedTermContentImportBytes === null ?
-                {termContentStorageMode: effectiveTermContentStorageMode} :
+                {termContentStorageMode: effectiveTermContentStorageMode, artifactFixedPackMinTotalRows} :
                 {
                     termContentStorageMode: effectiveTermContentStorageMode,
                     expectedTermContentImportBytes,
+                    artifactFixedPackMinTotalRows,
                 },
         );
         /** @type {Array<import('@zip.js/zip.js').Entry|{filename: string}>} */
@@ -3565,7 +3569,7 @@ export class DictionaryImporter {
         /** @type {(string|null)[]|null} */
         let chunkContentDictNames = null;
         let termRecordPlanBuilder = directArtifactChunkImport ? null : createArtifactTermRecordPreinternedPlanBuilder();
-        const chunkSize = this._termArtifactRowChunkSize;
+        const chunkSize = TERM_ARTIFACT_ROW_CHUNK_SIZE;
         /** @type {number[]|Uint32Array} */
         let termRecordExpressionIndexes = [];
         /** @type {number[]|Uint32Array} */

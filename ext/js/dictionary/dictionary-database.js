@@ -64,7 +64,7 @@ const HIGH_MEMORY_TERM_BULK_ADD_STAGING_MAX_ROWS = 10240;
 const TERM_CONTENT_STORAGE_MODE_BASELINE = 'baseline';
 const TERM_CONTENT_STORAGE_MODE_RAW_BYTES = 'raw-bytes';
 const DEFAULT_RAW_TERM_CONTENT_PACK_TARGET_BYTES = 4 * 1024 * 1024;
-const LARGE_ARTIFACT_FIXED_PACK_MIN_TOTAL_ROWS = 2_000_000;
+const DEFAULT_ARTIFACT_FIXED_PACK_MIN_TOTAL_ROWS = 0;
 const EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE = 512;
 const ZIP_COMPRESSION_METHOD_STORE = 0;
 const ZIP_COMPRESSION_METHOD_DEFLATE = 8;
@@ -336,6 +336,7 @@ export class DictionaryDatabase {
         this._termContentCompressionMinBytes = 1048576;
         /** @type {number} */
         this._rawTermContentPackTargetBytes = DEFAULT_RAW_TERM_CONTENT_PACK_TARGET_BYTES;
+        this._artifactFixedPackMinTotalRows = DEFAULT_ARTIFACT_FIXED_PACK_MIN_TOTAL_ROWS;
         /** @type {boolean} */
         this._importDebugLogging = false;
         /** @type {number} */
@@ -840,7 +841,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number}} [options]
+     * @param {{termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, artifactFixedPackMinTotalRows?: number|null}} [options]
      */
     setImportOptimizationFlags(options = {}) {
         this._adaptiveTermBulkAddBatchSize = true;
@@ -853,6 +854,9 @@ export class DictionaryDatabase {
             TERM_CONTENT_STORAGE_MODE_BASELINE;
         this._termContentCompressionMinBytes = 1048576;
         this._rawTermContentPackTargetBytes = DEFAULT_RAW_TERM_CONTENT_PACK_TARGET_BYTES;
+        this._artifactFixedPackMinTotalRows = Number.isFinite(options.artifactFixedPackMinTotalRows) ?
+            Math.max(0, Math.min(4_000_000, Math.trunc(/** @type {number} */ (options.artifactFixedPackMinTotalRows)))) :
+            DEFAULT_ARTIFACT_FIXED_PACK_MIN_TOTAL_ROWS;
         this._termContentStore.setImportStorageMode(this._termContentStorageMode);
         this._termContentStore.setExpectedImportBytes(options.expectedTermContentImportBytes ?? null);
         this._termContentStore.setWriteCoalesceMaxChunksOverride(null);
@@ -4199,7 +4203,7 @@ export class DictionaryDatabase {
                 const firstContentLength = contentChunks[0]?.byteLength ?? 0;
                 let useFixedSizePacking = (
                     firstContentLength > 0 &&
-                    (chunk.dictionaryTotalRows ?? 0) >= LARGE_ARTIFACT_FIXED_PACK_MIN_TOTAL_ROWS
+                    (chunk.dictionaryTotalRows ?? 0) >= this._artifactFixedPackMinTotalRows
                 );
                 for (let i = 1; i < count && useFixedSizePacking; ++i) {
                     if (contentChunks[i].byteLength !== firstContentLength) {
