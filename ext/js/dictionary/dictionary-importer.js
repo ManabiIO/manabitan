@@ -3799,6 +3799,7 @@ export class DictionaryImporter {
         const reverseRowsMs = 0;
         let importerChunkSinkMs = 0;
         const metadataRebaseMs = 0;
+        const collectArtifactRowProfile = this._debugImportLogging;
         let readingEqualsExpressionCount = 0;
         let sequencePresentCount = 0;
         let zeroScoreCount = 0;
@@ -3839,11 +3840,13 @@ export class DictionaryImporter {
                     byteRangeEqual(bytes, expressionStart, readingStart, expressionLength)
                 );
             }
-            if (readingMatchesExpression) {
+            if (collectArtifactRowProfile && readingMatchesExpression) {
                 ++readingEqualsExpressionCount;
             }
-            expressionLengthTotal += expressionLength;
-            readingLengthTotal += readingLength;
+            if (collectArtifactRowProfile) {
+                expressionLengthTotal += expressionLength;
+                readingLengthTotal += readingLength;
+            }
             const readingBytes = readingMatchesExpression ?
                 expressionBytes :
                 bytes.subarray(cursor, cursor + readingLength);
@@ -3866,14 +3869,16 @@ export class DictionaryImporter {
                 cursor += 1;
             }
             const score = view.getInt32(cursor, true);
-            if (score === 0) {
-                ++zeroScoreCount;
-            } else {
-                ++nonZeroScoreCount;
+            if (collectArtifactRowProfile) {
+                if (score === 0) {
+                    ++zeroScoreCount;
+                } else {
+                    ++nonZeroScoreCount;
+                }
             }
             cursor += 4;
             const sequenceRaw = view.getInt32(cursor, true);
-            if (sequenceRaw >= 0) {
+            if (collectArtifactRowProfile && sequenceRaw >= 0) {
                 ++sequencePresentCount;
             }
             cursor += 4;
@@ -3882,9 +3887,11 @@ export class DictionaryImporter {
             const hash2 = view.getUint32(cursor, true);
             cursor += 4;
             const contentLength = view.getUint32(cursor, true);
-            contentLengthTotal += contentLength;
-            if (contentLength > 0xfffd) {
-                ++contentLengthExtendedCount;
+            if (collectArtifactRowProfile) {
+                contentLengthTotal += contentLength;
+                if (contentLength > 0xfffd) {
+                    ++contentLengthExtendedCount;
+                }
             }
             cursor += 4;
             if ((cursor + contentLength) > bytes.byteLength) {
@@ -3904,7 +3911,9 @@ export class DictionaryImporter {
                     contentDictName === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME ||
                     contentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME
                 ) {
-                    ++sharedGlossaryRowCount;
+                    if (collectArtifactRowProfile) {
+                        ++sharedGlossaryRowCount;
+                    }
                 }
             } else {
                 contentBytes = this._normalizeArtifactTermContentBytes(contentBytes, termContentStorageMode);
@@ -4108,15 +4117,17 @@ export class DictionaryImporter {
             chunkCount: streamToChunkHandler ? chunkIndex : 0,
             totalRows: rowCount,
             rowChunkSize: chunkSize,
-            readingEqualsExpressionCount,
-            sequencePresentCount,
-            zeroScoreCount,
-            nonZeroScoreCount,
-            sharedGlossaryRowCount,
-            contentLengthExtendedCount,
-            avgContentLength: rowCount > 0 ? (contentLengthTotal / rowCount) : 0,
-            avgExpressionLength: rowCount > 0 ? (expressionLengthTotal / rowCount) : 0,
-            avgReadingLength: rowCount > 0 ? (readingLengthTotal / rowCount) : 0,
+            ...(collectArtifactRowProfile ? {
+                readingEqualsExpressionCount,
+                sequencePresentCount,
+                zeroScoreCount,
+                nonZeroScoreCount,
+                sharedGlossaryRowCount,
+                contentLengthExtendedCount,
+                avgContentLength: rowCount > 0 ? (contentLengthTotal / rowCount) : 0,
+                avgExpressionLength: rowCount > 0 ? (expressionLengthTotal / rowCount) : 0,
+                avgReadingLength: rowCount > 0 ? (readingLengthTotal / rowCount) : 0,
+            } : {}),
         };
         return {termList: streamToChunkHandler ? [] : termList, requirements: null};
     }
