@@ -286,7 +286,9 @@ static inline int write_byte_and_hash(
     if (*cursor >= out_capacity) { return 0; }
     out[*cursor] = value;
     *cursor += 1u;
-    hash_byte(h1, h2, value);
+    if (h1 != 0 && h2 != 0) {
+        hash_byte(h1, h2, value);
+    }
     return 1;
 }
 
@@ -305,7 +307,9 @@ static inline int write_bytes_and_hash(
     for (uint32_t i = 0u; i < length; ++i) {
         const uint8_t value = src[i];
         out[start + i] = value;
-        hash_byte(h1, h2, value);
+        if (h1 != 0 && h2 != 0) {
+            hash_byte(h1, h2, value);
+        }
     }
     *cursor = end;
     return 1;
@@ -455,7 +459,8 @@ static int encode_term_content_row(
     uint32_t out_capacity,
     uint32_t* cursor,
     uint32_t* out_h1,
-    uint32_t* out_h2
+    uint32_t* out_h2,
+    int compute_hashes
 ) {
     static const uint8_t PREFIX_RULES[] = "{\"rules\":";
     static const uint8_t PREFIX_DEFINITION_TAGS[] = ",\"definitionTags\":";
@@ -464,31 +469,33 @@ static int encode_term_content_row(
     static const uint8_t SUFFIX[] = "}";
     static const uint8_t EMPTY_QUOTED[] = "\"\"";
 
-    uint32_t h1 = FNV1A_OFFSET;
-    uint32_t h2 = MIX_OFFSET;
+    uint32_t h1 = compute_hashes ? FNV1A_OFFSET : 0u;
+    uint32_t h2 = compute_hashes ? MIX_OFFSET : 0u;
+    uint32_t* h1_ptr = compute_hashes ? &h1 : 0;
+    uint32_t* h2_ptr = compute_hashes ? &h2 : 0;
 
-    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_RULES, sizeof(PREFIX_RULES) - 1u, &h1, &h2)) { return 0; }
+    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_RULES, sizeof(PREFIX_RULES) - 1u, h1_ptr, h2_ptr)) { return 0; }
     if (row->rules_length > 0u && !is_null_token(src, row->rules_start, row->rules_length)) {
-        if (!write_bytes_and_hash(out, out_capacity, cursor, src + row->rules_start, row->rules_length, &h1, &h2)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, src + row->rules_start, row->rules_length, h1_ptr, h2_ptr)) { return 0; }
     } else {
-        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, &h1, &h2)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, h1_ptr, h2_ptr)) { return 0; }
     }
 
-    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_DEFINITION_TAGS, sizeof(PREFIX_DEFINITION_TAGS) - 1u, &h1, &h2)) { return 0; }
+    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_DEFINITION_TAGS, sizeof(PREFIX_DEFINITION_TAGS) - 1u, h1_ptr, h2_ptr)) { return 0; }
     if (row->definition_tags_length > 0u && !is_null_token(src, row->definition_tags_start, row->definition_tags_length)) {
-        if (!write_bytes_and_hash(out, out_capacity, cursor, src + row->definition_tags_start, row->definition_tags_length, &h1, &h2)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, src + row->definition_tags_start, row->definition_tags_length, h1_ptr, h2_ptr)) { return 0; }
     } else {
-        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, &h1, &h2)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, h1_ptr, h2_ptr)) { return 0; }
     }
 
-    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_TERM_TAGS, sizeof(PREFIX_TERM_TAGS) - 1u, &h1, &h2)) { return 0; }
+    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_TERM_TAGS, sizeof(PREFIX_TERM_TAGS) - 1u, h1_ptr, h2_ptr)) { return 0; }
     if (row->term_tags_length > 0u && !is_null_token(src, row->term_tags_start, row->term_tags_length)) {
-        if (!write_bytes_and_hash(out, out_capacity, cursor, src + row->term_tags_start, row->term_tags_length, &h1, &h2)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, src + row->term_tags_start, row->term_tags_length, h1_ptr, h2_ptr)) { return 0; }
     } else {
-        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, &h1, &h2)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, h1_ptr, h2_ptr)) { return 0; }
     }
 
-    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_GLOSSARY, sizeof(PREFIX_GLOSSARY) - 1u, &h1, &h2)) { return 0; }
+    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_GLOSSARY, sizeof(PREFIX_GLOSSARY) - 1u, h1_ptr, h2_ptr)) { return 0; }
     if (row->glossary_length > 0u) {
         if (!write_normalized_glossary_value_and_hash(
             src,
@@ -498,17 +505,17 @@ static int encode_term_content_row(
             out,
             out_capacity,
             cursor,
-            &h1,
-            &h2
+            h1_ptr,
+            h2_ptr
         )) { return 0; }
     } else {
         static const uint8_t EMPTY_ARRAY[] = "[]";
-        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_ARRAY, sizeof(EMPTY_ARRAY) - 1u, &h1, &h2)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_ARRAY, sizeof(EMPTY_ARRAY) - 1u, h1_ptr, h2_ptr)) { return 0; }
     }
 
-    if (!write_bytes_and_hash(out, out_capacity, cursor, SUFFIX, sizeof(SUFFIX) - 1u, &h1, &h2)) { return 0; }
+    if (!write_bytes_and_hash(out, out_capacity, cursor, SUFFIX, sizeof(SUFFIX) - 1u, h1_ptr, h2_ptr)) { return 0; }
 
-    if ((h1 | h2) == 0u) {
+    if (compute_hashes && (h1 | h2) == 0u) {
         h1 = 1u;
     }
     *out_h1 = h1;
@@ -561,13 +568,14 @@ int32_t parse_term_bank_with_media_hints(uint32_t json_ptr, uint32_t json_len, u
 }
 
 __attribute__((visibility("default")))
-int32_t encode_term_content(
+static int32_t encode_term_content_impl(
     uint32_t json_ptr,
     uint32_t metas_ptr,
     uint32_t row_count,
     uint32_t out_ptr,
     uint32_t out_capacity,
-    uint32_t row_meta_ptr
+    uint32_t row_meta_ptr,
+    int compute_hashes
 ) {
     if (json_ptr == 0u || metas_ptr == 0u || out_ptr == 0u || row_meta_ptr == 0u) {
         return -1;
@@ -582,7 +590,7 @@ int32_t encode_term_content(
         const uint32_t start = cursor;
         uint32_t h1 = 0u;
         uint32_t h2 = 0u;
-        if (!encode_term_content_row(src, &rows[i], out, out_capacity, &cursor, &h1, &h2)) {
+        if (!encode_term_content_row(src, &rows[i], out, out_capacity, &cursor, &h1, &h2, compute_hashes)) {
             return -2;
         }
         const uint32_t o = i * 4u;
@@ -592,4 +600,28 @@ int32_t encode_term_content(
         row_meta[o + 3u] = h2;
     }
     return (int32_t)cursor;
+}
+
+__attribute__((visibility("default")))
+int32_t encode_term_content(
+    uint32_t json_ptr,
+    uint32_t metas_ptr,
+    uint32_t row_count,
+    uint32_t out_ptr,
+    uint32_t out_capacity,
+    uint32_t row_meta_ptr
+) {
+    return encode_term_content_impl(json_ptr, metas_ptr, row_count, out_ptr, out_capacity, row_meta_ptr, 1);
+}
+
+__attribute__((visibility("default")))
+int32_t encode_term_content_no_hash(
+    uint32_t json_ptr,
+    uint32_t metas_ptr,
+    uint32_t row_count,
+    uint32_t out_ptr,
+    uint32_t out_capacity,
+    uint32_t row_meta_ptr
+) {
+    return encode_term_content_impl(json_ptr, metas_ptr, row_count, out_ptr, out_capacity, row_meta_ptr, 0);
 }

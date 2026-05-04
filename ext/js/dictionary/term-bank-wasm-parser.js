@@ -27,7 +27,7 @@ const U8_L = 0x6c;
 const CONTENT_META_U32_FIELDS = 4;
 const DEFAULT_ROW_CHUNK_SIZE = 2048;
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
-/** @type {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, parse_term_bank: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, parse_term_bank_with_media_hints: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}>|null} */
+/** @type {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, parse_term_bank: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, parse_term_bank_with_media_hints: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number, encode_term_content_no_hash: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}>|null} */
 let wasmPromise = null;
 
 /** @type {TextDecoder} */
@@ -40,7 +40,7 @@ let lastSuccessfulMetaCapacity = 0;
 let lastSuccessfulContentBytesPerRow = 0;
 
 /**
- * @returns {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, parse_term_bank: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, parse_term_bank_with_media_hints: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}>}
+ * @returns {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, parse_term_bank: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, parse_term_bank_with_media_hints: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number, encode_term_content_no_hash: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}>}
  */
 async function getWasm() {
     if (wasmPromise !== null) {
@@ -51,14 +51,15 @@ async function getWasm() {
         const response = await fetch(url);
         const bytes = await response.arrayBuffer();
         const instance = await WebAssembly.instantiate(bytes, {});
-        const exports = /** @type {WebAssembly.Exports & {memory?: WebAssembly.Memory, wasm_reset_heap?: () => void, wasm_alloc?: (size: number) => number, parse_term_bank?: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, parse_term_bank_with_media_hints?: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content?: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}} */ (instance.instance.exports);
+        const exports = /** @type {WebAssembly.Exports & {memory?: WebAssembly.Memory, wasm_reset_heap?: () => void, wasm_alloc?: (size: number) => number, parse_term_bank?: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, parse_term_bank_with_media_hints?: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content?: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number, encode_term_content_no_hash?: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}} */ (instance.instance.exports);
         if (
             !(exports.memory instanceof WebAssembly.Memory) ||
             typeof exports.wasm_reset_heap !== 'function' ||
             typeof exports.wasm_alloc !== 'function' ||
             typeof exports.parse_term_bank !== 'function' ||
             typeof exports.parse_term_bank_with_media_hints !== 'function' ||
-            typeof exports.encode_term_content !== 'function'
+            typeof exports.encode_term_content !== 'function' ||
+            typeof exports.encode_term_content_no_hash !== 'function'
         ) {
             throw new Error('term-bank wasm parser exports are invalid');
         }
@@ -69,6 +70,7 @@ async function getWasm() {
             parse_term_bank: exports.parse_term_bank,
             parse_term_bank_with_media_hints: exports.parse_term_bank_with_media_hints,
             encode_term_content: exports.encode_term_content,
+            encode_term_content_no_hash: exports.encode_term_content_no_hash,
         };
     })();
     return await wasmPromise;
@@ -216,10 +218,11 @@ function tokenBytesEqual(source, startA, lengthA, startB, lengthB) {
  * @param {number} initialMetaCapacityDivisor
  * @param {number} initialContentBytesPerRow
  * @param {boolean} mediaHintFastScan
+ * @param {boolean} computeContentHashes
  * @returns {Promise<{heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, rowCount: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number}>}
  * @throws {Error}
  */
-async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialMetaCapacityDivisor, initialContentBytesPerRow, mediaHintFastScan) {
+async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialMetaCapacityDivisor, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes) {
     if (contentBytes.byteLength === 0) {
         return {
             heap: new Uint8Array(0),
@@ -322,7 +325,8 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             throw new Error('Failed to allocate wasm content buffer');
         }
         tStart = Date.now();
-        encodedContentBytes = wasm.encode_term_content(
+        const encodeTermContent = computeContentHashes ? wasm.encode_term_content : wasm.encode_term_content_no_hash;
+        encodedContentBytes = encodeTermContent(
             jsonPtr,
             outPtr,
             rowCount,
@@ -517,7 +521,7 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
  * @param {number} version
  * @param {(rows: {expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[], progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
- * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, initialMetaCapacityDivisor?: number, initialContentBytesPerRow?: number, minimalDecode?: boolean, reuseExpressionForReadingDecode?: boolean, skipTagRuleDecode?: boolean, lazyGlossaryDecode?: boolean, mediaHintFastScan?: boolean, preallocateChunkRows?: boolean}} [options]
+ * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, initialMetaCapacityDivisor?: number, initialContentBytesPerRow?: number, minimalDecode?: boolean, reuseExpressionForReadingDecode?: boolean, skipTagRuleDecode?: boolean, lazyGlossaryDecode?: boolean, mediaHintFastScan?: boolean, preallocateChunkRows?: boolean, computeContentHashes?: boolean}} [options]
  * @returns {Promise<void>}
  */
 export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk, chunkSize = DEFAULT_ROW_CHUNK_SIZE, options = {}) {
@@ -531,6 +535,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
     const lazyGlossaryDecode = options.lazyGlossaryDecode === true;
     const mediaHintFastScan = options.mediaHintFastScan === true;
     const preallocateChunkRows = options.preallocateChunkRows === true;
+    const computeContentHashes = options.computeContentHashes !== false;
     const tBufferSetupStart = Date.now();
     const {
         heap,
@@ -549,6 +554,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
         initialMetaCapacityDivisor,
         initialContentBytesPerRow,
         mediaHintFastScan,
+        computeContentHashes,
     );
     const bufferSetupMs = Math.max(0, Date.now() - tBufferSetupStart);
     if (rowCount === 0) {

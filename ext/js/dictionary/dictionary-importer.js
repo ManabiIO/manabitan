@@ -3697,6 +3697,7 @@ export class DictionaryImporter {
                     skipTagRuleDecode: usePrecomputedContentForMediaRows,
                     lazyGlossaryDecode: useLazyGlossaryDecode,
                     mediaHintFastScan: useMediaHintFastScan,
+                    computeContentHashes: enableTermEntryContentDedup,
                 },
             );
             const parserProfile = consumeLastTermBankWasmParseProfile();
