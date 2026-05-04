@@ -70,6 +70,7 @@ const REVERSE_STRING_CACHE_MAX_ENTRIES = 4096;
 const TERM_BANK_ARTIFACT_MAGIC_V1 = 'MBTB0001';
 const TERM_BANK_ARTIFACT_MAGIC_V2 = 'MBTB0002';
 const TERM_BANK_ARTIFACT_MAGIC_V3 = 'MBTB0003';
+const TERM_BANK_ARTIFACT_MAGIC_V4 = 'MBTB0004';
 const TERM_BANK_ARTIFACT_MAGIC_BYTES = TERM_BANK_ARTIFACT_MAGIC_V1.length;
 const TERM_BANK_ARTIFACT_MANIFEST_FILE = 'manabitan-import-artifact.json';
 const TERM_BANK_PACKED_ARTIFACT_FILE = 'manabitan-term-banks-packed.bin';
@@ -3787,12 +3788,16 @@ export class DictionaryImporter {
         }
         const magic = textDecoder.decode(bytes.subarray(0, TERM_BANK_ARTIFACT_MAGIC_BYTES));
         const artifactVersion = (
-            magic === TERM_BANK_ARTIFACT_MAGIC_V3 ?
-                3 :
+            magic === TERM_BANK_ARTIFACT_MAGIC_V4 ?
+                4 :
                 (
-                    magic === TERM_BANK_ARTIFACT_MAGIC_V2 ?
-                        2 :
-                        (magic === TERM_BANK_ARTIFACT_MAGIC_V1 ? 1 : 0)
+                    magic === TERM_BANK_ARTIFACT_MAGIC_V3 ?
+                        3 :
+                        (
+                            magic === TERM_BANK_ARTIFACT_MAGIC_V2 ?
+                                2 :
+                                (magic === TERM_BANK_ARTIFACT_MAGIC_V1 ? 1 : 0)
+                        )
                 )
         );
         if (artifactVersion === 0) {
@@ -3804,6 +3809,8 @@ export class DictionaryImporter {
         cursor += 4;
         /** @type {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} */
         let artifactTermRecordPreinternedPlan = null;
+        /** @type {Uint32Array|null} */
+        let artifactTermRecordStringOffsets = null;
         if (artifactVersion >= 3) {
             if ((cursor + 8) > bytes.byteLength) {
                 throw new Error(`Invalid term artifact payload in '${filename}': truncated preinterned header`);
@@ -3835,6 +3842,18 @@ export class DictionaryImporter {
                 cursor += 4;
             }
             artifactTermRecordPreinternedPlan = {stringLengths, stringsBuffer, expressionIndexes, readingIndexes};
+            if (artifactVersion >= 4) {
+                artifactTermRecordStringOffsets = new Uint32Array(stringCount + 1);
+                let stringOffset = 0;
+                for (let i = 0; i < stringCount; ++i) {
+                    artifactTermRecordStringOffsets[i] = stringOffset;
+                    stringOffset += stringLengths[i];
+                }
+                artifactTermRecordStringOffsets[stringCount] = stringOffset;
+                if (stringOffset !== stringsBuffer.byteLength) {
+                    throw new Error(`Invalid term artifact payload in '${filename}': preinterned string table length mismatch`);
+                }
+            }
         }
         const streamToChunkHandler = typeof onChunk === 'function';
         /** @type {import('dictionary-database').DatabaseTermEntry[]} */
@@ -3909,35 +3928,72 @@ export class DictionaryImporter {
             )
         ) ? artifactTermContentMode : null;
         for (let i = 0; i < rowCount; ++i) {
-            if ((cursor + 4) > bytes.byteLength) {
-                throw new Error(`Invalid term artifact payload in '${filename}': truncated expression length`);
-            }
-            const expressionLength = view.getUint32(cursor, true);
-            cursor += 4;
-            if ((cursor + expressionLength + 4) > bytes.byteLength) {
-                throw new Error(`Invalid term artifact payload in '${filename}': truncated expression`);
-            }
-            const expressionStart = cursor;
-            const expressionBytes = bytes.subarray(cursor, cursor + expressionLength);
-            cursor += expressionLength;
-            const readingLength = view.getUint32(cursor, true);
-            cursor += 4;
-            const trailingRowBytes = artifactVersion >= 2 ? 21 : 20;
-            if ((cursor + readingLength + trailingRowBytes) > bytes.byteLength) {
-                throw new Error(`Invalid term artifact payload in '${filename}': truncated row payload`);
-            }
-            const readingStart = cursor;
+            /** @type {Uint8Array} */
+            let expressionBytes;
+            /** @type {Uint8Array} */
+            let readingBytes;
+            let expressionLength;
+            let readingLength;
             let readingMatchesExpression;
-            if (artifactVersion >= 2) {
-                const flagsOffset = cursor + readingLength;
-                const rowFlags = bytes[flagsOffset] ?? 0;
-                readingMatchesExpression = (rowFlags & 0x01) !== 0;
+            if (artifactVersion >= 4) {
+                if (artifactTermRecordPreinternedPlan === null || artifactTermRecordStringOffsets === null) {
+                    throw new Error(`Invalid term artifact payload in '${filename}': missing preinterned row strings`);
+                }
+                const expressionIndex = artifactTermRecordPreinternedPlan.expressionIndexes[i];
+                const readingIndex = artifactTermRecordPreinternedPlan.readingIndexes[i];
+                const stringLengths = artifactTermRecordPreinternedPlan.stringLengths;
+                const stringsBuffer = artifactTermRecordPreinternedPlan.stringsBuffer;
+                if (expressionIndex >= stringLengths.length || readingIndex >= stringLengths.length) {
+                    throw new Error(`Invalid term artifact payload in '${filename}': preinterned row index out of range`);
+                }
+                const expressionStart = artifactTermRecordStringOffsets[expressionIndex];
+                expressionLength = stringLengths[expressionIndex];
+                expressionBytes = stringsBuffer.subarray(expressionStart, expressionStart + expressionLength);
+                readingMatchesExpression = expressionIndex === readingIndex;
+                if (readingMatchesExpression) {
+                    readingLength = expressionLength;
+                    readingBytes = expressionBytes;
+                } else {
+                    const readingStart = artifactTermRecordStringOffsets[readingIndex];
+                    readingLength = stringLengths[readingIndex];
+                    readingBytes = stringsBuffer.subarray(readingStart, readingStart + readingLength);
+                }
+                if ((cursor + 20) > bytes.byteLength) {
+                    throw new Error(`Invalid term artifact payload in '${filename}': truncated row payload`);
+                }
             } else {
-                readingMatchesExpression = (
-                    readingLength > 0 &&
-                    readingLength === expressionLength &&
-                    byteRangeEqual(bytes, expressionStart, readingStart, expressionLength)
-                );
+                if ((cursor + 4) > bytes.byteLength) {
+                    throw new Error(`Invalid term artifact payload in '${filename}': truncated expression length`);
+                }
+                expressionLength = view.getUint32(cursor, true);
+                cursor += 4;
+                if ((cursor + expressionLength + 4) > bytes.byteLength) {
+                    throw new Error(`Invalid term artifact payload in '${filename}': truncated expression`);
+                }
+                const expressionStart = cursor;
+                expressionBytes = bytes.subarray(cursor, cursor + expressionLength);
+                cursor += expressionLength;
+                readingLength = view.getUint32(cursor, true);
+                cursor += 4;
+                const trailingRowBytes = artifactVersion >= 2 ? 21 : 20;
+                if ((cursor + readingLength + trailingRowBytes) > bytes.byteLength) {
+                    throw new Error(`Invalid term artifact payload in '${filename}': truncated row payload`);
+                }
+                const readingStart = cursor;
+                if (artifactVersion >= 2) {
+                    const flagsOffset = cursor + readingLength;
+                    const rowFlags = bytes[flagsOffset] ?? 0;
+                    readingMatchesExpression = (rowFlags & 0x01) !== 0;
+                } else {
+                    readingMatchesExpression = (
+                        readingLength > 0 &&
+                        readingLength === expressionLength &&
+                        byteRangeEqual(bytes, expressionStart, readingStart, expressionLength)
+                    );
+                }
+                readingBytes = readingMatchesExpression ?
+                    expressionBytes :
+                    bytes.subarray(cursor, cursor + readingLength);
             }
             if (collectArtifactRowProfile && readingMatchesExpression) {
                 ++readingEqualsExpressionCount;
@@ -3946,9 +4002,6 @@ export class DictionaryImporter {
                 expressionLengthTotal += expressionLength;
                 readingLengthTotal += readingLength;
             }
-            const readingBytes = readingMatchesExpression ?
-                expressionBytes :
-                bytes.subarray(cursor, cursor + readingLength);
             if (termRecordPlanBuilder !== null) {
                 const expressionIndex = termRecordPlanBuilder.internStringBytes(expressionBytes);
                 const readingIndex = readingMatchesExpression ?
@@ -3963,8 +4016,10 @@ export class DictionaryImporter {
                     /** @type {number[]} */ (termRecordReadingIndexes).push(readingIndex);
                 }
             }
-            cursor += readingLength;
-            if (artifactVersion >= 2) {
+            if (artifactVersion < 4) {
+                cursor += readingLength;
+            }
+            if (artifactVersion >= 2 && artifactVersion < 4) {
                 cursor += 1;
             }
             const score = view.getInt32(cursor, true);
