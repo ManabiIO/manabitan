@@ -1014,6 +1014,8 @@ export class DictionaryImporter {
                 `externalPackedMediaStorage=${String(useExternalPackedMediaStorage)}`,
             );
             const uniqueMediaPaths = useTermMediaRequirements ? new Set() : null;
+            /** @type {import('dictionary-importer').ImportRequirement[]} */
+            const deferredNoMetadataMediaRequirements = [];
             const termFileProgressAllowance = bulkAddProgressAllowance * 2;
             const step4ArtifactPreloadMs = (
                 packedTermArtifactPreloadMs +
@@ -1319,22 +1321,35 @@ export class DictionaryImporter {
                     const tMediaResolveStart = Date.now();
                     const tResolveExisting = Date.now();
                     if (alreadyAddedRequirements.length > 0) {
-                        /** @type {import('dictionary-importer').ImportRequirement[]} */
-                        const unresolvedRequirements = [];
-                        for (const requirement of alreadyAddedRequirements) {
-                            if (!this._tryResolveRequirementFromCachedImageMetadata(requirement)) {
-                                unresolvedRequirements.push(requirement);
+                        if (this._skipImageMetadata) {
+                            for (const requirement of alreadyAddedRequirements) {
+                                this._assignRequirementNoMetadata(requirement);
                             }
-                        }
-                        if (unresolvedRequirements.length > 0) {
-                            await this._resolveAsyncRequirements(unresolvedRequirements, fileMap);
+                        } else {
+                            /** @type {import('dictionary-importer').ImportRequirement[]} */
+                            const unresolvedRequirements = [];
+                            for (const requirement of alreadyAddedRequirements) {
+                                if (!this._tryResolveRequirementFromCachedImageMetadata(requirement)) {
+                                    unresolvedRequirements.push(requirement);
+                                }
+                            }
+                            if (unresolvedRequirements.length > 0) {
+                                await this._resolveAsyncRequirements(unresolvedRequirements, fileMap);
+                            }
                         }
                     }
                     const tResolveNew = Date.now();
                     /** @type {import('dictionary-database').MediaDataArrayBufferContent[]} */
                     let media = [];
                     if (notAddedRequirements.length > 0) {
-                        ({media} = await this._resolveAsyncRequirements(notAddedRequirements, fileMap));
+                        if (this._skipImageMetadata) {
+                            for (const requirement of notAddedRequirements) {
+                                this._assignRequirementNoMetadata(requirement);
+                            }
+                            deferredNoMetadataMediaRequirements.push(...notAddedRequirements);
+                        } else {
+                            ({media} = await this._resolveAsyncRequirements(notAddedRequirements, fileMap));
+                        }
                     }
                     const tResolved = Date.now();
                     mediaResolveMs += Math.max(0, tResolved - tMediaResolveStart);
@@ -1720,6 +1735,24 @@ export class DictionaryImporter {
                 );
                 step4TimingBreakdown.termFileNonParseWriteMs += Math.max(0, termFileElapsedMs - termFileAccountedMs);
                 this._logImport(`term file ${termFile.filename}: total elapsed=${termFileElapsedMs}ms`);
+            }
+
+            if (deferredNoMetadataMediaRequirements.length > 0) {
+                const tMediaResolveStart = Date.now();
+                const {media} = await this._resolveAsyncRequirements(deferredNoMetadataMediaRequirements, fileMap);
+                const tMediaResolved = Date.now();
+                step4TimingBreakdown.mediaResolveMs += Math.max(0, tMediaResolved - tMediaResolveStart);
+                const tMediaWriteStart = Date.now();
+                await bulkAdd('media', media, {trackProgress: false});
+                const tMediaWriteEnd = Date.now();
+                step4TimingBreakdown.mediaWriteMs += Math.max(0, tMediaWriteEnd - tMediaWriteStart);
+                counts.media.total += media.length;
+                this._logImport(
+                    `deferred no-metadata media: requirements=${deferredNoMetadataMediaRequirements.length} ` +
+                    `rows=${media.length} resolve=${tMediaResolved - tMediaResolveStart}ms ` +
+                    `write=${tMediaWriteEnd - tMediaWriteStart}ms`,
+                );
+                deferredNoMetadataMediaRequirements.length = 0;
             }
 
             for (const termMetaFile of termMetaFiles) {
@@ -2492,6 +2525,27 @@ export class DictionaryImporter {
                 return true;
             default:
                 return false;
+        }
+    }
+
+    /**
+     * @param {import('dictionary-importer').ImportRequirement} requirement
+     * @returns {void}
+     */
+    _assignRequirementNoMetadata(requirement) {
+        switch (requirement.type) {
+            case 'image':
+                this._assignResolvedImageData(requirement.target, requirement.source, 0, 0);
+                break;
+            case 'structured-content-image':
+                this._assignResolvedImageData(requirement.target, requirement.source, 0, 0);
+                if (typeof requirement.source.verticalAlign === 'string') { requirement.target.verticalAlign = requirement.source.verticalAlign; }
+                if (typeof requirement.source.border === 'string') { requirement.target.border = requirement.source.border; }
+                if (typeof requirement.source.borderRadius === 'string') { requirement.target.borderRadius = requirement.source.borderRadius; }
+                if (typeof requirement.source.sizeUnits === 'string') { requirement.target.sizeUnits = requirement.source.sizeUnits; }
+                break;
+            default:
+                break;
         }
     }
 
