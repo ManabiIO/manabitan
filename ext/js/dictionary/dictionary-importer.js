@@ -111,7 +111,7 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
     let stringLengthsCapacity = TERM_ARTIFACT_ROW_CHUNK_SIZE * 2;
     let stringLengths = new Uint16Array(stringLengthsCapacity);
     /** @type {Uint8Array[]} */
-    const stringBytesList = [];
+    let stringBytesList = createSparseArray(TERM_ARTIFACT_ROW_CHUNK_SIZE * 2);
     let totalStringBytes = 0;
     let stringCount = 0;
 
@@ -129,7 +129,12 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
         }
         const nextStringLengths = new Uint16Array(nextCapacity);
         nextStringLengths.set(stringLengths.subarray(0, stringCount));
+        const nextStringBytesList = createSparseArray(nextCapacity);
+        for (let i = 0; i < stringCount; ++i) {
+            nextStringBytesList[i] = stringBytesList[i];
+        }
         stringLengths = nextStringLengths;
+        stringBytesList = nextStringBytesList;
         stringLengthsCapacity = nextCapacity;
     };
 
@@ -197,7 +202,7 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
             cacheIndex(h1, h2, bytes.byteLength, index);
             ensureStringLengthsCapacity(index + 1);
             stringLengths[index] = bytes.byteLength;
-            stringBytesList.push(bytes);
+            stringBytesList[index] = bytes;
             totalStringBytes += bytes.byteLength;
             stringCount = index + 1;
             return index;
@@ -205,7 +210,8 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
         buildPlan(expressionIndexes, readingIndexes, count = expressionIndexes.length) {
             const stringsBuffer = new Uint8Array(totalStringBytes);
             let cursor = 0;
-            for (const bytes of stringBytesList) {
+            for (let i = 0; i < stringCount; ++i) {
+                const bytes = stringBytesList[i];
                 stringsBuffer.set(bytes, cursor);
                 cursor += bytes.byteLength;
             }
