@@ -78,6 +78,7 @@ const TERM_ARTIFACT_PRELOAD_CONCURRENCY = 4;
 const ZIP_COMPRESSION_METHOD_STORE = 0;
 const HEX_BYTE_TABLE = Array.from({length: 256}, (_, i) => i.toString(16).padStart(2, '0'));
 const GLOSSARY_IMAGE_PATH_PATTERN = /"path"\s*:\s*"((?:\\.|[^"\\])*)"/g;
+const JSON_PATH_KEY_BYTES = new Uint8Array([0x22, 0x70, 0x61, 0x74, 0x68, 0x22]);
 /** @type {import('dictionary-data').TermGlossary[]} */
 const EMPTY_TERM_GLOSSARY = [];
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
@@ -2250,14 +2251,123 @@ export class DictionaryImporter {
                 continue;
             }
             found = true;
-            requirements.push({
-                type: 'structured-content-image',
-                target: {tag: 'img', path: ''},
-                source: {tag: 'img', path},
-                entry,
-            });
+            this._addFastMediaRequirement(path, entry, requirements);
         }
         return found;
+    }
+
+    /**
+     * @param {{glossaryJson?: string, glossaryJsonBytes?: Uint8Array}} row
+     * @param {import('dictionary-database').DatabaseTermEntry} entry
+     * @param {import('dictionary-importer').ImportRequirement[]} requirements
+     * @returns {boolean}
+     */
+    _tryAddFastMediaRequirementsFromFastRow(row, entry, requirements) {
+        if (row.glossaryJsonBytes instanceof Uint8Array) {
+            const paths = this._extractImagePathsFromGlossaryJsonBytes(row.glossaryJsonBytes);
+            if (paths === null || paths.length === 0) {
+                return false;
+            }
+            for (const path of paths) {
+                this._addFastMediaRequirement(path, entry, requirements);
+            }
+            return true;
+        }
+        return this._tryAddFastMediaRequirementsFromGlossaryJson(this._getFastRowGlossaryJson(row), entry, requirements);
+    }
+
+    /**
+     * @param {Uint8Array} bytes
+     * @returns {string[]|null}
+     */
+    _extractImagePathsFromGlossaryJsonBytes(bytes) {
+        /** @type {string[]} */
+        const paths = [];
+        for (let i = 0, ii = bytes.length - JSON_PATH_KEY_BYTES.length; i <= ii; ++i) {
+            if (!this._bytesMatch(bytes, i, JSON_PATH_KEY_BYTES)) { continue; }
+            let cursor = i + JSON_PATH_KEY_BYTES.length;
+            cursor = this._skipJsonWhitespaceBytes(bytes, cursor);
+            if (bytes[cursor] !== 0x3a) { continue; }
+            cursor = this._skipJsonWhitespaceBytes(bytes, cursor + 1);
+            if (bytes[cursor] !== 0x22) { continue; }
+            const tokenStart = cursor + 1;
+            cursor = tokenStart;
+            let hasEscape = false;
+            while (cursor < bytes.length) {
+                const value = bytes[cursor];
+                if (value === 0x5c) {
+                    hasEscape = true;
+                    cursor += 2;
+                    continue;
+                }
+                if (value === 0x22) { break; }
+                ++cursor;
+            }
+            if (cursor >= bytes.length) {
+                return null;
+            }
+            const tokenBytes = bytes.subarray(tokenStart, cursor);
+            let path;
+            if (hasEscape) {
+                try {
+                    path = /** @type {string} */ (parseJson(`"${this._textDecoder.decode(tokenBytes)}"`));
+                } catch (_) {
+                    return null;
+                }
+            } else {
+                path = this._textDecoder.decode(tokenBytes);
+            }
+            if (getImageMediaTypeFromFileName(path) !== null) {
+                paths.push(path);
+            }
+            i = cursor;
+        }
+        return paths;
+    }
+
+    /**
+     * @param {Uint8Array} bytes
+     * @param {number} offset
+     * @param {Uint8Array} needle
+     * @returns {boolean}
+     */
+    _bytesMatch(bytes, offset, needle) {
+        for (let i = 0, ii = needle.length; i < ii; ++i) {
+            if (bytes[offset + i] !== needle[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param {Uint8Array} bytes
+     * @param {number} offset
+     * @returns {number}
+     */
+    _skipJsonWhitespaceBytes(bytes, offset) {
+        while (offset < bytes.length) {
+            const value = bytes[offset];
+            if (value !== 0x20 && value !== 0x0a && value !== 0x0d && value !== 0x09) {
+                break;
+            }
+            ++offset;
+        }
+        return offset;
+    }
+
+    /**
+     * @param {string} path
+     * @param {import('dictionary-database').DatabaseTermEntry} entry
+     * @param {import('dictionary-importer').ImportRequirement[]} requirements
+     */
+    _addFastMediaRequirement(path, entry, requirements) {
+        requirements.push({
+            type: 'structured-content-image',
+            target: {tag: 'img', path: ''},
+            source: {tag: 'img', path},
+            entry,
+        });
     }
 
     /**
@@ -3431,8 +3541,8 @@ export class DictionaryImporter {
                                 if (
                                     this._skipImageMetadata &&
                                     hasPrecomputedTermContent &&
-                                    this._tryAddFastMediaRequirementsFromGlossaryJson(
-                                        this._getFastRowGlossaryJson(row),
+                                    this._tryAddFastMediaRequirementsFromFastRow(
+                                        row,
                                         entry,
                                         requirementsForChunk,
                                     )
