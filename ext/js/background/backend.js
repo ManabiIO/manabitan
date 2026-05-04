@@ -986,7 +986,7 @@ export class Backend {
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
         if (details.skipLookupWarmWait !== true) {
-            await this._awaitDictionaryLookupWarmSettled(750);
+            await this._awaitDictionaryLookupWarmSettled(2500);
         }
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {resultOutputMode: mode, maxResults}} = options;
@@ -1698,9 +1698,11 @@ export class Backend {
     }
 
     async _awaitDictionaryRefreshSettled() {
-        while (this._dictionaryRefreshPromise !== null) {
+        while (true) {
+            const promise = this._dictionaryRefreshPromise;
+            if (typeof promise === 'undefined' || promise === null) { return; }
             try {
-                await this._dictionaryRefreshPromise;
+                await promise;
             } catch (_) {
                 // NOP
             }
@@ -1708,9 +1710,11 @@ export class Backend {
     }
 
     async _awaitDictionaryMutationSettled() {
-        while (this._dictionaryMutationPromise !== null) {
+        while (true) {
+            const promise = this._dictionaryMutationPromise;
+            if (typeof promise === 'undefined' || promise === null) { return; }
             try {
-                await this._dictionaryMutationPromise;
+                await promise;
             } catch (_) {
                 // NOP
             }
@@ -1722,8 +1726,9 @@ export class Backend {
      * @returns {Promise<void>}
      */
     async _awaitDictionaryLookupWarmSettled(timeoutMs = 0) {
-        while (this._dictionaryLookupWarmPromise !== null) {
+        while (true) {
             const promise = this._dictionaryLookupWarmPromise;
+            if (typeof promise === 'undefined' || promise === null) { return; }
             try {
                 if (timeoutMs > 0) {
                     const result = await Promise.race([

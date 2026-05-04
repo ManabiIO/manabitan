@@ -61,6 +61,7 @@ describe('Frontend dictionary update handling', () => {
         Reflect.set(frontend, '_clearSelection', vi.fn());
         Reflect.set(frontend, '_clearMousePosition', vi.fn());
         Reflect.set(frontend, '_updatePageDebugState', vi.fn());
+        Reflect.set(frontend, '_startPopupPrewarmForHover', vi.fn());
 
         const onDatabaseUpdated = Reflect.get(Frontend.prototype, '_onDatabaseUpdated');
         await onDatabaseUpdated.call(frontend, {type: 'dictionary', cause: 'import'});
@@ -68,6 +69,7 @@ describe('Frontend dictionary update handling', () => {
         expect(Reflect.get(frontend, '_updatePageDebugState')).toHaveBeenCalledWith({lastSearchState: 'dictionary-updated'});
         expect(Reflect.get(frontend, 'updateOptions')).toHaveBeenCalledOnce();
         expect(Reflect.get(frontend, 'updateOptions')).toHaveBeenCalledWith(true);
+        expect(Reflect.get(frontend, '_startPopupPrewarmForHover')).toHaveBeenCalledOnce();
         expect(Reflect.get(frontend, '_textScanner').searchLast).toHaveBeenCalledOnce();
         expect(Reflect.get(frontend, '_clearSelection')).not.toHaveBeenCalled();
         expect(Reflect.get(frontend, '_clearMousePosition')).not.toHaveBeenCalled();
@@ -81,11 +83,13 @@ describe('Frontend dictionary update handling', () => {
         Reflect.set(frontend, '_clearSelection', vi.fn());
         Reflect.set(frontend, '_clearMousePosition', vi.fn());
         Reflect.set(frontend, '_updatePageDebugState', vi.fn());
+        Reflect.set(frontend, '_startPopupPrewarmForHover', vi.fn());
 
         const onDatabaseUpdated = Reflect.get(Frontend.prototype, '_onDatabaseUpdated');
         await onDatabaseUpdated.call(frontend, {type: 'dictionary', cause: 'import'});
 
         expect(Reflect.get(frontend, 'updateOptions')).toHaveBeenCalledOnce();
+        expect(Reflect.get(frontend, '_startPopupPrewarmForHover')).toHaveBeenCalledOnce();
         expect(Reflect.get(frontend, '_textScanner').searchLast).toHaveBeenCalledOnce();
         expect(Reflect.get(frontend, '_clearSelection')).toHaveBeenCalledWith(true);
         expect(Reflect.get(frontend, '_clearMousePosition')).toHaveBeenCalledOnce();

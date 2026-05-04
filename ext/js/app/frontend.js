@@ -415,6 +415,7 @@ export class Frontend {
         try {
             this._dictionaryUpdateSearchActive = true;
             await this.updateOptions(true);
+            this._startPopupPrewarmForHover();
             if (await this._textScanner.searchLast()) {
                 return;
             }
@@ -794,7 +795,7 @@ export class Frontend {
                     const term = terms[index];
                     let dictionaryEntries = [];
                     try {
-                        ({dictionaryEntries} = await this._application.api.termsFind(term, {skipLookupWarmWait: true}, optionsContext));
+                        ({dictionaryEntries} = await this._application.api.termsFind(term, {}, optionsContext));
                     } catch (_) {
                         // Best-effort prewarm; visible lookup correctness does not depend on probes.
                     }

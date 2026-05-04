@@ -2548,6 +2548,7 @@ export class DictionaryDatabase {
      *   scannedCount: number,
      *   removedCount: number,
      *   removedTitles: string[],
+     *   restoredTitles: string[],
      *   removedEmptyTitleRows: number,
      *   failedCount: number,
      *   failedTitles: string[],
@@ -2562,6 +2563,7 @@ export class DictionaryDatabase {
                 scannedCount: 0,
                 removedCount: 0,
                 removedTitles: [],
+                restoredTitles: [],
                 removedEmptyTitleRows: 0,
                 failedCount: 0,
                 failedTitles: [],
@@ -2574,6 +2576,10 @@ export class DictionaryDatabase {
 
         /** @type {Set<string>} */
         const dictionaryTitlesToDelete = new Set();
+        /** @type {Set<string>} */
+        const installedTitles = new Set();
+        /** @type {{title: string, originalTitle: string, summary: Record<string, unknown>}[]} */
+        const restorableReplacedTitles = [];
         /** @type {number} */
         let removedEmptyTitleRows = 0;
         /** @type {number} */
@@ -2601,7 +2607,25 @@ export class DictionaryDatabase {
             ) ?
                 /** @type {unknown} */ (Reflect.get(summary, 'importSuccess')) :
                 void 0;
+            if (title.length > 0 && !TRANSIENT_UPDATE_TITLE_PATTERN.test(title)) {
+                installedTitles.add(title);
+            }
             if (title.length > 0 && isRecognizedTransientUpdateTitle(title, summary)) {
+                const transientInfo = parseTransientUpdateTitleInfo(title);
+                const originalTitle = title.replace(/\s+\[(?:update-staging|cutover|replaced) [^\]]+\]$/, '').trim();
+                if (
+                    transientInfo !== null &&
+                    transientInfo.stage === 'replaced' &&
+                    originalTitle.length > 0 &&
+                    typeof summary === 'object' &&
+                    summary !== null &&
+                    !Array.isArray(summary)
+                ) {
+                    const restoredSummary = {...summary, title: originalTitle};
+                    delete restoredSummary.transientUpdateStage;
+                    delete restoredSummary.updateSessionToken;
+                    restorableReplacedTitles.push({title, originalTitle, summary: restoredSummary});
+                }
                 dictionaryTitlesToDelete.add(title);
                 continue;
             }
@@ -2615,6 +2639,22 @@ export class DictionaryDatabase {
                 continue;
             }
             dictionaryTitlesToDelete.add(title);
+        }
+
+        /** @type {string[]} */
+        const restoredTitles = [];
+        for (const {title, originalTitle, summary} of restorableReplacedTitles) {
+            if (installedTitles.has(originalTitle)) { continue; }
+            try {
+                await this.replaceDictionaryTitle(title, originalTitle, summary, null);
+                dictionaryTitlesToDelete.delete(title);
+                installedTitles.add(originalTitle);
+                restoredTitles.push(originalTitle);
+                log.warn(`Restored interrupted dictionary update during startup: ${title} -> ${originalTitle}`);
+            } catch (e) {
+                const error = toError(e);
+                log.error(new Error(`Failed to restore interrupted dictionary update '${title}': ${error.message}`));
+            }
         }
 
         /** @type {string[]} */
@@ -2637,6 +2677,7 @@ export class DictionaryDatabase {
             scannedCount: rows.length,
             removedCount: removedTitles.length + removedEmptyTitleRows,
             removedTitles: [...removedTitles].sort((a, b) => a.localeCompare(b)),
+            restoredTitles: [...restoredTitles].sort((a, b) => a.localeCompare(b)),
             removedEmptyTitleRows,
             failedCount: failedTitles.length,
             failedTitles: [...failedTitles].sort((a, b) => a.localeCompare(b)),
