@@ -108,11 +108,30 @@ function createSparseArray(length) {
 function createArtifactTermRecordPreinternedPlanBuilder() {
     /** @type {Map<number, number[]>} */
     const stringIndexesByHash = new Map();
-    /** @type {number[]} */
-    const stringLengths = [];
+    let stringLengthsCapacity = TERM_ARTIFACT_ROW_CHUNK_SIZE * 2;
+    let stringLengths = new Uint16Array(stringLengthsCapacity);
     /** @type {Uint8Array[]} */
     const stringBytesList = [];
     let totalStringBytes = 0;
+    let stringCount = 0;
+
+    /**
+     * @param {number} requiredCapacity
+     * @returns {void}
+     */
+    const ensureStringLengthsCapacity = (requiredCapacity) => {
+        if (requiredCapacity <= stringLengthsCapacity) {
+            return;
+        }
+        let nextCapacity = stringLengthsCapacity;
+        while (nextCapacity < requiredCapacity) {
+            nextCapacity *= 2;
+        }
+        const nextStringLengths = new Uint16Array(nextCapacity);
+        nextStringLengths.set(stringLengths.subarray(0, stringCount));
+        stringLengths = nextStringLengths;
+        stringLengthsCapacity = nextCapacity;
+    };
 
     /**
      * @param {number} h1
@@ -174,11 +193,13 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
                     }
                 }
             }
-            const index = stringBytesList.length;
+            const index = stringCount;
             cacheIndex(h1, h2, bytes.byteLength, index);
-            stringLengths.push(bytes.byteLength);
+            ensureStringLengthsCapacity(index + 1);
+            stringLengths[index] = bytes.byteLength;
             stringBytesList.push(bytes);
             totalStringBytes += bytes.byteLength;
+            stringCount = index + 1;
             return index;
         },
         buildPlan(expressionIndexes, readingIndexes, count = expressionIndexes.length) {
@@ -189,7 +210,7 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
                 cursor += bytes.byteLength;
             }
             return {
-                stringLengths: Uint16Array.from(stringLengths),
+                stringLengths: stringLengths.subarray(0, stringCount),
                 stringsBuffer,
                 expressionIndexes: expressionIndexes instanceof Uint32Array ?
                     expressionIndexes.subarray(0, count) :
