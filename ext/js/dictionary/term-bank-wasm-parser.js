@@ -581,12 +581,11 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
     let chunkIndex = 0;
     let rowDecodeMs = 0;
     let chunkDispatchMs = 0;
+    let tChunkDecodeStart = Date.now();
     for (let i = 0; i < rowCount; ++i) {
-        const tDecodeStart = Date.now();
         const row = minimalDecode ?
             decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode) :
             decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, skipTagRuleDecode, lazyGlossaryDecode, mediaHintFastScan);
-        rowDecodeMs += Math.max(0, Date.now() - tDecodeStart);
         if (preallocateChunkRows) {
             rows[rowsIndex] = row;
             ++rowsIndex;
@@ -595,6 +594,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
             rowsIndex = rows.length;
         }
         if (rowsIndex >= normalizedChunkSize) {
+            rowDecodeMs += Math.max(0, Date.now() - tChunkDecodeStart);
             const chunk = rows;
             rows = preallocateChunkRows ? createRowBuffer(Math.min(normalizedChunkSize, rowCount - (i + 1))) : [];
             rowsIndex = 0;
@@ -607,9 +607,11 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
                 chunkCount,
             });
             chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
+            tChunkDecodeStart = Date.now();
         }
     }
     if (rowsIndex > 0) {
+        rowDecodeMs += Math.max(0, Date.now() - tChunkDecodeStart);
         if (preallocateChunkRows) {
             rows.length = rowsIndex;
         }
