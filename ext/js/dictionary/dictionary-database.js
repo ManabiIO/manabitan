@@ -4233,10 +4233,10 @@ export class DictionaryDatabase {
             await this._beginImmediateTransaction(this._requireDb());
         }
         try {
-            /** @type {number[]} */
-            const contentOffsets = new Array(count);
-            /** @type {number[]} */
-            const contentLengths = new Array(count);
+            /** @type {number[]|Uint32Array} */
+            let contentOffsets = new Array(count);
+            /** @type {number[]|Uint32Array} */
+            let contentLengths = new Array(count);
             /** @type {string | null} */
             let uniformContentDictName = null;
             /** @type {(string|null)[] | null} */
@@ -4244,6 +4244,8 @@ export class DictionaryDatabase {
             const contentChunks = chunk.contentBytesList;
             const tContentAppendStart = safePerformance.now();
             if (this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES) {
+                contentOffsets = new Uint32Array(count);
+                contentLengths = new Uint32Array(count);
                 const firstContentLength = contentChunks[0]?.byteLength ?? 0;
                 let useFixedSizePacking = (
                     firstContentLength > 0 &&
@@ -4265,6 +4267,7 @@ export class DictionaryDatabase {
                     /** @type {number[]} */
                     const packedLengths = new Array(packedChunks.length);
                     await this._termContentStore.appendBatchToArrays(packedChunks, packedOffsets, packedLengths);
+                    contentLengths.fill(firstContentLength);
                     for (let packedIndex = 0; packedIndex < packedChunks.length; ++packedIndex) {
                         const baseOffset = packedOffsets[packedIndex];
                         const rowStart = packedRowStarts[packedIndex];
@@ -4272,7 +4275,6 @@ export class DictionaryDatabase {
                         for (let localIndex = 0; localIndex < rowCount; ++localIndex) {
                             const rowIndex = rowStart + localIndex;
                             contentOffsets[rowIndex] = baseOffset + (localIndex * firstContentLength);
-                            contentLengths[rowIndex] = firstContentLength;
                         }
                     }
                 } else {
