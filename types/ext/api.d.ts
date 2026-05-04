@@ -49,6 +49,7 @@ export type FindTermsDetails = {
     matchType?: Translation.FindTermsMatchType;
     deinflect?: boolean;
     primaryReading?: string;
+    skipLookupWarmWait?: boolean;
 };
 
 export type ParseTextResultItem = {

@@ -985,7 +985,9 @@ export class Backend {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
-        await this._awaitDictionaryLookupWarmSettled(750);
+        if (details.skipLookupWarmWait !== true) {
+            await this._awaitDictionaryLookupWarmSettled(750);
+        }
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {resultOutputMode: mode, maxResults}} = options;
         let findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);

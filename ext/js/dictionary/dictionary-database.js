@@ -1640,8 +1640,10 @@ export class DictionaryDatabase {
             this._getSortedTermIndexKeys(index.expression);
             this._getSortedTermIndexKeys(index.reading);
         }
-        await this._warmSharedGlossaryArtifacts(names);
-        await this._warmLookupProbeTerms(names);
+        await Promise.all([
+            this._warmSharedGlossaryArtifacts(names),
+            this._warmLookupProbeTerms(names),
+        ]);
     }
 
     /**

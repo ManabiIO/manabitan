@@ -794,7 +794,7 @@ export class Frontend {
                     const term = terms[index];
                     let dictionaryEntries = [];
                     try {
-                        ({dictionaryEntries} = await this._application.api.termsFind(term, {}, optionsContext));
+                        ({dictionaryEntries} = await this._application.api.termsFind(term, {skipLookupWarmWait: true}, optionsContext));
                     } catch (_) {
                         // Best-effort prewarm; visible lookup correctness does not depend on probes.
                     }
