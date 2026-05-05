@@ -775,7 +775,7 @@ export class Frontend {
      * @returns {{firstMatchedResultPromise: Promise<?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>, resultsPromise: Promise<Array<{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>>}}
      */
     _runLookupPrewarmTerms(terms, optionsContext) {
-        const concurrency = 4;
+        const concurrency = 2;
         /** @type {Array<{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>} */
         const results = new Array(terms.length);
         let nextIndex = 0;
@@ -790,6 +790,7 @@ export class Frontend {
         for (let i = 0; i < workerCount; ++i) {
             workers.push((async () => {
                 while (true) {
+                    if (firstMatchedResultResolved) { return; }
                     const index = nextIndex++;
                     if (index >= terms.length) { return; }
                     const term = terms[index];
@@ -803,6 +804,7 @@ export class Frontend {
                     if (dictionaryEntries.length > 0 && !firstMatchedResultResolved) {
                         firstMatchedResultResolved = true;
                         resolveFirstMatchedResult({term, dictionaryEntries});
+                        return;
                     }
                 }
             })());
@@ -812,7 +814,7 @@ export class Frontend {
                 firstMatchedResultResolved = true;
                 resolveFirstMatchedResult(null);
             }
-            return results;
+            return results.filter((result) => typeof result !== 'undefined');
         });
         return {firstMatchedResultPromise, resultsPromise};
     }
