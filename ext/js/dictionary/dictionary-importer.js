@@ -71,6 +71,7 @@ const TERM_BANK_ARTIFACT_MAGIC_V1 = 'MBTB0001';
 const TERM_BANK_ARTIFACT_MAGIC_V2 = 'MBTB0002';
 const TERM_BANK_ARTIFACT_MAGIC_V3 = 'MBTB0003';
 const TERM_BANK_ARTIFACT_MAGIC_V4 = 'MBTB0004';
+const TERM_BANK_ARTIFACT_MAGIC_V5 = 'MBTB0005';
 const TERM_BANK_ARTIFACT_MAGIC_BYTES = TERM_BANK_ARTIFACT_MAGIC_V1.length;
 const TERM_BANK_ARTIFACT_MANIFEST_FILE = 'manabitan-import-artifact.json';
 const TERM_BANK_PACKED_ARTIFACT_FILE = 'manabitan-term-banks-packed.bin';
@@ -3788,15 +3789,19 @@ export class DictionaryImporter {
         }
         const magic = textDecoder.decode(bytes.subarray(0, TERM_BANK_ARTIFACT_MAGIC_BYTES));
         const artifactVersion = (
-            magic === TERM_BANK_ARTIFACT_MAGIC_V4 ?
-                4 :
+            magic === TERM_BANK_ARTIFACT_MAGIC_V5 ?
+                5 :
                 (
-                    magic === TERM_BANK_ARTIFACT_MAGIC_V3 ?
-                        3 :
+                    magic === TERM_BANK_ARTIFACT_MAGIC_V4 ?
+                        4 :
                         (
-                            magic === TERM_BANK_ARTIFACT_MAGIC_V2 ?
-                                2 :
-                                (magic === TERM_BANK_ARTIFACT_MAGIC_V1 ? 1 : 0)
+                            magic === TERM_BANK_ARTIFACT_MAGIC_V3 ?
+                                3 :
+                                (
+                                    magic === TERM_BANK_ARTIFACT_MAGIC_V2 ?
+                                        2 :
+                                        (magic === TERM_BANK_ARTIFACT_MAGIC_V1 ? 1 : 0)
+                                )
                         )
                 )
         );
@@ -3821,25 +3826,48 @@ export class DictionaryImporter {
             cursor += 4;
             const stringLengthsBytes = stringCount * 2;
             const indexBytes = rowCount * 4;
-            if ((cursor + stringLengthsBytes + stringsBufferLength + indexBytes + indexBytes) > bytes.byteLength) {
+            const indexesStart = cursor + stringLengthsBytes + stringsBufferLength;
+            const indexPaddingBytes = artifactVersion >= 5 ? ((-indexesStart) & 3) : 0;
+            if ((indexesStart + indexPaddingBytes + indexBytes + indexBytes) > bytes.byteLength) {
                 throw new Error(`Invalid term artifact payload in '${filename}': truncated preinterned plan`);
             }
-            const stringLengths = new Uint16Array(stringCount);
-            for (let i = 0; i < stringCount; ++i) {
-                stringLengths[i] = view.getUint16(cursor, true);
-                cursor += 2;
+            let stringLengths;
+            if (((bytes.byteOffset + cursor) % 2) === 0) {
+                stringLengths = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, stringCount);
+                cursor += stringLengthsBytes;
+            } else {
+                stringLengths = new Uint16Array(stringCount);
+                for (let i = 0; i < stringCount; ++i) {
+                    stringLengths[i] = view.getUint16(cursor, true);
+                    cursor += 2;
+                }
             }
             const stringsBuffer = bytes.slice(cursor, cursor + stringsBufferLength);
             cursor += stringsBufferLength;
-            const expressionIndexes = new Uint32Array(rowCount);
-            for (let i = 0; i < rowCount; ++i) {
-                expressionIndexes[i] = view.getUint32(cursor, true);
-                cursor += 4;
+            if (artifactVersion >= 5) {
+                cursor += (-cursor) & 3;
             }
-            const readingIndexes = new Uint32Array(rowCount);
-            for (let i = 0; i < rowCount; ++i) {
-                readingIndexes[i] = view.getUint32(cursor, true);
-                cursor += 4;
+            let expressionIndexes;
+            if (((bytes.byteOffset + cursor) % 4) === 0) {
+                expressionIndexes = new Uint32Array(bytes.buffer, bytes.byteOffset + cursor, rowCount);
+                cursor += indexBytes;
+            } else {
+                expressionIndexes = new Uint32Array(rowCount);
+                for (let i = 0; i < rowCount; ++i) {
+                    expressionIndexes[i] = view.getUint32(cursor, true);
+                    cursor += 4;
+                }
+            }
+            let readingIndexes;
+            if (((bytes.byteOffset + cursor) % 4) === 0) {
+                readingIndexes = new Uint32Array(bytes.buffer, bytes.byteOffset + cursor, rowCount);
+                cursor += indexBytes;
+            } else {
+                readingIndexes = new Uint32Array(rowCount);
+                for (let i = 0; i < rowCount; ++i) {
+                    readingIndexes[i] = view.getUint32(cursor, true);
+                    cursor += 4;
+                }
             }
             artifactTermRecordPreinternedPlan = {stringLengths, stringsBuffer, expressionIndexes, readingIndexes};
             if (artifactVersion >= 4) {
