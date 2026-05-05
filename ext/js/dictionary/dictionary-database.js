@@ -656,6 +656,16 @@ export class DictionaryDatabase {
             let termRecordEndImportSessionFlushPendingWritesMs = 0;
             let termRecordEndImportSessionAwaitQueuedWritesMs = 0;
             let termRecordEndImportSessionCloseWritableMs = 0;
+            let termRecordDrainCycleCount = 0;
+            let termRecordWriteCallCount = 0;
+            let termRecordSingleChunkWriteCount = 0;
+            let termRecordMergedWriteCount = 0;
+            let termRecordTotalWriteBytes = 0;
+            let termRecordMergedWriteBytes = 0;
+            let termRecordMaxWriteBytes = 0;
+            let termRecordMergedGroupChunkCount = 0;
+            let termRecordMaxMergedGroupChunkCount = 0;
+            let termRecordWriteCoalesceTargetBytes = 0;
             let termsVirtualTableSyncMs = 0;
             let createIndexesMs = 0;
             let createIndexesCheckpointCount = 0;
@@ -709,6 +719,16 @@ export class DictionaryDatabase {
                             termRecordEndImportSessionFlushPendingWritesMs = metrics.flushPendingWritesMs;
                             termRecordEndImportSessionAwaitQueuedWritesMs = metrics.awaitQueuedWritesMs;
                             termRecordEndImportSessionCloseWritableMs = metrics.closeWritableMs;
+                            termRecordDrainCycleCount = metrics.drainCycleCount;
+                            termRecordWriteCallCount = metrics.writeCallCount;
+                            termRecordSingleChunkWriteCount = metrics.singleChunkWriteCount;
+                            termRecordMergedWriteCount = metrics.mergedWriteCount;
+                            termRecordTotalWriteBytes = metrics.totalWriteBytes;
+                            termRecordMergedWriteBytes = metrics.mergedWriteBytes;
+                            termRecordMaxWriteBytes = metrics.maxWriteBytes;
+                            termRecordMergedGroupChunkCount = metrics.mergedGroupChunkCount;
+                            termRecordMaxMergedGroupChunkCount = metrics.maxMergedGroupChunkCount;
+                            termRecordWriteCoalesceTargetBytes = metrics.writeCoalesceTargetBytes;
                         }
                     });
                 await Promise.all([termContentEndImportSessionPromise, termRecordEndImportSessionPromise]);
@@ -786,6 +806,16 @@ export class DictionaryDatabase {
                         `termContentWriteCoalesceTargetBytes=${termContentWriteCoalesceTargetBytes} ` +
                         `termContentWriteCoalesceMaxChunks=${termContentWriteCoalesceMaxChunks} ` +
                         `termRecordEnd=${termRecordEndImportSessionMs.toFixed(1)}ms ` +
+                        `termRecordDrainCycles=${termRecordDrainCycleCount} ` +
+                        `termRecordWrites=${termRecordWriteCallCount} ` +
+                        `termRecordSingleWrites=${termRecordSingleChunkWriteCount} ` +
+                        `termRecordMergedWrites=${termRecordMergedWriteCount} ` +
+                        `termRecordTotalWriteBytes=${termRecordTotalWriteBytes} ` +
+                        `termRecordMergedWriteBytes=${termRecordMergedWriteBytes} ` +
+                        `termRecordMaxWriteBytes=${termRecordMaxWriteBytes} ` +
+                        `termRecordMergedGroupChunks=${termRecordMergedGroupChunkCount} ` +
+                        `termRecordMaxMergedGroupChunks=${termRecordMaxMergedGroupChunkCount} ` +
+                        `termRecordWriteCoalesceTargetBytes=${termRecordWriteCoalesceTargetBytes} ` +
                         `termsVtabSync=${termsVirtualTableSyncMs.toFixed(1)}ms ` +
                         `createIndexes=${createIndexesMs.toFixed(1)}ms ` +
                         `cacheReset=${cacheResetMs.toFixed(1)}ms ` +
@@ -817,6 +847,16 @@ export class DictionaryDatabase {
                     termRecordEndImportSessionFlushPendingWritesMs,
                     termRecordEndImportSessionAwaitQueuedWritesMs,
                     termRecordEndImportSessionCloseWritableMs,
+                    termRecordDrainCycleCount,
+                    termRecordWriteCallCount,
+                    termRecordSingleChunkWriteCount,
+                    termRecordMergedWriteCount,
+                    termRecordTotalWriteBytes,
+                    termRecordMergedWriteBytes,
+                    termRecordMaxWriteBytes,
+                    termRecordMergedGroupChunkCount,
+                    termRecordMaxMergedGroupChunkCount,
+                    termRecordWriteCoalesceTargetBytes,
                     termsVirtualTableSyncMs,
                     createIndexesMs,
                     createIndexesCheckpointCount,
