@@ -28,6 +28,9 @@ import {TextSourceGenerator} from '../dom/text-source-generator.js';
 import {TextSourceRange} from '../dom/text-source-range.js';
 import {TextScanner} from '../language/text-scanner.js';
 
+const JAPANESE_TEXT_PATTERN = /[\u3040-\u30ff\u3400-\u9fff]+/g;
+const JAPANESE_PARTICLE_BOUNDARY_PATTERN = /[はがをにへでとものや]/u;
+
 /**
  * This is the main class responsible for scanning and handling webpage content.
  */
@@ -83,6 +86,12 @@ export class Frontend {
         this._contentScale = 1;
         /** @type {Promise<void>} */
         this._lastShowPromise = Promise.resolve();
+        /** @type {?Promise<void>} */
+        this._popupPrewarmPromise = null;
+        /** @type {?Promise<void>} */
+        this._lookupPrewarmPromise = null;
+        /** @type {?string} */
+        this._popupContentPrewarmTerm = null;
         /** @type {TextSourceGenerator} */
         this._textSourceGenerator = new TextSourceGenerator();
         /** @type {TextScanner} */
@@ -176,6 +185,7 @@ export class Frontend {
         }
 
         this._textScanner.prepare();
+        this._startPopupPrewarmForHover();
 
         window.addEventListener('resize', this._onResize.bind(this), false);
         addFullscreenChangeEventListener(this._updatePopup.bind(this));
@@ -405,6 +415,7 @@ export class Frontend {
         try {
             this._dictionaryUpdateSearchActive = true;
             await this.updateOptions(true);
+            this._startPopupPrewarmForHover();
             if (await this._textScanner.searchLast()) {
                 return;
             }
@@ -446,11 +457,13 @@ export class Frontend {
      */
     _onSearchSuccess({type, dictionaryEntries, sentence, inputInfo: {eventType, detail: inputInfoDetail}, textSource, optionsContext, detail, pageTheme}) {
         this._debugSearchSuccessCount += 1;
+        const searchSuccessAt = safePerformance.now();
         this._updatePageDebugState({
             lastSearchState: 'success',
             lastSearchEventType: eventType,
             lastSearchResultCount: dictionaryEntries.length,
             searchSuccessCount: this._debugSearchSuccessCount,
+            lastSearchSuccessAt: Math.round(searchSuccessAt),
         });
         this._stopClearSelectionDelayed();
         let focus = (eventType === 'mouseMove');
@@ -458,7 +471,7 @@ export class Frontend {
             const focus2 = inputInfoDetail.focus;
             if (typeof focus2 === 'boolean') { focus = focus2; }
         }
-        this._showContent(textSource, focus, dictionaryEntries, type, sentence, detail !== null ? detail.documentTitle : null, optionsContext, pageTheme);
+        this._showContent(textSource, focus, dictionaryEntries, type, sentence, detail !== null ? detail.documentTitle : null, optionsContext, pageTheme, searchSuccessAt);
     }
 
     /** */
@@ -665,9 +678,323 @@ export class Frontend {
         }
 
         this._updateContentScale();
+        this._startPopupPrewarmForHover();
 
         if (!suppressSearchLast) {
             await this._textScanner.searchLast();
+        }
+    }
+
+    /**
+     * @returns {void}
+     */
+    _startPopupPrewarmForHover() {
+        this._startLookupPrewarmForHover();
+        if (this._popupPrewarmPromise !== null) { return; }
+        this._popupPrewarmPromise = this._prewarmPopupForHover();
+        void this._popupPrewarmPromise.finally(() => {
+            this._popupPrewarmPromise = null;
+        });
+    }
+
+    /**
+     * @returns {void}
+     */
+    _startLookupPrewarmForHover() {
+        if (this._lookupPrewarmPromise !== null) { return; }
+        this._lookupPrewarmPromise = this._prewarmLookupForHover();
+        void this._lookupPrewarmPromise.finally(() => {
+            this._lookupPrewarmPromise = null;
+        });
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _prewarmLookupForHover() {
+        const options = this._options;
+        if (
+            options === null ||
+            !options.general.enable ||
+            !this._textScanner.isEnabled()
+        ) {
+            return;
+        }
+
+        const startedAt = safePerformance.now();
+        this._updatePageDebugState({
+            lookupPrewarmRequested: true,
+            lookupPrewarmSettled: false,
+            lookupPrewarmLastError: null,
+        });
+        try {
+            const optionsContext = await this._getOptionsContext();
+            const prewarmTerms = await this._getLookupPrewarmTerms(options);
+            const {firstMatchedResultPromise, resultsPromise} = this._runLookupPrewarmTerms(prewarmTerms, optionsContext);
+            const firstMatchedResult = await firstMatchedResultPromise;
+            if (firstMatchedResult !== null) {
+                const popupPrewarmPromise = this._popupPrewarmPromise;
+                if (popupPrewarmPromise !== null) {
+                    await popupPrewarmPromise;
+                }
+                await this._prewarmPopupContentForHover(firstMatchedResult.term, firstMatchedResult.dictionaryEntries, optionsContext);
+            }
+            const lookupResults = await resultsPromise;
+            let resultCount = 0;
+            /** @type {string[]} */
+            const matchedTerms = [];
+            for (const {term, dictionaryEntries} of lookupResults) {
+                resultCount += dictionaryEntries.length;
+                if (dictionaryEntries.length > 0) {
+                    matchedTerms.push(term);
+                }
+            }
+            this._updatePageDebugState({
+                lookupPrewarmReady: resultCount > 0,
+                lookupPrewarmResultCount: resultCount,
+                lookupPrewarmTermCount: prewarmTerms.length,
+                lookupPrewarmMatchedTerm: matchedTerms[0] || '',
+                lookupPrewarmMatchedTermCount: matchedTerms.length,
+                lookupPrewarmSettled: true,
+                lookupPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
+            });
+        } catch (e) {
+            this._updatePageDebugState({
+                lookupPrewarmReady: false,
+                lookupPrewarmSettled: true,
+                lookupPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
+                lookupPrewarmLastError: e instanceof Error ? e.message : `${e}`,
+            });
+            log.error(e);
+        }
+    }
+
+    /**
+     * @param {string[]} terms
+     * @param {import('settings').OptionsContext} optionsContext
+     * @returns {{firstMatchedResultPromise: Promise<?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>, resultsPromise: Promise<Array<{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>>}}
+     */
+    _runLookupPrewarmTerms(terms, optionsContext) {
+        const concurrency = 2;
+        /** @type {Array<{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>} */
+        const results = new Array(terms.length);
+        let nextIndex = 0;
+        let firstMatchedResultResolved = false;
+        /** @type {(value: ?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}) => void} */
+        let resolveFirstMatchedResult = () => {};
+        const firstMatchedResultPromise = new Promise((resolve) => {
+            resolveFirstMatchedResult = resolve;
+        });
+        const workers = [];
+        const workerCount = Math.min(concurrency, terms.length);
+        for (let i = 0; i < workerCount; ++i) {
+            workers.push((async () => {
+                while (true) {
+                    if (firstMatchedResultResolved) { return; }
+                    const index = nextIndex++;
+                    if (index >= terms.length) { return; }
+                    const term = terms[index];
+                    let dictionaryEntries = [];
+                    try {
+                        ({dictionaryEntries} = await this._application.api.termsFind(term, {}, optionsContext));
+                    } catch (_) {
+                        // Best-effort prewarm; visible lookup correctness does not depend on probes.
+                    }
+                    results[index] = {term, dictionaryEntries};
+                    if (dictionaryEntries.length > 0 && !firstMatchedResultResolved) {
+                        firstMatchedResultResolved = true;
+                        resolveFirstMatchedResult({term, dictionaryEntries});
+                        return;
+                    }
+                }
+            })());
+        }
+        const resultsPromise = Promise.all(workers).then(() => {
+            if (!firstMatchedResultResolved) {
+                firstMatchedResultResolved = true;
+                resolveFirstMatchedResult(null);
+            }
+            return results.filter((result) => typeof result !== 'undefined');
+        });
+        return {firstMatchedResultPromise, resultsPromise};
+    }
+
+    /**
+     * @param {import('settings').ProfileOptions} options
+     * @returns {Promise<string[]>}
+     */
+    async _getLookupPrewarmTerms(options) {
+        /** @type {string[]} */
+        const terms = this._getPageLookupPrewarmTerms();
+        for (const {name, enabled} of options.dictionaries) {
+            if (!enabled || name.length === 0) { continue; }
+            try {
+                const probe = await this._application.api.getDictionaryTermProbe(name);
+                if (probe !== null) {
+                    terms.push(probe.expression, probe.reading);
+                }
+            } catch (_) {
+                // Best-effort prewarm; visible lookup correctness does not depend on probes.
+            }
+        }
+        terms.push('日本', 'する', 'ある', '見る');
+        return [...new Set(terms.map((term) => `${term}`.trim()).filter((term) => term.length > 0))];
+    }
+
+    /**
+     * @returns {string[]}
+     */
+    _getPageLookupPrewarmTerms() {
+        /** @type {string[]} */
+        const terms = [];
+        const ignoredParentNames = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT', 'SELECT', 'OPTION']);
+        const walker = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT);
+        while (terms.length < 6) {
+            const node = walker.nextNode();
+            if (node === null) { break; }
+            const parent = node.parentElement;
+            if (parent === null || ignoredParentNames.has(parent.tagName) || parent.closest('[hidden],[aria-hidden="true"]') !== null) {
+                continue;
+            }
+            const text = node.textContent || '';
+            JAPANESE_TEXT_PATTERN.lastIndex = 0;
+            for (const match of text.matchAll(JAPANESE_TEXT_PATTERN)) {
+                const term = this._getPrimaryPageLookupPrewarmTerm(match[0].slice(0, 12));
+                if (term.length > 0) {
+                    terms.push(term);
+                    if (terms.length >= 6) { break; }
+                }
+            }
+        }
+        return terms;
+    }
+
+    /**
+     * @param {string} text
+     * @returns {string}
+     */
+    _getPrimaryPageLookupPrewarmTerm(text) {
+        for (let i = 2; i < text.length; ++i) {
+            if (JAPANESE_PARTICLE_BOUNDARY_PATTERN.test(text[i])) {
+                return text.slice(0, i);
+            }
+        }
+        return text;
+    }
+
+    /**
+     * @param {string} term
+     * @param {import('dictionary').DictionaryEntry[]} dictionaryEntries
+     * @param {import('settings').OptionsContext} optionsContext
+     * @returns {Promise<void>}
+     */
+    async _prewarmPopupContentForHover(term, dictionaryEntries, optionsContext) {
+        const popup = this._popup;
+        if (
+            this._popupContentPrewarmTerm === term ||
+            popup === null ||
+            dictionaryEntries.length === 0 ||
+            typeof Reflect.get(popup, 'prewarmContent') !== 'function'
+        ) {
+            return;
+        }
+
+        const startedAt = safePerformance.now();
+        this._updatePageDebugState({
+            popupContentPrewarmRequested: true,
+            popupContentPrewarmSettled: false,
+            popupContentPrewarmLastError: null,
+        });
+        try {
+            const {tabId, frameId} = this._application;
+            /** @type {import('display').ContentDetails} */
+            const details = {
+                focus: false,
+                historyMode: 'clear',
+                params: {
+                    type: 'terms',
+                    query: term,
+                    wildcards: 'off',
+                    lookup: 'false',
+                },
+                state: {
+                    focusEntry: 0,
+                    optionsContext,
+                    url: optionsContext.url,
+                    pageTheme: 'light',
+                },
+                content: {
+                    dictionaryEntries,
+                    contentOrigin: {tabId, frameId},
+                },
+            };
+            await /** @type {{prewarmContent: (details: import('display').ContentDetails) => Promise<void>}} */ (popup).prewarmContent(details);
+            this._popupContentPrewarmTerm = term;
+            this._updatePageDebugState({
+                popupContentPrewarmReady: true,
+                popupContentPrewarmSettled: true,
+                popupContentPrewarmTerm: term,
+                popupContentPrewarmResultCount: dictionaryEntries.length,
+                popupContentPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
+            });
+        } catch (e) {
+            this._updatePageDebugState({
+                popupContentPrewarmReady: false,
+                popupContentPrewarmSettled: true,
+                popupContentPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
+                popupContentPrewarmLastError: e instanceof Error ? e.message : `${e}`,
+            });
+            log.error(e);
+        }
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _prewarmPopupForHover() {
+        const popup = this._popup;
+        const options = this._options;
+        if (
+            popup === null ||
+            options === null ||
+            !options.general.enable ||
+            options.general.usePopupWindow ||
+            !this._textScanner.isEnabled() ||
+            typeof popup.prepareFrame !== 'function'
+        ) {
+            return;
+        }
+
+        const timeout = 8000;
+        const startedAt = safePerformance.now();
+        this._updatePageDebugState({
+            popupPrewarmRequested: true,
+            popupPrewarmSettled: false,
+            popupPrewarmTimedOut: false,
+            popupPrewarmLastError: null,
+        });
+        try {
+            /** @type {Promise<boolean>} */
+            const timeoutPromise = new Promise((resolve) => {
+                setTimeout(() => { resolve(true); }, timeout);
+            });
+            const timedOut = await Promise.race([
+                popup.prepareFrame().then(() => false),
+                timeoutPromise,
+            ]);
+            this._updatePageDebugState({
+                popupPrewarmSettled: !timedOut,
+                popupPrewarmTimedOut: timedOut,
+                popupPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
+            });
+        } catch (e) {
+            this._updatePageDebugState({
+                popupPrewarmSettled: true,
+                popupPrewarmTimedOut: false,
+                popupPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
+                popupPrewarmLastError: e instanceof Error ? e.message : `${e}`,
+            });
+            log.error(e);
         }
     }
 
@@ -860,7 +1187,7 @@ export class Frontend {
      * @param {import('settings').OptionsContext} optionsContext
      * @param {'dark' | 'light'} pageTheme
      */
-    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme) {
+    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme, searchSuccessAt = safePerformance.now()) {
         const query = textSource.text();
         const {url} = optionsContext;
         /** @type {import('display').HistoryState} */
@@ -873,22 +1200,25 @@ export class Frontend {
         if (sentence !== null) { detailsState.sentence = sentence; }
         if (documentTitle !== null) { detailsState.documentTitle = documentTitle; }
         const {tabId, frameId} = this._application;
+        /** @type {import('display').HistoryParams} */
+        const params = {
+            type,
+            query,
+            wildcards: 'off',
+        };
         /** @type {import('display').HistoryContent} */
         const detailsContent = {
             contentOrigin: {tabId, frameId},
         };
         if (dictionaryEntries !== null) {
             detailsContent.dictionaryEntries = dictionaryEntries;
+            params.lookup = 'false';
         }
         /** @type {import('display').ContentDetails} */
         const details = {
             focus,
             historyMode: 'clear',
-            params: {
-                type,
-                query,
-                wildcards: 'off',
-            },
+            params,
             state: detailsState,
             content: detailsContent,
         };
@@ -896,7 +1226,7 @@ export class Frontend {
             details.params.full = textSource.fullContent;
             details.params['full-visible'] = 'true';
         }
-        void this._showPopupContent(textSource, optionsContext, details);
+        void this._showPopupContent(textSource, optionsContext, details, searchSuccessAt);
     }
 
     /**
@@ -905,7 +1235,14 @@ export class Frontend {
      * @param {?import('display').ContentDetails} details
      * @returns {Promise<void>}
      */
-    _showPopupContent(textSource, optionsContext, details) {
+    _showPopupContent(textSource, optionsContext, details, searchSuccessAt = safePerformance.now()) {
+        const showRequestedAt = safePerformance.now();
+        this._updatePageDebugState({
+            popupShowRequestedAt: Math.round(showRequestedAt),
+            popupShowRequestDelayMs: Math.round(showRequestedAt - searchSuccessAt),
+            popupShowSettled: false,
+            popupShowDurationMs: null,
+        });
         const sourceRects = [];
         for (const {left, top, right, bottom} of textSource.getRects()) {
             sourceRects.push({left, top, right, bottom});
@@ -922,6 +1259,12 @@ export class Frontend {
             ) :
             Promise.resolve()
         );
+        void this._lastShowPromise.then(() => {
+            this._updatePageDebugState({
+                popupShowSettled: true,
+                popupShowDurationMs: Math.round(safePerformance.now() - showRequestedAt),
+            });
+        });
         this._lastShowPromise.catch((error) => {
             if (this._application.webExtension.unloaded) { return; }
             log.error(error);
@@ -942,6 +1285,7 @@ export class Frontend {
         }
         if (enabled) {
             this._textScannerHasBeenEnabled = true;
+            this._startPopupPrewarmForHover();
         }
     }
 

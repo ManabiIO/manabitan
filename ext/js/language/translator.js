@@ -17,6 +17,7 @@
  */
 
 import {safePerformance} from '../core/safe-performance.js';
+import {reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {applyTextReplacement} from '../general/regex-util.js';
 import {isCodePointJapanese} from './ja/japanese.js';
 import {isCodePointKorean} from './ko/korean.js';
@@ -459,7 +460,33 @@ export class Translator {
         const uniqueDeinflectionTerms = [...uniqueDeinflectionsMap.keys()];
 
         const databaseEntries = await this._database.findTermsBulk(uniqueDeinflectionTerms, enabledDictionaryMap, matchType);
+        reportDiagnosticsLazy('dictionary-lookup-translator-stage', () => ({
+            stage: 'findTermsBulk',
+            language,
+            matchType,
+            queryTermCount: uniqueDeinflectionTerms.length,
+            queryTermsSample: uniqueDeinflectionTerms.slice(0, 12),
+            enabledDictionaryNames: [...enabledDictionaryMap.keys()],
+            databaseEntryCount: databaseEntries.length,
+            databaseEntryDictionaryCounts: [...databaseEntries.reduce((map, {dictionary}) => {
+                map.set(dictionary, (map.get(dictionary) || 0) + 1);
+                return map;
+            }, new Map()).entries()].map(([dictionary, count]) => ({dictionary, count})),
+        }));
         this._matchEntriesToDeinflections(language, databaseEntries, uniqueDeinflectionArrays, enabledDictionaryMap);
+        reportDiagnosticsLazy('dictionary-lookup-translator-stage', () => ({
+            stage: 'matchEntriesToDeinflections',
+            language,
+            matchType,
+            deinflectionCount: deinflections.length,
+            matchedDeinflectionCount: deinflections.filter(({databaseEntries: databaseEntries2}) => databaseEntries2.length > 0).length,
+            matchedDictionaryCounts: [...deinflections.reduce((map, {databaseEntries: databaseEntries2}) => {
+                for (const {dictionary} of databaseEntries2) {
+                    map.set(dictionary, (map.get(dictionary) || 0) + 1);
+                }
+                return map;
+            }, new Map()).entries()].map(([dictionary, count]) => ({dictionary, count})),
+        }));
     }
 
     /**

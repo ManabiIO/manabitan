@@ -26,6 +26,8 @@ import {anyNodeMatchesSelector, everyNodeMatchesSelector, getActiveModifiers, ge
 import {TextSourceElement} from '../dom/text-source-element.js';
 
 const SCAN_RESOLUTION_EXCLUDED_LANGUAGES = new Set(['ja', 'zh', 'yue', 'ko']);
+const TERM_SEARCH_SEGMENT_TERMINATOR_PATTERN = /[。．.!?！？\n\r\t,、，;；:：]/;
+const TERM_SEARCH_PARTICLE_BOUNDARY_PATTERN = /[はがをにへでとものや]/u;
 
 /**
  * @augments EventDispatcher<import('text-scanner').Events>
@@ -91,8 +93,16 @@ export class TextScanner extends EventDispatcher {
         this._textSourceCurrentSelected = false;
         /** @type {boolean} */
         this._pendingLookup = false;
+        /** @type {?{x: number, y: number, inputInfo: import('text-scanner').InputInfo}} */
+        this._queuedLookup = null;
+        /** @type {?{x: number, y: number, inputInfo: import('text-scanner').InputInfo}} */
+        this._queuedMouseMoveLookup = null;
+        /** @type {?import('core').Timeout} */
+        this._mouseMoveLookupTimer = null;
         /** @type {number} */
-        this._lookupTimeoutMs = 3_000;
+        this._mouseMoveLookupCoalesceDelay = 35;
+        /** @type {number} */
+        this._lookupTimeoutMs = 10_000;
         /** @type {number} */
         this._lookupSequence = 0;
         /** @type {?number} */
@@ -477,21 +487,25 @@ export class TextScanner extends EventDispatcher {
      * @param {boolean} showEmpty shows a "No results found" popup if no results are found
      * @param {boolean} disallowExpandStartOffset disallows expanding the start offset of the range
      * @param {?number} lookupSequence
+     * @returns {Promise<?boolean>}
      */
     async _search(textSource, searchTerms, searchKanji, inputInfo, showEmpty = false, disallowExpandStartOffset = false, lookupSequence = null) {
+        const searchStartedAt = safePerformance.now();
+        let contextDurationMs = 0;
+        let findDurationMs = 0;
         try {
             safePerformance.mark('scanner:_search:start');
-            if (this._isLookupStale(lookupSequence)) { return; }
+            if (this._isLookupStale(lookupSequence)) { return null; }
             const isAltText = textSource instanceof TextSourceElement;
             if (inputInfo.pointerType === 'touch') {
                 if (isAltText) {
-                    return;
+                    return null;
                 }
                 const {imposterSourceElement, rangeStartOffset} = textSource;
                 if (imposterSourceElement instanceof HTMLTextAreaElement || imposterSourceElement instanceof HTMLInputElement) {
                     const isFocused = imposterSourceElement === document.activeElement;
                     if (!isFocused || imposterSourceElement.selectionStart !== rangeStartOffset) {
-                        return;
+                        return null;
                     }
                 }
             }
@@ -510,12 +524,14 @@ export class TextScanner extends EventDispatcher {
             }
 
             if (this._textSourceCurrent !== null && this._textSourceCurrent.hasSameStart(textSource)) {
-                return;
+                return null;
             }
 
+            let phaseStartedAt = safePerformance.now();
             const getSearchContextPromise = this._getSearchContext();
             const getSearchContextResult = getSearchContextPromise instanceof Promise ? await getSearchContextPromise : getSearchContextPromise;
-            if (this._isLookupStale(lookupSequence)) { return; }
+            contextDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
+            if (this._isLookupStale(lookupSequence)) { return null; }
             const {detail} = getSearchContextResult;
             const optionsContext = this._createOptionsContextForInput(getSearchContextResult.optionsContext, inputInfo);
 
@@ -525,8 +541,10 @@ export class TextScanner extends EventDispatcher {
             let sentence = null;
             /** @type {'terms'|'kanji'} */
             let type = 'terms';
+            phaseStartedAt = safePerformance.now();
             const result = await this._findDictionaryEntries(textSource, searchTerms, searchKanji, optionsContext);
-            if (this._isLookupStale(lookupSequence)) { return; }
+            findDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
+            if (this._isLookupStale(lookupSequence)) { return null; }
             if (result !== null) {
                 ({dictionaryEntries, sentence, type} = result);
             } else if (showEmpty || (textSource !== null && isAltText && await this._isTextLookupWorthy(textSource.content))) {
@@ -534,7 +552,7 @@ export class TextScanner extends EventDispatcher {
                 dictionaryEntries = [];
                 sentence = {text: '', offset: 0};
             }
-            if (this._isLookupStale(lookupSequence)) { return; }
+            if (this._isLookupStale(lookupSequence)) { return null; }
 
             if (dictionaryEntries !== null && sentence !== null) {
                 this._inputInfoCurrent = inputInfo;
@@ -555,18 +573,39 @@ export class TextScanner extends EventDispatcher {
                     detail,
                     pageTheme,
                 });
+                this._updateDebugState({
+                    scannerSearchDurationMs: Math.round(safePerformance.now() - searchStartedAt),
+                    scannerSearchContextDurationMs: Math.round(contextDurationMs),
+                    scannerFindDurationMs: Math.round(findDurationMs),
+                    scannerSearchResultCount: dictionaryEntries.length,
+                    scannerSearchType: type,
+                    scannerSearchTextSample: this.getTextSourceContent(textSource, Math.min(this._scanLength, 24), this._layoutAwareScan, optionsContext.pointerType).slice(0, 24),
+                });
+                safePerformance.mark('scanner:_search:end');
+                safePerformance.measure('scanner:_search', 'scanner:_search:start', 'scanner:_search:end');
+                return true;
             } else {
                 this._triggerSearchEmpty(inputInfo);
+                this._updateDebugState({
+                    scannerSearchDurationMs: Math.round(safePerformance.now() - searchStartedAt),
+                    scannerSearchContextDurationMs: Math.round(contextDurationMs),
+                    scannerFindDurationMs: Math.round(findDurationMs),
+                    scannerSearchResultCount: 0,
+                    scannerSearchType: 'empty',
+                    scannerSearchTextSample: this.getTextSourceContent(textSource, Math.min(this._scanLength, 24), this._layoutAwareScan, optionsContext.pointerType).slice(0, 24),
+                });
+                safePerformance.mark('scanner:_search:end');
+                safePerformance.measure('scanner:_search', 'scanner:_search:start', 'scanner:_search:end');
+                return false;
             }
-            safePerformance.mark('scanner:_search:end');
-            safePerformance.measure('scanner:_search', 'scanner:_search:start', 'scanner:_search:end');
         } catch (error) {
-            if (this._isLookupStale(lookupSequence)) { return; }
+            if (this._isLookupStale(lookupSequence)) { return null; }
             this.trigger('searchError', {
                 error: error instanceof Error ? error : new Error(`A search error occurred: ${error}`),
                 textSource,
                 inputInfo,
             });
+            return false;
         }
     }
 
@@ -575,6 +614,23 @@ export class TextScanner extends EventDispatcher {
      */
     _triggerSearchEmpty(inputInfo) {
         this.trigger('searchEmpty', {inputInfo});
+    }
+
+    /**
+     * @param {Record<string, string|number|boolean|null|undefined>} values
+     * @returns {void}
+     */
+    _updateDebugState(values) {
+        const {documentElement} = document;
+        if (documentElement === null) { return; }
+        for (const [key, value] of Object.entries(values)) {
+            const datasetKey = `manabitan${key.slice(0, 1).toUpperCase()}${key.slice(1)}`;
+            if (value === null || typeof value === 'undefined') {
+                delete documentElement.dataset[datasetKey];
+            } else {
+                documentElement.dataset[datasetKey] = `${value}`;
+            }
+        }
     }
 
     /** */
@@ -1273,7 +1329,11 @@ export class TextScanner extends EventDispatcher {
 
         /** @type {import('api').FindTermsDetails} */
         const details = {};
-        const {dictionaryEntries, originalTextLength} = await this._api.termsFind(searchText, details, optionsContext);
+        const searchTextPrimary = this._getPrimaryTermSearchText(searchText);
+        let {dictionaryEntries, originalTextLength} = await this._api.termsFind(searchTextPrimary, details, optionsContext);
+        if (dictionaryEntries.length === 0 && searchTextPrimary !== searchText) {
+            ({dictionaryEntries, originalTextLength} = await this._api.termsFind(searchText, details, optionsContext));
+        }
         if (dictionaryEntries.length === 0) { return null; }
 
         textSource.setEndOffset(originalTextLength, false, layoutAwareScan);
@@ -1288,6 +1348,25 @@ export class TextScanner extends EventDispatcher {
         );
 
         return {dictionaryEntries, sentence, type: 'terms'};
+    }
+
+    /**
+     * @param {string} text
+     * @returns {string}
+     */
+    _getPrimaryTermSearchText(text) {
+        let end = text.length;
+        const match = TERM_SEARCH_SEGMENT_TERMINATOR_PATTERN.exec(text);
+        if (match !== null && typeof match.index === 'number' && match.index > 0) {
+            end = match.index;
+        }
+        const segment = text.slice(0, end);
+        for (let i = 2; i < segment.length; ++i) {
+            if (TERM_SEARCH_PARTICLE_BOUNDARY_PATTERN.test(segment[i])) {
+                return segment.slice(0, i);
+            }
+        }
+        return segment;
     }
 
     /**
@@ -1328,12 +1407,17 @@ export class TextScanner extends EventDispatcher {
      * @param {import('text-scanner').InputInfo} inputInfo
      */
     async _searchAt(x, y, inputInfo) {
-        if (this._pendingLookup) { return; }
+        if (this._pendingLookup) {
+            this._queuedLookup = {x, y, inputInfo};
+            return;
+        }
 
         const lookupSequence = ++this._lookupSequence;
         this._activeLookupSequence = lookupSequence;
+        this._queuedLookup = null;
         /** @type {?import('text-source').TextSource} */
         let activeTextSource = null;
+        let replayQueuedLookup = false;
         try {
             safePerformance.mark('scanner:_searchAt:start');
             const sourceInput = inputInfo.input;
@@ -1372,7 +1456,10 @@ export class TextScanner extends EventDispatcher {
                             }, timeoutMs);
                         });
                         const timedOut = await Promise.race([
-                            searchPromise.then(() => false),
+                            searchPromise.then((result) => {
+                                replayQueuedLookup = result === false;
+                                return false;
+                            }),
                             timeoutPromise,
                         ]);
                         if (timeout !== null) {
@@ -1383,7 +1470,7 @@ export class TextScanner extends EventDispatcher {
                             return;
                         }
                     } else {
-                        await searchPromise;
+                        replayQueuedLookup = await searchPromise === false;
                     }
                 } finally {
                     activeTextSource.cleanup();
@@ -1391,6 +1478,7 @@ export class TextScanner extends EventDispatcher {
             } else {
                 this._isMouseOverText = false;
                 this._triggerSearchEmpty(inputInfo);
+                replayQueuedLookup = true;
             }
             safePerformance.mark('scanner:_searchAt:end');
             safePerformance.measure('scanner:_searchAt', 'scanner:_searchAt:start', 'scanner:_searchAt:end');
@@ -1401,6 +1489,11 @@ export class TextScanner extends EventDispatcher {
                 this._activeLookupSequence = null;
             }
             this._pendingLookup = false;
+            const queuedLookup = this._queuedLookup;
+            this._queuedLookup = null;
+            if (replayQueuedLookup && queuedLookup !== null) {
+                void this._searchAt(queuedLookup.x, queuedLookup.y, queuedLookup.inputInfo);
+            }
         }
     }
 
@@ -1418,14 +1511,29 @@ export class TextScanner extends EventDispatcher {
      * @param {import('text-scanner').InputInfo} inputInfo
      */
     async _searchAtFromMouseMove(x, y, inputInfo) {
-        if (this._pendingLookup) { return; }
-
         if (inputInfo.passive && !await this._scanTimerWait()) {
             // Aborted
             return;
         }
 
-        await this._searchAt(x, y, inputInfo);
+        this._queuedMouseMoveLookup = {x, y, inputInfo};
+        if (this._mouseMoveLookupTimer !== null) {
+            clearTimeout(this._mouseMoveLookupTimer);
+        }
+        this._mouseMoveLookupTimer = setTimeout(() => {
+            this._mouseMoveLookupTimer = null;
+            this._flushQueuedMouseMoveLookup();
+        }, this._mouseMoveLookupCoalesceDelay);
+    }
+
+    /**
+     * @returns {void}
+     */
+    _flushQueuedMouseMoveLookup() {
+        const lookup = this._queuedMouseMoveLookup;
+        this._queuedMouseMoveLookup = null;
+        if (lookup === null) { return; }
+        void this._searchAt(lookup.x, lookup.y, lookup.inputInfo);
     }
 
     /**

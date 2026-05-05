@@ -19,6 +19,7 @@ const META_U32_FIELDS = 6;
 const META_BYTES = META_U32_FIELDS * 4;
 const U16_NULL = 0xffff;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
+const UTF8_TEXT_DECODER = new TextDecoder('utf-8', {fatal: true});
 
 /** @type {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, calc_encoded_size: (count: number, stringCount: number, lengthsPtr: number, stringsByteLength: number, metasPtr: number) => number, encode_records: (count: number, stringCount: number, lengthsPtr: number, stringsPtr: number, stringsByteLength: number, metasPtr: number, outPtr: number) => number}>|null} */
 let wasmPromise = null;
@@ -116,6 +117,35 @@ function createStringInterner(textEncoder) {
 }
 
 /**
+ * When callers provide byte-backed strings with placeholder `''` values, use
+ * the decoded UTF-8 bytes as the cache key so distinct terms do not collapse
+ * into one interned string-table entry.
+ * @param {string} value
+ * @param {Uint8Array|undefined} bytes
+ * @returns {string}
+ */
+function getInternKey(value, bytes) {
+    if (!(bytes instanceof Uint8Array) || bytes.byteLength === 0 || value.length > 0) {
+        return value;
+    }
+    return UTF8_TEXT_DECODER.decode(bytes);
+}
+
+/**
+ * @param {PreinternedTermRecordPlan|null} plan
+ * @returns {plan is PreinternedTermRecordPlan}
+ */
+function isCompletePreinternedPlan(plan) {
+    return (
+        plan !== null &&
+        plan.stringLengths instanceof Uint16Array &&
+        plan.stringsBuffer instanceof Uint8Array &&
+        plan.expressionIndexes instanceof Uint32Array &&
+        plan.readingIndexes instanceof Uint32Array
+    );
+}
+
+/**
  * @returns {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, calc_encoded_size: (count: number, stringCount: number, lengthsPtr: number, stringsByteLength: number, metasPtr: number) => number, encode_records: (count: number, stringCount: number, lengthsPtr: number, stringsPtr: number, stringsByteLength: number, metasPtr: number, outPtr: number) => number}>}
  */
 async function getWasm() {
@@ -166,9 +196,10 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
     const metasBuffer = new ArrayBuffer(records.length * META_BYTES);
     const metasU32 = new Uint32Array(metasBuffer);
     const metasI32 = new Int32Array(metasBuffer);
-    const {stringLengths, internString, internStringBytes, buildStringsBuffer} = createStringInterner(textEncoder);
-    const planExpressionIndexes = preinternedPlan?.expressionIndexes ?? null;
-    const planReadingIndexes = preinternedPlan?.readingIndexes ?? null;
+    const usePreinternedPlan = isCompletePreinternedPlan(preinternedPlan);
+    const interner = usePreinternedPlan ? null : createStringInterner(textEncoder);
+    const planExpressionIndexes = usePreinternedPlan ? preinternedPlan.expressionIndexes : null;
+    const planReadingIndexes = usePreinternedPlan ? preinternedPlan.readingIndexes : null;
     let recordIndex = 0;
     for (const record of records) {
         const expression = record.expression ?? '';
@@ -177,9 +208,9 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
         if (planExpressionIndexes instanceof Uint32Array) {
             expressionIndex = planExpressionIndexes[recordIndex];
         } else if (record.expressionBytes instanceof Uint8Array) {
-            expressionIndex = internStringBytes(expression, record.expressionBytes);
+            expressionIndex = interner.internStringBytes(getInternKey(expression, record.expressionBytes), record.expressionBytes);
         } else {
-            expressionIndex = internString(expression);
+            expressionIndex = interner.internString(expression);
         }
         const readingEqualsExpression = record.readingEqualsExpression ?? (reading === expression);
         let readingIndex;
@@ -188,15 +219,15 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
         } else if (readingEqualsExpression) {
             readingIndex = expressionIndex;
         } else if (record.readingBytes instanceof Uint8Array) {
-            readingIndex = internStringBytes(reading, record.readingBytes);
+            readingIndex = interner.internStringBytes(getInternKey(reading, record.readingBytes), record.readingBytes);
         } else {
-            readingIndex = internString(reading);
+            readingIndex = interner.internString(reading);
         }
         if (
-            !(preinternedPlan instanceof Object) &&
+            !usePreinternedPlan &&
             (
-                stringLengths[expressionIndex] > U16_NULL ||
-                stringLengths[readingIndex] > U16_NULL
+                interner.stringLengths[expressionIndex] > U16_NULL ||
+                interner.stringLengths[readingIndex] > U16_NULL
             )
         ) {
             return null;
@@ -210,13 +241,13 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
         metasI32[metaIndex + 5] = record.sequence ?? -1;
         ++recordIndex;
     }
-    const stringLengthsU16 = preinternedPlan?.stringLengths ?? Uint16Array.from(stringLengths);
+    const stringLengthsU16 = usePreinternedPlan ? preinternedPlan.stringLengths : Uint16Array.from(interner.stringLengths);
     const stringLengthsBuffer = new Uint8Array(
         stringLengthsU16.buffer,
         stringLengthsU16.byteOffset,
         stringLengthsU16.byteLength,
     );
-    const stringsBuffer = preinternedPlan?.stringsBuffer ?? buildStringsBuffer();
+    const stringsBuffer = usePreinternedPlan ? preinternedPlan.stringsBuffer : interner.buildStringsBuffer();
     wasm.wasm_reset_heap();
     const metasPtr = wasm.wasm_alloc(metasBuffer.byteLength);
     const stringLengthsPtr = wasm.wasm_alloc(stringLengthsBuffer.byteLength);
@@ -262,13 +293,14 @@ export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, co
     const metasBuffer = new ArrayBuffer(count * META_BYTES);
     const metasU32 = new Uint32Array(metasBuffer);
     const metasI32 = new Int32Array(metasBuffer);
-    const {stringLengths, internString, internStringBytes, buildStringsBuffer} = createStringInterner(textEncoder);
-    const planExpressionIndexes = preinternedPlan?.expressionIndexes ?? null;
-    const planReadingIndexes = preinternedPlan?.readingIndexes ?? null;
+    const usePreinternedPlan = isCompletePreinternedPlan(preinternedPlan);
+    const interner = usePreinternedPlan ? null : createStringInterner(textEncoder);
+    const planExpressionIndexes = usePreinternedPlan ? preinternedPlan.expressionIndexes : null;
+    const planReadingIndexes = usePreinternedPlan ? preinternedPlan.readingIndexes : null;
     for (let i = 0; i < count; ++i) {
         const expressionBytes = chunk.expressionBytesList[i];
         const readingEqualsExpression = chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1;
-        const expressionIndex = planExpressionIndexes instanceof Uint32Array ? planExpressionIndexes[i] : internStringBytes('', expressionBytes);
+        const expressionIndex = planExpressionIndexes instanceof Uint32Array ? planExpressionIndexes[i] : interner.internStringBytes(getInternKey('', expressionBytes), expressionBytes);
         let readingIndex;
         if (planReadingIndexes instanceof Uint32Array) {
             readingIndex = planReadingIndexes[i];
@@ -276,13 +308,13 @@ export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, co
             readingIndex = expressionIndex;
         } else {
             const readingBytes = chunk.readingBytesList[i];
-            readingIndex = readingBytes instanceof Uint8Array ? internStringBytes('', readingBytes) : internString('');
+            readingIndex = readingBytes instanceof Uint8Array ? interner.internStringBytes(getInternKey('', readingBytes), readingBytes) : interner.internString('');
         }
         if (
-            !(preinternedPlan instanceof Object) &&
+            !usePreinternedPlan &&
             (
-                stringLengths[expressionIndex] > U16_NULL ||
-                stringLengths[readingIndex] > U16_NULL
+                interner.stringLengths[expressionIndex] > U16_NULL ||
+                interner.stringLengths[readingIndex] > U16_NULL
             )
         ) {
             return null;
@@ -295,13 +327,13 @@ export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, co
         metasI32[metaIndex + 4] = (chunk.scoreList[i] ?? 0) | 0;
         metasI32[metaIndex + 5] = chunk.sequenceList[i] ?? -1;
     }
-    const stringLengthsU16 = preinternedPlan?.stringLengths ?? Uint16Array.from(stringLengths);
+    const stringLengthsU16 = usePreinternedPlan ? preinternedPlan.stringLengths : Uint16Array.from(interner.stringLengths);
     const stringLengthsBuffer = new Uint8Array(
         stringLengthsU16.buffer,
         stringLengthsU16.byteOffset,
         stringLengthsU16.byteLength,
     );
-    const stringsBuffer = preinternedPlan?.stringsBuffer ?? buildStringsBuffer();
+    const stringsBuffer = usePreinternedPlan ? preinternedPlan.stringsBuffer : interner.buildStringsBuffer();
     wasm.wasm_reset_heap();
     const metasPtr = wasm.wasm_alloc(metasBuffer.byteLength);
     const stringLengthsPtr = wasm.wasm_alloc(stringLengthsBuffer.byteLength);

@@ -49,6 +49,7 @@ export type FindTermsDetails = {
     matchType?: Translation.FindTermsMatchType;
     deinflect?: boolean;
     primaryReading?: string;
+    skipLookupWarmWait?: boolean;
 };
 
 export type ParseTextResultItem = {
@@ -311,6 +312,12 @@ type ApiSurface = {
             getTotal: boolean;
         };
         return: DictionaryDatabase.DictionaryCounts;
+    };
+    getDictionaryTermProbe: {
+        params: {
+            dictionaryTitle: string;
+        };
+        return: DictionaryDatabase.DictionaryTermProbe | null;
     };
     verifyDictionaryVisibility: {
         params: {

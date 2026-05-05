@@ -47,4 +47,23 @@ describe('PopupPreviewFrame', () => {
 
         expect(logError).toHaveBeenCalled();
     });
+
+    test('setCustomCss ignores disconnected popup frame races', async () => {
+        vi.resetModules();
+        vi.clearAllMocks();
+
+        const {PopupPreviewFrame} = await import('../ext/js/pages/settings/popup-preview-frame.js');
+        const frame = /** @type {import('../ext/js/pages/settings/popup-preview-frame.js').PopupPreviewFrame} */ (Object.create(PopupPreviewFrame.prototype));
+        Reflect.set(frame, '_frontend', {
+            popup: {
+                setCustomCss: vi.fn().mockRejectedValue(new Error('Failed to invoke action displaySetCustomCss: frame state invalid')),
+            },
+        });
+
+        frame._setCustomCss({css: '.test {}'});
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(logError).not.toHaveBeenCalled();
+    });
 });

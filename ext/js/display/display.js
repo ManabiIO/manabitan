@@ -23,6 +23,7 @@ import {DynamicProperty} from '../core/dynamic-property.js';
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
+import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {log} from '../core/log.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -97,6 +98,8 @@ export class Display extends EventDispatcher {
         this._historyChangeIgnore = false;
         /** @type {boolean} */
         this._historyHasChanged = false;
+        /** @type {Array<() => void>} */
+        this._stateChangeCompleteResolvers = [];
         /** @type {?Element} */
         this._aboveStickyHeader = document.querySelector('#above-sticky-header');
         /** @type {?Element} */
@@ -512,8 +515,10 @@ export class Display extends EventDispatcher {
     /**
      * Updates the content of the display.
      * @param {import('display').ContentDetails} details Information about the content to show.
+     * @returns {Promise<void>}
      */
     setContent(details) {
+        const stateChangeCompletePromise = this._waitForStateChangeComplete(5000);
         const {focus, params, state, content} = details;
         const historyMode = this._historyHasChanged ? details.historyMode : 'clear';
 
@@ -545,6 +550,7 @@ export class Display extends EventDispatcher {
         if (this._options) {
             this._setTheme(this._options);
         }
+        return stateChangeCompletePromise;
     }
 
     /**
@@ -644,7 +650,7 @@ export class Display extends EventDispatcher {
                 contentOrigin: this.getContentOrigin(),
             },
         };
-        this.setContent(details);
+        void this.setContent(details);
     }
 
     /**
@@ -764,9 +770,9 @@ export class Display extends EventDispatcher {
     }
 
     /** @type {import('display').DirectApiHandler<'displaySetContent'>} */
-    _onMessageSetContent({details}) {
+    async _onMessageSetContent({details}) {
         safePerformance.mark('invokeDisplaySetContent:end');
-        this.setContent(details);
+        await this.setContent(details);
     }
 
     /** @type {import('display').DirectApiHandler<'displaySetCustomCss'>} */
@@ -877,6 +883,7 @@ export class Display extends EventDispatcher {
         }
         safePerformance.mark('display:_onStateChanged:end');
         safePerformance.measure('display:_onStateChanged', 'display:_onStateChanged:start', 'display:_onStateChanged:end');
+        this._resolveStateChangeCompleteWaiters();
     }
 
     /**
@@ -907,7 +914,7 @@ export class Display extends EventDispatcher {
                 contentOrigin: this.getContentOrigin(),
             },
         };
-        this.setContent(details);
+        void this.setContent(details);
     }
 
     /** */
@@ -925,7 +932,7 @@ export class Display extends EventDispatcher {
                 contentOrigin: {tabId, frameId},
             },
         };
-        this.setContent(details);
+        void this.setContent(details);
     }
 
     /**
@@ -1008,7 +1015,7 @@ export class Display extends EventDispatcher {
                     contentOrigin: this.getContentOrigin(),
                 },
             };
-            this.setContent(details);
+            void this.setContent(details);
         } catch (error) {
             this.onError(toError(error));
         }
@@ -1348,8 +1355,10 @@ export class Display extends EventDispatcher {
             if (dictionaryEntries.length > 0) { return dictionaryEntries; }
 
             dictionaryEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
+            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, dictionaryEntries);
         } else {
             dictionaryEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
+            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, dictionaryEntries);
             if (dictionaryEntries.length > 0) { return dictionaryEntries; }
 
             dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
@@ -1380,6 +1389,33 @@ export class Display extends EventDispatcher {
             }
         }
         return {findDetails, source};
+    }
+
+    /**
+     * @param {string} source
+     * @param {string} normalizedSource
+     * @param {boolean} isKanji
+     * @param {import('api').FindTermsDetails} findDetails
+     * @param {import('settings').OptionsContext} optionsContext
+     * @param {import('dictionary').DictionaryEntry[]} dictionaryEntries
+     * @returns {void}
+     */
+    _reportTermsFindSnapshot(source, normalizedSource, isKanji, findDetails, optionsContext, dictionaryEntries) {
+        try {
+            const resultDictionaries = [...new Set(dictionaryEntries.flatMap((dictionaryEntry) => dictionaryEntry.definitions.map(({dictionary}) => dictionary)))];
+            reportDiagnostics('display-terms-find-snapshot', {
+                pageType: this._pageType,
+                isKanji,
+                source,
+                normalizedSource,
+                optionsContext,
+                findDetails,
+                resultDictionaryCount: dictionaryEntries.length,
+                resultDictionaries,
+            });
+        } catch (error) {
+            log.error(error);
+        }
     }
 
     /**
@@ -2225,7 +2261,7 @@ export class Display extends EventDispatcher {
             },
         };
         /** @type {TextScanner} */ (this._contentTextScanner).clearSelection();
-        this.setContent(details);
+        void this.setContent(details);
     }
 
     /**
@@ -2458,6 +2494,42 @@ export class Display extends EventDispatcher {
     /** */
     _triggerContentUpdateComplete() {
         this.trigger('contentUpdateComplete', {type: this._contentType});
+    }
+
+    /**
+     * @param {number} timeoutMs
+     * @returns {Promise<void>}
+     */
+    _waitForStateChangeComplete(timeoutMs) {
+        /** @type {import('core').Timeout|null} */
+        let timeout = null;
+        /** @type {(value?: void) => void} */
+        let resolvePromise;
+        const promise = new Promise((resolve) => {
+            resolvePromise = resolve;
+        });
+        const finish = () => {
+            const index = this._stateChangeCompleteResolvers.indexOf(finish);
+            if (index >= 0) {
+                this._stateChangeCompleteResolvers.splice(index, 1);
+            }
+            if (timeout !== null) {
+                clearTimeout(timeout);
+                timeout = null;
+            }
+            resolvePromise();
+        };
+        this._stateChangeCompleteResolvers.push(finish);
+        timeout = setTimeout(finish, timeoutMs);
+        return promise;
+    }
+
+    /** */
+    _resolveStateChangeCompleteWaiters() {
+        const resolvers = this._stateChangeCompleteResolvers.splice(0);
+        for (const resolve of resolvers) {
+            resolve();
+        }
     }
 
     /**

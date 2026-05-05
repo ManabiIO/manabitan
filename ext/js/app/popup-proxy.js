@@ -144,6 +144,13 @@ export class PopupProxy extends EventDispatcher {
     }
 
     /**
+     * @returns {Promise<boolean>}
+     */
+    async prepareFrame() {
+        return false;
+    }
+
+    /**
      * Hides the popup.
      * @param {boolean} changeFocus Whether or not the parent popup or host frame should be focused.
      * @returns {Promise<void>}

@@ -60,9 +60,12 @@ const LOW_MEMORY_QUEUED_WRITE_BUDGET_BYTES = 24 * 1024 * 1024;
 const HIGH_MEMORY_QUEUED_WRITE_BUDGET_BYTES = 64 * 1024 * 1024;
 const DEFAULT_WRITE_COALESCE_TARGET_BYTES = 4 * 1024 * 1024;
 const LOW_MEMORY_WRITE_COALESCE_TARGET_BYTES = 1024 * 1024;
-const HIGH_MEMORY_WRITE_COALESCE_TARGET_BYTES = 8 * 1024 * 1024;
+const HIGH_MEMORY_WRITE_COALESCE_TARGET_BYTES = 16 * 1024 * 1024;
+const LARGE_IMPORT_EXPECTED_BYTES_THRESHOLD = 512 * 1024 * 1024;
+const LARGE_IMPORT_WRITE_COALESCE_TARGET_BYTES = 64 * 1024 * 1024;
 const WRITE_COALESCE_MAX_CHUNKS = 512;
 const MAX_SHARD_SEGMENT_FILE_BYTES = 1024 * 1024 * 1024;
+const SHARD_LOAD_CONCURRENCY = 3;
 
 /**
  * @param {unknown[]} rows
@@ -111,6 +114,89 @@ function sliceTermRecordPreinternedPlan(plan, start, count) {
         expressionIndexes: plan.expressionIndexes.subarray(start, end),
         readingIndexes: plan.readingIndexes.subarray(start, end),
     };
+}
+
+/**
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
+ * @param {number} count
+ * @returns {plan is import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}
+ */
+function hasCompleteTermRecordPreinternedPlan(plan, count) {
+    return (
+        plan !== null &&
+        plan.stringLengths instanceof Uint16Array &&
+        plan.stringsBuffer instanceof Uint8Array &&
+        plan.expressionIndexes instanceof Uint32Array &&
+        plan.readingIndexes instanceof Uint32Array &&
+        plan.expressionIndexes.length >= count &&
+        plan.readingIndexes.length >= count
+    );
+}
+
+/**
+ * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
+ * @param {number} count
+ * @returns {boolean}
+ */
+function hasFixedContentSpan(chunk, count) {
+    return (
+        count > 0 &&
+        typeof chunk.fixedContentOffsetBase === 'number' &&
+        Number.isFinite(chunk.fixedContentOffsetBase) &&
+        chunk.fixedContentOffsetBase >= 0 &&
+        typeof chunk.fixedContentLength === 'number' &&
+        Number.isFinite(chunk.fixedContentLength) &&
+        chunk.fixedContentLength >= 0
+    );
+}
+
+/**
+ * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
+ * @param {number[]|Uint32Array} contentOffsets
+ * @param {number} index
+ * @returns {number}
+ */
+function getArtifactContentOffset(chunk, contentOffsets, index) {
+    if (hasFixedContentSpan(chunk, index + 1)) {
+        return /** @type {number} */ (chunk.fixedContentOffsetBase) + (index * /** @type {number} */ (chunk.fixedContentLength));
+    }
+    return contentOffsets[index];
+}
+
+/**
+ * @param {{fixedContentLength?: number}} chunk
+ * @param {number[]|Uint32Array} contentLengths
+ * @param {number} index
+ * @returns {number}
+ */
+function getArtifactContentLength(chunk, contentLengths, index) {
+    return typeof chunk.fixedContentLength === 'number' ? chunk.fixedContentLength : contentLengths[index];
+}
+
+/**
+ * @param {Uint8Array} output
+ * @param {number} offset
+ * @param {number} value
+ * @returns {number}
+ */
+function writeU16Le(output, offset, value) {
+    output[offset] = value & 0xff;
+    output[offset + 1] = (value >>> 8) & 0xff;
+    return offset + 2;
+}
+
+/**
+ * @param {Uint8Array} output
+ * @param {number} offset
+ * @param {number} value
+ * @returns {number}
+ */
+function writeU32Le(output, offset, value) {
+    output[offset] = value & 0xff;
+    output[offset + 1] = (value >>> 8) & 0xff;
+    output[offset + 2] = (value >>> 16) & 0xff;
+    output[offset + 3] = (value >>> 24) & 0xff;
+    return offset + 4;
 }
 const ENTRY_CONTENT_DICT_NAME_CODE_RAW = 0;
 const ENTRY_CONTENT_DICT_NAME_CODE_RAW_V2 = 1;
@@ -282,6 +368,8 @@ export class TermRecordOpfsStore {
         this._nextId = 1;
         /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
         this._indexByDictionary = new Map();
+        /** @type {WeakSet<{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
+        this._reverseIndexReady = new WeakSet();
         /** @type {boolean} */
         this._deferIndexBuild = false;
         /** @type {boolean} */
@@ -308,6 +396,12 @@ export class TermRecordOpfsStore {
         this._invalidShardFileNames = [];
         /** @type {number} */
         this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
+        /** @type {number|null} */
+        this._expectedImportBytes = null;
+        /** @type {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}|null} */
+        this._lastEndImportSessionMetrics = null;
+        /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}} */
+        this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
     }
 
     /**
@@ -380,6 +474,8 @@ export class TermRecordOpfsStore {
         this._pendingArtifactReloadPlansAfterImport = [];
         this._indexByDictionary.clear();
         this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
+        this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
+        this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
         for (const state of this._shardStateByFileName.values()) {
             state.pendingWriteBytes = 0;
             state.pendingWriteChunks = [];
@@ -396,7 +492,12 @@ export class TermRecordOpfsStore {
         if (!this._importSessionActive && !this._hasPendingShardWrites()) {
             return;
         }
+        const tStart = safePerformance.now();
+        let flushPendingWritesMs = 0;
+        let awaitQueuedWritesMs = 0;
+        let closeWritableMs = 0;
         const wasImportSessionActive = this._importSessionActive;
+        const tFlushPendingWritesStart = safePerformance.now();
         if (wasImportSessionActive) {
             await this._flushPendingWrites();
             this._importSessionActive = false;
@@ -404,9 +505,21 @@ export class TermRecordOpfsStore {
             this._importSessionActive = false;
             await this._flushPendingWrites();
         }
+        flushPendingWritesMs = safePerformance.now() - tFlushPendingWritesStart;
+        const tAwaitQueuedWritesStart = safePerformance.now();
         await this._awaitQueuedWrites();
+        awaitQueuedWritesMs = safePerformance.now() - tAwaitQueuedWritesStart;
+        const tCloseWritableStart = safePerformance.now();
         await this._closeAllWritables();
+        closeWritableMs = safePerformance.now() - tCloseWritableStart;
         this._deferIndexBuild = false;
+        this._lastEndImportSessionMetrics = {
+            flushPendingWritesMs,
+            awaitQueuedWritesMs,
+            closeWritableMs,
+            totalMs: safePerformance.now() - tStart,
+            ...this._writeDrainMetrics,
+        };
         if (this._reloadFromShardsAfterImport && this._pendingArtifactReloadPlansAfterImport.length > 0) {
             this._indexByDictionary.clear();
             this._indexDirty = false;
@@ -424,6 +537,24 @@ export class TermRecordOpfsStore {
             this._indexDirty = false;
         }
         this._reloadShardLogicalKeysAfterImport.clear();
+    }
+
+    /**
+     * @returns {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}|null}
+     */
+    getLastEndImportSessionMetrics() {
+        return this._lastEndImportSessionMetrics;
+    }
+
+    /**
+     * @param {number|null} value
+     */
+    setExpectedImportBytes(value) {
+        this._expectedImportBytes = (typeof value === 'number' && Number.isFinite(value) && value > 0) ?
+            Math.max(1, Math.trunc(value)) :
+            null;
+        this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
+        this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
     }
 
     /**
@@ -600,7 +731,7 @@ export class TermRecordOpfsStore {
         if (recordsByShard === null) {
             const state = await this._getOrCreateShardState(singleDictionaryName, singleContentDictName);
             if (state !== null) {
-                await this._appendEncodedChunk(state, await this._encodeRecords(singleDictionaryRecords), singleDictionaryRecords[0]?.id ?? 0, singleDictionaryRecords.length);
+                await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
             }
             return;
         }
@@ -608,7 +739,7 @@ export class TermRecordOpfsStore {
             const firstRecord = dictionaryRecords[0];
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            await this._appendEncodedChunk(state, await this._encodeRecords(dictionaryRecords), dictionaryRecords[0]?.id ?? 0, dictionaryRecords.length);
+            await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan);
         }
     }
 
@@ -643,7 +774,7 @@ export class TermRecordOpfsStore {
             const row = /** @type {{dictionary: string, expression: string, reading: string, readingEqualsExpression?: boolean, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, expressionReverse?: string, readingReverse?: string, score: number, sequence?: number}} */ (rows[i]);
             const id = this._nextId++;
             const dictionary = row.dictionary;
-            const readingEqualsExpression = row.readingEqualsExpression === true || row.reading === row.expression;
+            const readingEqualsExpression = row.readingEqualsExpression ?? (row.reading === row.expression);
             const useLazyArtifactStrings = preinternedPlan !== null;
             /** @type {TermRecord} */
             const record = {
@@ -706,7 +837,7 @@ export class TermRecordOpfsStore {
         if (recordsByShard === null) {
             const state = await this._getOrCreateShardState(singleDictionaryName, singleContentDictName);
             if (state !== null) {
-                const metrics = await this._encodeAndAppendChunkForState(state, singleDictionaryRecords, preinternedPlan);
+                const metrics = await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
                 encodeMs += metrics.encodeMs;
                 appendWriteMs += metrics.appendWriteMs;
             }
@@ -716,7 +847,7 @@ export class TermRecordOpfsStore {
             const firstRecord = dictionaryRecords[0];
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            const metrics = await this._encodeAndAppendChunkForState(state, dictionaryRecords, selectTermRecordPreinternedPlan(preinternedPlan, indexes));
+            const metrics = await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan, indexes);
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
         }
@@ -799,7 +930,7 @@ export class TermRecordOpfsStore {
         if (recordsByShard === null) {
             const state = await this._getOrCreateShardState(singleDictionaryName, singleContentDictName);
             if (state !== null) {
-                await this._encodeAndAppendChunkForState(state, singleDictionaryRecords);
+                await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords);
             }
             return;
         }
@@ -807,7 +938,7 @@ export class TermRecordOpfsStore {
             const firstRecord = dictionaryRecords[0];
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            await this._encodeAndAppendChunkForState(state, dictionaryRecords);
+            await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords);
         }
     }
 
@@ -901,7 +1032,7 @@ export class TermRecordOpfsStore {
         if (recordsByShard === null) {
             const state = await this._getOrCreateShardState(firstDictionaryName, normalizedContentDictName);
             if (state !== null) {
-                const metrics = await this._encodeAndAppendChunkForState(state, singleDictionaryRecords, preinternedPlan);
+                const metrics = await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
                 encodeMs += metrics.encodeMs;
                 appendWriteMs += metrics.appendWriteMs;
             }
@@ -911,7 +1042,7 @@ export class TermRecordOpfsStore {
             const firstRecord = dictionaryRecords[0];
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            const metrics = await this._encodeAndAppendChunkForState(state, dictionaryRecords, preinternedPlan);
+            const metrics = await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan);
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
         }
@@ -919,18 +1050,18 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
-     * @param {number[]} contentOffsets
-     * @param {number[]} contentLengths
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array} contentLengths
      * @param {string | (string|null)[]} contentDictNames
      * @returns {Promise<{buildRecordsMs: number, encodeMs: number, appendWriteMs: number}>}
      */
     async appendBatchFromArtifactChunkResolvedContent(chunk, contentOffsets, contentLengths, contentDictNames) {
         const count = chunk.rowCount;
         if (count <= 0) { return {buildRecordsMs: 0, encodeMs: 0, appendWriteMs: 0}; }
+        const fixedContentSpan = hasFixedContentSpan(chunk, count);
         if (
-            contentOffsets.length < count ||
-            contentLengths.length < count ||
+            (!fixedContentSpan && (contentOffsets.length < count || contentLengths.length < count)) ||
             (Array.isArray(contentDictNames) && contentDictNames.length < count)
         ) {
             throw new Error('appendBatchFromArtifactChunkResolvedContent content arrays are smaller than row count');
@@ -962,8 +1093,8 @@ export class TermRecordOpfsStore {
                     readingEqualsExpression: chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1,
                     expressionBytes: chunk.expressionBytesList[i],
                     readingBytes: (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ? void 0 : chunk.readingBytesList[i],
-                    entryContentOffset: contentOffsets[i],
-                    entryContentLength: contentLengths[i],
+                    entryContentOffset: getArtifactContentOffset(chunk, contentOffsets, i),
+                    entryContentLength: getArtifactContentLength(chunk, contentLengths, i),
                     entryContentDictName,
                     score: chunk.scoreList[i] ?? 0,
                     sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
@@ -1081,6 +1212,37 @@ export class TermRecordOpfsStore {
         const tAppendStart = safePerformance.now();
         await this._appendEncodedChunk(state, chunk, records[0]?.id ?? 0, records.length);
         const appendWriteMs = safePerformance.now() - tAppendStart;
+        return {encodeMs, appendWriteMs};
+    }
+
+    /**
+     * The current shard format stores `firstId` and `count` per chunk, so the
+     * records written in a single chunk must have contiguous IDs.
+     * @param {TermRecordShardState} state
+     * @param {TermRecord[]} records
+     * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
+     * @param {number[]|null} [recordIndexes=null]
+     * @returns {Promise<{encodeMs: number, appendWriteMs: number}>}
+     */
+    async _encodeAndAppendChunkRunsForState(state, records, preinternedPlan = null, recordIndexes = null) {
+        let encodeMs = 0;
+        let appendWriteMs = 0;
+        for (let runStart = 0; runStart < records.length;) {
+            let runEnd = runStart + 1;
+            while (runEnd < records.length && records[runEnd].id === (records[runEnd - 1].id + 1)) {
+                ++runEnd;
+            }
+            const runRecords = records.slice(runStart, runEnd);
+            const runPlan = (
+                recordIndexes !== null ?
+                    selectTermRecordPreinternedPlan(preinternedPlan, recordIndexes.slice(runStart, runEnd)) :
+                    preinternedPlan
+            );
+            const metrics = await this._encodeAndAppendChunkForState(state, runRecords, runPlan);
+            encodeMs += metrics.encodeMs;
+            appendWriteMs += metrics.appendWriteMs;
+            runStart = runEnd;
+        }
         return {encodeMs, appendWriteMs};
     }
 
@@ -1456,6 +1618,25 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {string} dictionaryName
+     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} [index]
+     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}}
+     */
+    ensureDictionaryReverseIndex(dictionaryName, index = this.getDictionaryIndex(dictionaryName)) {
+        if (this._reverseIndexReady.has(index)) {
+            return index;
+        }
+        index.expressionReverse.clear();
+        index.readingReverse.clear();
+        for (const record of this._recordsById.values()) {
+            if (record.dictionary !== dictionaryName) { continue; }
+            this._addRecordReverseToDictionaryIndex(index, record);
+        }
+        this._reverseIndexReady.add(index);
+        return index;
+    }
+
+    /**
      * @returns {string[]}
      */
     getShardFileNames() {
@@ -1514,9 +1695,7 @@ export class TermRecordOpfsStore {
             }
         }
         statesToLoad.sort((a, b) => a.fileName.localeCompare(b.fileName));
-        for (const state of statesToLoad) {
-            await this._loadShardStateContents(state);
-        }
+        await this._loadShardStatesContents(statesToLoad);
         for (const dictionaryName of pending) {
             this._loadedDictionaryNames.add(dictionaryName);
         }
@@ -1532,9 +1711,7 @@ export class TermRecordOpfsStore {
         }
         /** @type {TermRecordShardState[]} */
         const statesToLoad = [...this._shardStateByFileName.values()].sort((a, b) => a.fileName.localeCompare(b.fileName));
-        for (const state of statesToLoad) {
-            await this._loadShardStateContents(state);
-        }
+        await this._loadShardStatesContents(statesToLoad);
         for (const state of this._shardStateByFileName.values()) {
             const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
             if (dictionaryName !== null && dictionaryName.length > 0) {
@@ -1762,8 +1939,6 @@ export class TermRecordOpfsStore {
             }
             /** @type {string[]|null} */
             let chunkStrings = null;
-            /** @type {string[]|null} */
-            let chunkStringReverses = null;
             if (isCurrent) {
                 if ((cursor + STRING_TABLE_HEADER_BYTES) > content.byteLength) { return; }
                 const stringCount = view.getUint32(cursor, true); cursor += 4;
@@ -1771,7 +1946,6 @@ export class TermRecordOpfsStore {
                 const stringLengthsBytes = stringCount * 2;
                 if ((cursor + stringLengthsBytes + stringBytesLength) > content.byteLength) { return; }
                 chunkStrings = new Array(stringCount);
-                chunkStringReverses = new Array(stringCount);
                 let stringsCursor = cursor + stringLengthsBytes;
                 for (let i = 0; i < stringCount; ++i) {
                     const stringLength = view.getUint16(cursor, true); cursor += 2;
@@ -1779,7 +1953,6 @@ export class TermRecordOpfsStore {
                     const value = this._decodeString(content, stringsCursor, stringLength);
                     stringsCursor += stringLength;
                     chunkStrings[i] = value;
-                    chunkStringReverses[i] = this._reverseString(value);
                 }
                 cursor = stringsCursor;
             }
@@ -1891,10 +2064,8 @@ export class TermRecordOpfsStore {
                 let readingReverse;
                 if (isCurrent || isPrevious) {
                     if (isCurrent) {
-                        expressionReverse = chunkStringReverses !== null ? chunkStringReverses[expressionIndex] : this._reverseString(expression);
-                        readingReverse = reading === expression ?
-                            expressionReverse :
-                            (chunkStringReverses !== null ? chunkStringReverses[readingIndexRaw] : this._reverseString(reading));
+                        expressionReverse = null;
+                        readingReverse = null;
                     } else {
                         expressionReverse = this._reverseString(expression);
                         readingReverse = reading === expression ? expressionReverse : this._reverseString(reading);
@@ -1940,6 +2111,9 @@ export class TermRecordOpfsStore {
                     sequence: rawSequence >= 0 ? rawSequence : null,
                 };
                 this._recordsById.set(id, record);
+                if (!this._deferIndexBuild) {
+                    this._addToIndex(record);
+                }
                 if (id >= this._nextId) {
                     this._nextId = id + 1;
                 }
@@ -2027,6 +2201,9 @@ export class TermRecordOpfsStore {
                 sequence: this._asNullableNumber(raw[10]),
             };
             this._recordsById.set(id, record);
+            if (!this._deferIndexBuild) {
+                this._addToIndex(record);
+            }
             if (id >= this._nextId) {
                 this._nextId = id + 1;
             }
@@ -2120,12 +2297,15 @@ export class TermRecordOpfsStore {
         for (const record of records) {
             const expression = record.expression ?? '';
             const reading = record.reading ?? expression;
+            const readingEqualsExpression = record.readingEqualsExpression ?? (reading === expression);
             const expressionBytes = record.expressionBytes instanceof Uint8Array ? record.expressionBytes : this._textEncoder.encode(expression);
             const readingBytes = record.readingBytes instanceof Uint8Array ? record.readingBytes : this._textEncoder.encode(reading);
-            const expressionIndex = internStringBytes(expression, expressionBytes);
-            const readingIndex = reading === expression ?
+            const expressionKey = expression.length > 0 ? expression : this._decodeString(expressionBytes, 0, expressionBytes.byteLength);
+            const readingKey = reading.length > 0 ? reading : this._decodeString(readingBytes, 0, readingBytes.byteLength);
+            const expressionIndex = internStringBytes(expressionKey, expressionBytes);
+            const readingIndex = readingEqualsExpression ?
                 READING_EQUALS_EXPRESSION_U32 :
-                internStringBytes(reading, readingBytes);
+                internStringBytes(readingKey, readingBytes);
             totalBytes +=
                 RECORD_HEADER_BYTES +
                 ((record.entryContentLength >= 0 && record.entryContentLength > 0xfffd) ? 4 : 0);
@@ -2169,9 +2349,9 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
-     * @param {number[]} contentOffsets
-     * @param {number[]} contentLengths
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
+     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @returns {Promise<Uint8Array>}
      */
@@ -2179,7 +2359,8 @@ export class TermRecordOpfsStore {
         if (chunk.rowCount === 0) {
             return new Uint8Array(0);
         }
-        if (preinternedPlan !== null && !this._wasmEncoderUnavailable) {
+        const fixedContentSpan = hasFixedContentSpan(chunk, chunk.rowCount);
+        if (preinternedPlan !== null && !fixedContentSpan && !this._wasmEncoderUnavailable) {
             try {
                 const encoded = await encodeTermRecordArtifactChunkWithWasmPreinterned(
                     chunk,
@@ -2194,6 +2375,9 @@ export class TermRecordOpfsStore {
             } catch (_) {
                 this._wasmEncoderUnavailable = true;
             }
+        }
+        if (hasCompleteTermRecordPreinternedPlan(preinternedPlan, chunk.rowCount)) {
+            return this._encodePreinternedArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan);
         }
         /** @type {TermRecord[]} */
         const records = new Array(chunk.rowCount);
@@ -2210,14 +2394,71 @@ export class TermRecordOpfsStore {
                 readingBytes: (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ? void 0 : chunk.readingBytesList[i],
                 expressionReverse: null,
                 readingReverse: null,
-                entryContentOffset: contentOffsets[i],
-                entryContentLength: contentLengths[i],
+                entryContentOffset: getArtifactContentOffset(chunk, contentOffsets, i),
+                entryContentLength: getArtifactContentLength(chunk, contentLengths, i),
                 entryContentDictName: 'raw',
                 score: chunk.scoreList[i] ?? 0,
                 sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
             };
         }
         return await this._encodeRecords(records, preinternedPlan);
+    }
+
+    /**
+     * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
+     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array} contentLengths
+     * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} preinternedPlan
+     * @returns {Uint8Array}
+     */
+    _encodePreinternedArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan) {
+        const count = chunk.rowCount;
+        const stringLengths = preinternedPlan.stringLengths;
+        const stringsBuffer = preinternedPlan.stringsBuffer;
+        const expressionIndexes = preinternedPlan.expressionIndexes;
+        const readingIndexes = preinternedPlan.readingIndexes;
+        const fixedContentSpan = hasFixedContentSpan(chunk, count);
+        const fixedContentOffsetBase = fixedContentSpan ? /** @type {number} */ (chunk.fixedContentOffsetBase) : 0;
+        const fixedContentLength = fixedContentSpan ? /** @type {number} */ (chunk.fixedContentLength) : 0;
+        let totalBytes = STRING_TABLE_HEADER_BYTES + (stringLengths.length * 2) + stringsBuffer.byteLength;
+        for (let i = 0; i < count; ++i) {
+            const entryContentLength = fixedContentSpan ? fixedContentLength : contentLengths[i];
+            totalBytes += RECORD_HEADER_BYTES + ((entryContentLength >= 0 && entryContentLength > 0xfffd) ? 4 : 0);
+        }
+
+        const output = new Uint8Array(totalBytes);
+        let cursor = 0;
+        cursor = writeU32Le(output, cursor, stringLengths.length);
+        cursor = writeU32Le(output, cursor, stringsBuffer.byteLength);
+        for (let i = 0, ii = stringLengths.length; i < ii; ++i) {
+            cursor = writeU16Le(output, cursor, stringLengths[i]);
+        }
+        output.set(stringsBuffer, cursor);
+        cursor += stringsBuffer.byteLength;
+        for (let i = 0; i < count; ++i) {
+            const entryContentLength = fixedContentSpan ? fixedContentLength : contentLengths[i];
+            cursor = writeU32Le(output, cursor, expressionIndexes[i] >>> 0);
+            cursor = writeU32Le(
+                output,
+                cursor,
+                (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ?
+                    READING_EQUALS_EXPRESSION_U32 :
+                    (readingIndexes[i] >>> 0)
+            );
+            const entryContentOffset = fixedContentSpan ? fixedContentOffsetBase + (i * fixedContentLength) : contentOffsets[i];
+            cursor = writeU32Le(output, cursor, entryContentOffset >= 0 ? entryContentOffset : U32_NULL);
+            if (entryContentLength < 0) {
+                cursor = writeU16Le(output, cursor, ENTRY_CONTENT_LENGTH_U16_NULL);
+            } else if (entryContentLength <= 0xfffd) {
+                cursor = writeU16Le(output, cursor, entryContentLength);
+            } else {
+                cursor = writeU16Le(output, cursor, ENTRY_CONTENT_LENGTH_EXTENDED_U16);
+                cursor = writeU32Le(output, cursor, entryContentLength);
+            }
+            cursor = writeU32Le(output, cursor, chunk.scoreList[i] ?? 0);
+            cursor = writeU32Le(output, cursor, chunk.sequenceList[i] ?? -1);
+        }
+        return output;
     }
 
     /**
@@ -2238,12 +2479,24 @@ export class TermRecordOpfsStore {
             throw new Error(`Mixed entryContentDictName values are not supported within shard ${state.fileName}`);
         }
 
-        const withHeader = state.fileLength === 0 ?
-            this._withBinaryHeader(this._withChunkHeader(chunk, firstId, count), state.sharedContentDictName) :
-            this._withChunkHeader(chunk, firstId, count);
-        state.pendingWriteChunks.push(withHeader);
-        state.pendingWriteBytes += withHeader.byteLength;
-        state.fileLength += withHeader.byteLength;
+        /** @type {Uint8Array[]} */
+        const chunks = state.fileLength === 0 ?
+            [
+                this._createBinaryHeader(state.sharedContentDictName),
+                this._createChunkHeader(firstId, count),
+                chunk,
+            ] :
+            [
+                this._createChunkHeader(firstId, count),
+                chunk,
+            ];
+        let totalBytes = 0;
+        for (const pendingChunk of chunks) {
+            totalBytes += pendingChunk.byteLength;
+        }
+        state.pendingWriteChunks.push(...chunks);
+        state.pendingWriteBytes += totalBytes;
+        state.fileLength += totalBytes;
 
         if (!this._importSessionActive || state.pendingWriteBytes >= this._flushThresholdBytes) {
             await this._flushPendingWritesForShard(state);
@@ -2259,6 +2512,18 @@ export class TermRecordOpfsStore {
      * @returns {Uint8Array}
      */
     _withBinaryHeader(payload, contentDictName = 'raw') {
+        const header = this._createBinaryHeader(contentDictName);
+        const output = new Uint8Array(header.byteLength + payload.byteLength);
+        output.set(header, 0);
+        output.set(payload, header.byteLength);
+        return output;
+    }
+
+    /**
+     * @param {string} [contentDictName]
+     * @returns {Uint8Array}
+     */
+    _createBinaryHeader(contentDictName = 'raw') {
         const header = this._textEncoder.encode(BINARY_MAGIC_TEXT);
         const {meta: entryContentDictNameMeta, bytes: entryContentDictNameBytes} = this._encodeEntryContentDictNameMeta(contentDictName);
         const hasExtendedMeta = entryContentDictNameMeta > ENTRY_CONTENT_DICT_NAME_VALUE_MASK;
@@ -2266,8 +2531,7 @@ export class TermRecordOpfsStore {
             header.byteLength +
             2 +
             (hasExtendedMeta ? 4 : 0) +
-            (entryContentDictNameBytes?.byteLength ?? 0) +
-            payload.byteLength,
+            (entryContentDictNameBytes?.byteLength ?? 0),
         );
         output.set(header, 0);
         const view = new DataView(output.buffer, output.byteOffset, output.byteLength);
@@ -2280,9 +2544,7 @@ export class TermRecordOpfsStore {
         }
         if (entryContentDictNameBytes !== null) {
             output.set(entryContentDictNameBytes, cursor);
-            cursor += entryContentDictNameBytes.byteLength;
         }
-        output.set(payload, cursor);
         return output;
     }
 
@@ -2293,11 +2555,23 @@ export class TermRecordOpfsStore {
      * @returns {Uint8Array}
      */
     _withChunkHeader(payload, firstId, count) {
-        const output = new Uint8Array(CHUNK_HEADER_BYTES + payload.byteLength);
+        const header = this._createChunkHeader(firstId, count);
+        const output = new Uint8Array(header.byteLength + payload.byteLength);
+        output.set(header, 0);
+        output.set(payload, header.byteLength);
+        return output;
+    }
+
+    /**
+     * @param {number} firstId
+     * @param {number} count
+     * @returns {Uint8Array}
+     */
+    _createChunkHeader(firstId, count) {
+        const output = new Uint8Array(CHUNK_HEADER_BYTES);
         const view = new DataView(output.buffer, output.byteOffset, output.byteLength);
         view.setUint32(0, firstId >>> 0, true);
         view.setUint32(4, count >>> 0, true);
-        output.set(payload, CHUNK_HEADER_BYTES);
         return output;
     }
 
@@ -2509,6 +2783,28 @@ export class TermRecordOpfsStore {
                 // NOP
             }
         }
+    }
+
+    /**
+     * @param {TermRecordShardState[]} states
+     * @returns {Promise<void>}
+     */
+    async _loadShardStatesContents(states) {
+        if (states.length === 0) {
+            return;
+        }
+        let nextIndex = 0;
+        const workerCount = Math.min(SHARD_LOAD_CONCURRENCY, states.length);
+        const workers = [];
+        for (let i = 0; i < workerCount; ++i) {
+            workers.push((async () => {
+                while (nextIndex < states.length) {
+                    const state = states[nextIndex++];
+                    await this._loadShardStateContents(state);
+                }
+            })());
+        }
+        await Promise.all(workers);
     }
 
     /**
@@ -2743,6 +3039,7 @@ export class TermRecordOpfsStore {
      */
     async _drainQueuedWritesForShard(state) {
         try {
+            ++this._writeDrainMetrics.drainCycleCount;
             while (state.queuedWriteChunks.length > 0) {
                 const chunks = state.queuedWriteChunks;
                 state.queuedWriteChunks = [];
@@ -2912,6 +3209,12 @@ export class TermRecordOpfsStore {
      * @returns {number}
      */
     _computeWriteCoalesceTargetBytes() {
+        if (
+            this._expectedImportBytes !== null &&
+            this._expectedImportBytes >= LARGE_IMPORT_EXPECTED_BYTES_THRESHOLD
+        ) {
+            return LARGE_IMPORT_WRITE_COALESCE_TARGET_BYTES;
+        }
         /** @type {number|null} */
         let memoryGiB = null;
         try {
@@ -2940,6 +3243,9 @@ export class TermRecordOpfsStore {
     _coalescePendingChunks(chunks) {
         const targetBytes = this._writeCoalesceTargetBytes;
         if (chunks.length <= 1 || targetBytes <= 0) {
+            if (chunks.length === 1 && chunks[0].byteLength > 0) {
+                this._recordWriteDrainGroupMetrics(chunks[0].byteLength, 1, false);
+            }
             return chunks;
         }
         /** @type {Uint8Array[]} */
@@ -2951,16 +3257,19 @@ export class TermRecordOpfsStore {
             const chunkBytes = chunk.byteLength;
             if (chunkBytes <= 0) { continue; }
             if (groupBytes > 0 && (groupBytes + chunkBytes > targetBytes || group.length >= WRITE_COALESCE_MAX_CHUNKS)) {
+                this._recordWriteDrainGroupMetrics(groupBytes, group.length, group.length > 1);
                 result.push(this._mergeChunks(group, groupBytes));
                 group = [];
                 groupBytes = 0;
             }
             if (chunkBytes >= targetBytes) {
                 if (groupBytes > 0) {
+                    this._recordWriteDrainGroupMetrics(groupBytes, group.length, group.length > 1);
                     result.push(this._mergeChunks(group, groupBytes));
                     group = [];
                     groupBytes = 0;
                 }
+                this._recordWriteDrainGroupMetrics(chunkBytes, 1, false);
                 result.push(chunk);
                 continue;
             }
@@ -2968,9 +3277,64 @@ export class TermRecordOpfsStore {
             groupBytes += chunkBytes;
         }
         if (groupBytes > 0) {
+            this._recordWriteDrainGroupMetrics(groupBytes, group.length, group.length > 1);
             result.push(this._mergeChunks(group, groupBytes));
         }
         return result;
+    }
+
+    /**
+     * @param {number} byteLength
+     * @param {number} chunkCount
+     * @param {boolean} merged
+     * @returns {void}
+     */
+    _recordWriteDrainGroupMetrics(byteLength, chunkCount, merged) {
+        if (byteLength <= 0 || chunkCount <= 0) { return; }
+        ++this._writeDrainMetrics.writeCallCount;
+        this._writeDrainMetrics.totalWriteBytes += byteLength;
+        if (byteLength > this._writeDrainMetrics.maxWriteBytes) {
+            this._writeDrainMetrics.maxWriteBytes = byteLength;
+        }
+        if (this._writeDrainMetrics.minWriteBytes === 0 || byteLength < this._writeDrainMetrics.minWriteBytes) {
+            this._writeDrainMetrics.minWriteBytes = byteLength;
+        }
+        if (!merged) {
+            ++this._writeDrainMetrics.singleChunkWriteCount;
+            return;
+        }
+        ++this._writeDrainMetrics.mergedWriteCount;
+        this._writeDrainMetrics.mergedWriteBytes += byteLength;
+        this._writeDrainMetrics.mergedGroupChunkCount += chunkCount;
+        if (chunkCount > this._writeDrainMetrics.maxMergedGroupChunkCount) {
+            this._writeDrainMetrics.maxMergedGroupChunkCount = chunkCount;
+        }
+        if (
+            this._writeDrainMetrics.minMergedGroupChunkCount === 0 ||
+            chunkCount < this._writeDrainMetrics.minMergedGroupChunkCount
+        ) {
+            this._writeDrainMetrics.minMergedGroupChunkCount = chunkCount;
+        }
+    }
+
+    /**
+     * @returns {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}}
+     */
+    _createEmptyWriteDrainMetrics() {
+        return {
+            drainCycleCount: 0,
+            writeCallCount: 0,
+            singleChunkWriteCount: 0,
+            mergedWriteCount: 0,
+            totalWriteBytes: 0,
+            mergedWriteBytes: 0,
+            maxWriteBytes: 0,
+            minWriteBytes: 0,
+            mergedGroupChunkCount: 0,
+            maxMergedGroupChunkCount: 0,
+            minMergedGroupChunkCount: 0,
+            writeCoalesceTargetBytes: this._writeCoalesceTargetBytes,
+        };
     }
 
     /**
@@ -3255,23 +3619,10 @@ export class TermRecordOpfsStore {
      * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} index
      * @param {TermRecord} record
      */
-    _addRecordToDictionaryIndex(index, record) {
+    _addRecordReverseToDictionaryIndex(index, record) {
         this._ensureDecodedRecordStrings(record);
         const expression = record.expression ?? '';
         const reading = record.reading ?? expression;
-        const expressionList = index.expression.get(expression);
-        if (typeof expressionList === 'undefined') {
-            index.expression.set(expression, [record.id]);
-        } else {
-            expressionList.push(record.id);
-        }
-
-        const readingList = index.reading.get(reading);
-        if (typeof readingList === 'undefined') {
-            index.reading.set(reading, [record.id]);
-        } else {
-            readingList.push(record.id);
-        }
         if (record.expressionReverse === null || typeof record.expressionReverse === 'undefined') {
             record.expressionReverse = this._reverseString(expression);
         }
@@ -3295,6 +3646,32 @@ export class TermRecordOpfsStore {
             } else {
                 readingReverseList.push(record.id);
             }
+        }
+    }
+
+    /**
+     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} index
+     * @param {TermRecord} record
+     */
+    _addRecordToDictionaryIndex(index, record) {
+        this._ensureDecodedRecordStrings(record);
+        const expression = record.expression ?? '';
+        const reading = record.reading ?? expression;
+        const expressionList = index.expression.get(expression);
+        if (typeof expressionList === 'undefined') {
+            index.expression.set(expression, [record.id]);
+        } else {
+            expressionList.push(record.id);
+        }
+
+        const readingList = index.reading.get(reading);
+        if (typeof readingList === 'undefined') {
+            index.reading.set(reading, [record.id]);
+        } else {
+            readingList.push(record.id);
+        }
+        if (this._reverseIndexReady.has(index)) {
+            this._addRecordReverseToDictionaryIndex(index, record);
         }
 
         const pairKey = `${record.expression}\u001f${record.reading}`;

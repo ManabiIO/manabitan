@@ -290,10 +290,13 @@ class KeyboardShortcutHotkeyEntry {
         this._argumentInput = null;
         /** @type {EventListenerCollection} */
         this._argumentEventListeners = new EventListenerCollection();
+        /** @type {boolean} */
+        this._isDisposed = false;
     }
 
     /** */
     async prepare() {
+        this._isDisposed = false;
         const node = this._node;
 
         /** @type {HTMLButtonElement} */
@@ -323,6 +326,7 @@ class KeyboardShortcutHotkeyEntry {
 
         this._updateScopesButton();
         await this._updateActionArgument();
+        if (this._isDisposed || this._inputField === null || this._node.parentNode === null) { return; }
 
         this._eventListeners.addEventListener(scopesButton, 'menuOpen', this._onScopesMenuOpen.bind(this));
         this._eventListeners.addEventListener(scopesButton, 'menuClose', this._onScopesMenuClose.bind(this));
@@ -334,6 +338,7 @@ class KeyboardShortcutHotkeyEntry {
 
     /** */
     cleanup() {
+        this._isDisposed = true;
         this._eventListeners.removeAllEventListeners();
         if (this._inputField !== null) {
             this._inputField.cleanup();

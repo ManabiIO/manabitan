@@ -19,6 +19,41 @@ import {describe, expect, test, vi} from 'vitest';
 import {Frontend} from '../ext/js/app/frontend.js';
 
 describe('Frontend dictionary update handling', () => {
+    test('hover lookup prewarm stops scheduling probes after the first dictionary hit', async () => {
+        const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
+        const calls = [];
+        /** @type {Array<() => void>} */
+        const resolvers = [];
+        Reflect.set(frontend, '_application', {
+            api: {
+                termsFind: vi.fn((term) => new Promise((resolve) => {
+                    calls.push(term);
+                    resolvers.push(() => {
+                        resolve({
+                            dictionaryEntries: term === '日本' ? [{dictionary: 'JMdict'}] : [],
+                        });
+                    });
+                })),
+            },
+        });
+
+        const runLookupPrewarmTerms = Reflect.get(Frontend.prototype, '_runLookupPrewarmTerms');
+        const {firstMatchedResultPromise, resultsPromise} = runLookupPrewarmTerms.call(frontend, ['日本', 'する', 'ある', '見る', '食べる'], {});
+
+        expect(calls).toEqual(['日本', 'する']);
+        resolvers[0]();
+        const firstMatchedResult = await firstMatchedResultPromise;
+        expect(firstMatchedResult).toEqual({term: '日本', dictionaryEntries: [{dictionary: 'JMdict'}]});
+        for (let i = 1; i < resolvers.length; ++i) {
+            resolvers[i]();
+        }
+        const results = await resultsPromise;
+
+        expect(calls).toEqual(['日本', 'する']);
+        expect(results).toHaveLength(2);
+        expect(Reflect.get(frontend, '_application').api.termsFind).toHaveBeenCalledTimes(2);
+    });
+
     test('options updates rerun the active hover lookup and do not clear state on success', async () => {
         const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
         Reflect.set(frontend, '_application', {webExtension: {unloaded: false}});
@@ -61,6 +96,7 @@ describe('Frontend dictionary update handling', () => {
         Reflect.set(frontend, '_clearSelection', vi.fn());
         Reflect.set(frontend, '_clearMousePosition', vi.fn());
         Reflect.set(frontend, '_updatePageDebugState', vi.fn());
+        Reflect.set(frontend, '_startPopupPrewarmForHover', vi.fn());
 
         const onDatabaseUpdated = Reflect.get(Frontend.prototype, '_onDatabaseUpdated');
         await onDatabaseUpdated.call(frontend, {type: 'dictionary', cause: 'import'});
@@ -68,6 +104,7 @@ describe('Frontend dictionary update handling', () => {
         expect(Reflect.get(frontend, '_updatePageDebugState')).toHaveBeenCalledWith({lastSearchState: 'dictionary-updated'});
         expect(Reflect.get(frontend, 'updateOptions')).toHaveBeenCalledOnce();
         expect(Reflect.get(frontend, 'updateOptions')).toHaveBeenCalledWith(true);
+        expect(Reflect.get(frontend, '_startPopupPrewarmForHover')).toHaveBeenCalledOnce();
         expect(Reflect.get(frontend, '_textScanner').searchLast).toHaveBeenCalledOnce();
         expect(Reflect.get(frontend, '_clearSelection')).not.toHaveBeenCalled();
         expect(Reflect.get(frontend, '_clearMousePosition')).not.toHaveBeenCalled();
@@ -81,11 +118,13 @@ describe('Frontend dictionary update handling', () => {
         Reflect.set(frontend, '_clearSelection', vi.fn());
         Reflect.set(frontend, '_clearMousePosition', vi.fn());
         Reflect.set(frontend, '_updatePageDebugState', vi.fn());
+        Reflect.set(frontend, '_startPopupPrewarmForHover', vi.fn());
 
         const onDatabaseUpdated = Reflect.get(Frontend.prototype, '_onDatabaseUpdated');
         await onDatabaseUpdated.call(frontend, {type: 'dictionary', cause: 'import'});
 
         expect(Reflect.get(frontend, 'updateOptions')).toHaveBeenCalledOnce();
+        expect(Reflect.get(frontend, '_startPopupPrewarmForHover')).toHaveBeenCalledOnce();
         expect(Reflect.get(frontend, '_textScanner').searchLast).toHaveBeenCalledOnce();
         expect(Reflect.get(frontend, '_clearSelection')).toHaveBeenCalledWith(true);
         expect(Reflect.get(frontend, '_clearMousePosition')).toHaveBeenCalledOnce();

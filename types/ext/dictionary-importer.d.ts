@@ -62,11 +62,15 @@ export type ImportDetails = {
     skipImageMetadata?: boolean;
     mediaResolutionConcurrency?: number;
     debugImportLogging?: boolean;
-    enableTermEntryContentDedup?: boolean;
+    enableTermEntryContentDedup?: boolean | null;
     termContentStorageMode?: 'baseline' | 'raw-bytes';
     expectedTermContentImportBytes?: number;
     preserveCompressedMedia?: boolean;
     skipMediaImport?: boolean;
+    zipMaxWorkers?: number | null;
+    zipChunkSize?: number | null;
+    artifactFixedPackMinTotalRows?: number | null;
+    wasmPreallocateChunkRows?: boolean;
     updateSessionToken?: string | null;
 };
 

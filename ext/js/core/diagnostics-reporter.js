@@ -22,6 +22,8 @@ const DEFAULT_DEV_DIAGNOSTICS_VERBOSITY = 'basic';
 const DIAGNOSTICS_LOG_STORAGE_KEY = 'manabitanDiagnosticsLog';
 const DIAGNOSTICS_LOG_SCHEMA_VERSION = 1;
 const DIAGNOSTICS_LOG_MAX_ENTRIES = 500;
+const DIAGNOSTICS_LOG_FLUSH_DELAY_MS = 250;
+const DIAGNOSTICS_LOG_FLUSH_BATCH_SIZE = 50;
 const BASIC_DIAGNOSTICS_EVENTS = new Set([
     'extension-start',
     'backend-prepare-complete',
@@ -42,9 +44,21 @@ const BASIC_DIAGNOSTICS_EVENTS = new Set([
     'dictionary-import-step-final',
     'dictionary-import-zip-complete',
     'dictionary-import-worker-phase-summary',
+    'dictionary-lookup-db-query',
+    'dictionary-lookup-snapshot',
+    'display-terms-find-snapshot',
+    'dictionary-lookup-translator-stage',
 ]);
 /** @type {Promise<DiagnosticsConfig>|null} */
 let diagnosticsConfigPromise = null;
+/** @type {DiagnosticsLogEntry[]} */
+let pendingDiagnosticsLogEntries = [];
+/** @type {Promise<void>|null} */
+let diagnosticsLogFlushPromise = null;
+/** @type {ReturnType<typeof setTimeout>|null} */
+let diagnosticsLogFlushTimer = null;
+/** @type {chrome.runtime.Manifest|null|undefined} */
+let cachedManifest;
 
 /**
  * @typedef {{
@@ -74,12 +88,20 @@ let diagnosticsConfigPromise = null;
  * @returns {chrome.runtime.Manifest|null}
  */
 function getManifestOrNull() {
+    if (typeof cachedManifest !== 'undefined') {
+        return cachedManifest;
+    }
     const chromeValue = Reflect.get(globalThis, 'chrome');
     const runtime = /** @type {{runtime?: {getManifest?: () => chrome.runtime.Manifest}}} */ (chromeValue)?.runtime;
-    if (typeof runtime?.getManifest !== 'function') { return null; }
+    if (typeof runtime?.getManifest !== 'function') {
+        cachedManifest = null;
+        return null;
+    }
     try {
-        return runtime.getManifest();
+        cachedManifest = runtime.getManifest();
+        return cachedManifest;
     } catch (_) {
+        cachedManifest = null;
         return null;
     }
 }
@@ -219,18 +241,75 @@ function normalizeDiagnosticsLogEntries(value) {
  * @returns {Promise<void>}
  */
 async function appendDiagnosticsLogEntry(entry) {
+    pendingDiagnosticsLogEntries.push({
+        schemaVersion: DIAGNOSTICS_LOG_SCHEMA_VERSION,
+        timestampIso: entry.timestampIso,
+        event: entry.event,
+        extensionId: entry.extensionId,
+        manifest: entry.manifest,
+        contextUrl: entry.contextUrl,
+        payload: toSerializableValue(entry.payload),
+    });
+    if (pendingDiagnosticsLogEntries.length > DIAGNOSTICS_LOG_MAX_ENTRIES) {
+        pendingDiagnosticsLogEntries = pendingDiagnosticsLogEntries.slice(pendingDiagnosticsLogEntries.length - DIAGNOSTICS_LOG_MAX_ENTRIES);
+    }
+    if (pendingDiagnosticsLogEntries.length >= DIAGNOSTICS_LOG_FLUSH_BATCH_SIZE) {
+        await flushDiagnosticsLogEntries();
+        return;
+    }
+    scheduleDiagnosticsLogFlush();
+}
+
+/** */
+function scheduleDiagnosticsLogFlush() {
+    if (diagnosticsLogFlushTimer !== null || pendingDiagnosticsLogEntries.length === 0) {
+        return;
+    }
+    diagnosticsLogFlushTimer = setTimeout(() => {
+        diagnosticsLogFlushTimer = null;
+        void flushDiagnosticsLogEntries();
+    }, DIAGNOSTICS_LOG_FLUSH_DELAY_MS);
+}
+
+/**
+ * @returns {Promise<void>}
+ */
+async function flushDiagnosticsLogEntries() {
+    if (diagnosticsLogFlushTimer !== null) {
+        clearTimeout(diagnosticsLogFlushTimer);
+        diagnosticsLogFlushTimer = null;
+    }
+    if (diagnosticsLogFlushPromise !== null) {
+        await diagnosticsLogFlushPromise;
+        if (pendingDiagnosticsLogEntries.length === 0) {
+            return;
+        }
+    }
+    const entriesToFlush = pendingDiagnosticsLogEntries;
+    pendingDiagnosticsLogEntries = [];
+    if (entriesToFlush.length === 0) { return; }
+    diagnosticsLogFlushPromise = (async () => {
+        await writeDiagnosticsLogEntries(entriesToFlush);
+    })();
+    try {
+        await diagnosticsLogFlushPromise;
+    } finally {
+        diagnosticsLogFlushPromise = null;
+        if (pendingDiagnosticsLogEntries.length > 0) {
+            scheduleDiagnosticsLogFlush();
+        }
+    }
+}
+
+/**
+ * @param {DiagnosticsLogEntry[]} entriesToFlush
+ * @returns {Promise<void>}
+ */
+async function writeDiagnosticsLogEntries(entriesToFlush) {
     try {
         const result = await storageLocalGet([DIAGNOSTICS_LOG_STORAGE_KEY]);
         const existing = normalizeDiagnosticsLogEntries(Reflect.get(result, DIAGNOSTICS_LOG_STORAGE_KEY));
-        existing.push({
-            schemaVersion: DIAGNOSTICS_LOG_SCHEMA_VERSION,
-            timestampIso: entry.timestampIso,
-            event: entry.event,
-            extensionId: entry.extensionId,
-            manifest: entry.manifest,
-            contextUrl: entry.contextUrl,
-            payload: toSerializableValue(entry.payload),
-        });
+        existing.push(...entriesToFlush);
         const startIndex = Math.max(0, existing.length - DIAGNOSTICS_LOG_MAX_ENTRIES);
         await storageLocalSet({
             [DIAGNOSTICS_LOG_STORAGE_KEY]: existing.slice(startIndex),
@@ -283,6 +362,14 @@ async function getDiagnosticsConfig() {
         return await diagnosticsConfigPromise;
     }
     diagnosticsConfigPromise = (async () => {
+        const manifest = getManifestOrNull();
+        if (manifest === null || !isDevBuildManifest(manifest)) {
+            return {
+                enabled: false,
+                endpoint: null,
+                verbosity: 'off',
+            };
+        }
         const endpoint = await getDiagnosticsEndpoint();
         let enabled = true;
         /** @type {DiagnosticsVerbosity} */
@@ -344,6 +431,7 @@ function shouldReportDiagnosticsEvent(event, verbosity) {
  * @returns {Promise<{schemaVersion: number, entryCount: number, entries: DiagnosticsLogEntry[]}>}
  */
 export async function getDiagnosticsLogSnapshot(limit = DIAGNOSTICS_LOG_MAX_ENTRIES) {
+    await flushDiagnosticsLogEntries();
     const normalizedLimit = (
         typeof limit === 'number' &&
         Number.isFinite(limit) &&
@@ -365,19 +453,25 @@ export async function getDiagnosticsLogSnapshot(limit = DIAGNOSTICS_LOG_MAX_ENTR
  * @returns {Promise<void>}
  */
 export async function clearDiagnosticsLogSnapshot() {
+    if (diagnosticsLogFlushTimer !== null) {
+        clearTimeout(diagnosticsLogFlushTimer);
+        diagnosticsLogFlushTimer = null;
+    }
+    pendingDiagnosticsLogEntries = [];
+    if (diagnosticsLogFlushPromise !== null) {
+        await diagnosticsLogFlushPromise;
+    }
     await storageLocalRemove(DIAGNOSTICS_LOG_STORAGE_KEY);
 }
 
 /**
  * @param {string} event
  * @param {Record<string, unknown>} payload
+ * @param {string|null} endpoint
  * @returns {void}
  */
-export function reportDiagnostics(event, payload = {}) {
+function submitDiagnostics(event, payload, endpoint) {
     void (async () => {
-        const {enabled, endpoint, verbosity} = await getDiagnosticsConfig();
-        if (!enabled) { return; }
-        if (!shouldReportDiagnosticsEvent(event, verbosity)) { return; }
         const manifest = getManifestOrNull();
         const chromeValue = Reflect.get(globalThis, 'chrome');
         const runtimeId = /** @type {{runtime?: {id?: string}}} */ (chromeValue)?.runtime?.id;
@@ -431,5 +525,41 @@ export function reportDiagnostics(event, payload = {}) {
         } catch (_) {
             // Best-effort diagnostics channel.
         }
+    })();
+}
+
+/**
+ * @param {string} event
+ * @param {Record<string, unknown>} payload
+ * @returns {void}
+ */
+export function reportDiagnostics(event, payload = {}) {
+    void (async () => {
+        const {enabled, endpoint, verbosity} = await getDiagnosticsConfig();
+        if (!enabled) { return; }
+        if (!shouldReportDiagnosticsEvent(event, verbosity)) { return; }
+        submitDiagnostics(event, payload, endpoint);
+    })();
+}
+
+/**
+ * @param {string} event
+ * @param {() => Record<string, unknown>} createPayload
+ * @returns {void}
+ */
+export function reportDiagnosticsLazy(event, createPayload) {
+    void (async () => {
+        const {enabled, endpoint, verbosity} = await getDiagnosticsConfig();
+        if (!enabled) { return; }
+        if (!shouldReportDiagnosticsEvent(event, verbosity)) { return; }
+        let payload;
+        try {
+            payload = createPayload();
+        } catch (e) {
+            payload = {
+                diagnosticsPayloadError: e instanceof Error ? e.message : `${e}`,
+            };
+        }
+        submitDiagnostics(event, payload, endpoint);
     })();
 }

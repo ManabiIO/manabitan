@@ -204,7 +204,7 @@ async function buildDictionaryWasm(out) {
         {
             sourcePath: path.join(extDir, 'js', 'dictionary', 'wasm', 'term-bank-parser.c'),
             outputPath: path.join(out, 'term-bank-parser.wasm'),
-            exports: ['wasm_reset_heap', 'wasm_alloc', 'parse_term_bank', 'encode_term_content'],
+            exports: ['wasm_reset_heap', 'wasm_alloc', 'parse_term_bank', 'parse_term_bank_with_media_hints', 'encode_term_content', 'encode_term_content_no_hash'],
         },
         {
             sourcePath: path.join(extDir, 'js', 'dictionary', 'wasm', 'term-record-encoder.c'),

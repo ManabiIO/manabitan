@@ -17,7 +17,7 @@
 
 import {parseJson} from '../core/json.js';
 
-const META_U32_FIELDS = 16;
+const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
 const U8_QUOTE = 0x22;
 const U8_N = 0x6e;
@@ -26,10 +26,8 @@ const U8_L = 0x6c;
 
 const CONTENT_META_U32_FIELDS = 4;
 const DEFAULT_ROW_CHUNK_SIZE = 2048;
-const GLOSSARY_MEDIA_MARKER_IMAGE = new Uint8Array([0x22, 0x69, 0x6d, 0x61, 0x67, 0x65, 0x22]); // "image"
-const GLOSSARY_MEDIA_MARKER_IMG = new Uint8Array([0x22, 0x69, 0x6d, 0x67, 0x22]); // "img"
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
-/** @type {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, parse_term_bank: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}>|null} */
+/** @type {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, parse_term_bank: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, parse_term_bank_with_media_hints: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number, encode_term_content_no_hash: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}>|null} */
 let wasmPromise = null;
 
 /** @type {TextDecoder} */
@@ -42,7 +40,7 @@ let lastSuccessfulMetaCapacity = 0;
 let lastSuccessfulContentBytesPerRow = 0;
 
 /**
- * @returns {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, parse_term_bank: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}>}
+ * @returns {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, parse_term_bank: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, parse_term_bank_with_media_hints: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number, encode_term_content_no_hash: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}>}
  */
 async function getWasm() {
     if (wasmPromise !== null) {
@@ -53,13 +51,15 @@ async function getWasm() {
         const response = await fetch(url);
         const bytes = await response.arrayBuffer();
         const instance = await WebAssembly.instantiate(bytes, {});
-        const exports = /** @type {WebAssembly.Exports & {memory?: WebAssembly.Memory, wasm_reset_heap?: () => void, wasm_alloc?: (size: number) => number, parse_term_bank?: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content?: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}} */ (instance.instance.exports);
+        const exports = /** @type {WebAssembly.Exports & {memory?: WebAssembly.Memory, wasm_reset_heap?: () => void, wasm_alloc?: (size: number) => number, parse_term_bank?: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, parse_term_bank_with_media_hints?: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content?: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number, encode_term_content_no_hash?: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}} */ (instance.instance.exports);
         if (
             !(exports.memory instanceof WebAssembly.Memory) ||
             typeof exports.wasm_reset_heap !== 'function' ||
             typeof exports.wasm_alloc !== 'function' ||
             typeof exports.parse_term_bank !== 'function' ||
-            typeof exports.encode_term_content !== 'function'
+            typeof exports.parse_term_bank_with_media_hints !== 'function' ||
+            typeof exports.encode_term_content !== 'function' ||
+            typeof exports.encode_term_content_no_hash !== 'function'
         ) {
             throw new Error('term-bank wasm parser exports are invalid');
         }
@@ -68,7 +68,9 @@ async function getWasm() {
             wasm_reset_heap: exports.wasm_reset_heap,
             wasm_alloc: exports.wasm_alloc,
             parse_term_bank: exports.parse_term_bank,
+            parse_term_bank_with_media_hints: exports.parse_term_bank_with_media_hints,
             encode_term_content: exports.encode_term_content,
+            encode_term_content_no_hash: exports.encode_term_content_no_hash,
         };
     })();
     return await wasmPromise;
@@ -104,6 +106,25 @@ function decodeJsonStringToken(source, start, length) {
     }
     const quoted = textDecoder.decode(source.subarray(start, start + length));
     return /** @type {string} */ (parseJson(quoted));
+}
+
+/**
+ * @param {Uint8Array} source
+ * @param {number} start
+ * @param {number} length
+ * @returns {Uint8Array|null}
+ */
+function getUnescapedJsonStringTokenBytes(source, start, length) {
+    if (length < 2 || source[start] !== U8_QUOTE || source[start + length - 1] !== U8_QUOTE) {
+        return null;
+    }
+    if (length === 2) {
+        return EMPTY_UINT8_ARRAY;
+    }
+    const valueStart = start + 1;
+    const valueEnd = start + length - 1;
+    const valueBytes = source.subarray(valueStart, valueEnd);
+    return valueBytes.includes(U8_BACKSLASH) ? null : valueBytes;
 }
 
 /**
@@ -175,48 +196,6 @@ function decodeRawToken(source, start, length) {
 
 /**
  * @param {Uint8Array} source
- * @param {number} start
- * @param {number} length
- * @param {Uint8Array} marker
- * @returns {boolean}
- */
-function tokenContainsMarker(source, start, length, marker) {
-    const markerLength = marker.length;
-    if (markerLength === 0 || length < markerLength) {
-        return false;
-    }
-    const end = start + length - markerLength;
-    for (let i = start; i <= end; ++i) {
-        let matches = true;
-        for (let j = 0; j < markerLength; ++j) {
-            if (source[i + j] !== marker[j]) {
-                matches = false;
-                break;
-            }
-        }
-        if (matches) {
-            return true;
-        }
-    }
-    return false;
-}
-
-/**
- * @param {Uint8Array} source
- * @param {number} start
- * @param {number} length
- * @returns {boolean}
- */
-function glossaryTokenLikelyContainsMedia(source, start, length) {
-    const contains = tokenContainsMarker;
-    return (
-        contains(source, start, length, GLOSSARY_MEDIA_MARKER_IMAGE) ||
-        contains(source, start, length, GLOSSARY_MEDIA_MARKER_IMG)
-    );
-}
-
-/**
- * @param {Uint8Array} source
  * @param {number} startA
  * @param {number} lengthA
  * @param {number} startB
@@ -238,10 +217,12 @@ function tokenBytesEqual(source, startA, lengthA, startB, lengthB) {
  * @param {boolean} includeContentMetadata
  * @param {number} initialMetaCapacityDivisor
  * @param {number} initialContentBytesPerRow
+ * @param {boolean} mediaHintFastScan
+ * @param {boolean} computeContentHashes
  * @returns {Promise<{heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, rowCount: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number}>}
  * @throws {Error}
  */
-async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialMetaCapacityDivisor, initialContentBytesPerRow) {
+async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialMetaCapacityDivisor, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes) {
     if (contentBytes.byteLength === 0) {
         return {
             heap: new Uint8Array(0),
@@ -288,7 +269,9 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             throw new Error('Failed to allocate wasm term metadata buffer');
         }
         tStart = Date.now();
-        rowCount = wasm.parse_term_bank(jsonPtr, contentBytes.byteLength, outPtr, capacity);
+        rowCount = mediaHintFastScan ?
+            wasm.parse_term_bank_with_media_hints(jsonPtr, contentBytes.byteLength, outPtr, capacity) :
+            wasm.parse_term_bank(jsonPtr, contentBytes.byteLength, outPtr, capacity);
         parseBankMs += Math.max(0, Date.now() - tStart);
         if (rowCount >= 0) {
             break;
@@ -342,7 +325,8 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             throw new Error('Failed to allocate wasm content buffer');
         }
         tStart = Date.now();
-        encodedContentBytes = wasm.encode_term_content(
+        const encodeTermContent = computeContentHashes ? wasm.encode_term_content : wasm.encode_term_content_no_hash;
+        encodedContentBytes = encodeTermContent(
             jsonPtr,
             outPtr,
             rowCount,
@@ -402,7 +386,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
  * @param {boolean} skipTagRuleDecode
  * @param {boolean} lazyGlossaryDecode
  * @param {boolean} mediaHintFastScan
- * @returns {{expression: string, reading: string, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
+ * @returns {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
  */
 function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, skipTagRuleDecode, lazyGlossaryDecode, mediaHintFastScan) {
     const o = i * META_U32_FIELDS;
@@ -412,9 +396,13 @@ function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, v
     const readingStart = metas[o + 2];
     const readingLength = metas[o + 3];
     const expression = decodeJsonStringToken(source, expressionStart, expressionLength);
+    const readingIsEmpty = readingLength === 2 && source[readingStart] === U8_QUOTE && source[readingStart + 1] === U8_QUOTE;
     const reuseExpressionReading = (
         reuseExpressionForReadingDecode &&
-        tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
+        (
+            readingIsEmpty ||
+            tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
+        )
     );
     const reading = reuseExpressionReading ?
         expression :
@@ -426,7 +414,7 @@ function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, v
     const glossaryLength = metas[o + 11];
     const glossaryJsonBytes = source.subarray(glossaryStart, glossaryStart + glossaryLength);
     const glossaryJson = lazyGlossaryDecode ? '' : decodeRawToken(source, glossaryStart, glossaryLength);
-    const glossaryMayContainMedia = mediaHintFastScan ? glossaryTokenLikelyContainsMedia(source, glossaryStart, glossaryLength) : void 0;
+    const glossaryMayContainMedia = mediaHintFastScan ? metas[o + 16] === 1 : void 0;
     const sequence = version >= 3 ? (isNullToken(source, metas[o + 12], metas[o + 13]) ? null : decodeNumberToken(source, metas[o + 12], metas[o + 13], 0)) : null;
     const termTags = skipTagRuleDecode ? '' : (version >= 3 ? (decodeNullableJsonStringToken(source, metas[o + 14], metas[o + 15]) ?? '') : '');
     let termEntryContentHash1;
@@ -472,7 +460,7 @@ function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, v
  * @param {boolean} copyContentBytes
  * @param {boolean} includeContentMetadata
  * @param {boolean} reuseExpressionForReadingDecode
- * @returns {{expression: string, reading: string, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
+ * @returns {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
  */
 function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode) {
     const o = i * META_U32_FIELDS;
@@ -481,14 +469,18 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
     const expressionLength = metas[o + 1];
     const readingStart = metas[o + 2];
     const readingLength = metas[o + 3];
-    const expression = decodeJsonStringToken(source, expressionStart, expressionLength);
     const reuseExpressionReading = (
         reuseExpressionForReadingDecode &&
         tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
     );
+    const expressionBytes = getUnescapedJsonStringTokenBytes(source, expressionStart, expressionLength) ?? void 0;
+    const readingBytes = reuseExpressionReading ?
+        expressionBytes :
+        (getUnescapedJsonStringTokenBytes(source, readingStart, readingLength) ?? void 0);
+    const expression = typeof expressionBytes === 'undefined' ? decodeJsonStringToken(source, expressionStart, expressionLength) : '';
     const reading = reuseExpressionReading ?
         expression :
-        decodeJsonStringToken(source, readingStart, readingLength);
+        (typeof readingBytes === 'undefined' ? decodeJsonStringToken(source, readingStart, readingLength) : '');
     const score = decodeNumberToken(source, metas[o + 8], metas[o + 9], 0);
     const sequence = version >= 3 ? (isNullToken(source, metas[o + 12], metas[o + 13]) ? null : decodeNumberToken(source, metas[o + 12], metas[o + 13], 0)) : null;
     let termEntryContentHash1;
@@ -509,6 +501,9 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
     return {
         expression,
         reading,
+        expressionBytes,
+        readingBytes,
+        readingEqualsExpression: reuseExpressionReading,
         definitionTags: '',
         rules: '',
         score,
@@ -524,9 +519,9 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
 /**
  * @param {Uint8Array} contentBytes
  * @param {number} version
- * @param {(rows: {expression: string, reading: string, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[], progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {(rows: {expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[], progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
- * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, initialMetaCapacityDivisor?: number, initialContentBytesPerRow?: number, minimalDecode?: boolean, reuseExpressionForReadingDecode?: boolean, skipTagRuleDecode?: boolean, lazyGlossaryDecode?: boolean, mediaHintFastScan?: boolean, preallocateChunkRows?: boolean}} [options]
+ * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, initialMetaCapacityDivisor?: number, initialContentBytesPerRow?: number, minimalDecode?: boolean, reuseExpressionForReadingDecode?: boolean, skipTagRuleDecode?: boolean, lazyGlossaryDecode?: boolean, mediaHintFastScan?: boolean, preallocateChunkRows?: boolean, computeContentHashes?: boolean}} [options]
  * @returns {Promise<void>}
  */
 export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk, chunkSize = DEFAULT_ROW_CHUNK_SIZE, options = {}) {
@@ -540,6 +535,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
     const lazyGlossaryDecode = options.lazyGlossaryDecode === true;
     const mediaHintFastScan = options.mediaHintFastScan === true;
     const preallocateChunkRows = options.preallocateChunkRows === true;
+    const computeContentHashes = options.computeContentHashes !== false;
     const tBufferSetupStart = Date.now();
     const {
         heap,
@@ -557,6 +553,8 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
         includeContentMetadata,
         initialMetaCapacityDivisor,
         initialContentBytesPerRow,
+        mediaHintFastScan,
+        computeContentHashes,
     );
     const bufferSetupMs = Math.max(0, Date.now() - tBufferSetupStart);
     if (rowCount === 0) {
@@ -585,21 +583,20 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
     const chunkCount = Math.max(1, Math.ceil(rowCount / normalizedChunkSize));
     /**
      * @param {number} size
-     * @returns {{expression: string, reading: string, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[]}
+     * @returns {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[]}
      */
-    const createRowBuffer = (size) => /** @type {{expression: string, reading: string, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[]} */ (new Array(size));
-    /** @type {{expression: string, reading: string, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[]} */
+    const createRowBuffer = (size) => /** @type {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[]} */ (new Array(size));
+    /** @type {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[]} */
     let rows = preallocateChunkRows ? createRowBuffer(Math.min(normalizedChunkSize, rowCount)) : [];
     let rowsIndex = 0;
     let chunkIndex = 0;
     let rowDecodeMs = 0;
     let chunkDispatchMs = 0;
+    let tChunkDecodeStart = Date.now();
     for (let i = 0; i < rowCount; ++i) {
-        const tDecodeStart = Date.now();
         const row = minimalDecode ?
             decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode) :
             decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, skipTagRuleDecode, lazyGlossaryDecode, mediaHintFastScan);
-        rowDecodeMs += Math.max(0, Date.now() - tDecodeStart);
         if (preallocateChunkRows) {
             rows[rowsIndex] = row;
             ++rowsIndex;
@@ -608,6 +605,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
             rowsIndex = rows.length;
         }
         if (rowsIndex >= normalizedChunkSize) {
+            rowDecodeMs += Math.max(0, Date.now() - tChunkDecodeStart);
             const chunk = rows;
             rows = preallocateChunkRows ? createRowBuffer(Math.min(normalizedChunkSize, rowCount - (i + 1))) : [];
             rowsIndex = 0;
@@ -620,9 +618,11 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
                 chunkCount,
             });
             chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
+            tChunkDecodeStart = Date.now();
         }
     }
     if (rowsIndex > 0) {
+        rowDecodeMs += Math.max(0, Date.now() - tChunkDecodeStart);
         if (preallocateChunkRows) {
             rows.length = rowsIndex;
         }
