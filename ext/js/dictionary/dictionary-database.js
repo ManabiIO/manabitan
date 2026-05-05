@@ -896,7 +896,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, artifactFixedPackMinTotalRows?: number|null, queueTermContentWrites?: boolean}} [options]
+     * @param {{termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows?: number|null, queueTermContentWrites?: boolean}} [options]
      */
     setImportOptimizationFlags(options = {}) {
         this._adaptiveTermBulkAddBatchSize = true;
@@ -916,6 +916,7 @@ export class DictionaryDatabase {
         this._termContentStore.setExpectedImportBytes(options.expectedTermContentImportBytes ?? null);
         this._termContentStore.setWriteCoalesceMaxChunksOverride(null);
         this._termContentStore.setQueueImportWritesEnabled(options.queueTermContentWrites === true);
+        this._termRecordStore.setExpectedImportBytes(options.expectedTermRecordImportBytes ?? null);
     }
 
     /**

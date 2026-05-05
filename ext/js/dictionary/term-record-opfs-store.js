@@ -61,6 +61,8 @@ const HIGH_MEMORY_QUEUED_WRITE_BUDGET_BYTES = 64 * 1024 * 1024;
 const DEFAULT_WRITE_COALESCE_TARGET_BYTES = 4 * 1024 * 1024;
 const LOW_MEMORY_WRITE_COALESCE_TARGET_BYTES = 1024 * 1024;
 const HIGH_MEMORY_WRITE_COALESCE_TARGET_BYTES = 16 * 1024 * 1024;
+const LARGE_IMPORT_EXPECTED_BYTES_THRESHOLD = 512 * 1024 * 1024;
+const LARGE_IMPORT_WRITE_COALESCE_TARGET_BYTES = 64 * 1024 * 1024;
 const WRITE_COALESCE_MAX_CHUNKS = 512;
 const MAX_SHARD_SEGMENT_FILE_BYTES = 1024 * 1024 * 1024;
 const SHARD_LOAD_CONCURRENCY = 3;
@@ -394,6 +396,8 @@ export class TermRecordOpfsStore {
         this._invalidShardFileNames = [];
         /** @type {number} */
         this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
+        /** @type {number|null} */
+        this._expectedImportBytes = null;
         /** @type {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}|null} */
         this._lastEndImportSessionMetrics = null;
         /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}} */
@@ -470,6 +474,7 @@ export class TermRecordOpfsStore {
         this._pendingArtifactReloadPlansAfterImport = [];
         this._indexByDictionary.clear();
         this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
+        this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
         for (const state of this._shardStateByFileName.values()) {
             state.pendingWriteBytes = 0;
@@ -539,6 +544,17 @@ export class TermRecordOpfsStore {
      */
     getLastEndImportSessionMetrics() {
         return this._lastEndImportSessionMetrics;
+    }
+
+    /**
+     * @param {number|null} value
+     */
+    setExpectedImportBytes(value) {
+        this._expectedImportBytes = (typeof value === 'number' && Number.isFinite(value) && value > 0) ?
+            Math.max(1, Math.trunc(value)) :
+            null;
+        this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
+        this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
     }
 
     /**
@@ -3193,6 +3209,12 @@ export class TermRecordOpfsStore {
      * @returns {number}
      */
     _computeWriteCoalesceTargetBytes() {
+        if (
+            this._expectedImportBytes !== null &&
+            this._expectedImportBytes >= LARGE_IMPORT_EXPECTED_BYTES_THRESHOLD
+        ) {
+            return LARGE_IMPORT_WRITE_COALESCE_TARGET_BYTES;
+        }
         /** @type {number|null} */
         let memoryGiB = null;
         try {

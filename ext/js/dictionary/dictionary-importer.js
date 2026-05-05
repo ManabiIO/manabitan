@@ -66,6 +66,8 @@ const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_UPPER_BOUND_BYTES = 128 * 1024 * 10
 const ADAPTIVE_TERM_BANK_WASM_INITIAL_META_CAPACITY_DIVISOR = 18;
 const ADAPTIVE_TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW = 128;
 const TERM_BANK_BYTE_PREFETCH_COUNT = 8;
+const LARGE_ARCHIVE_ZIP_MAX_WORKERS = 2;
+const LARGE_ARCHIVE_ZIP_MAX_WORKERS_THRESHOLD_BYTES = 128 * 1024 * 1024;
 const REVERSE_STRING_CACHE_MAX_ENTRIES = 4096;
 const TERM_BANK_ARTIFACT_MAGIC_V1 = 'MBTB0001';
 const TERM_BANK_ARTIFACT_MAGIC_V2 = 'MBTB0002';
@@ -522,8 +524,17 @@ export class DictionaryImporter {
         this._skipMediaImport = details.skipMediaImport === true;
         this._mediaResolutionConcurrency = Math.max(1, Math.min(32, Math.trunc(details.mediaResolutionConcurrency ?? 8)));
         this._debugImportLogging = details.debugImportLogging === true;
-        const zipMaxWorkers = Number.isFinite(details.zipMaxWorkers) ? Math.max(1, Math.min(32, Math.trunc(/** @type {number} */ (details.zipMaxWorkers)))) : null;
+        let zipMaxWorkers = Number.isFinite(details.zipMaxWorkers) ? Math.max(1, Math.min(32, Math.trunc(/** @type {number} */ (details.zipMaxWorkers)))) : null;
         const zipChunkSize = Number.isFinite(details.zipChunkSize) ? Math.max(16 * 1024, Math.min(8 * 1024 * 1024, Math.trunc(/** @type {number} */ (details.zipChunkSize)))) : null;
+        const archiveSizeBytes = archiveContent instanceof Blob ? archiveContent.size : archiveContent?.byteLength;
+        const autoZipMaxWorkersForLargeArchive = (
+            zipMaxWorkers === null &&
+            typeof archiveSizeBytes === 'number' &&
+            archiveSizeBytes >= LARGE_ARCHIVE_ZIP_MAX_WORKERS_THRESHOLD_BYTES
+        );
+        if (autoZipMaxWorkersForLargeArchive) {
+            zipMaxWorkers = LARGE_ARCHIVE_ZIP_MAX_WORKERS;
+        }
         const artifactFixedPackMinTotalRows = Number.isFinite(details.artifactFixedPackMinTotalRows) ?
             Math.max(0, Math.min(4_000_000, Math.trunc(/** @type {number} */ (details.artifactFixedPackMinTotalRows)))) :
             null;
@@ -656,7 +667,12 @@ export class DictionaryImporter {
             indexVersion: typeof index.version === 'number' ? index.version : null,
             zipMaxWorkers,
             zipChunkSize,
+            autoZipMaxWorkersForLargeArchive,
+            archiveSizeBytes: archiveSizeBytes ?? null,
         });
+        if (autoZipMaxWorkersForLargeArchive) {
+            this._logImport(`large archive zip maxWorkers=${zipMaxWorkers} sizeBytes=${archiveSizeBytes}`);
+        }
         this._logImport(`archive+index ${Date.now() - tArchiveStart}ms files=${fileMap.size}`);
 
         const sourceDictionaryTitle = index.title;
@@ -900,6 +916,8 @@ export class DictionaryImporter {
                 termArtifactFiles,
             ) :
             null;
+        const expectedTermRecordImportBytes = totalArtifactTermRows > 0 ? totalArtifactTermRows * 128 : null;
+        /** @type {{termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
         const importOptimizationOptions = {
             termContentStorageMode: effectiveTermContentStorageMode,
             artifactFixedPackMinTotalRows,
@@ -907,6 +925,9 @@ export class DictionaryImporter {
         };
         if (expectedTermContentImportBytes !== null) {
             importOptimizationOptions.expectedTermContentImportBytes = expectedTermContentImportBytes;
+        }
+        if (expectedTermRecordImportBytes !== null) {
+            importOptimizationOptions.expectedTermRecordImportBytes = expectedTermRecordImportBytes;
         }
         dictionaryDatabase.setImportOptimizationFlags(importOptimizationOptions);
         /** @type {Array<import('@zip.js/zip.js').Entry|{filename: string}>} */
@@ -919,7 +940,8 @@ export class DictionaryImporter {
             `useArtifactTerms=${String(useTermArtifactFiles || usePackedTermArtifact)} packedTermArtifact=${String(packedTermArtifactBytes !== null)} ` +
             `prunedArtifactAux=${String(usePrunedArtifactAuxFastPath)} ` +
             `preloadedTermArtifacts=${String(preloadedTermArtifactBytes !== null)} ` +
-            `expectedTermContentImportBytes=${String(expectedTermContentImportBytes)}`,
+            `expectedTermContentImportBytes=${String(expectedTermContentImportBytes)} ` +
+            `expectedTermRecordImportBytes=${String(expectedTermRecordImportBytes)}`,
         );
 
         // Load and import data
