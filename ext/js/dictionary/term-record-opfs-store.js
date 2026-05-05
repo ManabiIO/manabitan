@@ -394,6 +394,8 @@ export class TermRecordOpfsStore {
         this._invalidShardFileNames = [];
         /** @type {number} */
         this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
+        /** @type {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number}|null} */
+        this._lastEndImportSessionMetrics = null;
     }
 
     /**
@@ -482,7 +484,12 @@ export class TermRecordOpfsStore {
         if (!this._importSessionActive && !this._hasPendingShardWrites()) {
             return;
         }
+        const tStart = safePerformance.now();
+        let flushPendingWritesMs = 0;
+        let awaitQueuedWritesMs = 0;
+        let closeWritableMs = 0;
         const wasImportSessionActive = this._importSessionActive;
+        const tFlushPendingWritesStart = safePerformance.now();
         if (wasImportSessionActive) {
             await this._flushPendingWrites();
             this._importSessionActive = false;
@@ -490,9 +497,20 @@ export class TermRecordOpfsStore {
             this._importSessionActive = false;
             await this._flushPendingWrites();
         }
+        flushPendingWritesMs = safePerformance.now() - tFlushPendingWritesStart;
+        const tAwaitQueuedWritesStart = safePerformance.now();
         await this._awaitQueuedWrites();
+        awaitQueuedWritesMs = safePerformance.now() - tAwaitQueuedWritesStart;
+        const tCloseWritableStart = safePerformance.now();
         await this._closeAllWritables();
+        closeWritableMs = safePerformance.now() - tCloseWritableStart;
         this._deferIndexBuild = false;
+        this._lastEndImportSessionMetrics = {
+            flushPendingWritesMs,
+            awaitQueuedWritesMs,
+            closeWritableMs,
+            totalMs: safePerformance.now() - tStart,
+        };
         if (this._reloadFromShardsAfterImport && this._pendingArtifactReloadPlansAfterImport.length > 0) {
             this._indexByDictionary.clear();
             this._indexDirty = false;
@@ -510,6 +528,13 @@ export class TermRecordOpfsStore {
             this._indexDirty = false;
         }
         this._reloadShardLogicalKeysAfterImport.clear();
+    }
+
+    /**
+     * @returns {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number}|null}
+     */
+    getLastEndImportSessionMetrics() {
+        return this._lastEndImportSessionMetrics;
     }
 
     /**

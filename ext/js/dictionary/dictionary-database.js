@@ -623,7 +623,7 @@ export class DictionaryDatabase {
 
     /**
      * @param {((index: number, count: number) => void)?} [onCheckpoint]
-     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termRecordEndImportSessionMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|null>}
+     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|null>}
      */
     async finishBulkImport(onCheckpoint = null) {
         if (this._bulkImportDepth <= 0) {
@@ -653,6 +653,9 @@ export class DictionaryDatabase {
             let termContentWriteCoalesceTargetBytes = 0;
             let termContentWriteCoalesceMaxChunks = 0;
             let termRecordEndImportSessionMs = 0;
+            let termRecordEndImportSessionFlushPendingWritesMs = 0;
+            let termRecordEndImportSessionAwaitQueuedWritesMs = 0;
+            let termRecordEndImportSessionCloseWritableMs = 0;
             let termsVirtualTableSyncMs = 0;
             let createIndexesMs = 0;
             let createIndexesCheckpointCount = 0;
@@ -701,6 +704,12 @@ export class DictionaryDatabase {
                 const termRecordEndImportSessionPromise = this._termRecordStore.endImportSession()
                     .then(() => {
                         termRecordEndImportSessionMs = safePerformance.now() - tTermRecordEndImportSessionStart;
+                        const metrics = this._termRecordStore.getLastEndImportSessionMetrics();
+                        if (metrics !== null) {
+                            termRecordEndImportSessionFlushPendingWritesMs = metrics.flushPendingWritesMs;
+                            termRecordEndImportSessionAwaitQueuedWritesMs = metrics.awaitQueuedWritesMs;
+                            termRecordEndImportSessionCloseWritableMs = metrics.closeWritableMs;
+                        }
                     });
                 await Promise.all([termContentEndImportSessionPromise, termRecordEndImportSessionPromise]);
                 if (this._termsVirtualTableDirty) {
@@ -805,6 +814,9 @@ export class DictionaryDatabase {
                     termContentWriteCoalesceTargetBytes,
                     termContentWriteCoalesceMaxChunks,
                     termRecordEndImportSessionMs,
+                    termRecordEndImportSessionFlushPendingWritesMs,
+                    termRecordEndImportSessionAwaitQueuedWritesMs,
+                    termRecordEndImportSessionCloseWritableMs,
                     termsVirtualTableSyncMs,
                     createIndexesMs,
                     createIndexesCheckpointCount,
