@@ -242,6 +242,7 @@ export class PopupPreviewFrame {
         const popup = this._frontend.popup;
         if (popup === null) { return; }
         void popup.setCustomCss(css).catch((error) => {
+            if (this._isDisconnectedPopupFrameError(error)) { return; }
             log.error(error);
         });
     }
@@ -252,8 +253,17 @@ export class PopupPreviewFrame {
         const popup = this._frontend.popup;
         if (popup === null) { return; }
         void popup.setCustomOuterCss(css, false).catch((error) => {
+            if (this._isDisconnectedPopupFrameError(error)) { return; }
             log.error(error);
         });
+    }
+
+    /**
+     * @param {unknown} error
+     * @returns {boolean}
+     */
+    _isDisconnectedPopupFrameError(error) {
+        return error instanceof Error && error.message.includes('frame state invalid');
     }
 
     /** @type {import('popup-preview-frame').ApiHandler<'updateOptionsContext'>} */
