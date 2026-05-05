@@ -984,7 +984,9 @@ async function evalSendMessage(page, expression, arg = null) {
             return {ok: true};
         }
         if (expression === 'backendDiagnostics') {
-            const term = String(arg || '打');
+            const term = String((arg && typeof arg === 'object') ? (arg.term || '打') : (arg || '打'));
+            const includeExpensiveDebugState = !(arg && typeof arg === 'object' && arg.includeExpensiveDebugState === false);
+            const includeAlternateLookupModes = !(arg && typeof arg === 'object' && arg.includeAlternateLookupModes === false);
             const options0 = await send('optionsGet', {optionsContext: {index: 0}});
             const optionsFull = await send('optionsGetFull', undefined);
             const dictionaryInfo = await send('getDictionaryInfo', undefined);
@@ -1013,8 +1015,8 @@ async function evalSendMessage(page, expression, arg = null) {
                 };
             };
             const termLookupDefault = await collectTermLookup({});
-            const termLookupExactNoDeinflect = await collectTermLookup({matchType: 'exact', deinflect: false});
-            const termLookupPrefixNoDeinflect = await collectTermLookup({matchType: 'prefix', deinflect: false});
+            const termLookupExactNoDeinflect = includeAlternateLookupModes ? await collectTermLookup({matchType: 'exact', deinflect: false}) : null;
+            const termLookupPrefixNoDeinflect = includeAlternateLookupModes ? await collectTermLookup({matchType: 'prefix', deinflect: false}) : null;
             const enabledDictionaryNames = [];
             for (const row of options0?.dictionaries || []) {
                 if (row?.enabled !== true) { continue; }
@@ -1027,12 +1029,12 @@ async function evalSendMessage(page, expression, arg = null) {
                 dictionaryNames: installedTitles,
                 getTotal: true,
             });
-            const debugDictionaryStorageState = await send('debugDictionaryStorageState', undefined);
             const enabledInstalledExactMatches = enabledDictionaryNames.filter((name) => installedTitles.includes(name));
-            const debugLookupState = await send('debugDictionaryLookupState', {
+            const debugDictionaryStorageState = includeExpensiveDebugState ? await send('debugDictionaryStorageState', undefined) : null;
+            const debugLookupState = includeExpensiveDebugState ? await send('debugDictionaryLookupState', {
                 text: term,
                 dictionaryNames: enabledInstalledExactMatches,
-            });
+            }) : null;
             const profileSelectorState = (optionsFull?.profiles || []).map((profile) => ({
                 id: String(profile?.id || ''),
                 mainDictionary: String(profile?.options?.general?.mainDictionary || ''),
@@ -1595,7 +1597,11 @@ async function findOverlapLookupTerm(page, expectedDictionaryNames, candidates) 
     for (const term of normalizedCandidates) {
         let diagnostics = null;
         try {
-            diagnostics = await evalSendMessage(page, 'backendDiagnostics', term);
+            diagnostics = await evalSendMessage(page, 'backendDiagnostics', {
+                term,
+                includeExpensiveDebugState: false,
+                includeAlternateLookupModes: false,
+            });
         } catch (_) {
             continue;
         }
@@ -4508,6 +4514,15 @@ async function main() {
                     }
                     const durationSummary = summarizeDurationsMs(iterations.map(({durationMs}) => durationMs));
                     const steadyDurationSummary = summarizeDurationsMs(iterations.slice(1).map(({durationMs}) => durationMs));
+                    const scannerSearchDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
+                        Number(timing?.lastAttempt?.hostDebugAfterPopupFrame?.manabitanScannerSearchDurationMs)
+                    )));
+                    const popupShowDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
+                        Number(timing?.lastAttempt?.hostDebugAfterPopupFrame?.manabitanPopupShowDurationMs)
+                    )));
+                    const pointerMoveDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
+                        Number(timing?.lastAttempt?.pointerMoveMs)
+                    )));
                     const firstHoverMs = iterations.length > 0 ? iterations[0].durationMs : 0;
                     if (firstHoverMs > 6000 || steadyDurationSummary.median > 900 || steadyDurationSummary.p95 > 1800) {
                         throw new Error(
@@ -4521,6 +4536,9 @@ async function main() {
                         iterations,
                         durationSummary,
                         steadyDurationSummary,
+                        scannerSearchDurationSummary,
+                        popupShowDurationSummary,
+                        pointerMoveDurationSummary,
                         prewarmDebugState,
                     };
                 });
@@ -4572,7 +4590,7 @@ async function main() {
                     for (let i = 0; i < 12; ++i) {
                         const selector = scanTargets[i % scanTargets.length];
                         const iterationStart = safePerformance.now();
-                        const {popupText, usedModifier} = await hoverLookupOnWagahai(page, selector);
+                        const {popupText, usedModifier, timing} = await hoverLookupOnWagahai(page, selector);
                         const iterationEnd = safePerformance.now();
                         const hasDictionaryResult = /jmdict|jitendex/i.test(popupText);
                         iterations.push({
@@ -4582,6 +4600,7 @@ async function main() {
                             durationMs: Math.max(0, iterationEnd - iterationStart),
                             hasDictionaryResult,
                             popupTextPreview: popupText.replaceAll(/\s+/g, ' ').trim().slice(0, 180),
+                            timing,
                         });
                         if (!hasDictionaryResult) {
                             throw new Error(`Scan iteration ${String(i + 1)} (${selector}) produced popup without dictionary result`);
@@ -4590,6 +4609,15 @@ async function main() {
                         await page.waitForTimeout(80);
                     }
                     const durationSummary = summarizeDurationsMs(iterations.map(({durationMs}) => durationMs));
+                    const scannerSearchDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
+                        Number(timing?.lastAttempt?.hostDebugAfterPopupFrame?.manabitanScannerSearchDurationMs)
+                    )));
+                    const popupShowDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
+                        Number(timing?.lastAttempt?.hostDebugAfterPopupFrame?.manabitanPopupShowDurationMs)
+                    )));
+                    const pointerMoveDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
+                        Number(timing?.lastAttempt?.pointerMoveMs)
+                    )));
                     if (durationSummary.median > 900 || durationSummary.p95 > 1800) {
                         throw new Error(
                             `Repeated hover latency regression: median=${formatDuration(durationSummary.median)} ` +
@@ -4600,6 +4628,9 @@ async function main() {
                         iterationCount: iterations.length,
                         iterations,
                         durationSummary,
+                        scannerSearchDurationSummary,
+                        popupShowDurationSummary,
+                        pointerMoveDurationSummary,
                     };
                 });
                 scanningStressResult = scanningStressProfile.result;
