@@ -42,7 +42,7 @@ describe('Frontend dictionary update handling', () => {
         const runLookupPrewarmTerms = Reflect.get(Frontend.prototype, '_runLookupPrewarmTerms');
         const {firstMatchedResultPromise, resultsPromise} = runLookupPrewarmTerms.call(frontend, ['日本', 'する', 'ある', '見る', '食べる'], {});
 
-        expect(calls).toEqual(['日本', 'する']);
+        expect(calls).toEqual(['日本', 'する', 'ある', '見る']);
         resolvers[0]();
         const firstMatchedResult = await firstMatchedResultPromise;
         expect(firstMatchedResult).toEqual({term: '日本', dictionaryEntries: [{dictionary: 'JMdict'}]});
@@ -51,10 +51,16 @@ describe('Frontend dictionary update handling', () => {
         }
         const results = await resultsPromise;
 
-        expect(calls).toEqual(['日本', 'する']);
-        expect(detailsCalls).toEqual([{skipLookupWarmWait: true}, {skipLookupWarmWait: true}]);
-        expect(results).toHaveLength(2);
-        expect(Reflect.get(frontend, '_application').api.termsFind).toHaveBeenCalledTimes(2);
+        expect(calls).toEqual(['日本', 'する', 'ある', '見る', '食べる']);
+        expect(detailsCalls).toEqual([
+            {skipLookupWarmWait: true},
+            {skipLookupWarmWait: true},
+            {skipLookupWarmWait: true},
+            {skipLookupWarmWait: true},
+            {skipLookupWarmWait: true},
+        ]);
+        expect(results).toHaveLength(5);
+        expect(Reflect.get(frontend, '_application').api.termsFind).toHaveBeenCalledTimes(5);
     });
 
     test('options updates rerun the active hover lookup and do not clear state on success', async () => {

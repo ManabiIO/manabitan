@@ -724,7 +724,8 @@ export class DictionaryImporter {
         const tagFiles = archiveFiles.tagFiles ?? [];
         const useTermArtifactFiles = termArtifactFiles.length > 0;
         const useTermArtifactImport = useTermArtifactFiles || termArtifactManifest !== null;
-        const enableTermEntryContentDedup = requestedTermEntryContentDedup ?? !useTermArtifactImport;
+        const defaultEnableTermEntryContentDedup = useTermArtifactImport;
+        const enableTermEntryContentDedup = requestedTermEntryContentDedup ?? defaultEnableTermEntryContentDedup;
         dictionaryDatabase.setTermEntryContentDedupEnabled(enableTermEntryContentDedup);
         const effectiveTermContentStorageMode = (
             termArtifactManifest !== null &&
@@ -939,6 +940,7 @@ export class DictionaryImporter {
             `termMeta=${termMetaFiles.length} kanji=${kanjiFiles.length} kanjiMeta=${kanjiMetaFiles.length} tags=${tagFiles.length} ` +
             `useArtifactTerms=${String(useTermArtifactFiles || usePackedTermArtifact)} packedTermArtifact=${String(packedTermArtifactBytes !== null)} ` +
             `prunedArtifactAux=${String(usePrunedArtifactAuxFastPath)} ` +
+            `termContentDedup=${String(enableTermEntryContentDedup)} ` +
             `preloadedTermArtifacts=${String(preloadedTermArtifactBytes !== null)} ` +
             `expectedTermContentImportBytes=${String(expectedTermContentImportBytes)} ` +
             `expectedTermRecordImportBytes=${String(expectedTermRecordImportBytes)}`,

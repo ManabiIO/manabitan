@@ -1719,6 +1719,14 @@ export class DictionaryDatabase {
             '食べる',
             '猫',
             '吾輩',
+            '名前',
+            '輩',
+            '学',
+            '食',
+            '見',
+            '言',
+            '行',
+            '水',
         ];
         for (const dictionaryName of dictionaryNames) {
             try {
