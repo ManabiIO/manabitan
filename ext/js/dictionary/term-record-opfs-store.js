@@ -295,6 +295,13 @@ class DenseIdRecordStore {
             }
         }
     }
+
+    /**
+     * @returns {(TermRecord|undefined)[]}
+     */
+    getRawRecords() {
+        return this._records;
+    }
 }
 
 /**
@@ -1670,6 +1677,36 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {string} dictionaryName
+     * @returns {number[]|undefined}
+     */
+    _getLiveRecordIdsForDictionary(dictionaryName) {
+        const ids = this._recordIdsByDictionary.get(dictionaryName);
+        if (typeof ids === 'undefined') {
+            return void 0;
+        }
+        if (!this._recordIdStaleDictionaryNames.has(dictionaryName)) {
+            return ids;
+        }
+        /** @type {Set<number>} */
+        const seenIds = new Set();
+        /** @type {number[]} */
+        const compactedIds = [];
+        const records = this._recordsById.getRawRecords();
+        for (const id of ids) {
+            if (seenIds.has(id)) { continue; }
+            seenIds.add(id);
+            const record = records[id];
+            if (typeof record !== 'undefined' && record.dictionary === dictionaryName) {
+                compactedIds.push(id);
+            }
+        }
+        this._recordIdsByDictionary.set(dictionaryName, compactedIds);
+        this._recordIdStaleDictionaryNames.delete(dictionaryName);
+        return compactedIds;
+    }
+
+    /**
      * @param {number} id
      * @returns {boolean}
      */
@@ -1802,30 +1839,13 @@ export class TermRecordOpfsStore {
      * @yields {TermRecord}
      */
     *_iterateRecordsForDictionary(dictionaryName) {
-        const ids = this._recordIdsByDictionary.get(dictionaryName);
+        const ids = this._getLiveRecordIdsForDictionary(dictionaryName);
         if (typeof ids !== 'undefined') {
-            if (this._recordIdStaleDictionaryNames.has(dictionaryName)) {
-                /** @type {Set<number>} */
-                const seenIds = new Set();
-                /** @type {number[]} */
-                const compactedIds = [];
-                for (const id of ids) {
-                    if (seenIds.has(id)) { continue; }
-                    seenIds.add(id);
-                    const record = this._recordsById.get(id);
-                    if (typeof record !== 'undefined' && record.dictionary === dictionaryName) {
-                        compactedIds.push(id);
-                        yield record;
-                    }
-                }
-                this._recordIdsByDictionary.set(dictionaryName, compactedIds);
-                this._recordIdStaleDictionaryNames.delete(dictionaryName);
-            } else {
-                for (const id of ids) {
-                    const record = this._recordsById.get(id);
-                    if (typeof record !== 'undefined' && record.dictionary === dictionaryName) {
-                        yield record;
-                    }
+            const records = this._recordsById.getRawRecords();
+            for (const id of ids) {
+                const record = records[id];
+                if (typeof record !== 'undefined') {
+                    yield record;
                 }
             }
             return;
@@ -1864,9 +1884,7 @@ export class TermRecordOpfsStore {
             pair: new Map(),
             sequence: new Map(),
         };
-        for (const record of this._iterateRecordsForDictionary(dictionaryName)) {
-            this._addRecordToDictionaryIndex(created, record);
-        }
+        this._addDictionaryRecordsToIndex(dictionaryName, created);
         if (
             created.expression.size === 0 &&
             created.reading.size === 0 &&
@@ -1927,9 +1945,7 @@ export class TermRecordOpfsStore {
             this._indexByDictionary.set(name, index);
         }
         for (const [name, index] of createdIndexes) {
-            for (const record of this._iterateRecordsForDictionary(name)) {
-                this._addRecordToDictionaryIndex(index, record);
-            }
+            this._addDictionaryRecordsToIndex(name, index);
         }
         for (const [name, index] of createdIndexes) {
             if (
@@ -1953,9 +1969,7 @@ export class TermRecordOpfsStore {
         }
         index.expressionReverse.clear();
         index.readingReverse.clear();
-        for (const record of this._iterateRecordsForDictionary(dictionaryName)) {
-            this._addRecordReverseToDictionaryIndex(index, record);
-        }
+        this._addDictionaryRecordsToReverseIndex(dictionaryName, index);
         this._reverseIndexReady.add(index);
         return index;
     }
@@ -1970,9 +1984,7 @@ export class TermRecordOpfsStore {
             return index;
         }
         index.pair.clear();
-        for (const record of this._iterateRecordsForDictionary(dictionaryName)) {
-            this._addRecordPairToDictionaryIndex(index, record);
-        }
+        this._addDictionaryRecordsToPairIndex(dictionaryName, index);
         this._pairIndexReady.add(index);
         return index;
     }
@@ -2476,7 +2488,7 @@ export class TermRecordOpfsStore {
                     this._storeRecord(record);
                 }
                 if (sharedDictionaryIndex !== null) {
-                    this._addRecordToDictionaryIndex(sharedDictionaryIndex, record);
+                    this._addDecodedRecordToDictionaryIndex(sharedDictionaryIndex, record, expression, reading);
                 } else if (!this._deferIndexBuild) {
                     this._addToIndex(record);
                 }
@@ -3970,6 +3982,75 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {string} dictionaryName
+     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} index
+     */
+    _addDictionaryRecordsToIndex(dictionaryName, index) {
+        const ids = this._getLiveRecordIdsForDictionary(dictionaryName);
+        if (typeof ids !== 'undefined') {
+            const records = this._recordsById.getRawRecords();
+            for (let i = 0, ii = ids.length; i < ii; ++i) {
+                const record = records[ids[i]];
+                if (typeof record !== 'undefined') {
+                    this._addRecordToDictionaryIndex(index, record);
+                }
+            }
+            return;
+        }
+        for (const record of this._recordsById.values()) {
+            if (record.dictionary === dictionaryName) {
+                this._addRecordToDictionaryIndex(index, record);
+            }
+        }
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {{expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>}} index
+     */
+    _addDictionaryRecordsToReverseIndex(dictionaryName, index) {
+        const ids = this._getLiveRecordIdsForDictionary(dictionaryName);
+        if (typeof ids !== 'undefined') {
+            const records = this._recordsById.getRawRecords();
+            for (let i = 0, ii = ids.length; i < ii; ++i) {
+                const record = records[ids[i]];
+                if (typeof record !== 'undefined') {
+                    this._addRecordReverseToDictionaryIndex(index, record);
+                }
+            }
+            return;
+        }
+        for (const record of this._recordsById.values()) {
+            if (record.dictionary === dictionaryName) {
+                this._addRecordReverseToDictionaryIndex(index, record);
+            }
+        }
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {{pair: Map<string, number[]>}} index
+     */
+    _addDictionaryRecordsToPairIndex(dictionaryName, index) {
+        const ids = this._getLiveRecordIdsForDictionary(dictionaryName);
+        if (typeof ids !== 'undefined') {
+            const records = this._recordsById.getRawRecords();
+            for (let i = 0, ii = ids.length; i < ii; ++i) {
+                const record = records[ids[i]];
+                if (typeof record !== 'undefined') {
+                    this._addRecordPairToDictionaryIndex(index, record);
+                }
+            }
+            return;
+        }
+        for (const record of this._recordsById.values()) {
+            if (record.dictionary === dictionaryName) {
+                this._addRecordPairToDictionaryIndex(index, record);
+            }
+        }
+    }
+
+    /**
      * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} index
      * @param {TermRecord} record
      */
@@ -4009,6 +4090,16 @@ export class TermRecordOpfsStore {
         this._ensureDecodedRecordStrings(record);
         const expression = record.expression ?? '';
         const reading = record.reading ?? expression;
+        this._addDecodedRecordToDictionaryIndex(index, record, expression, reading);
+    }
+
+    /**
+     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} index
+     * @param {TermRecord} record
+     * @param {string} expression
+     * @param {string} reading
+     */
+    _addDecodedRecordToDictionaryIndex(index, record, expression, reading) {
         const expressionList = index.expression.get(expression);
         if (typeof expressionList === 'undefined') {
             index.expression.set(expression, [record.id]);
