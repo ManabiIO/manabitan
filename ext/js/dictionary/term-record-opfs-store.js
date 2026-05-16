@@ -376,6 +376,8 @@ export class TermRecordOpfsStore {
         this._indexByDictionary = new Map();
         /** @type {WeakSet<{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
         this._reverseIndexReady = new WeakSet();
+        /** @type {WeakSet<{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
+        this._pairIndexReady = new WeakSet();
         /** @type {boolean} */
         this._deferIndexBuild = false;
         /** @type {boolean} */
@@ -1617,12 +1619,54 @@ export class TermRecordOpfsStore {
             }
             return;
         }
-        let ids = this._recordIdsByDictionary.get(record.dictionary);
+        this._getOrCreateRecordIdsForDictionary(record.dictionary).push(record.id);
+    }
+
+    /**
+     * @param {TermRecord} record
+     * @param {number[]} recordIds
+     * @returns {void}
+     */
+    _storeRecordWithKnownDictionaryIds(record, recordIds) {
+        if (typeof this._recordsById.get(record.id) !== 'undefined') {
+            this._storeRecord(record);
+            return;
+        }
+        this._recordsById.set(record.id, record);
+        recordIds.push(record.id);
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {number[]}
+     */
+    _getOrCreateRecordIdsForDictionary(dictionaryName) {
+        let ids = this._recordIdsByDictionary.get(dictionaryName);
         if (typeof ids === 'undefined') {
             ids = [];
-            this._recordIdsByDictionary.set(record.dictionary, ids);
+            this._recordIdsByDictionary.set(dictionaryName, ids);
         }
-        ids.push(record.id);
+        return ids;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}}
+     */
+    _getOrCreateDictionaryIndex(dictionaryName) {
+        let index = this._indexByDictionary.get(dictionaryName);
+        if (typeof index === 'undefined') {
+            index = {
+                expression: new Map(),
+                reading: new Map(),
+                expressionReverse: new Map(),
+                readingReverse: new Map(),
+                pair: new Map(),
+                sequence: new Map(),
+            };
+            this._indexByDictionary.set(dictionaryName, index);
+        }
+        return index;
     }
 
     /**
@@ -1917,6 +1961,23 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {string} dictionaryName
+     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} [index]
+     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}}
+     */
+    ensureDictionaryPairIndex(dictionaryName, index = this.getDictionaryIndex(dictionaryName)) {
+        if (this._pairIndexReady.has(index)) {
+            return index;
+        }
+        index.pair.clear();
+        for (const record of this._iterateRecordsForDictionary(dictionaryName)) {
+            this._addRecordPairToDictionaryIndex(index, record);
+        }
+        this._pairIndexReady.add(index);
+        return index;
+    }
+
+    /**
      * @returns {string[]}
      */
     getShardFileNames() {
@@ -2200,6 +2261,13 @@ export class TermRecordOpfsStore {
         let cursor = BINARY_MAGIC_BYTES;
         /** @type {string|null} */
         let sharedEntryContentDictName = null;
+        /** @type {number[]|null} */
+        const sharedDictionaryRecordIds = (isCurrent && shardDictionaryName !== null) ?
+            this._getOrCreateRecordIdsForDictionary(shardDictionaryName) :
+            null;
+        const sharedDictionaryIndex = (isCurrent && shardDictionaryName !== null && !this._deferIndexBuild) ?
+            this._getOrCreateDictionaryIndex(shardDictionaryName) :
+            null;
         if (isCurrent) {
             if ((cursor + 2) > content.byteLength) { return; }
             const entryContentDictNameMeta16 = view.getUint16(cursor, true); cursor += 2;
@@ -2246,6 +2314,7 @@ export class TermRecordOpfsStore {
                     chunkStrings[i] = value;
                 }
                 cursor = stringsCursor;
+                this._recordsById.ensureCapacity(chunkBaseId + chunkCount - 1);
             }
             for (let chunkIndex = 0; chunkIndex < chunkCount; ++chunkIndex) {
                 if ((cursor + recordHeaderBytes) > content.byteLength) { return; }
@@ -2401,8 +2470,14 @@ export class TermRecordOpfsStore {
                     score,
                     sequence: rawSequence >= 0 ? rawSequence : null,
                 };
-                this._storeRecord(record);
-                if (!this._deferIndexBuild) {
+                if (sharedDictionaryRecordIds !== null) {
+                    this._storeRecordWithKnownDictionaryIds(record, sharedDictionaryRecordIds);
+                } else {
+                    this._storeRecord(record);
+                }
+                if (sharedDictionaryIndex !== null) {
+                    this._addRecordToDictionaryIndex(sharedDictionaryIndex, record);
+                } else if (!this._deferIndexBuild) {
                     this._addToIndex(record);
                 }
                 if (id >= this._nextId) {
@@ -3891,19 +3966,7 @@ export class TermRecordOpfsStore {
      * @param {TermRecord} record
      */
     _addToIndex(record) {
-        let index = this._indexByDictionary.get(record.dictionary);
-        if (typeof index === 'undefined') {
-            index = {
-                expression: new Map(),
-                reading: new Map(),
-                expressionReverse: new Map(),
-                readingReverse: new Map(),
-                pair: new Map(),
-                sequence: new Map(),
-            };
-            this._indexByDictionary.set(record.dictionary, index);
-        }
-        this._addRecordToDictionaryIndex(index, record);
+        this._addRecordToDictionaryIndex(this._getOrCreateDictionaryIndex(record.dictionary), record);
     }
 
     /**
@@ -3964,13 +4027,8 @@ export class TermRecordOpfsStore {
         if (this._reverseIndexReady.has(index)) {
             this._addRecordReverseToDictionaryIndex(index, record);
         }
-
-        const pairKey = `${record.expression}\u001f${record.reading}`;
-        const pairList = index.pair.get(pairKey);
-        if (typeof pairList === 'undefined') {
-            index.pair.set(pairKey, [record.id]);
-        } else {
-            pairList.push(record.id);
+        if (this._pairIndexReady.has(index)) {
+            this._addRecordPairToDictionaryIndex(index, record);
         }
 
         if (typeof record.sequence === 'number' && record.sequence >= 0) {
@@ -3980,6 +4038,23 @@ export class TermRecordOpfsStore {
             } else {
                 sequenceList.push(record.id);
             }
+        }
+    }
+
+    /**
+     * @param {{pair: Map<string, number[]>}} index
+     * @param {TermRecord} record
+     */
+    _addRecordPairToDictionaryIndex(index, record) {
+        this._ensureDecodedRecordStrings(record);
+        const expression = record.expression ?? '';
+        const reading = record.reading ?? expression;
+        const pairKey = `${expression}\u001f${reading}`;
+        const pairList = index.pair.get(pairKey);
+        if (typeof pairList === 'undefined') {
+            index.pair.set(pairKey, [record.id]);
+        } else {
+            pairList.push(record.id);
         }
     }
 

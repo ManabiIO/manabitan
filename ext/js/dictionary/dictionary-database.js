@@ -2134,6 +2134,16 @@ export class DictionaryDatabase {
             }
         }
         const uniquePairs = [...termReadingIndexes.keys()];
+        const ensureDictionaryPairIndex = /** @type {unknown} */ (Reflect.get(this._termRecordStore, 'ensureDictionaryPairIndex'));
+        if (typeof ensureDictionaryPairIndex === 'function') {
+            for (const dictionaryName of dictionaryNames) {
+                /** @type {(dictionaryName: string, index?: {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}) => unknown} */ (ensureDictionaryPairIndex).call(
+                    this._termRecordStore,
+                    dictionaryName,
+                    this._ensureDirectTermIndex(dictionaryName),
+                );
+            }
+        }
         /** @type {Map<number, number[]>} */
         const idMatches = new Map();
         for (const pair of uniquePairs) {

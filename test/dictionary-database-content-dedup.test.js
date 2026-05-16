@@ -307,6 +307,43 @@ describe('DictionaryDatabase term lookup warming', () => {
         expect(Reflect.get(database, '_warmLookupProbeTerms')).toHaveBeenCalledWith(['JMdict']);
         expect(getSortedTermIndexKeys).not.toHaveBeenCalled();
     });
+
+    test('exact term-reading lookup builds pair indexes on demand', async () => {
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_db', {});
+        const index = {
+            expression: new Map([['日本', [1]]]),
+            reading: new Map([['にほん', [1]]]),
+            expressionReverse: new Map(),
+            readingReverse: new Map(),
+            pair: new Map([['日本\u001fにほん', [1]]]),
+            sequence: new Map(),
+        };
+        const ensureDictionariesLoaded = vi.fn(async () => {});
+        const ensureDictionaryIndexes = vi.fn();
+        const ensureDictionaryPairIndex = vi.fn();
+        const getDictionaryIndex = vi.fn(() => index);
+        Reflect.set(database, '_termRecordStore', {ensureDictionariesLoaded, ensureDictionaryIndexes, ensureDictionaryPairIndex, getDictionaryIndex});
+        Reflect.set(database, '_fetchTermRowsByIds', vi.fn(async () => new Map([[1, {
+            id: 1,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            definitionTags: '',
+            termTags: '',
+            rules: '',
+            score: 0,
+            glossary: ['Japan'],
+            sequence: 100,
+        }]])));
+
+        const results = await database.findTermsExactBulk([{term: '日本', reading: 'にほん'}], new Set(['JMdict']));
+
+        expect(ensureDictionaryPairIndex).toHaveBeenCalledOnce();
+        expect(ensureDictionaryPairIndex).toHaveBeenCalledWith('JMdict', index);
+        expect(results).toHaveLength(1);
+        expect(results[0].term).toBe('日本');
+    });
 });
 
 describe('TermRecordOpfsStore batch dictionary indexes', () => {

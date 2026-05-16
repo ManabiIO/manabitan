@@ -291,6 +291,49 @@ describe('TermRecordOpfsStore', () => {
         expect(idsByDictionary.get('JMdict')).toEqual([3]);
     });
 
+    test('pair index is built lazily and maintained after activation', () => {
+        const store = new TermRecordOpfsStore();
+        const storeRecord = /** @type {(record: unknown) => void} */ (Reflect.get(store, '_storeRecord').bind(store));
+        storeRecord({
+            id: 1,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+
+        const index = store.getDictionaryIndex('JMdict');
+        expect(index.expression.get('日本')).toEqual([1]);
+        expect(index.pair.size).toBe(0);
+
+        store.ensureDictionaryPairIndex('JMdict', index);
+        expect(index.pair.get('日本\u001fにほん')).toEqual([1]);
+
+        storeRecord({
+            id: 2,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にっぽん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 4,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+        Reflect.get(store, '_addRecordToDictionaryIndex').call(store, index, store.getById(2));
+
+        expect(index.pair.get('日本\u001fにほん')).toEqual([1]);
+        expect(index.pair.get('日本\u001fにっぽん')).toEqual([2]);
+    });
+
     test('lazy shard metadata scan prevents cold append id collisions', async () => {
         const sourceStore = new TermRecordOpfsStore();
         const sourceFileBytesByName = new Map();
