@@ -1618,6 +1618,67 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {Iterable<string>} dictionaryNames
+     * @returns {void}
+     */
+    ensureDictionaryIndexes(dictionaryNames) {
+        this._ensurePendingArtifactReloadPlansApplied();
+        this._ensureIndexesReady();
+        /** @type {Set<string>} */
+        const pending = new Set();
+        for (const dictionaryName of dictionaryNames) {
+            const name = `${dictionaryName}`.trim();
+            if (name.length === 0) { continue; }
+            const existing = this._indexByDictionary.get(name);
+            if (typeof existing === 'undefined') {
+                pending.add(name);
+            } else if (
+                existing.expression.size === 0 &&
+                existing.reading.size === 0 &&
+                this._hasRecordsForDictionary(name)
+            ) {
+                this._indexByDictionary.delete(name);
+                pending.add(name);
+            }
+        }
+        if (pending.size === 0) { return; }
+        if (pending.size === 1) {
+            this.getDictionaryIndex(/** @type {string} */ ([...pending][0]));
+            return;
+        }
+
+        /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
+        const createdIndexes = new Map();
+        for (const name of pending) {
+            const index = {
+                expression: new Map(),
+                reading: new Map(),
+                expressionReverse: new Map(),
+                readingReverse: new Map(),
+                pair: new Map(),
+                sequence: new Map(),
+            };
+            createdIndexes.set(name, index);
+            this._indexByDictionary.set(name, index);
+        }
+        for (const record of this._recordsById.values()) {
+            const index = createdIndexes.get(record.dictionary);
+            if (typeof index !== 'undefined') {
+                this._addRecordToDictionaryIndex(index, record);
+            }
+        }
+        for (const [name, index] of createdIndexes) {
+            if (
+                index.expression.size === 0 &&
+                index.reading.size === 0 &&
+                this._hasRecordsForDictionary(name)
+            ) {
+                this._indexByDictionary.delete(name);
+            }
+        }
+    }
+
+    /**
      * @param {string} dictionaryName
      * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} [index]
      * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}}

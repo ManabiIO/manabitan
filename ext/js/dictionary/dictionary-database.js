@@ -1658,31 +1658,51 @@ export class DictionaryDatabase {
         const names = [...dictionaryNames].filter((value, index, array) => value.length > 0 && array.indexOf(value) === index);
         /** @type {Promise<void>[]} */
         const promises = [];
+        /** @type {string[]} */
+        const namesToLoad = [];
         for (const dictionaryName of names) {
+            if (this._directTermIndexByDictionary.has(dictionaryName)) {
+                continue;
+            }
             const existing = this._directTermIndexLoadPromiseByDictionary.get(dictionaryName);
             if (typeof existing !== 'undefined') {
                 promises.push(existing);
                 continue;
             }
+            namesToLoad.push(dictionaryName);
+        }
+        if (namesToLoad.length > 0) {
             const generation = this._directTermIndexGeneration;
             const promise = (async () => {
-                await this._termRecordStore.ensureDictionariesLoaded([dictionaryName]);
+                await this._termRecordStore.ensureDictionariesLoaded(namesToLoad);
                 if (generation !== this._directTermIndexGeneration) {
                     return;
                 }
-                this._ensureDirectTermIndex(dictionaryName);
+                const ensureDictionaryIndexes = /** @type {unknown} */ (Reflect.get(this._termRecordStore, 'ensureDictionaryIndexes'));
+                if (typeof ensureDictionaryIndexes === 'function') {
+                    /** @type {(dictionaryNames: Iterable<string>) => void} */ (ensureDictionaryIndexes).call(this._termRecordStore, namesToLoad);
+                }
+                for (const dictionaryName of namesToLoad) {
+                    this._ensureDirectTermIndex(dictionaryName);
+                }
             })();
-            this._directTermIndexLoadPromiseByDictionary.set(dictionaryName, promise);
+            for (const dictionaryName of namesToLoad) {
+                this._directTermIndexLoadPromiseByDictionary.set(dictionaryName, promise);
+            }
             promises.push(promise);
             promise.then(
                 () => {
-                    if (this._directTermIndexLoadPromiseByDictionary.get(dictionaryName) === promise) {
-                        this._directTermIndexLoadPromiseByDictionary.delete(dictionaryName);
+                    for (const dictionaryName of namesToLoad) {
+                        if (this._directTermIndexLoadPromiseByDictionary.get(dictionaryName) === promise) {
+                            this._directTermIndexLoadPromiseByDictionary.delete(dictionaryName);
+                        }
                     }
                 },
                 () => {
-                    if (this._directTermIndexLoadPromiseByDictionary.get(dictionaryName) === promise) {
-                        this._directTermIndexLoadPromiseByDictionary.delete(dictionaryName);
+                    for (const dictionaryName of namesToLoad) {
+                        if (this._directTermIndexLoadPromiseByDictionary.get(dictionaryName) === promise) {
+                            this._directTermIndexLoadPromiseByDictionary.delete(dictionaryName);
+                        }
                     }
                 },
             );
@@ -1701,11 +1721,6 @@ export class DictionaryDatabase {
         if (names.length === 0) { return; }
         await this._termContentStore.ensureLoadedForRead();
         await this._ensureDirectTermIndexesLoaded(names);
-        for (const name of names) {
-            const index = this._ensureDirectTermIndex(name);
-            this._getSortedTermIndexKeys(index.expression);
-            this._getSortedTermIndexKeys(index.reading);
-        }
         await Promise.all([
             this._warmSharedGlossaryArtifacts(names),
             this._warmLookupProbeTerms(names),

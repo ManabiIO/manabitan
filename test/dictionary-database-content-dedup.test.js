@@ -17,6 +17,7 @@
 
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
+import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 
 /**
  * @param {DictionaryDatabase} database
@@ -197,5 +198,148 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(termRecordCalls[1].contentOffsets).toEqual([termRecordCalls[0].contentOffsets[0]]);
         expect(termRecordCalls[1].contentLengths).toEqual([3]);
         expect(termRecordCalls[1].contentDictNames).toBe('raw');
+    });
+});
+
+describe('DictionaryDatabase term lookup warming', () => {
+    test('does not reload direct term indexes already cached for lookup', async () => {
+        const database = new DictionaryDatabase();
+        Reflect.get(database, '_directTermIndexByDictionary').set('JMdict', {
+            expression: new Map(),
+            reading: new Map(),
+            expressionReverse: new Map(),
+            readingReverse: new Map(),
+            pair: new Map(),
+            sequence: new Map(),
+        });
+        const ensureDictionariesLoaded = vi.fn(async () => {});
+        Reflect.set(database, '_termRecordStore', {ensureDictionariesLoaded});
+
+        const ensureDirectTermIndexesLoaded = /** @type {(this: DictionaryDatabase, dictionaryNames: Iterable<string>) => Promise<void>} */ (
+            Reflect.get(database, '_ensureDirectTermIndexesLoaded')
+        );
+        await ensureDirectTermIndexesLoaded.call(database, ['JMdict']);
+
+        expect(ensureDictionariesLoaded).not.toHaveBeenCalled();
+    });
+
+    test('loads and indexes missing direct term indexes as one batch', async () => {
+        const database = new DictionaryDatabase();
+        const indexes = new Map([
+            ['JMdict', {
+                expression: new Map([['日本', [1]]]),
+                reading: new Map(),
+                expressionReverse: new Map(),
+                readingReverse: new Map(),
+                pair: new Map(),
+                sequence: new Map(),
+            }],
+            ['Jitendex', {
+                expression: new Map([['日本', [2]]]),
+                reading: new Map(),
+                expressionReverse: new Map(),
+                readingReverse: new Map(),
+                pair: new Map(),
+                sequence: new Map(),
+            }],
+        ]);
+        const ensureDictionariesLoaded = vi.fn(async () => {});
+        const ensureDictionaryIndexes = vi.fn();
+        const getDictionaryIndex = vi.fn((name) => indexes.get(name));
+        Reflect.set(database, '_termRecordStore', {ensureDictionariesLoaded, ensureDictionaryIndexes, getDictionaryIndex});
+
+        const ensureDirectTermIndexesLoaded = /** @type {(this: DictionaryDatabase, dictionaryNames: Iterable<string>) => Promise<void>} */ (
+            Reflect.get(database, '_ensureDirectTermIndexesLoaded')
+        );
+        await ensureDirectTermIndexesLoaded.call(database, ['JMdict', 'Jitendex']);
+
+        expect(ensureDictionariesLoaded).toHaveBeenCalledOnce();
+        expect(ensureDictionariesLoaded).toHaveBeenCalledWith(['JMdict', 'Jitendex']);
+        expect(ensureDictionaryIndexes).toHaveBeenCalledOnce();
+        expect(ensureDictionaryIndexes).toHaveBeenCalledWith(['JMdict', 'Jitendex']);
+        expect(getDictionaryIndex).toHaveBeenCalledTimes(2);
+        expect(Reflect.get(database, '_directTermIndexByDictionary').get('JMdict')).toBe(indexes.get('JMdict'));
+        expect(Reflect.get(database, '_directTermIndexByDictionary').get('Jitendex')).toBe(indexes.get('Jitendex'));
+    });
+
+    test('warms exact lookup storage without eagerly sorting prefix indexes', async () => {
+        const database = new DictionaryDatabase();
+        const index = {
+            expression: new Map([['日本', [1]]]),
+            reading: new Map([['にほん', [1]]]),
+            expressionReverse: new Map(),
+            readingReverse: new Map(),
+            pair: new Map(),
+            sequence: new Map(),
+        };
+        Reflect.set(database, '_termContentStore', {ensureLoadedForRead: vi.fn(async () => {})});
+        Reflect.set(database, '_termRecordStore', {
+            ensureDictionariesLoaded: vi.fn(async () => {}),
+            getDictionaryIndex: vi.fn(() => index),
+        });
+        Reflect.set(database, '_warmSharedGlossaryArtifacts', vi.fn(async () => {}));
+        Reflect.set(database, '_warmLookupProbeTerms', vi.fn(async () => {}));
+        const getSortedTermIndexKeys = vi.fn(() => []);
+        Reflect.set(database, '_getSortedTermIndexKeys', getSortedTermIndexKeys);
+
+        await database.warmTermLookupCaches(['JMdict']);
+
+        expect(Reflect.get(database, '_termContentStore').ensureLoadedForRead).toHaveBeenCalledOnce();
+        expect(Reflect.get(database, '_termRecordStore').ensureDictionariesLoaded).toHaveBeenCalledWith(['JMdict']);
+        expect(Reflect.get(database, '_warmSharedGlossaryArtifacts')).toHaveBeenCalledWith(['JMdict']);
+        expect(Reflect.get(database, '_warmLookupProbeTerms')).toHaveBeenCalledWith(['JMdict']);
+        expect(getSortedTermIndexKeys).not.toHaveBeenCalled();
+    });
+});
+
+describe('TermRecordOpfsStore batch dictionary indexes', () => {
+    test('builds multiple missing dictionary indexes with one record pass', () => {
+        const store = new TermRecordOpfsStore();
+        const recordsById = Reflect.get(store, '_recordsById');
+        recordsById.set(1, {
+            id: 1,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            entryContentOffset: 10,
+            entryContentLength: 5,
+            entryContentDictName: 'raw',
+            score: 1,
+            sequence: 100,
+        });
+        recordsById.set(2, {
+            id: 2,
+            dictionary: 'Jitendex',
+            expression: '日本',
+            reading: 'にほん',
+            entryContentOffset: 20,
+            entryContentLength: 5,
+            entryContentDictName: 'raw',
+            score: 2,
+            sequence: 200,
+        });
+        recordsById.set(3, {
+            id: 3,
+            dictionary: 'Other',
+            expression: '猫',
+            reading: 'ねこ',
+            entryContentOffset: 30,
+            entryContentLength: 5,
+            entryContentDictName: 'raw',
+            score: 3,
+            sequence: 300,
+        });
+
+        store.ensureDictionaryIndexes(['JMdict', 'Jitendex']);
+
+        const jmdict = store.getDictionaryIndex('JMdict');
+        const jitendex = store.getDictionaryIndex('Jitendex');
+        expect(jmdict.expression.get('日本')).toEqual([1]);
+        expect(jmdict.reading.get('にほん')).toEqual([1]);
+        expect(jmdict.sequence.get(100)).toEqual([1]);
+        expect(jitendex.expression.get('日本')).toEqual([2]);
+        expect(jitendex.reading.get('にほん')).toEqual([2]);
+        expect(jitendex.sequence.get(200)).toEqual([2]);
+        expect(Reflect.get(store, '_indexByDictionary').has('Other')).toBe(false);
     });
 });
