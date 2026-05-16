@@ -66,6 +66,43 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(groups.map((group) => group.map(([id]) => id))).toEqual([[1, 2], [3], [4], [5]]);
     });
 
+    test('reuses deserialized term rows until lookup caches are reset', async () => {
+        const database = new DictionaryDatabase();
+        const record = {
+            id: 1,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: -1,
+            entryContentLength: 0,
+            entryContentDictName: null,
+            score: 10,
+            sequence: 100,
+        };
+        const getByIds = vi.fn((ids) => new Map([...ids].map((id) => [id, {...record, id}])));
+        Reflect.set(database, '_termContentStore', {
+            ensureLoadedForRead: vi.fn(async () => {}),
+            warmSlices: vi.fn(async () => {}),
+        });
+        Reflect.set(database, '_termRecordStore', {getByIds});
+        const fetchTermRowsByIds = /** @type {(this: DictionaryDatabase, ids: Iterable<number>) => Promise<Map<number, unknown>>} */ (
+            Reflect.get(database, '_fetchTermRowsByIds')
+        );
+
+        const firstRows = await fetchTermRowsByIds.call(database, [1]);
+        const secondRows = await fetchTermRowsByIds.call(database, [1]);
+
+        expect(getByIds).toHaveBeenCalledTimes(1);
+        expect(firstRows.get(1)).toBe(secondRows.get(1));
+
+        Reflect.get(database, '_clearDirectTermIndexCaches').call(database);
+        await fetchTermRowsByIds.call(database, [1]);
+
+        expect(getByIds).toHaveBeenCalledTimes(2);
+    });
+
     test('keeps exact hash-pair matches distinct through collisions and resize', () => {
         const database = new DictionaryDatabase();
         Reflect.set(database, '_getTermEntryContentMetaHashPairSlot', () => 0);

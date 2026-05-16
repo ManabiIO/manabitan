@@ -55,6 +55,7 @@ import {TermRecordOpfsStore} from './term-record-opfs-store.js';
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 5;
 const TRANSIENT_UPDATE_TITLE_PATTERN = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
 const TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES = 4096;
+const TERM_ROW_CACHE_MAX_ENTRIES = 8192;
 const DEFAULT_STATEMENT_CACHE_MAX_ENTRIES = 256;
 const LOW_MEMORY_STATEMENT_CACHE_MAX_ENTRIES = 128;
 const DEFAULT_TERM_EXACT_PRESENCE_CACHE_MAX_ENTRIES = 25000;
@@ -304,6 +305,8 @@ export class DictionaryDatabase {
         this._statementCacheMaxEntries = this._computeStatementCacheMaxEntries();
         /** @type {Map<string, {definitionTags: string|null, termTags: string|undefined, rules: string, glossaryJson?: string, glossary?: import('dictionary-data').TermGlossary[]}>} */
         this._termEntryContentCache = new Map();
+        /** @type {Map<number, import('dictionary-database').DatabaseTermEntryWithId>} */
+        this._termRowCache = new Map();
         /** @type {Map<string, {contentOffset: number, contentLength: number, contentDictName: string, uncompressedLength: number}>} */
         this._sharedGlossaryArtifactMetaByDictionary = new Map();
         /** @type {Map<string, Uint8Array>} */
@@ -1539,6 +1542,7 @@ export class DictionaryDatabase {
         }
         this._statementCache.clear();
         this._termEntryContentCache.clear();
+        this._termRowCache.clear();
         this._termEntryContentIdByHash.clear();
         this._clearTermEntryContentMetaCaches();
         this._termExactPresenceCache.clear();
@@ -1624,6 +1628,7 @@ export class DictionaryDatabase {
         this._directTermIndexByDictionary.clear();
         this._directTermIndexLoadPromiseByDictionary.clear();
         this._termIndexSortedKeysByLookup = new WeakMap();
+        this._termRowCache.clear();
         ++this._directTermIndexGeneration;
     }
 
@@ -6021,7 +6026,20 @@ export class DictionaryDatabase {
         await this._termContentStore.ensureLoadedForRead();
         /** @type {Map<number, import('dictionary-database').DatabaseTermEntryWithId>} */
         const rowsById = new Map();
-        const recordsById = this._termRecordStore.getByIds(ids);
+        /** @type {number[]} */
+        const uncachedIds = [];
+        for (const id of ids) {
+            const cached = this._getCachedTermRow(id);
+            if (typeof cached !== 'undefined') {
+                rowsById.set(id, cached);
+            } else {
+                uncachedIds.push(id);
+            }
+        }
+        if (uncachedIds.length === 0) {
+            return rowsById;
+        }
+        const recordsById = this._termRecordStore.getByIds(uncachedIds);
         const warmSlices = /** @type {unknown} */ (Reflect.get(this._termContentStore, 'warmSlices'));
         if (typeof warmSlices === 'function') {
             await /** @type {(spans: Iterable<{offset: number, length: number}>) => Promise<void>} */ (warmSlices).call(
@@ -6056,6 +6074,7 @@ export class DictionaryDatabase {
                         sequence: record.sequence,
                     });
                     rowsById.set(id, row);
+                    this._setCachedTermRow(id, row);
                 }
             }
         };
@@ -6337,6 +6356,36 @@ export class DictionaryDatabase {
             const oldestKey = this._termEntryContentCache.keys().next().value;
             if (typeof oldestKey !== 'string') { break; }
             this._termEntryContentCache.delete(oldestKey);
+        }
+    }
+
+    /**
+     * @param {number} id
+     * @returns {import('dictionary-database').DatabaseTermEntryWithId|undefined}
+     */
+    _getCachedTermRow(id) {
+        const cached = this._termRowCache.get(id);
+        if (typeof cached === 'undefined') {
+            return void 0;
+        }
+        this._termRowCache.delete(id);
+        this._termRowCache.set(id, cached);
+        return cached;
+    }
+
+    /**
+     * @param {number} id
+     * @param {import('dictionary-database').DatabaseTermEntryWithId} value
+     */
+    _setCachedTermRow(id, value) {
+        if (this._termRowCache.has(id)) {
+            this._termRowCache.delete(id);
+        }
+        this._termRowCache.set(id, value);
+        while (this._termRowCache.size > TERM_ROW_CACHE_MAX_ENTRIES) {
+            const oldestKey = this._termRowCache.keys().next().value;
+            if (typeof oldestKey !== 'number') { break; }
+            this._termRowCache.delete(oldestKey);
         }
     }
 
