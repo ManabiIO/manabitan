@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {afterAll, describe, expect, test, vi} from 'vitest';
+import {afterAll, afterEach, describe, expect, test, vi} from 'vitest';
 import {TextScanner} from '../ext/js/language/text-scanner.js';
 import {setupDomTest} from './fixtures/dom-test.js';
 
@@ -139,6 +139,48 @@ describe('TextScanner lookup robustness', () => {
 
     afterAll(async () => {
         await teardown(global);
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    test('term hover lookup skips waiting for best-effort lookup warmup', async () => {
+        const termsFindImpl = vi.fn().mockResolvedValue({
+            dictionaryEntries: [createMockTermEntry()],
+            originalTextLength: 2,
+        });
+        const termsFind = /** @type {import('../ext/js/comm/api.js').API['termsFind']} */ (/** @type {unknown} */ (termsFindImpl));
+        const scanner = createScanner(termsFind, [createFakeTextSource('暗記')]);
+
+        await searchAt(scanner, 10, 10, createInputInfo());
+
+        expect(termsFindImpl).toHaveBeenCalledOnce();
+        expect(termsFindImpl.mock.calls[0][1]).toEqual({skipLookupWarmWait: true});
+    });
+
+    test('passive mousemove lookup flushes immediately after scan delay', async () => {
+        vi.useFakeTimers();
+        const scanner = /** @type {TextScanner} */ (/** @type {unknown} */ (Object.create(TextScanner.prototype)));
+        Reflect.set(scanner, '_delay', 40);
+        Reflect.set(scanner, '_scanTimerPromise', null);
+        Reflect.set(scanner, '_scanTimerPromiseResolve', null);
+        Reflect.set(scanner, '_queuedMouseMoveLookup', null);
+        Reflect.set(scanner, '_mouseMoveLookupTimer', null);
+        Reflect.set(scanner, '_mouseMoveLookupCoalesceDelay', 12);
+        Reflect.set(scanner, '_flushQueuedMouseMoveLookup', vi.fn());
+        const searchAtFromMouseMove = Reflect.get(TextScanner.prototype, '_searchAtFromMouseMove');
+        const promise = searchAtFromMouseMove.call(scanner, 10, 20, {...createInputInfo(), passive: true});
+
+        await vi.advanceTimersByTimeAsync(39);
+        expect(Reflect.get(scanner, '_flushQueuedMouseMoveLookup')).not.toHaveBeenCalled();
+
+        await vi.advanceTimersByTimeAsync(1);
+        await promise;
+
+        expect(Reflect.get(scanner, '_queuedMouseMoveLookup')).toEqual({x: 10, y: 20, inputInfo: {...createInputInfo(), passive: true}});
+        expect(Reflect.get(scanner, '_flushQueuedMouseMoveLookup')).toHaveBeenCalledOnce();
+        expect(Reflect.get(scanner, '_mouseMoveLookupTimer')).toBe(null);
     });
 
     test('hung lookup does not permanently block subsequent scans', async () => {

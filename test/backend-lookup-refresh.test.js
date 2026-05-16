@@ -89,6 +89,65 @@ describe('Backend lookup refresh gating', () => {
         expect(findTerms).toHaveBeenCalledOnce();
     });
 
+    test('terms lookup does not wait for best-effort lookup cache warmup by default', async () => {
+        const warmGate = createRefreshGate();
+        const findTerms = vi.fn().mockResolvedValue({dictionaryEntries: [], originalTextLength: 2});
+        const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+        Reflect.set(backend, '_dictionaryMutationPromise', null);
+        Reflect.set(backend, '_dictionaryRefreshPromise', null);
+        Reflect.set(backend, '_dictionaryLookupWarmPromise', warmGate.promise);
+        Reflect.set(backend, '_translator', {findTerms});
+        Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
+        Reflect.set(backend, '_getProfileOptions', vi.fn().mockReturnValue({
+            general: {resultOutputMode: 'group', maxResults: 32},
+            dictionaries: [],
+        }));
+        Reflect.set(backend, '_getTranslatorFindTermsOptions', vi.fn().mockReturnValue({enabledDictionaryMap: new Map()}));
+        Reflect.set(backend, '_hasInstalledDictionaries', vi.fn().mockResolvedValue(false));
+
+        await Backend.prototype._onApiTermsFind.call(backend, {
+            text: '暗記',
+            details: {},
+            optionsContext: {depth: 0, url: 'https://example.test/'},
+        });
+
+        expect(findTerms).toHaveBeenCalledOnce();
+        Reflect.set(backend, '_dictionaryLookupWarmPromise', null);
+        warmGate.resolve();
+    });
+
+    test('terms lookup can explicitly wait for best-effort lookup cache warmup', async () => {
+        const warmGate = createRefreshGate();
+        const findTerms = vi.fn().mockResolvedValue({dictionaryEntries: [], originalTextLength: 2});
+        const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+        Reflect.set(backend, '_dictionaryMutationPromise', null);
+        Reflect.set(backend, '_dictionaryRefreshPromise', null);
+        Reflect.set(backend, '_dictionaryLookupWarmPromise', warmGate.promise);
+        Reflect.set(backend, '_translator', {findTerms});
+        Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
+        Reflect.set(backend, '_getProfileOptions', vi.fn().mockReturnValue({
+            general: {resultOutputMode: 'group', maxResults: 32},
+            dictionaries: [],
+        }));
+        Reflect.set(backend, '_getTranslatorFindTermsOptions', vi.fn().mockReturnValue({enabledDictionaryMap: new Map()}));
+        Reflect.set(backend, '_hasInstalledDictionaries', vi.fn().mockResolvedValue(false));
+
+        const promise = Backend.prototype._onApiTermsFind.call(backend, {
+            text: '暗記',
+            details: {waitForLookupWarm: true},
+            optionsContext: {depth: 0, url: 'https://example.test/'},
+        });
+        await Promise.resolve();
+
+        expect(findTerms).not.toHaveBeenCalled();
+
+        Reflect.set(backend, '_dictionaryLookupWarmPromise', null);
+        warmGate.resolve();
+        await promise;
+
+        expect(findTerms).toHaveBeenCalledOnce();
+    });
+
     test('kanji lookup waits for dictionary refresh to settle before querying translator', async () => {
         const refreshGate = createRefreshGate();
         const findKanji = vi.fn().mockResolvedValue([]);

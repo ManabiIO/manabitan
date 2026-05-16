@@ -22,12 +22,14 @@ describe('Frontend dictionary update handling', () => {
     test('hover lookup prewarm stops scheduling probes after the first dictionary hit', async () => {
         const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
         const calls = [];
+        const detailsCalls = [];
         /** @type {Array<() => void>} */
         const resolvers = [];
         Reflect.set(frontend, '_application', {
             api: {
-                termsFind: vi.fn((term) => new Promise((resolve) => {
+                termsFind: vi.fn((term, details) => new Promise((resolve) => {
                     calls.push(term);
+                    detailsCalls.push(details);
                     resolvers.push(() => {
                         resolve({
                             dictionaryEntries: term === '日本' ? [{dictionary: 'JMdict'}] : [],
@@ -50,6 +52,7 @@ describe('Frontend dictionary update handling', () => {
         const results = await resultsPromise;
 
         expect(calls).toEqual(['日本', 'する']);
+        expect(detailsCalls).toEqual([{skipLookupWarmWait: true}, {skipLookupWarmWait: true}]);
         expect(results).toHaveLength(2);
         expect(Reflect.get(frontend, '_application').api.termsFind).toHaveBeenCalledTimes(2);
     });

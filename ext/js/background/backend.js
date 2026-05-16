@@ -985,7 +985,7 @@ export class Backend {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
-        if (details.skipLookupWarmWait !== true) {
+        if (details.waitForLookupWarm === true) {
             await this._awaitDictionaryLookupWarmSettled(2500);
         }
         const options = this._getProfileOptions(optionsContext, false);
