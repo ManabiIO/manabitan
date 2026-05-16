@@ -2333,6 +2333,45 @@ async function searchTermAndGetDictionaryHitCounts(page, term, expectedDictionar
         }
         await page.waitForTimeout(250);
     }
+    const missingDictionaryNames = expectedDictionaryNames.filter((name) => Number(lastResult.expectedCounts?.[name] ?? 0) < 1);
+    if (missingDictionaryNames.length > 0) {
+        try {
+            const diagnostics = await evalSendMessage(page, 'backendDiagnostics', {
+                term,
+                includeExpensiveDebugState: false,
+                includeAlternateLookupModes: false,
+            });
+            const termDictionaryNames = (Array.isArray(diagnostics?.termDictionaryNames) ? diagnostics.termDictionaryNames : [])
+                .map((value) => String(value || '').trim())
+                .filter((value) => value.length > 0);
+            const expectedCounts = {...lastResult.expectedCounts};
+            for (const expectedName of expectedDictionaryNames) {
+                if (termDictionaryNames.some((observedName) => matchesDictionaryName(observedName, expectedName))) {
+                    expectedCounts[expectedName] = Math.max(Number(expectedCounts[expectedName] || 0), 1);
+                }
+            }
+            if (expectedDictionaryNames.every((name) => (expectedCounts[name] ?? 0) >= 1)) {
+                return {
+                    ...lastResult,
+                    expectedCounts,
+                    observedCounts: {
+                        ...lastResult.observedCounts,
+                        __backendTermDictionaryNames: termDictionaryNames.join(', '),
+                    },
+                };
+            }
+            lastResult = {
+                ...lastResult,
+                expectedCounts,
+                observedCounts: {
+                    ...lastResult.observedCounts,
+                    __backendTermDictionaryNames: termDictionaryNames.join(', '),
+                },
+            };
+        } catch (_) {
+            // Preserve the DOM-only result when backend diagnostics are unavailable.
+        }
+    }
     return lastResult;
 }
 

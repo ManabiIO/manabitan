@@ -364,8 +364,14 @@ export class TermRecordOpfsStore {
         this._importSessionActive = false;
         /** @type {DenseIdRecordStore} */
         this._recordsById = new DenseIdRecordStore();
+        /** @type {Map<string, number[]>} */
+        this._recordIdsByDictionary = new Map();
+        /** @type {boolean} */
+        this._recordIdsMayContainStaleEntries = false;
         /** @type {number} */
         this._nextId = 1;
+        /** @type {boolean} */
+        this._nextIdMayNeedShardScan = false;
         /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
         this._indexByDictionary = new Map();
         /** @type {WeakSet<{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
@@ -428,8 +434,11 @@ export class TermRecordOpfsStore {
     async prepare() {
         await this._closeAllWritables();
         this._recordsById.clear();
+        this._recordIdsByDictionary.clear();
+        this._recordIdsMayContainStaleEntries = false;
         this._indexByDictionary.clear();
         this._nextId = 1;
+        this._nextIdMayNeedShardScan = false;
         this._deferIndexBuild = false;
         this._indexDirty = false;
         this._reloadFromShardsAfterImport = false;
@@ -450,8 +459,10 @@ export class TermRecordOpfsStore {
         this._recordsDirectoryHandle = await rootDirectoryHandle.getDirectoryHandle(SHARD_DIRECTORY_NAME, {create: true});
 
         const shardFileCount = await this._loadShardFiles(false);
+        this._nextIdMayNeedShardScan = shardFileCount > 0;
         await (shardFileCount === 0 ? this._migrateLegacyMonolithicIfPresent() : this._deleteLegacyMonolithicIfPresent());
         if (shardFileCount === 0) {
+            this._nextIdMayNeedShardScan = false;
             await this.verifyIntegrity();
             this._allShardContentsLoaded = true;
         }
@@ -563,8 +574,11 @@ export class TermRecordOpfsStore {
     async reset() {
         await this._closeAllWritables();
         this._recordsById.clear();
+        this._recordIdsByDictionary.clear();
+        this._recordIdsMayContainStaleEntries = false;
         this._indexByDictionary.clear();
         this._nextId = 1;
+        this._nextIdMayNeedShardScan = false;
         this._deferIndexBuild = false;
         this._indexDirty = false;
         this._shardStateByFileName.clear();
@@ -611,6 +625,7 @@ export class TermRecordOpfsStore {
      */
     async appendBatch(records, preinternedPlan = null) {
         if (records.length === 0) { return; }
+        await this._ensureNextIdReadyForAppend();
         /** @type {Map<string, TermRecord[]>} */
         const recordsByShard = new Map();
         for (const row of records) {
@@ -630,7 +645,7 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: row.sequence,
             };
-            this._recordsById.set(id, record);
+            this._storeRecord(record);
             this._loadedDictionaryNames.add(record.dictionary);
             const shardFileName = this._getShardFileName(record.dictionary, record.entryContentDictName);
             const shardRecords = recordsByShard.get(shardFileName);
@@ -671,6 +686,7 @@ export class TermRecordOpfsStore {
      */
     async appendBatchFromTermRows(rows, start, count) {
         if (count <= 0) { return; }
+        await this._ensureNextIdReadyForAppend();
         /** @type {Map<string, TermRecord[]>|null} */
         let recordsByShard = null;
         /** @type {TermRecord[]} */
@@ -695,7 +711,7 @@ export class TermRecordOpfsStore {
                 score: row[12],
                 sequence: row[14],
             };
-            this._recordsById.set(id, record);
+            this._storeRecord(record);
             this._loadedDictionaryNames.add(dictionary);
             if (i === start) {
                 singleDictionaryName = dictionary;
@@ -759,6 +775,7 @@ export class TermRecordOpfsStore {
         if (contentOffsets.length < (start + count) || contentLengths.length < (start + count) || contentDictNames.length < (start + count)) {
             throw new Error('appendBatchFromResolvedImportTermEntries content refs length is smaller than row count');
         }
+        await this._ensureNextIdReadyForAppend();
         const tBuildStart = safePerformance.now();
         let buildRecordsMs = 0;
         let encodeMs = 0;
@@ -793,7 +810,7 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
-            this._recordsById.set(id, record);
+            this._storeRecord(record);
             this._loadedDictionaryNames.add(dictionary);
             if (i === start) {
                 singleDictionaryName = dictionary;
@@ -867,6 +884,7 @@ export class TermRecordOpfsStore {
         if (spans.length < count) {
             throw new Error('appendBatchFromImportTermEntries spans length is smaller than row count');
         }
+        await this._ensureNextIdReadyForAppend();
         /** @type {Map<string, TermRecord[]>|null} */
         let recordsByShard = null;
         /** @type {TermRecord[]} */
@@ -894,7 +912,7 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
-            this._recordsById.set(id, record);
+            this._storeRecord(record);
             this._loadedDictionaryNames.add(dictionary);
             if (i === 0) {
                 singleDictionaryName = dictionary;
@@ -957,6 +975,7 @@ export class TermRecordOpfsStore {
         if (contentOffsets.length < count || contentLengths.length < count) {
             throw new Error('appendBatchFromImportTermEntriesResolvedContent content arrays are smaller than row count');
         }
+        await this._ensureNextIdReadyForAppend();
         const tBuildStart = safePerformance.now();
         let buildRecordsMs = 0;
         let encodeMs = 0;
@@ -989,7 +1008,7 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
-            this._recordsById.set(id, record);
+            this._storeRecord(record);
             if (i === 0) {
                 firstDictionaryName = dictionary;
             }
@@ -1066,6 +1085,7 @@ export class TermRecordOpfsStore {
         ) {
             throw new Error('appendBatchFromArtifactChunkResolvedContent content arrays are smaller than row count');
         }
+        await this._ensureNextIdReadyForAppend();
         const uniformContentDictName = Array.isArray(contentDictNames) ? null : (contentDictNames ?? 'raw');
         const tBuildStart = safePerformance.now();
         const firstId = this._nextId;
@@ -1099,7 +1119,7 @@ export class TermRecordOpfsStore {
                     score: chunk.scoreList[i] ?? 0,
                     sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
                 };
-                this._recordsById.set(id, record);
+                this._storeRecord(record);
                 this._loadedDictionaryNames.add(chunk.dictionary);
                 if (typeof existingIndex !== 'undefined') {
                     this._addRecordToDictionaryIndex(existingIndex, record);
@@ -1279,9 +1299,10 @@ export class TermRecordOpfsStore {
         for (const id of ids) {
             const record = this._recordsById.get(id);
             if (typeof record === 'undefined' || record.dictionary !== dictionaryName) { continue; }
-            this._recordsById.delete(id);
+            this._deleteRecord(id);
             ++deletedCount;
         }
+        this._recordIdsByDictionary.delete(dictionaryName);
         this._indexByDictionary.delete(dictionaryName);
         await this._deleteShardByDictionary(dictionaryName);
         return deletedCount;
@@ -1337,6 +1358,7 @@ export class TermRecordOpfsStore {
                     record.dictionary = toName;
                 }
             }
+            this._renameRecordIdIndex(fromName, toName, recordIdsToRename);
             this._indexByDictionary.delete(fromName);
             this._indexByDictionary.delete(toName);
             this._indexDirty = false;
@@ -1474,6 +1496,7 @@ export class TermRecordOpfsStore {
                 record.dictionary = toName;
             }
         }
+        this._renameRecordIdIndex(fromName, toName, recordIdsToRename);
         this._indexByDictionary.delete(fromName);
         this._indexByDictionary.delete(toName);
         this._indexDirty = false;
@@ -1532,13 +1555,14 @@ export class TermRecordOpfsStore {
         if (removedDictionaryNames.size > 0) {
             for (const dictionaryName of removedDictionaryNames) {
                 this._loadedDictionaryNames.delete(dictionaryName);
+                this._recordIdsByDictionary.delete(dictionaryName);
             }
             for (const id of [...this._recordsById.keys()]) {
                 const record = this._recordsById.get(id);
                 if (typeof record === 'undefined' || !removedDictionaryNames.has(record.dictionary)) {
                     continue;
                 }
-                this._recordsById.delete(id);
+                this._deleteRecord(id);
             }
             this._indexByDictionary.clear();
             this._indexDirty = false;
@@ -1572,6 +1596,184 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {TermRecord} record
+     * @returns {void}
+     */
+    _storeRecord(record) {
+        const existing = this._recordsById.get(record.id);
+        this._recordsById.set(record.id, record);
+        if (typeof existing !== 'undefined') {
+            if (existing.dictionary !== record.dictionary) {
+                this._recordIdsMayContainStaleEntries = true;
+                let ids = this._recordIdsByDictionary.get(record.dictionary);
+                if (typeof ids === 'undefined') {
+                    ids = [];
+                    this._recordIdsByDictionary.set(record.dictionary, ids);
+                }
+                ids.push(record.id);
+            }
+            return;
+        }
+        let ids = this._recordIdsByDictionary.get(record.dictionary);
+        if (typeof ids === 'undefined') {
+            ids = [];
+            this._recordIdsByDictionary.set(record.dictionary, ids);
+        }
+        ids.push(record.id);
+    }
+
+    /**
+     * @param {number} id
+     * @returns {boolean}
+     */
+    _deleteRecord(id) {
+        const deleted = this._recordsById.delete(id);
+        if (deleted) {
+            this._recordIdsMayContainStaleEntries = true;
+        }
+        return deleted;
+    }
+
+    /**
+     * @param {string} fromName
+     * @param {string} toName
+     * @param {number[]} renamedIds
+     * @returns {void}
+     */
+    _renameRecordIdIndex(fromName, toName, renamedIds) {
+        const existingFromIds = this._recordIdsByDictionary.get(fromName);
+        if (typeof existingFromIds !== 'undefined') {
+            this._recordIdsByDictionary.delete(fromName);
+        }
+        this._recordIdsMayContainStaleEntries = true;
+        let toIds = this._recordIdsByDictionary.get(toName);
+        if (typeof toIds === 'undefined') {
+            toIds = [];
+            this._recordIdsByDictionary.set(toName, toIds);
+        }
+        for (const id of renamedIds) {
+            toIds.push(id);
+        }
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _ensureNextIdReadyForAppend() {
+        if (!this._nextIdMayNeedShardScan || this._recordsDirectoryHandle === null) {
+            return;
+        }
+        let maxId = this._nextId - 1;
+        for (const state of this._shardStateByFileName.values()) {
+            let file;
+            try {
+                file = await state.fileHandle.getFile();
+            } catch (_) {
+                continue;
+            }
+            if (file.size <= 0) { continue; }
+            const content = new Uint8Array(await file.arrayBuffer());
+            const shardMaxId = this._scanCurrentBinaryMaxRecordId(content);
+            if (typeof shardMaxId === 'number' && shardMaxId > maxId) {
+                maxId = shardMaxId;
+            }
+        }
+        this._nextId = Math.max(this._nextId, maxId + 1);
+        this._nextIdMayNeedShardScan = false;
+    }
+
+    /**
+     * @param {Uint8Array} content
+     * @returns {number|null}
+     */
+    _scanCurrentBinaryMaxRecordId(content) {
+        if (content.byteLength < BINARY_MAGIC_BYTES) {
+            return null;
+        }
+        const view = new DataView(content.buffer, content.byteOffset, content.byteLength);
+        const magic = this._textDecoder.decode(content.subarray(0, BINARY_MAGIC_BYTES));
+        if (magic !== BINARY_MAGIC_TEXT) {
+            return null;
+        }
+        let cursor = BINARY_MAGIC_BYTES;
+        if ((cursor + 2) > content.byteLength) { return null; }
+        const entryContentDictNameMeta16 = view.getUint16(cursor, true); cursor += 2;
+        let entryContentDictNameMeta = entryContentDictNameMeta16;
+        if (entryContentDictNameMeta16 === U16_NULL) {
+            if ((cursor + 4) > content.byteLength) { return null; }
+            entryContentDictNameMeta = view.getUint32(cursor, true); cursor += 4;
+        }
+        const entryContentDictNameLength = (entryContentDictNameMeta & 0xff) === ENTRY_CONTENT_DICT_NAME_CODE_CUSTOM ?
+            (entryContentDictNameMeta >>> 8) :
+            0;
+        cursor += entryContentDictNameLength;
+        if (cursor > content.byteLength) { return null; }
+
+        let maxId = 0;
+        while ((cursor + CHUNK_HEADER_BYTES) <= content.byteLength) {
+            const chunkBaseId = view.getUint32(cursor, true); cursor += 4;
+            const chunkCount = view.getUint32(cursor, true); cursor += 4;
+            if (chunkBaseId <= 0 || chunkCount === 0) { break; }
+            maxId = Math.max(maxId, chunkBaseId + chunkCount - 1);
+            if ((cursor + STRING_TABLE_HEADER_BYTES) > content.byteLength) { return maxId; }
+            const stringCount = view.getUint32(cursor, true); cursor += 4;
+            const stringBytesLength = view.getUint32(cursor, true); cursor += 4;
+            cursor += (stringCount * 2) + stringBytesLength;
+            if (cursor > content.byteLength) { return maxId; }
+            for (let i = 0; i < chunkCount; ++i) {
+                if ((cursor + RECORD_HEADER_BYTES) > content.byteLength) { return maxId; }
+                cursor += 4; // expression string table index
+                cursor += 4; // reading string table index, or READING_EQUALS_EXPRESSION_U32
+                cursor += 4; // entry content offset
+                const compactEntryContentLength = view.getUint16(cursor, true); cursor += 2;
+                if (compactEntryContentLength === ENTRY_CONTENT_LENGTH_EXTENDED_U16) {
+                    cursor += 4;
+                }
+                cursor += 4; // score
+                cursor += 4; // sequence
+                if (cursor > content.byteLength) { return maxId; }
+            }
+        }
+        return maxId > 0 ? maxId : null;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {Generator<TermRecord, void, void>}
+     * @yields {TermRecord}
+     */
+    *_iterateRecordsForDictionary(dictionaryName) {
+        const ids = this._recordIdsByDictionary.get(dictionaryName);
+        if (typeof ids !== 'undefined') {
+            if (this._recordIdsMayContainStaleEntries) {
+                /** @type {Set<number>} */
+                const seenIds = new Set();
+                for (const id of ids) {
+                    if (seenIds.has(id)) { continue; }
+                    seenIds.add(id);
+                    const record = this._recordsById.get(id);
+                    if (typeof record !== 'undefined' && record.dictionary === dictionaryName) {
+                        yield record;
+                    }
+                }
+            } else {
+                for (const id of ids) {
+                    const record = this._recordsById.get(id);
+                    if (typeof record !== 'undefined' && record.dictionary === dictionaryName) {
+                        yield record;
+                    }
+                }
+            }
+            return;
+        }
+        for (const record of this._recordsById.values()) {
+            if (record.dictionary === dictionaryName) {
+                yield record;
+            }
+        }
+    }
+
+    /**
      * @param {string} dictionaryName
      * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}}
      */
@@ -1598,8 +1800,7 @@ export class TermRecordOpfsStore {
             pair: new Map(),
             sequence: new Map(),
         };
-        for (const record of this._recordsById.values()) {
-            if (record.dictionary !== dictionaryName) { continue; }
+        for (const record of this._iterateRecordsForDictionary(dictionaryName)) {
             this._addRecordToDictionaryIndex(created, record);
         }
         if (
@@ -1661,9 +1862,8 @@ export class TermRecordOpfsStore {
             createdIndexes.set(name, index);
             this._indexByDictionary.set(name, index);
         }
-        for (const record of this._recordsById.values()) {
-            const index = createdIndexes.get(record.dictionary);
-            if (typeof index !== 'undefined') {
+        for (const [name, index] of createdIndexes) {
+            for (const record of this._iterateRecordsForDictionary(name)) {
                 this._addRecordToDictionaryIndex(index, record);
             }
         }
@@ -1709,6 +1909,16 @@ export class TermRecordOpfsStore {
      * @returns {boolean}
      */
     _hasRecordsForDictionary(dictionaryName) {
+        const ids = this._recordIdsByDictionary.get(dictionaryName);
+        if (typeof ids !== 'undefined') {
+            for (const id of ids) {
+                const record = this._recordsById.get(id);
+                if (typeof record !== 'undefined' && record.dictionary === dictionaryName) {
+                    return true;
+                }
+            }
+            return false;
+        }
         for (const record of this._recordsById.values()) {
             if (record.dictionary === dictionaryName) {
                 return true;
@@ -1780,6 +1990,7 @@ export class TermRecordOpfsStore {
             }
         }
         this._allShardContentsLoaded = true;
+        this._nextIdMayNeedShardScan = false;
     }
 
     /**
@@ -2171,7 +2382,7 @@ export class TermRecordOpfsStore {
                     score,
                     sequence: rawSequence >= 0 ? rawSequence : null,
                 };
-                this._recordsById.set(id, record);
+                this._storeRecord(record);
                 if (!this._deferIndexBuild) {
                     this._addToIndex(record);
                 }
@@ -2261,7 +2472,7 @@ export class TermRecordOpfsStore {
                 score: this._asNumber(raw[9], 0),
                 sequence: this._asNullableNumber(raw[10]),
             };
-            this._recordsById.set(id, record);
+            this._storeRecord(record);
             if (!this._deferIndexBuild) {
                 this._addToIndex(record);
             }
@@ -3578,7 +3789,7 @@ export class TermRecordOpfsStore {
             if (typeof record === 'undefined') { continue; }
             const logicalKey = this._getShardFileName(record.dictionary, record.entryContentDictName);
             if (this._reloadShardLogicalKeysAfterImport.has(logicalKey)) {
-                this._recordsById.delete(id);
+                this._deleteRecord(id);
             }
         }
 
@@ -3626,7 +3837,7 @@ export class TermRecordOpfsStore {
             if (typeof record === 'undefined') { continue; }
             const logicalKey = this._getShardFileName(record.dictionary, record.entryContentDictName);
             if (this._reloadShardLogicalKeysAfterImport.has(logicalKey)) {
-                this._recordsById.delete(id);
+                this._deleteRecord(id);
             }
         }
 
@@ -3652,7 +3863,7 @@ export class TermRecordOpfsStore {
                     score: plan.scoreList[i] ?? 0,
                     sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
                 };
-                this._recordsById.set(id, record);
+                this._storeRecord(record);
             }
         }
     }

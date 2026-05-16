@@ -158,6 +158,148 @@ describe('TermRecordOpfsStore', () => {
         expect(shardStateByFileName.has(newFileName)).toBe(true);
     });
 
+    test('dictionary index construction uses maintained record ids without duplicate stale ids', () => {
+        const store = new TermRecordOpfsStore();
+        const storeRecord = /** @type {(record: unknown) => void} */ (Reflect.get(store, '_storeRecord').bind(store));
+        const deleteRecord = /** @type {(id: number) => boolean} */ (Reflect.get(store, '_deleteRecord').bind(store));
+
+        storeRecord({
+            id: 1,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: 100,
+        });
+        expect(deleteRecord(1)).toBe(true);
+        storeRecord({
+            id: 1,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 4,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: 100,
+        });
+
+        const index = store.getDictionaryIndex('JMdict');
+
+        expect(index.expression.get('日本')).toEqual([1]);
+        expect(index.reading.get('にほん')).toEqual([1]);
+        expect(index.sequence.get(100)).toEqual([1]);
+    });
+
+    test('dictionary id side index follows overwritten records across dictionaries', () => {
+        const store = new TermRecordOpfsStore();
+        const storeRecord = /** @type {(record: unknown) => void} */ (Reflect.get(store, '_storeRecord').bind(store));
+
+        storeRecord({
+            id: 7,
+            dictionary: 'Old',
+            expression: '古い',
+            reading: 'ふるい',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+        storeRecord({
+            id: 7,
+            dictionary: 'New',
+            expression: '新しい',
+            reading: 'あたらしい',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 4,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+
+        expect(store.getDictionaryIndex('Old').expression.get('古い')).toBeUndefined();
+        expect(store.getDictionaryIndex('New').expression.get('新しい')).toEqual([7]);
+    });
+
+    test('lazy shard metadata scan prevents cold append id collisions', async () => {
+        const sourceStore = new TermRecordOpfsStore();
+        const sourceFileBytesByName = new Map();
+        Reflect.set(sourceStore, '_recordsDirectoryHandle', createFakeDirectoryHandle(sourceFileBytesByName));
+        Reflect.set(sourceStore, '_nextId', 42);
+        await sourceStore.appendBatch([{
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        }]);
+        const shardBytes = sourceFileBytesByName.get(sourceStore._getShardSegmentFileName('JMdict', 'raw', 0));
+        expect(shardBytes).toBeInstanceOf(Uint8Array);
+        const fileBytesByName = new Map([[sourceStore._getShardSegmentFileName('JMdict', 'raw', 0), /** @type {Uint8Array} */ (shardBytes)]]);
+        const store = new TermRecordOpfsStore();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await Reflect.get(store, '_loadShardFiles').call(store, false);
+        Reflect.set(store, '_nextIdMayNeedShardScan', true);
+
+        await store.appendBatch([{
+            dictionary: 'Jitendex',
+            expression: '猫',
+            reading: 'ねこ',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 4,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        }]);
+
+        expect(store.getById(42)).toBeUndefined();
+        expect(store.getById(43)?.dictionary).toBe('Jitendex');
+        expect(store.getDictionaryIndex('Jitendex').expression.get('猫')).toEqual([43]);
+    });
+
+    test('current binary max-id scan reads appended shard chunks without materializing records', async () => {
+        const sourceStore = new TermRecordOpfsStore();
+        const sourceFileBytesByName = new Map();
+        Reflect.set(sourceStore, '_recordsDirectoryHandle', createFakeDirectoryHandle(sourceFileBytesByName));
+        Reflect.set(sourceStore, '_nextId', 42);
+        await sourceStore.appendBatch([{
+            id: 42,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        }]);
+        const shardBytes = sourceFileBytesByName.get(sourceStore._getShardSegmentFileName('JMdict', 'raw', 0));
+        expect(shardBytes).toBeInstanceOf(Uint8Array);
+        expect(sourceStore._scanCurrentBinaryMaxRecordId(/** @type {Uint8Array} */ (shardBytes))).toBe(42);
+    });
+
     test('replaceDictionaryName restores original shard files and records when source removal fails', async () => {
         const store = new TermRecordOpfsStore();
         const recordsById = Reflect.get(store, '_recordsById');
