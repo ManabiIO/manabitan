@@ -366,8 +366,8 @@ export class TermRecordOpfsStore {
         this._recordsById = new DenseIdRecordStore();
         /** @type {Map<string, number[]>} */
         this._recordIdsByDictionary = new Map();
-        /** @type {boolean} */
-        this._recordIdsMayContainStaleEntries = false;
+        /** @type {Set<string>} */
+        this._recordIdStaleDictionaryNames = new Set();
         /** @type {number} */
         this._nextId = 1;
         /** @type {boolean} */
@@ -435,7 +435,7 @@ export class TermRecordOpfsStore {
         await this._closeAllWritables();
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
-        this._recordIdsMayContainStaleEntries = false;
+        this._recordIdStaleDictionaryNames.clear();
         this._indexByDictionary.clear();
         this._nextId = 1;
         this._nextIdMayNeedShardScan = false;
@@ -575,7 +575,7 @@ export class TermRecordOpfsStore {
         await this._closeAllWritables();
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
-        this._recordIdsMayContainStaleEntries = false;
+        this._recordIdStaleDictionaryNames.clear();
         this._indexByDictionary.clear();
         this._nextId = 1;
         this._nextIdMayNeedShardScan = false;
@@ -1303,6 +1303,7 @@ export class TermRecordOpfsStore {
             ++deletedCount;
         }
         this._recordIdsByDictionary.delete(dictionaryName);
+        this._recordIdStaleDictionaryNames.delete(dictionaryName);
         this._indexByDictionary.delete(dictionaryName);
         await this._deleteShardByDictionary(dictionaryName);
         return deletedCount;
@@ -1556,6 +1557,7 @@ export class TermRecordOpfsStore {
             for (const dictionaryName of removedDictionaryNames) {
                 this._loadedDictionaryNames.delete(dictionaryName);
                 this._recordIdsByDictionary.delete(dictionaryName);
+                this._recordIdStaleDictionaryNames.delete(dictionaryName);
             }
             for (const id of [...this._recordsById.keys()]) {
                 const record = this._recordsById.get(id);
@@ -1604,7 +1606,8 @@ export class TermRecordOpfsStore {
         this._recordsById.set(record.id, record);
         if (typeof existing !== 'undefined') {
             if (existing.dictionary !== record.dictionary) {
-                this._recordIdsMayContainStaleEntries = true;
+                this._markRecordIdsStale(existing.dictionary);
+                this._markRecordIdsStale(record.dictionary);
                 let ids = this._recordIdsByDictionary.get(record.dictionary);
                 if (typeof ids === 'undefined') {
                     ids = [];
@@ -1627,11 +1630,22 @@ export class TermRecordOpfsStore {
      * @returns {boolean}
      */
     _deleteRecord(id) {
+        const existing = this._recordsById.get(id);
         const deleted = this._recordsById.delete(id);
-        if (deleted) {
-            this._recordIdsMayContainStaleEntries = true;
+        if (deleted && typeof existing !== 'undefined') {
+            this._markRecordIdsStale(existing.dictionary);
         }
         return deleted;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {void}
+     */
+    _markRecordIdsStale(dictionaryName) {
+        if (dictionaryName.length > 0) {
+            this._recordIdStaleDictionaryNames.add(dictionaryName);
+        }
     }
 
     /**
@@ -1645,7 +1659,8 @@ export class TermRecordOpfsStore {
         if (typeof existingFromIds !== 'undefined') {
             this._recordIdsByDictionary.delete(fromName);
         }
-        this._recordIdsMayContainStaleEntries = true;
+        this._markRecordIdsStale(fromName);
+        this._markRecordIdsStale(toName);
         let toIds = this._recordIdsByDictionary.get(toName);
         if (typeof toIds === 'undefined') {
             toIds = [];
@@ -1745,17 +1760,22 @@ export class TermRecordOpfsStore {
     *_iterateRecordsForDictionary(dictionaryName) {
         const ids = this._recordIdsByDictionary.get(dictionaryName);
         if (typeof ids !== 'undefined') {
-            if (this._recordIdsMayContainStaleEntries) {
+            if (this._recordIdStaleDictionaryNames.has(dictionaryName)) {
                 /** @type {Set<number>} */
                 const seenIds = new Set();
+                /** @type {number[]} */
+                const compactedIds = [];
                 for (const id of ids) {
                     if (seenIds.has(id)) { continue; }
                     seenIds.add(id);
                     const record = this._recordsById.get(id);
                     if (typeof record !== 'undefined' && record.dictionary === dictionaryName) {
+                        compactedIds.push(id);
                         yield record;
                     }
                 }
+                this._recordIdsByDictionary.set(dictionaryName, compactedIds);
+                this._recordIdStaleDictionaryNames.delete(dictionaryName);
             } else {
                 for (const id of ids) {
                     const record = this._recordsById.get(id);
@@ -1889,8 +1909,7 @@ export class TermRecordOpfsStore {
         }
         index.expressionReverse.clear();
         index.readingReverse.clear();
-        for (const record of this._recordsById.values()) {
-            if (record.dictionary !== dictionaryName) { continue; }
+        for (const record of this._iterateRecordsForDictionary(dictionaryName)) {
             this._addRecordReverseToDictionaryIndex(index, record);
         }
         this._reverseIndexReady.add(index);

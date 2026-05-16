@@ -49,6 +49,23 @@ function cacheMeta(database, contentHash, offset, length, dictName, hash1, hash2
 }
 
 describe('DictionaryDatabase term content dedup metadata cache', () => {
+    test('groups duplicate external content spans for sequential row materialization', () => {
+        const database = new DictionaryDatabase();
+        const groupEntries = /** @type {(entries: Array<[number, unknown]>) => Array<Array<[number, unknown]>>} */ (
+            Reflect.get(database, '_groupTermRecordEntriesByContentCacheKey').bind(database)
+        );
+
+        const groups = groupEntries([
+            [1, {entryContentOffset: 10, entryContentLength: 5, entryContentDictName: 'raw'}],
+            [2, {entryContentOffset: 10, entryContentLength: 5, entryContentDictName: 'raw'}],
+            [3, {entryContentOffset: 20, entryContentLength: 5, entryContentDictName: 'raw'}],
+            [4, {entryContentOffset: -1, entryContentLength: 0, entryContentDictName: 'raw'}],
+            [5, {entryContentOffset: 10, entryContentLength: 5, entryContentDictName: 'jmdict'}],
+        ]);
+
+        expect(groups.map((group) => group.map(([id]) => id))).toEqual([[1, 2], [3], [4], [5]]);
+    });
+
     test('keeps exact hash-pair matches distinct through collisions and resize', () => {
         const database = new DictionaryDatabase();
         Reflect.set(database, '_getTermEntryContentMetaHashPairSlot', () => 0);

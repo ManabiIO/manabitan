@@ -6019,37 +6019,70 @@ export class DictionaryDatabase {
                 [...recordsById.values()].map(({entryContentOffset: offset, entryContentLength: length}) => ({offset, length})),
             );
         }
-        const entries = [...recordsById];
-        const concurrency = Math.min(8, Math.max(1, entries.length));
+        const entryGroups = this._groupTermRecordEntriesByContentCacheKey([...recordsById]);
+        const concurrency = Math.min(8, Math.max(1, entryGroups.length));
         let nextIndex = 0;
         const deserializeNext = async () => {
             while (true) {
                 const entryIndex = nextIndex++;
-                if (entryIndex >= entries.length) { return; }
-                const [id, record] = entries[entryIndex];
-                const row = await this._deserializeTermRow({
-                    id,
-                    dictionary: record.dictionary,
-                    expression: record.expression,
-                    reading: record.reading,
-                    expressionReverse: record.expressionReverse,
-                    readingReverse: record.readingReverse,
-                    entryContentId: null,
-                    entryContentOffset: record.entryContentOffset,
-                    entryContentLength: record.entryContentLength,
-                    entryContentDictName: record.entryContentDictName,
-                    definitionTags: '',
-                    termTags: '',
-                    rules: '',
-                    score: record.score,
-                    glossaryJson: '[]',
-                    sequence: record.sequence,
-                });
-                rowsById.set(id, row);
+                if (entryIndex >= entryGroups.length) { return; }
+                for (const [id, record] of entryGroups[entryIndex]) {
+                    const row = await this._deserializeTermRow({
+                        id,
+                        dictionary: record.dictionary,
+                        expression: record.expression,
+                        reading: record.reading,
+                        expressionReverse: record.expressionReverse,
+                        readingReverse: record.readingReverse,
+                        entryContentId: null,
+                        entryContentOffset: record.entryContentOffset,
+                        entryContentLength: record.entryContentLength,
+                        entryContentDictName: record.entryContentDictName,
+                        definitionTags: '',
+                        termTags: '',
+                        rules: '',
+                        score: record.score,
+                        glossaryJson: '[]',
+                        sequence: record.sequence,
+                    });
+                    rowsById.set(id, row);
+                }
             }
         };
         await Promise.all(Array.from({length: concurrency}, () => deserializeNext()));
         return rowsById;
+    }
+
+    /**
+     * @param {Array<[number, import('./term-record-opfs-store.js').TermRecord]>} entries
+     * @returns {Array<Array<[number, import('./term-record-opfs-store.js').TermRecord]>>}
+     */
+    _groupTermRecordEntriesByContentCacheKey(entries) {
+        /** @type {Array<Array<[number, import('./term-record-opfs-store.js').TermRecord]>>} */
+        const groups = [];
+        /** @type {Map<string, Array<[number, import('./term-record-opfs-store.js').TermRecord]>>} */
+        const groupByKey = new Map();
+        for (const entry of entries) {
+            const [, record] = entry;
+            const cacheKey = (
+                record.entryContentOffset >= 0 &&
+                record.entryContentLength > 0
+            ) ?
+                `span:${record.entryContentOffset}:${record.entryContentLength}:${record.entryContentDictName}` :
+                '';
+            if (cacheKey.length === 0) {
+                groups.push([entry]);
+                continue;
+            }
+            let group = groupByKey.get(cacheKey);
+            if (typeof group === 'undefined') {
+                group = [];
+                groupByKey.set(cacheKey, group);
+                groups.push(group);
+            }
+            group.push(entry);
+        }
+        return groups;
     }
 
     /**

@@ -233,6 +233,64 @@ describe('TermRecordOpfsStore', () => {
         expect(store.getDictionaryIndex('New').expression.get('新しい')).toEqual([7]);
     });
 
+    test('stale record ids are compacted only for affected dictionaries', () => {
+        const store = new TermRecordOpfsStore();
+        const storeRecord = /** @type {(record: unknown) => void} */ (Reflect.get(store, '_storeRecord').bind(store));
+        const deleteRecord = /** @type {(id: number) => boolean} */ (Reflect.get(store, '_deleteRecord').bind(store));
+        const staleDictionaryNames = /** @type {Set<string>} */ (Reflect.get(store, '_recordIdStaleDictionaryNames'));
+        const idsByDictionary = /** @type {Map<string, number[]>} */ (Reflect.get(store, '_recordIdsByDictionary'));
+
+        storeRecord({
+            id: 1,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+        storeRecord({
+            id: 2,
+            dictionary: 'Jitendex',
+            expression: '猫',
+            reading: 'ねこ',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 4,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+        expect(deleteRecord(1)).toBe(true);
+        storeRecord({
+            id: 3,
+            dictionary: 'JMdict',
+            expression: '学校',
+            reading: 'がっこう',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 8,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+
+        expect(staleDictionaryNames.has('JMdict')).toBe(true);
+        expect(staleDictionaryNames.has('Jitendex')).toBe(false);
+        expect(store.getDictionaryIndex('Jitendex').expression.get('猫')).toEqual([2]);
+        expect(staleDictionaryNames.has('JMdict')).toBe(true);
+
+        expect(store.getDictionaryIndex('JMdict').expression.get('学校')).toEqual([3]);
+        expect(staleDictionaryNames.has('JMdict')).toBe(false);
+        expect(idsByDictionary.get('JMdict')).toEqual([3]);
+    });
+
     test('lazy shard metadata scan prevents cold append id collisions', async () => {
         const sourceStore = new TermRecordOpfsStore();
         const sourceFileBytesByName = new Map();
