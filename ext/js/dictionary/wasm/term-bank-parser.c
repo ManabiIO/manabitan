@@ -327,6 +327,72 @@ static uint32_t hash_content_xxh32(const uint8_t* src, uint32_t length, uint32_t
     return h32;
 }
 
+static inline uint32_t xxh32_finalize(uint32_t h32) {
+    h32 ^= h32 >> 15u;
+    h32 *= 2246822519u;
+    h32 ^= h32 >> 13u;
+    h32 *= 3266489917u;
+    h32 ^= h32 >> 16u;
+    return h32;
+}
+
+static void hash_content_xxh32_pair(const uint8_t* src, uint32_t length, uint32_t seed1, uint32_t seed2, uint32_t* out1, uint32_t* out2) {
+    const uint8_t* p = src;
+    const uint8_t* const end = src + length;
+    uint32_t h1;
+    uint32_t h2;
+    if (length >= 16u) {
+        const uint8_t* const limit = end - 16u;
+        uint32_t a1 = seed1 + 2654435761u + 2246822519u;
+        uint32_t b1 = seed1 + 2246822519u;
+        uint32_t c1 = seed1;
+        uint32_t d1 = seed1 - 2654435761u;
+        uint32_t a2 = seed2 + 2654435761u + 2246822519u;
+        uint32_t b2 = seed2 + 2246822519u;
+        uint32_t c2 = seed2;
+        uint32_t d2 = seed2 - 2654435761u;
+        do {
+            uint32_t value = read_u32_le(p); p += 4u;
+            a1 = xxh32_round(a1, value);
+            a2 = xxh32_round(a2, value);
+            value = read_u32_le(p); p += 4u;
+            b1 = xxh32_round(b1, value);
+            b2 = xxh32_round(b2, value);
+            value = read_u32_le(p); p += 4u;
+            c1 = xxh32_round(c1, value);
+            c2 = xxh32_round(c2, value);
+            value = read_u32_le(p); p += 4u;
+            d1 = xxh32_round(d1, value);
+            d2 = xxh32_round(d2, value);
+        } while (p <= limit);
+        h1 = rotl32(a1, 1u) + rotl32(b1, 7u) + rotl32(c1, 12u) + rotl32(d1, 18u);
+        h2 = rotl32(a2, 1u) + rotl32(b2, 7u) + rotl32(c2, 12u) + rotl32(d2, 18u);
+    } else {
+        h1 = seed1 + 374761393u;
+        h2 = seed2 + 374761393u;
+    }
+    h1 += length;
+    h2 += length;
+    while ((p + 4u) <= end) {
+        const uint32_t value = read_u32_le(p);
+        h1 += value * 3266489917u;
+        h1 = rotl32(h1, 17u) * 668265263u;
+        h2 += value * 3266489917u;
+        h2 = rotl32(h2, 17u) * 668265263u;
+        p += 4u;
+    }
+    while (p < end) {
+        const uint32_t value = (uint32_t)(*p);
+        h1 += value * 374761393u;
+        h1 = rotl32(h1, 11u) * 2654435761u;
+        h2 += value * 374761393u;
+        h2 = rotl32(h2, 11u) * 2654435761u;
+        ++p;
+    }
+    *out1 = xxh32_finalize(h1);
+    *out2 = xxh32_finalize(h2);
+}
+
 static inline int write_byte_and_hash(
     uint8_t* out,
     uint32_t out_capacity,
@@ -616,8 +682,7 @@ static int encode_term_content_row(
 
     if (compute_hashes) {
         const uint32_t row_length = *cursor - row_start;
-        h1 = hash_content_xxh32(out + row_start, row_length, FNV1A_OFFSET);
-        h2 = hash_content_xxh32(out + row_start, row_length, MIX_OFFSET);
+        hash_content_xxh32_pair(out + row_start, row_length, FNV1A_OFFSET, MIX_OFFSET, &h1, &h2);
         if ((h1 | h2) == 0u) {
             h1 = 1u;
         }

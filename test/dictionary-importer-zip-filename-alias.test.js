@@ -43,3 +43,27 @@ describe('DictionaryImporter ZIP filename aliases', () => {
         }
     });
 });
+
+describe('DictionaryImporter archive bank discovery', () => {
+    test('sorts numbered bank files numerically regardless of ZIP entry order', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const getArchiveFiles = /** @type {(this: DictionaryImporter, fileMap: Map<string, {filename: string}>, queryDetails: [string, RegExp][]) => Map<string, {filename: string}[]>} */ (
+            Reflect.get(importer, '_getArchiveFiles')
+        );
+        const fileMap = new Map([
+            ['term_bank_1.json', {filename: 'term_bank_1.json'}],
+            ['term_bank_10.json', {filename: 'term_bank_10.json'}],
+            ['term_bank_2.json', {filename: 'term_bank_2.json'}],
+            ['term_bank_100.json', {filename: 'term_bank_100.json'}],
+        ]);
+
+        const results = getArchiveFiles.call(importer, fileMap, [['termFiles', /^term_bank_(\d+)\.json$/]]);
+
+        expect(results.get('termFiles')?.map((entry) => entry.filename)).toEqual([
+            'term_bank_1.json',
+            'term_bank_2.json',
+            'term_bank_10.json',
+            'term_bank_100.json',
+        ]);
+    });
+});

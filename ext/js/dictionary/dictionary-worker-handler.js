@@ -21,6 +21,9 @@ import {log} from '../core/log.js';
 import {DictionaryDatabase} from './dictionary-database.js';
 import {DictionaryImporter} from './dictionary-importer.js';
 import {DictionaryWorkerMediaLoader} from './dictionary-worker-media-loader.js';
+import {convertMdxToArchive} from './mdx/mdx-converter.js';
+
+const MDX_IMPORT_VERSION = 1;
 
 export class DictionaryWorkerHandler {
     constructor() {
@@ -46,11 +49,17 @@ export class DictionaryWorkerHandler {
             case 'importDictionary':
                 void this._onMessageWithProgress(params, this._importDictionary.bind(this));
                 break;
+            case 'importMdxDictionary':
+                void this._onMessageWithProgress(params, this._importMdxDictionary.bind(this));
+                break;
             case 'deleteDictionary':
                 void this._onMessageWithProgress(params, this._deleteDictionary.bind(this));
                 break;
             case 'getDictionaryCounts':
                 void this._onMessageWithProgress(params, this._getDictionaryCounts.bind(this));
+                break;
+            case 'getMdxVersion':
+                void this._onMessageWithProgress(params, this._getMdxVersion.bind(this));
                 break;
             case 'getImageDetails.response':
                 this._mediaLoader.handleMessage(params);
@@ -123,6 +132,66 @@ export class DictionaryWorkerHandler {
     }
 
     /**
+     * @param {import('dictionary-worker-handler').ImportMdxDictionaryMessageParams} params
+     * @param {import('dictionary-worker-handler').OnProgressCallback} onProgress
+     * @returns {Promise<import('dictionary-worker').MessageCompleteResultSerialized>}
+     */
+    async _importMdxDictionary({details, mdxFileName, mdxBytes, mddFiles = [], options = {}}, onProgress) {
+        if (!(mdxBytes instanceof ArrayBuffer)) {
+            throw new Error('MDX import worker did not receive MDX bytes');
+        }
+        const normalizedMddFiles = Array.isArray(mddFiles) ?
+            mddFiles
+                .filter((value) => typeof value === 'object' && value !== null && !Array.isArray(value))
+                .map((value) => {
+                    const bytes = Reflect.get(value, 'bytes');
+                    return {
+                        name: typeof Reflect.get(value, 'name') === 'string' ? /** @type {string} */ (Reflect.get(value, 'name')) : 'dictionary.mdd',
+                        bytes: new Uint8Array(bytes instanceof ArrayBuffer ? bytes : new ArrayBuffer(0)),
+                    };
+                }) :
+            [];
+        const tPrepareStart = Date.now();
+        const progressState = {messageCount: 0};
+        const archive = await convertMdxToArchive(
+            typeof mdxFileName === 'string' && mdxFileName.length > 0 ? mdxFileName : 'dictionary.mdx',
+            options,
+            new Uint8Array(mdxBytes),
+            normalizedMddFiles,
+            ({completed, total}) => {
+                const normalizedTotal = Math.max(1, total);
+                onProgress({
+                    nextStep: false,
+                    index: Math.max(0, Math.min(normalizedTotal, completed)),
+                    count: normalizedTotal,
+                });
+                progressState.messageCount += 1;
+            },
+        );
+        const prepareTiming = {
+            phase: 'prepare-mdx-archive',
+            elapsedMs: Math.max(0, Date.now() - tPrepareStart),
+            details: {
+                ok: true,
+                archiveSizeBytes: archive.archiveContent.byteLength,
+                mddCount: normalizedMddFiles.length,
+                progressMessageCount: progressState.messageCount,
+            },
+        };
+        const importResult = await this._importDictionary({details, archiveContent: archive.archiveContent}, onProgress);
+        const debug = importResult.debug;
+        const importerDebug = debug?.importerDebug;
+        if (importerDebug !== null && typeof importerDebug === 'object') {
+            importerDebug.phaseTimings = [
+                ...archive.phaseTimings,
+                prepareTiming,
+                ...(Array.isArray(importerDebug.phaseTimings) ? importerDebug.phaseTimings : []),
+            ];
+        }
+        return importResult;
+    }
+
+    /**
      * @param {import('dictionary-worker-handler').ImportDictionaryMessageParams} details
      * @param {import('dictionary-worker-handler').OnProgressCallback} onProgress
      * @returns {Promise<import('dictionary-worker').MessageCompleteResultSerialized>}
@@ -178,14 +247,20 @@ export class DictionaryWorkerHandler {
             ) ?
                 /** @type {string} */ (Reflect.get(detailsRecord, 'replacementDictionaryTitle')).trim() :
                 null;
-            /** @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase */
+            /**
+             * @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase
+             * @returns {Promise<void>}
+             */
             const cleanupTransientReplacementTitles = async (activeDictionaryDatabase) => {
+                /** @type {Set<string>} */
                 const transientTitleCandidates = new Set();
                 const transientTitlePattern = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
                 const transientTokenMatch = (
                     dictionaryTitleOverride !== null &&
                     transientTitlePattern.test(dictionaryTitleOverride)
-                ) ? dictionaryTitleOverride.match(/\[(?:update-staging|cutover|replaced) ([^\]]+)\]$/) : null;
+                ) ?
+                    dictionaryTitleOverride.match(/\[(?:update-staging|cutover|replaced) ([^\]]+)\]$/) :
+                    null;
                 const transientSessionToken = Array.isArray(transientTokenMatch) && typeof transientTokenMatch[1] === 'string' && transientTokenMatch[1].length > 0 ?
                     transientTokenMatch[1] :
                     null;
@@ -194,17 +269,23 @@ export class DictionaryWorkerHandler {
                 }
                 const dictionaryInfos = await activeDictionaryDatabase.getDictionaryInfo();
                 for (const dictionaryInfo of dictionaryInfos) {
+                    const titleRaw = /** @type {unknown} */ (Reflect.get(dictionaryInfo, 'title'));
                     const title = (
                         dictionaryInfo &&
                         typeof dictionaryInfo === 'object' &&
-                        typeof Reflect.get(dictionaryInfo, 'title') === 'string'
-                    ) ? Reflect.get(dictionaryInfo, 'title').trim() : '';
+                        typeof titleRaw === 'string'
+                    ) ?
+                        titleRaw.trim() :
+                        '';
                     if (title.length === 0) { continue; }
+                    const infoTokenRaw = /** @type {unknown} */ (Reflect.get(dictionaryInfo, 'updateSessionToken'));
                     const infoToken = (
                         dictionaryInfo &&
                         typeof dictionaryInfo === 'object' &&
-                        typeof Reflect.get(dictionaryInfo, 'updateSessionToken') === 'string'
-                    ) ? /** @type {string} */ (Reflect.get(dictionaryInfo, 'updateSessionToken')).trim() : '';
+                        typeof infoTokenRaw === 'string'
+                    ) ?
+                        infoTokenRaw.trim() :
+                        '';
                     if (
                         transientTitlePattern.test(title) &&
                         (
@@ -237,10 +318,13 @@ export class DictionaryWorkerHandler {
                     );
                 });
             };
-            /** @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase */
+            /**
+             * @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase
+             * @returns {Promise<{result: import('dictionary-importer').Summary|null, errors: Error[], importerDebug: import('dictionary-importer').ImportDebug|null}>}
+             */
             const importOnce = async (activeDictionaryDatabase) => {
                 const importPayload = await dictionaryImporter.importDictionary(activeDictionaryDatabase, archiveContent, details);
-                let {result, errors} = importPayload;
+                const {result, errors} = importPayload;
                 const importerDebug = (typeof importPayload === 'object' && importPayload !== null && !Array.isArray(importPayload)) ?
                     (/** @type {import('dictionary-importer').ImportDebug|null} */ (Reflect.get(importPayload, 'debug') ?? null)) :
                     null;
@@ -325,6 +409,14 @@ export class DictionaryWorkerHandler {
      */
     async _getDictionaryCounts({dictionaryNames, getTotal}) {
         return await this._invokeBackendApi('getDictionaryCounts', {dictionaryNames, getTotal});
+    }
+
+    /**
+     * @param {Record<string, never>} _params
+     * @returns {Promise<number>}
+     */
+    async _getMdxVersion(_params) {
+        return MDX_IMPORT_VERSION;
     }
 
     /**

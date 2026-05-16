@@ -67,7 +67,7 @@ const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_UPPER_BOUND_BYTES = 128 * 1024 * 10
 const ADAPTIVE_TERM_BANK_WASM_INITIAL_META_CAPACITY_DIVISOR = 18;
 const ADAPTIVE_TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW = 128;
 const TERM_BANK_BYTE_PREFETCH_COUNT = 8;
-const SOURCE_TERM_BANK_BATCH_MAX_FILES = 8;
+const SOURCE_TERM_BANK_BATCH_MAX_FILES = 16;
 const SOURCE_TERM_BANK_BATCH_MAX_BYTES = 16 * 1024 * 1024;
 const SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE = 16384;
 const LARGE_ARCHIVE_ZIP_MAX_WORKERS = 2;
@@ -3184,6 +3184,21 @@ export class DictionaryImporter {
                     break;
                 }
             }
+        }
+        for (const [fileType, fileNameFormat] of queryDetails) {
+            const entries = results.get(fileType);
+            if (typeof entries === 'undefined') { continue; }
+            entries.sort((a, b) => {
+                const aFileName = typeof a.filename === 'string' ? a.filename : '';
+                const bFileName = typeof b.filename === 'string' ? b.filename : '';
+                const aMatch = fileNameFormat.exec(aFileName);
+                const bMatch = fileNameFormat.exec(bFileName);
+                const aParsedIndex = aMatch !== null ? Number.parseInt(aMatch[1], 10) : Number.NaN;
+                const bParsedIndex = bMatch !== null ? Number.parseInt(bMatch[1], 10) : Number.NaN;
+                const aIndex = Number.isFinite(aParsedIndex) ? aParsedIndex : Number.MAX_SAFE_INTEGER;
+                const bIndex = Number.isFinite(bParsedIndex) ? bParsedIndex : Number.MAX_SAFE_INTEGER;
+                return aIndex - bIndex;
+            });
         }
         return results;
     }

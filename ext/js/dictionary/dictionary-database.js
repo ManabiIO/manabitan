@@ -284,8 +284,16 @@ export class DictionaryDatabase {
         this._termEntryContentIdByHash = new Map();
         /** @type {Map<string, {id: number, offset: number, length: number, dictName: string}>} */
         this._termEntryContentMetaByHash = new Map();
-        /** @type {Map<number, Map<number, {id: number, offset: number, length: number, dictName: string}>>} */
-        this._termEntryContentMetaByHashPair = new Map();
+        /** @type {Uint32Array} */
+        this._termEntryContentMetaHash1Table = new Uint32Array(0);
+        /** @type {Uint32Array} */
+        this._termEntryContentMetaHash2Table = new Uint32Array(0);
+        /** @type {({id: number, offset: number, length: number, dictName: string, hash2?: number}|undefined)[]} */
+        this._termEntryContentMetaHashPairTable = [];
+        /** @type {number} */
+        this._termEntryContentMetaHashPairMask = 0;
+        /** @type {number} */
+        this._termEntryContentMetaHashPairCount = 0;
         /** @type {boolean} */
         this._termEntryContentHasExistingRows = true;
         /** @type {boolean} */
@@ -3639,6 +3647,9 @@ export class DictionaryDatabase {
                         }
                     }
 
+                    this._ensureTermEntryContentMetaHashPairCapacity(
+                        this._termEntryContentMetaHashPairCount + pendingContentBytes.length,
+                    );
                     for (let i = 0, ii = pendingContentBytes.length; i < ii; i += contentBatchSize) {
                         const chunkCount = Math.min(contentBatchSize, ii - i);
                         const tContentSqlStart = safePerformance.now();
@@ -3994,33 +4005,121 @@ export class DictionaryDatabase {
     /** */
     _clearTermEntryContentMetaCaches() {
         this._termEntryContentMetaByHash.clear();
-        this._termEntryContentMetaByHashPair.clear();
+        this._termEntryContentMetaHash1Table = new Uint32Array(0);
+        this._termEntryContentMetaHash2Table = new Uint32Array(0);
+        this._termEntryContentMetaHashPairTable = [];
+        this._termEntryContentMetaHashPairMask = 0;
+        this._termEntryContentMetaHashPairCount = 0;
     }
 
     /**
      * @param {number} hash1
      * @param {number} hash2
-     * @returns {{id: number, offset: number, length: number, dictName: string}|undefined}
+     * @param {number} mask
+     * @returns {number}
+     */
+    _getTermEntryContentMetaHashPairSlot(hash1, hash2, mask) {
+        let value = (hash1 ^ Math.imul(hash2, 0x9e3779b1)) >>> 0;
+        value ^= value >>> 16;
+        return value & mask;
+    }
+
+    /**
+     * @param {number} requiredCount
+     */
+    _ensureTermEntryContentMetaHashPairCapacity(requiredCount) {
+        if (this._termEntryContentMetaHashPairTable.length >= requiredCount * 2) {
+            return;
+        }
+        let tableSize = 16;
+        while (tableSize < requiredCount * 2) {
+            tableSize *= 2;
+        }
+        const oldHash1Table = this._termEntryContentMetaHash1Table;
+        const oldHash2Table = this._termEntryContentMetaHash2Table;
+        const oldMetaTable = this._termEntryContentMetaHashPairTable;
+        const hash1Table = new Uint32Array(tableSize);
+        const hash2Table = new Uint32Array(tableSize);
+        /** @type {({id: number, offset: number, length: number, dictName: string, hash2?: number}|undefined)[]} */
+        const metaTable = new Array(tableSize);
+        const mask = tableSize - 1;
+        for (let i = 0; i < oldMetaTable.length; ++i) {
+            const meta = oldMetaTable[i];
+            if (typeof meta === 'undefined') { continue; }
+            const hash1 = oldHash1Table[i];
+            const hash2 = oldHash2Table[i];
+            let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
+            while (typeof metaTable[slot] !== 'undefined') {
+                slot = (slot + 1) & mask;
+            }
+            hash1Table[slot] = hash1;
+            hash2Table[slot] = hash2;
+            metaTable[slot] = meta;
+        }
+        this._termEntryContentMetaHash1Table = hash1Table;
+        this._termEntryContentMetaHash2Table = hash2Table;
+        this._termEntryContentMetaHashPairTable = metaTable;
+        this._termEntryContentMetaHashPairMask = mask;
+    }
+
+    /**
+     * @param {number} hash1
+     * @param {number} hash2
+     * @returns {{id: number, offset: number, length: number, dictName: string, hash2?: number}|undefined}
      */
     _getTermEntryContentMetaByHashPair(hash1, hash2) {
-        const byHash2 = this._termEntryContentMetaByHashPair.get(hash1 >>> 0);
-        return typeof byHash2 !== 'undefined' ? byHash2.get(hash2 >>> 0) : void 0;
+        if (this._termEntryContentMetaHashPairCount <= 0) {
+            return void 0;
+        }
+        hash1 >>>= 0;
+        hash2 >>>= 0;
+        const hash1Table = this._termEntryContentMetaHash1Table;
+        const hash2Table = this._termEntryContentMetaHash2Table;
+        const metaTable = this._termEntryContentMetaHashPairTable;
+        const mask = this._termEntryContentMetaHashPairMask;
+        let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
+        while (true) {
+            const meta = metaTable[slot];
+            if (typeof meta === 'undefined') {
+                return void 0;
+            }
+            if (hash1Table[slot] === hash1 && hash2Table[slot] === hash2) {
+                return meta;
+            }
+            slot = (slot + 1) & mask;
+        }
     }
 
     /**
      * @param {number} hash1
      * @param {number} hash2
-     * @param {{id: number, offset: number, length: number, dictName: string}} meta
+     * @param {{id: number, offset: number, length: number, dictName: string, hash2?: number}} meta
      */
     _setTermEntryContentMetaByHashPair(hash1, hash2, meta) {
         hash1 >>>= 0;
         hash2 >>>= 0;
-        let byHash2 = this._termEntryContentMetaByHashPair.get(hash1);
-        if (typeof byHash2 === 'undefined') {
-            byHash2 = new Map();
-            this._termEntryContentMetaByHashPair.set(hash1, byHash2);
+        meta.hash2 = hash2;
+        this._ensureTermEntryContentMetaHashPairCapacity(this._termEntryContentMetaHashPairCount + 1);
+        const hash1Table = this._termEntryContentMetaHash1Table;
+        const hash2Table = this._termEntryContentMetaHash2Table;
+        const metaTable = this._termEntryContentMetaHashPairTable;
+        const mask = this._termEntryContentMetaHashPairMask;
+        let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
+        while (true) {
+            const existingMeta = metaTable[slot];
+            if (typeof existingMeta === 'undefined') {
+                hash1Table[slot] = hash1;
+                hash2Table[slot] = hash2;
+                metaTable[slot] = meta;
+                ++this._termEntryContentMetaHashPairCount;
+                return;
+            }
+            if (hash1Table[slot] === hash1 && hash2Table[slot] === hash2) {
+                metaTable[slot] = meta;
+                return;
+            }
+            slot = (slot + 1) & mask;
         }
-        byHash2.set(hash2, meta);
     }
 
     /**
@@ -4031,7 +4130,7 @@ export class DictionaryDatabase {
      * @param {number} [id]
      * @param {number} [hash1]
      * @param {number} [hash2]
-     * @returns {{id: number, offset: number, length: number, dictName: string}}
+     * @returns {{id: number, offset: number, length: number, dictName: string, hash2?: number}}
      */
     _cacheTermEntryContentMeta(contentHash, offset, length, dictName, id = 0, hash1 = -1, hash2 = -1) {
         const meta = {id, offset, length, dictName: dictName ?? 'raw'};
@@ -4493,16 +4592,58 @@ export class DictionaryDatabase {
             const contentLengths = new Int32Array(count);
             /** @type {string|((string|null)[])} */
             let resolvedContentDictNames = explicitContentDictNames !== null ? new Array(count) : (uniformContentDictName ?? 'raw');
-            /** @type {Map<number, Map<number, number>>} */
-            const pendingContentIndexByHashPair = new Map();
+            let pendingHashTableSize = 1;
+            while (pendingHashTableSize < count * 2) {
+                pendingHashTableSize *= 2;
+            }
+            const pendingHashTableMask = pendingHashTableSize - 1;
+            const pendingHash1Table = new Uint32Array(pendingHashTableSize);
+            const pendingHash2Table = new Uint32Array(pendingHashTableSize);
+            const pendingIndexTable = new Uint32Array(pendingHashTableSize);
+            /**
+             * @param {number} hash1
+             * @param {number} hash2
+             * @returns {number}
+             */
+            const getPendingHashSlot = (hash1, hash2) => {
+                let value = (hash1 ^ Math.imul(hash2, 0x9e3779b1)) >>> 0;
+                value ^= value >>> 16;
+                return value & pendingHashTableMask;
+            };
+            /**
+             * @param {number} hash1
+             * @param {number} hash2
+             * @returns {number}
+             */
+            const findOrInsertPendingContentIndex = (hash1, hash2) => {
+                let slot = getPendingHashSlot(hash1, hash2);
+                while (true) {
+                    const storedIndex = pendingIndexTable[slot];
+                    if (storedIndex === 0) {
+                        const pendingIndex = pendingContentBytes.length;
+                        pendingHash1Table[slot] = hash1;
+                        pendingHash2Table[slot] = hash2;
+                        pendingIndexTable[slot] = pendingIndex + 1;
+                        return ~pendingIndex;
+                    }
+                    if (pendingHash1Table[slot] === hash1 && pendingHash2Table[slot] === hash2) {
+                        return storedIndex - 1;
+                    }
+                    slot = (slot + 1) & pendingHashTableMask;
+                }
+            };
             /** @type {Uint8Array[]} */
             const pendingContentBytes = [];
             /** @type {number[]} */
             const pendingContentHash1s = [];
             /** @type {number[]} */
             const pendingContentHash2s = [];
-            /** @type {(string|null)[]} */
-            const pendingContentDictNames = [];
+            /** @type {(string|null)[]|null} */
+            const pendingContentDictNames = (
+                explicitContentDictNames === null &&
+                typeof uniformContentDictName === 'string' &&
+                uniformContentDictName.length > 0
+            ) ? null : [];
             const pendingRowToUniqueIndex = new Int32Array(count);
             pendingRowToUniqueIndex.fill(-1);
             const ensureResolvedContentDictNamesArray = (fillUntil) => {
@@ -4532,23 +4673,22 @@ export class DictionaryDatabase {
                     }
                     continue;
                 }
-                let byHash2 = pendingContentIndexByHashPair.get(hash1);
-                if (typeof byHash2 === 'undefined') {
-                    byHash2 = new Map();
-                    pendingContentIndexByHashPair.set(hash1, byHash2);
+                let pendingIndex = findOrInsertPendingContentIndex(hash1, hash2);
+                const isNewPendingContent = pendingIndex < 0;
+                if (isNewPendingContent) {
+                    pendingIndex = ~pendingIndex;
                 }
-                let pendingIndex = byHash2.get(hash2);
-                if (typeof pendingIndex !== 'number') {
-                    pendingIndex = pendingContentBytes.length;
-                    byHash2.set(hash2, pendingIndex);
+                if (isNewPendingContent) {
                     pendingContentBytes.push(chunk.contentBytesList[i]);
                     pendingContentHash1s.push(hash1);
                     pendingContentHash2s.push(hash2);
-                    pendingContentDictNames.push(
-                        explicitContentDictNames !== null ?
-                            (explicitContentDictNames[i] ?? null) :
-                            uniformContentDictName,
-                    );
+                    if (pendingContentDictNames !== null) {
+                        pendingContentDictNames.push(
+                            explicitContentDictNames !== null ?
+                                (explicitContentDictNames[i] ?? null) :
+                                uniformContentDictName,
+                        );
+                    }
                 }
                 pendingRowToUniqueIndex[i] = pendingIndex;
             }
@@ -4557,7 +4697,8 @@ export class DictionaryDatabase {
                 const storageChunks = this._createTermContentStorageChunks(
                     pendingContentBytes,
                     compressionDictName,
-                    pendingContentDictNames,
+                    pendingContentDictNames ?? [],
+                    pendingContentDictNames === null ? uniformContentDictName : null,
                 );
                 /** @type {number[]} */
                 const storedOffsets = [];
@@ -4568,6 +4709,9 @@ export class DictionaryDatabase {
                     storedOffsets,
                     storedLengths,
                 );
+                this._ensureTermEntryContentMetaHashPairCapacity(
+                    this._termEntryContentMetaHashPairCount + pendingContentBytes.length,
+                );
                 for (let i = 0; i < count; ++i) {
                     const pendingIndex = pendingRowToUniqueIndex[i];
                     if (pendingIndex < 0) { continue; }
@@ -4575,7 +4719,9 @@ export class DictionaryDatabase {
                     const storedOffset = storedOffsets[storedChunkIndex];
                     contentOffsets[i] = storedOffset + (storageChunks.entryToStoredChunkOffsets[pendingIndex] ?? 0);
                     contentLengths[i] = pendingContentBytes[pendingIndex].byteLength;
-                    const resolvedContentDictName = storageChunks.contentDictNames[pendingIndex] ?? 'raw';
+                    const resolvedContentDictName = pendingContentDictNames === null ?
+                        uniformContentDictName :
+                        (storageChunks.contentDictNames[pendingIndex] ?? 'raw');
                     if (Array.isArray(resolvedContentDictNames)) {
                         resolvedContentDictNames[i] = resolvedContentDictName;
                     } else if (resolvedContentDictName !== resolvedContentDictNames) {
@@ -4588,7 +4734,7 @@ export class DictionaryDatabase {
                         null,
                         storedOffsets[storedChunkIndex] + (storageChunks.entryToStoredChunkOffsets[i] ?? 0),
                         pendingContentBytes[i].byteLength,
-                        storageChunks.contentDictNames[i],
+                        pendingContentDictNames === null ? uniformContentDictName : storageChunks.contentDictNames[i],
                         0,
                         pendingContentHash1s[i],
                         pendingContentHash2s[i],
@@ -6539,23 +6685,54 @@ export class DictionaryDatabase {
      * @param {string|null} compressionDictName
      * @param {(string|null)[]} [contentDictNameOverrides]
      * @param {string|null} [uniformRawContentDictName]
-     * @returns {{storedChunks: Uint8Array[], contentDictNames: string[], entryToStoredChunkIndexes: number[], entryToStoredChunkOffsets: number[]}}
+     * @returns {{storedChunks: Uint8Array[], contentDictNames: string[]|string, entryToStoredChunkIndexes: number[]|Uint32Array, entryToStoredChunkOffsets: number[]|Uint32Array}}
      */
     _createTermContentStorageChunks(contentBytesList, compressionDictName, contentDictNameOverrides = [], uniformRawContentDictName = null) {
         if (this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES) {
-            const packed = packContentChunksIntoSlabs(contentBytesList, this._rawTermContentPackTargetBytes);
-            const entryToStoredChunkIndexes = packed.sourceChunkIndices;
-            const entryToStoredChunkOffsets = packed.sourceChunkLocalOffsets;
+            const firstContentLength = contentBytesList[0]?.byteLength ?? 0;
+            let useFixedSizePacking = firstContentLength > 0;
+            for (let i = 1; i < contentBytesList.length && useFixedSizePacking; ++i) {
+                if (contentBytesList[i].byteLength !== firstContentLength) {
+                    useFixedSizePacking = false;
+                }
+            }
+            let storedChunks;
+            let entryToStoredChunkIndexes;
+            let entryToStoredChunkOffsets;
+            if (useFixedSizePacking) {
+                const packed = packFixedSizeContentChunksIntoSlabs(
+                    contentBytesList,
+                    this._rawTermContentPackTargetBytes,
+                    firstContentLength,
+                );
+                storedChunks = packed.packedChunks;
+                entryToStoredChunkIndexes = new Uint32Array(contentBytesList.length);
+                entryToStoredChunkOffsets = new Uint32Array(contentBytesList.length);
+                for (let packedIndex = 0; packedIndex < packed.packedChunks.length; ++packedIndex) {
+                    const rowStart = packed.packedRowStarts[packedIndex];
+                    const rowCount = packed.packedRowCounts[packedIndex];
+                    for (let localIndex = 0; localIndex < rowCount; ++localIndex) {
+                        const rowIndex = rowStart + localIndex;
+                        entryToStoredChunkIndexes[rowIndex] = packedIndex;
+                        entryToStoredChunkOffsets[rowIndex] = localIndex * firstContentLength;
+                    }
+                }
+            } else {
+                const packed = packContentChunksIntoSlabs(contentBytesList, this._rawTermContentPackTargetBytes);
+                storedChunks = packed.packedChunks;
+                entryToStoredChunkIndexes = packed.sourceChunkIndices;
+                entryToStoredChunkOffsets = packed.sourceChunkLocalOffsets;
+            }
             if (typeof uniformRawContentDictName === 'string' && uniformRawContentDictName.length > 0) {
                 return {
-                    storedChunks: packed.packedChunks,
-                    contentDictNames: new Array(contentBytesList.length).fill(uniformRawContentDictName),
+                    storedChunks,
+                    contentDictNames: uniformRawContentDictName,
                     entryToStoredChunkIndexes,
                     entryToStoredChunkOffsets,
                 };
             }
             return {
-                storedChunks: packed.packedChunks,
+                storedChunks,
                 contentDictNames: contentBytesList.map((contentBytes, index) => {
                     const override = contentDictNameOverrides[index];
                     if (typeof override === 'string' && override.length > 0) {

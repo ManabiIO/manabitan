@@ -42,8 +42,8 @@ export const localEnglishMdxRevision = 'mdx import';
 export const localEnglishMdxLookupTerm = 'Read';
 export const localEnglishMdxLookupGlossary = 'To look at and understand written language.';
 
-const mdxFileName = 'fixture.mdx';
-const mdxFileUrl = `${mdxListingUrl}${mdxFileName}`;
+const mdxFileName = 'fixture read.mdx';
+const mdxFileUrl = `${mdxListingUrl}${encodeURIComponent(mdxFileName)}`;
 
 /**
  * @typedef {{

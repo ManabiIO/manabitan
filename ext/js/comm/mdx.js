@@ -22,6 +22,10 @@ const UNSUPPORTED_VARIANT_ERROR_MESSAGE = 'This MDX file uses an unsupported com
  */
 
 /**
+ * @typedef {{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}} MdxPhaseTiming
+ */
+
+/**
  * @typedef {{name: string, bytes: ArrayBuffer}} MdxWorkerInputFile
  */
 
@@ -34,7 +38,7 @@ const UNSUPPORTED_VARIANT_ERROR_MESSAGE = 'This MDX file uses an unsupported com
  */
 
 /**
- * @typedef {{action: 'progress', params: {details: MdxProgressDetails}} | {action: 'complete', params: {result?: {archiveContent?: ArrayBuffer, archiveFileName?: string}, error?: string}}} MdxWorkerMessage
+ * @typedef {{action: 'progress', params: {details: MdxProgressDetails}} | {action: 'complete', params: {result?: {archiveContent?: ArrayBuffer, archiveFileName?: string, phaseTimings?: MdxPhaseTiming[]}, error?: string}}} MdxWorkerMessage
  */
 
 /**
@@ -43,6 +47,40 @@ const UNSUPPORTED_VARIANT_ERROR_MESSAGE = 'This MDX file uses an unsupported com
  */
 function isRecord(value) {
     return typeof value === 'object' && value !== null;
+}
+
+/**
+ * @param {unknown} value
+ * @returns {MdxPhaseTiming[]}
+ */
+function parsePhaseTimings(value) {
+    if (!Array.isArray(value)) { return []; }
+    /** @type {MdxPhaseTiming[]} */
+    const timings = [];
+    for (const item of value) {
+        if (!isRecord(item)) { continue; }
+        const {phase, elapsedMs, details} = item;
+        if (typeof phase !== 'string' || typeof elapsedMs !== 'number' || !Number.isFinite(elapsedMs)) { continue; }
+        /** @type {MdxPhaseTiming} */
+        const timing = {phase, elapsedMs};
+        if (isRecord(details)) {
+            /** @type {Record<string, string|number|boolean|null>} */
+            const normalizedDetails = {};
+            for (const [key, detailValue] of Object.entries(details)) {
+                if (
+                    typeof detailValue === 'string' ||
+                    typeof detailValue === 'number' ||
+                    typeof detailValue === 'boolean' ||
+                    detailValue === null
+                ) {
+                    normalizedDetails[key] = detailValue;
+                }
+            }
+            timing.details = normalizedDetails;
+        }
+        timings.push(timing);
+    }
+    return timings;
 }
 
 /**
@@ -79,7 +117,7 @@ function parseWorkerMessage(value) {
                 completeParams.error = error;
             }
             if (isRecord(result)) {
-                /** @type {{archiveContent?: ArrayBuffer, archiveFileName?: string}} */
+                /** @type {{archiveContent?: ArrayBuffer, archiveFileName?: string, phaseTimings?: MdxPhaseTiming[]}} */
                 const archiveResult = {};
                 if (result.archiveContent instanceof ArrayBuffer) {
                     archiveResult.archiveContent = result.archiveContent;
@@ -87,6 +125,7 @@ function parseWorkerMessage(value) {
                 if (typeof result.archiveFileName === 'string') {
                     archiveResult.archiveFileName = result.archiveFileName;
                 }
+                archiveResult.phaseTimings = parsePhaseTimings(result.phaseTimings);
                 completeParams.result = archiveResult;
             }
             return {action, params: completeParams};
@@ -148,7 +187,7 @@ export class Mdx {
     /**
      * @param {{mdxFile: File, mddFiles?: File[], titleOverride?: string, descriptionOverride?: string, revision?: string, enableAudio?: boolean, includeAssets?: boolean, termBankSize?: number}} details
      * @param {?(details: {stage: 'upload'|'convert'|'download', completed: number, total: number}) => void} onProgress
-     * @returns {Promise<{archiveContent: ArrayBuffer, archiveFileName: string}>}
+     * @returns {Promise<{archiveContent: ArrayBuffer, archiveFileName: string, phaseTimings: MdxPhaseTiming[]}>}
      */
     async convertDictionary(details, onProgress = null) {
         const {
@@ -227,7 +266,7 @@ export class Mdx {
                             return;
                         }
                         this.disconnect();
-                        resolve({archiveContent, archiveFileName});
+                        resolve({archiveContent, archiveFileName, phaseTimings: result?.phaseTimings ?? []});
                         break;
                     }
                 }

@@ -25,9 +25,111 @@ import {toError} from '../../core/to-error.js';
 import {promiseTimeout} from '../../core/utilities.js';
 import {getKebabCase} from '../../data/anki-template-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
+import {Mdx} from '../../comm/mdx.js';
 import {DictionaryController} from './dictionary-controller.js';
 
 const OPFS_REQUIRED_USER_MESSAGE = 'Manabitan requires OPFS storage support.';
+const MDX_CONVERSION_PROGRESS_TOTAL = 1000;
+const MDX_UPLOAD_PROGRESS_RATIO = 0.45;
+
+/**
+ * @typedef {object} ZipImportSource
+ * @property {'zip'} type
+ * @property {File} file
+ */
+
+/**
+ * @typedef {object} MdxImportSource
+ * @property {'mdx'} type
+ * @property {File} mdxFile
+ * @property {File[]} mddFiles
+ */
+
+/**
+ * @typedef {ZipImportSource|MdxImportSource} DictionaryImportSource
+ */
+
+/**
+ * @typedef {{phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}} ImporterDebugPayload
+ */
+
+/**
+ * @typedef {{usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: ImporterDebugPayload|null}} ImportResultDebugPayload
+ */
+
+/**
+ * @typedef {import('dictionary-importer').ImportResult & {debug?: ImportResultDebugPayload}} ImportResultWithDebug
+ */
+
+/**
+ * @param {string} fileName
+ * @returns {string}
+ */
+function getLowercaseFileName(fileName) {
+    return fileName.trim().replaceAll('\\', '/').toLowerCase();
+}
+
+/**
+ * @param {File} file
+ * @returns {string}
+ */
+function getDictionaryFilePath(file) {
+    const relativePath = typeof file.webkitRelativePath === 'string' ? file.webkitRelativePath : '';
+    return relativePath.length > 0 ? relativePath : file.name;
+}
+
+/**
+ * @param {string} fileName
+ * @returns {boolean}
+ */
+function isZipDictionaryFileName(fileName) {
+    return getLowercaseFileName(fileName).endsWith('.zip');
+}
+
+/**
+ * @param {string} fileName
+ * @returns {boolean}
+ */
+function isMdxDictionaryFileName(fileName) {
+    return getLowercaseFileName(fileName).endsWith('.mdx');
+}
+
+/**
+ * @param {string} fileName
+ * @returns {boolean}
+ */
+function isMddDictionaryFileName(fileName) {
+    return /(?:\.\d+)?\.mdd$/i.test(fileName.trim());
+}
+
+/**
+ * @param {string} filePath
+ * @returns {string|null}
+ */
+function getDictionaryImportSourceKeyFromPath(filePath) {
+    const normalizedFilePath = getLowercaseFileName(filePath);
+    if (isMdxDictionaryFileName(normalizedFilePath)) {
+        return normalizedFilePath.slice(0, -4);
+    }
+    const match = /^(.*?)(?:\.\d+)?\.mdd$/i.exec(normalizedFilePath);
+    return match ? match[1] : null;
+}
+
+/**
+ * @param {string} url
+ * @returns {string|null}
+ */
+function getDictionaryFileNameFromUrl(url) {
+    try {
+        const parsed = new URL(url);
+        const pathName = decodeURIComponent(parsed.pathname);
+        const segments = pathName.split('/');
+        const fileName = segments.length > 0 ? segments[segments.length - 1].trim() : '';
+        return fileName.length > 0 ? fileName : null;
+    } catch (_error) {
+        return null;
+    }
+}
 
 /**
  * @param {number} valueMs
@@ -197,20 +299,47 @@ function getOpfsUnavailableUserMessage(message) {
             }
             return `${base} Update to a browser/runtime which exposes worker OPFS SyncAccessHandle support and reload the extension. ${formatFallbackDiagnostics()}`;
         }
-        const runtimeContext = Reflect.get(diagnostics, 'runtimeContext');
-        const mode = typeof Reflect.get(diagnostics, 'mode') === 'string' ? Reflect.get(diagnostics, 'mode') : 'unknown';
-        const hasStorageGetDirectory = typeof Reflect.get(runtimeContext ?? {}, 'hasStorageGetDirectory') === 'boolean' ? Reflect.get(runtimeContext ?? {}, 'hasStorageGetDirectory') : null;
-        const hasCreateSyncAccessHandle = typeof Reflect.get(runtimeContext ?? {}, 'hasCreateSyncAccessHandle') === 'boolean' ? Reflect.get(runtimeContext ?? {}, 'hasCreateSyncAccessHandle') : null;
-        const opfsSahpoolInstallResult = typeof Reflect.get(diagnostics, 'opfsSahpoolInstallResult') === 'string' ? Reflect.get(diagnostics, 'opfsSahpoolInstallResult') : null;
-        const opfsSahpoolInstallError = typeof Reflect.get(diagnostics, 'opfsSahpoolInstallError') === 'string' ? Reflect.get(diagnostics, 'opfsSahpoolInstallError') : null;
-        const opfsSahpoolVfs = typeof Reflect.get(diagnostics, 'hasOpfsSahpoolVfs') === 'boolean' ? Reflect.get(diagnostics, 'hasOpfsSahpoolVfs') : null;
-        const attempts = Array.isArray(Reflect.get(diagnostics, 'attempts')) ? Reflect.get(diagnostics, 'attempts') : [];
-        const lastSahpoolOpenError = attempts
-            .filter((/** @type {unknown} */ attempt) => typeof Reflect.get(attempt ?? {}, 'strategy') === 'string' && Reflect.get(attempt ?? {}, 'strategy') === 'uri-opfs-sahpool')
-            .map((/** @type {unknown} */ attempt) => typeof Reflect.get(attempt ?? {}, 'error') === 'string' ? Reflect.get(attempt ?? {}, 'error') : '')
-            .filter((/** @type {string} */ value) => value.length > 0)
-            .at(-1) ?? null;
-        const runtimeUserAgent = typeof Reflect.get(runtimeContext ?? {}, 'userAgent') === 'string' ? Reflect.get(runtimeContext ?? {}, 'userAgent') : '';
+        const diagnosticsRecord = /** @type {Record<string, unknown>} */ (diagnostics);
+        const runtimeContextRaw = Reflect.get(diagnosticsRecord, 'runtimeContext');
+        const runtimeContext = (typeof runtimeContextRaw === 'object' && runtimeContextRaw !== null && !Array.isArray(runtimeContextRaw)) ?
+            /** @type {Record<string, unknown>} */ (runtimeContextRaw) :
+            {};
+        const modeRaw = Reflect.get(diagnosticsRecord, 'mode');
+        const mode = typeof modeRaw === 'string' ? modeRaw : 'unknown';
+        const hasStorageGetDirectoryRaw = Reflect.get(runtimeContext, 'hasStorageGetDirectory');
+        const hasStorageGetDirectory = typeof hasStorageGetDirectoryRaw === 'boolean' ? hasStorageGetDirectoryRaw : null;
+        const hasCreateSyncAccessHandleRaw = Reflect.get(runtimeContext, 'hasCreateSyncAccessHandle');
+        const hasCreateSyncAccessHandle = typeof hasCreateSyncAccessHandleRaw === 'boolean' ? hasCreateSyncAccessHandleRaw : null;
+        const opfsSahpoolInstallResultRaw = Reflect.get(diagnosticsRecord, 'opfsSahpoolInstallResult');
+        const opfsSahpoolInstallResult = typeof opfsSahpoolInstallResultRaw === 'string' ? opfsSahpoolInstallResultRaw : null;
+        const opfsSahpoolInstallErrorRaw = Reflect.get(diagnosticsRecord, 'opfsSahpoolInstallError');
+        const opfsSahpoolInstallError = typeof opfsSahpoolInstallErrorRaw === 'string' ? opfsSahpoolInstallErrorRaw : null;
+        const opfsSahpoolVfsRaw = Reflect.get(diagnosticsRecord, 'hasOpfsSahpoolVfs');
+        const opfsSahpoolVfs = typeof opfsSahpoolVfsRaw === 'boolean' ? opfsSahpoolVfsRaw : null;
+        const attemptsRaw = Reflect.get(diagnosticsRecord, 'attempts');
+        /** @type {unknown[]} */
+        const attempts = Array.isArray(attemptsRaw) ? attemptsRaw : [];
+        /** @type {unknown} */
+        let lastSahpoolOpenAttempt = null;
+        for (let i = attempts.length - 1; i >= 0; --i) {
+            const attempt = attempts[i];
+            if (!(typeof attempt === 'object' && attempt !== null && !Array.isArray(attempt))) { continue; }
+            if (Reflect.get(attempt, 'strategy') !== 'uri-opfs-sahpool' || typeof Reflect.get(attempt, 'error') !== 'string') { continue; }
+            lastSahpoolOpenAttempt = attempt;
+            break;
+        }
+        const lastSahpoolOpenErrorRaw = /** @type {unknown} */ ((
+            typeof lastSahpoolOpenAttempt === 'object' &&
+            lastSahpoolOpenAttempt !== null &&
+            !Array.isArray(lastSahpoolOpenAttempt)
+        ) ?
+            Reflect.get(lastSahpoolOpenAttempt, 'error') :
+            null);
+        const lastSahpoolOpenError = typeof lastSahpoolOpenErrorRaw === 'string' && lastSahpoolOpenErrorRaw.length > 0 ?
+            lastSahpoolOpenErrorRaw :
+            null;
+        const runtimeUserAgentRaw = Reflect.get(runtimeContext, 'userAgent');
+        const runtimeUserAgent = typeof runtimeUserAgentRaw === 'string' ? runtimeUserAgentRaw : '';
         const isFirefoxRuntimeFromDiagnostics = /Firefox\//i.test(runtimeUserAgent) || isFirefoxRuntime;
         let reason = 'Update to a browser/runtime which exposes worker OPFS SyncAccessHandle support and reload the extension.';
         if (isFirefoxRuntimeFromDiagnostics) {
@@ -284,9 +413,17 @@ export class DictionaryImportController {
         /** @type {HTMLInputElement} */
         this._importButton = querySelectorNotNull(document, '#dictionary-import-button');
         /** @type {HTMLInputElement} */
+        this._importConfirmButton = querySelectorNotNull(document, '#dictionary-import-confirm-button');
+        /** @type {HTMLInputElement} */
         this._importURLButton = querySelectorNotNull(document, '#dictionary-import-url-button');
         /** @type {HTMLInputElement} */
         this._importURLText = querySelectorNotNull(document, '#dictionary-import-url-text');
+        /** @type {HTMLElement} */
+        this._importSourceList = querySelectorNotNull(document, '#dictionary-import-source-list');
+        /** @type {HTMLElement} */
+        this._importSourceEmpty = querySelectorNotNull(document, '#dictionary-import-source-empty');
+        /** @type {?import('./modal.js').Modal} */
+        this._importModal = null;
         /** @type {?import('./modal.js').Modal} */
         this._purgeConfirmModal = null;
         /** @type {?import('./modal.js').Modal} */
@@ -337,6 +474,8 @@ export class DictionaryImportController {
         };
         /** @type {number} */
         this._activeImportRunGeneration = 0;
+        /** @type {DictionaryImportSource[]} */
+        this._pendingImportSources = [];
         /** @type {(event: MouseEvent) => void} */
         this._onDocumentClickCaptureBind = this._onDocumentClickCapture.bind(this);
         /** @type {(event: Event) => void} */
@@ -360,6 +499,7 @@ export class DictionaryImportController {
         this._purgeButton.addEventListener('click', this._onPurgeButtonClick.bind(this), false);
         this._purgeConfirmButton.addEventListener('click', this._onPurgeConfirmButtonClick.bind(this), false);
         this._importButton.addEventListener('click', this._onImportButtonClick.bind(this), false);
+        this._importConfirmButton.addEventListener('click', this._onImportConfirm.bind(this), false);
         this._importURLButton.addEventListener('click', this._onImportFromURL.bind(this), false);
         this._importFileInput.addEventListener('change', this._onImportFileChange.bind(this), false);
 
@@ -389,13 +529,13 @@ export class DictionaryImportController {
      * @param {File} archiveContent
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
-     * @returns {Promise<import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}>}
+     * @returns {Promise<ImportResultWithDebug>}
      */
     async _tryImportDictionaryOffscreen(archiveContent, details, onProgress) {
         if (!(archiveContent instanceof Blob)) {
             throw new Error('Dictionary import requires Blob-backed archive content');
         }
-        return /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
+        return /** @type {ImportResultWithDebug} */ (
             await this._settingsController.application.api.importDictionaryOffscreen(archiveContent, details, onProgress)
         );
     }
@@ -404,10 +544,10 @@ export class DictionaryImportController {
      * @param {string} url
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
-     * @returns {Promise<import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}}>}
+     * @returns {Promise<ImportResultWithDebug>}
      */
     async _tryImportDictionaryUrlOffscreen(url, details, onProgress) {
-        return /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
+        return /** @type {ImportResultWithDebug} */ (
             await this._settingsController.application.api.importDictionaryUrlOffscreen(url, details, onProgress)
         );
     }
@@ -729,7 +869,7 @@ export class DictionaryImportController {
                 return Array.isArray(values) && values.length > 0;
             });
             if (!hasAnyRecommendedEntries) {
-                resolvedLanguage = undefined;
+                resolvedLanguage = void 0;
             }
         }
 
@@ -985,7 +1125,11 @@ export class DictionaryImportController {
         if (!e.dataTransfer) { return; }
         for (const item of e.dataTransfer.items) {
             // Directories and files with no extension both show as ''
-            if (item.type === '' || item.type === 'application/zip') {
+            if (
+                item.type === '' ||
+                item.type === 'application/zip' ||
+                item.type === 'application/octet-stream'
+            ) {
                 this._importFileDrop.classList.add('drag-over');
                 break;
             }
@@ -1050,7 +1194,8 @@ export class DictionaryImportController {
             const entry = entries.shift();
             if (!entry) { continue; }
             if (entry.isFile) {
-                if (entry.name.substring(entry.name.lastIndexOf('.'), entry.name.length) === '.zip') {
+                const extension = entry.name.substring(entry.name.lastIndexOf('.'), entry.name.length).toLowerCase();
+                if (extension === '.zip' || extension === '.mdx' || extension === '.mdd') {
                     // @ts-expect-error - ts does not recognize `if (entry.isFile)` as verifying `entry` is type `FileSystemFileEntry` and instanceof does not work
                     fileEntries.push(entry);
                 }
@@ -1098,7 +1243,17 @@ export class DictionaryImportController {
      */
     _onImportButtonClick(e) {
         e.preventDefault();
+        this._renderPendingImportSources();
         /** @type {import('./modal.js').Modal} */ (this._importModal).setVisible(true);
+    }
+
+    /**
+     * @param {MouseEvent} e
+     */
+    _onImportConfirm(e) {
+        e.preventDefault();
+        if (this._pendingImportSources.length === 0) { return; }
+        this._importSelectedSources([...this._pendingImportSources]);
     }
 
     /**
@@ -1139,13 +1294,31 @@ export class DictionaryImportController {
         e.preventDefault();
         const text = this._importURLText.value.trim();
         if (!text) { return; }
-        await this.importFilesFromURLs(text, null, null);
+        const urls = this._normalizeImportUrls(text);
+        /** @type {DictionaryImportSource[]} */
+        const sources = [];
+        /** @type {Error[]} */
+        const errors = [];
+        const importProgressTracker = new ImportProgressTracker(this._getUrlImportSteps(), urls.length);
+        const onProgress = importProgressTracker.onProgress.bind(importProgressTracker);
+        for await (const source of this._generateFilesFromUrls(urls, onProgress, (error) => {
+            errors.push(error);
+        })) {
+            sources.push(source);
+        }
+        if (sources.length === 0) {
+            if (errors.length > 0) { this._showErrors(errors); }
+            return;
+        }
+        this._importURLText.value = '';
+        this._appendPendingImportSources(sources, errors);
     }
 
     /**
      * @param {string} text
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
+     * @param {Partial<import('dictionary-importer').ImportDetails>|null} importDetailsOverrides
      */
     async importFilesFromURLs(
         text,
@@ -1191,6 +1364,7 @@ export class DictionaryImportController {
      * @param {File[]} files
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
+     * @param {Partial<import('dictionary-importer').ImportDetails>|null} importDetailsOverrides
      */
     async importFiles(
         files,
@@ -1199,17 +1373,105 @@ export class DictionaryImportController {
         /** @type {Partial<import('dictionary-importer').ImportDetails>|null} */ importDetailsOverrides = null,
     ) {
         if (files.length === 0) { return; }
-        const importProgressTracker = new ImportProgressTracker(this._getFileImportSteps(), files.length);
+        const {sources, errors} = this._createImportSourcesFromFiles(files);
+        if (sources.length === 0) {
+            if (errors.length > 0) { this._showErrors(errors); }
+            return;
+        }
+        const importProgressTracker = new ImportProgressTracker(this._getFileImportSteps(), sources.length);
         await this._runImportWithWatchdog(
             this._importDictionaries(
-                this._arrayToAsyncGenerator(files),
+                this._arrayToAsyncGenerator(sources),
                 profilesDictionarySettings,
                 onImportDone,
                 importProgressTracker,
                 importDetailsOverrides,
+                errors,
             ),
-            `File dictionary import (${String(files.length)})`,
+            `File dictionary import (${String(sources.length)})`,
         );
+    }
+
+    /**
+     * @param {DictionaryImportSource[]} sources
+     * @param {Error[]} errors
+     */
+    _appendPendingImportSources(sources, errors = []) {
+        this._pendingImportSources.push(...sources);
+        this._renderPendingImportSources();
+        this._hideErrors();
+        if (errors.length > 0) {
+            this._showErrors(errors);
+        }
+    }
+
+    /**
+     * @param {DictionaryImportSource[]} sources
+     * @param {Error[]} initialErrors
+     */
+    _importSelectedSources(sources, initialErrors = []) {
+        if (sources.length === 0) { return; }
+        this._clearPendingImportSources();
+        /** @type {import('./modal.js').Modal} */ (this._importModal).setVisible(false);
+        const importProgressTracker = new ImportProgressTracker(this._getFileImportSteps(), sources.length);
+        void this._runImportWithWatchdog(
+            this._importDictionaries(
+                this._arrayToAsyncGenerator(sources),
+                null,
+                null,
+                importProgressTracker,
+                null,
+                initialErrors,
+            ),
+            `Selected dictionary import (${String(sources.length)})`,
+        ).catch((error) => {
+            log.error(error);
+            this._showErrors([toError(error)]);
+        });
+    }
+
+    /** */
+    _clearPendingImportSources() {
+        this._pendingImportSources = [];
+        this._renderPendingImportSources();
+    }
+
+    /** */
+    _renderPendingImportSources() {
+        this._importSourceList.textContent = '';
+        const hasSources = this._pendingImportSources.length > 0;
+        this._importSourceEmpty.hidden = hasSources;
+        this._importConfirmButton.disabled = !hasSources;
+        if (!hasSources) { return; }
+
+        const fragment = document.createDocumentFragment();
+        for (const source of this._pendingImportSources) {
+            const node = /** @type {HTMLElement} */ (this._settingsController.instantiateTemplate('dictionary-import-source'));
+            const title = querySelectorNotNull(node, '.dictionary-import-source-title');
+            const description = querySelectorNotNull(node, '.dictionary-import-source-description');
+            title.textContent = this._getPendingImportSourceLabel(source);
+            description.textContent = this._getPendingImportSourceDescription(source);
+            fragment.appendChild(node);
+        }
+        this._importSourceList.appendChild(fragment);
+    }
+
+    /**
+     * @param {DictionaryImportSource} source
+     * @returns {string}
+     */
+    _getPendingImportSourceLabel(source) {
+        return source.type === 'zip' ? source.file.name : source.mdxFile.name;
+    }
+
+    /**
+     * @param {DictionaryImportSource} source
+     * @returns {string}
+     */
+    _getPendingImportSourceDescription(source) {
+        if (source.type === 'zip') { return 'ZIP archive'; }
+        const mddCount = source.mddFiles.length;
+        return mddCount > 0 ? `MDX dictionary with ${mddCount} matching MDD file${mddCount === 1 ? '' : 's'}` : 'MDX dictionary';
     }
 
     /**
@@ -1310,14 +1572,16 @@ export class DictionaryImportController {
     /**
      * @param {string[]} urls
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
-     * @yields {Promise<File>}
-     * @returns {AsyncGenerator<File, void, void>}
+     * @param {(error: Error) => void} [onError]
+     * @yields {Promise<DictionaryImportSource>}
+     * @returns {AsyncGenerator<DictionaryImportSource, void, void>}
      */
-    async *_generateFilesFromUrls(urls, onProgress) {
+    async *_generateFilesFromUrls(urls, onProgress, onError = void 0) {
         const downloadTimeoutMs = 120_000;
         for (const url of urls) {
             onProgress({nextStep: true, index: 0, count: 0});
             const trimmedUrl = url.trim();
+            if (trimmedUrl.length === 0) { continue; }
             const downloadStartTime = safePerformance.now();
             log.log(`[ImportTiming] download started: ${trimmedUrl}`);
             reportDiagnostics('dictionary-url-download-begin', {
@@ -1341,7 +1605,7 @@ export class DictionaryImportController {
                         elapsedMs: Math.max(0, downloadEndTime - downloadStartTime),
                         sizeBytes: file.size,
                     });
-                    yield file;
+                    yield {type: 'zip', file};
                     continue;
                 }
 
@@ -1350,16 +1614,17 @@ export class DictionaryImportController {
                     abortController.abort(new Error(`Timed out fetching URL after ${String(downloadTimeoutMs)}ms: ${trimmedUrl}`));
                 }, downloadTimeoutMs);
                 try {
-                    const file = await this._downloadDictionaryFileViaXhr(trimmedUrl, downloadTimeoutMs, onProgress, abortController.signal);
+                    const source = await this._createImportSourceFromUrl(trimmedUrl, downloadTimeoutMs, onProgress, abortController.signal);
                     const downloadEndTime = safePerformance.now();
                     log.log(`[ImportTiming] download completed in ${formatDurationMs(downloadEndTime - downloadStartTime)}: ${trimmedUrl}`);
                     reportDiagnostics('dictionary-url-download-complete', {
                         url: summarizeUrlForDiagnostics(trimmedUrl),
                         inline: false,
                         elapsedMs: Math.max(0, downloadEndTime - downloadStartTime),
-                        sizeBytes: file.size,
+                        sizeBytes: this._getImportSourceSize(source),
+                        sourceType: source.type,
                     });
-                    yield file;
+                    yield source;
                 } catch (error) {
                     const abortReason = /** @type {unknown} */ (abortController.signal.reason);
                     if (abortController.signal.aborted && abortReason instanceof Error) {
@@ -1377,6 +1642,11 @@ export class DictionaryImportController {
                     elapsedMs: Math.max(0, downloadEndTime - downloadStartTime),
                     message: toError(error).message,
                 });
+                if (typeof onError === 'function') {
+                    log.error(error);
+                    onError(toError(error));
+                    continue;
+                }
                 throw toError(error);
             }
         }
@@ -1385,7 +1655,7 @@ export class DictionaryImportController {
     /**
      * @param {string[]} urls
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
-     * @returns {AsyncGenerator<File|{downloadUrl: string}, void, void>}
+     * @returns {AsyncGenerator<DictionaryImportSource|{downloadUrl: string}, void, void>}
      */
     _getUrlImportSources(urls, onProgress) {
         return ('serviceWorker' in navigator) ?
@@ -1411,6 +1681,7 @@ export class DictionaryImportController {
                 request.onprogress = null;
                 abortSignal.removeEventListener('abort', onAbortSignal);
             };
+            /** @param {unknown} error */
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
@@ -1430,22 +1701,13 @@ export class DictionaryImportController {
                     fail(new Error(`Failed to fetch dictionary archive: ${url} (status=${String(request.status)})`));
                     return;
                 }
-                const response = request.response;
+                const response = /** @type {unknown} */ (request.response);
                 const contentBytes = response instanceof ArrayBuffer ? new Uint8Array(response) : new Uint8Array(0);
                 if (contentBytes.byteLength === 0) {
                     fail(new Error(`Fetched dictionary archive had no content: ${url}`));
                     return;
                 }
-                const urlPathName = (() => {
-                    try {
-                        return new URL(url).pathname;
-                    } catch (_) {
-                        return '';
-                    }
-                })();
-                const pathSegments = urlPathName.split('/');
-                const fileNameCandidate = pathSegments.length > 0 ? pathSegments[pathSegments.length - 1].trim() : '';
-                const fileName = fileNameCandidate.length > 0 ? fileNameCandidate : 'fileFromURL.zip';
+                const fileName = getDictionaryFileNameFromUrl(url) ?? 'fileFromURL.zip';
                 const contentType = request.getResponseHeader('Content-Type') || 'application/zip';
                 cleanup();
                 resolve(new File([contentBytes], fileName, {type: contentType}));
@@ -1474,13 +1736,170 @@ export class DictionaryImportController {
     }
 
     /**
+     * @param {string} url
+     * @param {number} timeoutMs
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {AbortSignal} abortSignal
+     * @returns {Promise<DictionaryImportSource>}
+     */
+    async _createImportSourceFromUrl(url, timeoutMs, onProgress, abortSignal) {
+        const directFileName = getDictionaryFileNameFromUrl(url);
+        if (directFileName !== null && isZipDictionaryFileName(directFileName)) {
+            return {type: 'zip', file: await this._downloadDictionaryFileViaXhr(url, timeoutMs, onProgress, abortSignal)};
+        }
+        if (directFileName !== null && isMdxDictionaryFileName(directFileName)) {
+            return await this._downloadMdxImportSourceFromUrl(url, timeoutMs, onProgress, abortSignal, directFileName);
+        }
+
+        const response = await fetch(url, {signal: abortSignal});
+        if (!response.ok) {
+            throw new Error(`Failed to fetch dictionary archive: ${url} (status=${String(response.status)})`);
+        }
+        const contentType = response.headers.get('content-type') || '';
+        if (/text\/html|application\/xhtml\+xml/i.test(contentType)) {
+            const listing = this._parseMdxListingDocument(url, await response.text(), null);
+            if (listing === null) {
+                throw new Error(`URL did not point to a supported dictionary file or MDX directory listing: ${url}`);
+            }
+            return await this._downloadMdxImportSourceFromListing(listing, timeoutMs, onProgress, abortSignal);
+        }
+
+        const content = await response.arrayBuffer();
+        if (content.byteLength === 0) {
+            throw new Error(`Fetched dictionary archive had no content: ${url}`);
+        }
+        const fileName = directFileName ?? 'fileFromURL.zip';
+        if (isMdxDictionaryFileName(fileName)) {
+            const mdxFile = new File([content], fileName, {type: contentType || 'application/octet-stream'});
+            return {type: 'mdx', mdxFile, mddFiles: []};
+        }
+        return {type: 'zip', file: new File([content], fileName, {type: contentType || 'application/zip'})};
+    }
+
+    /**
+     * @param {string} url
+     * @param {number} timeoutMs
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {AbortSignal} abortSignal
+     * @param {string} mdxFileName
+     * @returns {Promise<MdxImportSource>}
+     */
+    async _downloadMdxImportSourceFromUrl(url, timeoutMs, onProgress, abortSignal, mdxFileName) {
+        const mdxFile = await this._downloadDictionaryFileViaXhr(url, timeoutMs, onProgress, abortSignal);
+        const listing = await this._getMdxListingForUrl(url, mdxFile.name || mdxFileName, abortSignal);
+        if (listing === null) {
+            return {type: 'mdx', mdxFile, mddFiles: []};
+        }
+        const mddFiles = await this._downloadListingFiles(listing.mddLinks, timeoutMs, onProgress, abortSignal);
+        return {type: 'mdx', mdxFile, mddFiles};
+    }
+
+    /**
+     * @param {{mdxLink: {url: string, fileName: string}, mddLinks: Array<{url: string, fileName: string}>}} listing
+     * @param {number} timeoutMs
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {AbortSignal} abortSignal
+     * @returns {Promise<MdxImportSource>}
+     */
+    async _downloadMdxImportSourceFromListing(listing, timeoutMs, onProgress, abortSignal) {
+        const mdxFile = await this._downloadDictionaryFileViaXhr(listing.mdxLink.url, timeoutMs, onProgress, abortSignal);
+        const mddFiles = await this._downloadListingFiles(listing.mddLinks, timeoutMs, onProgress, abortSignal);
+        return {type: 'mdx', mdxFile, mddFiles};
+    }
+
+    /**
+     * @param {string} url
+     * @param {string} mdxFileName
+     * @param {AbortSignal} abortSignal
+     * @returns {Promise<{mdxLink: {url: string, fileName: string}, mddLinks: Array<{url: string, fileName: string}>}|null>}
+     */
+    async _getMdxListingForUrl(url, mdxFileName, abortSignal) {
+        try {
+            const parentUrl = new URL('.', url).href;
+            const response = await fetch(parentUrl, {signal: abortSignal});
+            if (!response.ok) { return null; }
+            const contentType = response.headers.get('content-type') || '';
+            if (!/text\/html|application\/xhtml\+xml/i.test(contentType)) { return null; }
+            return this._parseMdxListingDocument(parentUrl, await response.text(), mdxFileName);
+        } catch (_error) {
+            return null;
+        }
+    }
+
+    /**
+     * @param {Array<{url: string, fileName: string}>} listingFiles
+     * @param {number} timeoutMs
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {AbortSignal} abortSignal
+     * @returns {Promise<File[]>}
+     */
+    async _downloadListingFiles(listingFiles, timeoutMs, onProgress, abortSignal) {
+        /** @type {File[]} */
+        const files = [];
+        for (const {url, fileName} of listingFiles) {
+            files.push(await this._downloadDictionaryFileViaXhr(url, timeoutMs, onProgress, abortSignal));
+            if (files[files.length - 1].name !== fileName) {
+                files[files.length - 1] = new File([files[files.length - 1]], fileName, {type: files[files.length - 1].type});
+            }
+        }
+        files.sort((a, b) => this._getMddSequenceIndex(a) - this._getMddSequenceIndex(b));
+        return files;
+    }
+
+    /**
+     * @param {string} baseUrl
+     * @param {string} html
+     * @param {string|null} mdxFileName
+     * @returns {{mdxLink: {url: string, fileName: string}, mddLinks: Array<{url: string, fileName: string}>}|null}
+     */
+    _parseMdxListingDocument(baseUrl, html, mdxFileName) {
+        if (typeof DOMParser === 'undefined') { return null; }
+        const document = new DOMParser().parseFromString(html, 'text/html');
+        /** @type {Array<{url: string, fileName: string}>} */
+        const fileLinks = [];
+        for (const anchor of document.querySelectorAll('a[href]')) {
+            const href = anchor.getAttribute('href') || '';
+            let resolvedUrl;
+            try {
+                resolvedUrl = new URL(href, baseUrl).href;
+            } catch (_error) {
+                continue;
+            }
+            const fileName = getDictionaryFileNameFromUrl(resolvedUrl);
+            if (fileName === null) { continue; }
+            fileLinks.push({url: resolvedUrl, fileName});
+        }
+
+        let mdxLink = null;
+        if (typeof mdxFileName === 'string' && mdxFileName.length > 0) {
+            mdxLink = fileLinks.find(({fileName}) => fileName === mdxFileName && isMdxDictionaryFileName(fileName)) || null;
+        } else {
+            const mdxLinks = fileLinks.filter(({fileName}) => isMdxDictionaryFileName(fileName));
+            if (mdxLinks.length !== 1) { return null; }
+            [mdxLink] = mdxLinks;
+        }
+        if (mdxLink === null) { return null; }
+
+        const mdxKey = this._getMdxImportSourceKeyFromName(mdxLink.fileName);
+        if (mdxKey === null) { return null; }
+        const mddLinks = fileLinks
+            .filter(({fileName}) => (
+                isMddDictionaryFileName(fileName) &&
+                this._getMdxImportSourceKeyFromName(fileName) === mdxKey
+            ))
+            .sort((a, b) => this._getMddSequenceIndexFromName(a.fileName) - this._getMddSequenceIndexFromName(b.fileName));
+        return {mdxLink, mddLinks};
+    }
+
+    /**
      * @param {string[]} urls
-     * @yields {Promise<File|{downloadUrl: string}>}
-     * @returns {AsyncGenerator<File|{downloadUrl: string}, void, void>}
+     * @yields {Promise<DictionaryImportSource|{downloadUrl: string}>}
+     * @returns {AsyncGenerator<DictionaryImportSource|{downloadUrl: string}, void, void>}
      */
     async *_generateImportSourcesFromUrls(urls) {
         for (const url of urls) {
             const trimmedUrl = url.trim();
+            if (trimmedUrl.length === 0) { continue; }
             if (trimmedUrl.startsWith('manabitan-e2e-dict:')) {
                 const inlineArchiveBase64 = this._getInlineArchiveBase64ForUrl(trimmedUrl);
                 if (typeof inlineArchiveBase64 !== 'string') {
@@ -1488,7 +1907,7 @@ export class DictionaryImportController {
                 }
                 const tokenName = trimmedUrl.slice('manabitan-e2e-dict:'.length).trim();
                 const safeName = tokenName.length > 0 ? tokenName.replaceAll(/[^a-zA-Z0-9._-]/g, '-') : 'fileFromURL';
-                yield new File([this._base64ToUint8Array(inlineArchiveBase64)], `${safeName}.zip`, {type: 'application/zip'});
+                yield {type: 'zip', file: new File([this._base64ToUint8Array(inlineArchiveBase64)], `${safeName}.zip`, {type: 'application/zip'})};
                 continue;
             }
             yield {downloadUrl: trimmedUrl};
@@ -1528,6 +1947,141 @@ export class DictionaryImportController {
         return bytes;
     }
 
+    /**
+     * @param {File} file
+     * @returns {string|null}
+     */
+    _getMdxImportSourceKey(file) {
+        return getDictionaryImportSourceKeyFromPath(getDictionaryFilePath(file));
+    }
+
+    /**
+     * @param {File} file
+     * @returns {number}
+     */
+    _getMddSequenceIndex(file) {
+        return this._getMddSequenceIndexFromName(file.name);
+    }
+
+    /**
+     * @param {string} fileName
+     * @returns {number}
+     */
+    _getMddSequenceIndexFromName(fileName) {
+        const match = /\.([0-9]+)\.mdd$/i.exec(getLowercaseFileName(fileName));
+        return match !== null ? Number.parseInt(match[1], 10) : 0;
+    }
+
+    /**
+     * @param {string} fileName
+     * @returns {string|null}
+     */
+    _getMdxImportSourceKeyFromName(fileName) {
+        return getDictionaryImportSourceKeyFromPath(fileName);
+    }
+
+    /**
+     * @param {File[]} files
+     * @returns {{sources: DictionaryImportSource[], errors: Error[]}}
+     */
+    _createImportSourcesFromFiles(files) {
+        /** @type {Array<{firstIndex: number, source: DictionaryImportSource}>} */
+        const pendingSources = [];
+        /** @type {Error[]} */
+        const errors = [];
+        /** @type {Map<string, {firstIndex: number, mdxFile: File|null, mddFiles: File[]}>} */
+        const mdxGroups = new Map();
+
+        for (const [index, file] of files.entries()) {
+            const filePath = getDictionaryFilePath(file);
+            if (isZipDictionaryFileName(filePath)) {
+                pendingSources.push({firstIndex: index, source: {type: 'zip', file}});
+                continue;
+            }
+            if (!(isMdxDictionaryFileName(filePath) || isMddDictionaryFileName(filePath))) {
+                errors.push(new Error(`Unsupported dictionary file: ${file.name}`));
+                continue;
+            }
+            const key = this._getMdxImportSourceKey(file);
+            if (key === null) {
+                errors.push(new Error(`Unsupported MDX resource file: ${file.name}`));
+                continue;
+            }
+
+            let group = mdxGroups.get(key);
+            if (typeof group === 'undefined') {
+                group = {firstIndex: index, mdxFile: null, mddFiles: []};
+                mdxGroups.set(key, group);
+            }
+            group.firstIndex = Math.min(group.firstIndex, index);
+            if (isMdxDictionaryFileName(filePath)) {
+                if (group.mdxFile !== null) {
+                    errors.push(new Error(`Multiple MDX files matched the same dictionary group: ${file.name}`));
+                    continue;
+                }
+                group.mdxFile = file;
+            } else {
+                group.mddFiles.push(file);
+            }
+        }
+
+        for (const group of [...mdxGroups.values()].sort((a, b) => a.firstIndex - b.firstIndex)) {
+            if (group.mdxFile === null) {
+                const firstResource = group.mddFiles[0];
+                errors.push(new Error(`Found MDD resources without a matching MDX file: ${firstResource ? firstResource.name : 'unknown resource'}`));
+                continue;
+            }
+            group.mddFiles.sort((a, b) => this._getMddSequenceIndex(a) - this._getMddSequenceIndex(b));
+            pendingSources.push({
+                firstIndex: group.firstIndex,
+                source: {
+                    type: 'mdx',
+                    mdxFile: group.mdxFile,
+                    mddFiles: [...group.mddFiles],
+                },
+            });
+        }
+
+        pendingSources.sort((a, b) => a.firstIndex - b.firstIndex);
+        return {sources: pendingSources.map(({source}) => source), errors};
+    }
+
+    /**
+     * @param {DictionaryImportSource} source
+     * @returns {number}
+     */
+    _getImportSourceSize(source) {
+        if (source.type === 'zip') {
+            return source.file.size;
+        }
+        return source.mdxFile.size + source.mddFiles.reduce((sum, file) => sum + file.size, 0);
+    }
+
+    /**
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {{stage: 'upload'|'convert'|'download', completed: number, total: number}} details
+     */
+    _reportMdxConversionProgress(onProgress, details) {
+        const {stage, completed, total} = details;
+        let progress = 0;
+        switch (stage) {
+            case 'upload':
+                progress = (total > 0 ? completed / total : 0) * MDX_UPLOAD_PROGRESS_RATIO;
+                break;
+            case 'convert':
+                progress = MDX_UPLOAD_PROGRESS_RATIO + ((total > 0 ? completed / total : 1) * (1 - MDX_UPLOAD_PROGRESS_RATIO));
+                break;
+            case 'download':
+                progress = 1;
+                break;
+        }
+        onProgress({
+            nextStep: false,
+            index: Math.round(Math.max(0, Math.min(1, progress)) * MDX_CONVERSION_PROGRESS_TOTAL),
+            count: MDX_CONVERSION_PROGRESS_TOTAL,
+        });
+    }
+
     /** */
     async _purgeDatabase() {
         if (this._modifying) { return; }
@@ -1554,10 +2108,12 @@ export class DictionaryImportController {
     }
 
     /**
-     * @param {AsyncGenerator<File, void, void>} dictionaries
+     * @param {AsyncGenerator<File|DictionaryImportSource|{downloadUrl: string}, void, void>} dictionaries
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
      * @param {ImportProgressTracker} importProgressTracker
+     * @param {Partial<import('dictionary-importer').ImportDetails>|null} importDetailsOverrides
+     * @param {Error[]} initialErrors
      */
     async _importDictionaries(
         dictionaries,
@@ -1565,6 +2121,7 @@ export class DictionaryImportController {
         onImportDone,
         importProgressTracker,
         /** @type {Partial<import('dictionary-importer').ImportDetails>|null} */ importDetailsOverrides = null,
+        /** @type {Error[]} */ initialErrors = [],
     ) {
         if (this._modifying) { return; }
         const importRunGeneration = ++this._activeImportRunGeneration;
@@ -1580,9 +2137,9 @@ export class DictionaryImportController {
         Reflect.set(globalThis, '__manabitanImportStepTimingHistory', []);
 
         /** @type {Error[]} */
-        let errors = [];
+        let errors = [...initialErrors];
         /** @type {string[]} */
-        let importedTitles = [];
+        const importedTitles = [];
         const useImportSession = this._getUseImportSession();
         log.log(`[ImportTiming] import session reuse enabled=${String(useImportSession)} (globalOverride=${String(this._getUseImportSession())})`);
         reportDiagnostics('dictionary-import-session-begin', {
@@ -1639,35 +2196,49 @@ export class DictionaryImportController {
                     finalizeImportSession,
                 });
                 const nextDictionary = await dictionaries.next();
-                const fileValue = nextDictionary.done ? null : nextDictionary.value;
-                /** @type {File} */
-                let file;
+                const source = nextDictionary.done ? null : nextDictionary.value;
                 /** @type {string|null} */
                 let downloadUrl = null;
-                if (fileValue instanceof File) {
-                    file = fileValue;
+                /** @type {DictionaryImportSource|null} */
+                let importSource = null;
+                if (source instanceof File) {
+                    importSource = {type: 'zip', file: source};
                 } else if (
-                    fileValue &&
-                    typeof fileValue === 'object' &&
-                    !Array.isArray(fileValue) &&
-                    typeof Reflect.get(fileValue, 'downloadUrl') === 'string'
+                    source &&
+                    typeof source === 'object' &&
+                    !Array.isArray(source) &&
+                    Reflect.get(source, 'type') === 'zip' &&
+                    Reflect.get(source, 'file') instanceof File
                 ) {
-                    downloadUrl = /** @type {string} */ (Reflect.get(fileValue, 'downloadUrl')).trim();
-                    file = new File([], 'fileFromURL.zip', {type: 'application/zip'});
-                } else if (fileValue && typeof fileValue === 'object') {
-                    const blobPart = /** @type {BlobPart} */ (fileValue);
-                    file = new File([blobPart], 'fileFromURL.zip', {type: 'application/zip'});
+                    importSource = /** @type {ZipImportSource} */ (source);
+                } else if (
+                    source &&
+                    typeof source === 'object' &&
+                    !Array.isArray(source) &&
+                    Reflect.get(source, 'type') === 'mdx' &&
+                    Reflect.get(source, 'mdxFile') instanceof File &&
+                    Array.isArray(Reflect.get(source, 'mddFiles'))
+                ) {
+                    importSource = /** @type {MdxImportSource} */ (source);
+                } else if (
+                    source &&
+                    typeof source === 'object' &&
+                    !Array.isArray(source) &&
+                    typeof Reflect.get(source, 'downloadUrl') === 'string'
+                ) {
+                    downloadUrl = /** @type {string} */ (Reflect.get(source, 'downloadUrl')).trim();
                 } else {
-                    errors.push(new Error(`Failed to read file ${i + 1} of ${importProgressTracker.dictionaryCount} (value-type=${typeof fileValue}, value=${String(fileValue)}).`));
+                    errors.push(new Error(`Failed to read file ${i + 1} of ${importProgressTracker.dictionaryCount} (value-type=${typeof source}).`));
                     reportDiagnostics('dictionary-import-item-invalid-file', {
                         index: i + 1,
                         dictionaryCount: importProgressTracker.dictionaryCount,
-                        valueType: typeof fileValue,
+                        valueType: typeof source,
                     });
                     continue;
                 }
-                const importItemResult = (downloadUrl !== null && downloadUrl.length > 0) ?
-                    await this._importDictionaryFromUrl(
+                let importItemResult;
+                if (downloadUrl !== null && downloadUrl.length > 0) {
+                    importItemResult = await this._importDictionaryFromUrl(
                         downloadUrl,
                         profilesDictionarySettings,
                         importDetails,
@@ -1675,9 +2246,10 @@ export class DictionaryImportController {
                         finalizeImportSession,
                         importRunGeneration,
                         onProgress,
-                    ) :
-                    await this._importDictionaryFromZip(
-                        file,
+                    );
+                } else if (importSource?.type === 'mdx') {
+                    importItemResult = await this._importDictionaryFromMdx(
+                        importSource,
                         profilesDictionarySettings,
                         importDetails,
                         useImportSession,
@@ -1685,6 +2257,20 @@ export class DictionaryImportController {
                         importRunGeneration,
                         onProgress,
                     );
+                } else if (importSource?.type === 'zip') {
+                    importItemResult = await this._importDictionaryFromZip(
+                        importSource.file,
+                        profilesDictionarySettings,
+                        importDetails,
+                        useImportSession,
+                        finalizeImportSession,
+                        importRunGeneration,
+                        onProgress,
+                    );
+                } else {
+                    errors.push(new Error(`Unsupported dictionary import source at item ${i + 1}.`));
+                    continue;
+                }
                 errors = [...errors, ...importItemResult.errors];
                 if (typeof importItemResult.importedTitle === 'string' && importItemResult.importedTitle.length > 0) {
                     importedTitles.push(importItemResult.importedTitle);
@@ -1696,7 +2282,8 @@ export class DictionaryImportController {
                     dictionaryCount: importProgressTracker.dictionaryCount,
                     elapsedMs: Math.max(0, dictionaryLoopEndTime - dictionaryLoopStartTime),
                     cumulativeErrorCount: errors.length,
-                    fileName: file.name || null,
+                    fileName: importSource?.type === 'mdx' ? importSource.mdxFile.name : (importSource?.type === 'zip' ? importSource.file.name : null),
+                    sourceType: importSource?.type ?? (downloadUrl !== null ? 'url' : null),
                     memory: getImportMemorySnapshot(),
                 });
             }
@@ -1942,6 +2529,105 @@ export class DictionaryImportController {
     }
 
     /**
+     * @param {string} dictionaryTitle
+     * @param {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} localPhaseTimings
+     * @param {string} phase
+     * @param {number} startTime
+     * @param {number} endTime
+     * @param {Record<string, string|number|boolean|null>} [details]
+     * @returns {void}
+     */
+    _recordImportLocalPhase(dictionaryTitle, localPhaseTimings, phase, startTime, endTime, details = {}) {
+        const elapsedMs = Math.max(0, endTime - startTime);
+        localPhaseTimings.push({phase, elapsedMs, details});
+        log.log(`[ImportTiming] [${dictionaryTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
+    }
+
+    /**
+     * @param {MdxImportSource} source
+     * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
+     * @param {import('dictionary-importer').ImportDetails} importDetails
+     * @param {boolean} useImportSession
+     * @param {boolean} finalizeImportSession
+     * @param {number} importRunGeneration
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
+     */
+    async _importDictionaryFromMdx(source, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress) {
+        const dictionaryTitle = source.mdxFile.name || 'unknown-dictionary.mdx';
+        const importStartTime = safePerformance.now();
+        /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
+        const localPhaseTimings = [];
+        const recordLocalPhase = this._recordImportLocalPhase.bind(this, dictionaryTitle, localPhaseTimings);
+        log.log(`[ImportTiming] [${dictionaryTitle}] starting MDX import`);
+        reportDiagnostics('dictionary-import-mdx-begin', {
+            dictionaryTitle,
+            mddCount: source.mddFiles.length,
+            sizeBytes: source.mdxFile.size + source.mddFiles.reduce((sum, file) => sum + file.size, 0),
+            useImportSession,
+            finalizeImportSession,
+        });
+
+        const mdx = new Mdx();
+        /** @type {File|null} */
+        let archiveFile = null;
+        const prepareStartTime = safePerformance.now();
+        try {
+            const archive = await mdx.convertDictionary(
+                {
+                    mdxFile: source.mdxFile,
+                    mddFiles: source.mddFiles,
+                    enableAudio: false,
+                    includeAssets: true,
+                },
+                (details) => this._reportMdxConversionProgress(onProgress, details),
+            );
+            localPhaseTimings.push(...archive.phaseTimings);
+            archiveFile = new File([archive.archiveContent], archive.archiveFileName, {type: 'application/zip'});
+        } finally {
+            mdx.disconnect();
+        }
+        if (archiveFile === null) {
+            throw new Error(`MDX conversion did not return an archive for ${dictionaryTitle}`);
+        }
+        const prepareEndTime = safePerformance.now();
+        recordLocalPhase('prepare-mdx-archive', prepareStartTime, prepareEndTime, {
+            mddCount: source.mddFiles.length,
+            sourceSizeBytes: source.mdxFile.size + source.mddFiles.reduce((sum, file) => sum + file.size, 0),
+            archiveSizeBytes: archiveFile.size,
+        });
+
+        const workerImportStartTime = safePerformance.now();
+        const detailsAttempt = {
+            ...importDetails,
+            ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
+        };
+        const importResult = /** @type {ImportResultWithDebug} */ (
+            await this._tryImportDictionaryOffscreen(archiveFile, detailsAttempt, onProgress)
+        );
+        const workerImportEndTime = safePerformance.now();
+        recordLocalPhase('worker-import-dictionary', workerImportStartTime, workerImportEndTime, {
+            useImportSession,
+            finalizeImportSession,
+            source: 'mdx-converted-archive',
+        });
+
+        return await this._finalizeImportedDictionaryResult({
+            dictionaryTitle,
+            importStartTime,
+            importDetails,
+            importResult,
+            workerImportStartTime,
+            workerImportEndTime,
+            useImportSession,
+            finalizeImportSession,
+            importRunGeneration,
+            profilesDictionarySettings,
+            localPhaseTimings,
+        });
+    }
+
+    /**
      * @param {File} file
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('dictionary-importer').ImportDetails} importDetails
@@ -1956,17 +2642,7 @@ export class DictionaryImportController {
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
         const localPhaseTimings = [];
-        /**
-         * @param {string} phase
-         * @param {number} startTime
-         * @param {number} endTime
-         * @param {Record<string, string|number|boolean|null>} [details]
-         */
-        const recordLocalPhase = (phase, startTime, endTime, details = {}) => {
-            const elapsedMs = Math.max(0, endTime - startTime);
-            localPhaseTimings.push({phase, elapsedMs, details});
-            log.log(`[ImportTiming] [${dictionaryTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
-        };
+        const recordLocalPhase = this._recordImportLocalPhase.bind(this, dictionaryTitle, localPhaseTimings);
         log.log(`[ImportTiming] [${dictionaryTitle}] starting import`);
         reportDiagnostics('dictionary-import-zip-begin', {
             dictionaryTitle,
@@ -1985,13 +2661,11 @@ export class DictionaryImportController {
         });
 
         const workerImportStartTime = safePerformance.now();
-        /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */
-        let importResult;
         const detailsAttempt = {
             ...importDetails,
             ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
         };
-        importResult = /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
+        const importResult = /** @type {ImportResultWithDebug} */ (
             await this._tryImportDictionaryOffscreen(archiveContent, detailsAttempt, onProgress)
         );
         const workerImportEndTime = safePerformance.now();
@@ -2031,11 +2705,7 @@ export class DictionaryImportController {
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
         const localPhaseTimings = [];
-        const recordLocalPhase = (phase, startTime, endTime, details = {}) => {
-            const elapsedMs = Math.max(0, endTime - startTime);
-            localPhaseTimings.push({phase, elapsedMs, details});
-            log.log(`[ImportTiming] [${dictionaryTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
-        };
+        const recordLocalPhase = this._recordImportLocalPhase.bind(this, dictionaryTitle, localPhaseTimings);
         log.log(`[ImportTiming] [${dictionaryTitle}] starting import from URL`);
         reportDiagnostics('dictionary-import-url-begin', {
             downloadUrl: summarizeUrlForDiagnostics(downloadUrl),
@@ -2098,18 +2768,7 @@ export class DictionaryImportController {
         profilesDictionarySettings,
         localPhaseTimings,
     }) {
-        /**
-         * @param {string} phase
-         * @param {number} startTime
-         * @param {number} endTime
-         * @param {Record<string, string|number|boolean|null>} [details]
-         * @returns {void}
-         */
-        const recordLocalPhase = (phase, startTime, endTime, details = {}) => {
-            const elapsedMs = Math.max(0, endTime - startTime);
-            localPhaseTimings.push({phase, elapsedMs, details});
-            log.log(`[ImportTiming] [${dictionaryTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
-        };
+        const recordLocalPhase = this._recordImportLocalPhase.bind(this, dictionaryTitle, localPhaseTimings);
         /**
          * @param {string} phase
          * @returns {{errors: Error[], importedTitle: string|null}|null}
@@ -2220,7 +2879,9 @@ export class DictionaryImportController {
                 updateSessionToken: (
                     typeof importDetails.updateSessionToken === 'string' &&
                     importDetails.updateSessionToken.trim().length > 0
-                ) ? importDetails.updateSessionToken.trim() : null,
+                ) ?
+                    importDetails.updateSessionToken.trim() :
+                    null,
             };
             await this._settingsController.application.api.replaceDictionaryTitle({
                 fromDictionaryTitle: result.title,
@@ -2386,11 +3047,15 @@ export class DictionaryImportController {
         const sourceTitle = (
             typeof summary.sourceTitle === 'string' &&
             summary.sourceTitle.trim().length > 0
-        ) ? summary.sourceTitle.trim() : null;
+        ) ?
+            summary.sourceTitle.trim() :
+            null;
         const replacedTitle = (
             typeof summary.replacedDictionaryTitle === 'string' &&
             summary.replacedDictionaryTitle.trim().length > 0
-        ) ? summary.replacedDictionaryTitle.trim() : null;
+        ) ?
+            summary.replacedDictionaryTitle.trim() :
+            null;
         const selectorSourceTitle = sourceTitle ?? replacedTitle;
         let optionsFull;
         // Workaround Firefox bug sometimes causing getOptionsFull to fail
@@ -2455,14 +3120,9 @@ export class DictionaryImportController {
                 const {name} = profileDictionarySettings[0];
                 if (
                     options.general.mainDictionary === name ||
-                    (selectorSourceTitle !== null && options.general.mainDictionary === selectorSourceTitle)
+                    (selectorSourceTitle !== null && options.general.mainDictionary === selectorSourceTitle) ||
+                    (sequenced && options.general.mainDictionary === '')
                 ) {
-                    targets.push({
-                        action: 'set',
-                        path: `profiles[${i}].options.general.mainDictionary`,
-                        value: title,
-                    });
-                } else if (sequenced && options.general.mainDictionary === '') {
                     targets.push({
                         action: 'set',
                         path: `profiles[${i}].options.general.mainDictionary`,
@@ -2479,7 +3139,6 @@ export class DictionaryImportController {
                         value: title,
                     });
                 }
-                continue;
             }
         }
         return await this._modifyGlobalSettings(targets);

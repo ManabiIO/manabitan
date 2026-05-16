@@ -383,14 +383,18 @@ async function waitForTermsLookupReady(page, query) {
  * @returns {Promise<void>}
  */
 async function setSettingsPreviewText(page, text) {
-    await page.evaluate((previewText) => {
-        const frame = document.querySelector('#popup-preview-frame');
-        if (!(frame instanceof HTMLIFrameElement) || frame.contentWindow === null) {
-            throw new Error('Missing popup preview frame');
-        }
-        const targetOrigin = chrome.runtime.getURL('/').replace(/\/$/, '');
-        frame.contentWindow.postMessage({action: 'setText', params: {text: previewText}}, targetOrigin);
-    }, text);
+    await expect(async () => {
+        await page.evaluate((previewText) => {
+            const frame = document.querySelector('#popup-preview-frame');
+            if (!(frame instanceof HTMLIFrameElement) || frame.contentWindow === null) {
+                throw new Error('Missing popup preview frame');
+            }
+            const targetOrigin = chrome.runtime.getURL('/').replace(/\/$/, '');
+            frame.contentWindow.postMessage({action: 'setText', params: {text: previewText}}, targetOrigin);
+        }, text);
+        const currentText = await page.frameLocator('#popup-preview-frame').locator('#example-text').textContent({timeout: 1_000});
+        expect(currentText).toBe(text);
+    }).toPass({timeout: 30_000});
 }
 
 /**

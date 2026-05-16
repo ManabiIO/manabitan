@@ -16,6 +16,7 @@
  */
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
+import {Mdx} from '../ext/js/comm/mdx.js';
 import {DictionaryWorker} from '../ext/js/dictionary/dictionary-worker.js';
 
 /**
@@ -97,6 +98,92 @@ class FakeWorker {
 afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
+});
+
+describe('Mdx conversion worker client', () => {
+    test('returns sanitized worker phase timings with converted archive data', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn((url, options) => {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const mdx = new Mdx();
+        /** @type {Array<{stage: string, completed: number, total: number}>} */
+        const progressEvents = [];
+        const invocationPromise = mdx.convertDictionary(
+            {
+                mdxFile: new File([createBytes(4, 3)], 'fixture.mdx'),
+                mddFiles: [new File([createBytes(3, 9)], 'fixture.mdd')],
+            },
+            (details) => {
+                progressEvents.push(details);
+            },
+        );
+
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+
+        const [worker] = workerInstances;
+        expect(worker?.url).toBe('/js/dictionary/mdx-worker-main.js');
+        const postMessageCalls = worker?.postMessage.mock.calls ?? [];
+        const [message, transferables] = /** @type {[{action: string, params: {mdxFileName: string, mdxBytes: ArrayBuffer, mddFiles: Array<{name: string, bytes: ArrayBuffer}>}}, Transferable[]]} */ (/** @type {unknown} */ (postMessageCalls[0]));
+        expect(message.action).toBe('convertDictionary');
+        expect(message.params.mdxFileName).toBe('fixture.mdx');
+        expect(message.params.mddFiles[0].name).toBe('fixture.mdd');
+        expect(transferables).toHaveLength(2);
+
+        worker?.emitMessage({
+            action: 'progress',
+            params: {
+                details: {stage: 'convert', completed: 1, total: 2},
+            },
+        });
+        worker?.emitMessage({
+            action: 'complete',
+            params: {
+                result: {
+                    archiveContent: createBytes(5, 21).buffer,
+                    archiveFileName: 'fixture.zip',
+                    phaseTimings: [
+                        {
+                            phase: 'prepare-mdx:convert-entries',
+                            elapsedMs: 12,
+                            details: {
+                                ok: true,
+                                count: 1,
+                                nested: {ignored: true},
+                            },
+                        },
+                    ],
+                },
+            },
+        });
+
+        await expect(invocationPromise).resolves.toStrictEqual({
+            archiveContent: createBytes(5, 21).buffer,
+            archiveFileName: 'fixture.zip',
+            phaseTimings: [
+                {
+                    phase: 'prepare-mdx:convert-entries',
+                    elapsedMs: 12,
+                    details: {
+                        ok: true,
+                        count: 1,
+                    },
+                },
+            ],
+        });
+        expect(progressEvents).toStrictEqual([
+            {stage: 'upload', completed: 4, total: 7},
+            {stage: 'upload', completed: 7, total: 7},
+            {stage: 'convert', completed: 1, total: 2},
+        ]);
+        expect(worker?.terminate).toHaveBeenCalledTimes(1);
+    });
 });
 
 describe('DictionaryWorker MDX import integration', () => {
