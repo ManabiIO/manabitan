@@ -334,6 +334,49 @@ describe('TermRecordOpfsStore', () => {
         expect(index.pair.get('日本\u001fにっぽん')).toEqual([2]);
     });
 
+    test('dictionary indexes skip duplicate reading keys when reading equals expression', () => {
+        const store = new TermRecordOpfsStore();
+        const storeRecord = /** @type {(record: unknown) => void} */ (Reflect.get(store, '_storeRecord').bind(store));
+        storeRecord({
+            id: 1,
+            dictionary: 'JMdict',
+            expression: 'ヽ',
+            reading: 'ヽ',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+        storeRecord({
+            id: 2,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 4,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+
+        const index = store.getDictionaryIndex('JMdict');
+        expect(index.expression.get('ヽ')).toEqual([1]);
+        expect(index.reading.get('ヽ')).toBeUndefined();
+        expect(index.expression.get('日本')).toEqual([2]);
+        expect(index.reading.get('にほん')).toEqual([2]);
+
+        store.ensureDictionaryReverseIndex('JMdict', index);
+        expect(index.expressionReverse.get('ヽ')).toEqual([1]);
+        expect(index.readingReverse.get('ヽ')).toBeUndefined();
+        expect(index.expressionReverse.get('本日')).toEqual([2]);
+        expect(index.readingReverse.get('んほに')).toEqual([2]);
+    });
+
     test('lazy shard metadata scan prevents cold append id collisions', async () => {
         const sourceStore = new TermRecordOpfsStore();
         const sourceFileBytesByName = new Map();

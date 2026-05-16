@@ -3988,12 +3988,10 @@ export class TermRecordOpfsStore {
                 expressionReverseList.push(record.id);
             }
         }
-        if (record.readingReverse === null || typeof record.readingReverse === 'undefined') {
-            record.readingReverse = reading === expression ?
-                record.expressionReverse :
-                this._reverseString(reading);
+        if (reading !== expression && (record.readingReverse === null || typeof record.readingReverse === 'undefined')) {
+            record.readingReverse = this._reverseString(reading);
         }
-        if (record.readingReverse !== null) {
+        if (reading !== expression && record.readingReverse !== null) {
             const readingReverseList = index.readingReverse.get(record.readingReverse);
             if (typeof readingReverseList === 'undefined') {
                 index.readingReverse.set(record.readingReverse, [record.id]);
@@ -4018,11 +4016,13 @@ export class TermRecordOpfsStore {
             expressionList.push(record.id);
         }
 
-        const readingList = index.reading.get(reading);
-        if (typeof readingList === 'undefined') {
-            index.reading.set(reading, [record.id]);
-        } else {
-            readingList.push(record.id);
+        if (reading !== expression) {
+            const readingList = index.reading.get(reading);
+            if (typeof readingList === 'undefined') {
+                index.reading.set(reading, [record.id]);
+            } else {
+                readingList.push(record.id);
+            }
         }
         if (this._reverseIndexReady.has(index)) {
             this._addRecordReverseToDictionaryIndex(index, record);
