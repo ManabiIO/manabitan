@@ -93,6 +93,13 @@ class FakeWorker {
             listener(/** @type {ErrorEvent} */ (/** @type {unknown} */ ({message})));
         }
     }
+
+    /** */
+    emitMessageError() {
+        for (const listener of this._listeners.messageerror) {
+            listener(/** @type {MessageEvent} */ (/** @type {unknown} */ ({data: null})));
+        }
+    }
 }
 
 afterEach(() => {
@@ -183,6 +190,65 @@ describe('Mdx conversion worker client', () => {
             {stage: 'convert', completed: 1, total: 2},
         ]);
         expect(worker?.terminate).toHaveBeenCalledTimes(1);
+    });
+
+    test('clears active state when worker startup or message transfer fails', async () => {
+        vi.stubGlobal('Worker', vi.fn(() => {
+            throw new Error('worker blocked');
+        }));
+
+        const startupFailureMdx = new Mdx();
+        await expect(startupFailureMdx.convertDictionary({
+            mdxFile: new File([createBytes(4, 3)], 'fixture.mdx'),
+        })).rejects.toThrow('worker blocked');
+        expect(startupFailureMdx.isActive()).toBe(false);
+
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn((url, options) => {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const messageFailureMdx = new Mdx();
+        const invocationPromise = messageFailureMdx.convertDictionary({
+            mdxFile: new File([createBytes(4, 3)], 'fixture.mdx'),
+        });
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+        workerInstances[0]?.emitMessageError();
+
+        await expect(invocationPromise).rejects.toThrow('MDX conversion worker message deserialization failed');
+        expect(messageFailureMdx.isActive()).toBe(false);
+        expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
+    });
+
+    test('fails instead of hanging when worker sends malformed protocol data', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn((url, options) => {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const mdx = new Mdx();
+        const invocationPromise = mdx.convertDictionary({
+            mdxFile: new File([createBytes(4, 3)], 'fixture.mdx'),
+        });
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+        workerInstances[0]?.emitMessage({
+            action: 'progress',
+            params: {details: {stage: 'convert', completed: Number.NaN, total: 1}},
+        });
+
+        await expect(invocationPromise).rejects.toThrow('MDX conversion worker returned malformed message');
+        expect(mdx.isActive()).toBe(false);
+        expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
     });
 });
 

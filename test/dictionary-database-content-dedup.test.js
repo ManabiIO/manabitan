@@ -144,6 +144,13 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
                 };
             }),
         });
+        const getMetaOriginal = /** @type {(this: DictionaryDatabase, hash1: number, hash2: number) => unknown} */ (
+            Reflect.get(database, '_getTermEntryContentMetaByHashPair')
+        );
+        const getMetaSpy = vi.fn(function (hash1, hash2) {
+            return getMetaOriginal.call(database, hash1, hash2);
+        });
+        Reflect.set(database, '_getTermEntryContentMetaByHashPair', getMetaSpy);
 
         const bulkAddArtifactTermsChunkWithContentDedup = /** @type {(this: DictionaryDatabase, chunk: unknown) => Promise<void>} */ (
             Reflect.get(database, '_bulkAddArtifactTermsChunkWithContentDedup')
@@ -181,6 +188,8 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         ));
 
         expect(appendCalls).toHaveLength(1);
+        expect(getMetaSpy).not.toHaveBeenCalled();
+        expect(getMeta(database, 10, 20)).toMatchObject({offset: termRecordCalls[0].contentOffsets[0], length: 3});
         expect(termRecordCalls).toHaveLength(2);
         expect(termRecordCalls[0].contentOffsets[0]).toBe(termRecordCalls[0].contentOffsets[1]);
         expect(termRecordCalls[0].contentLengths).toEqual([3, 3, 2]);

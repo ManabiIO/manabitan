@@ -563,6 +563,14 @@ export class TextScanner extends EventDispatcher {
                 this._themeController = new ThemeController(document.documentElement);
                 const pageTheme = this._themeController.computeSiteTheme();
 
+                this._updateDebugState({
+                    scannerSearchDurationMs: Math.round(safePerformance.now() - searchStartedAt),
+                    scannerSearchContextDurationMs: Math.round(contextDurationMs),
+                    scannerFindDurationMs: Math.round(findDurationMs),
+                    scannerSearchResultCount: dictionaryEntries.length,
+                    scannerSearchType: type,
+                    scannerSearchTextSample: this.getTextSourceContent(textSource, Math.min(this._scanLength, 24), this._layoutAwareScan, optionsContext.pointerType).slice(0, 24),
+                });
                 this.trigger('searchSuccess', {
                     type,
                     dictionaryEntries,
@@ -573,19 +581,10 @@ export class TextScanner extends EventDispatcher {
                     detail,
                     pageTheme,
                 });
-                this._updateDebugState({
-                    scannerSearchDurationMs: Math.round(safePerformance.now() - searchStartedAt),
-                    scannerSearchContextDurationMs: Math.round(contextDurationMs),
-                    scannerFindDurationMs: Math.round(findDurationMs),
-                    scannerSearchResultCount: dictionaryEntries.length,
-                    scannerSearchType: type,
-                    scannerSearchTextSample: this.getTextSourceContent(textSource, Math.min(this._scanLength, 24), this._layoutAwareScan, optionsContext.pointerType).slice(0, 24),
-                });
                 safePerformance.mark('scanner:_search:end');
                 safePerformance.measure('scanner:_search', 'scanner:_search:start', 'scanner:_search:end');
                 return true;
             } else {
-                this._triggerSearchEmpty(inputInfo);
                 this._updateDebugState({
                     scannerSearchDurationMs: Math.round(safePerformance.now() - searchStartedAt),
                     scannerSearchContextDurationMs: Math.round(contextDurationMs),
@@ -594,6 +593,7 @@ export class TextScanner extends EventDispatcher {
                     scannerSearchType: 'empty',
                     scannerSearchTextSample: this.getTextSourceContent(textSource, Math.min(this._scanLength, 24), this._layoutAwareScan, optionsContext.pointerType).slice(0, 24),
                 });
+                this._triggerSearchEmpty(inputInfo);
                 safePerformance.mark('scanner:_search:end');
                 safePerformance.measure('scanner:_search', 'scanner:_search:start', 'scanner:_search:end');
                 return false;

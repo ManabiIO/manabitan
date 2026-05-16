@@ -19,6 +19,156 @@ import {describe, expect, test, vi} from 'vitest';
 import {Frontend} from '../ext/js/app/frontend.js';
 
 describe('Frontend dictionary update handling', () => {
+    test('hover lookup prewarm marks ready after the first dictionary hit before all probes finish', async () => {
+        /** @type {(value: Array<{term: string, dictionaryEntries: Array<{dictionary: string}>}>) => void} */
+        let resolveResults = () => {};
+        const resultsPromise = new Promise((resolve) => {
+            resolveResults = resolve;
+        });
+        const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
+        const updatePageDebugState = vi.fn();
+        Reflect.set(frontend, '_options', {general: {enable: true}});
+        Reflect.set(frontend, '_textScanner', {isEnabled: vi.fn(() => true)});
+        Reflect.set(frontend, '_getOptionsContext', vi.fn().mockResolvedValue({}));
+        Reflect.set(frontend, '_getInitialLookupPrewarmTerms', vi.fn(() => ['日本', 'する']));
+        Reflect.set(frontend, '_getDictionaryLookupPrewarmTerms', vi.fn().mockResolvedValue(['ある']));
+        Reflect.set(frontend, '_runLookupPrewarmTerms', vi.fn(() => ({
+            firstMatchedResultPromise: Promise.resolve({term: '日本', dictionaryEntries: [{dictionary: 'JMdict'}]}),
+            resultsPromise,
+        })));
+        Reflect.set(frontend, '_popupPrewarmPromise', null);
+        Reflect.set(frontend, '_prewarmPopupContentForHover', vi.fn().mockResolvedValue(void 0));
+        Reflect.set(frontend, '_updatePageDebugState', updatePageDebugState);
+
+        const prewarmPromise = Reflect.get(Frontend.prototype, '_prewarmLookupForHover').call(frontend);
+        await vi.waitFor(() => {
+            expect(updatePageDebugState).toHaveBeenCalledWith(expect.objectContaining({
+                lookupPrewarmReady: true,
+                lookupPrewarmSettled: true,
+                lookupPrewarmMatchedTerm: '日本',
+                lookupPrewarmResultCount: 1,
+            }));
+        });
+        expect(updatePageDebugState).not.toHaveBeenCalledWith(expect.objectContaining({
+            lookupPrewarmAllSettled: true,
+        }));
+
+        resolveResults([
+            {term: '日本', dictionaryEntries: [{dictionary: 'JMdict'}]},
+            {term: 'する', dictionaryEntries: []},
+        ]);
+        await prewarmPromise;
+        expect(updatePageDebugState).toHaveBeenCalledWith(expect.objectContaining({
+            lookupPrewarmAllSettled: true,
+            lookupPrewarmResultCount: 1,
+            lookupPrewarmAllWaitMs: expect.any(Number),
+        }));
+        expect(Reflect.get(frontend, '_getDictionaryLookupPrewarmTerms')).not.toHaveBeenCalled();
+    });
+
+    test('hover lookup prewarm bounds slow dictionary probe collection', async () => {
+        vi.useFakeTimers();
+        try {
+            const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
+            Reflect.set(frontend, '_getPageLookupPrewarmTerms', vi.fn(() => ['吾輩']));
+            Reflect.set(frontend, '_application', {
+                api: {
+                    getDictionaryTermProbe: vi.fn((name) => (
+                        name === 'fast' ?
+                            Promise.resolve({expression: '速い', reading: 'はやい'}) :
+                            new Promise(() => {})
+                    )),
+                },
+            });
+
+            const getLookupPrewarmTerms = Reflect.get(Frontend.prototype, '_getLookupPrewarmTerms');
+            const termsPromise = getLookupPrewarmTerms.call(frontend, {
+                dictionaries: [
+                    {name: 'fast', enabled: true},
+                    {name: 'slow', enabled: true},
+                    {name: 'disabled', enabled: false},
+                ],
+            });
+
+            await vi.advanceTimersByTimeAsync(125);
+            await expect(termsPromise).resolves.toEqual(['吾輩', '日本', 'する', 'ある', '見る', '速い', 'はやい']);
+            expect(Reflect.get(frontend, '_application').api.getDictionaryTermProbe).toHaveBeenCalledTimes(2);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    test('hover lookup dictionary prewarm limits backend probe fanout', async () => {
+        vi.useFakeTimers();
+        try {
+            const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
+            Reflect.set(frontend, '_application', {
+                api: {
+                    getDictionaryTermProbe: vi.fn(() => new Promise(() => {})),
+                },
+            });
+
+            const getDictionaryLookupPrewarmTerms = Reflect.get(Frontend.prototype, '_getDictionaryLookupPrewarmTerms');
+            const termsPromise = getDictionaryLookupPrewarmTerms.call(frontend, {
+                dictionaries: [
+                    {name: 'dict-1', enabled: true},
+                    {name: 'dict-2', enabled: true},
+                    {name: 'dict-3', enabled: true},
+                    {name: 'dict-4', enabled: true},
+                    {name: 'dict-5', enabled: true},
+                    {name: 'disabled', enabled: false},
+                ],
+            });
+
+            for (let i = 0; i < 4; ++i) {
+                await vi.advanceTimersByTimeAsync(125);
+            }
+            await expect(termsPromise).resolves.toEqual([]);
+            expect(Reflect.get(frontend, '_application').api.getDictionaryTermProbe).toHaveBeenCalledTimes(4);
+            expect(Reflect.get(frontend, '_application').api.getDictionaryTermProbe.mock.calls.map(([name]) => name)).toEqual([
+                'dict-1',
+                'dict-2',
+                'dict-3',
+                'dict-4',
+            ]);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    test('hover lookup prewarm falls back to dictionary probes only when initial terms miss', async () => {
+        const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
+        const updatePageDebugState = vi.fn();
+        Reflect.set(frontend, '_options', {general: {enable: true}});
+        Reflect.set(frontend, '_textScanner', {isEnabled: vi.fn(() => true)});
+        Reflect.set(frontend, '_getOptionsContext', vi.fn().mockResolvedValue({}));
+        Reflect.set(frontend, '_getInitialLookupPrewarmTerms', vi.fn(() => ['外れ']));
+        Reflect.set(frontend, '_getDictionaryLookupPrewarmTerms', vi.fn().mockResolvedValue(['日本']));
+        Reflect.set(frontend, '_popupPrewarmPromise', null);
+        Reflect.set(frontend, '_prewarmPopupContentForHover', vi.fn().mockResolvedValue(void 0));
+        Reflect.set(frontend, '_updatePageDebugState', updatePageDebugState);
+        const termsFind = vi.fn(async (term) => ({
+            dictionaryEntries: term === '日本' ? [{dictionary: 'JMdict'}] : [],
+        }));
+        Reflect.set(frontend, '_application', {
+            api: {
+                termsFind,
+            },
+        });
+
+        await Reflect.get(Frontend.prototype, '_prewarmLookupForHover').call(frontend);
+
+        expect(termsFind).toHaveBeenCalledTimes(2);
+        expect(termsFind.mock.calls.map(([term]) => term)).toEqual(['外れ', '日本']);
+        expect(Reflect.get(frontend, '_getDictionaryLookupPrewarmTerms')).toHaveBeenCalledOnce();
+        expect(updatePageDebugState).toHaveBeenCalledWith(expect.objectContaining({
+            lookupPrewarmReady: true,
+            lookupPrewarmMatchedTerm: '日本',
+            lookupPrewarmResultCount: 1,
+            lookupPrewarmTermCount: 2,
+        }));
+    });
+
     test('hover lookup prewarm stops scheduling probes after the first dictionary hit', async () => {
         const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
         const calls = [];
@@ -42,25 +192,18 @@ describe('Frontend dictionary update handling', () => {
         const runLookupPrewarmTerms = Reflect.get(Frontend.prototype, '_runLookupPrewarmTerms');
         const {firstMatchedResultPromise, resultsPromise} = runLookupPrewarmTerms.call(frontend, ['日本', 'する', 'ある', '見る', '食べる'], {});
 
-        expect(calls).toEqual(['日本', 'する', 'ある', '見る']);
+        expect(calls).toEqual(['日本']);
         resolvers[0]();
         const firstMatchedResult = await firstMatchedResultPromise;
         expect(firstMatchedResult).toEqual({term: '日本', dictionaryEntries: [{dictionary: 'JMdict'}]});
-        for (let i = 1; i < resolvers.length; ++i) {
-            resolvers[i]();
-        }
         const results = await resultsPromise;
 
-        expect(calls).toEqual(['日本', 'する', 'ある', '見る', '食べる']);
+        expect(calls).toEqual(['日本']);
         expect(detailsCalls).toEqual([
             {skipLookupWarmWait: true},
-            {skipLookupWarmWait: true},
-            {skipLookupWarmWait: true},
-            {skipLookupWarmWait: true},
-            {skipLookupWarmWait: true},
         ]);
-        expect(results).toHaveLength(5);
-        expect(Reflect.get(frontend, '_application').api.termsFind).toHaveBeenCalledTimes(5);
+        expect(results).toHaveLength(1);
+        expect(Reflect.get(frontend, '_application').api.termsFind).toHaveBeenCalledTimes(1);
     });
 
     test('options updates rerun the active hover lookup and do not clear state on success', async () => {

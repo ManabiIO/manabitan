@@ -2554,6 +2554,10 @@ export class DictionaryImportController {
      * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
     async _importDictionaryFromMdx(source, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress) {
+        if (typeof importRunGeneration === 'function' && typeof onProgress === 'undefined') {
+            onProgress = importRunGeneration;
+            importRunGeneration = this._activeImportRunGeneration;
+        }
         const dictionaryTitle = source.mdxFile.name || 'unknown-dictionary.mdx';
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
@@ -2638,6 +2642,10 @@ export class DictionaryImportController {
      * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
     async _importDictionaryFromZip(file, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress) {
+        if (typeof importRunGeneration === 'function' && typeof onProgress === 'undefined') {
+            onProgress = importRunGeneration;
+            importRunGeneration = this._activeImportRunGeneration;
+        }
         const dictionaryTitle = file.name || 'unknown-dictionary';
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
@@ -2701,6 +2709,10 @@ export class DictionaryImportController {
      * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
     async _importDictionaryFromUrl(downloadUrl, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress) {
+        if (typeof importRunGeneration === 'function' && typeof onProgress === 'undefined') {
+            onProgress = importRunGeneration;
+            importRunGeneration = this._activeImportRunGeneration;
+        }
         const dictionaryTitle = downloadUrl;
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
@@ -2990,7 +3002,11 @@ export class DictionaryImportController {
 
             for (const profile of profiles) {
                 const profileDictionarySettings = profilesDictionarySettings[profile.id];
-                const profileDictionarySetting = Array.isArray(profileDictionarySettings) ? profileDictionarySettings[0] : null;
+                const profileDictionarySetting = (
+                    Array.isArray(profileDictionarySettings) ?
+                        profileDictionarySettings[0] :
+                        /** @type {import('settings').DictionaryOptions|null} */ (profileDictionarySettings ?? null)
+                );
                 if (!(profileDictionarySetting && typeof profileDictionarySetting.name === 'string' && profileDictionarySetting.name.length > 0)) {
                     skippedProfileCount += 1;
                     continue;

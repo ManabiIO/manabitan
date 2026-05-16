@@ -233,6 +233,22 @@ function summarizeDurationsMs(values) {
     };
 }
 
+function getFreshScannerSearchDurationMs(timing, maxDurationMs = Number.POSITIVE_INFINITY) {
+    const attempt = timing?.lastAttempt;
+    const before = attempt?.hostDebugBeforePointerMove;
+    const after = attempt?.hostDebugAfterPopupContent ?? attempt?.hostDebugAfterPopupFrame;
+    const beforeSuccessCount = Number(before?.manabitanSearchSuccessCount ?? 0);
+    const afterSuccessCount = Number(after?.manabitanSearchSuccessCount ?? 0);
+    if (!Number.isFinite(afterSuccessCount) || afterSuccessCount <= beforeSuccessCount) {
+        return null;
+    }
+    const durationMs = Number(after?.manabitanScannerSearchDurationMs);
+    if (!Number.isFinite(durationMs) || durationMs > maxDurationMs) {
+        return null;
+    }
+    return durationMs;
+}
+
 function formatMemoryMb(value) {
     return `${value.toFixed(1)} MB`;
 }
@@ -2400,23 +2416,29 @@ async function waitForVisiblePopupFrameHandle(page, timeoutMs = 6000) {
         const frameHandles = await page.$$('iframe.yomitan-popup');
         for (const frameHandle of frameHandles) {
             fallbackFrameHandle = frameHandle;
-            const box = await frameHandle.boundingBox();
-            const isRenderedVisible = await frameHandle.evaluate((frame) => {
-                const style = getComputedStyle(frame);
-                return (
-                    style.visibility !== 'hidden' &&
-                    style.display !== 'none' &&
-                    Number.parseFloat(style.opacity || '1') > 0 &&
-                    frame.hidden !== true
-                );
-            });
-            if (box !== null && box.width > 0 && box.height > 0 && isRenderedVisible) {
+            if (await isPopupFrameHandleVisible(frameHandle)) {
                 return frameHandle;
             }
         }
         await page.waitForTimeout(80);
     }
     return fallbackFrameHandle;
+}
+
+async function isPopupFrameHandleVisible(frameHandle) {
+    const box = await frameHandle.boundingBox();
+    if (box === null || box.width <= 0 || box.height <= 0) {
+        return false;
+    }
+    return await frameHandle.evaluate((frame) => {
+        const style = getComputedStyle(frame);
+        return (
+            style.visibility !== 'hidden' &&
+            style.display !== 'none' &&
+            Number.parseFloat(style.opacity || '1') > 0 &&
+            frame.hidden !== true
+        );
+    });
 }
 
 async function getPageFrontendDebugState(page) {
@@ -2485,6 +2507,24 @@ async function waitForPopupContentState(popupFrame, timeoutMs = 5000) {
     throw new Error(`Timed out waiting ${timeoutMs}ms for popup content state`);
 }
 
+async function getPopupContentDebugState(popupFrame) {
+    return await popupFrame.evaluate(() => {
+        const entriesNode = document.querySelector('#dictionary-entries');
+        const noResultsNode = document.querySelector('#no-results');
+        const noDictionariesNode = document.querySelector('#no-dictionaries');
+        return {
+            readyState: document.readyState,
+            location: location.href,
+            bodyTextPreview: (document.body?.textContent || '').replaceAll(/\s+/g, ' ').trim().slice(0, 240),
+            hasDictionaryEntriesNode: entriesNode instanceof HTMLElement,
+            dictionaryEntriesHidden: entriesNode instanceof HTMLElement ? entriesNode.hidden : null,
+            dictionaryEntriesTextLength: entriesNode instanceof HTMLElement ? (entriesNode.textContent || '').trim().length : null,
+            noResultsHidden: noResultsNode instanceof HTMLElement ? noResultsNode.hidden : null,
+            noDictionariesHidden: noDictionariesNode instanceof HTMLElement ? noDictionariesNode.hidden : null,
+        };
+    });
+}
+
 async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) {
     const timing = {};
     let markStart = safePerformance.now();
@@ -2549,6 +2589,7 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
         try {
             for (let attempt = 0; attempt < 3; ++attempt) {
                 const attemptTiming = {attempt: attempt + 1};
+                attemptTiming.hostDebugBeforePointerMove = await getPageFrontendDebugState(page);
                 let attemptMarkStart = safePerformance.now();
                 await page.mouse.move(resetX, hoverY, {steps: moveAwaySteps});
                 await page.waitForTimeout(settleDelayMs);
@@ -2562,6 +2603,12 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
                     timing.lastAttempt = attemptTiming;
                     continue;
                 }
+                if (!await isPopupFrameHandleVisible(popupFrameHandle)) {
+                    attemptTiming.popupFrameVisible = false;
+                    timing.lastAttempt = attemptTiming;
+                    continue;
+                }
+                attemptTiming.popupFrameVisible = true;
                 attemptMarkStart = safePerformance.now();
                 const popupFrame = await popupFrameHandle.contentFrame();
                 attemptTiming.contentFrameMs = Math.max(0, safePerformance.now() - attemptMarkStart);
@@ -2570,7 +2617,14 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
                     continue;
                 }
                 attemptMarkStart = safePerformance.now();
-                await waitForPopupContentState(popupFrame, 5000);
+                try {
+                    await waitForPopupContentState(popupFrame, 5000);
+                } catch (e) {
+                    attemptTiming.popupSelectorWaitError = e instanceof Error ? e.message : `${e}`;
+                    attemptTiming.popupContentDebugState = await getPopupContentDebugState(popupFrame);
+                    timing.lastAttempt = attemptTiming;
+                    continue;
+                }
                 attemptTiming.popupSelectorWaitMs = Math.max(0, safePerformance.now() - attemptMarkStart);
                 attemptTiming.hostDebugAfterPopupContent = await getPageFrontendDebugState(page);
                 attemptMarkStart = safePerformance.now();
@@ -4514,9 +4568,7 @@ async function main() {
                     }
                     const durationSummary = summarizeDurationsMs(iterations.map(({durationMs}) => durationMs));
                     const steadyDurationSummary = summarizeDurationsMs(iterations.slice(1).map(({durationMs}) => durationMs));
-                    const scannerSearchDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
-                        Number(timing?.lastAttempt?.hostDebugAfterPopupFrame?.manabitanScannerSearchDurationMs)
-                    )));
+                    const scannerSearchDurationSummary = summarizeDurationsMs(iterations.map(({durationMs, timing}) => getFreshScannerSearchDurationMs(timing, durationMs)));
                     const popupShowDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
                         Number(timing?.lastAttempt?.hostDebugAfterPopupFrame?.manabitanPopupShowDurationMs)
                     )));
@@ -4609,9 +4661,7 @@ async function main() {
                         await page.waitForTimeout(80);
                     }
                     const durationSummary = summarizeDurationsMs(iterations.map(({durationMs}) => durationMs));
-                    const scannerSearchDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
-                        Number(timing?.lastAttempt?.hostDebugAfterPopupFrame?.manabitanScannerSearchDurationMs)
-                    )));
+                    const scannerSearchDurationSummary = summarizeDurationsMs(iterations.map(({durationMs, timing}) => getFreshScannerSearchDurationMs(timing, durationMs)));
                     const popupShowDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
                         Number(timing?.lastAttempt?.hostDebugAfterPopupFrame?.manabitanPopupShowDurationMs)
                     )));

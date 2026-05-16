@@ -265,6 +265,8 @@ class MddAssetResolver {
         this._recordsLowercase = new Map();
         /** @type {string[]} */
         this._cssKeys = [];
+        /** @type {number} */
+        this._lookupErrorCount = 0;
 
         try {
             for (const {name, bytes} of mddSources) {
@@ -306,13 +308,25 @@ class MddAssetResolver {
     }
 
     /**
+     * @returns {number}
+     */
+    get lookupErrorCount() {
+        return this._lookupErrorCount;
+    }
+
+    /**
      * @param {string} key
      * @returns {Uint8Array|null}
      */
     getBytes(key) {
         const entry = this._records.get(key) ?? this._recordsLowercase.get(key.toLowerCase());
         if (typeof entry === 'undefined') { return null; }
-        return this._dictionaries[entry.dictionaryIndex]?.lookupRecordByKeyBlock(entry.item) ?? null;
+        try {
+            return this._dictionaries[entry.dictionaryIndex]?.lookupRecordByKeyBlock(entry.item) ?? null;
+        } catch (_error) {
+            this._lookupErrorCount += 1;
+            return null;
+        }
     }
 
     /** */
@@ -324,6 +338,7 @@ class MddAssetResolver {
         this._records.clear();
         this._recordsLowercase.clear();
         this._cssKeys = [];
+        this._lookupErrorCount = 0;
     }
 }
 
@@ -927,6 +942,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         let sequence = 0;
         let processedEntries = 0;
         let redirectCount = 0;
+        let skippedEntryErrorCount = 0;
         let jsonEncodeMs = 0;
 
         /**
@@ -951,10 +967,19 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         const tConvertEntriesStart = Date.now();
         for (const item of mdx.keywordList) {
             const term = trimNullSuffix(item.keyText);
-            const result = mdx.fetch_definition(item);
-            const definition = trimNullSuffix(result.definition ?? '');
             processedEntries += 1;
             if (term.length === 0) {
+                if (typeof onProgress === 'function') {
+                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
+                }
+                continue;
+            }
+            let definition;
+            try {
+                const result = mdx.fetch_definition(item);
+                definition = trimNullSuffix(result.definition ?? '');
+            } catch (_error) {
+                skippedEntryErrorCount += 1;
                 if (typeof onProgress === 'function') {
                     onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
                 }
@@ -976,7 +1001,16 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 continue;
             }
 
-            const converted = convertDefinitionToStructuredContent(definition, {enableAudio, assetPrefix});
+            let converted;
+            try {
+                converted = convertDefinitionToStructuredContent(definition, {enableAudio, assetPrefix});
+            } catch (_error) {
+                skippedEntryErrorCount += 1;
+                if (typeof onProgress === 'function') {
+                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
+                }
+                continue;
+            }
             for (const [path, bytes] of converted.embeddedAssets) {
                 if (!embeddedAssets.has(path)) {
                     embeddedAssets.set(path, bytes);
@@ -1001,7 +1035,17 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             referencedAssetCount: referencedAssetKeys.size,
             inlineStylesheetCount: inlineStylesheets.length,
             embeddedAssetCount: embeddedAssets.size,
+            skippedEntryErrorCount,
         });
+        if (
+            mdx.keywordList.length > 0 &&
+            convertedEntries.length === 0
+        ) {
+            if (skippedEntryErrorCount > 0) {
+                throw new Error(`MDX import failed: all ${skippedEntryErrorCount} non-empty entr${skippedEntryErrorCount === 1 ? 'y was' : 'ies were'} corrupt or unsupported`);
+            }
+            throw new Error('MDX import failed: no usable non-redirect entries were found');
+        }
 
         const tEncodeBanksStart = Date.now();
         let bankIndex = 1;
@@ -1085,6 +1129,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             cssReferencedAssetCount: cssReferencedAssetKeys.size,
             embeddedAssetCount: embeddedAssets.size,
             materializedReferencedAssetCount,
+            assetLookupErrorCount: assetResolver?.lookupErrorCount ?? 0,
             hasRootStylesheet: rootStylesheet !== null,
         });
         if (typeof onProgress === 'function') {

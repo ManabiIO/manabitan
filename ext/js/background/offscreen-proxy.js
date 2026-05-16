@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
@@ -354,7 +355,14 @@ export class DictionaryRuntimeWorkerProxy {
         const id = typeof event.data?.id === 'number' ? event.data.id : null;
         if (id === null) { return; }
         const handler = this._responseHandlers.get(id);
-        if (typeof handler === 'undefined') { return; }
+        if (typeof handler === 'undefined') {
+            reportDiagnostics('offscreen-proxy-unmatched-response', {
+                reason: 'unknown-id',
+                id,
+                hasError: typeof event.data?.error !== 'undefined',
+            });
+            return;
+        }
         this._responseHandlers.delete(id);
         if (typeof event.data?.error !== 'undefined') {
             handler.reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (event.data.error)));

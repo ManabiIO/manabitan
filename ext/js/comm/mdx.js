@@ -102,7 +102,9 @@ function parseWorkerMessage(value) {
             if (
                 (stage !== 'upload' && stage !== 'convert' && stage !== 'download') ||
                 typeof completed !== 'number' ||
-                typeof total !== 'number'
+                typeof total !== 'number' ||
+                !Number.isFinite(completed) ||
+                !Number.isFinite(total)
             ) {
                 return null;
             }
@@ -231,7 +233,14 @@ export class Mdx {
         this._active = true;
 
         return await new Promise((resolve, reject) => {
-            const worker = new Worker('/js/dictionary/mdx-worker-main.js', {type: 'module'});
+            let worker;
+            try {
+                worker = new Worker('/js/dictionary/mdx-worker-main.js', {type: 'module'});
+            } catch (e) {
+                this._active = false;
+                reject(e instanceof Error ? e : new Error(String(e)));
+                return;
+            }
             this._worker = worker;
 
             /**
@@ -244,7 +253,10 @@ export class Mdx {
 
             worker.addEventListener('message', (event) => {
                 const message = parseWorkerMessage(event.data);
-                if (message === null) { return; }
+                if (message === null) {
+                    fail(new Error('MDX conversion worker returned malformed message'));
+                    return;
+                }
                 switch (message.action) {
                     case 'progress': {
                         if (typeof onProgress === 'function') {
@@ -273,6 +285,9 @@ export class Mdx {
             });
             worker.addEventListener('error', /** @param {ErrorEvent} event */ (event) => {
                 fail(new Error(event.message || 'MDX conversion worker failed'));
+            });
+            worker.addEventListener('messageerror', () => {
+                fail(new Error('MDX conversion worker message deserialization failed'));
             });
             try {
                 /** @type {MdxWorkerConvertParams} */

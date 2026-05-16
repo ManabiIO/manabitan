@@ -4600,6 +4600,11 @@ export class DictionaryDatabase {
             const pendingHash1Table = new Uint32Array(pendingHashTableSize);
             const pendingHash2Table = new Uint32Array(pendingHashTableSize);
             const pendingIndexTable = new Uint32Array(pendingHashTableSize);
+            const existingMetaHash1Table = this._termEntryContentMetaHash1Table;
+            const existingMetaHash2Table = this._termEntryContentMetaHash2Table;
+            const existingMetaTable = this._termEntryContentMetaHashPairTable;
+            const existingMetaMask = this._termEntryContentMetaHashPairMask;
+            const existingMetaCount = this._termEntryContentMetaHashPairCount;
             /**
              * @param {number} hash1
              * @param {number} hash2
@@ -4615,16 +4620,12 @@ export class DictionaryDatabase {
              * @param {number} hash2
              * @returns {number}
              */
-            const findOrInsertPendingContentIndex = (hash1, hash2) => {
+            const findPendingContentIndex = (hash1, hash2) => {
                 let slot = getPendingHashSlot(hash1, hash2);
                 while (true) {
                     const storedIndex = pendingIndexTable[slot];
                     if (storedIndex === 0) {
-                        const pendingIndex = pendingContentBytes.length;
-                        pendingHash1Table[slot] = hash1;
-                        pendingHash2Table[slot] = hash2;
-                        pendingIndexTable[slot] = pendingIndex + 1;
-                        return ~pendingIndex;
+                        return -1;
                     }
                     if (pendingHash1Table[slot] === hash1 && pendingHash2Table[slot] === hash2) {
                         return storedIndex - 1;
@@ -4632,6 +4633,42 @@ export class DictionaryDatabase {
                     slot = (slot + 1) & pendingHashTableMask;
                 }
             };
+            /**
+             * @param {number} hash1
+             * @param {number} hash2
+             * @returns {number}
+             */
+            const insertPendingContentIndex = (hash1, hash2) => {
+                let slot = getPendingHashSlot(hash1, hash2);
+                while (true) {
+                    if (pendingIndexTable[slot] === 0) {
+                        const pendingIndex = pendingContentBytes.length;
+                        pendingHash1Table[slot] = hash1;
+                        pendingHash2Table[slot] = hash2;
+                        pendingIndexTable[slot] = pendingIndex + 1;
+                        return pendingIndex;
+                    }
+                    slot = (slot + 1) & pendingHashTableMask;
+                }
+            };
+            /**
+             * @param {number} hash1
+             * @param {number} hash2
+             * @returns {{id: number, offset: number, length: number, dictName: string, hash2?: number}|undefined}
+             */
+            const findExistingContentMeta = existingMetaCount > 0 ? (hash1, hash2) => {
+                let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, existingMetaMask);
+                while (true) {
+                    const meta = existingMetaTable[slot];
+                    if (typeof meta === 'undefined') {
+                        return void 0;
+                    }
+                    if (existingMetaHash1Table[slot] === hash1 && existingMetaHash2Table[slot] === hash2) {
+                        return meta;
+                    }
+                    slot = (slot + 1) & existingMetaMask;
+                }
+            } : null;
             /** @type {Uint8Array[]} */
             const pendingContentBytes = [];
             /** @type {number[]} */
@@ -4662,7 +4699,12 @@ export class DictionaryDatabase {
             for (let i = 0; i < count; ++i) {
                 const hash1 = chunk.contentHash1List[i] >>> 0;
                 const hash2 = chunk.contentHash2List[i] >>> 0;
-                const existingMeta = this._getTermEntryContentMetaByHashPair(hash1, hash2);
+                const existingPendingIndex = findPendingContentIndex(hash1, hash2);
+                if (existingPendingIndex >= 0) {
+                    pendingRowToUniqueIndex[i] = existingPendingIndex;
+                    continue;
+                }
+                const existingMeta = findExistingContentMeta !== null ? findExistingContentMeta(hash1, hash2) : void 0;
                 if (typeof existingMeta !== 'undefined') {
                     contentOffsets[i] = existingMeta.offset;
                     contentLengths[i] = existingMeta.length;
@@ -4673,22 +4715,16 @@ export class DictionaryDatabase {
                     }
                     continue;
                 }
-                let pendingIndex = findOrInsertPendingContentIndex(hash1, hash2);
-                const isNewPendingContent = pendingIndex < 0;
-                if (isNewPendingContent) {
-                    pendingIndex = ~pendingIndex;
-                }
-                if (isNewPendingContent) {
-                    pendingContentBytes.push(chunk.contentBytesList[i]);
-                    pendingContentHash1s.push(hash1);
-                    pendingContentHash2s.push(hash2);
-                    if (pendingContentDictNames !== null) {
-                        pendingContentDictNames.push(
-                            explicitContentDictNames !== null ?
-                                (explicitContentDictNames[i] ?? null) :
-                                uniformContentDictName,
-                        );
-                    }
+                const pendingIndex = insertPendingContentIndex(hash1, hash2);
+                pendingContentBytes.push(chunk.contentBytesList[i]);
+                pendingContentHash1s.push(hash1);
+                pendingContentHash2s.push(hash2);
+                if (pendingContentDictNames !== null) {
+                    pendingContentDictNames.push(
+                        explicitContentDictNames !== null ?
+                            (explicitContentDictNames[i] ?? null) :
+                            uniformContentDictName,
+                    );
                 }
                 pendingRowToUniqueIndex[i] = pendingIndex;
             }
@@ -4712,6 +4748,10 @@ export class DictionaryDatabase {
                 this._ensureTermEntryContentMetaHashPairCapacity(
                     this._termEntryContentMetaHashPairCount + pendingContentBytes.length,
                 );
+                const cacheHash1Table = this._termEntryContentMetaHash1Table;
+                const cacheHash2Table = this._termEntryContentMetaHash2Table;
+                const cacheMetaTable = this._termEntryContentMetaHashPairTable;
+                const cacheMask = this._termEntryContentMetaHashPairMask;
                 for (let i = 0; i < count; ++i) {
                     const pendingIndex = pendingRowToUniqueIndex[i];
                     if (pendingIndex < 0) { continue; }
@@ -4730,15 +4770,31 @@ export class DictionaryDatabase {
                 }
                 for (let i = 0; i < pendingContentBytes.length; ++i) {
                     const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[i];
-                    this._cacheTermEntryContentMeta(
-                        null,
-                        storedOffsets[storedChunkIndex] + (storageChunks.entryToStoredChunkOffsets[i] ?? 0),
-                        pendingContentBytes[i].byteLength,
-                        pendingContentDictNames === null ? uniformContentDictName : storageChunks.contentDictNames[i],
-                        0,
-                        pendingContentHash1s[i],
-                        pendingContentHash2s[i],
-                    );
+                    const hash1 = pendingContentHash1s[i] >>> 0;
+                    const hash2 = pendingContentHash2s[i] >>> 0;
+                    const meta = {
+                        id: 0,
+                        offset: storedOffsets[storedChunkIndex] + (storageChunks.entryToStoredChunkOffsets[i] ?? 0),
+                        length: pendingContentBytes[i].byteLength,
+                        dictName: pendingContentDictNames === null ? (uniformContentDictName ?? 'raw') : (storageChunks.contentDictNames[i] ?? 'raw'),
+                        hash2,
+                    };
+                    let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, cacheMask);
+                    while (true) {
+                        const existingMeta = cacheMetaTable[slot];
+                        if (typeof existingMeta === 'undefined') {
+                            cacheHash1Table[slot] = hash1;
+                            cacheHash2Table[slot] = hash2;
+                            cacheMetaTable[slot] = meta;
+                            ++this._termEntryContentMetaHashPairCount;
+                            break;
+                        }
+                        if (cacheHash1Table[slot] === hash1 && cacheHash2Table[slot] === hash2) {
+                            cacheMetaTable[slot] = meta;
+                            break;
+                        }
+                        slot = (slot + 1) & cacheMask;
+                    }
                 }
             }
             contentAppendMs += safePerformance.now() - tContentAppendStart;

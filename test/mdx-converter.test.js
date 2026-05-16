@@ -490,6 +490,94 @@ describe('convertMdxToArchive', () => {
         expect(await readJson(emptyZip, 'term_bank_1.json')).toStrictEqual([]);
     });
 
+    test('skips corrupt MDX entries and optional MDD asset lookup failures without aborting import', async () => {
+        mockState.onFetchDefinition = (_fileName, keyText) => {
+            if (keyText === 'BadEntry') {
+                throw new Error('corrupt definition block');
+            }
+        };
+        mockState.onLookupRecord = (_fileName, keyText) => {
+            if (keyText === 'images/broken.png') {
+                throw new Error('corrupt asset block');
+            }
+        };
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Partial Corruption Fixture',
+                Description: '',
+            },
+            entries: [
+                {keyText: 'GoodEntry', definition: '<div><img src="images/good.png">ok</div>'},
+                {keyText: 'BadEntry', definition: '<div>bad</div>'},
+                {keyText: 'MissingAssetEntry', definition: '<div><img src="images/broken.png">kept</div>'},
+            ],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'images/good.png', value: Uint8Array.of(1, 2, 3)},
+            {keyText: 'images/broken.png', value: Uint8Array.of(4, 5, 6)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'partial-corruption.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'partial-corruption.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const convertPhase = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:convert-entries');
+        const assetPhase = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
+
+        expect(termBank.map(([expression]) => expression)).toStrictEqual(['GoodEntry', 'MissingAssetEntry']);
+        expect(await zip.file('mdict-media/images/good.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
+        expect(zip.file('mdict-media/images/broken.png')).toBeNull();
+        expect(convertPhase?.details).toMatchObject({skippedEntryErrorCount: 1});
+        expect(assetPhase?.details).toMatchObject({assetLookupErrorCount: 1});
+    });
+
+    test('rejects an all-corrupt non-empty MDX instead of producing an empty installed dictionary', async () => {
+        mockState.onFetchDefinition = () => {
+            throw new Error('corrupt definition block');
+        };
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'All Corrupt Fixture',
+                Description: '',
+            },
+            entries: [
+                {keyText: 'BrokenOne', definition: '<div>bad</div>'},
+                {keyText: 'BrokenTwo', definition: '<div>bad</div>'},
+            ],
+        });
+
+        await expect(convertMdxToArchive(
+            'all-corrupt.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        )).rejects.toThrow('MDX import failed: all 2 non-empty entries were corrupt or unsupported');
+    });
+
+    test('rejects non-empty MDX files with no usable target entries', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Redirect Only Fixture',
+                Description: '',
+            },
+            entries: [
+                {keyText: 'AliasOne', definition: '@@@LINK=MissingTarget'},
+                {keyText: 'AliasTwo', definition: '@@@LINK=MissingTarget'},
+            ],
+        });
+
+        await expect(convertMdxToArchive(
+            'redirect-only.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        )).rejects.toThrow('MDX import failed: no usable non-redirect entries were found');
+    });
+
     test('uses file-name fallback metadata and respects explicit overrides', async () => {
         mockState.mdxFactory = () => ({
             header: {

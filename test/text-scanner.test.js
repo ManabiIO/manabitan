@@ -159,6 +159,39 @@ describe('TextScanner lookup robustness', () => {
         expect(termsFindImpl.mock.calls[0][1]).toEqual({skipLookupWarmWait: true});
     });
 
+    test('search success handlers observe current scanner timing debug state', async () => {
+        const {dataset} = document.documentElement;
+        dataset.manabitanScannerSearchDurationMs = '9999';
+        dataset.manabitanScannerSearchType = 'stale';
+        dataset.manabitanScannerSearchResultCount = '0';
+        const termsFindImpl = vi.fn().mockResolvedValue({
+            dictionaryEntries: [createMockTermEntry()],
+            originalTextLength: 2,
+        });
+        const termsFind = /** @type {import('../ext/js/comm/api.js').API['termsFind']} */ (/** @type {unknown} */ (termsFindImpl));
+        const scanner = createScanner(termsFind, [createFakeTextSource('暗記')]);
+        const debugSnapshots = [];
+        scanner.on('searchSuccess', () => {
+            debugSnapshots.push({
+                durationMs: dataset.manabitanScannerSearchDurationMs,
+                resultCount: dataset.manabitanScannerSearchResultCount,
+                type: dataset.manabitanScannerSearchType,
+                textSample: dataset.manabitanScannerSearchTextSample,
+            });
+        });
+
+        await searchAt(scanner, 10, 10, createInputInfo());
+
+        expect(debugSnapshots).toHaveLength(1);
+        expect(debugSnapshots[0]).toMatchObject({
+            resultCount: '1',
+            type: 'terms',
+            textSample: '暗記',
+        });
+        expect(debugSnapshots[0].durationMs).not.toBe('9999');
+        expect(Number(debugSnapshots[0].durationMs)).toBeGreaterThanOrEqual(0);
+    });
+
     test('passive mousemove lookup flushes immediately after scan delay', async () => {
         vi.useFakeTimers();
         const scanner = /** @type {TextScanner} */ (/** @type {unknown} */ (Object.create(TextScanner.prototype)));
