@@ -50,6 +50,7 @@ export type FindTermsDetails = {
     deinflect?: boolean;
     primaryReading?: string;
     skipLookupWarmWait?: boolean;
+    waitForLookupWarm?: boolean;
 };
 
 export type ParseTextResultItem = {

@@ -100,7 +100,7 @@ export class TextScanner extends EventDispatcher {
         /** @type {?import('core').Timeout} */
         this._mouseMoveLookupTimer = null;
         /** @type {number} */
-        this._mouseMoveLookupCoalesceDelay = 35;
+        this._mouseMoveLookupCoalesceDelay = 12;
         /** @type {number} */
         this._lookupTimeoutMs = 10_000;
         /** @type {number} */
@@ -1328,7 +1328,7 @@ export class TextScanner extends EventDispatcher {
         if (searchText.length === 0) { return null; }
 
         /** @type {import('api').FindTermsDetails} */
-        const details = {};
+        const details = {skipLookupWarmWait: true};
         const searchTextPrimary = this._getPrimaryTermSearchText(searchText);
         let {dictionaryEntries, originalTextLength} = await this._api.termsFind(searchTextPrimary, details, optionsContext);
         if (dictionaryEntries.length === 0 && searchTextPrimary !== searchText) {
@@ -1511,6 +1511,7 @@ export class TextScanner extends EventDispatcher {
      * @param {import('text-scanner').InputInfo} inputInfo
      */
     async _searchAtFromMouseMove(x, y, inputInfo) {
+        const waitedForScanDelay = inputInfo.passive && this._delay > 0;
         if (inputInfo.passive && !await this._scanTimerWait()) {
             // Aborted
             return;
@@ -1519,6 +1520,11 @@ export class TextScanner extends EventDispatcher {
         this._queuedMouseMoveLookup = {x, y, inputInfo};
         if (this._mouseMoveLookupTimer !== null) {
             clearTimeout(this._mouseMoveLookupTimer);
+            this._mouseMoveLookupTimer = null;
+        }
+        if (waitedForScanDelay) {
+            this._flushQueuedMouseMoveLookup();
+            return;
         }
         this._mouseMoveLookupTimer = setTimeout(() => {
             this._mouseMoveLookupTimer = null;

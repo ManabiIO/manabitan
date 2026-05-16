@@ -80,6 +80,116 @@ describe('Backend database update deferral', () => {
         expect(Reflect.get(backend, '_pendingDatabaseUpdatedNotifications')).toStrictEqual([]);
     });
 
+    test('failed import-mode exit preserves deferred dictionary notification for retry', async () => {
+        const sendMessageAllTabsIgnoreResponse = vi.fn();
+        const refreshDictionaryDatabaseAfterUpdate = vi.fn()
+            .mockRejectedValueOnce(new Error('refresh failed'))
+            .mockResolvedValueOnce(void 0);
+        const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+        Reflect.set(backend, '_translator', {clearDatabaseCaches: vi.fn()});
+        Reflect.set(backend, '_dictionaryImportModeActive', true);
+        Reflect.set(backend, '_deferredDictionaryRefreshDuringImport', true);
+        Reflect.set(backend, '_pendingDatabaseUpdatedNotifications', [{type: 'dictionary', cause: 'import'}]);
+        Reflect.set(backend, '_sendMessageAllTabsIgnoreResponse', sendMessageAllTabsIgnoreResponse);
+        Reflect.set(backend, '_refreshDictionaryDatabaseAfterUpdate', refreshDictionaryDatabaseAfterUpdate);
+        Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
+        Reflect.set(backend, '_dictionaryDatabasePreparePromise', null);
+        Reflect.set(backend, '_setDictionaryImportModePromise', null);
+
+        await expect(Backend.prototype._setDictionaryImportMode.call(backend, false)).rejects.toThrow('refresh failed');
+
+        expect(sendMessageAllTabsIgnoreResponse).not.toHaveBeenCalled();
+        expect(Reflect.get(backend, '_dictionaryImportModeActive')).toBe(false);
+        expect(Reflect.get(backend, '_deferredDictionaryRefreshDuringImport')).toBe(true);
+        expect(Reflect.get(backend, '_pendingDatabaseUpdatedNotifications')).toStrictEqual([{type: 'dictionary', cause: 'import'}]);
+
+        await Backend.prototype._setDictionaryImportMode.call(backend, false);
+
+        expect(refreshDictionaryDatabaseAfterUpdate).toHaveBeenCalledTimes(2);
+        expect(sendMessageAllTabsIgnoreResponse).toHaveBeenCalledOnce();
+        expect(sendMessageAllTabsIgnoreResponse).toHaveBeenCalledWith({
+            action: 'applicationDatabaseUpdated',
+            params: {type: 'dictionary', cause: 'import'},
+        });
+        expect(Reflect.get(backend, '_deferredDictionaryRefreshDuringImport')).toBe(false);
+        expect(Reflect.get(backend, '_pendingDatabaseUpdatedNotifications')).toStrictEqual([]);
+    });
+
+    test('failed dictionary refresh outside import mode schedules retry and sends deferred notification', async () => {
+        vi.useFakeTimers();
+        try {
+            const sendMessageAllTabsIgnoreResponse = vi.fn();
+            const refreshDictionaryDatabaseAfterUpdate = vi.fn()
+                .mockRejectedValueOnce(new Error('refresh failed'))
+                .mockResolvedValueOnce(void 0);
+            const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+            Reflect.set(backend, '_translator', {clearDatabaseCaches: vi.fn()});
+            Reflect.set(backend, '_dictionaryImportModeActive', false);
+            Reflect.set(backend, '_deferredDictionaryRefreshDuringImport', false);
+            Reflect.set(backend, '_pendingDatabaseUpdatedNotifications', []);
+            Reflect.set(backend, '_sendMessageAllTabsIgnoreResponse', sendMessageAllTabsIgnoreResponse);
+            Reflect.set(backend, '_refreshDictionaryDatabaseAfterUpdate', refreshDictionaryDatabaseAfterUpdate);
+            Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
+            Reflect.set(backend, '_dictionaryDatabasePreparePromise', null);
+            Reflect.set(backend, '_setDictionaryImportModePromise', null);
+            Reflect.set(backend, '_dictionaryRefreshRetryTimer', null);
+            Reflect.set(backend, '_dictionaryRefreshRetryAttempt', 0);
+
+            await expect(Backend.prototype._triggerDatabaseUpdated.call(backend, 'dictionary', 'delete')).rejects.toThrow('refresh failed');
+
+            expect(sendMessageAllTabsIgnoreResponse).not.toHaveBeenCalled();
+            expect(Reflect.get(backend, '_deferredDictionaryRefreshDuringImport')).toBe(true);
+            expect(Reflect.get(backend, '_pendingDatabaseUpdatedNotifications')).toStrictEqual([{type: 'dictionary', cause: 'delete'}]);
+            expect(Reflect.get(backend, '_dictionaryRefreshRetryTimer')).not.toBe(null);
+
+            await vi.advanceTimersByTimeAsync(250);
+
+            expect(refreshDictionaryDatabaseAfterUpdate).toHaveBeenCalledTimes(2);
+            expect(sendMessageAllTabsIgnoreResponse).toHaveBeenCalledOnce();
+            expect(sendMessageAllTabsIgnoreResponse).toHaveBeenCalledWith({
+                action: 'applicationDatabaseUpdated',
+                params: {type: 'dictionary', cause: 'delete'},
+            });
+            expect(Reflect.get(backend, '_deferredDictionaryRefreshDuringImport')).toBe(false);
+            expect(Reflect.get(backend, '_pendingDatabaseUpdatedNotifications')).toStrictEqual([]);
+            expect(Reflect.get(backend, '_dictionaryRefreshRetryTimer')).toBe(null);
+            expect(Reflect.get(backend, '_dictionaryRefreshRetryAttempt')).toBe(0);
+        } finally {
+            vi.clearAllTimers();
+            vi.useRealTimers();
+        }
+    });
+
+    test('scheduled dictionary refresh retry does not disable a new active import', async () => {
+        vi.useFakeTimers();
+        try {
+            const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+            Reflect.set(backend, '_dictionaryImportModeActive', false);
+            Reflect.set(backend, '_deferredDictionaryRefreshDuringImport', true);
+            Reflect.set(backend, '_pendingDatabaseUpdatedNotifications', [{type: 'dictionary', cause: 'delete'}]);
+            Reflect.set(backend, '_dictionaryRefreshRetryTimer', null);
+            Reflect.set(backend, '_dictionaryRefreshRetryAttempt', 0);
+            Reflect.set(backend, '_setDictionaryImportModePromise', null);
+            Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
+            Reflect.set(backend, '_refreshDictionaryDatabaseAfterUpdate', vi.fn().mockResolvedValue(void 0));
+            Reflect.set(backend, '_sendMessageAllTabsIgnoreResponse', vi.fn());
+
+            Backend.prototype._scheduleDictionaryRefreshRetry.call(backend, 'test');
+            Reflect.set(backend, '_dictionaryImportModeActive', true);
+
+            await vi.advanceTimersByTimeAsync(250);
+
+            expect(Reflect.get(backend, '_ensureDictionaryDatabaseReady')).not.toHaveBeenCalled();
+            expect(Reflect.get(backend, '_refreshDictionaryDatabaseAfterUpdate')).not.toHaveBeenCalled();
+            expect(Reflect.get(backend, '_sendMessageAllTabsIgnoreResponse')).not.toHaveBeenCalled();
+            expect(Reflect.get(backend, '_dictionaryImportModeActive')).toBe(true);
+            expect(Reflect.get(backend, '_dictionaryRefreshRetryTimer')).not.toBe(null);
+        } finally {
+            vi.clearAllTimers();
+            vi.useRealTimers();
+        }
+    });
+
     test('non-dictionary updates still notify immediately during import mode', async () => {
         const sendMessageAllTabsIgnoreResponse = vi.fn();
         const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));

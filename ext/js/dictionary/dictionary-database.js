@@ -49,6 +49,7 @@ import {
 } from './raw-term-content.js';
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
 import {TermContentOpfsStore} from './term-content-opfs-store.js';
+import {hashPairToHex, hashTermEntryContentBytes, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {TermRecordOpfsStore} from './term-record-opfs-store.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 5;
@@ -1719,6 +1720,14 @@ export class DictionaryDatabase {
             '食べる',
             '猫',
             '吾輩',
+            '名前',
+            '輩',
+            '学',
+            '食',
+            '見',
+            '言',
+            '行',
+            '水',
         ];
         for (const dictionaryName of dictionaryNames) {
             try {
@@ -3714,20 +3723,22 @@ export class DictionaryDatabase {
                 let contentHash1 = precomputedHash1;
                 let contentHash2 = precomputedHash2;
                 let contentBytes = precomputedBytes;
-                if ((contentHash === null && !hasPrecomputedHashPair) || contentBytes === null) {
+                if (contentBytes === null) {
                     const rules = row.rules;
                     const definitionTags = row.definitionTags ?? row.tags ?? '';
                     const termTags = row.termTags ?? '';
                     const contentJson = row.termEntryContentJson ?? this._serializeTermEntryContent(rules, definitionTags, termTags, row.glossary);
-                    contentHash = contentHash ?? this._hashEntryContent(contentJson);
-                    contentBytes = contentBytes ?? this._textEncoder.encode(contentJson);
-                    if (contentHash1 < 0 || contentHash2 < 0) {
-                        const hashPair = parseContentHashHexPair(contentHash);
-                        if (hashPair !== null) {
-                            [contentHash1, contentHash2] = hashPair;
-                        }
+                    contentBytes = this._textEncoder.encode(contentJson);
+                }
+                if (contentHash1 < 0 || contentHash2 < 0) {
+                    const hashPair = contentHash !== null ? parseContentHashHexPair(contentHash) : null;
+                    if (hashPair !== null) {
+                        [contentHash1, contentHash2] = hashPair;
+                    } else {
+                        [contentHash1, contentHash2] = hashTermEntryContentBytesPair(contentBytes);
                     }
                 }
+                contentHash = contentHash ?? hashPairToHex(contentHash1, contentHash2);
                 computeContentMs += safePerformance.now() - tComputeStart;
 
                 let existingMeta = (contentHash1 >= 0 && contentHash2 >= 0) ?
@@ -6268,16 +6279,22 @@ export class DictionaryDatabase {
         const contentUncompressedLength = this._asNumber(row.contentUncompressedLength, 0);
         let content = this._toArrayBuffer(row.content);
         if (contentLength > 0 && content.byteLength === 0) {
-            let contentBytes = await this._termContentStore.readSlice(contentOffset, contentLength);
-            if (contentCompressionMethod !== ZIP_COMPRESSION_METHOD_STORE) {
-                contentBytes = await inflateZipMediaContent(contentBytes, contentCompressionMethod, contentUncompressedLength);
+            try {
+                let contentBytes = await this._termContentStore.readSlice(contentOffset, contentLength);
+                if (contentBytes !== null) {
+                    if (contentCompressionMethod !== ZIP_COMPRESSION_METHOD_STORE) {
+                        contentBytes = await inflateZipMediaContent(contentBytes, contentCompressionMethod, contentUncompressedLength);
+                    }
+                    content = (
+                        contentBytes.byteOffset === 0 &&
+                        contentBytes.byteLength === contentBytes.buffer.byteLength
+                    ) ?
+                        contentBytes.buffer :
+                        contentBytes.buffer.slice(contentBytes.byteOffset, contentBytes.byteOffset + contentBytes.byteLength);
+                }
+            } catch (e) {
+                logTermContentZstdError(e);
             }
-            content = (
-                contentBytes.byteOffset === 0 &&
-                contentBytes.byteLength === contentBytes.buffer.byteLength
-            ) ?
-                contentBytes.buffer :
-                contentBytes.buffer.slice(contentBytes.byteOffset, contentBytes.byteOffset + contentBytes.byteLength);
         }
         return {
             dictionary: this._asString(row.dictionary),
@@ -6514,19 +6531,7 @@ export class DictionaryDatabase {
      * @returns {string}
      */
     _hashEntryContent(contentJson) {
-        let h1 = 0x811c9dc5;
-        let h2 = 0x9e3779b9;
-        const bytes = this._textEncoder.encode(contentJson);
-        for (let i = 0, ii = bytes.length; i < ii; ++i) {
-            const code = bytes[i];
-            h1 = Math.imul((h1 ^ code) >>> 0, 0x01000193);
-            h2 = Math.imul((h2 ^ code) >>> 0, 0x85ebca6b);
-            h2 = (h2 ^ (h2 >>> 13)) >>> 0;
-        }
-        if ((h1 | h2) === 0) {
-            h1 = 1;
-        }
-        return `${(h1 >>> 0).toString(16).padStart(8, '0')}${(h2 >>> 0).toString(16).padStart(8, '0')}`;
+        return hashTermEntryContentBytes(this._textEncoder.encode(contentJson));
     }
 
     /**

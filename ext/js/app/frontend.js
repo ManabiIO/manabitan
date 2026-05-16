@@ -775,7 +775,7 @@ export class Frontend {
      * @returns {{firstMatchedResultPromise: Promise<?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>, resultsPromise: Promise<Array<{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>>}}
      */
     _runLookupPrewarmTerms(terms, optionsContext) {
-        const concurrency = 2;
+        const concurrency = 4;
         /** @type {Array<{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>} */
         const results = new Array(terms.length);
         let nextIndex = 0;
@@ -790,13 +790,13 @@ export class Frontend {
         for (let i = 0; i < workerCount; ++i) {
             workers.push((async () => {
                 while (true) {
-                    if (firstMatchedResultResolved) { return; }
                     const index = nextIndex++;
                     if (index >= terms.length) { return; }
                     const term = terms[index];
+                    /** @type {import('dictionary').DictionaryEntry[]} */
                     let dictionaryEntries = [];
                     try {
-                        ({dictionaryEntries} = await this._application.api.termsFind(term, {}, optionsContext));
+                        ({dictionaryEntries} = await this._application.api.termsFind(term, {skipLookupWarmWait: true}, optionsContext));
                     } catch (_) {
                         // Best-effort prewarm; visible lookup correctness does not depend on probes.
                     }
@@ -804,7 +804,6 @@ export class Frontend {
                     if (dictionaryEntries.length > 0 && !firstMatchedResultResolved) {
                         firstMatchedResultResolved = true;
                         resolveFirstMatchedResult({term, dictionaryEntries});
-                        return;
                     }
                 }
             })());
