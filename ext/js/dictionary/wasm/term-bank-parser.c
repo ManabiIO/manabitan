@@ -185,31 +185,32 @@ static void set_field(TermRowMeta* meta, uint32_t field_index, uint32_t start, u
     }
 }
 
-static int token_contains_literal(
-    const uint8_t* src,
-    uint32_t start,
-    uint32_t length,
-    const uint8_t* literal,
-    uint32_t literal_length
-) {
-    if (literal_length == 0u || length < literal_length) { return 0; }
-    const uint32_t end = start + length - literal_length;
-    for (uint32_t i = start; i <= end; ++i) {
-        uint32_t j = 0u;
-        while (j < literal_length && src[i + j] == literal[j]) {
-            ++j;
+static int glossary_may_contain_media_marker(const uint8_t* src, uint32_t start, uint32_t length) {
+    if (length < 5u) { return 0; }
+    const uint32_t end = start + length;
+    for (uint32_t i = start; i + 5u <= end; ++i) {
+        if (src[i] != '"') { continue; }
+        if (
+            src[i + 1u] == 'i' &&
+            src[i + 2u] == 'm' &&
+            src[i + 3u] == 'g' &&
+            src[i + 4u] == '"'
+        ) {
+            return 1;
         }
-        if (j == literal_length) { return 1; }
+        if (
+            i + 7u <= end &&
+            src[i + 1u] == 'i' &&
+            src[i + 2u] == 'm' &&
+            src[i + 3u] == 'a' &&
+            src[i + 4u] == 'g' &&
+            src[i + 5u] == 'e' &&
+            src[i + 6u] == '"'
+        ) {
+            return 1;
+        }
     }
     return 0;
-}
-
-static int glossary_may_contain_media_marker(const uint8_t* src, uint32_t start, uint32_t length) {
-    static const uint8_t VALUE_IMAGE[] = "\"image\"";
-    static const uint8_t VALUE_IMG[] = "\"img\"";
-    return
-        token_contains_literal(src, start, length, VALUE_IMAGE, sizeof(VALUE_IMAGE) - 1u) ||
-        token_contains_literal(src, start, length, VALUE_IMG, sizeof(VALUE_IMG) - 1u);
 }
 
 static void clear_term_row_meta(TermRowMeta* meta) {
@@ -269,10 +270,61 @@ static int is_null_token(const uint8_t* src, uint32_t start, uint32_t length) {
         src[start + 3u] == 'l';
 }
 
-static inline void hash_byte(uint32_t* h1, uint32_t* h2, uint8_t value) {
-    *h1 = (uint32_t)(((*h1 ^ (uint32_t)value) * 0x01000193u) & 0xffffffffu);
-    *h2 = (uint32_t)(((*h2 ^ (uint32_t)value) * 0x85ebca6bu) & 0xffffffffu);
-    *h2 ^= (*h2 >> 13u);
+static inline uint32_t rotl32(uint32_t value, uint32_t amount) {
+    return (uint32_t)((value << amount) | (value >> (32u - amount)));
+}
+
+static inline uint32_t read_u32_le(const uint8_t* src) {
+    return ((uint32_t)src[0]) |
+        ((uint32_t)src[1] << 8u) |
+        ((uint32_t)src[2] << 16u) |
+        ((uint32_t)src[3] << 24u);
+}
+
+static inline uint32_t xxh32_round(uint32_t acc, uint32_t input) {
+    acc += input * 2246822519u;
+    acc = rotl32(acc, 13u);
+    acc *= 2654435761u;
+    return acc;
+}
+
+static uint32_t hash_content_xxh32(const uint8_t* src, uint32_t length, uint32_t seed) {
+    const uint8_t* p = src;
+    const uint8_t* const end = src + length;
+    uint32_t h32;
+    if (length >= 16u) {
+        const uint8_t* const limit = end - 16u;
+        uint32_t v1 = seed + 2654435761u + 2246822519u;
+        uint32_t v2 = seed + 2246822519u;
+        uint32_t v3 = seed;
+        uint32_t v4 = seed - 2654435761u;
+        do {
+            v1 = xxh32_round(v1, read_u32_le(p)); p += 4u;
+            v2 = xxh32_round(v2, read_u32_le(p)); p += 4u;
+            v3 = xxh32_round(v3, read_u32_le(p)); p += 4u;
+            v4 = xxh32_round(v4, read_u32_le(p)); p += 4u;
+        } while (p <= limit);
+        h32 = rotl32(v1, 1u) + rotl32(v2, 7u) + rotl32(v3, 12u) + rotl32(v4, 18u);
+    } else {
+        h32 = seed + 374761393u;
+    }
+    h32 += length;
+    while ((p + 4u) <= end) {
+        h32 += read_u32_le(p) * 3266489917u;
+        h32 = rotl32(h32, 17u) * 668265263u;
+        p += 4u;
+    }
+    while (p < end) {
+        h32 += ((uint32_t)(*p)) * 374761393u;
+        h32 = rotl32(h32, 11u) * 2654435761u;
+        ++p;
+    }
+    h32 ^= h32 >> 15u;
+    h32 *= 2246822519u;
+    h32 ^= h32 >> 13u;
+    h32 *= 3266489917u;
+    h32 ^= h32 >> 16u;
+    return h32;
 }
 
 static inline int write_byte_and_hash(
@@ -286,9 +338,8 @@ static inline int write_byte_and_hash(
     if (*cursor >= out_capacity) { return 0; }
     out[*cursor] = value;
     *cursor += 1u;
-    if (h1 != 0 && h2 != 0) {
-        hash_byte(h1, h2, value);
-    }
+    (void)h1;
+    (void)h2;
     return 1;
 }
 
@@ -305,12 +356,10 @@ static inline int write_bytes_and_hash(
     const uint32_t end = start + length;
     if (end < start || end > out_capacity) { return 0; }
     for (uint32_t i = 0u; i < length; ++i) {
-        const uint8_t value = src[i];
-        out[start + i] = value;
-        if (h1 != 0 && h2 != 0) {
-            hash_byte(h1, h2, value);
-        }
+        out[start + i] = src[i];
     }
+    (void)h1;
+    (void)h2;
     *cursor = end;
     return 1;
 }
@@ -344,6 +393,57 @@ static int glossary_object_try_extract_text_value(
     static const uint8_t VALUE_TEXT[] = "\"text\"";
 
     if (start >= end || src[start] != '{') { return 0; }
+
+    uint32_t probe = skip_ws(src, src_len, start + 1u);
+    if (probe < end && src[probe] != '}') {
+        uint32_t key_end = 0u;
+        if (!parse_string_span(src, src_len, probe, &key_end)) { return 0; }
+        uint32_t key_start = probe;
+        uint32_t key_length = key_end - key_start;
+        if (token_equals_literal(src, key_start, key_length, KEY_TYPE, sizeof(KEY_TYPE) - 1u)) {
+            probe = skip_ws(src, src_len, key_end);
+            if (probe >= end || src[probe] != ':') { return 0; }
+            probe = skip_ws(src, src_len, probe + 1u);
+            uint32_t value_end = 0u;
+            if (!parse_value_span(src, src_len, probe, &value_end)) { return 0; }
+            if (!token_equals_literal(src, probe, value_end - probe, VALUE_TEXT, sizeof(VALUE_TEXT) - 1u)) {
+                return 0;
+            }
+            probe = skip_ws(src, src_len, value_end);
+            if (probe < end && src[probe] == ',') {
+                ++probe;
+            }
+            while (probe < end) {
+                probe = skip_ws(src, src_len, probe);
+                if (probe >= end) { return 0; }
+                if (src[probe] == '}') { return 0; }
+                if (!parse_string_span(src, src_len, probe, &key_end)) { return 0; }
+                key_start = probe;
+                key_length = key_end - key_start;
+                probe = skip_ws(src, src_len, key_end);
+                if (probe >= end || src[probe] != ':') { return 0; }
+                probe = skip_ws(src, src_len, probe + 1u);
+                if (!parse_value_span(src, src_len, probe, &value_end)) { return 0; }
+                if (token_equals_literal(src, key_start, key_length, KEY_TEXT, sizeof(KEY_TEXT) - 1u)) {
+                    if (value_end > probe && src[probe] == '"') {
+                        *out_text_start = probe;
+                        *out_text_length = value_end - probe;
+                        return 1;
+                    }
+                    return 0;
+                }
+                probe = skip_ws(src, src_len, value_end);
+                if (probe < end && src[probe] == ',') {
+                    ++probe;
+                    continue;
+                }
+                if (probe < end && src[probe] == '}') {
+                    return 0;
+                }
+            }
+            return 0;
+        }
+    }
 
     uint32_t i = skip_ws(src, src_len, start + 1u);
     int has_type_text = 0;
@@ -469,33 +569,32 @@ static int encode_term_content_row(
     static const uint8_t SUFFIX[] = "}";
     static const uint8_t EMPTY_QUOTED[] = "\"\"";
 
-    uint32_t h1 = compute_hashes ? FNV1A_OFFSET : 0u;
-    uint32_t h2 = compute_hashes ? MIX_OFFSET : 0u;
-    uint32_t* h1_ptr = compute_hashes ? &h1 : 0;
-    uint32_t* h2_ptr = compute_hashes ? &h2 : 0;
+    const uint32_t row_start = *cursor;
+    uint32_t h1 = 0u;
+    uint32_t h2 = 0u;
 
-    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_RULES, sizeof(PREFIX_RULES) - 1u, h1_ptr, h2_ptr)) { return 0; }
+    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_RULES, sizeof(PREFIX_RULES) - 1u, 0, 0)) { return 0; }
     if (row->rules_length > 0u && !is_null_token(src, row->rules_start, row->rules_length)) {
-        if (!write_bytes_and_hash(out, out_capacity, cursor, src + row->rules_start, row->rules_length, h1_ptr, h2_ptr)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, src + row->rules_start, row->rules_length, 0, 0)) { return 0; }
     } else {
-        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, h1_ptr, h2_ptr)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, 0, 0)) { return 0; }
     }
 
-    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_DEFINITION_TAGS, sizeof(PREFIX_DEFINITION_TAGS) - 1u, h1_ptr, h2_ptr)) { return 0; }
+    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_DEFINITION_TAGS, sizeof(PREFIX_DEFINITION_TAGS) - 1u, 0, 0)) { return 0; }
     if (row->definition_tags_length > 0u && !is_null_token(src, row->definition_tags_start, row->definition_tags_length)) {
-        if (!write_bytes_and_hash(out, out_capacity, cursor, src + row->definition_tags_start, row->definition_tags_length, h1_ptr, h2_ptr)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, src + row->definition_tags_start, row->definition_tags_length, 0, 0)) { return 0; }
     } else {
-        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, h1_ptr, h2_ptr)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, 0, 0)) { return 0; }
     }
 
-    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_TERM_TAGS, sizeof(PREFIX_TERM_TAGS) - 1u, h1_ptr, h2_ptr)) { return 0; }
+    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_TERM_TAGS, sizeof(PREFIX_TERM_TAGS) - 1u, 0, 0)) { return 0; }
     if (row->term_tags_length > 0u && !is_null_token(src, row->term_tags_start, row->term_tags_length)) {
-        if (!write_bytes_and_hash(out, out_capacity, cursor, src + row->term_tags_start, row->term_tags_length, h1_ptr, h2_ptr)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, src + row->term_tags_start, row->term_tags_length, 0, 0)) { return 0; }
     } else {
-        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, h1_ptr, h2_ptr)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, 0, 0)) { return 0; }
     }
 
-    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_GLOSSARY, sizeof(PREFIX_GLOSSARY) - 1u, h1_ptr, h2_ptr)) { return 0; }
+    if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_GLOSSARY, sizeof(PREFIX_GLOSSARY) - 1u, 0, 0)) { return 0; }
     if (row->glossary_length > 0u) {
         if (!write_normalized_glossary_value_and_hash(
             src,
@@ -505,18 +604,23 @@ static int encode_term_content_row(
             out,
             out_capacity,
             cursor,
-            h1_ptr,
-            h2_ptr
+            0,
+            0
         )) { return 0; }
     } else {
         static const uint8_t EMPTY_ARRAY[] = "[]";
-        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_ARRAY, sizeof(EMPTY_ARRAY) - 1u, h1_ptr, h2_ptr)) { return 0; }
+        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_ARRAY, sizeof(EMPTY_ARRAY) - 1u, 0, 0)) { return 0; }
     }
 
-    if (!write_bytes_and_hash(out, out_capacity, cursor, SUFFIX, sizeof(SUFFIX) - 1u, h1_ptr, h2_ptr)) { return 0; }
+    if (!write_bytes_and_hash(out, out_capacity, cursor, SUFFIX, sizeof(SUFFIX) - 1u, 0, 0)) { return 0; }
 
-    if (compute_hashes && (h1 | h2) == 0u) {
-        h1 = 1u;
+    if (compute_hashes) {
+        const uint32_t row_length = *cursor - row_start;
+        h1 = hash_content_xxh32(out + row_start, row_length, FNV1A_OFFSET);
+        h2 = hash_content_xxh32(out + row_start, row_length, MIX_OFFSET);
+        if ((h1 | h2) == 0u) {
+            h1 = 1u;
+        }
     }
     *out_h1 = h1;
     *out_h2 = h2;

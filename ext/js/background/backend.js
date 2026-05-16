@@ -50,6 +50,7 @@ import {RequestBuilder} from './request-builder.js';
 import {injectStylesheet} from './script-manager.js';
 
 const STARTUP_DIAGNOSTICS_STORAGE_KEY = 'manabitanStartupDiagnostics';
+const DICTIONARY_REFRESH_RETRY_DELAYS_MS = [250, 1000, 3000, 10000];
 
 /**
  * This class controls the core logic of the extension, including API calls
@@ -134,10 +135,16 @@ export class Backend {
         this._dictionaryRefreshPromise = null;
         /** @type {?Promise<void>} */
         this._dictionaryLookupWarmPromise = null;
+        /** @type {?string} */
+        this._dictionaryLookupWarmQueuedReason = null;
         /** @type {?Promise<void>} */
         this._dictionaryMutationPromise = null;
         /** @type {boolean} */
         this._dictionaryRefreshQueued = false;
+        /** @type {ReturnType<typeof setTimeout>|null} */
+        this._dictionaryRefreshRetryTimer = null;
+        /** @type {number} */
+        this._dictionaryRefreshRetryAttempt = 0;
         /** @type {?Promise<void>} */
         this._dictionaryDatabasePreparePromise = null;
 
@@ -1699,13 +1706,50 @@ export class Backend {
 
     async _awaitDictionaryRefreshSettled() {
         while (true) {
+            const importModePromise = this._setDictionaryImportModePromise;
+            if (typeof importModePromise !== 'undefined' && importModePromise !== null) {
+                try {
+                    await importModePromise;
+                } catch (_) {
+                    // NOP
+                }
+                continue;
+            }
             const promise = this._dictionaryRefreshPromise;
-            if (typeof promise === 'undefined' || promise === null) { return; }
+            if (typeof promise === 'undefined' || promise === null) {
+                await this._flushPendingDictionaryRefreshBeforeLookup();
+                return;
+            }
             try {
                 await promise;
             } catch (_) {
                 // NOP
             }
+        }
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _flushPendingDictionaryRefreshBeforeLookup() {
+        if (
+            this._dictionaryImportModeActive ||
+            this._setDictionaryImportModePromise !== null ||
+            !(
+                this._deferredDictionaryRefreshDuringImport ||
+                this._pendingDatabaseUpdatedNotifications.length > 0
+            )
+        ) {
+            return;
+        }
+        try {
+            await this._setDictionaryImportMode(false);
+        } catch (error) {
+            this._scheduleDictionaryRefreshRetry('lookup-pending-refresh-failed');
+            reportDiagnostics('dictionary-refresh-before-lookup-failed', {
+                pendingNotificationCount: this._pendingDatabaseUpdatedNotifications.length,
+                error: `${error}`,
+            });
         }
     }
 
@@ -3602,7 +3646,19 @@ export class Backend {
                 reportDiagnostics('dictionary-refresh-deferred-during-import', {cause});
                 return;
             } else {
-                await this._refreshDictionaryDatabaseAfterUpdate();
+                try {
+                    await this._refreshDictionaryDatabaseAfterUpdate();
+                } catch (error) {
+                    this._deferredDictionaryRefreshDuringImport = true;
+                    this._queueDeferredDatabaseUpdatedNotification(type, cause);
+                    this._scheduleDictionaryRefreshRetry('database-update-refresh-failed');
+                    reportDiagnostics('dictionary-refresh-after-update-failed', {
+                        cause,
+                        pendingNotificationCount: this._pendingDatabaseUpdatedNotifications.length,
+                        error: `${error}`,
+                    });
+                    throw error;
+                }
             }
         }
         this._sendApplicationDatabaseUpdated(type, cause);
@@ -3634,6 +3690,52 @@ export class Backend {
     }
 
     /**
+     * @param {string} reason
+     * @returns {void}
+     */
+    _scheduleDictionaryRefreshRetry(reason) {
+        if (this._dictionaryRefreshRetryTimer !== null) { return; }
+        const retryIndex = Math.min(this._dictionaryRefreshRetryAttempt, DICTIONARY_REFRESH_RETRY_DELAYS_MS.length - 1);
+        const delayMs = DICTIONARY_REFRESH_RETRY_DELAYS_MS[retryIndex];
+        ++this._dictionaryRefreshRetryAttempt;
+        reportDiagnostics('dictionary-refresh-retry-scheduled', {
+            reason,
+            delayMs,
+            attempt: this._dictionaryRefreshRetryAttempt,
+            pendingNotificationCount: this._pendingDatabaseUpdatedNotifications.length,
+        });
+        this._dictionaryRefreshRetryTimer = setTimeout(() => {
+            this._dictionaryRefreshRetryTimer = null;
+            if (this._dictionaryImportModeActive) {
+                this._scheduleDictionaryRefreshRetry('retry-deferred-during-active-import');
+                return;
+            }
+            void this._setDictionaryImportMode(false).catch((error) => {
+                reportDiagnostics('dictionary-refresh-retry-failed', {
+                    reason,
+                    attempt: this._dictionaryRefreshRetryAttempt,
+                    pendingNotificationCount: this._pendingDatabaseUpdatedNotifications.length,
+                    error: `${error}`,
+                });
+                if (this._deferredDictionaryRefreshDuringImport || this._pendingDatabaseUpdatedNotifications.length > 0) {
+                    this._scheduleDictionaryRefreshRetry('retry-failed');
+                }
+            });
+        }, delayMs);
+    }
+
+    /**
+     * @returns {void}
+     */
+    _clearDictionaryRefreshRetry() {
+        if (this._dictionaryRefreshRetryTimer !== null) {
+            clearTimeout(this._dictionaryRefreshRetryTimer);
+            this._dictionaryRefreshRetryTimer = null;
+        }
+        this._dictionaryRefreshRetryAttempt = 0;
+    }
+
+    /**
      * Reloads the background dictionary DB connection so updates performed in
      * worker/offscreen contexts become visible to lookup queries.
      * @returns {Promise<void>}
@@ -3652,8 +3754,14 @@ export class Backend {
                 if (this._offscreen === null) {
                     return;
                 }
-                await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
-                await this._offscreen.sendMessagePromise({action: 'clearDatabaseCachesOffscreen'});
+                try {
+                    await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
+                    await this._offscreen.sendMessagePromise({action: 'clearDatabaseCachesOffscreen'});
+                } catch (error) {
+                    reportDiagnostics('dictionary-offscreen-refresh-after-update-failed', {
+                        error: `${error}`,
+                    });
+                }
             })();
             if (this._dictionaryRefreshPromise !== null) {
                 this._dictionaryRefreshQueued = true;
@@ -3886,7 +3994,11 @@ export class Backend {
      * @returns {void}
      */
     _warmEnabledDictionaryLookupCaches(reason) {
-        if (this._options === null || this._dictionaryLookupWarmPromise !== null) {
+        if (this._options === null) {
+            return;
+        }
+        if (this._dictionaryLookupWarmPromise !== null) {
+            this._dictionaryLookupWarmQueuedReason = reason;
             return;
         }
         const options = this._getProfileOptions({current: true}, false);
@@ -3896,14 +4008,15 @@ export class Backend {
             .filter((value, index, array) => value.length > 0 && array.indexOf(value) === index);
         if (enabledTitles.length === 0) { return; }
         const startedAt = safePerformance.now();
-        this._dictionaryLookupWarmPromise = (async () => {
+        const warmPromise = (async () => {
             await this._awaitDictionaryRefreshSettled();
             await this._ensureDictionaryDatabaseReady();
             const warmMethod = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'warmTermLookupCaches'));
             if (typeof warmMethod !== 'function') { return; }
             await /** @type {(dictionaryNames: string[]) => Promise<void>} */ (warmMethod).call(this._dictionaryDatabase, enabledTitles);
         })();
-        this._dictionaryLookupWarmPromise
+        this._dictionaryLookupWarmPromise = warmPromise;
+        warmPromise
             .then(() => {
                 reportDiagnostics('dictionary-lookup-cache-warm-summary', {
                     reason,
@@ -3919,7 +4032,13 @@ export class Backend {
                 });
             })
             .finally(() => {
+                if (this._dictionaryLookupWarmPromise !== warmPromise) { return; }
                 this._dictionaryLookupWarmPromise = null;
+                const queuedReason = this._dictionaryLookupWarmQueuedReason;
+                this._dictionaryLookupWarmQueuedReason = null;
+                if (queuedReason !== null) {
+                    this._warmEnabledDictionaryLookupCaches(queuedReason);
+                }
             });
     }
 
@@ -4713,7 +4832,11 @@ export class Backend {
             await this._setDictionaryImportModePromise;
         }
         this._setDictionaryImportModePromise = (async () => {
-            if (this._dictionaryImportModeActive === active) {
+            const hasDeferredRefresh = (
+                this._deferredDictionaryRefreshDuringImport ||
+                this._pendingDatabaseUpdatedNotifications.length > 0
+            );
+            if (this._dictionaryImportModeActive === active && !(active === false && hasDeferredRefresh)) {
                 return;
             }
             if (active) {
@@ -4733,10 +4856,23 @@ export class Backend {
             this._dictionaryImportModeActive = false;
             await this._ensureDictionaryDatabaseReady();
             reportDiagnostics('dictionary-import-mode-changed', {active: false});
-            const hadDeferredRefresh = this._deferredDictionaryRefreshDuringImport;
+            const hadDeferredRefresh = this._deferredDictionaryRefreshDuringImport || this._pendingDatabaseUpdatedNotifications.length > 0;
             this._deferredDictionaryRefreshDuringImport = false;
             reportDiagnostics('dictionary-refresh-on-import-mode-exit', {hadDeferredRefresh});
-            await this._refreshDictionaryDatabaseAfterUpdate();
+            try {
+                await this._refreshDictionaryDatabaseAfterUpdate();
+            } catch (error) {
+                if (hadDeferredRefresh) {
+                    this._deferredDictionaryRefreshDuringImport = true;
+                }
+                reportDiagnostics('dictionary-refresh-on-import-mode-exit-failed', {
+                    hadDeferredRefresh,
+                    pendingNotificationCount: this._pendingDatabaseUpdatedNotifications.length,
+                    error: `${error}`,
+                });
+                this._scheduleDictionaryRefreshRetry('import-mode-exit-refresh-failed');
+                throw error;
+            }
             if (hadDeferredRefresh) {
                 const pendingNotifications = this._pendingDatabaseUpdatedNotifications.splice(0, this._pendingDatabaseUpdatedNotifications.length);
                 for (const {type, cause} of pendingNotifications) {
@@ -4745,6 +4881,7 @@ export class Backend {
             } else {
                 this._pendingDatabaseUpdatedNotifications.length = 0;
             }
+            this._clearDictionaryRefreshRetry();
         })();
         try {
             await this._setDictionaryImportModePromise;
