@@ -19,6 +19,8 @@
 import {ExtensionError} from '../core/extension-error.js';
 import {generateId} from '../core/utilities.js';
 
+const imageDetailsResponseTimeoutMs = 60_000;
+
 /**
  * Class used for loading and validating media from a worker thread
  * during the dictionary import process.
@@ -28,7 +30,7 @@ export class DictionaryWorkerMediaLoader {
      * Creates a new instance of the media loader.
      */
     constructor() {
-        /** @type {Map<string, {resolve: (result: import('dictionary-worker-media-loader').ImageDetails) => void, reject: (reason?: import('core').RejectionReason) => void}>} */
+        /** @type {Map<string, {resolve: (result: import('dictionary-worker-media-loader').ImageDetails) => void, reject: (reason?: import('core').RejectionReason) => void, timer: import('core').Timeout}>} */
         this._requests = new Map();
     }
 
@@ -41,6 +43,7 @@ export class DictionaryWorkerMediaLoader {
         const request = this._requests.get(id);
         if (typeof request === 'undefined') { return; }
         this._requests.delete(id);
+        clearTimeout(request.timer);
         const {error} = params;
         if (typeof error !== 'undefined') {
             request.reject(ExtensionError.deserialize(error));
@@ -53,12 +56,24 @@ export class DictionaryWorkerMediaLoader {
     getImageDetails(content, mediaType) {
         return new Promise((resolve, reject) => {
             const id = generateId(16);
-            this._requests.set(id, {resolve, reject});
+            const timer = setTimeout(() => {
+                const request = this._requests.get(id);
+                if (typeof request === 'undefined') { return; }
+                this._requests.delete(id);
+                request.reject(new Error(`Timed out waiting for image details response after ${String(imageDetailsResponseTimeoutMs)}ms`));
+            }, imageDetailsResponseTimeoutMs);
+            this._requests.set(id, {resolve, reject, timer});
             // This is executed in a Worker context, so the self needs to be force cast
-            /** @type {Worker} */ (/** @type {unknown} */ (self)).postMessage({
-                action: 'getImageDetails',
-                params: {id, content, mediaType},
-            }, [content]);
+            try {
+                /** @type {Worker} */ (/** @type {unknown} */ (self)).postMessage({
+                    action: 'getImageDetails',
+                    params: {id, content, mediaType},
+                }, [content]);
+            } catch (error) {
+                this._requests.delete(id);
+                clearTimeout(timer);
+                reject(error);
+            }
         });
     }
 }

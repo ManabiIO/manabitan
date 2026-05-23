@@ -315,7 +315,11 @@ export class DictionaryWorker {
         } catch (e) {
             response = {id, error: ExtensionError.serialize(e)};
         }
-        worker.postMessage({action: 'getImageDetails.response', params: response}, transfer);
+        try {
+            worker.postMessage({action: 'getImageDetails.response', params: response}, transfer);
+        } catch (_) {
+            // The import worker may already have been torn down after the async image decode.
+        }
     }
 
     /**

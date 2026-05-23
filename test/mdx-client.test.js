@@ -475,6 +475,63 @@ describe('DictionaryWorker MDX import integration', () => {
         expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
     });
 
+    test('ignores stale image-details response delivery failures after async decode', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn((url, options) => {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const dictionaryWorker = new DictionaryWorker();
+        const getImageDetails = vi.fn(async (content, _mediaType, transfer) => {
+            transfer.push(content);
+            return {
+                content,
+                width: 16,
+                height: 16,
+            };
+        });
+        Reflect.set(dictionaryWorker, '_dictionaryImporterMediaLoader', {getImageDetails});
+
+        const invocationPromise = dictionaryWorker.importDictionary(
+            createBytes(4, 9).buffer,
+            {prefixWildcardsSupported: true, yomitanVersion: '1.2.3.4'},
+            null,
+        );
+
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+
+        const [worker] = workerInstances;
+        worker.postMessage.mockImplementation((message) => {
+            if (message?.action === 'getImageDetails.response') {
+                throw new Error('worker already gone');
+            }
+        });
+        const content = createBytes(3, 17).buffer;
+
+        worker.emitMessage({
+            action: 'getImageDetails',
+            params: {
+                id: 'image-1',
+                content,
+                mediaType: 'image/png',
+            },
+        });
+
+        await vi.waitFor(() => {
+            expect(getImageDetails).toHaveBeenCalledTimes(1);
+        });
+        expect(() => {
+            worker.emitError('Dictionary worker exploded');
+        }).not.toThrow();
+
+        await expect(invocationPromise).rejects.toThrow('Dictionary worker failed: Dictionary worker exploded');
+    });
+
     test('surfaces worker failures and disconnects cleanly during direct MDX import', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
