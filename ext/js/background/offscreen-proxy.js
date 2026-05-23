@@ -22,6 +22,8 @@ import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
 
+const dictionaryRuntimeMessageTimeoutMs = 30_000;
+
 /**
  * This class is responsible for creating and communicating with an offscreen document.
  * This offscreen document is used to solve three issues:
@@ -309,18 +311,32 @@ export class DictionaryRuntimeWorkerProxy {
             throw this._fatalError;
         }
         const id = ++this._requestId;
+        const payload = /** @type {{action?: string, params?: unknown}} */ (
+            typeof message === 'object' && message !== null && !Array.isArray(message) ? message : {}
+        );
+        const action = payload.action ?? '';
         return await new Promise((resolve, reject) => {
+            const timeoutId = globalThis.setTimeout(() => {
+                const handler = this._responseHandlers.get(id);
+                if (typeof handler === 'undefined') { return; }
+                this._responseHandlers.delete(id);
+                handler.reject(new Error(`Timed out waiting for dictionary runtime response to ${action} after ${String(dictionaryRuntimeMessageTimeoutMs)}ms.`));
+            }, dictionaryRuntimeMessageTimeoutMs);
             this._responseHandlers.set(id, {
-                resolve: /** @type {(value: unknown) => void} */ (resolve),
-                reject,
+                resolve: (value) => {
+                    globalThis.clearTimeout(timeoutId);
+                    resolve(value);
+                },
+                reject: (reason) => {
+                    globalThis.clearTimeout(timeoutId);
+                    reject(reason);
+                },
             });
-            const payload = /** @type {{action?: string, params?: unknown}} */ (
-                typeof message === 'object' && message !== null && !Array.isArray(message) ? message : {}
-            );
             try {
-                this._worker.postMessage({id, action: payload.action ?? '', params: payload.params ?? {}});
+                this._worker.postMessage({id, action, params: payload.params ?? {}});
             } catch (error) {
                 this._responseHandlers.delete(id);
+                globalThis.clearTimeout(timeoutId);
                 const normalizedError = error instanceof Error ? error : new Error(String(error));
                 this._setFatalError(normalizedError);
                 reject(normalizedError);
@@ -460,7 +476,7 @@ export class DictionaryDatabaseProxy {
         if (this._openStorageDiagnostics === null || typeof this._openStorageDiagnostics !== 'object') {
             return null;
         }
-        return {.../** @type {Record<string, unknown>} */ (this._openStorageDiagnostics)};
+        return {...(/** @type {Record<string, unknown>} */ (this._openStorageDiagnostics))};
     }
 
     /**

@@ -30,6 +30,7 @@ import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
+import {toError} from '../core/to-error.js';
 import {clone, deferPromise, promiseTimeout} from '../core/utilities.js';
 import {generateAnkiNoteMediaFileName, INVALID_NOTE_ID, isNoteDataValid} from '../data/anki-util.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
@@ -1025,20 +1026,45 @@ export class Backend {
                     error: toError(e).message,
                 });
             }
-            hasInstalledDictionaries = installedDictionaryCount === null ?
-                await this._hasInstalledDictionaries() :
-                installedDictionaryCount > 0;
+            if (installedDictionaryCount === null) {
+                try {
+                    hasInstalledDictionaries = await this._hasInstalledDictionaries();
+                } catch (e) {
+                    hasInstalledDictionaries = true;
+                    reportDiagnostics('dictionary-lookup-installed-dictionary-check-failed', {
+                        textLength: text.length,
+                        mode,
+                        error: toError(e).message,
+                    });
+                }
+            } else {
+                hasInstalledDictionaries = installedDictionaryCount > 0;
+            }
             if (hasInstalledDictionaries) {
                 reportDiagnostics('dictionary-lookup-self-heal-begin', {
                     textLength: text.length,
                     enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
                     mode,
                 });
-                await this._refreshDictionaryDatabaseAfterUpdate();
-                void this._translator.clearDatabaseCaches();
-                findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
-                ({dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions));
-                if (dictionaryEntries.length === 0) {
+                try {
+                    await this._refreshDictionaryDatabaseAfterUpdate();
+                    void this._translator.clearDatabaseCaches();
+                    findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
+                    ({dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions));
+                } catch (e) {
+                    debugLookupState = {
+                        ok: false,
+                        reason: 'dictionary lookup self-heal failed',
+                        error: toError(e).message,
+                    };
+                    reportDiagnostics('dictionary-lookup-self-heal-failed', {
+                        textLength: text.length,
+                        enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
+                        mode,
+                        error: toError(e).message,
+                    });
+                }
+                if (dictionaryEntries.length === 0 && debugLookupState === null) {
                     try {
                         debugLookupState = await this._debugDictionaryLookupState(
                             text,
@@ -3736,6 +3762,34 @@ export class Backend {
     }
 
     /**
+     * Legacy fallback for direct database instances paired with an offscreen translator.
+     * DictionaryDatabaseProxy.refreshConnection already refreshes the offscreen runtime.
+     * @returns {Promise<void>}
+     */
+    async _refreshOffscreenDictionaryRuntimeAfterUpdate() {
+        if (this._offscreen === null) {
+            return;
+        }
+        try {
+            await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
+        } catch (error) {
+            reportDiagnostics('dictionary-offscreen-refresh-after-update-failed', {
+                action: 'databaseRefreshOffscreen',
+                error: toError(error).message,
+            });
+            return;
+        }
+        try {
+            await this._offscreen.sendMessagePromise({action: 'clearDatabaseCachesOffscreen'});
+        } catch (error) {
+            reportDiagnostics('dictionary-offscreen-refresh-after-update-failed', {
+                action: 'clearDatabaseCachesOffscreen',
+                error: toError(error).message,
+            });
+        }
+    }
+
+    /**
      * Reloads the background dictionary DB connection so updates performed in
      * worker/offscreen contexts become visible to lookup queries.
      * @returns {Promise<void>}
@@ -3750,28 +3804,15 @@ export class Backend {
         let rerunRefresh = false;
         do {
             rerunRefresh = false;
-            const refreshOffscreenPromise = (async () => {
-                if (this._offscreen === null) {
-                    return;
-                }
-                try {
-                    await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
-                    await this._offscreen.sendMessagePromise({action: 'clearDatabaseCachesOffscreen'});
-                } catch (error) {
-                    reportDiagnostics('dictionary-offscreen-refresh-after-update-failed', {
-                        error: `${error}`,
-                    });
-                }
-            })();
             if (this._dictionaryRefreshPromise !== null) {
                 this._dictionaryRefreshQueued = true;
-                await Promise.all([refreshOffscreenPromise, this._dictionaryRefreshPromise]);
+                await this._dictionaryRefreshPromise;
                 continue;
             }
             if (typeof refreshConnectionMethod === 'function') {
                 this._dictionaryRefreshPromise = /** @type {() => Promise<void>} */ (refreshConnectionMethod).call(dictionaryDatabase);
                 try {
-                    await Promise.all([refreshOffscreenPromise, this._dictionaryRefreshPromise]);
+                    await this._dictionaryRefreshPromise;
                 } finally {
                     this._dictionaryRefreshPromise = null;
                     rerunRefresh = this._dictionaryRefreshQueued;
@@ -3784,11 +3825,12 @@ export class Backend {
                 typeof dictionaryDatabase.isPrepared === 'function' &&
                 dictionaryDatabase.isPrepared()
             )) {
-                await refreshOffscreenPromise;
+                await this._refreshOffscreenDictionaryRuntimeAfterUpdate();
                 rerunRefresh = this._dictionaryRefreshQueued;
                 this._dictionaryRefreshQueued = false;
                 continue;
             }
+            const refreshOffscreenPromise = this._refreshOffscreenDictionaryRuntimeAfterUpdate();
             this._dictionaryRefreshPromise = (async () => {
                 if ('close' in dictionaryDatabase && typeof dictionaryDatabase.close === 'function') {
                     await dictionaryDatabase.close();

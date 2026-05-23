@@ -47,6 +47,7 @@ describe('OffscreenProxy response diagnostics', () => {
     const onMessage = /** @type {(this: import('../ext/js/background/offscreen-proxy.js').DictionaryRuntimeWorkerProxy, event: MessageEvent<{id?: number, result?: unknown}>) => void} */ (getOffscreenProxyMethod('_onMessage'));
 
     afterEach(() => {
+        vi.useRealTimers();
         vi.restoreAllMocks();
         reportDiagnostics.mockReset();
     });
@@ -77,6 +78,34 @@ describe('OffscreenProxy response diagnostics', () => {
         expect(reportDiagnostics).toHaveBeenCalledWith('offscreen-proxy-unmatched-response', {
             reason: 'unknown-id',
             id: 99,
+            hasError: false,
+        });
+    });
+
+    test('dictionary runtime messages time out when the worker never answers', async () => {
+        vi.useFakeTimers();
+        const proxy = createProxyForInternalTests();
+        const postMessage = vi.fn();
+        Reflect.set(proxy, '_worker', {postMessage});
+        Reflect.set(proxy, '_responseHandlers', new Map());
+        Reflect.set(proxy, '_requestId', 0);
+        Reflect.set(proxy, '_fatalError', null);
+
+        const promise = DictionaryRuntimeWorkerProxy.prototype.sendMessagePromise.call(proxy, {action: 'findTermsOffscreen'});
+        const expectation = expect(promise).rejects.toThrow(/Timed out waiting for dictionary runtime response to findTermsOffscreen after 30000ms/);
+        await vi.advanceTimersByTimeAsync(30_000);
+        await expectation;
+
+        expect(postMessage).toHaveBeenCalledWith({id: 1, action: 'findTermsOffscreen', params: {}});
+        expect(Reflect.get(proxy, '_responseHandlers').size).toBe(0);
+
+        onMessage.call(proxy, /** @type {MessageEvent<{id?: number, result?: unknown}>} */ (/** @type {unknown} */ ({
+            data: {id: 1, result: {ok: true}},
+        })));
+
+        expect(reportDiagnostics).toHaveBeenCalledWith('offscreen-proxy-unmatched-response', {
+            reason: 'unknown-id',
+            id: 1,
             hasError: false,
         });
     });
