@@ -290,6 +290,9 @@ export class Offscreen {
         return await this._invokeDictionaryWorker('findTermsBulkOffscreen', {termList, dictionaryNames, matchType});
     }
 
+    /**
+     * @returns {Promise<unknown>}
+     */
     async _debugDictionaryStorageStateHandler() {
         return await this._invokeDictionaryWorker('debugDictionaryStorageStateOffscreen', {});
     }
@@ -387,8 +390,17 @@ export class Offscreen {
         try {
             await this._invokeDictionaryWorker('importDictionaryOffscreen', {archiveContent, details}, [ports[0]]);
         } catch (error) {
-            ports[0].postMessage({type: 'error', error: ExtensionError.serialize(error)});
-            ports[0].close();
+            try {
+                ports[0].postMessage({type: 'error', error: ExtensionError.serialize(error)});
+            } catch (_) {
+                // Best effort error delivery to the import caller.
+            } finally {
+                try {
+                    ports[0].close();
+                } catch (_) {
+                    // Ignore close failures for dead import response ports.
+                }
+            }
         }
     }
 
