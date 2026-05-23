@@ -31,6 +31,8 @@ export class DictionaryWorker {
         this._reuseWorker = options.reuseWorker === true;
         /** @type {Worker|null} */
         this._worker = null;
+        /** @type {Set<import('dictionary-worker').InvokeDetails<import('core').SafeAny, import('core').SafeAny>>} */
+        this._activeInvocations = new Set();
     }
 
     /**
@@ -96,10 +98,9 @@ export class DictionaryWorker {
 
     /** */
     destroy() {
-        if (this._worker !== null) {
-            this._worker.terminate();
-            this._worker = null;
-        }
+        const {_worker: worker} = this;
+        if (worker === null) { return; }
+        this._rejectInvocationsForWorker(worker, new Error('Dictionary worker destroyed'), true);
     }
 
     // Private
@@ -128,25 +129,9 @@ export class DictionaryWorker {
             const fail = (error) => {
                 const details = detailsRef;
                 if (details === null || details.complete) { return; }
-                const {worker: worker2, reject: reject2, onMessage, onError: onError2, onMessageError: onMessageError2} = details;
-                if (worker2 === null || reject2 === null || onMessage === null) { return; }
-                details.complete = true;
-                details.worker = null;
-                details.resolve = null;
-                details.reject = null;
-                details.onMessage = null;
-                details.onError = null;
-                details.onMessageError = null;
-                details.onProgress = null;
-                details.formatResult = null;
-                worker2.removeEventListener('message', onMessage);
-                if (onError2 !== null) { worker2.removeEventListener('error', onError2); }
-                if (onMessageError2 !== null) { worker2.removeEventListener('messageerror', onMessageError2); }
-                worker2.terminate();
-                if (this._worker === worker2) {
-                    this._worker = null;
-                }
-                reject2(error);
+                const {worker: worker2} = details;
+                if (worker2 === null) { return; }
+                this._rejectInvocationsForWorker(worker2, error, true);
             };
             /**
              * @param {ErrorEvent} event
@@ -180,6 +165,7 @@ export class DictionaryWorker {
             details.onError = onError;
             details.onMessageError = onMessageError;
             detailsRef = details;
+            this._activeInvocations.add(/** @type {import('dictionary-worker').InvokeDetails<import('core').SafeAny, import('core').SafeAny>} */ (details));
             worker.addEventListener('message', onMessage);
             worker.addEventListener('error', onError);
             worker.addEventListener('messageerror', onMessageError);
@@ -206,6 +192,7 @@ export class DictionaryWorker {
                     const {worker, resolve, reject, onMessage, onError, onMessageError, formatResult} = details;
                     if (worker === null || onMessage === null || resolve === null || reject === null) { return; }
                     details.complete = true;
+                    this._activeInvocations.delete(/** @type {import('dictionary-worker').InvokeDetails<import('core').SafeAny, import('core').SafeAny>} */ (details));
                     details.worker = null;
                     details.resolve = null;
                     details.reject = null;
@@ -277,6 +264,40 @@ export class DictionaryWorker {
         if (typeof onProgress !== 'function') { return; }
         const {args} = params;
         onProgress(...args);
+    }
+
+    /**
+     * @param {Worker} worker
+     * @param {Error} error
+     * @param {boolean} terminateWorker
+     */
+    _rejectInvocationsForWorker(worker, error, terminateWorker) {
+        if (this._worker === worker) {
+            this._worker = null;
+        }
+
+        for (const details of this._activeInvocations) {
+            if (details.worker !== worker || details.complete) { continue; }
+            const {reject, onMessage, onError, onMessageError} = details;
+            details.complete = true;
+            details.worker = null;
+            details.resolve = null;
+            details.reject = null;
+            details.onMessage = null;
+            details.onError = null;
+            details.onMessageError = null;
+            details.onProgress = null;
+            details.formatResult = null;
+            this._activeInvocations.delete(details);
+            if (onMessage !== null) { worker.removeEventListener('message', onMessage); }
+            if (onError !== null) { worker.removeEventListener('error', onError); }
+            if (onMessageError !== null) { worker.removeEventListener('messageerror', onMessageError); }
+            if (reject !== null) { reject(error); }
+        }
+
+        if (terminateWorker) {
+            worker.terminate();
+        }
     }
 
     /**

@@ -421,6 +421,60 @@ describe('DictionaryWorker MDX import integration', () => {
         await expect(invocationPromise).resolves.toBe(1);
     });
 
+    test('rejects active reusable worker invocations when destroyed', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn((url, options) => {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const dictionaryWorker = new DictionaryWorker({reuseWorker: true});
+        const invocationPromise = dictionaryWorker.getMdxVersion();
+
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+
+        const expectation = expect(invocationPromise).rejects.toThrow('Dictionary worker destroyed');
+        dictionaryWorker.destroy();
+        await expectation;
+
+        const [worker] = workerInstances;
+        expect(worker?.terminate).toHaveBeenCalledTimes(1);
+        expect(worker?._listeners.message).toHaveLength(0);
+        expect(worker?._listeners.error).toHaveLength(0);
+        expect(worker?._listeners.messageerror).toHaveLength(0);
+    });
+
+    test('rejects every active reusable worker invocation on worker failure', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn((url, options) => {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const dictionaryWorker = new DictionaryWorker({reuseWorker: true});
+        const versionPromise = dictionaryWorker.getMdxVersion();
+        const countPromise = dictionaryWorker.getDictionaryCounts(['Fixture'], true);
+
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+            expect(workerInstances[0]?.postMessage).toHaveBeenCalledTimes(2);
+        });
+
+        const versionExpectation = expect(versionPromise).rejects.toThrow('Dictionary worker failed: Dictionary worker exploded');
+        const countExpectation = expect(countPromise).rejects.toThrow('Dictionary worker failed: Dictionary worker exploded');
+        workerInstances[0]?.emitError('Dictionary worker exploded');
+
+        await versionExpectation;
+        await countExpectation;
+        expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
+    });
+
     test('surfaces worker failures and disconnects cleanly during direct MDX import', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];

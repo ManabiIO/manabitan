@@ -1686,6 +1686,10 @@ export class DictionaryImportController {
                 cleanup();
                 reject(toError(error));
             };
+            const getAbortError = () => {
+                const abortReason = /** @type {unknown} */ (abortSignal.reason);
+                return abortReason instanceof Error ? abortReason : new Error(`Aborted fetching dictionary archive: ${url}`);
+            };
             const onAbortSignal = () => {
                 try {
                     request.abort();
@@ -1716,8 +1720,7 @@ export class DictionaryImportController {
                 fail(new Error(`Failed to fetch dictionary archive: ${url}`));
             };
             request.onabort = () => {
-                const abortReason = /** @type {unknown} */ (abortSignal.reason);
-                fail(abortReason instanceof Error ? abortReason : new Error(`Aborted fetching dictionary archive: ${url}`));
+                fail(getAbortError());
             };
             request.ontimeout = () => {
                 fail(new Error(`Timed out fetching URL after ${String(timeoutMs)}ms: ${url}`));
@@ -1726,6 +1729,10 @@ export class DictionaryImportController {
                 if (!event.lengthComputable) { return; }
                 onProgress({nextStep: false, index: event.loaded, count: event.total});
             };
+            if (abortSignal.aborted) {
+                fail(getAbortError());
+                return;
+            }
             abortSignal.addEventListener('abort', onAbortSignal, {once: true});
             try {
                 request.send();

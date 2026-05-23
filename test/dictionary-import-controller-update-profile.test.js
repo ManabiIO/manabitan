@@ -95,9 +95,9 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         Reflect.set(controller, '_showErrors', showErrors);
         Reflect.set(controller, '_recordImportDebugSnapshot', vi.fn());
         Reflect.set(controller, '_tryImportDictionaryOffscreen', vi.fn().mockResolvedValue({
-                result: {title: 'Jitendex staged [update-staging token123]', sourceTitle: 'Jitendex.org [2026-02-05]'},
-                errors: [],
-                debug: {importerDebug: {phaseTimings: []}},
+            result: {title: 'Jitendex staged [update-staging token123]', sourceTitle: 'Jitendex.org [2026-02-05]'},
+            errors: [],
+            debug: {importerDebug: {phaseTimings: []}},
         }));
 
         const result = await importDictionaryFromZip.call(
@@ -134,5 +134,55 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         expect(options.profiles[0].options.anki.cardFormats[0].fields.expression.value).toContain('jitendexorg-2026-02-05');
         expect(options.profiles[1].options.anki.cardFormats[0].fields.expression.value).toBe('{{untouched}}');
         expect(showErrors).not.toHaveBeenCalled();
+    });
+});
+
+describe('DictionaryImportController URL download cancellation', () => {
+    const downloadDictionaryFileViaXhr = /** @type {(this: DictionaryImportController, url: string, timeoutMs: number, onProgress: import('dictionary-worker').ImportProgressCallback, abortSignal: AbortSignal) => Promise<File>} */ (getDictionaryImportControllerMethod('_downloadDictionaryFileViaXhr'));
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.unstubAllGlobals();
+    });
+
+    test('does not send XHR when the abort signal is already cancelled', async () => {
+        /** @type {FakeXMLHttpRequest[]} */
+        const requests = [];
+        class FakeXMLHttpRequest {
+            /** */
+            constructor() {
+                this.open = vi.fn();
+                this.send = vi.fn();
+                this.abort = vi.fn();
+                this.getResponseHeader = vi.fn(() => null);
+                this.responseType = '';
+                this.timeout = 0;
+                this.onload = null;
+                this.onerror = null;
+                this.onabort = null;
+                this.ontimeout = null;
+                this.onprogress = null;
+                this.status = 0;
+                this.response = null;
+                requests.push(this);
+            }
+        }
+        vi.stubGlobal('XMLHttpRequest', FakeXMLHttpRequest);
+
+        const controller = createControllerForInternalTests();
+        const abortController = new AbortController();
+        abortController.abort(new Error('Cancelled before download'));
+
+        await expect(downloadDictionaryFileViaXhr.call(
+            controller,
+            'https://example.com/dictionary.zip',
+            1000,
+            vi.fn(),
+            abortController.signal,
+        )).rejects.toThrow('Cancelled before download');
+
+        expect(requests).toHaveLength(1);
+        expect(requests[0].open).toHaveBeenCalledTimes(1);
+        expect(requests[0].send).not.toHaveBeenCalled();
     });
 });
