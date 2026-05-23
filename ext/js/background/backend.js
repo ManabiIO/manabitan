@@ -54,6 +54,37 @@ const STARTUP_DIAGNOSTICS_STORAGE_KEY = 'manabitanStartupDiagnostics';
 const DICTIONARY_REFRESH_RETRY_DELAYS_MS = [250, 1000, 3000, 10000];
 
 /**
+ * @param {?MessagePort} responsePort
+ * @param {unknown} message
+ * @returns {boolean}
+ */
+function postDictionaryImportResponseMessage(responsePort, message) {
+    if (responsePort === null) {
+        return false;
+    }
+    try {
+        responsePort.postMessage(message);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+/**
+ * @param {?MessagePort} responsePort
+ */
+function closeDictionaryImportResponsePort(responsePort) {
+    if (responsePort === null) {
+        return;
+    }
+    try {
+        responsePort.close();
+    } catch (_) {
+        // Ignore close failures for dead import response ports.
+    }
+}
+
+/**
  * This class controls the core logic of the extension, including API calls
  * and various forms of communication between browser tabs and external applications.
  */
@@ -349,13 +380,8 @@ export class Backend {
             }
             await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort);
         } catch (error) {
-            try {
-                responsePort?.postMessage({type: 'error', error: ExtensionError.serialize(error)});
-            } catch (_) {
-                // Best effort error delivery to the import caller.
-            } finally {
-                responsePort?.close();
-            }
+            postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
+            closeDictionaryImportResponsePort(responsePort);
         }
     }
 
@@ -379,14 +405,14 @@ export class Backend {
             try {
                 // Without an explicit download progress phase here, fallback URL imports
                 // mislabel long download time as the later archive-loading step.
-                responsePort.postMessage({type: 'progress', progress: {nextStep: true, index: 0, count: 0}});
+                postDictionaryImportResponseMessage(responsePort, {type: 'progress', progress: {nextStep: true, index: 0, count: 0}});
                 const archiveContent = await this._downloadDictionaryArchiveBlobViaXhr(normalizedUrl, downloadTimeoutMs, (phase) => {
                     this._lastDictionaryUrlImportDebug = {
                         ...this._lastDictionaryUrlImportDebug,
                         ...phase,
                     };
                 }, (loaded, total) => {
-                    responsePort.postMessage({type: 'progress', progress: {nextStep: false, index: loaded, count: total}});
+                    postDictionaryImportResponseMessage(responsePort, {type: 'progress', progress: {nextStep: false, index: loaded, count: total}});
                 });
                 this._lastDictionaryUrlImportDebug = {
                     ...this._lastDictionaryUrlImportDebug,
@@ -423,13 +449,8 @@ export class Backend {
                 errorMessage: normalizedError.message,
                 failedAtIso: new Date().toISOString(),
             };
-            try {
-                responsePort?.postMessage({type: 'error', error: ExtensionError.serialize(normalizedError)});
-            } catch (_) {
-                // Best effort error delivery to the import caller.
-            } finally {
-                responsePort?.close();
-            }
+            postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(normalizedError)});
+            closeDictionaryImportResponsePort(responsePort);
         }
     }
 

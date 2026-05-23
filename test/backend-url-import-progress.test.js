@@ -20,6 +20,33 @@ import {describe, expect, test, vi} from 'vitest';
 const {Backend} = await import('../ext/js/background/backend.js');
 
 describe('Backend URL import progress', () => {
+    test('_onPmImportDictionaryOffscreen does not throw when error delivery to a dead response port fails', async () => {
+        const responsePort = {
+            postMessage: vi.fn(() => {
+                throw new Error('response port is closed');
+            }),
+            close: vi.fn(() => {
+                throw new Error('response port close failed');
+            }),
+        };
+        const context = /** @type {any} */ ({
+            _forwardDictionaryImportToRuntime: vi.fn(async () => {
+                throw new Error('dictionary runtime unavailable');
+            }),
+        });
+
+        await expect(Reflect.get(Backend.prototype, '_onPmImportDictionaryOffscreen').call(
+            context,
+            {archiveContent: new Blob(['dictionary']), details: {}},
+            [responsePort],
+        )).resolves.toBeUndefined();
+
+        expect(responsePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({
+            type: 'error',
+        }));
+        expect(responsePort.close).toHaveBeenCalledTimes(1);
+    });
+
     test('_onPmImportDictionaryUrlOffscreen reports download progress before forwarding to runtime', async () => {
         const responsePort = {
             postMessage: vi.fn(),
@@ -56,6 +83,36 @@ describe('Backend URL import progress', () => {
             type: 'progress',
             progress: {nextStep: false, index: 100, count: 100},
         });
+        expect(forwardDictionaryImportToRuntime).toHaveBeenCalledWith(archiveBlob, {}, responsePort);
+        expect(responsePort.close).not.toHaveBeenCalled();
+    });
+
+    test('_onPmImportDictionaryUrlOffscreen treats download progress as best effort', async () => {
+        const responsePort = {
+            postMessage: vi.fn(() => {
+                throw new Error('response port is closed');
+            }),
+            close: vi.fn(),
+        };
+        const archiveBlob = new Blob(['dictionary']);
+        const forwardDictionaryImportToRuntime = vi.fn(async () => {});
+        const downloadDictionaryArchiveBlobViaXhr = vi.fn(async (_url, _timeoutMs, _onPhase, onProgress) => {
+            onProgress?.(50, 100);
+            return archiveBlob;
+        });
+        const context = /** @type {any} */ ({
+            _lastDictionaryUrlImportDebug: null,
+            _downloadDictionaryArchiveBlobViaXhr: downloadDictionaryArchiveBlobViaXhr,
+            _forwardDictionaryImportToRuntime: forwardDictionaryImportToRuntime,
+        });
+
+        await Reflect.get(Backend.prototype, '_onPmImportDictionaryUrlOffscreen').call(
+            context,
+            {url: 'https://example.com/jitendex.zip', details: {}},
+            [responsePort],
+        );
+
+        expect(responsePort.postMessage).toHaveBeenCalledTimes(2);
         expect(forwardDictionaryImportToRuntime).toHaveBeenCalledWith(archiveBlob, {}, responsePort);
         expect(responsePort.close).not.toHaveBeenCalled();
     });
