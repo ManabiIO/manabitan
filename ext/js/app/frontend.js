@@ -808,9 +808,9 @@ export class Frontend {
         const results = [];
         /** @type {(value: ?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}) => void} */
         let resolveFirstMatchedResult = () => {};
-        const firstMatchedResultPromise = new Promise((resolve) => {
+        const firstMatchedResultPromise = /** @type {Promise<?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>} */ (new Promise((resolve) => {
             resolveFirstMatchedResult = resolve;
-        });
+        }));
 
         const resultsPromise = (async () => {
             let matched = false;
@@ -1245,6 +1245,7 @@ export class Frontend {
      * @param {?string} documentTitle
      * @param {import('settings').OptionsContext} optionsContext
      * @param {'dark' | 'light'} pageTheme
+     * @param {number} searchSuccessAt
      */
     _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme, searchSuccessAt = safePerformance.now()) {
         const query = textSource.text();
@@ -1292,6 +1293,7 @@ export class Frontend {
      * @param {import('text-source').TextSource} textSource
      * @param {?import('settings').OptionsContext} optionsContext
      * @param {?import('display').ContentDetails} details
+     * @param {number} searchSuccessAt
      * @returns {Promise<void>}
      */
     _showPopupContent(textSource, optionsContext, details, searchSuccessAt = safePerformance.now()) {
@@ -1318,16 +1320,18 @@ export class Frontend {
             ) :
             Promise.resolve()
         );
-        void this._lastShowPromise.then(() => {
-            this._updatePageDebugState({
-                popupShowSettled: true,
-                popupShowDurationMs: Math.round(safePerformance.now() - showRequestedAt),
-            });
-        });
-        this._lastShowPromise.catch((error) => {
-            if (this._application.webExtension.unloaded) { return; }
-            log.error(error);
-        });
+        void this._lastShowPromise.then(
+            () => {
+                this._updatePageDebugState({
+                    popupShowSettled: true,
+                    popupShowDurationMs: Math.round(safePerformance.now() - showRequestedAt),
+                });
+            },
+            (error) => {
+                if (this._application.webExtension.unloaded) { return; }
+                log.error(error);
+            },
+        );
         return this._lastShowPromise;
     }
 

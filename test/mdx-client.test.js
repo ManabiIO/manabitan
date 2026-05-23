@@ -103,6 +103,7 @@ class FakeWorker {
 }
 
 afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
 });
@@ -247,6 +248,56 @@ describe('Mdx conversion worker client', () => {
         });
 
         await expect(invocationPromise).rejects.toThrow('MDX conversion worker returned malformed message');
+        expect(mdx.isActive()).toBe(false);
+        expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
+    });
+
+    test('disconnect rejects active conversion instead of leaving it pending', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn((url, options) => {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const mdx = new Mdx();
+        const invocationPromise = mdx.convertDictionary({
+            mdxFile: new File([createBytes(4, 3)], 'fixture.mdx'),
+        });
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+
+        mdx.disconnect();
+
+        await expect(invocationPromise).rejects.toThrow('MDX conversion cancelled');
+        expect(mdx.isActive()).toBe(false);
+        expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
+    });
+
+    test('times out when worker never sends a completion message', async () => {
+        vi.useFakeTimers();
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn((url, options) => {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const mdx = new Mdx();
+        const invocationPromise = mdx.convertDictionary({
+            mdxFile: new File([createBytes(4, 3)], 'fixture.mdx'),
+        });
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+
+        const expectation = expect(invocationPromise).rejects.toThrow('MDX conversion worker did not complete within 180000ms');
+        await vi.advanceTimersByTimeAsync(180_000);
+        await expectation;
+
         expect(mdx.isActive()).toBe(false);
         expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
     });

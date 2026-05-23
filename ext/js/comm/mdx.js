@@ -16,6 +16,7 @@
  */
 
 const UNSUPPORTED_VARIANT_ERROR_MESSAGE = 'This MDX file uses an unsupported compression, encryption, or format variant. Convert it externally first or try a different MDX source.';
+const CONVERSION_TIMEOUT_MS = 180_000;
 
 /**
  * @typedef {{stage: 'upload'|'convert'|'download', completed: number, total: number}} MdxProgressDetails
@@ -147,6 +148,10 @@ export class Mdx {
         this._version = 2;
         /** @type {boolean} */
         this._active = false;
+        /** @type {((error: Error) => void)|null} */
+        this._activeReject = null;
+        /** @type {ReturnType<typeof setTimeout>|null} */
+        this._activeTimeout = null;
     }
 
     /**
@@ -179,11 +184,21 @@ export class Mdx {
 
     /** */
     disconnect() {
+        const activeReject = this._activeReject;
+        this._activeReject = null;
+        if (this._activeTimeout !== null) {
+            clearTimeout(this._activeTimeout);
+            this._activeTimeout = null;
+        }
         if (this._worker !== null) {
             this._worker.terminate();
             this._worker = null;
         }
+        const wasActive = this._active;
         this._active = false;
+        if (wasActive && activeReject !== null) {
+            activeReject(new Error('MDX conversion cancelled'));
+        }
     }
 
     /**
@@ -242,14 +257,53 @@ export class Mdx {
                 return;
             }
             this._worker = worker;
+            /** @type {boolean} */
+            let settled = false;
+
+            /**
+             * @returns {void}
+             */
+            const cleanup = () => {
+                if (this._activeTimeout !== null) {
+                    clearTimeout(this._activeTimeout);
+                    this._activeTimeout = null;
+                }
+                this._activeReject = null;
+                this._active = false;
+                if (this._worker === worker) {
+                    this._worker = null;
+                }
+                worker.terminate();
+            };
 
             /**
              * @param {Error} error
              */
             const fail = (error) => {
-                this.disconnect();
+                if (settled) { return; }
+                settled = true;
+                cleanup();
                 reject(error);
             };
+
+            /**
+             * @param {{archiveContent: ArrayBuffer, archiveFileName: string, phaseTimings: MdxPhaseTiming[]}} result
+             */
+            const complete = (result) => {
+                if (settled) { return; }
+                settled = true;
+                cleanup();
+                resolve(result);
+            };
+
+            this._activeReject = (error) => {
+                if (settled) { return; }
+                settled = true;
+                reject(error);
+            };
+            this._activeTimeout = setTimeout(() => {
+                fail(new Error(`MDX conversion worker did not complete within ${String(CONVERSION_TIMEOUT_MS)}ms`));
+            }, CONVERSION_TIMEOUT_MS);
 
             worker.addEventListener('message', (event) => {
                 const message = parseWorkerMessage(event.data);
@@ -265,7 +319,6 @@ export class Mdx {
                         break;
                     }
                     case 'complete': {
-                        this._active = false;
                         const {error = '', result} = message.params;
                         if (error.length > 0) {
                             fail(this._normalizeError(error));
@@ -277,8 +330,7 @@ export class Mdx {
                             fail(new Error('MDX conversion worker returned invalid archive data'));
                             return;
                         }
-                        this.disconnect();
-                        resolve({archiveContent, archiveFileName, phaseTimings: result?.phaseTimings ?? []});
+                        complete({archiveContent, archiveFileName, phaseTimings: result?.phaseTimings ?? []});
                         break;
                     }
                 }

@@ -17,6 +17,7 @@
 
 import {describe, expect, test, vi} from 'vitest';
 import {Frontend} from '../ext/js/app/frontend.js';
+import {log} from '../ext/js/core/log.js';
 
 describe('Frontend dictionary update handling', () => {
     test('hover lookup prewarm marks ready after the first dictionary hit before all probes finish', async () => {
@@ -314,6 +315,29 @@ describe('Frontend dictionary update handling', () => {
         expect(Reflect.get(frontend, '_textScanner').searchLast).not.toHaveBeenCalled();
         expect(Reflect.get(frontend, '_clearSelection')).not.toHaveBeenCalled();
         expect(Reflect.get(frontend, '_clearMousePosition')).not.toHaveBeenCalled();
+    });
+
+    test('popup show failures are observed without creating a detached rejection', async () => {
+        const error = new Error('show failed');
+        const logError = vi.spyOn(log, 'error').mockImplementation(() => {});
+        try {
+            const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
+            const textSource = {
+                getRects: vi.fn(() => []),
+                getWritingMode: vi.fn(() => 'horizontal-tb'),
+            };
+            Reflect.set(frontend, '_application', {webExtension: {unloaded: false}});
+            Reflect.set(frontend, '_popup', {showContent: vi.fn().mockRejectedValue(error)});
+            Reflect.set(frontend, '_updatePageDebugState', vi.fn());
+
+            const showPopupContent = Reflect.get(Frontend.prototype, '_showPopupContent');
+            const showPromise = showPopupContent.call(frontend, textSource, {}, null);
+
+            await expect(showPromise).rejects.toThrow('show failed');
+            expect(logError).toHaveBeenCalledWith(error);
+        } finally {
+            logError.mockRestore();
+        }
     });
 
     test('dictionary-update empty results clear stale hover state even when auto-hide is disabled', () => {
