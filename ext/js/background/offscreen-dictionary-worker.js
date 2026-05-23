@@ -29,7 +29,7 @@ import {Translator} from '../language/translator.js';
  * @typedef {{id: number, result?: unknown, error?: import('core').SerializedError}} WorkerResponse
  */
 
-class OffscreenDictionaryWorkerHandler {
+export class OffscreenDictionaryWorkerHandler {
     constructor() {
         /** @type {DictionaryDatabase} */
         this._dictionaryDatabase = new DictionaryDatabase();
@@ -138,28 +138,46 @@ class OffscreenDictionaryWorkerHandler {
     /**
      * @param {MessagePort} port
      * @param {unknown} progress
+     * @returns {boolean}
      */
     _postImportProgress(port, progress) {
-        port.postMessage({type: 'progress', progress});
+        return this._postImportPortMessage(port, {type: 'progress', progress});
     }
 
     /**
      * @param {MessagePort} port
      * @param {unknown} result
+     * @returns {boolean}
      */
     _postImportComplete(port, result) {
-        port.postMessage({type: 'complete', result});
+        return this._postImportPortMessage(port, {type: 'complete', result});
     }
 
     /**
      * @param {MessagePort} port
      * @param {unknown} error
+     * @returns {boolean}
      */
     _postImportError(port, error) {
-        port.postMessage({
+        return this._postImportPortMessage(port, {
             type: 'error',
             error: ExtensionError.serialize(error),
         });
+    }
+
+    /**
+     * @param {MessagePort} port
+     * @param {unknown} message
+     * @returns {boolean}
+     */
+    _postImportPortMessage(port, message) {
+        try {
+            port.postMessage(message);
+            return true;
+        } catch (error) {
+            log.warn(error);
+            return false;
+        }
     }
 
     /**
@@ -171,7 +189,12 @@ class OffscreenDictionaryWorkerHandler {
     async _importDictionaryOffscreen(details, archiveContent, port) {
         this._assertDatabaseAvailable('importDictionaryOffscreen');
         await this._ensureDatabasePrepared();
-        const dictionaryImporter = new DictionaryImporter(this._mediaLoader, this._postImportProgress.bind(this, port));
+        let responsePortAvailable = true;
+        const onProgress = (progress) => {
+            if (!responsePortAvailable) { return; }
+            responsePortAvailable = this._postImportProgress(port, progress);
+        };
+        const dictionaryImporter = new DictionaryImporter(this._mediaLoader, onProgress);
         try {
             const importPayload = await dictionaryImporter.importDictionary(this._dictionaryDatabase, archiveContent, details);
             const {result, errors, debug} = importPayload;
@@ -193,7 +216,11 @@ class OffscreenDictionaryWorkerHandler {
         } catch (error) {
             this._postImportError(port, error);
         } finally {
-            port.close();
+            try {
+                port.close();
+            } catch (_) {
+                // Ignore close failures for dead import response ports.
+            }
         }
     }
 
@@ -283,29 +310,33 @@ class OffscreenDictionaryWorkerHandler {
             case 'debugDictionaryStorageStateOffscreen':
                 this._assertDatabaseAvailable(action);
                 await this._ensureDatabasePrepared();
-                return {
-                    dictionaryRows: await this._dictionaryDatabase.debugGetDictionaryRows(),
-                    lastReplaceDictionaryTitleDebug: (
-                        typeof this._dictionaryDatabase.getLastReplaceDictionaryTitleDebug === 'function' ?
-                            this._dictionaryDatabase.getLastReplaceDictionaryTitleDebug() :
-                            null
-                    ),
-                    startupCleanupIncompleteImportsSummary: (
-                        typeof this._dictionaryDatabase.getStartupCleanupIncompleteImportsSummary === 'function' ?
-                            this._dictionaryDatabase.getStartupCleanupIncompleteImportsSummary() :
-                            null
-                    ),
-                    startupCleanupMissingTermRecordShardsSummary: (
-                        typeof this._dictionaryDatabase.getStartupCleanupMissingTermRecordShardsSummary === 'function' ?
-                            this._dictionaryDatabase.getStartupCleanupMissingTermRecordShardsSummary() :
-                            null
-                    ),
-                    termRecordShardFileNames: (
-                        typeof this._dictionaryDatabase._termRecordStore?.getShardFileNames === 'function' ?
-                            this._dictionaryDatabase._termRecordStore.getShardFileNames() :
-                            []
-                    ),
-                };
+                {
+                    const termRecordStore = Reflect.get(this._dictionaryDatabase, '_termRecordStore');
+                    const getShardFileNames = Reflect.get(termRecordStore, 'getShardFileNames');
+                    return {
+                        dictionaryRows: await this._dictionaryDatabase.debugGetDictionaryRows(),
+                        lastReplaceDictionaryTitleDebug: (
+                            typeof this._dictionaryDatabase.getLastReplaceDictionaryTitleDebug === 'function' ?
+                                this._dictionaryDatabase.getLastReplaceDictionaryTitleDebug() :
+                                null
+                        ),
+                        startupCleanupIncompleteImportsSummary: (
+                            typeof this._dictionaryDatabase.getStartupCleanupIncompleteImportsSummary === 'function' ?
+                                this._dictionaryDatabase.getStartupCleanupIncompleteImportsSummary() :
+                                null
+                        ),
+                        startupCleanupMissingTermRecordShardsSummary: (
+                            typeof this._dictionaryDatabase.getStartupCleanupMissingTermRecordShardsSummary === 'function' ?
+                                this._dictionaryDatabase.getStartupCleanupMissingTermRecordShardsSummary() :
+                                null
+                        ),
+                        termRecordShardFileNames: (
+                            typeof getShardFileNames === 'function' ?
+                                getShardFileNames.call(termRecordStore) :
+                                []
+                        ),
+                    };
+                }
             case 'debugDictionaryLookupStateOffscreen':
                 this._assertDatabaseAvailable(action);
                 await this._ensureDatabasePrepared();
@@ -443,6 +474,7 @@ class OffscreenDictionaryWorkerHandler {
         const getLastReadErrorDetails = Reflect.get(termContentStore, 'getLastReadErrorDetails');
         const getDebugState = Reflect.get(termContentStore, 'getDebugState');
         const textDecoder = new TextDecoder();
+        /** @type {Map<string, Record<string, unknown>>} */
         const sqlRowsByKey = new Map();
         if (typeof requireDb === 'function') {
             try {
@@ -466,7 +498,7 @@ class OffscreenDictionaryWorkerHandler {
                         {$dictionary: dictionaryName, $text: text},
                     ));
                     for (const row of rows) {
-                        const key = `${String(row.dictionary ?? '')}\u0000${String(row.expression ?? '')}\u0000${String(row.reading ?? '')}`;
+                        const key = this._createDebugTermRowKey(row.dictionary, row.expression, row.reading);
                         if (!sqlRowsByKey.has(key)) {
                             sqlRowsByKey.set(key, {
                                 dictionary: row.dictionary ?? null,
@@ -508,6 +540,7 @@ class OffscreenDictionaryWorkerHandler {
             });
         }
         const rowsById = await fetchTermRowsByIds.call(this._dictionaryDatabase, ids.keys());
+        /** @type {Array<Record<string, unknown>>} */
         const rowSample = [];
         for (const [id, match] of ids) {
             const row = rowsById.get(id);
@@ -553,7 +586,7 @@ class OffscreenDictionaryWorkerHandler {
                 rawEntryContentOffset: rawRecord?.entryContentOffset ?? null,
                 rawEntryContentLength: rawRecord?.entryContentLength ?? null,
                 rawEntryContentDictName: rawRecord?.entryContentDictName ?? null,
-                sqlTermRow: sqlRowsByKey.get(`${String(row?.dictionary ?? match.dictionary)}\u0000${String(row?.expression ?? '')}\u0000${String(row?.reading ?? '')}`) ?? null,
+                sqlTermRow: sqlRowsByKey.get(this._createDebugTermRowKey(row?.dictionary ?? match.dictionary, row?.expression, row?.reading)) ?? null,
                 rawContentPreview,
                 readErrorDetails,
             });
@@ -567,6 +600,30 @@ class OffscreenDictionaryWorkerHandler {
             rowSample,
             termContentStoreDebugState: typeof getDebugState === 'function' ? getDebugState.call(termContentStore) : null,
         };
+    }
+
+    /**
+     * @param {unknown} dictionary
+     * @param {unknown} expression
+     * @param {unknown} reading
+     * @returns {string}
+     */
+    _createDebugTermRowKey(dictionary, expression, reading) {
+        return `${this._debugValueToKeyPart(dictionary)}\u0000${this._debugValueToKeyPart(expression)}\u0000${this._debugValueToKeyPart(reading)}`;
+    }
+
+    /**
+     * @param {unknown} value
+     * @returns {string}
+     */
+    _debugValueToKeyPart(value) {
+        return (
+            typeof value === 'string' ||
+            typeof value === 'number' ||
+            typeof value === 'boolean' ?
+                String(value) :
+                ''
+        );
     }
 }
 
