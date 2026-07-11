@@ -69,7 +69,7 @@ const ADAPTIVE_TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW = 128;
 const TERM_BANK_BYTE_PREFETCH_COUNT = 8;
 const SOURCE_TERM_BANK_BATCH_MAX_FILES = 32;
 const SOURCE_TERM_BANK_BATCH_MAX_BYTES = 32 * 1024 * 1024;
-const SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE = 16384;
+const SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE = 8192;
 const LARGE_ARCHIVE_ZIP_MAX_WORKERS = 2;
 const LARGE_ARCHIVE_ZIP_MAX_WORKERS_THRESHOLD_BYTES = 128 * 1024 * 1024;
 const REVERSE_STRING_CACHE_MAX_ENTRIES = 4096;
@@ -460,16 +460,31 @@ function byteRangeEqual(bytes, aStart, bStart, length) {
     return true;
 }
 
+/**
+ * Allows queued worker messages to run between CPU-heavy import chunks.
+ * @returns {Promise<void>}
+ */
+function yieldToEventLoop() {
+    return new Promise((resolve) => {
+        setTimeout(resolve, 0);
+    });
+}
+
 export class DictionaryImporter {
     /**
      * @param {import('dictionary-importer-media-loader').GenericMediaLoader} mediaLoader
      * @param {import('dictionary-importer').OnProgressCallback} [onProgress]
+     * @param {() => boolean} [isCancelled]
      */
-    constructor(mediaLoader, onProgress) {
+    constructor(mediaLoader, onProgress, isCancelled) {
         /** @type {import('dictionary-importer-media-loader').GenericMediaLoader} */
         this._mediaLoader = mediaLoader;
         /** @type {import('dictionary-importer').OnProgressCallback} */
         this._onProgress = typeof onProgress === 'function' ? onProgress : () => {};
+        /** @type {() => boolean} */
+        this._isCancelled = typeof isCancelled === 'function' ? isCancelled : () => false;
+        /** @type {boolean} */
+        this._ignoreCancellation = false;
         /** @type {import('dictionary-importer').ProgressData} */
         this._progressData = this._createProgressData();
         /** @type {number} */
@@ -479,7 +494,7 @@ export class DictionaryImporter {
         /** @type {boolean} */
         this._skipMediaImport = false;
         /** @type {number} */
-        this._mediaResolutionConcurrency = 8;
+        this._mediaResolutionConcurrency = 16;
         /** @type {Map<string, Promise<import('dictionary-database').MediaDataArrayBufferContent>>} */
         this._pendingImageMediaByPath = new Map();
         /** @type {Map<string, {mediaType: string, width: number, height: number}>} */
@@ -551,6 +566,7 @@ export class DictionaryImporter {
      * @returns {Promise<import('dictionary-importer').ImportResult>}
      */
     async importDictionary(dictionaryDatabase, archiveContent, details) {
+        this._ignoreCancellation = false;
         if (!dictionaryDatabase) {
             throw new Error('Invalid database');
         }
@@ -569,7 +585,7 @@ export class DictionaryImporter {
             'raw-bytes';
         this._skipImageMetadata = details.skipImageMetadata === true;
         this._skipMediaImport = details.skipMediaImport === true;
-        this._mediaResolutionConcurrency = Math.max(1, Math.min(32, Math.trunc(details.mediaResolutionConcurrency ?? 8)));
+        this._mediaResolutionConcurrency = Math.max(1, Math.min(32, Math.trunc(details.mediaResolutionConcurrency ?? 16)));
         this._debugImportLogging = details.debugImportLogging === true;
         let zipMaxWorkers = Number.isFinite(details.zipMaxWorkers) ? Math.max(1, Math.min(32, Math.trunc(/** @type {number} */ (details.zipMaxWorkers)))) : null;
         const zipChunkSize = Number.isFinite(details.zipChunkSize) ? Math.max(16 * 1024, Math.min(8 * 1024 * 1024, Math.trunc(/** @type {number} */ (details.zipChunkSize)))) : null;
@@ -655,6 +671,7 @@ export class DictionaryImporter {
             }
 
             for (let i = 0, chunkIndex = 0; i < entryCount; i += maxTransactionLength, ++chunkIndex) {
+                this._throwIfCancelled();
                 const count = Math.min(maxTransactionLength, entryCount - i);
                 const tChunk = Date.now();
 
@@ -1812,6 +1829,7 @@ export class DictionaryImporter {
                                 if (requirementsChunk !== null) {
                                     requirementsChunk.length = 0;
                                 }
+                                await yieldToEventLoop();
                             },
                             preloadedTermFileBytes,
                             sourceTermFileBatchCount > 1 ? SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE : null,
@@ -2086,7 +2104,17 @@ export class DictionaryImporter {
                 ok: false,
             });
         } finally {
-            await closeArchiveReader();
+            if (!importFailed && this._isCancelled()) {
+                importFailed = true;
+                errors.push(new Error('Dictionary import was cancelled'));
+            }
+            this._ignoreCancellation = true;
+            try {
+                await closeArchiveReader();
+            } catch (e) {
+                importFailed = true;
+                errors.push(new Error(`Failed to close dictionary archive: ${toError(e).message}`));
+            }
             this._setProgressInterval(previousProgressInterval);
             const tBulkFinalizationStart = Date.now();
             /** @type {{commitMs?: number, termContentEndImportSessionMs?: number, termRecordEndImportSessionMs?: number, termsVirtualTableSyncMs?: number, createIndexesMs?: number, createIndexesCheckpointCount?: number, cacheResetMs?: number, runtimePragmasMs?: number, totalMs?: number}|null} */
@@ -2121,6 +2149,11 @@ export class DictionaryImporter {
             dictionaryDatabase.setImportDebugLogging(false);
         }
 
+        if (!importFailed && this._isCancelled()) {
+            importFailed = true;
+            errors.push(new Error('Dictionary import was cancelled'));
+        }
+
         if (importFailed) {
             try {
                 await dictionaryDatabase.deleteDictionary(dictionaryTitle, 1000, () => {});
@@ -2151,6 +2184,16 @@ export class DictionaryImporter {
             summary.updateSessionToken = details.updateSessionToken.trim();
         }
         const tSummaryUpdateStart = Date.now();
+        if (this._isCancelled()) {
+            try {
+                await dictionaryDatabase.deleteDictionary(dictionaryTitle, 1000, () => {});
+            } catch (e) {
+                const cleanupError = toError(e);
+                errors.push(new Error(`Failed to clean up cancelled dictionary ${dictionaryTitle}: ${cleanupError.message}`));
+            }
+            errors.push(new Error('Dictionary import was cancelled'));
+            return {result: null, errors, debug: {phaseTimings}};
+        }
         await dictionaryDatabase.bulkUpdate('dictionaries', [{data: summary, primaryKey: dictionarySummaryPrimaryKey}], 0, 1);
         recordPhaseTiming('write-summary', tSummaryUpdateStart, {ok: true});
         this._logImport(`import done ${Date.now() - tImportStart}ms terms=${counts.terms.total} media=${counts.media.total}`);
@@ -2166,6 +2209,7 @@ export class DictionaryImporter {
     /**
      * @param {ArrayBuffer|Blob} archiveContent
      * @returns {Promise<{fileMap: import('dictionary-importer').ArchiveFileMap, zipReader: import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>}>}
+     * @throws {Error}
      */
     async _getFilesFromArchive(archiveContent) {
         const zipFileReader = (
@@ -2174,17 +2218,46 @@ export class DictionaryImporter {
                 new Uint8ArrayReader(new Uint8Array(archiveContent))
         );
         const zipReader = /** @type {import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>} */ (new ZipReader(zipFileReader));
-        const zipEntries = await zipReader.getEntries();
+        try {
+            const zipEntries = await zipReader.getEntries();
+            const fileMap = this._createArchiveFileMap(zipEntries);
+            return {fileMap, zipReader};
+        } catch (e) {
+            try {
+                await zipReader.close();
+            } catch (_) {
+                // Preserve the archive validation/read error.
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * @param {import('@zip.js/zip.js').Entry[]} zipEntries
+     * @returns {import('dictionary-importer').ArchiveFileMap}
+     */
+    _createArchiveFileMap(zipEntries) {
         /** @type {import('dictionary-importer').ArchiveFileMap} */
         const fileMap = new Map();
+        const actualFilenames = new Set();
         for (const entry of zipEntries) {
+            if (actualFilenames.has(entry.filename)) {
+                throw new Error(`Duplicate archive filename: '${entry.filename}'`);
+            }
+            actualFilenames.add(entry.filename);
+            if (fileMap.has(entry.filename)) {
+                throw new Error(`Ambiguous archive filename: '${entry.filename}'`);
+            }
             fileMap.set(entry.filename, entry);
             const utf8Alias = getArchiveEntryUtf8Alias(entry);
-            if (typeof utf8Alias === 'string' && !fileMap.has(utf8Alias)) {
+            if (typeof utf8Alias === 'string') {
+                if (fileMap.has(utf8Alias)) {
+                    throw new Error(`Ambiguous archive filename: '${utf8Alias}'`);
+                }
                 fileMap.set(utf8Alias, entry);
             }
         }
-        return {fileMap, zipReader};
+        return fileMap;
     }
 
     /**
@@ -2287,14 +2360,25 @@ export class DictionaryImporter {
 
     /**
      * @param {boolean} nextStep
+     * @throws {Error} If the import was cancelled.
      */
     _progress(nextStep = false) {
+        this._throwIfCancelled();
         const now = Date.now();
         if (!nextStep && (now - this._lastProgressTimestamp) < this._progressMinIntervalMs) {
             return;
         }
         this._lastProgressTimestamp = now;
         this._onProgress({...this._progressData, nextStep});
+    }
+
+    /**
+     * @throws {Error} If the import was cancelled.
+     */
+    _throwIfCancelled() {
+        if (!this._ignoreCancellation && this._isCancelled()) {
+            throw new Error('Dictionary import was cancelled');
+        }
     }
 
     /**
@@ -3429,10 +3513,11 @@ export class DictionaryImporter {
                 }
             }
 
-            if (Array.isArray(entries)) {
-                for (const entry of /** @type {TEntry[]} */ (entries)) {
-                    results.push(convertEntry(entry, dictionaryTitle));
-                }
+            if (!Array.isArray(entries)) {
+                throw new Error(`Expected a JSON array in '${file.filename}'`);
+            }
+            for (const entry of /** @type {TEntry[]} */ (entries)) {
+                results.push(convertEntry(entry, dictionaryTitle));
             }
         }
         return results;
@@ -3484,7 +3569,7 @@ export class DictionaryImporter {
             }
         }
         if (!Array.isArray(entries)) {
-            return {termList: [], requirements: null};
+            throw new Error(`Expected a JSON array in '${termFile.filename}'`);
         }
         const parsedEntries = /** @type {unknown[]} */ (entries);
         /** @type {import('dictionary-importer').ImportRequirement[]|null} */
@@ -3533,6 +3618,9 @@ export class DictionaryImporter {
     async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null, wasmRowChunkSizeOverride = null) {
         this._lastFastTermBankReadProfile = null;
         const bytes = preloadedBytes !== null ? await preloadedBytes : await this._getData(termFile, new Uint8ArrayWriter());
+        if (getJsonArrayContentSpan(bytes) === null) {
+            throw new Error(`Expected a JSON array in '${termFile.filename}'`);
+        }
         let wasmRowChunkSize = this._termBankWasmRowChunkSize;
         if (this._adaptiveTermBankWasmRowChunkSizeTiered) {
             if (

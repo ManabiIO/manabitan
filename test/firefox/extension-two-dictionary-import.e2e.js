@@ -1583,6 +1583,18 @@ async function searchTermAndGetDictionaryHitCounts(driver, term, expectedDiction
     await driver.wait(async () => {
         // Selenium executeScript return value is untyped (`any`).
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const ready = await driver.executeScript(`
+            const debugState = globalThis.__manabitanSearchDebug;
+            return document.documentElement.dataset.loaded === 'true' &&
+                debugState &&
+                typeof debugState === 'object' &&
+                debugState.controllerPrepared === true;
+        `);
+        return ready === true;
+    }, 30_000, 'Expected search page controller to finish initialization');
+    await driver.wait(async () => {
+        // Selenium executeScript return value is untyped (`any`).
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const submitted = await driver.executeScript(`
             const textbox = document.querySelector('#search-textbox');
             const searchButton = document.querySelector('#search-button');
@@ -2640,6 +2652,7 @@ async function main() {
     firefoxOptions.setPreference('dom.postMessage.sharedArrayBuffer.withCOOP_COEP', true);
     firefoxOptions.setPreference('dom.postMessage.sharedArrayBuffer.bypassCOOP_COEP.insecure.enabled', true);
     const configuredFirefoxBinary = String(process.env.MANABITAN_FIREFOX_BINARY || '').trim();
+    let selectedFirefoxBinary = configuredFirefoxBinary;
     if (configuredFirefoxBinary.length > 0) {
         try {
             await access(configuredFirefoxBinary);
@@ -2648,19 +2661,24 @@ async function main() {
         }
         firefoxOptions.setBinary(configuredFirefoxBinary);
     } else {
+        const firefoxStablePath = '/Applications/Firefox.app/Contents/MacOS/firefox';
         const firefoxDeveloperEditionPath = '/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox';
-        try {
-            await access(firefoxDeveloperEditionPath);
-            firefoxOptions.setBinary(firefoxDeveloperEditionPath);
-        } catch (_) {
-            // Use default Firefox binary when Developer Edition is unavailable.
+        for (const candidatePath of [firefoxStablePath, firefoxDeveloperEditionPath]) {
+            try {
+                await access(candidatePath);
+                firefoxOptions.setBinary(candidatePath);
+                selectedFirefoxBinary = candidatePath;
+                break;
+            } catch (_) {
+                // Try the next known macOS installation, then Selenium's default.
+            }
         }
     }
     if (configuredFirefoxProfileDir.length > 0) {
         await mkdir(configuredFirefoxProfileDir, {recursive: true});
         firefoxOptions.setProfile(configuredFirefoxProfileDir);
     }
-    console.log(`[firefox-e2e] addon package: path=${xpiPath} sizeBytes=${String(extensionPackageStats.size)} installMode=webdriver-addon headless=${String(headless)} binary=${configuredFirefoxBinary || 'default'} profileDir=${configuredFirefoxProfileDir || 'temporary'}`);
+    console.log(`[firefox-e2e] addon package: path=${xpiPath} sizeBytes=${String(extensionPackageStats.size)} installMode=webdriver-addon headless=${String(headless)} binary=${selectedFirefoxBinary || 'default'} profileDir=${configuredFirefoxProfileDir || 'temporary'}`);
     await mkdir(diagnosticsArtifactPaths.crashDumpDir, {recursive: true});
     geckodriverLogFd = openSync(diagnosticsArtifactPaths.geckodriverLogPath, 'a');
     const firefoxService = new firefox.ServiceBuilder();
@@ -3454,6 +3472,8 @@ async function main() {
                 postReloadKuuSearchEnd,
                 postReloadKuuSearchEnd,
             );
+            report.status = 'success';
+            console.log('[firefox-e2e] PASS: Focused Jitendex + JMnedict baseline completed.');
             return;
         }
 
@@ -3624,6 +3644,20 @@ async function main() {
             verifyStart,
             verifyEnd,
         );
+
+        if (focusedBaselineOnly) {
+            await addReportPhase(
+                report,
+                driver,
+                'Focused baseline complete',
+                'Focused Firefox baseline for Jitendex + JMdict completed, including concurrent lookup and content-integrity verification; skipping update, batch-import, and hover stress paths.',
+                verifyEnd,
+                verifyEnd,
+            );
+            report.status = 'success';
+            console.log('[firefox-e2e] PASS: Focused Jitendex + JMdict baseline completed.');
+            return;
+        }
 
         const updateTriggerStart = safePerformance.now();
         await driver.executeScript(`

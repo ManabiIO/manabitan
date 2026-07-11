@@ -214,7 +214,7 @@ describe('Backend lookup refresh gating', () => {
         }
     });
 
-    test('terms lookup returns the initial result when self-heal refresh fails', async () => {
+    test('ordinary empty terms lookup does not restart the dictionary database', async () => {
         const findTerms = vi.fn().mockResolvedValue({dictionaryEntries: [], originalTextLength: 2});
         const refreshDictionaryDatabaseAfterUpdate = vi.fn().mockRejectedValue(new Error('refresh failed'));
         const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
@@ -246,7 +246,7 @@ describe('Backend lookup refresh gating', () => {
 
         expect(result).toStrictEqual({dictionaryEntries: [], originalTextLength: 2});
         expect(findTerms).toHaveBeenCalledOnce();
-        expect(refreshDictionaryDatabaseAfterUpdate).toHaveBeenCalledOnce();
+        expect(refreshDictionaryDatabaseAfterUpdate).not.toHaveBeenCalled();
     });
 
     test('terms lookup does not wait for best-effort lookup cache warmup by default', async () => {

@@ -407,7 +407,7 @@ export class Frontend {
 
     /**
      * @param {import('application').EventArgument<'databaseUpdated'>} details
-     * @returns {void}
+     * @returns {Promise<void>}
      */
     async _onDatabaseUpdated({type}) {
         if (type !== 'dictionary') { return; }
@@ -773,6 +773,7 @@ export class Frontend {
                 }
             }
             const allWaitMs = Math.round(safePerformance.now() - startedAt);
+            /** @type {Record<string, string|number|boolean|null|undefined>} */
             const finalPrewarmState = {
                 lookupPrewarmReady: resultCount > 0,
                 lookupPrewarmResultCount: resultCount,
@@ -818,7 +819,7 @@ export class Frontend {
                 /** @type {import('dictionary').DictionaryEntry[]} */
                 let dictionaryEntries = [];
                 try {
-                    ({dictionaryEntries} = await this._application.api.termsFind(term, {skipLookupWarmWait: true}, optionsContext));
+                    ({dictionaryEntries} = await this._application.api.termsFind(term, {}, optionsContext));
                 } catch (_) {
                     // Best-effort prewarm; visible lookup correctness does not depend on probes.
                 }
@@ -908,9 +909,12 @@ export class Frontend {
         const terms = [];
         const ignoredParentNames = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT', 'SELECT', 'OPTION']);
         const walker = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT);
-        while (terms.length < 6) {
+        const deadline = safePerformance.now() + 8;
+        let visitedNodeCount = 0;
+        while (terms.length < 6 && visitedNodeCount < 2000 && safePerformance.now() < deadline) {
             const node = walker.nextNode();
             if (node === null) { break; }
+            ++visitedNodeCount;
             const parent = node.parentElement;
             if (parent === null || ignoredParentNames.has(parent.tagName) || parent.closest('[hidden],[aria-hidden="true"]') !== null) {
                 continue;

@@ -163,6 +163,9 @@ export class TermContentOpfsStore {
                 return;
             }
             await this._awaitQueuedWrites();
+            if (this._fileHandle !== null && !this._loadedForRead) {
+                await this.ensureLoadedForRead();
+            }
             this._importSessionActive = true;
             this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
             this._writeCoalesceMaxChunks = this._computeWriteCoalesceMaxChunks();
@@ -220,6 +223,7 @@ export class TermContentOpfsStore {
                 logicalLengthAfterClose,
                 ...this._writeDrainMetrics,
             };
+            this._invalidateReadState();
         });
     }
 
@@ -387,7 +391,9 @@ export class TermContentOpfsStore {
                 await this._finalizeAppendBatch([bytes]);
                 return {offset: offsets[0] ?? offset, length: lengths[0] ?? bytes.byteLength};
             }
-            this._invalidateReadState();
+            if (!this._importSessionActive) {
+                this._invalidateReadState();
+            }
             if (this._pendingWriteBytes > 0 || this._pendingWriteChunks.length > 0) {
                 await this._flushPendingWrites();
             }
@@ -469,7 +475,9 @@ export class TermContentOpfsStore {
                 totalBytes += chunk.byteLength;
             }
             if (totalBytes > 0) {
-                this._invalidateReadState();
+                if (!this._importSessionActive) {
+                    this._invalidateReadState();
+                }
                 for (const chunk of chunks) {
                     if (chunk.byteLength <= 0) { continue; }
                     this._pendingWriteBytes += chunk.byteLength;

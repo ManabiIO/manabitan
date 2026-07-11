@@ -400,6 +400,8 @@ export class DictionaryImportController {
         this._statusFooter = statusFooter;
         /** @type {boolean} */
         this._modifying = false;
+        /** @type {Mdx|null} */
+        this._activeMdx = null;
         /** @type {HTMLButtonElement} */
         this._purgeButton = querySelectorNotNull(document, '#dictionary-delete-all-button');
         /** @type {HTMLButtonElement} */
@@ -554,6 +556,8 @@ export class DictionaryImportController {
 
     /** */
     _onBeforeUnload() {
+        this._activeMdx?.disconnect();
+        this._activeMdx = null;
         document.removeEventListener('click', this._onDocumentClickCaptureBind, true);
         globalThis.removeEventListener('manabitan:modal-visibility-changed', this._onModalVisibilityChangedEventBind, false);
         this._recommendedDictionariesModal?.off('visibilityChanged', this._onRecommendedDictionariesModalVisibilityChangedBind);
@@ -1504,6 +1508,8 @@ export class DictionaryImportController {
      */
     _forceRecoverHungImportSession(error, label) {
         this._activeImportRunGeneration += 1;
+        this._activeMdx?.disconnect();
+        this._activeMdx = null;
         reportDiagnostics('dictionary-import-watchdog-recovery', {
             label,
             message: error.message,
@@ -2399,7 +2405,7 @@ export class DictionaryImportController {
         if (typeof flags !== 'object' || flags === null || Array.isArray(flags)) {
             return {
                 skipImageMetadata: true,
-                mediaResolutionConcurrency: 8,
+                mediaResolutionConcurrency: 16,
                 debugImportLogging: false,
                 enableTermEntryContentDedup: null,
                 termContentStorageMode: 'raw-bytes',
@@ -2411,7 +2417,7 @@ export class DictionaryImportController {
             };
         }
         const flagsRecord = /** @type {Record<string, unknown>} */ (flags);
-        const mediaResolutionConcurrency = Number.isFinite(flagsRecord.mediaResolutionConcurrency) ? Math.trunc(/** @type {number} */ (flagsRecord.mediaResolutionConcurrency)) : 8;
+        const mediaResolutionConcurrency = Number.isFinite(flagsRecord.mediaResolutionConcurrency) ? Math.trunc(/** @type {number} */ (flagsRecord.mediaResolutionConcurrency)) : 16;
         const zipMaxWorkers = Number.isFinite(flagsRecord.zipMaxWorkers) ? Math.trunc(/** @type {number} */ (flagsRecord.zipMaxWorkers)) : null;
         const zipChunkSize = Number.isFinite(flagsRecord.zipChunkSize) ? Math.trunc(/** @type {number} */ (flagsRecord.zipChunkSize)) : null;
         const artifactFixedPackMinTotalRows = Number.isFinite(flagsRecord.artifactFixedPackMinTotalRows) ? Math.trunc(/** @type {number} */ (flagsRecord.artifactFixedPackMinTotalRows)) : null;
@@ -2580,6 +2586,10 @@ export class DictionaryImportController {
         });
 
         const mdx = new Mdx();
+        if (this._activeMdx !== null) {
+            throw new Error('An MDX conversion is already active');
+        }
+        this._activeMdx = mdx;
         /** @type {File|null} */
         let archiveFile = null;
         const prepareStartTime = safePerformance.now();
@@ -2597,6 +2607,9 @@ export class DictionaryImportController {
             archiveFile = new File([archive.archiveContent], archive.archiveFileName, {type: 'application/zip'});
         } finally {
             mdx.disconnect();
+            if (this._activeMdx === mdx) {
+                this._activeMdx = null;
+            }
         }
         if (archiveFile === null) {
             throw new Error(`MDX conversion did not return an archive for ${dictionaryTitle}`);

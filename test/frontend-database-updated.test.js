@@ -201,7 +201,7 @@ describe('Frontend dictionary update handling', () => {
 
         expect(calls).toEqual(['日本']);
         expect(detailsCalls).toEqual([
-            {skipLookupWarmWait: true},
+            {},
         ]);
         expect(results).toHaveLength(1);
         expect(Reflect.get(frontend, '_application').api.termsFind).toHaveBeenCalledTimes(1);

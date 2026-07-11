@@ -168,6 +168,10 @@ type ApiSurface = {
         params: void;
         return: void;
     };
+    cancelDictionaryImportOffscreen: {
+        params: void;
+        return: void;
+    };
     clipboardSetBrowserOffscreen: {
         params: {
             value: Environment.Browser | null;

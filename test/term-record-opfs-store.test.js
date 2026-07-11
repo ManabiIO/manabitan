@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {describe, expect, test} from 'vitest';
+import {describe, expect, test, vi} from 'vitest';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME} from '../ext/js/dictionary/raw-term-content.js';
 
@@ -107,6 +107,23 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
 }
 
 describe('TermRecordOpfsStore', () => {
+    test('does not reload existing dictionary shards when an import session begins', async () => {
+        const store = new TermRecordOpfsStore();
+        const loadShardStatesContents = vi.spyOn(store, '_loadShardStatesContents');
+        Reflect.get(store, '_loadedDictionaryNames').add('JMdict');
+        Reflect.set(store, '_allShardContentsLoaded', true);
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
+
+        await store.beginImportSession();
+        await store.ensureDictionariesLoaded(['JMdict']);
+
+        expect(loadShardStatesContents).not.toHaveBeenCalled();
+        expect(Reflect.get(store, '_loadedDictionaryNames').has('JMdict')).toBe(true);
+        expect(Reflect.get(store, '_allShardContentsLoaded')).toBe(true);
+
+        await store.endImportSession();
+    });
+
     test('encodes and decodes raw-v4 entry content dict names without falling back to custom strings', () => {
         const store = new TermRecordOpfsStore();
         const {meta, bytes} = store._encodeEntryContentDictNameMeta(RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME);

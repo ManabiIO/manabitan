@@ -50,6 +50,53 @@ function createReadableFile(bytes) {
 }
 
 describe('TermContentOpfsStore', () => {
+    test('reads the pre-import snapshot without waiting for queued append writes', async () => {
+        const initialBytes = new Uint8Array([1, 2, 3, 4]);
+        const store = new TermContentOpfsStore();
+        /** @type {(() => void)|null} */
+        let releaseWrite = null;
+        const writeStarted = new Promise((resolve) => {
+            const writable = {
+                seek: vi.fn(async () => {}),
+                close: vi.fn(async () => {}),
+                write: vi.fn(async () => {
+                    resolve(void 0);
+                    await new Promise((writeResolve) => {
+                        releaseWrite = writeResolve;
+                    });
+                }),
+            };
+            const fileHandle = {
+                createWritable: vi.fn(async () => writable),
+                getFile: vi.fn(async () => createReadableFile(initialBytes)),
+            };
+            Reflect.set(store, '_fileHandle', fileHandle);
+            Reflect.set(store, '_segmentStates', [{
+                index: 0,
+                fileName: 'manabitan-term-content.bin',
+                fileHandle,
+                fileLength: initialBytes.byteLength,
+                startOffset: 0,
+                readFile: createReadableFile(initialBytes),
+            }]);
+            Reflect.set(store, '_loadedForRead', true);
+            Reflect.set(store, '_length', initialBytes.byteLength);
+            Reflect.set(store, '_importSessionActive', true);
+            Reflect.set(store, '_flushThresholdBytes', 1);
+            store.setQueueImportWritesEnabled(true);
+        });
+
+        await store.appendBatch([new Uint8Array([5, 6])]);
+        await writeStarted;
+
+        await expect(store.readSlice(1, 2)).resolves.toStrictEqual(new Uint8Array([2, 3]));
+        expect(Reflect.get(store, '_loadedForRead')).toBe(true);
+
+        releaseWrite?.();
+        await store.endImportSession();
+        expect(Reflect.get(store, '_loadedForRead')).toBe(false);
+    });
+
     test('import append offsets include bytes in active queued writes', async () => {
         const store = new TermContentOpfsStore();
         /** @type {(() => void)|null} */

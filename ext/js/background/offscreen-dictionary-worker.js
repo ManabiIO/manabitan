@@ -43,6 +43,8 @@ export class OffscreenDictionaryWorkerHandler {
         this._mediaLoader = new DictionaryImporterMediaLoader();
         /** @type {Promise<void>} */
         this._requestQueue = Promise.resolve();
+        /** @type {AbortController|null} */
+        this._activeImportAbortController = null;
     }
 
     /** */
@@ -80,6 +82,15 @@ export class OffscreenDictionaryWorkerHandler {
      * @param {MessageEvent<WorkerRequest>} event
      */
     _onMessage(event) {
+        const action = event.data.action;
+        if (action === 'cancelDictionaryImportOffscreen') {
+            void this._onMessageAsync(event);
+            return;
+        }
+        if (action === 'findTermsOffscreen' || action === 'findKanjiOffscreen' || action === 'getTermFrequenciesOffscreen') {
+            void this._onMessageAsync(event);
+            return;
+        }
         this._requestQueue = this._requestQueue
             .then(async () => {
                 await this._onMessageAsync(event);
@@ -190,11 +201,17 @@ export class OffscreenDictionaryWorkerHandler {
         this._assertDatabaseAvailable('importDictionaryOffscreen');
         await this._ensureDatabasePrepared();
         let responsePortAvailable = true;
+        /** @param {import('dictionary-importer').ProgressData} progress */
         const onProgress = (progress) => {
             if (!responsePortAvailable) { return; }
             responsePortAvailable = this._postImportProgress(port, progress);
         };
-        const dictionaryImporter = new DictionaryImporter(this._mediaLoader, onProgress);
+        if (this._activeImportAbortController !== null) {
+            throw new Error('A dictionary import is already active');
+        }
+        const abortController = new AbortController();
+        this._activeImportAbortController = abortController;
+        const dictionaryImporter = new DictionaryImporter(this._mediaLoader, onProgress, () => abortController.signal.aborted);
         try {
             const importPayload = await dictionaryImporter.importDictionary(this._dictionaryDatabase, archiveContent, details);
             const {result, errors, debug} = importPayload;
@@ -216,6 +233,9 @@ export class OffscreenDictionaryWorkerHandler {
         } catch (error) {
             this._postImportError(port, error);
         } finally {
+            if (this._activeImportAbortController === abortController) {
+                this._activeImportAbortController = null;
+            }
             try {
                 port.close();
             } catch (_) {
@@ -427,6 +447,9 @@ export class OffscreenDictionaryWorkerHandler {
                 );
             case 'clearDatabaseCachesOffscreen':
                 this._translator.clearDatabaseCaches();
+                return;
+            case 'cancelDictionaryImportOffscreen':
+                this._activeImportAbortController?.abort();
                 return;
             case 'importDictionaryOffscreen':
                 await this._importDictionaryOffscreen(

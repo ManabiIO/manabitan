@@ -116,7 +116,27 @@ static int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, u
     return 0;
 }
 
-static int parse_composite_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+static int is_media_marker_at(const uint8_t* src, uint32_t len, uint32_t i) {
+    if (i + 5u <= len &&
+        src[i] == '"' &&
+        src[i + 1u] == 'i' &&
+        src[i + 2u] == 'm' &&
+        src[i + 3u] == 'g' &&
+        src[i + 4u] == '"'
+    ) {
+        return 1;
+    }
+    return i + 7u <= len &&
+        src[i] == '"' &&
+        src[i + 1u] == 'i' &&
+        src[i + 2u] == 'm' &&
+        src[i + 3u] == 'a' &&
+        src[i + 4u] == 'g' &&
+        src[i + 5u] == 'e' &&
+        src[i + 6u] == '"';
+}
+
+static int parse_composite_span_impl(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end, uint32_t* media_hint) {
     if (start >= len) { return 0; }
     uint8_t open = src[start];
     uint8_t close = 0;
@@ -129,6 +149,9 @@ static int parse_composite_span(const uint8_t* src, uint32_t len, uint32_t start
     while (i < len) {
         uint8_t c = src[i];
         if (c == '"') {
+            if (media_hint != 0 && is_media_marker_at(src, len, i)) {
+                *media_hint = 1u;
+            }
             uint32_t s_end = 0;
             if (!parse_string_span(src, len, i, &s_end)) { return 0; }
             i = s_end;
@@ -147,6 +170,10 @@ static int parse_composite_span(const uint8_t* src, uint32_t len, uint32_t start
         ++i;
     }
     return 0;
+}
+
+static int parse_composite_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+    return parse_composite_span_impl(src, len, start, out_end, 0);
 }
 
 static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
@@ -170,6 +197,15 @@ static int parse_value_span(const uint8_t* src, uint32_t len, uint32_t start, ui
     return parse_scalar_span(src, len, start, out_end);
 }
 
+static int parse_value_span_with_media_hint(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end, uint32_t* media_hint) {
+    if (start >= len) { return 0; }
+    uint8_t c = src[start];
+    if (c == '[' || c == '{') {
+        return parse_composite_span_impl(src, len, start, out_end, media_hint);
+    }
+    return parse_value_span(src, len, start, out_end);
+}
+
 static void set_field(TermRowMeta* meta, uint32_t field_index, uint32_t start, uint32_t end) {
     uint32_t length = end > start ? (end - start) : 0u;
     switch (field_index) {
@@ -183,34 +219,6 @@ static void set_field(TermRowMeta* meta, uint32_t field_index, uint32_t start, u
         case 7: meta->term_tags_start = start; meta->term_tags_length = length; break;
         default: break;
     }
-}
-
-static int glossary_may_contain_media_marker(const uint8_t* src, uint32_t start, uint32_t length) {
-    if (length < 5u) { return 0; }
-    const uint32_t end = start + length;
-    for (uint32_t i = start; i + 5u <= end; ++i) {
-        if (src[i] != '"') { continue; }
-        if (
-            src[i + 1u] == 'i' &&
-            src[i + 2u] == 'm' &&
-            src[i + 3u] == 'g' &&
-            src[i + 4u] == '"'
-        ) {
-            return 1;
-        }
-        if (
-            i + 7u <= end &&
-            src[i + 1u] == 'i' &&
-            src[i + 2u] == 'm' &&
-            src[i + 3u] == 'a' &&
-            src[i + 4u] == 'g' &&
-            src[i + 5u] == 'e' &&
-            src[i + 6u] == '"'
-        ) {
-            return 1;
-        }
-    }
-    return 0;
 }
 
 static void clear_term_row_meta(TermRowMeta* meta) {
@@ -246,12 +254,13 @@ static int parse_row_single_pass(
             return out_meta->expression_length > 0u;
         }
         uint32_t value_end = 0u;
-        if (!parse_value_span(src, len, i, &value_end)) { return 0; }
+        if (
+            media_hints && field_index == 5u ?
+                !parse_value_span_with_media_hint(src, len, i, &value_end, &out_meta->glossary_may_contain_media) :
+                !parse_value_span(src, len, i, &value_end)
+        ) { return 0; }
         if (field_index < 8u) {
             set_field(out_meta, field_index, i, value_end);
-            if (media_hints && field_index == 5u) {
-                out_meta->glossary_may_contain_media = (uint32_t)glossary_may_contain_media_marker(src, i, value_end - i);
-            }
         }
         ++field_index;
         i = skip_ws(src, len, value_end);

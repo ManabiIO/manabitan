@@ -39,9 +39,53 @@ function getDictionaryImportControllerMethod(name) {
 
 describe('DictionaryImportController staged update profile rewrites', () => {
     const importDictionaryFromZip = /** @type {(this: DictionaryImportController, file: File, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importDetails: import('dictionary-importer').ImportDetails, useImportSession: boolean, finalizeImportSession: boolean, onProgress: import('dictionary-worker').ImportProgressCallback) => Promise<{errors: Error[], importedTitle: string|null}>} */ (getDictionaryImportControllerMethod('_importDictionaryFromZip'));
+    const getImportPerformanceFlags = /** @type {(this: DictionaryImportController) => {mediaResolutionConcurrency: number}} */ (getDictionaryImportControllerMethod('_getImportPerformanceFlags'));
 
     afterEach(() => {
         vi.restoreAllMocks();
+        vi.unstubAllGlobals();
+        Reflect.deleteProperty(globalThis, 'manabitanImportPerformanceFlags');
+    });
+
+    test('uses the profiled media concurrency default and clamps debug overrides', () => {
+        const controller = createControllerForInternalTests();
+
+        expect(getImportPerformanceFlags.call(controller).mediaResolutionConcurrency).toBe(16);
+
+        Reflect.set(globalThis, 'manabitanImportPerformanceFlags', {mediaResolutionConcurrency: 100});
+        expect(getImportPerformanceFlags.call(controller).mediaResolutionConcurrency).toBe(32);
+    });
+
+    test('watchdog recovery terminates an active MDX conversion worker', async () => {
+        const controller = createControllerForInternalTests();
+        const disconnect = vi.fn();
+        const setDictionaryImportMode = vi.fn().mockResolvedValue();
+        vi.stubGlobal('document', {querySelectorAll: vi.fn().mockReturnValue([])});
+        Reflect.set(controller, '_activeImportRunGeneration', 4);
+        Reflect.set(controller, '_activeMdx', {disconnect});
+        Reflect.set(controller, '_setRecommendedError', vi.fn());
+        Reflect.set(controller, '_errorToString', vi.fn().mockReturnValue('timed out'));
+        Reflect.set(controller, '_showErrors', vi.fn());
+        Reflect.set(controller, '_recommendedDictionaryQueue', ['pending']);
+        Reflect.set(controller, '_recommendedDictionaryActiveImport', true);
+        Reflect.set(controller, '_recommendedDictionaryCurrentUrl', 'https://example.test/dictionary.mdx');
+        Reflect.set(controller, '_updateRecommendedImportDebugState', vi.fn());
+        Reflect.set(controller, '_setModifying', vi.fn());
+        Reflect.set(controller, '_statusFooter', null);
+        Reflect.set(controller, '_settingsController', {application: {api: {setDictionaryImportMode}}});
+        Reflect.set(controller, '_triggerStorageChanged', vi.fn());
+
+        Reflect.get(DictionaryImportController.prototype, '_forceRecoverHungImportSession').call(
+            controller,
+            new Error('MDX import did not complete within 180000ms'),
+            'MDX import',
+        );
+        await Promise.resolve();
+
+        expect(disconnect).toHaveBeenCalledOnce();
+        expect(Reflect.get(controller, '_activeMdx')).toBeNull();
+        expect(setDictionaryImportMode).toHaveBeenCalledWith(false);
+        expect(Reflect.get(controller, '_activeImportRunGeneration')).toBe(5);
     });
 
     test('skips profile dictionary rewrites for profiles without carried-over update settings', async () => {

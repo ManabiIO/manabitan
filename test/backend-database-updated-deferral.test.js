@@ -18,7 +18,51 @@
 import {describe, expect, test, vi} from 'vitest';
 import {Backend} from '../ext/js/background/backend.js';
 
+function createGate() {
+    /** @type {() => void} */
+    let resolve = () => {};
+    const promise = new Promise((resolvePromise) => {
+        resolve = resolvePromise;
+    });
+    return {promise, resolve};
+}
+
 describe('Backend database update deferral', () => {
+    test('serializes overlapping import-mode transitions in request order', async () => {
+        const prepareGate = createGate();
+        const refreshGate = createGate();
+        const refreshDictionaryDatabaseAfterUpdate = vi.fn(() => refreshGate.promise);
+        const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+        Reflect.set(backend, '_translator', {clearDatabaseCaches: vi.fn()});
+        Reflect.set(backend, '_dictionaryImportModeActive', false);
+        Reflect.set(backend, '_deferredDictionaryRefreshDuringImport', false);
+        Reflect.set(backend, '_pendingDatabaseUpdatedNotifications', []);
+        Reflect.set(backend, '_dictionaryDatabasePreparePromise', prepareGate.promise);
+        Reflect.set(backend, '_setDictionaryImportModePromise', null);
+        Reflect.set(backend, '_offscreen', null);
+        Reflect.set(backend, '_localDictionaryRuntime', null);
+        Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
+        Reflect.set(backend, '_refreshDictionaryDatabaseAfterUpdate', refreshDictionaryDatabaseAfterUpdate);
+        Reflect.set(backend, '_clearDictionaryRefreshRetry', vi.fn());
+
+        const enter1 = Backend.prototype._setDictionaryImportMode.call(backend, true);
+        const exit = Backend.prototype._setDictionaryImportMode.call(backend, false);
+        const enter2 = Backend.prototype._setDictionaryImportMode.call(backend, true);
+        prepareGate.resolve();
+        await vi.waitFor(() => {
+            expect(refreshDictionaryDatabaseAfterUpdate).toHaveBeenCalledOnce();
+        });
+
+        expect(Reflect.get(backend, '_dictionaryImportModeActive')).toBe(false);
+        expect(Reflect.get(backend, '_setDictionaryImportModePromise')).not.toBeNull();
+
+        refreshGate.resolve();
+        await Promise.all([enter1, exit, enter2]);
+
+        expect(Reflect.get(backend, '_dictionaryImportModeActive')).toBe(true);
+        expect(Reflect.get(backend, '_setDictionaryImportModePromise')).toBeNull();
+    });
+
     test('dictionary updates during import defer page notifications until refresh completes', async () => {
         const sendMessageAllTabsIgnoreResponse = vi.fn();
         const refreshDictionaryDatabaseAfterUpdate = vi.fn().mockResolvedValue(void 0);

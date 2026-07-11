@@ -19,6 +19,7 @@ import {afterEach, describe, expect, test, vi} from 'vitest';
 
 const logWarn = vi.fn();
 const logError = vi.fn();
+const importControl = vi.hoisted(() => ({waitForCancellation: false, started: false}));
 
 vi.mock('../ext/js/core/log.js', () => ({
     log: {
@@ -46,6 +47,8 @@ vi.mock('../ext/js/language/translator.js', () => ({
         prepare() {}
         /** */
         clearDatabaseCaches() {}
+        /** @returns {Promise<{dictionaryEntries: unknown[], originalTextLength: number}>} */
+        async findTerms() { return {dictionaryEntries: [], originalTextLength: 0}; }
     },
 }));
 
@@ -58,15 +61,24 @@ vi.mock('../ext/js/dictionary/dictionary-importer.js', () => ({
         /**
          * @param {unknown} _mediaLoader
          * @param {(progress: unknown) => void} onProgress
+         * @param {() => boolean} isCancelled
          */
-        constructor(_mediaLoader, onProgress) {
+        constructor(_mediaLoader, onProgress, isCancelled) {
             this._onProgress = onProgress;
+            this._isCancelled = isCancelled;
         }
 
         /**
          * @returns {Promise<{result: {title: string}, errors: Error[], debug: null}>}
          */
         async importDictionary() {
+            if (importControl.waitForCancellation) {
+                importControl.started = true;
+                while (!this._isCancelled()) {
+                    await new Promise((resolve) => { setTimeout(resolve, 1); });
+                }
+                throw new Error('Dictionary import was cancelled');
+            }
             this._onProgress({nextStep: false, index: 1, count: 2});
             this._onProgress({nextStep: false, index: 2, count: 2});
             return {
@@ -85,6 +97,8 @@ describe('Offscreen dictionary worker import response port handling', () => {
         vi.restoreAllMocks();
         logWarn.mockReset();
         logError.mockReset();
+        importControl.waitForCancellation = false;
+        importControl.started = false;
     });
 
     test('continues import work when progress delivery fails', async () => {
@@ -142,5 +156,54 @@ describe('Offscreen dictionary worker import response port handling', () => {
         expect(workerPostMessage).toHaveBeenCalledWith({id: 1, result: undefined});
         expect(logWarn).toHaveBeenCalledTimes(1);
         expect(logError).not.toHaveBeenCalled();
+    });
+
+    test('serves lookups during import and processes cancellation outside the mutation queue', async () => {
+        importControl.waitForCancellation = true;
+        /** @type {Map<string, (event: MessageEvent) => void>} */
+        const listeners = new Map();
+        const workerPostMessage = vi.fn();
+        vi.stubGlobal('self', {
+            addEventListener: vi.fn((type, listener) => {
+                listeners.set(type, listener);
+            }),
+            postMessage: workerPostMessage,
+        });
+
+        await import('../ext/js/background/offscreen-dictionary-worker.js');
+        const onMessage = listeners.get('message');
+        const responsePort = {postMessage: vi.fn(), close: vi.fn()};
+        onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: {id: 1, action: 'importDictionaryOffscreen', params: {archiveContent: new Blob(['dictionary']), details: {}}},
+            ports: [responsePort],
+        })));
+        await vi.waitFor(() => expect(importControl.started).toBe(true));
+
+        onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: {
+                id: 2,
+                action: 'findTermsOffscreen',
+                params: {
+                    mode: 'group',
+                    text: '日本',
+                    options: {enabledDictionaryMap: [], excludeDictionaryDefinitions: null, textReplacements: []},
+                },
+            },
+            ports: [],
+        })));
+        await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith({
+            id: 2,
+            result: {dictionaryEntries: [], originalTextLength: 0},
+        }));
+        expect(workerPostMessage).not.toHaveBeenCalledWith({id: 1, result: undefined});
+
+        onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: {id: 3, action: 'cancelDictionaryImportOffscreen', params: {}},
+            ports: [],
+        })));
+
+        await vi.waitFor(() => expect(responsePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'error'})));
+        await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith({id: 1, result: undefined}));
+        expect(responsePort.close).toHaveBeenCalledOnce();
     });
 });

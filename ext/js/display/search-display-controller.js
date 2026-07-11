@@ -100,6 +100,12 @@ export class SearchDisplayController {
         ]);
         /** @type {number} */
         this._profileSelectRefreshGeneration = 0;
+        /** @type {number} */
+        this._searchRequestSequence = 0;
+        /** @type {number} */
+        this._contentUpdateSequence = 0;
+        /** @type {string} */
+        this._contentUpdateQuery = '';
     }
 
     /** */
@@ -132,7 +138,7 @@ export class SearchDisplayController {
             /**
              * @param {string} query
              * @param {{animate?: boolean, historyMode?: import('display').HistoryMode, lookup?: boolean, flags?: string[]|null}} [details]
-             * @returns {{ok: boolean, query?: string, error?: string}}
+             * @returns {{ok: boolean, query?: string, sequence?: number, error?: string}}
              */
             triggerSearch: (query, {animate = true, historyMode = 'new', lookup = true, flags = null} = {}) => {
                 try {
@@ -150,6 +156,7 @@ export class SearchDisplayController {
                     return {
                         ok: true,
                         query: this._queryInput.value,
+                        sequence: this._searchRequestSequence,
                     };
                 } catch (error) {
                     updateSearchDebugState({
@@ -171,6 +178,7 @@ export class SearchDisplayController {
 
         this._display.on('optionsUpdated', this._onDisplayOptionsUpdated.bind(this));
         this._display.on('contentUpdateStart', this._onContentUpdateStart.bind(this));
+        this._display.on('contentUpdateComplete', this._onContentUpdateComplete.bind(this));
 
         this._display.hotkeyHandler.registerActions([
             ['focusSearchBox', this._onActionFocusSearchBox.bind(this)],
@@ -335,10 +343,13 @@ export class SearchDisplayController {
      * @param {import('display').EventArgument<'contentUpdateStart'>} details
      */
     _onContentUpdateStart({type, query}) {
+        this._contentUpdateSequence = this._searchRequestSequence;
+        this._contentUpdateQuery = typeof query === 'string' ? query : '';
         updateSearchDebugState({
             lastContentUpdateStart: {
                 type,
-                query: typeof query === 'string' ? query : '',
+                query: this._contentUpdateQuery,
+                sequence: this._contentUpdateSequence,
             },
         });
         let animate = false;
@@ -371,6 +382,19 @@ export class SearchDisplayController {
             this._updateSearchHeight(true);
         }
         this._setIntroVisible(!valid, animate);
+    }
+
+    /**
+     * @param {import('display').EventArgument<'contentUpdateComplete'>} details
+     */
+    _onContentUpdateComplete({type}) {
+        updateSearchDebugState({
+            lastContentUpdateComplete: {
+                type,
+                query: this._contentUpdateQuery,
+                sequence: this._contentUpdateSequence,
+            },
+        });
     }
 
     /**
@@ -760,6 +784,7 @@ export class SearchDisplayController {
         this._updateSearchText();
 
         const query = this._queryInput.value;
+        const sequence = ++this._searchRequestSequence;
         updateSearchDebugState({
             lastSearchRequest: {
                 animate,
@@ -767,6 +792,7 @@ export class SearchDisplayController {
                 lookup,
                 flags,
                 query,
+                sequence,
             },
         });
         const depth = this._display.depth;

@@ -1019,94 +1019,8 @@ export class Backend {
         }
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {resultOutputMode: mode, maxResults}} = options;
-        let findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
-        let {dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions);
-        let installedDictionaryCount = null;
-        let installedDictionaryTitles = null;
-        /** @type {unknown|null} */
-        let debugLookupState = null;
-        let hasInstalledDictionaries = true;
-        if (
-            dictionaryEntries.length === 0 &&
-            findTermsOptions.enabledDictionaryMap.size > 0
-        ) {
-            try {
-                const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
-                if (Array.isArray(dictionaryInfo)) {
-                    installedDictionaryCount = dictionaryInfo.length;
-                    installedDictionaryTitles = dictionaryInfo
-                        .map((dictionary) => (typeof dictionary?.title === 'string' ? dictionary.title : null))
-                        .filter((title) => typeof title === 'string' && title.length > 0);
-                }
-            } catch (e) {
-                installedDictionaryCount = null;
-                installedDictionaryTitles = null;
-                reportDiagnostics('dictionary-lookup-installed-dictionary-info-failed', {
-                    textLength: text.length,
-                    mode,
-                    error: toError(e).message,
-                });
-            }
-            if (installedDictionaryCount === null) {
-                try {
-                    hasInstalledDictionaries = await this._hasInstalledDictionaries();
-                } catch (e) {
-                    hasInstalledDictionaries = true;
-                    reportDiagnostics('dictionary-lookup-installed-dictionary-check-failed', {
-                        textLength: text.length,
-                        mode,
-                        error: toError(e).message,
-                    });
-                }
-            } else {
-                hasInstalledDictionaries = installedDictionaryCount > 0;
-            }
-            if (hasInstalledDictionaries) {
-                reportDiagnostics('dictionary-lookup-self-heal-begin', {
-                    textLength: text.length,
-                    enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
-                    mode,
-                });
-                try {
-                    await this._refreshDictionaryDatabaseAfterUpdate();
-                    void this._translator.clearDatabaseCaches();
-                    findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
-                    ({dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions));
-                } catch (e) {
-                    debugLookupState = {
-                        ok: false,
-                        reason: 'dictionary lookup self-heal failed',
-                        error: toError(e).message,
-                    };
-                    reportDiagnostics('dictionary-lookup-self-heal-failed', {
-                        textLength: text.length,
-                        enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
-                        mode,
-                        error: toError(e).message,
-                    });
-                }
-                if (dictionaryEntries.length === 0 && debugLookupState === null) {
-                    try {
-                        debugLookupState = await this._debugDictionaryLookupState(
-                            text,
-                            [...findTermsOptions.enabledDictionaryMap.keys()],
-                        );
-                    } catch (e) {
-                        debugLookupState = {
-                            ok: false,
-                            reason: 'debug lookup capture failed',
-                            error: toError(e).message,
-                        };
-                    }
-                }
-                reportDiagnostics('dictionary-lookup-self-heal-complete', {
-                    textLength: text.length,
-                    enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
-                    mode,
-                    recovered: dictionaryEntries.length > 0,
-                });
-            }
-        }
+        const findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
+        const {dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions);
         const hasExactHeadwordMatch = (
             text.length > 0 &&
             dictionaryEntries.some((entry) => (
@@ -1114,40 +1028,7 @@ export class Backend {
                 entry.headwords.some(({term, reading}) => term === text || reading === text)
             ))
         );
-        const shouldCaptureSuspiciousResultDebugState = (
-            debugLookupState === null &&
-            text.length > 0 &&
-            dictionaryEntries.length > 0 &&
-            dictionaryEntries.length <= 20 &&
-            findTermsOptions.enabledDictionaryMap.size > 0 &&
-            !hasExactHeadwordMatch
-        );
-        if (
-            (
-                dictionaryEntries.length === 0 ||
-                shouldCaptureSuspiciousResultDebugState
-            ) &&
-            findTermsOptions.enabledDictionaryMap.size > 0 &&
-            debugLookupState === null
-        ) {
-            try {
-                debugLookupState = await this._debugDictionaryLookupState(
-                    text,
-                    [...findTermsOptions.enabledDictionaryMap.keys()],
-                );
-            } catch (e) {
-                debugLookupState = {
-                    ok: false,
-                    reason: 'debug lookup capture failed',
-                    error: toError(e).message,
-                };
-            }
-        }
-        const includeDetailedLookupSnapshot = (
-            debugLookupState !== null ||
-            dictionaryEntries.length === 0 ||
-            !hasExactHeadwordMatch
-        );
+        const includeDetailedLookupSnapshot = dictionaryEntries.length === 0 || !hasExactHeadwordMatch;
         dictionaryEntries.splice(maxResults);
         reportDiagnosticsLazy('dictionary-lookup-snapshot', () => ({
             text,
@@ -1175,8 +1056,8 @@ export class Backend {
                 partsOfSpeechFilter,
                 useDeinflections,
             })),
-            installedDictionaryCount,
-            installedDictionaryTitles,
+            installedDictionaryCount: null,
+            installedDictionaryTitles: null,
             hasExactHeadwordMatch,
             resultDictionaryCount: dictionaryEntries.length,
             resultDictionaries: [...new Set(dictionaryEntries.flatMap((entry) => (
@@ -1189,7 +1070,7 @@ export class Backend {
                     entry.definitions.map(({dictionaryAlias}) => dictionaryAlias) :
                 [entry.dictionaryAlias]
             )))],
-            debugLookupState,
+            debugLookupState: null,
             resultEntries: includeDetailedLookupSnapshot ?
                 dictionaryEntries.map((entry) => (
                     entry.type === 'term' ?
@@ -3685,7 +3566,7 @@ export class Backend {
      * @param {import('backend').DatabaseUpdateCause} cause
      */
     async _triggerDatabaseUpdated(type, cause) {
-        void this._translator.clearDatabaseCaches();
+        await Promise.resolve(this._translator.clearDatabaseCaches());
         if (type === 'dictionary') {
             if (this._dictionaryImportModeActive) {
                 this._deferredDictionaryRefreshDuringImport = true;
@@ -4891,10 +4772,14 @@ export class Backend {
      * @returns {Promise<void>}
      */
     async _setDictionaryImportMode(active) {
-        if (this._setDictionaryImportModePromise !== null) {
-            await this._setDictionaryImportModePromise;
+        while (this._setDictionaryImportModePromise !== null) {
+            try {
+                await this._setDictionaryImportModePromise;
+            } catch (_) {
+                // A later transition must still run so it can recover the requested state.
+            }
         }
-        this._setDictionaryImportModePromise = (async () => {
+        const transitionPromise = (async () => {
             const hasDeferredRefresh = (
                 this._deferredDictionaryRefreshDuringImport ||
                 this._pendingDatabaseUpdatedNotifications.length > 0
@@ -4917,6 +4802,15 @@ export class Backend {
             }
 
             this._dictionaryImportModeActive = false;
+            try {
+                if (this._offscreen !== null) {
+                    await this._offscreen.sendMessagePromise({action: 'cancelDictionaryImportOffscreen'});
+                } else if (this._localDictionaryRuntime !== null) {
+                    await this._localDictionaryRuntime.sendMessagePromise({action: 'cancelDictionaryImportOffscreen'});
+                }
+            } catch (error) {
+                reportDiagnostics('dictionary-import-cancel-failed', {error: toError(error).message});
+            }
             await this._ensureDictionaryDatabaseReady();
             reportDiagnostics('dictionary-import-mode-changed', {active: false});
             const hadDeferredRefresh = this._deferredDictionaryRefreshDuringImport || this._pendingDatabaseUpdatedNotifications.length > 0;
@@ -4946,10 +4840,13 @@ export class Backend {
             }
             this._clearDictionaryRefreshRetry();
         })();
+        this._setDictionaryImportModePromise = transitionPromise;
         try {
-            await this._setDictionaryImportModePromise;
+            await transitionPromise;
         } finally {
-            this._setDictionaryImportModePromise = null;
+            if (this._setDictionaryImportModePromise === transitionPromise) {
+                this._setDictionaryImportModePromise = null;
+            }
         }
     }
 

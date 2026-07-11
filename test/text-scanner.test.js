@@ -145,7 +145,7 @@ describe('TextScanner lookup robustness', () => {
         vi.useRealTimers();
     });
 
-    test('term hover lookup skips waiting for best-effort lookup warmup', async () => {
+    test('term hover lookup uses the normal non-blocking lookup path', async () => {
         const termsFindImpl = vi.fn().mockResolvedValue({
             dictionaryEntries: [createMockTermEntry()],
             originalTextLength: 2,
@@ -156,7 +156,7 @@ describe('TextScanner lookup robustness', () => {
         await searchAt(scanner, 10, 10, createInputInfo());
 
         expect(termsFindImpl).toHaveBeenCalledOnce();
-        expect(termsFindImpl.mock.calls[0][1]).toEqual({skipLookupWarmWait: true});
+        expect(termsFindImpl.mock.calls[0][1]).toEqual({});
     });
 
     test('search success handlers observe current scanner timing debug state', async () => {

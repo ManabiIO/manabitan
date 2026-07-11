@@ -48,7 +48,7 @@ describe('DictionaryImporter archive bank discovery', () => {
     test('sorts numbered bank files numerically regardless of ZIP entry order', () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const getArchiveFiles = /** @type {(this: DictionaryImporter, fileMap: Map<string, {filename: string}>, queryDetails: [string, RegExp][]) => Map<string, {filename: string}[]>} */ (
-            Reflect.get(importer, '_getArchiveFiles')
+            /** @type {unknown} */ (Reflect.get(importer, '_getArchiveFiles'))
         );
         const fileMap = new Map([
             ['term_bank_1.json', {filename: 'term_bank_1.json'}],
@@ -65,5 +65,58 @@ describe('DictionaryImporter archive bank discovery', () => {
             'term_bank_10.json',
             'term_bank_100.json',
         ]);
+    });
+});
+
+describe('DictionaryImporter archive filename validation', () => {
+    test('rejects duplicate ZIP entry filenames', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const createArchiveFileMap = /** @type {(zipEntries: {filename: string}[]) => Map<string, unknown>} */ (
+            Reflect.get(importer, '_createArchiveFileMap')
+        );
+        const entry = {filename: 'term_bank_1.json'};
+
+        expect(() => createArchiveFileMap.call(importer, [entry, {...entry}])).toThrow(
+            "Duplicate archive filename: 'term_bank_1.json'",
+        );
+    });
+
+    test('rejects collisions between decoded filenames and UTF-8 aliases', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const createArchiveFileMap = /** @type {(zipEntries: {filename: string, rawFilename: Uint8Array}[]) => Map<string, unknown>} */ (
+            Reflect.get(importer, '_createArchiveFileMap')
+        );
+        const rawFilename = new TextEncoder().encode('文-default.svg');
+
+        expect(() => createArchiveFileMap.call(importer, [
+            {filename: 'µûç-default.svg', rawFilename},
+            {filename: '文-default.svg', rawFilename},
+        ])).toThrow("Ambiguous archive filename: '文-default.svg'");
+    });
+});
+
+describe('DictionaryImporter bank JSON validation', () => {
+    test('rejects non-array auxiliary bank JSON', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const readFileSequence = /** @type {(files: {filename: string, bytes: Uint8Array}[], convertEntry: (entry: unknown, dictionaryTitle: string) => unknown, dictionaryTitle: string) => Promise<unknown[]>} */ (
+            Reflect.get(importer, '_readFileSequence')
+        );
+        const file = {filename: 'tag_bank_1.json', bytes: new TextEncoder().encode('{}')};
+
+        await expect(readFileSequence.call(importer, [file], (entry) => entry, 'Test dictionary')).rejects.toThrow(
+            "Expected a JSON array in 'tag_bank_1.json'",
+        );
+    });
+
+    test('rejects non-array term bank JSON before treating it as empty', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const readTermBankFile = /** @type {(termFile: {filename: string, bytes: Uint8Array}, version: number, dictionaryTitle: string, prefixWildcardsSupported: boolean, useMediaPipeline: boolean, enableTermEntryContentDedup: boolean, termContentStorageMode: 'baseline'|'raw-bytes') => Promise<unknown>} */ (
+            /** @type {unknown} */ (Reflect.get(importer, '_readTermBankFile'))
+        );
+        const file = {filename: 'term_bank_1.json', bytes: new TextEncoder().encode('{}')};
+
+        await expect(readTermBankFile.call(importer, file, 3, 'Test dictionary', false, false, true, 'baseline')).rejects.toThrow(
+            "Expected a JSON array in 'term_bank_1.json'",
+        );
     });
 });

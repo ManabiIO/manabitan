@@ -72,6 +72,7 @@ const overlapLookupCandidates = [
     '今日',
 ];
 const lookupWords = ['暗記', '名前', '日本', '学生', '食べる', '見る', '言う', '行く', '水', '猫'];
+let chromiumSearchRequestSequence = 0;
 
 /**
  * @returns {string | null}
@@ -2249,6 +2250,30 @@ async function searchTermAndGetDictionaryHitCounts(page, term, expectedDictionar
     if (!(await waitForBodyVisible(page, 30000))) {
         throw new Error('Search page body remained hidden');
     }
+    const searchRequestToken = `chromium-search-${++chromiumSearchRequestSequence}`;
+    await page.evaluate((token) => {
+        const previousState = Reflect.get(globalThis, '__manabitanE2eSearchContentReset');
+        if (previousState?.observer instanceof MutationObserver) {
+            previousState.observer.disconnect();
+        }
+        const dictionaryEntries = document.querySelector('#dictionary-entries');
+        const state = {
+            token,
+            contentResetObserved: !(dictionaryEntries instanceof HTMLElement) || dictionaryEntries.childNodes.length === 0,
+            observer: null,
+        };
+        if (dictionaryEntries instanceof HTMLElement && !state.contentResetObserved) {
+            const observer = new MutationObserver((records) => {
+                if (records.some((record) => record.type === 'childList' && record.removedNodes.length > 0)) {
+                    state.contentResetObserved = true;
+                    observer.disconnect();
+                }
+            });
+            observer.observe(dictionaryEntries, {childList: true, subtree: true});
+            state.observer = observer;
+        }
+        /** @type {import('core').SafeAny} */ (globalThis).__manabitanE2eSearchContentReset = state;
+    }, searchRequestToken);
     const debugApiResult = await page.evaluate(({term: query}) => {
         const api = Reflect.get(globalThis, '__manabitanSearchDebugApi');
         if (!(api && typeof api === 'object' && typeof api.triggerSearch === 'function')) {
@@ -2284,15 +2309,19 @@ async function searchTermAndGetDictionaryHitCounts(page, term, expectedDictionar
         observedCounts: {},
         noResultsVisible: false,
         entriesTextPreview: '',
+        contentResetObserved: false,
     };
     while (safePerformance.now() < deadline) {
-        const snapshot = await page.evaluate(() => {
+        const snapshot = await page.evaluate((token) => {
+            const resetState = Reflect.get(globalThis, '__manabitanE2eSearchContentReset');
+            const contentResetObserved = resetState?.token === token && resetState.contentResetObserved === true;
             const dictionaryEntries = document.querySelector('#dictionary-entries');
             if (!(dictionaryEntries instanceof HTMLElement)) {
                 return {
                     observedCounts: {},
                     noResultsVisible: false,
                     entriesTextPreview: '',
+                    contentResetObserved,
                 };
             }
             const countMap = Object.create(null);
@@ -2309,17 +2338,20 @@ async function searchTermAndGetDictionaryHitCounts(page, term, expectedDictionar
                 observedCounts: countMap,
                 noResultsVisible,
                 entriesTextPreview: text.slice(0, 200),
+                contentResetObserved,
             };
-        });
+        }, searchRequestToken);
         const observedEntries = Object.entries(snapshot?.observedCounts ?? {});
         const expectedCounts = Object.fromEntries(expectedDictionaryNames.map((name) => [name, 0]));
-        for (const [observedNameRaw, countRaw] of observedEntries) {
-            const observedName = String(observedNameRaw || '').trim();
-            const count = Number(countRaw || 0);
-            if (!Number.isFinite(count) || count <= 0 || observedName.length === 0) { continue; }
-            for (const expectedName of expectedDictionaryNames) {
-                if (!matchesDictionaryName(observedName, expectedName)) { continue; }
-                expectedCounts[expectedName] = Number(expectedCounts[expectedName] || 0) + count;
+        if (snapshot?.contentResetObserved === true) {
+            for (const [observedNameRaw, countRaw] of observedEntries) {
+                const observedName = String(observedNameRaw || '').trim();
+                const count = Number(countRaw || 0);
+                if (!Number.isFinite(count) || count <= 0 || observedName.length === 0) { continue; }
+                for (const expectedName of expectedDictionaryNames) {
+                    if (!matchesDictionaryName(observedName, expectedName)) { continue; }
+                    expectedCounts[expectedName] = Number(expectedCounts[expectedName] || 0) + count;
+                }
             }
         }
         lastResult = {
@@ -2327,8 +2359,12 @@ async function searchTermAndGetDictionaryHitCounts(page, term, expectedDictionar
             observedCounts: snapshot?.observedCounts ?? {},
             noResultsVisible: snapshot?.noResultsVisible === true,
             entriesTextPreview: String(snapshot?.entriesTextPreview || ''),
+            contentResetObserved: snapshot?.contentResetObserved === true,
         };
-        if (expectedDictionaryNames.every((name) => (expectedCounts[name] ?? 0) >= 1)) {
+        if (
+            lastResult.contentResetObserved &&
+            expectedDictionaryNames.every((name) => (expectedCounts[name] ?? 0) >= 1)
+        ) {
             return lastResult;
         }
         await page.waitForTimeout(250);
@@ -2928,6 +2964,7 @@ async function main() {
             }
             context = await launchContext(currentHeadless, currentHideWindow);
             const relaunchedExtensionId = await discoverExtensionId(context, userDataDir, extensionDir);
+            extensionBaseUrl = `chrome-extension://${relaunchedExtensionId}`;
             page = context.pages()[0] ?? await context.newPage();
             attachPageLogging(page);
             const browserProcess = context.browser()?.process?.();
@@ -2935,7 +2972,7 @@ async function main() {
             const browserPid = browserPidFromPlaywright ?? await findChromiumPidByProfileDir(userDataDir);
             processSampler = startProcessSampler(browserPid);
             cdpSession = await createCdpSessionForPage(page);
-            return `chrome-extension://${relaunchedExtensionId}`;
+            return extensionBaseUrl;
         };
         /**
          * @param {string[]} titles
@@ -3145,7 +3182,7 @@ async function main() {
         }
         report.launchMode = launchModeLabel;
         appendLog(report, 'info', `${browserFlavor} launch mode: ${launchModeLabel}`);
-        const extensionBaseUrl = `chrome-extension://${extensionId}`;
+        let extensionBaseUrl = `chrome-extension://${extensionId}`;
         page = context.pages()[0] ?? await context.newPage();
         /** @type {import('@playwright/test').Page|null} */
         let concurrentSearchPage = null;
@@ -3606,6 +3643,13 @@ async function main() {
                     });
                 });
             }
+            const jitendexImportCompletionPromise = recordImportProgress(
+                'Jitendex',
+                'Monitored Jitendex import while the concurrent-search check was active',
+                async (onStepChange) => {
+                    await waitForImportCompletion(page, 'Jitendex', 300000, onStepChange);
+                },
+            );
             await page.waitForTimeout(700);
             const searchDuringImportStart = safePerformance.now();
             const searchDuringImportProfile = await runPhaseProfile(cdpSession, async () => {
@@ -3627,13 +3671,7 @@ async function main() {
                 fail(`Expected JMdict lookup backend to remain available during Jitendex import; saw ${JSON.stringify(searchDuringImportLookup)}`);
             }
 
-            const jitendexImportDebug = await recordImportProgress(
-                'Jitendex',
-                'Waited for progress clear for Jitendex import after the concurrent-search check',
-                async (onStepChange) => {
-                    await waitForImportCompletion(page, 'Jitendex', 300000, onStepChange);
-                },
-            );
+            const jitendexImportDebug = await jitendexImportCompletionPromise;
             if (!(jitendexImportDebug && jitendexImportDebug.hasResult === true && typeof jitendexImportDebug.resultTitle === 'string' && jitendexImportDebug.resultTitle.includes('Jitendex'))) {
                 fail(`Jitendex import did not finish with expected debug payload: ${JSON.stringify(jitendexImportDebug)}`);
             }
@@ -3927,6 +3965,13 @@ async function main() {
         if (concurrentSearchPage === null) {
             fail('Concurrent search page was not available for update verification');
         }
+        const updateImportCompletionPromise = recordImportProgress(
+            'JMdict update',
+            'Monitored JMdict update while concurrent popup verification was active',
+            async (onStepChange) => {
+                await waitForImportCompletion(page, 'JMdict', 300000, onStepChange);
+            },
+        );
         await page.waitForTimeout(700);
         const searchDuringUpdateStart = safePerformance.now();
         const searchDuringUpdateProfile = await runPhaseProfile(cdpSession, async () => {
@@ -3971,13 +4016,7 @@ async function main() {
             processSampler,
         );
 
-        const updateImportDebug = await recordImportProgress(
-            'JMdict update',
-            'Waited for progress clear for the JMdict update after concurrent popup verification',
-            async (onStepChange) => {
-                await waitForImportCompletion(page, 'JMdict', 300000, onStepChange);
-            },
-        );
+        const updateImportDebug = await updateImportCompletionPromise;
         if (!(updateImportDebug && updateImportDebug.hasResult === true && typeof updateImportDebug.resultTitle === 'string' && updateImportDebug.resultTitle.includes('JMdict'))) {
             fail(`JMdict update did not finish with expected debug payload: ${JSON.stringify(updateImportDebug)}`);
         }

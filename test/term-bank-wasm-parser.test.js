@@ -101,6 +101,19 @@ describe('term-bank WASM parser', () => {
         expect(rows[1].termEntryContentHash2).toBe(rows[0].termEntryContentHash2);
     });
 
+    maybeTest('preserves compact plain glossaries while normalizing equivalent object and spaced forms', async () => {
+        const rows = await parseRows([
+            ['compact', 'compact', '', '', 0, ['brace { and spaces', 'escaped "quote"'], 1, ''],
+            ['object', 'object', '', '', 0, [{type: 'text', text: 'same'}], 2, ''],
+            ['plain', 'plain', '', '', 0, ['same'], 3, ''],
+        ]);
+
+        expect(getContentString(rows[0])).toBe(
+            '{"rules":"","definitionTags":"","termTags":"","glossary":["brace { and spaces","escaped \\"quote\\""]}',
+        );
+        expect(getContentString(rows[1])).toBe(getContentString(rows[2]));
+    });
+
     maybeTest('uses the same dedup hash pair as every JavaScript fallback path', async () => {
         const [row] = await parseRows([
             ['hash', 'hash', 'tag', 'rule', 7, ['hash definition'], 1, 'term-tag'],
@@ -145,11 +158,15 @@ describe('term-bank WASM parser', () => {
     maybeTest('reports exact image media markers without matching ordinary words', async () => {
         const rows = await parseRows([
             ['image-row', 'image-row', '', '', 0, [{type: 'image', path: 'image-row.png'}], 1, ''],
+            ['img-row', 'img-row', '', '', 0, [{tag: 'div', content: [{tag: 'img', path: 'nested.png'}]}], 2, ''],
             ['word-row', 'word-row', '', '', 0, ['imagination and imagery'], 2, ''],
+            ['quoted-row', 'quoted-row', '', '', 0, ['The literal token "image" is not media'], 3, ''],
         ]);
 
         expect(rows[0].glossaryMayContainMedia).toBe(true);
-        expect(rows[1].glossaryMayContainMedia).toBe(false);
+        expect(rows[1].glossaryMayContainMedia).toBe(true);
+        expect(rows[2].glossaryMayContainMedia).toBe(false);
+        expect(rows[3].glossaryMayContainMedia).toBe(false);
     });
 
     maybeTest('does not dispatch partial chunks when parsing malformed term-bank JSON', async () => {

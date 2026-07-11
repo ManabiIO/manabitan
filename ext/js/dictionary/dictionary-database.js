@@ -611,24 +611,73 @@ export class DictionaryDatabase {
     async startBulkImport() {
         const db = this._requireDb();
         if (this._bulkImportDepth === 0) {
-            await this._termContentStore.beginImportSession();
-            await this._termRecordStore.beginImportSession();
-            this._applyImportPragmas();
-            this._deferTermsVirtualTableSync = true;
-            this._termsVirtualTableDirty = false;
-            this._termEntryContentHasExistingRows = this._asNumber(db.selectValue('SELECT 1 FROM termEntryContent LIMIT 1'), 0) === 1;
-            for (const dropIndexSql of this._createDropIndexesSql()) {
-                db.exec(dropIndexSql);
+            let termContentSessionStartAttempted = false;
+            let termRecordSessionStartAttempted = false;
+            try {
+                termContentSessionStartAttempted = true;
+                await this._termContentStore.beginImportSession();
+                termRecordSessionStartAttempted = true;
+                await this._termRecordStore.beginImportSession();
+                this._applyImportPragmas();
+                this._deferTermsVirtualTableSync = true;
+                this._termsVirtualTableDirty = false;
+                this._termEntryContentHasExistingRows = this._asNumber(db.selectValue('SELECT 1 FROM termEntryContent LIMIT 1'), 0) === 1;
+                for (const dropIndexSql of this._createDropIndexesSql()) {
+                    db.exec(dropIndexSql);
+                }
+                this._termEntryContentIdByKey.clear();
+                this._termEntryContentIdByHash.clear();
+                this._clearTermEntryContentMetaCaches();
+                this._termEntryContentCache.clear();
+                this._termExactPresenceCache.clear();
+                this._termPrefixNegativeCache.clear();
+                this._clearDirectTermIndexCaches();
+                await this._beginImmediateTransaction(db, false);
+                this._bulkImportTransactionOpen = true;
+            } catch (e) {
+                const errors = [toError(e)];
+                if (this._bulkImportTransactionOpen) {
+                    try {
+                        db.exec('ROLLBACK');
+                    } catch (rollbackError) {
+                        if (!this._isNoActiveTransactionError(toError(rollbackError))) {
+                            errors.push(toError(rollbackError));
+                        }
+                    }
+                    this._bulkImportTransactionOpen = false;
+                }
+                const cleanupPromises = [];
+                if (termContentSessionStartAttempted) {
+                    cleanupPromises.push(this._termContentStore.endImportSession());
+                }
+                if (termRecordSessionStartAttempted) {
+                    cleanupPromises.push(this._termRecordStore.endImportSession());
+                }
+                const cleanupResults = await Promise.allSettled(cleanupPromises);
+                for (const cleanupResult of cleanupResults) {
+                    if (cleanupResult.status === 'rejected') {
+                        errors.push(toError(cleanupResult.reason));
+                    }
+                }
+                this._deferTermsVirtualTableSync = false;
+                this._termsVirtualTableDirty = false;
+                for (const createIndexSql of this._createIndexesSql()) {
+                    try {
+                        db.exec(createIndexSql);
+                    } catch (restoreError) {
+                        errors.push(toError(restoreError));
+                    }
+                }
+                try {
+                    this._applyRuntimePragmas();
+                } catch (restoreError) {
+                    errors.push(toError(restoreError));
+                }
+                if (errors.length === 1) {
+                    throw errors[0];
+                }
+                throw new AggregateError(errors, 'Failed to start and clean up dictionary import storage');
             }
-            this._termEntryContentIdByKey.clear();
-            this._termEntryContentIdByHash.clear();
-            this._clearTermEntryContentMetaCaches();
-            this._termEntryContentCache.clear();
-            this._termExactPresenceCache.clear();
-            this._termPrefixNegativeCache.clear();
-            this._clearDirectTermIndexCaches();
-            await this._beginImmediateTransaction(db);
-            this._bulkImportTransactionOpen = true;
         }
         ++this._bulkImportDepth;
     }
@@ -683,6 +732,14 @@ export class DictionaryDatabase {
             let createIndexesCheckpointCount = 0;
             let cacheResetMs = 0;
             let runtimePragmasMs = 0;
+            /** @type {Awaited<ReturnType<DictionaryDatabase['finishBulkImport']>>} */
+            let result = null;
+            /** @type {Error|null} */
+            let operationError = null;
+            /** @type {Error[]} */
+            const cleanupErrors = [];
+            let termContentSessionEnded = false;
+            let termRecordSessionEnded = false;
             try {
                 if (this._bulkImportTransactionOpen) {
                     const tCommitStart = safePerformance.now();
@@ -700,6 +757,7 @@ export class DictionaryDatabase {
                 const tTermContentEndImportSessionStart = safePerformance.now();
                 const termContentEndImportSessionPromise = this._termContentStore.endImportSession()
                     .then(() => {
+                        termContentSessionEnded = true;
                         termContentEndImportSessionMs = safePerformance.now() - tTermContentEndImportSessionStart;
                         const metrics = this._termContentStore.getLastEndImportSessionMetrics();
                         if (metrics !== null) {
@@ -725,6 +783,7 @@ export class DictionaryDatabase {
                 const tTermRecordEndImportSessionStart = safePerformance.now();
                 const termRecordEndImportSessionPromise = this._termRecordStore.endImportSession()
                     .then(() => {
+                        termRecordSessionEnded = true;
                         termRecordEndImportSessionMs = safePerformance.now() - tTermRecordEndImportSessionStart;
                         const metrics = this._termRecordStore.getLastEndImportSessionMetrics();
                         if (metrics !== null) {
@@ -743,7 +802,19 @@ export class DictionaryDatabase {
                             termRecordWriteCoalesceTargetBytes = metrics.writeCoalesceTargetBytes;
                         }
                     });
-                await Promise.all([termContentEndImportSessionPromise, termRecordEndImportSessionPromise]);
+                const endImportSessionResults = await Promise.allSettled([
+                    termContentEndImportSessionPromise,
+                    termRecordEndImportSessionPromise,
+                ]);
+                const endImportSessionErrors = endImportSessionResults
+                    .filter((endResult) => endResult.status === 'rejected')
+                    .map((endResult) => toError(endResult.reason));
+                if (endImportSessionErrors.length === 1) {
+                    throw endImportSessionErrors[0];
+                }
+                if (endImportSessionErrors.length > 1) {
+                    throw new AggregateError(endImportSessionErrors, 'Failed to finalize dictionary import storage');
+                }
                 if (this._termsVirtualTableDirty) {
                     await this._beginImmediateTransaction(db);
                     try {
@@ -835,7 +906,7 @@ export class DictionaryDatabase {
                         `indexStatements=${createIndexesCheckpointCount}`,
                     );
                 }
-                return {
+                result = {
                     commitMs,
                     termContentEndImportSessionMs,
                     termContentEndImportSessionFlushPendingWritesMs,
@@ -876,21 +947,73 @@ export class DictionaryDatabase {
                     runtimePragmasMs,
                     totalMs,
                 };
+            } catch (e) {
+                operationError = toError(e);
             } finally {
                 if (this._bulkImportTransactionOpen) {
                     try {
                         db.exec('ROLLBACK');
                     } catch (e) {
                         if (!this._isNoActiveTransactionError(toError(e))) {
-                            throw e;
+                            cleanupErrors.push(toError(e));
                         }
                     }
                     this._bulkImportTransactionOpen = false;
                 }
-                await this._termContentStore.endImportSession();
-                await this._termRecordStore.endImportSession();
+                const cleanupPromises = [];
+                if (!termContentSessionEnded) {
+                    cleanupPromises.push(this._termContentStore.endImportSession());
+                }
+                if (!termRecordSessionEnded) {
+                    cleanupPromises.push(this._termRecordStore.endImportSession());
+                }
+                const cleanupResults = await Promise.allSettled(cleanupPromises);
+                for (const cleanupResult of cleanupResults) {
+                    if (cleanupResult.status === 'rejected') {
+                        cleanupErrors.push(toError(cleanupResult.reason));
+                    }
+                }
+                if (operationError !== null) {
+                    for (const createIndexSql of this._createIndexesSql()) {
+                        try {
+                            db.exec(createIndexSql);
+                        } catch (e) {
+                            cleanupErrors.push(toError(e));
+                        }
+                    }
+                    this._termEntryContentIdByKey.clear();
+                    this._termEntryContentIdByHash.clear();
+                    this._clearTermEntryContentMetaCaches();
+                    this._termEntryContentCache.clear();
+                    this._termExactPresenceCache.clear();
+                    this._termPrefixNegativeCache.clear();
+                    this._clearDirectTermIndexCaches();
+                    this._deferTermsVirtualTableSync = false;
+                    try {
+                        this._applyRuntimePragmas();
+                    } catch (e) {
+                        cleanupErrors.push(toError(e));
+                    }
+                }
             }
+            if (operationError !== null) {
+                if (cleanupErrors.length > 0) {
+                    throw new AggregateError(
+                        [operationError, ...cleanupErrors],
+                        'Dictionary import finalization and cleanup failed',
+                    );
+                }
+                throw operationError;
+            }
+            if (cleanupErrors.length === 1) {
+                throw cleanupErrors[0];
+            }
+            if (cleanupErrors.length > 1) {
+                throw new AggregateError(cleanupErrors, 'Failed to clean up dictionary import storage');
+            }
+            return result;
         }
+        return null;
     }
 
     /**
@@ -1896,6 +2019,7 @@ export class DictionaryDatabase {
         const columns = (matchType === 'suffix') ? ['expressionReverse', 'readingReverse'] : ['expression', 'reading'];
 
         if (matchType === 'exact') {
+            const exactVisited = new Set();
             /** @type {Map<string, number[]>} */
             const termIndexMap = new Map();
             /** @type {Map<number, {matchSource: import('dictionary-database').MatchSource, itemIndex: number}[]>} */
@@ -1932,15 +2056,15 @@ export class DictionaryDatabase {
                         hitCounts.expressionHits += expressionIds.length;
                         dictionaryExactHitCounts.set(dictionaryName, hitCounts);
                         for (const id of expressionIds) {
-                            if (id <= 0 || visited.has(id)) { continue; }
-                            visited.add(id);
+                            if (id <= 0) { continue; }
                             const matches = idMatches.get(id);
-                            if (typeof matches === 'undefined') {
-                                idMatches.set(id, itemIndexes.map((itemIndex) => ({matchSource: 'term', itemIndex})));
-                            } else {
-                                for (const itemIndex of itemIndexes) {
-                                    matches.push({matchSource: 'term', itemIndex});
-                                }
+                            const target = typeof matches === 'undefined' ? [] : matches;
+                            if (typeof matches === 'undefined') { idMatches.set(id, target); }
+                            for (const itemIndex of itemIndexes) {
+                                const key = `${String(id)}\u001fterm\u001f${String(itemIndex)}`;
+                                if (exactVisited.has(key)) { continue; }
+                                exactVisited.add(key);
+                                target.push({matchSource: 'term', itemIndex});
                             }
                         }
                     }
@@ -1954,15 +2078,15 @@ export class DictionaryDatabase {
                         hitCounts.readingHits += readingIds.length;
                         dictionaryExactHitCounts.set(dictionaryName, hitCounts);
                         for (const id of readingIds) {
-                            if (id <= 0 || visited.has(id)) { continue; }
-                            visited.add(id);
+                            if (id <= 0) { continue; }
                             const matches = idMatches.get(id);
-                            if (typeof matches === 'undefined') {
-                                idMatches.set(id, itemIndexes.map((itemIndex) => ({matchSource: 'reading', itemIndex})));
-                            } else {
-                                for (const itemIndex of itemIndexes) {
-                                    matches.push({matchSource: 'reading', itemIndex});
-                                }
+                            const target = typeof matches === 'undefined' ? [] : matches;
+                            if (typeof matches === 'undefined') { idMatches.set(id, target); }
+                            for (const itemIndex of itemIndexes) {
+                                const key = `${String(id)}\u001freading\u001f${String(itemIndex)}`;
+                                if (exactVisited.has(key)) { continue; }
+                                exactVisited.add(key);
+                                target.push({matchSource: 'reading', itemIndex});
                             }
                         }
                     }
@@ -2064,7 +2188,7 @@ export class DictionaryDatabase {
                             if (id <= 0 || visited.has(id)) { continue; }
                             visited.add(id);
                             const matchSource = (indexIndex === 0) ? 'term' : 'reading';
-                            const matchType2 = (value === queryData.term) ? 'exact' : matchType;
+                            const matchType2 = (value === queryData.query) ? 'exact' : matchType;
                             idMatches.set(id, {matchSource, matchType: matchType2, itemIndex: queryData.itemIndex});
                         }
                     }
@@ -6993,16 +7117,17 @@ export class DictionaryDatabase {
 
     /**
      * @param {import('@sqlite.org/sqlite-wasm').Database} db
+     * @param {boolean} [allowExisting=true]
      * @returns {Promise<void>}
      * @throws {Error}
      */
-    async _beginImmediateTransaction(db) {
+    async _beginImmediateTransaction(db, allowExisting = true) {
         if (!this._retryBeginImmediateTransaction) {
             try {
                 db.exec('BEGIN IMMEDIATE');
             } catch (e) {
                 const error = toError(e);
-                if (this._isAlreadyInTransactionError(error)) {
+                if (allowExisting && this._isAlreadyInTransactionError(error)) {
                     return;
                 }
                 throw error;
@@ -7019,7 +7144,7 @@ export class DictionaryDatabase {
                 return;
             } catch (e) {
                 const error = toError(e);
-                if (this._isAlreadyInTransactionError(error)) {
+                if (allowExisting && this._isAlreadyInTransactionError(error)) {
                     return;
                 }
                 lastError = error;

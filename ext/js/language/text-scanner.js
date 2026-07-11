@@ -107,6 +107,12 @@ export class TextScanner extends EventDispatcher {
         this._lookupSequence = 0;
         /** @type {?number} */
         this._activeLookupSequence = null;
+        /** @type {?ThemeController} */
+        this._themeController = null;
+        /** @type {'light'|'dark'} */
+        this._siteTheme = 'light';
+        /** @type {number} */
+        this._siteThemeComputedAt = 0;
         /** @type {?import('text-scanner').SelectionRestoreInfo} */
         this._selectionRestoreInfo = null;
 
@@ -559,9 +565,7 @@ export class TextScanner extends EventDispatcher {
                 this.setCurrentTextSource(textSource);
                 this._selectionRestoreInfo = selectionRestoreInfo;
 
-                /** @type {ThemeController} */
-                this._themeController = new ThemeController(document.documentElement);
-                const pageTheme = this._themeController.computeSiteTheme();
+                const pageTheme = this._getSiteTheme();
 
                 this._updateDebugState({
                     scannerSearchDurationMs: Math.round(safePerformance.now() - searchStartedAt),
@@ -1328,11 +1332,11 @@ export class TextScanner extends EventDispatcher {
         if (searchText.length === 0) { return null; }
 
         /** @type {import('api').FindTermsDetails} */
-        const details = {skipLookupWarmWait: true};
+        const details = {};
         const searchTextPrimary = this._getPrimaryTermSearchText(searchText);
-        let {dictionaryEntries, originalTextLength} = await this._api.termsFind(searchTextPrimary, details, optionsContext);
+        let {dictionaryEntries, originalTextLength} = await this._api.termsFind(searchText, details, optionsContext);
         if (dictionaryEntries.length === 0 && searchTextPrimary !== searchText) {
-            ({dictionaryEntries, originalTextLength} = await this._api.termsFind(searchText, details, optionsContext));
+            ({dictionaryEntries, originalTextLength} = await this._api.termsFind(searchTextPrimary, details, optionsContext));
         }
         if (dictionaryEntries.length === 0) { return null; }
 
@@ -1367,6 +1371,21 @@ export class TextScanner extends EventDispatcher {
             }
         }
         return segment;
+    }
+
+    /**
+     * @returns {'light'|'dark'}
+     */
+    _getSiteTheme() {
+        const now = safePerformance.now();
+        if (this._themeController === null) {
+            this._themeController = new ThemeController(document.documentElement);
+        }
+        if (this._siteThemeComputedAt === 0 || now - this._siteThemeComputedAt >= 5000) {
+            this._siteTheme = this._themeController.computeSiteTheme();
+            this._siteThemeComputedAt = now;
+        }
+        return this._siteTheme;
     }
 
     /**

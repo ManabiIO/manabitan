@@ -69,6 +69,7 @@ export class Offscreen {
             ['findTermsOffscreen',             this._findTermsHandler.bind(this)],
             ['getTermFrequenciesOffscreen',    this._getTermFrequenciesHandler.bind(this)],
             ['clearDatabaseCachesOffscreen',   this._clearDatabaseCachesHandler.bind(this)],
+            ['cancelDictionaryImportOffscreen', this._cancelDictionaryImportHandler.bind(this)],
             ['createAndRegisterPortOffscreen', this._createAndRegisterPort.bind(this)],
             ['sanitizeCSSOffscreen',           this._sanitizeCSSOffscreen.bind(this)],
         ]);
@@ -402,6 +403,11 @@ export class Offscreen {
                 }
             }
         }
+    }
+
+    /** @returns {Promise<void>} */
+    async _cancelDictionaryImportHandler() {
+        await this._invokeDictionaryWorker('cancelDictionaryImportOffscreen', {});
     }
 
     /** @type {import('offscreen').ApiHandler<'sanitizeCSSOffscreen'>} */

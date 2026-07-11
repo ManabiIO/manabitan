@@ -219,6 +219,8 @@ async function buildDictionaryWasm(out) {
         const args = [
             `--target=${dictionaryWasmTarget}`,
             '-O3',
+            '-mbulk-memory',
+            '-msimd128',
             '-nostdlib',
             '-Wl,--no-entry',
         ];
