@@ -49,6 +49,7 @@ import {
 } from './raw-term-content.js';
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
 import {TermContentOpfsStore} from './term-content-opfs-store.js';
+import {createDictionaryImportSessionId, DictionaryImportJournal} from './dictionary-import-journal.js';
 import {hashPairToHex, hashTermEntryContentBytes, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {TermRecordOpfsStore} from './term-record-opfs-store.js';
 
@@ -275,6 +276,10 @@ export class DictionaryDatabase {
         this._bulkImportDepth = 0;
         /** @type {boolean} */
         this._bulkImportTransactionOpen = false;
+        /** @type {DictionaryImportJournal} */
+        this._importJournal = new DictionaryImportJournal();
+        /** @type {import('dictionary-import-journal').DictionaryImportJournalRecord|null} */
+        this._bulkImportJournalRecord = null;
         /** @type {boolean} */
         this._deferTermsVirtualTableSync = false;
         /** @type {boolean} */
@@ -295,6 +300,8 @@ export class DictionaryDatabase {
         this._termEntryContentMetaHashPairMask = 0;
         /** @type {number} */
         this._termEntryContentMetaHashPairCount = 0;
+        /** @type {Map<string, Array<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}>>} */
+        this._termEntryContentMetaCollisionsByHashPair = new Map();
         /** @type {boolean} */
         this._termEntryContentHasExistingRows = true;
         /** @type {boolean} */
@@ -464,13 +471,22 @@ export class DictionaryDatabase {
         if (this._db === null) {
             throw new Error('Database is not open');
         }
-        await this._termContentStore.endImportSession();
-        await this._termRecordStore.endImportSession();
         if (this._bulkImportTransactionOpen) {
             try {
                 this._db.exec('ROLLBACK');
             } catch (_) { /* NOP */ }
             this._bulkImportTransactionOpen = false;
+        }
+        if (this._bulkImportJournalRecord !== null) {
+            await Promise.all([
+                this._termContentStore.rollbackImportSession(this._bulkImportJournalRecord.contentCheckpoint),
+                this._termRecordStore.rollbackImportSession(this._bulkImportJournalRecord.recordCheckpoint),
+            ]);
+            await this._importJournal.clear();
+            this._bulkImportJournalRecord = null;
+        } else {
+            await this._termContentStore.endImportSession();
+            await this._termRecordStore.endImportSession();
         }
         this._clearCachedStatements();
         this._termEntryContentCache.clear();
@@ -614,6 +630,18 @@ export class DictionaryDatabase {
             let termContentSessionStartAttempted = false;
             let termRecordSessionStartAttempted = false;
             try {
+                const [contentCheckpoint, recordCheckpoint] = await Promise.all([
+                    this._termContentStore.createImportCheckpoint(),
+                    this._termRecordStore.createImportCheckpoint(),
+                ]);
+                this._bulkImportJournalRecord = {
+                    version: 1,
+                    sessionId: createDictionaryImportSessionId(),
+                    contentCheckpoint,
+                    recordCheckpoint,
+                    createdAt: Date.now(),
+                };
+                await this._importJournal.write(this._bulkImportJournalRecord);
                 termContentSessionStartAttempted = true;
                 await this._termContentStore.beginImportSession();
                 termRecordSessionStartAttempted = true;
@@ -647,17 +675,29 @@ export class DictionaryDatabase {
                     this._bulkImportTransactionOpen = false;
                 }
                 const cleanupPromises = [];
-                if (termContentSessionStartAttempted) {
-                    cleanupPromises.push(this._termContentStore.endImportSession());
-                }
-                if (termRecordSessionStartAttempted) {
-                    cleanupPromises.push(this._termRecordStore.endImportSession());
+                const journalRecord = this._bulkImportJournalRecord;
+                if (journalRecord !== null) {
+                    if (termContentSessionStartAttempted) {
+                        cleanupPromises.push(this._termContentStore.rollbackImportSession(journalRecord.contentCheckpoint));
+                    }
+                    if (termRecordSessionStartAttempted) {
+                        cleanupPromises.push(this._termRecordStore.rollbackImportSession(journalRecord.recordCheckpoint));
+                    }
+                } else {
+                    if (termContentSessionStartAttempted) { cleanupPromises.push(this._termContentStore.endImportSession()); }
+                    if (termRecordSessionStartAttempted) { cleanupPromises.push(this._termRecordStore.endImportSession()); }
                 }
                 const cleanupResults = await Promise.allSettled(cleanupPromises);
                 for (const cleanupResult of cleanupResults) {
                     if (cleanupResult.status === 'rejected') {
                         errors.push(toError(cleanupResult.reason));
                     }
+                }
+                try {
+                    await this._importJournal.clear();
+                    this._bulkImportJournalRecord = null;
+                } catch (journalError) {
+                    errors.push(toError(journalError));
                 }
                 this._deferTermsVirtualTableSync = false;
                 this._termsVirtualTableDirty = false;
@@ -740,20 +780,8 @@ export class DictionaryDatabase {
             const cleanupErrors = [];
             let termContentSessionEnded = false;
             let termRecordSessionEnded = false;
+            let sqlitePublished = false;
             try {
-                if (this._bulkImportTransactionOpen) {
-                    const tCommitStart = safePerformance.now();
-                    try {
-                        db.exec('COMMIT');
-                    } catch (e) {
-                        const error = toError(e);
-                        if (!this._isNoActiveTransactionError(error)) {
-                            throw error;
-                        }
-                    }
-                    commitMs = safePerformance.now() - tCommitStart;
-                    this._bulkImportTransactionOpen = false;
-                }
                 const tTermContentEndImportSessionStart = safePerformance.now();
                 const termContentEndImportSessionPromise = this._termContentStore.endImportSession()
                     .then(() => {
@@ -816,28 +844,12 @@ export class DictionaryDatabase {
                     throw new AggregateError(endImportSessionErrors, 'Failed to finalize dictionary import storage');
                 }
                 if (this._termsVirtualTableDirty) {
-                    await this._beginImmediateTransaction(db);
                     try {
                         const tTermsVirtualTableSyncStart = safePerformance.now();
                         await this._syncTermsVirtualTableFromRecordStore();
                         termsVirtualTableSyncMs = safePerformance.now() - tTermsVirtualTableSyncStart;
-                        try {
-                            db.exec('COMMIT');
-                        } catch (e) {
-                            const error = toError(e);
-                            if (!this._isNoActiveTransactionError(error)) {
-                                throw error;
-                            }
-                        }
                         this._termsVirtualTableDirty = false;
                     } catch (e) {
-                        try {
-                            db.exec('ROLLBACK');
-                        } catch (rollbackError) {
-                            if (!this._isNoActiveTransactionError(toError(rollbackError))) {
-                                throw rollbackError;
-                            }
-                        }
                         throw e;
                     }
                 }
@@ -851,6 +863,31 @@ export class DictionaryDatabase {
                 }
                 createIndexesMs = safePerformance.now() - tCreateIndexesStart;
                 createIndexesCheckpointCount = createIndexStatements.length;
+                if (this._bulkImportTransactionOpen) {
+                    const sessionId = this._bulkImportJournalRecord?.sessionId;
+                    if (typeof sessionId !== 'string') {
+                        throw new Error('Missing dictionary import journal before publication');
+                    }
+                    db.exec({
+                        sql: 'INSERT OR REPLACE INTO dictionaryImportPublications (sessionId, publishedAt) VALUES (?, ?)',
+                        bind: [sessionId, Date.now()],
+                    });
+                    const tCommitStart = safePerformance.now();
+                    db.exec('COMMIT');
+                    commitMs = safePerformance.now() - tCommitStart;
+                    this._bulkImportTransactionOpen = false;
+                    sqlitePublished = true;
+                    try {
+                        await this._importJournal.clear();
+                        this._bulkImportJournalRecord = null;
+                        this._deleteImportPublicationMarkerBestEffort(sessionId);
+                    } catch (error) {
+                        reportDiagnostics('dictionary-import-publication-cleanup-failed', {
+                            sessionId,
+                            error: toError(error).message,
+                        });
+                    }
+                }
                 const tCacheResetStart = safePerformance.now();
                 this._termEntryContentIdByKey.clear();
                 this._termEntryContentIdByHash.clear();
@@ -961,16 +998,28 @@ export class DictionaryDatabase {
                     this._bulkImportTransactionOpen = false;
                 }
                 const cleanupPromises = [];
-                if (!termContentSessionEnded) {
-                    cleanupPromises.push(this._termContentStore.endImportSession());
-                }
-                if (!termRecordSessionEnded) {
-                    cleanupPromises.push(this._termRecordStore.endImportSession());
+                const journalRecord = this._bulkImportJournalRecord;
+                if (operationError !== null && !sqlitePublished && journalRecord !== null) {
+                    cleanupPromises.push(
+                        this._termContentStore.rollbackImportSession(journalRecord.contentCheckpoint),
+                        this._termRecordStore.rollbackImportSession(journalRecord.recordCheckpoint),
+                    );
+                } else {
+                    if (!termContentSessionEnded) { cleanupPromises.push(this._termContentStore.endImportSession()); }
+                    if (!termRecordSessionEnded) { cleanupPromises.push(this._termRecordStore.endImportSession()); }
                 }
                 const cleanupResults = await Promise.allSettled(cleanupPromises);
                 for (const cleanupResult of cleanupResults) {
                     if (cleanupResult.status === 'rejected') {
                         cleanupErrors.push(toError(cleanupResult.reason));
+                    }
+                }
+                if (operationError !== null && !sqlitePublished && journalRecord !== null) {
+                    try {
+                        await this._importJournal.clear();
+                        this._bulkImportJournalRecord = null;
+                    } catch (e) {
+                        cleanupErrors.push(toError(e));
                     }
                 }
                 if (operationError !== null) {
@@ -3719,8 +3768,6 @@ export class DictionaryDatabase {
         let pendingContentBytes = [];
         /** @type {Map<string, number>|null} */
         let pendingContentRowIndexByHash = shouldDedupWithinBatch ? new Map() : null;
-        /** @type {Map<number, Map<number, number>>|null} */
-        let pendingContentRowIndexByHashPair = shouldDedupWithinBatch ? new Map() : null;
 
         if (useLocalTransaction) {
             await this._beginImmediateTransaction(db);
@@ -3738,9 +3785,6 @@ export class DictionaryDatabase {
                     pendingContentBytes = [];
                     if (pendingContentRowIndexByHash !== null) {
                         pendingContentRowIndexByHash.clear();
-                    }
-                    if (pendingContentRowIndexByHashPair !== null) {
-                        pendingContentRowIndexByHashPair.clear();
                     }
                     return;
                 }
@@ -3811,6 +3855,10 @@ export class DictionaryDatabase {
                             const span = spans[storageChunks.entryToStoredChunkIndexes[j]];
                             const localOffset = storageChunks.entryToStoredChunkOffsets[j] ?? 0;
                             const contentDictName = storageChunks.contentDictNames[j];
+                            const storedChunk = storageChunks.storedChunks[storageChunks.entryToStoredChunkIndexes[j]];
+                            const exactContentBytes = contentDictName === 'raw' ?
+                                storedChunk.subarray(localOffset, localOffset + pendingContentBytes[j].byteLength) :
+                                pendingContentBytes[j];
                             this._cacheTermEntryContentMeta(
                                 pendingContentHashes[j],
                                 span.offset + localOffset,
@@ -3819,6 +3867,7 @@ export class DictionaryDatabase {
                                 0,
                                 pendingContentHash1s[j],
                                 pendingContentHash2s[j],
+                                exactContentBytes,
                             );
                         }
                         const contentBatchMs = safePerformance.now() - tContentSqlStart;
@@ -3872,7 +3921,6 @@ export class DictionaryDatabase {
                 pendingContentHash2s = [];
                 pendingContentBytes = [];
                 pendingContentRowIndexByHash = shouldDedupWithinBatch ? new Map() : null;
-                pendingContentRowIndexByHashPair = shouldDedupWithinBatch ? new Map() : null;
             };
 
             for (let i = start, ii = start + count; i < ii; ++i) {
@@ -3882,7 +3930,6 @@ export class DictionaryDatabase {
                 const precomputedHash = (typeof row.termEntryContentHash === 'string' && row.termEntryContentHash.length > 0) ? row.termEntryContentHash : null;
                 const precomputedHash1 = Number.isInteger(row.termEntryContentHash1) ? (/** @type {number} */ (row.termEntryContentHash1) >>> 0) : -1;
                 const precomputedHash2 = Number.isInteger(row.termEntryContentHash2) ? (/** @type {number} */ (row.termEntryContentHash2) >>> 0) : -1;
-                const hasPrecomputedHashPair = precomputedHash1 >= 0 && precomputedHash2 >= 0;
                 const precomputedBytes = row.termEntryContentBytes instanceof Uint8Array ? row.termEntryContentBytes : this._getRawTermContentBytesIfAvailable(row);
                 let contentHash = precomputedHash;
                 let contentHash1 = precomputedHash1;
@@ -3906,11 +3953,9 @@ export class DictionaryDatabase {
                 contentHash = contentHash ?? hashPairToHex(contentHash1, contentHash2);
                 computeContentMs += safePerformance.now() - tComputeStart;
 
-                let existingMeta = (contentHash1 >= 0 && contentHash2 >= 0) ?
-                    this._getTermEntryContentMetaByHashPair(contentHash1, contentHash2) :
-                    void 0;
-                if (typeof existingMeta === 'undefined' && contentHash !== null) {
-                    existingMeta = this._termEntryContentMetaByHash.get(contentHash);
+                let existingMeta = this._findMatchingTermEntryContentMeta(contentHash1, contentHash2, contentBytes);
+                if (existingMeta instanceof Promise) {
+                    existingMeta = await existingMeta;
                 }
                 if (typeof existingMeta !== 'undefined') {
                     ++resolvedFromCacheCount;
@@ -3923,18 +3968,12 @@ export class DictionaryDatabase {
                 }
 
                 let pendingContentIndex = -1;
-                if (pendingContentRowIndexByHashPair !== null && contentHash1 >= 0 && contentHash2 >= 0) {
-                    const pendingContentRowIndexByHash2 = pendingContentRowIndexByHashPair.get(contentHash1);
-                    if (typeof pendingContentRowIndexByHash2 !== 'undefined') {
-                        const existingPendingContentIndex = pendingContentRowIndexByHash2.get(contentHash2);
-                        if (typeof existingPendingContentIndex === 'number') {
-                            pendingContentIndex = existingPendingContentIndex;
-                        }
-                    }
-                }
-                if (pendingContentIndex < 0 && pendingContentRowIndexByHash !== null && contentHash !== null) {
+                if (pendingContentRowIndexByHash !== null && contentHash !== null) {
                     const existingPendingContentIndex = pendingContentRowIndexByHash.get(contentHash);
-                    if (typeof existingPendingContentIndex === 'number') {
+                    if (
+                        typeof existingPendingContentIndex === 'number' &&
+                        this._termContentBytesEqual(pendingContentBytes[existingPendingContentIndex], contentBytes)
+                    ) {
                         pendingContentIndex = existingPendingContentIndex;
                     }
                 }
@@ -3944,14 +3983,6 @@ export class DictionaryDatabase {
                     pendingContentIndex = pendingContentBytes.length;
                     if (pendingContentRowIndexByHash !== null && contentHash !== null) {
                         pendingContentRowIndexByHash.set(contentHash, pendingContentIndex);
-                    }
-                    if (pendingContentRowIndexByHashPair !== null && contentHash1 >= 0 && contentHash2 >= 0) {
-                        let pendingContentRowIndexByHash2 = pendingContentRowIndexByHashPair.get(contentHash1);
-                        if (typeof pendingContentRowIndexByHash2 === 'undefined') {
-                            pendingContentRowIndexByHash2 = new Map();
-                            pendingContentRowIndexByHashPair.set(contentHash1, pendingContentRowIndexByHash2);
-                        }
-                        pendingContentRowIndexByHash2.set(contentHash2, pendingContentIndex);
                     }
                     pendingContentHashes.push(contentHash);
                     pendingContentHash1s.push(contentHash1);
@@ -4164,6 +4195,91 @@ export class DictionaryDatabase {
         this._termEntryContentMetaHashPairTable = [];
         this._termEntryContentMetaHashPairMask = 0;
         this._termEntryContentMetaHashPairCount = 0;
+        this._termEntryContentMetaCollisionsByHashPair.clear();
+    }
+
+    /**
+     * @param {Uint8Array} contentBytes
+     * @returns {[number, number, number]}
+     */
+    _getTermContentSignatures(contentBytes) {
+        const read = (offset) => (
+            (contentBytes[offset] ?? 0) |
+            ((contentBytes[offset + 1] ?? 0) << 8) |
+            ((contentBytes[offset + 2] ?? 0) << 16) |
+            ((contentBytes[offset + 3] ?? 0) << 24)
+        ) >>> 0;
+        const lastOffset = Math.max(0, contentBytes.byteLength - 4);
+        return [read(0), read(Math.floor(lastOffset / 2)), read(lastOffset)];
+    }
+
+    /**
+     * @param {Uint8Array} a
+     * @param {Uint8Array} b
+     * @returns {boolean}
+     */
+    _termContentBytesEqual(a, b) {
+        if (!(a instanceof Uint8Array) || !(b instanceof Uint8Array)) {
+            throw new TypeError('Term content byte comparison requires Uint8Array inputs');
+        }
+        if (a.byteLength !== b.byteLength) { return false; }
+        for (let i = 0; i < a.byteLength; ++i) {
+            if (a[i] !== b[i]) { return false; }
+        }
+        return true;
+    }
+
+    /**
+     * The hash pair selects candidates. Length and three fixed-position words
+     * isolate collisions in the streaming hot path without retaining content.
+     * Persisted rows without signatures receive a one-time exact comparison.
+     * @param {number} hash1
+     * @param {number} hash2
+     * @param {Uint8Array} contentBytes
+     * @returns {{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}|Promise<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}|undefined>|undefined}
+     */
+    _findMatchingTermEntryContentMeta(hash1, hash2, contentBytes) {
+        const primary = this._getTermEntryContentMetaByHashPair(hash1, hash2);
+        const key = `${hash1 >>> 0}:${hash2 >>> 0}`;
+        /** @type {Array<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}>} */
+        const candidates = [];
+        if (typeof primary !== 'undefined') { candidates.push(primary); }
+        const collisions = this._termEntryContentMetaCollisionsByHashPair.get(key);
+        if (typeof collisions !== 'undefined') { candidates.push(...collisions); }
+        const [signature1, signature2, signature3] = this._getTermContentSignatures(contentBytes);
+        const persistedCandidates = [];
+        for (const meta of candidates) {
+            if (meta.length !== contentBytes.byteLength) { continue; }
+            if (typeof meta.signature1 === 'number') {
+                if (meta.signature1 === signature1 && meta.signature2 === signature2 && meta.signature3 === signature3) {
+                    return meta;
+                }
+                continue;
+            }
+            if (meta.dictName !== 'raw' && meta.dictName !== RAW_TERM_CONTENT_DICT_NAME && meta.dictName !== RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME) { continue; }
+            persistedCandidates.push(meta);
+        }
+        return persistedCandidates.length === 0 ?
+            void 0 :
+            this._findMatchingPersistedTermEntryContentMeta(persistedCandidates, contentBytes);
+    }
+
+    /**
+     * @param {Array<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}>} candidates
+     * @param {Uint8Array} contentBytes
+     * @returns {Promise<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}|undefined>}
+     */
+    async _findMatchingPersistedTermEntryContentMeta(candidates, contentBytes) {
+        for (const meta of candidates) {
+            const existingBytes = await this._termContentStore.readSlice(meta.offset, meta.length);
+            if (!(existingBytes instanceof Uint8Array)) { continue; }
+            const [existingSignature1, existingSignature2, existingSignature3] = this._getTermContentSignatures(existingBytes);
+            meta.signature1 = existingSignature1;
+            meta.signature2 = existingSignature2;
+            meta.signature3 = existingSignature3;
+            if (this._termContentBytesEqual(existingBytes, contentBytes)) { return meta; }
+        }
+        return void 0;
     }
 
     /**
@@ -4284,10 +4400,14 @@ export class DictionaryDatabase {
      * @param {number} [id]
      * @param {number} [hash1]
      * @param {number} [hash2]
-     * @returns {{id: number, offset: number, length: number, dictName: string, hash2?: number}}
+     * @param {Uint8Array|null} [contentBytes]
+     * @returns {{id: number, offset: number, length: number, dictName: string, hash2?: number, signature1?: number, signature2?: number, signature3?: number}}
      */
-    _cacheTermEntryContentMeta(contentHash, offset, length, dictName, id = 0, hash1 = -1, hash2 = -1) {
+    _cacheTermEntryContentMeta(contentHash, offset, length, dictName, id = 0, hash1 = -1, hash2 = -1, contentBytes = null) {
         const meta = {id, offset, length, dictName: dictName ?? 'raw'};
+        if (contentBytes instanceof Uint8Array) {
+            [meta.signature1, meta.signature2, meta.signature3] = this._getTermContentSignatures(contentBytes);
+        }
         if (typeof contentHash === 'string' && contentHash.length > 0) {
             this._termEntryContentMetaByHash.set(contentHash, meta);
             if (hash1 < 0 || hash2 < 0) {
@@ -4298,7 +4418,30 @@ export class DictionaryDatabase {
             }
         }
         if (hash1 >= 0 && hash2 >= 0) {
-            this._setTermEntryContentMetaByHashPair(hash1, hash2, meta);
+            const existing = this._getTermEntryContentMetaByHashPair(hash1, hash2);
+            if (typeof existing === 'undefined') {
+                this._setTermEntryContentMetaByHashPair(hash1, hash2, meta);
+            } else if (existing.offset !== offset) {
+                if (
+                    typeof existing.signature1 === 'number' &&
+                    typeof meta.signature1 === 'number' &&
+                    (
+                        existing.signature1 !== meta.signature1 ||
+                        existing.signature2 !== meta.signature2 ||
+                        existing.signature3 !== meta.signature3
+                    )
+                ) {
+                    const key = `${hash1 >>> 0}:${hash2 >>> 0}`;
+                    let collisions = this._termEntryContentMetaCollisionsByHashPair.get(key);
+                    if (typeof collisions === 'undefined') {
+                        collisions = [];
+                        this._termEntryContentMetaCollisionsByHashPair.set(key, collisions);
+                    }
+                    collisions.push(meta);
+                } else {
+                    this._setTermEntryContentMetaByHashPair(hash1, hash2, meta);
+                }
+            }
         }
         return meta;
     }
@@ -4772,9 +4915,10 @@ export class DictionaryDatabase {
             /**
              * @param {number} hash1
              * @param {number} hash2
+             * @param {Uint8Array} contentBytes
              * @returns {number}
              */
-            const findPendingContentIndex = (hash1, hash2) => {
+            const findPendingContentIndex = (hash1, hash2, contentBytes) => {
                 let slot = getPendingHashSlot(hash1, hash2);
                 while (true) {
                     const storedIndex = pendingIndexTable[slot];
@@ -4782,7 +4926,10 @@ export class DictionaryDatabase {
                         return -1;
                     }
                     if (pendingHash1Table[slot] === hash1 && pendingHash2Table[slot] === hash2) {
-                        return storedIndex - 1;
+                        const pendingIndex = storedIndex - 1;
+                        if (this._termContentBytesEqual(pendingContentBytes[pendingIndex], contentBytes)) {
+                            return pendingIndex;
+                        }
                     }
                     slot = (slot + 1) & pendingHashTableMask;
                 }
@@ -4810,19 +4957,23 @@ export class DictionaryDatabase {
              * @param {number} hash2
              * @returns {{id: number, offset: number, length: number, dictName: string, hash2?: number}|undefined}
              */
-            const findExistingContentMeta = existingMetaCount > 0 ? (hash1, hash2) => {
-                let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, existingMetaMask);
-                while (true) {
-                    const meta = existingMetaTable[slot];
-                    if (typeof meta === 'undefined') {
-                        return void 0;
+            /** @type {((hash1: number, hash2: number) => {id: number, offset: number, length: number, dictName: string, hash2?: number, signature1?: number, signature2?: number, signature3?: number}|undefined)|null} */
+            let findExistingContentMeta = null;
+            if (existingMetaCount > 0) {
+                findExistingContentMeta = (hash1, hash2) => {
+                    let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, existingMetaMask);
+                    while (true) {
+                        const meta = existingMetaTable[slot];
+                        if (typeof meta === 'undefined') {
+                            return void 0;
+                        }
+                        if (existingMetaHash1Table[slot] === hash1 && existingMetaHash2Table[slot] === hash2) {
+                            return meta;
+                        }
+                        slot = (slot + 1) & existingMetaMask;
                     }
-                    if (existingMetaHash1Table[slot] === hash1 && existingMetaHash2Table[slot] === hash2) {
-                        return meta;
-                    }
-                    slot = (slot + 1) & existingMetaMask;
-                }
-            } : null;
+                };
+            }
             /** @type {Uint8Array[]} */
             const pendingContentBytes = [];
             /** @type {number[]} */
@@ -4853,12 +5004,22 @@ export class DictionaryDatabase {
             for (let i = 0; i < count; ++i) {
                 const hash1 = chunk.contentHash1List[i] >>> 0;
                 const hash2 = chunk.contentHash2List[i] >>> 0;
-                const existingPendingIndex = findPendingContentIndex(hash1, hash2);
+                const contentBytes = chunk.contentBytesList[i];
+                if (!(contentBytes instanceof Uint8Array)) {
+                    throw new TypeError(`Artifact term content bytes are invalid at row ${i}`);
+                }
+                const existingPendingIndex = findPendingContentIndex(hash1, hash2, contentBytes);
                 if (existingPendingIndex >= 0) {
                     pendingRowToUniqueIndex[i] = existingPendingIndex;
                     continue;
                 }
-                const existingMeta = findExistingContentMeta !== null ? findExistingContentMeta(hash1, hash2) : void 0;
+                let existingMeta = findExistingContentMeta !== null ? findExistingContentMeta(hash1, hash2) : void 0;
+                if (typeof existingMeta !== 'undefined') {
+                    existingMeta = this._findMatchingTermEntryContentMeta(hash1, hash2, contentBytes);
+                    if (existingMeta instanceof Promise) {
+                        existingMeta = await existingMeta;
+                    }
+                }
                 if (typeof existingMeta !== 'undefined') {
                     contentOffsets[i] = existingMeta.offset;
                     contentLengths[i] = existingMeta.length;
@@ -4870,7 +5031,7 @@ export class DictionaryDatabase {
                     continue;
                 }
                 const pendingIndex = insertPendingContentIndex(hash1, hash2);
-                pendingContentBytes.push(chunk.contentBytesList[i]);
+                pendingContentBytes.push(contentBytes);
                 pendingContentHash1s.push(hash1);
                 pendingContentHash2s.push(hash2);
                 if (pendingContentDictNames !== null) {
@@ -4902,10 +5063,6 @@ export class DictionaryDatabase {
                 this._ensureTermEntryContentMetaHashPairCapacity(
                     this._termEntryContentMetaHashPairCount + pendingContentBytes.length,
                 );
-                const cacheHash1Table = this._termEntryContentMetaHash1Table;
-                const cacheHash2Table = this._termEntryContentMetaHash2Table;
-                const cacheMetaTable = this._termEntryContentMetaHashPairTable;
-                const cacheMask = this._termEntryContentMetaHashPairMask;
                 for (let i = 0; i < count; ++i) {
                     const pendingIndex = pendingRowToUniqueIndex[i];
                     if (pendingIndex < 0) { continue; }
@@ -4926,29 +5083,21 @@ export class DictionaryDatabase {
                     const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[i];
                     const hash1 = pendingContentHash1s[i] >>> 0;
                     const hash2 = pendingContentHash2s[i] >>> 0;
-                    const meta = {
-                        id: 0,
-                        offset: storedOffsets[storedChunkIndex] + (storageChunks.entryToStoredChunkOffsets[i] ?? 0),
-                        length: pendingContentBytes[i].byteLength,
-                        dictName: pendingContentDictNames === null ? (uniformContentDictName ?? 'raw') : (storageChunks.contentDictNames[i] ?? 'raw'),
+                    this._cacheTermEntryContentMeta(
+                        null,
+                        storedOffsets[storedChunkIndex] + (storageChunks.entryToStoredChunkOffsets[i] ?? 0),
+                        pendingContentBytes[i].byteLength,
+                        pendingContentDictNames === null ? (uniformContentDictName ?? 'raw') : (storageChunks.contentDictNames[i] ?? 'raw'),
+                        0,
+                        hash1,
                         hash2,
-                    };
-                    let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, cacheMask);
-                    while (true) {
-                        const existingMeta = cacheMetaTable[slot];
-                        if (typeof existingMeta === 'undefined') {
-                            cacheHash1Table[slot] = hash1;
-                            cacheHash2Table[slot] = hash2;
-                            cacheMetaTable[slot] = meta;
-                            ++this._termEntryContentMetaHashPairCount;
-                            break;
-                        }
-                        if (cacheHash1Table[slot] === hash1 && cacheHash2Table[slot] === hash2) {
-                            cacheMetaTable[slot] = meta;
-                            break;
-                        }
-                        slot = (slot + 1) & cacheMask;
-                    }
+                        (pendingContentDictNames === null ? uniformContentDictName : storageChunks.contentDictNames[i]) === 'raw' ?
+                            storageChunks.storedChunks[storedChunkIndex].subarray(
+                                storageChunks.entryToStoredChunkOffsets[i] ?? 0,
+                                (storageChunks.entryToStoredChunkOffsets[i] ?? 0) + pendingContentBytes[i].byteLength,
+                            ) :
+                            pendingContentBytes[i],
+                    );
                 }
             }
             contentAppendMs += safePerformance.now() - tContentAppendStart;
@@ -5140,6 +5289,56 @@ export class DictionaryDatabase {
 
         await this._initializeSchema();
         await this._runSchemaMigrations();
+        await this._recoverInterruptedImportSession();
+    }
+
+    /** */
+    async _recoverInterruptedImportSession() {
+        const db = this._requireDb();
+        let record = null;
+        try {
+            record = await this._importJournal.read();
+        } catch (error) {
+            reportDiagnostics('dictionary-import-journal-invalid', {error: toError(error).message});
+            await this._importJournal.clear();
+        }
+        if (record !== null) {
+            const published = this._asNumber(db.selectValue(
+                'SELECT 1 FROM dictionaryImportPublications WHERE sessionId = $sessionId LIMIT 1',
+                {$sessionId: record.sessionId},
+            ), 0) === 1;
+            if (!published) {
+                await Promise.all([
+                    this._termContentStore.rollbackImportSession(record.contentCheckpoint),
+                    this._termRecordStore.rollbackImportSession(record.recordCheckpoint),
+                ]);
+            }
+            await this._importJournal.clear();
+            reportDiagnostics('dictionary-import-session-recovered', {
+                sessionId: record.sessionId,
+                action: published ? 'kept-published-data' : 'rolled-back-unpublished-data',
+            });
+            this._deleteImportPublicationMarkerBestEffort(record.sessionId);
+        }
+    }
+
+    /**
+     * Publication markers are recovery hints, not live database state. Failing
+     * to remove one must not prevent the extension backend from starting.
+     * @param {string} sessionId
+     */
+    _deleteImportPublicationMarkerBestEffort(sessionId) {
+        try {
+            this._requireDb().exec({
+                sql: 'DELETE FROM dictionaryImportPublications WHERE sessionId = ?',
+                bind: [sessionId],
+            });
+        } catch (error) {
+            reportDiagnostics('dictionary-import-publication-cleanup-failed', {
+                sessionId,
+                error: toError(error).message,
+            });
+        }
     }
 
     /** */
@@ -5223,6 +5422,11 @@ export class DictionaryDatabase {
                 contentLength INTEGER NOT NULL,
                 contentDictName TEXT NOT NULL,
                 uncompressedLength INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS dictionaryImportPublications (
+                sessionId TEXT PRIMARY KEY,
+                publishedAt INTEGER NOT NULL
             );
         `);
         await this._ensureTermsVirtualTable();

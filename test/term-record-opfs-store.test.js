@@ -107,6 +107,29 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
 }
 
 describe('TermRecordOpfsStore', () => {
+    test('restores shard lengths and removes shards created after a checkpoint', async () => {
+        const store = new TermRecordOpfsStore();
+        const existingName = store._getShardSegmentFileName('JMdict', 'raw', 0);
+        const createdName = store._getShardSegmentFileName('Jitendex', 'raw', 0);
+        const fileBytesByName = new Map([[existingName, new Uint8Array([1, 2, 3])]]);
+        const directory = createFakeDirectoryHandle(fileBytesByName);
+        Reflect.set(store, '_recordsDirectoryHandle', directory);
+        const checkpoint = await store.createImportCheckpoint();
+
+        const existingWritable = await (await directory.getFileHandle(existingName)).createWritable({keepExistingData: true});
+        await existingWritable.seek(3);
+        await existingWritable.write(new Uint8Array([4, 5]));
+        await existingWritable.close();
+        const createdWritable = await (await directory.getFileHandle(createdName, {create: true})).createWritable();
+        await createdWritable.write(new Uint8Array([9]));
+        await createdWritable.close();
+
+        await store.rollbackImportSession(checkpoint);
+
+        expect(fileBytesByName.get(existingName)).toStrictEqual(new Uint8Array([1, 2, 3]));
+        expect(fileBytesByName.has(createdName)).toBe(false);
+    });
+
     test('does not reload existing dictionary shards when an import session begins', async () => {
         const store = new TermRecordOpfsStore();
         const loadShardStatesContents = vi.spyOn(store, '_loadShardStatesContents');
@@ -122,6 +145,27 @@ describe('TermRecordOpfsStore', () => {
         expect(Reflect.get(store, '_allShardContentsLoaded')).toBe(true);
 
         await store.endImportSession();
+    });
+
+    test('does not reload a dictionary during an all-dictionary load', async () => {
+        const store = new TermRecordOpfsStore();
+        const jmFileName = store._getShardSegmentFileName('JMdict', 'raw', 0);
+        const jitendexFileName = store._getShardSegmentFileName('Jitendex', 'raw', 0);
+        const makeState = (fileName) => ({fileName});
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
+        Reflect.get(store, '_shardStateByFileName').set(jmFileName, makeState(jmFileName));
+        Reflect.get(store, '_shardStateByFileName').set(jitendexFileName, makeState(jitendexFileName));
+        const loadedFileNames = [];
+        vi.spyOn(store, '_loadShardStatesContents').mockImplementation(async (states) => {
+            loadedFileNames.push(states.map(({fileName}) => fileName));
+            await Promise.resolve();
+        });
+
+        await store.ensureDictionariesLoaded(['JMdict']);
+        await store.ensureAllDictionariesLoaded();
+
+        expect(loadedFileNames).toEqual([[jmFileName], [jitendexFileName]]);
+        expect(Reflect.get(store, '_allShardContentsLoaded')).toBe(true);
     });
 
     test('encodes and decodes raw-v4 entry content dict names without falling back to custom strings', () => {
@@ -213,6 +257,27 @@ describe('TermRecordOpfsStore', () => {
         expect(index.expression.get('日本')).toEqual([1]);
         expect(index.reading.get('にほん')).toEqual([1]);
         expect(index.sequence.get(100)).toEqual([1]);
+    });
+
+    test('reports repeated records as already indexed', () => {
+        const store = new TermRecordOpfsStore();
+        const storeRecord = /** @type {(record: unknown) => boolean} */ (Reflect.get(store, '_storeRecord').bind(store));
+        const record = {
+            id: 1,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: 100,
+        };
+
+        expect(storeRecord(record)).toBe(true);
+        expect(storeRecord({...record})).toBe(false);
     });
 
     test('dictionary id side index follows overwritten records across dictionaries', () => {

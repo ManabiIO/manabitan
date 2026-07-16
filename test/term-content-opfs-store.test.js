@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {describe, expect, test, vi} from 'vitest';
+import {afterEach, describe, expect, test, vi} from 'vitest';
 import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
 
 /**
@@ -49,7 +49,76 @@ function createReadableFile(bytes) {
     };
 }
 
+afterEach(() => {
+    vi.unstubAllGlobals();
+});
+
 describe('TermContentOpfsStore', () => {
+    test('writes coalesced Blob data continuously across file segments', async () => {
+        const maxSegmentBytes = 128 * 1024 * 1024;
+        const firstWritable = {write: vi.fn(async () => {}), close: vi.fn(async () => {})};
+        const secondWritable = {write: vi.fn(async () => {}), close: vi.fn(async () => {}), seek: vi.fn(async () => {})};
+        const firstFileHandle = {createWritable: vi.fn(async () => firstWritable)};
+        const secondFileHandle = {
+            createWritable: vi.fn(async () => secondWritable),
+            getFile: vi.fn(async () => ({size: 0})),
+        };
+        vi.stubGlobal('navigator', {
+            storage: {
+                getDirectory: vi.fn(async () => ({
+                    getFileHandle: vi.fn(async () => secondFileHandle),
+                })),
+            },
+        });
+
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_writable', firstWritable);
+        Reflect.set(store, '_fileHandle', firstFileHandle);
+        Reflect.set(store, '_length', maxSegmentBytes - 2);
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle: firstFileHandle,
+            fileLength: maxSegmentBytes - 2,
+            startOffset: 0,
+            readFile: null,
+        }]);
+
+        await Reflect.get(store, '_writeDataToActiveSegments').call(store, new Blob([new Uint8Array([1, 2, 3, 4])]));
+
+        expect(firstWritable.write).toHaveBeenCalledTimes(1);
+        expect(Reflect.get(firstWritable.write.mock.calls[0][0], 'size')).toBe(2);
+        expect(secondWritable.write).toHaveBeenCalledTimes(1);
+        expect(Reflect.get(secondWritable.write.mock.calls[0][0], 'size')).toBe(2);
+        expect(Reflect.get(store, '_segmentStates')).toHaveLength(2);
+        expect(Reflect.get(store, '_length')).toBe(maxSegmentBytes + 2);
+    });
+
+    test('reopens and retries a Blob write when Chromium closes the stream', async () => {
+        const closingError = new Error('Cannot write to a closed or closing stream');
+        const firstWritable = {write: vi.fn(async () => { throw closingError; })};
+        const recoveredWritable = {write: vi.fn(async () => {}), seek: vi.fn(async () => {})};
+        const fileHandle = {createWritable: vi.fn(async () => recoveredWritable)};
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_writable', firstWritable);
+        Reflect.set(store, '_fileHandle', fileHandle);
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle,
+            fileLength: 10,
+            startOffset: 0,
+            readFile: null,
+        }]);
+
+        await Reflect.get(store, '_writeDataToActiveSegments').call(store, new Blob([new Uint8Array([1, 2, 3])]));
+
+        expect(fileHandle.createWritable).toHaveBeenCalledTimes(1);
+        expect(recoveredWritable.seek).toHaveBeenCalledWith(10);
+        expect(recoveredWritable.write).toHaveBeenCalledTimes(1);
+        expect(Reflect.get(store, '_length')).toBe(13);
+    });
+
     test('reads the pre-import snapshot without waiting for queued append writes', async () => {
         const initialBytes = new Uint8Array([1, 2, 3, 4]);
         const store = new TermContentOpfsStore();

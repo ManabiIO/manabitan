@@ -507,6 +507,55 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @returns {Promise<import('dictionary-import-journal').TermRecordCheckpoint>}
+     */
+    async createImportCheckpoint() {
+        await this._closeAllWritables();
+        if (this._recordsDirectoryHandle === null) { return {shards: []}; }
+        const shards = [];
+        for (const fileName of await this._listShardFileNames()) {
+            const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName);
+            shards.push({fileName, fileLength: (await fileHandle.getFile()).size});
+        }
+        return {shards};
+    }
+
+    /**
+     * @param {import('dictionary-import-journal').TermRecordCheckpoint} checkpoint
+     * @returns {Promise<void>}
+     */
+    async rollbackImportSession(checkpoint) {
+        await this.endImportSession();
+        if (this._recordsDirectoryHandle === null) { return; }
+        /** @type {Map<string, number>} */
+        const checkpointByName = new Map();
+        for (const shard of checkpoint.shards) {
+            checkpointByName.set(shard.fileName, shard.fileLength);
+        }
+        for (const fileName of await this._listShardFileNames()) {
+            const fileLength = checkpointByName.get(fileName);
+            if (typeof fileLength === 'undefined') {
+                await this._recordsDirectoryHandle.removeEntry(fileName);
+                continue;
+            }
+            const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName);
+            const writable = await fileHandle.createWritable({keepExistingData: true});
+            try {
+                await writable.truncate(fileLength);
+            } finally {
+                await writable.close();
+            }
+        }
+        for (const {fileName, fileLength} of checkpoint.shards) {
+            const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName, {create: true});
+            if ((await fileHandle.getFile()).size !== fileLength) {
+                throw new Error(`Cannot restore missing term-record bytes for ${fileName}`);
+            }
+        }
+        await this.prepare();
+    }
+
+    /**
      * @returns {Promise<void>}
      */
     async endImportSession() {
@@ -1609,7 +1658,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {TermRecord} record
-     * @returns {void}
+     * @returns {boolean} Whether the record must be added to its dictionary indexes.
      */
     _storeRecord(record) {
         const existing = this._recordsById.get(record.id);
@@ -1624,24 +1673,26 @@ export class TermRecordOpfsStore {
                     this._recordIdsByDictionary.set(record.dictionary, ids);
                 }
                 ids.push(record.id);
+                return true;
             }
-            return;
+            return false;
         }
         this._getOrCreateRecordIdsForDictionary(record.dictionary).push(record.id);
+        return true;
     }
 
     /**
      * @param {TermRecord} record
      * @param {number[]} recordIds
-     * @returns {void}
+     * @returns {boolean} Whether the record must be added to its dictionary indexes.
      */
     _storeRecordWithKnownDictionaryIds(record, recordIds) {
         if (typeof this._recordsById.get(record.id) !== 'undefined') {
-            this._storeRecord(record);
-            return;
+            return this._storeRecord(record);
         }
         this._recordsById.set(record.id, record);
         recordIds.push(record.id);
+        return true;
     }
 
     /**
@@ -2073,8 +2124,12 @@ export class TermRecordOpfsStore {
         if (this._allShardContentsLoaded || this._recordsDirectoryHandle === null) {
             return;
         }
-        /** @type {TermRecordShardState[]} */
-        const statesToLoad = [...this._shardStateByFileName.values()].sort((a, b) => a.fileName.localeCompare(b.fileName));
+        const statesToLoad = [...this._shardStateByFileName.values()]
+            .filter((state) => {
+                const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
+                return dictionaryName === null || !this._loadedDictionaryNames.has(dictionaryName);
+            })
+            .sort((a, b) => a.fileName.localeCompare(b.fileName));
         await this._loadShardStatesContents(statesToLoad);
         for (const state of this._shardStateByFileName.values()) {
             const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
@@ -2483,14 +2538,15 @@ export class TermRecordOpfsStore {
                     score,
                     sequence: rawSequence >= 0 ? rawSequence : null,
                 };
+                let indexRecord;
                 if (sharedDictionaryRecordIds !== null) {
-                    this._storeRecordWithKnownDictionaryIds(record, sharedDictionaryRecordIds);
+                    indexRecord = this._storeRecordWithKnownDictionaryIds(record, sharedDictionaryRecordIds);
                 } else {
-                    this._storeRecord(record);
+                    indexRecord = this._storeRecord(record);
                 }
-                if (sharedDictionaryIndex !== null) {
+                if (indexRecord && sharedDictionaryIndex !== null) {
                     this._addDecodedRecordToDictionaryIndex(sharedDictionaryIndex, record, expression, reading);
-                } else if (!this._deferIndexBuild) {
+                } else if (indexRecord && !this._deferIndexBuild) {
                     this._addToIndex(record);
                 }
                 if (id >= this._nextId) {
@@ -2579,8 +2635,8 @@ export class TermRecordOpfsStore {
                 score: this._asNumber(raw[9], 0),
                 sequence: this._asNullableNumber(raw[10]),
             };
-            this._storeRecord(record);
-            if (!this._deferIndexBuild) {
+            const indexRecord = this._storeRecord(record);
+            if (indexRecord && !this._deferIndexBuild) {
                 this._addToIndex(record);
             }
             if (id >= this._nextId) {

@@ -27,6 +27,7 @@ describe('WebExtension', () => {
         originalChrome = globalThis.chrome;
         globalThis.chrome = /** @type {typeof globalThis.chrome} */ ({
             runtime: {
+                id: 'test',
                 getURL: vi.fn((path) => `chrome-extension://test${path}`),
                 getManifest: vi.fn(() => ({name: 'Manabitan', version: '0.0.0.0'})),
                 sendMessage: vi.fn(),
@@ -58,7 +59,7 @@ describe('WebExtension', () => {
         await expectation;
     });
 
-    test('sendMessagePromise marks extension unloaded on retryable runtime disconnect', async () => {
+    test('sendMessagePromise does not mark a live extension unloaded when a recipient disconnects', async () => {
         const webExtension = new WebExtension();
         globalThis.chrome.runtime.sendMessage = vi.fn((_message, callback) => {
             globalThis.chrome.runtime.lastError = {message: 'Could not establish connection. Receiving end does not exist.'};
@@ -66,6 +67,32 @@ describe('WebExtension', () => {
         });
 
         await expect(webExtension.sendMessagePromise({action: 'noop'})).rejects.toThrow(/Could not establish connection/);
+        expect(webExtension.unloaded).toBe(false);
+    });
+
+    test.each([
+        'Could not establish connection. Receiving end does not exist.',
+        'The message port closed before a response was received.',
+    ])('sendMessagePromise marks extension unloaded when its context is gone: %s', async (message) => {
+        const webExtension = new WebExtension();
+        globalThis.chrome.runtime.sendMessage = vi.fn((_message, callback) => {
+            globalThis.chrome.runtime.id = '';
+            globalThis.chrome.runtime.lastError = {message};
+            callback(undefined);
+        });
+
+        await expect(webExtension.sendMessagePromise({action: 'noop'})).rejects.toThrow();
+        expect(webExtension.unloaded).toBe(true);
+    });
+
+    test('sendMessagePromise marks an explicitly invalidated extension context unloaded', async () => {
+        const webExtension = new WebExtension();
+        globalThis.chrome.runtime.sendMessage = vi.fn((_message, callback) => {
+            globalThis.chrome.runtime.lastError = {message: 'Extension context invalidated.'};
+            callback(undefined);
+        });
+
+        await expect(webExtension.sendMessagePromise({action: 'noop'})).rejects.toThrow(/context invalidated/);
         expect(webExtension.unloaded).toBe(true);
     });
 

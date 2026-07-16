@@ -137,6 +137,47 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         });
     });
 
+    test('uses content signatures to disambiguate identical hash pairs', async () => {
+        const database = new DictionaryDatabase();
+        const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
+        const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
+        const firstBytes = new Uint8Array([1, 2, 3]);
+        const secondBytes = new Uint8Array([1, 2, 4]);
+        Reflect.set(database, '_termContentStore', {readSlice: vi.fn(async () => firstBytes)});
+
+        cache(null, 10, firstBytes.byteLength, 'raw', 0, 123, 456, firstBytes);
+        expect(findMatching(123, 456, secondBytes)).toBeUndefined();
+        cache(null, 20, secondBytes.byteLength, 'raw', 0, 123, 456, secondBytes);
+
+        expect(findMatching(123, 456, firstBytes)).toMatchObject({offset: 10});
+        expect(findMatching(123, 456, secondBytes)).toMatchObject({offset: 20});
+    });
+
+    test('exactly compares persisted candidates which predate content signatures', async () => {
+        const database = new DictionaryDatabase();
+        const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
+        const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
+        const persistedBytes = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+        const collidingBytes = persistedBytes.slice();
+        collidingBytes[5] = 99;
+        Reflect.set(database, '_termContentStore', {readSlice: vi.fn(async () => persistedBytes)});
+
+        cache(null, 10, persistedBytes.byteLength, 'raw', 0, 123, 456);
+
+        const result = findMatching(123, 456, collidingBytes);
+        expect(result).toBeInstanceOf(Promise);
+        await expect(result).resolves.toBeUndefined();
+    });
+
+    test('returns synchronously when a hash pair has no persisted candidate', () => {
+        const database = new DictionaryDatabase();
+        const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
+
+        const result = findMatching(123, 456, new Uint8Array([1, 2, 3]));
+
+        expect(result).toBeUndefined();
+    });
+
     test('parses string content hashes into the numeric cache and clears both indexes', () => {
         const database = new DictionaryDatabase();
         const clearTermEntryContentMetaCaches = /** @type {(this: DictionaryDatabase) => void} */ (
@@ -176,6 +217,12 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
                     lengths.push(chunks[i].byteLength);
                     offset += chunks[i].byteLength;
                 }
+            }),
+            readSlice: vi.fn(async (offset, length) => {
+                const call = appendCalls.find(({offsets, lengths}) => offsets.some((value, index) => value === offset && lengths[index] >= length));
+                if (typeof call === 'undefined') { throw new Error('Missing test content span'); }
+                const index = call.offsets.indexOf(offset);
+                return call.chunks[index].slice(0, length);
             }),
         });
 
@@ -243,7 +290,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         ));
 
         expect(appendCalls).toHaveLength(1);
-        expect(getMetaSpy).not.toHaveBeenCalled();
+        expect(getMetaSpy).toHaveBeenCalled();
         expect(getMeta(database, 10, 20)).toMatchObject({offset: termRecordCalls[0].contentOffsets[0], length: 3});
         expect(termRecordCalls).toHaveLength(2);
         expect(termRecordCalls[0].contentOffsets[0]).toBe(termRecordCalls[0].contentOffsets[1]);
