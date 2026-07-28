@@ -39,7 +39,7 @@ function getDictionaryImportControllerMethod(name) {
 
 describe('DictionaryImportController staged update profile rewrites', () => {
     const importDictionaryFromZip = /** @type {(this: DictionaryImportController, file: File, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importDetails: import('dictionary-importer').ImportDetails, useImportSession: boolean, finalizeImportSession: boolean, onProgress: import('dictionary-worker').ImportProgressCallback) => Promise<{errors: Error[], importedTitle: string|null}>} */ (getDictionaryImportControllerMethod('_importDictionaryFromZip'));
-    const getImportPerformanceFlags = /** @type {(this: DictionaryImportController) => {mediaResolutionConcurrency: number}} */ (getDictionaryImportControllerMethod('_getImportPerformanceFlags'));
+    const getImportPerformanceFlags = /** @type {(this: DictionaryImportController) => {skipMediaImport: boolean, mediaResolutionConcurrency: number}} */ (getDictionaryImportControllerMethod('_getImportPerformanceFlags'));
 
     afterEach(() => {
         vi.restoreAllMocks();
@@ -51,9 +51,11 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         const controller = createControllerForInternalTests();
 
         expect(getImportPerformanceFlags.call(controller).mediaResolutionConcurrency).toBe(16);
+        expect(getImportPerformanceFlags.call(controller).skipMediaImport).toBe(false);
 
-        Reflect.set(globalThis, 'manabitanImportPerformanceFlags', {mediaResolutionConcurrency: 100});
+        Reflect.set(globalThis, 'manabitanImportPerformanceFlags', {mediaResolutionConcurrency: 100, skipMediaImport: true});
         expect(getImportPerformanceFlags.call(controller).mediaResolutionConcurrency).toBe(32);
+        expect(getImportPerformanceFlags.call(controller).skipMediaImport).toBe(true);
     });
 
     test('watchdog recovery terminates an active MDX conversion worker', async () => {

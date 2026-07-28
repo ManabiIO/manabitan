@@ -2174,6 +2174,7 @@ export class DictionaryImportController {
             const optionsFull = await this._settingsController.getOptionsFull();
             const {
                 skipImageMetadata,
+                skipMediaImport,
                 mediaResolutionConcurrency,
                 debugImportLogging,
                 enableTermEntryContentDedup,
@@ -2187,6 +2188,7 @@ export class DictionaryImportController {
                 prefixWildcardsSupported: optionsFull.global.database.prefixWildcardsSupported,
                 yomitanVersion: chrome.runtime.getManifest().version,
                 skipImageMetadata,
+                skipMediaImport,
                 mediaResolutionConcurrency,
                 debugImportLogging,
                 enableTermEntryContentDedup,
@@ -2398,13 +2400,14 @@ export class DictionaryImportController {
     }
 
     /**
-     * @returns {{skipImageMetadata: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean}}
+     * @returns {{skipImageMetadata: boolean, skipMediaImport: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean}}
      */
     _getImportPerformanceFlags() {
         const flags = /** @type {unknown} */ (Reflect.get(globalThis, 'manabitanImportPerformanceFlags'));
         if (typeof flags !== 'object' || flags === null || Array.isArray(flags)) {
             return {
                 skipImageMetadata: true,
+                skipMediaImport: false,
                 mediaResolutionConcurrency: 16,
                 debugImportLogging: false,
                 enableTermEntryContentDedup: null,
@@ -2427,6 +2430,7 @@ export class DictionaryImportController {
             'raw-bytes';
         return {
             skipImageMetadata: flagsRecord.skipImageMetadata !== false,
+            skipMediaImport: flagsRecord.skipMediaImport === true,
             mediaResolutionConcurrency: Math.max(1, Math.min(32, mediaResolutionConcurrency)),
             debugImportLogging: flagsRecord.debugImportLogging === true,
             enableTermEntryContentDedup: typeof flagsRecord.enableTermEntryContentDedup === 'boolean' ? flagsRecord.enableTermEntryContentDedup : null,

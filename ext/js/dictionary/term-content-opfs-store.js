@@ -501,6 +501,48 @@ export class TermContentOpfsStore {
     }
 
     /**
+     * Appends primary chunks and references derived from their final logical
+     * offsets as one exclusive mutation. Import-session rollback remains the
+     * durability boundary if the underlying OPFS write later fails.
+     * @param {Uint8Array[]} primaryChunks
+     * @param {(offsets: number[], lengths: number[]) => Uint8Array[]} createDerivedChunks
+     * @returns {Promise<{primaryOffsets: number[], primaryLengths: number[], derivedOffsets: number[], derivedLengths: number[]}>}
+     */
+    async appendBatchWithDerivedChunks(primaryChunks, createDerivedChunks) {
+        return await this._runMutationExclusive(async () => {
+            if (primaryChunks.length === 0) {
+                return {primaryOffsets: [], primaryLengths: [], derivedOffsets: [], derivedLengths: []};
+            }
+            const startOffset = this._getBufferedLength();
+            const primaryOffsets = new Array(primaryChunks.length);
+            const primaryLengths = new Array(primaryChunks.length);
+            let nextOffset = startOffset;
+            for (let i = 0; i < primaryChunks.length; ++i) {
+                primaryOffsets[i] = nextOffset;
+                primaryLengths[i] = primaryChunks[i].byteLength;
+                nextOffset += primaryLengths[i];
+            }
+            const derivedChunks = createDerivedChunks(primaryOffsets, primaryLengths);
+            if (!Array.isArray(derivedChunks)) {
+                throw new TypeError('Derived term-content chunks must be an array');
+            }
+            const allChunks = [...primaryChunks, ...derivedChunks];
+            /** @type {number[]} */
+            const allOffsets = [];
+            /** @type {number[]} */
+            const allLengths = [];
+            this._appendBatchInternal(allChunks, allOffsets, allLengths);
+            await this._finalizeAppendBatch(allChunks);
+            return {
+                primaryOffsets: allOffsets.slice(0, primaryChunks.length),
+                primaryLengths: allLengths.slice(0, primaryChunks.length),
+                derivedOffsets: allOffsets.slice(primaryChunks.length),
+                derivedLengths: allLengths.slice(primaryChunks.length),
+            };
+        });
+    }
+
+    /**
      * @param {Uint8Array[]} chunks
      * @param {number[]} offsets
      * @param {number[]} lengths
@@ -1477,8 +1519,7 @@ export class TermContentOpfsStore {
             return;
         }
         if (this._writable === null) {
-            this._writable = await activeSegment.fileHandle.createWritable({keepExistingData: true});
-            await this._writable.seek(activeSegment.fileLength);
+            await this._reopenWritableAtActiveSegmentOffset();
         }
         if (activeSegment.fileLength <= 0 || (activeSegment.fileLength + nextChunkBytes) <= MAX_FILE_SEGMENT_BYTES) {
             return;
@@ -1492,8 +1533,7 @@ export class TermContentOpfsStore {
         const nextState = this._createSegmentState(nextIndex, nextFileName, nextFileHandle, nextFile.size, activeSegment.startOffset + activeSegment.fileLength);
         this._segmentStates.push(nextState);
         this._syncActiveSegmentState();
-        this._writable = await nextFileHandle.createWritable({keepExistingData: true});
-        await this._writable.seek(nextState.fileLength);
+        await this._reopenWritableAtActiveSegmentOffset();
     }
 
     /**

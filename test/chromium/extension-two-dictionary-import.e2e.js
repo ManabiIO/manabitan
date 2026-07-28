@@ -2488,11 +2488,32 @@ async function waitForVisiblePopupFrameHandle(page, timeoutMs = 6000) {
     /** @type {import('@playwright/test').ElementHandle<HTMLElement>|null} */
     let fallbackFrameHandle = null;
     while (safePerformance.now() < deadline) {
-        const frameHandles = await page.$$('iframe.yomitan-popup');
+        const frameHandles = (await page.$$('iframe.yomitan-popup')).reverse();
         for (const frameHandle of frameHandles) {
-            fallbackFrameHandle = frameHandle;
-            if (await isPopupFrameHandleVisible(frameHandle)) {
-                return frameHandle;
+            if (!await isPopupFrameHandleVisible(frameHandle)) {
+                continue;
+            }
+            fallbackFrameHandle ??= frameHandle;
+            const popupFrame = await frameHandle.contentFrame();
+            if (popupFrame === null) {
+                continue;
+            }
+            try {
+                const ready = await popupFrame.evaluate(() => {
+                    const entriesNode = document.querySelector('#dictionary-entries');
+                    const noResultsNode = document.querySelector('#no-results');
+                    const noDictionariesNode = document.querySelector('#no-dictionaries');
+                    return (
+                        (entriesNode instanceof HTMLElement && (entriesNode.textContent || '').trim().length > 0) ||
+                        (noResultsNode instanceof HTMLElement && !noResultsNode.hidden) ||
+                        (noDictionariesNode instanceof HTMLElement && !noDictionariesNode.hidden)
+                    );
+                });
+                if (ready) {
+                    return frameHandle;
+                }
+            } catch (_) {
+                // The frame can be replaced while a popup is being shown; retry with the current frame set.
             }
         }
         await page.waitForTimeout(80);
@@ -2526,6 +2547,33 @@ async function getPageFrontendDebugState(page) {
         }
         return state;
     });
+}
+
+async function dismissVisiblePopupFrames(page) {
+    await page.keyboard.press('Escape');
+    await page.mouse.move(8, 8, {steps: 4});
+    try {
+        await page.waitForFunction(() => {
+            for (const frame of document.querySelectorAll('iframe.yomitan-popup')) {
+                if (!(frame instanceof HTMLElement) || frame.hidden) {
+                    continue;
+                }
+                const style = getComputedStyle(frame);
+                if (
+                    frame.clientWidth > 0 &&
+                    frame.clientHeight > 0 &&
+                    style.visibility !== 'hidden' &&
+                    style.display !== 'none' &&
+                    Number.parseFloat(style.opacity || '1') > 0
+                ) {
+                    return false;
+                }
+            }
+            return true;
+        }, undefined, {timeout: 1200});
+    } catch (_) {
+        // Some popup modes remain mounted while hidden logically; freshness is checked below.
+    }
 }
 
 async function waitForPageFrontendScanReady(page, timeoutMs = 10000) {
@@ -2604,6 +2652,7 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
     const timing = {};
     let markStart = safePerformance.now();
     await waitForPageFrontendScanReady(page);
+    await dismissVisiblePopupFrames(page);
     timing.waitFrontendReadyMs = Math.max(0, safePerformance.now() - markStart);
     markStart = safePerformance.now();
     const target = page.locator(targetSelector).first();
@@ -2671,6 +2720,22 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
                 await page.mouse.move(hoverX, hoverY, {steps: hoverSteps});
                 attemptTiming.pointerMoveMs = Math.max(0, safePerformance.now() - attemptMarkStart);
                 attemptMarkStart = safePerformance.now();
+                const previousPopupShowAttemptCount = Number(
+                    attemptTiming.hostDebugBeforePointerMove?.manabitanPopupShowAttemptCount,
+                );
+                if (Number.isFinite(previousPopupShowAttemptCount)) {
+                    try {
+                        await page.waitForFunction((previousCount) => (
+                            Number(document.documentElement?.dataset?.manabitanPopupShowAttemptCount) > previousCount
+                        ), previousPopupShowAttemptCount, {timeout: popupTimeoutMs});
+                    } catch (_) {
+                        attemptTiming.freshPopupShow = false;
+                        attemptTiming.hostDebugAfterPopupFrame = await getPageFrontendDebugState(page);
+                        timing.lastAttempt = attemptTiming;
+                        continue;
+                    }
+                }
+                attemptTiming.freshPopupShow = true;
                 const popupFrameHandle = await waitForVisiblePopupFrameHandle(page, popupTimeoutMs);
                 attemptTiming.popupFrameWaitMs = Math.max(0, safePerformance.now() - attemptMarkStart);
                 attemptTiming.hostDebugAfterPopupFrame = await getPageFrontendDebugState(page);

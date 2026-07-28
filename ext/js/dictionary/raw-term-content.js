@@ -19,12 +19,119 @@ const RAW_TERM_CONTENT_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x31]);
 const RAW_TERM_CONTENT_HEADER_BYTES = 20;
 const RAW_TERM_CONTENT_SHARED_GLOSSARY_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x32]);
 const RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES = 28;
+const RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x35]);
+const RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC_U32 = 0x3552424d;
+const U32_RANGE = 0x100000000;
+
+export const RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES = 28;
 
 export const RAW_TERM_CONTENT_DICT_NAME = 'raw-v2';
 
 export const RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME = 'raw-v3';
 
 export const RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME = 'raw-v4';
+
+export const RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX = 'raw-block-v1';
+
+/**
+ * @param {string|null} compressionDictName
+ * @returns {string}
+ */
+export function createRawTermContentBlockDictName(compressionDictName) {
+    return compressionDictName === null ? RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX : `${RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX}:${compressionDictName}`;
+}
+
+/**
+ * @param {string} contentDictName
+ * @returns {string|null|undefined} Undefined when the name is not a block format.
+ */
+export function getRawTermContentBlockCompressionDictName(contentDictName) {
+    if (contentDictName === RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX) { return null; }
+    const prefix = `${RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX}:`;
+    return contentDictName.startsWith(prefix) ? contentDictName.substring(prefix.length) : void 0;
+}
+
+/**
+ * @param {number} blockOffset
+ * @param {number} blockCompressedLength
+ * @param {number} blockUncompressedLength
+ * @param {number} entryOffset
+ * @param {number} entryLength
+ * @returns {Uint8Array}
+ */
+export function encodeRawTermContentBlockReference(blockOffset, blockCompressedLength, blockUncompressedLength, entryOffset, entryLength) {
+    const bytes = new Uint8Array(RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES);
+    writeRawTermContentBlockReference(
+        new DataView(bytes.buffer),
+        0,
+        blockOffset,
+        blockCompressedLength,
+        blockUncompressedLength,
+        entryOffset,
+        entryLength,
+    );
+    return bytes;
+}
+
+/**
+ * Writes a reference into an existing slab without allocating a per-reference view.
+ * @param {DataView} view
+ * @param {number} offset
+ * @param {number} blockOffset
+ * @param {number} blockCompressedLength
+ * @param {number} blockUncompressedLength
+ * @param {number} entryOffset
+ * @param {number} entryLength
+ */
+export function writeRawTermContentBlockReference(
+    view,
+    offset,
+    blockOffset,
+    blockCompressedLength,
+    blockUncompressedLength,
+    entryOffset,
+    entryLength,
+) {
+    view.setUint32(offset, RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC_U32, true);
+    view.setUint32(offset + 4, blockOffset, true);
+    view.setUint32(offset + 8, Math.floor(blockOffset / U32_RANGE), true);
+    view.setUint32(offset + 12, blockCompressedLength, true);
+    view.setUint32(offset + 16, blockUncompressedLength, true);
+    view.setUint32(offset + 20, entryOffset, true);
+    view.setUint32(offset + 24, entryLength, true);
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {{blockOffset: number, blockCompressedLength: number, blockUncompressedLength: number, entryOffset: number, entryLength: number}|null}
+ */
+export function decodeRawTermContentBlockReference(bytes) {
+    if (
+        bytes.byteLength !== RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES ||
+        bytes[0] !== RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC[0] ||
+        bytes[1] !== RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC[1] ||
+        bytes[2] !== RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC[2] ||
+        bytes[3] !== RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC[3]
+    ) {
+        return null;
+    }
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const blockOffset = view.getUint32(4, true) + view.getUint32(8, true) * U32_RANGE;
+    const blockCompressedLength = view.getUint32(12, true);
+    const blockUncompressedLength = view.getUint32(16, true);
+    const entryOffset = view.getUint32(20, true);
+    const entryLength = view.getUint32(24, true);
+    if (
+        !Number.isSafeInteger(blockOffset) ||
+        blockCompressedLength <= 0 ||
+        blockUncompressedLength <= 0 ||
+        entryLength <= 0 ||
+        entryOffset + entryLength > blockUncompressedLength
+    ) {
+        return null;
+    }
+    return {blockOffset, blockCompressedLength, blockUncompressedLength, entryOffset, entryLength};
+}
 
 /**
  * @param {Uint8Array} bytes

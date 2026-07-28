@@ -17,6 +17,7 @@
 
 import {describe, expect, test, vi} from 'vitest';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
+import {createTermRecordPreinternedPlanBuilder} from '../ext/js/dictionary/term-record-preinterned-plan.js';
 import {RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME} from '../ext/js/dictionary/raw-term-content.js';
 
 /**
@@ -767,6 +768,45 @@ describe('TermRecordOpfsStore', () => {
         const loadedRecord = readerStore.getById(index.expression.get('食う')?.[0] ?? -1);
         expect(loadedRecord?.expression).toBe('食う');
         expect(loadedRecord?.reading).toBe('くう');
+    });
+
+    test('retains live imported strings through the owned preinterned buffer', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'JMdict';
+        const expressionBytes = textEncoder.encode('暗記');
+        const readingBytes = textEncoder.encode('あんき');
+        const builder = createTermRecordPreinternedPlanBuilder(2);
+        const expressionIndex = builder.internStringBytes(expressionBytes);
+        const readingIndex = builder.internStringBytes(readingBytes);
+        const plan = builder.buildPlan([expressionIndex], [readingIndex]);
+        const fileBytesByName = new Map();
+        const store = new TermRecordOpfsStore();
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));
+
+        await store.beginImportSession();
+        await store.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: dictionaryName,
+                dictionaryTotalRows: 1,
+                rowCount: 1,
+                expressionBytesList: [expressionBytes],
+                readingBytesList: [readingBytes],
+                readingEqualsExpressionList: new Uint8Array([0]),
+                scoreList: new Int32Array([1]),
+                sequenceList: new Int32Array([10]),
+                termRecordPreinternedPlan: plan,
+            },
+            [0],
+            [64],
+            'raw',
+        );
+        expressionBytes.fill(0);
+        readingBytes.fill(0);
+        await store.endImportSession();
+
+        const index = store.getDictionaryIndex(dictionaryName);
+        const record = store.getById(index.expression.get('暗記')?.[0] ?? -1);
+        expect(record).toMatchObject({expression: '暗記', reading: 'あんき'});
     });
 
     test('round-trips preinterned artifact chunk records through JS fallback', async () => {

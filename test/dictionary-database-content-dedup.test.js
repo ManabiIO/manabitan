@@ -49,6 +49,24 @@ function cacheMeta(database, contentHash, offset, length, dictName, hash1, hash2
 }
 
 describe('DictionaryDatabase term content dedup metadata cache', () => {
+    test('promotes weighted content-cache hits without re-weighing them', () => {
+        const database = new DictionaryDatabase();
+        const cache = Reflect.get(database, '_termEntryContentCache');
+        const getCached = Reflect.get(database, '_getCachedTermEntryContent').bind(database);
+        const setCached = Reflect.get(database, '_setCachedTermEntryContent').bind(database);
+        const value = {definitionTags: null, termTags: '', rules: '', glossaryJson: '[]', glossary: []};
+        setCached('first', value);
+        setCached('second', {...value});
+        const weightBefore = cache.weight;
+        const setSpy = vi.spyOn(cache, 'set');
+
+        expect(getCached('first')).toBe(value);
+
+        expect(setSpy).not.toHaveBeenCalled();
+        expect(cache.weight).toBe(weightBefore);
+        expect([...cache.keys()]).toStrictEqual(['second', 'first']);
+    });
+
     test('groups duplicate external content spans for sequential row materialization', () => {
         const database = new DictionaryDatabase();
         const groupEntries = /** @type {(entries: Array<[number, unknown]>) => Array<Array<[number, unknown]>>} */ (
@@ -143,7 +161,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
         const firstBytes = new Uint8Array([1, 2, 3]);
         const secondBytes = new Uint8Array([1, 2, 4]);
-        Reflect.set(database, '_termContentStore', {readSlice: vi.fn(async () => firstBytes)});
+        Reflect.set(database, '_readTermEntryContentBytes', vi.fn(async () => firstBytes));
 
         cache(null, 10, firstBytes.byteLength, 'raw', 0, 123, 456, firstBytes);
         expect(findMatching(123, 456, secondBytes)).toBeUndefined();
@@ -160,13 +178,29 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         const persistedBytes = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
         const collidingBytes = persistedBytes.slice();
         collidingBytes[5] = 99;
-        Reflect.set(database, '_termContentStore', {readSlice: vi.fn(async () => persistedBytes)});
+        Reflect.set(database, '_readTermEntryContentBytes', vi.fn(async () => persistedBytes));
 
         cache(null, 10, persistedBytes.byteLength, 'raw', 0, 123, 456);
 
         const result = findMatching(123, 456, collidingBytes);
         expect(result).toBeInstanceOf(Promise);
         await expect(result).resolves.toBeUndefined();
+    });
+
+    test('exactly compares persisted block content after a database reload', async () => {
+        const database = new DictionaryDatabase();
+        const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
+        const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
+        const persistedBytes = new Uint8Array([1, 2, 3, 4]);
+        const readTermEntryContentBytes = vi.fn(async () => persistedBytes);
+        Reflect.set(database, '_readTermEntryContentBytes', readTermEntryContentBytes);
+
+        cache(null, 10, persistedBytes.byteLength, 'raw-block-v1:jmdict', 0, 123, 456);
+
+        const result = findMatching(123, 456, persistedBytes.slice());
+        expect(result).toBeInstanceOf(Promise);
+        await expect(result).resolves.toMatchObject({offset: 10, dictName: 'raw-block-v1:jmdict'});
+        expect(readTermEntryContentBytes).toHaveBeenCalledWith(10, persistedBytes.byteLength, 'raw-block-v1:jmdict');
     });
 
     test('returns synchronously when a hash pair has no persisted candidate', () => {
@@ -180,6 +214,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
 
     test('parses string content hashes into the numeric cache and clears both indexes', () => {
         const database = new DictionaryDatabase();
+        const clearBlockCache = vi.spyOn(Reflect.get(database, '_termContentBlockStore'), 'clearCache');
         const clearTermEntryContentMetaCaches = /** @type {(this: DictionaryDatabase) => void} */ (
             Reflect.get(database, '_clearTermEntryContentMetaCaches')
         );
@@ -196,6 +231,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(getMeta(database, 1, 2)).toBeUndefined();
         expect(Reflect.get(database, '_termEntryContentMetaByHash').size).toBe(0);
         expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(0);
+        expect(clearBlockCache).toHaveBeenCalledOnce();
     });
 });
 

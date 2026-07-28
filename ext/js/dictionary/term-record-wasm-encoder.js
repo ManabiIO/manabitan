@@ -27,6 +27,7 @@ let wasmPromise = null;
 /**
  * @typedef {{
  *   stringLengths: Uint16Array,
+ *   stringOffsets?: Uint32Array,
  *   stringsBuffer: Uint8Array,
  *   expressionIndexes: Uint32Array,
  *   readingIndexes: Uint32Array,

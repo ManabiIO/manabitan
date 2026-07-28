@@ -23,7 +23,7 @@ import {afterAll, beforeAll, describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
-import {parseTermBankWithWasmChunks} from '../ext/js/dictionary/term-bank-wasm-parser.js';
+import {consumeLastTermBankWasmParseProfile, parseTermBankWithWasmChunks, parseTermBankWithWasmColumnChunks} from '../ext/js/dictionary/term-bank-wasm-parser.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -32,28 +32,15 @@ const maybeTest = existsSync(termBankParserWasmPath) ? test : test.skip;
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 const nativeFetch = globalThis.fetch;
+/** @typedef {{expression: string, reading: string, glossaryMayContainMedia?: boolean, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array, readingEqualsExpression?: boolean, readingBytes?: Uint8Array}} ParsedRow */
 
 /**
  * @param {Array<unknown>} rows
  * @param {Parameters<typeof parseTermBankWithWasmChunks>[4]} [options]
- * @returns {Promise<Array<{
- *   expression: string,
- *   reading: string,
- *   glossaryMayContainMedia?: boolean,
- *   termEntryContentHash1?: number,
- *   termEntryContentHash2?: number,
- *   termEntryContentBytes: Uint8Array
- * }>>}
+ * @returns {Promise<ParsedRow[]>}
  */
 async function parseRows(rows, options = {}) {
-    /** @type {Array<{
-     *   expression: string,
-     *   reading: string,
-     *   glossaryMayContainMedia?: boolean,
-     *   termEntryContentHash1?: number,
-     *   termEntryContentHash2?: number,
-     *   termEntryContentBytes: Uint8Array
-     * }>} */
+    /** @type {ParsedRow[]} */
     const parsedRows = [];
     await parseTermBankWithWasmChunks(
         textEncoder.encode(JSON.stringify(rows)),
@@ -179,5 +166,122 @@ describe('term-bank WASM parser', () => {
             {copyContentBytes: true},
         )).rejects.toThrow(/term-bank parser failed/);
         expect(chunkCount).toBe(0);
+    });
+
+    maybeTest('bounds and serializes pipelined chunk dispatch', async () => {
+        const calls = [];
+        let releaseFirst = () => {};
+        const firstGate = new Promise((resolve) => { releaseFirst = resolve; });
+        let active = 0;
+        let maxActive = 0;
+        const parsePromise = parseTermBankWithWasmChunks(
+            textEncoder.encode(JSON.stringify([
+                ['a', 'a', '', '', 0, ['a'], 1, ''],
+                ['b', 'b', '', '', 0, ['b'], 2, ''],
+                ['c', 'c', '', '', 0, ['c'], 3, ''],
+            ])),
+            3,
+            async (_chunk, progress) => {
+                ++active;
+                maxActive = Math.max(maxActive, active);
+                calls.push(progress.chunkIndex);
+                if (progress.chunkIndex === 1) { await firstGate; }
+                --active;
+            },
+            1,
+            {copyContentBytes: true, maxPendingChunks: 2},
+        );
+        await vi.waitFor(() => { expect(calls).toStrictEqual([1]); });
+        releaseFirst();
+        await parsePromise;
+
+        expect(calls).toStrictEqual([1, 2, 3]);
+        expect(maxActive).toBe(1);
+        expect(consumeLastTermBankWasmParseProfile()?.maxPendingChunks).toBe(2);
+    });
+
+    maybeTest('combines source arrays directly in WASM input memory', async () => {
+        const chunks = [];
+        await parseTermBankWithWasmChunks(
+            [
+                textEncoder.encode(JSON.stringify([['a', 'a', '', '', 0, ['first'], 1, '']])),
+                textEncoder.encode(JSON.stringify([['b', 'b', '', '', 0, ['second'], 2, '']])),
+            ],
+            3,
+            (rows) => { chunks.push(...rows); },
+            1,
+            {copyContentBytes: true},
+        );
+
+        expect(chunks.map((row) => row.expression)).toStrictEqual(['a', 'b']);
+        expect(chunks.map(getContentString)).toStrictEqual([
+            '{"rules":"","definitionTags":"","termTags":"","glossary":["first"]}',
+            '{"rules":"","definitionTags":"","termTags":"","glossary":["second"]}',
+        ]);
+    });
+
+    maybeTest('treats an empty reading as the expression in minimal and columnar paths', async () => {
+        const source = textEncoder.encode(JSON.stringify([
+            ['expression', '', '', '', 4, ['definition'], 12, ''],
+        ]));
+        /** @type {ParsedRow[]} */
+        const rows = [];
+        await parseTermBankWithWasmChunks(
+            source,
+            3,
+            (chunk) => { rows.push(...chunk); },
+            1,
+            {minimalDecode: true, reuseExpressionForReadingDecode: true},
+        );
+        /** @type {Array<Parameters<Parameters<typeof parseTermBankWithWasmColumnChunks>[2]>[0]>} */
+        const columns = [];
+        await parseTermBankWithWasmColumnChunks(source, 3, (chunk) => { columns.push(chunk); }, 1);
+
+        expect(rows[0].readingEqualsExpression).toBe(true);
+        expect(textDecoder.decode(rows[0].readingBytes)).toBe('expression');
+        expect(columns[0].readingEqualsExpressionList[0]).toBe(1);
+        expect(columns[0].readingBytesList[0]).toHaveLength(0);
+        expect(columns[0].termRecordPreinternedPlan.readingIndexes[0]).toBe(
+            columns[0].termRecordPreinternedPlan.expressionIndexes[0],
+        );
+    });
+
+    maybeTest('emits equivalent import columns and decodes only media compatibility rows', async () => {
+        const source = textEncoder.encode(JSON.stringify([
+            ['escaped\\value', 'reading', '', '', -2, ['plain'], null, ''],
+            ['image', '', '', '', 7, [{type: 'image', path: 'test.png'}], 8, ''],
+        ]));
+        /** @type {Array<Parameters<Parameters<typeof parseTermBankWithWasmColumnChunks>[2]>[0]>} */
+        const chunks = [];
+        await parseTermBankWithWasmColumnChunks(
+            source,
+            3,
+            (chunk) => { chunks.push(chunk); },
+            8,
+            {mediaHintFastScan: true},
+        );
+        const [chunk] = chunks;
+        const plan = chunk.termRecordPreinternedPlan;
+        const stringOffsets = [];
+        let offset = 0;
+        for (const length of plan.stringLengths) {
+            stringOffsets.push(offset);
+            offset += length;
+        }
+        const getPlanString = (index) => textDecoder.decode(
+            plan.stringsBuffer.subarray(stringOffsets[index], stringOffsets[index] + plan.stringLengths[index]),
+        );
+
+        expect(chunk.rowCount).toBe(2);
+        expect(chunk.scoreList).toStrictEqual(new Int32Array([-2, 7]));
+        expect(chunk.sequenceList).toStrictEqual(new Int32Array([-1, 8]));
+        expect(getPlanString(plan.expressionIndexes[0])).toBe('escaped\\value');
+        expect(getPlanString(plan.readingIndexes[0])).toBe('reading');
+        expect(getPlanString(plan.expressionIndexes[1])).toBe('image');
+        expect(plan.readingIndexes[1]).toBe(plan.expressionIndexes[1]);
+        expect(chunk.mediaRows).toHaveLength(1);
+        expect(chunk.mediaRows[0].index).toBe(1);
+        expect(chunk.mediaRows[0].row.glossaryMayContainMedia).toBe(true);
+        expect(getContentString({termEntryContentBytes: chunk.contentBytesList[0]})).toContain('"plain"');
     });
 });

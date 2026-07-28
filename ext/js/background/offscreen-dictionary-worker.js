@@ -492,10 +492,6 @@ export class OffscreenDictionaryWorkerHandler {
         const directHits = [];
         const termRecordStore = Reflect.get(this._dictionaryDatabase, '_termRecordStore');
         const getRecordById = Reflect.get(termRecordStore, 'getById');
-        const termContentStore = Reflect.get(this._dictionaryDatabase, '_termContentStore');
-        const readSlice = Reflect.get(termContentStore, 'readSlice');
-        const getLastReadErrorDetails = Reflect.get(termContentStore, 'getLastReadErrorDetails');
-        const getDebugState = Reflect.get(termContentStore, 'getDebugState');
         const textDecoder = new TextDecoder();
         /** @type {Map<string, Record<string, unknown>>} */
         const sqlRowsByKey = new Map();
@@ -569,34 +565,41 @@ export class OffscreenDictionaryWorkerHandler {
             const row = rowsById.get(id);
             const rawRecord = (typeof getRecordById === 'function') ? getRecordById.call(termRecordStore, id) : null;
             let rawContentPreview = null;
+            let decodedContentDebug = null;
             let readErrorDetails = null;
             if (
                 rawRecord &&
                 typeof rawRecord.entryContentOffset === 'number' &&
                 rawRecord.entryContentOffset >= 0 &&
                 typeof rawRecord.entryContentLength === 'number' &&
-                rawRecord.entryContentLength > 0 &&
-                typeof readSlice === 'function'
+                rawRecord.entryContentLength > 0
             ) {
                 try {
-                    const bytes = await readSlice.call(
-                        termContentStore,
+                    const bytes = await this._dictionaryDatabase.readRawTermContentBytesForDiagnostics(
                         rawRecord.entryContentOffset,
                         Math.min(rawRecord.entryContentLength, 120),
                     );
                     if (!(bytes instanceof Uint8Array)) {
                         rawContentPreview = '<read-null>';
-                        readErrorDetails = typeof getLastReadErrorDetails === 'function' ?
-                            getLastReadErrorDetails.call(termContentStore) :
-                            null;
+                        readErrorDetails = this._dictionaryDatabase.getTermContentDiagnostics().opfsReadError;
                     } else {
                         rawContentPreview = textDecoder.decode(bytes).replaceAll(/\s+/g, ' ').slice(0, 120);
                     }
+                    const decodedBytes = await this._dictionaryDatabase.readTermEntryContentBytesForDiagnostics(
+                        rawRecord.entryContentOffset,
+                        rawRecord.entryContentLength,
+                        rawRecord.entryContentDictName ?? '',
+                    );
+                    decodedContentDebug = decodedBytes instanceof Uint8Array ?
+                        {
+                            length: decodedBytes.byteLength,
+                            prefixBytes: [...decodedBytes.subarray(0, 24)],
+                            textPrefix: textDecoder.decode(decodedBytes.subarray(0, 120)).replaceAll(/\s+/g, ' ').slice(0, 120),
+                        } :
+                        {length: null, prefixBytes: null, textPrefix: '<read-null>'};
                 } catch (_) {
                     rawContentPreview = '<read-failed>';
-                    readErrorDetails = typeof getLastReadErrorDetails === 'function' ?
-                        getLastReadErrorDetails.call(termContentStore) :
-                        null;
+                    readErrorDetails = this._dictionaryDatabase.getTermContentDiagnostics().opfsReadError;
                 }
             }
             rowSample.push({
@@ -611,6 +614,7 @@ export class OffscreenDictionaryWorkerHandler {
                 rawEntryContentDictName: rawRecord?.entryContentDictName ?? null,
                 sqlTermRow: sqlRowsByKey.get(this._createDebugTermRowKey(row?.dictionary ?? match.dictionary, row?.expression, row?.reading)) ?? null,
                 rawContentPreview,
+                decodedContentDebug,
                 readErrorDetails,
             });
             if (rowSample.length >= 10) { break; }
@@ -621,7 +625,7 @@ export class OffscreenDictionaryWorkerHandler {
             dictionaryNames,
             directHits,
             rowSample,
-            termContentStoreDebugState: typeof getDebugState === 'function' ? getDebugState.call(termContentStore) : null,
+            termContentDiagnostics: this._dictionaryDatabase.getTermContentDiagnostics(),
         };
     }
 

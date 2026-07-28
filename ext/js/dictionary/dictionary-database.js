@@ -27,6 +27,7 @@ import {parseJson} from '../core/json.js';
 import {log} from '../core/log.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
+import {WeightedLruMap} from '../core/weighted-lru-map.js';
 import {stringReverse} from '../core/utilities.js';
 import {deleteOpfsDatabaseFiles, didLastOpenUseFallbackStorage, getLastOpenStorageDiagnostics, getSqlite3, importOpfsDatabase, openOpfsDatabase} from './sqlite-wasm.js';
 import {
@@ -44,11 +45,14 @@ import {
     getRawTermContentGlossaryJsonBytes,
     isRawTermContentBinary,
     isRawTermContentSharedGlossaryBinary,
+    getRawTermContentBlockCompressionDictName,
     RAW_TERM_CONTENT_DICT_NAME,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
 } from './raw-term-content.js';
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
 import {TermContentOpfsStore} from './term-content-opfs-store.js';
+import {TermContentBlockStore} from './term-content-block-store.js';
+import {createTermImportMetrics} from './term-import-metrics.js';
 import {createDictionaryImportSessionId, DictionaryImportJournal} from './dictionary-import-journal.js';
 import {hashPairToHex, hashTermEntryContentBytes, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {TermRecordOpfsStore} from './term-record-opfs-store.js';
@@ -56,6 +60,7 @@ import {TermRecordOpfsStore} from './term-record-opfs-store.js';
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 5;
 const TRANSIENT_UPDATE_TITLE_PATTERN = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
 const TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES = 4096;
+const TERM_ENTRY_CONTENT_CACHE_MAX_BYTES = 32 * 1024 * 1024;
 const TERM_ROW_CACHE_MAX_ENTRIES = 8192;
 const DEFAULT_STATEMENT_CACHE_MAX_ENTRIES = 256;
 const LOW_MEMORY_STATEMENT_CACHE_MAX_ENTRIES = 128;
@@ -71,6 +76,22 @@ const DEFAULT_ARTIFACT_FIXED_PACK_MIN_TOTAL_ROWS = 0;
 const EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE = 512;
 const ZIP_COMPRESSION_METHOD_STORE = 0;
 const ZIP_COMPRESSION_METHOD_DEFLATE = 8;
+
+/**
+ * @param {unknown} value
+ * @returns {number}
+ */
+function estimateCachedTermEntryContentBytes(value) {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) { return 0; }
+    const content = /** @type {{definitionTags?: unknown, termTags?: unknown, rules?: unknown, glossaryJson?: unknown}} */ (value);
+    let stringCodeUnits = 0;
+    for (const item of [content.definitionTags, content.termTags, content.rules]) {
+        if (typeof item === 'string') { stringCodeUnits += item.length; }
+    }
+    // Parsed glossary objects generally occupy several times their JSON text.
+    const glossaryCodeUnits = typeof content.glossaryJson === 'string' ? content.glossaryJson.length : 0;
+    return 128 + stringCodeUnits * 2 + glossaryCodeUnits * 4;
+}
 
 /**
  * @param {Uint8Array} bytes
@@ -311,7 +332,11 @@ export class DictionaryDatabase {
         /** @type {number} */
         this._statementCacheMaxEntries = this._computeStatementCacheMaxEntries();
         /** @type {Map<string, {definitionTags: string|null, termTags: string|undefined, rules: string, glossaryJson?: string, glossary?: import('dictionary-data').TermGlossary[]}>} */
-        this._termEntryContentCache = new Map();
+        this._termEntryContentCache = new WeightedLruMap(
+            TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES,
+            TERM_ENTRY_CONTENT_CACHE_MAX_BYTES,
+            estimateCachedTermEntryContentBytes,
+        );
         /** @type {Map<number, import('dictionary-database').DatabaseTermEntryWithId>} */
         this._termRowCache = new Map();
         /** @type {Map<string, {contentOffset: number, contentLength: number, contentDictName: string, uncompressedLength: number}>} */
@@ -322,8 +347,6 @@ export class DictionaryDatabase {
         this._sharedGlossaryArtifactInflatePromiseByDictionary = new Map();
         /** @type {Record<string, unknown>|null} */
         this._lastReplaceDictionaryTitleDebug = null;
-        /** @type {number} */
-        this._termEntryContentCacheMaxEntries = TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES;
         /** @type {TextEncoder} */
         this._textEncoder = new TextEncoder();
         /** @type {TextDecoder} */
@@ -383,10 +406,16 @@ export class DictionaryDatabase {
         this._termBulkAddStagingMaxRows = this._computeDefaultTermBulkAddStagingMaxRows();
         /** @type {boolean} */
         this._termRecordRowAppendFastPath = true;
-        /** @type {{contentAppendMs: number, termRecordBuildMs: number, termRecordEncodeMs: number, termRecordWriteMs: number, termsVtabInsertMs: number}|null} */
+        /** @type {{contentAppendMs: number, dedupScanMs?: number, contentStoreMs?: number, contentMetadataMs?: number, termRecordBuildMs: number, termRecordEncodeMs: number, termRecordWriteMs: number, termsVtabInsertMs: number}|null} */
         this._lastBulkAddTermsMetrics = null;
         /** @type {TermContentOpfsStore} */
         this._termContentStore = new TermContentOpfsStore();
+        /** @type {TermContentBlockStore} */
+        this._termContentBlockStore = new TermContentBlockStore(this._termContentStore, {
+            blockTargetBytes: 2 * 1024 * 1024,
+        });
+        /** @type {import('./term-content-block-store.js').TermContentBlockImportSession|null} */
+        this._termContentBlockImportSession = null;
         /** @type {TermRecordOpfsStore} */
         this._termRecordStore = new TermRecordOpfsStore();
         /**
@@ -488,9 +517,12 @@ export class DictionaryDatabase {
             await this._termContentStore.endImportSession();
             await this._termRecordStore.endImportSession();
         }
+        this._termContentBlockImportSession?.close();
+        this._termContentBlockImportSession = null;
         this._clearCachedStatements();
         this._termEntryContentCache.clear();
         this._termEntryContentIdByHash.clear();
+        this._clearTermEntryContentMetaCaches();
         this._termExactPresenceCache.clear();
         this._termPrefixNegativeCache.clear();
         this._clearDirectTermIndexCaches();
@@ -656,6 +688,8 @@ export class DictionaryDatabase {
                 this._termEntryContentIdByKey.clear();
                 this._termEntryContentIdByHash.clear();
                 this._clearTermEntryContentMetaCaches();
+                this._termContentBlockImportSession?.close();
+                this._termContentBlockImportSession = this._termContentBlockStore.beginImportSession();
                 this._termEntryContentCache.clear();
                 this._termExactPresenceCache.clear();
                 this._termPrefixNegativeCache.clear();
@@ -701,6 +735,8 @@ export class DictionaryDatabase {
                 }
                 this._deferTermsVirtualTableSync = false;
                 this._termsVirtualTableDirty = false;
+                this._termContentBlockImportSession?.close();
+                this._termContentBlockImportSession = null;
                 for (const createIndexSql of this._createIndexesSql()) {
                     try {
                         db.exec(createIndexSql);
@@ -1044,6 +1080,8 @@ export class DictionaryDatabase {
                         cleanupErrors.push(toError(e));
                     }
                 }
+                this._termContentBlockImportSession?.close();
+                this._termContentBlockImportSession = null;
             }
             if (operationError !== null) {
                 if (cleanupErrors.length > 0) {
@@ -3193,7 +3231,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @returns {{contentAppendMs: number, termRecordBuildMs: number, termRecordEncodeMs: number, termRecordWriteMs: number, termsVtabInsertMs: number, termRecordInternMs?: number, termRecordPackLengthsMs?: number, termRecordHeapCopyMs?: number, termRecordWasmEncodeMs?: number}|null}
+     * @returns {{contentAppendMs: number, dedupScanMs?: number, contentStoreMs?: number, contentMetadataMs?: number, termRecordBuildMs: number, termRecordEncodeMs: number, termRecordWriteMs: number, termsVtabInsertMs: number, termRecordInternMs?: number, termRecordPackLengthsMs?: number, termRecordHeapCopyMs?: number, termRecordWasmEncodeMs?: number}|null}
      */
     getLastBulkAddTermsMetrics() {
         return this._lastBulkAddTermsMetrics;
@@ -4190,6 +4228,7 @@ export class DictionaryDatabase {
     /** */
     _clearTermEntryContentMetaCaches() {
         this._termEntryContentMetaByHash.clear();
+        this._termContentBlockStore.clearCache();
         this._termEntryContentMetaHash1Table = new Uint32Array(0);
         this._termEntryContentMetaHash2Table = new Uint32Array(0);
         this._termEntryContentMetaHashPairTable = [];
@@ -4200,17 +4239,27 @@ export class DictionaryDatabase {
 
     /**
      * @param {Uint8Array} contentBytes
-     * @returns {[number, number, number]}
+     * @param {number} offset
+     * @returns {number}
      */
-    _getTermContentSignatures(contentBytes) {
-        const read = (offset) => (
+    _readTermContentSignature(contentBytes, offset) {
+        return (
             (contentBytes[offset] ?? 0) |
             ((contentBytes[offset + 1] ?? 0) << 8) |
             ((contentBytes[offset + 2] ?? 0) << 16) |
             ((contentBytes[offset + 3] ?? 0) << 24)
         ) >>> 0;
+    }
+
+    /**
+     * @param {{signature1?: number, signature2?: number, signature3?: number}} meta
+     * @param {Uint8Array} contentBytes
+     */
+    _setTermContentSignatures(meta, contentBytes) {
         const lastOffset = Math.max(0, contentBytes.byteLength - 4);
-        return [read(0), read(Math.floor(lastOffset / 2)), read(lastOffset)];
+        meta.signature1 = this._readTermContentSignature(contentBytes, 0);
+        meta.signature2 = this._readTermContentSignature(contentBytes, Math.floor(lastOffset / 2));
+        meta.signature3 = this._readTermContentSignature(contentBytes, lastOffset);
     }
 
     /**
@@ -4236,32 +4285,58 @@ export class DictionaryDatabase {
      * @param {number} hash1
      * @param {number} hash2
      * @param {Uint8Array} contentBytes
+     * @param {{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}|undefined} [primary]
      * @returns {{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}|Promise<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}|undefined>|undefined}
      */
-    _findMatchingTermEntryContentMeta(hash1, hash2, contentBytes) {
-        const primary = this._getTermEntryContentMetaByHashPair(hash1, hash2);
-        const key = `${hash1 >>> 0}:${hash2 >>> 0}`;
-        /** @type {Array<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}>} */
-        const candidates = [];
-        if (typeof primary !== 'undefined') { candidates.push(primary); }
-        const collisions = this._termEntryContentMetaCollisionsByHashPair.get(key);
-        if (typeof collisions !== 'undefined') { candidates.push(...collisions); }
-        const [signature1, signature2, signature3] = this._getTermContentSignatures(contentBytes);
-        const persistedCandidates = [];
-        for (const meta of candidates) {
-            if (meta.length !== contentBytes.byteLength) { continue; }
-            if (typeof meta.signature1 === 'number') {
-                if (meta.signature1 === signature1 && meta.signature2 === signature2 && meta.signature3 === signature3) {
-                    return meta;
+    _findMatchingTermEntryContentMeta(hash1, hash2, contentBytes, primary = this._getTermEntryContentMetaByHashPair(hash1, hash2)) {
+        const lastOffset = Math.max(0, contentBytes.byteLength - 4);
+        const signature1 = this._readTermContentSignature(contentBytes, 0);
+        const signature2 = this._readTermContentSignature(contentBytes, Math.floor(lastOffset / 2));
+        const signature3 = this._readTermContentSignature(contentBytes, lastOffset);
+        /** @type {Array<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}>|null} */
+        let persistedCandidates = null;
+        if (typeof primary !== 'undefined' && primary.length === contentBytes.byteLength) {
+            if (typeof primary.signature1 === 'number') {
+                if (primary.signature1 === signature1 && primary.signature2 === signature2 && primary.signature3 === signature3) {
+                    return primary;
                 }
-                continue;
+            } else if (this._canExactlyComparePersistedTermContent(primary.dictName)) {
+                persistedCandidates = [primary];
             }
-            if (meta.dictName !== 'raw' && meta.dictName !== RAW_TERM_CONTENT_DICT_NAME && meta.dictName !== RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME) { continue; }
-            persistedCandidates.push(meta);
         }
-        return persistedCandidates.length === 0 ?
+        const collisions = this._termEntryContentMetaCollisionsByHashPair.size > 0 ?
+            this._termEntryContentMetaCollisionsByHashPair.get(`${hash1 >>> 0}:${hash2 >>> 0}`) :
+            void 0;
+        if (typeof collisions !== 'undefined') {
+            for (const meta of collisions) {
+                if (meta.length !== contentBytes.byteLength) { continue; }
+                if (typeof meta.signature1 === 'number') {
+                    if (meta.signature1 === signature1 && meta.signature2 === signature2 && meta.signature3 === signature3) {
+                        return meta;
+                    }
+                    continue;
+                }
+                if (!this._canExactlyComparePersistedTermContent(meta.dictName)) { continue; }
+                if (persistedCandidates === null) { persistedCandidates = []; }
+                persistedCandidates.push(meta);
+            }
+        }
+        return persistedCandidates === null ?
             void 0 :
             this._findMatchingPersistedTermEntryContentMeta(persistedCandidates, contentBytes);
+    }
+
+    /**
+     * @param {string} dictName
+     * @returns {boolean}
+     */
+    _canExactlyComparePersistedTermContent(dictName) {
+        return (
+            dictName === 'raw' ||
+            dictName === RAW_TERM_CONTENT_DICT_NAME ||
+            dictName === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME ||
+            typeof getRawTermContentBlockCompressionDictName(dictName) !== 'undefined'
+        );
     }
 
     /**
@@ -4271,15 +4346,53 @@ export class DictionaryDatabase {
      */
     async _findMatchingPersistedTermEntryContentMeta(candidates, contentBytes) {
         for (const meta of candidates) {
-            const existingBytes = await this._termContentStore.readSlice(meta.offset, meta.length);
+            const existingBytes = await this._readTermEntryContentBytes(meta.offset, meta.length, meta.dictName);
             if (!(existingBytes instanceof Uint8Array)) { continue; }
-            const [existingSignature1, existingSignature2, existingSignature3] = this._getTermContentSignatures(existingBytes);
-            meta.signature1 = existingSignature1;
-            meta.signature2 = existingSignature2;
-            meta.signature3 = existingSignature3;
+            this._setTermContentSignatures(meta, existingBytes);
             if (this._termContentBytesEqual(existingBytes, contentBytes)) { return meta; }
         }
         return void 0;
+    }
+
+    /**
+     * @param {number} contentOffset
+     * @param {number} contentLength
+     * @param {string} contentDictName
+     * @returns {Promise<Uint8Array|null>}
+     */
+    async _readTermEntryContentBytes(contentOffset, contentLength, contentDictName) {
+        return await this._termContentBlockStore.read(contentOffset, contentLength, contentDictName);
+    }
+
+    /**
+     * Diagnostic-only content read which avoids exposing storage internals.
+     * @param {number} contentOffset
+     * @param {number} contentLength
+     * @param {string} contentDictName
+     * @returns {Promise<Uint8Array|null>}
+     */
+    async readTermEntryContentBytesForDiagnostics(contentOffset, contentLength, contentDictName) {
+        return await this._readTermEntryContentBytes(contentOffset, contentLength, contentDictName);
+    }
+
+    /**
+     * @param {number} contentOffset
+     * @param {number} contentLength
+     * @returns {Promise<Uint8Array|null>}
+     */
+    async readRawTermContentBytesForDiagnostics(contentOffset, contentLength) {
+        return await this._termContentStore.readSlice(contentOffset, contentLength);
+    }
+
+    /**
+     * @returns {{blockStore: Record<string, unknown>, opfsStore: Record<string, unknown>|null, opfsReadError: Record<string, unknown>|null}}
+     */
+    getTermContentDiagnostics() {
+        return {
+            blockStore: this._termContentBlockStore.getDiagnostics(),
+            opfsStore: this._termContentStore.getDebugState(),
+            opfsReadError: this._termContentStore.getLastReadErrorDetails(),
+        };
     }
 
     /**
@@ -4406,7 +4519,7 @@ export class DictionaryDatabase {
     _cacheTermEntryContentMeta(contentHash, offset, length, dictName, id = 0, hash1 = -1, hash2 = -1, contentBytes = null) {
         const meta = {id, offset, length, dictName: dictName ?? 'raw'};
         if (contentBytes instanceof Uint8Array) {
-            [meta.signature1, meta.signature2, meta.signature3] = this._getTermContentSignatures(contentBytes);
+            this._setTermContentSignatures(meta, contentBytes);
         }
         if (typeof contentHash === 'string' && contentHash.length > 0) {
             this._termEntryContentMetaByHash.set(contentHash, meta);
@@ -4853,295 +4966,368 @@ export class DictionaryDatabase {
         const useLocalTransaction = !this._bulkImportTransactionOpen;
         const count = chunk.rowCount;
         if (count <= 0) {
-            this._lastBulkAddTermsMetrics = {
-                contentAppendMs: 0,
-                termRecordBuildMs: 0,
-                termRecordEncodeMs: 0,
-                termRecordWriteMs: 0,
-                termsVtabInsertMs: 0,
-                termRecordInternMs: 0,
-                termRecordPackLengthsMs: 0,
-                termRecordHeapCopyMs: 0,
-                termRecordWasmEncodeMs: 0,
-            };
+            this._lastBulkAddTermsMetrics = createTermImportMetrics();
             return;
         }
         if (chunk.contentHash1List.length < count || chunk.contentHash2List.length < count) {
             throw new Error('Artifact chunk content hash arrays are smaller than row count');
         }
-        let contentAppendMs = 0;
-        let termRecordBuildMs = 0;
-        let termRecordEncodeMs = 0;
-        let termRecordWriteMs = 0;
-        let termsVtabInsertMs = 0;
-        let termRecordInternMs = 0;
-        let termRecordPackLengthsMs = 0;
-        let termRecordHeapCopyMs = 0;
-        let termRecordWasmEncodeMs = 0;
+        const importMetrics = createTermImportMetrics();
 
         if (useLocalTransaction) {
             await this._beginImmediateTransaction(this._requireDb());
         }
         try {
-            const explicitContentDictNames = Array.isArray(chunk.contentDictNameList) ? chunk.contentDictNameList : null;
-            const uniformContentDictName = typeof chunk.uniformContentDictName !== 'undefined' ? (chunk.uniformContentDictName ?? null) : null;
-            const contentOffsets = new Int32Array(count);
-            const contentLengths = new Int32Array(count);
-            /** @type {string|((string|null)[])} */
-            let resolvedContentDictNames = explicitContentDictNames !== null ? new Array(count) : (uniformContentDictName ?? 'raw');
-            let pendingHashTableSize = 1;
-            while (pendingHashTableSize < count * 2) {
-                pendingHashTableSize *= 2;
-            }
-            const pendingHashTableMask = pendingHashTableSize - 1;
-            const pendingHash1Table = new Uint32Array(pendingHashTableSize);
-            const pendingHash2Table = new Uint32Array(pendingHashTableSize);
-            const pendingIndexTable = new Uint32Array(pendingHashTableSize);
-            const existingMetaHash1Table = this._termEntryContentMetaHash1Table;
-            const existingMetaHash2Table = this._termEntryContentMetaHash2Table;
-            const existingMetaTable = this._termEntryContentMetaHashPairTable;
-            const existingMetaMask = this._termEntryContentMetaHashPairMask;
-            const existingMetaCount = this._termEntryContentMetaHashPairCount;
-            /**
-             * @param {number} hash1
-             * @param {number} hash2
-             * @returns {number}
-             */
-            const getPendingHashSlot = (hash1, hash2) => {
-                let value = (hash1 ^ Math.imul(hash2, 0x9e3779b1)) >>> 0;
-                value ^= value >>> 16;
-                return value & pendingHashTableMask;
-            };
-            /**
-             * @param {number} hash1
-             * @param {number} hash2
-             * @param {Uint8Array} contentBytes
-             * @returns {number}
-             */
-            const findPendingContentIndex = (hash1, hash2, contentBytes) => {
-                let slot = getPendingHashSlot(hash1, hash2);
-                while (true) {
-                    const storedIndex = pendingIndexTable[slot];
-                    if (storedIndex === 0) {
-                        return -1;
-                    }
-                    if (pendingHash1Table[slot] === hash1 && pendingHash2Table[slot] === hash2) {
-                        const pendingIndex = storedIndex - 1;
-                        if (this._termContentBytesEqual(pendingContentBytes[pendingIndex], contentBytes)) {
-                            return pendingIndex;
-                        }
-                    }
-                    slot = (slot + 1) & pendingHashTableMask;
-                }
-            };
-            /**
-             * @param {number} hash1
-             * @param {number} hash2
-             * @returns {number}
-             */
-            const insertPendingContentIndex = (hash1, hash2) => {
-                let slot = getPendingHashSlot(hash1, hash2);
-                while (true) {
-                    if (pendingIndexTable[slot] === 0) {
-                        const pendingIndex = pendingContentBytes.length;
-                        pendingHash1Table[slot] = hash1;
-                        pendingHash2Table[slot] = hash2;
-                        pendingIndexTable[slot] = pendingIndex + 1;
-                        return pendingIndex;
-                    }
-                    slot = (slot + 1) & pendingHashTableMask;
-                }
-            };
-            /**
-             * @param {number} hash1
-             * @param {number} hash2
-             * @returns {{id: number, offset: number, length: number, dictName: string, hash2?: number}|undefined}
-             */
-            /** @type {((hash1: number, hash2: number) => {id: number, offset: number, length: number, dictName: string, hash2?: number, signature1?: number, signature2?: number, signature3?: number}|undefined)|null} */
-            let findExistingContentMeta = null;
-            if (existingMetaCount > 0) {
-                findExistingContentMeta = (hash1, hash2) => {
-                    let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, existingMetaMask);
-                    while (true) {
-                        const meta = existingMetaTable[slot];
-                        if (typeof meta === 'undefined') {
-                            return void 0;
-                        }
-                        if (existingMetaHash1Table[slot] === hash1 && existingMetaHash2Table[slot] === hash2) {
-                            return meta;
-                        }
-                        slot = (slot + 1) & existingMetaMask;
-                    }
-                };
-            }
-            /** @type {Uint8Array[]} */
-            const pendingContentBytes = [];
-            /** @type {number[]} */
-            const pendingContentHash1s = [];
-            /** @type {number[]} */
-            const pendingContentHash2s = [];
-            /** @type {(string|null)[]|null} */
-            const pendingContentDictNames = (
-                explicitContentDictNames === null &&
-                typeof uniformContentDictName === 'string' &&
-                uniformContentDictName.length > 0
-            ) ? null : [];
-            const pendingRowToUniqueIndex = new Int32Array(count);
-            pendingRowToUniqueIndex.fill(-1);
-            const ensureResolvedContentDictNamesArray = (fillUntil) => {
-                if (Array.isArray(resolvedContentDictNames)) {
-                    return resolvedContentDictNames;
-                }
-                const uniformDictName = resolvedContentDictNames;
-                const values = new Array(count);
-                if (fillUntil > 0) {
-                    values.fill(uniformDictName, 0, fillUntil);
-                }
-                resolvedContentDictNames = values;
-                return values;
-            };
             const tContentAppendStart = safePerformance.now();
-            for (let i = 0; i < count; ++i) {
-                const hash1 = chunk.contentHash1List[i] >>> 0;
-                const hash2 = chunk.contentHash2List[i] >>> 0;
-                const contentBytes = chunk.contentBytesList[i];
-                if (!(contentBytes instanceof Uint8Array)) {
-                    throw new TypeError(`Artifact term content bytes are invalid at row ${i}`);
-                }
-                const existingPendingIndex = findPendingContentIndex(hash1, hash2, contentBytes);
-                if (existingPendingIndex >= 0) {
-                    pendingRowToUniqueIndex[i] = existingPendingIndex;
-                    continue;
-                }
-                let existingMeta = findExistingContentMeta !== null ? findExistingContentMeta(hash1, hash2) : void 0;
-                if (typeof existingMeta !== 'undefined') {
-                    existingMeta = this._findMatchingTermEntryContentMeta(hash1, hash2, contentBytes);
-                    if (existingMeta instanceof Promise) {
-                        existingMeta = await existingMeta;
-                    }
-                }
-                if (typeof existingMeta !== 'undefined') {
-                    contentOffsets[i] = existingMeta.offset;
-                    contentLengths[i] = existingMeta.length;
-                    if (Array.isArray(resolvedContentDictNames)) {
-                        resolvedContentDictNames[i] = existingMeta.dictName;
-                    } else if (existingMeta.dictName !== resolvedContentDictNames) {
-                        ensureResolvedContentDictNamesArray(i)[i] = existingMeta.dictName;
-                    }
-                    continue;
-                }
-                const pendingIndex = insertPendingContentIndex(hash1, hash2);
-                pendingContentBytes.push(contentBytes);
-                pendingContentHash1s.push(hash1);
-                pendingContentHash2s.push(hash2);
-                if (pendingContentDictNames !== null) {
-                    pendingContentDictNames.push(
-                        explicitContentDictNames !== null ?
-                            (explicitContentDictNames[i] ?? null) :
-                            uniformContentDictName,
-                    );
-                }
-                pendingRowToUniqueIndex[i] = pendingIndex;
-            }
+            const dedup = await this._resolveArtifactTermContentDedup(chunk);
+            const {
+                contentOffsets,
+                contentLengths,
+                pendingContentBytes,
+                pendingContentHash1s,
+                pendingContentHash2s,
+                pendingContentDictNames,
+                pendingRowToUniqueIndex,
+                uniformContentDictName,
+            } = dedup;
+            let {resolvedContentDictNames} = dedup;
+            importMetrics.dedupScanMs += safePerformance.now() - tContentAppendStart;
+            const tContentStoreStart = safePerformance.now();
             if (pendingContentBytes.length > 0) {
-                const compressionDictName = resolveTermContentZstdDictName(chunk.dictionary);
-                const storageChunks = this._createTermContentStorageChunks(
+                const {pendingOffsets, pendingLengths, pendingResolvedDictNames} = await this._persistArtifactTermContent(
+                    chunk.dictionary,
                     pendingContentBytes,
-                    compressionDictName,
-                    pendingContentDictNames ?? [],
-                    pendingContentDictNames === null ? uniformContentDictName : null,
-                );
-                /** @type {number[]} */
-                const storedOffsets = [];
-                /** @type {number[]} */
-                const storedLengths = [];
-                await this._termContentStore.appendBatchToArrays(
-                    storageChunks.storedChunks,
-                    storedOffsets,
-                    storedLengths,
+                    pendingContentDictNames,
+                    uniformContentDictName,
                 );
                 this._ensureTermEntryContentMetaHashPairCapacity(
                     this._termEntryContentMetaHashPairCount + pendingContentBytes.length,
                 );
-                for (let i = 0; i < count; ++i) {
-                    const pendingIndex = pendingRowToUniqueIndex[i];
-                    if (pendingIndex < 0) { continue; }
-                    const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[pendingIndex];
-                    const storedOffset = storedOffsets[storedChunkIndex];
-                    contentOffsets[i] = storedOffset + (storageChunks.entryToStoredChunkOffsets[pendingIndex] ?? 0);
-                    contentLengths[i] = pendingContentBytes[pendingIndex].byteLength;
-                    const resolvedContentDictName = pendingContentDictNames === null ?
-                        uniformContentDictName :
-                        (storageChunks.contentDictNames[pendingIndex] ?? 'raw');
-                    if (Array.isArray(resolvedContentDictNames)) {
-                        resolvedContentDictNames[i] = resolvedContentDictName;
-                    } else if (resolvedContentDictName !== resolvedContentDictNames) {
-                        ensureResolvedContentDictNamesArray(i)[i] = resolvedContentDictName;
-                    }
-                }
-                for (let i = 0; i < pendingContentBytes.length; ++i) {
-                    const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[i];
-                    const hash1 = pendingContentHash1s[i] >>> 0;
-                    const hash2 = pendingContentHash2s[i] >>> 0;
-                    this._cacheTermEntryContentMeta(
-                        null,
-                        storedOffsets[storedChunkIndex] + (storageChunks.entryToStoredChunkOffsets[i] ?? 0),
-                        pendingContentBytes[i].byteLength,
-                        pendingContentDictNames === null ? (uniformContentDictName ?? 'raw') : (storageChunks.contentDictNames[i] ?? 'raw'),
-                        0,
-                        hash1,
-                        hash2,
-                        (pendingContentDictNames === null ? uniformContentDictName : storageChunks.contentDictNames[i]) === 'raw' ?
-                            storageChunks.storedChunks[storedChunkIndex].subarray(
-                                storageChunks.entryToStoredChunkOffsets[i] ?? 0,
-                                (storageChunks.entryToStoredChunkOffsets[i] ?? 0) + pendingContentBytes[i].byteLength,
-                            ) :
-                            pendingContentBytes[i],
-                    );
-                }
+                importMetrics.contentStoreMs += safePerformance.now() - tContentStoreStart;
+                const tContentMetadataStart = safePerformance.now();
+                resolvedContentDictNames = this._publishArtifactTermContentMetadata({
+                    count,
+                    contentOffsets,
+                    contentLengths,
+                    resolvedContentDictNames,
+                    pendingRowToUniqueIndex,
+                    pendingContentBytes,
+                    pendingContentHash1s,
+                    pendingContentHash2s,
+                    pendingOffsets,
+                    pendingLengths,
+                    pendingResolvedDictNames,
+                });
+                importMetrics.contentMetadataMs += safePerformance.now() - tContentMetadataStart;
+            } else {
+                importMetrics.contentStoreMs += safePerformance.now() - tContentStoreStart;
             }
-            contentAppendMs += safePerformance.now() - tContentAppendStart;
-            const metrics = await this._termRecordStore.appendBatchFromArtifactChunkResolvedContent(
+            resolvedContentDictNames = this._compactUniformContentDictNames(resolvedContentDictNames);
+            importMetrics.contentAppendMs += safePerformance.now() - tContentAppendStart;
+            await this._appendResolvedArtifactTermRecords(
                 chunk,
                 contentOffsets,
                 contentLengths,
                 resolvedContentDictNames,
+                importMetrics,
             );
-            termRecordBuildMs += metrics.buildRecordsMs;
-            termRecordEncodeMs += metrics.encodeMs;
-            termRecordWriteMs += metrics.appendWriteMs;
-            termRecordInternMs += metrics.internMs ?? 0;
-            termRecordPackLengthsMs += metrics.packLengthsMs ?? 0;
-            termRecordHeapCopyMs += metrics.heapCopyMs ?? 0;
-            termRecordWasmEncodeMs += metrics.wasmEncodeMs ?? 0;
-            const deferVirtualTableWrite = this._deferTermsVirtualTableSync || this._bulkImportDepth > 0;
-            if (deferVirtualTableWrite) {
-                this._termsVirtualTableDirty = true;
-            } else {
-                const tTermsVtabInsertStart = safePerformance.now();
-                await this._insertTermRowsIntoVirtualTable(count);
-                termsVtabInsertMs += safePerformance.now() - tTermsVtabInsertStart;
-            }
             if (useLocalTransaction) {
                 this._requireDb().exec('COMMIT');
             }
-            this._lastBulkAddTermsMetrics = {
-                contentAppendMs,
-                termRecordBuildMs,
-                termRecordEncodeMs,
-                termRecordWriteMs,
-                termsVtabInsertMs,
-                termRecordInternMs,
-                termRecordPackLengthsMs,
-                termRecordHeapCopyMs,
-                termRecordWasmEncodeMs,
-            };
+            this._lastBulkAddTermsMetrics = importMetrics;
         } catch (e) {
             if (useLocalTransaction) {
                 try { this._requireDb().exec('ROLLBACK'); } catch (_) { /* NOP */ }
             }
             throw e;
         }
+    }
+
+    /**
+     * Resolves intra-chunk duplicates and content already persisted by earlier chunks.
+     * @param {import('core').SafeAny} chunk
+     * @returns {Promise<{contentOffsets: Int32Array, contentLengths: Int32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array, uniformContentDictName: string|null}>}
+     */
+    async _resolveArtifactTermContentDedup(chunk) {
+        const count = chunk.rowCount;
+        const explicitContentDictNames = Array.isArray(chunk.contentDictNameList) ? chunk.contentDictNameList : null;
+        const uniformContentDictName = typeof chunk.uniformContentDictName !== 'undefined' ? (chunk.uniformContentDictName ?? null) : null;
+        const contentOffsets = new Int32Array(count);
+        const contentLengths = new Int32Array(count);
+        /** @type {string|(string|null)[]} */
+        let resolvedContentDictNames = explicitContentDictNames !== null ? new Array(count) : (uniformContentDictName ?? 'raw');
+        let tableSize = 1;
+        while (tableSize < count * 2) { tableSize *= 2; }
+        const tableMask = tableSize - 1;
+        const pendingHash1Table = new Uint32Array(tableSize);
+        const pendingHash2Table = new Uint32Array(tableSize);
+        const pendingIndexTable = new Uint32Array(tableSize);
+        /** @type {Uint8Array[]} */
+        const pendingContentBytes = [];
+        /** @type {number[]} */
+        const pendingContentHash1s = [];
+        /** @type {number[]} */
+        const pendingContentHash2s = [];
+        /** @type {(string|null)[]|null} */
+        const pendingContentDictNames = (
+            explicitContentDictNames === null &&
+            typeof uniformContentDictName === 'string' &&
+            uniformContentDictName.length > 0
+        ) ? null : [];
+        const pendingRowToUniqueIndex = new Int32Array(count);
+        pendingRowToUniqueIndex.fill(-1);
+
+        const getPendingHashSlot = (hash1, hash2) => {
+            let value = (hash1 ^ Math.imul(hash2, 0x9e3779b1)) >>> 0;
+            value ^= value >>> 16;
+            return value & tableMask;
+        };
+        const findPendingContentIndex = (hash1, hash2, contentBytes) => {
+            let slot = getPendingHashSlot(hash1, hash2);
+            while (true) {
+                const storedIndex = pendingIndexTable[slot];
+                if (storedIndex === 0) { return -1; }
+                if (pendingHash1Table[slot] === hash1 && pendingHash2Table[slot] === hash2) {
+                    const pendingIndex = storedIndex - 1;
+                    if (this._termContentBytesEqual(pendingContentBytes[pendingIndex], contentBytes)) {
+                        return pendingIndex;
+                    }
+                }
+                slot = (slot + 1) & tableMask;
+            }
+        };
+        const insertPendingContentIndex = (hash1, hash2) => {
+            let slot = getPendingHashSlot(hash1, hash2);
+            while (pendingIndexTable[slot] !== 0) { slot = (slot + 1) & tableMask; }
+            const pendingIndex = pendingContentBytes.length;
+            pendingHash1Table[slot] = hash1;
+            pendingHash2Table[slot] = hash2;
+            pendingIndexTable[slot] = pendingIndex + 1;
+            return pendingIndex;
+        };
+        const findExistingContentMeta = (hash1, hash2) => {
+            if (this._termEntryContentMetaHashPairCount <= 0) { return void 0; }
+            let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, this._termEntryContentMetaHashPairMask);
+            while (true) {
+                const meta = this._termEntryContentMetaHashPairTable[slot];
+                if (typeof meta === 'undefined') { return void 0; }
+                if (this._termEntryContentMetaHash1Table[slot] === hash1 && this._termEntryContentMetaHash2Table[slot] === hash2) {
+                    return meta;
+                }
+                slot = (slot + 1) & this._termEntryContentMetaHashPairMask;
+            }
+        };
+        const ensureResolvedContentDictNamesArray = (fillUntil) => {
+            if (Array.isArray(resolvedContentDictNames)) { return resolvedContentDictNames; }
+            const values = new Array(count);
+            if (fillUntil > 0) { values.fill(resolvedContentDictNames, 0, fillUntil); }
+            resolvedContentDictNames = values;
+            return values;
+        };
+
+        for (let i = 0; i < count; ++i) {
+            const hash1 = chunk.contentHash1List[i] >>> 0;
+            const hash2 = chunk.contentHash2List[i] >>> 0;
+            const contentBytes = chunk.contentBytesList[i];
+            if (!(contentBytes instanceof Uint8Array)) {
+                throw new TypeError(`Artifact term content bytes are invalid at row ${i}`);
+            }
+            const existingPendingIndex = findPendingContentIndex(hash1, hash2, contentBytes);
+            if (existingPendingIndex >= 0) {
+                pendingRowToUniqueIndex[i] = existingPendingIndex;
+                continue;
+            }
+            let existingMeta = findExistingContentMeta(hash1, hash2);
+            if (typeof existingMeta !== 'undefined') {
+                existingMeta = this._findMatchingTermEntryContentMeta(hash1, hash2, contentBytes, existingMeta);
+                if (existingMeta instanceof Promise) { existingMeta = await existingMeta; }
+            }
+            if (typeof existingMeta !== 'undefined') {
+                contentOffsets[i] = existingMeta.offset;
+                contentLengths[i] = existingMeta.length;
+                if (Array.isArray(resolvedContentDictNames)) {
+                    resolvedContentDictNames[i] = existingMeta.dictName;
+                } else if (existingMeta.dictName !== resolvedContentDictNames) {
+                    ensureResolvedContentDictNamesArray(i)[i] = existingMeta.dictName;
+                }
+                continue;
+            }
+            const pendingIndex = insertPendingContentIndex(hash1, hash2);
+            pendingContentBytes.push(contentBytes);
+            pendingContentHash1s.push(hash1);
+            pendingContentHash2s.push(hash2);
+            if (pendingContentDictNames !== null) {
+                pendingContentDictNames.push(explicitContentDictNames !== null ? (explicitContentDictNames[i] ?? null) : uniformContentDictName);
+            }
+            pendingRowToUniqueIndex[i] = pendingIndex;
+        }
+        return {
+            contentOffsets,
+            contentLengths,
+            resolvedContentDictNames,
+            pendingContentBytes,
+            pendingContentHash1s,
+            pendingContentHash2s,
+            pendingContentDictNames,
+            pendingRowToUniqueIndex,
+            uniformContentDictName,
+        };
+    }
+
+    /**
+     * Persists the unique content selected by the dedup phase.
+     * @param {string} dictionary
+     * @param {Uint8Array[]} pendingContentBytes
+     * @param {(string|null)[]|null} pendingContentDictNames
+     * @param {string|null} uniformContentDictName
+     * @returns {Promise<{pendingOffsets: number[], pendingLengths: number[], pendingResolvedDictNames: string|string[]}>}
+     */
+    async _persistArtifactTermContent(dictionary, pendingContentBytes, pendingContentDictNames, uniformContentDictName) {
+        const compressionDictName = resolveTermContentZstdDictName(dictionary);
+        const ownsBlockSession = this._termContentBlockImportSession === null;
+        const blockSession = this._termContentBlockImportSession ?? this._termContentBlockStore.beginImportSession();
+        let blockStorage = null;
+        try {
+            if (this._termContentZstdInitialized) {
+                blockStorage = await blockSession.append(dictionary, pendingContentBytes, compressionDictName);
+            }
+        } finally {
+            if (ownsBlockSession) { blockSession.close(); }
+        }
+        if (blockStorage !== null) {
+            return {
+                pendingOffsets: blockStorage.contentOffsets,
+                pendingLengths: blockStorage.contentLengths,
+                pendingResolvedDictNames: blockStorage.contentDictName,
+            };
+        }
+
+        const storageChunks = this._createTermContentStorageChunks(
+            pendingContentBytes,
+            compressionDictName,
+            pendingContentDictNames ?? [],
+            pendingContentDictNames === null ? uniformContentDictName : null,
+        );
+        /** @type {number[]} */
+        const storedOffsets = [];
+        /** @type {number[]} */
+        const storedLengths = [];
+        await this._termContentStore.appendBatchToArrays(storageChunks.storedChunks, storedOffsets, storedLengths);
+        const pendingOffsets = new Array(pendingContentBytes.length);
+        const pendingLengths = new Array(pendingContentBytes.length);
+        /** @type {string|string[]} */
+        const pendingResolvedDictNames = pendingContentDictNames === null ?
+            (uniformContentDictName ?? 'raw') :
+            new Array(pendingContentBytes.length);
+        for (let i = 0; i < pendingContentBytes.length; ++i) {
+            const storedChunkIndex = storageChunks.entryToStoredChunkIndexes[i];
+            pendingOffsets[i] = storedOffsets[storedChunkIndex] + (storageChunks.entryToStoredChunkOffsets[i] ?? 0);
+            pendingLengths[i] = pendingContentBytes[i].byteLength;
+            if (Array.isArray(pendingResolvedDictNames)) {
+                pendingResolvedDictNames[i] = storageChunks.contentDictNames[i] ?? 'raw';
+            }
+        }
+        return {pendingOffsets, pendingLengths, pendingResolvedDictNames};
+    }
+
+    /**
+     * Publishes persisted offsets to rows and to the in-memory dedup index.
+     * @param {{count: number, contentOffsets: Int32Array, contentLengths: Int32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[], pendingLengths: number[], pendingResolvedDictNames: string|string[]}} state
+     * @returns {string|(string|null)[]}
+     */
+    _publishArtifactTermContentMetadata(state) {
+        const {
+            count,
+            contentOffsets,
+            contentLengths,
+            pendingRowToUniqueIndex,
+            pendingContentBytes,
+            pendingContentHash1s,
+            pendingContentHash2s,
+            pendingOffsets,
+            pendingLengths,
+            pendingResolvedDictNames,
+        } = state;
+        let {resolvedContentDictNames} = state;
+        const ensureResolvedContentDictNamesArray = (fillUntil) => {
+            if (Array.isArray(resolvedContentDictNames)) { return resolvedContentDictNames; }
+            const values = new Array(count);
+            if (fillUntil > 0) { values.fill(resolvedContentDictNames, 0, fillUntil); }
+            resolvedContentDictNames = values;
+            return values;
+        };
+        for (let i = 0; i < count; ++i) {
+            const pendingIndex = pendingRowToUniqueIndex[i];
+            if (pendingIndex < 0) { continue; }
+            contentOffsets[i] = pendingOffsets[pendingIndex];
+            contentLengths[i] = pendingLengths[pendingIndex];
+            const resolvedContentDictName = Array.isArray(pendingResolvedDictNames) ?
+                pendingResolvedDictNames[pendingIndex] :
+                pendingResolvedDictNames;
+            if (Array.isArray(resolvedContentDictNames)) {
+                resolvedContentDictNames[i] = resolvedContentDictName;
+            } else if (resolvedContentDictName !== resolvedContentDictNames) {
+                ensureResolvedContentDictNamesArray(i)[i] = resolvedContentDictName;
+            }
+        }
+        for (let i = 0; i < pendingContentBytes.length; ++i) {
+            this._cacheTermEntryContentMeta(
+                null,
+                pendingOffsets[i],
+                pendingLengths[i],
+                Array.isArray(pendingResolvedDictNames) ? pendingResolvedDictNames[i] : pendingResolvedDictNames,
+                0,
+                pendingContentHash1s[i] >>> 0,
+                pendingContentHash2s[i] >>> 0,
+                pendingContentBytes[i],
+            );
+        }
+        return resolvedContentDictNames;
+    }
+
+    /**
+     * @param {string|(string|null)[]} contentDictNames
+     * @returns {string|(string|null)[]}
+     */
+    _compactUniformContentDictNames(contentDictNames) {
+        if (!Array.isArray(contentDictNames) || contentDictNames.length === 0) { return contentDictNames; }
+        const first = contentDictNames[0];
+        if (typeof first !== 'string') { return contentDictNames; }
+        for (let i = 1; i < contentDictNames.length; ++i) {
+            if (contentDictNames[i] !== first) { return contentDictNames; }
+        }
+        return first;
+    }
+
+    /**
+     * @param {import('core').SafeAny} chunk
+     * @param {Int32Array} contentOffsets
+     * @param {Int32Array} contentLengths
+     * @param {string|(string|null)[]} resolvedContentDictNames
+     * @param {Record<string, number>} importMetrics
+     * @returns {Promise<void>}
+     */
+    async _appendResolvedArtifactTermRecords(chunk, contentOffsets, contentLengths, resolvedContentDictNames, importMetrics) {
+        const metrics = await this._termRecordStore.appendBatchFromArtifactChunkResolvedContent(
+            chunk,
+            contentOffsets,
+            contentLengths,
+            resolvedContentDictNames,
+        );
+        importMetrics.termRecordBuildMs += metrics.buildRecordsMs;
+        importMetrics.termRecordEncodeMs += metrics.encodeMs;
+        importMetrics.termRecordWriteMs += metrics.appendWriteMs;
+        importMetrics.termRecordInternMs += metrics.internMs ?? 0;
+        importMetrics.termRecordPackLengthsMs += metrics.packLengthsMs ?? 0;
+        importMetrics.termRecordHeapCopyMs += metrics.heapCopyMs ?? 0;
+        importMetrics.termRecordWasmEncodeMs += metrics.wasmEncodeMs ?? 0;
+        if (this._deferTermsVirtualTableSync || this._bulkImportDepth > 0) {
+            this._termsVirtualTableDirty = true;
+            return;
+        }
+        const tTermsVtabInsertStart = safePerformance.now();
+        await this._insertTermRowsIntoVirtualTable(chunk.rowCount);
+        importMetrics.termsVtabInsertMs += safePerformance.now() - tTermsVtabInsertStart;
     }
 
     /**
@@ -5282,6 +5468,7 @@ export class DictionaryDatabase {
         this._openStorageDiagnostics = getLastOpenStorageDiagnostics();
         await this._termContentStore.prepare();
         await this._termRecordStore.prepare();
+        this._termContentBlockStore.clearCache();
         this._clearTermsVtabCursorState();
         this._termsVtabModuleRegistered = false;
 
@@ -6473,7 +6660,7 @@ export class DictionaryDatabase {
                 let contentBytes = null;
                 if (contentOffset >= 0 && contentLength > 0) {
                     try {
-                        contentBytes = await this._termContentStore.readSlice(contentOffset, contentLength);
+                        contentBytes = await this._readTermEntryContentBytes(contentOffset, contentLength, contentDictName);
                     } catch (e) {
                         logTermContentZstdError(e);
                         contentBytes = null;
@@ -6537,7 +6724,11 @@ export class DictionaryDatabase {
                                     glossary: Array.isArray(glossary) ? glossary : [],
                                 };
                             } else {
-                                const contentJson = (contentDictName === 'raw') ?
+                                // Block references describe their container compression; the
+                                // extracted entry is the original raw payload and must not be
+                                // decompressed a second time.
+                                const isBlockContent = typeof getRawTermContentBlockCompressionDictName(contentDictName) !== 'undefined';
+                                const contentJson = (contentDictName === 'raw' || isBlockContent) ?
                                     this._textDecoder.decode(contentBytes) :
                                     this._textDecoder.decode(decompressTermContentZstd(contentBytes, contentDictName.length > 0 ? contentDictName : null));
                                 const parsedHeader = this._parseSerializedTermEntryContentHeader(contentJson);
@@ -6662,13 +6853,7 @@ export class DictionaryDatabase {
      */
     _getCachedTermEntryContent(cacheKey) {
         const cached = this._termEntryContentCache.get(cacheKey);
-        if (typeof cached === 'undefined') {
-            return void 0;
-        }
-        // Promote recently used entries.
-        this._termEntryContentCache.delete(cacheKey);
-        this._termEntryContentCache.set(cacheKey, cached);
-        return cached;
+        return typeof cached === 'undefined' ? void 0 : cached;
     }
 
     /**
@@ -6676,15 +6861,7 @@ export class DictionaryDatabase {
      * @param {{definitionTags: string|null, termTags: string|undefined, rules: string, glossaryJson?: string, glossary?: import('dictionary-data').TermGlossary[]}} value
      */
     _setCachedTermEntryContent(cacheKey, value) {
-        if (this._termEntryContentCache.has(cacheKey)) {
-            this._termEntryContentCache.delete(cacheKey);
-        }
         this._termEntryContentCache.set(cacheKey, value);
-        while (this._termEntryContentCache.size > this._termEntryContentCacheMaxEntries) {
-            const oldestKey = this._termEntryContentCache.keys().next().value;
-            if (typeof oldestKey !== 'string') { break; }
-            this._termEntryContentCache.delete(oldestKey);
-        }
     }
 
     /**

@@ -16,6 +16,7 @@
  */
 
 import {parseJson} from '../core/json.js';
+import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -23,16 +24,22 @@ const U8_QUOTE = 0x22;
 const U8_N = 0x6e;
 const U8_U = 0x75;
 const U8_L = 0x6c;
+const U8_ARRAY_OPEN = 0x5b;
+const U8_ARRAY_CLOSE = 0x5d;
+const U8_COMMA = 0x2c;
 
 const CONTENT_META_U32_FIELDS = 4;
 const DEFAULT_ROW_CHUNK_SIZE = 2048;
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
+/** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @type {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, parse_term_bank: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, parse_term_bank_with_media_hints: (jsonPtr: number, jsonLen: number, outPtr: number, outCapacity: number) => number, encode_term_content: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number, encode_term_content_no_hash: (jsonPtr: number, metasPtr: number, rowCount: number, outPtr: number, outCapacity: number, rowMetaPtr: number) => number}>|null} */
 let wasmPromise = null;
 
 /** @type {TextDecoder} */
 const textDecoder = new TextDecoder();
-/** @type {{bufferSetupMs: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, rowDecodeMs: number, chunkDispatchMs: number, rowCount: number, chunkCount: number, chunkSize: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean}|null} */
+/** @type {TextEncoder} */
+const textEncoder = new TextEncoder();
+/** @type {{bufferSetupMs: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, rowDecodeMs: number, chunkDispatchMs: number, rowCount: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean}|null} */
 let lastTermBankWasmParseProfile = null;
 /** @type {number} */
 let lastSuccessfulMetaCapacity = 0;
@@ -77,12 +84,37 @@ async function getWasm() {
 }
 
 /**
- * @returns {{bufferSetupMs: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, rowDecodeMs: number, chunkDispatchMs: number, rowCount: number, chunkCount: number, chunkSize: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean}|null}
+ * @returns {{bufferSetupMs: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, rowDecodeMs: number, chunkDispatchMs: number, rowCount: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean}|null}
  */
 export function consumeLastTermBankWasmParseProfile() {
     const value = lastTermBankWasmParseProfile;
     lastTermBankWasmParseProfile = null;
     return value;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {{start: number, end: number}|null}
+ */
+function getJsonArrayContentSpan(bytes) {
+    let start = 0;
+    let end = bytes.byteLength;
+    while (start < end && isJsonWhitespace(bytes[start])) { ++start; }
+    while (end > start && isJsonWhitespace(bytes[end - 1])) { --end; }
+    if (start >= end || bytes[start] !== U8_ARRAY_OPEN || bytes[end - 1] !== U8_ARRAY_CLOSE) { return null; }
+    ++start;
+    --end;
+    while (start < end && isJsonWhitespace(bytes[start])) { ++start; }
+    while (end > start && isJsonWhitespace(bytes[end - 1])) { --end; }
+    return {start, end};
+}
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+function isJsonWhitespace(value) {
+    return value === 0x20 || value === 0x0a || value === 0x0d || value === 0x09;
 }
 
 /**
@@ -154,6 +186,16 @@ function isNullToken(source, start, length) {
  * @param {Uint8Array} source
  * @param {number} start
  * @param {number} length
+ * @returns {boolean}
+ */
+function isEmptyJsonStringToken(source, start, length) {
+    return length === 2 && source[start] === U8_QUOTE && source[start + 1] === U8_QUOTE;
+}
+
+/**
+ * @param {Uint8Array} source
+ * @param {number} start
+ * @param {number} length
  * @param {number} fallback
  * @returns {number}
  */
@@ -213,7 +255,7 @@ function tokenBytesEqual(source, startA, lengthA, startB, lengthB) {
 }
 
 /**
- * @param {Uint8Array} contentBytes
+ * @param {Uint8Array|Uint8Array[]} contentBytes
  * @param {boolean} includeContentMetadata
  * @param {number} initialMetaCapacityDivisor
  * @param {number} initialContentBytesPerRow
@@ -223,7 +265,25 @@ function tokenBytesEqual(source, startA, lengthA, startB, lengthB) {
  * @throws {Error}
  */
 async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialMetaCapacityDivisor, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes) {
-    if (contentBytes.byteLength === 0) {
+    const sourceArrays = Array.isArray(contentBytes) ? contentBytes : [contentBytes];
+    /** @type {Array<{bytes: Uint8Array, start: number, end: number}>} */
+    const sourceSpans = [];
+    let jsonLength = sourceArrays.length > 1 ? 2 : 0;
+    for (const bytes of sourceArrays) {
+        if (sourceArrays.length === 1) {
+            sourceSpans.push({bytes, start: 0, end: bytes.byteLength});
+            jsonLength = bytes.byteLength;
+            continue;
+        }
+        const span = getJsonArrayContentSpan(bytes);
+        if (span === null) { throw new Error('Expected a JSON array in term-bank source fragment'); }
+        if (span.end > span.start) {
+            sourceSpans.push({bytes, ...span});
+            jsonLength += span.end - span.start;
+        }
+    }
+    if (sourceArrays.length > 1) { jsonLength += Math.max(0, sourceSpans.length - 1); }
+    if (jsonLength === 0) {
         return {
             heap: new Uint8Array(0),
             source: new Uint8Array(0),
@@ -244,17 +304,30 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
     let parseBankMs = 0;
     let encodeContentMs = 0;
     let tStart = Date.now();
-    const jsonPtr = wasm.wasm_alloc(contentBytes.byteLength);
+    const jsonPtr = wasm.wasm_alloc(jsonLength);
     allocationMs += Math.max(0, Date.now() - tStart);
     if (jsonPtr === 0) {
         throw new Error('Failed to allocate wasm json buffer');
     }
     tStart = Date.now();
-    new Uint8Array(wasm.memory.buffer).set(contentBytes, jsonPtr);
+    const inputHeap = new Uint8Array(wasm.memory.buffer);
+    if (sourceArrays.length === 1) {
+        inputHeap.set(sourceArrays[0], jsonPtr);
+    } else {
+        let cursor = jsonPtr;
+        inputHeap[cursor++] = U8_ARRAY_OPEN;
+        for (let i = 0; i < sourceSpans.length; ++i) {
+            if (i > 0) { inputHeap[cursor++] = U8_COMMA; }
+            const {bytes, start, end} = sourceSpans[i];
+            inputHeap.set(bytes.subarray(start, end), cursor);
+            cursor += end - start;
+        }
+        inputHeap[cursor] = U8_ARRAY_CLOSE;
+    }
     copyJsonMs += Math.max(0, Date.now() - tStart);
 
     const normalizedMetaCapacityDivisor = Number.isFinite(initialMetaCapacityDivisor) ? Math.max(8, Math.min(128, Math.trunc(initialMetaCapacityDivisor))) : 24;
-    let capacity = Math.max(1024, Math.floor(contentBytes.byteLength / normalizedMetaCapacityDivisor));
+    let capacity = Math.max(1024, Math.floor(jsonLength / normalizedMetaCapacityDivisor));
     if (capacity < 8192) { capacity = 8192; }
     if (lastSuccessfulMetaCapacity > 0) {
         capacity = Math.max(capacity, lastSuccessfulMetaCapacity);
@@ -270,8 +343,8 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         }
         tStart = Date.now();
         rowCount = mediaHintFastScan ?
-            wasm.parse_term_bank_with_media_hints(jsonPtr, contentBytes.byteLength, outPtr, capacity) :
-            wasm.parse_term_bank(jsonPtr, contentBytes.byteLength, outPtr, capacity);
+            wasm.parse_term_bank_with_media_hints(jsonPtr, jsonLength, outPtr, capacity) :
+            wasm.parse_term_bank(jsonPtr, jsonLength, outPtr, capacity);
         parseBankMs += Math.max(0, Date.now() - tStart);
         if (rowCount >= 0) {
             break;
@@ -289,7 +362,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
     if (!includeContentMetadata) {
         const heap = new Uint8Array(wasm.memory.buffer);
         const metas = new Uint32Array(wasm.memory.buffer, outPtr, rowCount * META_U32_FIELDS);
-        const source = heap.subarray(jsonPtr, jsonPtr + contentBytes.byteLength);
+        const source = heap.subarray(jsonPtr, jsonPtr + jsonLength);
         return {
             heap,
             source,
@@ -311,7 +384,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         throw new Error('Failed to allocate wasm content metadata buffer');
     }
     const normalizedInitialContentBytesPerRow = Number.isFinite(initialContentBytesPerRow) ? Math.max(16, Math.min(512, Math.trunc(initialContentBytesPerRow))) : 96;
-    let contentOutCapacity = Math.max(contentBytes.byteLength, rowCount * normalizedInitialContentBytesPerRow);
+    let contentOutCapacity = Math.max(jsonLength, rowCount * normalizedInitialContentBytesPerRow);
     if (lastSuccessfulContentBytesPerRow > 0) {
         contentOutCapacity = Math.max(contentOutCapacity, rowCount * lastSuccessfulContentBytesPerRow);
     }
@@ -356,7 +429,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
 
     const heap = new Uint8Array(wasm.memory.buffer);
     const metas = new Uint32Array(wasm.memory.buffer, outPtr, rowCount * META_U32_FIELDS);
-    const source = heap.subarray(jsonPtr, jsonPtr + contentBytes.byteLength);
+    const source = heap.subarray(jsonPtr, jsonPtr + jsonLength);
     const contentMetas = new Uint32Array(wasm.memory.buffer, contentMetaPtr, rowCount * CONTENT_META_U32_FIELDS);
     return {
         heap,
@@ -473,7 +546,10 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
     const readingLength = metas[o + 3];
     const reuseExpressionReading = (
         reuseExpressionForReadingDecode &&
-        tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
+        (
+            isEmptyJsonStringToken(source, readingStart, readingLength) ||
+            tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
+        )
     );
     const expressionBytes = getUnescapedJsonStringTokenBytes(source, expressionStart, expressionLength) ?? void 0;
     const readingBytes = reuseExpressionReading ?
@@ -525,11 +601,11 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
 }
 
 /**
- * @param {Uint8Array} contentBytes
+ * @param {Uint8Array|Uint8Array[]} contentBytes
  * @param {number} version
  * @param {(rows: {expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[], progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
- * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, initialMetaCapacityDivisor?: number, initialContentBytesPerRow?: number, minimalDecode?: boolean, reuseExpressionForReadingDecode?: boolean, skipTagRuleDecode?: boolean, lazyGlossaryDecode?: boolean, mediaHintFastScan?: boolean, preallocateChunkRows?: boolean, computeContentHashes?: boolean}} [options]
+ * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, initialMetaCapacityDivisor?: number, initialContentBytesPerRow?: number, minimalDecode?: boolean, reuseExpressionForReadingDecode?: boolean, skipTagRuleDecode?: boolean, lazyGlossaryDecode?: boolean, mediaHintFastScan?: boolean, preallocateChunkRows?: boolean, computeContentHashes?: boolean, maxPendingChunks?: number}} [options]
  * @returns {Promise<void>}
  */
 export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk, chunkSize = DEFAULT_ROW_CHUNK_SIZE, options = {}) {
@@ -544,6 +620,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
     const mediaHintFastScan = options.mediaHintFastScan === true;
     const preallocateChunkRows = options.preallocateChunkRows === true;
     const computeContentHashes = options.computeContentHashes !== false;
+    const maxPendingChunks = Number.isFinite(options.maxPendingChunks) ? Math.max(1, Math.min(4, Math.trunc(/** @type {number} */ (options.maxPendingChunks)))) : 1;
     const tBufferSetupStart = Date.now();
     const {
         heap,
@@ -577,6 +654,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
             rowCount: 0,
             chunkCount: 0,
             chunkSize: 0,
+            maxPendingChunks,
             minimalDecode,
             includeContentMetadata,
             copyContentBytes,
@@ -600,6 +678,26 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
     let chunkIndex = 0;
     let rowDecodeMs = 0;
     let chunkDispatchMs = 0;
+    /** @type {Promise<void>[]} */
+    const pendingDispatches = [];
+    /** @type {Promise<void>} */
+    let dispatchTail = Promise.resolve();
+    /**
+     * @param {ParsedTermBankRow[]} chunk
+     * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}} progress
+     * @returns {Promise<void>|null}
+     */
+    const enqueueChunk = (chunk, progress) => {
+        const invoke = async () => {
+            const tDispatchStart = Date.now();
+            await onChunk(chunk, progress);
+            chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
+        };
+        const promise = pendingDispatches.length === 0 ? invoke() : dispatchTail.then(invoke);
+        dispatchTail = promise;
+        pendingDispatches.push(promise);
+        return pendingDispatches.length >= maxPendingChunks ? /** @type {Promise<void>} */ (pendingDispatches.shift()) : null;
+    };
     let tChunkDecodeStart = Date.now();
     for (let i = 0; i < rowCount; ++i) {
         const row = minimalDecode ?
@@ -618,14 +716,13 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
             rows = preallocateChunkRows ? createRowBuffer(Math.min(normalizedChunkSize, rowCount - (i + 1))) : [];
             rowsIndex = 0;
             ++chunkIndex;
-            const tDispatchStart = Date.now();
-            await onChunk(chunk, {
+            const backpressure = enqueueChunk(chunk, {
                 processedRows: i + 1,
                 totalRows: rowCount,
                 chunkIndex,
                 chunkCount,
             });
-            chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
+            if (backpressure !== null) { await backpressure; }
             tChunkDecodeStart = Date.now();
         }
     }
@@ -635,15 +732,15 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
             rows.length = rowsIndex;
         }
         ++chunkIndex;
-        const tDispatchStart = Date.now();
-        await onChunk(rows, {
+        const backpressure = enqueueChunk(rows, {
             processedRows: rowCount,
             totalRows: rowCount,
             chunkIndex,
             chunkCount,
         });
-        chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
+        if (backpressure !== null) { await backpressure; }
     }
+    await Promise.all(pendingDispatches);
     lastTermBankWasmParseProfile = {
         bufferSetupMs,
         allocationMs,
@@ -655,12 +752,155 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
         rowCount,
         chunkCount,
         chunkSize: normalizedChunkSize,
+        maxPendingChunks,
         minimalDecode,
         includeContentMetadata,
         copyContentBytes,
         reuseExpressionForReadingDecode,
         skipTagRuleDecode,
         lazyGlossaryDecode,
+        mediaHintFastScan,
+    };
+}
+
+/**
+ * Parses directly into the columnar payload consumed by the raw-byte importer.
+ * Only rows which may contain media receive a compatibility row object.
+ * @param {Uint8Array|Uint8Array[]} contentBytes
+ * @param {number} version
+ * @param {(chunk: {rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, termRecordPreinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {number} [chunkSize]
+ * @param {{initialMetaCapacityDivisor?: number, initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean}} [options]
+ * @returns {Promise<void>}
+ */
+export async function parseTermBankWithWasmColumnChunks(contentBytes, version, onChunk, chunkSize = DEFAULT_ROW_CHUNK_SIZE, options = {}) {
+    const initialMetaCapacityDivisor = Number.isFinite(options.initialMetaCapacityDivisor) ? /** @type {number} */ (options.initialMetaCapacityDivisor) : 24;
+    const initialContentBytesPerRow = Number.isFinite(options.initialContentBytesPerRow) ? /** @type {number} */ (options.initialContentBytesPerRow) : 96;
+    const mediaHintFastScan = options.mediaHintFastScan === true;
+    const computeContentHashes = options.computeContentHashes !== false;
+    const maxPendingChunks = Number.isFinite(options.maxPendingChunks) ? Math.max(1, Math.min(4, Math.trunc(/** @type {number} */ (options.maxPendingChunks)))) : 1;
+    const tBufferSetupStart = Date.now();
+    const parsed = await parseTermBankWasmBuffers(
+        contentBytes,
+        true,
+        initialMetaCapacityDivisor,
+        initialContentBytesPerRow,
+        mediaHintFastScan,
+        computeContentHashes,
+    );
+    const bufferSetupMs = Math.max(0, Date.now() - tBufferSetupStart);
+    const {heap, source, metas, contentMetas, contentOutPtr, rowCount} = parsed;
+    const normalizedChunkSize = Number.isFinite(chunkSize) ? Math.max(1, Math.trunc(chunkSize)) : DEFAULT_ROW_CHUNK_SIZE;
+    const chunkCount = rowCount === 0 ? 0 : Math.ceil(rowCount / normalizedChunkSize);
+    let rowDecodeMs = 0;
+    let chunkDispatchMs = 0;
+    /** @type {Promise<void>[]} */
+    const pendingDispatches = [];
+    let dispatchTail = Promise.resolve();
+
+    for (let start = 0, chunkIndex = 0; start < rowCount; start += normalizedChunkSize) {
+        const tDecodeStart = Date.now();
+        const end = Math.min(rowCount, start + normalizedChunkSize);
+        const count = end - start;
+        /** @type {Uint8Array[]} */
+        const expressionBytesList = new Array(count);
+        /** @type {Uint8Array[]} */
+        const readingBytesList = new Array(count);
+        const readingEqualsExpressionList = new Uint8Array(count);
+        const scoreList = new Int32Array(count);
+        const sequenceList = new Int32Array(count);
+        /** @type {Uint8Array[]} */
+        const contentBytesList = new Array(count);
+        const contentHash1List = new Uint32Array(count);
+        const contentHash2List = new Uint32Array(count);
+        const expressionIndexes = new Uint32Array(count);
+        const readingIndexes = new Uint32Array(count);
+        const planBuilder = createTermRecordPreinternedPlanBuilder(count * 2);
+        /** @type {Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>} */
+        const mediaRows = [];
+
+        for (let sourceIndex = start, i = 0; sourceIndex < end; ++sourceIndex, ++i) {
+            const o = sourceIndex * META_U32_FIELDS;
+            const c = sourceIndex * CONTENT_META_U32_FIELDS;
+            const expressionStart = metas[o + 0];
+            const expressionLength = metas[o + 1];
+            const readingStart = metas[o + 2];
+            const readingLength = metas[o + 3];
+            const expressionBytes = getUnescapedJsonStringTokenBytes(source, expressionStart, expressionLength) ?? textEncoder.encode(decodeJsonStringToken(source, expressionStart, expressionLength));
+            const readingEqualsExpression = (
+                isEmptyJsonStringToken(source, readingStart, readingLength) ||
+                tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
+            );
+            const readingBytes = readingEqualsExpression ?
+                EMPTY_UINT8_ARRAY :
+                (getUnescapedJsonStringTokenBytes(source, readingStart, readingLength) ?? textEncoder.encode(decodeJsonStringToken(source, readingStart, readingLength)));
+            expressionBytesList[i] = expressionBytes;
+            readingBytesList[i] = readingBytes;
+            readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
+            expressionIndexes[i] = planBuilder.internStringBytes(expressionBytes);
+            readingIndexes[i] = readingEqualsExpression ? expressionIndexes[i] : planBuilder.internStringBytes(readingBytes);
+            scoreList[i] = decodeNumberToken(source, metas[o + 8], metas[o + 9], 0) | 0;
+            sequenceList[i] = version >= 3 && !isNullToken(source, metas[o + 12], metas[o + 13]) ? decodeNumberToken(source, metas[o + 12], metas[o + 13], 0) : -1;
+            const contentOffset = contentMetas[c + 0];
+            const contentLength = contentMetas[c + 1];
+            contentBytesList[i] = heap.subarray(contentOutPtr + contentOffset, contentOutPtr + contentOffset + contentLength);
+            contentHash1List[i] = contentMetas[c + 2] >>> 0;
+            contentHash2List[i] = contentMetas[c + 3] >>> 0;
+            if (mediaHintFastScan && metas[o + 16] === 1) {
+                mediaRows.push({
+                    index: i,
+                    row: decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, sourceIndex, false, true, true, true, true),
+                });
+            }
+        }
+        rowDecodeMs += Math.max(0, Date.now() - tDecodeStart);
+        const chunk = {
+            rowCount: count,
+            expressionBytesList,
+            readingBytesList,
+            readingEqualsExpressionList,
+            scoreList,
+            sequenceList,
+            contentBytesList,
+            contentHash1List,
+            contentHash2List,
+            termRecordPreinternedPlan: planBuilder.buildPlan(expressionIndexes, readingIndexes, count),
+            mediaRows,
+        };
+        ++chunkIndex;
+        const progress = {processedRows: end, totalRows: rowCount, chunkIndex, chunkCount};
+        const invokeColumnChunk = async () => {
+            const tDispatchStart = Date.now();
+            const result = onChunk(chunk, progress);
+            await result;
+            chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
+        };
+        const promise = pendingDispatches.length === 0 ? invokeColumnChunk() : dispatchTail.then(invokeColumnChunk);
+        dispatchTail = promise;
+        pendingDispatches.push(promise);
+        if (pendingDispatches.length >= maxPendingChunks) {
+            await /** @type {Promise<void>} */ (pendingDispatches.shift());
+        }
+    }
+    await Promise.all(pendingDispatches);
+    lastTermBankWasmParseProfile = {
+        bufferSetupMs,
+        allocationMs: parsed.allocationMs,
+        copyJsonMs: parsed.copyJsonMs,
+        parseBankMs: parsed.parseBankMs,
+        encodeContentMs: parsed.encodeContentMs,
+        rowDecodeMs,
+        chunkDispatchMs,
+        rowCount,
+        chunkCount,
+        chunkSize: rowCount === 0 ? 0 : normalizedChunkSize,
+        maxPendingChunks,
+        minimalDecode: true,
+        includeContentMetadata: true,
+        copyContentBytes: false,
+        reuseExpressionForReadingDecode: true,
+        skipTagRuleDecode: true,
+        lazyGlossaryDecode: true,
         mediaHintFastScan,
     };
 }

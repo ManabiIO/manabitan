@@ -54,6 +54,34 @@ afterEach(() => {
 });
 
 describe('TermContentOpfsStore', () => {
+    test('appends primary and offset-derived chunks in one logical mutation', async () => {
+        const store = new TermContentOpfsStore();
+        const result = await store.appendBatchWithDerivedChunks(
+            [new Uint8Array([1, 2]), new Uint8Array([3])],
+            (offsets, lengths) => [new Uint8Array([offsets[0], lengths[0], offsets[1], lengths[1]])],
+        );
+
+        expect(result).toStrictEqual({
+            primaryOffsets: [0, 2],
+            primaryLengths: [2, 1],
+            derivedOffsets: [3],
+            derivedLengths: [4],
+        });
+        expect(await store.readSlice(0, 7)).toStrictEqual(new Uint8Array([1, 2, 3, 0, 2, 2, 1]));
+    });
+
+    test('does not mutate storage when derived chunk construction fails', async () => {
+        const store = new TermContentOpfsStore();
+        await store.appendBatch([new Uint8Array([7, 8])]);
+
+        await expect(store.appendBatchWithDerivedChunks(
+            [new Uint8Array([9])],
+            () => { throw new Error('derive failed'); },
+        )).rejects.toThrow('derive failed');
+        expect(await store.readSlice(0, 3)).toBeNull();
+        expect(await store.readSlice(0, 2)).toStrictEqual(new Uint8Array([7, 8]));
+    });
+
     test('writes coalesced Blob data continuously across file segments', async () => {
         const maxSegmentBytes = 128 * 1024 * 1024;
         const firstWritable = {write: vi.fn(async () => {}), close: vi.fn(async () => {})};
