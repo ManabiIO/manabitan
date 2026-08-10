@@ -480,28 +480,6 @@ describe('Backend lookup refresh gating', () => {
         expect(getMedia).toHaveBeenCalledOnce();
     });
 
-    test('dictionary export waits for dictionary mutation to settle before querying the database', async () => {
-        const mutationGate = createRefreshGate();
-        const exportDatabase = vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3]).buffer);
-        const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
-        Reflect.set(backend, '_dictionaryMutationPromise', mutationGate.promise);
-        Reflect.set(backend, '_dictionaryRefreshPromise', null);
-        Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
-        Reflect.set(backend, '_dictionaryDatabase', {exportDatabase});
-
-        const promise = Backend.prototype._onApiExportDictionaryDatabase.call(backend);
-        await Promise.resolve();
-
-        expect(exportDatabase).not.toHaveBeenCalled();
-
-        Reflect.set(backend, '_dictionaryMutationPromise', null);
-        mutationGate.resolve();
-        const result = await promise;
-
-        expect(exportDatabase).toHaveBeenCalledOnce();
-        expect(result).toBe('AQID');
-    });
-
     test('delete dictionary refreshes the backend dictionary connection before returning', async () => {
         const deleteDictionary = vi.fn().mockResolvedValue(void 0);
         const refreshDictionaryDatabaseAfterUpdate = vi.fn().mockResolvedValue(void 0);

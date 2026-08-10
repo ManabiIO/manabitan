@@ -18,7 +18,6 @@
 import path from 'path';
 import {readFileSync} from 'fs';
 import {createDictionaryArchiveData} from '../../dev/dictionary-archive-util.js';
-import {createDictionaryDatabaseBase64} from '../e2e/minimal-dictionary-database.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 import {
@@ -73,8 +72,6 @@ const localMdxFixturePath = path.join(root, 'test', 'data', 'dictionaries', loca
 const localEnglishMdxFixturePath = path.join(root, 'test', 'data', 'dictionaries', localEnglishMdxFixtureFileName);
 const clipboardMonitorInitialValue = 'い';
 const clipboardMonitorUpdatedValue = 'あ';
-/** @type {Promise<string>|null} */
-let testDictionaryDatabaseBase64Promise = null;
 /** @type {Map<string, Promise<Array<{title: string, file: {name: string, mimeType: string, buffer: Buffer}}>>>} */
 const importValidationDictionaryArchivesPromiseMap = new Map();
 
@@ -169,23 +166,6 @@ function ensureImportedDictionariesConfigured(optionsFull, dictionaryTitles) {
 }
 
 /**
- * @returns {Promise<string>}
- */
-async function getTestDictionaryDatabaseBase64() {
-    if (testDictionaryDatabaseBase64Promise !== null) {
-        return await testDictionaryDatabaseBase64Promise;
-    }
-    testDictionaryDatabaseBase64Promise = createDictionaryDatabaseBase64({
-        title: testDictionaryTitle,
-        revision: 'test',
-        expression: japaneseLookupTerm,
-        reading: japaneseLookupReading,
-        glossary: [japaneseLookupGlossary],
-    });
-    return await testDictionaryDatabaseBase64Promise;
-}
-
-/**
  * @param {string[]} [dictionaryTitles]
  * @returns {Promise<Array<{title: string, file: {name: string, mimeType: string, buffer: Buffer}}>>}
  */
@@ -212,22 +192,7 @@ async function getImportValidationDictionaryArchives(dictionaryTitles = defaultI
  * @returns {Promise<void>}
  */
 async function importTestDictionary(page) {
-    await invokeRuntimeApi(page, 'purgeDatabase');
-    await invokeRuntimeApi(page, 'importDictionaryDatabase', {content: await getTestDictionaryDatabaseBase64()});
-    const optionsFull = /** @type {import('settings').Options} */ (await invokeRuntimeApi(page, 'optionsGetFull'));
-    ensureImportedDictionariesConfigured(optionsFull, [testDictionaryTitle]);
-    await invokeRuntimeApi(page, 'setAllSettings', {value: optionsFull, source: 'playwright'});
-    await invokeRuntimeApi(page, 'triggerDatabaseUpdated', {type: 'dictionary', cause: 'import'});
-
-    try {
-        await expect(async () => {
-            const info = /** @type {import('dictionary-importer').Summary[]} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
-            expect(info.length).toBe(1);
-            expect(info[0].title).toBe(testDictionaryTitle);
-        }).toPass({timeout: 60_000});
-    } catch (error) {
-        throw new Error('Failed to import test dictionary database', {cause: error});
-    }
+    await importValidationDictionariesFromSettings(page, [testDictionaryTitle]);
 }
 
 test.beforeEach(async ({context}) => {
@@ -682,33 +647,6 @@ test('search clipboard', async ({page, extensionId}) => {
         await writeToClipboardFromPage(page, clipboardMonitorUpdatedValue);
         await expect(page.locator('#search-textbox')).toHaveValue(clipboardMonitorUpdatedValue);
     }).toPass({timeout: 15_000});
-});
-
-test('dictionary db export and restore', async ({page, extensionId}) => {
-    await page.goto(`chrome-extension://${extensionId}/settings.html`);
-    await waitForSettingsPageReady(page);
-
-    await importTestDictionary(page);
-
-    const exported = await invokeRuntimeApi(page, 'exportDictionaryDatabase');
-    await invokeRuntimeApi(page, 'purgeDatabase');
-    await page.reload();
-    await waitForSettingsPageReady(page);
-
-    await expect(async () => {
-        const info = /** @type {import('dictionary-importer').Summary[]} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
-        expect(info.length).toBe(0);
-    }).toPass({timeout: 10_000});
-
-    await invokeRuntimeApi(page, 'importDictionaryDatabase', {content: exported});
-    await page.reload();
-    await waitForSettingsPageReady(page);
-
-    await expect(async () => {
-        const info = /** @type {import('dictionary-importer').Summary[]} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
-        expect(info.length).toBe(1);
-        expect(info[0].title).toBe(testDictionaryTitle);
-    }).toPass({timeout: 10_000});
 });
 
 test('chromium settings URL import routes an MDX listing through the browser flow and supports lookup', async ({page, extensionId}) => {

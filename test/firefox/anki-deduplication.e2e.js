@@ -21,13 +21,13 @@
 import {access, mkdir, stat, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {Builder, Browser} from 'selenium-webdriver';
+import {Builder, Browser, By} from 'selenium-webdriver';
 import * as firefox from 'selenium-webdriver/firefox.js';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
+import {createDictionaryArchiveData} from '../../dev/dictionary-archive-util.js';
 import {applyAnkiDedupeOptions, dedupeDictionaryTitle, dedupeSearchTerm, getAnkiDedupeMatrix, normalizeExpectedButtonState} from '../e2e/anki-dedupe-matrix.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
-import {getMinimalDictionaryDatabaseBase64} from '../e2e/minimal-dictionary-database.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -264,7 +264,13 @@ async function importDictionaryFixture(driver, extensionBaseUrl) {
     await driver.get(`${extensionBaseUrl}/settings.html`);
     await driver.executeScript('return document.readyState === "complete";');
     await sendRuntimeMessage(driver, 'purgeDatabase', void 0);
-    await sendRuntimeMessage(driver, 'importDictionaryDatabase', {content: await getMinimalDictionaryDatabaseBase64()});
+    const archivePath = path.join(root, 'builds', 'anki-dedupe-fixture.zip');
+    await mkdir(path.dirname(archivePath), {recursive: true});
+    await writeFile(archivePath, Buffer.from(await createDictionaryArchiveData(
+        path.join(root, 'test', 'data', 'dictionaries', 'valid-dictionary1'),
+        dedupeDictionaryTitle,
+    )));
+    await (await driver.findElement(By.id('dictionary-import-file-input'))).sendKeys(archivePath);
     await sendRuntimeMessage(driver, 'triggerDatabaseUpdated', {type: 'dictionary', cause: 'import'});
     const deadline = safePerformance.now() + 60_000;
     while (safePerformance.now() < deadline) {

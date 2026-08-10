@@ -221,11 +221,22 @@ export class DictionaryWorkerHandler {
                 null
         );
         if (usesFallbackStorage) {
-            throw new Error(`OPFS is required for dictionary import. diagnostics=${JSON.stringify(openStorageDiagnostics)}`);
+            const fallbackStorageError = new Error(
+                `OPFS is required for dictionary import. diagnostics=${JSON.stringify(openStorageDiagnostics)}`,
+            );
+            await this._closeDictionaryDatabaseAfterImport(
+                dictionaryDatabase,
+                useImportSession,
+                true,
+                fallbackStorageError,
+            );
+            throw fallbackStorageError;
         }
         if (createdImportSessionDatabase) {
             this._importSessionDictionaryDatabase = dictionaryDatabase;
         }
+        /** @type {unknown|null} */
+        let importError = null;
         try {
             const dictionaryImporter = new DictionaryImporter(this._mediaLoader, onProgress);
             const detailsRecord = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (details));
@@ -247,77 +258,6 @@ export class DictionaryWorkerHandler {
             ) ?
                 /** @type {string} */ (Reflect.get(detailsRecord, 'replacementDictionaryTitle')).trim() :
                 null;
-            /**
-             * @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase
-             * @returns {Promise<void>}
-             */
-            const cleanupTransientReplacementTitles = async (activeDictionaryDatabase) => {
-                /** @type {Set<string>} */
-                const transientTitleCandidates = new Set();
-                const transientTitlePattern = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
-                const transientTokenMatch = (
-                    dictionaryTitleOverride !== null &&
-                    transientTitlePattern.test(dictionaryTitleOverride)
-                ) ?
-                    dictionaryTitleOverride.match(/\[(?:update-staging|cutover|replaced) ([^\]]+)\]$/) :
-                    null;
-                const transientSessionToken = Array.isArray(transientTokenMatch) && typeof transientTokenMatch[1] === 'string' && transientTokenMatch[1].length > 0 ?
-                    transientTokenMatch[1] :
-                    null;
-                if (dictionaryTitleOverride !== null && transientTitlePattern.test(dictionaryTitleOverride)) {
-                    transientTitleCandidates.add(dictionaryTitleOverride);
-                }
-                const dictionaryInfos = await activeDictionaryDatabase.getDictionaryInfo();
-                for (const dictionaryInfo of dictionaryInfos) {
-                    const titleRaw = /** @type {unknown} */ (Reflect.get(dictionaryInfo, 'title'));
-                    const title = (
-                        dictionaryInfo &&
-                        typeof dictionaryInfo === 'object' &&
-                        typeof titleRaw === 'string'
-                    ) ?
-                        titleRaw.trim() :
-                        '';
-                    if (title.length === 0) { continue; }
-                    const infoTokenRaw = /** @type {unknown} */ (Reflect.get(dictionaryInfo, 'updateSessionToken'));
-                    const infoToken = (
-                        dictionaryInfo &&
-                        typeof dictionaryInfo === 'object' &&
-                        typeof infoTokenRaw === 'string'
-                    ) ?
-                        infoTokenRaw.trim() :
-                        '';
-                    if (
-                        transientTitlePattern.test(title) &&
-                        (
-                            title === dictionaryTitleOverride ||
-                            (transientSessionToken !== null && infoToken === transientSessionToken) ||
-                            (transientSessionToken !== null && title.endsWith(` ${transientSessionToken}]`))
-                        )
-                    ) {
-                        transientTitleCandidates.add(title);
-                    }
-                }
-                for (const transientTitle of transientTitleCandidates) {
-                    try {
-                        await activeDictionaryDatabase.deleteDictionary(transientTitle, 1000, () => {});
-                    } catch (_) {
-                        // NOP - best effort cleanup before retry.
-                    }
-                }
-                await activeDictionaryDatabase.cleanupTransientTermRecordShards((/** @type {string} */ dictionaryName) => {
-                    const title = String(dictionaryName || '').trim();
-                    if (title.length === 0) {
-                        return false;
-                    }
-                    if (transientTitleCandidates.has(title)) {
-                        return true;
-                    }
-                    return transientTitlePattern.test(title) && (
-                        transientSessionToken !== null &&
-                        title.endsWith(` ${transientSessionToken}]`)
-                    );
-                });
-            };
             /**
              * @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase
              * @returns {Promise<{result: import('dictionary-importer').Summary|null, errors: Error[], importerDebug: import('dictionary-importer').ImportDebug|null}>}
@@ -364,7 +304,10 @@ export class DictionaryWorkerHandler {
             } catch (error) {
                 if (replacementDictionaryTitle !== null || dictionaryTitleOverride !== null) {
                     try {
-                        await cleanupTransientReplacementTitles(dictionaryDatabase);
+                        await this._cleanupTransientReplacementTitles(
+                            dictionaryDatabase,
+                            dictionaryTitleOverride,
+                        );
                     } catch (_) {
                         // NOP - preserve the original failure.
                     }
@@ -382,14 +325,132 @@ export class DictionaryWorkerHandler {
                     importerDebug,
                 },
             };
+        } catch (error) {
+            importError = error;
+            throw error;
         } finally {
-            if (useImportSession && finalizeImportSession && this._importSessionDictionaryDatabase !== null) {
-                await this._importSessionDictionaryDatabase.close();
-                this._importSessionDictionaryDatabase = null;
-            } else if (!useImportSession && dictionaryDatabase.isPrepared()) {
-                await dictionaryDatabase.close();
+            await this._closeDictionaryDatabaseAfterImport(
+                dictionaryDatabase,
+                useImportSession,
+                finalizeImportSession,
+                importError,
+            );
+        }
+    }
+
+    /**
+     * @param {DictionaryDatabase} dictionaryDatabase
+     * @param {boolean} useImportSession
+     * @param {boolean} finalizeImportSession
+     * @param {unknown|null} importError
+     * @returns {Promise<void>}
+     */
+    async _closeDictionaryDatabaseAfterImport(
+        dictionaryDatabase,
+        useImportSession,
+        finalizeImportSession,
+        importError,
+    ) {
+        const shouldCloseImportSession = useImportSession && finalizeImportSession;
+        const shouldCloseStandaloneDatabase = !useImportSession && dictionaryDatabase.isPrepared();
+        if (!shouldCloseImportSession && !shouldCloseStandaloneDatabase) { return; }
+        if (shouldCloseImportSession && this._importSessionDictionaryDatabase === dictionaryDatabase) {
+            this._importSessionDictionaryDatabase = null;
+        }
+        try {
+            await dictionaryDatabase.close();
+        } catch (closeError) {
+            if (importError === null) { throw closeError; }
+            log.error(new AggregateError(
+                [importError, closeError],
+                'Dictionary import failed and its database could not be closed',
+            ));
+        }
+    }
+
+    /**
+     * Removes abandoned update dictionaries without deleting record shards for
+     * a dictionary whose SQLite deletion failed.
+     * @param {DictionaryDatabase} dictionaryDatabase
+     * @param {string|null} dictionaryTitleOverride
+     * @returns {Promise<void>}
+     */
+    async _cleanupTransientReplacementTitles(dictionaryDatabase, dictionaryTitleOverride) {
+        /** @type {Set<string>} */
+        const transientTitleCandidates = new Set();
+        /** @type {Set<string>} */
+        const installedTitles = new Set();
+        /** @type {Set<string>} */
+        const shardCleanupTitles = new Set();
+        const transientTitlePattern = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
+        const transientTokenMatch = (
+            dictionaryTitleOverride !== null &&
+            transientTitlePattern.test(dictionaryTitleOverride)
+        ) ?
+            dictionaryTitleOverride.match(/\[(?:update-staging|cutover|replaced) ([^\]]+)\]$/) :
+            null;
+        const transientSessionToken = Array.isArray(transientTokenMatch) && typeof transientTokenMatch[1] === 'string' && transientTokenMatch[1].length > 0 ?
+            transientTokenMatch[1] :
+            null;
+        if (dictionaryTitleOverride !== null && transientTitlePattern.test(dictionaryTitleOverride)) {
+            transientTitleCandidates.add(dictionaryTitleOverride);
+        }
+        const dictionaryInfos = await dictionaryDatabase.getDictionaryInfo();
+        for (const dictionaryInfo of dictionaryInfos) {
+            const titleRaw = /** @type {unknown} */ (Reflect.get(dictionaryInfo, 'title'));
+            const title = (
+                dictionaryInfo &&
+                typeof dictionaryInfo === 'object' &&
+                typeof titleRaw === 'string'
+            ) ?
+                titleRaw.trim() :
+                '';
+            if (title.length === 0) { continue; }
+            installedTitles.add(title);
+            const infoTokenRaw = /** @type {unknown} */ (Reflect.get(dictionaryInfo, 'updateSessionToken'));
+            const infoToken = (
+                dictionaryInfo &&
+                typeof dictionaryInfo === 'object' &&
+                typeof infoTokenRaw === 'string'
+            ) ?
+                infoTokenRaw.trim() :
+                '';
+            if (
+                transientTitlePattern.test(title) &&
+                (
+                    title === dictionaryTitleOverride ||
+                    (transientSessionToken !== null && infoToken === transientSessionToken) ||
+                    (transientSessionToken !== null && title.endsWith(` ${transientSessionToken}]`))
+                )
+            ) {
+                transientTitleCandidates.add(title);
             }
         }
+        for (const transientTitle of transientTitleCandidates) {
+            try {
+                await dictionaryDatabase.deleteDictionary(transientTitle, 1000, () => {});
+                installedTitles.delete(transientTitle);
+                shardCleanupTitles.add(transientTitle);
+            } catch (error) {
+                log.warn(new Error(
+                    `Could not remove transient dictionary ${transientTitle}; preserving its record shards`,
+                    {cause: error},
+                ));
+            }
+        }
+        await dictionaryDatabase.cleanupTransientTermRecordShards((dictionaryName) => {
+            const title = String(dictionaryName || '').trim();
+            if (title.length === 0) {
+                return false;
+            }
+            if (shardCleanupTitles.has(title)) {
+                return true;
+            }
+            return !installedTitles.has(title) && transientTitlePattern.test(title) && (
+                transientSessionToken !== null &&
+                title.endsWith(` ${transientSessionToken}]`)
+            );
+        });
     }
 
     /**

@@ -31,11 +31,14 @@ import {stringReverse} from '../core/utilities.js';
 import {getFileExtensionFromImageMediaType, getImageMediaTypeFromFileName} from '../media/media-util.js';
 import {
     decodeRawTermContentBinary,
+    decodeRawTermContentTokenBinary,
     encodeRawTermContentBinary,
     RAW_TERM_CONTENT_DICT_NAME,
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
+    RAW_TERM_CONTENT_TOKEN_DICT_NAME,
     isRawTermContentSharedGlossaryBinary,
+    isRawTermContentTokenBinary,
     rebaseRawTermContentSharedGlossaryBinary,
 } from './raw-term-content.js';
 import {
@@ -44,7 +47,7 @@ import {
 } from './zstd-term-content.js';
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
 import {compareRevisions} from './dictionary-data-util.js';
-import {consumeLastTermBankWasmParseProfile, parseTermBankWithWasmChunks, parseTermBankWithWasmColumnChunks} from './term-bank-wasm-parser.js';
+import {consumeLastTermBankWasmParseProfile, parseTermBankWithWasmChunks, parseTermBankWithWasmColumnChunks, TermBankWasmResourceError} from './term-bank-wasm-parser.js';
 import {hashPairToHex, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} from './term-import-metrics.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
@@ -60,16 +63,13 @@ const INDEX_FILE_NAME = 'index.json';
 const SUPPORTED_INDEX_VERSIONS = new Set([1, 3]);
 const JSON_QUOTED_STRING_CACHE_MAX_ENTRIES = 8192;
 const TERM_BANK_WASM_ROW_CHUNK_SIZE = 12000;
-const TERM_BANK_WASM_INITIAL_META_CAPACITY_DIVISOR = 24;
-const TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW = 96;
+const TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW = 48;
 const TERM_ARTIFACT_ROW_CHUNK_SIZE = 75000;
 const NO_MEDIA_FAST_PATH_TERM_BANK_WASM_ROW_CHUNK_SIZE = 8192;
 const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_UPPER_BOUND_BYTES = 128 * 1024 * 1024;
-const ADAPTIVE_TERM_BANK_WASM_INITIAL_META_CAPACITY_DIVISOR = 18;
-const ADAPTIVE_TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW = 128;
-const SOURCE_TERM_BANK_BATCH_MAX_FILES = 32;
-const SOURCE_TERM_BANK_BATCH_MAX_BYTES = 64 * 1024 * 1024;
+const SOURCE_TERM_BANK_BATCH_MAX_FILES = 64;
+const SOURCE_TERM_BANK_BATCH_MAX_BYTES = 192 * 1024 * 1024;
 const SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE = 8192;
 const TERM_BANK_BYTE_PREFETCH_COUNT = 8;
 const LARGE_ARCHIVE_ZIP_MAX_WORKERS = 2;
@@ -92,6 +92,27 @@ const JSON_PATH_KEY_BYTES = new Uint8Array([0x22, 0x70, 0x61, 0x74, 0x68, 0x22])
 /** @type {import('dictionary-data').TermGlossary[]} */
 const EMPTY_TERM_GLOSSARY = [];
 /** @typedef {import('dictionary-importer').ImportFileEntry} ImportFileEntry */
+/**
+ * @typedef {{
+ *   dictionary: string,
+ *   rowCount: number,
+ *   dictionaryTotalRows?: number,
+ *   expressionBytesList: Uint8Array[],
+ *   readingBytesList: Uint8Array[],
+ *   readingEqualsExpressionList: boolean[]|Uint8Array,
+ *   scoreList: number[]|Int32Array,
+ *   sequenceList: (number|undefined)[]|Int32Array,
+ *   contentBytesList: Uint8Array[],
+ *   contentHash1List?: number[]|Uint32Array,
+ *   contentHash2List?: number[]|Uint32Array,
+ *   contentBytesBuffer?: Uint8Array,
+ *   contentBytesBaseOffset?: number,
+ *   contentMetaList?: Uint32Array,
+ *   contentDictNameList: ((string|null)[]|null),
+ *   uniformContentDictName?: string|null,
+ *   termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null,
+ * }} DirectTermChunk
+ */
 const EMPTY_ARRAY_BUFFER = new ArrayBuffer(0);
 const UTF8_TEXT_DECODER = new TextDecoder('utf-8', {fatal: true});
 Object.freeze(EMPTY_TERM_GLOSSARY);
@@ -153,6 +174,8 @@ function sliceArtifactTermRecordPreinternedPlan(plan, start, count) {
     const end = start + count;
     return {
         stringLengths: plan.stringLengths,
+        stringOffsets: plan.stringOffsets,
+        stringHashes: plan.stringHashes,
         stringsBuffer: plan.stringsBuffer,
         expressionIndexes: plan.expressionIndexes.subarray(start, end),
         readingIndexes: plan.readingIndexes.subarray(start, end),
@@ -300,8 +323,20 @@ function byteRangeEqual(bytes, aStart, bStart, length) {
  * @returns {Promise<void>}
  */
 function yieldToEventLoop() {
-    return new Promise((resolve) => {
-        setTimeout(resolve, 0);
+    return new Promise((resolve, reject) => {
+        const channel = new MessageChannel();
+        channel.port1.onmessage = () => {
+            resolve();
+            try { channel.port1.close(); } catch (_) { /* NOP */ }
+            try { channel.port2.close(); } catch (_) { /* NOP */ }
+        };
+        try {
+            channel.port2.postMessage(null);
+        } catch (error) {
+            try { channel.port1.close(); } catch (_) { /* NOP */ }
+            try { channel.port2.close(); } catch (_) { /* NOP */ }
+            reject(error);
+        }
     });
 }
 
@@ -363,15 +398,11 @@ export class DictionaryImporter {
         /** @type {number} */
         this._termBankWasmRowChunkSize = TERM_BANK_WASM_ROW_CHUNK_SIZE;
         /** @type {number} */
-        this._termBankWasmInitialMetaCapacityDivisor = TERM_BANK_WASM_INITIAL_META_CAPACITY_DIVISOR;
-        /** @type {number} */
         this._termBankWasmInitialContentBytesPerRow = TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW;
         /** @type {boolean} */
         this._adaptiveTermBankWasmRowChunkSize = false;
         /** @type {boolean} */
         this._adaptiveTermBankWasmRowChunkSizeTiered = false;
-        /** @type {boolean} */
-        this._adaptiveTermBankWasmInitialCapacity = false;
         /** @type {boolean} */
         this._streamTermArtifactChunks = true;
         /** @type {boolean} */
@@ -876,7 +907,7 @@ export class DictionaryImporter {
         }
         if (isStagedDictionaryUpdate) {
             summary.transientUpdateStage = 'update-staging';
-            summary.updateSessionToken = details.updateSessionToken.trim();
+            summary.updateSessionToken = /** @type {string} */ (details.updateSessionToken).trim();
         }
         const dictionarySummaryPrimaryKey = await dictionaryDatabase.addWithResult('dictionaries', summary);
         let styles = '';
@@ -1057,7 +1088,8 @@ export class DictionaryImporter {
                         );
                         continue;
                     } else if (useArtifactMediaManifestFastPath) {
-                        media = new Array(chunkEntries.length);
+                        media = [];
+                        media.length = chunkEntries.length;
                         for (let j = 0, jj = chunkEntries.length; j < jj; ++j) {
                             const {path, mediaType, packedOffset, packedLength, compressionMethod, uncompressedLength} = chunkEntries[j];
                             const start = /** @type {number} */ (packedOffset);
@@ -1234,7 +1266,7 @@ export class DictionaryImporter {
             };
             /**
              * @param {{filename: string}} termFile
-             * @param {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} termChunk
+             * @param {import('dictionary-database').DatabaseTermEntry[]|DirectTermChunk} termChunk
              * @param {import('dictionary-importer').ImportRequirement[]|null} requirements
              * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}|null} streamedProgress
              * @param {number} streamedProgressStartIndex
@@ -1243,7 +1275,7 @@ export class DictionaryImporter {
              */
             const processTermChunk = async (termFile, termChunk, requirements, streamedProgress = null, streamedProgressStartIndex = 0, streamedProgressAllowance = termFileProgressAllowance) => {
                 const trackProgress = streamedProgress === null;
-                /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}|null} */
+                /** @type {DirectTermChunk|null} */
                 const directArtifactChunk = Array.isArray(termChunk) ? null : termChunk;
                 /** @type {import('dictionary-database').DatabaseTermEntry[]} */
                 const termList = Array.isArray(termChunk) ? termChunk : [];
@@ -1342,6 +1374,9 @@ export class DictionaryImporter {
                     directArtifactChunk.contentBytesList = [];
                     directArtifactChunk.contentHash1List = new Uint32Array(0);
                     directArtifactChunk.contentHash2List = new Uint32Array(0);
+                    directArtifactChunk.contentBytesBuffer = new Uint8Array(0);
+                    directArtifactChunk.contentBytesBaseOffset = 0;
+                    directArtifactChunk.contentMetaList = new Uint32Array(0);
                     if (Array.isArray(directArtifactChunk.contentDictNameList)) {
                         directArtifactChunk.contentDictNameList.length = 0;
                     }
@@ -1413,11 +1448,11 @@ export class DictionaryImporter {
              * @returns {number}
              */
             const getTermFileEstimatedBytes = (termFile) => {
-                const uncompressedSize = Reflect.get(termFile, 'uncompressedSize');
+                const uncompressedSize = /** @type {unknown} */ (Reflect.get(termFile, 'uncompressedSize'));
                 if (typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) && uncompressedSize > 0) {
                     return Math.trunc(uncompressedSize);
                 }
-                const size = Reflect.get(termFile, 'size');
+                const size = /** @type {unknown} */ (Reflect.get(termFile, 'size'));
                 return (typeof size === 'number' && Number.isFinite(size) && size > 0) ? Math.trunc(size) : 0;
             };
             /**
@@ -1632,6 +1667,7 @@ export class DictionaryImporter {
                         streamedImportCompleted = true;
                     } catch (error) {
                         const e = toError(error);
+                        if (e instanceof TermBankWasmResourceError) { throw e; }
                         if (streamedFastPathChunkCount > 0) {
                             throw new Error(`term file ${termFile.filename}: streaming fast path failed after partial import (${e.message})`);
                         }
@@ -1661,6 +1697,11 @@ export class DictionaryImporter {
                             parserEncodeContentMs: parserProfile.encodeContentMs ?? null,
                             parserRowDecodeMs: parserProfile.rowDecodeMs ?? null,
                             parserChunkDispatchMs: parserProfile.chunkDispatchMs ?? null,
+                            parserMetaCapacity: parserProfile.metaCapacity ?? null,
+                            parserMetaAllocatedBytes: parserProfile.metaAllocatedBytes ?? null,
+                            parserEncodedContentBytes: parserProfile.encodedContentBytes ?? null,
+                            parserContentCapacity: parserProfile.contentCapacity ?? null,
+                            parserInitialContentBytesPerRow: parserProfile.initialContentBytesPerRow ?? null,
                             parserChunkSize: parserProfile.chunkSize ?? null,
                             parserMinimalDecode: parserProfile.minimalDecode ?? null,
                             ...copyTermImportMetrics(artifactMetrics),
@@ -2024,6 +2065,7 @@ export class DictionaryImporter {
     /**
      * @param {import('@zip.js/zip.js').Entry[]} zipEntries
      * @returns {import('dictionary-importer').ArchiveFileMap}
+     * @throws {Error} If the archive contains duplicate normalized filenames.
      */
     _createArchiveFileMap(zipEntries) {
         /** @type {import('dictionary-importer').ArchiveFileMap} */
@@ -3245,9 +3287,11 @@ export class DictionaryImporter {
             }
         } else {
             for (const termArtifactFile of termArtifactFiles) {
-                const uncompressedSize = typeof Reflect.get(termArtifactFile, 'uncompressedSize') === 'number' ?
-                    Reflect.get(termArtifactFile, 'uncompressedSize') :
-                    (typeof Reflect.get(termArtifactFile, 'bytes') !== 'undefined' ? Reflect.get(/** @type {{bytes: Uint8Array}} */ (termArtifactFile), 'bytes').byteLength : 0);
+                const artifactUncompressedSize = /** @type {unknown} */ (Reflect.get(termArtifactFile, 'uncompressedSize'));
+                const artifactBytes = /** @type {unknown} */ (Reflect.get(termArtifactFile, 'bytes'));
+                const uncompressedSize = typeof artifactUncompressedSize === 'number' ?
+                    artifactUncompressedSize :
+                    (artifactBytes instanceof Uint8Array ? artifactBytes.byteLength : 0);
                 const size = typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) ?
                     Math.max(0, Math.trunc(uncompressedSize)) :
                     0;
@@ -3343,6 +3387,7 @@ export class DictionaryImporter {
                     termContentStorageMode,
                 );
             } catch (e) {
+                if (e instanceof TermBankWasmResourceError) { throw e; }
                 this._logImport(`term file ${termFile.filename}: wasm parse fallback (${/** @type {Error} */ (toError(e)).message})`);
             }
         } else {
@@ -3426,21 +3471,7 @@ export class DictionaryImporter {
         ) {
             wasmRowChunkSize = Math.max(wasmRowChunkSize, 4096);
         }
-        let wasmInitialMetaCapacityDivisor = this._termBankWasmInitialMetaCapacityDivisor;
-        let wasmInitialContentBytesPerRow = this._termBankWasmInitialContentBytesPerRow;
-        if (
-            this._adaptiveTermBankWasmInitialCapacity &&
-            totalSourceBytes >= ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_THRESHOLD_BYTES
-        ) {
-            wasmInitialMetaCapacityDivisor = Math.min(
-                wasmInitialMetaCapacityDivisor,
-                ADAPTIVE_TERM_BANK_WASM_INITIAL_META_CAPACITY_DIVISOR,
-            );
-            wasmInitialContentBytesPerRow = Math.max(
-                wasmInitialContentBytesPerRow,
-                ADAPTIVE_TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW,
-            );
-        }
+        const wasmInitialContentBytesPerRow = this._termBankWasmInitialContentBytesPerRow;
         const streamToChunkHandler = typeof onChunk === 'function';
         if (streamToChunkHandler && !useMediaPipeline) {
             wasmRowChunkSize = Math.max(wasmRowChunkSize, NO_MEDIA_FAST_PATH_TERM_BANK_WASM_ROW_CHUNK_SIZE);
@@ -3486,92 +3517,92 @@ export class DictionaryImporter {
              * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}} chunkProgress
              */
             const handleParsedChunk = async (parsedRows, chunkProgress) => {
-                    ++importerChunkCount;
-                    importerTotalRows = chunkProgress.processedRows;
-                    /** @type {import('dictionary-importer').ImportRequirement[]|null} */
-                    const requirementsForChunk = useMediaPipeline ? [] : null;
+                ++importerChunkCount;
+                importerTotalRows = chunkProgress.processedRows;
+                /** @type {import('dictionary-importer').ImportRequirement[]|null} */
+                const requirementsForChunk = useMediaPipeline ? [] : null;
+                if (requirementsForChunk !== null) {
+                    requirementsForChunk.length = 0;
+                }
+                if (useDirectArtifactChunkImport) {
+                    const tMaterializationStart = Date.now();
+                    const columnChunk = /** @type {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow}>}} */ (/** @type {unknown} */ (parsedRows));
+                    const {mediaRows, ...columnPayload} = columnChunk;
                     if (requirementsForChunk !== null) {
-                        requirementsForChunk.length = 0;
-                    }
-                    if (useDirectArtifactChunkImport) {
-                        const tMaterializationStart = Date.now();
-                        const columnChunk = /** @type {{rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, termRecordPreinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan, mediaRows: Array<{index: number, row: ParsedTermBankChunkRow}>}} */ (/** @type {unknown} */ (parsedRows));
-                        const {mediaRows, ...columnPayload} = columnChunk;
-                        if (requirementsForChunk !== null) {
-                            for (const {index, row} of mediaRows) {
-                                const expression = row.expression.length > 0 ? row.expression : this._textDecoder.decode(columnChunk.expressionBytesList[index]);
-                                let reading = expression;
-                                if (columnChunk.readingEqualsExpressionList[index] !== 1) {
-                                    reading = row.reading.length > 0 ? row.reading : this._textDecoder.decode(columnChunk.readingBytesList[index]);
-                                }
-                                /** @type {import('dictionary-database').DatabaseTermEntry} */
-                                const entry = {
-                                    expression,
-                                    reading,
-                                    definitionTags: row.definitionTags ?? '',
-                                    rules: row.rules ?? '',
-                                    score: row.score,
-                                    glossary: [],
-                                    termTags: row.termTags ?? '',
-                                    dictionary: dictionaryTitle,
-                                };
-                                let glossaryList;
-                                if (
-                                    this._skipImageMetadata &&
-                                    hasPrecomputedTermEntryContent(row) &&
-                                    this._tryAddFastMediaRequirementsFromFastRow(row, entry, requirementsForChunk)
-                                ) {
-                                    continue;
-                                } else if (usePrecomputedContentForMediaRows && hasPrecomputedTermEntryContent(row)) {
-                                    const contentPayload = this._parseTermEntryContentFromFastRow(row, termFile.filename);
-                                    entry.rules = contentPayload.rules;
-                                    entry.definitionTags = contentPayload.definitionTags;
-                                    entry.termTags = contentPayload.termTags;
-                                    glossaryList = contentPayload.glossary;
-                                } else {
-                                    glossaryList = this._parseGlossaryJsonFromFastRow(this._getFastRowGlossaryJson(row), termFile.filename);
-                                }
-                                for (const glossary of glossaryList) {
-                                    if (typeof glossary === 'object' && glossary !== null && !Array.isArray(glossary)) {
-                                        this._formatDictionaryTermGlossaryObject(glossary, entry, requirementsForChunk);
-                                    }
+                        for (const {index, row} of mediaRows) {
+                            const expression = row.expression.length > 0 ? row.expression : this._textDecoder.decode(columnChunk.expressionBytesList[index]);
+                            let reading = expression;
+                            if (columnChunk.readingEqualsExpressionList[index] !== 1) {
+                                reading = row.reading.length > 0 ? row.reading : this._textDecoder.decode(columnChunk.readingBytesList[index]);
+                            }
+                            /** @type {import('dictionary-database').DatabaseTermEntry} */
+                            const entry = {
+                                expression,
+                                reading,
+                                definitionTags: row.definitionTags ?? '',
+                                rules: row.rules ?? '',
+                                score: row.score,
+                                glossary: [],
+                                termTags: row.termTags ?? '',
+                                dictionary: dictionaryTitle,
+                            };
+                            let glossaryList;
+                            if (
+                                this._skipImageMetadata &&
+                                hasPrecomputedTermEntryContent(row) &&
+                                this._tryAddFastMediaRequirementsFromFastRow(row, entry, requirementsForChunk)
+                            ) {
+                                continue;
+                            } else if (usePrecomputedContentForMediaRows && hasPrecomputedTermEntryContent(row)) {
+                                const contentPayload = this._parseTermEntryContentFromFastRow(row, termFile.filename);
+                                entry.rules = contentPayload.rules;
+                                entry.definitionTags = contentPayload.definitionTags;
+                                entry.termTags = contentPayload.termTags;
+                                glossaryList = contentPayload.glossary;
+                            } else {
+                                glossaryList = this._parseGlossaryJsonFromFastRow(this._getFastRowGlossaryJson(row), termFile.filename);
+                            }
+                            for (const glossary of glossaryList) {
+                                if (typeof glossary === 'object' && glossary !== null && !Array.isArray(glossary)) {
+                                    this._formatDictionaryTermGlossaryObject(glossary, entry, requirementsForChunk);
                                 }
                             }
                         }
-                        importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
-                        const tChunkSinkStart = Date.now();
-                        await /** @type {(termList: {dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentDictNameList: null, uniformContentDictName: string, termRecordPreinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (/** @type {unknown} */ (onChunk))(
-                            {
-                                ...columnPayload,
-                                dictionary: dictionaryTitle,
-                                dictionaryTotalRows: chunkProgress.totalRows,
-                                contentDictNameList: null,
-                                uniformContentDictName: 'raw',
-                            },
-                            requirementsForChunk,
-                            chunkProgress,
-                        );
-                        importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
-                        return;
                     }
-                    const decodedRows = /** @type {ParsedTermBankChunkRow[]} */ (/** @type {unknown} */ (parsedRows));
-                    /** @type {import('dictionary-database').DatabaseTermEntry[]} */
-                    const termListChunk = [];
-                    termListChunk.length = decodedRows.length;
-                    const tMaterializationStart = Date.now();
-                    for (let i = 0, ii = decodedRows.length; i < ii; ++i) {
-                        const row = decodedRows[i];
-                        const expression = row.expression;
-                        const reading = row.reading.length > 0 ? row.reading : expression;
-                        const hasPrecomputedTermContent = hasPrecomputedTermEntryContent(row);
-                        let usePrecomputedTermContent = false;
-                        const useLeanTermEntryObject = (
-                            this._leanCanonicalTermEntryObjects &&
-                            requirementsForChunk === null &&
-                            hasPrecomputedTermContent
-                        );
+                    importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
+                    const tChunkSinkStart = Date.now();
+                    await /** @type {(termList: DirectTermChunk, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (/** @type {unknown} */ (onChunk))(
+                        {
+                            ...columnPayload,
+                            dictionary: dictionaryTitle,
+                            dictionaryTotalRows: chunkProgress.totalRows,
+                            contentDictNameList: null,
+                            uniformContentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME,
+                        },
+                        requirementsForChunk,
+                        chunkProgress,
+                    );
+                    importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
+                    return;
+                }
+                const decodedRows = /** @type {ParsedTermBankChunkRow[]} */ (/** @type {unknown} */ (parsedRows));
+                /** @type {import('dictionary-database').DatabaseTermEntry[]} */
+                const termListChunk = [];
+                termListChunk.length = decodedRows.length;
+                const tMaterializationStart = Date.now();
+                for (let i = 0, ii = decodedRows.length; i < ii; ++i) {
+                    const row = decodedRows[i];
+                    const expression = row.expression;
+                    const reading = row.reading.length > 0 ? row.reading : expression;
+                    const hasPrecomputedTermContent = hasPrecomputedTermEntryContent(row);
+                    let usePrecomputedTermContent = false;
+                    const useLeanTermEntryObject = (
+                        this._leanCanonicalTermEntryObjects &&
+                        requirementsForChunk === null &&
+                        hasPrecomputedTermContent
+                    );
                         /** @type {import('dictionary-database').DatabaseTermEntry} */
-                        const entry = useLeanTermEntryObject ?
+                    const entry = useLeanTermEntryObject ?
                             {
                                 expression,
                                 reading,
@@ -3592,122 +3623,121 @@ export class DictionaryImporter {
                                 termTags: row.termTags ?? '',
                                 dictionary: dictionaryTitle,
                             };
-                        if (requirementsForChunk === null) {
-                            const rowGlossaryJson = this._getFastRowGlossaryJson(row);
-                            if (rowGlossaryJson.length > 0) {
-                                entry.glossaryJson = rowGlossaryJson;
-                            }
-                            usePrecomputedTermContent = useRawBytesDirectContent ?
+                    if (requirementsForChunk === null) {
+                        const rowGlossaryJson = this._getFastRowGlossaryJson(row);
+                        if (rowGlossaryJson.length > 0) {
+                            entry.glossaryJson = rowGlossaryJson;
+                        }
+                        usePrecomputedTermContent = useRawBytesDirectContent ?
                                 hasPrecomputedTermContent :
                                 true;
-                        } else {
-                            const skipGlossaryParse = (
+                    } else {
+                        const skipGlossaryParse = (
                                 typeof row.glossaryMayContainMedia === 'boolean' ?
                                     !row.glossaryMayContainMedia :
                                     !this._glossaryJsonLikelyContainsMedia(this._getFastRowGlossaryJson(row))
-                            );
-                            if (skipGlossaryParse) {
-                                if (!this._wasmPassThroughTermContent) {
-                                    entry.glossaryJson = this._getFastRowGlossaryJson(row);
-                                }
-                                usePrecomputedTermContent = true;
-                            } else {
-                                let glossaryList = null;
-                                if (
-                                    this._skipImageMetadata &&
-                                    hasPrecomputedTermContent &&
-                                    this._tryAddFastMediaRequirementsFromFastRow(
-                                        row,
-                                        entry,
-                                        requirementsForChunk,
-                                    )
-                                ) {
-                                    usePrecomputedTermContent = true;
-                                } else if (usePrecomputedContentForMediaRows && hasPrecomputedTermContent) {
-                                    const contentPayload = this._parseTermEntryContentFromFastRow(row, termFile.filename);
-                                    entry.rules = contentPayload.rules;
-                                    entry.definitionTags = contentPayload.definitionTags;
-                                    entry.termTags = contentPayload.termTags;
-                                    glossaryList = contentPayload.glossary;
-                                } else {
-                                    const rowGlossaryJson = this._getFastRowGlossaryJson(row);
-                                    glossaryList = this._parseGlossaryJsonFromFastRow(rowGlossaryJson, termFile.filename);
-                                }
-                                if (glossaryList !== null) {
-                                    for (let j = 0, jj = glossaryList.length; j < jj; ++j) {
-                                        const glossary = glossaryList[j];
-                                        if (typeof glossary !== 'object' || glossary === null || Array.isArray(glossary)) { continue; }
-                                        glossaryList[j] = this._formatDictionaryTermGlossaryObject(glossary, entry, requirementsForChunk);
-                                    }
-                                    entry.glossary = glossaryList;
-                                }
-                            }
-                        }
-                        if (typeof row.sequence === 'number') {
-                            entry.sequence = row.sequence;
-                        }
-                        if (
-                            usePrecomputedTermContent &&
-                            this._wasmPassThroughTermContent &&
-                            hasPrecomputedTermContent
-                        ) {
-                            if (typeof row.termEntryContentHash === 'string' && row.termEntryContentHash.length > 0) {
-                                entry.termEntryContentHash = row.termEntryContentHash;
-                            }
-                            if (Number.isInteger(row.termEntryContentHash1) && Number.isInteger(row.termEntryContentHash2)) {
-                                entry.termEntryContentHash1 = /** @type {number} */ (row.termEntryContentHash1);
-                                entry.termEntryContentHash2 = /** @type {number} */ (row.termEntryContentHash2);
-                            }
-                            entry.termEntryContentBytes = row.termEntryContentBytes;
-                        }
-                        // Keep serialization canonical with the runtime deserializer.
-                        if (
-                            requirementsForChunk === null ||
-                            (
-                                requirementsForChunk !== null &&
-                                (
-                                    !hasPrecomputedTermEntryContent(entry)
-                                )
-                            )
-                        ) {
-                            if (
-                                requirementsForChunk !== null &&
-                                typeof entry.glossaryJson !== 'string' &&
-                                (
-                                    !hasPrecomputedTermEntryContent(entry)
-                                )
-                            ) {
+                        );
+                        if (skipGlossaryParse) {
+                            if (!this._wasmPassThroughTermContent) {
                                 entry.glossaryJson = this._getFastRowGlossaryJson(row);
                             }
-                            this._prepareTermEntrySerialization(
-                                entry,
-                                enableTermEntryContentDedup,
-                                null,
-                            );
+                            usePrecomputedTermContent = true;
+                        } else {
+                            let glossaryList = null;
+                            if (
+                                this._skipImageMetadata &&
+                                hasPrecomputedTermContent &&
+                                this._tryAddFastMediaRequirementsFromFastRow(
+                                    row,
+                                    entry,
+                                    requirementsForChunk,
+                                )
+                            ) {
+                                usePrecomputedTermContent = true;
+                            } else if (usePrecomputedContentForMediaRows && hasPrecomputedTermContent) {
+                                const contentPayload = this._parseTermEntryContentFromFastRow(row, termFile.filename);
+                                entry.rules = contentPayload.rules;
+                                entry.definitionTags = contentPayload.definitionTags;
+                                entry.termTags = contentPayload.termTags;
+                                glossaryList = contentPayload.glossary;
+                            } else {
+                                const rowGlossaryJson = this._getFastRowGlossaryJson(row);
+                                glossaryList = this._parseGlossaryJsonFromFastRow(rowGlossaryJson, termFile.filename);
+                            }
+                            if (glossaryList !== null) {
+                                for (let j = 0, jj = glossaryList.length; j < jj; ++j) {
+                                    const glossary = glossaryList[j];
+                                    if (typeof glossary !== 'object' || glossary === null || Array.isArray(glossary)) { continue; }
+                                    glossaryList[j] = this._formatDictionaryTermGlossaryObject(glossary, entry, requirementsForChunk);
+                                }
+                                entry.glossary = glossaryList;
+                            }
                         }
-                        termListChunk[i] = entry;
                     }
-                    importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
-
-                    const tChunkSinkStart = Date.now();
-                    if (streamToChunkHandler) {
-                        await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(
-                            termListChunk,
-                            requirementsForChunk,
-                            chunkProgress,
+                    if (typeof row.sequence === 'number') {
+                        entry.sequence = row.sequence;
+                    }
+                    if (
+                        usePrecomputedTermContent &&
+                        this._wasmPassThroughTermContent &&
+                        hasPrecomputedTermContent
+                    ) {
+                        if (typeof row.termEntryContentHash === 'string' && row.termEntryContentHash.length > 0) {
+                            entry.termEntryContentHash = row.termEntryContentHash;
+                        }
+                        if (Number.isInteger(row.termEntryContentHash1) && Number.isInteger(row.termEntryContentHash2)) {
+                            entry.termEntryContentHash1 = /** @type {number} */ (row.termEntryContentHash1);
+                            entry.termEntryContentHash2 = /** @type {number} */ (row.termEntryContentHash2);
+                        }
+                        entry.termEntryContentBytes = row.termEntryContentBytes;
+                    }
+                    // Keep serialization canonical with the runtime deserializer.
+                    if (
+                        requirementsForChunk === null ||
+                        (
+                            requirementsForChunk !== null &&
+                            (
+                                !hasPrecomputedTermEntryContent(entry)
+                            )
+                        )
+                    ) {
+                        if (
+                            requirementsForChunk !== null &&
+                            typeof entry.glossaryJson !== 'string' &&
+                            (
+                                !hasPrecomputedTermEntryContent(entry)
+                            )
+                        ) {
+                            entry.glossaryJson = this._getFastRowGlossaryJson(row);
+                        }
+                        this._prepareTermEntrySerialization(
+                            entry,
+                            enableTermEntryContentDedup,
+                            null,
                         );
-                    } else {
-                        termList.push(...termListChunk);
-                        if (requirements !== null && requirementsForChunk !== null) {
-                            requirements.push(...requirementsForChunk);
-                        }
                     }
-                    importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
+                    termListChunk[i] = entry;
+                }
+                importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
+
+                const tChunkSinkStart = Date.now();
+                if (streamToChunkHandler) {
+                    await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(
+                        termListChunk,
+                        requirementsForChunk,
+                        chunkProgress,
+                    );
+                } else {
+                    termList.push(...termListChunk);
+                    if (requirements !== null && requirementsForChunk !== null) {
+                        requirements.push(...requirementsForChunk);
+                    }
+                }
+                importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
             };
             const parserOptions = {
                 copyContentBytes: this._wasmPassThroughTermContent && !streamToChunkHandler,
                 includeContentMetadata,
-                initialMetaCapacityDivisor: wasmInitialMetaCapacityDivisor,
                 initialContentBytesPerRow: wasmInitialContentBytesPerRow,
                 minimalDecode,
                 reuseExpressionForReadingDecode: this._wasmReuseExpressionForReadingDecode,
@@ -3716,6 +3746,9 @@ export class DictionaryImporter {
                 lazyGlossaryDecode: useLazyGlossaryDecode,
                 mediaHintFastScan: useMediaHintFastScan,
                 computeContentHashes: enableTermEntryContentDedup,
+                emitContentSlab: useDirectArtifactChunkImport && enableTermEntryContentDedup,
+                emitTokenBinaryContent: useDirectArtifactChunkImport,
+                emitTermByteLists: !useDirectArtifactChunkImport,
                 maxPendingChunks: useDirectArtifactChunkImport ? 2 : 1,
             };
             const parseTermBankChunks = useDirectArtifactChunkImport ? parseTermBankWithWasmColumnChunks : parseTermBankWithWasmChunks;
@@ -3775,23 +3808,14 @@ export class DictionaryImporter {
             throw new Error(`Invalid term artifact payload in '${filename}': too small`);
         }
         const magic = textDecoder.decode(bytes.subarray(0, TERM_BANK_ARTIFACT_MAGIC_BYTES));
-        const artifactVersion = (
-            magic === TERM_BANK_ARTIFACT_MAGIC_V5 ?
-                5 :
-                (
-                    magic === TERM_BANK_ARTIFACT_MAGIC_V4 ?
-                        4 :
-                        (
-                            magic === TERM_BANK_ARTIFACT_MAGIC_V3 ?
-                                3 :
-                                (
-                                    magic === TERM_BANK_ARTIFACT_MAGIC_V2 ?
-                                        2 :
-                                        (magic === TERM_BANK_ARTIFACT_MAGIC_V1 ? 1 : 0)
-                                )
-                        )
-                )
-        );
+        let artifactVersion = 0;
+        switch (magic) {
+            case TERM_BANK_ARTIFACT_MAGIC_V5: artifactVersion = 5; break;
+            case TERM_BANK_ARTIFACT_MAGIC_V4: artifactVersion = 4; break;
+            case TERM_BANK_ARTIFACT_MAGIC_V3: artifactVersion = 3; break;
+            case TERM_BANK_ARTIFACT_MAGIC_V2: artifactVersion = 2; break;
+            case TERM_BANK_ARTIFACT_MAGIC_V1: artifactVersion = 1; break;
+        }
         if (artifactVersion === 0) {
             throw new Error(`Invalid term artifact payload in '${filename}': bad magic`);
         }
@@ -3932,13 +3956,25 @@ export class DictionaryImporter {
                 dictionaryTotalRows,
                 expressionBytesList: useFullChunkArrays ? chunkExpressionBytes : chunkExpressionBytes.slice(0, streamedRowCount),
                 readingBytesList: useFullChunkArrays ? chunkReadingBytes : chunkReadingBytes.slice(0, streamedRowCount),
-                readingEqualsExpressionList: useFullChunkArrays ? chunkReadingEqualsExpression : chunkReadingEqualsExpression.subarray(0, streamedRowCount),
-                scoreList: useFullChunkArrays ? chunkScores : chunkScores.subarray(0, streamedRowCount),
-                sequenceList: useFullChunkArrays ? chunkSequences : chunkSequences.subarray(0, streamedRowCount),
+                readingEqualsExpressionList: /** @type {Uint8Array} */ (
+                    useFullChunkArrays ? chunkReadingEqualsExpression : /** @type {Uint8Array} */ (chunkReadingEqualsExpression).subarray(0, streamedRowCount)
+                ),
+                scoreList: /** @type {Int32Array} */ (
+                    useFullChunkArrays ? chunkScores : /** @type {Int32Array} */ (chunkScores).subarray(0, streamedRowCount)
+                ),
+                sequenceList: /** @type {Int32Array} */ (
+                    useFullChunkArrays ? chunkSequences : /** @type {Int32Array} */ (chunkSequences).subarray(0, streamedRowCount)
+                ),
                 contentBytesList: useFullChunkArrays ? chunkContentBytes : chunkContentBytes.slice(0, streamedRowCount),
-                contentHash1List: useFullChunkArrays ? chunkContentHash1 : chunkContentHash1.subarray(0, streamedRowCount),
-                contentHash2List: useFullChunkArrays ? chunkContentHash2 : chunkContentHash2.subarray(0, streamedRowCount),
-                contentDictNameList: chunkContentDictNames === null ? null : (
+                contentHash1List: /** @type {Uint32Array} */ (
+                    useFullChunkArrays ? chunkContentHash1 : /** @type {Uint32Array} */ (chunkContentHash1).subarray(0, streamedRowCount)
+                ),
+                contentHash2List: /** @type {Uint32Array} */ (
+                    useFullChunkArrays ? chunkContentHash2 : /** @type {Uint32Array} */ (chunkContentHash2).subarray(0, streamedRowCount)
+                ),
+                contentDictNameList: chunkContentDictNames === null ?
+null :
+(
                     useFullChunkArrays ? chunkContentDictNames : chunkContentDictNames.slice(0, streamedRowCount)
                 ),
                 uniformContentDictName: chunkUniformContentDictName,
@@ -3967,7 +4003,9 @@ export class DictionaryImporter {
                 artifactTermContentMode === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME ||
                 artifactTermContentMode === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME
             )
-        ) ? artifactTermContentMode : null;
+        ) ?
+artifactTermContentMode :
+null;
         for (let i = 0; i < rowCount; ++i) {
             /** @type {Uint8Array} */
             let expressionBytes;
@@ -4107,13 +4145,11 @@ export class DictionaryImporter {
                 const contentInfo = this._normalizeArtifactTermContent(contentBytes, sharedGlossaryBaseOffset);
                 contentBytes = contentInfo.contentBytes;
                 contentDictName = contentInfo.contentDictName;
-                if (
+                if ((
                     contentDictName === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME ||
                     contentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME
-                ) {
-                    if (collectArtifactRowProfile) {
-                        ++sharedGlossaryRowCount;
-                    }
+                ) && collectArtifactRowProfile) {
+                    ++sharedGlossaryRowCount;
                 }
             } else {
                 contentBytes = this._normalizeArtifactTermContentBytes(contentBytes, termContentStorageMode);
@@ -4300,17 +4336,19 @@ export class DictionaryImporter {
             chunkCount: streamToChunkHandler ? chunkIndex : 0,
             totalRows: rowCount,
             rowChunkSize: chunkSize,
-            ...(collectArtifactRowProfile ? {
-                readingEqualsExpressionCount,
-                sequencePresentCount,
-                zeroScoreCount,
-                nonZeroScoreCount,
-                sharedGlossaryRowCount,
-                contentLengthExtendedCount,
-                avgContentLength: rowCount > 0 ? (contentLengthTotal / rowCount) : 0,
-                avgExpressionLength: rowCount > 0 ? (expressionLengthTotal / rowCount) : 0,
-                avgReadingLength: rowCount > 0 ? (readingLengthTotal / rowCount) : 0,
-            } : {}),
+            ...(collectArtifactRowProfile ?
+{
+    readingEqualsExpressionCount,
+    sequencePresentCount,
+    zeroScoreCount,
+    nonZeroScoreCount,
+    sharedGlossaryRowCount,
+    contentLengthExtendedCount,
+    avgContentLength: rowCount > 0 ? (contentLengthTotal / rowCount) : 0,
+    avgExpressionLength: rowCount > 0 ? (expressionLengthTotal / rowCount) : 0,
+    avgReadingLength: rowCount > 0 ? (readingLengthTotal / rowCount) : 0,
+} :
+{}),
         };
         return {termList: streamToChunkHandler ? [] : termList, requirements: null};
     }
@@ -4351,7 +4389,8 @@ export class DictionaryImporter {
         }
         if (
             decodeRawTermContentBinary(termEntryContentBytes, this._textDecoder) !== null ||
-            isRawTermContentSharedGlossaryBinary(termEntryContentBytes)
+            isRawTermContentSharedGlossaryBinary(termEntryContentBytes) ||
+            isRawTermContentTokenBinary(termEntryContentBytes)
         ) {
             return termEntryContentBytes;
         }
@@ -4394,6 +4433,9 @@ export class DictionaryImporter {
         }
         if (decodeRawTermContentBinary(contentBytes, this._textDecoder) !== null) {
             return {contentBytes, contentDictName: RAW_TERM_CONTENT_DICT_NAME};
+        }
+        if (decodeRawTermContentTokenBinary(contentBytes, this._textDecoder) !== null) {
+            return {contentBytes, contentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME};
         }
         try {
             const parsedValue = /** @type {unknown} */ (parseJson(this._textDecoder.decode(contentBytes)));
@@ -4533,12 +4575,13 @@ export class DictionaryImporter {
         const termEntryContentBytes = row.termEntryContentBytes;
         try {
             const rawContent = decodeRawTermContentBinary(termEntryContentBytes, this._textDecoder);
-            if (rawContent !== null) {
+            const tokenContent = rawContent ?? decodeRawTermContentTokenBinary(termEntryContentBytes, this._textDecoder);
+            if (tokenContent !== null) {
                 return {
-                    rules: rawContent.rules,
-                    definitionTags: rawContent.definitionTags,
-                    termTags: rawContent.termTags,
-                    glossary: this._parseGlossaryJsonFromFastRow(rawContent.glossaryJson, fileName),
+                    rules: tokenContent.rules,
+                    definitionTags: tokenContent.definitionTags,
+                    termTags: tokenContent.termTags,
+                    glossary: this._parseGlossaryJsonFromFastRow(tokenContent.glossaryJson, fileName),
                 };
             }
             const parsedValue = /** @type {unknown} */ (parseJson(this._textDecoder.decode(termEntryContentBytes)));
@@ -4584,7 +4627,8 @@ export class DictionaryImporter {
      * @returns {Promise<T>}
      */
     async _getData(entry, writer) {
-        const bytes = /** @type {Uint8Array|undefined} */ (Reflect.get(entry, 'bytes'));
+        const entryBytes = /** @type {unknown} */ (Reflect.get(entry, 'bytes'));
+        const bytes = entryBytes instanceof Uint8Array ? entryBytes : void 0;
         if (bytes instanceof Uint8Array) {
             if (writer instanceof Uint8ArrayWriter) {
                 return /** @type {T} */ (bytes);
@@ -4597,11 +4641,11 @@ export class DictionaryImporter {
             }
             throw new Error(`Unsupported writer for ${entry.filename}`);
         }
-        const getData = Reflect.get(entry, 'getData');
-        if (typeof getData !== 'function') {
+        const entryGetData = /** @type {unknown} */ (Reflect.get(entry, 'getData'));
+        if (typeof entryGetData !== 'function') {
             throw new Error(`Cannot read ${entry.filename}`);
         }
+        const getData = /** @type {(writer: import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter) => Promise<T>} */ (entryGetData);
         return await getData.call(entry, writer);
     }
-
 }

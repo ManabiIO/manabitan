@@ -17,6 +17,7 @@
 
 import sqlite3InitModule from '../../lib/sqlite/index.mjs';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
+import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
 
 export const DICTIONARY_DB_FILE = '/dict.sqlite3';
 
@@ -24,10 +25,8 @@ const OPFS_SAHPOOL_VFS_NAME = 'opfs-sahpool';
 const OPFS_SAHPOOL_DIRECTORY = '/manabitan/sqlite-sahpool-v1';
 const OPFS_SAHPOOL_MIN_CAPACITY = 8;
 
-/** @type {Promise<import('@sqlite.org/sqlite-wasm').Sqlite3Static>|null} */
-let sqlite3Promise = null;
-/** @type {Promise<import('@sqlite.org/sqlite-wasm').SAHPoolUtil>|null} */
-let opfsSahpoolPromise = null;
+const sqlite3Cache = new RetryablePromiseCache();
+const opfsSahpoolCache = new RetryablePromiseCache();
 /** @type {boolean} */
 let sqliteInitDiagnosticsReported = false;
 
@@ -253,33 +252,34 @@ function syncCapabilityIntoDiagnostics(sqlite3) {
  * @returns {Promise<import('@sqlite.org/sqlite-wasm').Sqlite3Static>}
  */
 export async function getSqlite3() {
-    if (sqlite3Promise !== null) {
-        return await sqlite3Promise;
-    }
-    const initWithOptions = /** @type {(options: {locateFile: (file: string) => string}) => Promise<import('@sqlite.org/sqlite-wasm').Sqlite3Static>} */ (sqlite3InitModule);
-    /** @param {string} file */
-    const locateFile = (file) => new URL(`../../lib/sqlite/${file}`, import.meta.url).href;
-    sqlite3Promise = initWithOptions({locateFile});
-    const sqlite3 = await sqlite3Promise;
-    if (!sqliteInitDiagnosticsReported) {
-        sqliteInitDiagnosticsReported = true;
-        const snapshot = getOpfsCapabilitySnapshot(sqlite3);
-        reportDiagnostics('opfs-sqlite-init', {
-            context: getRuntimeContextDiagnostics(),
-            hasInstallOpfsSAHPoolVfs: typeof Reflect.get(sqlite3, 'installOpfsSAHPoolVfs') === 'function',
-            hasOpfsDbCtor: snapshot.hasOpfsDbCtor,
-            hasOpfsImportDb: snapshot.hasOpfsImportDb,
-            hasWasmfsDir: snapshot.hasWasmfsDir,
-            hasOpfsVfs: snapshot.hasOpfsVfs,
-            hasOpfsSahpoolVfs: snapshot.hasOpfsSahpoolVfs,
-            opfsVfsPtr: snapshot.opfsVfsPtr,
-            opfsSahpoolVfsPtr: snapshot.opfsSahpoolVfsPtr,
-            sqliteVersion: sqlite3?.version?.libVersion ?? null,
-            opfsSahpoolDirectory: OPFS_SAHPOOL_DIRECTORY,
-            opfsSahpoolMinCapacity: OPFS_SAHPOOL_MIN_CAPACITY,
-        });
-    }
-    return sqlite3;
+    return await sqlite3Cache.get(async () => {
+        const initWithOptions = /** @type {(options: {locateFile: (file: string) => string}) => Promise<import('@sqlite.org/sqlite-wasm').Sqlite3Static>} */ (sqlite3InitModule);
+        /**
+         * @param {string} file
+         * @returns {string}
+         */
+        const locateFile = (file) => new URL(`../../lib/sqlite/${file}`, import.meta.url).href;
+        const sqlite3 = await initWithOptions({locateFile});
+        if (!sqliteInitDiagnosticsReported) {
+            sqliteInitDiagnosticsReported = true;
+            const snapshot = getOpfsCapabilitySnapshot(sqlite3);
+            reportDiagnostics('opfs-sqlite-init', {
+                context: getRuntimeContextDiagnostics(),
+                hasInstallOpfsSAHPoolVfs: typeof Reflect.get(sqlite3, 'installOpfsSAHPoolVfs') === 'function',
+                hasOpfsDbCtor: snapshot.hasOpfsDbCtor,
+                hasOpfsImportDb: snapshot.hasOpfsImportDb,
+                hasWasmfsDir: snapshot.hasWasmfsDir,
+                hasOpfsVfs: snapshot.hasOpfsVfs,
+                hasOpfsSahpoolVfs: snapshot.hasOpfsSahpoolVfs,
+                opfsVfsPtr: snapshot.opfsVfsPtr,
+                opfsSahpoolVfsPtr: snapshot.opfsSahpoolVfsPtr,
+                sqliteVersion: sqlite3?.version?.libVersion ?? null,
+                opfsSahpoolDirectory: OPFS_SAHPOOL_DIRECTORY,
+                opfsSahpoolMinCapacity: OPFS_SAHPOOL_MIN_CAPACITY,
+            });
+        }
+        return sqlite3;
+    });
 }
 
 /**
@@ -287,14 +287,11 @@ export async function getSqlite3() {
  * @returns {Promise<import('@sqlite.org/sqlite-wasm').SAHPoolUtil>}
  */
 async function ensureOpfsSahpool(sqlite3) {
-    if (opfsSahpoolPromise !== null) {
-        return await opfsSahpoolPromise;
-    }
     const installOpfsSAHPoolVfs = /** @type {unknown} */ (Reflect.get(sqlite3, 'installOpfsSAHPoolVfs'));
     if (typeof installOpfsSAHPoolVfs !== 'function') {
         throw new Error('sqlite-wasm build does not expose installOpfsSAHPoolVfs()');
     }
-    opfsSahpoolPromise = (async () => {
+    return await opfsSahpoolCache.get(async () => {
         const context = getRuntimeContextDiagnostics();
         if (!context.isDedicatedWorkerGlobalScope) {
             throw new Error(`opfs-sahpool requires a DedicatedWorkerGlobalScope. runtimeContext=${JSON.stringify(context)}`);
@@ -323,8 +320,7 @@ async function ensureOpfsSahpool(sqlite3) {
             pushAttemptError('install-opfs-sahpool-vfs', OPFS_SAHPOOL_DIRECTORY, '-', error);
             throw error;
         }
-    })();
-    return await opfsSahpoolPromise;
+    });
 }
 
 /**
@@ -405,30 +401,6 @@ export async function deleteOpfsDatabaseFiles() {
         reportDiagnostics('opfs-delete-files-unavailable', {
             context: getRuntimeContextDiagnostics(),
             diagnostics: getLastOpenStorageDiagnostics(),
-            error: (error instanceof Error) ? error.message : String(error),
-        });
-        throw error;
-    }
-}
-
-/**
- * @param {ArrayBuffer} content
- * @returns {Promise<void>}
- */
-export async function importOpfsDatabase(content) {
-    const sqlite3 = await getSqlite3();
-    syncCapabilityIntoDiagnostics(sqlite3);
-    try {
-        const poolUtil = await ensureOpfsSahpool(sqlite3);
-        await poolUtil.importDb(DICTIONARY_DB_FILE, new Uint8Array(content));
-        lastOpenStorageDiagnostics.opfsSahpoolCapacity = poolUtil.getCapacity();
-        lastOpenStorageDiagnostics.opfsSahpoolFileCount = poolUtil.getFileCount();
-        lastOpenStorageDiagnostics.opfsSahpoolFileNames = poolUtil.getFileNames();
-    } catch (error) {
-        reportDiagnostics('opfs-import-db-unavailable', {
-            context: getRuntimeContextDiagnostics(),
-            diagnostics: getLastOpenStorageDiagnostics(),
-            contentBytes: content.byteLength,
             error: (error instanceof Error) ? error.message : String(error),
         });
         throw error;

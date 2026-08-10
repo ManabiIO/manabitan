@@ -48,6 +48,9 @@
             "dictionary-importer": [
                 "../types/ext/dictionary-importer"
             ],
+            "dictionary-import-journal": [
+                "../types/ext/dictionary-import-journal"
+            ],
             "dictionary-importer-media-loader": [
                 "../types/ext/dictionary-importer-media-loader"
             ],

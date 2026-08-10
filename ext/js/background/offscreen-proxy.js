@@ -20,9 +20,24 @@ import {ExtensionError} from '../core/extension-error.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
-import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
+import {base64ToArrayBuffer} from '../data/array-buffer-util.js';
+import {getDictionaryRuntimeActionPolicy} from './dictionary-runtime-action-policy.js';
+import {DictionaryWorkerClient} from './dictionary-worker-client.js';
 
-const dictionaryRuntimeMessageTimeoutMs = 30_000;
+const offscreenControlRequestTimeoutMs = 30_000;
+const offscreenRetriedLookupRequestTimeoutMs = 65_000;
+
+class OffscreenControlTransportError extends Error {
+    /**
+     * @param {string} message
+     * @param {{cause?: unknown}} [options]
+     */
+    constructor(message, options) {
+        super(message, options);
+        /** @type {string} */
+        this.name = 'OffscreenControlTransportError';
+    }
+}
 
 /**
  * This class is responsible for creating and communicating with an offscreen document.
@@ -72,6 +87,10 @@ export class OffscreenProxy {
         this._offscreenPortReadyPromise = Promise.resolve();
         /** @type {null|(() => void)} */
         this._resolveOffscreenPortReady = null;
+        /** @type {number} */
+        this._offscreenControlRequestId = 0;
+        /** @type {Map<number, {port: MessagePort, resolve: (value: unknown) => void, reject: (reason?: unknown) => void}>} */
+        this._offscreenControlResponseHandlers = new Map();
         this._resetOffscreenPortReadyPromise();
     }
 
@@ -150,6 +169,12 @@ export class OffscreenProxy {
         }
         this._currentOffscreenPort = null;
         this._resetOffscreenPortReadyPromise();
+        const error = new OffscreenControlTransportError('Offscreen control port disconnected');
+        for (const [id, handler] of this._offscreenControlResponseHandlers) {
+            if (handler.port !== port) { continue; }
+            this._offscreenControlResponseHandlers.delete(id);
+            handler.reject(error);
+        }
         try {
             port.close();
         } catch (_) {
@@ -215,15 +240,14 @@ export class OffscreenProxy {
      * @param {MessagePort} port
      */
     async registerOffscreenPort(port) {
+        /** @type {(event: MessageEvent<{id?: number, result?: unknown, error?: import('core').SerializedError}>) => void} */
+        const onMessage = (event) => { this._onOffscreenControlMessage(port, event); };
+        port.onmessage = onMessage;
         port.onmessageerror = () => {
             this._clearCurrentOffscreenPort(port);
         };
         if (this._currentOffscreenPort && this._currentOffscreenPort !== port) {
-            try {
-                this._currentOffscreenPort.close();
-            } catch (_) {
-                // Ignore close failures while rotating the control port.
-            }
+            this._clearCurrentOffscreenPort(this._currentOffscreenPort);
         }
         this._currentOffscreenPort = port;
         this._resolveOffscreenPortReady?.();
@@ -235,94 +259,54 @@ export class OffscreenProxy {
      * @template {import('offscreen').McApiNames} TMessageType
      * @param {import('offscreen').McApiMessage<TMessageType>} message
      * @param {Transferable[]} transfers
+     * @returns {Promise<import('offscreen').McApiReturn<TMessageType>>}
      */
     async sendMessageViaPort(message, transfers) {
-        await this._ensureOffscreenPort();
-        const port = this._currentOffscreenPort;
-        if (port === null) {
-            throw new Error('Offscreen control port is unavailable');
-        }
-        try {
-            port.postMessage(message, transfers);
-        } catch (_) {
-            this._clearCurrentOffscreenPort(port);
+        const attemptCount = transfers.length === 0 ? 2 : 1;
+        for (let attempt = 0; attempt < attemptCount; ++attempt) {
             await this._ensureOffscreenPort();
-            const retriedPort = this._currentOffscreenPort;
-            if (retriedPort === null) {
+            const port = this._currentOffscreenPort;
+            if (port === null) {
                 throw new Error('Offscreen control port is unavailable');
             }
-            retriedPort.postMessage(message, transfers);
-        }
-    }
-}
-
-/**
- * @typedef {{
- *   sendMessagePromise: (message: import('offscreen').ApiMessageAny) => Promise<unknown>,
- *   sendMessageViaPort: (message: import('offscreen').McApiMessageAny, transfers: Transferable[]) => Promise<void>
- * }} DictionaryRuntimeMessenger
- */
-
-export class DictionaryRuntimeWorkerProxy {
-    /**
-     * @param {string} workerPath
-     */
-    constructor(workerPath) {
-        /** @type {Worker} */
-        this._worker = new Worker(workerPath, {type: 'module'});
-        /** @type {Map<number, {resolve: (value: unknown) => void, reject: (reason?: unknown) => void}>} */
-        this._responseHandlers = new Map();
-        /** @type {number} */
-        this._requestId = 0;
-        /** @type {Error|null} */
-        this._fatalError = null;
-        this._worker.addEventListener('message', this._onMessage.bind(this));
-        this._worker.addEventListener('messageerror', this._onMessageError.bind(this));
-        this._worker.addEventListener('error', this._onError.bind(this));
-    }
-
-    /**
-     * @param {Error} error
-     * @returns {void}
-     */
-    _setFatalError(error) {
-        if (this._fatalError !== null) {
-            return;
-        }
-        this._fatalError = error;
-        for (const [, handler] of this._responseHandlers) {
-            handler.reject(error);
-        }
-        this._responseHandlers.clear();
-        try {
-            this._worker.terminate();
-        } catch (_) {
-            // Ignore termination failures after a fatal worker error.
+            try {
+                return /** @type {import('offscreen').McApiReturn<TMessageType>} */ (
+                    await this._sendOffscreenControlMessage(port, /** @type {import('offscreen').McApiMessageAny} */ (message), transfers)
+                );
+            } catch (error) {
+                if (!(error instanceof OffscreenControlTransportError)) {
+                    throw error;
+                }
+                this._clearCurrentOffscreenPort(port);
+                if (attempt + 1 >= attemptCount) {
+                    throw error;
+                }
+            }
         }
     }
 
     /**
-     * @template [TReturn=unknown]
-     * @param {import('offscreen').ApiMessageAny} message
-     * @returns {Promise<TReturn>}
+     * @param {MessagePort} port
+     * @param {import('offscreen').McApiMessageAny} message
+     * @param {Transferable[]} transfers
+     * @returns {Promise<unknown>}
      */
-    async sendMessagePromise(message) {
-        if (this._fatalError !== null) {
-            throw this._fatalError;
-        }
-        const id = ++this._requestId;
-        const payload = /** @type {{action?: string, params?: unknown}} */ (
-            typeof message === 'object' && message !== null && !Array.isArray(message) ? message : {}
-        );
-        const action = payload.action ?? '';
+    async _sendOffscreenControlMessage(port, message, transfers) {
+        const id = ++this._offscreenControlRequestId;
+        const timeoutMs = message.action === 'findTermsStructuredOffscreen' ?
+            offscreenRetriedLookupRequestTimeoutMs :
+            offscreenControlRequestTimeoutMs;
         return await new Promise((resolve, reject) => {
             const timeoutId = globalThis.setTimeout(() => {
-                const handler = this._responseHandlers.get(id);
+                const handler = this._offscreenControlResponseHandlers.get(id);
                 if (typeof handler === 'undefined') { return; }
-                this._responseHandlers.delete(id);
-                handler.reject(new Error(`Timed out waiting for dictionary runtime response to ${action} after ${String(dictionaryRuntimeMessageTimeoutMs)}ms.`));
-            }, dictionaryRuntimeMessageTimeoutMs);
-            this._responseHandlers.set(id, {
+                this._offscreenControlResponseHandlers.delete(id);
+                handler.reject(new OffscreenControlTransportError(
+                    `Timed out waiting for offscreen control response to ${message.action} after ${String(timeoutMs)}ms`,
+                ));
+            }, timeoutMs);
+            this._offscreenControlResponseHandlers.set(id, {
+                port,
                 resolve: (value) => {
                     globalThis.clearTimeout(timeoutId);
                     resolve(value);
@@ -333,73 +317,96 @@ export class DictionaryRuntimeWorkerProxy {
                 },
             });
             try {
-                this._worker.postMessage({id, action, params: payload.params ?? {}});
+                port.postMessage({...message, id}, transfers);
             } catch (error) {
-                this._responseHandlers.delete(id);
+                this._offscreenControlResponseHandlers.delete(id);
                 globalThis.clearTimeout(timeoutId);
-                const normalizedError = error instanceof Error ? error : new Error(String(error));
-                this._setFatalError(normalizedError);
-                reject(normalizedError);
+                reject(new OffscreenControlTransportError('Failed to send offscreen control message', {cause: error}));
             }
         });
     }
 
     /**
-     * @param {import('offscreen').McApiMessageAny} message
-     * @param {Transferable[]} transfers
-     */
-    async sendMessageViaPort(message, transfers) {
-        if (this._fatalError !== null) {
-            throw this._fatalError;
-        }
-        const payload = /** @type {{action?: string, params?: unknown}} */ (
-            typeof message === 'object' && message !== null && !Array.isArray(message) ? message : {}
-        );
-        try {
-            this._worker.postMessage({id: ++this._requestId, action: payload.action ?? '', params: payload.params ?? {}}, transfers);
-        } catch (error) {
-            const normalizedError = error instanceof Error ? error : new Error(String(error));
-            this._setFatalError(normalizedError);
-            throw normalizedError;
-        }
-    }
-
-    /**
+     * @param {MessagePort} port
      * @param {MessageEvent<{id?: number, result?: unknown, error?: import('core').SerializedError}>} event
+     * @returns {void}
      */
-    _onMessage(event) {
+    _onOffscreenControlMessage(port, event) {
+        if (port !== this._currentOffscreenPort) { return; }
         const id = typeof event.data?.id === 'number' ? event.data.id : null;
-        if (id === null) { return; }
-        const handler = this._responseHandlers.get(id);
-        if (typeof handler === 'undefined') {
-            reportDiagnostics('offscreen-proxy-unmatched-response', {
-                reason: 'unknown-id',
-                id,
-                hasError: typeof event.data?.error !== 'undefined',
-            });
+        if (id === null) {
+            this._clearCurrentOffscreenPort(port);
             return;
         }
-        this._responseHandlers.delete(id);
+        const handler = this._offscreenControlResponseHandlers.get(id);
+        if (typeof handler === 'undefined' || handler.port !== port) {
+            reportDiagnostics('offscreen-control-unmatched-response', {id});
+            this._clearCurrentOffscreenPort(port);
+            return;
+        }
+        this._offscreenControlResponseHandlers.delete(id);
         if (typeof event.data?.error !== 'undefined') {
-            handler.reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (event.data.error)));
+            try {
+                handler.reject(ExtensionError.deserialize(event.data.error));
+            } catch (error) {
+                handler.reject(new OffscreenControlTransportError('Invalid offscreen control error response', {cause: error}));
+                this._clearCurrentOffscreenPort(port);
+            }
             return;
         }
         handler.resolve(event.data?.result);
     }
+}
 
+/**
+ * @typedef {{
+ *   sendMessagePromise: (message: import('offscreen').ApiMessageAny) => Promise<unknown>,
+ *   sendMessageViaPort: (message: import('offscreen').McApiMessageAny, transfers: Transferable[]) => Promise<unknown>
+ * }} DictionaryRuntimeMessenger
+ */
+
+export class DictionaryRuntimeWorkerProxy {
     /**
-     * @param {MessageEvent} _event
+     * @param {string} workerPath
      */
-    _onMessageError(_event) {
-        this._setFatalError(new Error('Dictionary runtime worker message deserialization failed'));
+    constructor(workerPath) {
+        /** @type {DictionaryWorkerClient} */
+        this._client = new DictionaryWorkerClient(workerPath, {context: 'Dictionary runtime worker'});
     }
 
     /**
-     * @param {ErrorEvent} event
+     * @template [TReturn=unknown]
+     * @param {import('offscreen').ApiMessageAny} message
+     * @returns {Promise<TReturn>}
      */
-    _onError(event) {
-        const message = event.message ? `: ${event.message}` : '';
-        this._setFatalError(new Error(`Dictionary runtime worker failed${message}`));
+    async sendMessagePromise(message) {
+        const payload = /** @type {{action?: string, params?: unknown}} */ (
+            typeof message === 'object' && message !== null && !Array.isArray(message) ? message : {}
+        );
+        const action = payload.action ?? '';
+        return await this._client.invoke(
+            action,
+            /** @type {import('core').SerializableObject} */ (payload.params ?? {}),
+        );
+    }
+
+    /**
+     * @template [TReturn=unknown]
+     * @param {import('offscreen').McApiMessageAny} message
+     * @param {Transferable[]} transfers
+     * @returns {Promise<TReturn>}
+     */
+    async sendMessageViaPort(message, transfers) {
+        const payload = /** @type {{action?: string, params?: unknown}} */ (
+            typeof message === 'object' && message !== null && !Array.isArray(message) ? message : {}
+        );
+        const action = payload.action ?? '';
+        const params = /** @type {import('core').SerializableObject} */ (payload.params ?? {});
+        if (getDictionaryRuntimeActionPolicy(action).concurrency === 'streamed-import') {
+            this._client.post(action, params, transfers);
+            return /** @type {TReturn} */ (void 0);
+        }
+        return await this._client.invoke(action, params, transfers);
     }
 }
 
@@ -574,23 +581,6 @@ export class DictionaryDatabaseProxy {
     }
 
     /**
-     * @returns {Promise<ArrayBuffer>}
-     */
-    async exportDatabase() {
-        const content = await this._offscreen.sendMessagePromise({action: 'databaseExportOffscreen'});
-        return base64ToArrayBuffer(typeof content === 'string' ? content : '');
-    }
-
-    /**
-     * @param {ArrayBuffer} content
-     * @returns {Promise<void>}
-     */
-    async importDatabase(content) {
-        await this._offscreen.sendMessagePromise({action: 'databaseImportOffscreen', params: {content: arrayBufferToBase64(content)}});
-        await this._refreshRuntimeState();
-    }
-
-    /**
      * @param {MessagePort} port
      * @returns {Promise<void>}
      */
@@ -635,20 +625,9 @@ export class TranslatorProxy {
      * @returns {Promise<import('translator').FindTermsResult>}
      */
     async findTerms(mode, text, options) {
-        const {enabledDictionaryMap, excludeDictionaryDefinitions, textReplacements} = options;
-        const enabledDictionaryMapList = [...enabledDictionaryMap];
-        const excludeDictionaryDefinitionsList = excludeDictionaryDefinitions ? [...excludeDictionaryDefinitions] : null;
-        const textReplacementsSerialized = textReplacements.map((group) => {
-            return group !== null ? group.map((opt) => ({...opt, pattern: opt.pattern.toString()})) : null;
-        });
-        /** @type {import('offscreen').FindTermsOptionsOffscreen} */
-        const modifiedOptions = {
-            ...options,
-            enabledDictionaryMap: enabledDictionaryMapList,
-            excludeDictionaryDefinitions: excludeDictionaryDefinitionsList,
-            textReplacements: textReplacementsSerialized,
-        };
-        return /** @type {Promise<import('translator').FindTermsResult>} */ (this._offscreen.sendMessagePromise({action: 'findTermsOffscreen', params: {mode, text, options: modifiedOptions}}));
+        return /** @type {Promise<import('translator').FindTermsResult>} */ (
+            this._offscreen.sendMessageViaPort({action: 'findTermsStructuredOffscreen', params: {mode, text, options}}, [])
+        );
     }
 
     /**

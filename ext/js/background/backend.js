@@ -33,7 +33,7 @@ import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
 import {clone, deferPromise, promiseTimeout} from '../core/utilities.js';
 import {generateAnkiNoteMediaFileName, INVALID_NOTE_ID, isNoteDataValid} from '../data/anki-util.js';
-import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
+import {arrayBufferToBase64} from '../data/array-buffer-util.js';
 import {OptionsUtil} from '../data/options-util.js';
 import {getAllPermissions, hasPermissions, hasRequiredPermissionsForOptions} from '../data/permissions-util.js';
 import {DictionaryDatabase} from '../dictionary/dictionary-database.js';
@@ -144,6 +144,8 @@ export class Backend {
         this._options = null;
         /** @type {import('../data/json-schema.js').JsonSchema[]} */
         this._profileConditionsSchemaCache = [];
+        /** @type {WeakMap<import('settings').ProfileOptions, {enabledDictionaryMap: Map<string, import('translation').FindTermDictionary>, textReplacements: (?(import('translation').FindTermsTextReplacement[]))[]}>} */
+        this._translatorProfileOptionsCache = new WeakMap();
         /** @type {?string} */
         this._ankiClipboardImageFilenameCache = null;
         /** @type {?string} */
@@ -246,8 +248,6 @@ export class Backend {
             ['downloadDictionaryArchive',    this._onApiDownloadDictionaryArchive.bind(this)],
             ['setDictionaryImportMode',      this._onApiSetDictionaryImportMode.bind(this)],
             ['purgeDatabase',                this._onApiPurgeDatabase.bind(this)],
-            ['exportDictionaryDatabase',     this._onApiExportDictionaryDatabase.bind(this)],
-            ['importDictionaryDatabase',     this._onApiImportDictionaryDatabase.bind(this)],
             ['getMedia',                     this._onApiGetMedia.bind(this)],
             ['logGenericErrorBackend',       this._onApiLogGenericErrorBackend.bind(this)],
             ['logIndicatorClear',            this._onApiLogIndicatorClear.bind(this)],
@@ -461,7 +461,7 @@ export class Backend {
      * @param {(loaded: number, total: number) => void} [onProgress]
      * @returns {Promise<Blob>}
      */
-    async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase, onProgress = null) {
+    async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase, onProgress = void 0) {
         return await new Promise((resolve, reject) => {
             const request = new XMLHttpRequest();
             const cleanup = () => {
@@ -472,6 +472,7 @@ export class Backend {
                 request.onprogress = null;
                 request.onreadystatechange = null;
             };
+            /** @param {Error|Event|string} error */
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
@@ -1060,38 +1061,26 @@ export class Backend {
             installedDictionaryTitles: null,
             hasExactHeadwordMatch,
             resultDictionaryCount: dictionaryEntries.length,
-            resultDictionaries: [...new Set(dictionaryEntries.flatMap((entry) => (
-                entry.type === 'term' ?
-                    entry.definitions.map(({dictionary}) => dictionary) :
-                    [entry.dictionary]
-            )))],
-            resultDictionaryAliases: [...new Set(dictionaryEntries.flatMap((entry) => (
-                entry.type === 'term' ?
-                    entry.definitions.map(({dictionaryAlias}) => dictionaryAlias) :
-                [entry.dictionaryAlias]
-            )))],
+            resultDictionaries: [...new Set(dictionaryEntries.flatMap(
+                ({definitions}) => definitions.map(({dictionary}) => dictionary),
+            ))],
+            resultDictionaryAliases: [...new Set(dictionaryEntries.flatMap(
+                ({definitions}) => definitions.map(({dictionaryAlias}) => dictionaryAlias),
+            ))],
             debugLookupState: null,
             resultEntries: includeDetailedLookupSnapshot ?
-                dictionaryEntries.map((entry) => (
-                    entry.type === 'term' ?
-                        {
-                            type: entry.type,
-                            dictionaryIndex: entry.dictionaryIndex,
-                            dictionaryAlias: entry.dictionaryAlias,
-                            headwords: entry.headwords.map(({term, reading}) => ({term, reading})),
-                            definitions: entry.definitions.map(({dictionary, dictionaryAlias, sequences, isPrimary}) => ({
-                                dictionary,
-                                dictionaryAlias,
-                                sequences,
-                                isPrimary,
-                            })),
-                        } :
-                        {
-                            type: entry.type,
-                            dictionary: entry.dictionary,
-                            dictionaryAlias: entry.dictionaryAlias,
-                        }
-                )) :
+                dictionaryEntries.map((entry) => ({
+                    type: entry.type,
+                    dictionaryIndex: entry.dictionaryIndex,
+                    dictionaryAlias: entry.dictionaryAlias,
+                    headwords: entry.headwords.map(({term, reading}) => ({term, reading})),
+                    definitions: entry.definitions.map(({dictionary, dictionaryAlias, sequences, isPrimary}) => ({
+                        dictionary,
+                        dictionaryAlias,
+                        sequences,
+                        isPrimary,
+                    })),
+                })) :
                 void 0,
         }));
         return {dictionaryEntries, originalTextLength};
@@ -1819,24 +1808,6 @@ export class Backend {
         });
     }
 
-    /** @type {import('api').ApiHandler<'exportDictionaryDatabase'>} */
-    async _onApiExportDictionaryDatabase() {
-        await this._awaitDictionaryMutationSettled();
-        await this._awaitDictionaryRefreshSettled();
-        await this._ensureDictionaryDatabaseReady();
-        const content = await this._dictionaryDatabase.exportDatabase();
-        return arrayBufferToBase64(content);
-    }
-
-    /** @type {import('api').ApiHandler<'importDictionaryDatabase'>} */
-    async _onApiImportDictionaryDatabase({content}) {
-        await this._runDictionaryMutation(async () => {
-            await this._ensureDictionaryDatabaseReady();
-            await this._dictionaryDatabase.importDatabase(base64ToArrayBuffer(content));
-            await this._triggerDatabaseUpdated('dictionary', 'import');
-        });
-    }
-
     /** @type {import('api').ApiHandler<'getMedia'>} */
     async _onApiGetMedia({targets}) {
         return await this._getNormalizedDictionaryDatabaseMedia(targets);
@@ -2404,6 +2375,7 @@ export class Backend {
      * @param {string} source
      */
     _applyOptions(source) {
+        this._translatorProfileOptionsCache = new WeakMap();
         const options = this._getProfileOptions({current: true}, false);
         this._updateBadge();
 
@@ -3840,7 +3812,7 @@ export class Backend {
         const installed = dictionaryInfo.some((dictionary) => dictionary.title === normalizedTitle);
         const counts = Array.isArray(dictionaryCounts.counts) && dictionaryCounts.counts.length > 0 ? dictionaryCounts.counts[0] : null;
         const options = this._getProfileOptions({current: true}, false);
-        const enabledDictionaryMap = this._getTranslatorEnabledDictionaryMap(options);
+        const {enabledDictionaryMap} = this._getTranslatorPreparedProfileOptions(options);
         const enabled = !requireEnabledForActiveProfile || enabledDictionaryMap.has(normalizedTitle);
         const termCount = typeof counts?.terms === 'number' ? counts.terms : 0;
         const requiresTermProbe = termCount > 0;
@@ -4364,18 +4336,15 @@ export class Backend {
         if (typeof matchType !== 'string') { matchType = /** @type {import('translation').FindTermsMatchType} */ ('exact'); }
         if (typeof deinflect !== 'boolean') { deinflect = true; }
         if (typeof primaryReading !== 'string') { primaryReading = ''; }
-        const enabledDictionaryMap = this._getTranslatorEnabledDictionaryMap(options);
+        let {enabledDictionaryMap, textReplacements} = this._getTranslatorPreparedProfileOptions(options);
         const {
             general: {mainDictionary, sortFrequencyDictionary, sortFrequencyDictionaryOrder, language},
             scanning: {alphanumeric},
-            translation: {
-                textReplacements: textReplacementsOptions,
-                searchResolution,
-            },
+            translation: {searchResolution},
         } = options;
-        const textReplacements = this._getTranslatorTextReplacements(textReplacementsOptions);
         let excludeDictionaryDefinitions = null;
         if (mode === 'merge' && !enabledDictionaryMap.has(mainDictionary)) {
+            enabledDictionaryMap = new Map(enabledDictionaryMap);
             enabledDictionaryMap.set(mainDictionary, {
                 index: enabledDictionaryMap.size,
                 alias: mainDictionary,
@@ -4408,11 +4377,26 @@ export class Backend {
      * @returns {import('translation').FindKanjiOptions} An options object.
      */
     _getTranslatorFindKanjiOptions(options) {
-        const enabledDictionaryMap = this._getTranslatorEnabledDictionaryMap(options);
+        const {enabledDictionaryMap} = this._getTranslatorPreparedProfileOptions(options);
         return {
             enabledDictionaryMap,
             removeNonJapaneseCharacters: !options.scanning.alphanumeric,
         };
+    }
+
+    /**
+     * @param {import('settings').ProfileOptions} options
+     * @returns {{enabledDictionaryMap: Map<string, import('translation').FindTermDictionary>, textReplacements: (?(import('translation').FindTermsTextReplacement[]))[]}}
+     */
+    _getTranslatorPreparedProfileOptions(options) {
+        const cached = this._translatorProfileOptionsCache.get(options);
+        if (typeof cached !== 'undefined') { return cached; }
+        const value = {
+            enabledDictionaryMap: this._getTranslatorEnabledDictionaryMap(options),
+            textReplacements: this._getTranslatorTextReplacements(options.translation.textReplacements),
+        };
+        this._translatorProfileOptionsCache.set(options, value);
+        return value;
     }
 
     /**
@@ -4658,10 +4642,10 @@ export class Backend {
      */
     async _debugDictionaryLookupStateLocal(text, dictionaryNames) {
         const database = this._dictionaryDatabase;
-        const ensureIndex = Reflect.get(database, '_ensureDirectTermIndex');
+        const findDirectTermIds = Reflect.get(database, '_findDirectTermIds');
         const fetchTermRowsByIds = Reflect.get(database, '_fetchTermRowsByIds');
         const ensureRecordDictionariesLoaded = Reflect.get(database, '_ensureDirectTermIndexesLoaded');
-        if (typeof ensureIndex !== 'function' || typeof fetchTermRowsByIds !== 'function') {
+        if (typeof findDirectTermIds !== 'function' || typeof fetchTermRowsByIds !== 'function') {
             return {
                 ok: false,
                 reason: 'debug lookup unavailable',
@@ -4685,9 +4669,12 @@ export class Backend {
         for (const dictionaryNameRaw of dictionaryNames) {
             const dictionaryName = String(dictionaryNameRaw || '').trim();
             if (dictionaryName.length === 0) { continue; }
-            const index = ensureIndex.call(database, dictionaryName);
-            const expressionIds = Array.isArray(index?.expression?.get?.(text)) ? index.expression.get(text) : [];
-            const readingIds = Array.isArray(index?.reading?.get?.(text)) ? index.reading.get(text) : [];
+            const expressionIds = /** @type {number[]} */ (
+                findDirectTermIds.call(database, dictionaryName, text, 'expression')
+            );
+            const readingIds = /** @type {number[]} */ (
+                findDirectTermIds.call(database, dictionaryName, text, 'reading')
+            );
             for (const id of expressionIds) {
                 if (typeof id === 'number' && id > 0 && !ids.has(id)) {
                     ids.set(id, {dictionary: dictionaryName, matchSource: 'expression'});

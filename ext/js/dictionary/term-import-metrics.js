@@ -25,6 +25,10 @@ export const TERM_IMPORT_METRIC_KEYS = Object.freeze([
     'dedupScanMs',
     'contentStoreMs',
     'contentMetadataMs',
+    'dedupPendingHitCount',
+    'dedupPersistedHitCount',
+    'dedupUniqueCount',
+    'dedupExactFallbackCount',
     'termRecordBuildMs',
     'termRecordEncodeMs',
     'termRecordWriteMs',
@@ -33,6 +37,8 @@ export const TERM_IMPORT_METRIC_KEYS = Object.freeze([
     'termRecordPackLengthsMs',
     'termRecordHeapCopyMs',
     'termRecordWasmEncodeMs',
+    'termRecordValidationMs',
+    'termLookupIndexEncodeMs',
 ]);
 
 /**

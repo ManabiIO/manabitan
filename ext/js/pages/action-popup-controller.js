@@ -111,11 +111,8 @@ export class DisplayController {
         this._updateProfileSelect(profiles, profileCurrent);
     }
 
-    /**
-     * @param {{source?: string}} details
-     * @returns {void}
-     */
-    _onOptionsUpdated(_details) {
+    /** */
+    _onOptionsUpdated() {
         void this._refreshOptionsState().catch((error) => {
             log.error(error);
         });
@@ -294,6 +291,8 @@ export class DisplayController {
                 toggle.checked = extensionEnabled;
             }
             if (!this._toggleListenersSetup) {
+                // Bound in the constructor.
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 toggle.addEventListener('change', this._onToggleChanged, false);
             }
         }
@@ -413,9 +412,10 @@ export class DisplayController {
 
     /**
      * @param {import('settings').ProfileOptions} options
+     * @param {number} [generation]
      */
     async _updateDictionariesEnabledWarnings(options, generation = this._optionsSetupGeneration) {
-        const tooltip = document.querySelectorAll('.tooltip');
+        const tooltip = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.tooltip'));
         const dictionaries = await this._api.getDictionaryInfo();
         if (generation !== this._optionsSetupGeneration) { return; }
 
@@ -440,6 +440,7 @@ export class DisplayController {
 
     /**
      * @param {import('settings').ProfileOptions} options
+     * @param {number} [generation]
      */
     async _updatePermissionsWarnings(options, generation = this._optionsSetupGeneration) {
         const permissions = await getAllPermissions();

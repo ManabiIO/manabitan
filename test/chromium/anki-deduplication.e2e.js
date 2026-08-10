@@ -25,11 +25,11 @@ import {mkdir, rm, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
+import {createDictionaryArchiveData} from '../../dev/dictionary-archive-util.js';
 import {ManifestUtil} from '../../dev/manifest-util.js';
 import {applyAnkiDedupeOptions, dedupeDictionaryTitle, dedupeSearchTerm, getAnkiDedupeMatrix, normalizeExpectedButtonState} from '../e2e/anki-dedupe-matrix.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
-import {getMinimalDictionaryDatabaseBase64} from '../e2e/minimal-dictionary-database.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -318,7 +318,15 @@ async function sendRuntimeMessage(page, action, params = void 0) {
 async function importDictionaryFixture(page, extensionBaseUrl) {
     await gotoExtensionPage(page, `${extensionBaseUrl}/settings.html`, '#dictionary-import-file-input');
     await sendRuntimeMessage(page, 'purgeDatabase', void 0);
-    await sendRuntimeMessage(page, 'importDictionaryDatabase', {content: await getMinimalDictionaryDatabaseBase64()});
+    const archive = Buffer.from(await createDictionaryArchiveData(
+        path.join(root, 'test', 'data', 'dictionaries', 'valid-dictionary1'),
+        dedupeDictionaryTitle,
+    ));
+    await page.locator('#dictionary-import-file-input').setInputFiles({
+        name: 'anki-dedupe-fixture.zip',
+        mimeType: 'application/zip',
+        buffer: archive,
+    });
     await sendRuntimeMessage(page, 'triggerDatabaseUpdated', {type: 'dictionary', cause: 'import'});
     const deadline = safePerformance.now() + 60_000;
     while (safePerformance.now() < deadline) {

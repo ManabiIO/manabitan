@@ -177,7 +177,7 @@ async function waitForBackendReady(webExtension) {
  * @returns {void}
  */
 function showStartupFailureUi(error) {
-    if (!(window.location.protocol === new URL(import.meta.url).protocol)) { return; }
+    if (window.location.protocol !== new URL(import.meta.url).protocol) { return; }
     const message = error instanceof Error ? error.message : String(error);
     try {
         document.documentElement.dataset.loadingStalled = 'true';
@@ -185,23 +185,7 @@ function showStartupFailureUi(error) {
         if (document.body !== null) {
             document.body.hidden = false;
         }
-        let container = document.querySelector('#startup-error-message');
-        if (!(container instanceof HTMLElement)) {
-            container = document.createElement('div');
-            container.id = 'startup-error-message';
-            container.style.whiteSpace = 'pre-wrap';
-            container.style.margin = '16px';
-            container.style.padding = '12px 16px';
-            container.style.border = '1px solid rgba(208, 2, 27, 0.35)';
-            container.style.background = 'rgba(208, 2, 27, 0.08)';
-            container.style.color = '#7a1020';
-            container.style.fontFamily = 'monospace';
-            container.style.fontSize = '13px';
-            container.style.lineHeight = '1.5';
-            if (document.body !== null) {
-                document.body.prepend(container);
-            }
-        }
+        const container = getOrCreateStartupErrorContainer();
         container.textContent = (
             'Manabitan failed to start the dictionary backend.\n' +
             `error=${message}`
@@ -216,34 +200,42 @@ function showStartupFailureUi(error) {
  * @returns {void}
  */
 function showRuntimeDisconnectedUi(message) {
-    if (!(window.location.protocol === new URL(import.meta.url).protocol)) { return; }
+    if (window.location.protocol !== new URL(import.meta.url).protocol) { return; }
     try {
         document.documentElement.dataset.loadingStalled = 'true';
         document.documentElement.dataset.loadingError = 'true';
         if (document.body !== null) {
             document.body.hidden = false;
         }
-        let container = document.querySelector('#startup-error-message');
-        if (!(container instanceof HTMLElement)) {
-            container = document.createElement('div');
-            container.id = 'startup-error-message';
-            container.style.whiteSpace = 'pre-wrap';
-            container.style.margin = '16px';
-            container.style.padding = '12px 16px';
-            container.style.border = '1px solid rgba(208, 2, 27, 0.35)';
-            container.style.background = 'rgba(208, 2, 27, 0.08)';
-            container.style.color = '#7a1020';
-            container.style.fontFamily = 'monospace';
-            container.style.fontSize = '13px';
-            container.style.lineHeight = '1.5';
-            if (document.body !== null) {
-                document.body.prepend(container);
-            }
-        }
+        const container = getOrCreateStartupErrorContainer();
         container.textContent = message;
     } catch (_) {
         // NOP
     }
+}
+
+/**
+ * @returns {HTMLElement}
+ * @throws {Error} If the browser cannot create or attach the error element.
+ */
+function getOrCreateStartupErrorContainer() {
+    const existing = document.querySelector('#startup-error-message');
+    if (existing instanceof HTMLElement) {
+        return existing;
+    }
+    const container = document.createElement('div');
+    container.id = 'startup-error-message';
+    container.style.whiteSpace = 'pre-wrap';
+    container.style.margin = '16px';
+    container.style.padding = '12px 16px';
+    container.style.border = '1px solid rgba(208, 2, 27, 0.35)';
+    container.style.background = 'rgba(208, 2, 27, 0.08)';
+    container.style.color = '#7a1020';
+    container.style.fontFamily = 'monospace';
+    container.style.fontSize = '13px';
+    container.style.lineHeight = '1.5';
+    document.body?.prepend(container);
+    return container;
 }
 
 /**
@@ -265,6 +257,7 @@ function waitForDomContentLoaded() {
 
 /**
  * @returns {MessagePort}
+ * @throws {Error} If the Firefox backend channel cannot be initialized.
  */
 function createFirefoxBackendPort() {
     const sharedWorkerBridge = new SharedWorker(new URL('comm/shared-worker-bridge.js', import.meta.url), {type: 'module'});
@@ -531,7 +524,7 @@ export class Application extends EventDispatcher {
             if (mediaDrawingWorker !== null) {
                 await api.ensureMediaDrawingWorkerConnected();
             }
-            heartbeatInterval = setInterval(() => {
+            heartbeatInterval = window.setInterval(() => {
                 void api.heartbeat().then(() => {
                     heartbeatFailureLogged = false;
                 }).catch((error) => {

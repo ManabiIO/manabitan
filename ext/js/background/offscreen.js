@@ -25,6 +25,7 @@ import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {sanitizeCSS} from '../core/utilities.js';
 import {getSqlite3} from '../dictionary/sqlite-wasm.js';
 import {WebExtension} from '../extension/web-extension.js';
+import {DictionaryWorkerClient} from './dictionary-worker-client.js';
 
 /**
  * This class controls the core logic of the extension, including API calls
@@ -58,12 +59,11 @@ export class Offscreen {
             ['getDictionaryCountsOffscreen',   this._getDictionaryCountsHandler.bind(this)],
             ['getDictionaryTermProbeOffscreen', this._getDictionaryTermProbeHandler.bind(this)],
             ['findTermsBulkOffscreen',         this._findTermsBulkHandler.bind(this)],
+            ['warmTermLookupCachesOffscreen',  this._warmTermLookupCachesHandler.bind(this)],
             ['debugDictionaryStorageStateOffscreen', this._debugDictionaryStorageStateHandler.bind(this)],
             ['debugDictionaryLookupStateOffscreen', this._debugDictionaryLookupStateHandler.bind(this)],
             ['databasePurgeOffscreen',         this._purgeDatabaseHandler.bind(this)],
             ['databaseGetMediaOffscreen',      this._getMediaHandler.bind(this)],
-            ['databaseExportOffscreen',        this._exportDatabaseHandler.bind(this)],
-            ['databaseImportOffscreen',        this._importDatabaseHandler.bind(this)],
             ['translatorPrepareOffscreen',     this._prepareTranslatorHandler.bind(this)],
             ['findKanjiOffscreen',             this._findKanjiHandler.bind(this)],
             ['findTermsOffscreen',             this._findTermsHandler.bind(this)],
@@ -79,21 +79,19 @@ export class Offscreen {
         this._mcApiMap = createApiMap([
             ['connectToDatabaseWorker', this._connectToDatabaseWorkerHandler.bind(this)],
             ['importDictionaryOffscreen', this._importDictionaryOffscreenHandler.bind(this)],
+            ['findTermsStructuredOffscreen', this._findTermsStructuredHandler.bind(this)],
         ]);
 
         /** @type {?Promise<void>} */
         this._prepareDatabasePromise = null;
-        /** @type {Worker} */
-        this._dictionaryWorker = new Worker('/js/background/offscreen-dictionary-worker.js', {type: 'module'});
-        /** @type {Map<number, {resolve: (value: unknown) => void, reject: (reason?: unknown) => void}>} */
-        this._dictionaryWorkerResponseHandlers = new Map();
-        /** @type {number} */
-        this._dictionaryWorkerRequestId = 0;
-        /** @type {ExtensionError|null} */
-        this._dictionaryWorkerFatalError = null;
-        this._dictionaryWorker.addEventListener('message', this._onDictionaryWorkerMessage.bind(this));
-        this._dictionaryWorker.addEventListener('messageerror', this._onDictionaryWorkerMessageError.bind(this));
-        this._dictionaryWorker.addEventListener('error', this._onDictionaryWorkerError.bind(this));
+        /** @type {DictionaryWorkerClient} */
+        this._dictionaryWorkerClient = new DictionaryWorkerClient(
+            '/js/background/offscreen-dictionary-worker.js',
+            {
+                context: 'Offscreen dictionary worker',
+                onFatalError: (error) => { log.error(error); },
+            },
+        );
 
         /**
          * @type {API}
@@ -291,9 +289,12 @@ export class Offscreen {
         return await this._invokeDictionaryWorker('findTermsBulkOffscreen', {termList, dictionaryNames, matchType});
     }
 
-    /**
-     * @returns {Promise<unknown>}
-     */
+    /** @type {import('offscreen').ApiHandler<'warmTermLookupCachesOffscreen'>} */
+    async _warmTermLookupCachesHandler({dictionaryNames}) {
+        await this._invokeDictionaryWorker('warmTermLookupCachesOffscreen', {dictionaryNames});
+    }
+
+    /** @type {import('offscreen').ApiHandler<'debugDictionaryStorageStateOffscreen'>} */
     async _debugDictionaryStorageStateHandler() {
         return await this._invokeDictionaryWorker('debugDictionaryStorageStateOffscreen', {});
     }
@@ -311,16 +312,6 @@ export class Offscreen {
         return await this._invokeDictionaryWorker('databaseGetMediaOffscreen', {targets});
     }
 
-    /** @type {import('offscreen').ApiHandler<'databaseExportOffscreen'>} */
-    async _exportDatabaseHandler() {
-        return await this._invokeDictionaryWorker('databaseExportOffscreen', {});
-    }
-
-    /** @type {import('offscreen').ApiHandler<'databaseImportOffscreen'>} */
-    async _importDatabaseHandler({content}) {
-        await this._invokeDictionaryWorker('databaseImportOffscreen', {content});
-    }
-
     /** @type {import('offscreen').ApiHandler<'translatorPrepareOffscreen'>} */
     async _prepareTranslatorHandler() {
         await this._invokeDictionaryWorker('translatorPrepareOffscreen', {});
@@ -334,6 +325,11 @@ export class Offscreen {
     /** @type {import('offscreen').ApiHandler<'findTermsOffscreen'>} */
     async _findTermsHandler({mode, text, options}) {
         return await this._invokeDictionaryWorker('findTermsOffscreen', {mode, text, options});
+    }
+
+    /** @type {import('offscreen').McApiHandler<'findTermsStructuredOffscreen'>} */
+    async _findTermsStructuredHandler({mode, text, options}) {
+        return await this._invokeDictionaryWorker('findTermsStructuredOffscreen', {mode, text, options});
     }
 
     /** @type {import('offscreen').ApiHandler<'getTermFrequenciesOffscreen'>} */
@@ -384,25 +380,24 @@ export class Offscreen {
     }
 
     /** @type {import('offscreen').McApiHandler<'importDictionaryOffscreen'>} */
-    async _importDictionaryOffscreenHandler({archiveContent, details}, ports) {
+    _importDictionaryOffscreenHandler({archiveContent, details}, ports) {
         if (ports.length === 0) {
             throw new Error('Offscreen import response port missing');
         }
-        try {
-            await this._invokeDictionaryWorker('importDictionaryOffscreen', {archiveContent, details}, [ports[0]]);
-        } catch (error) {
-            try {
-                ports[0].postMessage({type: 'error', error: ExtensionError.serialize(error)});
-            } catch (_) {
-                // Best effort error delivery to the import caller.
-            } finally {
+        void this._invokeDictionaryWorker('importDictionaryOffscreen', {archiveContent, details}, [ports[0]])
+            .catch((error) => {
                 try {
-                    ports[0].close();
+                    ports[0].postMessage({type: 'error', error: ExtensionError.serialize(error)});
                 } catch (_) {
-                    // Ignore close failures for dead import response ports.
+                    // Best effort error delivery to the import caller.
+                } finally {
+                    try {
+                        ports[0].close();
+                    } catch (_) {
+                        // Ignore close failures for dead import response ports.
+                    }
                 }
-            }
-        }
+            });
     }
 
     /** @returns {Promise<void>} */
@@ -422,92 +417,33 @@ export class Offscreen {
      * @returns {Promise<any>}
      */
     _invokeDictionaryWorker(action, params, transferables = []) {
-        if (this._dictionaryWorkerFatalError !== null) {
-            return Promise.reject(this._dictionaryWorkerFatalError);
-        }
-        const id = ++this._dictionaryWorkerRequestId;
-        return new Promise((resolve, reject) => {
-            this._dictionaryWorkerResponseHandlers.set(id, {resolve, reject});
-            try {
-                this._dictionaryWorker.postMessage({id, action, params}, transferables);
-            } catch (error) {
-                this._dictionaryWorkerResponseHandlers.delete(id);
-                const normalizedError = error instanceof Error ?
-                    new ExtensionError(error.message) :
-                    new ExtensionError(String(error));
-                this._rejectPendingDictionaryWorkerResponses(normalizedError);
-                reject(normalizedError);
-            }
-        });
-    }
-
-    /**
-     * @param {ExtensionError} error
-     * @returns {void}
-     */
-    _rejectPendingDictionaryWorkerResponses(error) {
-        if (this._dictionaryWorkerFatalError === null) {
-            this._dictionaryWorkerFatalError = error;
-        }
-        for (const [, handler] of this._dictionaryWorkerResponseHandlers) {
-            handler.reject(error);
-        }
-        this._dictionaryWorkerResponseHandlers.clear();
-        try {
-            this._dictionaryWorker.terminate();
-        } catch (_) {
-            // Ignore termination failures after a fatal worker error.
-        }
-    }
-
-    /**
-     * @param {MessageEvent<{id: number, result?: unknown, error?: import('core').SerializedError}>} event
-     */
-    _onDictionaryWorkerMessage(event) {
-        const {id, result, error} = event.data;
-        const handler = this._dictionaryWorkerResponseHandlers.get(id);
-        if (typeof handler === 'undefined') {
-            return;
-        }
-        this._dictionaryWorkerResponseHandlers.delete(id);
-        if (error) {
-            handler.reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error)));
-            return;
-        }
-        handler.resolve(result);
-    }
-
-    /**
-     * @param {MessageEvent} event
-     */
-    _onDictionaryWorkerMessageError(event) {
-        const error = new ExtensionError('Offscreen: Error receiving dictionary worker message');
-        error.data = event;
-        log.error(error);
-        this._rejectPendingDictionaryWorkerResponses(error);
-    }
-
-    /**
-     * @param {ErrorEvent} event
-     */
-    _onDictionaryWorkerError(event) {
-        const error = new ExtensionError('Offscreen: Dictionary worker terminated with an error');
-        error.data = {
-            filename: event.filename,
-            lineno: event.lineno,
-            colno: event.colno,
-            message: event.message,
-        };
-        log.error(error);
-        this._rejectPendingDictionaryWorkerResponses(error);
+        return this._dictionaryWorkerClient.invoke(action, params, transferables);
     }
 
     /**
      * @param {MessageEvent<import('offscreen').McApiMessageAny>} event
      */
     _onMcMessage(event) {
-        const {action, params} = event.data;
-        invokeApiMapHandler(this._mcApiMap, action, params, [event.ports], () => {});
+        const {id, action, params} = /** @type {import('offscreen').McApiRequest} */ (event.data);
+        const responsePortValue = event.currentTarget;
+        if (responsePortValue === null || typeof Reflect.get(responsePortValue, 'postMessage') !== 'function' || typeof id !== 'number') { return; }
+        const responsePort = /** @type {MessagePort} */ (responsePortValue);
+        /** @param {import('core').Response<unknown>} response */
+        const callback = (response) => {
+            try {
+                responsePort.postMessage({id, ...response});
+            } catch (_) {
+                // The control port may have rotated while the action was running.
+            }
+        };
+        invokeApiMapHandler(
+            this._mcApiMap,
+            action,
+            params,
+            [event.ports],
+            callback,
+            () => { callback({error: ExtensionError.serialize(new Error(`Unknown offscreen control action: ${action}`))}); },
+        );
     }
 
     /**

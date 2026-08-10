@@ -47,6 +47,11 @@ const focusedSecondaryDictionary = String(process.env.MANABITAN_FIREFOX_RECOMMEN
 const focusedBaselineOnly = /^(1|true|yes)$/i.test(String(process.env.MANABITAN_FIREFOX_FOCUSED_BASELINE_ONLY || ''));
 const existingProfileOnly = /^(1|true|yes)$/i.test(String(process.env.MANABITAN_FIREFOX_EXISTING_PROFILE_ONLY || ''));
 const profileCycle = /^(1|true|yes)$/i.test(String(process.env.MANABITAN_FIREFOX_PROFILE_CYCLE || ''));
+const firefoxHeadless = !/^(0|false|no)$/i.test(String(process.env.MANABITAN_FIREFOX_HEADLESS ?? '1'));
+const scriptedHoverEnv = String(process.env.MANABITAN_FIREFOX_SCRIPTED_HOVER || '').trim();
+const useScriptedHoverMotion = scriptedHoverEnv.length > 0 ?
+    /^(1|true|yes)$/i.test(scriptedHoverEnv) :
+    process.platform === 'darwin' && firefoxHeadless;
 
 /**
  * @param {'JMdict'|'JMnedict'} name
@@ -186,30 +191,88 @@ async function navigateToExtensionPage(driver, pageUrl, readyLocator, options = 
     const attempts = Math.max(1, Number(options?.attempts ?? 3));
     const pageLoadTimeoutMs = Math.max(1_000, Number(options?.pageLoadTimeoutMs ?? 15_000));
     const readyTimeoutMs = Math.max(1_000, Number(options?.readyTimeoutMs ?? 30_000));
+    const targetLocation = new URL(pageUrl);
     let lastError = null;
     const originalTimeouts = await driver.manage().getTimeouts();
     try {
         await driver.manage().setTimeouts({...originalTimeouts, pageLoad: pageLoadTimeoutMs});
-        for (let attempt = 1; attempt <= attempts; ++attempt) {
+        await driver.switchTo().defaultContent();
+        if (/^(moz|chrome)-extension:$/.test(targetLocation.protocol)) {
+            const originalWindowHandle = await driver.getWindowHandle();
+            for (const windowHandle of await driver.getAllWindowHandles()) {
+                try {
+                    await driver.switchTo().window(windowHandle);
+                    const candidateLocation = new URL(await driver.getCurrentUrl());
+                    if (
+                        candidateLocation.protocol === targetLocation.protocol &&
+                        candidateLocation.host === targetLocation.host
+                    ) {
+                        break;
+                    }
+                } catch (_) {
+                    // Try the next live window.
+                }
+            }
             try {
-                await driver.get('about:blank');
+                const activeLocation = new URL(await driver.getCurrentUrl());
+                if (
+                    activeLocation.protocol !== targetLocation.protocol ||
+                    activeLocation.host !== targetLocation.host
+                ) {
+                    await driver.switchTo().window(originalWindowHandle);
+                }
             } catch (_) {
-                // Best-effort reset before the real navigation.
+                await driver.switchTo().window(originalWindowHandle);
+            }
+        }
+        for (let attempt = 1; attempt <= attempts; ++attempt) {
+            if (!pageUrl.startsWith('moz-extension://')) {
+                try {
+                    await driver.get('about:blank');
+                } catch (_) {
+                    // Best-effort reset before the real navigation.
+                }
             }
             try {
                 await driver.get(pageUrl);
             } catch (error) {
                 lastError = error;
+                try {
+                    const currentUrl = String(await driver.getCurrentUrl());
+                    const currentLocation = new URL(currentUrl);
+                    const targetLocation = new URL(pageUrl);
+                    if (
+                        currentLocation.protocol === 'moz-extension:' &&
+                        currentLocation.protocol === targetLocation.protocol &&
+                        currentLocation.host === targetLocation.host
+                    ) {
+                        await driver.executeScript('window.location.assign(arguments[0]);', pageUrl);
+                    }
+                } catch (_) {
+                    // Preserve the original navigation error for the final failure.
+                }
             }
             try {
                 await driver.wait(async () => {
                     try {
-                        const currentUrl = await driver.getCurrentUrl();
-                        return currentUrl.startsWith(pageUrl);
+                        const currentLocation = new URL(await driver.getCurrentUrl());
+                        if (
+                            currentLocation.protocol !== targetLocation.protocol ||
+                            currentLocation.host !== targetLocation.host ||
+                            currentLocation.pathname !== targetLocation.pathname
+                        ) {
+                            return false;
+                        }
+                        for (const [key, value] of targetLocation.searchParams) {
+                            if (currentLocation.searchParams.get(key) !== value) {
+                                return false;
+                            }
+                        }
+                        return true;
                     } catch (_) {
                         return false;
                     }
-                }, Math.min(5_000, pageLoadTimeoutMs));
+                }, pageLoadTimeoutMs);
                 await driver.wait(until.elementLocated(readyLocator), readyTimeoutMs);
                 return;
             } catch (error) {
@@ -655,8 +718,11 @@ function isIgnorableDriverQuitError(value) {
  * @returns {Promise<void>}
  */
 async function recoverExtensionSearchContext(driver, extensionBaseUrl, query = '暗記') {
-    await driver.get(`${extensionBaseUrl}/search.html?query=${encodeURIComponent(query)}&type=terms&wildcards=off`);
-    await driver.wait(until.elementLocated(By.css('#search-textbox')), 30_000);
+    await navigateToExtensionPage(
+        driver,
+        `${extensionBaseUrl}/search.html?query=${encodeURIComponent(query)}&type=terms&wildcards=off`,
+        By.css('#search-textbox'),
+    );
 }
 
 /**
@@ -1056,7 +1122,11 @@ async function getImportProgressLabel(driver) {
         ];
         for (const selector of selectors) {
             const container = document.querySelector(selector);
-            if (!(container instanceof HTMLElement) || container.hidden) { continue; }
+            if (
+                !(container instanceof HTMLElement) ||
+                container.hidden ||
+                container.closest('[hidden]') !== null
+            ) { continue; }
             const label = container.querySelector('.progress-info');
             if (!(label instanceof HTMLElement)) { continue; }
             const text = (label.textContent || '').trim();
@@ -1123,9 +1193,10 @@ async function getMockSeenUrls(driver) {
  * @param {string} dictionaryName
  * @param {string} expectedCounts
  * @param {number} timeoutMs
+ * @param {Record<string, unknown>|null} [previousImportDebug]
  * @returns {Promise<void>}
  */
-async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName, expectedCounts, timeoutMs) {
+async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName, expectedCounts, timeoutMs, previousImportDebug = null) {
     const importStartTime = safePerformance.now();
     let previousLabel = '';
     let previousLabelStart = importStartTime;
@@ -1133,8 +1204,19 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
     let sawStepText = false;
     let clearedAfterStep = false;
     let emptySince = null;
-    const emptyStabilityMs = 2_000;
+    // A fresh import-debug snapshot is authoritative completion evidence. Keep
+    // only a short UI-settle window so report totals do not include a fixed 2s.
+    const emptyStabilityMs = 250;
     let lastCountsText = '';
+    const previousImportDebugJson = previousImportDebug === null ? null : JSON.stringify(previousImportDebug);
+
+    const getCompletedImportDebug = async () => {
+        const importDebug = await getLastImportDebug(driver);
+        if (previousImportDebugJson !== null && JSON.stringify(importDebug) === previousImportDebugJson) {
+            return {importDebug, completed: false};
+        }
+        return {importDebug, completed: importDebug !== null};
+    };
 
     while (safePerformance.now() < deadline) {
         const now = safePerformance.now();
@@ -1167,6 +1249,15 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
             emptySince ??= now;
             if ((now - emptySince) >= emptyStabilityMs) {
                 clearedAfterStep = true;
+                const {importDebug, completed} = await getCompletedImportDebug();
+                if (!completed) {
+                    const storageDiagnostics = await getBackendStorageDiagnostics(driver);
+                    fail(
+                        `${dictionaryName} progress cleared without a new completed import snapshot. ` +
+                        `counts=${lastCountsText} dictionary-error="${await getDictionaryErrorText(driver)}" ` +
+                        `import-debug=${JSON.stringify(importDebug)} storage=${summarizeBackendStorageDiagnostics(storageDiagnostics)}`,
+                    );
+                }
                 if (previousLabel.length > 0) {
                     await addReportPhase(
                         report,
@@ -1198,6 +1289,11 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
         if (currentLabel.length === 0 && lastCountsText === expectedCounts) {
             emptySince ??= now;
             if ((now - emptySince) >= emptyStabilityMs) {
+                const {importDebug, completed} = await getCompletedImportDebug();
+                if (!completed) {
+                    await driver.sleep(250);
+                    continue;
+                }
                 if (previousLabel.length > 0) {
                     await addReportPhase(
                         report,
@@ -1226,6 +1322,13 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
     const countsText = lastCountsText || await getDictionaryCountsText(driver);
     const errorText = await getDictionaryErrorText(driver);
     if (errorText.length === 0 && countsText === expectedCounts) {
+        const {importDebug, completed} = await getCompletedImportDebug();
+        if (!completed) {
+            fail(
+                `Timed out waiting for a new ${dictionaryName} import snapshot despite settled counts. ` +
+                `counts=${countsText} import-debug=${JSON.stringify(importDebug)}`,
+            );
+        }
         const now = safePerformance.now();
         await addReportPhase(
             report,
@@ -1507,7 +1610,11 @@ async function openInstalledDictionariesModal(driver) {
  * @returns {Promise<void>}
  */
 async function openSearchPageViaActionPopup(driver, extensionBaseUrl) {
-    await driver.get(`${extensionBaseUrl}/action-popup.html`);
+    await navigateToExtensionPage(
+        driver,
+        `${extensionBaseUrl}/action-popup.html`,
+        By.css('.action-open-search'),
+    );
     await driver.wait(async () => {
         // Selenium executeScript return value is untyped (`any`).
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -1542,10 +1649,15 @@ async function openSearchPageViaActionPopup(driver, extensionBaseUrl) {
  * @returns {Promise<string>}
  */
 async function openSearchPageInNewTab(driver, extensionBaseUrl) {
-    await driver.switchTo().newWindow('tab');
-    await driver.get(`${extensionBaseUrl}/search.html`);
+    const existingHandles = new Set((await driver.getAllWindowHandles()).map(String));
+    await driver.executeScript('window.open(arguments[0], "_blank");', `${extensionBaseUrl}/search.html`);
+    const newHandle = await driver.wait(async () => {
+        const handles = (await driver.getAllWindowHandles()).map(String);
+        return handles.find((handle) => !existingHandles.has(handle)) ?? false;
+    }, 30_000, 'Expected extension search tab to open');
+    await driver.switchTo().window(String(newHandle));
     await driver.wait(until.elementLocated(By.css('#search-textbox')), 30_000);
-    return await driver.getWindowHandle();
+    return String(newHandle);
 }
 
 /**
@@ -1857,15 +1969,39 @@ async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictio
     let popupVisible = false;
     let usedModifier = null;
     for (const modifier of modifierCandidates) {
-        if (modifier !== null) {
+        if (modifier !== null && !useScriptedHoverMotion) {
             await driver.actions({async: true}).keyDown(modifier).perform();
         }
         try {
-            await driver.actions({async: true})
-                .move({origin: moveOrigin, x: moveAwayOffsetX, y: -8})
-                .move({origin: moveOrigin, x: 2, y: 2})
-                .move({origin: moveOrigin, x: moveToOffsetX, y: moveToOffsetY, duration: 220})
-                .perform();
+            if (useScriptedHoverMotion) {
+                await driver.executeScript(`
+                    const [target, awayX, toX, toY, shiftKey, altKey, ctrlKey] = arguments;
+                    const rect = target.getBoundingClientRect();
+                    const emit = (type, x, y) => target.dispatchEvent(new PointerEvent(type, {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window,
+                        pointerId: 1,
+                        pointerType: 'mouse',
+                        isPrimary: true,
+                        clientX: rect.left + (rect.width / 2) + x,
+                        clientY: rect.top + (rect.height / 2) + y,
+                        shiftKey,
+                        altKey,
+                        ctrlKey,
+                    }));
+                    emit('pointerover', awayX, -8);
+                    emit('pointermove', awayX, -8);
+                    emit('pointermove', 2, 2);
+                    emit('pointermove', toX, toY);
+                `, targetElement, moveAwayOffsetX, moveToOffsetX, moveToOffsetY, modifier === Key.SHIFT, modifier === Key.ALT, modifier === Key.CONTROL);
+            } else {
+                await driver.actions({async: true})
+                    .move({origin: moveOrigin, x: moveAwayOffsetX, y: -8})
+                    .move({origin: moveOrigin, x: 2, y: 2})
+                    .move({origin: moveOrigin, x: moveToOffsetX, y: moveToOffsetY, duration: 220})
+                    .perform();
+            }
             if (pauseAfterMoveMs > 0) {
                 await driver.sleep(pauseAfterMoveMs);
             }
@@ -1884,7 +2020,7 @@ async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictio
                 break;
             }
         } finally {
-            if (modifier !== null) {
+            if (modifier !== null && !useScriptedHoverMotion) {
                 await driver.actions({async: true}).keyUp(modifier).perform();
             }
         }
@@ -2395,8 +2531,13 @@ async function getBackendStorageDiagnostics(driver) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await driver.executeAsyncScript(`
         const done = arguments[arguments.length - 1];
-        chrome.runtime.sendMessage({action: 'debugDictionaryStorageState', params: undefined}, (response) => {
-            const runtimeError = chrome.runtime.lastError;
+        const runtime = globalThis.chrome?.runtime ?? globalThis.browser?.runtime;
+        if (!(runtime && typeof runtime.sendMessage === 'function')) {
+            done({ok: false, error: 'Extension runtime API unavailable in current page'});
+            return;
+        }
+        runtime.sendMessage({action: 'debugDictionaryStorageState', params: undefined}, (response) => {
+            const runtimeError = runtime.lastError;
             if (runtimeError) {
                 done({ok: false, error: runtimeError.message || String(runtimeError)});
                 return;
@@ -3717,7 +3858,14 @@ async function main() {
         heartbeat.setActiveOperation('wait for updated Jitendex import completion');
         await beginPageProfilePhase(driver);
         const updateSampler = startFirefoxResourceSampler(firefoxPid);
-        await waitForImportWithPhaseScreenshots(driver, report, 'Jitendex', '2 installed, 2 enabled', 300_000);
+        await waitForImportWithPhaseScreenshots(
+            driver,
+            report,
+            'Jitendex',
+            '2 installed, 2 enabled',
+            300_000,
+            jmdictImportDebug,
+        );
         const updateResourceSummary = await updateSampler.stop();
         const updatePageSummary = await endPageProfilePhase(driver);
         const updateProfileEnd = safePerformance.now();
@@ -3991,6 +4139,7 @@ async function main() {
         }
 
         const hoverSpeedStressStart = safePerformance.now();
+        heartbeat.setActiveOperation(`hover speed stress (${useScriptedHoverMotion ? 'scripted' : 'native'} motion)`);
         await closeModalIfOpen(driver, '#dictionaries-modal');
         await beginPageProfilePhase(driver);
         const hoverSpeedSampler = startFirefoxResourceSampler(firefoxPid);
@@ -4061,6 +4210,7 @@ async function main() {
         }
 
         const hoverLookupStart = safePerformance.now();
+        heartbeat.setActiveOperation(`repeated hover stress (${useScriptedHoverMotion ? 'scripted' : 'native'} motion)`);
         const hoverTargets = ['#target-word', '#target-cat', '#target-name', '#target-kotoba', '#target-born', '#target-mitou'];
         /** @type {Array<{iteration: number, selector: string, popupTextPreview: string}>} */
         const hoverIterationSummaries = [];
@@ -4128,8 +4278,11 @@ async function main() {
         let postHoverHitCounts = /** @type {Record<string, number>} */ ({});
         let postHoverSearchError = '';
         try {
-            await driver.get(`${extensionBaseUrl}/search.html?query=${encodeURIComponent(postHoverSearchTerm)}&type=terms&wildcards=off`);
-            await driver.wait(until.elementLocated(By.css('#search-textbox')), 30_000);
+            await navigateToExtensionPage(
+                driver,
+                `${extensionBaseUrl}/search.html?query=${encodeURIComponent(postHoverSearchTerm)}&type=terms&wildcards=off`,
+                By.css('#search-textbox'),
+            );
             postHoverHitCounts = await searchTermAndGetDictionaryHitCounts(driver, postHoverSearchTerm, expectedLookupDictionaries, 20_000, 'button');
             if ((postHoverHitCounts.Jitendex ?? 0) < 1 || (postHoverHitCounts.JMdict ?? 0) < 1) {
                 const searchDiagnostics = await getSearchPageDiagnostics(driver);

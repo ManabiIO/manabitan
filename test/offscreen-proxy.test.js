@@ -5,108 +5,111 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
 
-const reportDiagnostics = vi.fn();
-vi.mock('../ext/js/core/diagnostics-reporter.js', () => ({
-    reportDiagnostics,
-}));
+vi.mock('../ext/js/core/diagnostics-reporter.js', () => ({reportDiagnostics: vi.fn()}));
 
-const {DictionaryRuntimeWorkerProxy} = await import('../ext/js/background/offscreen-proxy.js');
+const {DictionaryRuntimeWorkerProxy, TranslatorProxy} = await import('../ext/js/background/offscreen-proxy.js');
 
-/**
- * @returns {import('../ext/js/background/offscreen-proxy.js').DictionaryRuntimeWorkerProxy}
- */
-function createProxyForInternalTests() {
-    return /** @type {import('../ext/js/background/offscreen-proxy.js').DictionaryRuntimeWorkerProxy} */ (Object.create(DictionaryRuntimeWorkerProxy.prototype));
-}
-
-/**
- * @param {string} name
- * @returns {Function}
- */
-function getOffscreenProxyMethod(name) {
-    const method = /** @type {unknown} */ (Reflect.get(DictionaryRuntimeWorkerProxy.prototype, name));
-    if (typeof method !== 'function') {
-        throw new Error(`Expected DictionaryRuntimeWorkerProxy.${name} to be a function`);
-    }
-    return method;
-}
-
-describe('OffscreenProxy response diagnostics', () => {
-    const onMessage = /** @type {(this: import('../ext/js/background/offscreen-proxy.js').DictionaryRuntimeWorkerProxy, event: MessageEvent<{id?: number, result?: unknown}>) => void} */ (getOffscreenProxyMethod('_onMessage'));
-
+describe('DictionaryRuntimeWorkerProxy', () => {
     afterEach(() => {
-        vi.useRealTimers();
+        vi.unstubAllGlobals();
         vi.restoreAllMocks();
-        reportDiagnostics.mockReset();
     });
 
-    test('does not emit unmatched-response diagnostics for matched replies', () => {
-        const proxy = createProxyForInternalTests();
-        const resolve = vi.fn();
-        const reject = vi.fn();
-        Reflect.set(proxy, '_responseHandlers', new Map([[7, {resolve, reject}]]));
+    test('uses shared recovery and lookup retry behavior', async () => {
+        class FakeWorker {
+            /** @type {FakeWorker[]} */
+            static instances = [];
 
-        onMessage.call(proxy, /** @type {MessageEvent<{id?: number, result?: unknown}>} */ (/** @type {unknown} */ ({
-            data: {id: 7, result: {ok: true}},
-        })));
+            constructor() {
+                this.listeners = new Map();
+                this.postMessage = vi.fn();
+                this.terminate = vi.fn();
+                FakeWorker.instances.push(this);
+            }
 
-        expect(resolve).toHaveBeenCalledWith({ok: true});
-        expect(reject).not.toHaveBeenCalled();
-        expect(reportDiagnostics).not.toHaveBeenCalled();
+            /**
+             * @param {string} type
+             * @param {Function} listener
+             */
+            addEventListener(type, listener) {
+                this.listeners.set(type, listener);
+            }
+        }
+        vi.stubGlobal('Worker', FakeWorker);
+        const proxy = new DictionaryRuntimeWorkerProxy('/dictionary-worker.js');
+        const promise = proxy.sendMessagePromise(/** @type {import('offscreen').ApiMessageAny} */ ({action: 'findTermsOffscreen'}));
+        FakeWorker.instances[0].listeners.get('error')?.({message: 'crashed'});
+
+        await vi.waitFor(() => expect(FakeWorker.instances).toHaveLength(2));
+        expect(FakeWorker.instances[1].postMessage).toHaveBeenCalledWith(
+            {id: 2, action: 'findTermsOffscreen', params: {}},
+            [],
+        );
+        FakeWorker.instances[1].listeners.get('message')?.({data: {id: 2, result: {ok: true}}});
+        await expect(promise).resolves.toEqual({ok: true});
     });
 
-    test('emits unmatched-response diagnostics for unknown reply ids', () => {
-        const proxy = createProxyForInternalTests();
-        Reflect.set(proxy, '_responseHandlers', new Map());
+    test('forwards transferred import ports as one-way requests', async () => {
+        class FakeWorker {
+            constructor() {
+                this.postMessage = vi.fn();
+            }
 
-        onMessage.call(proxy, /** @type {MessageEvent<{id?: number, result?: unknown}>} */ (/** @type {unknown} */ ({
-            data: {id: 99, result: {ok: true}},
-        })));
+            addEventListener() {}
+        }
+        vi.stubGlobal('Worker', FakeWorker);
+        const proxy = new DictionaryRuntimeWorkerProxy('/dictionary-worker.js');
+        const port = /** @type {MessagePort} */ (/** @type {unknown} */ ({name: 'response-port'}));
 
-        expect(reportDiagnostics).toHaveBeenCalledWith('offscreen-proxy-unmatched-response', {
-            reason: 'unknown-id',
-            id: 99,
-            hasError: false,
+        await proxy.sendMessageViaPort(
+            {action: 'importDictionaryOffscreen', params: {archiveContent: new Blob([]), details: {}}},
+            [port],
+        );
+
+        const client = Reflect.get(proxy, '_client');
+        const worker = Reflect.get(client, '_worker');
+        expect(worker.postMessage).toHaveBeenCalledWith(
+            {id: 1, action: 'importDictionaryOffscreen', params: {archiveContent: expect.any(Blob), details: {}}},
+            [port],
+        );
+    });
+});
+
+describe('TranslatorProxy', () => {
+    test('sends native lookup settings through the structured-clone transport', async () => {
+        const sendMessageViaPort = vi.fn(async () => ({dictionaryEntries: [], originalTextLength: 0}));
+        const messenger = /** @type {ConstructorParameters<typeof TranslatorProxy>[0]} */ (/** @type {unknown} */ ({sendMessageViaPort}));
+        const proxy = new TranslatorProxy(messenger);
+        const enabledDictionaryMap = new Map([['JMdict', {
+            index: 0,
+            alias: 'JMdict',
+            allowSecondarySearches: false,
+            partsOfSpeechFilter: true,
+            useDeinflections: true,
+        }]]);
+        const excludeDictionaryDefinitions = new Set(['Excluded']);
+        const textReplacements = [[{pattern: /a\/b\\c/giu, replacement: 'x'}]];
+        const options = /** @type {import('translation').FindTermsOptions} */ ({
+            enabledDictionaryMap,
+            excludeDictionaryDefinitions,
+            textReplacements,
         });
-    });
 
-    test('dictionary runtime messages time out when the worker never answers', async () => {
-        vi.useFakeTimers();
-        const proxy = createProxyForInternalTests();
-        const postMessage = vi.fn();
-        Reflect.set(proxy, '_worker', {postMessage});
-        Reflect.set(proxy, '_responseHandlers', new Map());
-        Reflect.set(proxy, '_requestId', 0);
-        Reflect.set(proxy, '_fatalError', null);
+        await proxy.findTerms('group', 'first', options);
+        await proxy.findTerms('group', 'second', options);
 
-        const promise = DictionaryRuntimeWorkerProxy.prototype.sendMessagePromise.call(proxy, {action: 'findTermsOffscreen'});
-        const expectation = expect(promise).rejects.toThrow(/Timed out waiting for dictionary runtime response to findTermsOffscreen after 30000ms/);
-        await vi.advanceTimersByTimeAsync(30_000);
-        await expectation;
-
-        expect(postMessage).toHaveBeenCalledWith({id: 1, action: 'findTermsOffscreen', params: {}});
-        expect(Reflect.get(proxy, '_responseHandlers').size).toBe(0);
-
-        onMessage.call(proxy, /** @type {MessageEvent<{id?: number, result?: unknown}>} */ (/** @type {unknown} */ ({
-            data: {id: 1, result: {ok: true}},
-        })));
-
-        expect(reportDiagnostics).toHaveBeenCalledWith('offscreen-proxy-unmatched-response', {
-            reason: 'unknown-id',
-            id: 1,
-            hasError: false,
+        expect(sendMessageViaPort).toHaveBeenCalledTimes(2);
+        expect(sendMessageViaPort.mock.calls[0][0]).toEqual({
+            action: 'findTermsStructuredOffscreen',
+            params: {mode: 'group', text: 'first', options},
         });
+        expect(sendMessageViaPort.mock.calls[0][1]).toEqual([]);
+        expect(sendMessageViaPort.mock.calls[0][0].params.options.enabledDictionaryMap).toBe(enabledDictionaryMap);
+        expect(sendMessageViaPort.mock.calls[0][0].params.options.excludeDictionaryDefinitions).toBe(excludeDictionaryDefinitions);
+        expect(sendMessageViaPort.mock.calls[0][0].params.options.textReplacements[0][0].pattern).toBeInstanceOf(RegExp);
     });
 });

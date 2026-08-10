@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026  Manabitan Authors
+ * Copyright (C) 2026 Manabitan authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import {parseJson} from '../core/json.js';
 
 const FILE_NAME = 'manabitan-dictionary-import-journal.json';
 const JOURNAL_VERSION = 1;
+const MAX_CHECKPOINT_FILES = 100000;
 
 export class DictionaryImportJournal {
     /**
@@ -35,7 +36,9 @@ export class DictionaryImportJournal {
             throw error;
         }
         const file = await handle.getFile();
-        if (file.size <= 0) { return null; }
+        if (file.size <= 0) {
+            throw new Error('Invalid empty dictionary import journal');
+        }
         const value = /** @type {unknown} */ (parseJson(await file.text()));
         if (!this._isRecord(value)) {
             throw new Error('Invalid dictionary import journal');
@@ -52,13 +55,28 @@ export class DictionaryImportJournal {
             throw new Error('Invalid dictionary import journal record');
         }
         const root = await this._getRoot();
-        if (root === null) { return; }
+        if (root === null) {
+            throw new Error('Dictionary import journal requires OPFS');
+        }
         const handle = await root.getFileHandle(FILE_NAME, {create: true});
         const writable = await handle.createWritable();
         try {
             await writable.write(JSON.stringify(record));
-        } finally {
             await writable.close();
+        } catch (error) {
+            const writeError = error instanceof Error ? error : new Error(String(error));
+            try {
+                await writable.abort(writeError);
+            } catch (abortError) {
+                throw new AggregateError(
+                    [
+                        writeError,
+                        abortError instanceof Error ? abortError : new Error(String(abortError)),
+                    ],
+                    'Dictionary import journal write and abort failed',
+                );
+            }
+            throw writeError;
         }
     }
 
@@ -67,7 +85,9 @@ export class DictionaryImportJournal {
      */
     async clear() {
         const root = await this._getRoot();
-        if (root === null) { return; }
+        if (root === null) {
+            throw new Error('Dictionary import journal requires OPFS');
+        }
         try {
             await root.removeEntry(FILE_NAME);
         } catch (error) {
@@ -100,11 +120,48 @@ export class DictionaryImportJournal {
             record.version === JOURNAL_VERSION &&
             typeof record.sessionId === 'string' &&
             record.sessionId.length > 0 &&
-            typeof record.contentCheckpoint === 'object' &&
-            record.contentCheckpoint !== null &&
-            typeof record.recordCheckpoint === 'object' &&
-            record.recordCheckpoint !== null
+            record.sessionId.length <= 256 &&
+            Number.isSafeInteger(record.createdAt) &&
+            /** @type {number} */ (record.createdAt) >= 0 &&
+            this._isCheckpoint(record.contentCheckpoint, 'segments') &&
+            this._isCheckpoint(record.recordCheckpoint, 'shards')
         );
+    }
+
+    /**
+     * @param {unknown} value
+     * @param {'segments'|'shards'} key
+     * @returns {boolean}
+     */
+    _isCheckpoint(value, key) {
+        if (typeof value !== 'object' || value === null) { return false; }
+        const checkpoint = /** @type {Record<string, unknown>} */ (value);
+        const files = checkpoint[key];
+        if (!Array.isArray(files) || files.length > MAX_CHECKPOINT_FILES) { return false; }
+        const names = new Set();
+        for (const file of files) {
+            if (typeof file !== 'object' || file === null) { return false; }
+            /** @type {unknown} */
+            const checkpointFileValue = file;
+            const checkpointFile = /** @type {Record<string, unknown>} */ (checkpointFileValue);
+            const fileName = checkpointFile.fileName;
+            const fileLength = checkpointFile.fileLength;
+            if (
+                typeof fileName !== 'string' ||
+                fileName.length === 0 ||
+                fileName.length > 512 ||
+                fileName === '.' ||
+                fileName === '..' ||
+                /[/\\\0]/.test(fileName) ||
+                names.has(fileName) ||
+                !Number.isSafeInteger(fileLength) ||
+                /** @type {number} */ (fileLength) < 0
+            ) {
+                return false;
+            }
+            names.add(fileName);
+        }
+        return true;
     }
 
     /**

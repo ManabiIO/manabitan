@@ -22,15 +22,18 @@ const DEFAULT_INITIAL_STRING_CAPACITY = 16384;
  * @param {number} [initialStringCapacity]
  * @returns {{
  *   internStringBytes: (bytes: Uint8Array) => number,
+ *   internStringBytesWithHash: (bytes: Uint8Array, hash: number) => number,
  *   buildPlan: (expressionIndexes: number[]|Uint32Array, readingIndexes: number[]|Uint32Array, count?: number) => import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan,
  * }}
  */
 export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = DEFAULT_INITIAL_STRING_CAPACITY) {
     const normalizedInitialCapacity = Math.max(16, Math.trunc(initialStringCapacity));
-    /** @type {Map<number, number|number[]>} */
-    const stringIndexesByHash = new Map();
+    let hashTableCapacity = 32;
+    while (hashTableCapacity < normalizedInitialCapacity * 2) { hashTableCapacity *= 2; }
+    let stringIndexTable = new Uint32Array(hashTableCapacity);
     let stringLengthsCapacity = normalizedInitialCapacity;
     let stringLengths = new Uint16Array(stringLengthsCapacity);
+    let stringHashes = new Uint32Array(stringLengthsCapacity);
     /** @type {Uint8Array[]} */
     const stringBytesList = new Array(stringLengthsCapacity);
     let totalStringBytes = 0;
@@ -44,6 +47,9 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
         const nextStringLengths = new Uint16Array(nextCapacity);
         nextStringLengths.set(stringLengths.subarray(0, stringCount));
         stringLengths = nextStringLengths;
+        const nextStringHashes = new Uint32Array(nextCapacity);
+        nextStringHashes.set(stringHashes.subarray(0, stringCount));
+        stringHashes = nextStringHashes;
         stringBytesList.length = nextCapacity;
         stringLengthsCapacity = nextCapacity;
     };
@@ -63,51 +69,80 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
 
     /**
      * @param {number} h1
-     * @param {number} h2
      * @param {number} byteLength
      * @returns {number}
      */
-    const getHashKey = (h1, h2, byteLength) => (
-        (h1 ^ Math.imul(h2, 0x9e3779b1) ^ Math.imul(byteLength, 0x85ebca6b)) >>> 0
-    );
+    const getHashSlot = (h1, byteLength) => {
+        let value = (h1 ^ Math.imul(byteLength, 0x85ebca6b)) >>> 0;
+        value ^= value >>> 16;
+        return value & (stringIndexTable.length - 1);
+    };
+
+    /** @param {number} requiredCount */
+    const ensureHashCapacity = (requiredCount) => {
+        if (requiredCount * 2 <= stringIndexTable.length) { return; }
+        const oldTable = stringIndexTable;
+        stringIndexTable = new Uint32Array(oldTable.length * 2);
+        for (let index = 0; index < stringCount; ++index) {
+            let slot = getHashSlot(stringHashes[index], stringLengths[index]);
+            while (stringIndexTable[slot] !== 0) {
+                slot = (slot + 1) & (stringIndexTable.length - 1);
+            }
+            stringIndexTable[slot] = index + 1;
+        }
+    };
+
+    /**
+     * @param {Uint8Array} bytes
+     * @param {number} hash
+     * @returns {number}
+     */
+    const internHashedBytes = (bytes, hash) => {
+        if (bytes.byteLength > 0xffff) {
+            throw new Error('Term expression or reading exceeds the binary record limit');
+        }
+        const h1 = hash >>> 0;
+        let slot = getHashSlot(h1, bytes.byteLength);
+        while (true) {
+            const stored = stringIndexTable[slot];
+            if (stored === 0) { break; }
+            const index = stored - 1;
+            if (
+                stringHashes[index] === h1 &&
+                stringLengths[index] === bytes.byteLength &&
+                bytesEqual(stringBytesList[index], bytes)
+            ) {
+                return index;
+            }
+            slot = (slot + 1) & (stringIndexTable.length - 1);
+        }
+
+        const index = stringCount;
+        ensureCapacity(index + 1);
+        ensureHashCapacity(index + 1);
+        slot = getHashSlot(h1, bytes.byteLength);
+        while (stringIndexTable[slot] !== 0) {
+            slot = (slot + 1) & (stringIndexTable.length - 1);
+        }
+        stringLengths[index] = bytes.byteLength;
+        stringHashes[index] = h1;
+        stringBytesList[index] = bytes;
+        stringIndexTable[slot] = index + 1;
+        totalStringBytes += bytes.byteLength;
+        stringCount = index + 1;
+        return index;
+    };
 
     return {
         internStringBytes(bytes) {
-            if (bytes.byteLength > 0xffff) {
-                throw new Error('Term expression or reading exceeds the binary record limit');
-            }
             let h1 = 0x811c9dc5;
-            let h2 = 0x9e3779b9;
             for (let i = 0; i < bytes.byteLength; ++i) {
-                const code = bytes[i];
-                h1 = Math.imul((h1 ^ code) >>> 0, 0x01000193);
-                h2 = Math.imul((h2 ^ code) >>> 0, 0x85ebca6b);
-                h2 = (h2 ^ (h2 >>> 13)) >>> 0;
+                h1 = Math.imul(h1 ^ bytes[i], 0x01000193);
             }
-            const key = getHashKey(h1, h2, bytes.byteLength);
-            const cached = stringIndexesByHash.get(key);
-            if (typeof cached === 'number') {
-                if (bytesEqual(stringBytesList[cached], bytes)) { return cached; }
-            } else if (Array.isArray(cached)) {
-                for (const index of cached) {
-                    if (bytesEqual(stringBytesList[index], bytes)) { return index; }
-                }
-            }
-
-            const index = stringCount;
-            ensureCapacity(index + 1);
-            stringLengths[index] = bytes.byteLength;
-            stringBytesList[index] = bytes;
-            totalStringBytes += bytes.byteLength;
-            stringCount = index + 1;
-            if (typeof cached === 'number') {
-                stringIndexesByHash.set(key, [cached, index]);
-            } else if (Array.isArray(cached)) {
-                cached.push(index);
-            } else {
-                stringIndexesByHash.set(key, index);
-            }
-            return index;
+            return internHashedBytes(bytes, h1);
+        },
+        internStringBytesWithHash(bytes, hash) {
+            return internHashedBytes(bytes, hash);
         },
         buildPlan(expressionIndexes, readingIndexes, count = expressionIndexes.length) {
             const stringsBuffer = new Uint8Array(totalStringBytes);
@@ -121,6 +156,7 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
             }
             return {
                 stringLengths: stringLengths.subarray(0, stringCount),
+                stringHashes: stringHashes.subarray(0, stringCount),
                 stringOffsets,
                 stringsBuffer,
                 expressionIndexes: expressionIndexes instanceof Uint32Array ? expressionIndexes.subarray(0, count) : Uint32Array.from(expressionIndexes.slice(0, count)),

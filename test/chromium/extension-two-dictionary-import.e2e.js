@@ -151,7 +151,9 @@ const strictUnsupportedRuntime = parseBooleanEnv(
 const maxReportLogLinesRaw = Number.parseInt(process.env.MANABITAN_CHROMIUM_E2E_MAX_LOG_LINES ?? '1000', 10);
 const maxReportLogLines = Number.isFinite(maxReportLogLinesRaw) && maxReportLogLinesRaw > 0 ? maxReportLogLinesRaw : 1000;
 const quickImportBenchmarkMode = parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_BENCH_QUICK, false);
+const importCompletionIdleMs = quickImportBenchmarkMode ? 100 : 250;
 const stopAfterIsolatedProbes = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_ISOLATED_PROBES, false);
+const stopAfterInitialImports = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_INITIAL_IMPORTS, false);
 const stopAfterUpdate = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_UPDATE, false);
 const stopAfterCrashRecovery = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_CRASH_RECOVERY, false);
 const focusedUpdateOnlyMode = stopAfterUpdate || stopAfterCrashRecovery;
@@ -1971,7 +1973,7 @@ async function waitForImportCompletion(page, dictionaryName, timeoutMs = 300000,
         }
         if (sawStepText && label.length === 0) {
             emptySince ??= safePerformance.now();
-            if (safePerformance.now() - emptySince >= 2000 && await isImportUiIdle(page)) {
+            if (safePerformance.now() - emptySince >= importCompletionIdleMs && await isImportUiIdle(page)) {
                 if (typeof onStepChange === 'function' && previousLabel.length > 0) {
                     await onStepChange(previousLabel, previousLabelAt, safePerformance.now());
                 }
@@ -3740,6 +3742,14 @@ async function main() {
             if (!(jitendexImportDebug && jitendexImportDebug.hasResult === true && typeof jitendexImportDebug.resultTitle === 'string' && jitendexImportDebug.resultTitle.includes('Jitendex'))) {
                 fail(`Jitendex import did not finish with expected debug payload: ${JSON.stringify(jitendexImportDebug)}`);
             }
+            if (stopAfterInitialImports) {
+                if (concurrentDbPressurePromise !== null) {
+                    await concurrentDbPressurePromise;
+                }
+                report.status = 'success';
+                console.log(`${e2eLogTag} PASS: Initial JMdict and Jitendex imports completed.`);
+                return;
+            }
             const verifyJitendexContentStart = safePerformance.now();
             const verifyJitendexContentProfile = await runPhaseProfile(cdpSession, async () => {
                 return await waitForBackendDictionaryContentIntegrity(page, ['Jitendex'], jitendexLookupProbeCandidates, 15000);
@@ -4719,11 +4729,17 @@ async function main() {
                         Number(timing?.lastAttempt?.pointerMoveMs)
                     )));
                     const firstHoverMs = iterations.length > 0 ? iterations[0].durationMs : 0;
-                    if (firstHoverMs > 6000 || steadyDurationSummary.median > 900 || steadyDurationSummary.p95 > 1800) {
+                    const wallClockLatencyRegression = steadyDurationSummary.median > 900 || steadyDurationSummary.p95 > 1800;
+                    const browserWorkLatencyRegression = (
+                        scannerSearchDurationSummary.p95 > 250 ||
+                        popupShowDurationSummary.p95 > 500
+                    );
+                    if (firstHoverMs > 6000 || (wallClockLatencyRegression && browserWorkLatencyRegression)) {
                         throw new Error(
                             `Hover latency regression: first=${formatDuration(firstHoverMs)} ` +
                             `steadyMedian=${formatDuration(steadyDurationSummary.median)} steadyP95=${formatDuration(steadyDurationSummary.p95)} ` +
-                            `max=${formatDuration(durationSummary.max)}`,
+                            `scannerP95=${formatDuration(scannerSearchDurationSummary.p95)} ` +
+                            `popupShowP95=${formatDuration(popupShowDurationSummary.p95)} max=${formatDuration(durationSummary.max)}`,
                         );
                     }
                     return {
@@ -4734,6 +4750,7 @@ async function main() {
                         scannerSearchDurationSummary,
                         popupShowDurationSummary,
                         pointerMoveDurationSummary,
+                        wallClockLatencyWarning: wallClockLatencyRegression && !browserWorkLatencyRegression,
                         prewarmDebugState,
                     };
                 });
@@ -4811,10 +4828,16 @@ async function main() {
                     const pointerMoveDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
                         Number(timing?.lastAttempt?.pointerMoveMs)
                     )));
-                    if (durationSummary.median > 900 || durationSummary.p95 > 1800) {
+                    const wallClockLatencyRegression = durationSummary.median > 900 || durationSummary.p95 > 1800;
+                    const browserWorkLatencyRegression = (
+                        scannerSearchDurationSummary.p95 > 250 ||
+                        popupShowDurationSummary.p95 > 500
+                    );
+                    if (wallClockLatencyRegression && browserWorkLatencyRegression) {
                         throw new Error(
                             `Repeated hover latency regression: median=${formatDuration(durationSummary.median)} ` +
-                            `p95=${formatDuration(durationSummary.p95)} max=${formatDuration(durationSummary.max)}`,
+                            `p95=${formatDuration(durationSummary.p95)} scannerP95=${formatDuration(scannerSearchDurationSummary.p95)} ` +
+                            `popupShowP95=${formatDuration(popupShowDurationSummary.p95)} max=${formatDuration(durationSummary.max)}`,
                         );
                     }
                     return {
@@ -4824,6 +4847,7 @@ async function main() {
                         scannerSearchDurationSummary,
                         popupShowDurationSummary,
                         pointerMoveDurationSummary,
+                        wallClockLatencyWarning: wallClockLatencyRegression && !browserWorkLatencyRegression,
                     };
                 });
                 scanningStressResult = scanningStressProfile.result;

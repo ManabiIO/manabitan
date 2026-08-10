@@ -24,7 +24,7 @@ import {
     RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES,
     writeRawTermContentBlockReference,
 } from './raw-term-content.js';
-import {compressTermContentZstd, decompressTermContentZstd} from './zstd-term-content.js';
+import {compressTermContentZstd, compressTermContentZstdBatch, decompressTermContentZstd} from './zstd-term-content.js';
 
 const DEFAULT_BLOCK_TARGET_BYTES = 2 * 1024 * 1024;
 const DEFAULT_REFERENCE_PACK_TARGET_BYTES = 4 * 1024 * 1024;
@@ -55,6 +55,29 @@ export class TermContentBlockImportSession {
         if (this._closed) { throw new Error('Term content block import session is closed'); }
         const result = await this._store.tryAppend(
             contentBytesList,
+            compressionDictName,
+            this._blockEnabledDictionaries.has(dictionary),
+        );
+        if (result !== null) {
+            this._blockEnabledDictionaries.add(dictionary);
+        }
+        return result;
+    }
+
+    /**
+     * @param {string} dictionary
+     * @param {Uint8Array} sourceBytes
+     * @param {Uint32Array} sourceOffsets
+     * @param {Uint32Array} sourceLengths
+     * @param {string|null} compressionDictName
+     * @returns {Promise<{contentOffsets: number[], contentLengths: number[], contentDictName: string, compressedBytes: number, uncompressedBytes: number}|null>}
+     */
+    async appendSpans(dictionary, sourceBytes, sourceOffsets, sourceLengths, compressionDictName) {
+        if (this._closed) { throw new Error('Term content block import session is closed'); }
+        const result = await this._store.tryAppendSpans(
+            sourceBytes,
+            sourceOffsets,
+            sourceLengths,
             compressionDictName,
             this._blockEnabledDictionaries.has(dictionary),
         );
@@ -298,20 +321,86 @@ export class TermContentBlockStore {
      */
     async tryAppend(contentBytesList, compressionDictName, force = false) {
         if (contentBytesList.length === 0) { return null; }
+        const sourceLengths = Uint32Array.from(contentBytesList, ({byteLength}) => byteLength);
+        return await this._tryAppendPacked(
+            () => packContentChunksIntoSlabs(contentBytesList, this._blockTargetBytes),
+            sourceLengths,
+            compressionDictName,
+            force,
+        );
+    }
+
+    /**
+     * Packs byte spans directly from a shared source slab, avoiding one
+     * Uint8Array view allocation per logical content entry.
+     * @param {Uint8Array} sourceBytes
+     * @param {Uint32Array} sourceOffsets
+     * @param {Uint32Array} sourceLengths
+     * @param {string|null} compressionDictName
+     * @param {boolean} force
+     * @returns {Promise<{contentOffsets: number[], contentLengths: number[], contentDictName: string, compressedBytes: number, uncompressedBytes: number}|null>}
+     */
+    async tryAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
+        if (!(sourceBytes instanceof Uint8Array)) {
+            throw new TypeError('Term content source must be a Uint8Array');
+        }
+        if (
+            !(sourceOffsets instanceof Uint32Array) ||
+            !(sourceLengths instanceof Uint32Array) ||
+            sourceOffsets.length !== sourceLengths.length
+        ) {
+            throw new TypeError('Term content span offsets and lengths must be equally sized Uint32Arrays');
+        }
+        if (sourceOffsets.length === 0) { return null; }
+        for (let i = 0; i < sourceOffsets.length; ++i) {
+            const start = sourceOffsets[i];
+            const length = sourceLengths[i];
+            if (start > sourceBytes.byteLength || length > sourceBytes.byteLength - start) {
+                throw new RangeError(`Term content span ${i} is out of bounds`);
+            }
+        }
+        return await this._tryAppendPacked(
+            () => packContentSpansIntoSlabs(sourceBytes, sourceOffsets, sourceLengths, this._blockTargetBytes),
+            sourceLengths,
+            compressionDictName,
+            force,
+        );
+    }
+
+    /**
+     * @param {() => ReturnType<typeof packContentChunksIntoSlabs>} pack
+     * @param {Uint32Array} sourceLengths
+     * @param {string|null} compressionDictName
+     * @param {boolean} force
+     * @returns {Promise<{contentOffsets: number[], contentLengths: number[], contentDictName: string, compressedBytes: number, uncompressedBytes: number}|null>}
+     */
+    async _tryAppendPacked(pack, sourceLengths, compressionDictName, force) {
         let uncompressedBytes = 0;
-        for (const contentBytes of contentBytesList) { uncompressedBytes += contentBytes.byteLength; }
+        for (const length of sourceLengths) { uncompressedBytes += length; }
         if (!force && uncompressedBytes < this._minInputBytes) { return null; }
 
-        const packed = packContentChunksIntoSlabs(contentBytesList, this._blockTargetBytes);
+        let packed = pack();
+        let packedChunkLengths = Uint32Array.from(packed.packedChunks, ({byteLength}) => byteLength);
         /** @type {Uint8Array[]} */
-        const compressedChunks = new Array(packed.packedChunks.length);
+        let compressedChunks;
+        try {
+            compressedChunks = await compressTermContentZstdBatch(packed.packedChunks, compressionDictName);
+            validateCompressedChunks(compressedChunks, packed.packedChunks.length);
+        } catch (_) {
+            // Worker dispatch may detach packed slabs. Repack from stable source
+            // bytes before using the synchronous fallback.
+            packed = pack();
+            packedChunkLengths = Uint32Array.from(packed.packedChunks, ({byteLength}) => byteLength);
+            compressedChunks = packed.packedChunks.map(
+                (content) => Uint8Array.from(compressTermContentZstd(content, compressionDictName)),
+            );
+            validateCompressedChunks(compressedChunks, packed.packedChunks.length);
+        }
         let compressedBytes = 0;
-        for (let i = 0; i < packed.packedChunks.length; ++i) {
-            const compressed = Uint8Array.from(compressTermContentZstd(packed.packedChunks[i], compressionDictName));
-            compressedChunks[i] = compressed;
+        for (const compressed of compressedChunks) {
             compressedBytes += compressed.byteLength;
         }
-        const referenceBytes = contentBytesList.length * RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES;
+        const referenceBytes = sourceLengths.length * RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES;
         if (!force && (compressedBytes + referenceBytes) > uncompressedBytes * (1 - this._minSavingsRatio)) {
             return null;
         }
@@ -320,12 +409,12 @@ export class TermContentBlockStore {
         const appendResult = await this._contentStore.appendBatchWithDerivedChunks(
             compressedChunks,
             (blockOffsets, blockLengths) => {
-                const slabCount = Math.ceil(contentBytesList.length / referenceEntriesPerSlab);
+                const slabCount = Math.ceil(sourceLengths.length / referenceEntriesPerSlab);
                 /** @type {Uint8Array[]} */
                 const referenceSlabs = new Array(slabCount);
                 for (let slabIndex = 0; slabIndex < slabCount; ++slabIndex) {
                     const startIndex = slabIndex * referenceEntriesPerSlab;
-                    const entryCount = Math.min(referenceEntriesPerSlab, contentBytesList.length - startIndex);
+                    const entryCount = Math.min(referenceEntriesPerSlab, sourceLengths.length - startIndex);
                     const slab = new Uint8Array(entryCount * RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES);
                     const view = new DataView(slab.buffer, slab.byteOffset, slab.byteLength);
                     for (let localIndex = 0; localIndex < entryCount; ++localIndex) {
@@ -336,9 +425,9 @@ export class TermContentBlockStore {
                             localIndex * RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES,
                             blockOffsets[blockIndex],
                             blockLengths[blockIndex],
-                            packed.packedChunks[blockIndex].byteLength,
+                            packedChunkLengths[blockIndex],
                             packed.sourceChunkLocalOffsets[contentIndex],
-                            contentBytesList[contentIndex].byteLength,
+                            sourceLengths[contentIndex],
                         );
                     }
                     referenceSlabs[slabIndex] = slab;
@@ -347,15 +436,13 @@ export class TermContentBlockStore {
             },
         );
         const referenceSlabOffsets = appendResult.derivedOffsets;
-        /** @type {number[]} */
-        const contentOffsets = new Array(contentBytesList.length);
-        /** @type {number[]} */
-        const contentLengths = new Array(contentBytesList.length);
-        for (let i = 0; i < contentBytesList.length; ++i) {
+        const contentOffsets = new Array(sourceLengths.length);
+        const contentLengths = new Array(sourceLengths.length);
+        for (let i = 0; i < sourceLengths.length; ++i) {
             const referenceSlabIndex = Math.floor(i / referenceEntriesPerSlab);
             const referenceSlabLocalIndex = i % referenceEntriesPerSlab;
             contentOffsets[i] = referenceSlabOffsets[referenceSlabIndex] + referenceSlabLocalIndex * RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES;
-            contentLengths[i] = contentBytesList[i].byteLength;
+            contentLengths[i] = sourceLengths[i];
         }
         return {
             contentOffsets,
@@ -373,6 +460,23 @@ export class TermContentBlockStore {
     _recordError(eventName, details) {
         this._lastError = details;
         reportDiagnostics(eventName, details);
+    }
+}
+
+/**
+ * @param {unknown} chunks
+ * @param {number} expectedCount
+ * @returns {asserts chunks is Uint8Array[]}
+ */
+function validateCompressedChunks(chunks, expectedCount) {
+    if (
+        !Array.isArray(chunks) ||
+        chunks.length !== expectedCount ||
+        chunks.some((chunk) => !(chunk instanceof Uint8Array))
+    ) {
+        throw new Error(
+            `Invalid term content compression result: expected ${expectedCount} byte chunks`,
+        );
     }
 }
 
@@ -407,6 +511,46 @@ function packContentChunksIntoSlabs(chunks, targetBytes) {
             sourceChunkLocalOffsets[i] = offset;
             output.set(bytes, offset);
             offset += bytes.byteLength;
+        }
+        packedChunks.push(output);
+        startIndex = endIndex;
+    }
+    return {packedChunks, sourceChunkIndices, sourceChunkLocalOffsets};
+}
+
+/**
+ * @param {Uint8Array} sourceBytes
+ * @param {Uint32Array} sourceOffsets
+ * @param {Uint32Array} sourceLengths
+ * @param {number} targetBytes
+ * @returns {{packedChunks: Uint8Array[], sourceChunkIndices: Uint32Array, sourceChunkLocalOffsets: Uint32Array}}
+ */
+function packContentSpansIntoSlabs(sourceBytes, sourceOffsets, sourceLengths, targetBytes) {
+    const packedChunks = [];
+    const sourceChunkIndices = new Uint32Array(sourceLengths.length);
+    const sourceChunkLocalOffsets = new Uint32Array(sourceLengths.length);
+    let startIndex = 0;
+    while (startIndex < sourceLengths.length) {
+        let totalBytes = 0;
+        let endIndex = startIndex;
+        while (endIndex < sourceLengths.length) {
+            const nextBytes = sourceLengths[endIndex];
+            if (totalBytes > 0 && (totalBytes + nextBytes) > targetBytes) {
+                break;
+            }
+            totalBytes += nextBytes;
+            ++endIndex;
+        }
+        const packedIndex = packedChunks.length;
+        const output = new Uint8Array(totalBytes);
+        let outputOffset = 0;
+        for (let i = startIndex; i < endIndex; ++i) {
+            const sourceOffset = sourceOffsets[i];
+            const length = sourceLengths[i];
+            sourceChunkIndices[i] = packedIndex;
+            sourceChunkLocalOffsets[i] = outputOffset;
+            output.set(sourceBytes.subarray(sourceOffset, sourceOffset + length), outputOffset);
+            outputOffset += length;
         }
         packedChunks.push(output);
         startIndex = endIndex;

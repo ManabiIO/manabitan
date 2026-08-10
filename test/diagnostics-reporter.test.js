@@ -92,4 +92,33 @@ describe('diagnostics reporter gating', () => {
         expect(storageGet).toHaveBeenCalled();
         expect(fetchMock).toHaveBeenCalled();
     });
+
+    test('basic dev diagnostics skip high-frequency lookup events', async () => {
+        const {storageGet, storageSet, fetchMock} = stubRuntime('Manabitan Popup Dictionary (dev)');
+        const {reportDiagnosticsLazy} = await import('../ext/js/core/diagnostics-reporter.js');
+        const createPayload = vi.fn(() => ({source: 'lookup'}));
+
+        reportDiagnosticsLazy('dictionary-lookup-snapshot', createPayload);
+        await settleMicrotasks();
+
+        expect(storageGet).toHaveBeenCalled();
+        expect(createPayload).not.toHaveBeenCalled();
+        expect(storageSet).not.toHaveBeenCalled();
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    test('verbose dev diagnostics include high-frequency lookup events', async () => {
+        const {storageGet, fetchMock} = stubRuntime('Manabitan Popup Dictionary (dev)');
+        storageGet.mockImplementation((keys, callback) => {
+            callback({manabitanDiagnosticsVerbosity: 'verbose'});
+        });
+        const {reportDiagnosticsLazy} = await import('../ext/js/core/diagnostics-reporter.js');
+        const createPayload = vi.fn(() => ({source: 'lookup'}));
+
+        reportDiagnosticsLazy('dictionary-lookup-snapshot', createPayload);
+        await settleMicrotasks();
+
+        expect(createPayload).toHaveBeenCalledOnce();
+        expect(fetchMock).toHaveBeenCalled();
+    });
 });

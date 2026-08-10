@@ -15,19 +15,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
+
 const META_U32_FIELDS = 6;
 const META_BYTES = META_U32_FIELDS * 4;
 const U16_NULL = 0xffff;
+const U32_NULL = 0xffffffff;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
 const UTF8_TEXT_DECODER = new TextDecoder('utf-8', {fatal: true});
 
-/** @type {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, calc_encoded_size: (count: number, stringCount: number, lengthsPtr: number, stringsByteLength: number, metasPtr: number) => number, encode_records: (count: number, stringCount: number, lengthsPtr: number, stringsPtr: number, stringsByteLength: number, metasPtr: number, outPtr: number) => number}>|null} */
-let wasmPromise = null;
+const wasmCache = new RetryablePromiseCache();
+
+/**
+ * @typedef {object} EncodedTermRecordsWithWasm
+ * @property {Uint8Array} bytes
+ * @property {Uint8Array} fixedFieldsHashes
+ */
 
 /**
  * @typedef {{
  *   stringLengths: Uint16Array,
  *   stringOffsets?: Uint32Array,
+ *   stringHashes?: Uint32Array,
  *   stringsBuffer: Uint8Array,
  *   expressionIndexes: Uint32Array,
  *   readingIndexes: Uint32Array,
@@ -147,18 +156,46 @@ function isCompletePreinternedPlan(plan) {
 }
 
 /**
- * @returns {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, calc_encoded_size: (count: number, stringCount: number, lengthsPtr: number, stringsByteLength: number, metasPtr: number) => number, encode_records: (count: number, stringCount: number, lengthsPtr: number, stringsPtr: number, stringsByteLength: number, metasPtr: number, outPtr: number) => number}>}
+ * @param {number} value
+ * @param {number} contentOffsetBase
+ * @returns {number}
+ * @throws {RangeError} If the offset cannot be represented by the record format.
+ */
+function encodeContentOffsetDelta(value, contentOffsetBase) {
+    if (value === -1) { return U32_NULL; }
+    if (!Number.isSafeInteger(value) || value < 0) {
+        throw new RangeError(`Invalid term content offset: ${value}`);
+    }
+    const delta = value - contentOffsetBase;
+    if (!Number.isSafeInteger(delta) || delta < 0 || delta >= U32_NULL) {
+        throw new RangeError(`Term content offset ${value} is outside the encodable chunk range for base ${contentOffsetBase}`);
+    }
+    return delta;
+}
+
+/**
+ * @param {number} value
+ * @returns {number}
+ * @throws {RangeError} If the length cannot be represented by the record format.
+ */
+function encodeContentLength(value) {
+    if (value === -1) { return U32_NULL; }
+    if (!Number.isSafeInteger(value) || value < 0 || value >= U32_NULL) {
+        throw new RangeError(`Invalid term content length: ${value}`);
+    }
+    return value;
+}
+
+/**
+ * @returns {Promise<{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, calc_encoded_size: (count: number, stringCount: number, lengthsPtr: number, stringsByteLength: number, metasPtr: number) => number, encode_records: (count: number, stringCount: number, lengthsPtr: number, stringsPtr: number, stringsByteLength: number, metasPtr: number, outPtr: number, fixedHashesPtr: number) => number}>}
  */
 async function getWasm() {
-    if (wasmPromise !== null) {
-        return await wasmPromise;
-    }
-    wasmPromise = (async () => {
+    return await wasmCache.get(async () => {
         const url = new URL('../../lib/term-record-encoder.wasm', import.meta.url);
         const response = await fetch(url);
         const bytes = await response.arrayBuffer();
         const instance = await WebAssembly.instantiate(bytes, {});
-        const exports = /** @type {WebAssembly.Exports & {memory?: WebAssembly.Memory, wasm_reset_heap?: () => void, wasm_alloc?: (size: number) => number, calc_encoded_size?: (count: number, metasPtr: number) => number, encode_records?: (count: number, metasPtr: number, stringsPtr: number, outPtr: number) => number}} */ (instance.instance.exports);
+        const exports = /** @type {WebAssembly.Exports & {memory?: WebAssembly.Memory, wasm_reset_heap?: () => void, wasm_alloc?: (size: number) => number, calc_encoded_size?: (...args: number[]) => number, encode_records?: (...args: number[]) => number}} */ (instance.instance.exports);
         if (!(exports.memory instanceof WebAssembly.Memory) || typeof exports.wasm_reset_heap !== 'function' || typeof exports.wasm_alloc !== 'function' || typeof exports.calc_encoded_size !== 'function' || typeof exports.encode_records !== 'function') {
             throw new Error('term-record wasm encoder exports are invalid');
         }
@@ -169,28 +206,29 @@ async function getWasm() {
             calc_encoded_size: exports.calc_encoded_size,
             encode_records: exports.encode_records,
         };
-    })();
-    return await wasmPromise;
+    });
 }
 
 /**
  * @param {{id: number, dictionary: string, expression?: string, reading?: string, readingEqualsExpression?: boolean, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, expressionReverse?: string|null, readingReverse?: string|null, entryContentOffset: number, entryContentLength: number, entryContentDictName: string, score: number, sequence: number|null}[]} records
  * @param {TextEncoder} textEncoder
- * @returns {Promise<Uint8Array|null>}
+ * @param {number} [contentOffsetBase=0]
+ * @returns {Promise<EncodedTermRecordsWithWasm|null>}
  */
-export async function encodeTermRecordsWithWasm(records, textEncoder) {
-    return await encodeTermRecordsWithWasmPreinterned(records, textEncoder, null);
+export async function encodeTermRecordsWithWasm(records, textEncoder, contentOffsetBase = 0) {
+    return await encodeTermRecordsWithWasmPreinterned(records, textEncoder, null, contentOffsetBase);
 }
 
 /**
  * @param {{id: number, dictionary: string, expression?: string, reading?: string, readingEqualsExpression?: boolean, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, expressionReverse?: string|null, readingReverse?: string|null, entryContentOffset: number, entryContentLength: number, entryContentDictName: string, score: number, sequence: number|null}[]} records
  * @param {TextEncoder} textEncoder
  * @param {PreinternedTermRecordPlan|null} preinternedPlan
- * @returns {Promise<Uint8Array|null>}
+ * @param {number} [contentOffsetBase=0]
+ * @returns {Promise<EncodedTermRecordsWithWasm|null>}
  */
-export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder, preinternedPlan) {
+export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder, preinternedPlan, contentOffsetBase = 0) {
     if (records.length === 0) {
-        return new Uint8Array(0);
+        return {bytes: new Uint8Array(0), fixedFieldsHashes: new Uint8Array(0)};
     }
     const wasm = await getWasm();
 
@@ -198,7 +236,7 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
     const metasU32 = new Uint32Array(metasBuffer);
     const metasI32 = new Int32Array(metasBuffer);
     const usePreinternedPlan = isCompletePreinternedPlan(preinternedPlan);
-    const interner = usePreinternedPlan ? null : createStringInterner(textEncoder);
+    const interner = createStringInterner(textEncoder);
     const planExpressionIndexes = usePreinternedPlan ? preinternedPlan.expressionIndexes : null;
     const planReadingIndexes = usePreinternedPlan ? preinternedPlan.readingIndexes : null;
     let recordIndex = 0;
@@ -234,12 +272,18 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
             return null;
         }
         const metaIndex = recordIndex * META_U32_FIELDS;
-        metasU32[metaIndex + 0] = expressionIndex >>> 0;
-        metasU32[metaIndex + 1] = readingEqualsExpression ? READING_EQUALS_EXPRESSION_U32 : (readingIndex >>> 0);
-        metasI32[metaIndex + 2] = record.entryContentOffset | 0;
-        metasI32[metaIndex + 3] = record.entryContentLength | 0;
-        metasI32[metaIndex + 4] = record.score | 0;
-        metasI32[metaIndex + 5] = record.sequence ?? -1;
+        const encodedExpressionIndex = expressionIndex >>> 0;
+        const encodedReadingIndex = readingEqualsExpression ? READING_EQUALS_EXPRESSION_U32 : (readingIndex >>> 0);
+        const encodedContentOffsetDelta = encodeContentOffsetDelta(record.entryContentOffset, contentOffsetBase);
+        const encodedContentLength = encodeContentLength(record.entryContentLength);
+        const encodedScore = record.score | 0;
+        const encodedSequence = record.sequence ?? -1;
+        metasU32[metaIndex + 0] = encodedExpressionIndex;
+        metasU32[metaIndex + 1] = encodedReadingIndex;
+        metasU32[metaIndex + 2] = encodedContentOffsetDelta;
+        metasU32[metaIndex + 3] = encodedContentLength;
+        metasI32[metaIndex + 4] = encodedScore;
+        metasI32[metaIndex + 5] = encodedSequence;
         ++recordIndex;
     }
     const stringLengthsU16 = usePreinternedPlan ? preinternedPlan.stringLengths : Uint16Array.from(interner.stringLengths);
@@ -263,39 +307,53 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
 
     const encodedSize = wasm.calc_encoded_size(records.length, stringLengthsU16.length, stringLengthsPtr, stringsBuffer.byteLength, metasPtr);
     if (encodedSize <= 0) {
-        return new Uint8Array(0);
+        return {bytes: new Uint8Array(0), fixedFieldsHashes: new Uint8Array(0)};
     }
     const outPtr = wasm.wasm_alloc(encodedSize);
-    if (outPtr === 0) {
+    const fixedHashesPtr = wasm.wasm_alloc(records.length * 4);
+    if (outPtr === 0 || fixedHashesPtr === 0) {
         return null;
     }
-    const written = wasm.encode_records(records.length, stringLengthsU16.length, stringLengthsPtr, stringsPtr, stringsBuffer.byteLength, metasPtr, outPtr);
+    const written = wasm.encode_records(
+        records.length,
+        stringLengthsU16.length,
+        stringLengthsPtr,
+        stringsPtr,
+        stringsBuffer.byteLength,
+        metasPtr,
+        outPtr,
+        fixedHashesPtr,
+    );
     if (written <= 0) {
-        return new Uint8Array(0);
+        return {bytes: new Uint8Array(0), fixedFieldsHashes: new Uint8Array(0)};
     }
     const heapAfterEncode = new Uint8Array(wasm.memory.buffer);
-    return heapAfterEncode.slice(outPtr, outPtr + written);
+    return {
+        bytes: heapAfterEncode.slice(outPtr, outPtr + written),
+        fixedFieldsHashes: heapAfterEncode.slice(fixedHashesPtr, fixedHashesPtr + (records.length * 4)),
+    };
 }
 
 /**
  * @param {{rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
- * @param {number[]|Uint32Array} contentOffsets
+ * @param {number[]|Uint32Array|Float64Array} contentOffsets
  * @param {number[]|Uint32Array} contentLengths
  * @param {TextEncoder} textEncoder
  * @param {PreinternedTermRecordPlan|null} preinternedPlan
- * @returns {Promise<Uint8Array|null>}
+ * @param {number} [contentOffsetBase=0]
+ * @returns {Promise<EncodedTermRecordsWithWasm|null>}
  */
-export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, contentOffsets, contentLengths, textEncoder, preinternedPlan) {
+export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, contentOffsets, contentLengths, textEncoder, preinternedPlan, contentOffsetBase = 0) {
     const count = chunk.rowCount;
     if (count === 0) {
-        return new Uint8Array(0);
+        return {bytes: new Uint8Array(0), fixedFieldsHashes: new Uint8Array(0)};
     }
     const wasm = await getWasm();
     const metasBuffer = new ArrayBuffer(count * META_BYTES);
     const metasU32 = new Uint32Array(metasBuffer);
     const metasI32 = new Int32Array(metasBuffer);
     const usePreinternedPlan = isCompletePreinternedPlan(preinternedPlan);
-    const interner = usePreinternedPlan ? null : createStringInterner(textEncoder);
+    const interner = createStringInterner(textEncoder);
     const planExpressionIndexes = usePreinternedPlan ? preinternedPlan.expressionIndexes : null;
     const planReadingIndexes = usePreinternedPlan ? preinternedPlan.readingIndexes : null;
     for (let i = 0; i < count; ++i) {
@@ -321,12 +379,18 @@ export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, co
             return null;
         }
         const metaIndex = i * META_U32_FIELDS;
-        metasU32[metaIndex + 0] = expressionIndex >>> 0;
-        metasU32[metaIndex + 1] = readingEqualsExpression ? READING_EQUALS_EXPRESSION_U32 : (readingIndex >>> 0);
-        metasI32[metaIndex + 2] = contentOffsets[i] | 0;
-        metasI32[metaIndex + 3] = contentLengths[i] | 0;
-        metasI32[metaIndex + 4] = (chunk.scoreList[i] ?? 0) | 0;
-        metasI32[metaIndex + 5] = chunk.sequenceList[i] ?? -1;
+        const encodedExpressionIndex = expressionIndex >>> 0;
+        const encodedReadingIndex = readingEqualsExpression ? READING_EQUALS_EXPRESSION_U32 : (readingIndex >>> 0);
+        const encodedContentOffsetDelta = encodeContentOffsetDelta(contentOffsets[i], contentOffsetBase);
+        const encodedContentLength = encodeContentLength(contentLengths[i]);
+        const encodedScore = (chunk.scoreList[i] ?? 0) | 0;
+        const encodedSequence = chunk.sequenceList[i] ?? -1;
+        metasU32[metaIndex + 0] = encodedExpressionIndex;
+        metasU32[metaIndex + 1] = encodedReadingIndex;
+        metasU32[metaIndex + 2] = encodedContentOffsetDelta;
+        metasU32[metaIndex + 3] = encodedContentLength;
+        metasI32[metaIndex + 4] = encodedScore;
+        metasI32[metaIndex + 5] = encodedSequence;
     }
     const stringLengthsU16 = usePreinternedPlan ? preinternedPlan.stringLengths : Uint16Array.from(interner.stringLengths);
     const stringLengthsBuffer = new Uint8Array(
@@ -349,16 +413,29 @@ export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, co
 
     const encodedSize = wasm.calc_encoded_size(count, stringLengthsU16.length, stringLengthsPtr, stringsBuffer.byteLength, metasPtr);
     if (encodedSize <= 0) {
-        return new Uint8Array(0);
+        return {bytes: new Uint8Array(0), fixedFieldsHashes: new Uint8Array(0)};
     }
     const outPtr = wasm.wasm_alloc(encodedSize);
-    if (outPtr === 0) {
+    const fixedHashesPtr = wasm.wasm_alloc(count * 4);
+    if (outPtr === 0 || fixedHashesPtr === 0) {
         return null;
     }
-    const written = wasm.encode_records(count, stringLengthsU16.length, stringLengthsPtr, stringsPtr, stringsBuffer.byteLength, metasPtr, outPtr);
+    const written = wasm.encode_records(
+        count,
+        stringLengthsU16.length,
+        stringLengthsPtr,
+        stringsPtr,
+        stringsBuffer.byteLength,
+        metasPtr,
+        outPtr,
+        fixedHashesPtr,
+    );
     if (written <= 0) {
-        return new Uint8Array(0);
+        return {bytes: new Uint8Array(0), fixedFieldsHashes: new Uint8Array(0)};
     }
     const heapAfterEncode = new Uint8Array(wasm.memory.buffer);
-    return heapAfterEncode.slice(outPtr, outPtr + written);
+    return {
+        bytes: heapAfterEncode.slice(outPtr, outPtr + written),
+        fixedFieldsHashes: heapAfterEncode.slice(fixedHashesPtr, fixedHashesPtr + (count * 4)),
+    };
 }

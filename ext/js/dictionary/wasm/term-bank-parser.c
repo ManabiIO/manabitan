@@ -20,10 +20,13 @@
 #define WASM_PAGE_SIZE 65536u
 #define FNV1A_OFFSET 0x811c9dc5u
 #define MIX_OFFSET 0x9e3779b9u
+#define MAX_JSON_NESTING 256u
 
 extern unsigned char __heap_base;
 
 static uint32_t heap_ptr = 0u;
+static uint32_t last_parse_capacity = 0u;
+static uint32_t last_content_capacity = 0u;
 
 void* memset(void* dest, int value, unsigned long count) {
     unsigned char* bytes = (unsigned char*)dest;
@@ -42,15 +45,15 @@ typedef struct {
     uint32_t definition_tags_length;
     uint32_t rules_start;
     uint32_t rules_length;
-    uint32_t score_start;
-    uint32_t score_length;
+    int32_t score;
     uint32_t glossary_start;
     uint32_t glossary_length;
-    uint32_t sequence_start;
-    uint32_t sequence_length;
+    int32_t sequence;
     uint32_t term_tags_start;
     uint32_t term_tags_length;
     uint32_t glossary_may_contain_media;
+    uint32_t glossary_requires_normalization;
+    uint32_t glossary_requires_text_normalization;
 } TermRowMeta;
 
 static uint32_t align8(uint32_t value) {
@@ -79,14 +82,78 @@ uint32_t wasm_alloc(uint32_t size) {
     if (heap_ptr == 0u) {
         wasm_reset_heap();
     }
+    if (size > UINT32_MAX - 7u) {
+        return 0u;
+    }
     uint32_t aligned_size = align8(size);
     uint32_t start = align8(heap_ptr);
+    if (start > UINT32_MAX - aligned_size) {
+        return 0u;
+    }
     uint32_t end = start + aligned_size;
     if (!ensure_memory(end)) {
         return 0u;
     }
     heap_ptr = end;
     return start;
+}
+
+__attribute__((visibility("default")))
+uint32_t wasm_get_last_parse_capacity(void) {
+    return last_parse_capacity;
+}
+
+__attribute__((visibility("default")))
+uint32_t wasm_get_last_content_capacity(void) {
+    return last_content_capacity;
+}
+
+static int grow_term_row_buffer(
+    uint32_t out_ptr,
+    uint32_t old_capacity,
+    uint32_t* out_capacity
+) {
+    const uint32_t max_capacity = UINT32_MAX / (uint32_t)sizeof(TermRowMeta);
+    if (old_capacity >= max_capacity) { return 0; }
+    uint32_t growth = old_capacity / 2u;
+    if (growth < 8192u) { growth = 8192u; }
+    const uint32_t new_capacity = old_capacity > max_capacity - growth ?
+        max_capacity :
+        old_capacity + growth;
+    const uint32_t old_bytes = old_capacity * (uint32_t)sizeof(TermRowMeta);
+    const uint32_t extra_bytes = (new_capacity - old_capacity) * (uint32_t)sizeof(TermRowMeta);
+    if (out_ptr > UINT32_MAX - old_bytes) { return 0; }
+    const uint32_t expected_end = out_ptr + old_bytes;
+    if (heap_ptr != expected_end) { return 0; }
+    const uint32_t extra_ptr = wasm_alloc(extra_bytes);
+    if (extra_ptr == 0u || extra_ptr != expected_end) { return 0; }
+    *out_capacity = new_capacity;
+    last_parse_capacity = new_capacity;
+    return 1;
+}
+
+static int grow_content_buffer(
+    uint32_t out_ptr,
+    uint32_t old_capacity,
+    uint32_t* out_capacity
+) {
+    const uint32_t max_capacity = 0x7fffffffu;
+    if (old_capacity >= max_capacity) { return 0; }
+    uint32_t growth = old_capacity / 2u;
+    if (growth < 1048576u) { growth = 1048576u; }
+    const uint32_t new_capacity = old_capacity > max_capacity - growth ?
+        max_capacity :
+        old_capacity + growth;
+    const uint32_t old_bytes = align8(old_capacity);
+    const uint32_t new_bytes = align8(new_capacity);
+    if (out_ptr > UINT32_MAX - old_bytes) { return 0; }
+    const uint32_t expected_end = out_ptr + old_bytes;
+    if (heap_ptr != expected_end) { return 0; }
+    const uint32_t extra_ptr = wasm_alloc(new_bytes - old_bytes);
+    if (extra_ptr == 0u || extra_ptr != expected_end) { return 0; }
+    *out_capacity = new_capacity;
+    last_content_capacity = new_capacity;
+    return 1;
 }
 
 static int is_ws(uint8_t c) {
@@ -98,15 +165,73 @@ static uint32_t skip_ws(const uint8_t* src, uint32_t len, uint32_t i) {
     return i;
 }
 
+static uint32_t hash_json_string_token(const uint8_t* src, uint32_t start, uint32_t length) {
+    uint32_t hash = FNV1A_OFFSET;
+    if (length < 2u || src[start] != '"' || src[start + length - 1u] != '"') {
+        return hash;
+    }
+    const uint32_t end = start + length - 1u;
+    for (uint32_t i = start + 1u; i < end; ++i) {
+        hash = (hash ^ src[i]) * 0x01000193u;
+    }
+    return hash;
+}
+
+static inline uint32_t has_zero_byte(uint32_t value) {
+    return (value - 0x01010101u) & ~value & 0x80808080u;
+}
+
+static inline uint32_t has_control_byte(uint32_t value) {
+    return (value - 0x20202020u) & ~value & 0x80808080u;
+}
+
+static int is_hex_digit(uint8_t value) {
+    return (value >= '0' && value <= '9') ||
+        (value >= 'a' && value <= 'f') ||
+        (value >= 'A' && value <= 'F');
+}
+
 static int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
     if (start >= len || src[start] != '"') { return 0; }
     uint32_t i = start + 1u;
     while (i < len) {
+        while (i + 4u <= len) {
+            const uint32_t word =
+                ((uint32_t)src[i]) |
+                ((uint32_t)src[i + 1u] << 8u) |
+                ((uint32_t)src[i + 2u] << 16u) |
+                ((uint32_t)src[i + 3u] << 24u);
+            if (
+                has_zero_byte(word ^ 0x22222222u) != 0u ||
+                has_zero_byte(word ^ 0x5c5c5c5cu) != 0u ||
+                has_control_byte(word) != 0u
+            ) {
+                break;
+            }
+            i += 4u;
+        }
+        if (i >= len) { break; }
         uint8_t c = src[i];
         if (c == '\\') {
+            if (i + 1u >= len) { return 0; }
+            const uint8_t escape = src[i + 1u];
+            if (escape == 'u') {
+                if (i + 6u > len) { return 0; }
+                for (uint32_t j = i + 2u; j < i + 6u; ++j) {
+                    if (!is_hex_digit(src[j])) { return 0; }
+                }
+                i += 6u;
+                continue;
+            }
+            if (
+                escape != '"' && escape != '\\' && escape != '/' &&
+                escape != 'b' && escape != 'f' && escape != 'n' &&
+                escape != 'r' && escape != 't'
+            ) { return 0; }
             i += 2u;
             continue;
         }
+        if (c < 0x20u) { return 0; }
         if (c == '"') {
             *out_end = i + 1u;
             return 1;
@@ -136,29 +261,77 @@ static int is_media_marker_at(const uint8_t* src, uint32_t len, uint32_t i) {
         src[i + 6u] == '"';
 }
 
-static int parse_composite_span_impl(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end, uint32_t* media_hint) {
+static inline int type_text_pair_at(const uint8_t* src, uint32_t len, uint32_t key_start, uint32_t key_end) {
+    static const uint8_t KEY_TYPE[] = "\"type\"";
+    static const uint8_t VALUE_TEXT[] = "\"text\"";
+    if (key_end - key_start != sizeof(KEY_TYPE) - 1u) { return 0; }
+    for (uint32_t i = 0u; i < sizeof(KEY_TYPE) - 1u; ++i) {
+        if (src[key_start + i] != KEY_TYPE[i]) { return 0; }
+    }
+    uint32_t separator = skip_ws(src, len, key_end);
+    if (separator >= len || src[separator] != ':') { return 0; }
+    const uint32_t value_start = skip_ws(src, len, separator + 1u);
+    if (value_start > len || sizeof(VALUE_TEXT) - 1u > len - value_start) { return 0; }
+    for (uint32_t i = 0u; i < sizeof(VALUE_TEXT) - 1u; ++i) {
+        if (src[value_start + i] != VALUE_TEXT[i]) { return 0; }
+    }
+    return 1;
+}
+
+static int parse_composite_span_impl(
+    const uint8_t* src,
+    uint32_t len,
+    uint32_t start,
+    uint32_t* out_end,
+    uint32_t* media_hint,
+    uint32_t* normalization_hint,
+    uint32_t* text_normalization_hint
+) {
     if (start >= len) { return 0; }
-    uint8_t open = src[start];
+    const uint8_t open = src[start];
     uint8_t close = 0;
     if (open == '[') { close = ']'; }
     else if (open == '{') { close = '}'; }
     else { return 0; }
 
+    uint8_t expected_closers[MAX_JSON_NESTING];
+    expected_closers[0] = close;
     uint32_t depth = 1u;
     uint32_t i = start + 1u;
     while (i < len) {
         uint8_t c = src[i];
         if (c == '"') {
-            if (media_hint != 0 && is_media_marker_at(src, len, i)) {
+            if (media_hint != 0 && *media_hint == 0u && is_media_marker_at(src, len, i)) {
                 *media_hint = 1u;
             }
             uint32_t s_end = 0;
             if (!parse_string_span(src, len, i, &s_end)) { return 0; }
+            if (
+                expected_closers[depth - 1u] == '}' &&
+                (
+                    (normalization_hint != 0 && *normalization_hint == 0u) ||
+                    (text_normalization_hint != 0 && *text_normalization_hint == 0u)
+                ) &&
+                type_text_pair_at(src, len, i, s_end)
+            ) {
+                if (normalization_hint != 0) { *normalization_hint = 1u; }
+                if (text_normalization_hint != 0) { *text_normalization_hint = 1u; }
+            }
             i = s_end;
             continue;
         }
-        if (c == open) { ++depth; ++i; continue; }
-        if (c == close) {
+        if (normalization_hint != 0 && *normalization_hint == 0u && is_ws(c)) {
+            *normalization_hint = 1u;
+        }
+        if (c == '[' || c == '{') {
+            if (depth >= MAX_JSON_NESTING) { return 0; }
+            expected_closers[depth] = c == '[' ? ']' : '}';
+            ++depth;
+            ++i;
+            continue;
+        }
+        if (c == ']' || c == '}') {
+            if (c != expected_closers[depth - 1u]) { return 0; }
             --depth;
             ++i;
             if (depth == 0u) {
@@ -173,7 +346,7 @@ static int parse_composite_span_impl(const uint8_t* src, uint32_t len, uint32_t 
 }
 
 static int parse_composite_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
-    return parse_composite_span_impl(src, len, start, out_end, 0);
+    return parse_composite_span_impl(src, len, start, out_end, 0, 0, 0);
 }
 
 static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
@@ -197,28 +370,71 @@ static int parse_value_span(const uint8_t* src, uint32_t len, uint32_t start, ui
     return parse_scalar_span(src, len, start, out_end);
 }
 
-static int parse_value_span_with_media_hint(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end, uint32_t* media_hint) {
+static int parse_value_span_with_glossary_hints(
+    const uint8_t* src,
+    uint32_t len,
+    uint32_t start,
+    uint32_t* out_end,
+    uint32_t* media_hint,
+    uint32_t* normalization_hint,
+    uint32_t* text_normalization_hint
+) {
     if (start >= len) { return 0; }
     uint8_t c = src[start];
     if (c == '[' || c == '{') {
-        return parse_composite_span_impl(src, len, start, out_end, media_hint);
+        return parse_composite_span_impl(src, len, start, out_end, media_hint, normalization_hint, text_normalization_hint);
     }
     return parse_value_span(src, len, start, out_end);
 }
 
-static void set_field(TermRowMeta* meta, uint32_t field_index, uint32_t start, uint32_t end) {
+static int is_null_token(const uint8_t* src, uint32_t start, uint32_t length);
+
+static int parse_int32_token(
+    const uint8_t* src,
+    uint32_t start,
+    uint32_t end,
+    int32_t null_value,
+    int32_t* out_value
+) {
+    if (end - start == 4u && is_null_token(src, start, 4u)) {
+        *out_value = null_value;
+        return 1;
+    }
+    uint32_t i = start;
+    int negative = 0;
+    if (i < end && src[i] == '-') {
+        negative = 1;
+        ++i;
+    }
+    if (i >= end || src[i] < '0' || src[i] > '9') { return 0; }
+    if (src[i] == '0' && i + 1u < end) { return 0; }
+    uint32_t value = 0u;
+    const uint32_t limit = negative ? 0x80000000u : 0x7fffffffu;
+    for (; i < end; ++i) {
+        const uint8_t c = src[i];
+        if (c < '0' || c > '9') { return 0; }
+        const uint32_t digit = (uint32_t)(c - '0');
+        if (value > (limit - digit) / 10u) { return 0; }
+        value = value * 10u + digit;
+    }
+    *out_value = negative ? (int32_t)(0u - value) : (int32_t)value;
+    return 1;
+}
+
+static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index, uint32_t start, uint32_t end) {
     uint32_t length = end > start ? (end - start) : 0u;
     switch (field_index) {
         case 0: meta->expression_start = start; meta->expression_length = length; break;
         case 1: meta->reading_start = start; meta->reading_length = length; break;
         case 2: meta->definition_tags_start = start; meta->definition_tags_length = length; break;
         case 3: meta->rules_start = start; meta->rules_length = length; break;
-        case 4: meta->score_start = start; meta->score_length = length; break;
+        case 4: return parse_int32_token(src, start, end, 0, &meta->score);
         case 5: meta->glossary_start = start; meta->glossary_length = length; break;
-        case 6: meta->sequence_start = start; meta->sequence_length = length; break;
+        case 6: return parse_int32_token(src, start, end, -1, &meta->sequence);
         case 7: meta->term_tags_start = start; meta->term_tags_length = length; break;
         default: break;
     }
+    return 1;
 }
 
 static void clear_term_row_meta(TermRowMeta* meta) {
@@ -226,11 +442,13 @@ static void clear_term_row_meta(TermRowMeta* meta) {
     meta->reading_start = 0u; meta->reading_length = 0u;
     meta->definition_tags_start = 0u; meta->definition_tags_length = 0u;
     meta->rules_start = 0u; meta->rules_length = 0u;
-    meta->score_start = 0u; meta->score_length = 0u;
+    meta->score = 0;
     meta->glossary_start = 0u; meta->glossary_length = 0u;
-    meta->sequence_start = 0u; meta->sequence_length = 0u;
+    meta->sequence = -1;
     meta->term_tags_start = 0u; meta->term_tags_length = 0u;
     meta->glossary_may_contain_media = 0u;
+    meta->glossary_requires_normalization = 0u;
+    meta->glossary_requires_text_normalization = 0u;
 }
 
 static int parse_row_single_pass(
@@ -254,19 +472,33 @@ static int parse_row_single_pass(
             return out_meta->expression_length > 0u;
         }
         uint32_t value_end = 0u;
-        if (
-            media_hints && field_index == 5u ?
-                !parse_value_span_with_media_hint(src, len, i, &value_end, &out_meta->glossary_may_contain_media) :
-                !parse_value_span(src, len, i, &value_end)
-        ) { return 0; }
+        if (field_index == 5u) {
+            uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
+            if (!parse_value_span_with_glossary_hints(
+                    src,
+                    len,
+                    i,
+                    &value_end,
+                    media_hint,
+                    &out_meta->glossary_requires_normalization,
+                    &out_meta->glossary_requires_text_normalization
+                )) { return 0; }
+        } else if (!parse_value_span(src, len, i, &value_end)) {
+            return 0;
+        }
         if (field_index < 8u) {
-            set_field(out_meta, field_index, i, value_end);
+            if (!set_field(src, out_meta, field_index, i, value_end)) { return 0; }
         }
         ++field_index;
         i = skip_ws(src, len, value_end);
-        if (i < len && src[i] == ',') {
-            ++i;
+        if (i >= len) { return 0; }
+        if (src[i] == ']') {
+            *out_next = i + 1u;
+            return out_meta->expression_length > 0u;
         }
+        if (src[i] != ',') { return 0; }
+        i = skip_ws(src, len, i + 1u);
+        if (i >= len || src[i] == ']') { return 0; }
     }
     return 0;
 }
@@ -430,9 +662,7 @@ static inline int write_bytes_and_hash(
     const uint32_t start = *cursor;
     const uint32_t end = start + length;
     if (end < start || end > out_capacity) { return 0; }
-    for (uint32_t i = 0u; i < length; ++i) {
-        out[start + i] = src[i];
-    }
+    __builtin_memcpy(out + start, src, length);
     (void)h1;
     (void)h2;
     *cursor = end;
@@ -516,6 +746,15 @@ static int glossary_object_try_extract_text_value(
                     return 0;
                 }
             }
+            return 0;
+        }
+        /*
+         * A schema-valid text glossary object has exactly the "type" and
+         * "text" keys. Structured-content dictionaries often serialize their
+         * large "content" value first; reject that shape before walking the
+         * nested value a second time.
+         */
+        if (!token_equals_literal(src, key_start, key_length, KEY_TEXT, sizeof(KEY_TEXT) - 1u)) {
             return 0;
         }
     }
@@ -670,7 +909,17 @@ static int encode_term_content_row(
     }
 
     if (!write_bytes_and_hash(out, out_capacity, cursor, PREFIX_GLOSSARY, sizeof(PREFIX_GLOSSARY) - 1u, 0, 0)) { return 0; }
-    if (row->glossary_length > 0u) {
+    if (row->glossary_length > 0u && row->glossary_requires_normalization == 0u) {
+        if (!write_bytes_and_hash(
+                out,
+                out_capacity,
+                cursor,
+                src + row->glossary_start,
+                row->glossary_length,
+                0,
+                0
+            )) { return 0; }
+    } else if (row->glossary_length > 0u) {
         if (!write_normalized_glossary_value_and_hash(
             src,
             row->glossary_start + row->glossary_length,
@@ -701,26 +950,101 @@ static int encode_term_content_row(
     return 1;
 }
 
+static int encode_term_content_token_binary_row(
+    const uint8_t* src,
+    const TermRowMeta* row,
+    uint8_t* out,
+    uint32_t out_capacity,
+    uint32_t* cursor,
+    uint32_t* out_h1,
+    uint32_t* out_h2
+) {
+    static const uint8_t MAGIC[] = "MBR6";
+    static const uint8_t EMPTY_QUOTED[] = "\"\"";
+    const uint32_t row_start = *cursor;
+    if (!write_bytes_and_hash(out, out_capacity, cursor, MAGIC, sizeof(MAGIC) - 1u, 0, 0)) { return 0; }
+
+    const uint32_t field_starts[3] = {
+        row->rules_start,
+        row->definition_tags_start,
+        row->term_tags_start,
+    };
+    const uint32_t field_lengths[3] = {
+        row->rules_length,
+        row->definition_tags_length,
+        row->term_tags_length,
+    };
+    for (uint32_t i = 0u; i < 3u; ++i) {
+        const uint32_t field_length = field_lengths[i];
+        if (field_length > 0u && !is_null_token(src, field_starts[i], field_length)) {
+            if (!write_bytes_and_hash(out, out_capacity, cursor, src + field_starts[i], field_length, 0, 0)) { return 0; }
+        } else {
+            if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u, 0, 0)) { return 0; }
+        }
+        if (!write_byte_and_hash(out, out_capacity, cursor, 0u, 0, 0)) { return 0; }
+    }
+
+    if (row->glossary_length > 0u && row->glossary_requires_text_normalization == 0u) {
+        if (!write_bytes_and_hash(
+                out,
+                out_capacity,
+                cursor,
+                src + row->glossary_start,
+                row->glossary_length,
+                0,
+                0
+            )) { return 0; }
+    } else if (row->glossary_length > 0u) {
+        if (!write_normalized_glossary_value_and_hash(
+            src,
+            row->glossary_start + row->glossary_length,
+            row->glossary_start,
+            row->glossary_start + row->glossary_length,
+            out,
+            out_capacity,
+            cursor,
+            0,
+            0
+        )) { return 0; }
+    } else {
+        static const uint8_t EMPTY_ARRAY[] = "[]";
+        if (!write_bytes_and_hash(out, out_capacity, cursor, EMPTY_ARRAY, sizeof(EMPTY_ARRAY) - 1u, 0, 0)) { return 0; }
+    }
+
+    const uint32_t row_length = *cursor - row_start;
+    uint32_t h1 = 0u;
+    uint32_t h2 = 0u;
+    hash_content_xxh32_pair(out + row_start, row_length, FNV1A_OFFSET, MIX_OFFSET, &h1, &h2);
+    if ((h1 | h2) == 0u) {
+        h1 = 1u;
+    }
+    *out_h1 = h1;
+    *out_h2 = h2;
+    return 1;
+}
+
 static int32_t parse_term_bank_impl(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity, int media_hints) {
     if (json_ptr == 0u || json_len == 0u || out_ptr == 0u || out_capacity == 0u) {
         return -1;
     }
     const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
     TermRowMeta* rows = (TermRowMeta*)(uintptr_t)out_ptr;
+    last_parse_capacity = out_capacity;
 
     uint32_t i = skip_ws(src, json_len, 0u);
     if (i >= json_len || src[i] != '[') { return -1; }
-    ++i;
+    i = skip_ws(src, json_len, i + 1u);
+    if (i < json_len && src[i] == ']') {
+        i = skip_ws(src, json_len, i + 1u);
+        return i == json_len ? 0 : -1;
+    }
 
     uint32_t row_count = 0u;
     while (i < json_len) {
-        i = skip_ws(src, json_len, i);
-        if (i >= json_len) { break; }
-        if (src[i] == ']') {
-            return (int32_t)row_count;
-        }
         if (row_count >= out_capacity) {
-            return -2;
+            if (!grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) {
+                return -2;
+            }
         }
         uint32_t row_end = 0u;
         if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end)) {
@@ -728,9 +1052,14 @@ static int32_t parse_term_bank_impl(uint32_t json_ptr, uint32_t json_len, uint32
         }
         ++row_count;
         i = skip_ws(src, json_len, row_end);
-        if (i < json_len && src[i] == ',') {
-            ++i;
+        if (i >= json_len) { return -1; }
+        if (src[i] == ']') {
+            i = skip_ws(src, json_len, i + 1u);
+            return i == json_len ? (int32_t)row_count : -1;
         }
+        if (src[i] != ',') { return -1; }
+        i = skip_ws(src, json_len, i + 1u);
+        if (i >= json_len || src[i] == ']') { return -1; }
     }
     return -1;
 }
@@ -763,13 +1092,14 @@ static int32_t encode_term_content_impl(
     uint8_t* out = (uint8_t*)(uintptr_t)out_ptr;
     uint32_t* row_meta = (uint32_t*)(uintptr_t)row_meta_ptr;
     uint32_t cursor = 0u;
-
+    last_content_capacity = out_capacity;
     for (uint32_t i = 0u; i < row_count; ++i) {
         const uint32_t start = cursor;
         uint32_t h1 = 0u;
         uint32_t h2 = 0u;
-        if (!encode_term_content_row(src, &rows[i], out, out_capacity, &cursor, &h1, &h2, compute_hashes)) {
-            return -2;
+        while (!encode_term_content_row(src, &rows[i], out, out_capacity, &cursor, &h1, &h2, compute_hashes)) {
+            cursor = start;
+            if (!grow_content_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         }
         const uint32_t o = i * 4u;
         row_meta[o + 0u] = start;
@@ -802,4 +1132,350 @@ int32_t encode_term_content_no_hash(
     uint32_t row_meta_ptr
 ) {
     return encode_term_content_impl(json_ptr, metas_ptr, row_count, out_ptr, out_capacity, row_meta_ptr, 0);
+}
+
+__attribute__((visibility("default")))
+int32_t encode_term_content_token_binary(
+    uint32_t json_ptr,
+    uint32_t metas_ptr,
+    uint32_t row_count,
+    uint32_t out_ptr,
+    uint32_t out_capacity,
+    uint32_t row_meta_ptr
+) {
+    if (json_ptr == 0u || metas_ptr == 0u || out_ptr == 0u || row_meta_ptr == 0u) {
+        return -1;
+    }
+    const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
+    const TermRowMeta* rows = (const TermRowMeta*)(uintptr_t)metas_ptr;
+    uint8_t* out = (uint8_t*)(uintptr_t)out_ptr;
+    uint32_t* row_meta = (uint32_t*)(uintptr_t)row_meta_ptr;
+    uint32_t cursor = 0u;
+    last_content_capacity = out_capacity;
+    for (uint32_t i = 0u; i < row_count; ++i) {
+        const uint32_t start = cursor;
+        uint32_t h1 = 0u;
+        uint32_t h2 = 0u;
+        while (!encode_term_content_token_binary_row(src, &rows[i], out, out_capacity, &cursor, &h1, &h2)) {
+            cursor = start;
+            if (!grow_content_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
+        }
+        const uint32_t o = i * 4u;
+        row_meta[o + 0u] = start;
+        row_meta[o + 1u] = cursor - start;
+        row_meta[o + 2u] = h1;
+        row_meta[o + 3u] = h2;
+    }
+    return (int32_t)cursor;
+}
+
+static int content_bytes_equal(
+    const uint8_t* bytes,
+    uint32_t first_offset,
+    uint32_t second_offset,
+    uint32_t length
+) {
+    uint32_t i = 0u;
+    while (i + 8u <= length) {
+        uint64_t first;
+        uint64_t second;
+        __builtin_memcpy(&first, bytes + first_offset + i, sizeof(first));
+        __builtin_memcpy(&second, bytes + second_offset + i, sizeof(second));
+        if (first != second) { return 0; }
+        i += 8u;
+    }
+    while (i < length) {
+        if (bytes[first_offset + i] != bytes[second_offset + i]) { return 0; }
+        ++i;
+    }
+    return 1;
+}
+
+static int content_bytes_equal_between(
+    const uint8_t* first_bytes,
+    uint32_t first_offset,
+    const uint8_t* second_bytes,
+    uint32_t second_offset,
+    uint32_t length
+) {
+    uint32_t i = 0u;
+    while (i + 8u <= length) {
+        uint64_t first;
+        uint64_t second;
+        __builtin_memcpy(&first, first_bytes + first_offset + i, sizeof(first));
+        __builtin_memcpy(&second, second_bytes + second_offset + i, sizeof(second));
+        if (first != second) { return 0; }
+        i += 8u;
+    }
+    while (i < length) {
+        if (first_bytes[first_offset + i] != second_bytes[second_offset + i]) {
+            return 0;
+        }
+        ++i;
+    }
+    return 1;
+}
+
+static int json_string_token_has_escape(
+    const uint8_t* src,
+    uint32_t start,
+    uint32_t length
+) {
+    if (length < 2u || src[start] != '"' || src[start + length - 1u] != '"') {
+        return 1;
+    }
+    const uint32_t end = start + length - 1u;
+    for (uint32_t i = start + 1u; i < end; ++i) {
+        if (src[i] == '\\') { return 1; }
+    }
+    return 0;
+}
+
+static uint32_t mix_string_hash(uint32_t hash, uint32_t length) {
+    uint32_t value = hash ^ (length * 0x85ebca6bu);
+    value ^= value >> 16u;
+    return value;
+}
+
+__attribute__((visibility("default")))
+int32_t build_term_string_plan(
+    uint32_t json_ptr,
+    uint32_t metas_ptr,
+    uint32_t row_start,
+    uint32_t row_count,
+    uint32_t strings_ptr,
+    uint32_t strings_capacity,
+    uint32_t string_lengths_ptr,
+    uint32_t string_offsets_ptr,
+    uint32_t string_hashes_ptr,
+    uint32_t expression_indexes_ptr,
+    uint32_t reading_indexes_ptr,
+    uint32_t hash_table_ptr,
+    uint32_t hash_table_size,
+    uint32_t unique_count_ptr
+) {
+    if (
+        json_ptr == 0u ||
+        metas_ptr == 0u ||
+        strings_ptr == 0u ||
+        string_lengths_ptr == 0u ||
+        string_offsets_ptr == 0u ||
+        string_hashes_ptr == 0u ||
+        expression_indexes_ptr == 0u ||
+        reading_indexes_ptr == 0u ||
+        hash_table_ptr == 0u ||
+        unique_count_ptr == 0u ||
+        hash_table_size == 0u ||
+        (hash_table_size & (hash_table_size - 1u)) != 0u
+    ) {
+        return -1;
+    }
+    const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
+    const TermRowMeta* rows = (const TermRowMeta*)(uintptr_t)metas_ptr;
+    uint8_t* strings = (uint8_t*)(uintptr_t)strings_ptr;
+    uint16_t* string_lengths = (uint16_t*)(uintptr_t)string_lengths_ptr;
+    uint32_t* string_offsets = (uint32_t*)(uintptr_t)string_offsets_ptr;
+    uint32_t* string_hashes = (uint32_t*)(uintptr_t)string_hashes_ptr;
+    uint32_t* expression_indexes = (uint32_t*)(uintptr_t)expression_indexes_ptr;
+    uint32_t* reading_indexes = (uint32_t*)(uintptr_t)reading_indexes_ptr;
+    uint32_t* hash_table = (uint32_t*)(uintptr_t)hash_table_ptr;
+    const uint32_t table_mask = hash_table_size - 1u;
+    const uint32_t max_unique_count = row_count * 2u;
+    uint32_t unique_count = 0u;
+    uint32_t strings_cursor = 0u;
+
+    for (uint32_t local_row = 0u; local_row < row_count; ++local_row) {
+        const TermRowMeta* row = &rows[row_start + local_row];
+        const uint32_t token_starts[2] = {
+            row->expression_start,
+            row->reading_start,
+        };
+        const uint32_t token_lengths[2] = {
+            row->expression_length,
+            row->reading_length,
+        };
+        uint32_t indexes[2] = {0u, 0u};
+        int reading_equals_expression = (
+            token_lengths[1] == 2u &&
+            src[token_starts[1]] == '"' &&
+            src[token_starts[1] + 1u] == '"'
+        );
+        if (
+            !reading_equals_expression &&
+            token_lengths[0] == token_lengths[1] &&
+            content_bytes_equal(src, token_starts[0], token_starts[1], token_lengths[0])
+        ) {
+            reading_equals_expression = 1;
+        }
+
+        for (uint32_t field = 0u; field < 2u; ++field) {
+            if (field == 1u && reading_equals_expression) {
+                indexes[1] = indexes[0];
+                continue;
+            }
+            const uint32_t token_start = token_starts[field];
+            const uint32_t token_length = token_lengths[field];
+            if (json_string_token_has_escape(src, token_start, token_length)) {
+                return -4;
+            }
+            const uint32_t value_start = token_start + 1u;
+            const uint32_t value_length = token_length - 2u;
+            if (value_length >= 0xffffu) { return -5; }
+            const uint32_t hash = hash_json_string_token(src, token_start, token_length);
+            uint32_t slot = mix_string_hash(hash, value_length) & table_mask;
+            uint32_t matched_index = 0xffffffffu;
+            for (uint32_t probes = 0u; probes < hash_table_size; ++probes) {
+                const uint32_t stored = hash_table[slot];
+                if (stored == 0u) { break; }
+                const uint32_t candidate = stored - 1u;
+                if (candidate >= unique_count) { return -3; }
+                if (
+                    string_hashes[candidate] == hash &&
+                    string_lengths[candidate] == value_length &&
+                    content_bytes_equal_between(
+                        strings,
+                        string_offsets[candidate],
+                        src,
+                        value_start,
+                        value_length
+                    )
+                ) {
+                    matched_index = candidate;
+                    break;
+                }
+                slot = (slot + 1u) & table_mask;
+            }
+            if (matched_index != 0xffffffffu) {
+                indexes[field] = matched_index;
+                continue;
+            }
+            if (
+                unique_count >= max_unique_count ||
+                hash_table[slot] != 0u ||
+                strings_cursor + value_length > strings_capacity
+            ) {
+                return -2;
+            }
+            for (uint32_t i = 0u; i < value_length; ++i) {
+                strings[strings_cursor + i] = src[value_start + i];
+            }
+            string_lengths[unique_count] = (uint16_t)value_length;
+            string_offsets[unique_count] = strings_cursor;
+            string_hashes[unique_count] = hash;
+            hash_table[slot] = unique_count + 1u;
+            indexes[field] = unique_count;
+            strings_cursor += value_length;
+            ++unique_count;
+        }
+        expression_indexes[local_row] = indexes[0];
+        reading_indexes[local_row] = indexes[1];
+    }
+    *(uint32_t*)(uintptr_t)unique_count_ptr = unique_count;
+    return (int32_t)strings_cursor;
+}
+
+__attribute__((visibility("default")))
+int32_t encode_term_content_token_binary_dedup(
+    uint32_t json_ptr,
+    uint32_t metas_ptr,
+    uint32_t row_count,
+    uint32_t out_ptr,
+    uint32_t out_capacity,
+    uint32_t row_meta_ptr,
+    uint32_t hash_table_ptr,
+    uint32_t hash_table_size,
+    uint32_t unique_indexes_ptr,
+    uint32_t unique_count_ptr
+) {
+    if (
+        json_ptr == 0u ||
+        metas_ptr == 0u ||
+        out_ptr == 0u ||
+        row_meta_ptr == 0u ||
+        hash_table_ptr == 0u ||
+        unique_indexes_ptr == 0u ||
+        unique_count_ptr == 0u ||
+        hash_table_size == 0u ||
+        (hash_table_size & (hash_table_size - 1u)) != 0u
+    ) {
+        return -1;
+    }
+    const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
+    const TermRowMeta* rows = (const TermRowMeta*)(uintptr_t)metas_ptr;
+    uint8_t* out = (uint8_t*)(uintptr_t)out_ptr;
+    uint32_t* row_meta = (uint32_t*)(uintptr_t)row_meta_ptr;
+    uint32_t* hash_table = (uint32_t*)(uintptr_t)hash_table_ptr;
+    uint32_t* unique_indexes = (uint32_t*)(uintptr_t)unique_indexes_ptr;
+    uint32_t cursor = 0u;
+    uint32_t unique_count = 0u;
+    const uint32_t table_mask = hash_table_size - 1u;
+    last_content_capacity = out_capacity;
+
+    for (uint32_t row = 0u; row < row_count; ++row) {
+        const uint32_t start = cursor;
+        uint32_t hash1 = 0u;
+        uint32_t hash2 = 0u;
+        while (!encode_term_content_token_binary_row(
+            src,
+            &rows[row],
+            out,
+            out_capacity,
+            &cursor,
+            &hash1,
+            &hash2
+        )) {
+            cursor = start;
+            if (!grow_content_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
+        }
+        const uint32_t row_offset = row * 4u;
+        const uint32_t length = cursor - start;
+        uint32_t mixed = hash1 ^ (hash2 * 0x9e3779b1u);
+        mixed ^= mixed >> 16u;
+        uint32_t slot = mixed & table_mask;
+        uint32_t matched_row = 0xffffffffu;
+
+        for (uint32_t probes = 0u; probes < hash_table_size; ++probes) {
+            const uint32_t stored = hash_table[slot];
+            if (stored == 0u) { break; }
+            const uint32_t candidate_row = stored - 1u;
+            if (candidate_row >= row) { return -3; }
+            const uint32_t candidate_row_offset = candidate_row * 4u;
+            if (
+                row_meta[candidate_row_offset + 2u] == hash1 &&
+                row_meta[candidate_row_offset + 3u] == hash2 &&
+                row_meta[candidate_row_offset + 1u] == length &&
+                content_bytes_equal(
+                    out,
+                    row_meta[candidate_row_offset + 0u],
+                    start,
+                    length
+                )
+            ) {
+                matched_row = candidate_row;
+                break;
+            }
+            slot = (slot + 1u) & table_mask;
+        }
+
+        if (matched_row != 0xffffffffu) {
+            const uint32_t canonical_row_offset = matched_row * 4u;
+            row_meta[row_offset + 0u] = row_meta[canonical_row_offset + 0u];
+            row_meta[row_offset + 1u] = length;
+            row_meta[row_offset + 2u] = hash1;
+            row_meta[row_offset + 3u] = hash2;
+            unique_indexes[row] = unique_indexes[matched_row];
+            cursor = start;
+            continue;
+        }
+        if (hash_table[slot] != 0u || unique_count == 0xffffffffu) { return -3; }
+        row_meta[row_offset + 0u] = start;
+        row_meta[row_offset + 1u] = length;
+        row_meta[row_offset + 2u] = hash1;
+        row_meta[row_offset + 3u] = hash2;
+        unique_indexes[row] = unique_count;
+        hash_table[slot] = row + 1u;
+        ++unique_count;
+    }
+    *(uint32_t*)(uintptr_t)unique_count_ptr = unique_count;
+    return (int32_t)cursor;
 }

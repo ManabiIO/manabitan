@@ -39,6 +39,8 @@ function getDictionaryControllerMethod(name) {
 
 describe('DictionaryController task dictionary resolution', () => {
     const getDictionaryInfoForTask = /** @type {(this: DictionaryController, dictionaryTitle: string) => Promise<unknown>} */ (getDictionaryControllerMethod('_getDictionaryInfoForTask'));
+    const importReplacementDictionary = /** @type {(this: DictionaryController, dictionaryTitle: string, downloadUrl: string, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importToken: string, stagedDictionaryTitle: string) => Promise<import('settings-controller').ImportDictionaryDoneResult>} */ (getDictionaryControllerMethod('_importReplacementDictionary'));
+    const recoverTimedOutUpdateState = /** @type {(this: DictionaryController, dictionaryTitle: string, importToken: string, stagedDictionaryTitle: string) => Promise<boolean>} */ (getDictionaryControllerMethod('_recoverTimedOutUpdateState'));
 
     afterEach(() => {
         vi.restoreAllMocks();
@@ -57,5 +59,73 @@ describe('DictionaryController task dictionary resolution', () => {
 
         expect(result).toMatchObject({title: 'Jitendex.org [2026-02-05]'});
         expect(getDictionaryInfo).toHaveBeenCalledTimes(1);
+    });
+
+    test('imports replacements by URL without cloning a large archive through the settings page', async () => {
+        const controller = createControllerForInternalTests();
+        const result = {ok: true, errors: [], importedTitles: ['Jitendex']};
+        const importDictionaryFromUrl = vi.fn().mockResolvedValue(result);
+        Reflect.set(controller, '_settingsController', {importDictionaryFromUrl});
+        Reflect.set(controller, '_getMutationCallbackTimeoutMs', vi.fn(() => 10_000));
+
+        await expect(importReplacementDictionary.call(
+            controller,
+            'Jitendex',
+            'https://example.invalid/jitendex.zip',
+            {},
+            'token123',
+            'Jitendex [update-staging token123]',
+        )).resolves.toBe(result);
+
+        expect(importDictionaryFromUrl).toHaveBeenCalledWith(
+            'https://example.invalid/jitendex.zip',
+            {},
+            {
+                dictionaryTitleOverride: 'Jitendex [update-staging token123]',
+                replacementDictionaryTitle: 'Jitendex',
+                updateSessionToken: 'token123',
+                useImportSession: false,
+                finalizeImportSession: false,
+            },
+        );
+    });
+
+    test('does not delete staging state while a timed-out update may still be running', async () => {
+        const controller = createControllerForInternalTests();
+        const getDictionaryInfo = vi.fn().mockResolvedValue([
+            {title: 'Jitendex', updateSessionToken: 'old-token'},
+            {title: 'Jitendex [update-staging token123]', updateSessionToken: 'token123'},
+        ]);
+        const deleteDictionaryInternal = vi.fn();
+        const deleteDictionarySettings = vi.fn();
+        Reflect.set(controller, '_settingsController', {application: {api: {getDictionaryInfo}}});
+        Reflect.set(controller, '_deleteDictionaryInternal', deleteDictionaryInternal);
+        Reflect.set(controller, '_deleteDictionarySettings', deleteDictionarySettings);
+
+        await expect(recoverTimedOutUpdateState.call(
+            controller,
+            'Jitendex',
+            'token123',
+            'Jitendex [update-staging token123]',
+        )).resolves.toBe(false);
+
+        expect(getDictionaryInfo).toHaveBeenCalledOnce();
+        expect(deleteDictionaryInternal).not.toHaveBeenCalled();
+        expect(deleteDictionarySettings).not.toHaveBeenCalled();
+    });
+
+    test('accepts a timed-out update only when its final token is installed', async () => {
+        const controller = createControllerForInternalTests();
+        const getDictionaryInfo = vi.fn().mockResolvedValue([
+            {title: 'Jitendex', updateSessionToken: 'token123'},
+        ]);
+        Reflect.set(controller, '_settingsController', {application: {api: {getDictionaryInfo}}});
+
+        await expect(recoverTimedOutUpdateState.call(
+            controller,
+            'Jitendex',
+            'token123',
+            'Jitendex [update-staging token123]',
+        )).resolves.toBe(true);
     });
 });

@@ -1508,7 +1508,9 @@ export class TextScanner extends EventDispatcher {
                 this._activeLookupSequence = null;
             }
             this._pendingLookup = false;
-            const queuedLookup = this._queuedLookup;
+            const queuedLookup = /** @type {{x: number, y: number, inputInfo: import('text-scanner').InputInfo}|null} */ (
+                /** @type {unknown} */ (this._queuedLookup)
+            );
             this._queuedLookup = null;
             if (replayQueuedLookup && queuedLookup !== null) {
                 void this._searchAt(queuedLookup.x, queuedLookup.y, queuedLookup.inputInfo);

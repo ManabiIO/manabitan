@@ -46,7 +46,7 @@ jobs:
         env:
           MANABITAN_FIREFOX_XPI: ${{ github.workspace }}/builds/manabitan-firefox-dev.xpi
           MANABITAN_FIREFOX_HEADLESS: '0'
-          MANABITAN_E2E_STRICT_RUNTIME: '0'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
         run: xvfb-run -a npm run test:e2e:firefox-extension
 
       - name: Enforce Firefox extension E2E success

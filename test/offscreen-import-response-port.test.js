@@ -38,7 +38,7 @@ function getOffscreenMethod(name) {
 }
 
 describe('Offscreen import response port handling', () => {
-    const importDictionaryOffscreenHandler = /** @type {(this: Offscreen, params: {archiveContent: Blob, details: import('dictionary-importer').ImportDetails}, ports: MessagePort[]) => Promise<void>} */ (getOffscreenMethod('_importDictionaryOffscreenHandler'));
+    const importDictionaryOffscreenHandler = /** @type {(this: Offscreen, params: {archiveContent: Blob, details: import('dictionary-importer').ImportDetails}, ports: MessagePort[]) => void} */ (getOffscreenMethod('_importDictionaryOffscreenHandler'));
 
     afterEach(() => {
         vi.restoreAllMocks();
@@ -59,18 +59,18 @@ describe('Offscreen import response port handling', () => {
         };
         const typedResponsePort = /** @type {MessagePort} */ (/** @type {unknown} */ (responsePort));
 
-        await expect(importDictionaryOffscreenHandler.call(
+        expect(importDictionaryOffscreenHandler.call(
             offscreen,
             {
                 archiveContent: new Blob(['dictionary']),
                 details: /** @type {import('dictionary-importer').ImportDetails} */ ({}),
             },
             [typedResponsePort],
-        )).resolves.toBeUndefined();
+        )).toBeUndefined();
 
-        expect(responsePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({
+        await vi.waitFor(() => expect(responsePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({
             type: 'error',
-        }));
+        })));
         expect(responsePort.close).toHaveBeenCalledTimes(1);
     });
 });

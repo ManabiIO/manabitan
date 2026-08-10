@@ -23,7 +23,7 @@ import {DynamicProperty} from '../core/dynamic-property.js';
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
-import {reportDiagnostics} from '../core/diagnostics-reporter.js';
+import {reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {log} from '../core/log.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -1354,11 +1354,13 @@ export class Display extends EventDispatcher {
             dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
             if (dictionaryEntries.length > 0) { return dictionaryEntries; }
 
-            dictionaryEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
-            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, dictionaryEntries);
+            const termEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
+            dictionaryEntries = termEntries;
+            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, termEntries);
         } else {
-            dictionaryEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
-            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, dictionaryEntries);
+            const termEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
+            dictionaryEntries = termEntries;
+            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, termEntries);
             if (dictionaryEntries.length > 0) { return dictionaryEntries; }
 
             dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
@@ -1397,13 +1399,13 @@ export class Display extends EventDispatcher {
      * @param {boolean} isKanji
      * @param {import('api').FindTermsDetails} findDetails
      * @param {import('settings').OptionsContext} optionsContext
-     * @param {import('dictionary').DictionaryEntry[]} dictionaryEntries
+     * @param {import('dictionary').TermDictionaryEntry[]} dictionaryEntries
      * @returns {void}
      */
     _reportTermsFindSnapshot(source, normalizedSource, isKanji, findDetails, optionsContext, dictionaryEntries) {
-        try {
+        reportDiagnosticsLazy('display-terms-find-snapshot', () => {
             const resultDictionaries = [...new Set(dictionaryEntries.flatMap((dictionaryEntry) => dictionaryEntry.definitions.map(({dictionary}) => dictionary)))];
-            reportDiagnostics('display-terms-find-snapshot', {
+            return {
                 pageType: this._pageType,
                 isKanji,
                 source,
@@ -1412,10 +1414,8 @@ export class Display extends EventDispatcher {
                 findDetails,
                 resultDictionaryCount: dictionaryEntries.length,
                 resultDictionaries,
-            });
-        } catch (error) {
-            log.error(error);
-        }
+            };
+        });
     }
 
     /**

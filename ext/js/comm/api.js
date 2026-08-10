@@ -21,11 +21,67 @@ import {ExtensionError} from '../core/extension-error.js';
 const pmTransportTimeoutMs = 10_000;
 const apiInvokeTimeoutMs = 30_000;
 const apiInvokeExtendedTimeoutMs = 180_000;
+const dictionaryRuntimeImportInactivityTimeoutMs = 150_000;
 
+/**
+ * @param {number} delayMs
+ * @returns {Promise<void>}
+ */
 function sleep(delayMs) {
     return new Promise((resolve) => {
         globalThis.setTimeout(resolve, delayMs);
     });
+}
+
+/**
+ * @param {number|ReturnType<typeof globalThis.setTimeout>} timeoutId
+ * @param {() => void} onTimeout
+ * @returns {number|ReturnType<typeof globalThis.setTimeout>}
+ */
+function resetDictionaryRuntimeImportInactivityTimeout(timeoutId, onTimeout) {
+    globalThis.clearTimeout(timeoutId);
+    return globalThis.setTimeout(onTimeout, dictionaryRuntimeImportInactivityTimeoutMs);
+}
+
+/**
+ * @param {{settled: boolean, timeoutId: number|ReturnType<typeof globalThis.setTimeout>}} state
+ * @param {Set<(error: Error) => void>} shutdownRejectors
+ * @param {(error: Error) => void} shutdownReject
+ * @param {MessagePort} responsePort
+ * @returns {boolean}
+ */
+function finalizeDictionaryRuntimeImportResponse(state, shutdownRejectors, shutdownReject, responsePort) {
+    if (state.settled) { return false; }
+    state.settled = true;
+    shutdownRejectors.delete(shutdownReject);
+    globalThis.clearTimeout(state.timeoutId);
+    try {
+        responsePort.close();
+    } catch (_) {
+        // The response itself is already available; a torn-down port must not strand it.
+    }
+    return true;
+}
+
+/**
+ * @param {Set<(error: Error) => void>} shutdownRejectors
+ * @param {MessagePort} responsePort
+ * @param {(reason?: unknown) => void} reject
+ * @returns {{state: {settled: boolean, timeoutId: number|ReturnType<typeof globalThis.setTimeout>}, shutdownReject: (error: Error) => void}}
+ */
+function createDictionaryRuntimeImportRejectionState(shutdownRejectors, responsePort, reject) {
+    const state = {
+        settled: false,
+        /** @type {number|ReturnType<typeof globalThis.setTimeout>} */
+        timeoutId: 0,
+    };
+    /** @param {Error} error */
+    const shutdownReject = (error) => {
+        if (!finalizeDictionaryRuntimeImportResponse(state, shutdownRejectors, shutdownReject, responsePort)) { return; }
+        reject(error);
+    };
+    shutdownRejectors.add(shutdownReject);
+    return {state, shutdownReject};
 }
 
 export class API {
@@ -367,13 +423,6 @@ export class API {
     }
 
     /**
-     * @returns {Promise<import('api').ApiReturn<'debugDictionaryStorageState'>>}
-     */
-    debugDictionaryStorageState() {
-        return this._invoke('debugDictionaryStorageState', void 0);
-    }
-
-    /**
      * @param {string} url
      * @returns {Promise<{contentBase64: string, fileName: string, contentType: string|null}>}
      */
@@ -394,21 +443,6 @@ export class API {
      */
     purgeDatabase() {
         return this._invoke('purgeDatabase', void 0);
-    }
-
-    /**
-     * @returns {Promise<import('api').ApiReturn<'exportDictionaryDatabase'>>}
-     */
-    exportDictionaryDatabase() {
-        return this._invoke('exportDictionaryDatabase', void 0);
-    }
-
-    /**
-     * @param {import('api').ApiParam<'importDictionaryDatabase', 'content'>} content
-     * @returns {Promise<import('api').ApiReturn<'importDictionaryDatabase'>>}
-     */
-    importDictionaryDatabase(content) {
-        return this._invoke('importDictionaryDatabase', {content});
     }
 
     /**
@@ -580,41 +614,30 @@ export class API {
         }
         const channel = new MessageChannel();
         return new Promise((resolve, reject) => {
-            let settled = false;
-            const shutdownReject = (error) => {
-                if (settled) { return; }
-                settled = true;
-                this._shutdownRejectors.delete(shutdownReject);
-                globalThis.clearTimeout(timeoutId);
-                try {
-                    channel.port1.close();
-                } catch (_) {
-                    // Ignore close failures for torn-down import response channels.
-                }
-                reject(error);
+            const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(this._shutdownRejectors, channel.port1, reject);
+            const resetInactivityTimeout = () => {
+                state.timeoutId = resetDictionaryRuntimeImportInactivityTimeout(state.timeoutId, () => {
+                    shutdownReject(new Error(`Dictionary runtime import response was inactive for ${String(dictionaryRuntimeImportInactivityTimeoutMs)}ms`));
+                });
             };
-            this._shutdownRejectors.add(shutdownReject);
-            const timeoutMs = 150_000;
-            const timeoutId = globalThis.setTimeout(() => {
-                shutdownReject(new Error(`Dictionary runtime import response timed out after ${String(timeoutMs)}ms`));
-            }, timeoutMs);
+            resetInactivityTimeout();
             channel.port1.onmessage = (event) => {
-                if (settled) { return; }
+                if (state.settled) { return; }
                 const eventData = /** @type {unknown} */ (event.data);
                 const data = (
                     typeof eventData === 'object' &&
                     eventData !== null &&
                     !Array.isArray(eventData)
-                ) ? /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) : null;
+                ) ?
+                    /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) :
+                    null;
                 switch (data?.type) {
                     case 'progress':
+                        resetInactivityTimeout();
                         onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
                         return;
                     case 'complete':
-                        settled = true;
-                        this._shutdownRejectors.delete(shutdownReject);
-                        globalThis.clearTimeout(timeoutId);
-                        channel.port1.close();
+                        if (!finalizeDictionaryRuntimeImportResponse(state, this._shutdownRejectors, shutdownReject, channel.port1)) { return; }
                         if (
                             data.result &&
                             typeof data.result === 'object' &&
@@ -633,10 +656,7 @@ export class API {
                         resolve(data.result ?? null);
                         return;
                     case 'error':
-                        settled = true;
-                        this._shutdownRejectors.delete(shutdownReject);
-                        globalThis.clearTimeout(timeoutId);
-                        channel.port1.close();
+                        if (!finalizeDictionaryRuntimeImportResponse(state, this._shutdownRejectors, shutdownReject, channel.port1)) { return; }
                         reject(ExtensionError.deserialize(
                             data.error ?? {name: 'Error', message: 'Dictionary runtime import failed', stack: ''},
                         ));
@@ -671,41 +691,30 @@ export class API {
         }
         const channel = new MessageChannel();
         return new Promise((resolve, reject) => {
-            let settled = false;
-            const shutdownReject = (error) => {
-                if (settled) { return; }
-                settled = true;
-                this._shutdownRejectors.delete(shutdownReject);
-                globalThis.clearTimeout(timeoutId);
-                try {
-                    channel.port1.close();
-                } catch (_) {
-                    // Ignore close failures for torn-down URL import response channels.
-                }
-                reject(error);
+            const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(this._shutdownRejectors, channel.port1, reject);
+            const resetInactivityTimeout = () => {
+                state.timeoutId = resetDictionaryRuntimeImportInactivityTimeout(state.timeoutId, () => {
+                    shutdownReject(new Error(`Dictionary runtime URL import response was inactive for ${String(dictionaryRuntimeImportInactivityTimeoutMs)}ms`));
+                });
             };
-            this._shutdownRejectors.add(shutdownReject);
-            const timeoutMs = 150_000;
-            const timeoutId = globalThis.setTimeout(() => {
-                shutdownReject(new Error(`Dictionary runtime URL import response timed out after ${String(timeoutMs)}ms`));
-            }, timeoutMs);
+            resetInactivityTimeout();
             channel.port1.onmessage = (event) => {
-                if (settled) { return; }
+                if (state.settled) { return; }
                 const eventData = /** @type {unknown} */ (event.data);
                 const data = (
                     typeof eventData === 'object' &&
                     eventData !== null &&
                     !Array.isArray(eventData)
-                ) ? /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) : null;
+                ) ?
+                    /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) :
+                    null;
                 switch (data?.type) {
                     case 'progress':
+                        resetInactivityTimeout();
                         onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
                         return;
                     case 'complete':
-                        settled = true;
-                        this._shutdownRejectors.delete(shutdownReject);
-                        globalThis.clearTimeout(timeoutId);
-                        channel.port1.close();
+                        if (!finalizeDictionaryRuntimeImportResponse(state, this._shutdownRejectors, shutdownReject, channel.port1)) { return; }
                         if (
                             data.result &&
                             typeof data.result === 'object' &&
@@ -724,10 +733,7 @@ export class API {
                         resolve(data.result ?? null);
                         return;
                     case 'error':
-                        settled = true;
-                        this._shutdownRejectors.delete(shutdownReject);
-                        globalThis.clearTimeout(timeoutId);
-                        channel.port1.close();
+                        if (!finalizeDictionaryRuntimeImportResponse(state, this._shutdownRejectors, shutdownReject, channel.port1)) { return; }
                         reject(ExtensionError.deserialize(
                             data.error ?? {name: 'Error', message: 'Dictionary runtime URL import failed', stack: ''},
                         ));
@@ -821,6 +827,7 @@ export class API {
         return new Promise((resolve, reject) => {
             let settled = false;
             let retriedTransientFailure = false;
+            /** @param {Error} error */
             const shutdownReject = (error) => {
                 if (settled) { return; }
                 settled = true;
@@ -896,8 +903,6 @@ export class API {
      */
     _getInvokeTimeoutMs(action) {
         switch (action) {
-            case 'exportDictionaryDatabase':
-            case 'importDictionaryDatabase':
             case 'downloadDictionaryArchive':
             case 'purgeDatabase':
             case 'triggerDatabaseUpdated':
@@ -965,12 +970,16 @@ export class API {
             if (this._backendPort === null) {
                 await this._reconnectBackendPort();
             }
+            const backendPort = this._backendPort;
             const transportError = this._getPmTransportError();
             if (transportError !== null) {
                 throw transportError;
             }
+            if (backendPort === null) {
+                throw new Error('Backend message port is not available. You may need to refresh the page.');
+            }
             try {
-                this._backendPort.postMessage({action, params}, transferables);
+                backendPort.postMessage({action, params}, transferables);
             } catch (error) {
                 this._setBackendPort(null);
                 await this._reconnectBackendPort();
@@ -994,7 +1003,7 @@ export class API {
                 /** @type {(error: Error) => void} */
                 let shutdownReject = () => {};
                 try {
-                    const serviceWorkerRegistration = await Promise.race([
+                    const serviceWorkerRegistrationValue = await /** @type {Promise<unknown>} */ (Promise.race([
                         navigator.serviceWorker.ready,
                         new Promise((_, reject) => {
                             timeoutId = globalThis.setTimeout(() => {
@@ -1007,7 +1016,15 @@ export class API {
                             };
                             this._shutdownRejectors.add(shutdownReject);
                         }),
-                    ]);
+                    ]));
+                    if (
+                        typeof serviceWorkerRegistrationValue !== 'object' ||
+                        serviceWorkerRegistrationValue === null ||
+                        !('active' in serviceWorkerRegistrationValue)
+                    ) {
+                        throw new Error(`[${self.constructor.name}] invalid service worker registration`);
+                    }
+                    const serviceWorkerRegistration = /** @type {ServiceWorkerRegistration} */ (serviceWorkerRegistrationValue);
                     if (serviceWorkerRegistration.active === null) {
                         throw new Error(`[${self.constructor.name}] no active service worker`);
                     }
@@ -1121,6 +1138,7 @@ export class API {
 
     /**
      * @returns {MessagePort}
+     * @throws {Error} If the Firefox backend channel cannot be initialized.
      */
     _createFirefoxBackendPort() {
         const sharedWorkerBridge = new SharedWorker(new URL('shared-worker-bridge.js', import.meta.url), {type: 'module'});

@@ -62,6 +62,8 @@ export class TermContentOpfsStore {
         this._pendingWriteChunks = [];
         /** @type {Promise<void>|null} */
         this._queuedWritePromise = null;
+        /** @type {Error|null} */
+        this._queuedWriteError = null;
         /** @type {Uint8Array[]} */
         this._queuedWriteChunks = [];
         /** @type {number} */
@@ -153,6 +155,7 @@ export class TermContentOpfsStore {
             this._pendingWriteBytes = 0;
             this._pendingWriteChunks = [];
             this._queuedWritePromise = null;
+            this._queuedWriteError = null;
             this._queuedWriteChunks = [];
             this._queuedWriteBytes = 0;
             this._inFlightWriteBytes = 0;
@@ -181,6 +184,7 @@ export class TermContentOpfsStore {
             this._pendingWriteBytes = 0;
             this._pendingWriteChunks = [];
             this._queuedWritePromise = null;
+            this._queuedWriteError = null;
             this._queuedWriteChunks = [];
             this._queuedWriteBytes = 0;
             this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
@@ -217,36 +221,100 @@ export class TermContentOpfsStore {
      */
     async rollbackImportSession(checkpoint) {
         await this._runMutationExclusive(async () => {
+            if (
+                typeof checkpoint !== 'object' ||
+                checkpoint === null ||
+                !Array.isArray(checkpoint.segments)
+            ) {
+                throw new TypeError('Invalid term-content import checkpoint');
+            }
             this._importSessionActive = false;
             this._pendingWriteBytes = 0;
             this._pendingWriteChunks = [];
-            await this._awaitQueuedWrites();
-            await this._closeWritable();
+            this._queuedWriteChunks = [];
+            this._queuedWriteBytes = 0;
+            const queuedWrite = this._queuedWritePromise;
+            if (queuedWrite !== null) {
+                try {
+                    await queuedWrite;
+                } catch (error) {
+                    reportDiagnostics('term-content-store-rollback-abandoned-write-error', {
+                        error: error instanceof Error ? error.message : String(error),
+                    });
+                }
+            }
+            this._queuedWritePromise = null;
+            this._queuedWriteError = null;
+            this._inFlightWriteBytes = 0;
+            const writable = this._writable;
+            this._writable = null;
+            if (writable !== null) {
+                try {
+                    const abort = /** @type {unknown} */ (Reflect.get(writable, 'abort'));
+                    const closePromise = typeof abort === 'function' ?
+                        /** @type {() => Promise<void>} */ (abort).call(writable) :
+                        writable.close();
+                    await closePromise;
+                } catch (_) {
+                    // Restoration below uses fresh handles and verifies every checkpoint file.
+                }
+            }
             if (!this._hasStorageDirectoryApi()) { return; }
             const root = await navigator.storage.getDirectory();
             /** @type {Map<string, number>} */
             const checkpointByName = new Map();
             for (const segment of checkpoint.segments) {
+                if (
+                    typeof segment !== 'object' ||
+                    segment === null ||
+                    typeof segment.fileName !== 'string' ||
+                    segment.fileName.length === 0 ||
+                    !Number.isSafeInteger(segment.fileLength) ||
+                    segment.fileLength < 0 ||
+                    checkpointByName.has(segment.fileName)
+                ) {
+                    throw new TypeError('Invalid term-content import checkpoint segment');
+                }
                 checkpointByName.set(segment.fileName, segment.fileLength);
             }
-            for (const state of await this._loadSegmentStates(root)) {
-                const fileLength = checkpointByName.get(state.fileName);
-                if (typeof fileLength === 'undefined') {
-                    await root.removeEntry(state.fileName);
-                    continue;
-                }
-                const writable = await state.fileHandle.createWritable({keepExistingData: true});
+            /** @type {Error[]} */
+            const errors = [];
+            /** @type {Array<{index: number, fileName: string, fileHandle: FileSystemFileHandle, fileLength: number, startOffset: number, readFile: File|null}>} */
+            let currentStates = [];
+            try {
+                currentStates = await this._loadSegmentStates(root);
+            } catch (error) {
+                errors.push(error instanceof Error ? error : new Error(String(error)));
+            }
+            for (const state of currentStates) {
                 try {
-                    await writable.truncate(fileLength);
-                } finally {
-                    await writable.close();
+                    const fileLength = checkpointByName.get(state.fileName);
+                    if (typeof fileLength === 'undefined') {
+                        await root.removeEntry(state.fileName);
+                        continue;
+                    }
+                    const nextWritable = await state.fileHandle.createWritable({keepExistingData: true});
+                    try {
+                        await nextWritable.truncate(fileLength);
+                    } finally {
+                        await nextWritable.close();
+                    }
+                } catch (error) {
+                    errors.push(error instanceof Error ? error : new Error(String(error)));
                 }
             }
             for (const {fileName, fileLength} of checkpoint.segments) {
-                const handle = await root.getFileHandle(fileName, {create: true});
-                if ((await handle.getFile()).size !== fileLength) {
-                    throw new Error(`Cannot restore missing term-content bytes for ${fileName}`);
+                try {
+                    const handle = await root.getFileHandle(fileName);
+                    if ((await handle.getFile()).size !== fileLength) {
+                        throw new Error(`Cannot restore missing term-content bytes for ${fileName}`);
+                    }
+                } catch (error) {
+                    errors.push(error instanceof Error ? error : new Error(String(error)));
                 }
+            }
+            if (errors.length > 0) {
+                throw new AggregateError(errors, 'Failed to roll back term-content import storage');
             }
             this._segmentStates = await this._loadSegmentStates(root);
             if (this._segmentStates.length === 0) {
@@ -708,6 +776,9 @@ export class TermContentOpfsStore {
         if (chunks.length === 0) {
             return;
         }
+        if (this._queuedWriteError !== null) {
+            return;
+        }
         for (const chunk of chunks) {
             this._queuedWriteChunks.push(chunk);
             this._queuedWriteBytes += chunk.byteLength;
@@ -722,6 +793,9 @@ export class TermContentOpfsStore {
      * @returns {Promise<void>}
      */
     async _awaitQueuedWrites() {
+        if (this._queuedWriteError !== null) {
+            throw this._queuedWriteError;
+        }
         const promise = this._queuedWritePromise;
         if (promise === null) {
             return;
@@ -750,11 +824,13 @@ export class TermContentOpfsStore {
                     this._inFlightWriteBytes = Math.max(0, this._inFlightWriteBytes - inFlightBytes);
                 }
             }
+        } catch (error) {
+            this._queuedWriteError = error instanceof Error ? error : new Error(String(error));
+            this._queuedWriteChunks = [];
+            this._queuedWriteBytes = 0;
+            throw error;
         } finally {
             this._queuedWritePromise = null;
-            if (this._queuedWriteChunks.length > 0) {
-                this._queuedWritePromise = this._drainQueuedWrites();
-            }
         }
     }
 

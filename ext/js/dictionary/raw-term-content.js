@@ -15,12 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {parseJson} from '../core/json.js';
+
 const RAW_TERM_CONTENT_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x31]);
 const RAW_TERM_CONTENT_HEADER_BYTES = 20;
 const RAW_TERM_CONTENT_SHARED_GLOSSARY_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x32]);
 const RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES = 28;
 const RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x35]);
 const RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC_U32 = 0x3552424d;
+const RAW_TERM_CONTENT_TOKEN_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x36]);
+const RAW_TERM_CONTENT_TOKEN_HEADER_BYTES = 4;
 const U32_RANGE = 0x100000000;
 
 export const RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES = 28;
@@ -31,7 +35,23 @@ export const RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME = 'raw-v3';
 
 export const RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME = 'raw-v4';
 
+export const RAW_TERM_CONTENT_TOKEN_DICT_NAME = 'raw-v6';
+
 export const RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX = 'raw-block-v1';
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {boolean}
+ */
+export function isRawTermContentTokenBinary(bytes) {
+    return (
+        bytes.byteLength >= RAW_TERM_CONTENT_TOKEN_HEADER_BYTES &&
+        bytes[0] === RAW_TERM_CONTENT_TOKEN_MAGIC[0] &&
+        bytes[1] === RAW_TERM_CONTENT_TOKEN_MAGIC[1] &&
+        bytes[2] === RAW_TERM_CONTENT_TOKEN_MAGIC[2] &&
+        bytes[3] === RAW_TERM_CONTENT_TOKEN_MAGIC[3]
+    );
+}
 
 /**
  * @param {string|null} compressionDictName
@@ -335,5 +355,64 @@ export function decodeRawTermContentBinary(bytes, textDecoder) {
         return null;
     }
     const glossaryJson = textDecoder.decode(getRawTermContentGlossaryJsonBytes(bytes, header.glossaryJsonOffset, header.glossaryJsonLength));
+    return {rules: header.rules, definitionTags: header.definitionTags, termTags: header.termTags, glossaryJson};
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {TextDecoder} textDecoder
+ * @returns {{rules: string, definitionTags: string, termTags: string, glossaryJsonOffset: number, glossaryJsonLength: number}|null}
+ */
+export function decodeRawTermContentTokenHeader(bytes, textDecoder) {
+    if (!isRawTermContentTokenBinary(bytes)) {
+        return null;
+    }
+    let offset = RAW_TERM_CONTENT_TOKEN_HEADER_BYTES;
+    const decodeToken = () => {
+        const end = bytes.indexOf(0, offset);
+        if (end < 0) { return null; }
+        const start = offset;
+        offset = end + 1;
+        if (end - start >= 2 && bytes[start] === 0x22 && bytes[end - 1] === 0x22) {
+            if (end - start === 2) { return ''; }
+            const escapeIndex = bytes.indexOf(0x5c, start + 1);
+            if (escapeIndex < 0 || escapeIndex >= end - 1) {
+                return textDecoder.decode(bytes.subarray(start + 1, end - 1));
+            }
+        }
+        const token = textDecoder.decode(bytes.subarray(start, end));
+        try {
+            const value = /** @type {unknown} */ (parseJson(token));
+            return typeof value === 'string' ? value : null;
+        } catch {
+            return null;
+        }
+    };
+    const rules = decodeToken();
+    const definitionTags = decodeToken();
+    const termTags = decodeToken();
+    if (rules === null || definitionTags === null || termTags === null) {
+        return null;
+    }
+    const glossaryJsonOffset = offset;
+    const glossaryJsonLength = bytes.byteLength - glossaryJsonOffset;
+    if (glossaryJsonLength <= 0) { return null; }
+    return {rules, definitionTags, termTags, glossaryJsonOffset, glossaryJsonLength};
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {TextDecoder} textDecoder
+ * @returns {{rules: string, definitionTags: string, termTags: string, glossaryJson: string}|null}
+ */
+export function decodeRawTermContentTokenBinary(bytes, textDecoder) {
+    const header = decodeRawTermContentTokenHeader(bytes, textDecoder);
+    if (header === null) {
+        return null;
+    }
+    const glossaryJson = textDecoder.decode(bytes.subarray(
+        header.glossaryJsonOffset,
+        header.glossaryJsonOffset + header.glossaryJsonLength,
+    ));
     return {rules: header.rules, definitionTags: header.definitionTags, termTags: header.termTags, glossaryJson};
 }

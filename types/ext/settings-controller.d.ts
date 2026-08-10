@@ -29,7 +29,7 @@ export type PageExitPrevention = {
     end: () => void;
 };
 
-type ProfileDictionarySettings = Settings.DictionaryOptions & {index: number};
+export type ProfileDictionarySettings = Settings.DictionaryOptions & {index: number};
 
 export type ProfilesDictionarySettings = {[profileId: string]: ProfileDictionarySettings[]} | null;
 

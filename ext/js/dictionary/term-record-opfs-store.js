@@ -15,57 +15,66 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {parseJson} from '../core/json.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
     RAW_TERM_CONTENT_DICT_NAME,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
+    RAW_TERM_CONTENT_TOKEN_DICT_NAME,
 } from './raw-term-content.js';
+import {
+    appendExactRowMatches,
+    encodePersistedTermLookupIndexFromPreinternedPlan,
+    encodePersistedTermLookupIndexFromRecordPayload,
+    findExactRows,
+    findPrefixRows,
+    findSequenceRows,
+    getPersistedTermKeyBytes,
+    hashTermLookupKeyBytes,
+    parsePersistedTermLookupIndex,
+    warmPersistedTermPrefixIndex,
+} from './term-lookup-index.js';
 import {encodeTermRecordArtifactChunkWithWasmPreinterned, encodeTermRecordsWithWasm, encodeTermRecordsWithWasmPreinterned} from './term-record-wasm-encoder.js';
 
-const LEGACY_FILE_NAME = 'manabitan-term-records.ndjson';
 const SHARD_DIRECTORY_NAME = 'manabitan-term-records';
 const SHARD_FILE_PREFIX = 'dict-';
 const SHARD_FILE_SUFFIX = '.mbtr';
+const LOOKUP_INDEX_FILE_SUFFIX = '.mbti';
 const SHARD_FILE_CONTENT_DICT_SEPARATOR = '|';
 const SHARD_FILE_SEGMENT_SEPARATOR = '^';
-const BINARY_MAGIC_TEXT = 'MBTRR11B';
-const PREVIOUS_BINARY_MAGIC_TEXT = 'MBTRR10B';
-const PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT = 'MBTRREC9';
-const PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT = 'MBTRREC8';
-const PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT = 'MBTRREC5';
-const PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT = 'MBTRREC4';
-const PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT = 'MBTRREC3';
-const PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT = 'MBTRREC2';
-const LEGACY_BINARY_MAGIC_TEXT = 'MBTRREC1';
+const BINARY_MAGIC_TEXT = 'MBTRR12B';
 const BINARY_MAGIC_BYTES = 8;
-const CHUNK_HEADER_BYTES = 8;
+const CHUNK_HEADER_BYTES = 16;
 const STRING_TABLE_HEADER_BYTES = 8;
-const RECORD_HEADER_BYTES = 22;
-const PREVIOUS_RECORD_HEADER_BYTES = 18;
-const PREVIOUS_PREVIOUS_RECORD_HEADER_BYTES = 22;
-const PREVIOUS_PREVIOUS_PREVIOUS_RECORD_HEADER_BYTES = 32;
-const PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_RECORD_HEADER_BYTES = 40;
-const LEGACY_RECORD_HEADER_BYTES = 44;
+const RECORD_HEADER_BYTES = 24;
 const U32_NULL = 0xffffffff;
+const MAX_CONTENT_OFFSET_DELTA = U32_NULL - 1;
+const U32_RANGE = 0x100000000;
 const U16_NULL = 0xffff;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
 const DEFAULT_FLUSH_THRESHOLD_BYTES = 32 * 1024 * 1024;
 const LOW_MEMORY_FLUSH_THRESHOLD_BYTES = 16 * 1024 * 1024;
+const PREFIX_WARM_YIELD_BUDGET_MS = 8;
 const HIGH_MEMORY_FLUSH_THRESHOLD_BYTES = 64 * 1024 * 1024;
 const DEFAULT_QUEUED_WRITE_BUDGET_BYTES = 64 * 1024 * 1024;
 const LOW_MEMORY_QUEUED_WRITE_BUDGET_BYTES = 24 * 1024 * 1024;
 const HIGH_MEMORY_QUEUED_WRITE_BUDGET_BYTES = 64 * 1024 * 1024;
 const DEFAULT_WRITE_COALESCE_TARGET_BYTES = 4 * 1024 * 1024;
 const LOW_MEMORY_WRITE_COALESCE_TARGET_BYTES = 1024 * 1024;
-const HIGH_MEMORY_WRITE_COALESCE_TARGET_BYTES = 16 * 1024 * 1024;
+const HIGH_MEMORY_WRITE_COALESCE_TARGET_BYTES = 32 * 1024 * 1024;
 const LARGE_IMPORT_EXPECTED_BYTES_THRESHOLD = 512 * 1024 * 1024;
 const LARGE_IMPORT_WRITE_COALESCE_TARGET_BYTES = 64 * 1024 * 1024;
 const WRITE_COALESCE_MAX_CHUNKS = 512;
 const MAX_SHARD_SEGMENT_FILE_BYTES = 1024 * 1024 * 1024;
 const SHARD_LOAD_CONCURRENCY = 3;
+const LOOKUP_INDEX_MAGIC_TEXT = 'MBTIDX06';
+const LOOKUP_INDEX_MAGIC_BYTES = 8;
+const LOOKUP_INDEX_FILE_HEADER_BYTES = 24;
+const LOOKUP_INDEX_CHUNK_HEADER_BYTES = 32;
+const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
+const MAX_COMPACT_LOOKUP_INDEX_ROWS = 30000;
+const PERSISTED_ONLY_IMPORT_ROW_THRESHOLD = 250000;
 
 /**
  * @param {unknown[]} rows
@@ -94,6 +103,7 @@ function selectTermRecordPreinternedPlan(plan, indexes) {
     return {
         stringLengths: plan.stringLengths,
         stringOffsets: plan.stringOffsets,
+        stringHashes: plan.stringHashes,
         stringsBuffer: plan.stringsBuffer,
         expressionIndexes,
         readingIndexes,
@@ -112,9 +122,107 @@ function sliceTermRecordPreinternedPlan(plan, start, count) {
     return {
         stringLengths: plan.stringLengths,
         stringOffsets: plan.stringOffsets,
+        stringHashes: plan.stringHashes,
         stringsBuffer: plan.stringsBuffer,
         expressionIndexes: plan.expressionIndexes.subarray(start, end),
         readingIndexes: plan.readingIndexes.subarray(start, end),
+    };
+}
+
+/**
+ * Copies and remaps only the strings referenced by a row slice.
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
+ * @param {number} start
+ * @param {number} count
+ * @param {Uint32Array} remapScratch
+ * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
+ * @throws {RangeError} If the requested row range or scratch buffer is invalid.
+ */
+function compactTermRecordPreinternedPlan(plan, start, count, remapScratch) {
+    if (plan === null) { return null; }
+    if (
+        start < 0 || count < 0 ||
+        (start + count) > plan.expressionIndexes.length ||
+        (start + count) > plan.readingIndexes.length ||
+        remapScratch.length < plan.stringLengths.length
+    ) {
+        throw new RangeError('Invalid preinterned plan compaction range');
+    }
+    const referencedOldIndexes = [];
+    const expressionIndexes = new Uint32Array(count);
+    const readingIndexes = new Uint32Array(count);
+    try {
+        for (let i = 0; i < count; ++i) {
+            const sourceIndex = start + i;
+            const expressionOldIndex = plan.expressionIndexes[sourceIndex];
+            const readingOldIndex = plan.readingIndexes[sourceIndex];
+            if (expressionOldIndex >= plan.stringLengths.length) {
+                throw new RangeError(`Preinterned string index out of bounds: ${expressionOldIndex}`);
+            }
+            let expressionRemap = remapScratch[expressionOldIndex];
+            if (expressionRemap === 0) {
+                referencedOldIndexes.push(expressionOldIndex);
+                expressionRemap = referencedOldIndexes.length;
+                remapScratch[expressionOldIndex] = expressionRemap;
+            }
+            expressionIndexes[i] = expressionRemap - 1;
+
+            if (readingOldIndex >= plan.stringLengths.length) {
+                throw new RangeError(`Preinterned string index out of bounds: ${readingOldIndex}`);
+            }
+            let readingRemap = remapScratch[readingOldIndex];
+            if (readingRemap === 0) {
+                referencedOldIndexes.push(readingOldIndex);
+                readingRemap = referencedOldIndexes.length;
+                remapScratch[readingOldIndex] = readingRemap;
+            }
+            readingIndexes[i] = readingRemap - 1;
+        }
+    } finally {
+        for (const oldIndex of referencedOldIndexes) {
+            remapScratch[oldIndex] = 0;
+        }
+    }
+    const stringLengths = new Uint16Array(referencedOldIndexes.length);
+    const stringOffsets = new Uint32Array(referencedOldIndexes.length);
+    const stringHashes = plan.stringHashes instanceof Uint32Array ?
+        new Uint32Array(referencedOldIndexes.length) :
+        void 0;
+    const sourceStringHashes = plan.stringHashes;
+    let sourceStringOffsets = plan.stringOffsets;
+    if (!(sourceStringOffsets instanceof Uint32Array) || sourceStringOffsets.length !== plan.stringLengths.length) {
+        sourceStringOffsets = new Uint32Array(plan.stringLengths.length);
+        let sourceOffset = 0;
+        for (let i = 0; i < plan.stringLengths.length; ++i) {
+            sourceStringOffsets[i] = sourceOffset;
+            sourceOffset += plan.stringLengths[i];
+        }
+    }
+    let stringsByteLength = 0;
+    for (let i = 0; i < referencedOldIndexes.length; ++i) {
+        const oldIndex = referencedOldIndexes[i];
+        stringOffsets[i] = stringsByteLength;
+        stringLengths[i] = plan.stringLengths[oldIndex];
+        if (stringHashes instanceof Uint32Array && sourceStringHashes instanceof Uint32Array) {
+            stringHashes[i] = sourceStringHashes[oldIndex];
+        }
+        stringsByteLength += stringLengths[i];
+    }
+    const stringsBuffer = new Uint8Array(stringsByteLength);
+    let cursor = 0;
+    for (const oldIndex of referencedOldIndexes) {
+        const oldOffset = sourceStringOffsets[oldIndex];
+        const length = plan.stringLengths[oldIndex];
+        stringsBuffer.set(plan.stringsBuffer.subarray(oldOffset, oldOffset + length), cursor);
+        cursor += length;
+    }
+    return {
+        stringLengths,
+        stringOffsets,
+        stringHashes,
+        stringsBuffer,
+        expressionIndexes,
+        readingIndexes,
     };
 }
 
@@ -154,7 +262,7 @@ function hasFixedContentSpan(chunk, count) {
 
 /**
  * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
- * @param {number[]|Uint32Array} contentOffsets
+ * @param {number[]|Uint32Array|Float64Array} contentOffsets
  * @param {number} index
  * @returns {number}
  */
@@ -200,18 +308,151 @@ function writeU32Le(output, offset, value) {
     output[offset + 3] = (value >>> 24) & 0xff;
     return offset + 4;
 }
+
+/**
+ * @param {DataView} view
+ * @param {number} offset
+ * @param {number} value
+ * @throws {RangeError} If value is outside the non-negative safe integer range.
+ */
+function writeSafeU64Le(view, offset, value) {
+    if (!Number.isSafeInteger(value) || value < 0) {
+        throw new RangeError(`Invalid unsigned 64-bit safe integer: ${value}`);
+    }
+    const high = Math.floor(value / U32_RANGE);
+    const low = value - (high * U32_RANGE);
+    view.setUint32(offset, low, true);
+    view.setUint32(offset + 4, high, true);
+}
+
+/**
+ * @param {DataView} view
+ * @param {number} offset
+ * @returns {number}
+ * @throws {RangeError} If the decoded value is outside the safe integer range.
+ */
+function readSafeU64Le(view, offset) {
+    const low = view.getUint32(offset, true);
+    const high = view.getUint32(offset + 4, true);
+    const value = low + (high * U32_RANGE);
+    if (!Number.isSafeInteger(value)) {
+        throw new RangeError('Term content offset base exceeds the JavaScript safe integer range');
+    }
+    return value;
+}
+
+/**
+ * @param {number} value
+ * @throws {RangeError} If value is not a supported content offset.
+ */
+function validateContentOffset(value) {
+    if (value !== -1 && (!Number.isSafeInteger(value) || value < 0)) {
+        throw new RangeError(`Invalid term content offset: ${value}`);
+    }
+}
+
+/**
+ * @param {number} value
+ * @throws {RangeError} If value is not a supported content length.
+ */
+function validateContentLength(value) {
+    if (value !== -1 && (!Number.isSafeInteger(value) || value < 0 || value >= U32_NULL)) {
+        throw new RangeError(`Invalid term content length: ${value}`);
+    }
+}
+
+/**
+ * @param {number[]} offsets
+ * @returns {number}
+ * @throws {RangeError} If an offset is invalid.
+ */
+function getContentOffsetBase(offsets) {
+    let base = Number.POSITIVE_INFINITY;
+    for (const offset of offsets) {
+        validateContentOffset(offset);
+        if (offset >= 0 && offset < base) { base = offset; }
+    }
+    return base === Number.POSITIVE_INFINITY ? 0 : base;
+}
+
+/**
+ * @param {number} offset
+ * @param {number} base
+ * @returns {number}
+ * @throws {RangeError} If the offset is outside the encodable chunk range.
+ */
+function getContentOffsetDelta(offset, base) {
+    if (offset < 0) { return U32_NULL; }
+    const delta = offset - base;
+    if (!Number.isSafeInteger(delta) || delta < 0 || delta > MAX_CONTENT_OFFSET_DELTA) {
+        throw new RangeError(`Term content offset ${offset} is outside the encodable chunk range for base ${base}`);
+    }
+    return delta;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {number}
+ */
+function hashLookupIndexBytes(bytes) {
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < bytes.byteLength; ++i) {
+        hash = Math.imul(hash ^ bytes[i], 0x01000193);
+    }
+    return hash >>> 0;
+}
+
+/**
+ * @param {DataView} view
+ * @param {number} offset
+ * @returns {number}
+ */
+function hashTermRecordFixedFields(view, offset) {
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < RECORD_HEADER_BYTES; i += 4) {
+        hash = Math.imul(hash ^ view.getUint32(offset + i, true), 0x01000193);
+    }
+    return hash >>> 0;
+}
+
+/**
+ * @param {Uint8Array} a
+ * @param {Uint8Array} b
+ * @returns {boolean}
+ */
+function bytesEqual(a, b) {
+    if (a.byteLength !== b.byteLength) { return false; }
+    for (let i = 0; i < a.byteLength; ++i) {
+        if (a[i] !== b[i]) { return false; }
+    }
+    return true;
+}
+
+/**
+ * @param {Array<{expressionBytes: Uint8Array, readingBytes: Uint8Array|null, sequence: number|null}>} rows
+ * @returns {Uint8Array}
+ * @throws {RangeError} If an indexed string is too large for the sidecar format.
+ */
 const ENTRY_CONTENT_DICT_NAME_CODE_RAW = 0;
 const ENTRY_CONTENT_DICT_NAME_CODE_RAW_V2 = 1;
 const ENTRY_CONTENT_DICT_NAME_CODE_RAW_V3 = 2;
 const ENTRY_CONTENT_DICT_NAME_CODE_RAW_V4 = 3;
 const ENTRY_CONTENT_DICT_NAME_CODE_JMDICT = 4;
+const ENTRY_CONTENT_DICT_NAME_CODE_RAW_V6 = 5;
 const ENTRY_CONTENT_DICT_NAME_CODE_CUSTOM = 0xff;
-const ENTRY_CONTENT_LENGTH_U16_NULL = 0xffff;
-const ENTRY_CONTENT_LENGTH_EXTENDED_U16 = 0xfffe;
-const ENTRY_CONTENT_DICT_NAME_FLAG_READING_EQUALS_EXPRESSION = 0x8000;
-const ENTRY_CONTENT_DICT_NAME_FLAG_READING_REVERSE_EQUALS_EXPRESSION_REVERSE = 0x40000000;
-const ENTRY_CONTENT_DICT_NAME_FLAGS_MASK = 0x8000;
 const ENTRY_CONTENT_DICT_NAME_VALUE_MASK = 0x7fff;
+
+/** Error raised when a persisted record no longer matches its lookup sidecar. */
+class TermRecordIntegrityError extends Error {
+    /**
+     * @param {string} message
+     */
+    constructor(message) {
+        super(message);
+        /** @type {string} */
+        this.name = 'TermRecordIntegrityError';
+    }
+}
 
 class DenseIdRecordStore {
     /** */
@@ -334,10 +575,45 @@ class DenseIdRecordStore {
  * @property {Uint8Array[]} pendingWriteChunks
  * @property {number} queuedWriteBytes
  * @property {Promise<void>|null} queuedWritePromise
+ * @property {Error|null} queuedWriteError
  * @property {Uint8Array[]} queuedWriteChunks
  * @property {string|null} sharedContentDictName
  * @property {number} segmentIndex
  * @property {string} logicalKey
+ * @property {number} initialFileLength
+ * @property {Uint8Array[]} pendingLookupIndexChunks
+ * @property {number} pendingLookupIndexBytes
+ * @property {number} pendingLookupIndexRecordCount
+ * @property {FileSystemFileHandle|null} lookupIndexFileHandle
+ * @property {FileSystemWritableFileStream|null} lookupIndexWritable
+ * @property {number} lookupIndexChunkCount
+ * @property {number} lookupIndexRecordCount
+ * @property {boolean} appendFormatValidated
+ */
+
+/**
+ * @typedef {object} PersistentRecordChunk
+ * @property {number} firstId
+ * @property {number} count
+ * @property {string} fileName
+ * @property {FileSystemFileHandle} fileHandle
+ * @property {number} chunkOffset
+ * @property {string} dictionaryName
+ * @property {string} contentDictName
+ * @property {number} chunkHeaderHash
+ * @property {Uint8Array} recordFixedFieldsHashes
+ * @property {import('./term-lookup-index.js').PersistedTermLookupIndex} lookupIndex
+ */
+
+/**
+ * @typedef {object} TermRecordRenamePlan
+ * @property {TermRecordShardState} state
+ * @property {{dictionaryName: string, contentDictName: string, segmentIndex: number}} shardInfo
+ * @property {string} nextFileName
+ * @property {FileSystemFileHandle} nextFileHandle
+ * @property {ArrayBuffer} bytes
+ * @property {number} fileSize
+ * @property {ArrayBuffer|null} indexBytes
  */
 
 export class TermRecordOpfsStore {
@@ -350,6 +626,16 @@ export class TermRecordOpfsStore {
         this._shardStateByFileName = new Map();
         /** @type {Map<string, TermRecordShardState>} */
         this._activeAppendShardStateByKey = new Map();
+        /** @type {Map<string, PersistentRecordChunk[]>} */
+        this._persistentRecordChunksByDictionary = new Map();
+        /** @type {Set<string>} */
+        this._persistentIndexLoadedDictionaryNames = new Set();
+        /** @type {Map<string, Promise<boolean>>} */
+        this._persistentIndexLoadPromiseByDictionary = new Map();
+        /** @type {number} */
+        this._persistentLookupGeneration = 0;
+        /** @type {Map<string, Promise<{file: File, strings: string[], recordsStart: number, contentOffsetBase: number, firstId: number, count: number}|null>>} */
+        this._randomReadChunkMetadataCache = new Map();
         /** @type {number} */
         this._flushThresholdBytes = this._computeFlushThresholdBytes();
         /** @type {number} */
@@ -366,12 +652,10 @@ export class TermRecordOpfsStore {
         this._nextId = 1;
         /** @type {boolean} */
         this._nextIdMayNeedShardScan = false;
-        /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
+        /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}>} */
         this._indexByDictionary = new Map();
-        /** @type {WeakSet<{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
+        /** @type {WeakSet<{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}>} */
         this._reverseIndexReady = new WeakSet();
-        /** @type {WeakSet<{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
-        this._pairIndexReady = new WeakSet();
         /** @type {boolean} */
         this._deferIndexBuild = false;
         /** @type {boolean} */
@@ -387,9 +671,9 @@ export class TermRecordOpfsStore {
         /** @type {TextDecoder} */
         this._textDecoder = new TextDecoder();
         /** @type {boolean} */
-        // The wasm encoder currently emits corrupted entryContent offsets on Chromium-family import paths.
-        // Keep the JS fallback there for correctness, but allow the faster path on other runtimes.
-        this._wasmEncoderUnavailable = this._shouldDisableWasmEncoderByDefault();
+        this._wasmEncoderUnavailable = false;
+        /** @type {Uint32Array} */
+        this._preinternedCompactionRemap = new Uint32Array(0);
         /** @type {string[]} */
         this._invalidShardFileNames = [];
         /** @type {number} */
@@ -402,22 +686,24 @@ export class TermRecordOpfsStore {
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
     }
 
+    /** */
+    _invalidateAllPersistentLookupState() {
+        ++this._persistentLookupGeneration;
+        this._persistentRecordChunksByDictionary.clear();
+        this._persistentIndexLoadedDictionaryNames.clear();
+        this._persistentIndexLoadPromiseByDictionary.clear();
+        this._randomReadChunkMetadataCache.clear();
+    }
+
     /**
-     * @returns {boolean}
+     * @param {string} dictionaryName
      */
-    _shouldDisableWasmEncoderByDefault() {
-        if (typeof globalThis === 'undefined') {
-            return false;
-        }
-        const browserRuntime = /** @type {{runtime?: {getBrowserInfo?: (() => Promise<unknown>)}}|undefined} */ (Reflect.get(globalThis, 'browser'));
-        if (typeof browserRuntime?.runtime?.getBrowserInfo === 'function') {
-            return false;
-        }
-        const chromeRuntime = /** @type {{runtime?: unknown}|undefined} */ (Reflect.get(globalThis, 'chrome'));
-        if (typeof chromeRuntime?.runtime === 'object' && chromeRuntime.runtime !== null) {
-            return true;
-        }
-        return false;
+    _invalidatePersistentLookupState(dictionaryName) {
+        ++this._persistentLookupGeneration;
+        this._persistentRecordChunksByDictionary.delete(dictionaryName);
+        this._persistentIndexLoadedDictionaryNames.delete(dictionaryName);
+        this._persistentIndexLoadPromiseByDictionary.delete(dictionaryName);
+        this._randomReadChunkMetadataCache.clear();
     }
 
     /**
@@ -440,6 +726,8 @@ export class TermRecordOpfsStore {
         this._recordsDirectoryHandle = null;
         this._shardStateByFileName.clear();
         this._activeAppendShardStateByKey.clear();
+        this._invalidateAllPersistentLookupState();
+        this._preinternedCompactionRemap = new Uint32Array(0);
         this._invalidShardFileNames = [];
         if (typeof navigator === 'undefined' || !('storage' in navigator) || !('getDirectory' in navigator.storage)) {
             return;
@@ -450,7 +738,6 @@ export class TermRecordOpfsStore {
 
         const shardFileCount = await this._loadShardFiles(false);
         this._nextIdMayNeedShardScan = shardFileCount > 0;
-        await (shardFileCount === 0 ? this._migrateLegacyMonolithicIfPresent() : this._deleteLegacyMonolithicIfPresent());
         if (shardFileCount === 0) {
             this._nextIdMayNeedShardScan = false;
             await this.verifyIntegrity();
@@ -470,6 +757,7 @@ export class TermRecordOpfsStore {
         this._indexDirty = true;
         this._reloadFromShardsAfterImport = false;
         this._indexByDictionary.clear();
+        this._invalidateAllPersistentLookupState();
         this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
         this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
@@ -478,7 +766,16 @@ export class TermRecordOpfsStore {
             state.pendingWriteChunks = [];
             state.queuedWriteBytes = 0;
             state.queuedWritePromise = null;
+            state.queuedWriteError = null;
             state.queuedWriteChunks = [];
+            state.initialFileLength = state.fileLength;
+            state.pendingLookupIndexChunks = [];
+            state.pendingLookupIndexBytes = 0;
+            state.pendingLookupIndexRecordCount = 0;
+            state.lookupIndexFileHandle = null;
+            state.lookupIndexWritable = null;
+            state.lookupIndexChunkCount = 0;
+            state.lookupIndexRecordCount = 0;
         }
     }
 
@@ -489,7 +786,7 @@ export class TermRecordOpfsStore {
         await this._closeAllWritables();
         if (this._recordsDirectoryHandle === null) { return {shards: []}; }
         const shards = [];
-        for (const fileName of await this._listShardFileNames()) {
+        for (const fileName of await this._listTermRecordStorageFileNames()) {
             const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName);
             shards.push({fileName, fileLength: (await fileHandle.getFile()).size});
         }
@@ -501,40 +798,164 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async rollbackImportSession(checkpoint) {
-        await this.endImportSession();
+        if (
+            typeof checkpoint !== 'object' ||
+            checkpoint === null ||
+            !Array.isArray(checkpoint.shards)
+        ) {
+            throw new TypeError('Invalid term-record import checkpoint');
+        }
+        await this._abandonImportWritesForRollback();
         if (this._recordsDirectoryHandle === null) { return; }
         /** @type {Map<string, number>} */
         const checkpointByName = new Map();
         for (const shard of checkpoint.shards) {
+            if (
+                typeof shard !== 'object' ||
+                shard === null ||
+                typeof shard.fileName !== 'string' ||
+                shard.fileName.length === 0 ||
+                !Number.isSafeInteger(shard.fileLength) ||
+                shard.fileLength < 0 ||
+                checkpointByName.has(shard.fileName)
+            ) {
+                throw new TypeError('Invalid term-record import checkpoint shard');
+            }
             checkpointByName.set(shard.fileName, shard.fileLength);
         }
-        for (const fileName of await this._listShardFileNames()) {
-            const fileLength = checkpointByName.get(fileName);
-            if (typeof fileLength === 'undefined') {
-                await this._recordsDirectoryHandle.removeEntry(fileName);
-                continue;
-            }
-            const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName);
-            const writable = await fileHandle.createWritable({keepExistingData: true});
+        /** @type {Error[]} */
+        const errors = [];
+        /** @type {string[]} */
+        let currentFileNames = [];
+        try {
+            currentFileNames = await this._listTermRecordStorageFileNames();
+        } catch (error) {
+            errors.push(error instanceof Error ? error : new Error(String(error)));
+        }
+        for (const fileName of currentFileNames) {
             try {
-                await writable.truncate(fileLength);
-            } finally {
-                await writable.close();
+                const fileLength = checkpointByName.get(fileName);
+                if (typeof fileLength === 'undefined') {
+                    await this._recordsDirectoryHandle.removeEntry(fileName);
+                    continue;
+                }
+                const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName);
+                const writable = await fileHandle.createWritable({keepExistingData: true});
+                try {
+                    await writable.truncate(fileLength);
+                } finally {
+                    await writable.close();
+                }
+            } catch (error) {
+                errors.push(error instanceof Error ? error : new Error(String(error)));
             }
         }
         for (const {fileName, fileLength} of checkpoint.shards) {
-            const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName, {create: true});
-            if ((await fileHandle.getFile()).size !== fileLength) {
-                throw new Error(`Cannot restore missing term-record bytes for ${fileName}`);
+            try {
+                const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName);
+                if ((await fileHandle.getFile()).size !== fileLength) {
+                    throw new Error(`Cannot restore missing term-record bytes for ${fileName}`);
+                }
+            } catch (error) {
+                errors.push(error instanceof Error ? error : new Error(String(error)));
             }
         }
-        await this.prepare();
+        try {
+            await this.prepare();
+        } catch (error) {
+            errors.push(error instanceof Error ? error : new Error(String(error)));
+        }
+        if (errors.length > 0) {
+            throw new AggregateError(errors, 'Failed to roll back term-record import storage');
+        }
+    }
+
+    /**
+     * Stops import writes without flushing data which is about to be rolled back.
+     * @returns {Promise<void>}
+     */
+    async _abandonImportWritesForRollback() {
+        this._importSessionActive = false;
+        this._deferIndexBuild = false;
+        this._indexDirty = false;
+        this._preinternedCompactionRemap = new Uint32Array(0);
+        const states = [...this._shardStateByFileName.values()];
+        const queuedWrites = [];
+        for (const state of states) {
+            state.pendingWriteBytes = 0;
+            state.pendingWriteChunks = [];
+            state.queuedWriteBytes = 0;
+            state.queuedWriteChunks = [];
+            state.pendingLookupIndexChunks = [];
+            state.pendingLookupIndexBytes = 0;
+            state.pendingLookupIndexRecordCount = 0;
+            if (state.queuedWritePromise !== null) {
+                queuedWrites.push(state.queuedWritePromise);
+            }
+        }
+        const settledWrites = await Promise.allSettled(queuedWrites);
+        const abandonedWriteErrors = settledWrites
+            .filter((result) => result.status === 'rejected')
+            .map((result) => (
+                result.reason instanceof Error ?
+                    result.reason.message :
+                    String(result.reason)
+            ));
+        if (abandonedWriteErrors.length > 0) {
+            reportDiagnostics('term-record-store-rollback-abandoned-write-errors', {
+                errors: abandonedWriteErrors,
+            });
+        }
+        for (const state of states) {
+            state.queuedWritePromise = null;
+            state.queuedWriteError = null;
+            const writable = state.writable;
+            state.writable = null;
+            if (writable !== null) {
+                try {
+                    const abort = /** @type {unknown} */ (Reflect.get(writable, 'abort'));
+                    const closePromise = typeof abort === 'function' ?
+                        /** @type {() => Promise<void>} */ (abort).call(writable) :
+                        writable.close();
+                    await closePromise;
+                } catch (_) {
+                    // Restoration below uses fresh handles and verifies every checkpoint file.
+                }
+            }
+            const lookupIndexWritable = state.lookupIndexWritable;
+            state.lookupIndexWritable = null;
+            state.lookupIndexFileHandle = null;
+            state.lookupIndexChunkCount = 0;
+            state.lookupIndexRecordCount = 0;
+            if (lookupIndexWritable === null) { continue; }
+            try {
+                const abort = /** @type {unknown} */ (Reflect.get(lookupIndexWritable, 'abort'));
+                const closePromise = typeof abort === 'function' ?
+                    /** @type {() => Promise<void>} */ (abort).call(lookupIndexWritable) :
+                    lookupIndexWritable.close();
+                await closePromise;
+            } catch (_) {
+                // Checkpoint restoration validates the committed sidecar bytes below.
+            }
+        }
+        this._invalidateAllPersistentLookupState();
     }
 
     /**
      * @returns {Promise<void>}
      */
     async endImportSession() {
+        try {
+            await this._endImportSession();
+        } finally {
+            this._preinternedCompactionRemap = new Uint32Array(0);
+        }
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _endImportSession() {
         if (!this._importSessionActive && !this._hasPendingShardWrites()) {
             return;
         }
@@ -611,12 +1032,14 @@ export class TermRecordOpfsStore {
         this._shardStateByFileName.clear();
         this._invalidShardFileNames = [];
         this._activeAppendShardStateByKey.clear();
+        this._invalidateAllPersistentLookupState();
+        this._preinternedCompactionRemap = new Uint32Array(0);
         this._loadedDictionaryNames.clear();
         this._allShardContentsLoaded = false;
         if (this._recordsDirectoryHandle === null) {
             return;
         }
-        const shardFileNames = await this._listShardFileNames();
+        const shardFileNames = await this._listTermRecordStorageFileNames();
         for (const fileName of shardFileNames) {
             try {
                 await this._recordsDirectoryHandle.removeEntry(fileName);
@@ -624,7 +1047,6 @@ export class TermRecordOpfsStore {
                 // NOP
             }
         }
-        await this._deleteLegacyMonolithicIfPresent();
     }
 
     /**
@@ -691,12 +1113,7 @@ export class TermRecordOpfsStore {
             const firstRecord = dictionaryRecords[0];
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            await this._appendEncodedChunk(
-                state,
-                await this._encodeRecords(dictionaryRecords, preinternedPlan),
-                firstRecord?.id ?? 0,
-                dictionaryRecords.length,
-            );
+            await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan);
         }
     }
 
@@ -787,7 +1204,7 @@ export class TermRecordOpfsStore {
      * @param {unknown[]} rows
      * @param {number} start
      * @param {number} count
-     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {(string|null)[]} contentDictNames
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
@@ -1093,14 +1510,23 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
-     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {string | (string|null)[]} contentDictNames
-     * @returns {Promise<{buildRecordsMs: number, encodeMs: number, appendWriteMs: number}>}
+     * @returns {Promise<{buildRecordsMs: number, encodeMs: number, appendWriteMs: number, validationMs: number, wasmEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
     async appendBatchFromArtifactChunkResolvedContent(chunk, contentOffsets, contentLengths, contentDictNames) {
         const count = chunk.rowCount;
-        if (count <= 0) { return {buildRecordsMs: 0, encodeMs: 0, appendWriteMs: 0}; }
+        if (count <= 0) {
+            return {
+                buildRecordsMs: 0,
+                encodeMs: 0,
+                appendWriteMs: 0,
+                validationMs: 0,
+                wasmEncodeMs: 0,
+                lookupIndexEncodeMs: 0,
+            };
+        }
         const fixedContentSpan = hasFixedContentSpan(chunk, count);
         if (
             (!fixedContentSpan && (contentOffsets.length < count || contentLengths.length < count)) ||
@@ -1115,15 +1541,23 @@ export class TermRecordOpfsStore {
         const firstContentDictName = uniformContentDictName ?? (contentDictNames[0] ?? 'raw');
         const preinternedPlan = chunk.termRecordPreinternedPlan ?? null;
         const stableStringOffsets = preinternedPlan?.stringOffsets;
+        const stableStringLengths = preinternedPlan?.stringLengths;
+        const stableStringsBuffer = preinternedPlan?.stringsBuffer;
+        const stableExpressionIndexes = preinternedPlan?.expressionIndexes;
+        const stableReadingIndexes = preinternedPlan?.readingIndexes;
         const hasStableStringSlices = (
             stableStringOffsets instanceof Uint32Array &&
-            stableStringOffsets.length === preinternedPlan.stringLengths.length &&
-            preinternedPlan.expressionIndexes.length >= count &&
-            preinternedPlan.readingIndexes.length >= count
+            stableStringLengths instanceof Uint16Array &&
+            stableStringsBuffer instanceof Uint8Array &&
+            stableExpressionIndexes instanceof Uint32Array &&
+            stableReadingIndexes instanceof Uint32Array &&
+            stableStringOffsets.length === stableStringLengths.length &&
+            stableExpressionIndexes.length >= count &&
+            stableReadingIndexes.length >= count
         );
         const skipRecordMaterialization = (
             this._importSessionActive &&
-            (chunk.dictionaryTotalRows ?? count) >= 1_000_000
+            (chunk.dictionaryTotalRows ?? count) >= PERSISTED_ONLY_IMPORT_ROW_THRESHOLD
         );
         if (skipRecordMaterialization) {
             this._nextId += count;
@@ -1137,17 +1571,17 @@ export class TermRecordOpfsStore {
                 const id = this._nextId++;
                 const sequenceValue = chunk.sequenceList[i];
                 const entryContentDictName = uniformContentDictName ?? (contentDictNames[i] ?? 'raw');
-                const expressionIndex = preinternedPlan?.expressionIndexes[i] ?? -1;
-                const readingIndex = preinternedPlan?.readingIndexes[i] ?? -1;
-                const hasStableExpression = hasStableStringSlices && expressionIndex >= 0 && expressionIndex < preinternedPlan.stringLengths.length;
-                const hasStableReading = hasStableStringSlices && readingIndex >= 0 && readingIndex < preinternedPlan.stringLengths.length;
+                const expressionIndex = stableExpressionIndexes?.[i] ?? -1;
+                const readingIndex = stableReadingIndexes?.[i] ?? -1;
+                const hasStableExpression = hasStableStringSlices && expressionIndex >= 0 && expressionIndex < stableStringLengths.length;
+                const hasStableReading = hasStableStringSlices && readingIndex >= 0 && readingIndex < stableStringLengths.length;
                 const expressionOffset = hasStableExpression ? stableStringOffsets[expressionIndex] : 0;
                 const readingOffset = hasStableReading ? stableStringOffsets[readingIndex] : 0;
                 const expressionBytes = hasStableExpression ?
-                    preinternedPlan.stringsBuffer.subarray(expressionOffset, expressionOffset + preinternedPlan.stringLengths[expressionIndex]) :
+                    stableStringsBuffer.subarray(expressionOffset, expressionOffset + stableStringLengths[expressionIndex]) :
                     chunk.expressionBytesList[i];
                 const readingBytes = hasStableReading ?
-                    preinternedPlan.stringsBuffer.subarray(readingOffset, readingOffset + preinternedPlan.stringLengths[readingIndex]) :
+                    stableStringsBuffer.subarray(readingOffset, readingOffset + stableStringLengths[readingIndex]) :
                     chunk.readingBytesList[i];
                 /** @type {TermRecord} */
                 const record = {
@@ -1175,9 +1609,14 @@ export class TermRecordOpfsStore {
         const buildRecordsMs = safePerformance.now() - tBuildStart;
         let encodeMs = 0;
         let appendWriteMs = 0;
+        let validationMs = 0;
+        let wasmEncodeMs = 0;
+        let lookupIndexEncodeMs = 0;
         if (uniformContentDictName !== null) {
             const state = await this._getOrCreateShardState(chunk.dictionary, uniformContentDictName);
-            if (state === null) { return {buildRecordsMs, encodeMs, appendWriteMs}; }
+            if (state === null) {
+                return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, wasmEncodeMs, lookupIndexEncodeMs};
+            }
             const metrics = await this._encodeAndAppendArtifactChunkForState(
                 state,
                 chunk,
@@ -1189,7 +1628,10 @@ export class TermRecordOpfsStore {
             );
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
-            return {buildRecordsMs, encodeMs, appendWriteMs};
+            validationMs += metrics.validationMs;
+            wasmEncodeMs += metrics.wasmEncodeMs;
+            lookupIndexEncodeMs += metrics.lookupIndexEncodeMs;
+            return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, wasmEncodeMs, lookupIndexEncodeMs};
         }
         let singleContentDictName = true;
         for (let i = 1; i < count; ++i) {
@@ -1200,7 +1642,9 @@ export class TermRecordOpfsStore {
         }
         if (singleContentDictName) {
             const state = await this._getOrCreateShardState(chunk.dictionary, firstContentDictName);
-            if (state === null) { return {buildRecordsMs, encodeMs, appendWriteMs}; }
+            if (state === null) {
+                return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, wasmEncodeMs, lookupIndexEncodeMs};
+            }
             const metrics = await this._encodeAndAppendArtifactChunkForState(
                 state,
                 chunk,
@@ -1212,7 +1656,10 @@ export class TermRecordOpfsStore {
             );
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
-            return {buildRecordsMs, encodeMs, appendWriteMs};
+            validationMs += metrics.validationMs;
+            wasmEncodeMs += metrics.wasmEncodeMs;
+            lookupIndexEncodeMs += metrics.lookupIndexEncodeMs;
+            return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, wasmEncodeMs, lookupIndexEncodeMs};
         }
         for (let runStart = 0; runStart < count;) {
             const contentDictName = contentDictNames[runStart] ?? 'raw';
@@ -1248,9 +1695,12 @@ export class TermRecordOpfsStore {
             );
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
+            validationMs += metrics.validationMs;
+            wasmEncodeMs += metrics.wasmEncodeMs;
+            lookupIndexEncodeMs += metrics.lookupIndexEncodeMs;
             runStart = runEnd;
         }
-        return {buildRecordsMs, encodeMs, appendWriteMs};
+        return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, wasmEncodeMs, lookupIndexEncodeMs};
     }
 
     /**
@@ -1261,10 +1711,19 @@ export class TermRecordOpfsStore {
      */
     async _encodeAndAppendChunkForState(state, records, preinternedPlan = null) {
         const tEncodeStart = safePerformance.now();
-        const chunk = await this._encodeRecords(records, preinternedPlan);
+        const {bytes, contentOffsetBase, lookupIndexBytes, fixedFieldsHashes} = await this._encodeRecords(records, preinternedPlan);
         const encodeMs = safePerformance.now() - tEncodeStart;
         const tAppendStart = safePerformance.now();
-        await this._appendEncodedChunk(state, chunk, records[0]?.id ?? 0, records.length);
+        await this._appendEncodedChunk(
+            state,
+            bytes,
+            records[0]?.id ?? 0,
+            records.length,
+            null,
+            contentOffsetBase,
+            lookupIndexBytes,
+            fixedFieldsHashes,
+        );
         const appendWriteMs = safePerformance.now() - tAppendStart;
         return {encodeMs, appendWriteMs};
     }
@@ -1283,14 +1742,27 @@ export class TermRecordOpfsStore {
         let appendWriteMs = 0;
         for (let runStart = 0; runStart < records.length;) {
             let runEnd = runStart + 1;
+            let minContentOffset = records[runStart].entryContentOffset >= 0 ? records[runStart].entryContentOffset : Number.POSITIVE_INFINITY;
+            let maxContentOffset = records[runStart].entryContentOffset >= 0 ? records[runStart].entryContentOffset : Number.NEGATIVE_INFINITY;
             while (runEnd < records.length && records[runEnd].id === (records[runEnd - 1].id + 1)) {
+                const contentOffset = records[runEnd].entryContentOffset;
+                const nextMinContentOffset = contentOffset >= 0 ? Math.min(minContentOffset, contentOffset) : minContentOffset;
+                const nextMaxContentOffset = contentOffset >= 0 ? Math.max(maxContentOffset, contentOffset) : maxContentOffset;
+                if (
+                    nextMinContentOffset !== Number.POSITIVE_INFINITY &&
+                    (nextMaxContentOffset - nextMinContentOffset) > MAX_CONTENT_OFFSET_DELTA
+                ) {
+                    break;
+                }
+                minContentOffset = nextMinContentOffset;
+                maxContentOffset = nextMaxContentOffset;
                 ++runEnd;
             }
             const runRecords = records.slice(runStart, runEnd);
             const runPlan = (
                 recordIndexes !== null ?
                     selectTermRecordPreinternedPlan(preinternedPlan, recordIndexes.slice(runStart, runEnd)) :
-                    preinternedPlan
+                    sliceTermRecordPreinternedPlan(preinternedPlan, runStart, runEnd - runStart)
             );
             const metrics = await this._encodeAndAppendChunkForState(state, runRecords, runPlan);
             encodeMs += metrics.encodeMs;
@@ -1302,22 +1774,105 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {TermRecordShardState} state
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
      * @param {number} firstId
-     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {string} [contentDictName='raw']
-     * @returns {Promise<{encodeMs: number, appendWriteMs: number}>}
+     * @returns {Promise<{encodeMs: number, appendWriteMs: number, validationMs: number, wasmEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
     async _encodeAndAppendArtifactChunkForState(state, chunk, firstId, contentOffsets, contentLengths, preinternedPlan = null, contentDictName = 'raw') {
-        const tEncodeStart = safePerformance.now();
-        const encodedChunk = await this._encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan);
-        const encodeMs = safePerformance.now() - tEncodeStart;
-        const tAppendStart = safePerformance.now();
-        await this._appendEncodedChunk(state, encodedChunk, firstId, chunk.rowCount, contentDictName);
-        const appendWriteMs = safePerformance.now() - tAppendStart;
-        return {encodeMs, appendWriteMs};
+        let encodeMs = 0;
+        let appendWriteMs = 0;
+        let validationMs = 0;
+        let wasmEncodeMs = 0;
+        let lookupIndexEncodeMs = 0;
+        const count = chunk.rowCount;
+        for (let runStart = 0; runStart < count;) {
+            let runEnd = runStart;
+            let minContentOffset = Number.POSITIVE_INFINITY;
+            let maxContentOffset = Number.NEGATIVE_INFINITY;
+            while (runEnd < count) {
+                if ((runEnd - runStart) >= MAX_COMPACT_LOOKUP_INDEX_ROWS) {
+                    break;
+                }
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd);
+                validateContentOffset(contentOffset);
+                const nextMinContentOffset = contentOffset >= 0 ? Math.min(minContentOffset, contentOffset) : minContentOffset;
+                const nextMaxContentOffset = contentOffset >= 0 ? Math.max(maxContentOffset, contentOffset) : maxContentOffset;
+                if (
+                    runEnd > runStart &&
+                    nextMinContentOffset !== Number.POSITIVE_INFINITY &&
+                    (nextMaxContentOffset - nextMinContentOffset) > MAX_CONTENT_OFFSET_DELTA
+                ) {
+                    break;
+                }
+                minContentOffset = nextMinContentOffset;
+                maxContentOffset = nextMaxContentOffset;
+                ++runEnd;
+            }
+            const runCount = runEnd - runStart;
+            const isWholeChunk = runStart === 0 && runEnd === count;
+            const runChunk = isWholeChunk ?
+                chunk :
+                {
+                    dictionary: chunk.dictionary,
+                    rowCount: runCount,
+                    expressionBytesList: chunk.expressionBytesList.slice(runStart, runEnd),
+                    readingBytesList: chunk.readingBytesList.slice(runStart, runEnd),
+                    readingEqualsExpressionList: chunk.readingEqualsExpressionList.slice(runStart, runEnd),
+                    scoreList: chunk.scoreList.slice(runStart, runEnd),
+                    sequenceList: chunk.sequenceList.slice(runStart, runEnd),
+                    fixedContentOffsetBase: (
+                        typeof chunk.fixedContentOffsetBase === 'number' && typeof chunk.fixedContentLength === 'number' ?
+                            chunk.fixedContentOffsetBase + (runStart * chunk.fixedContentLength) :
+                            void 0
+                    ),
+                    fixedContentLength: chunk.fixedContentLength,
+                };
+            const runOffsets = isWholeChunk || hasFixedContentSpan(runChunk, runCount) ? contentOffsets : contentOffsets.slice(runStart, runEnd);
+            const runLengths = isWholeChunk || hasFixedContentSpan(runChunk, runCount) ? contentLengths : contentLengths.slice(runStart, runEnd);
+            const runPlan = isWholeChunk ?
+                preinternedPlan :
+                compactTermRecordPreinternedPlan(
+                    preinternedPlan,
+                    runStart,
+                    runCount,
+                    this._getPreinternedCompactionRemap(preinternedPlan?.stringLengths.length ?? 0),
+                );
+            const tEncodeStart = safePerformance.now();
+            const encodedChunk = await this._encodeArtifactChunkRecords(runChunk, runOffsets, runLengths, runPlan);
+            encodeMs += safePerformance.now() - tEncodeStart;
+            validationMs += encodedChunk.validationMs;
+            wasmEncodeMs += encodedChunk.wasmEncodeMs;
+            lookupIndexEncodeMs += encodedChunk.lookupIndexEncodeMs;
+            const tAppendStart = safePerformance.now();
+            await this._appendEncodedChunk(
+                state,
+                encodedChunk.bytes,
+                firstId + runStart,
+                runCount,
+                contentDictName,
+                encodedChunk.contentOffsetBase,
+                encodedChunk.lookupIndexBytes,
+                encodedChunk.fixedFieldsHashes,
+            );
+            appendWriteMs += safePerformance.now() - tAppendStart;
+            runStart = runEnd;
+        }
+        return {encodeMs, appendWriteMs, validationMs, wasmEncodeMs, lookupIndexEncodeMs};
+    }
+
+    /**
+     * @param {number} minimumLength
+     * @returns {Uint32Array}
+     */
+    _getPreinternedCompactionRemap(minimumLength) {
+        if (this._preinternedCompactionRemap.length < minimumLength) {
+            this._preinternedCompactionRemap = new Uint32Array(minimumLength);
+        }
+        return this._preinternedCompactionRemap;
     }
 
     /**
@@ -1338,6 +1893,7 @@ export class TermRecordOpfsStore {
         this._recordIdsByDictionary.delete(dictionaryName);
         this._recordIdStaleDictionaryNames.delete(dictionaryName);
         this._indexByDictionary.delete(dictionaryName);
+        this._invalidatePersistentLookupState(dictionaryName);
         await this._deleteShardByDictionary(dictionaryName);
         return deletedCount;
     }
@@ -1345,9 +1901,10 @@ export class TermRecordOpfsStore {
     /**
      * @param {string} fromDictionaryName
      * @param {string} toDictionaryName
+     * @param {boolean} [preserveSourceFiles=false]
      * @returns {Promise<number>}
      */
-    async replaceDictionaryName(fromDictionaryName, toDictionaryName) {
+    async replaceDictionaryName(fromDictionaryName, toDictionaryName, preserveSourceFiles = false) {
         const fromName = `${fromDictionaryName}`.trim();
         const toName = `${toDictionaryName}`.trim();
         if (fromName.length === 0 || toName.length === 0 || fromName === toName) {
@@ -1360,7 +1917,12 @@ export class TermRecordOpfsStore {
         await this._flushPendingWrites();
         await this._awaitQueuedWrites();
         await this._closeAllWritables();
-        if (!this._indexByDictionary.has(toName)) {
+        await Promise.all([
+            this._tryLoadPersistentDictionaryIndex(fromName),
+            this._tryLoadPersistentDictionaryIndex(toName),
+        ]);
+        const hasLiveTargetRecords = this._hasRecordsForDictionary(toName);
+        if (!hasLiveTargetRecords && !this._indexByDictionary.has(toName)) {
             const removedStaleTargetFiles = await this.cleanupShardFilesByDictionaryPredicate((dictionaryName) => dictionaryName === toName);
             if (removedStaleTargetFiles.length > 0) {
                 reportDiagnostics('term-record-store-rename-cleanup-stale-target', {
@@ -1370,8 +1932,6 @@ export class TermRecordOpfsStore {
                 });
             }
         }
-        const targetRecordIds = this._indexByDictionary.get(toName);
-        const hasLiveTargetRecords = targetRecordIds instanceof Set && targetRecordIds.size > 0;
 
         const recordIdsToRename = [];
         for (const id of this._recordsById.keys()) {
@@ -1379,7 +1939,9 @@ export class TermRecordOpfsStore {
             if (typeof record === 'undefined' || record.dictionary !== fromName) { continue; }
             recordIdsToRename.push(id);
         }
-        const renamedCount = recordIdsToRename.length;
+        const renamedCount = recordIdsToRename.length > 0 ?
+            recordIdsToRename.length :
+            (this._persistentRecordChunksByDictionary.get(fromName) ?? []).reduce((sum, {count}) => sum + count, 0);
         if (renamedCount === 0) {
             return 0;
         }
@@ -1400,7 +1962,7 @@ export class TermRecordOpfsStore {
         const sourceStates = [...this._shardStateByFileName.values()]
             .filter((state) => this._decodeDictionaryNameFromShardFileName(state.fileName) === fromName)
             .sort((a, b) => a.fileName.localeCompare(b.fileName));
-        /** @type {Array<{state: TermRecordShardState, shardInfo: NonNullable<ReturnType<TermRecordOpfsStore['_decodeShardInfoFromShardFileName']>>, nextFileName: string, nextFileHandle: FileSystemFileHandle, bytes: ArrayBuffer, fileSize: number}>} */
+        /** @type {TermRecordRenamePlan[]} */
         const renamePlans = [];
         for (const state of sourceStates) {
             let file;
@@ -1411,6 +1973,17 @@ export class TermRecordOpfsStore {
             }
             const shardInfo = this._decodeShardInfoFromShardFileName(state.fileName);
             if (shardInfo === null) { continue; }
+            /** @type {ArrayBuffer|null} */
+            let indexBytes = null;
+            try {
+                const indexFileHandle = await this._recordsDirectoryHandle.getFileHandle(
+                    `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
+                    {create: false},
+                );
+                indexBytes = await (await indexFileHandle.getFile()).arrayBuffer();
+            } catch (_) {
+                // Older shards without a sidecar retain the full-shard fallback.
+            }
             const nextFileName = this._getShardSegmentFileName(toName, shardInfo.contentDictName, shardInfo.segmentIndex);
             const existingTargetState = this._shardStateByFileName.get(nextFileName);
             if (typeof existingTargetState !== 'undefined') {
@@ -1426,6 +1999,11 @@ export class TermRecordOpfsStore {
                 } catch (_) {
                     // NOP - fall through and let create/write validation below fail if cleanup was insufficient.
                 }
+                try {
+                    await this._recordsDirectoryHandle.removeEntry(`${nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
+                } catch (_) {
+                    // NOP
+                }
                 reportDiagnostics('term-record-store-rename-remove-colliding-target', {
                     fromName,
                     toName,
@@ -1439,6 +2017,11 @@ export class TermRecordOpfsStore {
                     if (!hasLiveTargetRecords) {
                         try {
                             await this._recordsDirectoryHandle.removeEntry(nextFileName);
+                            try {
+                                await this._recordsDirectoryHandle.removeEntry(`${nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
+                            } catch (_) {
+                                // NOP
+                            }
                             reportDiagnostics('term-record-store-rename-remove-colliding-target-bytes', {
                                 fromName,
                                 toName,
@@ -1453,6 +2036,7 @@ export class TermRecordOpfsStore {
                                 nextFileHandle: replacementHandle,
                                 bytes: await file.arrayBuffer(),
                                 fileSize: file.size,
+                                indexBytes,
                             });
                             continue;
                         } catch (_) {
@@ -1473,6 +2057,7 @@ export class TermRecordOpfsStore {
                 nextFileHandle,
                 bytes: await file.arrayBuffer(),
                 fileSize: file.size,
+                indexBytes,
             });
         }
         /**
@@ -1491,31 +2076,57 @@ export class TermRecordOpfsStore {
                 await writable.close();
             }
         };
-        /** @type {typeof renamePlans} */
+        /** @type {TermRecordRenamePlan[]} */
         const createdPlans = [];
-        /** @type {typeof renamePlans} */
+        /** @type {TermRecordRenamePlan[]} */
         const removedPlans = [];
         try {
             for (const plan of renamePlans) {
                 await writeShardBytes(plan.nextFileHandle, plan.bytes);
+                if (plan.indexBytes !== null) {
+                    const nextIndexHandle = await this._recordsDirectoryHandle.getFileHandle(
+                        `${plan.nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
+                        {create: true},
+                    );
+                    await writeShardBytes(nextIndexHandle, plan.indexBytes);
+                }
                 createdPlans.push(plan);
             }
-            for (const plan of renamePlans) {
-                await this._recordsDirectoryHandle.removeEntry(plan.state.fileName);
-                removedPlans.push(plan);
+            if (!preserveSourceFiles) {
+                for (const plan of renamePlans) {
+                    await this._recordsDirectoryHandle.removeEntry(plan.state.fileName);
+                    try {
+                        await this._recordsDirectoryHandle.removeEntry(`${plan.state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
+                    } catch (_) {
+                        // NOP
+                    }
+                    removedPlans.push(plan);
+                }
             }
         } catch (e) {
-            for (const plan of removedPlans.slice().reverse()) {
+            for (const plan of [...removedPlans].reverse()) {
                 try {
                     const restoredHandle = await this._recordsDirectoryHandle.getFileHandle(plan.state.fileName, {create: true});
                     await writeShardBytes(restoredHandle, plan.bytes);
+                    if (plan.indexBytes !== null) {
+                        const restoredIndexHandle = await this._recordsDirectoryHandle.getFileHandle(
+                            `${plan.state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
+                            {create: true},
+                        );
+                        await writeShardBytes(restoredIndexHandle, plan.indexBytes);
+                    }
                 } catch (_) {
                     // NOP - preserve original failure.
                 }
             }
-            for (const plan of createdPlans.slice().reverse()) {
+            for (const plan of [...createdPlans].reverse()) {
                 try {
                     await this._recordsDirectoryHandle.removeEntry(plan.nextFileName);
+                    try {
+                        await this._recordsDirectoryHandle.removeEntry(`${plan.nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
+                    } catch (_) {
+                        // NOP
+                    }
                 } catch (_) {
                     // NOP - preserve original failure.
                 }
@@ -1532,6 +2143,8 @@ export class TermRecordOpfsStore {
         this._renameRecordIdIndex(fromName, toName, recordIdsToRename);
         this._indexByDictionary.delete(fromName);
         this._indexByDictionary.delete(toName);
+        this._invalidatePersistentLookupState(fromName);
+        this._invalidatePersistentLookupState(toName);
         this._indexDirty = false;
         for (const plan of renamePlans) {
             this._shardStateByFileName.delete(plan.state.fileName);
@@ -1583,14 +2196,20 @@ export class TermRecordOpfsStore {
             } catch (_) {
                 // NOP
             }
+            try {
+                await this._recordsDirectoryHandle.removeEntry(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
+            } catch (_) {
+                // NOP
+            }
         }
         if (removedDictionaryNames.size > 0) {
             for (const dictionaryName of removedDictionaryNames) {
                 this._loadedDictionaryNames.delete(dictionaryName);
                 this._recordIdsByDictionary.delete(dictionaryName);
                 this._recordIdStaleDictionaryNames.delete(dictionaryName);
+                this._invalidatePersistentLookupState(dictionaryName);
             }
-            for (const id of [...this._recordsById.keys()]) {
+            for (const id of this._recordsById.keys()) {
                 const record = this._recordsById.get(id);
                 if (typeof record === 'undefined' || !removedDictionaryNames.has(record.dictionary)) {
                     continue;
@@ -1614,6 +2233,272 @@ export class TermRecordOpfsStore {
             const record = this._recordsById.get(id);
             if (typeof record !== 'undefined') {
                 result.set(id, record);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @param {File} file
+     * @param {number} start
+     * @param {number} end
+     * @returns {Promise<Uint8Array>}
+     */
+    async _readFileRange(file, start, end) {
+        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || end < start || end > file.size) {
+            throw new RangeError(`Invalid term-record file range: ${start}..${end} of ${file.size}`);
+        }
+        const slice = /** @type {unknown} */ (Reflect.get(file, 'slice'));
+        if (typeof slice === 'function') {
+            const blob = /** @type {Blob} */ (/** @type {(start: number, end: number) => Blob} */ (slice).call(file, start, end));
+            return new Uint8Array(await blob.arrayBuffer());
+        }
+        const content = new Uint8Array(await file.arrayBuffer());
+        return content.slice(start, end);
+    }
+
+    /**
+     * @param {number} id
+     * @returns {PersistentRecordChunk|null}
+     */
+    _findPersistentRecordChunk(id) {
+        for (const chunks of this._persistentRecordChunksByDictionary.values()) {
+            let low = 0;
+            let high = chunks.length - 1;
+            while (low <= high) {
+                const middle = (low + high) >>> 1;
+                const chunk = chunks[middle];
+                if (id < chunk.firstId) {
+                    high = middle - 1;
+                } else if (id >= (chunk.firstId + chunk.count)) {
+                    low = middle + 1;
+                } else {
+                    return chunk;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param {PersistentRecordChunk} chunk
+     * @returns {Promise<{file: File, strings: string[], recordsStart: number, contentOffsetBase: number, firstId: number, count: number}|null>}
+     */
+    async _loadRandomReadChunkMetadata(chunk) {
+        const cacheKey = `${chunk.fileName}:${chunk.chunkOffset}`;
+        const cached = this._randomReadChunkMetadataCache.get(cacheKey);
+        if (typeof cached !== 'undefined') { return await cached; }
+        const load = (async () => {
+            const file = await chunk.fileHandle.getFile();
+            const prefix = await this._readFileRange(
+                file,
+                chunk.chunkOffset,
+                chunk.chunkOffset + CHUNK_HEADER_BYTES + STRING_TABLE_HEADER_BYTES,
+            );
+            const prefixView = new DataView(prefix.buffer, prefix.byteOffset, prefix.byteLength);
+            const firstId = prefixView.getUint32(0, true);
+            const count = prefixView.getUint32(4, true);
+            const contentOffsetBase = readSafeU64Le(prefixView, 8);
+            if (hashLookupIndexBytes(prefix.subarray(0, CHUNK_HEADER_BYTES)) !== chunk.chunkHeaderHash) {
+                throw new TermRecordIntegrityError(`Term-record chunk header checksum mismatch for ${chunk.fileName}`);
+            }
+            const stringCount = prefixView.getUint32(CHUNK_HEADER_BYTES, true);
+            const stringBytesLength = prefixView.getUint32(CHUNK_HEADER_BYTES + 4, true);
+            if (firstId !== chunk.firstId || count !== chunk.count || stringCount > count * 2) {
+                throw new TermRecordIntegrityError(`Invalid term-record chunk metadata for ${chunk.fileName}`);
+            }
+            const tableBytes = (stringCount * 2) + stringBytesLength;
+            const table = await this._readFileRange(
+                file,
+                chunk.chunkOffset + CHUNK_HEADER_BYTES + STRING_TABLE_HEADER_BYTES,
+                chunk.chunkOffset + CHUNK_HEADER_BYTES + STRING_TABLE_HEADER_BYTES + tableBytes,
+            );
+            const tableView = new DataView(table.buffer, table.byteOffset, table.byteLength);
+            const strings = new Array(stringCount);
+            let lengthsCursor = 0;
+            let stringsCursor = stringCount * 2;
+            for (let i = 0; i < stringCount; ++i) {
+                const length = tableView.getUint16(lengthsCursor, true); lengthsCursor += 2;
+                if ((stringsCursor + length) > table.byteLength) {
+                    throw new TermRecordIntegrityError(`Invalid term-record string table for ${chunk.fileName}`);
+                }
+                strings[i] = this._decodeString(table, stringsCursor, length);
+                stringsCursor += length;
+            }
+            if (stringsCursor !== table.byteLength) {
+                throw new TermRecordIntegrityError(`Invalid term-record string table length for ${chunk.fileName}`);
+            }
+            return {
+                file,
+                strings,
+                recordsStart: chunk.chunkOffset + CHUNK_HEADER_BYTES + STRING_TABLE_HEADER_BYTES + tableBytes,
+                contentOffsetBase,
+                firstId,
+                count,
+            };
+        })();
+        this._randomReadChunkMetadataCache.set(cacheKey, load);
+        try {
+            const result = await load;
+            if (result === null) { this._randomReadChunkMetadataCache.delete(cacheKey); }
+            return result;
+        } catch (error) {
+            if (this._randomReadChunkMetadataCache.get(cacheKey) === load) {
+                this._randomReadChunkMetadataCache.delete(cacheKey);
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * @param {{fileName: string}} chunk
+     * @returns {Promise<void>}
+     */
+    async _loadShardForRandomReadFallback(chunk) {
+        const state = this._shardStateByFileName.get(chunk.fileName);
+        if (typeof state === 'undefined') { return; }
+        const deferIndexBuild = this._deferIndexBuild;
+        this._deferIndexBuild = true;
+        try {
+            await this._loadShardStateContents(state);
+        } finally {
+            this._deferIndexBuild = deferIndexBuild;
+        }
+    }
+
+    /**
+     * @param {Iterable<number>} ids
+     * @returns {Promise<Map<number, TermRecord>>}
+     */
+    async getByIdsAsync(ids) {
+        const idList = [...ids];
+        const result = this.getByIds(idList);
+        /** @type {Map<ReturnType<TermRecordOpfsStore['_findPersistentRecordChunk']>, number[]>} */
+        const idsByChunk = new Map();
+        for (const id of idList) {
+            if (result.has(id)) { continue; }
+            const chunk = this._findPersistentRecordChunk(id);
+            if (chunk === null) { continue; }
+            const chunkIds = idsByChunk.get(chunk);
+            if (typeof chunkIds === 'undefined') {
+                idsByChunk.set(chunk, [id]);
+            } else {
+                chunkIds.push(id);
+            }
+        }
+        const chunkEntries = [...idsByChunk];
+        /** @type {Array<[NonNullable<ReturnType<TermRecordOpfsStore['_findPersistentRecordChunk']>>, number[]]>} */
+        const fallbackEntries = [];
+        let nextChunkIndex = 0;
+        const readNextChunk = async () => {
+            while (true) {
+                const chunkIndex = nextChunkIndex++;
+                if (chunkIndex >= chunkEntries.length) { return; }
+                const [chunk, chunkIds] = chunkEntries[chunkIndex];
+                if (chunk === null) { continue; }
+                try {
+                    const metadata = await this._loadRandomReadChunkMetadata(chunk);
+                    if (metadata === null) { throw new Error(`Invalid term-record chunk metadata for ${chunk.fileName}`); }
+                    let minOrdinal = Number.POSITIVE_INFINITY;
+                    let maxOrdinal = -1;
+                    for (const id of chunkIds) {
+                        const ordinal = id - chunk.firstId;
+                        minOrdinal = Math.min(minOrdinal, ordinal);
+                        maxOrdinal = Math.max(maxOrdinal, ordinal);
+                    }
+                    const records = await this._readFileRange(
+                        metadata.file,
+                        metadata.recordsStart + (minOrdinal * RECORD_HEADER_BYTES),
+                        metadata.recordsStart + ((maxOrdinal + 1) * RECORD_HEADER_BYTES),
+                    );
+                    const view = new DataView(records.buffer, records.byteOffset, records.byteLength);
+                    for (const id of chunkIds) {
+                        const ordinal = id - chunk.firstId;
+                        let cursor = (ordinal - minOrdinal) * RECORD_HEADER_BYTES;
+                        const fixedFieldsOffset = cursor;
+                        const expressionIndex = view.getUint32(cursor, true); cursor += 4;
+                        const readingIndex = view.getUint32(cursor, true); cursor += 4;
+                        const contentOffsetDelta = view.getUint32(cursor, true); cursor += 4;
+                        const rawContentLength = view.getUint32(cursor, true); cursor += 4;
+                        const score = view.getInt32(cursor, true); cursor += 4;
+                        const rawSequence = view.getInt32(cursor, true);
+                        if (expressionIndex >= metadata.strings.length) {
+                            throw new TermRecordIntegrityError(`Invalid expression index for term record ${id}`);
+                        }
+                        const expression = metadata.strings[expressionIndex];
+                        const reading = readingIndex === READING_EQUALS_EXPRESSION_U32 ?
+                            expression :
+                            metadata.strings[readingIndex];
+                        if (typeof reading !== 'string') {
+                            throw new TermRecordIntegrityError(`Invalid reading index for term record ${id}`);
+                        }
+                        const expectedExpression = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'expression');
+                        const expectedReading = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'reading') ?? expectedExpression;
+                        const expectedFixedFieldsHash = new DataView(
+                            chunk.recordFixedFieldsHashes.buffer,
+                            chunk.recordFixedFieldsHashes.byteOffset + (ordinal * 4),
+                            4,
+                        ).getUint32(0, true);
+                        if (
+                            expectedExpression === null ||
+                            expectedReading === null ||
+                            expectedFixedFieldsHash !== hashTermRecordFixedFields(view, fixedFieldsOffset) ||
+                            !bytesEqual(expectedExpression, this._textEncoder.encode(expression)) ||
+                            !bytesEqual(expectedReading, this._textEncoder.encode(reading))
+                        ) {
+                            throw new TermRecordIntegrityError(`Term-record checksum mismatch for ${id} in ${chunk.fileName}`);
+                        }
+                        const entryContentOffset = contentOffsetDelta === U32_NULL ?
+                            -1 :
+                            metadata.contentOffsetBase + contentOffsetDelta;
+                        if (entryContentOffset >= 0 && !Number.isSafeInteger(entryContentOffset)) {
+                            throw new Error(`Unsafe content offset for term record ${id}`);
+                        }
+                        const record = {
+                            id,
+                            dictionary: chunk.dictionaryName,
+                            expression,
+                            reading,
+                            expressionReverse: null,
+                            readingReverse: null,
+                            entryContentOffset,
+                            entryContentLength: rawContentLength === U32_NULL ? -1 : rawContentLength,
+                            entryContentDictName: chunk.contentDictName,
+                            score,
+                            sequence: rawSequence >= 0 ? rawSequence : null,
+                        };
+                        this._storeRecord(record);
+                        result.set(id, record);
+                    }
+                } catch (error) {
+                    if (error instanceof TermRecordIntegrityError) {
+                        reportDiagnostics('term-record-random-read-integrity-error', {
+                            fileName: chunk.fileName,
+                            firstId: chunk.firstId,
+                            count: chunk.count,
+                            requestedIds: chunkIds,
+                            error: error.message,
+                        });
+                        throw error;
+                    }
+                    fallbackEntries.push([chunk, chunkIds]);
+                }
+            }
+        };
+        const randomReadConcurrency = Math.min(4, chunkEntries.length);
+        const readResults = await Promise.allSettled(
+            Array.from({length: randomReadConcurrency}, () => readNextChunk()),
+        );
+        const failedRead = readResults.find((readResult) => readResult.status === 'rejected');
+        if (typeof failedRead !== 'undefined' && failedRead.status === 'rejected') {
+            throw failedRead.reason;
+        }
+        // Serialize corrupt-sidecar fallbacks because multiple chunks can share one shard.
+        for (const [chunk, chunkIds] of fallbackEntries) {
+            await this._loadShardForRandomReadFallback(chunk);
+            for (const id of chunkIds) {
+                const record = this._recordsById.get(id);
+                if (typeof record !== 'undefined') { result.set(id, record); }
             }
         }
         return result;
@@ -1680,7 +2565,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {string} dictionaryName
-     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}}
+     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}}
      */
     _getOrCreateDictionaryIndex(dictionaryName) {
         let index = this._indexByDictionary.get(dictionaryName);
@@ -1690,7 +2575,6 @@ export class TermRecordOpfsStore {
                 reading: new Map(),
                 expressionReverse: new Map(),
                 readingReverse: new Map(),
-                pair: new Map(),
                 sequence: new Map(),
             };
             this._indexByDictionary.set(dictionaryName, index);
@@ -1832,6 +2716,7 @@ export class TermRecordOpfsStore {
             const chunkBaseId = view.getUint32(cursor, true); cursor += 4;
             const chunkCount = view.getUint32(cursor, true); cursor += 4;
             if (chunkBaseId <= 0 || chunkCount === 0) { break; }
+            cursor += 8; // 64-bit entry-content offset base
             maxId = Math.max(maxId, chunkBaseId + chunkCount - 1);
             if ((cursor + STRING_TABLE_HEADER_BYTES) > content.byteLength) { return maxId; }
             const stringCount = view.getUint32(cursor, true); cursor += 4;
@@ -1843,10 +2728,7 @@ export class TermRecordOpfsStore {
                 cursor += 4; // expression string table index
                 cursor += 4; // reading string table index, or READING_EQUALS_EXPRESSION_U32
                 cursor += 4; // entry content offset
-                const compactEntryContentLength = view.getUint16(cursor, true); cursor += 2;
-                if (compactEntryContentLength === ENTRY_CONTENT_LENGTH_EXTENDED_U16) {
-                    cursor += 4;
-                }
+                cursor += 4; // entry content length
                 cursor += 4; // score
                 cursor += 4; // sequence
                 if (cursor > content.byteLength) { return maxId; }
@@ -1881,7 +2763,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {string} dictionaryName
-     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}}
+     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}}
      */
     getDictionaryIndex(dictionaryName) {
         this._ensureIndexesReady();
@@ -1902,7 +2784,6 @@ export class TermRecordOpfsStore {
             reading: new Map(),
             expressionReverse: new Map(),
             readingReverse: new Map(),
-            pair: new Map(),
             sequence: new Map(),
         };
         this._addDictionaryRecordsToIndex(dictionaryName, created);
@@ -1950,7 +2831,7 @@ export class TermRecordOpfsStore {
             return;
         }
 
-        /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}>} */
+        /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}>} */
         const createdIndexes = new Map();
         for (const name of pending) {
             const index = {
@@ -1958,7 +2839,6 @@ export class TermRecordOpfsStore {
                 reading: new Map(),
                 expressionReverse: new Map(),
                 readingReverse: new Map(),
-                pair: new Map(),
                 sequence: new Map(),
             };
             createdIndexes.set(name, index);
@@ -1980,8 +2860,8 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {string} dictionaryName
-     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} [index]
-     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}}
+     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}} [index]
+     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}}
      */
     ensureDictionaryReverseIndex(dictionaryName, index = this.getDictionaryIndex(dictionaryName)) {
         if (this._reverseIndexReady.has(index)) {
@@ -1989,23 +2869,17 @@ export class TermRecordOpfsStore {
         }
         index.expressionReverse.clear();
         index.readingReverse.clear();
-        this._addDictionaryRecordsToReverseIndex(dictionaryName, index);
-        this._reverseIndexReady.add(index);
-        return index;
-    }
-
-    /**
-     * @param {string} dictionaryName
-     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} [index]
-     * @returns {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}}
-     */
-    ensureDictionaryPairIndex(dictionaryName, index = this.getDictionaryIndex(dictionaryName)) {
-        if (this._pairIndexReady.has(index)) {
-            return index;
+        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName)) {
+            for (const [expression, ids] of index.expression) {
+                index.expressionReverse.set(this._reverseString(expression), ids);
+            }
+            for (const [reading, ids] of index.reading) {
+                index.readingReverse.set(this._reverseString(reading), ids);
+            }
+        } else {
+            this._addDictionaryRecordsToReverseIndex(dictionaryName, index);
         }
-        index.pair.clear();
-        this._addDictionaryRecordsToPairIndex(dictionaryName, index);
-        this._pairIndexReady.add(index);
+        this._reverseIndexReady.add(index);
         return index;
     }
 
@@ -2021,6 +2895,9 @@ export class TermRecordOpfsStore {
      * @returns {boolean}
      */
     _hasRecordsForDictionary(dictionaryName) {
+        if ((this._persistentRecordChunksByDictionary.get(dictionaryName)?.length ?? 0) > 0) {
+            return true;
+        }
         const ids = this._recordIdsByDictionary.get(dictionaryName);
         if (typeof ids !== 'undefined') {
             for (const id of ids) {
@@ -2048,6 +2925,326 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {string} dictionaryName
+     * @returns {Promise<boolean>}
+     */
+    async _tryLoadPersistentDictionaryIndex(dictionaryName) {
+        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName)) {
+            return true;
+        }
+        const existing = this._persistentIndexLoadPromiseByDictionary.get(dictionaryName);
+        if (typeof existing !== 'undefined') { return await existing; }
+        const generation = this._persistentLookupGeneration;
+        const load = this._loadPersistentDictionaryIndex(dictionaryName, generation);
+        this._persistentIndexLoadPromiseByDictionary.set(dictionaryName, load);
+        try {
+            return await load;
+        } finally {
+            if (this._persistentIndexLoadPromiseByDictionary.get(dictionaryName) === load) {
+                this._persistentIndexLoadPromiseByDictionary.delete(dictionaryName);
+            }
+        }
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {number} generation
+     * @returns {Promise<boolean>}
+     */
+    async _loadPersistentDictionaryIndex(dictionaryName, generation) {
+        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName)) {
+            return true;
+        }
+        if (this._recordsDirectoryHandle === null) { return false; }
+        const states = [...this._shardStateByFileName.values()]
+            .filter((state) => this._decodeDictionaryNameFromShardFileName(state.fileName) === dictionaryName)
+            .sort((a, b) => a.fileName.localeCompare(b.fileName));
+        if (states.length === 0) { return false; }
+        /** @type {PersistentRecordChunk[]} */
+        const recordChunks = [];
+        try {
+            for (const state of states) {
+                const indexFileHandle = await this._recordsDirectoryHandle.getFileHandle(
+                    `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
+                    {create: false},
+                );
+                const [recordFile, indexFile] = await Promise.all([
+                    state.fileHandle.getFile(),
+                    indexFileHandle.getFile(),
+                ]);
+                if (recordFile.size <= 0 || indexFile.size < LOOKUP_INDEX_FILE_HEADER_BYTES) {
+                    return false;
+                }
+                const content = new Uint8Array(await indexFile.arrayBuffer());
+                const view = new DataView(content.buffer, content.byteOffset, content.byteLength);
+                if (this._textDecoder.decode(content.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {
+                    return false;
+                }
+                const expectedRecordFileLength = readSafeU64Le(view, 8);
+                const chunkCount = view.getUint32(16, true);
+                const expectedRecordCount = view.getUint32(20, true);
+                if (expectedRecordFileLength !== recordFile.size || chunkCount === 0 || expectedRecordCount === 0) {
+                    return false;
+                }
+                let cursor = LOOKUP_INDEX_FILE_HEADER_BYTES;
+                let actualRecordCount = 0;
+                for (let chunkIndex = 0; chunkIndex < chunkCount; ++chunkIndex) {
+                    if ((cursor + LOOKUP_INDEX_CHUNK_HEADER_BYTES) > content.byteLength) { return false; }
+                    const firstId = view.getUint32(cursor, true); cursor += 4;
+                    const count = view.getUint32(cursor, true); cursor += 4;
+                    const recordChunkOffset = readSafeU64Le(view, cursor); cursor += 8;
+                    const payloadLength = view.getUint32(cursor, true); cursor += 4;
+                    const payloadHash = view.getUint32(cursor, true); cursor += 4;
+                    const chunkHeaderHash = view.getUint32(cursor, true); cursor += 4;
+                    const fixedFieldsHashesHash = view.getUint32(cursor, true); cursor += 4;
+                    const payloadEnd = cursor + payloadLength;
+                    const fixedFieldsHashesEnd = payloadEnd + (count * 4);
+                    if (
+                        firstId <= 0 ||
+                        count === 0 ||
+                        (firstId + count - 1) > 0xffffffff ||
+                        (recordChunkOffset + CHUNK_HEADER_BYTES + STRING_TABLE_HEADER_BYTES) > recordFile.size ||
+                        fixedFieldsHashesEnd > content.byteLength
+                    ) {
+                        return false;
+                    }
+                    const payload = content.subarray(cursor, payloadEnd);
+                    if (hashLookupIndexBytes(payload) !== payloadHash) { return false; }
+                    const fixedFieldsHashesBytes = content.subarray(payloadEnd, fixedFieldsHashesEnd);
+                    if (hashLookupIndexBytes(fixedFieldsHashesBytes) !== fixedFieldsHashesHash) { return false; }
+                    const lookupIndex = parsePersistedTermLookupIndex(payload);
+                    if (
+                        lookupIndex.expressionKeys.length !== count ||
+                        lookupIndex.readingKeys.length !== count ||
+                        lookupIndex.sequenceValues.length !== count
+                    ) {
+                        return false;
+                    }
+                    recordChunks.push({
+                        firstId,
+                        count,
+                        fileName: state.fileName,
+                        fileHandle: state.fileHandle,
+                        chunkOffset: recordChunkOffset,
+                        dictionaryName,
+                        contentDictName: state.sharedContentDictName ?? 'raw',
+                        chunkHeaderHash,
+                        recordFixedFieldsHashes: fixedFieldsHashesBytes,
+                        lookupIndex,
+                    });
+                    actualRecordCount += count;
+                    cursor = fixedFieldsHashesEnd;
+                }
+                if (cursor !== content.byteLength || actualRecordCount !== expectedRecordCount) {
+                    return false;
+                }
+            }
+        } catch (_) {
+            return false;
+        }
+        recordChunks.sort((a, b) => a.firstId - b.firstId);
+        for (let i = 1; i < recordChunks.length; ++i) {
+            if (recordChunks[i].firstId <= (recordChunks[i - 1].firstId + recordChunks[i - 1].count - 1)) {
+                return false;
+            }
+        }
+        if (
+            generation !== this._persistentLookupGeneration ||
+            this._importSessionActive ||
+            states.some((state) => this._shardStateByFileName.get(state.fileName) !== state)
+        ) {
+            return false;
+        }
+        this._indexByDictionary.delete(dictionaryName);
+        this._persistentRecordChunksByDictionary.set(dictionaryName, recordChunks);
+        this._persistentIndexLoadedDictionaryNames.add(dictionaryName);
+        return true;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {string} query
+     * @param {'expression'|'reading'} field
+     * @returns {number[]}
+     */
+    findTermIds(dictionaryName, query, field) {
+        const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
+            const queryBytes = this._textEncoder.encode(query);
+            const queryHash = hashTermLookupKeyBytes(queryBytes);
+            const ids = [];
+            for (const chunk of chunks) {
+                for (const row of findExactRows(chunk.lookupIndex, queryBytes, field, queryHash)) {
+                    ids.push(chunk.firstId + row);
+                }
+            }
+            return ids;
+        }
+        return [...(this.getDictionaryIndex(dictionaryName)[field].get(query) ?? [])];
+    }
+
+    /**
+     * Resolves expression and reading postings together so persistent chunks only
+     * hash and probe the query once.
+     * @param {string} dictionaryName
+     * @param {string} query
+     * @returns {{expression: number[], reading: number[]}}
+     */
+    findTermIdMatches(dictionaryName, query) {
+        const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
+            const queryBytes = this._textEncoder.encode(query);
+            const queryHash = hashTermLookupKeyBytes(queryBytes);
+            /** @type {number[]} */
+            const expression = [];
+            /** @type {number[]} */
+            const reading = [];
+            for (const chunk of chunks) {
+                appendExactRowMatches(
+                    chunk.lookupIndex,
+                    queryBytes,
+                    expression,
+                    reading,
+                    chunk.firstId,
+                    queryHash,
+                );
+            }
+            return {expression, reading};
+        }
+        const index = this.getDictionaryIndex(dictionaryName);
+        return {
+            expression: [...(index.expression.get(query) ?? [])],
+            reading: [...(index.reading.get(query) ?? [])],
+        };
+    }
+
+    /**
+     * @param {Iterable<string>} dictionaryNames
+     * @returns {Promise<void>}
+     */
+    async warmPrefixIndexes(dictionaryNames) {
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
+        let yieldDeadline = safePerformance.now() + PREFIX_WARM_YIELD_BUDGET_MS;
+        for (const dictionaryName of dictionaryNames) {
+            const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+            if (!this._persistentIndexLoadedDictionaryNames.has(dictionaryName) || typeof chunks === 'undefined') {
+                continue;
+            }
+            for (const chunk of chunks) {
+                warmPersistedTermPrefixIndex(chunk.lookupIndex);
+                if (safePerformance.now() < yieldDeadline) { continue; }
+                await new Promise((resolve) => { setTimeout(resolve, 0); });
+                yieldDeadline = safePerformance.now() + PREFIX_WARM_YIELD_BUDGET_MS;
+            }
+        }
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {string} query
+     * @param {'expression'|'reading'} field
+     * @param {boolean} [reverse=false]
+     * @returns {Array<{id: number, exact: boolean}>}
+     */
+    findTermPrefixIdMatches(dictionaryName, query, field, reverse = false) {
+        const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
+            const queryBytes = this._textEncoder.encode(query);
+            const matches = [];
+            for (const chunk of chunks) {
+                for (const {row, exact} of findPrefixRows(chunk.lookupIndex, queryBytes, field, reverse)) {
+                    matches.push({id: chunk.firstId + row, exact});
+                }
+            }
+            return matches;
+        }
+        const index = this.getDictionaryIndex(dictionaryName);
+        const lookup = index[field];
+        const matches = [];
+        for (const [key, ids] of lookup) {
+            const matched = reverse ? key.endsWith(query) : key.startsWith(query);
+            if (!matched) { continue; }
+            for (const id of ids) { matches.push({id, exact: key === query}); }
+        }
+        return matches;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {number} sequence
+     * @returns {number[]}
+     */
+    findTermIdsBySequence(dictionaryName, sequence) {
+        const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
+            const ids = [];
+            for (const chunk of chunks) {
+                for (const row of findSequenceRows(chunk.lookupIndex, sequence)) {
+                    ids.push(chunk.firstId + row);
+                }
+            }
+            return ids;
+        }
+        return [...(this.getDictionaryIndex(dictionaryName).sequence.get(sequence) ?? [])];
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {boolean}
+     */
+    hasPersistentTermLookupIndex(dictionaryName) {
+        return this._persistentIndexLoadedDictionaryNames.has(dictionaryName);
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {number}
+     */
+    getDictionaryRecordCount(dictionaryName) {
+        const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
+            let count = 0;
+            for (const chunk of chunks) { count += chunk.count; }
+            return count;
+        }
+        const ids = this._getLiveRecordIdsForDictionary(dictionaryName);
+        if (typeof ids !== 'undefined') { return ids.length; }
+        let count = 0;
+        for (const record of this._recordsById.values()) {
+            if (record.dictionary === dictionaryName) { ++count; }
+        }
+        return count;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {number} limit
+     * @returns {number[]}
+     */
+    getDictionarySampleIds(dictionaryName, limit) {
+        if (!Number.isInteger(limit) || limit <= 0) { return []; }
+        const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
+            const ids = [];
+            for (const chunk of chunks) {
+                const count = Math.min(chunk.count, limit - ids.length);
+                for (let i = 0; i < count; ++i) { ids.push(chunk.firstId + i); }
+                if (ids.length >= limit) { break; }
+            }
+            return ids;
+        }
+        const liveIds = this._getLiveRecordIdsForDictionary(dictionaryName);
+        if (typeof liveIds !== 'undefined') { return liveIds.slice(0, limit); }
+        const ids = [];
+        for (const record of this._recordsById.values()) {
+            if (record.dictionary !== dictionaryName) { continue; }
+            ids.push(record.id);
+            if (ids.length >= limit) { break; }
+        }
+        return ids;
+    }
+
+    /**
      * @param {Iterable<string>} dictionaryNames
      * @returns {Promise<void>}
      */
@@ -2067,6 +3264,30 @@ export class TermRecordOpfsStore {
         if (pending.size === 0) {
             return;
         }
+        const persistentIndexNames = [...pending];
+        /** @type {string[]} */
+        const persistentIndexLoadedNames = [];
+        let nextPersistentIndex = 0;
+        const loadNextPersistentIndex = async () => {
+            while (true) {
+                const index = nextPersistentIndex++;
+                if (index >= persistentIndexNames.length) { return; }
+                const dictionaryName = persistentIndexNames[index];
+                if (await this._tryLoadPersistentDictionaryIndex(dictionaryName)) {
+                    persistentIndexLoadedNames.push(dictionaryName);
+                }
+            }
+        };
+        const persistentIndexLoadConcurrency = Math.min(3, persistentIndexNames.length);
+        await Promise.all(
+            Array.from({length: persistentIndexLoadConcurrency}, () => loadNextPersistentIndex()),
+        );
+        for (const dictionaryName of persistentIndexLoadedNames) {
+            if (pending.delete(dictionaryName)) {
+                this._loadedDictionaryNames.add(dictionaryName);
+            }
+        }
+        if (pending.size === 0) { return; }
         /** @type {TermRecordShardState[]} */
         const statesToLoad = [];
         for (const state of this._shardStateByFileName.values()) {
@@ -2092,16 +3313,28 @@ export class TermRecordOpfsStore {
         const statesToLoad = [...this._shardStateByFileName.values()]
             .filter((state) => {
                 const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
-                return dictionaryName === null || !this._loadedDictionaryNames.has(dictionaryName);
+                return (
+                    dictionaryName === null ||
+                    !this._loadedDictionaryNames.has(dictionaryName) ||
+                    this._persistentIndexLoadedDictionaryNames.has(dictionaryName)
+                );
             })
             .sort((a, b) => a.fileName.localeCompare(b.fileName));
-        await this._loadShardStatesContents(statesToLoad);
+        const deferIndexBuild = this._deferIndexBuild;
+        this._deferIndexBuild = true;
+        try {
+            await this._loadShardStatesContents(statesToLoad);
+        } finally {
+            this._deferIndexBuild = deferIndexBuild;
+        }
         for (const state of this._shardStateByFileName.values()) {
             const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
             if (dictionaryName !== null && dictionaryName.length > 0) {
                 this._loadedDictionaryNames.add(dictionaryName);
             }
         }
+        this._invalidateAllPersistentLookupState();
+        this._rebuildIndexesFromRecords();
         this._allShardContentsLoaded = true;
         this._nextIdMayNeedShardScan = false;
     }
@@ -2247,277 +3480,128 @@ export class TermRecordOpfsStore {
             return false;
         }
         const magic = this._textDecoder.decode(content.subarray(0, BINARY_MAGIC_BYTES));
-        return (
-            magic === BINARY_MAGIC_TEXT ||
-            magic === PREVIOUS_BINARY_MAGIC_TEXT ||
-            magic === PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT ||
-            magic === PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT ||
-            magic === PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT ||
-            magic === PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT ||
-            magic === PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT ||
-            magic === PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT ||
-            magic === LEGACY_BINARY_MAGIC_TEXT
-        );
+        return magic === BINARY_MAGIC_TEXT;
     }
 
     /**
      * @param {Uint8Array} content
      * @param {string|null} shardDictionaryName
+     * @returns {boolean}
      */
     _loadBinary(content, shardDictionaryName = null) {
+        if (content.byteLength < BINARY_MAGIC_BYTES || shardDictionaryName === null) {
+            return false;
+        }
         const view = new DataView(content.buffer, content.byteOffset, content.byteLength);
         const magic = this._textDecoder.decode(content.subarray(0, BINARY_MAGIC_BYTES));
-        const isLegacy = magic === LEGACY_BINARY_MAGIC_TEXT;
-        const isCurrent = magic === BINARY_MAGIC_TEXT;
-        const isPrevious = magic === PREVIOUS_BINARY_MAGIC_TEXT;
-        const isPreviousPrevious = magic === PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT;
-        const isPreviousPreviousPrevious = magic === PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT;
-        const isPreviousPreviousPreviousPrevious = magic === PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT;
-        const isPreviousPreviousPreviousPreviousPrevious = magic === PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT;
-        const isPreviousPreviousPreviousPreviousPreviousPrevious = magic === PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT;
-        const isPreviousPreviousPreviousPreviousPreviousPreviousPrevious = magic === PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_BINARY_MAGIC_TEXT;
-        let recordHeaderBytes;
-        if (isLegacy) {
-            recordHeaderBytes = LEGACY_RECORD_HEADER_BYTES;
-        } else if (isCurrent) {
-            recordHeaderBytes = RECORD_HEADER_BYTES;
-        } else if (isPrevious) {
-            recordHeaderBytes = PREVIOUS_RECORD_HEADER_BYTES;
-        } else if (isPreviousPrevious) {
-            recordHeaderBytes = PREVIOUS_PREVIOUS_RECORD_HEADER_BYTES;
-        } else if (isPreviousPreviousPrevious || isPreviousPreviousPreviousPrevious) {
-            recordHeaderBytes = PREVIOUS_PREVIOUS_PREVIOUS_RECORD_HEADER_BYTES;
-        } else {
-            recordHeaderBytes = PREVIOUS_PREVIOUS_PREVIOUS_PREVIOUS_RECORD_HEADER_BYTES;
+        if (magic !== BINARY_MAGIC_TEXT) {
+            return false;
         }
         let cursor = BINARY_MAGIC_BYTES;
-        /** @type {string|null} */
-        let sharedEntryContentDictName = null;
-        /** @type {number[]|null} */
-        const sharedDictionaryRecordIds = (isCurrent && shardDictionaryName !== null) ?
-            this._getOrCreateRecordIdsForDictionary(shardDictionaryName) :
-            null;
-        const sharedDictionaryIndex = (isCurrent && shardDictionaryName !== null && !this._deferIndexBuild) ?
-            this._getOrCreateDictionaryIndex(shardDictionaryName) :
-            null;
-        if (isCurrent) {
-            if ((cursor + 2) > content.byteLength) { return; }
-            const entryContentDictNameMeta16 = view.getUint16(cursor, true); cursor += 2;
-            let entryContentDictNameMeta = entryContentDictNameMeta16;
-            if (entryContentDictNameMeta16 === U16_NULL) {
-                if ((cursor + 4) > content.byteLength) { return; }
-                entryContentDictNameMeta = view.getUint32(cursor, true); cursor += 4;
-            }
-            let entryContentDictNameLength = 0;
-            if ((entryContentDictNameMeta & 0xff) === ENTRY_CONTENT_DICT_NAME_CODE_CUSTOM) {
-                entryContentDictNameLength = entryContentDictNameMeta >>> 8;
-            }
-            if ((cursor + entryContentDictNameLength) > content.byteLength) { return; }
-            sharedEntryContentDictName = this._decodeEntryContentDictName(entryContentDictNameMeta, content, cursor, entryContentDictNameLength);
-            cursor += entryContentDictNameLength;
+        /** @type {TermRecord[]} */
+        const parsedRecords = [];
+        if ((cursor + 2) > content.byteLength) { return false; }
+        const entryContentDictNameMeta16 = view.getUint16(cursor, true); cursor += 2;
+        let entryContentDictNameMeta = entryContentDictNameMeta16;
+        if (entryContentDictNameMeta16 === U16_NULL) {
+            if ((cursor + 4) > content.byteLength) { return false; }
+            entryContentDictNameMeta = view.getUint32(cursor, true); cursor += 4;
         }
+        const entryContentDictNameLength = (entryContentDictNameMeta & 0xff) === ENTRY_CONTENT_DICT_NAME_CODE_CUSTOM ?
+            (entryContentDictNameMeta >>> 8) :
+            0;
+        if ((cursor + entryContentDictNameLength) > content.byteLength) { return false; }
+        const sharedEntryContentDictName = this._decodeEntryContentDictName(
+            entryContentDictNameMeta,
+            content,
+            cursor,
+            entryContentDictNameLength,
+        );
+        cursor += entryContentDictNameLength;
         while (true) {
-            let chunkBaseId = 0;
-            let chunkCount = 0;
-            if (isCurrent) {
-                if ((cursor + CHUNK_HEADER_BYTES) > content.byteLength) { break; }
-                chunkBaseId = view.getUint32(cursor, true); cursor += 4;
-                chunkCount = view.getUint32(cursor, true); cursor += 4;
-                if (chunkBaseId <= 0 || chunkCount === 0) { break; }
-            } else {
-                if ((cursor + recordHeaderBytes) > content.byteLength) { break; }
-                chunkCount = 1;
+            if ((cursor + CHUNK_HEADER_BYTES) > content.byteLength) { break; }
+            const chunkBaseId = view.getUint32(cursor, true); cursor += 4;
+            const chunkCount = view.getUint32(cursor, true); cursor += 4;
+            if (chunkBaseId <= 0 || chunkCount === 0) { break; }
+            let chunkContentOffsetBase;
+            try {
+                chunkContentOffsetBase = readSafeU64Le(view, cursor);
+            } catch (_) {
+                return false;
             }
-            /** @type {string[]|null} */
-            let chunkStrings = null;
-            if (isCurrent) {
-                if ((cursor + STRING_TABLE_HEADER_BYTES) > content.byteLength) { return; }
-                const stringCount = view.getUint32(cursor, true); cursor += 4;
-                const stringBytesLength = view.getUint32(cursor, true); cursor += 4;
-                const stringLengthsBytes = stringCount * 2;
-                if ((cursor + stringLengthsBytes + stringBytesLength) > content.byteLength) { return; }
-                chunkStrings = new Array(stringCount);
-                let stringsCursor = cursor + stringLengthsBytes;
-                for (let i = 0; i < stringCount; ++i) {
-                    const stringLength = view.getUint16(cursor, true); cursor += 2;
-                    if ((stringsCursor + stringLength) > content.byteLength) { return; }
-                    const value = this._decodeString(content, stringsCursor, stringLength);
-                    stringsCursor += stringLength;
-                    chunkStrings[i] = value;
-                }
-                cursor = stringsCursor;
-                this._recordsById.ensureCapacity(chunkBaseId + chunkCount - 1);
+            cursor += 8;
+            if ((cursor + STRING_TABLE_HEADER_BYTES) > content.byteLength) { return false; }
+            const stringCount = view.getUint32(cursor, true); cursor += 4;
+            const stringBytesLength = view.getUint32(cursor, true); cursor += 4;
+            const stringLengthsBytes = stringCount * 2;
+            if ((cursor + stringLengthsBytes + stringBytesLength) > content.byteLength) { return false; }
+            /** @type {string[]} */
+            const chunkStrings = new Array(stringCount);
+            let stringsCursor = cursor + stringLengthsBytes;
+            for (let i = 0; i < stringCount; ++i) {
+                const stringLength = view.getUint16(cursor, true); cursor += 2;
+                if ((stringsCursor + stringLength) > content.byteLength) { return false; }
+                const value = this._decodeString(content, stringsCursor, stringLength);
+                stringsCursor += stringLength;
+                chunkStrings[i] = value;
             }
+            cursor = stringsCursor;
             for (let chunkIndex = 0; chunkIndex < chunkCount; ++chunkIndex) {
-                if ((cursor + recordHeaderBytes) > content.byteLength) { return; }
-                const id = isCurrent ? (chunkBaseId + chunkIndex) : view.getUint32(cursor, true);
-                if (!isCurrent) { cursor += 4; }
-                const dictionaryLength = isLegacy ? view.getUint32(cursor, true) : 0; cursor += isLegacy ? 4 : 0;
-                const expressionLength = (isCurrent || isPrevious) ? (isCurrent ? 0 : view.getUint16(cursor, true)) : view.getUint32(cursor, true); cursor += (isCurrent || isPrevious) ? (isCurrent ? 0 : 2) : 4;
-                const rawReadingLength = (isCurrent || isPrevious) ? (isCurrent ? 0 : view.getUint16(cursor, true)) : view.getUint32(cursor, true); cursor += (isCurrent || isPrevious) ? (isCurrent ? 0 : 2) : 4;
-                const expressionIndex = isCurrent ? view.getUint32(cursor, true) : 0; cursor += isCurrent ? 4 : 0;
-                const readingIndexRaw = isCurrent ? view.getUint32(cursor, true) : 0; cursor += isCurrent ? 4 : 0;
-                const readingEqualsExpression = isCurrent ? (readingIndexRaw === READING_EQUALS_EXPRESSION_U32) : false;
-                const readingLength = readingEqualsExpression ? 0 : rawReadingLength;
-                const rawExpressionReverseLength = (
-                (isCurrent || isPrevious) ?
-                    U16_NULL :
-                    ((isPreviousPrevious || isPreviousPreviousPrevious) ? view.getUint16(cursor, true) : view.getUint32(cursor, true))
-                );
-                if (!(isCurrent || isPrevious)) { cursor += (isPreviousPrevious || isPreviousPreviousPrevious) ? 2 : 4; }
-                const rawReadingReverseLength = (
-                (isCurrent || isPrevious) ?
-                    U16_NULL :
-                    ((isPreviousPrevious || isPreviousPreviousPrevious) ? view.getUint16(cursor, true) : view.getUint32(cursor, true))
-                );
-                if (!(isCurrent || isPrevious)) { cursor += (isPreviousPrevious || isPreviousPreviousPrevious) ? 2 : 4; }
-                const expressionReverseLength = (
-                (isCurrent || isPrevious || isPreviousPrevious || isPreviousPreviousPrevious) ?
-                    (rawExpressionReverseLength === U16_NULL ? -1 : rawExpressionReverseLength) :
-                    (rawExpressionReverseLength === U32_NULL ? -1 : /** @type {number} */ (rawExpressionReverseLength))
-                );
-                const readingReverseLength = (
-                (isCurrent || isPrevious || isPreviousPrevious || isPreviousPreviousPrevious) ?
-                    (rawReadingReverseLength === U16_NULL ? -1 : rawReadingReverseLength) :
-                    (rawReadingReverseLength === U32_NULL ? -1 : /** @type {number} */ (rawReadingReverseLength))
-                );
+                if ((cursor + RECORD_HEADER_BYTES) > content.byteLength) { return false; }
+                const id = chunkBaseId + chunkIndex;
+                const expressionIndex = view.getUint32(cursor, true); cursor += 4;
+                const readingIndexRaw = view.getUint32(cursor, true); cursor += 4;
+                const readingEqualsExpression = readingIndexRaw === READING_EQUALS_EXPRESSION_U32;
                 const rawEntryContentOffset = view.getUint32(cursor, true); cursor += 4;
-                let rawEntryContentLength;
-                if (isCurrent) {
-                    const compactEntryContentLength = view.getUint16(cursor, true); cursor += 2;
-                    if (compactEntryContentLength === ENTRY_CONTENT_LENGTH_U16_NULL) {
-                        rawEntryContentLength = U32_NULL;
-                    } else if (compactEntryContentLength === ENTRY_CONTENT_LENGTH_EXTENDED_U16) {
-                        rawEntryContentLength = view.getUint32(cursor, true); cursor += 4;
-                    } else {
-                        rawEntryContentLength = compactEntryContentLength;
-                    }
-                } else {
-                    rawEntryContentLength = view.getUint32(cursor, true); cursor += 4;
-                }
-                let entryContentDictNameMeta = 0;
-                let entryContentDictNameFlags = 0;
-                let entryContentDictNameValue = 0;
-                if (!isCurrent) {
-                    const entryContentDictNameMeta16 = isPrevious ? view.getUint16(cursor, true) : view.getUint32(cursor, true); cursor += isPrevious ? 2 : 4;
-                    entryContentDictNameMeta = (isPrevious && entryContentDictNameMeta16 === U16_NULL) ? view.getUint32(cursor, true) : entryContentDictNameMeta16;
-                    if (isPrevious && entryContentDictNameMeta16 === U16_NULL) { cursor += 4; }
-                    entryContentDictNameFlags = (isPrevious || isPreviousPrevious) ? (entryContentDictNameMeta & ENTRY_CONTENT_DICT_NAME_FLAGS_MASK) : 0;
-                    entryContentDictNameValue = (isPrevious || isPreviousPrevious) ? (entryContentDictNameMeta & ENTRY_CONTENT_DICT_NAME_VALUE_MASK) : entryContentDictNameMeta;
-                }
+                const rawEntryContentLength = view.getUint32(cursor, true); cursor += 4;
                 const score = view.getInt32(cursor, true); cursor += 4;
                 const rawSequence = view.getInt32(cursor, true); cursor += 4;
-                let entryContentDictNameLength = 0;
-                if (isLegacy || isPrevious || isPreviousPrevious || isPreviousPreviousPrevious || isPreviousPreviousPreviousPrevious || isPreviousPreviousPreviousPreviousPrevious || isPreviousPreviousPreviousPreviousPreviousPrevious) {
-                    entryContentDictNameLength = entryContentDictNameMeta;
-                } else if (!isCurrent && (entryContentDictNameValue & 0xff) === ENTRY_CONTENT_DICT_NAME_CODE_CUSTOM) {
-                    entryContentDictNameLength = entryContentDictNameValue >>> 8;
-                }
-
-                const requiredBytes =
-                dictionaryLength +
-                (isCurrent ? 0 : expressionLength) +
-                (isCurrent ? 0 : readingLength) +
-                (
-                    (isCurrent || isPrevious) ?
-                        0 :
-                        (
-                            Math.max(0, expressionReverseLength) +
-                            Math.max(0, readingReverseLength)
-                        )
-                ) +
-                entryContentDictNameLength;
-                if ((cursor + requiredBytes) > content.byteLength || id <= 0) {
-                    return;
-                }
-
-                const dictionary = isLegacy ? this._decodeString(content, cursor, dictionaryLength) : shardDictionaryName;
-                if (isLegacy) { cursor += dictionaryLength; }
-                if (dictionary === null) { return; }
-                const expression = isCurrent ?
-                    (chunkStrings !== null && expressionIndex < chunkStrings.length ? chunkStrings[expressionIndex] : '') :
-                    this._decodeString(content, cursor, expressionLength);
-                if (!isCurrent) { cursor += expressionLength; }
-                if (expression.length === 0 && isCurrent) { return; }
-                let reading;
-                if (isCurrent && readingEqualsExpression) {
-                    reading = expression;
-                } else if (isPrevious && (entryContentDictNameFlags & ENTRY_CONTENT_DICT_NAME_FLAG_READING_EQUALS_EXPRESSION) !== 0) {
-                    reading = expression;
-                } else if (isCurrent) {
-                    reading = (chunkStrings !== null && readingIndexRaw < chunkStrings.length) ? chunkStrings[readingIndexRaw] : '';
-                } else {
-                    reading = this._decodeString(content, cursor, readingLength);
-                }
-                if (!(isCurrent && readingEqualsExpression) && !(isPrevious && (entryContentDictNameFlags & ENTRY_CONTENT_DICT_NAME_FLAG_READING_EQUALS_EXPRESSION) !== 0) && !isCurrent) {
-                    cursor += readingLength;
-                }
-                let expressionReverse;
-                let readingReverse;
-                if (isCurrent || isPrevious) {
-                    if (isCurrent) {
-                        expressionReverse = null;
-                        readingReverse = null;
-                    } else {
-                        expressionReverse = this._reverseString(expression);
-                        readingReverse = reading === expression ? expressionReverse : this._reverseString(reading);
-                    }
-                } else {
-                    expressionReverse = expressionReverseLength >= 0 ? this._decodeString(content, cursor, expressionReverseLength) : null;
-                    if (expressionReverseLength >= 0) { cursor += expressionReverseLength; }
-                    readingReverse = (
-                    readingReverseLength >= 0 ?
-                        (
-                            isPreviousPrevious && (entryContentDictNameFlags & ENTRY_CONTENT_DICT_NAME_FLAG_READING_REVERSE_EQUALS_EXPRESSION_REVERSE) !== 0 ?
-                                expressionReverse :
-                                this._decodeString(content, cursor, readingReverseLength)
-                        ) :
-                        null
-                    );
-                    if (readingReverseLength >= 0 && !(isPreviousPrevious && (entryContentDictNameFlags & ENTRY_CONTENT_DICT_NAME_FLAG_READING_REVERSE_EQUALS_EXPRESSION_REVERSE) !== 0)) {
-                        cursor += readingReverseLength;
-                    }
-                }
-                const entryContentDictName = isCurrent ?
-                    (sharedEntryContentDictName ?? 'raw') :
-                    (
-                        (isLegacy || isPrevious || isPreviousPrevious || isPreviousPreviousPrevious || isPreviousPreviousPreviousPrevious || isPreviousPreviousPreviousPreviousPrevious || isPreviousPreviousPreviousPreviousPreviousPrevious || isPreviousPreviousPreviousPreviousPreviousPreviousPrevious) ?
-                            this._decodeString(content, cursor, entryContentDictNameLength) :
-                            this._decodeEntryContentDictName(entryContentDictNameValue, content, cursor, entryContentDictNameLength)
-                    );
-                if (!isCurrent) {
-                    cursor += entryContentDictNameLength;
-                }
+                const expression = expressionIndex < chunkStrings.length ? chunkStrings[expressionIndex] : '';
+                if (expression.length === 0) { return false; }
+                const reading = readingEqualsExpression ?
+                    expression :
+                    (readingIndexRaw < chunkStrings.length ? chunkStrings[readingIndexRaw] : '');
+                const entryContentOffset = rawEntryContentOffset === U32_NULL ?
+                    -1 :
+                    chunkContentOffsetBase + rawEntryContentOffset;
+                if (entryContentOffset >= 0 && !Number.isSafeInteger(entryContentOffset)) { return false; }
 
                 const record = {
                     id,
-                    dictionary,
+                    dictionary: shardDictionaryName,
                     expression,
                     reading,
-                    expressionReverse,
-                    readingReverse,
-                    entryContentOffset: rawEntryContentOffset === U32_NULL ? -1 : rawEntryContentOffset,
+                    expressionReverse: null,
+                    readingReverse: null,
+                    entryContentOffset,
                     entryContentLength: rawEntryContentLength === U32_NULL ? -1 : rawEntryContentLength,
-                    entryContentDictName,
+                    entryContentDictName: sharedEntryContentDictName,
                     score,
                     sequence: rawSequence >= 0 ? rawSequence : null,
                 };
-                let indexRecord;
-                if (sharedDictionaryRecordIds !== null) {
-                    indexRecord = this._storeRecordWithKnownDictionaryIds(record, sharedDictionaryRecordIds);
-                } else {
-                    indexRecord = this._storeRecord(record);
-                }
-                if (indexRecord && sharedDictionaryIndex !== null) {
-                    this._addDecodedRecordToDictionaryIndex(sharedDictionaryIndex, record, expression, reading);
-                } else if (indexRecord && !this._deferIndexBuild) {
-                    this._addToIndex(record);
-                }
-                if (id >= this._nextId) {
-                    this._nextId = id + 1;
-                }
+                parsedRecords.push(record);
             }
         }
+        if (cursor !== content.byteLength) { return false; }
+        const sharedDictionaryRecordIds = this._getOrCreateRecordIdsForDictionary(shardDictionaryName);
+        const sharedDictionaryIndex = !this._deferIndexBuild ?
+            this._getOrCreateDictionaryIndex(shardDictionaryName) :
+            null;
+        for (const record of parsedRecords) {
+            const indexRecord = this._storeRecordWithKnownDictionaryIds(record, sharedDictionaryRecordIds);
+            if (indexRecord && sharedDictionaryIndex !== null) {
+                this._addDecodedRecordToDictionaryIndex(
+                    sharedDictionaryIndex,
+                    record,
+                    record.expression ?? '',
+                    record.reading ?? record.expression ?? '',
+                );
+            }
+            if (record.id >= this._nextId) {
+                this._nextId = record.id + 1;
+            }
+        }
+        return true;
     }
 
     /**
@@ -2539,6 +3623,8 @@ export class TermRecordOpfsStore {
                 return RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME;
             case ENTRY_CONTENT_DICT_NAME_CODE_JMDICT:
                 return 'jmdict';
+            case ENTRY_CONTENT_DICT_NAME_CODE_RAW_V6:
+                return RAW_TERM_CONTENT_TOKEN_DICT_NAME;
             case ENTRY_CONTENT_DICT_NAME_CODE_CUSTOM:
                 return this._decodeString(content, offset, customLength);
             default:
@@ -2563,48 +3649,11 @@ export class TermRecordOpfsStore {
                 return {meta: ENTRY_CONTENT_DICT_NAME_CODE_RAW_V4, bytes: null};
             case 'jmdict':
                 return {meta: ENTRY_CONTENT_DICT_NAME_CODE_JMDICT, bytes: null};
+            case RAW_TERM_CONTENT_TOKEN_DICT_NAME:
+                return {meta: ENTRY_CONTENT_DICT_NAME_CODE_RAW_V6, bytes: null};
             default: {
                 const bytes = this._textEncoder.encode(value);
                 return {meta: (((bytes.byteLength >>> 0) << 8) | ENTRY_CONTENT_DICT_NAME_CODE_CUSTOM) >>> 0, bytes};
-            }
-        }
-    }
-
-    /**
-     * @param {Uint8Array} content
-     */
-    _loadLegacyNdjson(content) {
-        const text = this._textDecoder.decode(content);
-        for (const line of text.split('\n')) {
-            if (line.length === 0) { continue; }
-            let raw;
-            try {
-                raw = /** @type {unknown[]} */ (parseJson(line));
-            } catch (_) {
-                continue;
-            }
-            if (!Array.isArray(raw) || raw.length < 11) { continue; }
-            const id = this._asNumber(raw[0], -1);
-            if (id <= 0) { continue; }
-            const record = {
-                id,
-                dictionary: this._asString(raw[1]),
-                expression: this._asString(raw[2]),
-                reading: this._asString(raw[3]),
-                expressionReverse: this._asNullableString(raw[4]),
-                readingReverse: this._asNullableString(raw[5]),
-                entryContentOffset: this._asNumber(raw[6], -1),
-                entryContentLength: this._asNumber(raw[7], -1),
-                entryContentDictName: this._asString(raw[8]),
-                score: this._asNumber(raw[9], 0),
-                sequence: this._asNullableNumber(raw[10]),
-            };
-            const indexRecord = this._storeRecord(record);
-            if (indexRecord && !this._deferIndexBuild) {
-                this._addToIndex(record);
-            }
-            if (id >= this._nextId) {
-                this._nextId = id + 1;
             }
         }
     }
@@ -2649,19 +3698,34 @@ export class TermRecordOpfsStore {
     /**
      * @param {TermRecord[]} records
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
-     * @returns {Promise<Uint8Array>}
+     * @returns {Promise<{bytes: Uint8Array, contentOffsetBase: number, lookupIndexBytes: Uint8Array, fixedFieldsHashes: Uint8Array|null}>}
      */
     async _encodeRecords(records, preinternedPlan = null) {
         if (records.length === 0) {
-            return new Uint8Array(0);
+            return {
+                bytes: new Uint8Array(0),
+                contentOffsetBase: 0,
+                lookupIndexBytes: new Uint8Array(0),
+                fixedFieldsHashes: new Uint8Array(0),
+            };
+        }
+        const contentOffsetBase = getContentOffsetBase(records.map(({entryContentOffset}) => entryContentOffset));
+        for (const {entryContentOffset, entryContentLength} of records) {
+            getContentOffsetDelta(entryContentOffset, contentOffsetBase);
+            validateContentLength(entryContentLength);
         }
         if (!this._wasmEncoderUnavailable) {
             try {
                 const encoded = preinternedPlan === null ?
-                    await encodeTermRecordsWithWasm(records, this._textEncoder) :
-                    await encodeTermRecordsWithWasmPreinterned(records, this._textEncoder, preinternedPlan);
-                if (encoded instanceof Uint8Array) {
-                    return encoded;
+                    await encodeTermRecordsWithWasm(records, this._textEncoder, contentOffsetBase) :
+                    await encodeTermRecordsWithWasmPreinterned(records, this._textEncoder, preinternedPlan, contentOffsetBase);
+                if (encoded !== null) {
+                    return {
+                        bytes: encoded.bytes,
+                        contentOffsetBase,
+                        lookupIndexBytes: encodePersistedTermLookupIndexFromRecordPayload(encoded.bytes, records.length),
+                        fixedFieldsHashes: encoded.fixedFieldsHashes,
+                    };
                 }
             } catch (_) {
                 this._wasmEncoderUnavailable = true;
@@ -2705,9 +3769,7 @@ export class TermRecordOpfsStore {
             const readingIndex = readingEqualsExpression ?
                 READING_EQUALS_EXPRESSION_U32 :
                 internStringBytes(readingKey, readingBytes);
-            totalBytes +=
-                RECORD_HEADER_BYTES +
-                ((record.entryContentLength >= 0 && record.entryContentLength > 0xfffd) ? 4 : 0);
+            totalBytes += RECORD_HEADER_BYTES;
             encodedRows.push({
                 record,
                 expressionIndex,
@@ -2732,34 +3794,57 @@ export class TermRecordOpfsStore {
             const {record, expressionIndex, readingIndex} = row;
             view.setUint32(cursor, expressionIndex, true); cursor += 4;
             view.setUint32(cursor, readingIndex, true); cursor += 4;
-            view.setUint32(cursor, record.entryContentOffset >= 0 ? record.entryContentOffset : U32_NULL, true); cursor += 4;
-            if (record.entryContentLength < 0) {
-                view.setUint16(cursor, ENTRY_CONTENT_LENGTH_U16_NULL, true); cursor += 2;
-            } else if (record.entryContentLength <= 0xfffd) {
-                view.setUint16(cursor, record.entryContentLength, true); cursor += 2;
-            } else {
-                view.setUint16(cursor, ENTRY_CONTENT_LENGTH_EXTENDED_U16, true); cursor += 2;
-                view.setUint32(cursor, record.entryContentLength, true); cursor += 4;
-            }
+            view.setUint32(cursor, getContentOffsetDelta(record.entryContentOffset, contentOffsetBase), true); cursor += 4;
+            view.setUint32(cursor, record.entryContentLength < 0 ? U32_NULL : record.entryContentLength, true); cursor += 4;
             view.setInt32(cursor, record.score, true); cursor += 4;
             view.setInt32(cursor, record.sequence ?? -1, true); cursor += 4;
         }
-        return output;
+        return {
+            bytes: output,
+            contentOffsetBase,
+            lookupIndexBytes: encodePersistedTermLookupIndexFromRecordPayload(output, records.length),
+            fixedFieldsHashes: null,
+        };
     }
 
     /**
      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
-     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
-     * @returns {Promise<Uint8Array>}
+     * @returns {Promise<{bytes: Uint8Array, contentOffsetBase: number, lookupIndexBytes: Uint8Array, fixedFieldsHashes: Uint8Array|null, validationMs: number, wasmEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
     async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null) {
         if (chunk.rowCount === 0) {
-            return new Uint8Array(0);
+            return {
+                bytes: new Uint8Array(0),
+                contentOffsetBase: 0,
+                lookupIndexBytes: new Uint8Array(0),
+                fixedFieldsHashes: new Uint8Array(0),
+                validationMs: 0,
+                wasmEncodeMs: 0,
+                lookupIndexEncodeMs: 0,
+            };
         }
+        const tValidationStart = safePerformance.now();
         const fixedContentSpan = hasFixedContentSpan(chunk, chunk.rowCount);
+        let contentOffsetBase = Number.POSITIVE_INFINITY;
+        for (let i = 0; i < chunk.rowCount; ++i) {
+            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+            validateContentOffset(contentOffset);
+            validateContentLength(contentLength);
+            if (contentOffset >= 0 && contentOffset < contentOffsetBase) {
+                contentOffsetBase = contentOffset;
+            }
+        }
+        if (contentOffsetBase === Number.POSITIVE_INFINITY) { contentOffsetBase = 0; }
+        for (let i = 0; i < chunk.rowCount; ++i) {
+            getContentOffsetDelta(getArtifactContentOffset(chunk, contentOffsets, i), contentOffsetBase);
+        }
+        const validationMs = safePerformance.now() - tValidationStart;
         if (preinternedPlan !== null && !fixedContentSpan && !this._wasmEncoderUnavailable) {
+            const tWasmEncodeStart = safePerformance.now();
             try {
                 const encoded = await encodeTermRecordArtifactChunkWithWasmPreinterned(
                     chunk,
@@ -2767,16 +3852,57 @@ export class TermRecordOpfsStore {
                     contentLengths,
                     this._textEncoder,
                     preinternedPlan,
+                    contentOffsetBase,
                 );
-                if (encoded instanceof Uint8Array) {
-                    return encoded;
+                const wasmEncodeMs = safePerformance.now() - tWasmEncodeStart;
+                if (encoded !== null) {
+                    const tLookupIndexEncodeStart = safePerformance.now();
+                    const lookupIndexBytes = encodePersistedTermLookupIndexFromPreinternedPlan(
+                        preinternedPlan,
+                        chunk.readingEqualsExpressionList,
+                        chunk.sequenceList,
+                        chunk.rowCount,
+                    );
+                    return {
+                        bytes: encoded.bytes,
+                        contentOffsetBase,
+                        lookupIndexBytes,
+                        fixedFieldsHashes: encoded.fixedFieldsHashes,
+                        validationMs,
+                        wasmEncodeMs,
+                        lookupIndexEncodeMs: safePerformance.now() - tLookupIndexEncodeStart,
+                    };
                 }
             } catch (_) {
                 this._wasmEncoderUnavailable = true;
             }
         }
         if (hasCompleteTermRecordPreinternedPlan(preinternedPlan, chunk.rowCount)) {
-            return this._encodePreinternedArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan);
+            const tRecordEncodeStart = safePerformance.now();
+            const bytes = this._encodePreinternedArtifactChunkRecords(
+                chunk,
+                contentOffsets,
+                contentLengths,
+                preinternedPlan,
+                contentOffsetBase,
+            );
+            const wasmEncodeMs = safePerformance.now() - tRecordEncodeStart;
+            const tLookupIndexEncodeStart = safePerformance.now();
+            const lookupIndexBytes = encodePersistedTermLookupIndexFromPreinternedPlan(
+                preinternedPlan,
+                chunk.readingEqualsExpressionList,
+                chunk.sequenceList,
+                chunk.rowCount,
+            );
+            return {
+                bytes,
+                contentOffsetBase,
+                lookupIndexBytes,
+                fixedFieldsHashes: null,
+                validationMs,
+                wasmEncodeMs,
+                lookupIndexEncodeMs: safePerformance.now() - tLookupIndexEncodeStart,
+            };
         }
         /** @type {TermRecord[]} */
         const records = new Array(chunk.rowCount);
@@ -2800,17 +3926,25 @@ export class TermRecordOpfsStore {
                 sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
             };
         }
-        return await this._encodeRecords(records, preinternedPlan);
+        const tRecordEncodeStart = safePerformance.now();
+        const encoded = await this._encodeRecords(records, preinternedPlan);
+        return {
+            ...encoded,
+            validationMs,
+            wasmEncodeMs: safePerformance.now() - tRecordEncodeStart,
+            lookupIndexEncodeMs: 0,
+        };
     }
 
     /**
      * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
-     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} preinternedPlan
+     * @param {number} contentOffsetBase
      * @returns {Uint8Array}
      */
-    _encodePreinternedArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan) {
+    _encodePreinternedArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan, contentOffsetBase) {
         const count = chunk.rowCount;
         const stringLengths = preinternedPlan.stringLengths;
         const stringsBuffer = preinternedPlan.stringsBuffer;
@@ -2820,10 +3954,7 @@ export class TermRecordOpfsStore {
         const fixedContentOffsetBase = fixedContentSpan ? /** @type {number} */ (chunk.fixedContentOffsetBase) : 0;
         const fixedContentLength = fixedContentSpan ? /** @type {number} */ (chunk.fixedContentLength) : 0;
         let totalBytes = STRING_TABLE_HEADER_BYTES + (stringLengths.length * 2) + stringsBuffer.byteLength;
-        for (let i = 0; i < count; ++i) {
-            const entryContentLength = fixedContentSpan ? fixedContentLength : contentLengths[i];
-            totalBytes += RECORD_HEADER_BYTES + ((entryContentLength >= 0 && entryContentLength > 0xfffd) ? 4 : 0);
-        }
+        totalBytes += count * RECORD_HEADER_BYTES;
 
         const output = new Uint8Array(totalBytes);
         let cursor = 0;
@@ -2842,18 +3973,11 @@ export class TermRecordOpfsStore {
                 cursor,
                 (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ?
                     READING_EQUALS_EXPRESSION_U32 :
-                    (readingIndexes[i] >>> 0)
+                (readingIndexes[i] >>> 0),
             );
             const entryContentOffset = fixedContentSpan ? fixedContentOffsetBase + (i * fixedContentLength) : contentOffsets[i];
-            cursor = writeU32Le(output, cursor, entryContentOffset >= 0 ? entryContentOffset : U32_NULL);
-            if (entryContentLength < 0) {
-                cursor = writeU16Le(output, cursor, ENTRY_CONTENT_LENGTH_U16_NULL);
-            } else if (entryContentLength <= 0xfffd) {
-                cursor = writeU16Le(output, cursor, entryContentLength);
-            } else {
-                cursor = writeU16Le(output, cursor, ENTRY_CONTENT_LENGTH_EXTENDED_U16);
-                cursor = writeU32Le(output, cursor, entryContentLength);
-            }
+            cursor = writeU32Le(output, cursor, getContentOffsetDelta(entryContentOffset, contentOffsetBase));
+            cursor = writeU32Le(output, cursor, entryContentLength < 0 ? U32_NULL : entryContentLength);
             cursor = writeU32Le(output, cursor, chunk.scoreList[i] ?? 0);
             cursor = writeU32Le(output, cursor, chunk.sequenceList[i] ?? -1);
         }
@@ -2866,10 +3990,23 @@ export class TermRecordOpfsStore {
      * @param {number} firstId
      * @param {number} count
      * @param {string|null} [contentDictNameOverride=null]
+     * @param {number} [contentOffsetBase=0]
+     * @param {Uint8Array|null} [lookupIndexBytes=null]
+     * @param {Uint8Array|null} [fixedFieldsHashes=null]
      * @returns {Promise<void>}
      */
-    async _appendEncodedChunk(state, chunk, firstId, count, contentDictNameOverride = null) {
+    async _appendEncodedChunk(
+        state,
+        chunk,
+        firstId,
+        count,
+        contentDictNameOverride = null,
+        contentOffsetBase = 0,
+        lookupIndexBytes = null,
+        fixedFieldsHashes = null,
+    ) {
         if (chunk.byteLength <= 0) { return; }
+        await this._validateShardAppendFormat(state);
         const firstRecord = this._recordsById.get(firstId) ?? null;
         const contentDictName = contentDictNameOverride ?? firstRecord?.entryContentDictName ?? 'raw';
         if (state.sharedContentDictName === null) {
@@ -2878,15 +4015,17 @@ export class TermRecordOpfsStore {
             throw new Error(`Mixed entryContentDictName values are not supported within shard ${state.fileName}`);
         }
 
-        /** @type {Uint8Array[]} */
-        const chunks = state.fileLength === 0 ?
+        /** @type {Uint8Array|null} */
+        const binaryHeader = state.fileLength === 0 ? this._createBinaryHeader(state.sharedContentDictName) : null;
+        const recordChunkOffset = state.fileLength + (binaryHeader?.byteLength ?? 0);
+        const chunks = binaryHeader !== null ?
             [
-                this._createBinaryHeader(state.sharedContentDictName),
-                this._createChunkHeader(firstId, count),
+                binaryHeader,
+                this._createChunkHeader(firstId, count, contentOffsetBase),
                 chunk,
             ] :
             [
-                this._createChunkHeader(firstId, count),
+                this._createChunkHeader(firstId, count, contentOffsetBase),
                 chunk,
             ];
         let totalBytes = 0;
@@ -2896,6 +4035,27 @@ export class TermRecordOpfsStore {
         state.pendingWriteChunks.push(...chunks);
         state.pendingWriteBytes += totalBytes;
         state.fileLength += totalBytes;
+        if (
+            state.initialFileLength === 0 &&
+            lookupIndexBytes instanceof Uint8Array &&
+            lookupIndexBytes.byteLength > 0
+        ) {
+            const lookupIndexChunk = this._createLookupIndexChunk(
+                firstId,
+                count,
+                recordChunkOffset,
+                contentOffsetBase,
+                lookupIndexBytes,
+                chunk,
+                fixedFieldsHashes,
+            );
+            state.pendingLookupIndexChunks.push(lookupIndexChunk);
+            state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;
+            state.pendingLookupIndexRecordCount += count;
+            if (state.pendingLookupIndexBytes >= LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES) {
+                await this._flushPendingLookupIndexChunks(state);
+            }
+        }
 
         if (!this._importSessionActive || state.pendingWriteBytes >= this._flushThresholdBytes) {
             await this._flushPendingWritesForShard(state);
@@ -2951,10 +4111,11 @@ export class TermRecordOpfsStore {
      * @param {Uint8Array} payload
      * @param {number} firstId
      * @param {number} count
+     * @param {number} [contentOffsetBase=0]
      * @returns {Uint8Array}
      */
-    _withChunkHeader(payload, firstId, count) {
-        const header = this._createChunkHeader(firstId, count);
+    _withChunkHeader(payload, firstId, count, contentOffsetBase = 0) {
+        const header = this._createChunkHeader(firstId, count, contentOffsetBase);
         const output = new Uint8Array(header.byteLength + payload.byteLength);
         output.set(header, 0);
         output.set(payload, header.byteLength);
@@ -2964,14 +4125,164 @@ export class TermRecordOpfsStore {
     /**
      * @param {number} firstId
      * @param {number} count
+     * @param {number} [contentOffsetBase=0]
      * @returns {Uint8Array}
      */
-    _createChunkHeader(firstId, count) {
+    _createChunkHeader(firstId, count, contentOffsetBase = 0) {
         const output = new Uint8Array(CHUNK_HEADER_BYTES);
         const view = new DataView(output.buffer, output.byteOffset, output.byteLength);
         view.setUint32(0, firstId >>> 0, true);
         view.setUint32(4, count >>> 0, true);
+        writeSafeU64Le(view, 8, contentOffsetBase);
         return output;
+    }
+
+    /**
+     * @param {number} firstId
+     * @param {number} count
+     * @param {number} recordChunkOffset
+     * @param {number} contentOffsetBase
+     * @param {Uint8Array} payload
+     * @param {Uint8Array} recordPayload
+     * @param {Uint8Array|null} [precomputedFixedFieldsHashes=null]
+     * @returns {Uint8Array}
+     * @throws {Error} If the encoded record payload does not match the declared record count.
+     */
+    _createLookupIndexChunk(
+        firstId,
+        count,
+        recordChunkOffset,
+        contentOffsetBase,
+        payload,
+        recordPayload,
+        precomputedFixedFieldsHashes = null,
+    ) {
+        const recordPayloadView = new DataView(
+            recordPayload.buffer,
+            recordPayload.byteOffset,
+            recordPayload.byteLength,
+        );
+        const stringCount = recordPayloadView.getUint32(0, true);
+        const stringBytesLength = recordPayloadView.getUint32(4, true);
+        const recordsOffset = STRING_TABLE_HEADER_BYTES + (stringCount * 2) + stringBytesLength;
+        if (
+            recordsOffset > recordPayload.byteLength ||
+            (recordPayload.byteLength - recordsOffset) !== (count * RECORD_HEADER_BYTES)
+        ) {
+            throw new Error('Invalid term-record payload while creating lookup sidecar');
+        }
+        let fixedFieldsHashes = precomputedFixedFieldsHashes;
+        if (fixedFieldsHashes === null) {
+            fixedFieldsHashes = new Uint8Array(count * 4);
+            const fixedFieldsHashesView = new DataView(
+                fixedFieldsHashes.buffer,
+                fixedFieldsHashes.byteOffset,
+                fixedFieldsHashes.byteLength,
+            );
+            for (let i = 0; i < count; ++i) {
+                fixedFieldsHashesView.setUint32(
+                    i * 4,
+                    hashTermRecordFixedFields(recordPayloadView, recordsOffset + (i * RECORD_HEADER_BYTES)),
+                    true,
+                );
+            }
+        } else if (fixedFieldsHashes.byteLength !== count * 4) {
+            throw new Error('Invalid precomputed term-record fixed-field hashes');
+        }
+        const output = new Uint8Array(
+            LOOKUP_INDEX_CHUNK_HEADER_BYTES +
+            payload.byteLength +
+            fixedFieldsHashes.byteLength,
+        );
+        const view = new DataView(output.buffer, output.byteOffset, output.byteLength);
+        view.setUint32(0, firstId, true);
+        view.setUint32(4, count, true);
+        writeSafeU64Le(view, 8, recordChunkOffset);
+        view.setUint32(16, payload.byteLength, true);
+        view.setUint32(20, hashLookupIndexBytes(payload), true);
+        view.setUint32(24, hashLookupIndexBytes(this._createChunkHeader(firstId, count, contentOffsetBase)), true);
+        view.setUint32(28, hashLookupIndexBytes(fixedFieldsHashes), true);
+        output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);
+        output.set(fixedFieldsHashes, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);
+        return output;
+    }
+
+    /**
+     * @param {TermRecordShardState} state
+     * @returns {Promise<void>}
+     */
+    async _flushLookupIndexFile(state) {
+        if (
+            (
+                state.pendingLookupIndexChunks.length === 0 &&
+                state.lookupIndexWritable === null
+            ) ||
+            this._recordsDirectoryHandle === null
+        ) {
+            return;
+        }
+        const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
+        if (state.initialFileLength !== 0) {
+            try {
+                await this._recordsDirectoryHandle.removeEntry(indexFileName);
+            } catch (_) {
+                // Missing or stale sidecars are handled by the full-shard fallback.
+            }
+            state.pendingLookupIndexChunks = [];
+            state.pendingLookupIndexBytes = 0;
+            state.pendingLookupIndexRecordCount = 0;
+            return;
+        }
+        await this._flushPendingLookupIndexChunks(state);
+        const writable = state.lookupIndexWritable;
+        if (writable === null) { return; }
+        try {
+            const header = new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES);
+            header.set(this._textEncoder.encode(LOOKUP_INDEX_MAGIC_TEXT), 0);
+            const view = new DataView(header.buffer, header.byteOffset, header.byteLength);
+            writeSafeU64Le(view, 8, state.fileLength);
+            view.setUint32(16, state.lookupIndexChunkCount, true);
+            view.setUint32(20, state.lookupIndexRecordCount, true);
+            await writable.seek(0);
+            await writable.write(header);
+        } finally {
+            try {
+                await writable.close();
+            } finally {
+                state.lookupIndexWritable = null;
+                state.lookupIndexFileHandle = null;
+            }
+        }
+        state.pendingLookupIndexChunks = [];
+        state.pendingLookupIndexBytes = 0;
+        state.pendingLookupIndexRecordCount = 0;
+        state.lookupIndexChunkCount = 0;
+        state.lookupIndexRecordCount = 0;
+    }
+
+    /**
+     * @param {TermRecordShardState} state
+     * @returns {Promise<void>}
+     */
+    async _flushPendingLookupIndexChunks(state) {
+        if (state.pendingLookupIndexChunks.length === 0 || this._recordsDirectoryHandle === null) {
+            return;
+        }
+        if (state.lookupIndexWritable === null) {
+            const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
+            state.lookupIndexFileHandle = await this._recordsDirectoryHandle.getFileHandle(indexFileName, {create: true});
+            state.lookupIndexWritable = await state.lookupIndexFileHandle.createWritable();
+            await state.lookupIndexWritable.truncate(0);
+            await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
+        }
+        const chunks = state.pendingLookupIndexChunks;
+        const recordCount = state.pendingLookupIndexRecordCount;
+        await state.lookupIndexWritable.write(new Blob(chunks));
+        state.lookupIndexChunkCount += chunks.length;
+        state.lookupIndexRecordCount += recordCount;
+        state.pendingLookupIndexChunks = [];
+        state.pendingLookupIndexBytes = 0;
+        state.pendingLookupIndexRecordCount = 0;
     }
 
     /**
@@ -3005,6 +4316,7 @@ export class TermRecordOpfsStore {
         for (const state of this._shardStateByFileName.values()) {
             await this._awaitQueuedWritesForShard(state);
             await this._closeShardWritable(state);
+            await this._flushLookupIndexFile(state);
         }
     }
 
@@ -3067,7 +4379,13 @@ export class TermRecordOpfsStore {
             } catch (_) {
                 // NOP
             }
+            try {
+                await this._recordsDirectoryHandle.removeEntry(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
+            } catch (_) {
+                // NOP
+            }
         }
+        this._invalidateAllPersistentLookupState();
 
         /** @type {Map<string, {dictionaryName: string, contentDictName: string, records: TermRecord[]}>} */
         const recordsByShard = new Map();
@@ -3085,15 +4403,38 @@ export class TermRecordOpfsStore {
 
         for (const [fileName, shard] of recordsByShard) {
             const {contentDictName, records} = shard;
-            const payload = await this._encodeRecords(records);
             const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName, {create: true});
             const writable = await fileHandle.createWritable();
             await writable.truncate(0);
             let fileLength = 0;
-            if (payload.byteLength > 0) {
-                const output = this._withBinaryHeader(payload, contentDictName);
-                await writable.write(output);
-                fileLength = output.byteLength;
+            const header = this._createBinaryHeader(contentDictName);
+            await writable.write(header);
+            fileLength += header.byteLength;
+            for (let runStart = 0; runStart < records.length;) {
+                let runEnd = runStart + 1;
+                let minContentOffset = records[runStart].entryContentOffset >= 0 ? records[runStart].entryContentOffset : Number.POSITIVE_INFINITY;
+                let maxContentOffset = records[runStart].entryContentOffset >= 0 ? records[runStart].entryContentOffset : Number.NEGATIVE_INFINITY;
+                while (runEnd < records.length && records[runEnd].id === (records[runEnd - 1].id + 1)) {
+                    const contentOffset = records[runEnd].entryContentOffset;
+                    const nextMinContentOffset = contentOffset >= 0 ? Math.min(minContentOffset, contentOffset) : minContentOffset;
+                    const nextMaxContentOffset = contentOffset >= 0 ? Math.max(maxContentOffset, contentOffset) : maxContentOffset;
+                    if (
+                        nextMinContentOffset !== Number.POSITIVE_INFINITY &&
+                        (nextMaxContentOffset - nextMinContentOffset) > MAX_CONTENT_OFFSET_DELTA
+                    ) {
+                        break;
+                    }
+                    minContentOffset = nextMinContentOffset;
+                    maxContentOffset = nextMaxContentOffset;
+                    ++runEnd;
+                }
+                const runRecords = records.slice(runStart, runEnd);
+                const encoded = await this._encodeRecords(runRecords);
+                const chunkHeader = this._createChunkHeader(runRecords[0].id, runRecords.length, encoded.contentOffsetBase);
+                await writable.write(chunkHeader);
+                await writable.write(encoded.bytes);
+                fileLength += chunkHeader.byteLength + encoded.bytes.byteLength;
+                runStart = runEnd;
             }
             await writable.close();
             const state = this._createShardState(fileName, fileHandle, fileLength, contentDictName);
@@ -3103,6 +4444,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {boolean} materializeRecords
      * @returns {Promise<number>}
      */
     async _loadShardFiles(materializeRecords = true) {
@@ -3134,7 +4476,7 @@ export class TermRecordOpfsStore {
                 name,
                 fileHandle,
                 file.size,
-                null,
+                shardInfo?.contentDictName ?? null,
                 shardInfo?.segmentIndex ?? 0,
                 shardInfo === null ? name : this._getShardFileName(shardInfo.dictionaryName, shardInfo.contentDictName),
             );
@@ -3168,8 +4510,10 @@ export class TermRecordOpfsStore {
         }
         const arrayBuffer = await file.arrayBuffer();
         const content = new Uint8Array(arrayBuffer);
-        if (this._isBinaryFormat(content)) {
-            this._loadBinary(content, this._decodeDictionaryNameFromShardFileName(state.fileName));
+        if (
+            this._isBinaryFormat(content) &&
+            this._loadBinary(content, this._decodeDictionaryNameFromShardFileName(state.fileName))
+        ) {
             return;
         }
         this._invalidShardFileNames.push(state.fileName);
@@ -3207,49 +4551,6 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @returns {Promise<boolean>}
-     */
-    async _migrateLegacyMonolithicIfPresent() {
-        if (this._rootDirectoryHandle === null) {
-            return false;
-        }
-        let fileHandle;
-        try {
-            fileHandle = await this._rootDirectoryHandle.getFileHandle(LEGACY_FILE_NAME, {create: false});
-        } catch (_) {
-            return false;
-        }
-        const file = await fileHandle.getFile();
-        if (file.size <= 0) {
-            await this._deleteLegacyMonolithicIfPresent();
-            return false;
-        }
-        const content = new Uint8Array(await file.arrayBuffer());
-        if (this._isBinaryFormat(content)) {
-            this._loadBinary(content);
-        } else {
-            this._loadLegacyNdjson(content);
-        }
-        await this._rewriteAllShardsFromMemory();
-        await this._deleteLegacyMonolithicIfPresent();
-        return true;
-    }
-
-    /**
-     * @returns {Promise<void>}
-     */
-    async _deleteLegacyMonolithicIfPresent() {
-        if (this._rootDirectoryHandle === null) {
-            return;
-        }
-        try {
-            await this._rootDirectoryHandle.removeEntry(LEGACY_FILE_NAME);
-        } catch (_) {
-            // NOP
-        }
-    }
-
-    /**
      * @returns {Promise<string[]>}
      */
     async _listShardFileNames() {
@@ -3274,11 +4575,39 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @returns {Promise<string[]>}
+     */
+    async _listTermRecordStorageFileNames() {
+        if (this._recordsDirectoryHandle === null) { return []; }
+        const entriesMethod = /** @type {unknown} */ (Reflect.get(this._recordsDirectoryHandle, 'entries'));
+        if (typeof entriesMethod !== 'function') { return []; }
+        const entries = /** @type {() => AsyncIterable<[string, FileSystemHandle]>} */ (entriesMethod).call(this._recordsDirectoryHandle);
+        const names = [];
+        for await (const entry of entries) {
+            const name = String(entry[0] ?? '');
+            const fileSystemHandle = /** @type {FileSystemHandle} */ (/** @type {unknown} */ (entry[1]));
+            if (
+                fileSystemHandle.kind === 'file' &&
+                (this._isShardFileName(name) || name.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`))
+            ) {
+                names.push(name);
+            }
+        }
+        return names;
+    }
+
+    /**
      * @returns {boolean}
      */
     _hasPendingShardWrites() {
         for (const state of this._shardStateByFileName.values()) {
-            if (state.writable !== null || state.pendingWriteBytes > 0 || state.pendingWriteChunks.length > 0) {
+            if (
+                state.writable !== null ||
+                state.pendingWriteBytes > 0 ||
+                state.pendingWriteChunks.length > 0 ||
+                state.pendingLookupIndexChunks.length > 0 ||
+                state.lookupIndexWritable !== null
+            ) {
                 return true;
             }
         }
@@ -3374,6 +4703,9 @@ export class TermRecordOpfsStore {
         if (chunks.length === 0) {
             return;
         }
+        if (state.queuedWriteError !== null) {
+            return;
+        }
         for (const chunk of chunks) {
             if (chunk.byteLength <= 0) { continue; }
             state.queuedWriteChunks.push(chunk);
@@ -3390,6 +4722,9 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async _awaitQueuedWritesForShard(state) {
+        if (state.queuedWriteError !== null) {
+            throw state.queuedWriteError;
+        }
         const promise = state.queuedWritePromise;
         if (promise === null) {
             return;
@@ -3445,11 +4780,13 @@ export class TermRecordOpfsStore {
                 state.queuedWriteBytes = 0;
                 await this._writeChunksForShard(state, chunks);
             }
+        } catch (error) {
+            state.queuedWriteError = error instanceof Error ? error : new Error(String(error));
+            state.queuedWriteChunks = [];
+            state.queuedWriteBytes = 0;
+            throw error;
         } finally {
             state.queuedWritePromise = null;
-            if (state.queuedWriteChunks.length > 0) {
-                state.queuedWritePromise = this._drainQueuedWritesForShard(state);
-            }
         }
     }
 
@@ -3516,10 +4853,56 @@ export class TermRecordOpfsStore {
                 this._shardStateByFileName.delete(fileName);
                 this._activeAppendShardStateByKey.delete(state.logicalKey);
             }
+            await this._removeStorageFileOrTruncate(fileName, false);
+            await this._removeStorageFileOrTruncate(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
+        }
+        this._invalidatePersistentLookupState(dictionaryName);
+    }
+
+    /**
+     * Removes a storage file, or truncates it when another browser runtime
+     * temporarily prevents unlinking an open OPFS handle.
+     * @param {string} fileName
+     * @param {boolean} allowMissing
+     * @returns {Promise<void>}
+     * @throws {Error}
+     */
+    async _removeStorageFileOrTruncate(fileName, allowMissing) {
+        if (this._recordsDirectoryHandle === null) { return; }
+        try {
+            await this._recordsDirectoryHandle.removeEntry(fileName);
+            return;
+        } catch (removeError) {
+            let fileHandle;
             try {
-                await this._recordsDirectoryHandle.removeEntry(fileName);
-            } catch (_) {
-                // NOP
+                fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName, {create: false});
+            } catch (lookupError) {
+                if (allowMissing) { return; }
+                throw new AggregateError(
+                    [removeError, lookupError],
+                    `Failed to remove or open term-record storage file ${fileName}`,
+                );
+            }
+            try {
+                const writable = await fileHandle.createWritable({keepExistingData: true});
+                try {
+                    await writable.truncate(0);
+                } finally {
+                    await writable.close();
+                }
+                const file = await fileHandle.getFile();
+                if (file.size > 0) {
+                    throw new Error(`Truncated term-record storage file is not empty: ${fileName}`);
+                }
+                reportDiagnostics('term-record-store-delete-truncated-open-file', {
+                    fileName,
+                    removeError: removeError instanceof Error ? removeError.message : String(removeError),
+                });
+            } catch (truncateError) {
+                throw new AggregateError(
+                    [removeError, truncateError],
+                    `Failed to remove or truncate term-record storage file ${fileName}`,
+                );
             }
         }
     }
@@ -3543,11 +4926,40 @@ export class TermRecordOpfsStore {
             pendingWriteChunks: [],
             queuedWriteBytes: 0,
             queuedWritePromise: null,
+            queuedWriteError: null,
             queuedWriteChunks: [],
             sharedContentDictName,
             segmentIndex,
             logicalKey: logicalKey ?? fileName,
+            initialFileLength: fileLength,
+            pendingLookupIndexChunks: [],
+            pendingLookupIndexBytes: 0,
+            pendingLookupIndexRecordCount: 0,
+            lookupIndexFileHandle: null,
+            lookupIndexWritable: null,
+            lookupIndexChunkCount: 0,
+            lookupIndexRecordCount: 0,
+            appendFormatValidated: fileLength === 0,
         };
+    }
+
+    /**
+     * Prevents a new-format chunk from being appended to an older shard header.
+     * @param {TermRecordShardState} state
+     * @returns {Promise<void>}
+     */
+    async _validateShardAppendFormat(state) {
+        if (state.appendFormatValidated) { return; }
+        const file = await state.fileHandle.getFile();
+        if (file.size < BINARY_MAGIC_BYTES) {
+            throw new Error(`Cannot append to truncated term-record shard: ${state.fileName}`);
+        }
+        const magicBytes = await this._readFileRange(file, 0, BINARY_MAGIC_BYTES);
+        const magic = this._textDecoder.decode(magicBytes);
+        if (magic !== BINARY_MAGIC_TEXT) {
+            throw new Error(`Cannot append ${BINARY_MAGIC_TEXT} records to ${magic || 'unknown'} shard: ${state.fileName}`);
+        }
+        state.appendFormatValidated = true;
     }
 
     /**
@@ -3895,7 +5307,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {string} dictionaryName
-     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} index
+     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}} index
      */
     _addDictionaryRecordsToIndex(dictionaryName, index) {
         const ids = this._getLiveRecordIdsForDictionary(dictionaryName);
@@ -3940,29 +5352,6 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {string} dictionaryName
-     * @param {{pair: Map<string, number[]>}} index
-     */
-    _addDictionaryRecordsToPairIndex(dictionaryName, index) {
-        const ids = this._getLiveRecordIdsForDictionary(dictionaryName);
-        if (typeof ids !== 'undefined') {
-            const records = this._recordsById.getRawRecords();
-            for (let i = 0, ii = ids.length; i < ii; ++i) {
-                const record = records[ids[i]];
-                if (typeof record !== 'undefined') {
-                    this._addRecordPairToDictionaryIndex(index, record);
-                }
-            }
-            return;
-        }
-        for (const record of this._recordsById.values()) {
-            if (record.dictionary === dictionaryName) {
-                this._addRecordPairToDictionaryIndex(index, record);
-            }
-        }
-    }
-
-    /**
      * @param {{expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>}} index
      * @param {TermRecord} record
      */
@@ -3995,7 +5384,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} index
+     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}} index
      * @param {TermRecord} record
      */
     _addRecordToDictionaryIndex(index, record) {
@@ -4006,7 +5395,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, pair: Map<string, number[]>, sequence: Map<number, number[]>}} index
+     * @param {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}} index
      * @param {TermRecord} record
      * @param {string} expression
      * @param {string} reading
@@ -4030,10 +5419,6 @@ export class TermRecordOpfsStore {
         if (this._reverseIndexReady.has(index)) {
             this._addRecordReverseToDictionaryIndex(index, record);
         }
-        if (this._pairIndexReady.has(index)) {
-            this._addRecordPairToDictionaryIndex(index, record);
-        }
-
         if (typeof record.sequence === 'number' && record.sequence >= 0) {
             const sequenceList = index.sequence.get(record.sequence);
             if (typeof sequenceList === 'undefined') {
@@ -4041,23 +5426,6 @@ export class TermRecordOpfsStore {
             } else {
                 sequenceList.push(record.id);
             }
-        }
-    }
-
-    /**
-     * @param {{pair: Map<string, number[]>}} index
-     * @param {TermRecord} record
-     */
-    _addRecordPairToDictionaryIndex(index, record) {
-        this._ensureDecodedRecordStrings(record);
-        const expression = record.expression ?? '';
-        const reading = record.reading ?? expression;
-        const pairKey = `${expression}\u001f${reading}`;
-        const pairList = index.pair.get(pairKey);
-        if (typeof pairList === 'undefined') {
-            index.pair.set(pairKey, [record.id]);
-        } else {
-            pairList.push(record.id);
         }
     }
 

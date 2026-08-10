@@ -50,6 +50,21 @@ describe('DictionaryDatabase direct term indexes', () => {
         ]);
     });
 
+    test('exact lookup resolves expression and reading postings with one store probe', async () => {
+        const database = createDatabase({});
+        const findTermIdMatches = vi.fn().mockReturnValue({expression: [7], reading: [8]});
+        Reflect.set(database, '_termRecordStore', {findTermIdMatches});
+
+        const results = await database.findTermsBulk(['食べる'], new Set(['Test']), 'exact');
+
+        expect(findTermIdMatches).toHaveBeenCalledOnce();
+        expect(findTermIdMatches).toHaveBeenCalledWith('Test', '食べる');
+        expect(results).toEqual([
+            {id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 0},
+            {id: 8, matchSource: 'reading', matchType: 'exact', itemIndex: 0},
+        ]);
+    });
+
     test('suffix lookup marks a complete reversed-key match as exact', async () => {
         const database = createDatabase({expressionReverse: new Map([['るべ食', [7]]])});
 

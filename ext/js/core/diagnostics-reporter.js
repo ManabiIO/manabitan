@@ -44,10 +44,6 @@ const BASIC_DIAGNOSTICS_EVENTS = new Set([
     'dictionary-import-step-final',
     'dictionary-import-zip-complete',
     'dictionary-import-worker-phase-summary',
-    'dictionary-lookup-db-query',
-    'dictionary-lookup-snapshot',
-    'display-terms-find-snapshot',
-    'dictionary-lookup-translator-stage',
 ]);
 /** @type {Promise<DiagnosticsConfig>|null} */
 let diagnosticsConfigPromise = null;
@@ -534,6 +530,8 @@ function submitDiagnostics(event, payload, endpoint) {
  * @returns {void}
  */
 export function reportDiagnostics(event, payload = {}) {
+    const manifest = getManifestOrNull();
+    if (manifest === null || !isDevBuildManifest(manifest)) { return; }
     void (async () => {
         const {enabled, endpoint, verbosity} = await getDiagnosticsConfig();
         if (!enabled) { return; }
@@ -548,6 +546,8 @@ export function reportDiagnostics(event, payload = {}) {
  * @returns {void}
  */
 export function reportDiagnosticsLazy(event, createPayload) {
+    const manifest = getManifestOrNull();
+    if (manifest === null || !isDevBuildManifest(manifest)) { return; }
     void (async () => {
         const {enabled, endpoint, verbosity} = await getDiagnosticsConfig();
         if (!enabled) { return; }

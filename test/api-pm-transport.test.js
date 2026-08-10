@@ -278,6 +278,103 @@ describe('API PM transport reliability', () => {
         expect(api._shutdownRejectors.size).toBe(0);
     });
 
+    test.each([
+        ['file', (api) => api.importDictionaryOffscreen(new Blob([]), /** @type {import('../ext/js/dictionary/dictionary-importer.js').ImportDetails} */ ({}), null)],
+        ['url', (api) => api.importDictionaryUrlOffscreen('https://example.com/test.zip', /** @type {import('../ext/js/dictionary/dictionary-importer.js').ImportDetails} */ ({}), null)],
+    ])('%s import watchdog resets when progress is received', async (_kind, startImport) => {
+        vi.useFakeTimers();
+        const channels = [];
+        vi.stubGlobal('MessageChannel', class {
+            constructor() {
+                this.port1 = {onmessage: null, onmessageerror: null, close: vi.fn()};
+                this.port2 = {close: vi.fn()};
+                channels.push(this);
+            }
+        });
+        Object.defineProperty(globalThis, 'navigator', {
+            configurable: true,
+            value: {serviceWorker: {}},
+        });
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
+        vi.spyOn(api, '_pmInvoke').mockResolvedValue();
+
+        const promise = startImport(api);
+        let settled = false;
+        void promise.finally(() => { settled = true; });
+        await vi.advanceTimersByTimeAsync(149_000);
+        channels[0].port1.onmessage?.({data: {type: 'progress', progress: {index: 1, count: 2}}});
+        await vi.advanceTimersByTimeAsync(149_000);
+        expect(settled).toBe(false);
+        channels[0].port1.onmessage?.({data: {type: 'complete', result: {errors: []}}});
+
+        await expect(promise).resolves.toEqual({errors: []});
+        expect(channels[0].port1.close).toHaveBeenCalledOnce();
+        expect(api._shutdownRejectors.size).toBe(0);
+    });
+
+    test('file import watchdog rejects after sustained inactivity', async () => {
+        vi.useFakeTimers();
+        vi.stubGlobal('MessageChannel', class {
+            constructor() {
+                this.port1 = {onmessage: null, onmessageerror: null, close: vi.fn()};
+                this.port2 = {close: vi.fn()};
+            }
+        });
+        Object.defineProperty(globalThis, 'navigator', {
+            configurable: true,
+            value: {serviceWorker: {}},
+        });
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
+        vi.spyOn(api, '_pmInvoke').mockResolvedValue();
+        const promise = api.importDictionaryOffscreen(new Blob([]), /** @type {import('../ext/js/dictionary/dictionary-importer.js').ImportDetails} */ ({}), null);
+        const expectation = expect(promise).rejects.toThrow(/inactive for 150000ms/);
+
+        await vi.advanceTimersByTimeAsync(150_000);
+        await expectation;
+        expect(api._shutdownRejectors.size).toBe(0);
+    });
+
+    test.each([
+        ['file', 'complete', (api) => api.importDictionaryOffscreen(new Blob([]), /** @type {import('../ext/js/dictionary/dictionary-importer.js').ImportDetails} */ ({}), null)],
+        ['file', 'error', (api) => api.importDictionaryOffscreen(new Blob([]), /** @type {import('../ext/js/dictionary/dictionary-importer.js').ImportDetails} */ ({}), null)],
+        ['url', 'complete', (api) => api.importDictionaryUrlOffscreen('https://example.com/test.zip', /** @type {import('../ext/js/dictionary/dictionary-importer.js').ImportDetails} */ ({}), null)],
+        ['url', 'error', (api) => api.importDictionaryUrlOffscreen('https://example.com/test.zip', /** @type {import('../ext/js/dictionary/dictionary-importer.js').ImportDetails} */ ({}), null)],
+    ])('%s import %s response settles when closing the response port throws', async (_kind, responseType, startImport) => {
+        const channels = [];
+        vi.stubGlobal('MessageChannel', class {
+            constructor() {
+                this.port1 = {
+                    onmessage: null,
+                    onmessageerror: null,
+                    close: vi.fn(() => { throw new Error('port already closed'); }),
+                };
+                this.port2 = {close: vi.fn()};
+                channels.push(this);
+            }
+        });
+        Object.defineProperty(globalThis, 'navigator', {
+            configurable: true,
+            value: {serviceWorker: {}},
+        });
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
+        vi.spyOn(api, '_pmInvoke').mockResolvedValue();
+
+        const promise = startImport(api);
+        channels[0].port1.onmessage?.({
+            data: responseType === 'complete' ?
+                {type: 'complete', result: {errors: []}} :
+                {type: 'error', error: {name: 'Error', message: 'worker failed', stack: ''}},
+        });
+
+        if (responseType === 'complete') {
+            await expect(promise).resolves.toEqual({errors: []});
+        } else {
+            await expect(promise).rejects.toThrow('worker failed');
+        }
+        expect(channels[0].port1.close).toHaveBeenCalledOnce();
+        expect(api._shutdownRejectors.size).toBe(0);
+    });
+
     test('_invoke times out when backend never answers', async () => {
         vi.useFakeTimers();
         Object.defineProperty(globalThis, 'navigator', {

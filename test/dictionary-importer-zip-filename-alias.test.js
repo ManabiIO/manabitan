@@ -20,6 +20,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {describe, expect, test} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+import {TermBankWasmResourceError} from '../ext/js/dictionary/term-bank-wasm-parser.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -118,5 +119,26 @@ describe('DictionaryImporter bank JSON validation', () => {
         await expect(readTermBankFile.call(importer, file, 3, 'Test dictionary', false, false, true, 'baseline')).rejects.toThrow(
             "Expected a JSON array in 'term_bank_1.json'",
         );
+    });
+
+    test('does not retry a WASM resource failure through the larger JSON fallback', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const readTermBankFile = /** @type {(termFile: {filename: string, bytes: Uint8Array}, version: number, dictionaryTitle: string, prefixWildcardsSupported: boolean, useMediaPipeline: boolean, enableTermEntryContentDedup: boolean, termContentStorageMode: 'baseline'|'raw-bytes') => Promise<unknown>} */ (
+            /** @type {unknown} */ (Reflect.get(importer, '_readTermBankFile'))
+        );
+        let fallbackRead = false;
+        Reflect.set(importer, '_readTermBankFileFast', async () => {
+            throw new TermBankWasmResourceError('capacity exhausted');
+        });
+        Reflect.set(importer, '_getData', async () => {
+            fallbackRead = true;
+            return '[]';
+        });
+        const file = {filename: 'term_bank_1.json', bytes: new Uint8Array(0)};
+
+        await expect(readTermBankFile.call(importer, file, 3, 'Test dictionary', false, false, true, 'baseline')).rejects.toThrow(
+            'capacity exhausted',
+        );
+        expect(fallbackRead).toBe(false);
     });
 });

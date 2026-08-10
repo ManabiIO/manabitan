@@ -93,6 +93,12 @@ type ApiSurface = {
         };
         return: DictionaryDatabase.TermEntry[];
     };
+    warmTermLookupCachesOffscreen: {
+        params: {
+            dictionaryNames: string[];
+        };
+        return: void;
+    };
     debugDictionaryStorageStateOffscreen: {
         params: void;
         return: {
@@ -127,16 +133,6 @@ type ApiSurface = {
             targets: DictionaryDatabase.MediaRequest[];
         };
         return: DictionaryDatabase.Media<string>[];
-    };
-    databaseExportOffscreen: {
-        params: void;
-        return: string;
-    };
-    databaseImportOffscreen: {
-        params: {
-            content: string;
-        };
-        return: void;
     };
     translatorPrepareOffscreen: {
         params: void;
@@ -225,7 +221,10 @@ export type FindTermsOptionsOffscreen = Omit<Translation.FindTermsOptions, 'enab
 };
 
 export type FindTermsTextReplacementOffscreen = Omit<Translation.FindTermsTextReplacement, 'pattern'> & {
-    pattern: string;
+    pattern: {
+        source: string;
+        flags: string;
+    };
 };
 
 export type ApiMap = BaseApiMap<ApiSurface>;
@@ -254,6 +253,14 @@ type McApiSurface = {
         };
         return: void;
     };
+    findTermsStructuredOffscreen: {
+        params: {
+            mode: Translator.FindTermsMode;
+            text: string;
+            options: Translation.FindTermsOptions;
+        };
+        return: Translator.FindTermsResult;
+    };
     dummy: {
         params: void;
         return: void;
@@ -281,3 +288,5 @@ export type McApiParams<TName extends McApiNames> = BaseApiParams<McApiSurface[T
 export type McApiReturn<TName extends McApiNames> = BaseApiReturn<McApiSurface[TName]>;
 
 export type McApiMessageAny = {[name in McApiNames]: McApiMessage<name>}[McApiNames];
+
+export type McApiRequest = McApiMessageAny & {id: number};

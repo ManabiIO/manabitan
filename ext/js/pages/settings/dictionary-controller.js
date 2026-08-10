@@ -943,7 +943,9 @@ export class DictionaryController {
         void this._onDatabaseUpdated(details);
     }
 
-    /** */
+    /**
+     * @param {import('application').EventArgument<'databaseUpdated'>|undefined} [_details]
+     */
     async _onDatabaseUpdated(_details = void 0) {
         /** @type {?import('core').TokenObject} */
         const token = {};
@@ -1491,10 +1493,6 @@ export class DictionaryController {
         const options = await this._settingsController.getOptionsFull();
         this._clearMutationErrors();
         const profilesDictionarySettings = this._getProfilesDictionarySettingsForTitle(options.profiles, dictionaryTitle);
-        const downloadedFile = await this._downloadReplacementDictionary(dictionaryTitle, downloadUrl);
-        if (!(downloadedFile instanceof File)) {
-            throw new Error(`Failed to download replacement dictionary for ${dictionaryTitle}`);
-        }
 
         const importToken = this._createUpdateImportToken();
         const stagedDictionaryTitle = `${dictionaryTitle} [update-staging ${importToken}]`;
@@ -1502,7 +1500,7 @@ export class DictionaryController {
         try {
             importResult = await this._importReplacementDictionary(
                 dictionaryTitle,
-                downloadedFile,
+                downloadUrl,
                 profilesDictionarySettings,
                 importToken,
                 stagedDictionaryTitle,
@@ -1586,7 +1584,7 @@ export class DictionaryController {
         const profilesDictionarySettings = {};
         for (const profile of profiles) {
             const dictionaries = profile.options.dictionaries;
-            /** @type {import('settings').DictionaryOptions[]} */
+            /** @type {import('settings-controller.js').ProfileDictionarySettings[]} */
             const profileMatches = [];
             for (let i = 0; i < dictionaries.length; ++i) {
                 if (dictionaries[i].name !== dictionaryTitle) { continue; }
@@ -1602,27 +1600,15 @@ export class DictionaryController {
     /**
      * @param {string} dictionaryTitle
      * @param {string} downloadUrl
-     * @returns {Promise<File|null>}
-     */
-    async _downloadReplacementDictionary(dictionaryTitle, downloadUrl) {
-        return await this._awaitPromiseResult(
-            this._settingsController.downloadDictionaryFromUrl(downloadUrl),
-            `Timed out downloading replacement dictionary for ${dictionaryTitle}`,
-        );
-    }
-
-    /**
-     * @param {string} dictionaryTitle
-     * @param {File} downloadedFile
      * @param {import('settings-controller.js').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {string} importToken
      * @param {string} stagedDictionaryTitle
      * @returns {Promise<import('settings-controller').ImportDictionaryDoneResult>}
      */
-    async _importReplacementDictionary(dictionaryTitle, downloadedFile, profilesDictionarySettings, importToken, stagedDictionaryTitle) {
+    async _importReplacementDictionary(dictionaryTitle, downloadUrl, profilesDictionarySettings, importToken, stagedDictionaryTitle) {
         return await this._awaitPromiseResult(
-            this._settingsController.importDictionaryFromFile(
-                [downloadedFile],
+            this._settingsController.importDictionaryFromUrl(
+                downloadUrl,
                 profilesDictionarySettings,
                 {
                     dictionaryTitleOverride: stagedDictionaryTitle,
@@ -1689,7 +1675,10 @@ export class DictionaryController {
      * @returns {Promise<boolean>}
      */
     async _recoverTimedOutUpdateState(dictionaryTitle, importToken, stagedDictionaryTitle) {
-        const {dictionaryInfo, transientTitles} = await this._getDictionaryInfoAfterTransientCleanup();
+        // Promise.race does not cancel the underlying import. Inspect state without
+        // deleting staging rows which may still be owned by that import.
+        const dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
+        const transientTitles = this._getTransientDictionaryTitles(dictionaryInfo);
         const updatedDictionary = dictionaryInfo.find((dictionary) => dictionary.title === dictionaryTitle);
         const updateTokenApplied = typeof updatedDictionary?.updateSessionToken === 'string' && updatedDictionary.updateSessionToken === importToken;
         reportDiagnostics('dictionary-update-timeout-recovery', {

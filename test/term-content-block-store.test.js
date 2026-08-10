@@ -11,9 +11,11 @@ import {describe, expect, test, vi} from 'vitest';
 import {ByteBoundedLruCache, TermContentBlockImportSession, TermContentBlockStore} from '../ext/js/dictionary/term-content-block-store.js';
 import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
 import {encodeRawTermContentBlockReference} from '../ext/js/dictionary/raw-term-content.js';
+import {compressTermContentZstdBatch} from '../ext/js/dictionary/zstd-term-content.js';
 
 vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
     compressTermContentZstd: (bytes) => Uint8Array.from(bytes),
+    compressTermContentZstdBatch: vi.fn(async (chunks) => chunks.map((bytes) => Uint8Array.from(bytes))),
     decompressTermContentZstd: (bytes) => Uint8Array.from(bytes),
 }));
 
@@ -60,6 +62,21 @@ describe('TermContentBlockImportSession', () => {
         session.close();
         await expect(session.append('A', [], null)).rejects.toThrow('closed');
     });
+
+    test('tracks forced block mode for shared-slab appends', async () => {
+        const tryAppendSpans = vi.fn()
+            .mockResolvedValueOnce({contentOffsets: [], contentLengths: [], contentDictName: 'raw-block-v1'})
+            .mockResolvedValueOnce(null);
+        const session = new TermContentBlockImportSession({tryAppendSpans});
+        const source = new Uint8Array([1]);
+        const offsets = new Uint32Array([0]);
+        const lengths = new Uint32Array([1]);
+
+        await session.appendSpans('A', source, offsets, lengths, null);
+        await session.appendSpans('A', source, offsets, lengths, null);
+
+        expect(tryAppendSpans.mock.calls.map((call) => call[4])).toStrictEqual([false, true]);
+    });
 });
 
 describe('TermContentBlockStore', () => {
@@ -87,6 +104,149 @@ describe('TermContentBlockStore', () => {
             )).toStrictEqual(content[i]);
         }
         expect(blockStore.getDiagnostics()).toMatchObject({cacheEntries: 2, cacheBytes: 9});
+    });
+
+    test('appends logical entries directly from a shared byte slab', async () => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 5,
+            referencePackTargetBytes: 56,
+            minInputBytes: 0,
+        });
+        const source = new Uint8Array([99, 1, 2, 3, 88, 4, 5, 77, 6, 7, 8, 9]);
+        const offsets = new Uint32Array([1, 5, 8]);
+        const lengths = new Uint32Array([3, 2, 4]);
+
+        const result = await blockStore.tryAppendSpans(source, offsets, lengths, null, true);
+
+        expect(result).not.toBeNull();
+        expect(await blockStore.read(
+            result.contentOffsets[0],
+            result.contentLengths[0],
+            result.contentDictName,
+        )).toStrictEqual(new Uint8Array([1, 2, 3]));
+        expect(await blockStore.read(
+            result.contentOffsets[1],
+            result.contentLengths[1],
+            result.contentDictName,
+        )).toStrictEqual(new Uint8Array([4, 5]));
+        expect(await blockStore.read(
+            result.contentOffsets[2],
+            result.contentLengths[2],
+            result.contentDictName,
+        )).toStrictEqual(new Uint8Array([6, 7, 8, 9]));
+    });
+
+    test('rejects invalid shared-slab spans before writing', async () => {
+        const blockStore = new TermContentBlockStore(new TermContentOpfsStore(), {minInputBytes: 0});
+
+        await expect(blockStore.tryAppendSpans(
+            new Uint8Array([1, 2, 3]),
+            new Uint32Array([2]),
+            new Uint32Array([2]),
+            null,
+            true,
+        )).rejects.toThrow('out of bounds');
+    });
+
+    test('repacks shared-slab input after parallel compression detaches output', async () => {
+        vi.mocked(compressTermContentZstdBatch).mockImplementationOnce(async (chunks) => {
+            for (const chunk of chunks) {
+                structuredClone(chunk, {transfer: [chunk.buffer]});
+            }
+            throw new Error('injected worker failure');
+        });
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 3,
+            referencePackTargetBytes: 56,
+            minInputBytes: 0,
+        });
+        const source = new Uint8Array([1, 2, 3, 4, 5, 6]);
+
+        const result = await blockStore.tryAppendSpans(
+            source,
+            new Uint32Array([0, 3]),
+            new Uint32Array([3, 3]),
+            null,
+            true,
+        );
+
+        expect(result).not.toBeNull();
+        expect(await blockStore.read(
+            result.contentOffsets[0],
+            result.contentLengths[0],
+            result.contentDictName,
+        )).toStrictEqual(new Uint8Array([1, 2, 3]));
+        expect(await blockStore.read(
+            result.contentOffsets[1],
+            result.contentLengths[1],
+            result.contentDictName,
+        )).toStrictEqual(new Uint8Array([4, 5, 6]));
+    });
+
+    test('falls back when batch compression returns an incomplete result', async () => {
+        vi.mocked(compressTermContentZstdBatch).mockResolvedValueOnce([]);
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 3,
+            referencePackTargetBytes: 56,
+            minInputBytes: 0,
+        });
+        const source = new Uint8Array([1, 2, 3, 4, 5, 6]);
+
+        const result = await blockStore.tryAppendSpans(
+            source,
+            new Uint32Array([0, 3]),
+            new Uint32Array([3, 3]),
+            null,
+            true,
+        );
+
+        expect(result).not.toBeNull();
+        expect(await blockStore.read(
+            result.contentOffsets[0],
+            result.contentLengths[0],
+            result.contentDictName,
+        )).toStrictEqual(new Uint8Array([1, 2, 3]));
+        expect(await blockStore.read(
+            result.contentOffsets[1],
+            result.contentLengths[1],
+            result.contentDictName,
+        )).toStrictEqual(new Uint8Array([4, 5, 6]));
+    });
+
+    test('repacks detached slabs and falls back after parallel compression fails', async () => {
+        vi.mocked(compressTermContentZstdBatch).mockImplementationOnce(async (chunks) => {
+            for (const chunk of chunks) {
+                structuredClone(chunk, {transfer: [chunk.buffer]});
+            }
+            throw new Error('injected worker failure');
+        });
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 3,
+            referencePackTargetBytes: 56,
+            minInputBytes: 0,
+        });
+        const content = [
+            new Uint8Array([1, 2, 3]),
+            new Uint8Array([4, 5, 6]),
+        ];
+
+        const result = await blockStore.tryAppend(content, null, true);
+
+        expect(result).not.toBeNull();
+        expect(await blockStore.read(
+            result.contentOffsets[0],
+            result.contentLengths[0],
+            result.contentDictName,
+        )).toStrictEqual(content[0]);
+        expect(await blockStore.read(
+            result.contentOffsets[1],
+            result.contentLengths[1],
+            result.contentDictName,
+        )).toStrictEqual(content[1]);
     });
 
     test('coalesces concurrent reads of entries in the same block', async () => {

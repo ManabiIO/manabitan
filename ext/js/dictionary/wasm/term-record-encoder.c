@@ -18,11 +18,9 @@
 #include <stdint.h>
 
 #define STRING_TABLE_HEADER_BYTES 8u
-#define RECORD_HEADER_BYTES 22u
+#define RECORD_HEADER_BYTES 24u
 #define U32_NULL 0xffffffffu
 #define READING_EQUALS_EXPRESSION_U32 0xffffffffu
-#define U16_NULL 0xffffu
-#define ENTRY_CONTENT_LENGTH_EXTENDED_U16 0xfffeu
 #define WASM_PAGE_SIZE 65536u
 
 extern unsigned char __heap_base;
@@ -32,8 +30,8 @@ static uint32_t heap_ptr = 0u;
 struct RecordMeta {
     uint32_t expression_index;
     uint32_t reading_index;
-    int32_t entry_content_offset;
-    int32_t entry_content_length;
+    uint32_t entry_content_offset_delta;
+    uint32_t entry_content_length;
     int32_t score;
     int32_t sequence;
 };
@@ -102,6 +100,17 @@ static inline void copy_bytes(uint8_t* out, uint32_t* cursor, const uint8_t* src
     *cursor = c + len;
 }
 
+static inline uint32_t hash_record_fixed_fields(const struct RecordMeta* meta) {
+    uint32_t hash = 0x811c9dc5u;
+    hash = (hash ^ meta->expression_index) * 0x01000193u;
+    hash = (hash ^ meta->reading_index) * 0x01000193u;
+    hash = (hash ^ meta->entry_content_offset_delta) * 0x01000193u;
+    hash = (hash ^ meta->entry_content_length) * 0x01000193u;
+    hash = (hash ^ (uint32_t)meta->score) * 0x01000193u;
+    hash = (hash ^ (uint32_t)meta->sequence) * 0x01000193u;
+    return hash;
+}
+
 __attribute__((visibility("default")))
 uint32_t calc_encoded_size(uint32_t record_count, uint32_t string_count, uint32_t lengths_ptr, uint32_t strings_byte_length, uint32_t metas_ptr) {
     const struct RecordMeta* metas = (const struct RecordMeta*)(uintptr_t)metas_ptr;
@@ -109,20 +118,19 @@ uint32_t calc_encoded_size(uint32_t record_count, uint32_t string_count, uint32_
     uint32_t total = STRING_TABLE_HEADER_BYTES + (string_count * 2u) + strings_byte_length;
     for (uint32_t i = 0u; i < record_count; ++i) {
         const struct RecordMeta* m = &metas[i];
+        (void)m;
         total += RECORD_HEADER_BYTES;
-        if ((uint32_t)m->entry_content_length > 0xfffdu) {
-            total += 4u;
-        }
     }
     return total;
 }
 
 __attribute__((visibility("default")))
-uint32_t encode_records(uint32_t record_count, uint32_t string_count, uint32_t lengths_ptr, uint32_t strings_ptr, uint32_t strings_byte_length, uint32_t metas_ptr, uint32_t out_ptr) {
+uint32_t encode_records(uint32_t record_count, uint32_t string_count, uint32_t lengths_ptr, uint32_t strings_ptr, uint32_t strings_byte_length, uint32_t metas_ptr, uint32_t out_ptr, uint32_t fixed_hashes_ptr) {
     const struct RecordMeta* metas = (const struct RecordMeta*)(uintptr_t)metas_ptr;
     const uint16_t* lengths = (const uint16_t*)(uintptr_t)lengths_ptr;
     const uint8_t* strings = (const uint8_t*)(uintptr_t)strings_ptr;
     uint8_t* out = (uint8_t*)(uintptr_t)out_ptr;
+    uint32_t* fixed_hashes = (uint32_t*)(uintptr_t)fixed_hashes_ptr;
     uint32_t cursor = 0u;
 
     write_u32(out, &cursor, string_count);
@@ -136,17 +144,11 @@ uint32_t encode_records(uint32_t record_count, uint32_t string_count, uint32_t l
         const struct RecordMeta* m = &metas[i];
         write_u32(out, &cursor, m->expression_index);
         write_u32(out, &cursor, m->reading_index);
-        write_u32(out, &cursor, m->entry_content_offset >= 0 ? (uint32_t)m->entry_content_offset : U32_NULL);
-        if (m->entry_content_length < 0) {
-            write_u16(out, &cursor, U16_NULL);
-        } else if ((uint32_t)m->entry_content_length <= 0xfffdu) {
-            write_u16(out, &cursor, (uint32_t)m->entry_content_length);
-        } else {
-            write_u16(out, &cursor, ENTRY_CONTENT_LENGTH_EXTENDED_U16);
-            write_u32(out, &cursor, (uint32_t)m->entry_content_length);
-        }
+        write_u32(out, &cursor, m->entry_content_offset_delta);
+        write_u32(out, &cursor, m->entry_content_length);
         write_i32(out, &cursor, m->score);
         write_i32(out, &cursor, m->sequence);
+        fixed_hashes[i] = hash_record_fixed_fields(m);
     }
     return cursor;
 }

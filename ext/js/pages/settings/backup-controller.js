@@ -22,7 +22,7 @@ import {parseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {isObjectNotArray} from '../../core/object-utilities.js';
 import {toError} from '../../core/to-error.js';
-import {arrayBufferToBase64, arrayBufferUtf8Decode, base64ToArrayBuffer} from '../../data/array-buffer-util.js';
+import {arrayBufferUtf8Decode} from '../../data/array-buffer-util.js';
 import {OptionsUtil} from '../../data/options-util.js';
 import {getAllPermissions} from '../../data/permissions-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
@@ -55,11 +55,6 @@ export class BackupController {
         /** @type {?OptionsUtil} */
         this._optionsUtil = null;
 
-        /** @type {string} */
-        this._dictionariesDatabaseName = 'dict';
-        /** @type {?import('core').TokenObject} */
-        this._settingsExportDatabaseToken = null;
-
         try {
             this._optionsUtil = new OptionsUtil();
         } catch (e) {
@@ -88,9 +83,6 @@ export class BackupController {
         this._addNodeEventListener('#settings-reset-button', 'click', this._onSettingsResetClick.bind(this), false);
         this._addNodeEventListener('#settings-reset-confirm-button', 'click', this._onSettingsResetConfirmClick.bind(this), false);
 
-        this._addNodeEventListener('#settings-export-db-button', 'click', this._onSettingsExportDatabaseClick.bind(this), false);
-        this._addNodeEventListener('#settings-import-db-button', 'click', this._onSettingsImportDatabaseClick.bind(this), false);
-        this._addNodeEventListener('#settings-import-db', 'change', this._onSettingsImportDatabaseChange.bind(this), false);
         this._addNodeEventListener('#diagnostics-copy-button', 'click', this._onDiagnosticsCopyClick.bind(this), false);
         this._addNodeEventListener('#diagnostics-download-button', 'click', this._onDiagnosticsDownloadClick.bind(this), false);
         this._addNodeEventListener('#diagnostics-clear-button', 'click', this._onDiagnosticsClearClick.bind(this), false);
@@ -687,168 +679,4 @@ export class BackupController {
         }
     }
 
-    // Exporting Dictionaries Database
-
-    /**
-     * @param {string} message
-     * @param {boolean} [isWarning]
-     */
-    _databaseExportImportErrorMessage(message, isWarning = false) {
-        /** @type {HTMLElement} */
-        const errorMessageSettingsContainer = querySelectorNotNull(document, '#db-ops-error-report-container');
-        errorMessageSettingsContainer.style.display = 'block';
-        /** @type {HTMLElement} */
-        const errorMessageContainer = querySelectorNotNull(document, '#db-ops-error-report');
-        errorMessageContainer.style.display = 'block';
-        errorMessageContainer.textContent = message;
-
-        if (isWarning) { // Hide after 5 seconds (5000 milliseconds)
-            errorMessageContainer.style.color = '#FFC40C';
-            setTimeout(function _hideWarningMessage() {
-                errorMessageContainer.style.display = 'none';
-                errorMessageContainer.style.color = '#8B0000';
-            }, 5000);
-        }
-    }
-
-    /**
-     * @param {{totalRows: number, completedRows: number, done: boolean}} details
-     */
-    _databaseExportProgressCallback({totalRows, completedRows, done}) {
-        log.log(`Progress: ${completedRows} of ${totalRows} rows completed`);
-        /** @type {HTMLElement} */
-        const messageSettingsContainer = querySelectorNotNull(document, '#db-ops-progress-report-container');
-        messageSettingsContainer.style.display = 'block';
-        /** @type {HTMLElement} */
-        const messageContainer = querySelectorNotNull(document, '#db-ops-progress-report');
-        messageContainer.style.display = 'block';
-        messageContainer.textContent = `Export Progress: ${completedRows} of ${totalRows} rows completed`;
-
-        if (done) {
-            log.log('Done exporting.');
-            messageContainer.style.display = 'none';
-        }
-    }
-
-    /**
-     * @param {string} databaseName
-     * @returns {Promise<Blob>}
-     */
-    async _exportDatabase(databaseName) {
-        void databaseName;
-        const base64 = await this._settingsController.application.api.exportDictionaryDatabase();
-        this._databaseExportProgressCallback({totalRows: 1, completedRows: 1, done: true});
-        return new Blob([base64ToArrayBuffer(base64)], {type: 'application/octet-stream'});
-    }
-
-    /** */
-    async _onSettingsExportDatabaseClick() {
-        if (this._settingsExportDatabaseToken !== null) {
-            // An existing import or export is in progress.
-            this._databaseExportImportErrorMessage('An export or import operation is already in progress. Please wait till it is over.', true);
-            return;
-        }
-
-        /** @type {HTMLElement} */
-        const errorMessageContainer = querySelectorNotNull(document, '#db-ops-error-report');
-        errorMessageContainer.style.display = 'none';
-
-        const date = new Date(Date.now());
-        const pageExitPrevention = this._settingsController.preventPageExit();
-        try {
-            /** @type {import('core').TokenObject} */
-            const token = {};
-            this._settingsExportDatabaseToken = token;
-            const fileName = `yomitan-dictionaries-${this._getSettingsExportDateString(date, '-', '-', '-', 6)}.sqlite3`;
-            const blob = await this._exportDatabase(this._dictionariesDatabaseName);
-            this._saveBlob(blob, fileName);
-        } catch (error) {
-            log.log(error);
-            this._databaseExportImportErrorMessage('Errors encountered while exporting. Please try again. Restart the browser if it continues to fail.');
-        } finally {
-            pageExitPrevention.end();
-            this._settingsExportDatabaseToken = null;
-        }
-    }
-
-    // Importing Dictionaries Database
-
-    /**
-     * @param {{totalRows: number, completedRows: number, done: boolean}} details
-     */
-    _databaseImportProgressCallback({totalRows, completedRows, done}) {
-        log.log(`Progress: ${completedRows} of ${totalRows} rows completed`);
-        /** @type {HTMLElement} */
-        const messageSettingsContainer = querySelectorNotNull(document, '#db-ops-progress-report-container');
-        messageSettingsContainer.style.display = 'block';
-        /** @type {HTMLElement} */
-        const messageContainer = querySelectorNotNull(document, '#db-ops-progress-report');
-        messageContainer.style.display = 'block';
-        messageContainer.style.color = '#4169e1';
-        messageContainer.textContent = `Import Progress: ${completedRows} of ${totalRows} rows completed`;
-
-        if (done) {
-            log.log('Done importing.');
-            messageContainer.style.color = '#006633';
-            messageContainer.textContent = 'Done importing. You will need to re-enable the dictionaries and refresh afterward. If you run into issues, please restart the browser. If it continues to fail, reinstall Manabitan and import dictionaries one-by-one.';
-        }
-    }
-
-    /**
-     * @param {string} _databaseName
-     * @param {File} file
-     */
-    async _importDatabase(_databaseName, file) {
-        void _databaseName;
-        const content = await this._readFileArrayBuffer(file);
-        this._databaseImportProgressCallback({totalRows: 1, completedRows: 0, done: false});
-        await this._settingsController.application.api.importDictionaryDatabase(arrayBufferToBase64(content));
-        this._databaseImportProgressCallback({totalRows: 1, completedRows: 1, done: true});
-        this._settingsController.application.triggerStorageChanged();
-    }
-
-    /** */
-    _onSettingsImportDatabaseClick() {
-        /** @type {HTMLElement} */
-        const element = querySelectorNotNull(document, '#settings-import-db');
-        element.click();
-    }
-
-    /**
-     * @param {Event} e
-     */
-    async _onSettingsImportDatabaseChange(e) {
-        if (this._settingsExportDatabaseToken !== null) {
-            // An existing import or export is in progress.
-            this._databaseExportImportErrorMessage('An export or import operation is already in progress. Please wait till it is over.', true);
-            return;
-        }
-
-        /** @type {HTMLElement} */
-        const errorMessageContainer = querySelectorNotNull(document, '#db-ops-error-report');
-        errorMessageContainer.style.display = 'none';
-
-        const element = /** @type {HTMLInputElement} */ (e.currentTarget);
-        const files = element.files;
-        if (files === null || files.length === 0) { return; }
-
-        const pageExitPrevention = this._settingsController.preventPageExit();
-        const file = files[0];
-        element.value = '';
-        try {
-            /** @type {import('core').TokenObject} */
-            const token = {};
-            this._settingsExportDatabaseToken = token;
-            await this._importDatabase(this._dictionariesDatabaseName, file);
-        } catch (error) {
-            log.log(error);
-            /** @type {HTMLElement} */
-            const messageContainer = querySelectorNotNull(document, '#db-ops-progress-report');
-            messageContainer.style.color = 'red';
-            this._databaseExportImportErrorMessage('Encountered errors when importing. Please restart the browser and try again. If it continues to fail, reinstall Manabitan and import dictionaries one-by-one.');
-        } finally {
-            pageExitPrevention.end();
-            this._settingsExportDatabaseToken = null;
-        }
-    }
 }

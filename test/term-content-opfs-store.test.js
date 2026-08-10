@@ -49,11 +49,112 @@ function createReadableFile(bytes) {
     };
 }
 
+/**
+ * @param {Map<string, Uint8Array>} fileBytesByName
+ * @returns {FileSystemDirectoryHandle}
+ */
+function createMutableDirectory(fileBytesByName) {
+    const getFileHandle = async (
+        /** @type {string} */ name,
+        /** @type {{create?: boolean}} */ options = {},
+    ) => {
+        const create = options.create === true;
+        if (!fileBytesByName.has(name)) {
+            if (!create) {
+                const error = new Error(`File not found: ${name}`);
+                error.name = 'NotFoundError';
+                throw error;
+            }
+            fileBytesByName.set(name, new Uint8Array());
+        }
+        return {
+            kind: 'file',
+            name,
+            async getFile() {
+                const bytes = fileBytesByName.get(name) ?? new Uint8Array();
+                return createReadableFile(bytes);
+            },
+            async createWritable() {
+                let nextBytes = new Uint8Array(fileBytesByName.get(name) ?? new Uint8Array());
+                return {
+                    async truncate(/** @type {number} */ length) {
+                        nextBytes = nextBytes.slice(0, length);
+                    },
+                    async close() {
+                        fileBytesByName.set(name, nextBytes);
+                    },
+                };
+            },
+        };
+    };
+    return /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+        getFileHandle,
+        async removeEntry(/** @type {string} */ name) {
+            fileBytesByName.delete(name);
+        },
+        async *entries() {
+            for (const name of fileBytesByName.keys()) {
+                yield [name, await getFileHandle(name)];
+            }
+        },
+    }));
+}
+
 afterEach(() => {
     vi.unstubAllGlobals();
 });
 
 describe('TermContentOpfsStore', () => {
+    test('keeps queued write failures sticky until rollback resets storage', async () => {
+        const store = new TermContentOpfsStore();
+        const writeError = new Error('injected write failure');
+        const deferredWrite = {
+            /** @type {(error: Error) => void} */
+            reject: () => {},
+        };
+        vi.spyOn(store, '_writePendingChunksCoalesced').mockImplementation(() => {
+            return new Promise((_, reject) => {
+                deferredWrite.reject = reject;
+            });
+        });
+        Reflect.set(store, '_queuedWriteChunks', [new Uint8Array([1])]);
+        Reflect.set(store, '_queuedWriteBytes', 1);
+
+        const drain = Reflect.get(store, '_drainQueuedWrites').call(store);
+        Reflect.set(store, '_queuedWritePromise', drain);
+        Reflect.get(store, '_queueWriteChunks').call(store, [new Uint8Array([2])]);
+        deferredWrite.reject(writeError);
+        await expect(drain).rejects.toBe(writeError);
+
+        expect(Reflect.get(store, '_queuedWriteChunks')).toStrictEqual([]);
+        Reflect.get(store, '_queueWriteChunks').call(store, [new Uint8Array([3])]);
+        expect(Reflect.get(store, '_queuedWriteChunks')).toStrictEqual([]);
+        await expect(Reflect.get(store, '_awaitQueuedWrites').call(store)).rejects.toBe(writeError);
+    });
+
+    test('rollback survives a rejected queued write and does not create missing checkpoint files', async () => {
+        const fileName = 'manabitan-term-content.bin';
+        const createdName = 'manabitan-term-content^1.bin';
+        const fileBytesByName = new Map([[fileName, new Uint8Array([1, 2, 3])]]);
+        const root = createMutableDirectory(fileBytesByName);
+        vi.stubGlobal('navigator', {storage: {getDirectory: vi.fn(async () => root)}});
+        const store = new TermContentOpfsStore();
+        await store.prepare();
+        const checkpoint = await store.createImportCheckpoint();
+
+        fileBytesByName.set(fileName, new Uint8Array([1, 2, 3, 4]));
+        fileBytesByName.set(createdName, new Uint8Array([9]));
+        Reflect.set(store, '_queuedWritePromise', Promise.reject(new Error('injected write failure')));
+        await expect(store.rollbackImportSession(checkpoint)).resolves.toBeUndefined();
+        expect(fileBytesByName.get(fileName)).toStrictEqual(new Uint8Array([1, 2, 3]));
+        expect(fileBytesByName.has(createdName)).toBe(false);
+
+        await expect(store.rollbackImportSession({
+            segments: [{fileName: 'manabitan-term-content-2.bin', fileLength: 12}],
+        })).rejects.toThrow(/Failed to roll back term-content import storage/);
+        expect(fileBytesByName.has('manabitan-term-content-2.bin')).toBe(false);
+    });
+
     test('appends primary and offset-derived chunks in one logical mutation', async () => {
         const store = new TermContentOpfsStore();
         const result = await store.appendBatchWithDerivedChunks(
