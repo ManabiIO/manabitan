@@ -117,6 +117,118 @@ describe('DictionaryDatabase import cleanup', () => {
             });
     });
 
+    test('publishes an update without an intermediate cutover shard copy', async () => {
+        const token = 'update-token';
+        const stagingTitle = `JMdict [update-staging ${token}]`;
+        const replacedTitle = `JMdict [replaced ${token}]`;
+        let rows = [
+            {id: 1, title: stagingTitle, version: 3, summaryJson: JSON.stringify({title: stagingTitle, version: 3, importSuccess: true})},
+            {id: 2, title: 'JMdict', version: 3, summaryJson: JSON.stringify({title: 'JMdict', version: 3, importSuccess: true})},
+        ];
+        let transactionSnapshot = [];
+        const exec = vi.fn((value) => {
+            const sql = typeof value === 'string' ? value : value.sql;
+            if (sql === 'BEGIN IMMEDIATE') {
+                transactionSnapshot = rows.map((row) => ({...row}));
+            } else if (typeof value === 'object' && sql.startsWith('UPDATE dictionaries SET title')) {
+                const row = rows.find(({id}) => id === value.bind.$id);
+                Object.assign(row, {
+                    title: value.bind.$toTitle,
+                    version: value.bind.$version,
+                    summaryJson: value.bind.$summaryJson,
+                });
+            } else if (sql === 'ROLLBACK') {
+                rows = transactionSnapshot.map((row) => ({...row}));
+            }
+        });
+        const database = new DictionaryDatabase();
+        const replaceDictionaryName = vi.fn().mockResolvedValue(1);
+        Reflect.set(database, '_db', {
+            exec,
+            selectObject: vi.fn((_sql, bind) => rows.find(({title}) => title === bind.$title) ?? null),
+            selectObjects: vi.fn(() => rows),
+        });
+        Reflect.set(database, '_termRecordStore', {
+            replaceDictionaryName,
+            rollbackPreservedDictionaryRename: vi.fn().mockResolvedValue(),
+        });
+        vi.spyOn(database, 'cleanupTransientTermRecordShards').mockResolvedValue([]);
+        vi.spyOn(database, 'deleteDictionary').mockImplementation(async (title) => {
+            rows = rows.filter((row) => row.title !== title);
+        });
+
+        await database.replaceDictionaryTitle(
+            stagingTitle,
+            'JMdict',
+            {title: 'JMdict', version: 3, importSuccess: true, updateSessionToken: token},
+            'JMdict',
+        );
+
+        expect(replaceDictionaryName.mock.calls).toStrictEqual([
+            ['JMdict', replacedTitle, true],
+            [stagingTitle, 'JMdict', true],
+        ]);
+        expect(replaceDictionaryName.mock.calls.flat().some((value) => `${value}`.includes('[cutover '))).toBe(false);
+        expect(rows.map(({title}) => title)).toStrictEqual(['JMdict']);
+    });
+
+    test('restores the old generation when direct staged publication fails', async () => {
+        const token = 'update-token';
+        const stagingTitle = `JMdict [update-staging ${token}]`;
+        const replacedTitle = `JMdict [replaced ${token}]`;
+        let rows = [
+            {id: 1, title: stagingTitle, version: 3, summaryJson: JSON.stringify({title: stagingTitle, version: 3, importSuccess: true})},
+            {id: 2, title: 'JMdict', version: 3, summaryJson: JSON.stringify({title: 'JMdict', version: 3, importSuccess: true})},
+        ];
+        let transactionSnapshot = [];
+        const exec = vi.fn((value) => {
+            const sql = typeof value === 'string' ? value : value.sql;
+            if (sql === 'BEGIN IMMEDIATE') {
+                transactionSnapshot = rows.map((row) => ({...row}));
+            } else if (typeof value === 'object' && sql.startsWith('UPDATE dictionaries SET title')) {
+                const row = rows.find(({id}) => id === value.bind.$id);
+                Object.assign(row, {
+                    title: value.bind.$toTitle,
+                    version: value.bind.$version,
+                    summaryJson: value.bind.$summaryJson,
+                });
+            } else if (sql === 'ROLLBACK') {
+                rows = transactionSnapshot.map((row) => ({...row}));
+            }
+        });
+        const database = new DictionaryDatabase();
+        const replaceDictionaryName = vi.fn(async (fromTitle, toTitle) => {
+            if (fromTitle === stagingTitle && toTitle === 'JMdict') {
+                throw new Error('injected staged publication failure');
+            }
+            return 1;
+        });
+        Reflect.set(database, '_db', {
+            exec,
+            selectObject: vi.fn((_sql, bind) => rows.find(({title}) => title === bind.$title) ?? null),
+            selectObjects: vi.fn(() => rows),
+        });
+        Reflect.set(database, '_termRecordStore', {
+            replaceDictionaryName,
+            rollbackPreservedDictionaryRename: vi.fn().mockResolvedValue(),
+        });
+        vi.spyOn(database, 'cleanupTransientTermRecordShards').mockResolvedValue([]);
+
+        await expect(database.replaceDictionaryTitle(
+            stagingTitle,
+            'JMdict',
+            {title: 'JMdict', version: 3, importSuccess: true, updateSessionToken: token},
+            'JMdict',
+        )).rejects.toThrow('injected staged publication failure');
+
+        expect(replaceDictionaryName.mock.calls).toStrictEqual([
+            ['JMdict', replacedTitle, true],
+            [stagingTitle, 'JMdict', true],
+            [replacedTitle, 'JMdict', true],
+        ]);
+        expect(rows.map(({title}) => title).sort()).toStrictEqual(['JMdict', stagingTitle].sort());
+    });
+
     test('removes a failed-import placeholder by primary key only', async () => {
         const database = new DictionaryDatabase();
         const exec = vi.fn();

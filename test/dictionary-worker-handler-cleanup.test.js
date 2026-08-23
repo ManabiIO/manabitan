@@ -12,6 +12,34 @@ import {log} from '../ext/js/core/log.js';
 import {DictionaryWorkerHandler} from '../ext/js/dictionary/dictionary-worker-handler.js';
 
 describe('DictionaryWorkerHandler transient update cleanup', () => {
+    test('preserves an authoritative replaced generation for startup recovery', async () => {
+        const handler = new DictionaryWorkerHandler();
+        const title = 'JMdict [replaced update-token]';
+        /** @type {((dictionaryName: string) => boolean)|undefined} */
+        let shardPredicate;
+        const database = {
+            getDictionaryInfo: vi.fn(async () => [{
+                title,
+                updateSessionToken: 'update-token',
+                transientUpdateStage: 'replaced',
+            }]),
+            deleteDictionary: vi.fn().mockResolvedValue(),
+            cleanupTransientTermRecordShards: vi.fn(async (predicate) => {
+                shardPredicate = predicate;
+                return [];
+            }),
+        };
+
+        await Reflect.get(handler, '_cleanupTransientReplacementTitles').call(
+            handler,
+            /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (database)),
+            'JMdict [update-staging update-token]',
+        );
+
+        expect(database.deleteDictionary).not.toHaveBeenCalledWith(title, 1000, expect.any(Function));
+        expect(shardPredicate?.(title)).toBe(false);
+    });
+
     test('preserves record shards when deleting installed metadata fails', async () => {
         const handler = new DictionaryWorkerHandler();
         const title = 'JMdict [replaced update-token]';

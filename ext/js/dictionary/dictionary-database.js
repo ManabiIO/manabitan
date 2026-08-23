@@ -1987,13 +1987,8 @@ export class DictionaryDatabase {
             throw new Error(`Dictionary title not found for replacement: ${fromTitle}`);
         }
 
-        let activeFromTitle = fromTitle;
         if (replacedTitle !== null && replacedTitle.length > 0 && replacedTitle === toTitle && replacedTitle !== fromTitle) {
-            const temporaryCutoverTitle = `${toTitle} [cutover ${transientSessionToken}]`;
             const temporaryReplacedTitle = `${replacedTitle} [replaced ${transientSessionToken}]`;
-            const temporarySummary = buildTransientSummaryForTitle(summaryRow, temporaryCutoverTitle, 'cutover', summaryOverride);
-            await renameDictionaryData(fromTitle, temporaryCutoverTitle, temporarySummary, 'afterTemporaryCutoverRows');
-            activeFromTitle = temporaryCutoverTitle;
             let replacedDictionaryMovedAside = false;
             try {
                 const replacedSummaryRow = getSummaryRowByTitle(replacedTitle);
@@ -2013,7 +2008,7 @@ export class DictionaryDatabase {
                 };
 
                 const finalSummary = buildSummaryForTitle(summaryRow, toTitle, summaryOverride);
-                await renameDictionaryData(activeFromTitle, toTitle, finalSummary, 'afterRenameRows');
+                await renameDictionaryData(fromTitle, toTitle, finalSummary, 'afterRenameRows');
             } catch (e) {
                 if (replacedDictionaryMovedAside) {
                     try {
@@ -2025,22 +2020,6 @@ export class DictionaryDatabase {
                                 buildSummaryForTitle(movedAsideSummaryRow, replacedTitle, null),
                                 'afterRestoreReplacedRows',
                             );
-                        }
-                    } catch (_) {
-                        // NOP - preserve the original failure, but leave debug breadcrumbs.
-                    }
-                }
-                if (activeFromTitle !== fromTitle) {
-                    try {
-                        const stagedSummaryRow = getSummaryRowByTitle(activeFromTitle);
-                        if (stagedSummaryRow && typeof stagedSummaryRow === 'object') {
-                            await renameDictionaryData(
-                                activeFromTitle,
-                                fromTitle,
-                                buildSummaryForTitle(stagedSummaryRow, fromTitle, summaryOverride),
-                                'afterRestoreStagedRows',
-                            );
-                            activeFromTitle = fromTitle;
                         }
                     } catch (_) {
                         // NOP - preserve the original failure, but leave debug breadcrumbs.
@@ -2067,7 +2046,7 @@ export class DictionaryDatabase {
                 afterDeleteRows: snapshotRows(),
             };
         } else {
-            if (replacedTitle !== null && replacedTitle.length > 0 && replacedTitle !== activeFromTitle) {
+            if (replacedTitle !== null && replacedTitle.length > 0 && replacedTitle !== fromTitle) {
                 await this.deleteDictionary(replacedTitle, 1000, () => {});
             }
             this._lastReplaceDictionaryTitleDebug = {
@@ -2076,7 +2055,7 @@ export class DictionaryDatabase {
             };
 
             const finalSummary = buildSummaryForTitle(summaryRow, toTitle, summaryOverride);
-            await renameDictionaryData(activeFromTitle, toTitle, finalSummary, 'afterRenameRows');
+            await renameDictionaryData(fromTitle, toTitle, finalSummary, 'afterRenameRows');
         }
 
         this._termsVirtualTableDirty = true;

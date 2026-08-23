@@ -381,6 +381,8 @@ export class DictionaryWorkerHandler {
         /** @type {Set<string>} */
         const installedTitles = new Set();
         /** @type {Set<string>} */
+        const recoveryTitles = new Set();
+        /** @type {Set<string>} */
         const shardCleanupTitles = new Set();
         const transientTitlePattern = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
         const transientTokenMatch = (
@@ -415,6 +417,8 @@ export class DictionaryWorkerHandler {
             ) ?
                 infoTokenRaw.trim() :
                 '';
+            const infoStageRaw = /** @type {unknown} */ (Reflect.get(dictionaryInfo, 'transientUpdateStage'));
+            const infoStage = typeof infoStageRaw === 'string' ? infoStageRaw.trim() : '';
             if (
                 transientTitlePattern.test(title) &&
                 (
@@ -423,10 +427,18 @@ export class DictionaryWorkerHandler {
                     (transientSessionToken !== null && title.endsWith(` ${transientSessionToken}]`))
                 )
             ) {
-                transientTitleCandidates.add(title);
+                if (infoStage === 'replaced') {
+                    // This can be the only authoritative old generation after a
+                    // failed cutover rollback. Startup recovery knows how to
+                    // restore it; generic failed-import cleanup must not delete it.
+                    recoveryTitles.add(title);
+                } else {
+                    transientTitleCandidates.add(title);
+                }
             }
         }
         for (const transientTitle of transientTitleCandidates) {
+            if (recoveryTitles.has(transientTitle)) { continue; }
             try {
                 await dictionaryDatabase.deleteDictionary(transientTitle, 1000, () => {});
                 installedTitles.delete(transientTitle);
@@ -441,6 +453,9 @@ export class DictionaryWorkerHandler {
         await dictionaryDatabase.cleanupTransientTermRecordShards((dictionaryName) => {
             const title = String(dictionaryName || '').trim();
             if (title.length === 0) {
+                return false;
+            }
+            if (recoveryTitles.has(title)) {
                 return false;
             }
             if (shardCleanupTitles.has(title)) {
