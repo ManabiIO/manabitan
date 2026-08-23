@@ -10,11 +10,16 @@
 import {describe, expect, test} from 'vitest';
 import {
     createRawTermContentBlockDictName,
+    createRawTermContentCompactBlockDictName,
     decodeRawTermContentBlockReference,
+    decodeRawTermContentCompactBlockReference,
     encodeRawTermContentBlockReference,
+    encodeRawTermContentCompactBlockReference,
     getRawTermContentBlockCompressionDictName,
     RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES,
+    RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES,
     writeRawTermContentBlockReference,
+    writeRawTermContentCompactBlockReference,
 } from '../ext/js/dictionary/raw-term-content.js';
 
 describe('raw term content block references', () => {
@@ -72,6 +77,62 @@ describe('raw term content block references', () => {
         expect(createRawTermContentBlockDictName('jmdict')).toBe('raw-block-v1:jmdict');
         expect(getRawTermContentBlockCompressionDictName('raw-block-v1')).toBeNull();
         expect(getRawTermContentBlockCompressionDictName('raw-block-v1:jmdict')).toBe('jmdict');
+        expect(createRawTermContentCompactBlockDictName(null)).toBe('raw-block-v2');
+        expect(createRawTermContentCompactBlockDictName('jmdict')).toBe('raw-block-v2:jmdict');
+        expect(getRawTermContentBlockCompressionDictName('raw-block-v2')).toBeNull();
+        expect(getRawTermContentBlockCompressionDictName('raw-block-v2:jmdict')).toBe('jmdict');
         expect(getRawTermContentBlockCompressionDictName('raw-v2')).toBeUndefined();
+    });
+
+    test('round trips compact references with uint64 offsets', () => {
+        const bytes = encodeRawTermContentCompactBlockReference(
+            Number.MAX_SAFE_INTEGER - 123,
+            123,
+            2_000_000,
+            456,
+        );
+
+        expect(bytes).toHaveLength(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);
+        expect(decodeRawTermContentCompactBlockReference(bytes, 789)).toStrictEqual({
+            blockOffset: Number.MAX_SAFE_INTEGER - 123,
+            blockCompressedLength: 123,
+            blockUncompressedLength: 2_000_000,
+            entryOffset: 456,
+            entryLength: 789,
+        });
+    });
+
+    test('writes compact references into a slab and rejects out-of-bounds content', () => {
+        const slab = new Uint8Array(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES * 2);
+        const view = new DataView(slab.buffer);
+        writeRawTermContentCompactBlockReference(view, 0, 10, 20, 100, 5);
+        writeRawTermContentCompactBlockReference(view, RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES, 30, 40, 200, 50);
+
+        expect(decodeRawTermContentCompactBlockReference(
+            slab.subarray(0, RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES),
+            60,
+        )).toMatchObject({blockOffset: 10, entryOffset: 5, entryLength: 60});
+        expect(decodeRawTermContentCompactBlockReference(
+            slab.subarray(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES),
+            151,
+        )).toBeNull();
+        expect(decodeRawTermContentCompactBlockReference(
+            slab.subarray(0, RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES),
+            Number.NaN,
+        )).toBeNull();
+        expect(() => writeRawTermContentCompactBlockReference(
+            view,
+            Number.NaN,
+            10,
+            20,
+            100,
+            5,
+        )).toThrow(RangeError);
+        expect(() => encodeRawTermContentCompactBlockReference(
+            Number.MAX_SAFE_INTEGER,
+            1,
+            100,
+            5,
+        )).toThrow(RangeError);
     });
 });

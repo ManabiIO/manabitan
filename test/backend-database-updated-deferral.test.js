@@ -28,6 +28,30 @@ function createGate() {
 }
 
 describe('Backend database update deferral', () => {
+    test('successful import update reuses worker-side translator invalidation', async () => {
+        const clearDatabaseCaches = vi.fn();
+        const refreshDictionaryDatabaseAfterUpdate = vi.fn().mockResolvedValue(void 0);
+        const sendMessageAllTabsIgnoreResponse = vi.fn();
+        const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+        Reflect.set(backend, '_translator', {clearDatabaseCaches});
+        Reflect.set(backend, '_dictionaryImportModeActive', false);
+        Reflect.set(backend, '_deferredDictionaryRefreshDuringImport', false);
+        Reflect.set(backend, '_pendingDatabaseUpdatedNotifications', []);
+        Reflect.set(backend, '_refreshDictionaryDatabaseAfterUpdate', refreshDictionaryDatabaseAfterUpdate);
+        Reflect.set(backend, '_sendMessageAllTabsIgnoreResponse', sendMessageAllTabsIgnoreResponse);
+
+        await Backend.prototype._triggerDatabaseUpdated.call(backend, 'dictionary', 'import');
+
+        expect(clearDatabaseCaches).not.toHaveBeenCalled();
+        expect(refreshDictionaryDatabaseAfterUpdate).toHaveBeenCalledWith({reuseActiveImportConnection: true});
+        expect(sendMessageAllTabsIgnoreResponse).toHaveBeenCalledOnce();
+
+        await Backend.prototype._triggerDatabaseUpdated.call(backend, 'dictionary', 'delete');
+
+        expect(clearDatabaseCaches).toHaveBeenCalledOnce();
+        expect(refreshDictionaryDatabaseAfterUpdate).toHaveBeenLastCalledWith({reuseActiveImportConnection: false});
+    });
+
     test('serializes overlapping import-mode transitions in request order', async () => {
         const prepareGate = createGate();
         const refreshGate = createGate();

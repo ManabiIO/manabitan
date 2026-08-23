@@ -15,6 +15,7 @@ import {
     encodePersistedTermLookupIndexFromRecordPayload,
     encodePersistedTermLookupIndex,
     findExactRows,
+    findPrefixRowMatches,
     findPrefixRows,
     findSequenceRows,
     getPersistedTermKeyBytes,
@@ -202,6 +203,66 @@ describe('persisted term lookup index', () => {
         expect(getPersistedTermKeyBytes(index, 3, 'expression')).toBeNull();
     });
 
+    test('stores row-oriented lookup columns compactly as 16-bit values', () => {
+        const encoded = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('食べる'), readingBytes: bytes('たべる'), sequence: 1},
+            {expressionBytes: bytes('する'), readingBytes: null, sequence: null},
+        ]);
+        const header = new Uint32Array(encoded.buffer, encoded.byteOffset, 16);
+        const index = parsePersistedTermLookupIndex(encoded);
+
+        expect(header[6]).toBe(3);
+        expect(index.expressionKeys).toBeInstanceOf(Uint16Array);
+        expect(index.readingKeys).toBeInstanceOf(Uint16Array);
+        expect(index.expressionPostingOffsets).toBeInstanceOf(Uint16Array);
+        expect(index.expressionPostingRows).toBeInstanceOf(Uint16Array);
+        expect(index.readingPostingOffsets).toBeInstanceOf(Uint16Array);
+        expect(index.readingPostingRows).toBeInstanceOf(Uint16Array);
+        expect(index.sequenceHeads).toBeInstanceOf(Uint16Array);
+        expect(index.sequenceNext).toBeInstanceOf(Uint16Array);
+        expect(index.readingKeys[1]).toBe(0xffff);
+    });
+
+    test('round trips a full production-sized 30,000-row lookup chunk', () => {
+        const rowCount = 30_000;
+        const plan = {
+            stringLengths: new Uint16Array([1]),
+            stringOffsets: new Uint32Array([0]),
+            stringHashes: new Uint32Array([0xe40c292c]),
+            stringsBuffer: bytes('a'),
+            expressionIndexes: new Uint32Array(rowCount),
+            readingIndexes: new Uint32Array(rowCount),
+        };
+        const encoded = encodePersistedTermLookupIndexFromPreinternedPlan(
+            plan,
+            new Uint8Array(rowCount).fill(1),
+            new Int32Array(rowCount).fill(-1),
+            rowCount,
+        );
+        const index = parsePersistedTermLookupIndex(encoded);
+
+        expect(index.expressionPostingOffsets).toEqual(new Uint16Array([0, rowCount]));
+        expect(index.expressionPostingRows[0]).toBe(0);
+        expect(index.expressionPostingRows[rowCount - 1]).toBe(rowCount - 1);
+        expect(findExactRows(index, bytes('a'), 'expression')).toHaveLength(rowCount);
+    });
+
+    test('rejects row counts that collide with the compact null sentinel', () => {
+        const plan = {
+            stringLengths: new Uint16Array([1]),
+            stringsBuffer: bytes('a'),
+            expressionIndexes: new Uint32Array([0]),
+            readingIndexes: new Uint32Array([0]),
+        };
+
+        expect(() => encodePersistedTermLookupIndexFromPreinternedPlan(
+            plan,
+            new Uint8Array([1]),
+            new Int32Array([-1]),
+            0xffff,
+        )).toThrow('Term lookup index has too many rows for one chunk');
+    });
+
     test('appends expression and reading matches with one row offset', () => {
         const index = createIndex([
             {expression: 'する', reading: null},
@@ -260,6 +321,12 @@ describe('persisted term lookup index', () => {
         ]));
         expect(index.forwardReady).toBe(true);
         expect(findPrefixRows(index, bytes('たべる'), 'reading')).toEqual([{row: 0, exact: true}]);
+        const combined = findPrefixRowMatches(index, bytes('食べ'));
+        expect(combined.expression).toEqual(expect.arrayContaining([
+            {row: 0, exact: false},
+            {row: 1, exact: false},
+        ]));
+        expect(combined.reading).toEqual([]);
         expect(index.reverseReady).toBe(false);
         expect(findPrefixRows(index, bytes('😀'), 'expression', true).sort((a, b) => a.row - b.row)).toEqual([
             {row: 2, exact: false},
@@ -268,6 +335,7 @@ describe('persisted term lookup index', () => {
         expect(index.reverseReady).toBe(true);
         expect(findPrefixRows(index, bytes('不存在'), 'expression')).toEqual([]);
         expect(findPrefixRows(index, new Uint8Array(), 'expression')).toEqual([]);
+        expect(findPrefixRowMatches(index, new Uint8Array())).toEqual({expression: [], reading: []});
     });
 
     test('rejects truncated and malformed payloads', () => {
@@ -365,7 +433,7 @@ describe('persisted term lookup index', () => {
             {expressionBytes: bytes('beta'), readingBytes: null, sequence: null},
         ]);
         const index = parsePersistedTermLookupIndex(encoded);
-        const sourceSlot = index.sequenceHeads.findIndex((value) => value !== 0xffffffff);
+        const sourceSlot = index.sequenceHeads.findIndex((value) => value !== 0xffff);
         const targetSlot = sourceSlot === 0 ? 1 : 0;
         const row = index.sequenceHeads[sourceSlot];
         index.sequenceHeads[sourceSlot] = index.sequenceNext[row];

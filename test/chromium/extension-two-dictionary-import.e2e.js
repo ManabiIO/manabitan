@@ -1880,6 +1880,9 @@ function summarizeImportStep4Breakdown(historyRaw) {
             mediaWriteMs: readTimingValue(details, 'step4MediaWriteMs'),
             accountedMs: readTimingValue(details, 'step4AccountedMs'),
             otherMs: readTimingValue(details, 'step4OtherMs'),
+            parserWorkerCount: readTimingValue(details, 'fastPathParserParallelWorkerCount'),
+            parserPipelineGroupsPerWorker: readTimingValue(details, 'fastPathParserParallelPipelineGroupsPerWorker'),
+            parserGroupCount: readTimingValue(details, 'fastPathParserParallelGroupCount'),
         };
         dictionaries.push(timingSummary);
         aggregate.termParseMs += timingSummary.termParseMs;
@@ -2552,30 +2555,61 @@ async function getPageFrontendDebugState(page) {
 }
 
 async function dismissVisiblePopupFrames(page) {
-    await page.keyboard.press('Escape');
-    await page.mouse.move(8, 8, {steps: 4});
-    try {
-        await page.waitForFunction(() => {
-            for (const frame of document.querySelectorAll('iframe.yomitan-popup')) {
-                if (!(frame instanceof HTMLElement) || frame.hidden) {
-                    continue;
-                }
-                const style = getComputedStyle(frame);
-                if (
-                    frame.clientWidth > 0 &&
-                    frame.clientHeight > 0 &&
-                    style.visibility !== 'hidden' &&
-                    style.display !== 'none' &&
-                    Number.parseFloat(style.opacity || '1') > 0
-                ) {
-                    return false;
-                }
+    for (let attempt = 0; attempt < 3; ++attempt) {
+        await page.mouse.move(8, 8, {steps: 4});
+        const frameHandles = (await page.$$('iframe.yomitan-popup')).reverse();
+        for (const frameHandle of frameHandles) {
+            try {
+                if (!await isPopupFrameHandleVisible(frameHandle)) { continue; }
+                const popupFrame = await frameHandle.contentFrame();
+                if (popupFrame === null) { continue; }
+                await popupFrame.locator('body').press('Escape', {timeout: 1500});
+            } catch (_) {
+                // Popup frames can be hidden or replaced while Escape is propagating.
             }
-            return true;
-        }, undefined, {timeout: 1200});
-    } catch (_) {
-        // Some popup modes remain mounted while hidden logically; freshness is checked below.
+        }
+        await page.keyboard.press('Escape');
+        try {
+            await page.waitForFunction(() => {
+                for (const frame of document.querySelectorAll('iframe.yomitan-popup')) {
+                    if (!(frame instanceof HTMLElement) || frame.hidden) {
+                        continue;
+                    }
+                    const style = getComputedStyle(frame);
+                    if (
+                        frame.clientWidth > 0 &&
+                        frame.clientHeight > 0 &&
+                        style.visibility !== 'hidden' &&
+                        style.display !== 'none' &&
+                        Number.parseFloat(style.opacity || '1') > 0
+                    ) {
+                        return false;
+                    }
+                }
+                return true;
+            }, undefined, {timeout: 2500});
+            return;
+        } catch (_) {
+            // Retry because popup hide messages can be delayed under browser CPU pressure.
+        }
     }
+    const debugState = await page.evaluate(() => ({
+        frontend: Object.fromEntries(
+            Object.entries(document.documentElement?.dataset ?? {}).filter(([key]) => key.startsWith('manabitan')),
+        ),
+        frames: Array.from(document.querySelectorAll('iframe.yomitan-popup')).map((frame) => {
+            const style = frame instanceof HTMLElement ? getComputedStyle(frame) : null;
+            return {
+                hidden: frame instanceof HTMLElement ? frame.hidden : null,
+                width: frame instanceof HTMLElement ? frame.clientWidth : null,
+                height: frame instanceof HTMLElement ? frame.clientHeight : null,
+                visibility: style?.visibility ?? null,
+                display: style?.display ?? null,
+                opacity: style?.opacity ?? null,
+            };
+        }),
+    }));
+    throw new Error(`Existing popup remained visible after three dismissal attempts; state=${JSON.stringify(debugState)}`);
 }
 
 async function waitForPageFrontendScanReady(page, timeoutMs = 10000) {
@@ -4552,6 +4586,30 @@ async function main() {
             );
             if (!(verifyBatchJmnedictContentProfile.result && verifyBatchJmnedictContentProfile.result.ok === true)) {
                 fail(`JMnedict backend content integrity failed after multi-file import. diagnostics=${JSON.stringify(verifyBatchJmnedictContentProfile.result ?? null)}`);
+            }
+            const verifyUnaffectedLookupStart = safePerformance.now();
+            const verifyUnaffectedLookupProfile = await runPhaseProfile(cdpSession, async () => {
+                return await waitForBackendDictionaryReady(
+                    page,
+                    expectedLookupDictionaries,
+                    readinessTerm,
+                    15_000,
+                    true,
+                );
+            });
+            const verifyUnaffectedLookupEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                page,
+                'Verify existing dictionary lookup continuity after multi-file import',
+                `Required live ${expectedLookupDictionaries.join(' + ')} lookup results immediately after importing JMdict + JMnedict: ${JSON.stringify(verifyUnaffectedLookupProfile.result ?? null)}`,
+                verifyUnaffectedLookupStart,
+                verifyUnaffectedLookupEnd,
+                verifyUnaffectedLookupProfile,
+                processSampler,
+            );
+            if (!(verifyUnaffectedLookupProfile.result && verifyUnaffectedLookupProfile.result.ok === true)) {
+                fail(`Existing dictionary lookup coverage was lost after multi-file import. diagnostics=${JSON.stringify(verifyUnaffectedLookupProfile.result ?? null)}`);
             }
             const enableExtendedDictionariesStart = safePerformance.now();
             const enableExtendedDictionariesProfile = await runPhaseProfile(cdpSession, async () => {

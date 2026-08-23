@@ -273,16 +273,15 @@ export class Popup extends EventDispatcher {
      * @param {boolean} changeFocus Whether or not the parent popup or host frame should be focused.
      */
     hide(changeFocus) {
+        this.stopHideDelayed();
+        if (this._child !== null) {
+            this._child.hide(false);
+        }
         if (!this.isVisibleSync()) {
             return;
         }
 
-        this.stopHideDelayed();
-
         this._setVisible(false);
-        if (this._child !== null) {
-            this._child.hide(false);
-        }
         if (changeFocus) {
             this._focusParent();
         }

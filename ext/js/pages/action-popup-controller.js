@@ -427,15 +427,27 @@ export class DisplayController {
         }
 
         let enabledCount = 0;
-        for (const {title} of dictionaries) {
+        let unavailableEnabledCount = 0;
+        let temporarilyUnavailableEnabledCount = 0;
+        let repairPendingEnabledCount = 0;
+        for (const {title, storageHealth} of dictionaries) {
             if (enabledDictionaries.has(title)) {
-                ++enabledCount;
+                if (storageHealth === 'reimportRequired') {
+                    ++unavailableEnabledCount;
+                } else if (storageHealth === 'repairPending') {
+                    ++enabledCount;
+                    ++repairPendingEnabledCount;
+                } else if (storageHealth === 'repairing' || storageHealth === 'temporarilyUnavailable') {
+                    ++temporarilyUnavailableEnabledCount;
+                } else {
+                    ++enabledCount;
+                }
             }
         }
 
         updateDictionaryWarningTooltips(tooltip, enabledCount > 0, () => {
             void this._updateDisplayModifierKey();
-        });
+        }, unavailableEnabledCount > 0, temporarilyUnavailableEnabledCount > 0, repairPendingEnabledCount > 0);
     }
 
     /**

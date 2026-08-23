@@ -20,7 +20,9 @@ const zstd = vi.hoisted(() => ({
 vi.mock('../ext/lib/zstd-wasm.js', () => ({
     ...zstd,
     compress: vi.fn(),
+    compressSpansUsingDictWithPrefix: vi.fn(),
     compressUsingDict: vi.fn(),
+    compressUsingDictWithPrefix: vi.fn(),
     decompress: vi.fn(),
     decompressUsingDict: vi.fn(),
 }));

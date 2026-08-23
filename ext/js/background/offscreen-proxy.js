@@ -26,6 +26,7 @@ import {DictionaryWorkerClient} from './dictionary-worker-client.js';
 
 const offscreenControlRequestTimeoutMs = 30_000;
 const offscreenRetriedLookupRequestTimeoutMs = 65_000;
+const offscreenLookupAcceptanceTimeoutMs = 3_000;
 
 class OffscreenControlTransportError extends Error {
     /**
@@ -89,7 +90,7 @@ export class OffscreenProxy {
         this._resolveOffscreenPortReady = null;
         /** @type {number} */
         this._offscreenControlRequestId = 0;
-        /** @type {Map<number, {port: MessagePort, resolve: (value: unknown) => void, reject: (reason?: unknown) => void}>} */
+        /** @type {Map<number, {port: MessagePort, accept: (() => void)|null, resolve: (value: unknown) => void, reject: (reason?: unknown) => void}>} */
         this._offscreenControlResponseHandlers = new Map();
         this._resetOffscreenPortReadyPromise();
     }
@@ -98,10 +99,15 @@ export class OffscreenProxy {
      * @see https://developer.chrome.com/docs/extensions/reference/offscreen/
      */
     async prepare() {
-        if (await this._hasOffscreenDocument()) {
-            await this._ensureOffscreenPort();
-            return;
-        }
+        await this._ensureOffscreenDocument();
+        await this._ensureOffscreenPort();
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _ensureOffscreenDocument() {
+        if (await this._hasOffscreenDocument()) { return; }
         if (this._creatingOffscreen) {
             await this._creatingOffscreen;
             return;
@@ -114,7 +120,6 @@ export class OffscreenProxy {
                 ],
                 justification: 'Access to the clipboard',
             });
-            await this._ensureOffscreenPort();
         })();
         try {
             await this._creatingOffscreen;
@@ -264,22 +269,38 @@ export class OffscreenProxy {
     async sendMessageViaPort(message, transfers) {
         const attemptCount = transfers.length === 0 ? 2 : 1;
         for (let attempt = 0; attempt < attemptCount; ++attempt) {
-            await this._ensureOffscreenPort();
-            const port = this._currentOffscreenPort;
-            if (port === null) {
-                throw new Error('Offscreen control port is unavailable');
-            }
+            /** @type {MessagePort|null} */
+            let port = null;
             try {
+                try {
+                    await this._ensureOffscreenPort();
+                } catch (initialError) {
+                    reportDiagnostics('offscreen-control-runtime-recovery', {
+                        action: message.action,
+                        attempt: attempt + 1,
+                        reason: initialError instanceof Error ? initialError.message : String(initialError),
+                    });
+                    await this.prepare();
+                }
+                port = this._currentOffscreenPort;
+                if (port === null) {
+                    throw new OffscreenControlTransportError('Offscreen control port is unavailable');
+                }
                 return /** @type {import('offscreen').McApiReturn<TMessageType>} */ (
                     await this._sendOffscreenControlMessage(port, /** @type {import('offscreen').McApiMessageAny} */ (message), transfers)
                 );
             } catch (error) {
-                if (!(error instanceof OffscreenControlTransportError)) {
+                const transportError = error instanceof OffscreenControlTransportError ?
+                    error :
+                    (port === null ? new OffscreenControlTransportError('Failed to establish offscreen control transport', {cause: error}) : null);
+                if (transportError === null) {
                     throw error;
                 }
-                this._clearCurrentOffscreenPort(port);
+                if (port !== null) {
+                    this._clearCurrentOffscreenPort(port);
+                }
                 if (attempt + 1 >= attemptCount) {
-                    throw error;
+                    throw transportError;
                 }
             }
         }
@@ -293,10 +314,20 @@ export class OffscreenProxy {
      */
     async _sendOffscreenControlMessage(port, message, transfers) {
         const id = ++this._offscreenControlRequestId;
-        const timeoutMs = message.action === 'findTermsStructuredOffscreen' ?
+        const isStructuredLookup = message.action === 'findTermsStructuredOffscreen';
+        const timeoutMs = isStructuredLookup ?
             offscreenRetriedLookupRequestTimeoutMs :
             offscreenControlRequestTimeoutMs;
         return await new Promise((resolve, reject) => {
+            /** @type {ReturnType<typeof globalThis.setTimeout>|null} */
+            let acceptanceTimeoutId = null;
+            const clearTimers = () => {
+                globalThis.clearTimeout(timeoutId);
+                if (acceptanceTimeoutId !== null) {
+                    globalThis.clearTimeout(acceptanceTimeoutId);
+                    acceptanceTimeoutId = null;
+                }
+            };
             const timeoutId = globalThis.setTimeout(() => {
                 const handler = this._offscreenControlResponseHandlers.get(id);
                 if (typeof handler === 'undefined') { return; }
@@ -305,14 +336,30 @@ export class OffscreenProxy {
                     `Timed out waiting for offscreen control response to ${message.action} after ${String(timeoutMs)}ms`,
                 ));
             }, timeoutMs);
+            if (isStructuredLookup) {
+                acceptanceTimeoutId = globalThis.setTimeout(() => {
+                    const handler = this._offscreenControlResponseHandlers.get(id);
+                    if (typeof handler === 'undefined') { return; }
+                    this._offscreenControlResponseHandlers.delete(id);
+                    handler.reject(new OffscreenControlTransportError(
+                        `Timed out waiting for offscreen control acceptance of ${message.action} after ${String(offscreenLookupAcceptanceTimeoutMs)}ms`,
+                    ));
+                }, offscreenLookupAcceptanceTimeoutMs);
+            }
             this._offscreenControlResponseHandlers.set(id, {
                 port,
+                accept: isStructuredLookup ? () => {
+                    if (acceptanceTimeoutId !== null) {
+                        globalThis.clearTimeout(acceptanceTimeoutId);
+                        acceptanceTimeoutId = null;
+                    }
+                } : null,
                 resolve: (value) => {
-                    globalThis.clearTimeout(timeoutId);
+                    clearTimers();
                     resolve(value);
                 },
                 reject: (reason) => {
-                    globalThis.clearTimeout(timeoutId);
+                    clearTimers();
                     reject(reason);
                 },
             });
@@ -320,7 +367,7 @@ export class OffscreenProxy {
                 port.postMessage({...message, id}, transfers);
             } catch (error) {
                 this._offscreenControlResponseHandlers.delete(id);
-                globalThis.clearTimeout(timeoutId);
+                clearTimers();
                 reject(new OffscreenControlTransportError('Failed to send offscreen control message', {cause: error}));
             }
         });
@@ -328,7 +375,7 @@ export class OffscreenProxy {
 
     /**
      * @param {MessagePort} port
-     * @param {MessageEvent<{id?: number, result?: unknown, error?: import('core').SerializedError}>} event
+     * @param {MessageEvent<{id?: number, accepted?: boolean, result?: unknown, error?: import('core').SerializedError}>} event
      * @returns {void}
      */
     _onOffscreenControlMessage(port, event) {
@@ -342,6 +389,20 @@ export class OffscreenProxy {
         if (typeof handler === 'undefined' || handler.port !== port) {
             reportDiagnostics('offscreen-control-unmatched-response', {id});
             this._clearCurrentOffscreenPort(port);
+            return;
+        }
+        if (event.data?.accepted === true) {
+            if (
+                handler.accept === null ||
+                typeof event.data?.error !== 'undefined' ||
+                typeof event.data?.result !== 'undefined'
+            ) {
+                handler.reject(new OffscreenControlTransportError('Invalid offscreen control acceptance response'));
+                this._offscreenControlResponseHandlers.delete(id);
+                this._clearCurrentOffscreenPort(port);
+                return;
+            }
+            handler.accept();
             return;
         }
         this._offscreenControlResponseHandlers.delete(id);
@@ -451,6 +512,17 @@ export class DictionaryDatabaseProxy {
     async refreshConnection() {
         await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
         await this._refreshRuntimeState();
+    }
+
+    /**
+     * Imports execute on the same dictionary worker and database instance used
+     * by lookups. Successful completion proves that instance is prepared, so
+     * retain its newly built indexes and warm OPFS handles without another
+     * queued control request.
+     * @returns {Promise<void>}
+     */
+    async adoptCurrentConnectionAfterImport() {
+        this._isPrepared = true;
     }
 
     /**

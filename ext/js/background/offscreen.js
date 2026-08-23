@@ -27,6 +27,8 @@ import {getSqlite3} from '../dictionary/sqlite-wasm.js';
 import {WebExtension} from '../extension/web-extension.js';
 import {DictionaryWorkerClient} from './dictionary-worker-client.js';
 
+const structuredLookupAcceptanceDelayMs = 250;
+
 /**
  * This class controls the core logic of the extension, including API calls
  * and various forms of communication between browser tabs and external applications.
@@ -428,8 +430,18 @@ export class Offscreen {
         const responsePortValue = event.currentTarget;
         if (responsePortValue === null || typeof Reflect.get(responsePortValue, 'postMessage') !== 'function' || typeof id !== 'number') { return; }
         const responsePort = /** @type {MessagePort} */ (responsePortValue);
+        const acceptanceTimeoutId = action === 'findTermsStructuredOffscreen' ? globalThis.setTimeout(() => {
+            try {
+                responsePort.postMessage({id, accepted: true});
+            } catch (_) {
+                // The control port may have rotated while the lookup was running.
+            }
+        }, structuredLookupAcceptanceDelayMs) : null;
         /** @param {import('core').Response<unknown>} response */
         const callback = (response) => {
+            if (acceptanceTimeoutId !== null) {
+                globalThis.clearTimeout(acceptanceTimeoutId);
+            }
             try {
                 responsePort.postMessage({id, ...response});
             } catch (_) {

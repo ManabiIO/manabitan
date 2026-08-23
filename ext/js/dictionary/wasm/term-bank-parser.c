@@ -21,6 +21,9 @@
 #define FNV1A_OFFSET 0x811c9dc5u
 #define MIX_OFFSET 0x9e3779b9u
 #define MAX_JSON_NESTING 256u
+#ifndef RECENT_CONTENT_DEDUP_WINDOW
+#define RECENT_CONTENT_DEDUP_WINDOW 4u
+#endif
 
 extern unsigned char __heap_base;
 
@@ -165,24 +168,12 @@ static uint32_t skip_ws(const uint8_t* src, uint32_t len, uint32_t i) {
     return i;
 }
 
-static uint32_t hash_json_string_token(const uint8_t* src, uint32_t start, uint32_t length) {
-    uint32_t hash = FNV1A_OFFSET;
-    if (length < 2u || src[start] != '"' || src[start + length - 1u] != '"') {
-        return hash;
-    }
-    const uint32_t end = start + length - 1u;
-    for (uint32_t i = start + 1u; i < end; ++i) {
-        hash = (hash ^ src[i]) * 0x01000193u;
-    }
-    return hash;
+static inline uint64_t has_zero_byte64(uint64_t value) {
+    return (value - UINT64_C(0x0101010101010101)) & ~value & UINT64_C(0x8080808080808080);
 }
 
-static inline uint32_t has_zero_byte(uint32_t value) {
-    return (value - 0x01010101u) & ~value & 0x80808080u;
-}
-
-static inline uint32_t has_control_byte(uint32_t value) {
-    return (value - 0x20202020u) & ~value & 0x80808080u;
+static inline uint64_t has_control_byte64(uint64_t value) {
+    return (value - UINT64_C(0x2020202020202020)) & ~value & UINT64_C(0x8080808080808080);
 }
 
 static int is_hex_digit(uint8_t value) {
@@ -195,20 +186,17 @@ static int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, u
     if (start >= len || src[start] != '"') { return 0; }
     uint32_t i = start + 1u;
     while (i < len) {
-        while (i + 4u <= len) {
-            const uint32_t word =
-                ((uint32_t)src[i]) |
-                ((uint32_t)src[i + 1u] << 8u) |
-                ((uint32_t)src[i + 2u] << 16u) |
-                ((uint32_t)src[i + 3u] << 24u);
+        while (i + 8u <= len) {
+            uint64_t word;
+            __builtin_memcpy(&word, src + i, sizeof(word));
             if (
-                has_zero_byte(word ^ 0x22222222u) != 0u ||
-                has_zero_byte(word ^ 0x5c5c5c5cu) != 0u ||
-                has_control_byte(word) != 0u
+                has_zero_byte64(word ^ UINT64_C(0x2222222222222222)) != 0u ||
+                has_zero_byte64(word ^ UINT64_C(0x5c5c5c5c5c5c5c5c)) != 0u ||
+                has_control_byte64(word) != 0u
             ) {
                 break;
             }
-            i += 4u;
+            i += 8u;
         }
         if (i >= len) { break; }
         uint8_t c = src[i];
@@ -278,6 +266,21 @@ static inline int type_text_pair_at(const uint8_t* src, uint32_t len, uint32_t k
     return 1;
 }
 
+static int scan_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+    if (start >= len) { return 0; }
+    uint32_t i = start;
+    while (i < len) {
+        const uint8_t c = src[i];
+        if (c == ',' || c == ']' || c == '}' || is_ws(c)) { break; }
+        ++i;
+    }
+    if (i == start) { return 0; }
+    *out_end = i;
+    return 1;
+}
+
+static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end);
+
 static int parse_composite_span_impl(
     const uint8_t* src,
     uint32_t len,
@@ -295,43 +298,78 @@ static int parse_composite_span_impl(
     else { return 0; }
 
     uint8_t expected_closers[MAX_JSON_NESTING];
+    /*
+     * Array states: 0 = first value or end, 1 = comma or end,
+     * 2 = value after comma. Object states: 0 = first key or end,
+     * 1 = colon, 2 = value, 3 = comma or end, 4 = key after comma.
+     */
+    uint8_t states[MAX_JSON_NESTING];
     expected_closers[0] = close;
+    states[0] = 0u;
     uint32_t depth = 1u;
     uint32_t i = start + 1u;
     while (i < len) {
         uint8_t c = src[i];
+        if (is_ws(c)) {
+            if (normalization_hint != 0 && *normalization_hint == 0u) {
+                *normalization_hint = 1u;
+            }
+            ++i;
+            continue;
+        }
+
+        const uint8_t expected_closer = expected_closers[depth - 1u];
+        uint8_t* const state = &states[depth - 1u];
         if (c == '"') {
             if (media_hint != 0 && *media_hint == 0u && is_media_marker_at(src, len, i)) {
                 *media_hint = 1u;
             }
             uint32_t s_end = 0;
             if (!parse_string_span(src, len, i, &s_end)) { return 0; }
-            if (
-                expected_closers[depth - 1u] == '}' &&
-                (
-                    (normalization_hint != 0 && *normalization_hint == 0u) ||
-                    (text_normalization_hint != 0 && *text_normalization_hint == 0u)
-                ) &&
-                type_text_pair_at(src, len, i, s_end)
-            ) {
-                if (normalization_hint != 0) { *normalization_hint = 1u; }
-                if (text_normalization_hint != 0) { *text_normalization_hint = 1u; }
+            if (expected_closer == '}') {
+                if (*state == 0u || *state == 4u) {
+                    if (
+                        (
+                            (normalization_hint != 0 && *normalization_hint == 0u) ||
+                            (text_normalization_hint != 0 && *text_normalization_hint == 0u)
+                        ) &&
+                        type_text_pair_at(src, len, i, s_end)
+                    ) {
+                        if (normalization_hint != 0) { *normalization_hint = 1u; }
+                        if (text_normalization_hint != 0) { *text_normalization_hint = 1u; }
+                    }
+                    *state = 1u;
+                } else if (*state == 2u) {
+                    *state = 3u;
+                } else {
+                    return 0;
+                }
+            } else {
+                if (*state != 0u && *state != 2u) { return 0; }
+                *state = 1u;
             }
             i = s_end;
             continue;
         }
-        if (normalization_hint != 0 && *normalization_hint == 0u && is_ws(c)) {
-            *normalization_hint = 1u;
-        }
         if (c == '[' || c == '{') {
+            if (
+                (expected_closer == ']' && *state != 0u && *state != 2u) ||
+                (expected_closer == '}' && *state != 2u)
+            ) { return 0; }
+            *state = expected_closer == ']' ? 1u : 3u;
             if (depth >= MAX_JSON_NESTING) { return 0; }
             expected_closers[depth] = c == '[' ? ']' : '}';
+            states[depth] = 0u;
             ++depth;
             ++i;
             continue;
         }
         if (c == ']' || c == '}') {
-            if (c != expected_closers[depth - 1u]) { return 0; }
+            if (c != expected_closer) { return 0; }
+            if (
+                (expected_closer == ']' && *state != 0u && *state != 1u) ||
+                (expected_closer == '}' && *state != 0u && *state != 3u)
+            ) { return 0; }
             --depth;
             ++i;
             if (depth == 0u) {
@@ -340,7 +378,31 @@ static int parse_composite_span_impl(
             }
             continue;
         }
-        ++i;
+        if (c == ',') {
+            if (expected_closer == ']') {
+                if (*state != 1u) { return 0; }
+                *state = 2u;
+            } else {
+                if (*state != 3u) { return 0; }
+                *state = 4u;
+            }
+            ++i;
+            continue;
+        }
+        if (c == ':') {
+            if (expected_closer != '}' || *state != 1u) { return 0; }
+            *state = 2u;
+            ++i;
+            continue;
+        }
+        if (
+            (expected_closer == ']' && *state != 0u && *state != 2u) ||
+            (expected_closer == '}' && *state != 2u)
+        ) { return 0; }
+        uint32_t scalar_end = 0u;
+        if (!parse_scalar_span(src, len, i, &scalar_end)) { return 0; }
+        *state = expected_closer == ']' ? 1u : 3u;
+        i = scalar_end;
     }
     return 0;
 }
@@ -349,15 +411,52 @@ static int parse_composite_span(const uint8_t* src, uint32_t len, uint32_t start
     return parse_composite_span_impl(src, len, start, out_end, 0, 0, 0);
 }
 
-static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
-    if (start >= len) { return 0; }
-    uint32_t i = start;
-    while (i < len) {
-        uint8_t c = src[i];
-        if (c == ',' || c == ']' || c == '}' || is_ws(c)) { break; }
-        ++i;
+static int token_equals_bytes(const uint8_t* src, uint32_t start, uint32_t end, const char* expected, uint32_t expected_length) {
+    if (end - start != expected_length) { return 0; }
+    for (uint32_t i = 0u; i < expected_length; ++i) {
+        if (src[start + i] != (uint8_t)expected[i]) { return 0; }
     }
-    if (i == start) { return 0; }
+    return 1;
+}
+
+static int is_valid_json_number(const uint8_t* src, uint32_t start, uint32_t end) {
+    uint32_t i = start;
+    if (i < end && src[i] == '-') { ++i; }
+    if (i >= end) { return 0; }
+    if (src[i] == '0') {
+        ++i;
+        if (i < end && src[i] >= '0' && src[i] <= '9') { return 0; }
+    } else {
+        if (src[i] < '1' || src[i] > '9') { return 0; }
+        do { ++i; } while (i < end && src[i] >= '0' && src[i] <= '9');
+    }
+    if (i < end && src[i] == '.') {
+        ++i;
+        const uint32_t fraction_start = i;
+        while (i < end && src[i] >= '0' && src[i] <= '9') { ++i; }
+        if (i == fraction_start) { return 0; }
+    }
+    if (i < end && (src[i] == 'e' || src[i] == 'E')) {
+        ++i;
+        if (i < end && (src[i] == '+' || src[i] == '-')) { ++i; }
+        const uint32_t exponent_start = i;
+        while (i < end && src[i] >= '0' && src[i] <= '9') { ++i; }
+        if (i == exponent_start) { return 0; }
+    }
+    return i == end;
+}
+
+static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+    uint32_t i = 0u;
+    if (!scan_scalar_span(src, len, start, &i)) { return 0; }
+    int valid = 0;
+    switch (src[start]) {
+        case 't': valid = token_equals_bytes(src, start, i, "true", 4u); break;
+        case 'f': valid = token_equals_bytes(src, start, i, "false", 5u); break;
+        case 'n': valid = token_equals_bytes(src, start, i, "null", 4u); break;
+        default: valid = is_valid_json_number(src, start, i); break;
+    }
+    if (!valid) { return 0; }
     *out_end = i;
     return 1;
 }
@@ -472,7 +571,9 @@ static int parse_row_single_pass(
             return out_meta->expression_length > 0u;
         }
         uint32_t value_end = 0u;
-        if (field_index == 5u) {
+        if (field_index == 4u || field_index == 6u) {
+            if (!scan_scalar_span(src, len, i, &value_end)) { return 0; }
+        } else if (field_index == 5u) {
             uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
             if (!parse_value_span_with_glossary_hints(
                     src,
@@ -1216,6 +1317,72 @@ static int content_bytes_equal_between(
     return 1;
 }
 
+static int raw_term_content_tokens_equal(
+    const uint8_t* src,
+    const TermRowMeta* first,
+    const TermRowMeta* second
+) {
+    return (
+        first->glossary_length == second->glossary_length &&
+        content_bytes_equal_between(
+            src,
+            first->glossary_start,
+            src,
+            second->glossary_start,
+            first->glossary_length
+        ) &&
+        first->rules_length == second->rules_length &&
+        content_bytes_equal_between(
+            src,
+            first->rules_start,
+            src,
+            second->rules_start,
+            first->rules_length
+        ) &&
+        first->definition_tags_length == second->definition_tags_length &&
+        content_bytes_equal_between(
+            src,
+            first->definition_tags_start,
+            src,
+            second->definition_tags_start,
+            first->definition_tags_length
+        ) &&
+        first->term_tags_length == second->term_tags_length &&
+        content_bytes_equal_between(
+            src,
+            first->term_tags_start,
+            src,
+            second->term_tags_start,
+            first->term_tags_length
+        )
+    );
+}
+
+static uint32_t raw_term_content_quick_signature(
+    const uint8_t* src,
+    const TermRowMeta* row
+) {
+    const uint32_t length = row->glossary_length;
+    uint32_t first = 0u;
+    uint32_t middle = 0u;
+    uint32_t last = 0u;
+    if (length > 0u) {
+        const uint32_t sample_length = length < 4u ? length : 4u;
+        __builtin_memcpy(&first, src + row->glossary_start, sample_length);
+        __builtin_memcpy(&middle, src + row->glossary_start + ((length - sample_length) / 2u), sample_length);
+        __builtin_memcpy(&last, src + row->glossary_start + length - sample_length, sample_length);
+    }
+    uint32_t signature = length * 0x9e3779b1u;
+    signature ^= row->rules_length * 0x85ebca6bu;
+    signature ^= row->definition_tags_length * 0xc2b2ae35u;
+    signature ^= row->term_tags_length * 0x27d4eb2fu;
+    signature ^= first;
+    signature = (signature << 13u) | (signature >> 19u);
+    signature ^= middle * 0x165667b1u;
+    signature = (signature << 11u) | (signature >> 21u);
+    return signature ^ last;
+}
+
 static int json_string_token_has_escape(
     const uint8_t* src,
     uint32_t start,
@@ -1321,7 +1488,7 @@ int32_t build_term_string_plan(
             const uint32_t value_start = token_start + 1u;
             const uint32_t value_length = token_length - 2u;
             if (value_length >= 0xffffu) { return -5; }
-            const uint32_t hash = hash_json_string_token(src, token_start, token_length);
+            const uint32_t hash = hash_content_xxh32(src + value_start, value_length, FNV1A_OFFSET);
             uint32_t slot = mix_string_hash(hash, value_length) & table_mask;
             uint32_t matched_index = 0xffffffffu;
             for (uint32_t probes = 0u; probes < hash_table_size; ++probes) {
@@ -1412,6 +1579,7 @@ int32_t encode_term_content_token_binary_dedup(
     last_content_capacity = out_capacity;
 
     for (uint32_t row = 0u; row < row_count; ++row) {
+        const uint32_t row_offset = row * 4u;
         const uint32_t start = cursor;
         uint32_t hash1 = 0u;
         uint32_t hash2 = 0u;
@@ -1427,7 +1595,6 @@ int32_t encode_term_content_token_binary_dedup(
             cursor = start;
             if (!grow_content_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         }
-        const uint32_t row_offset = row * 4u;
         const uint32_t length = cursor - start;
         uint32_t mixed = hash1 ^ (hash2 * 0x9e3779b1u);
         mixed ^= mixed >> 16u;
@@ -1465,17 +1632,307 @@ int32_t encode_term_content_token_binary_dedup(
             row_meta[row_offset + 3u] = hash2;
             unique_indexes[row] = unique_indexes[matched_row];
             cursor = start;
-            continue;
+        } else {
+            if (hash_table[slot] != 0u || unique_count == 0xffffffffu) { return -3; }
+            row_meta[row_offset + 0u] = start;
+            row_meta[row_offset + 1u] = length;
+            row_meta[row_offset + 2u] = hash1;
+            row_meta[row_offset + 3u] = hash2;
+            unique_indexes[row] = unique_count;
+            hash_table[slot] = row + 1u;
+            ++unique_count;
         }
-        if (hash_table[slot] != 0u || unique_count == 0xffffffffu) { return -3; }
-        row_meta[row_offset + 0u] = start;
-        row_meta[row_offset + 1u] = length;
-        row_meta[row_offset + 2u] = hash1;
-        row_meta[row_offset + 3u] = hash2;
-        unique_indexes[row] = unique_count;
-        hash_table[slot] = row + 1u;
-        ++unique_count;
     }
     *(uint32_t*)(uintptr_t)unique_count_ptr = unique_count;
     return (int32_t)cursor;
+}
+
+__attribute__((visibility("default")))
+int32_t parse_and_encode_term_bank_token_binary_dedup(
+    uint32_t json_ptr,
+    uint32_t json_len,
+    uint32_t metas_ptr,
+    uint32_t metas_capacity,
+    uint32_t out_ptr,
+    uint32_t out_capacity,
+    uint32_t row_meta_ptr,
+    uint32_t hash_table_ptr,
+    uint32_t hash_table_size,
+    uint32_t unique_indexes_ptr,
+    uint32_t unique_count_ptr,
+    uint32_t row_count_ptr,
+    uint32_t strings_ptr,
+    uint32_t strings_capacity,
+    uint32_t string_lengths_ptr,
+    uint32_t string_offsets_ptr,
+    uint32_t string_hashes_ptr,
+    uint32_t expression_indexes_ptr,
+    uint32_t reading_indexes_ptr,
+    uint32_t string_hash_table_ptr,
+    uint32_t string_hash_table_size,
+    uint32_t string_unique_count_ptr,
+    uint32_t string_bytes_count_ptr,
+    uint32_t reading_equals_ptr,
+    uint32_t scores_ptr,
+    uint32_t sequences_ptr,
+    uint32_t recent_content_hits_ptr,
+    uint32_t media_hints
+) {
+    if (
+        json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
+        out_ptr == 0u || row_meta_ptr == 0u || hash_table_ptr == 0u ||
+        unique_indexes_ptr == 0u || unique_count_ptr == 0u || row_count_ptr == 0u ||
+        strings_ptr == 0u || string_lengths_ptr == 0u || string_offsets_ptr == 0u ||
+        string_hashes_ptr == 0u || expression_indexes_ptr == 0u || reading_indexes_ptr == 0u ||
+        string_hash_table_ptr == 0u || string_unique_count_ptr == 0u || string_bytes_count_ptr == 0u ||
+        reading_equals_ptr == 0u || scores_ptr == 0u || sequences_ptr == 0u ||
+        recent_content_hits_ptr == 0u ||
+        hash_table_size == 0u || (hash_table_size & (hash_table_size - 1u)) != 0u ||
+        string_hash_table_size == 0u || (string_hash_table_size & (string_hash_table_size - 1u)) != 0u
+    ) {
+        return -1;
+    }
+    const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
+    TermRowMeta* rows = (TermRowMeta*)(uintptr_t)metas_ptr;
+    uint8_t* out = (uint8_t*)(uintptr_t)out_ptr;
+    uint32_t* row_meta = (uint32_t*)(uintptr_t)row_meta_ptr;
+    uint32_t* hash_table = (uint32_t*)(uintptr_t)hash_table_ptr;
+    uint32_t* unique_indexes = (uint32_t*)(uintptr_t)unique_indexes_ptr;
+    uint8_t* strings = (uint8_t*)(uintptr_t)strings_ptr;
+    uint16_t* string_lengths = (uint16_t*)(uintptr_t)string_lengths_ptr;
+    uint32_t* string_offsets = (uint32_t*)(uintptr_t)string_offsets_ptr;
+    uint32_t* string_hashes = (uint32_t*)(uintptr_t)string_hashes_ptr;
+    uint32_t* expression_indexes = (uint32_t*)(uintptr_t)expression_indexes_ptr;
+    uint32_t* reading_indexes = (uint32_t*)(uintptr_t)reading_indexes_ptr;
+    uint32_t* string_hash_table = (uint32_t*)(uintptr_t)string_hash_table_ptr;
+    uint8_t* reading_equals = (uint8_t*)(uintptr_t)reading_equals_ptr;
+    int32_t* scores = (int32_t*)(uintptr_t)scores_ptr;
+    int32_t* sequences = (int32_t*)(uintptr_t)sequences_ptr;
+    uint32_t cursor = 0u;
+    uint32_t unique_count = 0u;
+    uint32_t string_unique_count = 0u;
+    uint32_t strings_cursor = 0u;
+    uint32_t row_count = 0u;
+    uint32_t recent_content_hits = 0u;
+#if RECENT_CONTENT_DEDUP_WINDOW > 0
+    uint32_t recent_content_signatures[RECENT_CONTENT_DEDUP_WINDOW];
+#endif
+    const uint32_t table_mask = hash_table_size - 1u;
+    const uint32_t string_table_mask = string_hash_table_size - 1u;
+    last_parse_capacity = metas_capacity;
+    last_content_capacity = out_capacity;
+
+    uint32_t i = skip_ws(src, json_len, 0u);
+    if (i >= json_len || src[i] != '[') { return -1; }
+    i = skip_ws(src, json_len, i + 1u);
+    if (i < json_len && src[i] == ']') {
+        i = skip_ws(src, json_len, i + 1u);
+        if (i != json_len) { return -1; }
+        *(uint32_t*)(uintptr_t)unique_count_ptr = 0u;
+        *(uint32_t*)(uintptr_t)row_count_ptr = 0u;
+        *(uint32_t*)(uintptr_t)string_unique_count_ptr = 0u;
+        *(uint32_t*)(uintptr_t)string_bytes_count_ptr = 0u;
+        *(uint32_t*)(uintptr_t)recent_content_hits_ptr = 0u;
+        return 0;
+    }
+
+    while (i < json_len) {
+        if (row_count >= metas_capacity) { return -4; }
+        uint32_t row_end = 0u;
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints != 0u, &row_end)) {
+            return -1;
+        }
+
+        const TermRowMeta* parsed_row = &rows[row_count];
+        const uint32_t token_starts[2] = {
+            parsed_row->expression_start,
+            parsed_row->reading_start,
+        };
+        const uint32_t token_lengths[2] = {
+            parsed_row->expression_length,
+            parsed_row->reading_length,
+        };
+        uint32_t string_indexes[2] = {0u, 0u};
+        int reading_equals_expression = (
+            token_lengths[1] == 2u &&
+            src[token_starts[1]] == '"' &&
+            src[token_starts[1] + 1u] == '"'
+        );
+        if (
+            !reading_equals_expression &&
+            token_lengths[0] == token_lengths[1] &&
+            content_bytes_equal_between(
+                src,
+                token_starts[0],
+                src,
+                token_starts[1],
+                token_lengths[0]
+            )
+        ) {
+            reading_equals_expression = 1;
+        }
+        for (uint32_t field = 0u; field < 2u; ++field) {
+            if (field == 1u && reading_equals_expression) {
+                string_indexes[1] = string_indexes[0];
+                continue;
+            }
+            const uint32_t token_start = token_starts[field];
+            const uint32_t token_length = token_lengths[field];
+            if (json_string_token_has_escape(src, token_start, token_length)) { return -5; }
+            const uint32_t value_start = token_start + 1u;
+            const uint32_t value_length = token_length - 2u;
+            if (value_length >= 0xffffu) { return -5; }
+            const uint32_t string_hash = hash_content_xxh32(src + value_start, value_length, FNV1A_OFFSET);
+            uint32_t string_slot = mix_string_hash(string_hash, value_length) & string_table_mask;
+            uint32_t matched_index = 0xffffffffu;
+            for (uint32_t probes = 0u; probes < string_hash_table_size; ++probes) {
+                const uint32_t stored = string_hash_table[string_slot];
+                if (stored == 0u) { break; }
+                const uint32_t candidate = stored - 1u;
+                if (candidate >= string_unique_count) { return -3; }
+                if (
+                    string_hashes[candidate] == string_hash &&
+                    string_lengths[candidate] == value_length &&
+                    content_bytes_equal_between(
+                        strings,
+                        string_offsets[candidate],
+                        src,
+                        value_start,
+                        value_length
+                    )
+                ) {
+                    matched_index = candidate;
+                    break;
+                }
+                string_slot = (string_slot + 1u) & string_table_mask;
+            }
+            if (matched_index != 0xffffffffu) {
+                string_indexes[field] = matched_index;
+                continue;
+            }
+            if (
+                string_unique_count >= metas_capacity * 2u ||
+                string_hash_table[string_slot] != 0u ||
+                strings_cursor + value_length > strings_capacity
+            ) {
+                return -5;
+            }
+            __builtin_memcpy(strings + strings_cursor, src + value_start, value_length);
+            string_lengths[string_unique_count] = (uint16_t)value_length;
+            string_offsets[string_unique_count] = strings_cursor;
+            string_hashes[string_unique_count] = string_hash;
+            string_hash_table[string_slot] = string_unique_count + 1u;
+            string_indexes[field] = string_unique_count;
+            strings_cursor += value_length;
+            ++string_unique_count;
+        }
+        expression_indexes[row_count] = string_indexes[0];
+        reading_indexes[row_count] = string_indexes[1];
+        reading_equals[row_count] = reading_equals_expression ? 1u : 0u;
+        scores[row_count] = parsed_row->score;
+        sequences[row_count] = parsed_row->sequence;
+
+        const uint32_t row_offset = row_count * 4u;
+        uint32_t recent_match = 0xffffffffu;
+#if RECENT_CONTENT_DEDUP_WINDOW > 0
+        const uint32_t raw_content_signature = raw_term_content_quick_signature(src, parsed_row);
+        const uint32_t recent_start = row_count > RECENT_CONTENT_DEDUP_WINDOW ?
+            row_count - RECENT_CONTENT_DEDUP_WINDOW :
+            0u;
+        for (uint32_t candidate = row_count; candidate > recent_start;) {
+            --candidate;
+            if (
+                recent_content_signatures[candidate % RECENT_CONTENT_DEDUP_WINDOW] == raw_content_signature &&
+                raw_term_content_tokens_equal(src, parsed_row, &rows[candidate])
+            ) {
+                recent_match = candidate;
+                break;
+            }
+        }
+        recent_content_signatures[row_count % RECENT_CONTENT_DEDUP_WINDOW] = raw_content_signature;
+#endif
+        if (recent_match != 0xffffffffu) {
+            const uint32_t canonical_offset = recent_match * 4u;
+            row_meta[row_offset] = row_meta[canonical_offset];
+            row_meta[row_offset + 1u] = row_meta[canonical_offset + 1u];
+            row_meta[row_offset + 2u] = row_meta[canonical_offset + 2u];
+            row_meta[row_offset + 3u] = row_meta[canonical_offset + 3u];
+            unique_indexes[row_count] = unique_indexes[recent_match];
+            ++recent_content_hits;
+        } else {
+            const uint32_t start = cursor;
+            uint32_t hash1 = 0u;
+            uint32_t hash2 = 0u;
+            while (!encode_term_content_token_binary_row(
+                src,
+                &rows[row_count],
+                out,
+                out_capacity,
+                &cursor,
+                &hash1,
+                &hash2
+            )) {
+                cursor = start;
+                if (!grow_content_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
+            }
+            const uint32_t length = cursor - start;
+            uint32_t mixed = hash1 ^ (hash2 * 0x9e3779b1u);
+            mixed ^= mixed >> 16u;
+            uint32_t slot = mixed & table_mask;
+            uint32_t matched_row = 0xffffffffu;
+            for (uint32_t probes = 0u; probes < hash_table_size; ++probes) {
+                const uint32_t stored = hash_table[slot];
+                if (stored == 0u) { break; }
+                const uint32_t candidate_row = stored - 1u;
+                if (candidate_row >= row_count) { return -3; }
+                const uint32_t candidate_offset = candidate_row * 4u;
+                if (
+                    row_meta[candidate_offset + 2u] == hash1 &&
+                    row_meta[candidate_offset + 3u] == hash2 &&
+                    row_meta[candidate_offset + 1u] == length &&
+                    content_bytes_equal(out, row_meta[candidate_offset], start, length)
+                ) {
+                    matched_row = candidate_row;
+                    break;
+                }
+                slot = (slot + 1u) & table_mask;
+            }
+            if (matched_row != 0xffffffffu) {
+                const uint32_t canonical_offset = matched_row * 4u;
+                row_meta[row_offset] = row_meta[canonical_offset];
+                row_meta[row_offset + 1u] = length;
+                row_meta[row_offset + 2u] = hash1;
+                row_meta[row_offset + 3u] = hash2;
+                unique_indexes[row_count] = unique_indexes[matched_row];
+                cursor = start;
+            } else {
+                if (hash_table[slot] != 0u || unique_count == 0xffffffffu) { return -3; }
+                row_meta[row_offset] = start;
+                row_meta[row_offset + 1u] = length;
+                row_meta[row_offset + 2u] = hash1;
+                row_meta[row_offset + 3u] = hash2;
+                unique_indexes[row_count] = unique_count;
+                hash_table[slot] = row_count + 1u;
+                ++unique_count;
+            }
+        }
+
+        ++row_count;
+        i = skip_ws(src, json_len, row_end);
+        if (i >= json_len) { return -1; }
+        if (src[i] == ']') {
+            i = skip_ws(src, json_len, i + 1u);
+            if (i != json_len) { return -1; }
+            *(uint32_t*)(uintptr_t)unique_count_ptr = unique_count;
+            *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
+            *(uint32_t*)(uintptr_t)string_unique_count_ptr = string_unique_count;
+            *(uint32_t*)(uintptr_t)string_bytes_count_ptr = strings_cursor;
+            *(uint32_t*)(uintptr_t)recent_content_hits_ptr = recent_content_hits;
+            return (int32_t)cursor;
+        }
+        if (src[i] != ',') { return -1; }
+        i = skip_ws(src, json_len, i + 1u);
+        if (i >= json_len || src[i] == ']') { return -1; }
+    }
+    return -1;
 }

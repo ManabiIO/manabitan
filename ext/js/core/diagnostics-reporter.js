@@ -111,6 +111,15 @@ function isDevBuildManifest(manifest) {
 }
 
 /**
+ * Synchronous hot-path guard for work that exists only to enrich diagnostics.
+ * @returns {boolean}
+ */
+export function isDevDiagnosticsBuild() {
+    const manifest = getManifestOrNull();
+    return manifest !== null && isDevBuildManifest(manifest);
+}
+
+/**
  * @returns {chrome.storage.LocalStorageArea|null}
  */
 function getStorageLocalArea() {
@@ -530,8 +539,7 @@ function submitDiagnostics(event, payload, endpoint) {
  * @returns {void}
  */
 export function reportDiagnostics(event, payload = {}) {
-    const manifest = getManifestOrNull();
-    if (manifest === null || !isDevBuildManifest(manifest)) { return; }
+    if (!isDevDiagnosticsBuild()) { return; }
     void (async () => {
         const {enabled, endpoint, verbosity} = await getDiagnosticsConfig();
         if (!enabled) { return; }
@@ -546,8 +554,7 @@ export function reportDiagnostics(event, payload = {}) {
  * @returns {void}
  */
 export function reportDiagnosticsLazy(event, createPayload) {
-    const manifest = getManifestOrNull();
-    if (manifest === null || !isDevBuildManifest(manifest)) { return; }
+    if (!isDevDiagnosticsBuild()) { return; }
     void (async () => {
         const {enabled, endpoint, verbosity} = await getDiagnosticsConfig();
         if (!enabled) { return; }

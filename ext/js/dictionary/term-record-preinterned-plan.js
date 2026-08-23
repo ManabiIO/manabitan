@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {hashTermKeyBytes} from './term-key-hash.js';
+
 const DEFAULT_INITIAL_STRING_CAPACITY = 16384;
 
 /**
@@ -25,8 +27,12 @@ const DEFAULT_INITIAL_STRING_CAPACITY = 16384;
  *   internStringBytesWithHash: (bytes: Uint8Array, hash: number) => number,
  *   buildPlan: (expressionIndexes: number[]|Uint32Array, readingIndexes: number[]|Uint32Array, count?: number) => import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan,
  * }}
+ * @throws {RangeError} If the initial capacity is not finite.
  */
 export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = DEFAULT_INITIAL_STRING_CAPACITY) {
+    if (!Number.isFinite(initialStringCapacity)) {
+        throw new RangeError('Invalid initial preinterned string capacity');
+    }
     const normalizedInitialCapacity = Math.max(16, Math.trunc(initialStringCapacity));
     let hashTableCapacity = 32;
     while (hashTableCapacity < normalizedInitialCapacity * 2) { hashTableCapacity *= 2; }
@@ -96,6 +102,7 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
      * @param {Uint8Array} bytes
      * @param {number} hash
      * @returns {number}
+     * @throws {Error} If a string exceeds the persisted record format limit.
      */
     const internHashedBytes = (bytes, hash) => {
         if (bytes.byteLength > 0xffff) {
@@ -135,16 +142,18 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
 
     return {
         internStringBytes(bytes) {
-            let h1 = 0x811c9dc5;
-            for (let i = 0; i < bytes.byteLength; ++i) {
-                h1 = Math.imul(h1 ^ bytes[i], 0x01000193);
-            }
-            return internHashedBytes(bytes, h1);
+            return internHashedBytes(bytes, hashTermKeyBytes(bytes));
         },
         internStringBytesWithHash(bytes, hash) {
             return internHashedBytes(bytes, hash);
         },
         buildPlan(expressionIndexes, readingIndexes, count = expressionIndexes.length) {
+            if (
+                !Number.isSafeInteger(count) || count < 0 ||
+                count > expressionIndexes.length || count > readingIndexes.length
+            ) {
+                throw new RangeError('Invalid preinterned plan row count');
+            }
             const stringsBuffer = new Uint8Array(totalStringBytes);
             const stringOffsets = new Uint32Array(stringCount);
             let cursor = 0;
@@ -159,9 +168,261 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
                 stringHashes: stringHashes.subarray(0, stringCount),
                 stringOffsets,
                 stringsBuffer,
-                expressionIndexes: expressionIndexes instanceof Uint32Array ? expressionIndexes.subarray(0, count) : Uint32Array.from(expressionIndexes.slice(0, count)),
-                readingIndexes: readingIndexes instanceof Uint32Array ? readingIndexes.subarray(0, count) : Uint32Array.from(readingIndexes.slice(0, count)),
+                expressionIndexes: expressionIndexes instanceof Uint32Array ?
+                    expressionIndexes.subarray(0, count) :
+                    Uint32Array.from(expressionIndexes.slice(0, count)),
+                readingIndexes: readingIndexes instanceof Uint32Array ?
+                    readingIndexes.subarray(0, count) :
+                    Uint32Array.from(readingIndexes.slice(0, count)),
             };
         },
     };
+}
+
+/**
+ * @param {unknown[]} rows
+ * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
+ */
+export function getTermRecordPreinternedPlan(rows) {
+    const value = /** @type {{termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}} */ (/** @type {unknown} */ (rows)).termRecordPreinternedPlan;
+    return value ?? null;
+}
+
+/**
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} plan
+ * @param {number} start
+ * @param {number} count
+ * @throws {RangeError} If the requested row range is invalid.
+ */
+function validatePlanRowRange(plan, start, count) {
+    if (
+        !(plan.expressionIndexes instanceof Uint32Array) ||
+        !(plan.readingIndexes instanceof Uint32Array) ||
+        !Number.isSafeInteger(start) || start < 0 ||
+        !Number.isSafeInteger(count) || count < 0 ||
+        start > plan.expressionIndexes.length - count ||
+        start > plan.readingIndexes.length - count
+    ) {
+        throw new RangeError('Invalid preinterned plan row range');
+    }
+}
+
+/**
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
+ * @param {number[]} indexes
+ * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
+ * @throws {RangeError} If a selected row index is invalid.
+ */
+export function selectTermRecordPreinternedPlan(plan, indexes) {
+    if (plan === null) { return null; }
+    validatePlanRowRange(plan, 0, 0);
+    const count = indexes.length;
+    const expressionIndexes = new Uint32Array(count);
+    const readingIndexes = new Uint32Array(count);
+    for (let i = 0; i < count; ++i) {
+        const sourceIndex = indexes[i];
+        if (
+            !Number.isSafeInteger(sourceIndex) || sourceIndex < 0 ||
+            sourceIndex >= plan.expressionIndexes.length ||
+            sourceIndex >= plan.readingIndexes.length
+        ) {
+            throw new RangeError(`Preinterned plan row index out of bounds: ${sourceIndex}`);
+        }
+        expressionIndexes[i] = plan.expressionIndexes[sourceIndex];
+        readingIndexes[i] = plan.readingIndexes[sourceIndex];
+    }
+    return {
+        stringLengths: plan.stringLengths,
+        stringOffsets: plan.stringOffsets,
+        stringHashes: plan.stringHashes,
+        stringsBuffer: plan.stringsBuffer,
+        expressionIndexes,
+        readingIndexes,
+    };
+}
+
+/**
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
+ * @param {number} start
+ * @param {number} count
+ * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
+ * @throws {RangeError} If the requested row range is invalid.
+ */
+export function sliceTermRecordPreinternedPlan(plan, start, count) {
+    if (plan === null) { return null; }
+    validatePlanRowRange(plan, start, count);
+    const end = start + count;
+    return {
+        stringLengths: plan.stringLengths,
+        stringOffsets: plan.stringOffsets,
+        stringHashes: plan.stringHashes,
+        stringsBuffer: plan.stringsBuffer,
+        expressionIndexes: plan.expressionIndexes.subarray(start, end),
+        readingIndexes: plan.readingIndexes.subarray(start, end),
+    };
+}
+
+/**
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} plan
+ * @returns {Uint32Array}
+ * @throws {TypeError|RangeError} If string metadata or the arena is malformed.
+ */
+function getValidatedStringOffsets(plan) {
+    const {stringLengths, stringOffsets, stringHashes, stringsBuffer} = plan;
+    if (!(stringLengths instanceof Uint16Array) || !(stringsBuffer instanceof Uint8Array)) {
+        throw new TypeError('Invalid preinterned plan string storage');
+    }
+    if (stringHashes !== void 0 && (!(stringHashes instanceof Uint32Array) || stringHashes.length !== stringLengths.length)) {
+        throw new TypeError('Invalid preinterned plan string hashes');
+    }
+    let offsets;
+    if (stringOffsets === void 0) {
+        offsets = new Uint32Array(stringLengths.length);
+        let offset = 0;
+        for (let i = 0; i < stringLengths.length; ++i) {
+            offsets[i] = offset;
+            offset += stringLengths[i];
+            if (offset > stringsBuffer.byteLength) {
+                throw new RangeError('Preinterned plan string arena is out of bounds');
+            }
+        }
+        if (offset !== stringsBuffer.byteLength) {
+            throw new RangeError('Preinterned plan string arena length does not match its strings');
+        }
+        return offsets;
+    }
+    if (!(stringOffsets instanceof Uint32Array) || stringOffsets.length !== stringLengths.length) {
+        throw new TypeError('Invalid preinterned plan string offsets');
+    }
+    offsets = stringOffsets;
+    let expectedOffset = 0;
+    for (let i = 0; i < stringLengths.length; ++i) {
+        const offset = offsets[i];
+        if (offset !== expectedOffset || offset > stringsBuffer.byteLength - stringLengths[i]) {
+            throw new RangeError('Preinterned plan string arena is out of bounds');
+        }
+        expectedOffset += stringLengths[i];
+    }
+    if (expectedOffset !== stringsBuffer.byteLength) {
+        throw new RangeError('Preinterned plan string arena length does not match its strings');
+    }
+    return offsets;
+}
+
+/**
+ * Copies and remaps only the strings referenced by a row slice.
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
+ * @param {number} start
+ * @param {number} count
+ * @param {Uint32Array} remapScratch
+ * @param {boolean[]|Uint8Array} [readingEqualsExpressionList]
+ * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
+ * @throws {TypeError|RangeError|Error} If the plan, range, or scratch storage is invalid.
+ */
+export function compactTermRecordPreinternedPlan(plan, start, count, remapScratch, readingEqualsExpressionList = void 0) {
+    if (plan === null) { return null; }
+    validatePlanRowRange(plan, start, count);
+    if (!(remapScratch instanceof Uint32Array) || remapScratch.length < plan.stringLengths.length) {
+        throw new RangeError('Invalid preinterned plan compaction scratch');
+    }
+    if (typeof readingEqualsExpressionList !== 'undefined' && readingEqualsExpressionList.length < start + count) {
+        throw new RangeError('Invalid preinterned plan reading-equality range');
+    }
+    const sourceStringOffsets = getValidatedStringOffsets(plan);
+    const referencedOldIndexes = [];
+    const expressionIndexes = new Uint32Array(count);
+    const readingIndexes = new Uint32Array(count);
+    try {
+        for (let i = 0; i < count; ++i) {
+            const sourceIndex = start + i;
+            const expressionOldIndex = plan.expressionIndexes[sourceIndex];
+            const readingEqualsExpression = (
+                readingEqualsExpressionList?.[sourceIndex] === true ||
+                readingEqualsExpressionList?.[sourceIndex] === 1
+            );
+            const readingOldIndex = readingEqualsExpression ? expressionOldIndex : plan.readingIndexes[sourceIndex];
+            if (expressionOldIndex >= plan.stringLengths.length) {
+                throw new RangeError(`Preinterned string index out of bounds: ${expressionOldIndex}`);
+            }
+            let expressionRemap = remapScratch[expressionOldIndex];
+            if (expressionRemap === 0) {
+                referencedOldIndexes.push(expressionOldIndex);
+                expressionRemap = referencedOldIndexes.length;
+                remapScratch[expressionOldIndex] = expressionRemap;
+            } else if (referencedOldIndexes[expressionRemap - 1] !== expressionOldIndex) {
+                throw new Error('Preinterned plan compaction scratch is not clear');
+            }
+            expressionIndexes[i] = expressionRemap - 1;
+
+            if (readingOldIndex >= plan.stringLengths.length) {
+                throw new RangeError(`Preinterned string index out of bounds: ${readingOldIndex}`);
+            }
+            let readingRemap = remapScratch[readingOldIndex];
+            if (readingRemap === 0) {
+                referencedOldIndexes.push(readingOldIndex);
+                readingRemap = referencedOldIndexes.length;
+                remapScratch[readingOldIndex] = readingRemap;
+            } else if (referencedOldIndexes[readingRemap - 1] !== readingOldIndex) {
+                throw new Error('Preinterned plan compaction scratch is not clear');
+            }
+            readingIndexes[i] = readingRemap - 1;
+        }
+    } finally {
+        for (const oldIndex of referencedOldIndexes) {
+            remapScratch[oldIndex] = 0;
+        }
+    }
+    const stringLengths = new Uint16Array(referencedOldIndexes.length);
+    const stringOffsets = new Uint32Array(referencedOldIndexes.length);
+    const stringHashes = plan.stringHashes instanceof Uint32Array ? new Uint32Array(referencedOldIndexes.length) : void 0;
+    let stringsByteLength = 0;
+    for (let i = 0; i < referencedOldIndexes.length; ++i) {
+        const oldIndex = referencedOldIndexes[i];
+        stringOffsets[i] = stringsByteLength;
+        stringLengths[i] = plan.stringLengths[oldIndex];
+        if (stringHashes instanceof Uint32Array && plan.stringHashes instanceof Uint32Array) {
+            stringHashes[i] = plan.stringHashes[oldIndex];
+        }
+        stringsByteLength += stringLengths[i];
+    }
+    const stringsBuffer = new Uint8Array(stringsByteLength);
+    let cursor = 0;
+    for (const oldIndex of referencedOldIndexes) {
+        const oldOffset = sourceStringOffsets[oldIndex];
+        const length = plan.stringLengths[oldIndex];
+        stringsBuffer.set(plan.stringsBuffer.subarray(oldOffset, oldOffset + length), cursor);
+        cursor += length;
+    }
+    return {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes};
+}
+
+/**
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
+ * @param {number} count
+ * @returns {plan is import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}
+ */
+export function hasCompleteTermRecordPreinternedPlan(plan, count) {
+    if (plan === null || !Number.isSafeInteger(count) || count < 0) { return false; }
+    const {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes} = plan;
+    if (
+        !(stringLengths instanceof Uint16Array) ||
+        !(stringsBuffer instanceof Uint8Array) ||
+        !(expressionIndexes instanceof Uint32Array) ||
+        !(readingIndexes instanceof Uint32Array) ||
+        expressionIndexes.length < count || readingIndexes.length < count ||
+        (stringHashes !== void 0 && (!(stringHashes instanceof Uint32Array) || stringHashes.length !== stringLengths.length)) ||
+        (stringOffsets !== void 0 && (!(stringOffsets instanceof Uint32Array) || stringOffsets.length !== stringLengths.length))
+    ) {
+        return false;
+    }
+    if (stringLengths.length === 0) {
+        return count === 0 && stringsBuffer.byteLength === 0;
+    }
+    if (stringOffsets instanceof Uint32Array) {
+        const lastIndex = stringLengths.length - 1;
+        return stringOffsets[0] === 0 && stringOffsets[lastIndex] + stringLengths[lastIndex] === stringsBuffer.byteLength;
+    }
+    let expectedBytes = 0;
+    for (let i = 0; i < stringLengths.length; ++i) { expectedBytes += stringLengths[i]; }
+    return expectedBytes === stringsBuffer.byteLength;
 }

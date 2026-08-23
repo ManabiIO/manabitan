@@ -8,6 +8,7 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
+import {log} from '../ext/js/core/log.js';
 import {DictionaryWorkerHandler} from '../ext/js/dictionary/dictionary-worker-handler.js';
 
 describe('DictionaryWorkerHandler transient update cleanup', () => {
@@ -42,7 +43,7 @@ describe('DictionaryWorkerHandler transient update cleanup', () => {
         let shardPredicate;
         const database = {
             getDictionaryInfo: vi.fn(async () => [{title, updateSessionToken: 'update-token'}]),
-            deleteDictionary: vi.fn().mockResolvedValue(undefined),
+            deleteDictionary: vi.fn().mockResolvedValue(),
             cleanupTransientTermRecordShards: vi.fn(async (predicate) => {
                 shardPredicate = predicate;
                 return [];
@@ -60,22 +61,118 @@ describe('DictionaryWorkerHandler transient update cleanup', () => {
 });
 
 describe('DictionaryWorkerHandler import database cleanup', () => {
-    test('preserves the import error when database close also fails', async () => {
+    test('keeps a successful non-final import session open', async () => {
         const handler = new DictionaryWorkerHandler();
-        const importError = new Error('import failed');
         const database = {
             isPrepared: vi.fn(() => true),
-            close: vi.fn().mockRejectedValue(new Error('close failed')),
+            close: vi.fn().mockResolvedValue(),
         };
+        Reflect.set(handler, '_importSessionDictionaryDatabase', database);
 
         await expect(Reflect.get(handler, '_closeDictionaryDatabaseAfterImport').call(
             handler,
             /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (database)),
+            true,
             false,
+            null,
+        )).resolves.toBeUndefined();
+
+        expect(database.close).not.toHaveBeenCalled();
+        expect(Reflect.get(handler, '_importSessionDictionaryDatabase')).toBe(database);
+    });
+
+    test('closes and clears a failed non-final import session', async () => {
+        const handler = new DictionaryWorkerHandler();
+        const importError = new Error('import failed');
+        const database = {
+            isPrepared: vi.fn(() => true),
+            close: vi.fn().mockResolvedValue(),
+        };
+        Reflect.set(handler, '_importSessionDictionaryDatabase', database);
+
+        await expect(Reflect.get(handler, '_closeDictionaryDatabaseAfterImport').call(
+            handler,
+            /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (database)),
+            true,
             false,
             importError,
         )).resolves.toBeUndefined();
+
         expect(database.close).toHaveBeenCalledOnce();
+        expect(Reflect.get(handler, '_importSessionDictionaryDatabase')).toBeNull();
+    });
+
+    test('preserves the import error and logs both failures when session close fails', async () => {
+        const handler = new DictionaryWorkerHandler();
+        const importError = new Error('import failed');
+        const closeError = new Error('close failed');
+        const database = {
+            isPrepared: vi.fn(() => true),
+            close: vi.fn().mockRejectedValue(closeError),
+        };
+        Reflect.set(handler, '_importSessionDictionaryDatabase', database);
+        const logError = vi.spyOn(log, 'error').mockImplementation(() => {});
+
+        try {
+            await expect(Reflect.get(handler, '_closeDictionaryDatabaseAfterImport').call(
+                handler,
+                /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (database)),
+                true,
+                false,
+                importError,
+            )).resolves.toBeUndefined();
+
+            expect(logError).toHaveBeenCalledOnce();
+            const aggregateError = logError.mock.calls[0][0];
+            expect(aggregateError).toBeInstanceOf(AggregateError);
+            expect(aggregateError.errors).toStrictEqual([importError, closeError]);
+            expect(Reflect.get(handler, '_importSessionDictionaryDatabase')).toBeNull();
+        } finally {
+            logError.mockRestore();
+        }
+    });
+
+    test('does not reuse a database from a failed import session', async () => {
+        const handler = new DictionaryWorkerHandler();
+        const failedDatabase = {
+            isPrepared: vi.fn(() => true),
+            close: vi.fn().mockResolvedValue(),
+            usesFallbackStorage: vi.fn(() => {
+                throw new Error('failed session was reused');
+            }),
+        };
+        const replacementDatabase = {
+            usesFallbackStorage: vi.fn(() => true),
+            getOpenStorageDiagnostics: vi.fn(() => ({opfsVfsPtr: 0})),
+            isPrepared: vi.fn(() => true),
+            close: vi.fn().mockResolvedValue(),
+        };
+        Reflect.set(handler, '_importSessionDictionaryDatabase', failedDatabase);
+
+        await Reflect.get(handler, '_closeDictionaryDatabaseAfterImport').call(
+            handler,
+            /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (failedDatabase)),
+            true,
+            false,
+            new Error('import failed'),
+        );
+        const getPreparedDictionaryDatabase = vi.spyOn(
+            /** @type {import('../ext/js/dictionary/dictionary-worker-handler.js').DictionaryWorkerHandler & {_getPreparedDictionaryDatabase: () => Promise<import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase>}} */ (handler),
+            '_getPreparedDictionaryDatabase',
+        ).mockResolvedValue(/** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (replacementDatabase)));
+
+        await expect(Reflect.get(handler, '_importDictionary').call(
+            handler,
+            {
+                details: /** @type {import('dictionary-importer').ImportDetails} */ ({useImportSession: true}),
+                archiveContent: new ArrayBuffer(0),
+            },
+            vi.fn(),
+        )).rejects.toThrow(/OPFS is required/);
+
+        expect(getPreparedDictionaryDatabase).toHaveBeenCalledOnce();
+        expect(failedDatabase.usesFallbackStorage).not.toHaveBeenCalled();
+        expect(replacementDatabase.close).toHaveBeenCalledOnce();
     });
 
     test('reports database close failure after a successful import', async () => {
@@ -120,7 +217,7 @@ describe('DictionaryWorkerHandler import database cleanup', () => {
             usesFallbackStorage: vi.fn(() => true),
             getOpenStorageDiagnostics: vi.fn(() => ({opfsVfsPtr: 0})),
             isPrepared: vi.fn(() => true),
-            close: vi.fn().mockResolvedValue(undefined),
+            close: vi.fn().mockResolvedValue(),
         };
         Reflect.set(handler, '_importSessionDictionaryDatabase', database);
 

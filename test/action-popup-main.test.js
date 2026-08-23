@@ -85,6 +85,29 @@ describe('action popup live refresh handling', () => {
         }, 0);
     });
 
+    test('enabled dictionaries requiring reimport are not counted as lookup-ready', async () => {
+        const controller = new DisplayController(/** @type {import('../ext/js/application.js').Application} */ (/** @type {unknown} */ ({
+            api: {
+                getDictionaryInfo: vi.fn().mockResolvedValue([{
+                    title: 'JMdict',
+                    storageHealth: 'reimportRequired',
+                }]),
+            },
+        })));
+        Reflect.set(controller, '_optionsSetupGeneration', 1);
+        const {document} = window;
+        document.body.innerHTML = '<p class="tooltip">Hover over text to scan</p>';
+
+        await controller._updateDictionariesEnabledWarnings(
+            /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
+                dictionaries: [{name: 'JMdict', enabled: true}],
+            })),
+            1,
+        );
+
+        expect(document.querySelector('.tooltip')?.textContent).toBe('Dictionary re-import required');
+    });
+
     test('stale dictionary warning refresh does not overwrite newer profile state', async () => {
         const dictionariesDeferred = Promise.withResolvers();
         const controller = new DisplayController(/** @type {import('../ext/js/application.js').Application} */ (/** @type {unknown} */ ({

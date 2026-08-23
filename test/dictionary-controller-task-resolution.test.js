@@ -40,6 +40,7 @@ function getDictionaryControllerMethod(name) {
 describe('DictionaryController task dictionary resolution', () => {
     const getDictionaryInfoForTask = /** @type {(this: DictionaryController, dictionaryTitle: string) => Promise<unknown>} */ (getDictionaryControllerMethod('_getDictionaryInfoForTask'));
     const importReplacementDictionary = /** @type {(this: DictionaryController, dictionaryTitle: string, downloadUrl: string, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importToken: string, stagedDictionaryTitle: string) => Promise<import('settings-controller').ImportDictionaryDoneResult>} */ (getDictionaryControllerMethod('_importReplacementDictionary'));
+    const importReplacementDictionaryFromFiles = /** @type {(this: DictionaryController, dictionaryTitle: string, files: File[], profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importToken: string, stagedDictionaryTitle: string) => Promise<import('settings-controller').ImportDictionaryDoneResult>} */ (getDictionaryControllerMethod('_importReplacementDictionaryFromFiles'));
     const recoverTimedOutUpdateState = /** @type {(this: DictionaryController, dictionaryTitle: string, importToken: string, stagedDictionaryTitle: string) => Promise<boolean>} */ (getDictionaryControllerMethod('_recoverTimedOutUpdateState'));
 
     afterEach(() => {
@@ -83,6 +84,36 @@ describe('DictionaryController task dictionary resolution', () => {
             {
                 dictionaryTitleOverride: 'Jitendex [update-staging token123]',
                 replacementDictionaryTitle: 'Jitendex',
+                updateSessionToken: 'token123',
+                useImportSession: false,
+                finalizeImportSession: false,
+            },
+        );
+    });
+
+    test('imports local recovery files through the staged replacement path', async () => {
+        const controller = createControllerForInternalTests();
+        const files = [new File(['dictionary'], 'jmdict.zip', {type: 'application/zip'})];
+        const result = {ok: true, errors: [], importedTitles: ['JMdict']};
+        const importDictionaryFromFile = vi.fn().mockResolvedValue(result);
+        Reflect.set(controller, '_settingsController', {importDictionaryFromFile});
+        Reflect.set(controller, '_getMutationCallbackTimeoutMs', vi.fn(() => 10_000));
+
+        await expect(importReplacementDictionaryFromFiles.call(
+            controller,
+            'JMdict',
+            files,
+            {},
+            'token123',
+            'JMdict [update-staging token123]',
+        )).resolves.toBe(result);
+
+        expect(importDictionaryFromFile).toHaveBeenCalledWith(
+            files,
+            {},
+            {
+                dictionaryTitleOverride: 'JMdict [update-staging token123]',
+                replacementDictionaryTitle: 'JMdict',
                 updateSessionToken: 'token123',
                 useImportSession: false,
                 finalizeImportSession: false,

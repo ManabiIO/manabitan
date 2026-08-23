@@ -44,6 +44,16 @@ function createSettingsController(overrides) {
 }
 
 describe('Settings list rebuild robustness', () => {
+    test('dictionary options refresh does not reconcile against cached database state', async () => {
+        const controller = /** @type {DictionaryController} */ (Object.create(DictionaryController.prototype));
+        const updateEntries = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(controller, '_updateEntries', updateEntries);
+
+        await Reflect.get(DictionaryController.prototype, '_refreshEntriesAfterOptionsChanged').call(controller);
+
+        expect(updateEntries).toHaveBeenCalledWith(null, false);
+    });
+
     test('translation text replacements skips broken entries during rebuild', async ({window}) => {
         window.document.body.innerHTML = `
             <button id="translation-text-replacement-add"></button>
@@ -277,11 +287,11 @@ describe('Settings list rebuild robustness', () => {
                     <button id="dictionary-move-up"></button>
                     <button id="dictionary-move-down"></button>
                     <button class="dictionary-menu-button"></button>
-                    <button class="dictionary-outdated-button"></button>
-                    <button class="dictionary-integrity-button-check"></button>
-                    <button class="dictionary-integrity-button-warning"></button>
-                    <button class="dictionary-integrity-button-error"></button>
-                    <button class="dictionary-update-available"></button>
+                    <button class="dictionary-outdated-button" hidden></button>
+                    <button class="dictionary-integrity-button-check" hidden></button>
+                    <button class="dictionary-integrity-button-warning" hidden></button>
+                    <button class="dictionary-integrity-button-error" hidden></button>
+                    <button class="dictionary-update-available" hidden></button>
                     <div class="dictionary-alias"></div>
                     <div class="dictionary-revision"></div>
                     <div class="dictionary-item-title-container"></div>
@@ -308,12 +318,21 @@ describe('Settings list rebuild robustness', () => {
             Reflect.get(DictionaryController.prototype, '_createDictionaryEntry')
         );
 
-        createDictionaryEntry.call(controller, 0, {title: 'Dict 1', revision: '1', version: 3, importSuccess: true}, null, null);
+        createDictionaryEntry.call(controller, 0, {
+            title: 'Dict 1',
+            revision: '1',
+            version: 3,
+            importSuccess: true,
+            storageHealth: 'reimportRequired',
+        }, null, null);
         createDictionaryEntry.call(controller, 1, {title: 'Dict 2', revision: '1', version: 3, importSuccess: true}, null, null);
 
         expect(Reflect.get(controller, 'instantiateTemplateFragment')).toHaveBeenCalledTimes(2);
         expect(window.document.querySelectorAll('#dictionary-list .dictionary-item')).toHaveLength(1);
         expect(Reflect.get(controller, '_dictionaryEntries')).toHaveLength(1);
+        const integrityError = /** @type {HTMLButtonElement} */ (window.document.querySelector('.dictionary-integrity-button-error'));
+        expect(integrityError.hidden).toBe(false);
+        expect(integrityError.title).toBe('Re-import required');
     });
 
     test('scan inputs controller skips broken entries during rebuild', async ({window}) => {

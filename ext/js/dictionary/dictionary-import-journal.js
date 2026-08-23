@@ -37,7 +37,11 @@ export class DictionaryImportJournal {
         }
         const file = await handle.getFile();
         if (file.size <= 0) {
-            throw new Error('Invalid empty dictionary import journal');
+            // The file handle is created before any import mutation begins. A
+            // crash before the first writable closes can therefore leave an
+            // empty file with no state to roll back.
+            await this.clear();
+            return null;
         }
         const value = /** @type {unknown} */ (parseJson(await file.text()));
         if (!this._isRecord(value)) {

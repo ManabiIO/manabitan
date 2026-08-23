@@ -17,6 +17,10 @@
 
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
+import {
+    encodeRawTermContentSharedGlossaryBinary,
+    RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
+} from '../ext/js/dictionary/raw-term-content.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 
 /**
@@ -46,6 +50,116 @@ function cacheMeta(database, contentHash, offset, length, dictName, hash1, hash2
         Reflect.get(database, '_cacheTermEntryContentMeta')
     );
     cacheTermEntryContentMeta.call(database, contentHash, offset, length, dictName, 0, hash1, hash2);
+}
+
+/**
+ * @returns {{database: DictionaryDatabase, chunk: Record<string, unknown>, plan: Record<string, unknown>, appendRecords: ReturnType<typeof vi.fn>, resolveContent: () => void, rejectContent: (error: Error) => void, resolveRecords: () => void, rejectRecords: (error: Error) => void, run: () => Promise<void>}}
+ */
+function createArtifactOverlapHarness() {
+    const database = new DictionaryDatabase();
+    Reflect.set(database, '_bulkImportTransactionOpen', true);
+    Reflect.set(database, '_deferTermsVirtualTableSync', true);
+    Reflect.set(database, '_termContentZstdInitialized', true);
+
+    /** @type {(value: Record<string, number>) => void} */
+    let resolveContent = () => {};
+    /** @type {(error: Error) => void} */
+    let rejectContent = () => {};
+    const contentCompletion = new Promise((resolve, reject) => {
+        resolveContent = () => {
+            resolve({packMs: 1, compressMs: 2, envelopeMs: 3, referenceMs: 4, opfsAppendMs: 5});
+        };
+        rejectContent = reject;
+    });
+    /** @type {(value: Record<string, number>) => void} */
+    let resolveRecords = () => {};
+    /** @type {(error: Error) => void} */
+    let rejectRecords = () => {};
+    const recordCompletion = new Promise((resolve, reject) => {
+        resolveRecords = () => {
+            resolve({
+                buildRecordsMs: 0,
+                encodeMs: 0,
+                appendWriteMs: 0,
+                internMs: 0,
+                packLengthsMs: 0,
+                heapCopyMs: 0,
+                wasmEncodeMs: 0,
+                validationMs: 0,
+                lookupIndexEncodeMs: 0,
+            });
+        };
+        rejectRecords = reject;
+    });
+    const appendRecords = vi.fn(async () => await recordCompletion);
+    Reflect.set(database, '_termRecordStore', {
+        appendBatchFromArtifactChunkResolvedContent: appendRecords,
+    });
+    Reflect.set(database, '_termContentBlockImportSession', {
+        tryBeginAppendSpans: vi.fn(() => ({
+            initialSelection: true,
+            storage: Promise.resolve({
+                contentOffsets: new Float64Array([100]),
+                contentLengths: new Uint32Array([3]),
+                contentDictName: 'raw-block-v2:jmdict',
+            }),
+            completion: contentCompletion.then((profile) => ({
+                contentOffsets: new Float64Array([100]),
+                contentLengths: new Uint32Array([3]),
+                contentDictName: 'raw-block-v2:jmdict',
+                ...profile,
+            })),
+        })),
+    });
+
+    const source = new Uint8Array(new SharedArrayBuffer(3));
+    source.set([1, 2, 3]);
+    const plan = {
+        uniqueCount: 1,
+        sourceRowCount: 1,
+        resolvedFlags: new Uint8Array(1),
+        resolvedOffsets: new Float64Array(1),
+        resolvedLengths: new Uint32Array(1),
+        resolvedDictNames: null,
+        pendingEpochs: new Uint32Array(1),
+        pendingIndexes: new Uint32Array(1),
+        nextEpoch: 1,
+        nextUnresolvedUniqueIndex: 0,
+        persistedLookupRequired: false,
+    };
+    const chunk = {
+        dictionary: 'JMdict',
+        rowCount: 1,
+        dictionaryTotalRows: 1,
+        expressionBytesList: [new TextEncoder().encode('test')],
+        readingBytesList: [new Uint8Array(0)],
+        readingEqualsExpressionList: new Uint8Array([1]),
+        scoreList: new Int32Array(1),
+        sequenceList: new Int32Array([-1]),
+        contentBytesList: [],
+        contentHash1List: new Uint32Array(0),
+        contentHash2List: new Uint32Array(0),
+        contentBytesBuffer: source,
+        contentBytesBaseOffset: 0,
+        contentMetaList: new Uint32Array([0, 3, 10, 20]),
+        contentUniqueIndexList: new Uint32Array([0]),
+        contentDedupPlan: plan,
+        contentDictNameList: null,
+        uniformContentDictName: 'raw-v6',
+        termRecordPreinternedPlan: null,
+    };
+    const bulkAdd = Reflect.get(database, '_bulkAddArtifactTermsChunkWithContentDedup').bind(database);
+    return {
+        database,
+        chunk,
+        plan,
+        appendRecords,
+        resolveContent,
+        rejectContent,
+        resolveRecords,
+        rejectRecords,
+        run: async () => await bulkAdd(chunk),
+    };
 }
 
 describe('DictionaryDatabase term content dedup metadata cache', () => {
@@ -123,9 +237,14 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             sequence: 100,
         };
         const getByIds = vi.fn((ids) => new Map([...ids].map((id) => [id, {...record, id}])));
+        /** @type {Array<{offset: number, length: number}>} */
+        const warmedSpans = [];
+        const warmSlices = vi.fn(async (/** @type {Iterable<{offset: number, length: number}>} */ spans) => {
+            warmedSpans.push(...spans);
+        });
         Reflect.set(database, '_termContentStore', {
             ensureLoadedForRead: vi.fn(async () => {}),
-            warmSlices: vi.fn(async () => {}),
+            warmSlices,
         });
         Reflect.set(database, '_termRecordStore', {getByIds});
         const fetchTermRowsByIds = /** @type {(this: DictionaryDatabase, ids: Iterable<number>) => Promise<Map<number, unknown>>} */ (
@@ -137,11 +256,127 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
 
         expect(getByIds).toHaveBeenCalledTimes(1);
         expect(firstRows.get(1)).toBe(secondRows.get(1));
+        expect(warmedSpans).toEqual([{offset: -1, length: 0}]);
 
         Reflect.get(database, '_clearDirectTermIndexCaches').call(database);
         await fetchTermRowsByIds.call(database, [1]);
 
         expect(getByIds).toHaveBeenCalledTimes(2);
+    });
+
+    test('does not cache transient content read failures as empty glossaries', async () => {
+        const database = new DictionaryDatabase();
+        const readDetailed = vi.fn()
+            .mockResolvedValueOnce({status: 'temporarilyUnavailable', reason: 'injected OPFS failure'})
+            .mockResolvedValueOnce({
+                status: 'ok',
+                bytes: new TextEncoder().encode(JSON.stringify({
+                    definitionTags: '',
+                    termTags: '',
+                    rules: '',
+                    glossary: ['definition'],
+                })),
+            });
+        Reflect.set(database, '_termContentBlockStore', {readDetailed});
+        const markDictionaryReimportRequired = vi.spyOn(
+            Reflect.get(database, '_termRecordStore'),
+            'markDictionaryReimportRequired',
+        );
+        const deserialize = Reflect.get(database, '_deserializeTermRow').bind(database);
+        const row = {
+            id: 1,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentId: null,
+            entryContentOffset: 10,
+            entryContentLength: 20,
+            entryContentDictName: 'raw',
+            score: 1,
+            sequence: 1,
+        };
+
+        await expect(deserialize(row)).rejects.toThrow('temporarily unavailable');
+        expect(Reflect.get(database, '_termEntryContentCache').size).toBe(0);
+        expect(markDictionaryReimportRequired).not.toHaveBeenCalled();
+
+        await expect(deserialize(row)).resolves.toMatchObject({glossary: ['definition']});
+        expect(readDetailed).toHaveBeenCalledTimes(2);
+        expect(Reflect.get(database, '_termEntryContentCache').size).toBe(1);
+    });
+
+    test('does not misclassify a transient shared-glossary read as corruption', async () => {
+        const database = new DictionaryDatabase();
+        const textEncoder = new TextEncoder();
+        const glossaryBytes = textEncoder.encode('["shared definition"]');
+        const sharedHeader = encodeRawTermContentSharedGlossaryBinary(
+            '',
+            '',
+            '',
+            200,
+            glossaryBytes.byteLength,
+            textEncoder,
+        );
+        const readDetailed = vi.fn()
+            .mockResolvedValueOnce({status: 'ok', bytes: sharedHeader})
+            .mockResolvedValueOnce({status: 'temporarilyUnavailable', reason: 'injected shared OPFS failure'})
+            .mockResolvedValueOnce({status: 'ok', bytes: sharedHeader})
+            .mockResolvedValueOnce({status: 'ok', bytes: glossaryBytes});
+        Reflect.set(database, '_termContentBlockStore', {readDetailed});
+        const markDictionaryReimportRequired = vi.spyOn(
+            Reflect.get(database, '_termRecordStore'),
+            'markDictionaryReimportRequired',
+        );
+        const deserialize = Reflect.get(database, '_deserializeTermRow').bind(database);
+        const row = {
+            id: 1,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            entryContentId: null,
+            entryContentOffset: 10,
+            entryContentLength: sharedHeader.byteLength,
+            entryContentDictName: RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
+            score: 1,
+            sequence: 1,
+        };
+
+        await expect(deserialize(row)).rejects.toThrow('temporarily unavailable');
+        expect(markDictionaryReimportRequired).not.toHaveBeenCalled();
+        expect(Reflect.get(database, '_termEntryContentCache').size).toBe(0);
+
+        await expect(deserialize(row)).resolves.toMatchObject({glossary: ['shared definition']});
+        expect(readDetailed).toHaveBeenCalledTimes(4);
+        expect(Reflect.get(database, '_termEntryContentCache').size).toBe(1);
+    });
+
+    test('marks confirmed term-content corruption as requiring reimport', async () => {
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_termContentBlockStore', {
+            readDetailed: vi.fn(async () => ({status: 'corrupt', reason: 'injected checksum mismatch'})),
+        });
+        const markDictionaryReimportRequired = vi.spyOn(
+            Reflect.get(database, '_termRecordStore'),
+            'markDictionaryReimportRequired',
+        );
+        const deserialize = Reflect.get(database, '_deserializeTermRow').bind(database);
+
+        await expect(deserialize({
+            id: 1,
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            entryContentId: null,
+            entryContentOffset: 10,
+            entryContentLength: 20,
+            entryContentDictName: 'raw-block-v2',
+            score: 1,
+            sequence: 1,
+        })).rejects.toThrow('must be re-imported');
+        expect(markDictionaryReimportRequired).toHaveBeenCalledWith('JMdict', 'injected checksum mismatch');
+        expect(Reflect.get(database, '_termEntryContentCache').size).toBe(0);
     });
 
     test('keeps exact hash-pair matches distinct through collisions and resize', () => {
@@ -185,6 +420,124 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             dictName: 'raw-block-v1:jmdict',
         });
         expect(findMatching(123, 456, new Uint8Array(contentBytes))).toMatchObject({offset: largeOffset});
+    });
+
+    test('preallocates bounded metadata capacity using the parser unique ratio', () => {
+        const database = new DictionaryDatabase();
+        const getCapacityHint = Reflect.get(database, '_getArtifactTermContentMetaCapacityHint').bind(database);
+
+        expect(getCapacityHint({
+            rowCount: 250,
+            dictionaryTotalRows: 1000,
+            contentDedupPlan: {sourceRowCount: 250, uniqueCount: 125},
+        }, 125)).toBe(500);
+        expect(getCapacityHint({
+            rowCount: 100,
+            dictionaryTotalRows: 10_000,
+            contentDedupPlan: {sourceRowCount: 100, uniqueCount: 90},
+        }, 90)).toBe(9000);
+        expect(getCapacityHint({
+            rowCount: 100,
+            dictionaryTotalRows: 10_000_000,
+            contentDedupPlan: {sourceRowCount: 100, uniqueCount: 100},
+        }, 100)).toBe(1024 * 1024);
+        expect(getCapacityHint({
+            rowCount: 100,
+            dictionaryTotalRows: 1000,
+            contentDedupPlan: {sourceRowCount: 0, uniqueCount: 50},
+        }, 50)).toBe(50);
+
+        cacheMeta(database, null, 0, 1, 'raw', 1, 2);
+        expect(getCapacityHint({
+            rowCount: 250,
+            dictionaryTotalRows: 1000,
+            contentDedupPlan: {sourceRowCount: 250, uniqueCount: 125},
+        }, 125)).toBe(126);
+    });
+
+    test('keeps staged metadata invisible until persisted offsets are published', () => {
+        const database = new DictionaryDatabase();
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
+        const contentBytes = new Uint8Array([1, 2, 3, 4, 5]);
+        const stagedContentMetadata = stage([101], [202], [contentBytes], null);
+
+        expect(getMeta(database, 101, 202)).toBeUndefined();
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+        publish({
+            count: 1,
+            contentOffsets: new Float64Array(1),
+            contentLengths: new Uint32Array(1),
+            resolvedContentDictNames: 'raw',
+            pendingRowToUniqueIndex: new Int32Array([0]),
+            pendingContentBytes: [contentBytes],
+            pendingContentHash1s: [101],
+            pendingContentHash2s: [202],
+            pendingOffsets: [1234],
+            pendingLengths: [contentBytes.byteLength],
+            pendingResolvedDictNames: 'raw',
+            pendingContentSpans: null,
+            stagedContentMetadata,
+        });
+
+        expect(getMeta(database, 101, 202)).toMatchObject({
+            offset: 1234,
+            length: contentBytes.byteLength,
+            dictName: 'raw',
+        });
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
+    });
+
+    test('clears unpublished staged metadata after persistence failure', () => {
+        const database = new DictionaryDatabase();
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const clear = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        const staged = stage(
+            [101, 303],
+            [202, 404],
+            [new Uint8Array([1]), new Uint8Array([2])],
+            null,
+        );
+
+        clear(staged, [101, 303], [202, 404]);
+
+        expect(getMeta(database, 101, 202)).toBeUndefined();
+        expect(getMeta(database, 303, 404)).toBeUndefined();
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(0);
+    });
+
+    test('rolls back already-published staged metadata without losing prior entries', () => {
+        const database = new DictionaryDatabase();
+        cacheMeta(database, null, 50, 3, 'raw', 11, 22);
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        const contentBytes = new Uint8Array([9, 8, 7, 6]);
+        const stagedContentMetadata = stage([101], [202], [contentBytes], null);
+        publish({
+            count: 1,
+            contentOffsets: new Float64Array(1),
+            contentLengths: new Uint32Array(1),
+            resolvedContentDictNames: 'raw',
+            pendingRowToUniqueIndex: new Int32Array([0]),
+            pendingContentBytes: [contentBytes],
+            pendingContentHash1s: [101],
+            pendingContentHash2s: [202],
+            pendingOffsets: [1234],
+            pendingLengths: [contentBytes.byteLength],
+            pendingResolvedDictNames: 'raw',
+            pendingContentSpans: null,
+            stagedContentMetadata,
+        });
+
+        rollback(stagedContentMetadata, [101], [202]);
+        rollback(stagedContentMetadata, [101], [202]);
+
+        expect(getMeta(database, 101, 202)).toBeUndefined();
+        expect(getMeta(database, 11, 22)).toMatchObject({offset: 50, length: 3});
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
     });
 
     test('updates existing hash pairs without growing the cache', () => {
@@ -432,7 +785,8 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             resolvedFlags: new Uint8Array([1, 0]),
             resolvedOffsets: new Float64Array([123, 0]),
             resolvedLengths: new Uint32Array([3, 0]),
-            resolvedDictNames: ['raw-block-v1:jmdict', void 0],
+            resolvedDictNames: null,
+            resolvedUniformDictName: 'raw-block-v1:jmdict',
             pendingEpochs: new Uint32Array(2),
             pendingIndexes: new Uint32Array(2),
             nextEpoch: 1,
@@ -453,7 +807,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         });
 
         expect(result.pendingContentBytes).toEqual([second]);
-        expect([...result.pendingRowToUniqueIndex]).toEqual([-1, 0, 0]);
+        expect(result.pendingRowToUniqueIndex).toBeNull();
         expect(result.pendingPlanUniqueStart).toBe(1);
         expect(result.pendingHitCount).toBe(2);
         expect(result.contentOffsets[0]).toBe(123);
@@ -502,8 +856,69 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(result.pendingContentSpans?.buffer).toBe(source);
         expect([...result.pendingContentSpans.offsets]).toEqual([1, 4]);
         expect([...result.pendingContentSpans.lengths]).toEqual([3, 2]);
-        expect([...result.pendingRowToUniqueIndex]).toEqual([0, 1, 1]);
+        expect(result.pendingRowToUniqueIndex).toBeNull();
         expect(result.pendingHitCount).toBe(1);
+
+        const offsetScratch = plan.pendingSpanOffsetsScratch;
+        const lengthScratch = plan.pendingSpanLengthsScratch;
+        plan.resolvedFlags.fill(1);
+        plan.resolvedOffsets.set([100, 200]);
+        plan.resolvedLengths.set([3, 2]);
+        plan.resolvedDictNames.splice(0, 2, 'raw-v6', 'raw-v6');
+        const repeated = await resolve({
+            rowCount: 1,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 1,
+            contentMetaList: new Uint32Array([0, 3, 10, 20]),
+            contentUniqueIndexList: new Uint32Array([0]),
+            contentDedupPlan: plan,
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        });
+        expect(plan.pendingSpanOffsetsScratch).toBe(offsetScratch);
+        expect(plan.pendingSpanLengthsScratch).toBe(lengthScratch);
+        expect(repeated.pendingContentCount).toBe(0);
+        expect(repeated.contentOffsets[0]).toBe(plan.resolvedOffsets[0]);
+    });
+
+    test('projects persisted native-plan metadata without allocating a row map', () => {
+        const database = new DictionaryDatabase();
+        Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').call(database, 2);
+        const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
+        const contentOffsets = new Float64Array(3);
+        const contentLengths = new Uint32Array(3);
+        const first = new Uint8Array([1, 2, 3]);
+        const second = new Uint8Array([4, 5, 6, 7]);
+        const resolvedContentDictNames = publish({
+            count: 3,
+            contentOffsets,
+            contentLengths,
+            resolvedContentDictNames: 'raw',
+            pendingRowToUniqueIndex: null,
+            pendingContentBytes: [first, second],
+            pendingContentHash1s: [11, 22],
+            pendingContentHash2s: [33, 44],
+            pendingOffsets: [100, 200],
+            pendingLengths: [3, 4],
+            pendingResolvedDictNames: 'raw',
+            pendingContentSpans: null,
+            contentDedupPlan: {
+                resolvedFlags: new Uint8Array([1, 1]),
+                resolvedOffsets: new Float64Array([100, 200]),
+                resolvedLengths: new Uint32Array([3, 4]),
+                resolvedDictNames: ['raw', 'raw'],
+            },
+            contentUniqueIndexList: new Uint32Array([0, 1, 0]),
+        });
+
+        expect([...contentOffsets]).toEqual([100, 200, 100]);
+        expect([...contentLengths]).toEqual([3, 4, 3]);
+        expect(resolvedContentDictNames).toBe('raw');
+        expect(getMeta(database, 11, 33)).toMatchObject({offset: 100, length: 3, dictName: 'raw'});
+        expect(getMeta(database, 22, 44)).toMatchObject({offset: 200, length: 4, dictName: 'raw'});
     });
 
     test('keeps unmatched persisted-plan content as shared slab spans', async () => {
@@ -601,6 +1016,103 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect([...result.pendingRowToUniqueIndex]).toEqual([0, 1, 0, 1]);
         expect(result.pendingHitCount).toBe(2);
         expect(result.persistedHitCount).toBe(0);
+    });
+
+    test('rolls back reserved metadata when content persistence fails during record append', async () => {
+        const harness = createArtifactOverlapHarness();
+        const importing = harness.run();
+
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(harness.appendRecords.mock.calls[0][1]).toStrictEqual(new Float64Array([100]));
+        harness.rejectContent(new Error('injected reserved content failure'));
+        harness.resolveRecords();
+
+        await expect(importing).rejects.toThrow('injected reserved content failure');
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(harness.plan.resolvedFlags).toStrictEqual(new Uint8Array([0]));
+        expect(harness.plan.nextUnresolvedUniqueIndex).toBe(0);
+    });
+
+    test('reports source-driven initial content reservation', async () => {
+        const harness = createArtifactOverlapHarness();
+        const importing = harness.run();
+
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        harness.resolveContent();
+        harness.resolveRecords();
+        await importing;
+
+        expect(harness.database.getLastBulkAddTermsMetrics()).toMatchObject({
+            contentInitialReservationCount: 1,
+        });
+    });
+
+    test('waits for pending content before surfacing a concurrent record failure', async () => {
+        const harness = createArtifactOverlapHarness();
+        const importing = harness.run();
+        let importSettled = false;
+        void importing.finally(() => { importSettled = true; }).catch(() => {});
+
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        harness.rejectRecords(new Error('injected term record failure'));
+        await Promise.resolve();
+        expect(importSettled).toBe(false);
+
+        harness.resolveContent();
+        await expect(importing).rejects.toThrow('injected term record failure');
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(harness.plan.resolvedFlags).toStrictEqual(new Uint8Array([0]));
+        expect(harness.plan.nextUnresolvedUniqueIndex).toBe(0);
+    });
+
+    test('keeps local non-journaled imports on completed-content ordering', async () => {
+        const database = new DictionaryDatabase();
+        const db = {exec: vi.fn()};
+        Reflect.set(database, '_db', db);
+        Reflect.set(database, '_deferTermsVirtualTableSync', true);
+        vi.spyOn(database, '_beginImmediateTransaction').mockResolvedValue();
+        const tryBeginPersistence = vi.spyOn(database, '_tryBeginPersistArtifactTermContent');
+        const persist = vi.spyOn(database, '_persistArtifactTermContent').mockResolvedValue({
+            pendingOffsets: [50],
+            pendingLengths: [3],
+            pendingResolvedDictNames: 'raw',
+            blockProfile: null,
+        });
+        Reflect.set(database, '_termRecordStore', {
+            appendBatchFromArtifactChunkResolvedContent: vi.fn(async () => ({
+                buildRecordsMs: 0,
+                encodeMs: 0,
+                appendWriteMs: 0,
+                internMs: 0,
+                packLengthsMs: 0,
+                heapCopyMs: 0,
+                wasmEncodeMs: 0,
+            })),
+        });
+        const bytes = new Uint8Array([1, 2, 3]);
+        const chunk = {
+            dictionary: 'JMdict',
+            rowCount: 1,
+            dictionaryTotalRows: 1,
+            expressionBytesList: [new TextEncoder().encode('test')],
+            readingBytesList: [new Uint8Array(0)],
+            readingEqualsExpressionList: new Uint8Array([1]),
+            scoreList: new Int32Array(1),
+            sequenceList: new Int32Array([-1]),
+            contentBytesList: [bytes],
+            contentHash1List: new Uint32Array([10]),
+            contentHash2List: new Uint32Array([20]),
+            contentDictNameList: null,
+            uniformContentDictName: 'raw',
+            termRecordPreinternedPlan: null,
+        };
+        const bulkAdd = Reflect.get(database, '_bulkAddArtifactTermsChunkWithContentDedup').bind(database);
+
+        await bulkAdd(chunk);
+
+        expect(tryBeginPersistence).not.toHaveBeenCalled();
+        expect(persist).toHaveBeenCalledOnce();
+        expect(db.exec).toHaveBeenCalledWith('COMMIT');
     });
 
     test('reuses duplicate artifact content within and across chunks', async () => {

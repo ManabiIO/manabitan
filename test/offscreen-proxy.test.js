@@ -11,7 +11,7 @@ import {afterEach, describe, expect, test, vi} from 'vitest';
 
 vi.mock('../ext/js/core/diagnostics-reporter.js', () => ({reportDiagnostics: vi.fn()}));
 
-const {DictionaryRuntimeWorkerProxy, TranslatorProxy} = await import('../ext/js/background/offscreen-proxy.js');
+const {DictionaryDatabaseProxy, DictionaryRuntimeWorkerProxy, TranslatorProxy} = await import('../ext/js/background/offscreen-proxy.js');
 
 describe('DictionaryRuntimeWorkerProxy', () => {
     afterEach(() => {
@@ -76,6 +76,31 @@ describe('DictionaryRuntimeWorkerProxy', () => {
             {id: 1, action: 'importDictionaryOffscreen', params: {archiveContent: expect.any(Blob), details: {}}},
             [port],
         );
+    });
+});
+
+describe('DictionaryDatabaseProxy', () => {
+    test('adopts an already prepared import connection without a worker round trip', async () => {
+        const sendMessagePromise = vi.fn();
+        const messenger = /** @type {ConstructorParameters<typeof DictionaryDatabaseProxy>[0]} */ (/** @type {unknown} */ ({sendMessagePromise}));
+        const proxy = new DictionaryDatabaseProxy(messenger);
+        Reflect.set(proxy, '_isPrepared', true);
+
+        await proxy.adoptCurrentConnectionAfterImport();
+
+        expect(sendMessagePromise).not.toHaveBeenCalled();
+        expect(proxy.isPrepared()).toBe(true);
+    });
+
+    test('adopts a successful import when cached runtime state was unknown', async () => {
+        const sendMessagePromise = vi.fn();
+        const messenger = /** @type {ConstructorParameters<typeof DictionaryDatabaseProxy>[0]} */ (/** @type {unknown} */ ({sendMessagePromise}));
+        const proxy = new DictionaryDatabaseProxy(messenger);
+
+        await proxy.adoptCurrentConnectionAfterImport();
+
+        expect(sendMessagePromise).not.toHaveBeenCalled();
+        expect(proxy.isPrepared()).toBe(true);
     });
 });
 

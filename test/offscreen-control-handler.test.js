@@ -42,6 +42,7 @@ function dispatchControlMessage(offscreen, action, params = {}, ports = []) {
 
 describe('Offscreen control message acknowledgements', () => {
     afterEach(() => {
+        vi.useRealTimers();
         vi.restoreAllMocks();
     });
 
@@ -79,6 +80,26 @@ describe('Offscreen control message acknowledgements', () => {
 
         const {controlPort} = dispatchControlMessage(offscreen, 'findTermsStructuredOffscreen');
 
+        await vi.waitFor(() => expect(controlPort.postMessage).toHaveBeenCalledWith({id: 7, result}));
+        expect(controlPort.postMessage).toHaveBeenCalledTimes(1);
+    });
+
+    test('acknowledges a slow structured lookup before returning its result', async () => {
+        vi.useFakeTimers();
+        const offscreen = /** @type {Offscreen} */ (Object.create(Offscreen.prototype));
+        const result = {dictionaryEntries: [{id: 1}], originalTextLength: 2};
+        /** @type {(value: unknown) => void} */
+        let resolveLookup = () => {};
+        const lookup = new Promise((resolve) => { resolveLookup = resolve; });
+        Reflect.set(offscreen, '_mcApiMap', new Map([
+            ['findTermsStructuredOffscreen', async () => await lookup],
+        ]));
+
+        const {controlPort} = dispatchControlMessage(offscreen, 'findTermsStructuredOffscreen');
+        await vi.advanceTimersByTimeAsync(250);
+
+        expect(controlPort.postMessage).toHaveBeenCalledWith({id: 7, accepted: true});
+        resolveLookup(result);
         await vi.waitFor(() => expect(controlPort.postMessage).toHaveBeenCalledWith({id: 7, result}));
     });
 

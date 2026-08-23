@@ -199,6 +199,9 @@
                 This dictionary is outdated and may not support new extension features.
                 Re-import the dictionary to enable support for the latest features.
             </div></div>
+            <div class="settings-item dictionary-storage-error-notification" hidden><div class="settings-item-children danger-text">
+                This dictionary's stored data cannot be used. Re-import it to restore lookups.
+            </div></div>
             <div class="settings-item">
                 <div class="settings-item-inner">
                     <div class="settings-item-left">
@@ -278,6 +281,7 @@
             </div></div>
         </div>
         <div class="modal-footer">
+            <button type="button" class="dictionary-reimport-button" hidden>Re-import</button>
             <button type="button" data-modal-action="hide">Close</button>
         </div>
     </div></div>

@@ -34,7 +34,7 @@ const RAW_BYTES_WRITE_COALESCE_MAX_CHUNKS = 8192;
 const DEFAULT_WRITE_FLUSH_THRESHOLD_BYTES = 16 * 1024 * 1024;
 const LOW_MEMORY_WRITE_FLUSH_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const HIGH_MEMORY_WRITE_FLUSH_THRESHOLD_BYTES = 128 * 1024 * 1024;
-const RAW_BYTES_WRITE_FLUSH_THRESHOLD_BYTES = 16 * 1024 * 1024;
+const RAW_BYTES_WRITE_FLUSH_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const LARGE_IMPORT_WRITE_COALESCE_TARGET_BYTES = 64 * 1024 * 1024;
 const LARGE_IMPORT_WRITE_FLUSH_THRESHOLD_BYTES = 128 * 1024 * 1024;
 const LARGE_IMPORT_EXPECTED_BYTES_THRESHOLD = 128 * 1024 * 1024;
@@ -80,6 +80,10 @@ export class TermContentOpfsStore {
         this._queueImportWritesEnabled = false;
         /** @type {boolean} */
         this._loadedForRead = false;
+        /** @type {number} */
+        this._readStateGeneration = 0;
+        /** @type {{generation: number, promise: Promise<void>}|null} */
+        this._ensureLoadedForReadOperation = null;
         /** @type {Map<string, Uint8Array>} */
         this._readPageCache = new Map();
         /** @type {string} */
@@ -98,9 +102,9 @@ export class TermContentOpfsStore {
         this._writeCoalesceMaxChunksOverride = null;
         /** @type {number|null} */
         this._expectedImportBytes = null;
-        /** @type {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, persistedLengthAfterClose: number, logicalLengthAfterClose: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number}|null} */
+        /** @type {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, persistedLengthAfterClose: number, logicalLengthAfterClose: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number, writeFlushThresholdBytes: number}|null} */
         this._lastEndImportSessionMetrics = null;
-        /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number}} */
+        /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number, writeFlushThresholdBytes: number}} */
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
         /** @type {'baseline'|'raw-bytes'} */
         this._importStorageMode = 'baseline';
@@ -352,7 +356,7 @@ export class TermContentOpfsStore {
             await this._closeWritable();
             const closeWritableMs = safePerformance.now() - tCloseWritableStart;
             let persistedLengthAfterClose = -1;
-            let logicalLengthAfterClose = this._length;
+            const logicalLengthAfterClose = this._length;
             if (this._fileHandle !== null) {
                 try {
                     const persistedFile = await this._fileHandle.getFile();
@@ -386,7 +390,19 @@ export class TermContentOpfsStore {
     }
 
     /**
-     * @returns {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, persistedLengthAfterClose: number, logicalLengthAfterClose: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number}|null}
+     * Starts writing the current import buffer without waiting for the OPFS
+     * write to finish. Finalization remains the durability boundary.
+     * @returns {Promise<void>}
+     */
+    async queuePendingImportWrites() {
+        await this._runMutationExclusive(async () => {
+            if (!this._importSessionActive || !this._queueImportWritesEnabled) { return; }
+            await this._flushPendingWrites();
+        });
+    }
+
+    /**
+     * @returns {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, persistedLengthAfterClose: number, logicalLengthAfterClose: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number, writeFlushThresholdBytes: number}|null}
      */
     getLastEndImportSessionMetrics() {
         return this._lastEndImportSessionMetrics;
@@ -582,7 +598,9 @@ export class TermContentOpfsStore {
                 return {primaryOffsets: [], primaryLengths: [], derivedOffsets: [], derivedLengths: []};
             }
             const startOffset = this._getBufferedLength();
+            /** @type {number[]} */
             const primaryOffsets = new Array(primaryChunks.length);
+            /** @type {number[]} */
             const primaryLengths = new Array(primaryChunks.length);
             let nextOffset = startOffset;
             for (let i = 0; i < primaryChunks.length; ++i) {
@@ -608,6 +626,103 @@ export class TermContentOpfsStore {
                 derivedLengths: allLengths.slice(primaryChunks.length),
             };
         });
+    }
+
+    /**
+     * Reserves a fixed-size derived prefix while primary chunks are still being
+     * produced. The exclusive mutation remains held until completion, so the
+     * published offsets cannot be invalidated by another append.
+     * @param {Promise<Uint8Array[]>} primaryChunksPromise
+     * @param {number[]|Uint32Array} derivedChunkLengths
+     * @param {(primaryOffsets: number[], primaryLengths: number[]) => Uint8Array[]} createDerivedChunks
+     * @returns {{reserved: Promise<{derivedOffsets: number[], derivedLengths: number[]}>, completion: Promise<{primaryOffsets: number[], primaryLengths: number[], derivedOffsets: number[], derivedLengths: number[]}>}}
+     * @throws {TypeError|RangeError} If the reservation lengths are invalid.
+     */
+    beginAppendBatchWithDerivedPrefix(primaryChunksPromise, derivedChunkLengths, createDerivedChunks) {
+        if (
+            !(derivedChunkLengths instanceof Uint32Array) &&
+            !Array.isArray(derivedChunkLengths)
+        ) {
+            throw new TypeError('Reserved term-content chunk lengths must be an array');
+        }
+        const normalizedDerivedLengths = Array.from(derivedChunkLengths, (length) => {
+            if (!Number.isSafeInteger(length) || length < 0) {
+                throw new RangeError('Reserved term-content chunk length is invalid');
+            }
+            return length;
+        });
+        const primaryPromise = Promise.resolve(primaryChunksPromise);
+        void primaryPromise.catch(() => {});
+        /** @type {(value: {derivedOffsets: number[], derivedLengths: number[]}) => void} */
+        let resolveReserved = () => {};
+        /** @type {(reason?: unknown) => void} */
+        let rejectReserved = () => {};
+        let reservationSettled = false;
+        /** @type {Promise<{derivedOffsets: number[], derivedLengths: number[]}>} */
+        const reserved = new Promise((resolve, reject) => {
+            resolveReserved = resolve;
+            rejectReserved = reject;
+        });
+        void reserved.catch(() => {});
+        const completion = this._runMutationExclusive(async () => {
+            try {
+                const startOffset = this._getBufferedLength();
+                /** @type {number[]} */
+                const derivedOffsets = new Array(normalizedDerivedLengths.length);
+                let primaryStartOffset = startOffset;
+                for (let i = 0; i < normalizedDerivedLengths.length; ++i) {
+                    derivedOffsets[i] = primaryStartOffset;
+                    primaryStartOffset += normalizedDerivedLengths[i];
+                }
+                reservationSettled = true;
+                resolveReserved({
+                    derivedOffsets: [...derivedOffsets],
+                    derivedLengths: [...normalizedDerivedLengths],
+                });
+
+                const primaryChunks = await primaryPromise;
+                if (!Array.isArray(primaryChunks) || primaryChunks.some((chunk) => !(chunk instanceof Uint8Array))) {
+                    throw new TypeError('Primary term-content chunks must be Uint8Arrays');
+                }
+                /** @type {number[]} */
+                const primaryOffsets = new Array(primaryChunks.length);
+                /** @type {number[]} */
+                const primaryLengths = new Array(primaryChunks.length);
+                let nextOffset = primaryStartOffset;
+                for (let i = 0; i < primaryChunks.length; ++i) {
+                    primaryOffsets[i] = nextOffset;
+                    primaryLengths[i] = primaryChunks[i].byteLength;
+                    nextOffset += primaryLengths[i];
+                }
+                const derivedChunks = createDerivedChunks(primaryOffsets, primaryLengths);
+                if (
+                    !Array.isArray(derivedChunks) ||
+                    derivedChunks.length !== normalizedDerivedLengths.length ||
+                    derivedChunks.some((chunk, index) => (
+                        !(chunk instanceof Uint8Array) ||
+                        chunk.byteLength !== normalizedDerivedLengths[index]
+                    ))
+                ) {
+                    throw new TypeError('Derived term-content chunks do not match their reservation');
+                }
+                const chunks = [...derivedChunks, ...primaryChunks];
+                /** @type {number[]} */
+                const offsets = [];
+                /** @type {number[]} */
+                const lengths = [];
+                this._appendBatchInternal(chunks, offsets, lengths);
+                await this._finalizeAppendBatch(chunks);
+                return {primaryOffsets, primaryLengths, derivedOffsets, derivedLengths: normalizedDerivedLengths};
+            } catch (error) {
+                if (!reservationSettled) {
+                    reservationSettled = true;
+                    rejectReserved(error);
+                }
+                throw error;
+            }
+        });
+        void completion.catch(() => {});
+        return {reserved, completion};
     }
 
     /**
@@ -674,15 +789,15 @@ export class TermContentOpfsStore {
                     this._pendingWriteBytes += chunk.byteLength;
                     this._pendingWriteChunks.push(chunk);
                 }
-                if (this._importSessionActive) {
-                    if (!this._queueImportWritesEnabled) {
-                        await this._flushPendingWrites();
-                    } else if (
+                if (
+                    this._importSessionActive &&
+                    (
+                        !this._queueImportWritesEnabled ||
                         this._pendingWriteBytes >= this._flushThresholdBytes ||
                         this._pendingWriteChunks.length >= this._writeCoalesceMaxChunks
-                    ) {
-                        await this._flushPendingWrites();
-                    }
+                    )
+                ) {
+                    await this._flushPendingWrites();
                 } else if (this._pendingWriteBytes >= this._flushThresholdBytes) {
                     await this._flushPendingWrites();
                     await this._awaitQueuedWrites();
@@ -696,12 +811,43 @@ export class TermContentOpfsStore {
      * @returns {Promise<void>}
      */
     async ensureLoadedForRead() {
+        while (!this._loadedForRead) {
+            const generation = this._readStateGeneration;
+            let operation = this._ensureLoadedForReadOperation;
+            if (operation === null || operation.generation !== generation) {
+                const promise = this._ensureLoadedForReadGeneration(generation);
+                operation = {generation, promise};
+                this._ensureLoadedForReadOperation = operation;
+            }
+            try {
+                await operation.promise;
+            } finally {
+                if (this._ensureLoadedForReadOperation === operation) {
+                    this._ensureLoadedForReadOperation = null;
+                }
+            }
+            // A mutation can invalidate snapshots while an OPFS getFile call
+            // is in flight. Loop onto the new generation instead of publishing
+            // or consuming the stale snapshot.
+            if (generation === this._readStateGeneration && !this._loadedForRead) {
+                return;
+            }
+        }
+    }
+
+    /**
+     * @param {number} generation
+     * @returns {Promise<void>}
+     */
+    async _ensureLoadedForReadGeneration(generation) {
         await this._flushPendingWrites();
         await this._awaitQueuedWrites();
         await this._closeWritable();
+        if (generation !== this._readStateGeneration) { return; }
         if (this._fileHandle === null && this._chunks.length === 0 && this._hasStorageDirectoryApi()) {
             await this._reloadSegmentHandlesIfAvailable();
         }
+        if (generation !== this._readStateGeneration) { return; }
         if (this._loadedForRead) { return; }
         if (this._fileHandle === null) {
             // Non-OPFS environments rely on in-memory chunks only.
@@ -713,23 +859,33 @@ export class TermContentOpfsStore {
             return;
         }
         try {
+            const states = this._segmentStates;
+            /** @type {Array<{state: {index: number, fileName: string, fileHandle: FileSystemFileHandle, fileLength: number, startOffset: number, readFile: File|null}, file: File, startOffset: number}>} */
+            const snapshots = [];
             let startOffset = 0;
-            for (const state of this._segmentStates) {
+            for (const state of states) {
                 const file = await state.fileHandle.getFile();
-                state.fileLength = file.size;
-                state.startOffset = startOffset;
-                state.readFile = file;
+                snapshots.push({state, file, startOffset});
                 startOffset += file.size;
+            }
+            if (generation !== this._readStateGeneration || states !== this._segmentStates) { return; }
+            for (const {state, file, startOffset: snapshotStartOffset} of snapshots) {
+                state.fileLength = file.size;
+                state.startOffset = snapshotStartOffset;
+                state.readFile = file;
             }
             this._length = startOffset;
             this._readPageCache.clear();
             this._loadedForRead = true;
         } catch (error) {
+            if (generation !== this._readStateGeneration) { return; }
             if (!this._isNotReadableFileError(error)) {
                 throw error;
             }
             const recovered = await this._recoverFromNotReadableFileError('ensure-loaded', error);
-            this._loadedForRead = recovered;
+            if (generation === this._readStateGeneration) {
+                this._loadedForRead = recovered;
+            }
         }
     }
 
@@ -1245,6 +1401,7 @@ export class TermContentOpfsStore {
 
     /** */
     _invalidateReadState() {
+        ++this._readStateGeneration;
         this._loadedForRead = false;
         for (const state of this._segmentStates) {
             state.readFile = null;
@@ -1275,6 +1432,7 @@ export class TermContentOpfsStore {
             segmentCount: this._segmentStates.length,
             queuedWriteBytes: this._queuedWriteBytes,
             queuedWriteBudgetBytes: this._queuedWriteBudgetBytes,
+            writeFlushThresholdBytes: this._flushThresholdBytes,
             activeSegmentIndex: this._getActiveSegmentState()?.index ?? null,
             segments: this._segmentStates.map((state) => ({
                 index: state.index,
@@ -1774,7 +1932,7 @@ export class TermContentOpfsStore {
     }
 
     /**
-     * @returns {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number}}
+     * @returns {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number, writeFlushThresholdBytes: number}}
      */
     _createEmptyWriteDrainMetrics() {
         return {
@@ -1794,6 +1952,7 @@ export class TermContentOpfsStore {
             flushFinalGroupCount: 0,
             writeCoalesceTargetBytes: this._writeCoalesceTargetBytes,
             writeCoalesceMaxChunks: this._writeCoalesceMaxChunks,
+            writeFlushThresholdBytes: this._flushThresholdBytes,
         };
     }
 

@@ -107,14 +107,20 @@ export class OffscreenDictionaryWorkerHandler {
             this._queuedExclusiveRequestCount === 0 &&
             this._activeImportAbortController === null
         ) {
-            const lookupPromise = this._onMessageAsync(event);
-            this._activeConcurrentLookupPromises.add(lookupPromise);
-            void lookupPromise
+            this._startConcurrentLookup(event);
+            return;
+        }
+        if (policy.concurrency === 'lookup') {
+            // Preserve ordering with mutations that were already queued, but
+            // do not turn reads waiting behind that mutation into additional
+            // exclusive work. Once the mutation drains, all adjacent reads can
+            // fan out and a later mutation will wait for the active read set.
+            this._requestQueue = this._requestQueue
+                .then(() => {
+                    this._startConcurrentLookup(event);
+                })
                 .catch((error) => {
                     log.error(error);
-                })
-                .finally(() => {
-                    this._activeConcurrentLookupPromises.delete(lookupPromise);
                 });
             return;
         }
@@ -132,6 +138,22 @@ export class OffscreenDictionaryWorkerHandler {
             })
             .finally(() => {
                 --this._queuedExclusiveRequestCount;
+            });
+    }
+
+    /**
+     * @param {MessageEvent<WorkerRequest>} event
+     * @returns {void}
+     */
+    _startConcurrentLookup(event) {
+        const lookupPromise = this._onMessageAsync(event);
+        this._activeConcurrentLookupPromises.add(lookupPromise);
+        void lookupPromise
+            .catch((error) => {
+                log.error(error);
+            })
+            .finally(() => {
+                this._activeConcurrentLookupPromises.delete(lookupPromise);
             });
     }
 
@@ -260,6 +282,9 @@ export class OffscreenDictionaryWorkerHandler {
             const dictionaryImporter = new DictionaryImporter(this._mediaLoader, onProgress, () => abortController?.signal.aborted === true);
             const importPayload = await dictionaryImporter.importDictionary(this._dictionaryDatabase, archiveContent, details);
             const {result, errors, debug} = importPayload;
+            // Publish completion only after lookups can no longer observe cached
+            // translations from the pre-import dictionary generation.
+            this._translator.clearDatabaseCaches();
             const completionDelivered = this._postImportComplete(port, {
                 result,
                 errors: errors.map((error) => ExtensionError.serialize(error)),
@@ -670,7 +695,7 @@ export class OffscreenDictionaryWorkerHandler {
             dictionaryNames,
             directHits,
             rowSample,
-            termContentDiagnostics: this._dictionaryDatabase.getTermContentDiagnostics(),
+            termContentDiagnostics: this._dictionaryDatabase.getTermContentDiagnostics(dictionaryNames),
         };
     }
 

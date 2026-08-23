@@ -39,6 +39,30 @@ function createDatabase(index) {
 }
 
 describe('DictionaryDatabase direct term indexes', () => {
+    test('normalizes dictionary iterables without quadratic duplicate scans', () => {
+        const database = new DictionaryDatabase();
+        const iterable = {
+            *[Symbol.iterator]() {
+                yield 'JMdict';
+                yield '';
+                yield 'Jitendex';
+                yield 'JMdict';
+            },
+        };
+
+        expect(database._getUniqueDictionaryNames(iterable)).toEqual(['JMdict', 'Jitendex']);
+        expect(database._getUniqueDictionaryNames(new Set(['JMdict', '', 'Jitendex'])))
+            .toEqual(['JMdict', 'Jitendex']);
+    });
+
+    test('keeps positive exact cache keys sensitive to dictionary order', () => {
+        const database = new DictionaryDatabase();
+        const createKey = Reflect.get(database, '_createTermExactMatchCacheKey').bind(database);
+
+        expect(createKey(['JMdict', 'Jitendex'], '食べる'))
+            .not.toBe(createKey(['Jitendex', 'JMdict'], '食べる'));
+    });
+
     test('exact lookup preserves every duplicate input association without duplicating index IDs', async () => {
         const database = createDatabase({expression: new Map([['食べる', [7, 7]]])});
 
@@ -63,6 +87,89 @@ describe('DictionaryDatabase direct term indexes', () => {
             {id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 0},
             {id: 8, matchSource: 'reading', matchType: 'exact', itemIndex: 0},
         ]);
+    });
+
+    test('exact lookup probes all enabled dictionaries through one shared-query call', async () => {
+        const database = createDatabase({});
+        Reflect.set(database, '_getDictionaryNames', vi.fn().mockReturnValue(['JMdict', 'Jitendex']));
+        const findTermIdMatchesForDictionaries = vi.fn().mockReturnValue([
+            {expression: [7], reading: []},
+            {expression: [], reading: [8]},
+        ]);
+        Reflect.set(database, '_termRecordStore', {findTermIdMatchesForDictionaries});
+
+        const results = await database.findTermsBulk(['食べる'], new Set(['JMdict', 'Jitendex']), 'exact');
+
+        expect(findTermIdMatchesForDictionaries).toHaveBeenCalledOnce();
+        expect(findTermIdMatchesForDictionaries).toHaveBeenCalledWith(['JMdict', 'Jitendex'], '食べる');
+        expect(results).toEqual([
+            {id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 0},
+            {id: 8, matchSource: 'reading', matchType: 'exact', itemIndex: 0},
+        ]);
+    });
+
+    test('reuses bounded positive exact postings across repeated lookups', async () => {
+        const database = createDatabase({});
+        const findTermIdMatchesForDictionaries = vi.fn().mockReturnValue([
+            {expression: [7], reading: [8]},
+        ]);
+        Reflect.set(database, '_termRecordStore', {findTermIdMatchesForDictionaries});
+
+        const first = await database.findTermsBulk(['食べる'], new Set(['Test']), 'exact');
+        const second = await database.findTermsBulk(['食べる'], new Set(['Test']), 'exact');
+
+        expect(second).toEqual(first);
+        expect(findTermIdMatchesForDictionaries).toHaveBeenCalledOnce();
+        expect(Reflect.get(database, '_termExactMatchCache').size).toBe(1);
+
+        Reflect.get(database, '_clearDirectTermIndexCaches').call(database);
+        await database.findTermsBulk(['食べる'], new Set(['Test']), 'exact');
+        expect(findTermIdMatchesForDictionaries).toHaveBeenCalledTimes(2);
+    });
+
+    test('does not cache an empty exact result while dictionary storage is temporarily unavailable', async () => {
+        const database = createDatabase({});
+        let available = false;
+        const findTermIdMatchesForDictionaries = vi.fn(() => [{expression: [7], reading: []}]);
+        Reflect.set(database, '_termRecordStore', {
+            isDictionaryAvailable: vi.fn(() => available),
+            findTermIdMatchesForDictionaries,
+        });
+
+        await expect(database.findTermsBulk(['食べる'], new Set(['Test']), 'exact')).resolves.toEqual([]);
+        expect(findTermIdMatchesForDictionaries).not.toHaveBeenCalled();
+        expect(Reflect.get(database, '_termExactPresenceCache').size).toBe(0);
+
+        available = true;
+        await expect(database.findTermsBulk(['食べる'], new Set(['Test']), 'exact')).resolves.toEqual([
+            {id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 0},
+        ]);
+        expect(findTermIdMatchesForDictionaries).toHaveBeenCalledOnce();
+    });
+
+    test('retries loading after a previously loaded dictionary becomes temporarily unavailable', async () => {
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_db', {});
+        const ensureDictionariesLoaded = vi.fn().mockResolvedValue(undefined);
+        Reflect.set(database, '_termRecordStore', {
+            ensureDictionariesLoaded,
+            isDictionaryAvailable: vi.fn(() => true),
+            hasPersistentTermLookupIndex: vi.fn(() => true),
+        });
+        Reflect.get(database, '_directTermIndexLoadedDictionaryNames').add('Test');
+        Reflect.get(database, '_directTermIndexByDictionary').set('Test', {});
+
+        database._onTermRecordDictionaryHealthChanged(
+            'Test',
+            'temporarilyUnavailable',
+            'injected transient read failure',
+        );
+
+        expect(Reflect.get(database, '_directTermIndexLoadedDictionaryNames').has('Test')).toBe(false);
+        expect(Reflect.get(database, '_directTermIndexByDictionary').has('Test')).toBe(false);
+        await database._ensureDirectTermIndexesLoaded(['Test']);
+        expect(ensureDictionariesLoaded).toHaveBeenCalledOnce();
+        expect(Reflect.get(database, '_directTermIndexLoadedDictionaryNames').has('Test')).toBe(true);
     });
 
     test('suffix lookup marks a complete reversed-key match as exact', async () => {

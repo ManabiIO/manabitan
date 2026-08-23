@@ -17,6 +17,7 @@
 
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
+import {toError} from '../core/to-error.js';
 import {
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
     RAW_TERM_CONTENT_DICT_NAME,
@@ -28,6 +29,7 @@ import {
     encodePersistedTermLookupIndexFromPreinternedPlan,
     encodePersistedTermLookupIndexFromRecordPayload,
     findExactRows,
+    findPrefixRowMatches,
     findPrefixRows,
     findSequenceRows,
     getPersistedTermKeyBytes,
@@ -35,6 +37,13 @@ import {
     parsePersistedTermLookupIndex,
     warmPersistedTermPrefixIndex,
 } from './term-lookup-index.js';
+import {
+    compactTermRecordPreinternedPlan,
+    getTermRecordPreinternedPlan,
+    hasCompleteTermRecordPreinternedPlan,
+    selectTermRecordPreinternedPlan,
+    sliceTermRecordPreinternedPlan,
+} from './term-record-preinterned-plan.js';
 import {encodeTermRecordArtifactChunkWithWasmPreinterned, encodeTermRecordsWithWasm, encodeTermRecordsWithWasmPreinterned} from './term-record-wasm-encoder.js';
 
 const SHARD_DIRECTORY_NAME = 'manabitan-term-records';
@@ -43,9 +52,11 @@ const SHARD_FILE_SUFFIX = '.mbtr';
 const LOOKUP_INDEX_FILE_SUFFIX = '.mbti';
 const SHARD_FILE_CONTENT_DICT_SEPARATOR = '|';
 const SHARD_FILE_SEGMENT_SEPARATOR = '^';
-const BINARY_MAGIC_TEXT = 'MBTRR12B';
+const BINARY_MAGIC_TEXT = 'MBTRR15X';
 const BINARY_MAGIC_BYTES = 8;
-const CHUNK_HEADER_BYTES = 16;
+const SHARD_GENERATION_BYTES = 16;
+const BINARY_HEADER_PREFIX_BYTES = BINARY_MAGIC_BYTES + SHARD_GENERATION_BYTES;
+const CHUNK_HEADER_BYTES = 20;
 const STRING_TABLE_HEADER_BYTES = 8;
 const RECORD_HEADER_BYTES = 24;
 const U32_NULL = 0xffffffff;
@@ -53,195 +64,33 @@ const MAX_CONTENT_OFFSET_DELTA = U32_NULL - 1;
 const U32_RANGE = 0x100000000;
 const U16_NULL = 0xffff;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
-const DEFAULT_FLUSH_THRESHOLD_BYTES = 32 * 1024 * 1024;
-const LOW_MEMORY_FLUSH_THRESHOLD_BYTES = 16 * 1024 * 1024;
+const DEFAULT_FLUSH_THRESHOLD_BYTES = 8 * 1024 * 1024;
+const LOW_MEMORY_FLUSH_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const PREFIX_WARM_YIELD_BUDGET_MS = 8;
-const HIGH_MEMORY_FLUSH_THRESHOLD_BYTES = 64 * 1024 * 1024;
+const HIGH_MEMORY_FLUSH_THRESHOLD_BYTES = 16 * 1024 * 1024;
 const DEFAULT_QUEUED_WRITE_BUDGET_BYTES = 64 * 1024 * 1024;
 const LOW_MEMORY_QUEUED_WRITE_BUDGET_BYTES = 24 * 1024 * 1024;
 const HIGH_MEMORY_QUEUED_WRITE_BUDGET_BYTES = 64 * 1024 * 1024;
 const DEFAULT_WRITE_COALESCE_TARGET_BYTES = 4 * 1024 * 1024;
 const LOW_MEMORY_WRITE_COALESCE_TARGET_BYTES = 1024 * 1024;
-const HIGH_MEMORY_WRITE_COALESCE_TARGET_BYTES = 32 * 1024 * 1024;
+const HIGH_MEMORY_WRITE_COALESCE_TARGET_BYTES = 16 * 1024 * 1024;
 const LARGE_IMPORT_EXPECTED_BYTES_THRESHOLD = 512 * 1024 * 1024;
 const LARGE_IMPORT_WRITE_COALESCE_TARGET_BYTES = 64 * 1024 * 1024;
 const WRITE_COALESCE_MAX_CHUNKS = 512;
 const MAX_SHARD_SEGMENT_FILE_BYTES = 1024 * 1024 * 1024;
 const SHARD_LOAD_CONCURRENCY = 3;
-const LOOKUP_INDEX_MAGIC_TEXT = 'MBTIDX06';
+const LOOKUP_INDEX_MAGIC_TEXT = 'MBTIDX09';
 const LOOKUP_INDEX_MAGIC_BYTES = 8;
-const LOOKUP_INDEX_FILE_HEADER_BYTES = 24;
+const LOOKUP_INDEX_FILE_HEADER_BYTES = 40;
 const LOOKUP_INDEX_CHUNK_HEADER_BYTES = 32;
 const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
 const MAX_COMPACT_LOOKUP_INDEX_ROWS = 30000;
 const PERSISTED_ONLY_IMPORT_ROW_THRESHOLD = 250000;
-
-/**
- * @param {unknown[]} rows
- * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
- */
-function getTermRecordPreinternedPlan(rows) {
-    const value = /** @type {{termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}} */ (/** @type {unknown} */ (rows)).termRecordPreinternedPlan;
-    return value ?? null;
-}
-
-/**
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
- * @param {number[]} indexes
- * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
- */
-function selectTermRecordPreinternedPlan(plan, indexes) {
-    if (plan === null) { return null; }
-    const count = indexes.length;
-    const expressionIndexes = new Uint32Array(count);
-    const readingIndexes = new Uint32Array(count);
-    for (let i = 0; i < count; ++i) {
-        const sourceIndex = indexes[i];
-        expressionIndexes[i] = plan.expressionIndexes[sourceIndex];
-        readingIndexes[i] = plan.readingIndexes[sourceIndex];
-    }
-    return {
-        stringLengths: plan.stringLengths,
-        stringOffsets: plan.stringOffsets,
-        stringHashes: plan.stringHashes,
-        stringsBuffer: plan.stringsBuffer,
-        expressionIndexes,
-        readingIndexes,
-    };
-}
-
-/**
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
- * @param {number} start
- * @param {number} count
- * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
- */
-function sliceTermRecordPreinternedPlan(plan, start, count) {
-    if (plan === null) { return null; }
-    const end = start + count;
-    return {
-        stringLengths: plan.stringLengths,
-        stringOffsets: plan.stringOffsets,
-        stringHashes: plan.stringHashes,
-        stringsBuffer: plan.stringsBuffer,
-        expressionIndexes: plan.expressionIndexes.subarray(start, end),
-        readingIndexes: plan.readingIndexes.subarray(start, end),
-    };
-}
-
-/**
- * Copies and remaps only the strings referenced by a row slice.
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
- * @param {number} start
- * @param {number} count
- * @param {Uint32Array} remapScratch
- * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
- * @throws {RangeError} If the requested row range or scratch buffer is invalid.
- */
-function compactTermRecordPreinternedPlan(plan, start, count, remapScratch) {
-    if (plan === null) { return null; }
-    if (
-        start < 0 || count < 0 ||
-        (start + count) > plan.expressionIndexes.length ||
-        (start + count) > plan.readingIndexes.length ||
-        remapScratch.length < plan.stringLengths.length
-    ) {
-        throw new RangeError('Invalid preinterned plan compaction range');
-    }
-    const referencedOldIndexes = [];
-    const expressionIndexes = new Uint32Array(count);
-    const readingIndexes = new Uint32Array(count);
-    try {
-        for (let i = 0; i < count; ++i) {
-            const sourceIndex = start + i;
-            const expressionOldIndex = plan.expressionIndexes[sourceIndex];
-            const readingOldIndex = plan.readingIndexes[sourceIndex];
-            if (expressionOldIndex >= plan.stringLengths.length) {
-                throw new RangeError(`Preinterned string index out of bounds: ${expressionOldIndex}`);
-            }
-            let expressionRemap = remapScratch[expressionOldIndex];
-            if (expressionRemap === 0) {
-                referencedOldIndexes.push(expressionOldIndex);
-                expressionRemap = referencedOldIndexes.length;
-                remapScratch[expressionOldIndex] = expressionRemap;
-            }
-            expressionIndexes[i] = expressionRemap - 1;
-
-            if (readingOldIndex >= plan.stringLengths.length) {
-                throw new RangeError(`Preinterned string index out of bounds: ${readingOldIndex}`);
-            }
-            let readingRemap = remapScratch[readingOldIndex];
-            if (readingRemap === 0) {
-                referencedOldIndexes.push(readingOldIndex);
-                readingRemap = referencedOldIndexes.length;
-                remapScratch[readingOldIndex] = readingRemap;
-            }
-            readingIndexes[i] = readingRemap - 1;
-        }
-    } finally {
-        for (const oldIndex of referencedOldIndexes) {
-            remapScratch[oldIndex] = 0;
-        }
-    }
-    const stringLengths = new Uint16Array(referencedOldIndexes.length);
-    const stringOffsets = new Uint32Array(referencedOldIndexes.length);
-    const stringHashes = plan.stringHashes instanceof Uint32Array ?
-        new Uint32Array(referencedOldIndexes.length) :
-        void 0;
-    const sourceStringHashes = plan.stringHashes;
-    let sourceStringOffsets = plan.stringOffsets;
-    if (!(sourceStringOffsets instanceof Uint32Array) || sourceStringOffsets.length !== plan.stringLengths.length) {
-        sourceStringOffsets = new Uint32Array(plan.stringLengths.length);
-        let sourceOffset = 0;
-        for (let i = 0; i < plan.stringLengths.length; ++i) {
-            sourceStringOffsets[i] = sourceOffset;
-            sourceOffset += plan.stringLengths[i];
-        }
-    }
-    let stringsByteLength = 0;
-    for (let i = 0; i < referencedOldIndexes.length; ++i) {
-        const oldIndex = referencedOldIndexes[i];
-        stringOffsets[i] = stringsByteLength;
-        stringLengths[i] = plan.stringLengths[oldIndex];
-        if (stringHashes instanceof Uint32Array && sourceStringHashes instanceof Uint32Array) {
-            stringHashes[i] = sourceStringHashes[oldIndex];
-        }
-        stringsByteLength += stringLengths[i];
-    }
-    const stringsBuffer = new Uint8Array(stringsByteLength);
-    let cursor = 0;
-    for (const oldIndex of referencedOldIndexes) {
-        const oldOffset = sourceStringOffsets[oldIndex];
-        const length = plan.stringLengths[oldIndex];
-        stringsBuffer.set(plan.stringsBuffer.subarray(oldOffset, oldOffset + length), cursor);
-        cursor += length;
-    }
-    return {
-        stringLengths,
-        stringOffsets,
-        stringHashes,
-        stringsBuffer,
-        expressionIndexes,
-        readingIndexes,
-    };
-}
-
-/**
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
- * @param {number} count
- * @returns {plan is import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}
- */
-function hasCompleteTermRecordPreinternedPlan(plan, count) {
-    return (
-        plan !== null &&
-        plan.stringLengths instanceof Uint16Array &&
-        plan.stringsBuffer instanceof Uint8Array &&
-        plan.expressionIndexes instanceof Uint32Array &&
-        plan.readingIndexes instanceof Uint32Array &&
-        plan.expressionIndexes.length >= count &&
-        plan.readingIndexes.length >= count
-    );
-}
+const SMALL_SHARD_FALLBACK_MAX_BYTES = 32 * 1024 * 1024;
+const STORAGE_READ_RETRY_COUNT = 2;
+const REPAIR_YIELD_BUDGET_MS = 8;
+const MAX_LOOKUP_INDEX_OVERHEAD_BYTES = 64 * 1024 * 1024;
+const MAX_REPAIR_CHUNK_PAYLOAD_BYTES = 256 * 1024 * 1024;
 
 /**
  * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
@@ -395,11 +244,7 @@ function getContentOffsetDelta(offset, base) {
  * @returns {number}
  */
 function hashLookupIndexBytes(bytes) {
-    let hash = 0x811c9dc5;
-    for (let i = 0; i < bytes.byteLength; ++i) {
-        hash = Math.imul(hash ^ bytes[i], 0x01000193);
-    }
-    return hash >>> 0;
+    return hashTermLookupKeyBytes(bytes);
 }
 
 /**
@@ -452,6 +297,33 @@ class TermRecordIntegrityError extends Error {
         /** @type {string} */
         this.name = 'TermRecordIntegrityError';
     }
+}
+
+/** Error raised when a persisted lookup index cannot be trusted. */
+class PersistentLookupIndexError extends Error {
+    /**
+     * @param {'missing'|'invalid'|'transient'} kind
+     * @param {string} message
+     * @param {unknown} [cause]
+     */
+    constructor(kind, message, cause) {
+        super(message, typeof cause === 'undefined' ? void 0 : {cause});
+        /** @type {string} */
+        this.name = 'PersistentLookupIndexError';
+        /** @type {'missing'|'invalid'|'transient'} */
+        this.kind = kind;
+    }
+}
+
+/**
+ * @param {unknown} error
+ * @returns {boolean}
+ */
+function isStorageEntryNotFoundError(error) {
+    return error instanceof Error && (
+        error.name === 'NotFoundError' ||
+        /\b(?:file|entry) not found\b/i.test(error.message)
+    );
 }
 
 class DenseIdRecordStore {
@@ -588,7 +460,36 @@ class DenseIdRecordStore {
  * @property {FileSystemWritableFileStream|null} lookupIndexWritable
  * @property {number} lookupIndexChunkCount
  * @property {number} lookupIndexRecordCount
+ * @property {number} lookupIndexQueuedBytes
+ * @property {number} lookupIndexMaxQueuedBytes
+ * @property {Promise<void>|null} lookupIndexWritePromise
+ * @property {Error|null} lookupIndexWriteError
  * @property {boolean} appendFormatValidated
+ * @property {Uint8Array} generationId
+ */
+
+/**
+ * @typedef {object} TermRecordEndImportSessionMetrics
+ * @property {number} flushPendingWritesMs
+ * @property {number} awaitQueuedWritesMs
+ * @property {number} closeWritableMs
+ * @property {number} totalMs
+ * @property {number} drainCycleCount
+ * @property {number} writeCallCount
+ * @property {number} singleChunkWriteCount
+ * @property {number} mergedWriteCount
+ * @property {number} totalWriteBytes
+ * @property {number} mergedWriteBytes
+ * @property {number} maxWriteBytes
+ * @property {number} minWriteBytes
+ * @property {number} mergedGroupChunkCount
+ * @property {number} maxMergedGroupChunkCount
+ * @property {number} minMergedGroupChunkCount
+ * @property {number} writeCoalesceTargetBytes
+ * @property {number} lookupIndexWriteCallCount
+ * @property {number} lookupIndexWriteBytes
+ * @property {number} lookupIndexAwaitMs
+ * @property {number} lookupIndexMaxQueuedBytes
  */
 
 /**
@@ -611,9 +512,9 @@ class DenseIdRecordStore {
  * @property {{dictionaryName: string, contentDictName: string, segmentIndex: number}} shardInfo
  * @property {string} nextFileName
  * @property {FileSystemFileHandle} nextFileHandle
- * @property {ArrayBuffer} bytes
+ * @property {File} file
  * @property {number} fileSize
- * @property {ArrayBuffer|null} indexBytes
+ * @property {File|null} indexFile
  */
 
 export class TermRecordOpfsStore {
@@ -632,8 +533,22 @@ export class TermRecordOpfsStore {
         this._persistentIndexLoadedDictionaryNames = new Set();
         /** @type {Map<string, Promise<boolean>>} */
         this._persistentIndexLoadPromiseByDictionary = new Map();
+        /** @type {Map<string, Promise<boolean>>} */
+        this._persistentIndexRepairPromiseByDictionary = new Map();
+        /** @type {Promise<void>} */
+        this._storageMutationTail = Promise.resolve();
+        /** @type {boolean} */
+        this._storageMutationActive = false;
+        /** @type {Map<string, {kind: 'missing'|'invalid'|'transient', message: string}>} */
+        this._persistentIndexFailureByDictionary = new Map();
+        /** @type {Map<string, {status: 'available'|'repairPending'|'repairing'|'temporarilyUnavailable'|'reimportRequired', reason: string|null}>} */
+        this._dictionaryHealthByName = new Map();
+        /** @type {((dictionaryName: string, status: 'available'|'repairPending'|'repairing'|'temporarilyUnavailable'|'reimportRequired', reason: string|null) => void)|null} */
+        this._dictionaryHealthChangeHandler = null;
         /** @type {number} */
         this._persistentLookupGeneration = 0;
+        /** @type {Map<string, number>} */
+        this._persistentLookupGenerationByDictionary = new Map();
         /** @type {Map<string, Promise<{file: File, strings: string[], recordsStart: number, contentOffsetBase: number, firstId: number, count: number}|null>>} */
         this._randomReadChunkMetadataCache = new Map();
         /** @type {number} */
@@ -663,6 +578,8 @@ export class TermRecordOpfsStore {
         /** @type {boolean} */
         this._reloadFromShardsAfterImport = false;
         /** @type {Set<string>} */
+        this._importSessionDictionaryNames = new Set();
+        /** @type {Set<string>} */
         this._loadedDictionaryNames = new Set();
         /** @type {boolean} */
         this._allShardContentsLoaded = false;
@@ -680,10 +597,12 @@ export class TermRecordOpfsStore {
         this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
         /** @type {number|null} */
         this._expectedImportBytes = null;
-        /** @type {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}|null} */
+        /** @type {TermRecordEndImportSessionMetrics|null} */
         this._lastEndImportSessionMetrics = null;
         /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}} */
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
+        /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number}} */
+        this._lookupIndexWriteMetrics = this._createEmptyLookupIndexWriteMetrics();
     }
 
     /** */
@@ -692,24 +611,196 @@ export class TermRecordOpfsStore {
         this._persistentRecordChunksByDictionary.clear();
         this._persistentIndexLoadedDictionaryNames.clear();
         this._persistentIndexLoadPromiseByDictionary.clear();
+        this._persistentIndexFailureByDictionary.clear();
         this._randomReadChunkMetadataCache.clear();
+        this._persistentLookupGenerationByDictionary.clear();
     }
 
     /**
      * @param {string} dictionaryName
      */
     _invalidatePersistentLookupState(dictionaryName) {
-        ++this._persistentLookupGeneration;
+        const recordChunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+        if (typeof recordChunks !== 'undefined') {
+            for (const {fileName, chunkOffset} of recordChunks) {
+                this._randomReadChunkMetadataCache.delete(`${fileName}:${chunkOffset}`);
+            }
+        }
+        this._persistentLookupGenerationByDictionary.set(
+            dictionaryName,
+            (this._persistentLookupGenerationByDictionary.get(dictionaryName) ?? 0) + 1,
+        );
         this._persistentRecordChunksByDictionary.delete(dictionaryName);
         this._persistentIndexLoadedDictionaryNames.delete(dictionaryName);
         this._persistentIndexLoadPromiseByDictionary.delete(dictionaryName);
-        this._randomReadChunkMetadataCache.clear();
+        this._persistentIndexFailureByDictionary.delete(dictionaryName);
+    }
+
+    /**
+     * Invalidates only the dictionary whose shard bytes are about to change.
+     * Unrelated dictionaries remain lookup-ready throughout an import.
+     * @param {string} dictionaryName
+     */
+    _registerDictionaryMutation(dictionaryName) {
+        let firstMutation = true;
+        if (this._importSessionActive) {
+            firstMutation = !this._importSessionDictionaryNames.has(dictionaryName);
+            this._importSessionDictionaryNames.add(dictionaryName);
+        }
+        this._indexByDictionary.delete(dictionaryName);
+        if (firstMutation) {
+            this._invalidatePersistentLookupState(dictionaryName);
+        }
+    }
+
+    /**
+     * Keeps destructive shard mutations serialized and waits for every repair
+     * which was already allowed to publish derived sidecars.
+     * @template T
+     * @param {() => Promise<T>} callback
+     * @param {boolean} [allowActiveImport=false]
+     * @returns {Promise<T>}
+     */
+    async _runExclusiveStorageMutation(callback, allowActiveImport = false) {
+        const previous = this._storageMutationTail;
+        /** @type {() => void} */
+        let release = () => {};
+        this._storageMutationTail = new Promise((resolve) => { release = resolve; });
+        await previous;
+        this._storageMutationActive = true;
+        try {
+            await this._awaitPersistentIndexRepairs();
+            if (this._importSessionActive && !allowActiveImport) {
+                throw new Error('Cannot mutate term-record storage during an active import session');
+            }
+            return await callback();
+        } finally {
+            this._storageMutationActive = false;
+            release();
+        }
+    }
+
+    /** @returns {Promise<void>} */
+    async _awaitPersistentIndexRepairs() {
+        while (this._persistentIndexRepairPromiseByDictionary.size > 0) {
+            await Promise.allSettled(this._persistentIndexRepairPromiseByDictionary.values());
+        }
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {number}
+     */
+    _getPersistentLookupGeneration(dictionaryName) {
+        return this._persistentLookupGenerationByDictionary.get(dictionaryName) ?? 0;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {{status: 'available'|'repairPending'|'repairing'|'temporarilyUnavailable'|'reimportRequired', reason: string|null}}
+     */
+    getDictionaryHealth(dictionaryName) {
+        return this._dictionaryHealthByName.get(dictionaryName) ?? {status: 'available', reason: null};
+    }
+
+    /**
+     * Returns bounded runtime state for diagnosing lookup availability without
+     * reading record or sidecar payloads.
+     * @param {Iterable<string>} [dictionaryNames=[]]
+     * @returns {{importSessionActive: boolean, reloadFromShardsAfterImport: boolean, persistentLookupGeneration: number, dictionaries: Array<Record<string, unknown>>}}
+     */
+    getDiagnostics(dictionaryNames = []) {
+        const names = [...new Set([...dictionaryNames].map((value) => `${value}`.trim()).filter((value) => value.length > 0))];
+        const dictionaries = names.map((dictionaryName) => {
+            const states = this._getDictionaryShardStates(dictionaryName);
+            return {
+                dictionaryName,
+                health: this.getDictionaryHealth(dictionaryName),
+                loaded: this._loadedDictionaryNames.has(dictionaryName),
+                persistentIndexLoaded: this._persistentIndexLoadedDictionaryNames.has(dictionaryName),
+                persistentIndexLoading: this._persistentIndexLoadPromiseByDictionary.has(dictionaryName),
+                persistentIndexRepairing: this._persistentIndexRepairPromiseByDictionary.has(dictionaryName),
+                persistentIndexFailure: this._persistentIndexFailureByDictionary.get(dictionaryName) ?? null,
+                persistentChunkCount: this._persistentRecordChunksByDictionary.get(dictionaryName)?.length ?? 0,
+                materializedRecordCount: this._getLiveRecordIdsForDictionary(dictionaryName)?.length ?? 0,
+                shardCount: states.length,
+                shardBytes: states.reduce((sum, state) => sum + state.fileLength, 0),
+                shardFiles: states.slice(0, 8).map((state) => state.fileName),
+            };
+        });
+        return {
+            importSessionActive: this._importSessionActive,
+            reloadFromShardsAfterImport: this._reloadFromShardsAfterImport,
+            persistentLookupGeneration: this._persistentLookupGeneration,
+            dictionaries,
+        };
+    }
+
+    /**
+     * @param {((dictionaryName: string, status: 'available'|'repairPending'|'repairing'|'temporarilyUnavailable'|'reimportRequired', reason: string|null) => void)|null} handler
+     */
+    setDictionaryHealthChangeHandler(handler) {
+        this._dictionaryHealthChangeHandler = handler;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {boolean}
+     */
+    isDictionaryAvailable(dictionaryName) {
+        const {status} = this.getDictionaryHealth(dictionaryName);
+        return status === 'available' || status === 'repairPending';
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {string} reason
+     */
+    markDictionaryReimportRequired(dictionaryName, reason) {
+        this._setDictionaryHealth(dictionaryName, 'reimportRequired', reason);
+        this._discardMaterializedDictionary(dictionaryName);
+        this._invalidatePersistentLookupState(dictionaryName);
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {'available'|'repairPending'|'repairing'|'temporarilyUnavailable'|'reimportRequired'} status
+     * @param {string|null} reason
+     */
+    _setDictionaryHealth(dictionaryName, status, reason = null) {
+        const previous = this._dictionaryHealthByName.get(dictionaryName);
+        if (status === 'available') {
+            this._dictionaryHealthByName.delete(dictionaryName);
+        } else {
+            this._dictionaryHealthByName.set(dictionaryName, {status, reason});
+        }
+        if (previous?.status === status && previous.reason === reason) { return; }
+        reportDiagnostics('term-record-dictionary-health-changed', {
+            dictionaryName,
+            previousStatus: previous?.status ?? 'available',
+            status,
+            reason,
+        });
+        try {
+            this._dictionaryHealthChangeHandler?.(dictionaryName, status, reason);
+        } catch (error) {
+            reportDiagnostics('term-record-dictionary-health-persist-failed', {
+                dictionaryName,
+                status,
+                error: error instanceof Error ? error.message : String(error),
+            });
+        }
     }
 
     /**
      * @returns {Promise<void>}
      */
     async prepare() {
+        await this._runExclusiveStorageMutation(async () => await this._prepare());
+    }
+
+    /** @returns {Promise<void>} */
+    async _prepare() {
         await this._closeAllWritables();
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
@@ -720,6 +811,7 @@ export class TermRecordOpfsStore {
         this._deferIndexBuild = false;
         this._indexDirty = false;
         this._reloadFromShardsAfterImport = false;
+        this._importSessionDictionaryNames.clear();
         this._loadedDictionaryNames.clear();
         this._allShardContentsLoaded = false;
         this._rootDirectoryHandle = null;
@@ -727,6 +819,7 @@ export class TermRecordOpfsStore {
         this._shardStateByFileName.clear();
         this._activeAppendShardStateByKey.clear();
         this._invalidateAllPersistentLookupState();
+        this._dictionaryHealthByName.clear();
         this._preinternedCompactionRemap = new Uint32Array(0);
         this._invalidShardFileNames = [];
         if (typeof navigator === 'undefined' || !('storage' in navigator) || !('getDirectory' in navigator.storage)) {
@@ -749,34 +842,41 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async beginImportSession() {
-        if (this._importSessionActive) {
-            return;
-        }
-        this._importSessionActive = true;
-        this._deferIndexBuild = true;
-        this._indexDirty = true;
-        this._reloadFromShardsAfterImport = false;
-        this._indexByDictionary.clear();
-        this._invalidateAllPersistentLookupState();
-        this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
-        this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
-        this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
-        for (const state of this._shardStateByFileName.values()) {
-            state.pendingWriteBytes = 0;
-            state.pendingWriteChunks = [];
-            state.queuedWriteBytes = 0;
-            state.queuedWritePromise = null;
-            state.queuedWriteError = null;
-            state.queuedWriteChunks = [];
-            state.initialFileLength = state.fileLength;
-            state.pendingLookupIndexChunks = [];
-            state.pendingLookupIndexBytes = 0;
-            state.pendingLookupIndexRecordCount = 0;
-            state.lookupIndexFileHandle = null;
-            state.lookupIndexWritable = null;
-            state.lookupIndexChunkCount = 0;
-            state.lookupIndexRecordCount = 0;
-        }
+        await this._runExclusiveStorageMutation(async () => {
+            if (this._importSessionActive) {
+                return;
+            }
+            this._importSessionActive = true;
+            this._deferIndexBuild = true;
+            this._indexDirty = true;
+            this._reloadFromShardsAfterImport = false;
+            this._importSessionDictionaryNames.clear();
+            this._indexByDictionary.clear();
+            this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
+            this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
+            this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
+            this._lookupIndexWriteMetrics = this._createEmptyLookupIndexWriteMetrics();
+            for (const state of this._shardStateByFileName.values()) {
+                state.pendingWriteBytes = 0;
+                state.pendingWriteChunks = [];
+                state.queuedWriteBytes = 0;
+                state.queuedWritePromise = null;
+                state.queuedWriteError = null;
+                state.queuedWriteChunks = [];
+                state.initialFileLength = state.fileLength;
+                state.pendingLookupIndexChunks = [];
+                state.pendingLookupIndexBytes = 0;
+                state.pendingLookupIndexRecordCount = 0;
+                state.lookupIndexFileHandle = null;
+                state.lookupIndexWritable = null;
+                state.lookupIndexChunkCount = 0;
+                state.lookupIndexRecordCount = 0;
+                state.lookupIndexQueuedBytes = 0;
+                state.lookupIndexMaxQueuedBytes = 0;
+                state.lookupIndexWritePromise = null;
+                state.lookupIndexWriteError = null;
+            }
+        }, true);
     }
 
     /**
@@ -787,6 +887,7 @@ export class TermRecordOpfsStore {
         if (this._recordsDirectoryHandle === null) { return {shards: []}; }
         const shards = [];
         for (const fileName of await this._listTermRecordStorageFileNames()) {
+            if (fileName.endsWith(LOOKUP_INDEX_FILE_SUFFIX)) { continue; }
             const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName);
             shards.push({fileName, fileLength: (await fileHandle.getFile()).size});
         }
@@ -798,6 +899,17 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async rollbackImportSession(checkpoint) {
+        await this._runExclusiveStorageMutation(
+            async () => await this._rollbackImportSession(checkpoint),
+            true,
+        );
+    }
+
+    /**
+     * @param {import('dictionary-import-journal').TermRecordCheckpoint} checkpoint
+     * @returns {Promise<void>}
+     */
+    async _rollbackImportSession(checkpoint) {
         if (
             typeof checkpoint !== 'object' ||
             checkpoint === null ||
@@ -821,7 +933,9 @@ export class TermRecordOpfsStore {
             ) {
                 throw new TypeError('Invalid term-record import checkpoint shard');
             }
-            checkpointByName.set(shard.fileName, shard.fileLength);
+            if (!shard.fileName.endsWith(LOOKUP_INDEX_FILE_SUFFIX)) {
+                checkpointByName.set(shard.fileName, shard.fileLength);
+            }
         }
         /** @type {Error[]} */
         const errors = [];
@@ -851,6 +965,7 @@ export class TermRecordOpfsStore {
             }
         }
         for (const {fileName, fileLength} of checkpoint.shards) {
+            if (fileName.endsWith(LOOKUP_INDEX_FILE_SUFFIX)) { continue; }
             try {
                 const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName);
                 if ((await fileHandle.getFile()).size !== fileLength) {
@@ -861,7 +976,7 @@ export class TermRecordOpfsStore {
             }
         }
         try {
-            await this.prepare();
+            await this._prepare();
         } catch (error) {
             errors.push(error instanceof Error ? error : new Error(String(error)));
         }
@@ -879,6 +994,7 @@ export class TermRecordOpfsStore {
         this._deferIndexBuild = false;
         this._indexDirty = false;
         this._preinternedCompactionRemap = new Uint32Array(0);
+        this._importSessionDictionaryNames.clear();
         const states = [...this._shardStateByFileName.values()];
         const queuedWrites = [];
         for (const state of states) {
@@ -891,6 +1007,9 @@ export class TermRecordOpfsStore {
             state.pendingLookupIndexRecordCount = 0;
             if (state.queuedWritePromise !== null) {
                 queuedWrites.push(state.queuedWritePromise);
+            }
+            if (state.lookupIndexWritePromise !== null) {
+                queuedWrites.push(state.lookupIndexWritePromise);
             }
         }
         const settledWrites = await Promise.allSettled(queuedWrites);
@@ -909,6 +1028,9 @@ export class TermRecordOpfsStore {
         for (const state of states) {
             state.queuedWritePromise = null;
             state.queuedWriteError = null;
+            state.lookupIndexWritePromise = null;
+            state.lookupIndexWriteError = null;
+            state.lookupIndexQueuedBytes = 0;
             const writable = state.writable;
             state.writable = null;
             if (writable !== null) {
@@ -963,21 +1085,19 @@ export class TermRecordOpfsStore {
         let flushPendingWritesMs = 0;
         let awaitQueuedWritesMs = 0;
         let closeWritableMs = 0;
-        const wasImportSessionActive = this._importSessionActive;
         const tFlushPendingWritesStart = safePerformance.now();
-        if (wasImportSessionActive) {
-            await this._flushPendingWrites();
-            this._importSessionActive = false;
-        } else {
-            this._importSessionActive = false;
-            await this._flushPendingWrites();
-        }
+        await this._flushPendingWrites();
         flushPendingWritesMs = safePerformance.now() - tFlushPendingWritesStart;
         const tAwaitQueuedWritesStart = safePerformance.now();
         await this._awaitQueuedWrites();
         awaitQueuedWritesMs = safePerformance.now() - tAwaitQueuedWritesStart;
         const tCloseWritableStart = safePerformance.now();
         await this._closeAllWritables();
+        for (const dictionaryName of this._importSessionDictionaryNames) {
+            this._setDictionaryHealth(dictionaryName, 'available');
+        }
+        this._importSessionDictionaryNames.clear();
+        this._importSessionActive = false;
         closeWritableMs = safePerformance.now() - tCloseWritableStart;
         this._deferIndexBuild = false;
         this._lastEndImportSessionMetrics = {
@@ -986,6 +1106,10 @@ export class TermRecordOpfsStore {
             closeWritableMs,
             totalMs: safePerformance.now() - tStart,
             ...this._writeDrainMetrics,
+            lookupIndexWriteCallCount: this._lookupIndexWriteMetrics.writeCallCount,
+            lookupIndexWriteBytes: this._lookupIndexWriteMetrics.writeBytes,
+            lookupIndexAwaitMs: this._lookupIndexWriteMetrics.awaitMs,
+            lookupIndexMaxQueuedBytes: this._lookupIndexWriteMetrics.maxQueuedBytes,
         };
         if (this._reloadFromShardsAfterImport) {
             this._indexByDictionary.clear();
@@ -999,7 +1123,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @returns {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}|null}
+     * @returns {TermRecordEndImportSessionMetrics|null}
      */
     getLastEndImportSessionMetrics() {
         return this._lastEndImportSessionMetrics;
@@ -1033,6 +1157,8 @@ export class TermRecordOpfsStore {
         this._invalidShardFileNames = [];
         this._activeAppendShardStateByKey.clear();
         this._invalidateAllPersistentLookupState();
+        this._dictionaryHealthByName.clear();
+        this._importSessionDictionaryNames.clear();
         this._preinternedCompactionRemap = new Uint32Array(0);
         this._loadedDictionaryNames.clear();
         this._allShardContentsLoaded = false;
@@ -1053,14 +1179,23 @@ export class TermRecordOpfsStore {
      * @returns {number}
      */
     get size() {
-        return this._recordsById.size;
+        let count = this._recordsById.size;
+        for (const dictionaryName of this._persistentIndexLoadedDictionaryNames) {
+            const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+            if (typeof chunks === 'undefined') { continue; }
+            let persistentCount = 0;
+            for (const chunk of chunks) { persistentCount += chunk.count; }
+            const materializedCount = this._getLiveRecordIdsForDictionary(dictionaryName)?.length ?? 0;
+            count += Math.max(0, persistentCount - materializedCount);
+        }
+        return count;
     }
 
     /**
      * @returns {boolean}
      */
     isEmpty() {
-        return this._recordsById.size === 0;
+        return this.size === 0;
     }
 
     /**
@@ -1092,6 +1227,7 @@ export class TermRecordOpfsStore {
             };
             this._storeRecord(record);
             this._loadedDictionaryNames.add(record.dictionary);
+            this._setDictionaryHealth(record.dictionary, 'available');
             const shardFileName = this._getShardFileName(record.dictionary, record.entryContentDictName);
             const shardRecords = recordsByShard.get(shardFileName);
             if (typeof shardRecords === 'undefined') {
@@ -1509,7 +1645,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null, preparedLookupIndexes?: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}>}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {string | (string|null)[]} contentDictNames
@@ -1625,6 +1761,7 @@ export class TermRecordOpfsStore {
                 contentLengths,
                 chunk.termRecordPreinternedPlan ?? null,
                 uniformContentDictName,
+                chunk.preparedLookupIndexes ?? null,
             );
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
@@ -1653,6 +1790,7 @@ export class TermRecordOpfsStore {
                 contentLengths,
                 chunk.termRecordPreinternedPlan ?? null,
                 firstContentDictName,
+                chunk.preparedLookupIndexes ?? null,
             );
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
@@ -1780,9 +1918,10 @@ export class TermRecordOpfsStore {
      * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {string} [contentDictName='raw']
+     * @param {Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}>|null} [preparedLookupIndexes=null]
      * @returns {Promise<{encodeMs: number, appendWriteMs: number, validationMs: number, wasmEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
-    async _encodeAndAppendArtifactChunkForState(state, chunk, firstId, contentOffsets, contentLengths, preinternedPlan = null, contentDictName = 'raw') {
+    async _encodeAndAppendArtifactChunkForState(state, chunk, firstId, contentOffsets, contentLengths, preinternedPlan = null, contentDictName = 'raw', preparedLookupIndexes = null) {
         let encodeMs = 0;
         let appendWriteMs = 0;
         let validationMs = 0;
@@ -1833,16 +1972,22 @@ export class TermRecordOpfsStore {
                 };
             const runOffsets = isWholeChunk || hasFixedContentSpan(runChunk, runCount) ? contentOffsets : contentOffsets.slice(runStart, runEnd);
             const runLengths = isWholeChunk || hasFixedContentSpan(runChunk, runCount) ? contentLengths : contentLengths.slice(runStart, runEnd);
-            const runPlan = isWholeChunk ?
-                preinternedPlan :
-                compactTermRecordPreinternedPlan(
-                    preinternedPlan,
-                    runStart,
-                    runCount,
-                    this._getPreinternedCompactionRemap(preinternedPlan?.stringLengths.length ?? 0),
-                );
+            const preparedLookupIndex = preparedLookupIndexes?.get(`${runStart}:${runCount}`) ?? null;
+            const runPlan = preparedLookupIndex?.preinternedPlan ?? compactTermRecordPreinternedPlan(
+                preinternedPlan,
+                runStart,
+                runCount,
+                this._getPreinternedCompactionRemap(preinternedPlan?.stringLengths.length ?? 0),
+                chunk.readingEqualsExpressionList,
+            );
             const tEncodeStart = safePerformance.now();
-            const encodedChunk = await this._encodeArtifactChunkRecords(runChunk, runOffsets, runLengths, runPlan);
+            const encodedChunk = await this._encodeArtifactChunkRecords(
+                runChunk,
+                runOffsets,
+                runLengths,
+                runPlan,
+                preparedLookupIndex?.bytes ?? null,
+            );
             encodeMs += safePerformance.now() - tEncodeStart;
             validationMs += encodedChunk.validationMs;
             wasmEncodeMs += encodedChunk.wasmEncodeMs;
@@ -1865,6 +2010,52 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Builds offset-independent lookup sidecars before term content persistence
+     * completes. Exact range keys ensure offset-driven shard splits safely fall
+     * back to the normal encoder.
+     * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+     * @returns {{indexes: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}>, encodeMs: number}|null}
+     */
+    prepareArtifactChunkLookupIndexes(chunk) {
+        const count = chunk.rowCount;
+        const preinternedPlan = chunk.termRecordPreinternedPlan ?? null;
+        if (count <= 0 || !hasCompleteTermRecordPreinternedPlan(preinternedPlan, count)) {
+            return null;
+        }
+        const completePlan = /** @type {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} */ (preinternedPlan);
+        const startedAt = safePerformance.now();
+        /** @type {Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}>} */
+        const indexes = new Map();
+        for (let runStart = 0; runStart < count; runStart += MAX_COMPACT_LOOKUP_INDEX_ROWS) {
+            const runCount = Math.min(MAX_COMPACT_LOOKUP_INDEX_ROWS, count - runStart);
+            const isWholeChunk = runStart === 0 && runCount === count;
+            const runPlan = /** @type {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} */ (compactTermRecordPreinternedPlan(
+                completePlan,
+                runStart,
+                runCount,
+                this._getPreinternedCompactionRemap(completePlan.stringLengths.length),
+                chunk.readingEqualsExpressionList,
+            ));
+            const readingEqualsExpressionList = isWholeChunk ?
+                chunk.readingEqualsExpressionList :
+                chunk.readingEqualsExpressionList.slice(runStart, runStart + runCount);
+            const sequenceList = isWholeChunk ?
+                chunk.sequenceList :
+                chunk.sequenceList.slice(runStart, runStart + runCount);
+            indexes.set(`${runStart}:${runCount}`, {
+                bytes: encodePersistedTermLookupIndexFromPreinternedPlan(
+                    runPlan,
+                    readingEqualsExpressionList,
+                    sequenceList,
+                    runCount,
+                ),
+                preinternedPlan: runPlan,
+            });
+        }
+        return {indexes, encodeMs: safePerformance.now() - startedAt};
+    }
+
+    /**
      * @param {number} minimumLength
      * @returns {Uint32Array}
      */
@@ -1880,10 +2071,18 @@ export class TermRecordOpfsStore {
      * @returns {Promise<number>}
      */
     async deleteByDictionary(dictionaryName) {
+        return await this._runExclusiveStorageMutation(async () => await this._deleteByDictionary(dictionaryName));
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {Promise<number>}
+     */
+    async _deleteByDictionary(dictionaryName) {
         this._loadedDictionaryNames.delete(dictionaryName);
         this._allShardContentsLoaded = false;
         let deletedCount = 0;
-        const ids = [...this._recordsById.keys()];
+        const ids = this._getLiveRecordIdsForDictionary(dictionaryName) ?? [...this._recordsById.keys()];
         for (const id of ids) {
             const record = this._recordsById.get(id);
             if (typeof record === 'undefined' || record.dictionary !== dictionaryName) { continue; }
@@ -1894,6 +2093,7 @@ export class TermRecordOpfsStore {
         this._recordIdStaleDictionaryNames.delete(dictionaryName);
         this._indexByDictionary.delete(dictionaryName);
         this._invalidatePersistentLookupState(dictionaryName);
+        this._setDictionaryHealth(dictionaryName, 'available');
         await this._deleteShardByDictionary(dictionaryName);
         return deletedCount;
     }
@@ -1905,6 +2105,57 @@ export class TermRecordOpfsStore {
      * @returns {Promise<number>}
      */
     async replaceDictionaryName(fromDictionaryName, toDictionaryName, preserveSourceFiles = false) {
+        return await this._runExclusiveStorageMutation(async () => await this._replaceDictionaryName(
+            fromDictionaryName,
+            toDictionaryName,
+            preserveSourceFiles,
+        ));
+    }
+
+    /**
+     * Removes a destination copy created with preserveSourceFiles=true and
+     * reloads the still-authoritative source shards.
+     * @param {string} fromDictionaryName
+     * @param {string} toDictionaryName
+     * @returns {Promise<void>}
+     * @throws {Error} If rollback cleanup or source reload fails.
+     */
+    async rollbackPreservedDictionaryRename(fromDictionaryName, toDictionaryName) {
+        const fromName = `${fromDictionaryName}`.trim();
+        const toName = `${toDictionaryName}`.trim();
+        if (fromName.length === 0 || toName.length === 0 || fromName === toName) {
+            throw new Error('Dictionary rename rollback titles must be distinct and non-empty');
+        }
+        await this._runExclusiveStorageMutation(async () => {
+            if (this._recordsDirectoryHandle === null) {
+                await this._replaceDictionaryName(toName, fromName, false);
+                return;
+            }
+            /** @type {Error[]} */
+            const errors = [];
+            try {
+                await this._cleanupShardFilesByDictionaryPredicate((dictionaryName) => dictionaryName === toName);
+            } catch (error) {
+                errors.push(toError(error));
+            }
+            try {
+                await this._prepare();
+            } catch (error) {
+                errors.push(toError(error));
+            }
+            if (errors.length > 0) {
+                throw new AggregateError(errors, `Failed to roll back preserved dictionary rename ${toName} to ${fromName}`);
+            }
+        });
+    }
+
+    /**
+     * @param {string} fromDictionaryName
+     * @param {string} toDictionaryName
+     * @param {boolean} preserveSourceFiles
+     * @returns {Promise<number>}
+     */
+    async _replaceDictionaryName(fromDictionaryName, toDictionaryName, preserveSourceFiles) {
         const fromName = `${fromDictionaryName}`.trim();
         const toName = `${toDictionaryName}`.trim();
         if (fromName.length === 0 || toName.length === 0 || fromName === toName) {
@@ -1917,13 +2168,13 @@ export class TermRecordOpfsStore {
         await this._flushPendingWrites();
         await this._awaitQueuedWrites();
         await this._closeAllWritables();
-        await Promise.all([
+        const [sourceIndexLoaded] = await Promise.all([
             this._tryLoadPersistentDictionaryIndex(fromName),
             this._tryLoadPersistentDictionaryIndex(toName),
         ]);
         const hasLiveTargetRecords = this._hasRecordsForDictionary(toName);
         if (!hasLiveTargetRecords && !this._indexByDictionary.has(toName)) {
-            const removedStaleTargetFiles = await this.cleanupShardFilesByDictionaryPredicate((dictionaryName) => dictionaryName === toName);
+            const removedStaleTargetFiles = await this._cleanupShardFilesByDictionaryPredicate((dictionaryName) => dictionaryName === toName);
             if (removedStaleTargetFiles.length > 0) {
                 reportDiagnostics('term-record-store-rename-cleanup-stale-target', {
                     fromName,
@@ -1933,8 +2184,21 @@ export class TermRecordOpfsStore {
             }
         }
 
+        const sourceStates = [...this._shardStateByFileName.values()]
+            .filter((state) => this._decodeDictionaryNameFromShardFileName(state.fileName) === fromName)
+            .sort((a, b) => a.fileName.localeCompare(b.fileName));
+        let hasUsableSourceIndex = sourceIndexLoaded;
+        if (!hasUsableSourceIndex && sourceStates.length > 0 && !this._hasRecordsForDictionary(fromName)) {
+            hasUsableSourceIndex = await this._tryRepairPersistentDictionaryIndex(fromName, true) &&
+            await this._tryLoadPersistentDictionaryIndex(fromName);
+            if (!hasUsableSourceIndex) {
+                throw new Error(`Cannot rename dictionary with unreadable term-record shards: ${fromName}`);
+            }
+        }
+
         const recordIdsToRename = [];
-        for (const id of this._recordsById.keys()) {
+        const candidateRecordIds = this._getLiveRecordIdsForDictionary(fromName) ?? this._recordsById.keys();
+        for (const id of candidateRecordIds) {
             const record = this._recordsById.get(id);
             if (typeof record === 'undefined' || record.dictionary !== fromName) { continue; }
             recordIdsToRename.push(id);
@@ -1943,6 +2207,9 @@ export class TermRecordOpfsStore {
             recordIdsToRename.length :
             (this._persistentRecordChunksByDictionary.get(fromName) ?? []).reduce((sum, {count}) => sum + count, 0);
         if (renamedCount === 0) {
+            if (sourceStates.length > 0) {
+                throw new Error(`Cannot establish source record count for dictionary rename: ${fromName}`);
+            }
             return 0;
         }
 
@@ -1957,30 +2224,32 @@ export class TermRecordOpfsStore {
             this._indexByDictionary.delete(fromName);
             this._indexByDictionary.delete(toName);
             this._indexDirty = false;
+            this._setDictionaryHealth(fromName, 'available');
+            this._setDictionaryHealth(toName, 'available');
             return renamedCount;
         }
-        const sourceStates = [...this._shardStateByFileName.values()]
-            .filter((state) => this._decodeDictionaryNameFromShardFileName(state.fileName) === fromName)
-            .sort((a, b) => a.fileName.localeCompare(b.fileName));
         /** @type {TermRecordRenamePlan[]} */
         const renamePlans = [];
         for (const state of sourceStates) {
             let file;
             try {
                 file = await state.fileHandle.getFile();
-            } catch (_) {
-                continue;
+            } catch (error) {
+                throw new Error(`Cannot read source shard during dictionary rename: ${state.fileName}`, {cause: error});
             }
             const shardInfo = this._decodeShardInfoFromShardFileName(state.fileName);
-            if (shardInfo === null) { continue; }
-            /** @type {ArrayBuffer|null} */
-            let indexBytes = null;
+            if (shardInfo === null) {
+                throw new Error(`Cannot decode source shard name during dictionary rename: ${state.fileName}`);
+            }
+            /** @type {File|null} */
+            let indexFile = null;
             try {
+                if (!hasUsableSourceIndex) { throw new Error('Source lookup index is unavailable'); }
                 const indexFileHandle = await this._recordsDirectoryHandle.getFileHandle(
                     `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
                     {create: false},
                 );
-                indexBytes = await (await indexFileHandle.getFile()).arrayBuffer();
+                indexFile = await indexFileHandle.getFile();
             } catch (_) {
                 // Older shards without a sidecar retain the full-shard fallback.
             }
@@ -2034,9 +2303,9 @@ export class TermRecordOpfsStore {
                                 shardInfo,
                                 nextFileName,
                                 nextFileHandle: replacementHandle,
-                                bytes: await file.arrayBuffer(),
+                                file,
                                 fileSize: file.size,
-                                indexBytes,
+                                indexFile,
                             });
                             continue;
                         } catch (_) {
@@ -2049,28 +2318,29 @@ export class TermRecordOpfsStore {
                 if (e instanceof Error && /already contains data|already exists/.test(e.message)) {
                     throw e;
                 }
+                throw new Error(`Cannot inspect target shard during dictionary rename: ${nextFileName}`, {cause: e});
             }
             renamePlans.push({
                 state,
                 shardInfo,
                 nextFileName,
                 nextFileHandle,
-                bytes: await file.arrayBuffer(),
+                file,
                 fileSize: file.size,
-                indexBytes,
+                indexFile,
             });
         }
         /**
          * @param {FileSystemFileHandle} fileHandle
-         * @param {ArrayBuffer} bytes
+         * @param {File} file
          * @returns {Promise<void>}
          */
-        const writeShardBytes = async (fileHandle, bytes) => {
+        const writeShardFile = async (fileHandle, file) => {
             const writable = await fileHandle.createWritable();
             try {
                 await writable.truncate(0);
-                if (bytes.byteLength > 0) {
-                    await writable.write(bytes);
+                if (file.size > 0) {
+                    await writable.write(file);
                 }
             } finally {
                 await writable.close();
@@ -2082,13 +2352,13 @@ export class TermRecordOpfsStore {
         const removedPlans = [];
         try {
             for (const plan of renamePlans) {
-                await writeShardBytes(plan.nextFileHandle, plan.bytes);
-                if (plan.indexBytes !== null) {
+                await writeShardFile(plan.nextFileHandle, plan.file);
+                if (plan.indexFile !== null) {
                     const nextIndexHandle = await this._recordsDirectoryHandle.getFileHandle(
                         `${plan.nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
                         {create: true},
                     );
-                    await writeShardBytes(nextIndexHandle, plan.indexBytes);
+                    await writeShardFile(nextIndexHandle, plan.indexFile);
                 }
                 createdPlans.push(plan);
             }
@@ -2107,13 +2377,13 @@ export class TermRecordOpfsStore {
             for (const plan of [...removedPlans].reverse()) {
                 try {
                     const restoredHandle = await this._recordsDirectoryHandle.getFileHandle(plan.state.fileName, {create: true});
-                    await writeShardBytes(restoredHandle, plan.bytes);
-                    if (plan.indexBytes !== null) {
+                    await writeShardFile(restoredHandle, plan.file);
+                    if (plan.indexFile !== null) {
                         const restoredIndexHandle = await this._recordsDirectoryHandle.getFileHandle(
                             `${plan.state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
                             {create: true},
                         );
-                        await writeShardBytes(restoredIndexHandle, plan.indexBytes);
+                        await writeShardFile(restoredIndexHandle, plan.indexFile);
                     }
                 } catch (_) {
                     // NOP - preserve original failure.
@@ -2160,6 +2430,8 @@ export class TermRecordOpfsStore {
             this._shardStateByFileName.set(plan.nextFileName, nextState);
             this._setActiveAppendShardState(nextState);
         }
+        this._setDictionaryHealth(fromName, 'available');
+        this._setDictionaryHealth(toName, 'available');
 
         return renamedCount;
     }
@@ -2169,6 +2441,16 @@ export class TermRecordOpfsStore {
      * @returns {Promise<string[]>}
      */
     async cleanupShardFilesByDictionaryPredicate(predicate) {
+        return await this._runExclusiveStorageMutation(
+            async () => await this._cleanupShardFilesByDictionaryPredicate(predicate),
+        );
+    }
+
+    /**
+     * @param {(dictionaryName: string) => boolean} predicate
+     * @returns {Promise<string[]>}
+     */
+    async _cleanupShardFilesByDictionaryPredicate(predicate) {
         if (this._recordsDirectoryHandle === null) {
             return [];
         }
@@ -2182,39 +2464,51 @@ export class TermRecordOpfsStore {
             if (dictionaryName === null || !predicate(dictionaryName)) {
                 continue;
             }
-            removedDictionaryNames.add(dictionaryName);
             const state = this._shardStateByFileName.get(fileName);
             if (typeof state !== 'undefined') {
                 await this._flushPendingWritesForShard(state);
                 await this._closeShardWritable(state);
+            }
+            await this._removeStorageFileOrTruncate(fileName, true);
+            if (typeof state !== 'undefined') {
                 this._shardStateByFileName.delete(fileName);
                 this._activeAppendShardStateByKey.delete(state.logicalKey);
             }
-            try {
-                await this._recordsDirectoryHandle.removeEntry(fileName);
-                removedFileNames.push(fileName);
-            } catch (_) {
-                // NOP
-            }
-            try {
-                await this._recordsDirectoryHandle.removeEntry(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
-            } catch (_) {
-                // NOP
-            }
+            await this._removeStorageFileOrTruncate(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
+            removedDictionaryNames.add(dictionaryName);
+            removedFileNames.push(fileName);
         }
         if (removedDictionaryNames.size > 0) {
+            const recordIdsToDelete = [];
+            let requiresFullRecordScan = false;
+            for (const dictionaryName of removedDictionaryNames) {
+                const ids = this._getLiveRecordIdsForDictionary(dictionaryName);
+                if (typeof ids === 'undefined') {
+                    requiresFullRecordScan = true;
+                    break;
+                }
+                for (const id of ids) {
+                    recordIdsToDelete.push(id);
+                }
+            }
+            if (requiresFullRecordScan) {
+                recordIdsToDelete.length = 0;
+                for (const id of this._recordsById.keys()) {
+                    const record = this._recordsById.get(id);
+                    if (typeof record !== 'undefined' && removedDictionaryNames.has(record.dictionary)) {
+                        recordIdsToDelete.push(id);
+                    }
+                }
+            }
+            for (const id of recordIdsToDelete) {
+                this._deleteRecord(id);
+            }
             for (const dictionaryName of removedDictionaryNames) {
                 this._loadedDictionaryNames.delete(dictionaryName);
                 this._recordIdsByDictionary.delete(dictionaryName);
                 this._recordIdStaleDictionaryNames.delete(dictionaryName);
                 this._invalidatePersistentLookupState(dictionaryName);
-            }
-            for (const id of this._recordsById.keys()) {
-                const record = this._recordsById.get(id);
-                if (typeof record === 'undefined' || !removedDictionaryNames.has(record.dictionary)) {
-                    continue;
-                }
-                this._deleteRecord(id);
+                this._setDictionaryHealth(dictionaryName, 'available');
             }
             this._indexByDictionary.clear();
             this._indexDirty = false;
@@ -2298,7 +2592,14 @@ export class TermRecordOpfsStore {
             const prefixView = new DataView(prefix.buffer, prefix.byteOffset, prefix.byteLength);
             const firstId = prefixView.getUint32(0, true);
             const count = prefixView.getUint32(4, true);
-            const contentOffsetBase = readSafeU64Le(prefixView, 8);
+            let contentOffsetBase;
+            try {
+                contentOffsetBase = readSafeU64Le(prefixView, 8);
+            } catch (error) {
+                throw new TermRecordIntegrityError(
+                    `Invalid term-record content offset base for ${chunk.fileName}: ${String(error)}`,
+                );
+            }
             if (hashLookupIndexBytes(prefix.subarray(0, CHUNK_HEADER_BYTES)) !== chunk.chunkHeaderHash) {
                 throw new TermRecordIntegrityError(`Term-record chunk header checksum mismatch for ${chunk.fileName}`);
             }
@@ -2351,16 +2652,16 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{fileName: string}} chunk
-     * @returns {Promise<void>}
+     * @param {{fileName: string, dictionaryName: string}} chunk
+     * @returns {Promise<boolean>}
      */
     async _loadShardForRandomReadFallback(chunk) {
         const state = this._shardStateByFileName.get(chunk.fileName);
-        if (typeof state === 'undefined') { return; }
+        if (typeof state === 'undefined' || !this._canMaterializeDictionaryFallback(chunk.dictionaryName)) { return false; }
         const deferIndexBuild = this._deferIndexBuild;
         this._deferIndexBuild = true;
         try {
-            await this._loadShardStateContents(state);
+            return await this._loadShardStateContents(state);
         } finally {
             this._deferIndexBuild = deferIndexBuild;
         }
@@ -2373,12 +2674,26 @@ export class TermRecordOpfsStore {
     async getByIdsAsync(ids) {
         const idList = [...ids];
         const result = this.getByIds(idList);
+        /** @type {Map<string, number>} */
+        const generationByDictionary = new Map();
+        for (const record of result.values()) {
+            generationByDictionary.set(
+                record.dictionary,
+                this._getPersistentLookupGeneration(record.dictionary),
+            );
+        }
         /** @type {Map<ReturnType<TermRecordOpfsStore['_findPersistentRecordChunk']>, number[]>} */
         const idsByChunk = new Map();
         for (const id of idList) {
             if (result.has(id)) { continue; }
             const chunk = this._findPersistentRecordChunk(id);
             if (chunk === null) { continue; }
+            if (!generationByDictionary.has(chunk.dictionaryName)) {
+                generationByDictionary.set(
+                    chunk.dictionaryName,
+                    this._getPersistentLookupGeneration(chunk.dictionaryName),
+                );
+            }
             const chunkIds = idsByChunk.get(chunk);
             if (typeof chunkIds === 'undefined') {
                 idsByChunk.set(chunk, [id]);
@@ -2389,6 +2704,8 @@ export class TermRecordOpfsStore {
         const chunkEntries = [...idsByChunk];
         /** @type {Array<[NonNullable<ReturnType<TermRecordOpfsStore['_findPersistentRecordChunk']>>, number[]]>} */
         const fallbackEntries = [];
+        /** @type {Set<string>} */
+        const failedDictionaryNames = new Set();
         let nextChunkIndex = 0;
         const readNextChunk = async () => {
             while (true) {
@@ -2396,91 +2713,114 @@ export class TermRecordOpfsStore {
                 if (chunkIndex >= chunkEntries.length) { return; }
                 const [chunk, chunkIds] = chunkEntries[chunkIndex];
                 if (chunk === null) { continue; }
-                try {
-                    const metadata = await this._loadRandomReadChunkMetadata(chunk);
-                    if (metadata === null) { throw new Error(`Invalid term-record chunk metadata for ${chunk.fileName}`); }
-                    let minOrdinal = Number.POSITIVE_INFINITY;
-                    let maxOrdinal = -1;
-                    for (const id of chunkIds) {
-                        const ordinal = id - chunk.firstId;
-                        minOrdinal = Math.min(minOrdinal, ordinal);
-                        maxOrdinal = Math.max(maxOrdinal, ordinal);
-                    }
-                    const records = await this._readFileRange(
-                        metadata.file,
-                        metadata.recordsStart + (minOrdinal * RECORD_HEADER_BYTES),
-                        metadata.recordsStart + ((maxOrdinal + 1) * RECORD_HEADER_BYTES),
-                    );
-                    const view = new DataView(records.buffer, records.byteOffset, records.byteLength);
-                    for (const id of chunkIds) {
-                        const ordinal = id - chunk.firstId;
-                        let cursor = (ordinal - minOrdinal) * RECORD_HEADER_BYTES;
-                        const fixedFieldsOffset = cursor;
-                        const expressionIndex = view.getUint32(cursor, true); cursor += 4;
-                        const readingIndex = view.getUint32(cursor, true); cursor += 4;
-                        const contentOffsetDelta = view.getUint32(cursor, true); cursor += 4;
-                        const rawContentLength = view.getUint32(cursor, true); cursor += 4;
-                        const score = view.getInt32(cursor, true); cursor += 4;
-                        const rawSequence = view.getInt32(cursor, true);
-                        if (expressionIndex >= metadata.strings.length) {
-                            throw new TermRecordIntegrityError(`Invalid expression index for term record ${id}`);
+                const expectedGeneration = generationByDictionary.get(chunk.dictionaryName);
+                const isCurrent = () => (
+                    expectedGeneration === this._getPersistentLookupGeneration(chunk.dictionaryName) &&
+                    this.getDictionaryHealth(chunk.dictionaryName).status !== 'reimportRequired' &&
+                    (this._persistentRecordChunksByDictionary.get(chunk.dictionaryName) ?? []).includes(chunk)
+                );
+                if (!isCurrent()) { continue; }
+                /** @type {unknown} */
+                let readError = null;
+                for (let attempt = 0; attempt < STORAGE_READ_RETRY_COUNT; ++attempt) {
+                    try {
+                        const metadata = await this._loadRandomReadChunkMetadata(chunk);
+                        if (metadata === null) { throw new Error(`Invalid term-record chunk metadata for ${chunk.fileName}`); }
+                        if (!isCurrent()) { break; }
+                        let minOrdinal = Number.POSITIVE_INFINITY;
+                        let maxOrdinal = -1;
+                        for (const id of chunkIds) {
+                            const ordinal = id - chunk.firstId;
+                            minOrdinal = Math.min(minOrdinal, ordinal);
+                            maxOrdinal = Math.max(maxOrdinal, ordinal);
                         }
-                        const expression = metadata.strings[expressionIndex];
-                        const reading = readingIndex === READING_EQUALS_EXPRESSION_U32 ?
+                        const records = await this._readFileRange(
+                            metadata.file,
+                            metadata.recordsStart + (minOrdinal * RECORD_HEADER_BYTES),
+                            metadata.recordsStart + ((maxOrdinal + 1) * RECORD_HEADER_BYTES),
+                        );
+                        const view = new DataView(records.buffer, records.byteOffset, records.byteLength);
+                        for (const id of chunkIds) {
+                            const ordinal = id - chunk.firstId;
+                            let cursor = (ordinal - minOrdinal) * RECORD_HEADER_BYTES;
+                            const fixedFieldsOffset = cursor;
+                            const expressionIndex = view.getUint32(cursor, true); cursor += 4;
+                            const readingIndex = view.getUint32(cursor, true); cursor += 4;
+                            const contentOffsetDelta = view.getUint32(cursor, true); cursor += 4;
+                            const rawContentLength = view.getUint32(cursor, true); cursor += 4;
+                            const score = view.getInt32(cursor, true); cursor += 4;
+                            const rawSequence = view.getInt32(cursor, true);
+                            if (expressionIndex >= metadata.strings.length) {
+                                throw new TermRecordIntegrityError(`Invalid expression index for term record ${id}`);
+                            }
+                            const expression = metadata.strings[expressionIndex];
+                            const reading = readingIndex === READING_EQUALS_EXPRESSION_U32 ?
                             expression :
                             metadata.strings[readingIndex];
-                        if (typeof reading !== 'string') {
-                            throw new TermRecordIntegrityError(`Invalid reading index for term record ${id}`);
-                        }
-                        const expectedExpression = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'expression');
-                        const expectedReading = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'reading') ?? expectedExpression;
-                        const expectedFixedFieldsHash = new DataView(
-                            chunk.recordFixedFieldsHashes.buffer,
-                            chunk.recordFixedFieldsHashes.byteOffset + (ordinal * 4),
-                            4,
-                        ).getUint32(0, true);
-                        if (
-                            expectedExpression === null ||
-                            expectedReading === null ||
-                            expectedFixedFieldsHash !== hashTermRecordFixedFields(view, fixedFieldsOffset) ||
-                            !bytesEqual(expectedExpression, this._textEncoder.encode(expression)) ||
-                            !bytesEqual(expectedReading, this._textEncoder.encode(reading))
-                        ) {
-                            throw new TermRecordIntegrityError(`Term-record checksum mismatch for ${id} in ${chunk.fileName}`);
-                        }
-                        const entryContentOffset = contentOffsetDelta === U32_NULL ?
+                            if (typeof reading !== 'string') {
+                                throw new TermRecordIntegrityError(`Invalid reading index for term record ${id}`);
+                            }
+                            const expectedExpression = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'expression');
+                            const expectedReading = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'reading') ?? expectedExpression;
+                            const expectedFixedFieldsHash = new DataView(
+                                chunk.recordFixedFieldsHashes.buffer,
+                                chunk.recordFixedFieldsHashes.byteOffset + (ordinal * 4),
+                                4,
+                            ).getUint32(0, true);
+                            if (
+                                expectedExpression === null ||
+                                expectedReading === null ||
+                                expectedFixedFieldsHash !== hashTermRecordFixedFields(view, fixedFieldsOffset) ||
+                                !bytesEqual(expectedExpression, this._textEncoder.encode(expression)) ||
+                                !bytesEqual(expectedReading, this._textEncoder.encode(reading))
+                            ) {
+                                throw new TermRecordIntegrityError(`Term-record checksum mismatch for ${id} in ${chunk.fileName}`);
+                            }
+                            const entryContentOffset = contentOffsetDelta === U32_NULL ?
                             -1 :
                             metadata.contentOffsetBase + contentOffsetDelta;
-                        if (entryContentOffset >= 0 && !Number.isSafeInteger(entryContentOffset)) {
-                            throw new Error(`Unsafe content offset for term record ${id}`);
+                            if (entryContentOffset >= 0 && !Number.isSafeInteger(entryContentOffset)) {
+                                throw new TermRecordIntegrityError(`Unsafe content offset for term record ${id}`);
+                            }
+                            const record = {
+                                id,
+                                dictionary: chunk.dictionaryName,
+                                expression,
+                                reading,
+                                expressionReverse: null,
+                                readingReverse: null,
+                                entryContentOffset,
+                                entryContentLength: rawContentLength === U32_NULL ? -1 : rawContentLength,
+                                entryContentDictName: chunk.contentDictName,
+                                score,
+                                sequence: rawSequence >= 0 ? rawSequence : null,
+                            };
+                            if (!isCurrent()) { break; }
+                            this._storeRecord(record);
+                            result.set(id, record);
                         }
-                        const record = {
-                            id,
-                            dictionary: chunk.dictionaryName,
-                            expression,
-                            reading,
-                            expressionReverse: null,
-                            readingReverse: null,
-                            entryContentOffset,
-                            entryContentLength: rawContentLength === U32_NULL ? -1 : rawContentLength,
-                            entryContentDictName: chunk.contentDictName,
-                            score,
-                            sequence: rawSequence >= 0 ? rawSequence : null,
-                        };
-                        this._storeRecord(record);
-                        result.set(id, record);
+                        readError = null;
+                        break;
+                    } catch (error) {
+                        readError = error;
+                        if (error instanceof TermRecordIntegrityError) { break; }
+                        if ((attempt + 1) < STORAGE_READ_RETRY_COUNT) {
+                            await new Promise((resolve) => { setTimeout(resolve, 0); });
+                        }
                     }
-                } catch (error) {
-                    if (error instanceof TermRecordIntegrityError) {
-                        reportDiagnostics('term-record-random-read-integrity-error', {
-                            fileName: chunk.fileName,
-                            firstId: chunk.firstId,
-                            count: chunk.count,
-                            requestedIds: chunkIds,
-                            error: error.message,
-                        });
-                        throw error;
-                    }
+                }
+                if (readError === null) { continue; }
+                if (readError instanceof TermRecordIntegrityError) {
+                    reportDiagnostics('term-record-random-read-integrity-error', {
+                        fileName: chunk.fileName,
+                        firstId: chunk.firstId,
+                        count: chunk.count,
+                        requestedIds: chunkIds,
+                        error: readError.message,
+                    });
+                    failedDictionaryNames.add(chunk.dictionaryName);
+                    this.markDictionaryReimportRequired(chunk.dictionaryName, 'Dictionary record data is damaged');
+                } else {
                     fallbackEntries.push([chunk, chunkIds]);
                 }
             }
@@ -2489,16 +2829,44 @@ export class TermRecordOpfsStore {
         const readResults = await Promise.allSettled(
             Array.from({length: randomReadConcurrency}, () => readNextChunk()),
         );
-        const failedRead = readResults.find((readResult) => readResult.status === 'rejected');
-        if (typeof failedRead !== 'undefined' && failedRead.status === 'rejected') {
-            throw failedRead.reason;
+        for (const readResult of readResults) {
+            if (readResult.status === 'rejected') {
+                reportDiagnostics('term-record-random-read-worker-error', {error: String(readResult.reason)});
+            }
         }
-        // Serialize corrupt-sidecar fallbacks because multiple chunks can share one shard.
+        // Small dictionaries may retain an availability fallback. Large dictionaries
+        // never materialize on a lookup path.
         for (const [chunk, chunkIds] of fallbackEntries) {
-            await this._loadShardForRandomReadFallback(chunk);
+            if (!await this._loadShardForRandomReadFallback(chunk)) {
+                failedDictionaryNames.add(chunk.dictionaryName);
+                this._setDictionaryHealth(
+                    chunk.dictionaryName,
+                    'temporarilyUnavailable',
+                    'Dictionary record data could not be read',
+                );
+                continue;
+            }
             for (const id of chunkIds) {
                 const record = this._recordsById.get(id);
                 if (typeof record !== 'undefined') { result.set(id, record); }
+            }
+        }
+        if (failedDictionaryNames.size > 0) {
+            for (const dictionaryName of failedDictionaryNames) {
+                this._discardMaterializedDictionary(dictionaryName);
+            }
+            for (const [id, record] of result) {
+                if (failedDictionaryNames.has(record.dictionary)) {
+                    result.delete(id);
+                }
+            }
+        }
+        for (const [id, record] of result) {
+            if (
+                generationByDictionary.get(record.dictionary) !== this._getPersistentLookupGeneration(record.dictionary) ||
+                this.getDictionaryHealth(record.dictionary).status === 'reimportRequired'
+            ) {
+                result.delete(id);
             }
         }
         return result;
@@ -2689,7 +3057,7 @@ export class TermRecordOpfsStore {
      * @returns {number|null}
      */
     _scanCurrentBinaryMaxRecordId(content) {
-        if (content.byteLength < BINARY_MAGIC_BYTES) {
+        if (content.byteLength < BINARY_HEADER_PREFIX_BYTES) {
             return null;
         }
         const view = new DataView(content.buffer, content.byteOffset, content.byteLength);
@@ -2697,7 +3065,7 @@ export class TermRecordOpfsStore {
         if (magic !== BINARY_MAGIC_TEXT) {
             return null;
         }
-        let cursor = BINARY_MAGIC_BYTES;
+        let cursor = BINARY_HEADER_PREFIX_BYTES;
         if ((cursor + 2) > content.byteLength) { return null; }
         const entryContentDictNameMeta16 = view.getUint16(cursor, true); cursor += 2;
         let entryContentDictNameMeta = entryContentDictNameMeta16;
@@ -2717,6 +3085,7 @@ export class TermRecordOpfsStore {
             const chunkCount = view.getUint32(cursor, true); cursor += 4;
             if (chunkBaseId <= 0 || chunkCount === 0) { break; }
             cursor += 8; // 64-bit entry-content offset base
+            cursor += 4; // record payload checksum
             maxId = Math.max(maxId, chunkBaseId + chunkCount - 1);
             if ((cursor + STRING_TABLE_HEADER_BYTES) > content.byteLength) { return maxId; }
             const stringCount = view.getUint32(cursor, true); cursor += 4;
@@ -2930,12 +3299,29 @@ export class TermRecordOpfsStore {
      */
     async _tryLoadPersistentDictionaryIndex(dictionaryName) {
         if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName)) {
+            this._setDictionaryHealth(dictionaryName, 'available');
             return true;
         }
         const existing = this._persistentIndexLoadPromiseByDictionary.get(dictionaryName);
         if (typeof existing !== 'undefined') { return await existing; }
-        const generation = this._persistentLookupGeneration;
-        const load = this._loadPersistentDictionaryIndex(dictionaryName, generation);
+        const globalGeneration = this._persistentLookupGeneration;
+        const dictionaryGeneration = this._getPersistentLookupGeneration(dictionaryName);
+        const load = (async () => {
+            for (let attempt = 0; attempt < STORAGE_READ_RETRY_COUNT; ++attempt) {
+                if (await this._loadPersistentDictionaryIndex(
+                    dictionaryName,
+                    globalGeneration,
+                    dictionaryGeneration,
+                )) {
+                    return true;
+                }
+                if (this._persistentIndexFailureByDictionary.get(dictionaryName)?.kind !== 'transient') {
+                    break;
+                }
+                await new Promise((resolve) => { setTimeout(resolve, 0); });
+            }
+            return false;
+        })();
         this._persistentIndexLoadPromiseByDictionary.set(dictionaryName, load);
         try {
             return await load;
@@ -2948,51 +3334,133 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {string} dictionaryName
-     * @param {number} generation
+     * @param {number} globalGeneration
+     * @param {number} [dictionaryGeneration]
      * @returns {Promise<boolean>}
      */
-    async _loadPersistentDictionaryIndex(dictionaryName, generation) {
+    async _loadPersistentDictionaryIndex(
+        dictionaryName,
+        globalGeneration,
+        dictionaryGeneration = this._getPersistentLookupGeneration(dictionaryName),
+    ) {
         if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName)) {
+            this._setDictionaryHealth(dictionaryName, 'available');
             return true;
         }
-        if (this._recordsDirectoryHandle === null) { return false; }
+        if (this._recordsDirectoryHandle === null) {
+            this._recordPersistentIndexFailure(dictionaryName, 'transient', 'Term-record directory is unavailable');
+            return false;
+        }
         const states = [...this._shardStateByFileName.values()]
             .filter((state) => this._decodeDictionaryNameFromShardFileName(state.fileName) === dictionaryName)
             .sort((a, b) => a.fileName.localeCompare(b.fileName));
-        if (states.length === 0) { return false; }
+        if (states.length === 0) {
+            this._recordPersistentIndexFailure(dictionaryName, 'missing', 'No term-record shards exist');
+            return false;
+        }
         /** @type {PersistentRecordChunk[]} */
         const recordChunks = [];
         try {
             for (const state of states) {
-                const indexFileHandle = await this._recordsDirectoryHandle.getFileHandle(
-                    `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
-                    {create: false},
-                );
-                const [recordFile, indexFile] = await Promise.all([
-                    state.fileHandle.getFile(),
-                    indexFileHandle.getFile(),
+                let indexFileHandle;
+                try {
+                    indexFileHandle = await this._recordsDirectoryHandle.getFileHandle(
+                        `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
+                        {create: false},
+                    );
+                } catch (error) {
+                    if (isStorageEntryNotFoundError(error)) {
+                        throw new PersistentLookupIndexError('missing', `Lookup index is missing for ${state.fileName}`, error);
+                    }
+                    throw error;
+                }
+                let recordFile;
+                let indexFile;
+                try {
+                    [recordFile, indexFile] = await Promise.all([
+                        state.fileHandle.getFile(),
+                        indexFileHandle.getFile(),
+                    ]);
+                } catch (error) {
+                    if (isStorageEntryNotFoundError(error)) {
+                        throw new PersistentLookupIndexError(
+                            'invalid',
+                            `Term-record shard or lookup index disappeared for ${state.fileName}`,
+                            error,
+                        );
+                    }
+                    throw error;
+                }
+                if (recordFile.size < (BINARY_HEADER_PREFIX_BYTES + 2) || indexFile.size < LOOKUP_INDEX_FILE_HEADER_BYTES) {
+                    throw new PersistentLookupIndexError('invalid', `Lookup index is truncated for ${state.fileName}`);
+                }
+                const [indexHeader, recordHeader] = await Promise.all([
+                    this._readFileRange(indexFile, 0, LOOKUP_INDEX_FILE_HEADER_BYTES),
+                    this._readFileRange(recordFile, 0, BINARY_HEADER_PREFIX_BYTES),
                 ]);
-                if (recordFile.size <= 0 || indexFile.size < LOOKUP_INDEX_FILE_HEADER_BYTES) {
-                    return false;
+                const headerView = new DataView(indexHeader.buffer, indexHeader.byteOffset, indexHeader.byteLength);
+                if (this._textDecoder.decode(indexHeader.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {
+                    throw new PersistentLookupIndexError('invalid', `Lookup index header is invalid for ${state.fileName}`);
+                }
+                if (this._textDecoder.decode(recordHeader.subarray(0, BINARY_MAGIC_BYTES)) !== BINARY_MAGIC_TEXT) {
+                    throw new PersistentLookupIndexError('invalid', `Term-record shard header is invalid for ${state.fileName}`);
+                }
+                const recordGenerationId = recordHeader.subarray(BINARY_MAGIC_BYTES, BINARY_HEADER_PREFIX_BYTES);
+                const indexGenerationId = indexHeader.subarray(24, LOOKUP_INDEX_FILE_HEADER_BYTES);
+                if (!bytesEqual(recordGenerationId, indexGenerationId)) {
+                    throw new PersistentLookupIndexError('invalid', `Lookup index generation does not match ${state.fileName}`);
+                }
+                state.generationId = new Uint8Array(recordGenerationId);
+                let expectedRecordFileLength;
+                try {
+                    expectedRecordFileLength = readSafeU64Le(headerView, 8);
+                } catch (error) {
+                    throw new PersistentLookupIndexError(
+                        'invalid',
+                        `Lookup index record length is invalid for ${state.fileName}`,
+                        error,
+                    );
+                }
+                const chunkCount = headerView.getUint32(16, true);
+                const expectedRecordCount = headerView.getUint32(20, true);
+                if (expectedRecordFileLength !== recordFile.size || chunkCount === 0 || expectedRecordCount === 0) {
+                    throw new PersistentLookupIndexError('invalid', `Lookup index metadata does not match ${state.fileName}`);
+                }
+                const minimumIndexBytes = LOOKUP_INDEX_FILE_HEADER_BYTES +
+                (chunkCount * LOOKUP_INDEX_CHUNK_HEADER_BYTES) +
+                (expectedRecordCount * 4);
+                const maximumIndexBytes = Math.max(
+                    MAX_LOOKUP_INDEX_OVERHEAD_BYTES,
+                    Math.min(Number.MAX_SAFE_INTEGER, (recordFile.size * 4) + MAX_LOOKUP_INDEX_OVERHEAD_BYTES),
+                );
+                if (
+                    !Number.isSafeInteger(minimumIndexBytes) ||
+                    minimumIndexBytes > indexFile.size ||
+                    indexFile.size > maximumIndexBytes
+                ) {
+                    throw new PersistentLookupIndexError('invalid', `Lookup index size is implausible for ${state.fileName}`);
                 }
                 const content = new Uint8Array(await indexFile.arrayBuffer());
                 const view = new DataView(content.buffer, content.byteOffset, content.byteLength);
-                if (this._textDecoder.decode(content.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {
-                    return false;
-                }
-                const expectedRecordFileLength = readSafeU64Le(view, 8);
-                const chunkCount = view.getUint32(16, true);
-                const expectedRecordCount = view.getUint32(20, true);
-                if (expectedRecordFileLength !== recordFile.size || chunkCount === 0 || expectedRecordCount === 0) {
-                    return false;
-                }
                 let cursor = LOOKUP_INDEX_FILE_HEADER_BYTES;
                 let actualRecordCount = 0;
                 for (let chunkIndex = 0; chunkIndex < chunkCount; ++chunkIndex) {
-                    if ((cursor + LOOKUP_INDEX_CHUNK_HEADER_BYTES) > content.byteLength) { return false; }
+                    if ((cursor + LOOKUP_INDEX_CHUNK_HEADER_BYTES) > content.byteLength) {
+                        throw new PersistentLookupIndexError('invalid', `Lookup index chunk header is truncated for ${state.fileName}`);
+                    }
                     const firstId = view.getUint32(cursor, true); cursor += 4;
                     const count = view.getUint32(cursor, true); cursor += 4;
-                    const recordChunkOffset = readSafeU64Le(view, cursor); cursor += 8;
+                    let recordChunkOffset;
+                    try {
+                        recordChunkOffset = readSafeU64Le(view, cursor);
+                    } catch (error) {
+                        throw new PersistentLookupIndexError(
+                            'invalid',
+                            `Lookup index record offset is invalid for ${state.fileName}`,
+                            error,
+                        );
+                    }
+                    cursor += 8;
                     const payloadLength = view.getUint32(cursor, true); cursor += 4;
                     const payloadHash = view.getUint32(cursor, true); cursor += 4;
                     const chunkHeaderHash = view.getUint32(cursor, true); cursor += 4;
@@ -3006,19 +3474,28 @@ export class TermRecordOpfsStore {
                         (recordChunkOffset + CHUNK_HEADER_BYTES + STRING_TABLE_HEADER_BYTES) > recordFile.size ||
                         fixedFieldsHashesEnd > content.byteLength
                     ) {
-                        return false;
+                        throw new PersistentLookupIndexError('invalid', `Lookup index chunk metadata is invalid for ${state.fileName}`);
                     }
                     const payload = content.subarray(cursor, payloadEnd);
-                    if (hashLookupIndexBytes(payload) !== payloadHash) { return false; }
+                    if (hashLookupIndexBytes(payload) !== payloadHash) {
+                        throw new PersistentLookupIndexError('invalid', `Lookup index payload checksum failed for ${state.fileName}`);
+                    }
                     const fixedFieldsHashesBytes = content.subarray(payloadEnd, fixedFieldsHashesEnd);
-                    if (hashLookupIndexBytes(fixedFieldsHashesBytes) !== fixedFieldsHashesHash) { return false; }
-                    const lookupIndex = parsePersistedTermLookupIndex(payload);
+                    if (hashLookupIndexBytes(fixedFieldsHashesBytes) !== fixedFieldsHashesHash) {
+                        throw new PersistentLookupIndexError('invalid', `Lookup index record checksum table failed for ${state.fileName}`);
+                    }
+                    let lookupIndex;
+                    try {
+                        lookupIndex = parsePersistedTermLookupIndex(payload);
+                    } catch (error) {
+                        throw new PersistentLookupIndexError('invalid', `Lookup index payload is invalid for ${state.fileName}`, error);
+                    }
                     if (
                         lookupIndex.expressionKeys.length !== count ||
                         lookupIndex.readingKeys.length !== count ||
                         lookupIndex.sequenceValues.length !== count
                     ) {
-                        return false;
+                        throw new PersistentLookupIndexError('invalid', `Lookup index row counts are invalid for ${state.fileName}`);
                     }
                     recordChunks.push({
                         firstId,
@@ -3036,29 +3513,325 @@ export class TermRecordOpfsStore {
                     cursor = fixedFieldsHashesEnd;
                 }
                 if (cursor !== content.byteLength || actualRecordCount !== expectedRecordCount) {
-                    return false;
+                    throw new PersistentLookupIndexError('invalid', `Lookup index file length is invalid for ${state.fileName}`);
                 }
             }
-        } catch (_) {
+        } catch (error) {
+            if (error instanceof PersistentLookupIndexError) {
+                this._recordPersistentIndexFailure(dictionaryName, error.kind, error.message);
+            } else {
+                this._recordPersistentIndexFailure(
+                    dictionaryName,
+                    'transient',
+                    error instanceof Error ? error.message : String(error),
+                );
+            }
             return false;
         }
         recordChunks.sort((a, b) => a.firstId - b.firstId);
         for (let i = 1; i < recordChunks.length; ++i) {
             if (recordChunks[i].firstId <= (recordChunks[i - 1].firstId + recordChunks[i - 1].count - 1)) {
+                this._recordPersistentIndexFailure(dictionaryName, 'invalid', 'Lookup index record ranges overlap');
                 return false;
             }
         }
         if (
-            generation !== this._persistentLookupGeneration ||
+            globalGeneration !== this._persistentLookupGeneration ||
+            dictionaryGeneration !== this._getPersistentLookupGeneration(dictionaryName) ||
             this._importSessionActive ||
             states.some((state) => this._shardStateByFileName.get(state.fileName) !== state)
         ) {
+            this._recordPersistentIndexFailure(dictionaryName, 'transient', 'Lookup index generation changed while loading');
             return false;
         }
         this._indexByDictionary.delete(dictionaryName);
         this._persistentRecordChunksByDictionary.set(dictionaryName, recordChunks);
         this._persistentIndexLoadedDictionaryNames.add(dictionaryName);
+        this._persistentIndexFailureByDictionary.delete(dictionaryName);
+        this._setDictionaryHealth(dictionaryName, 'available');
         return true;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {'missing'|'invalid'|'transient'} kind
+     * @param {string} message
+     */
+    _recordPersistentIndexFailure(dictionaryName, kind, message) {
+        this._persistentIndexFailureByDictionary.set(dictionaryName, {kind, message});
+        reportDiagnostics('term-record-persistent-index-load-failed', {dictionaryName, kind, message});
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {boolean} [allowDuringStorageMutation=false]
+     * @returns {Promise<boolean>}
+     */
+    async _tryRepairPersistentDictionaryIndex(dictionaryName, allowDuringStorageMutation = false) {
+        if (this._importSessionActive || (this._storageMutationActive && !allowDuringStorageMutation)) {
+            return false;
+        }
+        const existing = this._persistentIndexRepairPromiseByDictionary.get(dictionaryName);
+        if (typeof existing !== 'undefined') { return await existing; }
+        const repair = this._repairPersistentDictionaryIndex(dictionaryName);
+        this._persistentIndexRepairPromiseByDictionary.set(dictionaryName, repair);
+        try {
+            return await repair;
+        } finally {
+            if (this._persistentIndexRepairPromiseByDictionary.get(dictionaryName) === repair) {
+                this._persistentIndexRepairPromiseByDictionary.delete(dictionaryName);
+            }
+        }
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {Promise<boolean>}
+     */
+    async _repairPersistentDictionaryIndex(dictionaryName) {
+        if (this._recordsDirectoryHandle === null) {
+            this._setDictionaryHealth(dictionaryName, 'temporarilyUnavailable', 'Term-record directory is unavailable');
+            return false;
+        }
+        const states = this._getDictionaryShardStates(dictionaryName);
+        if (states.length === 0) {
+            this._setDictionaryHealth(dictionaryName, 'reimportRequired', 'Dictionary record data is missing');
+            return false;
+        }
+        this._setDictionaryHealth(dictionaryName, 'repairing', null);
+        const globalGeneration = this._persistentLookupGeneration;
+        const generation = this._getPersistentLookupGeneration(dictionaryName);
+        const startedAt = safePerformance.now();
+        let recordCount = 0;
+        let indexBytes = 0;
+        try {
+            for (const state of states) {
+                if (
+                    globalGeneration !== this._persistentLookupGeneration ||
+                    generation !== this._getPersistentLookupGeneration(dictionaryName) ||
+                    this._importSessionActive ||
+                    this._shardStateByFileName.get(state.fileName) !== state
+                ) {
+                    this._recordPersistentIndexFailure(dictionaryName, 'transient', 'Lookup index generation changed during repair');
+                    this._setDictionaryHealth(dictionaryName, 'temporarilyUnavailable', 'Dictionary repair was superseded by a storage update');
+                    return false;
+                }
+                const result = await this._rebuildLookupIndexForShard(state);
+                recordCount += result.recordCount;
+                indexBytes += result.indexBytes;
+            }
+            if (
+                globalGeneration !== this._persistentLookupGeneration ||
+                generation !== this._getPersistentLookupGeneration(dictionaryName) ||
+                this._importSessionActive ||
+                states.some((state) => this._shardStateByFileName.get(state.fileName) !== state)
+            ) {
+                this._recordPersistentIndexFailure(dictionaryName, 'transient', 'Lookup index generation changed during repair');
+                this._setDictionaryHealth(dictionaryName, 'temporarilyUnavailable', 'Dictionary repair was superseded by a storage update');
+                return false;
+            }
+            this._invalidatePersistentLookupState(dictionaryName);
+            reportDiagnostics('term-record-persistent-index-repair-complete', {
+                dictionaryName,
+                shardCount: states.length,
+                recordCount,
+                indexBytes,
+                elapsedMs: safePerformance.now() - startedAt,
+            });
+            return true;
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            const integrityFailure = error instanceof TermRecordIntegrityError;
+            if (integrityFailure) {
+                this.markDictionaryReimportRequired(dictionaryName, 'Dictionary record data is damaged');
+            } else {
+                this._setDictionaryHealth(
+                    dictionaryName,
+                    'temporarilyUnavailable',
+                    'Dictionary repair could not access browser storage',
+                );
+            }
+            reportDiagnostics('term-record-persistent-index-repair-failed', {
+                dictionaryName,
+                shardCount: states.length,
+                elapsedMs: safePerformance.now() - startedAt,
+                integrityFailure,
+                error: message,
+            });
+            return false;
+        }
+    }
+
+    /**
+     * @param {TermRecordShardState} state
+     * @returns {Promise<{recordCount: number, indexBytes: number}>}
+     */
+    async _rebuildLookupIndexForShard(state) {
+        if (this._recordsDirectoryHandle === null) {
+            throw new Error('Term-record directory is unavailable');
+        }
+        let file;
+        try {
+            file = await state.fileHandle.getFile();
+        } catch (error) {
+            if (isStorageEntryNotFoundError(error)) {
+                throw new TermRecordIntegrityError(`Term-record shard no longer exists: ${state.fileName}`);
+            }
+            throw error;
+        }
+        state.fileLength = file.size;
+        if (file.size < (BINARY_HEADER_PREFIX_BYTES + 2)) {
+            throw new TermRecordIntegrityError(`Term-record shard is truncated: ${state.fileName}`);
+        }
+        const initialHeaderLength = Math.min(file.size, BINARY_HEADER_PREFIX_BYTES + 2 + 4);
+        const initialHeader = await this._readFileRange(file, 0, initialHeaderLength);
+        if (!this._isBinaryFormat(initialHeader)) {
+            throw new TermRecordIntegrityError(`Term-record shard header is invalid: ${state.fileName}`);
+        }
+        const initialView = new DataView(initialHeader.buffer, initialHeader.byteOffset, initialHeader.byteLength);
+        const generationId = new Uint8Array(initialHeader.subarray(BINARY_MAGIC_BYTES, BINARY_HEADER_PREFIX_BYTES));
+        state.generationId = generationId;
+        let cursor = BINARY_HEADER_PREFIX_BYTES;
+        const meta16 = initialView.getUint16(cursor, true); cursor += 2;
+        let meta = meta16;
+        if (meta16 === U16_NULL) {
+            if ((cursor + 4) > initialHeader.byteLength) {
+                throw new TermRecordIntegrityError(`Term-record shard metadata is truncated: ${state.fileName}`);
+            }
+            meta = initialView.getUint32(cursor, true); cursor += 4;
+        }
+        const customNameLength = (meta & 0xff) === ENTRY_CONTENT_DICT_NAME_CODE_CUSTOM ? (meta >>> 8) : 0;
+        cursor += customNameLength;
+        if (cursor > file.size) {
+            throw new TermRecordIntegrityError(`Term-record shard dictionary metadata is truncated: ${state.fileName}`);
+        }
+
+        const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
+        const indexFileHandle = await this._recordsDirectoryHandle.getFileHandle(indexFileName, {create: true});
+        const writable = await indexFileHandle.createWritable();
+        let chunkCount = 0;
+        let recordCount = 0;
+        let indexBytes = LOOKUP_INDEX_FILE_HEADER_BYTES;
+        let yieldDeadline = safePerformance.now() + REPAIR_YIELD_BUDGET_MS;
+        try {
+            await writable.truncate(0);
+            await writable.seek(0);
+            await writable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
+            while (cursor < file.size) {
+                const chunkOffset = cursor;
+                const prefixEnd = cursor + CHUNK_HEADER_BYTES + STRING_TABLE_HEADER_BYTES;
+                if (prefixEnd > file.size) {
+                    throw new TermRecordIntegrityError(`Term-record chunk header is truncated: ${state.fileName}`);
+                }
+                const prefix = await this._readFileRange(file, cursor, prefixEnd);
+                const view = new DataView(prefix.buffer, prefix.byteOffset, prefix.byteLength);
+                const firstId = view.getUint32(0, true);
+                const count = view.getUint32(4, true);
+                let contentOffsetBase;
+                try {
+                    contentOffsetBase = readSafeU64Le(view, 8);
+                } catch (error) {
+                    throw new TermRecordIntegrityError(`Term-record chunk content offset is invalid: ${state.fileName}: ${String(error)}`);
+                }
+                const expectedPayloadHash = view.getUint32(16, true);
+                const stringCount = view.getUint32(CHUNK_HEADER_BYTES, true);
+                const stringBytesLength = view.getUint32(CHUNK_HEADER_BYTES + 4, true);
+                const lastId = firstId + count - 1;
+                if (
+                    firstId <= 0 ||
+                    count === 0 ||
+                    lastId > 0xffffffff ||
+                    stringCount === 0 ||
+                    stringCount > (count * 2)
+                ) {
+                    throw new TermRecordIntegrityError(`Term-record chunk metadata is invalid: ${state.fileName}`);
+                }
+                const payloadLength = STRING_TABLE_HEADER_BYTES + (stringCount * 2) + stringBytesLength + (count * RECORD_HEADER_BYTES);
+                const payloadStart = cursor + CHUNK_HEADER_BYTES;
+                const payloadEnd = payloadStart + payloadLength;
+                if (
+                    !Number.isSafeInteger(payloadEnd) ||
+                    payloadLength > MAX_REPAIR_CHUNK_PAYLOAD_BYTES ||
+                    payloadEnd > file.size
+                ) {
+                    throw new TermRecordIntegrityError(`Term-record chunk payload is truncated: ${state.fileName}`);
+                }
+                const payload = await this._readFileRange(file, payloadStart, payloadEnd);
+                if (hashLookupIndexBytes(payload) !== expectedPayloadHash) {
+                    throw new TermRecordIntegrityError(`Term-record chunk payload checksum failed: ${state.fileName}`);
+                }
+                let lookupPayload;
+                try {
+                    lookupPayload = encodePersistedTermLookupIndexFromRecordPayload(payload, count);
+                } catch (error) {
+                    if (error instanceof RangeError) { throw error; }
+                    throw new TermRecordIntegrityError(`Term-record chunk payload is invalid: ${state.fileName}: ${String(error)}`);
+                }
+                const indexChunk = this._createLookupIndexChunk(
+                    firstId,
+                    count,
+                    chunkOffset,
+                    contentOffsetBase,
+                    lookupPayload,
+                    payload,
+                );
+                await writable.write(indexChunk);
+                ++chunkCount;
+                recordCount += count;
+                indexBytes += indexChunk.byteLength;
+                cursor = payloadEnd;
+                if (safePerformance.now() >= yieldDeadline) {
+                    await new Promise((resolve) => { setTimeout(resolve, 0); });
+                    yieldDeadline = safePerformance.now() + REPAIR_YIELD_BUDGET_MS;
+                }
+            }
+            if (chunkCount === 0 || recordCount === 0 || cursor !== file.size) {
+                throw new TermRecordIntegrityError(`Term-record shard contains no complete records: ${state.fileName}`);
+            }
+            const header = new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES);
+            header.set(this._textEncoder.encode(LOOKUP_INDEX_MAGIC_TEXT), 0);
+            const headerView = new DataView(header.buffer, header.byteOffset, header.byteLength);
+            writeSafeU64Le(headerView, 8, file.size);
+            headerView.setUint32(16, chunkCount, true);
+            headerView.setUint32(20, recordCount, true);
+            header.set(generationId, 24);
+            await writable.seek(0);
+            await writable.write(header);
+            await writable.close();
+        } catch (error) {
+            const abort = Reflect.get(writable, 'abort');
+            if (typeof abort === 'function') {
+                try {
+                    await /** @type {() => Promise<void>} */ (abort).call(writable);
+                } catch (_) {
+                    // Preserve the original repair failure.
+                }
+            }
+            if (error instanceof TermRecordIntegrityError) {
+                await this._discardInvalidShardState(state);
+            }
+            throw error;
+        }
+        return {recordCount, indexBytes};
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {TermRecordShardState[]}
+     */
+    _getDictionaryShardStates(dictionaryName) {
+        return [...this._shardStateByFileName.values()]
+            .filter((state) => this._decodeDictionaryNameFromShardFileName(state.fileName) === dictionaryName)
+            .sort((a, b) => a.fileName.localeCompare(b.fileName));
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {boolean}
+     */
+    _canMaterializeDictionaryFallback(dictionaryName) {
+        const states = this._getDictionaryShardStates(dictionaryName);
+        return states.length > 0 && states.reduce((sum, state) => sum + state.fileLength, 0) <= SMALL_SHARD_FALLBACK_MAX_BYTES;
     }
 
     /**
@@ -3119,6 +3892,48 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Resolves the same query across dictionaries while sharing UTF-8 encoding
+     * and hashing, which are otherwise repeated for every enabled dictionary.
+     * @param {string[]} dictionaryNames
+     * @param {string} query
+     * @returns {Array<{expression: number[], reading: number[]}>}
+     */
+    findTermIdMatchesForDictionaries(dictionaryNames, query) {
+        /** @type {Uint8Array|null} */
+        let queryBytes = null;
+        let queryHash = 0;
+        return dictionaryNames.map((dictionaryName) => {
+            const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+            if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
+                if (queryBytes === null) {
+                    queryBytes = this._textEncoder.encode(query);
+                    queryHash = hashTermLookupKeyBytes(queryBytes);
+                }
+                /** @type {number[]} */
+                const expression = [];
+                /** @type {number[]} */
+                const reading = [];
+                for (const chunk of chunks) {
+                    appendExactRowMatches(
+                        chunk.lookupIndex,
+                        queryBytes,
+                        expression,
+                        reading,
+                        chunk.firstId,
+                        queryHash,
+                    );
+                }
+                return {expression, reading};
+            }
+            const index = this.getDictionaryIndex(dictionaryName);
+            return {
+                expression: [...(index.expression.get(query) ?? [])],
+                reading: [...(index.reading.get(query) ?? [])],
+            };
+        });
+    }
+
+    /**
      * @param {Iterable<string>} dictionaryNames
      * @returns {Promise<void>}
      */
@@ -3170,6 +3985,41 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Resolves both prefix fields across dictionaries while sharing UTF-8
+     * encoding and each persisted key-range scan.
+     * @param {string[]} dictionaryNames
+     * @param {string} query
+     * @param {boolean} [reverse=false]
+     * @returns {Array<{expression: Array<{id: number, exact: boolean}>, reading: Array<{id: number, exact: boolean}>}>}
+     */
+    findTermPrefixIdMatchesForDictionaries(dictionaryNames, query, reverse = false) {
+        /** @type {Uint8Array|null} */
+        let queryBytes = null;
+        return dictionaryNames.map((dictionaryName) => {
+            const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+            if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
+                queryBytes ??= this._textEncoder.encode(query);
+                const expression = [];
+                const reading = [];
+                for (const chunk of chunks) {
+                    const matches = findPrefixRowMatches(chunk.lookupIndex, queryBytes, reverse);
+                    for (const {row, exact} of matches.expression) {
+                        expression.push({id: chunk.firstId + row, exact});
+                    }
+                    for (const {row, exact} of matches.reading) {
+                        reading.push({id: chunk.firstId + row, exact});
+                    }
+                }
+                return {expression, reading};
+            }
+            return {
+                expression: this.findTermPrefixIdMatches(dictionaryName, query, 'expression', reverse),
+                reading: this.findTermPrefixIdMatches(dictionaryName, query, 'reading', reverse),
+            };
+        });
+    }
+
+    /**
      * @param {string} dictionaryName
      * @param {number} sequence
      * @returns {number[]}
@@ -3193,7 +4043,24 @@ export class TermRecordOpfsStore {
      * @returns {boolean}
      */
     hasPersistentTermLookupIndex(dictionaryName) {
-        return this._persistentIndexLoadedDictionaryNames.has(dictionaryName);
+        return (
+            this._persistentIndexLoadedDictionaryNames.has(dictionaryName) &&
+            this._persistentRecordChunksByDictionary.has(dictionaryName)
+        );
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {boolean}
+     */
+    _hasCompleteDictionaryLookupState(dictionaryName) {
+        if (this.hasPersistentTermLookupIndex(dictionaryName)) { return true; }
+        return (
+            this._allShardContentsLoaded &&
+            this._loadedDictionaryNames.has(dictionaryName) &&
+            (!this._importSessionActive || !this._importSessionDictionaryNames.has(dictionaryName)) &&
+            this._hasRecordsForDictionary(dictionaryName)
+        );
     }
 
     /**
@@ -3250,13 +4117,31 @@ export class TermRecordOpfsStore {
      */
     async ensureDictionariesLoaded(dictionaryNames) {
         if (this._recordsDirectoryHandle === null) {
+            for (const value of dictionaryNames) {
+                const dictionaryName = `${value}`.trim();
+                if (
+                    dictionaryName.length > 0 &&
+                    this.getDictionaryHealth(dictionaryName).status !== 'reimportRequired'
+                ) {
+                    this._setDictionaryHealth(
+                        dictionaryName,
+                        'temporarilyUnavailable',
+                        'Term-record directory is unavailable',
+                    );
+                }
+            }
             return;
         }
         /** @type {Set<string>} */
         const pending = new Set();
         for (const dictionaryName of dictionaryNames) {
             const name = `${dictionaryName}`.trim();
-            if (name.length === 0 || this._loadedDictionaryNames.has(name)) {
+            const healthStatus = this.getDictionaryHealth(name).status;
+            if (
+                name.length === 0 ||
+                healthStatus === 'reimportRequired' ||
+                (healthStatus === 'available' && this._hasCompleteDictionaryLookupState(name))
+            ) {
                 continue;
             }
             pending.add(name);
@@ -3288,24 +4173,74 @@ export class TermRecordOpfsStore {
             }
         }
         if (pending.size === 0) { return; }
-        /** @type {TermRecordShardState[]} */
-        const statesToLoad = [];
-        for (const state of this._shardStateByFileName.values()) {
-            const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
-            if (dictionaryName !== null && pending.has(dictionaryName)) {
-                statesToLoad.push(state);
+
+        // Sidecars are derived data. Repair them from bounded record chunks before
+        // considering materialization, and serialize repairs to cap CPU and memory.
+        for (const dictionaryName of pending) {
+            const failure = this._persistentIndexFailureByDictionary.get(dictionaryName);
+            if (failure?.kind === 'transient') {
+                this._setDictionaryHealth(
+                    dictionaryName,
+                    'temporarilyUnavailable',
+                    failure.message || 'Dictionary lookup data is temporarily unavailable',
+                );
+                pending.delete(dictionaryName);
+                continue;
+            }
+            if (!await this._tryRepairPersistentDictionaryIndex(dictionaryName)) { continue; }
+            if (await this._tryLoadPersistentDictionaryIndex(dictionaryName)) {
+                pending.delete(dictionaryName);
+                this._loadedDictionaryNames.add(dictionaryName);
             }
         }
-        statesToLoad.sort((a, b) => a.fileName.localeCompare(b.fileName));
-        await this._loadShardStatesContents(statesToLoad);
+        if (pending.size === 0) { return; }
+
         for (const dictionaryName of pending) {
-            this._loadedDictionaryNames.add(dictionaryName);
+            if (this.getDictionaryHealth(dictionaryName).status === 'reimportRequired') {
+                continue;
+            }
+            if (!this._canMaterializeDictionaryFallback(dictionaryName)) {
+                if (this.getDictionaryHealth(dictionaryName).status !== 'reimportRequired') {
+                    this._setDictionaryHealth(dictionaryName, 'temporarilyUnavailable', 'Dictionary lookup data is unavailable');
+                }
+                continue;
+            }
+            const states = this._getDictionaryShardStates(dictionaryName);
+            const results = await Promise.all(states.map((state) => this._loadShardStateContents(state)));
+            if (results.every(Boolean)) {
+                this._loadedDictionaryNames.add(dictionaryName);
+                this._setDictionaryHealth(
+                    dictionaryName,
+                    'repairPending',
+                    'Lookup index repair is pending; materialized lookup remains available',
+                );
+            } else {
+                this._discardMaterializedDictionary(dictionaryName);
+                if (this.getDictionaryHealth(dictionaryName).status !== 'reimportRequired') {
+                    this._setDictionaryHealth(dictionaryName, 'temporarilyUnavailable', 'Dictionary record data could not be loaded');
+                }
+            }
         }
     }
 
     /**
-     * @returns {Promise<void>}
+     * @param {string} dictionaryName
      */
+    _discardMaterializedDictionary(dictionaryName) {
+        const ids = this._getLiveRecordIdsForDictionary(dictionaryName) ?? this._recordsById.keys();
+        for (const id of ids) {
+            const record = this._recordsById.get(id);
+            if (record?.dictionary === dictionaryName) {
+                this._deleteRecord(id);
+            }
+        }
+        this._recordIdsByDictionary.delete(dictionaryName);
+        this._recordIdStaleDictionaryNames.delete(dictionaryName);
+        this._indexByDictionary.delete(dictionaryName);
+        this._loadedDictionaryNames.delete(dictionaryName);
+    }
+
+    /** @returns {Promise<void>} */
     async ensureAllDictionariesLoaded() {
         if (this._allShardContentsLoaded || this._recordsDirectoryHandle === null) {
             return;
@@ -3329,7 +4264,7 @@ export class TermRecordOpfsStore {
         }
         for (const state of this._shardStateByFileName.values()) {
             const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
-            if (dictionaryName !== null && dictionaryName.length > 0) {
+            if (dictionaryName !== null && dictionaryName.length > 0 && this.isDictionaryAvailable(dictionaryName)) {
                 this._loadedDictionaryNames.add(dictionaryName);
             }
         }
@@ -3358,16 +4293,65 @@ export class TermRecordOpfsStore {
      */
     async verifyIntegrity(expectedDictionaryNames = null) {
         if (!this._allShardContentsLoaded && this._recordsById.size === 0) {
+            /** @type {Set<string>|null} */
+            const expectedNames = Array.isArray(expectedDictionaryNames) ?
+                new Set(expectedDictionaryNames.filter((name) => typeof name === 'string' && name.length > 0)) :
+                null;
+            /** @type {Set<string>} */
+            const actualNames = new Set();
+            /** @type {Map<string, string[]>} */
+            const actualFileNamesByDictionary = new Map();
+            for (const fileName of this._shardStateByFileName.keys()) {
+                const dictionaryName = this._decodeDictionaryNameFromShardFileName(fileName);
+                if (dictionaryName === null) { continue; }
+                actualNames.add(dictionaryName);
+                const fileNames = actualFileNamesByDictionary.get(dictionaryName);
+                if (typeof fileNames === 'undefined') {
+                    actualFileNamesByDictionary.set(dictionaryName, [fileName]);
+                } else {
+                    fileNames.push(fileName);
+                }
+            }
+            /** @type {string[]} */
+            let missingDictionaryNames = [];
+            /** @type {string[]} */
+            let orphanDictionaryNames = [];
+            if (expectedNames !== null) {
+                missingDictionaryNames = [...expectedNames].filter((name) => !actualNames.has(name)).sort();
+                orphanDictionaryNames = [...actualNames].filter((name) => !expectedNames.has(name)).sort();
+            }
+            const orphanShardFileNames = orphanDictionaryNames
+                .flatMap((name) => actualFileNamesByDictionary.get(name) ?? [])
+                .sort();
+            let removedOrphanShardCount = 0;
+            for (const fileName of orphanShardFileNames) {
+                try {
+                    await this._removeStorageFileOrTruncate(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
+                    await this._removeStorageFileOrTruncate(fileName, true);
+                } catch (error) {
+                    reportDiagnostics('term-record-orphan-shard-cleanup-failed', {
+                        fileName,
+                        error: error instanceof Error ? error.message : String(error),
+                    });
+                    continue;
+                }
+                const state = this._shardStateByFileName.get(fileName);
+                if (typeof state !== 'undefined') {
+                    this._activeAppendShardStateByKey.delete(state.logicalKey);
+                }
+                this._shardStateByFileName.delete(fileName);
+                ++removedOrphanShardCount;
+            }
             const summary = {
-                expectedShardCount: 0,
+                expectedShardCount: expectedNames?.size ?? 0,
                 actualShardCount: this._shardStateByFileName.size,
-                missingShardCount: 0,
-                missingShardFileNames: [],
-                missingDictionaryNames: [],
-                orphanShardCount: 0,
-                orphanShardFileNames: [],
-                orphanDictionaryNames: [],
-                removedOrphanShardCount: 0,
+                missingShardCount: missingDictionaryNames.length,
+                missingShardFileNames: missingDictionaryNames.map((name) => this._getShardFileName(name)),
+                missingDictionaryNames,
+                orphanShardCount: orphanShardFileNames.length,
+                orphanShardFileNames,
+                orphanDictionaryNames,
+                removedOrphanShardCount,
                 invalidShardPayloadCount: this._invalidShardFileNames.length,
                 invalidShardFileNames: [...this._invalidShardFileNames].sort(),
                 rewroteAllShardsFromMemory: false,
@@ -3422,15 +4406,21 @@ export class TermRecordOpfsStore {
 
         let removedOrphanShardCount = 0;
         for (const fileName of orphanShardFileNames) {
-            if (this._recordsDirectoryHandle !== null) {
-                try {
-                    await this._recordsDirectoryHandle.removeEntry(fileName);
-                    ++removedOrphanShardCount;
-                } catch (_) {
-                    // NOP
-                }
+            try {
+                // Remove the derived index first. If record removal then fails,
+                // the authoritative shard remains registered and its index can
+                // be rebuilt; the reverse order can leave hidden stale data.
+                await this._removeStorageFileOrTruncate(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
+                await this._removeStorageFileOrTruncate(fileName, true);
+            } catch (error) {
+                reportDiagnostics('term-record-orphan-shard-cleanup-failed', {
+                    fileName,
+                    error: error instanceof Error ? error.message : String(error),
+                });
+                continue;
             }
             this._shardStateByFileName.delete(fileName);
+            ++removedOrphanShardCount;
         }
 
         let rewroteAllShardsFromMemory = false;
@@ -3476,7 +4466,7 @@ export class TermRecordOpfsStore {
      * @returns {boolean}
      */
     _isBinaryFormat(content) {
-        if (content.byteLength < BINARY_MAGIC_BYTES) {
+        if (content.byteLength < BINARY_HEADER_PREFIX_BYTES) {
             return false;
         }
         const magic = this._textDecoder.decode(content.subarray(0, BINARY_MAGIC_BYTES));
@@ -3489,7 +4479,7 @@ export class TermRecordOpfsStore {
      * @returns {boolean}
      */
     _loadBinary(content, shardDictionaryName = null) {
-        if (content.byteLength < BINARY_MAGIC_BYTES || shardDictionaryName === null) {
+        if (content.byteLength < BINARY_HEADER_PREFIX_BYTES || shardDictionaryName === null) {
             return false;
         }
         const view = new DataView(content.buffer, content.byteOffset, content.byteLength);
@@ -3497,7 +4487,7 @@ export class TermRecordOpfsStore {
         if (magic !== BINARY_MAGIC_TEXT) {
             return false;
         }
-        let cursor = BINARY_MAGIC_BYTES;
+        let cursor = BINARY_HEADER_PREFIX_BYTES;
         /** @type {TermRecord[]} */
         const parsedRecords = [];
         if ((cursor + 2) > content.byteLength) { return false; }
@@ -3530,6 +4520,8 @@ export class TermRecordOpfsStore {
                 return false;
             }
             cursor += 8;
+            const expectedPayloadHash = view.getUint32(cursor, true); cursor += 4;
+            const payloadStart = cursor;
             if ((cursor + STRING_TABLE_HEADER_BYTES) > content.byteLength) { return false; }
             const stringCount = view.getUint32(cursor, true); cursor += 4;
             const stringBytesLength = view.getUint32(cursor, true); cursor += 4;
@@ -3580,6 +4572,9 @@ export class TermRecordOpfsStore {
                     sequence: rawSequence >= 0 ? rawSequence : null,
                 };
                 parsedRecords.push(record);
+            }
+            if (hashLookupIndexBytes(content.subarray(payloadStart, cursor)) !== expectedPayloadHash) {
+                return false;
             }
         }
         if (cursor !== content.byteLength) { return false; }
@@ -3635,6 +4630,7 @@ export class TermRecordOpfsStore {
     /**
      * @param {string} value
      * @returns {{meta: number, bytes: Uint8Array|null}}
+     * @throws {RangeError} If a custom dictionary name exceeds the persisted format limit.
      */
     _encodeEntryContentDictNameMeta(value) {
         switch (value) {
@@ -3653,6 +4649,9 @@ export class TermRecordOpfsStore {
                 return {meta: ENTRY_CONTENT_DICT_NAME_CODE_RAW_V6, bytes: null};
             default: {
                 const bytes = this._textEncoder.encode(value);
+                if (bytes.byteLength > 0x00ffffff) {
+                    throw new RangeError('Term-record content dictionary name exceeds the shard format limit');
+                }
                 return {meta: (((bytes.byteLength >>> 0) << 8) | ENTRY_CONTENT_DICT_NAME_CODE_CUSTOM) >>> 0, bytes};
             }
         }
@@ -3812,9 +4811,10 @@ export class TermRecordOpfsStore {
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
+     * @param {Uint8Array|null} [preparedLookupIndexBytes=null]
      * @returns {Promise<{bytes: Uint8Array, contentOffsetBase: number, lookupIndexBytes: Uint8Array, fixedFieldsHashes: Uint8Array|null, validationMs: number, wasmEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
-    async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null) {
+    async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null) {
         if (chunk.rowCount === 0) {
             return {
                 bytes: new Uint8Array(0),
@@ -3857,7 +4857,7 @@ export class TermRecordOpfsStore {
                 const wasmEncodeMs = safePerformance.now() - tWasmEncodeStart;
                 if (encoded !== null) {
                     const tLookupIndexEncodeStart = safePerformance.now();
-                    const lookupIndexBytes = encodePersistedTermLookupIndexFromPreinternedPlan(
+                    const lookupIndexBytes = preparedLookupIndexBytes ?? encodePersistedTermLookupIndexFromPreinternedPlan(
                         preinternedPlan,
                         chunk.readingEqualsExpressionList,
                         chunk.sequenceList,
@@ -3870,7 +4870,7 @@ export class TermRecordOpfsStore {
                         fixedFieldsHashes: encoded.fixedFieldsHashes,
                         validationMs,
                         wasmEncodeMs,
-                        lookupIndexEncodeMs: safePerformance.now() - tLookupIndexEncodeStart,
+                        lookupIndexEncodeMs: preparedLookupIndexBytes === null ? safePerformance.now() - tLookupIndexEncodeStart : 0,
                     };
                 }
             } catch (_) {
@@ -3888,7 +4888,7 @@ export class TermRecordOpfsStore {
             );
             const wasmEncodeMs = safePerformance.now() - tRecordEncodeStart;
             const tLookupIndexEncodeStart = safePerformance.now();
-            const lookupIndexBytes = encodePersistedTermLookupIndexFromPreinternedPlan(
+            const lookupIndexBytes = preparedLookupIndexBytes ?? encodePersistedTermLookupIndexFromPreinternedPlan(
                 preinternedPlan,
                 chunk.readingEqualsExpressionList,
                 chunk.sequenceList,
@@ -3901,7 +4901,7 @@ export class TermRecordOpfsStore {
                 fixedFieldsHashes: null,
                 validationMs,
                 wasmEncodeMs,
-                lookupIndexEncodeMs: safePerformance.now() - tLookupIndexEncodeStart,
+                lookupIndexEncodeMs: preparedLookupIndexBytes === null ? safePerformance.now() - tLookupIndexEncodeStart : 0,
             };
         }
         /** @type {TermRecord[]} */
@@ -3990,7 +4990,7 @@ export class TermRecordOpfsStore {
      * @param {number} firstId
      * @param {number} count
      * @param {string|null} [contentDictNameOverride=null]
-     * @param {number} [contentOffsetBase=0]
+     * @param {number} contentOffsetBase
      * @param {Uint8Array|null} [lookupIndexBytes=null]
      * @param {Uint8Array|null} [fixedFieldsHashes=null]
      * @returns {Promise<void>}
@@ -4016,16 +5016,19 @@ export class TermRecordOpfsStore {
         }
 
         /** @type {Uint8Array|null} */
-        const binaryHeader = state.fileLength === 0 ? this._createBinaryHeader(state.sharedContentDictName) : null;
+        const binaryHeader = state.fileLength === 0 ?
+            this._createBinaryHeader(state.sharedContentDictName, state.generationId) :
+            null;
         const recordChunkOffset = state.fileLength + (binaryHeader?.byteLength ?? 0);
+        const recordPayloadHash = hashLookupIndexBytes(chunk);
         const chunks = binaryHeader !== null ?
             [
                 binaryHeader,
-                this._createChunkHeader(firstId, count, contentOffsetBase),
+                this._createChunkHeader(firstId, count, contentOffsetBase, chunk, recordPayloadHash),
                 chunk,
             ] :
             [
-                this._createChunkHeader(firstId, count, contentOffsetBase),
+                this._createChunkHeader(firstId, count, contentOffsetBase, chunk, recordPayloadHash),
                 chunk,
             ];
         let totalBytes = 0;
@@ -4048,12 +5051,16 @@ export class TermRecordOpfsStore {
                 lookupIndexBytes,
                 chunk,
                 fixedFieldsHashes,
+                recordPayloadHash,
             );
             state.pendingLookupIndexChunks.push(lookupIndexChunk);
             state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;
             state.pendingLookupIndexRecordCount += count;
+            if (state.lookupIndexWriteError !== null) {
+                throw state.lookupIndexWriteError;
+            }
             if (state.pendingLookupIndexBytes >= LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES) {
-                await this._flushPendingLookupIndexChunks(state);
+                await this._flushPendingLookupIndexChunks(state, !this._importSessionActive);
             }
         }
 
@@ -4080,21 +5087,28 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {string} [contentDictName]
+     * @param {Uint8Array} [generationId]
      * @returns {Uint8Array}
+     * @throws {Error} If the generation ID or dictionary metadata is invalid.
      */
-    _createBinaryHeader(contentDictName = 'raw') {
+    _createBinaryHeader(contentDictName = 'raw', generationId = this._createShardGenerationId()) {
         const header = this._textEncoder.encode(BINARY_MAGIC_TEXT);
+        if (!(generationId instanceof Uint8Array) || generationId.byteLength !== SHARD_GENERATION_BYTES) {
+            throw new Error('Invalid term-record shard generation ID');
+        }
         const {meta: entryContentDictNameMeta, bytes: entryContentDictNameBytes} = this._encodeEntryContentDictNameMeta(contentDictName);
         const hasExtendedMeta = entryContentDictNameMeta > ENTRY_CONTENT_DICT_NAME_VALUE_MASK;
         const output = new Uint8Array(
             header.byteLength +
+            SHARD_GENERATION_BYTES +
             2 +
             (hasExtendedMeta ? 4 : 0) +
             (entryContentDictNameBytes?.byteLength ?? 0),
         );
         output.set(header, 0);
+        output.set(generationId, header.byteLength);
         const view = new DataView(output.buffer, output.byteOffset, output.byteLength);
-        let cursor = header.byteLength;
+        let cursor = BINARY_HEADER_PREFIX_BYTES;
         if (hasExtendedMeta) {
             view.setUint16(cursor, U16_NULL, true); cursor += 2;
             view.setUint32(cursor, entryContentDictNameMeta >>> 0, true); cursor += 4;
@@ -4107,6 +5121,20 @@ export class TermRecordOpfsStore {
         return output;
     }
 
+    /** @returns {Uint8Array} */
+    _createShardGenerationId() {
+        const generationId = new Uint8Array(SHARD_GENERATION_BYTES);
+        const crypto = globalThis.crypto;
+        if (typeof crypto?.getRandomValues === 'function') {
+            crypto.getRandomValues(generationId);
+            return generationId;
+        }
+        for (let i = 0; i < generationId.length; ++i) {
+            generationId[i] = Math.floor(Math.random() * 256);
+        }
+        return generationId;
+    }
+
     /**
      * @param {Uint8Array} payload
      * @param {number} firstId
@@ -4115,7 +5143,7 @@ export class TermRecordOpfsStore {
      * @returns {Uint8Array}
      */
     _withChunkHeader(payload, firstId, count, contentOffsetBase = 0) {
-        const header = this._createChunkHeader(firstId, count, contentOffsetBase);
+        const header = this._createChunkHeader(firstId, count, contentOffsetBase, payload);
         const output = new Uint8Array(header.byteLength + payload.byteLength);
         output.set(header, 0);
         output.set(payload, header.byteLength);
@@ -4125,15 +5153,22 @@ export class TermRecordOpfsStore {
     /**
      * @param {number} firstId
      * @param {number} count
-     * @param {number} [contentOffsetBase=0]
+     * @param {number} contentOffsetBase
+     * @param {Uint8Array} payload
+     * @param {number|null} [payloadHash=null]
      * @returns {Uint8Array}
+     * @throws {TypeError|RangeError} If the payload or numeric fields are invalid.
      */
-    _createChunkHeader(firstId, count, contentOffsetBase = 0) {
+    _createChunkHeader(firstId, count, contentOffsetBase, payload, payloadHash = null) {
+        if (!(payload instanceof Uint8Array)) {
+            throw new TypeError('Term-record chunk payload is required');
+        }
         const output = new Uint8Array(CHUNK_HEADER_BYTES);
         const view = new DataView(output.buffer, output.byteOffset, output.byteLength);
         view.setUint32(0, firstId >>> 0, true);
         view.setUint32(4, count >>> 0, true);
         writeSafeU64Le(view, 8, contentOffsetBase);
+        view.setUint32(16, payloadHash ?? hashLookupIndexBytes(payload), true);
         return output;
     }
 
@@ -4145,6 +5180,7 @@ export class TermRecordOpfsStore {
      * @param {Uint8Array} payload
      * @param {Uint8Array} recordPayload
      * @param {Uint8Array|null} [precomputedFixedFieldsHashes=null]
+     * @param {number|null} [recordPayloadHash=null]
      * @returns {Uint8Array}
      * @throws {Error} If the encoded record payload does not match the declared record count.
      */
@@ -4156,6 +5192,7 @@ export class TermRecordOpfsStore {
         payload,
         recordPayload,
         precomputedFixedFieldsHashes = null,
+        recordPayloadHash = null,
     ) {
         const recordPayloadView = new DataView(
             recordPayload.buffer,
@@ -4200,7 +5237,13 @@ export class TermRecordOpfsStore {
         writeSafeU64Le(view, 8, recordChunkOffset);
         view.setUint32(16, payload.byteLength, true);
         view.setUint32(20, hashLookupIndexBytes(payload), true);
-        view.setUint32(24, hashLookupIndexBytes(this._createChunkHeader(firstId, count, contentOffsetBase)), true);
+        view.setUint32(24, hashLookupIndexBytes(this._createChunkHeader(
+            firstId,
+            count,
+            contentOffsetBase,
+            recordPayload,
+            recordPayloadHash,
+        )), true);
         view.setUint32(28, hashLookupIndexBytes(fixedFieldsHashes), true);
         output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);
         output.set(fixedFieldsHashes, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);
@@ -4215,7 +5258,8 @@ export class TermRecordOpfsStore {
         if (
             (
                 state.pendingLookupIndexChunks.length === 0 &&
-                state.lookupIndexWritable === null
+                state.lookupIndexWritable === null &&
+                state.lookupIndexWritePromise === null
             ) ||
             this._recordsDirectoryHandle === null
         ) {
@@ -4233,7 +5277,7 @@ export class TermRecordOpfsStore {
             state.pendingLookupIndexRecordCount = 0;
             return;
         }
-        await this._flushPendingLookupIndexChunks(state);
+        await this._flushPendingLookupIndexChunks(state, true);
         const writable = state.lookupIndexWritable;
         if (writable === null) { return; }
         try {
@@ -4243,6 +5287,7 @@ export class TermRecordOpfsStore {
             writeSafeU64Le(view, 8, state.fileLength);
             view.setUint32(16, state.lookupIndexChunkCount, true);
             view.setUint32(20, state.lookupIndexRecordCount, true);
+            header.set(state.generationId, 24);
             await writable.seek(0);
             await writable.write(header);
         } finally {
@@ -4262,27 +5307,83 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {TermRecordShardState} state
+     * @param {boolean} [waitForCompletion=true]
      * @returns {Promise<void>}
      */
-    async _flushPendingLookupIndexChunks(state) {
-        if (state.pendingLookupIndexChunks.length === 0 || this._recordsDirectoryHandle === null) {
-            return;
+    async _flushPendingLookupIndexChunks(state, waitForCompletion = true) {
+        if (state.lookupIndexWriteError !== null) {
+            throw state.lookupIndexWriteError;
         }
-        if (state.lookupIndexWritable === null) {
-            const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
-            state.lookupIndexFileHandle = await this._recordsDirectoryHandle.getFileHandle(indexFileName, {create: true});
-            state.lookupIndexWritable = await state.lookupIndexFileHandle.createWritable();
-            await state.lookupIndexWritable.truncate(0);
-            await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
+        if (state.pendingLookupIndexChunks.length === 0 || this._recordsDirectoryHandle === null) {
+            if (waitForCompletion) {
+                await this._awaitLookupIndexWritesForShard(state);
+            }
+            return;
         }
         const chunks = state.pendingLookupIndexChunks;
         const recordCount = state.pendingLookupIndexRecordCount;
-        await state.lookupIndexWritable.write(new Blob(chunks));
-        state.lookupIndexChunkCount += chunks.length;
-        state.lookupIndexRecordCount += recordCount;
+        const byteLength = state.pendingLookupIndexBytes;
         state.pendingLookupIndexChunks = [];
         state.pendingLookupIndexBytes = 0;
         state.pendingLookupIndexRecordCount = 0;
+        const previousWrite = state.lookupIndexWritePromise ?? Promise.resolve();
+        state.lookupIndexQueuedBytes += byteLength;
+        state.lookupIndexMaxQueuedBytes = Math.max(state.lookupIndexMaxQueuedBytes, state.lookupIndexQueuedBytes);
+        this._lookupIndexWriteMetrics.maxQueuedBytes = Math.max(
+            this._lookupIndexWriteMetrics.maxQueuedBytes,
+            state.lookupIndexMaxQueuedBytes,
+        );
+        const writePromise = previousWrite
+            .then(async () => {
+                if (state.lookupIndexWritable === null) {
+                    const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
+                    state.lookupIndexFileHandle = await this._recordsDirectoryHandle?.getFileHandle(indexFileName, {create: true}) ?? null;
+                    if (state.lookupIndexFileHandle === null) {
+                        throw new Error('Term-record lookup index directory became unavailable during import');
+                    }
+                    state.lookupIndexWritable = await state.lookupIndexFileHandle.createWritable();
+                    await state.lookupIndexWritable.truncate(0);
+                    await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
+                }
+                await state.lookupIndexWritable.write(new Blob(chunks));
+                ++this._lookupIndexWriteMetrics.writeCallCount;
+                this._lookupIndexWriteMetrics.writeBytes += byteLength;
+                state.lookupIndexChunkCount += chunks.length;
+                state.lookupIndexRecordCount += recordCount;
+            })
+            .catch((error) => {
+                state.lookupIndexWriteError = error instanceof Error ? error : new Error(String(error));
+                throw state.lookupIndexWriteError;
+            })
+            .finally(() => {
+                state.lookupIndexQueuedBytes = Math.max(0, state.lookupIndexQueuedBytes - byteLength);
+            });
+        state.lookupIndexWritePromise = writePromise;
+        void writePromise.catch(() => {});
+        if (waitForCompletion || state.lookupIndexQueuedBytes >= this._queuedWriteBudgetBytes) {
+            await this._awaitLookupIndexWritesForShard(state);
+        }
+    }
+
+    /**
+     * @param {TermRecordShardState} state
+     * @returns {Promise<void>}
+     */
+    async _awaitLookupIndexWritesForShard(state) {
+        if (state.lookupIndexWriteError !== null) {
+            throw state.lookupIndexWriteError;
+        }
+        const writePromise = state.lookupIndexWritePromise;
+        if (writePromise === null) { return; }
+        const startedAt = safePerformance.now();
+        try {
+            await writePromise;
+        } finally {
+            this._lookupIndexWriteMetrics.awaitMs += safePerformance.now() - startedAt;
+            if (state.lookupIndexWritePromise === writePromise && state.lookupIndexWriteError === null) {
+                state.lookupIndexWritePromise = null;
+            }
+        }
     }
 
     /**
@@ -4407,7 +5508,8 @@ export class TermRecordOpfsStore {
             const writable = await fileHandle.createWritable();
             await writable.truncate(0);
             let fileLength = 0;
-            const header = this._createBinaryHeader(contentDictName);
+            const generationId = this._createShardGenerationId();
+            const header = this._createBinaryHeader(contentDictName, generationId);
             await writable.write(header);
             fileLength += header.byteLength;
             for (let runStart = 0; runStart < records.length;) {
@@ -4430,7 +5532,12 @@ export class TermRecordOpfsStore {
                 }
                 const runRecords = records.slice(runStart, runEnd);
                 const encoded = await this._encodeRecords(runRecords);
-                const chunkHeader = this._createChunkHeader(runRecords[0].id, runRecords.length, encoded.contentOffsetBase);
+                const chunkHeader = this._createChunkHeader(
+                    runRecords[0].id,
+                    runRecords.length,
+                    encoded.contentOffsetBase,
+                    encoded.bytes,
+                );
                 await writable.write(chunkHeader);
                 await writable.write(encoded.bytes);
                 fileLength += chunkHeader.byteLength + encoded.bytes.byteLength;
@@ -4438,6 +5545,7 @@ export class TermRecordOpfsStore {
             }
             await writable.close();
             const state = this._createShardState(fileName, fileHandle, fileLength, contentDictName);
+            state.generationId = generationId;
             this._shardStateByFileName.set(fileName, state);
             this._setActiveAppendShardState(state);
         }
@@ -4493,7 +5601,7 @@ export class TermRecordOpfsStore {
     /**
      * @param {TermRecordShardState} state
      * @param {File|null} [existingFile=null]
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
     async _loadShardStateContents(state, existingFile = null) {
         let file = existingFile;
@@ -4501,31 +5609,59 @@ export class TermRecordOpfsStore {
             try {
                 file = await state.fileHandle.getFile();
             } catch (_) {
-                return;
+                return false;
             }
         }
         state.fileLength = file.size;
         if (file.size <= 0) {
-            return;
+            return false;
         }
-        const arrayBuffer = await file.arrayBuffer();
+        let arrayBuffer;
+        try {
+            arrayBuffer = await file.arrayBuffer();
+        } catch (_) {
+            return false;
+        }
         const content = new Uint8Array(arrayBuffer);
         if (
             this._isBinaryFormat(content) &&
             this._loadBinary(content, this._decodeDictionaryNameFromShardFileName(state.fileName))
         ) {
-            return;
+            return true;
         }
-        this._invalidShardFileNames.push(state.fileName);
-        this._shardStateByFileName.delete(state.fileName);
-        this._activeAppendShardStateByKey.delete(state.logicalKey);
+        await this._discardInvalidShardState(state);
+        const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
+        if (dictionaryName !== null) {
+            this.markDictionaryReimportRequired(dictionaryName, 'Dictionary record data is damaged');
+        }
+        return false;
+    }
+
+    /**
+     * @param {TermRecordShardState} state
+     * @returns {Promise<void>}
+     */
+    async _discardInvalidShardState(state) {
+        if (!this._invalidShardFileNames.includes(state.fileName)) {
+            this._invalidShardFileNames.push(state.fileName);
+        }
         if (this._recordsDirectoryHandle !== null) {
             try {
-                await this._recordsDirectoryHandle.removeEntry(state.fileName);
-            } catch (_) {
-                // NOP
+                await this._closeShardWritable(state);
+                await this._removeStorageFileOrTruncate(`${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
+                await this._removeStorageFileOrTruncate(state.fileName, true);
+            } catch (error) {
+                // Keep the invalid state registered so deletion/reimport can
+                // retry cleanup instead of appending to a hidden stale file.
+                reportDiagnostics('term-record-invalid-shard-cleanup-failed', {
+                    fileName: state.fileName,
+                    error: error instanceof Error ? error.message : String(error),
+                });
+                return;
             }
         }
+        this._shardStateByFileName.delete(state.fileName);
+        this._activeAppendShardStateByKey.delete(state.logicalKey);
     }
 
     /**
@@ -4606,7 +5742,8 @@ export class TermRecordOpfsStore {
                 state.pendingWriteBytes > 0 ||
                 state.pendingWriteChunks.length > 0 ||
                 state.pendingLookupIndexChunks.length > 0 ||
-                state.lookupIndexWritable !== null
+                state.lookupIndexWritable !== null ||
+                state.lookupIndexWritePromise !== null
             ) {
                 return true;
             }
@@ -4620,6 +5757,7 @@ export class TermRecordOpfsStore {
      * @returns {Promise<TermRecordShardState|null>}
      */
     async _getOrCreateShardState(dictionaryName, contentDictName = 'raw') {
+        this._registerDictionaryMutation(dictionaryName);
         if (this._recordsDirectoryHandle === null) {
             return null;
         }
@@ -4850,11 +5988,13 @@ export class TermRecordOpfsStore {
             if (typeof state !== 'undefined') {
                 await this._flushPendingWritesForShard(state);
                 await this._closeShardWritable(state);
+            }
+            await this._removeStorageFileOrTruncate(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
+            await this._removeStorageFileOrTruncate(fileName, false);
+            if (typeof state !== 'undefined') {
                 this._shardStateByFileName.delete(fileName);
                 this._activeAppendShardStateByKey.delete(state.logicalKey);
             }
-            await this._removeStorageFileOrTruncate(fileName, false);
-            await this._removeStorageFileOrTruncate(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
         }
         this._invalidatePersistentLookupState(dictionaryName);
     }
@@ -4939,7 +6079,12 @@ export class TermRecordOpfsStore {
             lookupIndexWritable: null,
             lookupIndexChunkCount: 0,
             lookupIndexRecordCount: 0,
+            lookupIndexQueuedBytes: 0,
+            lookupIndexMaxQueuedBytes: 0,
+            lookupIndexWritePromise: null,
+            lookupIndexWriteError: null,
             appendFormatValidated: fileLength === 0,
+            generationId: this._createShardGenerationId(),
         };
     }
 
@@ -4951,14 +6096,15 @@ export class TermRecordOpfsStore {
     async _validateShardAppendFormat(state) {
         if (state.appendFormatValidated) { return; }
         const file = await state.fileHandle.getFile();
-        if (file.size < BINARY_MAGIC_BYTES) {
+        if (file.size < BINARY_HEADER_PREFIX_BYTES) {
             throw new Error(`Cannot append to truncated term-record shard: ${state.fileName}`);
         }
-        const magicBytes = await this._readFileRange(file, 0, BINARY_MAGIC_BYTES);
-        const magic = this._textDecoder.decode(magicBytes);
+        const headerBytes = await this._readFileRange(file, 0, BINARY_HEADER_PREFIX_BYTES);
+        const magic = this._textDecoder.decode(headerBytes.subarray(0, BINARY_MAGIC_BYTES));
         if (magic !== BINARY_MAGIC_TEXT) {
             throw new Error(`Cannot append ${BINARY_MAGIC_TEXT} records to ${magic || 'unknown'} shard: ${state.fileName}`);
         }
+        state.generationId = new Uint8Array(headerBytes.subarray(BINARY_MAGIC_BYTES));
         state.appendFormatValidated = true;
     }
 
@@ -5015,6 +6161,7 @@ export class TermRecordOpfsStore {
         }
         return DEFAULT_QUEUED_WRITE_BUDGET_BYTES;
     }
+
 
     /**
      * @returns {number}
@@ -5145,6 +6292,18 @@ export class TermRecordOpfsStore {
             maxMergedGroupChunkCount: 0,
             minMergedGroupChunkCount: 0,
             writeCoalesceTargetBytes: this._writeCoalesceTargetBytes,
+        };
+    }
+
+    /**
+     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number}}
+     */
+    _createEmptyLookupIndexWriteMetrics() {
+        return {
+            writeCallCount: 0,
+            writeBytes: 0,
+            awaitMs: 0,
+            maxQueuedBytes: 0,
         };
     }
 

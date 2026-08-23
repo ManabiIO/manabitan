@@ -69,8 +69,10 @@ export type ImportDetails = {
     skipMediaImport?: boolean;
     zipMaxWorkers?: number | null;
     zipChunkSize?: number | null;
+    zipUseWebWorkers?: boolean | null;
     artifactFixedPackMinTotalRows?: number | null;
     wasmPreallocateChunkRows?: boolean;
+    termContentBlockTargetBytes?: number | null;
     updateSessionToken?: string | null;
 };
 
@@ -81,6 +83,8 @@ export type DictionaryAutoUpdateInfo = {
     lastUpdatedAt: number | null;
     nextUpdateAt: number | null;
 };
+
+export type DictionaryStorageHealth = 'available' | 'repairPending' | 'repairing' | 'temporarilyUnavailable' | 'reimportRequired';
 
 export type Summary = {
     title: string;
@@ -107,6 +111,8 @@ export type Summary = {
     targetLanguage?: string;
     frequencyMode?: 'occurrence-based' | 'rank-based';
     importSuccess?: boolean;
+    storageHealth?: DictionaryStorageHealth;
+    storageHealthReason?: string | null;
     autoUpdate?: DictionaryAutoUpdateInfo;
     metadataOverrides?: SummaryMetadataOverrides;
 };

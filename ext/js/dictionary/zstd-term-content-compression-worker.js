@@ -34,17 +34,52 @@ self.addEventListener('message', (event) => {
 /** @param {MessageEvent} event */
 async function compressContent(event) {
     const rawData = /** @type {unknown} */ (event.data);
-    const data = /** @type {{id?: unknown, content?: unknown, dictName?: unknown}} */ (rawData);
+    const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown}} */ (rawData);
     const id = typeof data?.id === 'number' ? data.id : -1;
     try {
-        const {compressTermContentZstd} = await modulePromise;
+        const {compressTermContentZstd, compressWrappedTermContentZstd, compressWrappedTermContentZstdSpans} = await modulePromise;
         await initialization;
-        if (!(data.content instanceof Uint8Array)) {
-            throw new TypeError('Compression worker input is not a Uint8Array');
-        }
         const dictName = typeof data.dictName === 'string' ? data.dictName : null;
-        const compressed = Uint8Array.from(compressTermContentZstd(data.content, dictName));
-        self.postMessage({id, compressed: compressed.buffer}, [compressed.buffer]);
+        /** @type {{bytes: Uint8Array, envelopeMs: number}} */
+        let result;
+        if (
+            data.source instanceof Uint8Array &&
+            data.sourceOffsets instanceof Uint32Array &&
+            data.sourceLengths instanceof Uint32Array
+        ) {
+            if (data.wrap !== true) { throw new TypeError('Span compression requires a wrapped output'); }
+            if (
+                typeof data.contentBytes !== 'number' ||
+                !Number.isSafeInteger(data.contentBytes) ||
+                data.contentBytes < 0 ||
+                data.sourceOffsets.length !== data.sourceLengths.length
+            ) {
+                throw new RangeError('Compression worker span input is invalid');
+            }
+            result = compressWrappedTermContentZstdSpans(
+                data.source,
+                data.sourceOffsets,
+                data.sourceLengths,
+                data.contentBytes,
+                dictName,
+            );
+        } else {
+            if (!(data.content instanceof Uint8Array)) {
+                throw new TypeError('Compression worker input is not a Uint8Array');
+            }
+            result = data.wrap === true ?
+                compressWrappedTermContentZstd(data.content, dictName) :
+                {bytes: compressTermContentZstd(data.content, dictName), envelopeMs: 0};
+        }
+        const {bytes, envelopeMs} = result;
+        const compressed = (
+            bytes.buffer instanceof ArrayBuffer &&
+            bytes.byteOffset === 0 &&
+            bytes.byteLength === bytes.buffer.byteLength
+        ) ?
+            bytes.buffer :
+            Uint8Array.from(bytes).buffer;
+        self.postMessage({id, compressed, envelopeMs}, [compressed]);
     } catch (error) {
         self.postMessage({id, error: `${error}`});
     }

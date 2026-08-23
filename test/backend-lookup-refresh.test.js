@@ -366,6 +366,46 @@ describe('Backend lookup refresh gating', () => {
         expect(warmEnabledDictionaryLookupCaches).toHaveBeenCalledWith('dictionary-refresh-after-update');
     });
 
+    test('post-import refresh adopts the active worker connection', async () => {
+        const adoptCurrentConnectionAfterImport = vi.fn().mockResolvedValue(void 0);
+        const refreshConnection = vi.fn().mockResolvedValue(void 0);
+        const warmEnabledDictionaryLookupCaches = vi.fn();
+        const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+        Reflect.set(backend, '_dictionaryImportModeActive', false);
+        Reflect.set(backend, '_dictionaryRefreshPromise', null);
+        Reflect.set(backend, '_dictionaryRefreshQueued', false);
+        Reflect.set(backend, '_dictionaryDatabase', {adoptCurrentConnectionAfterImport, refreshConnection});
+        Reflect.set(backend, '_warmEnabledDictionaryLookupCaches', warmEnabledDictionaryLookupCaches);
+
+        await Backend.prototype._refreshDictionaryDatabaseAfterUpdate.call(backend, {
+            reuseActiveImportConnection: true,
+        });
+
+        expect(adoptCurrentConnectionAfterImport).toHaveBeenCalledOnce();
+        expect(refreshConnection).not.toHaveBeenCalled();
+        expect(warmEnabledDictionaryLookupCaches).toHaveBeenCalledWith('dictionary-import-connection-adopted');
+    });
+
+    test('failed post-import connection adoption falls back to reopen', async () => {
+        const adoptCurrentConnectionAfterImport = vi.fn().mockRejectedValue(new Error('worker restarted'));
+        const refreshConnection = vi.fn().mockResolvedValue(void 0);
+        const warmEnabledDictionaryLookupCaches = vi.fn();
+        const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+        Reflect.set(backend, '_dictionaryImportModeActive', false);
+        Reflect.set(backend, '_dictionaryRefreshPromise', null);
+        Reflect.set(backend, '_dictionaryRefreshQueued', false);
+        Reflect.set(backend, '_dictionaryDatabase', {adoptCurrentConnectionAfterImport, refreshConnection});
+        Reflect.set(backend, '_warmEnabledDictionaryLookupCaches', warmEnabledDictionaryLookupCaches);
+
+        await Backend.prototype._refreshDictionaryDatabaseAfterUpdate.call(backend, {
+            reuseActiveImportConnection: true,
+        });
+
+        expect(adoptCurrentConnectionAfterImport).toHaveBeenCalledOnce();
+        expect(refreshConnection).toHaveBeenCalledOnce();
+        expect(warmEnabledDictionaryLookupCaches).toHaveBeenCalledWith('dictionary-refresh-after-update');
+    });
+
     test('dictionary refresh fallback continues when direct offscreen refresh fails', async () => {
         const sendMessagePromise = vi.fn().mockRejectedValue(new Error('offscreen refresh failed'));
         const warmEnabledDictionaryLookupCaches = vi.fn();

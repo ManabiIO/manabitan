@@ -2374,16 +2374,33 @@ function summarizeDictionaryInfoHealth(dictionaryInfoEntries) {
  * @returns {boolean}
  */
 function diagnosticsShowExpectedDictionaryCoverage(diagnostics, expectedDictionaryNames) {
-    const installedTitles = Array.isArray(diagnostics.installedTitles) ?
-        diagnostics.installedTitles.map((value) => String(value || '').trim()).filter((value) => value.length > 0) :
-        [];
     const termDictionaryNames = Array.isArray(diagnostics.termDictionaryNames) ?
         diagnostics.termDictionaryNames.map((value) => String(value || '').trim()).filter((value) => value.length > 0) :
         [];
     return expectedDictionaryNames.every((expectedName) => (
-        installedTitles.some((title) => matchesDictionaryName(title, expectedName)) ||
         termDictionaryNames.some((title) => matchesDictionaryName(title, expectedName))
     ));
+}
+
+/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @param {string} term
+ * @param {string[]} expectedDictionaryNames
+ * @param {number} [timeoutMs]
+ * @returns {Promise<{ok: boolean, diagnostics: Record<string, unknown>}>}
+ */
+async function waitForBackendDictionaryLookupCoverage(driver, term, expectedDictionaryNames, timeoutMs = 15_000) {
+    const deadline = safePerformance.now() + timeoutMs;
+    /** @type {Record<string, unknown>} */
+    let diagnostics = {};
+    while (safePerformance.now() < deadline) {
+        diagnostics = await getBackendLookupDiagnostics(driver, term);
+        if (diagnosticsShowExpectedDictionaryCoverage(diagnostics, expectedDictionaryNames)) {
+            return {ok: true, diagnostics};
+        }
+        await driver.sleep(250);
+    }
+    return {ok: false, diagnostics};
 }
 
 /**
@@ -4083,6 +4100,25 @@ async function main() {
         }
         if (!(verifyBatchJmnedictContent.ok === true)) {
             fail(`JMnedict backend content integrity failed after multi-file import. diagnostics=${JSON.stringify(verifyBatchJmnedictContent)}`);
+        }
+        const verifyUnaffectedLookupStart = safePerformance.now();
+        const verifyUnaffectedLookup = await waitForBackendDictionaryLookupCoverage(
+            driver,
+            '暗記',
+            expectedLookupDictionaries,
+            15_000,
+        );
+        const verifyUnaffectedLookupEnd = safePerformance.now();
+        await addReportPhase(
+            report,
+            driver,
+            'Verify existing dictionary lookup continuity after multi-file import',
+            `Required live ${expectedLookupDictionaries.join(' + ')} lookup results immediately after importing JMdict + JMnedict. diagnostics=${JSON.stringify(verifyUnaffectedLookup.diagnostics)}`,
+            verifyUnaffectedLookupStart,
+            verifyUnaffectedLookupEnd,
+        );
+        if (!verifyUnaffectedLookup.ok) {
+            fail(`Existing dictionary lookup coverage was lost after multi-file import. diagnostics=${JSON.stringify(verifyUnaffectedLookup.diagnostics)}`);
         }
 
         const verifyTripleStart = safePerformance.now();

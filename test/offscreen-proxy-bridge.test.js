@@ -134,6 +134,77 @@ describe('OffscreenProxy bridge reliability', () => {
         expect(freshPort.postMessage).toHaveBeenCalledWith({action: 'connectToDatabaseWorker', id: 2}, []);
     });
 
+    test('recreates a missing offscreen document after the control port dies', async () => {
+        const stalePort = createPort(() => { throw new Error('stale'); });
+        /** @type {MessagePort|null} */
+        let freshPort = null;
+        freshPort = createPort((message) => {
+            queueMicrotask(() => { respond(/** @type {MessagePort} */ (freshPort), {id: message.id, result: undefined}); });
+        });
+        /** @type {InstanceType<typeof OffscreenProxy>|null} */
+        let proxy = null;
+        const createDocument = vi.fn(async () => {
+            await proxy?.registerOffscreenPort(/** @type {MessagePort} */ (freshPort));
+        });
+        globalThis.chrome = /** @type {typeof globalThis.chrome} */ (/** @type {unknown} */ ({
+            runtime: {
+                lastError: undefined,
+                getURL: vi.fn(() => 'chrome-extension://test/offscreen.html'),
+                getContexts: vi.fn(async () => []),
+            },
+            offscreen: {createDocument},
+        }));
+        const webExtension = {
+            sendMessagePromise: vi.fn(async () => {
+                throw new Error('Could not establish connection. Receiving end does not exist.');
+            }),
+        };
+        proxy = new OffscreenProxy(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ (webExtension)));
+        await proxy.registerOffscreenPort(stalePort);
+
+        await proxy.sendMessageViaPort({action: 'connectToDatabaseWorker'}, []);
+
+        expect(stalePort.close).toHaveBeenCalledOnce();
+        expect(createDocument).toHaveBeenCalledOnce();
+        expect(freshPort.postMessage).toHaveBeenCalledWith({action: 'connectToDatabaseWorker', id: 2}, []);
+    });
+
+    test('rotates a silently disconnected lookup port after the acceptance deadline', async () => {
+        vi.useFakeTimers();
+        const stalePort = createPort();
+        /** @type {MessagePort|null} */
+        let freshPort = null;
+        const result = {dictionaryEntries: [], originalTextLength: 2};
+        freshPort = createPort((message) => {
+            queueMicrotask(() => { respond(/** @type {MessagePort} */ (freshPort), {id: message.id, result}); });
+        });
+        /** @type {InstanceType<typeof OffscreenProxy>|null} */
+        let proxy = null;
+        const webExtension = {
+            sendMessagePromise: vi.fn(async (message) => {
+                if (message?.action === 'createAndRegisterPortOffscreen' && proxy !== null) {
+                    queueMicrotask(() => { void proxy?.registerOffscreenPort(/** @type {MessagePort} */ (freshPort)); });
+                }
+                return {result: null};
+            }),
+        };
+        proxy = new OffscreenProxy(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ (webExtension)));
+        await proxy.registerOffscreenPort(stalePort);
+        const lookup = proxy.sendMessageViaPort({
+            action: 'findTermsStructuredOffscreen',
+            params: {mode: 'group', text: '日本', options: {}},
+        }, []);
+
+        await vi.advanceTimersByTimeAsync(3_000);
+
+        await expect(lookup).resolves.toBe(result);
+        expect(stalePort.close).toHaveBeenCalledOnce();
+        expect(freshPort.postMessage).toHaveBeenCalledWith(expect.objectContaining({
+            action: 'findTermsStructuredOffscreen',
+            id: 2,
+        }), []);
+    });
+
     test('does not retry after attempting to transfer ownership', async () => {
         const stalePort = createPort(() => { throw new Error('stale'); });
         const webExtension = {sendMessagePromise: vi.fn(async () => ({result: null}))};

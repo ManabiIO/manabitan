@@ -69,7 +69,9 @@ describe('diagnostics reporter gating', () => {
 
     test('release manifests do not emit diagnostics', async () => {
         const {storageGet, storageSet, fetchMock} = stubRuntime('Manabitan Popup Dictionary');
-        const {reportDiagnostics, reportDiagnosticsLazy} = await import('../ext/js/core/diagnostics-reporter.js');
+        const {isDevDiagnosticsBuild, reportDiagnostics, reportDiagnosticsLazy} = await import('../ext/js/core/diagnostics-reporter.js');
+
+        expect(isDevDiagnosticsBuild()).toBe(false);
 
         reportDiagnostics('extension-start', {source: 'release'});
         reportDiagnosticsLazy('dictionary-lookup-snapshot', () => {
@@ -84,7 +86,9 @@ describe('diagnostics reporter gating', () => {
 
     test('dev manifests emit diagnostics by default', async () => {
         const {storageGet, fetchMock} = stubRuntime('Manabitan Popup Dictionary (dev)');
-        const {reportDiagnostics} = await import('../ext/js/core/diagnostics-reporter.js');
+        const {isDevDiagnosticsBuild, reportDiagnostics} = await import('../ext/js/core/diagnostics-reporter.js');
+
+        expect(isDevDiagnosticsBuild()).toBe(true);
 
         reportDiagnostics('extension-start', {source: 'dev'});
         await settleMicrotasks();

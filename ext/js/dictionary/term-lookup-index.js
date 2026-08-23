@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {hashTermKeyByteRange, hashTermKeyBytes} from './term-key-hash.js';
+
 const HEADER_U32_COUNT = 16;
 const HEADER_BYTES = HEADER_U32_COUNT * 4;
 const RADIX_SIZE = 257;
@@ -23,6 +25,7 @@ const U16_NULL = 0xffff;
 const RECORD_HEADER_BYTES = 24;
 const RECORD_STRING_TABLE_HEADER_BYTES = 8;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
+const COMPACT_INDEX_FORMAT_VERSION = 3;
 
 /**
  * @typedef {object} PersistedTermLookupIndex
@@ -30,15 +33,15 @@ const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
  * @property {Uint32Array} keyOffsets
  * @property {Uint16Array} keyHeads
  * @property {Uint16Array} keyNext
- * @property {Uint32Array} expressionKeys
- * @property {Uint32Array} readingKeys
+ * @property {Uint16Array} expressionKeys
+ * @property {Uint16Array} readingKeys
  * @property {Int32Array} sequenceValues
- * @property {Uint32Array} expressionPostingOffsets
- * @property {Uint32Array} expressionPostingRows
- * @property {Uint32Array} readingPostingOffsets
- * @property {Uint32Array} readingPostingRows
- * @property {Uint32Array} sequenceHeads
- * @property {Uint32Array} sequenceNext
+ * @property {Uint16Array} expressionPostingOffsets
+ * @property {Uint16Array} expressionPostingRows
+ * @property {Uint16Array} readingPostingOffsets
+ * @property {Uint16Array} readingPostingRows
+ * @property {Uint16Array} sequenceHeads
+ * @property {Uint16Array} sequenceNext
  * @property {Uint32Array|null} keyOrder
  * @property {Uint32Array|null} keyReverseOrder
  * @property {Uint32Array|null} keyRadix
@@ -56,8 +59,15 @@ const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
  * @throws {Error} If the record payload is malformed.
  */
 export function encodePersistedTermLookupIndexFromRecordPayload(recordPayload, rowCount) {
-    if (recordPayload.byteLength < RECORD_STRING_TABLE_HEADER_BYTES || rowCount <= 0) {
+    if (
+        recordPayload.byteLength < RECORD_STRING_TABLE_HEADER_BYTES ||
+        !Number.isSafeInteger(rowCount) ||
+        rowCount <= 0
+    ) {
         throw new Error('Invalid term-record payload for lookup index');
+    }
+    if (rowCount >= U16_NULL) {
+        throw new RangeError('Term lookup index has too many rows for one chunk');
     }
     const view = new DataView(recordPayload.buffer, recordPayload.byteOffset, recordPayload.byteLength);
     const keyCount = view.getUint32(0, true);
@@ -67,6 +77,7 @@ export function encodePersistedTermLookupIndexFromRecordPayload(recordPayload, r
     const recordsOffset = keyBytesOffset + keyBytesLength;
     if (
         keyCount === 0 ||
+        keyCount >= U16_NULL ||
         recordsOffset > recordPayload.byteLength ||
         (recordPayload.byteLength - recordsOffset) !== rowCount * RECORD_HEADER_BYTES
     ) {
@@ -127,6 +138,12 @@ export function encodePersistedTermLookupIndexFromPreinternedPlan(
     rowCount,
 ) {
     const {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes} = plan;
+    if (!Number.isSafeInteger(rowCount) || rowCount >= U16_NULL) {
+        throw new RangeError('Term lookup index has too many rows for one chunk');
+    }
+    if (stringLengths.length >= U16_NULL) {
+        throw new RangeError('Term lookup index has too many keys for one chunk');
+    }
     if (
         rowCount <= 0 ||
         stringLengths.length === 0 ||
@@ -137,28 +154,29 @@ export function encodePersistedTermLookupIndexFromPreinternedPlan(
     ) {
         throw new Error('Invalid preinterned term-record plan for lookup index');
     }
-    const keyOffsets = new Uint32Array(stringLengths.length + 1);
+    /** @type {Uint32Array} */
+    let keyOffsets;
     let keyBytesLength;
     if (
         stringOffsets instanceof Uint32Array &&
         stringOffsets.length === stringLengths.length
     ) {
-        keyOffsets.set(stringOffsets);
+        keyOffsets = stringOffsets;
         const lastKey = stringLengths.length - 1;
         keyBytesLength = stringOffsets[lastKey] + stringLengths[lastKey];
     } else {
+        keyOffsets = new Uint32Array(stringLengths.length);
         keyBytesLength = 0;
         for (let key = 0; key < stringLengths.length; ++key) {
             keyOffsets[key] = keyBytesLength;
             keyBytesLength += stringLengths[key];
         }
     }
-    keyOffsets[stringLengths.length] = keyBytesLength;
     if (keyBytesLength !== stringsBuffer.byteLength) {
         throw new Error('Invalid preinterned term-record string arena');
     }
     const expressionKeys = expressionIndexes.subarray(0, rowCount);
-    const readingKeys = new Uint32Array(rowCount);
+    const readingKeys = readingIndexes.subarray(0, rowCount);
     const sequenceValues = sequenceList instanceof Int32Array ?
         sequenceList.subarray(0, rowCount) :
         Int32Array.from(sequenceList.slice(0, rowCount), (value) => value ?? -1);
@@ -176,14 +194,15 @@ export function encodePersistedTermLookupIndexFromPreinternedPlan(
         ) {
             throw new Error('Invalid preinterned term-record key reference');
         }
-        readingKeys[row] = readingKey;
         if (!readingEqualsExpression) { ++readingPostingCount; }
     }
     return encodeIndexPlan({
         keyBytes: stringsBuffer,
         keyOffsets,
+        keyCount: stringLengths.length,
         expressionKeys,
         readingKeys,
+        readingEqualsExpressionList,
         sequenceValues,
         readingPostingCount,
         keyHashes: stringHashes,
@@ -199,6 +218,9 @@ export function encodePersistedTermLookupIndexFromPreinternedPlan(
  */
 export function encodePersistedTermLookupIndex(rows) {
     if (rows.length === 0) { throw new RangeError('Term lookup index requires at least one row'); }
+    if (rows.length >= U16_NULL) {
+        throw new RangeError('Term lookup index has too many rows for one chunk');
+    }
     /** @type {Uint8Array[]} */
     const keys = [];
     /** @type {Map<number, number[]>} */
@@ -263,14 +285,36 @@ export function encodePersistedTermLookupIndex(rows) {
 }
 
 /**
- * @param {{keyBytes: Uint8Array, keyOffsets: Uint32Array, expressionKeys: Uint32Array, readingKeys: Uint32Array, sequenceValues: Int32Array, readingPostingCount: number, keyHashes?: Uint32Array}} plan
+ * @param {{keyBytes: Uint8Array, keyOffsets: Uint32Array, keyCount?: number, expressionKeys: Uint32Array, readingKeys: Uint32Array, readingEqualsExpressionList?: boolean[]|Uint8Array, sequenceValues: Int32Array, readingPostingCount: number, keyHashes?: Uint32Array}} plan
  * @returns {Uint8Array}
  * @throws {RangeError} If one chunk cannot represent all interned keys.
  */
 function encodeIndexPlan(plan) {
-    const {keyBytes, keyOffsets, expressionKeys, readingKeys, sequenceValues, readingPostingCount, keyHashes} = plan;
+    const {keyBytes, keyOffsets, expressionKeys, readingKeys, readingEqualsExpressionList, sequenceValues, readingPostingCount, keyHashes} = plan;
     const rowCount = expressionKeys.length;
-    const keyCount = keyOffsets.length - 1;
+    const keyCount = typeof plan.keyCount === 'number' ? plan.keyCount : keyOffsets.length - 1;
+    if (
+        !Number.isSafeInteger(keyCount) ||
+        keyCount <= 0 ||
+        rowCount <= 0 ||
+        rowCount >= U16_NULL ||
+        (keyOffsets.length !== keyCount && keyOffsets.length !== keyCount + 1)
+    ) {
+        throw new Error('Invalid term lookup index key offsets');
+    }
+    if (
+        readingKeys.length !== rowCount ||
+        sequenceValues.length !== rowCount ||
+        !Number.isSafeInteger(readingPostingCount) ||
+        readingPostingCount < 0 ||
+        readingPostingCount > rowCount ||
+        (
+            typeof readingEqualsExpressionList !== 'undefined' &&
+            readingEqualsExpressionList.length < rowCount
+        )
+    ) {
+        throw new Error('Invalid term lookup index row columns');
+    }
     if (keyCount >= U16_NULL) {
         throw new RangeError('Term lookup index has too many keys for one chunk');
     }
@@ -278,18 +322,23 @@ function encodeIndexPlan(plan) {
     const sequenceSlotCount = getHashSlotCount(rowCount);
     const alignedKeyBytesLength = align4(keyBytes.byteLength);
     const keyHashBytesLength = align4((keySlotCount + keyCount) * 2);
-    const u32SectionCount =
-        keyOffsets.length +
-        rowCount +
-        rowCount +
-        rowCount +
+    const compactU16Count =
+        (rowCount * 2) +
         (keyCount + 1) +
         rowCount +
         (keyCount + 1) +
         readingPostingCount +
         sequenceSlotCount +
         rowCount;
-    const output = new Uint8Array(HEADER_BYTES + alignedKeyBytesLength + keyHashBytesLength + (u32SectionCount * 4));
+    const compactU16BytesLength = align4(compactU16Count * 2);
+    const output = new Uint8Array(
+        HEADER_BYTES +
+        alignedKeyBytesLength +
+        keyHashBytesLength +
+        ((keyCount + 1) * 4) +
+        compactU16BytesLength +
+        (rowCount * 4),
+    );
     const header = new Uint32Array(output.buffer, output.byteOffset, HEADER_U32_COUNT);
     header[0] = rowCount;
     header[1] = keyCount;
@@ -297,7 +346,7 @@ function encodeIndexPlan(plan) {
     header[3] = keySlotCount;
     header[4] = sequenceSlotCount;
     header[5] = readingPostingCount;
-    header[6] = 2;
+    header[6] = COMPACT_INDEX_FORMAT_VERSION;
     output.set(keyBytes, HEADER_BYTES);
     let cursor = HEADER_BYTES + alignedKeyBytesLength;
     /**
@@ -309,7 +358,18 @@ function encodeIndexPlan(plan) {
         cursor += length * 4;
         return value;
     };
-    take(keyOffsets.length).set(keyOffsets);
+    /**
+     * @param {number} length
+     * @returns {Uint16Array}
+     */
+    const takeCompact = (length) => {
+        const value = new Uint16Array(output.buffer, output.byteOffset + cursor, length);
+        cursor += length * 2;
+        return value;
+    };
+    const persistedKeyOffsets = take(keyCount + 1);
+    persistedKeyOffsets.set(keyOffsets.subarray(0, keyCount));
+    persistedKeyOffsets[keyCount] = keyBytes.byteLength;
     const keyHeads = new Uint16Array(output.buffer, output.byteOffset + cursor, keySlotCount);
     cursor += keySlotCount * 2;
     const keyNext = new Uint16Array(output.buffer, output.byteOffset + cursor, keyCount);
@@ -317,16 +377,37 @@ function encodeIndexPlan(plan) {
     cursor = align4(cursor);
     keyHeads.fill(U16_NULL);
     keyNext.fill(U16_NULL);
-    take(rowCount).set(expressionKeys);
-    take(rowCount).set(readingKeys);
+    let expectedKeyStart = 0;
+    for (let key = 0; key < keyCount; ++key) {
+        const start = persistedKeyOffsets[key];
+        const end = key === keyCount - 1 ? keyBytes.byteLength : persistedKeyOffsets[key + 1];
+        if (start !== expectedKeyStart || start >= end || end > keyBytes.byteLength) {
+            throw new Error('Invalid term lookup index key boundary');
+        }
+        expectedKeyStart = end;
+    }
+    const persistedExpressionKeys = takeCompact(rowCount); persistedExpressionKeys.set(expressionKeys);
+    const persistedReadingKeys = takeCompact(rowCount);
+    if (typeof readingEqualsExpressionList === 'undefined') {
+        persistedReadingKeys.set(readingKeys);
+    } else {
+        for (let row = 0; row < rowCount; ++row) {
+            persistedReadingKeys[row] = (
+                readingEqualsExpressionList[row] === true ||
+                readingEqualsExpressionList[row] === 1
+            ) ?
+                U16_NULL :
+                readingKeys[row];
+        }
+    }
+    const expressionPostingOffsets = takeCompact(keyCount + 1);
+    const expressionPostingRows = takeCompact(rowCount);
+    const readingPostingOffsets = takeCompact(keyCount + 1);
+    const readingPostingRows = takeCompact(readingPostingCount);
+    const sequenceHeads = takeCompact(sequenceSlotCount); sequenceHeads.fill(U16_NULL);
+    const sequenceNext = takeCompact(rowCount); sequenceNext.fill(U16_NULL);
+    cursor = align4(cursor);
     new Int32Array(output.buffer, output.byteOffset + cursor, rowCount).set(sequenceValues);
-    cursor += rowCount * 4;
-    const expressionPostingOffsets = take(keyCount + 1);
-    const expressionPostingRows = take(rowCount);
-    const readingPostingOffsets = take(keyCount + 1);
-    const readingPostingRows = take(readingPostingCount);
-    const sequenceHeads = take(sequenceSlotCount); sequenceHeads.fill(U32_NULL);
-    const sequenceNext = take(rowCount); sequenceNext.fill(U32_NULL);
 
     for (let key = 0; key < keyCount; ++key) {
         insertHash(
@@ -335,16 +416,16 @@ function encodeIndexPlan(plan) {
             key,
             keyHashes instanceof Uint32Array && keyHashes.length === keyCount ?
                 keyHashes[key] :
-                hashByteRange(keyBytes, keyOffsets[key], keyOffsets[key + 1]),
+                hashByteRange(keyBytes, persistedKeyOffsets[key], persistedKeyOffsets[key + 1]),
         );
     }
     fillPostingAndSequenceTables(
         expressionPostingOffsets,
         expressionPostingRows,
-        expressionKeys,
+        persistedExpressionKeys,
         readingPostingOffsets,
         readingPostingRows,
-        readingKeys,
+        persistedReadingKeys,
         sequenceHeads,
         sequenceNext,
         sequenceValues,
@@ -371,9 +452,10 @@ export function parsePersistedTermLookupIndex(bytes) {
     const flags = header[6];
     if (
         rowCount === 0 ||
+        rowCount >= U16_NULL ||
         keyCount === 0 ||
         readingPostingCount > rowCount ||
-        flags !== 2 ||
+        flags !== COMPACT_INDEX_FORMAT_VERSION ||
         keyCount >= U16_NULL ||
         !isPowerOfTwo(keySlotCount) ||
         !isPowerOfTwo(sequenceSlotCount)
@@ -382,16 +464,24 @@ export function parsePersistedTermLookupIndex(bytes) {
     }
     const alignedKeyBytesLength = align4(keyBytesLength);
     const keyHashBytesLength = align4((keySlotCount + keyCount) * 2);
-    const u32SectionCount =
-        (keyCount + 1) +
-        (rowCount * 3) +
+    const compactU16Count =
+        (rowCount * 2) +
         (keyCount + 1) +
         rowCount +
         (keyCount + 1) +
         readingPostingCount +
         sequenceSlotCount +
         rowCount;
-    if (bytes.byteLength !== HEADER_BYTES + alignedKeyBytesLength + keyHashBytesLength + (u32SectionCount * 4)) {
+    const compactU16BytesLength = align4(compactU16Count * 2);
+    if (
+        bytes.byteLength !==
+        HEADER_BYTES +
+        alignedKeyBytesLength +
+        ((keyCount + 1) * 4) +
+        keyHashBytesLength +
+        compactU16BytesLength +
+        (rowCount * 4)
+    ) {
         throw new Error('Invalid persisted term lookup index length');
     }
     const keyBytes = bytes.subarray(HEADER_BYTES, HEADER_BYTES + keyBytesLength);
@@ -405,16 +495,31 @@ export function parsePersistedTermLookupIndex(bytes) {
         cursor += length * 4;
         return value;
     };
+    /**
+     * @param {number} length
+     * @returns {Uint16Array}
+     */
+    const takeCompact = (length) => {
+        const value = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, length);
+        cursor += length * 2;
+        return value;
+    };
     const keyOffsets = take(keyCount + 1);
     const keyHeads = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, keySlotCount);
     cursor += keySlotCount * 2;
     const keyNext = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, keyCount);
     cursor += keyCount * 2;
     cursor = align4(cursor);
-    const expressionKeys = take(rowCount);
-    const readingKeys = take(rowCount);
+    const expressionKeys = takeCompact(rowCount);
+    const readingKeys = takeCompact(rowCount);
+    const expressionPostingOffsets = takeCompact(keyCount + 1);
+    const expressionPostingRows = takeCompact(rowCount);
+    const readingPostingOffsets = takeCompact(keyCount + 1);
+    const readingPostingRows = takeCompact(readingPostingCount);
+    const sequenceHeads = takeCompact(sequenceSlotCount);
+    const sequenceNext = takeCompact(rowCount);
+    cursor = align4(cursor);
     const sequenceValues = new Int32Array(bytes.buffer, bytes.byteOffset + cursor, rowCount);
-    cursor += rowCount * 4;
     const index = {
         keyBytes,
         keyOffsets,
@@ -423,12 +528,12 @@ export function parsePersistedTermLookupIndex(bytes) {
         expressionKeys,
         readingKeys,
         sequenceValues,
-        expressionPostingOffsets: take(keyCount + 1),
-        expressionPostingRows: take(rowCount),
-        readingPostingOffsets: take(keyCount + 1),
-        readingPostingRows: take(readingPostingCount),
-        sequenceHeads: take(sequenceSlotCount),
-        sequenceNext: take(rowCount),
+        expressionPostingOffsets,
+        expressionPostingRows,
+        readingPostingOffsets,
+        readingPostingRows,
+        sequenceHeads,
+        sequenceNext,
         keyOrder: null,
         keyReverseOrder: null,
         keyRadix: null,
@@ -496,7 +601,7 @@ export function findSequenceRows(index, sequence) {
     let visited = 0;
     for (
         let row = index.sequenceHeads[hashSequence(sequence) & (index.sequenceHeads.length - 1)];
-        row !== U32_NULL;
+        row !== U16_NULL;
         row = index.sequenceNext[row]
     ) {
         if (++visited > index.sequenceNext.length) { throw new Error('Cyclic persisted sequence lookup hash chain'); }
@@ -558,6 +663,56 @@ export function findPrefixRows(index, query, field, reverse = false) {
 }
 
 /**
+ * Finds expression and reading prefix postings with one key-range search.
+ * @param {PersistedTermLookupIndex} index
+ * @param {Uint8Array} query
+ * @param {boolean} reverse
+ * @returns {{expression: Array<{row: number, exact: boolean}>, reading: Array<{row: number, exact: boolean}>}}
+ */
+export function findPrefixRowMatches(index, query, reverse = false) {
+    /** @type {Array<{row: number, exact: boolean}>} */
+    const expression = [];
+    /** @type {Array<{row: number, exact: boolean}>} */
+    const reading = [];
+    if (query.byteLength === 0) { return {expression, reading}; }
+    if (reverse) {
+        ensureReverseIndex(index);
+    } else {
+        ensureForwardIndex(index);
+    }
+    const order = reverse ?
+        /** @type {Uint32Array} */ (index.keyReverseOrder) :
+        /** @type {Uint32Array} */ (index.keyOrder);
+    const radix = reverse ?
+        /** @type {Uint32Array} */ (index.keyReverseRadix) :
+        /** @type {Uint32Array} */ (index.keyRadix);
+    const radixKey = reverse ? query[query.byteLength - 1] : query[0];
+    let low = radix[radixKey];
+    let high = radix[radixKey + 1];
+    while (low < high) {
+        const middle = (low + high) >>> 1;
+        const comparison = compareKeyBytes(index.keyBytes, index.keyOffsets, order[middle], query, reverse);
+        if (comparison < 0) {
+            low = middle + 1;
+        } else {
+            high = middle;
+        }
+    }
+    for (let i = low; i < radix[radixKey + 1]; ++i) {
+        const key = order[i];
+        if (!keyBytesHavePrefix(index.keyBytes, index.keyOffsets, key, query, reverse)) { break; }
+        const exact = (index.keyOffsets[key + 1] - index.keyOffsets[key]) === query.byteLength;
+        for (let posting = index.expressionPostingOffsets[key]; posting < index.expressionPostingOffsets[key + 1]; ++posting) {
+            expression.push({row: index.expressionPostingRows[posting], exact});
+        }
+        for (let posting = index.readingPostingOffsets[key]; posting < index.readingPostingOffsets[key + 1]; ++posting) {
+            reading.push({row: index.readingPostingRows[posting], exact});
+        }
+    }
+    return {expression, reading};
+}
+
+/**
  * Builds the transient forward prefix order during background prewarm.
  * @param {PersistedTermLookupIndex} index
  */
@@ -574,7 +729,7 @@ export function warmPersistedTermPrefixIndex(index) {
 export function getPersistedTermKeyBytes(index, row, field) {
     if (!Number.isInteger(row) || row < 0 || row >= index.expressionKeys.length) { return null; }
     const key = field === 'reading' ? index.readingKeys[row] : index.expressionKeys[row];
-    if (key === READING_EQUALS_EXPRESSION_U32) { return null; }
+    if (key === U16_NULL) { return null; }
     return getKeyBytes(index.keyBytes, index.keyOffsets, key);
 }
 
@@ -648,13 +803,13 @@ function validateIndex(index) {
         if (key >= keyCount) { throw new Error('Invalid persisted expression key'); }
     }
     for (const key of index.readingKeys) {
-        if (key !== READING_EQUALS_EXPRESSION_U32 && key >= keyCount) { throw new Error('Invalid persisted reading key'); }
+        if (key !== U16_NULL && key >= keyCount) { throw new Error('Invalid persisted reading key'); }
     }
     validateU16References(index.keyHeads, keyCount);
     validateU16References(index.keyNext, keyCount);
     validateKeyHashChains(index.keyHeads, index.keyNext, index.keyBytes, index.keyOffsets);
-    validateReferences(index.sequenceHeads, rowCount);
-    validateReferences(index.sequenceNext, rowCount);
+    validateU16References(index.sequenceHeads, rowCount);
+    validateU16References(index.sequenceNext, rowCount);
     validateOffsets(index.expressionPostingOffsets, index.expressionPostingRows.length);
     validateOffsets(index.readingPostingOffsets, index.readingPostingRows.length);
     const rowSeen = new Uint8Array(rowCount);
@@ -662,7 +817,7 @@ function validateIndex(index) {
         index.expressionPostingOffsets,
         index.expressionPostingRows,
         index.expressionKeys,
-        U32_NULL,
+        U16_NULL,
         rowSeen,
         1,
     );
@@ -670,7 +825,7 @@ function validateIndex(index) {
         index.readingPostingOffsets,
         index.readingPostingRows,
         index.readingKeys,
-        READING_EQUALS_EXPRESSION_U32,
+        U16_NULL,
         rowSeen,
         2,
     );
@@ -729,9 +884,9 @@ function validateKeyHashChains(heads, next, keyBytes, keyOffsets) {
 }
 
 /**
- * @param {Uint32Array} offsets
- * @param {Uint32Array} rows
- * @param {Uint32Array} keys
+ * @param {Uint16Array|Uint32Array} offsets
+ * @param {Uint16Array|Uint32Array} rows
+ * @param {Uint16Array|Uint32Array} keys
  * @param {number} skipKey
  * @param {Uint8Array} seen
  * @param {number} marker
@@ -755,8 +910,8 @@ function validatePostingRows(offsets, rows, keys, skipKey, seen, marker) {
 }
 
 /**
- * @param {Uint32Array} heads
- * @param {Uint32Array} next
+ * @param {Uint16Array} heads
+ * @param {Uint16Array} next
  * @param {Int32Array} values
  * @param {Uint8Array} seen
  * @param {number} marker
@@ -764,7 +919,7 @@ function validatePostingRows(offsets, rows, keys, skipKey, seen, marker) {
  */
 function validateSequenceHashChains(heads, next, values, seen, marker) {
     for (let slot = 0; slot < heads.length; ++slot) {
-        for (let row = heads[slot]; row !== U32_NULL; row = next[row]) {
+        for (let row = heads[slot]; row !== U16_NULL; row = next[row]) {
             const value = values[row];
             if (
                 value < 0 ||
@@ -865,7 +1020,7 @@ function validateReferences(values, limit) {
 }
 
 /**
- * @param {Uint32Array} offsets
+ * @param {Uint16Array|Uint32Array} offsets
  * @param {number} end
  * @throws {Error} If offsets are non-monotonic or out of bounds.
  */
@@ -879,14 +1034,14 @@ function validateOffsets(offsets, end) {
 }
 
 /**
- * @param {Uint32Array} expressionOffsets
- * @param {Uint32Array} expressionRows
- * @param {Uint32Array} expressionKeys
- * @param {Uint32Array} readingOffsets
- * @param {Uint32Array} readingRows
- * @param {Uint32Array} readingKeys
- * @param {Uint32Array} sequenceHeads
- * @param {Uint32Array} sequenceNext
+ * @param {Uint16Array} expressionOffsets
+ * @param {Uint16Array} expressionRows
+ * @param {Uint16Array} expressionKeys
+ * @param {Uint16Array} readingOffsets
+ * @param {Uint16Array} readingRows
+ * @param {Uint16Array} readingKeys
+ * @param {Uint16Array} sequenceHeads
+ * @param {Uint16Array} sequenceNext
  * @param {Int32Array} sequenceValues
  */
 function fillPostingAndSequenceTables(
@@ -904,24 +1059,29 @@ function fillPostingAndSequenceTables(
     for (let row = 0; row < rowCount; ++row) {
         ++expressionOffsets[expressionKeys[row] + 1];
         const readingKey = readingKeys[row];
-        if (readingKey !== READING_EQUALS_EXPRESSION_U32) { ++readingOffsets[readingKey + 1]; }
+        if (readingKey !== U16_NULL) { ++readingOffsets[readingKey + 1]; }
+        const sequence = sequenceValues[row];
+        if (sequence >= 0) { insertHash(sequenceHeads, sequenceNext, row, hashSequence(sequence)); }
     }
     for (let key = 1; key < expressionOffsets.length; ++key) {
         expressionOffsets[key] += expressionOffsets[key - 1];
         readingOffsets[key] += readingOffsets[key - 1];
     }
-    const expressionCursors = expressionOffsets.slice(0, -1);
-    const readingCursors = readingOffsets.slice(0, -1);
-    for (let row = 0; row < rowCount; ++row) {
+    for (let row = rowCount - 1; row >= 0; --row) {
         const expressionKey = expressionKeys[row];
-        expressionRows[expressionCursors[expressionKey]++] = row;
+        expressionRows[--expressionOffsets[expressionKey + 1]] = row;
         const readingKey = readingKeys[row];
-        if (readingKey !== READING_EQUALS_EXPRESSION_U32) {
-            readingRows[readingCursors[readingKey]++] = row;
+        if (readingKey !== U16_NULL) {
+            readingRows[--readingOffsets[readingKey + 1]] = row;
         }
-        const sequence = sequenceValues[row];
-        if (sequence >= 0) { insertHash(sequenceHeads, sequenceNext, row, hashSequence(sequence)); }
     }
+    const keyCount = expressionOffsets.length - 1;
+    for (let key = 1; key < keyCount; ++key) {
+        expressionOffsets[key] = expressionOffsets[key + 1];
+        readingOffsets[key] = readingOffsets[key + 1];
+    }
+    expressionOffsets[keyCount] = expressionRows.length;
+    readingOffsets[keyCount] = readingRows.length;
 }
 
 /**
@@ -967,7 +1127,7 @@ function insertHash(heads, next, value, hash) {
  * @returns {number}
  */
 function hashBytes(bytes) {
-    return hashByteRange(bytes, 0, bytes.byteLength);
+    return hashTermKeyBytes(bytes);
 }
 
 /**
@@ -977,11 +1137,7 @@ function hashBytes(bytes) {
  * @returns {number}
  */
 function hashByteRange(bytes, start, end) {
-    let hash = 0x811c9dc5;
-    for (let i = start; i < end; ++i) {
-        hash = Math.imul(hash ^ bytes[i], 0x01000193);
-    }
-    return hash >>> 0;
+    return hashTermKeyByteRange(bytes, start, end);
 }
 
 /**

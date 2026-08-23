@@ -114,7 +114,7 @@ class DictionaryEntry {
     prepare() {
         //
         const index = this._index;
-        const {revision, version, importSuccess} = this._dictionaryInfo;
+        const {revision, version, importSuccess, storageHealth} = this._dictionaryInfo;
 
         this._aliasNode.dataset.setting = `dictionaries[${index}].alias`;
         this._versionNode.textContent = `rev.${revision}`;
@@ -132,8 +132,14 @@ class DictionaryEntry {
         this._eventListeners.addEventListener(this._integrityButtonError, 'click', this._onIntegrityButtonClick.bind(this), false);
         this._eventListeners.addEventListener(this._updatesAvailable, 'click', this._onUpdateButtonClick.bind(this), false);
 
-        if (importSuccess === false) {
+        if (importSuccess === false || storageHealth === 'reimportRequired') {
             this._integrityButtonError.hidden = false;
+            this._integrityButtonError.title = storageHealth === 'reimportRequired' ? 'Re-import required' : 'Dictionary may not have been imported properly';
+        } else if (storageHealth === 'repairPending' || storageHealth === 'repairing' || storageHealth === 'temporarilyUnavailable') {
+            this._integrityButtonWarning.hidden = false;
+            this._integrityButtonWarning.title = storageHealth === 'repairPending' ?
+                'Lookup index repair pending; dictionary lookup remains available' :
+                'Dictionary lookup data is temporarily unavailable';
         }
 
         this.setCounts(this._databaseCounts);
@@ -171,7 +177,14 @@ class DictionaryEntry {
             }
         }
 
-        if (this._integrityButtonError.hidden) {
+        if (
+            this._dictionaryInfo.storageHealth === 'repairPending' ||
+            this._dictionaryInfo.storageHealth === 'repairing' ||
+            this._dictionaryInfo.storageHealth === 'temporarilyUnavailable'
+        ) {
+            this._integrityButtonWarning.hidden = false;
+            this._integrityButtonCheck.hidden = true;
+        } else if (this._integrityButtonError.hidden) {
             this._integrityButtonWarning.hidden = !countsMismatch;
             this._integrityButtonCheck.hidden = countsMismatch;
         }
@@ -330,7 +343,7 @@ class DictionaryEntry {
 
     /** */
     _showDetails() {
-        const {title, revision, version, counts, prefixWildcardsSupported} = this._dictionaryInfo;
+        const {title, revision, version, counts, prefixWildcardsSupported, storageHealth} = this._dictionaryInfo;
 
         const modal = this._dictionaryController.modalController.getModal('dictionary-details');
         if (modal === null) { return; }
@@ -341,6 +354,10 @@ class DictionaryEntry {
         const versionElement = querySelectorNotNull(modal.node, '.dictionary-revision');
         /** @type {HTMLElement} */
         const outdateElement = querySelectorNotNull(modal.node, '.dictionary-outdated-notification');
+        /** @type {HTMLElement} */
+        const storageErrorElement = querySelectorNotNull(modal.node, '.dictionary-storage-error-notification');
+        /** @type {HTMLButtonElement} */
+        const reimportButton = querySelectorNotNull(modal.node, '.dictionary-reimport-button');
         /** @type {HTMLInputElement} */
         const wildcardSupportedElement = querySelectorNotNull(modal.node, '.dictionary-prefix-wildcard-searches-supported');
         /** @type {HTMLElement} */
@@ -357,6 +374,21 @@ class DictionaryEntry {
         titleElement.textContent = title;
         versionElement.textContent = `rev.${revision}`;
         outdateElement.hidden = (version >= 3);
+        storageErrorElement.hidden = storageHealth !== 'reimportRequired';
+        reimportButton.hidden = storageHealth !== 'reimportRequired';
+        reimportButton.onclick = null;
+        if (storageHealth === 'reimportRequired') {
+            const downloadUrl = this._updateDownloadUrl ?? normalizeOptionalDownloadUrl(this._dictionaryInfo.downloadUrl);
+            reimportButton.textContent = downloadUrl === null ? 'Choose file...' : 'Download again';
+            reimportButton.onclick = () => {
+                modal.setVisible(false);
+                if (downloadUrl !== null) {
+                    this._dictionaryController.updateDictionary(title, downloadUrl);
+                } else {
+                    this._dictionaryController.reimportDictionaryFromFile(title);
+                }
+            };
+        }
         wildcardSupportedElement.checked = prefixWildcardsSupported;
         partsOfSpeechFilterSetting.hidden = !counts?.terms.total;
         partsOfSpeechFilterToggle.dataset.setting = `dictionaries[${this._index}].partsOfSpeechFilter`;
@@ -389,6 +421,7 @@ class DictionaryEntry {
             tagMeta: 'Tag Count',
             media: 'Media Count',
             importSuccess: 'Import Success',
+            storageHealth: 'Storage',
         };
 
         const dictionaryInfo = {...this._dictionaryInfo, ...this._dictionaryInfo.counts};
@@ -396,12 +429,22 @@ class DictionaryEntry {
         let any = false;
         for (const [key, label] of /** @type {([keyof (typeof this._dictionaryInfo & typeof this._dictionaryInfo.counts), string])[]} */ (Object.entries(targets))) {
             const info = dictionaryInfo[key];
-            let displayText = ((_info) => {
-                if (typeof _info === 'string') { return _info; }
-                if (_info && typeof _info === 'object' && 'total' in _info) {
-                    return _info.total ? `${_info.total}` : false;
+            let displayText = ((value) => {
+                if (typeof value === 'string') {
+                    if (key === 'storageHealth') {
+                        return {
+                            available: 'Available',
+                            repairing: 'Repairing',
+                            temporarilyUnavailable: 'Temporarily unavailable',
+                            reimportRequired: 'Re-import required',
+                        }[value] ?? value;
+                    }
+                    return value;
                 }
-                if (typeof _info === 'boolean') { return _info.toString(); }
+                if (value && typeof value === 'object' && 'total' in value) {
+                    return value.total ? `${value.total}` : false;
+                }
+                if (typeof value === 'boolean') { return value.toString(); }
                 return false;
             })(info);
             if (!displayText) { continue; }
@@ -788,6 +831,22 @@ export class DictionaryController {
     }
 
     /**
+     * @param {string} dictionaryTitle
+     */
+    reimportDictionaryFromFile(dictionaryTitle) {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.zip,.mdx,.mdd,application/zip';
+        fileInput.multiple = true;
+        fileInput.addEventListener('change', () => {
+            const files = fileInput.files === null ? [] : [...fileInput.files];
+            if (files.length === 0) { return; }
+            this._enqueueTask({type: 'replaceFromFiles', dictionaryTitle, files});
+        }, {once: true});
+        fileInput.click();
+    }
+
+    /**
      * @param {number} currentIndex
      * @param {number} targetIndex
      */
@@ -929,7 +988,10 @@ export class DictionaryController {
      */
     async _refreshEntriesAfterOptionsChanged() {
         try {
-            await this._updateEntries();
+            // The cached dictionary list can be older than an in-flight import.
+            // Reconcile settings only after a databaseUpdated event supplies a
+            // fresh list; an options-only refresh must remain render-only.
+            await this._updateEntries(null, false);
         } catch (error) {
             log.error(error);
         }
@@ -978,8 +1040,11 @@ export class DictionaryController {
         void this._setAllDictionariesEnabled(value);
     }
 
-    /** */
-    async _updateEntries(token = null) {
+    /**
+     * @param {import('core').TokenObject|null} [token]
+     * @param {boolean} [reconcileSettings]
+     */
+    async _updateEntries(token = null, reconcileSettings = true) {
         const dictionaries = this._dictionaries;
         if (dictionaries === null) { return; }
         this._updateMainDictionarySelectOptions(dictionaries);
@@ -1002,8 +1067,10 @@ export class DictionaryController {
             node.hidden = hasDictionary;
         }
 
-        await DictionaryController.ensureDictionarySettings(this._settingsController, dictionaries, void 0, true, false);
-        if (token !== null && this._databaseStateToken !== token) { return; }
+        if (reconcileSettings) {
+            await DictionaryController.ensureDictionarySettings(this._settingsController, dictionaries, void 0, true, false);
+            if (token !== null && this._databaseStateToken !== token) { return; }
+        }
 
         const options = await this._settingsController.getOptions();
         if (token !== null && this._databaseStateToken !== token) { return; }
@@ -1404,6 +1471,8 @@ export class DictionaryController {
                         await this._deleteDictionary(task.dictionaryTitle);
                     } else if (task.type === 'update') {
                         await this._updateDictionary(task.dictionaryTitle, task.downloadUrl);
+                    } else if (task.type === 'replaceFromFiles') {
+                        await this._reimportDictionaryFromFiles(task.dictionaryTitle, task.files);
                     }
                 } catch (error) {
                     const normalizedError = error instanceof Error ? error : new Error(String(error));
@@ -1524,6 +1593,47 @@ export class DictionaryController {
 
     /**
      * @param {string} dictionaryTitle
+     * @param {File[]} files
+     */
+    async _reimportDictionaryFromFiles(dictionaryTitle, files) {
+        if (this._checkingIntegrity || this._checkingUpdates || files.length === 0) { return; }
+
+        const dictionaryInfo = await this._getDictionaryInfoForTask(dictionaryTitle);
+        dictionaryTitle = dictionaryInfo.title;
+        const options = await this._settingsController.getOptionsFull();
+        this._clearMutationErrors();
+        const profilesDictionarySettings = this._getProfilesDictionarySettingsForTitle(options.profiles, dictionaryTitle);
+
+        const importToken = this._createUpdateImportToken();
+        const stagedDictionaryTitle = `${dictionaryTitle} [update-staging ${importToken}]`;
+        let importResult;
+        try {
+            importResult = await this._importReplacementDictionaryFromFiles(
+                dictionaryTitle,
+                files,
+                profilesDictionarySettings,
+                importToken,
+                stagedDictionaryTitle,
+            );
+        } catch (error) {
+            const normalizedError = error instanceof Error ? error : new Error(String(error));
+            if (normalizedError.message.includes('Timed out importing replacement dictionary')) {
+                const recovered = await this._recoverTimedOutUpdateState(dictionaryTitle, importToken, stagedDictionaryTitle);
+                if (recovered) { return; }
+            }
+            throw normalizedError;
+        }
+        if (!importResult.ok) {
+            throw new Error(
+                `Replacement dictionary import failed for ${dictionaryTitle}: ` +
+                importResult.errors.map((error) => error.message).join('; '),
+            );
+        }
+        await this._validateUpdatedDictionaryState(dictionaryTitle, importToken, stagedDictionaryTitle, importResult.importedTitles);
+    }
+
+    /**
+     * @param {string} dictionaryTitle
      * @returns {Promise<import('dictionary-importer').Summary>}
      */
     async _getDictionaryInfoForTask(dictionaryTitle) {
@@ -1609,6 +1719,31 @@ export class DictionaryController {
         return await this._awaitPromiseResult(
             this._settingsController.importDictionaryFromUrl(
                 downloadUrl,
+                profilesDictionarySettings,
+                {
+                    dictionaryTitleOverride: stagedDictionaryTitle,
+                    replacementDictionaryTitle: dictionaryTitle,
+                    updateSessionToken: importToken,
+                    useImportSession: false,
+                    finalizeImportSession: false,
+                },
+            ),
+            `Timed out importing replacement dictionary for ${dictionaryTitle}`,
+        );
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @param {File[]} files
+     * @param {import('settings-controller.js').ProfilesDictionarySettings} profilesDictionarySettings
+     * @param {string} importToken
+     * @param {string} stagedDictionaryTitle
+     * @returns {Promise<import('settings-controller').ImportDictionaryDoneResult>}
+     */
+    async _importReplacementDictionaryFromFiles(dictionaryTitle, files, profilesDictionarySettings, importToken, stagedDictionaryTitle) {
+        return await this._awaitPromiseResult(
+            this._settingsController.importDictionaryFromFile(
+                files,
                 profilesDictionarySettings,
                 {
                     dictionaryTitleOverride: stagedDictionaryTitle,

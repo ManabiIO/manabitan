@@ -28,6 +28,7 @@ const RAW_TERM_CONTENT_TOKEN_HEADER_BYTES = 4;
 const U32_RANGE = 0x100000000;
 
 export const RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES = 28;
+export const RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES = 20;
 
 export const RAW_TERM_CONTENT_DICT_NAME = 'raw-v2';
 
@@ -38,6 +39,8 @@ export const RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME = 'raw-v4';
 export const RAW_TERM_CONTENT_TOKEN_DICT_NAME = 'raw-v6';
 
 export const RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX = 'raw-block-v1';
+
+export const RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX = 'raw-block-v2';
 
 /**
  * @param {Uint8Array} bytes
@@ -68,7 +71,99 @@ export function createRawTermContentBlockDictName(compressionDictName) {
 export function getRawTermContentBlockCompressionDictName(contentDictName) {
     if (contentDictName === RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX) { return null; }
     const prefix = `${RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX}:`;
-    return contentDictName.startsWith(prefix) ? contentDictName.substring(prefix.length) : void 0;
+    if (contentDictName.startsWith(prefix)) { return contentDictName.substring(prefix.length); }
+    if (contentDictName === RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX) { return null; }
+    const compactPrefix = `${RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX}:`;
+    if (contentDictName.startsWith(compactPrefix)) { return contentDictName.substring(compactPrefix.length); }
+    return void 0;
+}
+
+/**
+ * @param {string|null} compressionDictName
+ * @returns {string}
+ */
+export function createRawTermContentCompactBlockDictName(compressionDictName) {
+    return compressionDictName === null ? RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX : `${RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX}:${compressionDictName}`;
+}
+
+/**
+ * @param {number} blockOffset
+ * @param {number} blockCompressedLength
+ * @param {number} blockUncompressedLength
+ * @param {number} entryOffset
+ * @returns {Uint8Array}
+ */
+export function encodeRawTermContentCompactBlockReference(blockOffset, blockCompressedLength, blockUncompressedLength, entryOffset) {
+    const bytes = new Uint8Array(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);
+    writeRawTermContentCompactBlockReference(
+        new DataView(bytes.buffer),
+        0,
+        blockOffset,
+        blockCompressedLength,
+        blockUncompressedLength,
+        entryOffset,
+    );
+    return bytes;
+}
+
+/**
+ * @param {DataView} view
+ * @param {number} offset
+ * @param {number} blockOffset
+ * @param {number} blockCompressedLength
+ * @param {number} blockUncompressedLength
+ * @param {number} entryOffset
+ */
+export function writeRawTermContentCompactBlockReference(
+    view,
+    offset,
+    blockOffset,
+    blockCompressedLength,
+    blockUncompressedLength,
+    entryOffset,
+) {
+    if (
+        !Number.isSafeInteger(blockOffset) || blockOffset < 0 ||
+        !Number.isSafeInteger(blockCompressedLength) || blockCompressedLength <= 0 || blockCompressedLength >= U32_RANGE ||
+        !Number.isSafeInteger(blockUncompressedLength) || blockUncompressedLength <= 0 || blockUncompressedLength >= U32_RANGE ||
+        !Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= U32_RANGE ||
+        !Number.isSafeInteger(offset) || offset < 0 || offset + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES > view.byteLength ||
+        !Number.isSafeInteger(blockOffset + blockCompressedLength)
+    ) {
+        throw new RangeError('Invalid compact term-content block reference');
+    }
+    view.setUint32(offset, blockOffset, true);
+    view.setUint32(offset + 4, Math.floor(blockOffset / U32_RANGE), true);
+    view.setUint32(offset + 8, blockCompressedLength, true);
+    view.setUint32(offset + 12, blockUncompressedLength, true);
+    view.setUint32(offset + 16, entryOffset, true);
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {number} entryLength
+ * @returns {{blockOffset: number, blockCompressedLength: number, blockUncompressedLength: number, entryOffset: number, entryLength: number}|null}
+ */
+export function decodeRawTermContentCompactBlockReference(bytes, entryLength) {
+    if (
+        bytes.byteLength !== RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES ||
+        !Number.isSafeInteger(entryLength) || entryLength <= 0 || entryLength >= U32_RANGE
+    ) { return null; }
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const blockOffset = view.getUint32(0, true) + view.getUint32(4, true) * U32_RANGE;
+    const blockCompressedLength = view.getUint32(8, true);
+    const blockUncompressedLength = view.getUint32(12, true);
+    const entryOffset = view.getUint32(16, true);
+    if (
+        !Number.isSafeInteger(blockOffset) ||
+        blockCompressedLength <= 0 ||
+        blockUncompressedLength <= 0 ||
+        !Number.isSafeInteger(blockOffset + blockCompressedLength) ||
+        entryOffset + entryLength > blockUncompressedLength
+    ) {
+        return null;
+    }
+    return {blockOffset, blockCompressedLength, blockUncompressedLength, entryOffset, entryLength};
 }
 
 /**

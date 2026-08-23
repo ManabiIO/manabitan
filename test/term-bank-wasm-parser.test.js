@@ -23,8 +23,20 @@ import {afterAll, beforeAll, describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
+import {hashTermKeyBytes} from '../ext/js/dictionary/term-key-hash.js';
 import {decodeRawTermContentTokenBinary} from '../ext/js/dictionary/raw-term-content.js';
-import {consumeLastTermBankWasmParseProfile, parseTermBankWithWasmChunks, parseTermBankWithWasmColumnChunks} from '../ext/js/dictionary/term-bank-wasm-parser.js';
+import {
+    consumeLastTermBankWasmParseProfile,
+    copyWasmBackedColumnChunk,
+    disposeParallelTermBankParser,
+    getParallelTermBankParserWorkerCount,
+    parseTermBankWithWasmChunks,
+    parseTermBankWithWasmColumnChunks,
+    parseTermBankWithWasmColumnChunksParallel,
+    parseTermBankWithWasmColumnChunksParallelDeferred,
+    prewarmParallelTermBankParser,
+    TermBankWasmResourceError,
+} from '../ext/js/dictionary/term-bank-wasm-parser.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -34,6 +46,16 @@ const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 const nativeFetch = globalThis.fetch;
 /** @typedef {{expression: string, reading: string, glossaryMayContainMedia?: boolean, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array, readingEqualsExpression?: boolean, readingBytes?: Uint8Array}} ParsedRow */
+
+/**
+ * @param {Map<string, Set<(event: MessageEvent<unknown>) => void>>} listeners
+ * @param {unknown} data
+ */
+function emitWorkerMessage(listeners, data) {
+    for (const listener of listeners.get('message') ?? []) {
+        listener(/** @type {MessageEvent<unknown>} */ ({data}));
+    }
+}
 /** @typedef {{strings: string[], stringLengths: number[], stringHashes: number[], stringOffsets: number[], expressionIndexes: number[], readingIndexes: number[], readingEqualsExpressionList: number[]}} TermStringPlanSnapshot */
 
 /**
@@ -83,13 +105,7 @@ function getContentString(row) {
  * @param {Uint8Array} bytes
  * @returns {number}
  */
-function hashBytes(bytes) {
-    let hash = 0x811c9dc5;
-    for (const value of bytes) {
-        hash = Math.imul(hash ^ value, 0x01000193);
-    }
-    return hash >>> 0;
-}
+const hashBytes = hashTermKeyBytes;
 
 describe('term-bank WASM parser', () => {
     beforeAll(() => {
@@ -104,6 +120,1140 @@ describe('term-bank WASM parser', () => {
 
     afterAll(() => {
         vi.unstubAllGlobals();
+    });
+
+    test('copies every WASM-backed column before a parser heap can be reused', () => {
+        const heap = new Uint8Array(512);
+        const expressionBytesList = [heap.subarray(8, 11), heap.subarray(12, 15)];
+        const readingBytesList = [heap.subarray(16, 19), heap.subarray(20, 23)];
+        expressionBytesList[0].set([1, 2, 3]);
+        expressionBytesList[1].set([4, 5, 6]);
+        readingBytesList[0].set([7, 8, 9]);
+        readingBytesList[1].set([10, 11, 12]);
+        const readingEqualsExpressionList = new Uint8Array(heap.buffer, 24, 2);
+        readingEqualsExpressionList.set([0, 1]);
+        const scoreList = new Int32Array(heap.buffer, 28, 2);
+        scoreList.set([-4, 8]);
+        const sequenceList = new Int32Array(heap.buffer, 36, 2);
+        sequenceList.set([100, 200]);
+        const contentHash1List = new Uint32Array(heap.buffer, 44, 2);
+        contentHash1List.set([101, 102]);
+        const contentHash2List = new Uint32Array(heap.buffer, 52, 2);
+        contentHash2List.set([201, 202]);
+        const contentMetaList = new Uint32Array(heap.buffer, 60, 8);
+        contentMetaList.set([0, 3, 101, 201, 3, 2, 102, 202]);
+        const contentUniqueIndexList = new Uint32Array(heap.buffer, 92, 2);
+        contentUniqueIndexList.set([0, 1]);
+        const stringLengths = new Uint16Array(heap.buffer, 100, 2);
+        stringLengths.set([3, 3]);
+        const stringOffsets = new Uint32Array(heap.buffer, 104, 2);
+        stringOffsets.set([0, 3]);
+        const stringHashes = new Uint32Array(heap.buffer, 112, 2);
+        stringHashes.set([301, 302]);
+        const stringsBuffer = heap.subarray(120, 126);
+        stringsBuffer.set([13, 14, 15, 16, 17, 18]);
+        const expressionIndexes = new Uint32Array(heap.buffer, 128, 2);
+        expressionIndexes.set([0, 1]);
+        const readingIndexes = new Uint32Array(heap.buffer, 136, 2);
+        readingIndexes.set([1, 0]);
+        heap.set([31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42], 160);
+        heap.set([21, 22, 23, 24, 25], 256);
+
+        const copy = copyWasmBackedColumnChunk({
+            rowCount: 2,
+            expressionBytesList,
+            readingBytesList,
+            readingEqualsExpressionList,
+            scoreList,
+            sequenceList,
+            contentBytesList: [heap.subarray(256, 259), heap.subarray(259, 261)],
+            contentHash1List,
+            contentHash2List,
+            contentBytesBuffer: heap,
+            contentBytesBaseOffset: 256,
+            contentMetaList,
+            contentUniqueIndexList,
+            contentDedupPlan: null,
+            termRecordPreinternedPlan: {
+                stringLengths,
+                stringOffsets,
+                stringHashes,
+                stringsBuffer,
+                expressionIndexes,
+                readingIndexes,
+            },
+            mediaRows: [{
+                index: 1,
+                row: {
+                    expression: '',
+                    reading: '',
+                    expressionBytes: heap.subarray(160, 163),
+                    readingBytes: heap.subarray(163, 166),
+                    readingEqualsExpression: false,
+                    definitionTags: '',
+                    rules: '',
+                    score: 0,
+                    glossaryJson: '[]',
+                    glossaryJsonBytes: heap.subarray(166, 169),
+                    glossaryMayContainMedia: true,
+                    sequence: null,
+                    termTags: '',
+                    termEntryContentBytes: heap.subarray(169, 172),
+                },
+            }],
+        }, true);
+
+        heap.fill(0);
+        expect(copy.contentBytesBuffer.buffer).toBeInstanceOf(SharedArrayBuffer);
+        expect(copy.expressionBytesList.map((value) => [...value])).toStrictEqual([[1, 2, 3], [4, 5, 6]]);
+        expect(copy.readingBytesList.map((value) => [...value])).toStrictEqual([[7, 8, 9], [10, 11, 12]]);
+        expect([...copy.readingEqualsExpressionList]).toStrictEqual([0, 1]);
+        expect([...copy.scoreList]).toStrictEqual([-4, 8]);
+        expect([...copy.sequenceList]).toStrictEqual([100, 200]);
+        expect(copy.contentBytesList.map((value) => [...value])).toStrictEqual([[21, 22, 23], [24, 25]]);
+        expect([...copy.contentHash1List]).toStrictEqual([101, 102]);
+        expect([...copy.contentHash2List]).toStrictEqual([201, 202]);
+        expect([...copy.contentBytesBuffer]).toStrictEqual([21, 22, 23, 24, 25]);
+        expect([...copy.contentMetaList]).toStrictEqual([0, 3, 101, 201, 3, 2, 102, 202]);
+        expect([...copy.contentUniqueIndexList]).toStrictEqual([0, 1]);
+        expect([...copy.termRecordPreinternedPlan.stringLengths]).toStrictEqual([3, 3]);
+        expect([...copy.termRecordPreinternedPlan.stringOffsets]).toStrictEqual([0, 3]);
+        expect([...copy.termRecordPreinternedPlan.stringHashes]).toStrictEqual([301, 302]);
+        expect([...copy.termRecordPreinternedPlan.stringsBuffer]).toStrictEqual([13, 14, 15, 16, 17, 18]);
+        expect([...copy.termRecordPreinternedPlan.expressionIndexes]).toStrictEqual([0, 1]);
+        expect([...copy.termRecordPreinternedPlan.readingIndexes]).toStrictEqual([1, 0]);
+        expect(copy.mediaRows).toHaveLength(1);
+        expect([...copy.mediaRows[0].row.expressionBytes]).toStrictEqual([31, 32, 33]);
+        expect([...copy.mediaRows[0].row.readingBytes]).toStrictEqual([34, 35, 36]);
+        expect([...copy.mediaRows[0].row.glossaryJsonBytes]).toStrictEqual([37, 38, 39]);
+        expect([...copy.mediaRows[0].row.termEntryContentBytes]).toStrictEqual([40, 41, 42]);
+    });
+
+    test.each([
+        [{hardwareConcurrency: 12, deviceMemory: 8}, 3],
+        [{hardwareConcurrency: 12, deviceMemory: 4}, 2],
+        [{hardwareConcurrency: 4, deviceMemory: 8}, 2],
+        [{}, 2],
+    ])('selects parser worker count from browser capability: %j', (navigatorValue, expected) => {
+        const originalNavigator = globalThis.navigator;
+        try {
+            vi.stubGlobal('navigator', navigatorValue);
+            expect(getParallelTermBankParserWorkerCount()).toBe(expected);
+        } finally {
+            vi.stubGlobal('navigator', originalNavigator);
+        }
+    });
+
+    maybeTest('deduplicates concurrent parallel parser prewarm calls', async () => {
+        const workerCount = getParallelTermBankParserWorkerCount();
+        let constructionCount = 0;
+        let terminateCount = 0;
+        class ReadyWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+                ++constructionCount;
+            }
+
+            /**
+             * @param {string} type
+             * @param {(event: MessageEvent<unknown>) => void} listener
+             */
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            /**
+             * @param {string} type
+             * @param {(event: MessageEvent<unknown>) => void} listener
+             */
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            /** @param {{type: string, id?: number}} message */
+            postMessage(message) {
+                if (message.type !== 'initialize') { return; }
+                queueMicrotask(() => emitWorkerMessage(this.listeners, {type: 'ready'}));
+            }
+
+            terminate() { ++terminateCount; }
+        }
+
+        vi.stubGlobal('Worker', ReadyWorker);
+        try {
+            await expect(Promise.all([
+                prewarmParallelTermBankParser(),
+                prewarmParallelTermBankParser(),
+                prewarmParallelTermBankParser(),
+            ])).resolves.toStrictEqual([true, true, true]);
+            expect(constructionCount).toBe(workerCount);
+            await disposeParallelTermBankParser();
+            expect(terminateCount).toBe(workerCount);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('does not recreate a prewarm generation ordered before a later disposal', async () => {
+        const workerCount = getParallelTermBankParserWorkerCount();
+        let constructionCount = 0;
+        let terminateCount = 0;
+        /** @type {() => void} */
+        let markInitialWorkersCreated;
+        const initialWorkersCreated = new Promise((resolve) => { markInitialWorkersCreated = resolve; });
+        class GenerationWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+                this.generation = Math.floor(constructionCount / workerCount);
+                ++constructionCount;
+                if (constructionCount === workerCount) { markInitialWorkersCreated(); }
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                if (message.type === 'initialize' && this.generation > 0) {
+                    queueMicrotask(() => emitWorkerMessage(this.listeners, {type: 'ready'}));
+                }
+            }
+
+            terminate() { ++terminateCount; }
+        }
+
+        vi.stubGlobal('Worker', GenerationWorker);
+        try {
+            const obsoletePrewarm = prewarmParallelTermBankParser();
+            await initialWorkersCreated;
+            const firstDisposal = disposeParallelTermBankParser();
+            const stalePrewarm = prewarmParallelTermBankParser();
+            const laterDisposal = disposeParallelTermBankParser();
+
+            await expect(obsoletePrewarm).resolves.toBe(false);
+            await Promise.all([firstDisposal, laterDisposal]);
+            await expect(stalePrewarm).resolves.toBe(false);
+            expect(constructionCount).toBe(workerCount);
+            expect(terminateCount).toBe(workerCount);
+
+            await expect(prewarmParallelTermBankParser()).resolves.toBe(true);
+            expect(constructionCount).toBe(workerCount * 2);
+            await disposeParallelTermBankParser();
+            expect(terminateCount).toBe(workerCount * 2);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('allows serial fallback after parallel parser resource pressure', async () => {
+        class ResourceFailingWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                if (!this.listeners.has(type)) { this.listeners.set(type, new Set()); }
+                this.listeners.get(type).add(listener);
+            }
+
+            removeEventListener(type, listener) {
+                const listeners = this.listeners.get(type);
+                if (typeof listeners !== 'undefined') { listeners.delete(listener); }
+            }
+
+            postMessage(message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        this.emit('message', {type: 'ready'});
+                    } else if (message.type === 'parse') {
+                        this.emit('message', {
+                            type: 'parse-error',
+                            id: message.id,
+                            error: {name: 'TermBankWasmResourceError', message: 'mock allocation failure'},
+                        });
+                    }
+                });
+            }
+
+            terminate() {}
+
+            emit(type, data) {
+                for (const listener of this.listeners.get(type) ?? []) {
+                    listener(/** @type {MessageEvent<unknown>} */ ({data}));
+                }
+            }
+        }
+
+        vi.stubGlobal('Worker', ResourceFailingWorker);
+        try {
+            const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
+            let sinkCalls = 0;
+            const result = parseTermBankWithWasmColumnChunksParallel(
+                sourceBanks,
+                3,
+                () => { ++sinkCalls; },
+                {emitContentSlab: true},
+            );
+            await expect(result).rejects.toSatisfy((error) => (
+                error instanceof Error &&
+                !(error instanceof TermBankWasmResourceError) &&
+                /Parallel term-bank parser exceeded its resource budget/.test(error.message)
+            ));
+            expect(sinkCalls).toBe(0);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('reuses successful parser workers until import cleanup', async () => {
+        const workerCount = getParallelTermBankParserWorkerCount();
+        let constructionCount = 0;
+        let parseCount = 0;
+        let terminateCount = 0;
+        class SuccessfulWorker {
+            constructor() {
+                ++constructionCount;
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                const listeners = this.listeners.get(type);
+                if (typeof listeners !== 'undefined') { listeners.delete(listener); }
+            }
+
+            postMessage(message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    ++parseCount;
+                    emitWorkerMessage(this.listeners, {
+                        type: 'parsed',
+                        id: message.id,
+                        rowCount: 0,
+                    });
+                    emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: message.id,
+                        chunk: {rowCount: 0},
+                        profile: {chunkDispatchMs: 0},
+                    });
+                });
+            }
+
+            terminate() { ++terminateCount; }
+        }
+
+        vi.stubGlobal('Worker', SuccessfulWorker);
+        try {
+            for (let batch = 0; batch < 2; ++batch) {
+                const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
+                await expect(parseTermBankWithWasmColumnChunksParallel(
+                    sourceBanks,
+                    3,
+                    () => {},
+                    {emitContentSlab: true},
+                )).resolves.toBe(true);
+            }
+            expect(constructionCount).toBe(workerCount);
+            expect(parseCount).toBe(8);
+            expect(terminateCount).toBe(0);
+            await disposeParallelTermBankParser();
+            expect(terminateCount).toBe(workerCount);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('uses shallower parallel grouping for media-aware term banks', async () => {
+        const originalNavigator = globalThis.navigator;
+        let parseCount = 0;
+        class SuccessfulWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            /**
+             * @param {string} type
+             * @param {(event: MessageEvent<unknown>) => void} listener
+             */
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            /**
+             * @param {string} type
+             * @param {(event: MessageEvent<unknown>) => void} listener
+             */
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            /** @param {{type: string, id?: number}} message */
+            postMessage(message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    ++parseCount;
+                    emitWorkerMessage(this.listeners, {type: 'parsed', id: message.id, rowCount: 1});
+                    emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: message.id,
+                        chunk: {rowCount: 1},
+                        profile: {chunkDispatchMs: 0},
+                    });
+                });
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('navigator', {hardwareConcurrency: 12, deviceMemory: 8});
+        vi.stubGlobal('Worker', SuccessfulWorker);
+        try {
+            const sourceBanks = Array.from({length: 12}, () => textEncoder.encode('[]'));
+            await expect(parseTermBankWithWasmColumnChunksParallel(
+                sourceBanks.map((bytes) => new Uint8Array(bytes)),
+                3,
+                () => {},
+                {emitContentSlab: true},
+            )).resolves.toBe(true);
+            const plainProfile = consumeLastTermBankWasmParseProfile();
+            expect(plainProfile).toMatchObject({
+                parallelWorkerCount: 3,
+                parallelPipelineGroupsPerWorker: 4,
+                parallelGroupCount: 12,
+            });
+            expect(parseCount).toBe(12);
+
+            await expect(parseTermBankWithWasmColumnChunksParallel(
+                sourceBanks.map((bytes) => new Uint8Array(bytes)),
+                3,
+                () => {},
+                {emitContentSlab: true, mediaHintFastScan: true},
+            )).resolves.toBe(true);
+            const mediaProfile = consumeLastTermBankWasmParseProfile();
+            expect(mediaProfile).toMatchObject({
+                parallelWorkerCount: 3,
+                parallelPipelineGroupsPerWorker: 3,
+                parallelGroupCount: 9,
+            });
+            expect(parseCount).toBe(21);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('navigator', originalNavigator);
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('defers disposal until an active parallel run releases ownership', async () => {
+        const workerCount = getParallelTermBankParserWorkerCount();
+        let terminateCount = 0;
+        class SuccessfulWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    this.emitResult(message.id);
+                });
+            }
+
+            emitResult(id) {
+                emitWorkerMessage(this.listeners, {type: 'parsed', id, rowCount: 1});
+                emitWorkerMessage(this.listeners, {
+                    type: 'result',
+                    id,
+                    chunk: {rowCount: 1},
+                    profile: {chunkDispatchMs: 0},
+                });
+            }
+
+            terminate() { ++terminateCount; }
+        }
+
+        vi.stubGlobal('Worker', SuccessfulWorker);
+        /** @type {() => void} */
+        let releaseSink;
+        const sinkGate = new Promise((resolve) => { releaseSink = resolve; });
+        /** @type {() => void} */
+        let markSinkStarted;
+        const sinkStarted = new Promise((resolve) => { markSinkStarted = resolve; });
+        try {
+            const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
+            const parsing = parseTermBankWithWasmColumnChunksParallel(
+                sourceBanks,
+                3,
+                async (_chunk, progress) => {
+                    if (progress.chunkIndex !== 1) { return; }
+                    markSinkStarted();
+                    await sinkGate;
+                },
+                {emitContentSlab: true},
+            );
+            await sinkStarted;
+            const stalePrewarm = prewarmParallelTermBankParser();
+            let disposalSettled = false;
+            const disposal = disposeParallelTermBankParser().then(() => { disposalSettled = true; });
+            const nextPrewarm = prewarmParallelTermBankParser();
+            await Promise.resolve();
+            expect(disposalSettled).toBe(false);
+            expect(terminateCount).toBe(0);
+
+            releaseSink();
+            await expect(parsing).resolves.toBe(true);
+            await expect(stalePrewarm).resolves.toBe(false);
+            await disposal;
+            await expect(nextPrewarm).resolves.toBe(true);
+            expect(disposalSettled).toBe(true);
+            expect(terminateCount).toBe(workerCount);
+            await disposeParallelTermBankParser();
+            expect(terminateCount).toBe(workerCount * 2);
+        } finally {
+            releaseSink();
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('creates a fresh worker pool after a failed parallel run', async () => {
+        const workerCount = getParallelTermBankParserWorkerCount();
+        let constructionCount = 0;
+        let failNextParse = true;
+        class FailOnceWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+                constructionCount += 1;
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    if (failNextParse) {
+                        failNextParse = false;
+                        emitWorkerMessage(this.listeners, {
+                            type: 'parse-error',
+                            id: message.id,
+                            error: {message: 'injected one-time parse failure'},
+                        });
+                        return;
+                    }
+                    emitWorkerMessage(this.listeners, {type: 'parsed', id: message.id, rowCount: 0});
+                    emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: message.id,
+                        chunk: {rowCount: 0},
+                        profile: {chunkDispatchMs: 0},
+                    });
+                });
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('Worker', FailOnceWorker);
+        try {
+            const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
+            await expect(parseTermBankWithWasmColumnChunksParallel(
+                sourceBanks,
+                3,
+                () => {},
+                {emitContentSlab: true},
+            )).rejects.toThrow('injected one-time parse failure');
+            await expect(parseTermBankWithWasmColumnChunksParallel(
+                sourceBanks,
+                3,
+                () => {},
+                {emitContentSlab: true},
+            )).resolves.toBe(true);
+            expect(constructionCount).toBe(workerCount * 2);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('streams archive-ordered results while later workers copy output', async () => {
+        let workerIndex = 0;
+        /** @type {() => void} */
+        let releaseSecondResult;
+        const secondResultGate = new Promise((resolve) => { releaseSecondResult = resolve; });
+        let fallbackReleasedSecondResult = false;
+        let firstSinkPrecededSecondParse = false;
+        const fallbackTimeout = setTimeout(() => {
+            fallbackReleasedSecondResult = true;
+            releaseSecondResult();
+        }, 100);
+        class StagedWorker {
+            constructor() {
+                this.index = workerIndex++;
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message, transfer = []) {
+                const dispatchedMessage = structuredClone(message, {transfer});
+                queueMicrotask(() => {
+                    if (dispatchedMessage.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    if (this.index === 0) {
+                        emitWorkerMessage(this.listeners, {type: 'parsed', id: dispatchedMessage.id, rowCount: 1});
+                        this.emitResult(dispatchedMessage.id);
+                    } else {
+                        void secondResultGate.then(() => {
+                            emitWorkerMessage(this.listeners, {type: 'parsed', id: dispatchedMessage.id, rowCount: 1});
+                            this.emitResult(dispatchedMessage.id);
+                        });
+                    }
+                });
+            }
+
+            emitResult(id) {
+                emitWorkerMessage(this.listeners, {
+                    type: 'result',
+                    id,
+                    chunk: {rowCount: 1},
+                    profile: {chunkDispatchMs: 0},
+                });
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('Worker', StagedWorker);
+        try {
+            const progress = [];
+            const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
+            await expect(parseTermBankWithWasmColumnChunksParallel(
+                sourceBanks,
+                3,
+                (_chunk, value) => {
+                    progress.push(value);
+                    if (value.chunkIndex === 1) {
+                        firstSinkPrecededSecondParse = !fallbackReleasedSecondResult;
+                        releaseSecondResult();
+                    }
+                },
+                {emitContentSlab: true},
+            )).resolves.toBe(true);
+            expect(firstSinkPrecededSecondParse).toBe(true);
+            expect(progress).toStrictEqual([
+                {processedRows: 1, totalRows: 4, chunkIndex: 1, chunkCount: 4},
+                {processedRows: 2, totalRows: 4, chunkIndex: 2, chunkCount: 4},
+                {processedRows: 3, totalRows: 4, chunkIndex: 3, chunkCount: 4},
+                {processedRows: 4, totalRows: 4, chunkIndex: 4, chunkCount: 4},
+            ]);
+        } finally {
+            clearTimeout(fallbackTimeout);
+            releaseSecondResult();
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('streams early groups while later ZIP sources are unresolved', async () => {
+        class SuccessfulWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    emitWorkerMessage(this.listeners, {type: 'parsed', id: message.id, rowCount: 1});
+                    emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: message.id,
+                        chunk: {rowCount: 1},
+                        profile: {chunkDispatchMs: 0},
+                    });
+                });
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('Worker', SuccessfulWorker);
+        /** @type {() => void} */
+        let releaseLaterSources;
+        const laterSources = new Promise((resolve) => { releaseLaterSources = resolve; });
+        /** @type {() => void} */
+        let resolveFirstSink;
+        const firstSink = new Promise((resolve) => { resolveFirstSink = resolve; });
+        try {
+            const emptyBank = textEncoder.encode('[]');
+            const sourcePromises = [
+                Promise.resolve(new Uint8Array(emptyBank)),
+                Promise.resolve(new Uint8Array(emptyBank)),
+                laterSources.then(() => new Uint8Array(emptyBank)),
+                laterSources.then(() => new Uint8Array(emptyBank)),
+            ];
+            const sinkIndexes = [];
+            const parsing = parseTermBankWithWasmColumnChunksParallelDeferred(
+                sourcePromises,
+                sourcePromises.map(() => emptyBank.byteLength),
+                3,
+                (_chunk, progress) => {
+                    sinkIndexes.push(progress.chunkIndex);
+                    resolveFirstSink();
+                },
+                {emitContentSlab: true},
+            );
+            await firstSink;
+            expect(sinkIndexes.length).toBeGreaterThan(0);
+            expect(Math.max(...sinkIndexes)).toBeLessThanOrEqual(2);
+            releaseLaterSources();
+            await expect(parsing).resolves.toBe(true);
+            expect(sinkIndexes).toStrictEqual([1, 2, 3, 4]);
+        } finally {
+            releaseLaterSources();
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('rejects promptly when a later pipelined group fails', async () => {
+        const workerCount = getParallelTermBankParserWorkerCount();
+        let workerIndex = 0;
+        class LaterFailingWorker {
+            constructor() {
+                this.index = workerIndex++;
+                this.parseCount = 0;
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    ++this.parseCount;
+                    if (this.index === 0 && this.parseCount === 2) {
+                        emitWorkerMessage(this.listeners, {
+                            type: 'parse-error',
+                            id: message.id,
+                            error: {name: 'Error', message: 'injected later pipeline failure'},
+                        });
+                        return;
+                    }
+                    emitWorkerMessage(this.listeners, {type: 'parsed', id: message.id, rowCount: 1});
+                    emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: message.id,
+                        chunk: {rowCount: 1},
+                        profile: {chunkDispatchMs: 0},
+                    });
+                });
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('Worker', LaterFailingWorker);
+        try {
+            const sinkIndexes = [];
+            const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
+            await expect(parseTermBankWithWasmColumnChunksParallel(
+                sourceBanks,
+                3,
+                (_chunk, progress) => { sinkIndexes.push(progress.chunkIndex); },
+                {emitContentSlab: true},
+            )).rejects.toThrow('injected later pipeline failure');
+            expect(sinkIndexes).toStrictEqual(
+                Array.from({length: workerCount}, (_, index) => index + 1),
+            );
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('terminates parser workers promptly when import is cancelled', async () => {
+        let terminateCount = 0;
+        class HangingWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                let listeners = this.listeners.get(type);
+                if (typeof listeners === 'undefined') {
+                    listeners = new Set();
+                    this.listeners.set(type, listeners);
+                }
+                listeners.add(listener);
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                if (message.type !== 'initialize') { return; }
+                queueMicrotask(() => {
+                    for (const listener of this.listeners.get('message') ?? []) {
+                        listener(/** @type {MessageEvent<unknown>} */ ({data: {type: 'ready'}}));
+                    }
+                });
+            }
+
+            terminate() { ++terminateCount; }
+        }
+
+        vi.stubGlobal('Worker', HangingWorker);
+        let cancelled = false;
+        const cancelTimer = setTimeout(() => { cancelled = true; }, 10);
+        try {
+            const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
+            let sinkCalls = 0;
+            await expect(parseTermBankWithWasmColumnChunksParallel(
+                sourceBanks,
+                3,
+                () => { ++sinkCalls; },
+                {emitContentSlab: true},
+                () => cancelled,
+            )).rejects.toMatchObject({name: 'AbortError'});
+            expect(sinkCalls).toBe(0);
+            expect(terminateCount).toBeGreaterThanOrEqual(2);
+        } finally {
+            clearTimeout(cancelTimer);
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('cancels while deferred ZIP sources are unresolved', async () => {
+        let terminateCount = 0;
+        class ReadyWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                if (message.type === 'initialize') {
+                    queueMicrotask(() => {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                    });
+                }
+            }
+
+            terminate() { ++terminateCount; }
+        }
+
+        vi.stubGlobal('Worker', ReadyWorker);
+        let cancellationChecks = 0;
+        try {
+            const never = new Promise(() => {});
+            await expect(parseTermBankWithWasmColumnChunksParallelDeferred(
+                Array.from({length: 4}, () => never),
+                Array.from({length: 4}, () => 2),
+                3,
+                () => {},
+                {emitContentSlab: true},
+                () => ++cancellationChecks >= 3,
+            )).rejects.toMatchObject({name: 'AbortError'});
+            expect(terminateCount).toBeGreaterThanOrEqual(2);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('settles active worker jobs when the chunk sink rejects', async () => {
+        let terminateCount = 0;
+        class HangingAfterFirstWorker {
+            constructor() {
+                this.parseCount = 0;
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    ++this.parseCount;
+                    if (this.parseCount > 1) { return; }
+                    emitWorkerMessage(this.listeners, {type: 'parsed', id: message.id, rowCount: 1});
+                    emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: message.id,
+                        chunk: {rowCount: 1},
+                        profile: {chunkDispatchMs: 0},
+                    });
+                });
+            }
+
+            terminate() { ++terminateCount; }
+        }
+
+        vi.stubGlobal('Worker', HangingAfterFirstWorker);
+        try {
+            const sourceBanks = Array.from({length: 4}, () => Promise.resolve(textEncoder.encode('[]')));
+            await expect(parseTermBankWithWasmColumnChunksParallelDeferred(
+                sourceBanks,
+                sourceBanks.map(() => 2),
+                3,
+                () => { throw new Error('injected sink failure'); },
+                {emitContentSlab: true},
+            )).rejects.toThrow('injected sink failure');
+            expect(terminateCount).toBeGreaterThanOrEqual(2);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('settles peer jobs when a worker result cannot be transferred', async () => {
+        let workerIndex = 0;
+        let terminateCount = 0;
+        class TransferFailingWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+                this.index = workerIndex++;
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    emitWorkerMessage(this.listeners, {type: 'parsed', id: message.id, rowCount: 1});
+                    if (this.index !== 0) { return; }
+                    for (const listener of this.listeners.get('messageerror') ?? []) {
+                        listener(/** @type {MessageEvent<unknown>} */ ({}));
+                    }
+                });
+            }
+
+            terminate() { ++terminateCount; }
+        }
+
+        vi.stubGlobal('Worker', TransferFailingWorker);
+        try {
+            const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
+            await expect(parseTermBankWithWasmColumnChunksParallel(
+                sourceBanks,
+                3,
+                () => {},
+                {emitContentSlab: true},
+            )).rejects.toThrow('returned an invalid message');
+            expect(terminateCount).toBeGreaterThanOrEqual(2);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('normalizes a null deferred-source rejection', async () => {
+        class ReadyWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) { this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener)); }
+
+            removeEventListener(type, listener) { this.listeners.get(type)?.delete(listener); }
+
+            postMessage(message) {
+                if (message.type !== 'initialize') { return; }
+                queueMicrotask(() => emitWorkerMessage(this.listeners, {type: 'ready'}));
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('Worker', ReadyWorker);
+        try {
+            const rejectedSource = Promise.reject(null);
+            void rejectedSource.catch(() => {});
+            await expect(parseTermBankWithWasmColumnChunksParallelDeferred(
+                [rejectedSource, ...Array.from({length: 3}, () => Promise.resolve(textEncoder.encode('[]')))],
+                Array.from({length: 4}, () => 2),
+                3,
+                () => {},
+                {emitContentSlab: true},
+            )).rejects.toThrow('null');
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('aborts a hung parser prewarm during import cleanup', async () => {
+        let terminateCount = 0;
+        class NeverReadyWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: Event) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                const listeners = this.listeners.get(type) ?? new Set();
+                listeners.add(listener);
+                this.listeners.set(type, listeners);
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage() {}
+            terminate() { ++terminateCount; }
+        }
+
+        vi.stubGlobal('Worker', NeverReadyWorker);
+        try {
+            const prewarm = prewarmParallelTermBankParser();
+            await new Promise((resolve) => { setTimeout(resolve, 0); });
+            let timeoutId;
+            const timeout = new Promise((_, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Parser prewarm disposal timed out')), 250);
+            });
+            try {
+                await Promise.race([disposeParallelTermBankParser(), timeout]);
+            } finally {
+                clearTimeout(timeoutId);
+            }
+            await expect(prewarm).resolves.toBe(false);
+            expect(terminateCount).toBeGreaterThanOrEqual(2);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    test('uses the serial path for large imports on low-memory devices', async () => {
+        const originalNavigator = globalThis.navigator;
+        let workerConstructionCount = 0;
+        class UnexpectedWorker {
+            constructor() { ++workerConstructionCount; }
+        }
+        vi.stubGlobal('navigator', {deviceMemory: 4});
+        vi.stubGlobal('Worker', UnexpectedWorker);
+        try {
+            const sharedBytes = new Uint8Array(16 * 1024 * 1024);
+            const usedParallel = await parseTermBankWithWasmColumnChunksParallel(
+                Array.from({length: 5}, () => sharedBytes),
+                3,
+                () => {},
+                {emitContentSlab: true},
+            );
+            expect(usedParallel).toBe(false);
+            expect(workerConstructionCount).toBe(0);
+        } finally {
+            vi.stubGlobal('navigator', originalNavigator);
+            vi.stubGlobal('Worker', void 0);
+        }
     });
 
     maybeTest('keeps text-object glossary dedup equivalent to plain text glossary', async () => {
@@ -124,6 +1274,32 @@ describe('term-bank WASM parser', () => {
         expect(rows[2].termEntryContentHash2).toBe(rows[0].termEntryContentHash2);
     });
 
+    maybeTest('keeps source-identical duplicates canonical after a normalized match', async () => {
+        const chunks = [];
+        await parseTermBankWithWasmColumnChunks(
+            textEncoder.encode(JSON.stringify([
+                ['object', '', '', '', 0, [{type: 'text', text: 'same'}], 1, ''],
+                ['plain', '', '', '', 0, ['same'], 2, ''],
+                ['plain-duplicate', '', '', '', 0, ['same'], 3, ''],
+            ])),
+            3,
+            (chunk) => { chunks.push(chunk); },
+            8,
+            {emitContentSlab: true, emitTokenBinaryContent: true},
+        );
+
+        const [chunk] = chunks;
+        expect(chunk.contentUniqueIndexList).toStrictEqual(new Uint32Array([0, 0, 0]));
+        expect(chunk.contentDedupPlan?.uniqueCount).toBe(1);
+        expect(chunk.contentDedupPlan?.sourceRowCount).toBe(3);
+        expect(chunk.contentDedupPlan?.resolvedDictNames).toBeNull();
+        expect(chunk.contentDedupPlan?.resolvedUniformDictName).toBeUndefined();
+        expect(chunk.contentMetaList[0]).toBe(chunk.contentMetaList[4]);
+        expect(chunk.contentMetaList[0]).toBe(chunk.contentMetaList[8]);
+        expect(chunk.contentMetaList[1]).toBe(chunk.contentMetaList[5]);
+        expect(chunk.contentMetaList[1]).toBe(chunk.contentMetaList[9]);
+    });
+
     maybeTest('preserves compact plain glossaries while normalizing equivalent object and spaced forms', async () => {
         const rows = await parseRows([
             ['compact', 'compact', '', '', 0, ['brace { and spaces', 'escaped "quote"'], 1, ''],
@@ -137,18 +1313,10 @@ describe('term-bank WASM parser', () => {
         expect(getContentString(rows[1])).toBe(getContentString(rows[2]));
     });
 
-    maybeTest('scans escaped strings correctly at every word alignment', async () => {
-        const glossary = [
-            '"',
-            'a"b',
-            'ab"c',
-            'abc"d',
-            '\\',
-            'a\\b',
-            'ab\\c',
-            'abc\\d',
-            `long-${'x'.repeat(257)}-"quoted"-\\-終`,
-        ];
+    maybeTest('scans escaped strings correctly at every wide-word alignment', async () => {
+        const glossary = Array.from({length: 16}, (_, index) => (
+            `${'x'.repeat(index)}-"quoted"-\\-${'y'.repeat(257 - index)}-終`
+        ));
         const [row] = await parseRows([
             ['alignment', 'alignment', '', '', 0, glossary, 1, ''],
         ]);
@@ -182,8 +1350,26 @@ describe('term-bank WASM parser', () => {
         ['invalid escape', '[["entry\\x", "", "", "", 0, ["definition"], 1, ""]]'],
         ['invalid unicode escape', '[["entry\\u12xz", "", "", "", 0, ["definition"], 1, ""]]'],
         ['leading-zero score', '[["entry", "", "", "", 01, ["definition"], 1, ""]]'],
+        ['invalid glossary literal', '[["entry", "", "", "", 0, [nonsense], 1, ""]]'],
+        ['invalid nested literal', '[["entry", "", "", "", 0, [{"value":truth}], 1, ""]]'],
+        ['leading-zero glossary number', '[["entry", "", "", "", 0, [01], 1, ""]]'],
+        ['missing fractional digits', '[["entry", "", "", "", 0, [1.], 1, ""]]'],
+        ['missing exponent digits', '[["entry", "", "", "", 0, [1e+], 1, ""]]'],
+        ['nested missing comma', '[["entry", "", "", "", 0, ["first" "second"], 1, ""]]'],
+        ['object missing colon', '[["entry", "", "", "", 0, [{"value" "text"}], 1, ""]]'],
+        ['nested trailing comma', '[["entry", "", "", "", 0, ["value",], 1, ""]]'],
+        ['non-string object key', '[["entry", "", "", "", 0, [{1:"value"}], 1, ""]]'],
     ])('rejects malformed JSON syntax: %s', async (_name, malformed) => {
         await expect(parseRowsJson(malformed)).rejects.toThrow(/term-bank parser failed/);
+    });
+
+    maybeTest('accepts every valid JSON scalar form in glossary content', async () => {
+        const glossary = [true, false, null, 0, -0, 12, -12, 1.25, 1e20, 1e-20];
+        const [row] = await parseRows([
+            ['scalars', '', '', '', 0, glossary, 1, ''],
+        ]);
+
+        expect(JSON.parse(getContentString(row)).glossary).toStrictEqual(JSON.parse(JSON.stringify(glossary)));
     });
 
     maybeTest('preserves valid deeply mixed glossary containers', async () => {
@@ -429,6 +1615,182 @@ describe('term-bank WASM parser', () => {
         ]);
     });
 
+    maybeTest('fuses multi-bank parsing, content dedup, and lookup projection', async () => {
+        const sources = [
+            textEncoder.encode(JSON.stringify([
+                ['first', '', '', '', 2, ['shared'], 11, ''],
+                ['first', '', '', '', 3, ['shared'], 12, ''],
+            ])),
+            textEncoder.encode(JSON.stringify([
+                ['second', 'reading', '', '', 4, ['distinct'], 13, ''],
+            ])),
+        ];
+        const chunks = [];
+        await parseTermBankWithWasmColumnChunks(
+            sources,
+            3,
+            (chunk) => { chunks.push(chunk); },
+            8,
+            {emitContentSlab: true, emitTokenBinaryContent: true, emitTermByteLists: false, singleChunk: true},
+        );
+
+        const [chunk] = chunks;
+        expect(chunks).toHaveLength(1);
+        expect(chunk.rowCount).toBe(3);
+        expect(chunk.contentUniqueIndexList).toStrictEqual(new Uint32Array([0, 0, 1]));
+        expect(chunk.readingEqualsExpressionList).toStrictEqual(new Uint8Array([1, 1, 0]));
+        expect(chunk.scoreList).toStrictEqual(new Int32Array([2, 3, 4]));
+        expect(chunk.sequenceList).toStrictEqual(new Int32Array([11, 12, 13]));
+        const plan = chunk.termRecordPreinternedPlan;
+        expect(plan.expressionIndexes[0]).toBe(plan.expressionIndexes[1]);
+        expect(plan.readingIndexes[0]).toBe(plan.expressionIndexes[0]);
+        expect(plan.readingIndexes[2]).not.toBe(plan.expressionIndexes[2]);
+        const profile = consumeLastTermBankWasmParseProfile();
+        expect(profile?.rowDecodeMs).toBe(0);
+        expect(profile?.nativeStringPlanMs).toBe(0);
+        expect(profile?.recentContentDedupHitCount).toBe(1);
+
+        const version1Chunks = [];
+        await parseTermBankWithWasmColumnChunks(
+            sources,
+            1,
+            (version1Chunk) => { version1Chunks.push(version1Chunk); },
+            8,
+            {emitContentSlab: true, emitTokenBinaryContent: true, emitTermByteLists: false, singleChunk: true},
+        );
+        expect(version1Chunks[0].sequenceList).toStrictEqual(new Int32Array([-1, -1, -1]));
+    });
+
+    maybeTest('keeps recent exact matches on a normalized duplicate canonical', async () => {
+        const objectGlossary = {type: 'text', text: 'same'};
+        const sources = [
+            textEncoder.encode(JSON.stringify([
+                ['plain', '', '', '', 0, ['same'], 1, ''],
+                ['object', '', '', '', 0, [objectGlossary], 2, ''],
+            ])),
+            textEncoder.encode(JSON.stringify([
+                ['object-copy', '', '', '', 0, [objectGlossary], 3, ''],
+            ])),
+        ];
+        const chunks = [];
+        await parseTermBankWithWasmColumnChunks(
+            sources,
+            3,
+            (chunk) => { chunks.push(chunk); },
+            8,
+            {emitContentSlab: true, emitTokenBinaryContent: true, emitTermByteLists: false, singleChunk: true},
+        );
+
+        const [chunk] = chunks;
+        expect(chunk.contentUniqueIndexList).toStrictEqual(new Uint32Array([0, 0, 0]));
+        expect(chunk.contentDedupPlan?.uniqueCount).toBe(1);
+        expect(chunk.contentMetaList[0]).toBe(chunk.contentMetaList[4]);
+        expect(chunk.contentMetaList[0]).toBe(chunk.contentMetaList[8]);
+        expect(consumeLastTermBankWasmParseProfile()?.recentContentDedupHitCount).toBe(1);
+    });
+
+    maybeTest('keeps fused multi-bank columns equivalent to the established single-buffer path', async () => {
+        const rows = [
+            ['日本語', '', 'common tag', 'v1', -2147483648, ['plain', {type: 'text', text: 'normalized'}], null, 'tag-a'],
+            ['escaped\\expression', 'escaped\\reading', '', '', 2147483647, ['slashes \\ and "quotes"'], 2147483647, ''],
+            ['duplicate-a', '', '', '', 0, ['same'], 3, ''],
+            ['duplicate-b', 'duplicate-b', '', '', 0, [{type: 'text', text: 'same'}], 4, ''],
+            ['supplementary-𠮷', 'よし', '', '', -1, [true, false, null, 1.25], 5, ''],
+        ];
+        const sources = [
+            textEncoder.encode(JSON.stringify(rows.slice(0, 2))),
+            textEncoder.encode('[]'),
+            textEncoder.encode(JSON.stringify(rows.slice(2))),
+        ];
+        /**
+         * @param {Uint8Array|Uint8Array[]} source
+         * @returns {Promise<ReturnType<typeof copyWasmBackedColumnChunk>>}
+         */
+        const parseStableChunk = async (source) => {
+            let result = null;
+            await parseTermBankWithWasmColumnChunks(
+                source,
+                3,
+                (chunk) => { result = copyWasmBackedColumnChunk(chunk); },
+                16,
+                {
+                    emitContentSlab: true,
+                    emitTokenBinaryContent: true,
+                    emitTermByteLists: false,
+                    singleChunk: true,
+                },
+            );
+            return /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (result);
+        };
+        const getContentRows = (chunk) => {
+            const result = [];
+            for (let i = 0; i < chunk.rowCount; ++i) {
+                const metaOffset = i * 4;
+                const offset = chunk.contentMetaList[metaOffset];
+                const length = chunk.contentMetaList[metaOffset + 1];
+                result.push([...chunk.contentBytesBuffer.subarray(offset, offset + length)]);
+            }
+            return result;
+        };
+        const getPlanStrings = (chunk) => {
+            const {stringLengths, stringOffsets, stringsBuffer} = chunk.termRecordPreinternedPlan;
+            return Array.from(stringLengths, (length, index) => (
+                [...stringsBuffer.subarray(stringOffsets[index], stringOffsets[index] + length)]
+            ));
+        };
+
+        const fused = await parseStableChunk(sources);
+        const established = await parseStableChunk(textEncoder.encode(JSON.stringify(rows)));
+        expect(fused.rowCount).toBe(established.rowCount);
+        expect(fused.readingEqualsExpressionList).toStrictEqual(established.readingEqualsExpressionList);
+        expect(fused.scoreList).toStrictEqual(established.scoreList);
+        expect(fused.sequenceList).toStrictEqual(established.sequenceList);
+        expect(fused.contentHash1List).toStrictEqual(established.contentHash1List);
+        expect(fused.contentHash2List).toStrictEqual(established.contentHash2List);
+        expect(fused.contentUniqueIndexList).toStrictEqual(established.contentUniqueIndexList);
+        expect(getContentRows(fused)).toStrictEqual(getContentRows(established));
+        expect(getPlanStrings(fused)).toStrictEqual(getPlanStrings(established));
+        expect(fused.termRecordPreinternedPlan.stringHashes).toStrictEqual(established.termRecordPreinternedPlan.stringHashes);
+        expect(fused.termRecordPreinternedPlan.expressionIndexes).toStrictEqual(established.termRecordPreinternedPlan.expressionIndexes);
+        expect(fused.termRecordPreinternedPlan.readingIndexes).toStrictEqual(established.termRecordPreinternedPlan.readingIndexes);
+    });
+
+    maybeTest('preserves media hints in the fused multi-bank path', async () => {
+        const sources = [
+            textEncoder.encode(JSON.stringify([
+                ['plain', '', '', '', 1, ['definition'], 1, ''],
+                ['image', '', '', '', 2, [{type: 'image', path: 'test.png'}], 2, ''],
+            ])),
+            textEncoder.encode(JSON.stringify([
+                ['other', '', '', '', 3, ['other definition'], 3, ''],
+            ])),
+        ];
+        const chunks = [];
+        await parseTermBankWithWasmColumnChunks(
+            sources,
+            3,
+            (chunk) => { chunks.push(chunk); },
+            8,
+            {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                emitTermByteLists: false,
+                mediaHintFastScan: true,
+                singleChunk: true,
+            },
+        );
+
+        const [chunk] = chunks;
+        expect(chunk.rowCount).toBe(3);
+        expect(chunk.mediaRows).toHaveLength(1);
+        expect(chunk.mediaRows[0].index).toBe(1);
+        expect(chunk.mediaRows[0].row.glossaryMayContainMedia).toBe(true);
+        expect(chunk.contentUniqueIndexList).toStrictEqual(new Uint32Array([0, 1, 2]));
+        const profile = consumeLastTermBankWasmParseProfile();
+        expect(profile?.nativeStringPlanMs).toBe(0);
+        expect(profile?.nativeStringPlanFallbackChunkCount).toBe(0);
+    });
+
     maybeTest('treats an empty reading as the expression in minimal and columnar paths', async () => {
         const source = textEncoder.encode(JSON.stringify([
             ['expression', '', '', '', 4, ['definition'], 12, ''],
@@ -455,7 +1817,7 @@ describe('term-bank WASM parser', () => {
         );
     });
 
-    maybeTest('builds native string plans equivalent to the JavaScript fallback across duplicates and hash collisions', async () => {
+    maybeTest('builds native string plans equivalent to the JavaScript fallback across duplicates', async () => {
         const source = textEncoder.encode(JSON.stringify([
             ['003pwu', '00a5fa', '', '', 1, ['first collision'], 1, ''],
             ['00a5fa', '003pwu', '', '', 2, ['second collision'], 2, ''],
@@ -463,7 +1825,6 @@ describe('term-bank WASM parser', () => {
             ['same', '', '', '', 4, ['empty reading'], 4, ''],
             ['other', 'same', '', '', 5, ['shared reading'], 5, ''],
         ]));
-        expect(hashBytes(textEncoder.encode('003pwu'))).toBe(hashBytes(textEncoder.encode('00a5fa')));
 
         /**
          * @param {boolean} useNativeStringPlan
@@ -671,5 +2032,4 @@ describe('term-bank WASM parser', () => {
         expect(formattedChunk.contentMetaList[3]).toBe(formattedChunk.contentMetaList[7]);
         expect(formattedChunk.contentMetaList[1]).toBe(formattedChunk.contentMetaList[5]);
     });
-
 });

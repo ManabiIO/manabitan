@@ -62,6 +62,24 @@ const MDX_UPLOAD_PROGRESS_RATIO = 0.45;
  */
 
 /**
+ * Page-side work which must not be published until every worker import in the
+ * shared import session has returned.
+ * @typedef {object} DeferredDictionaryFinalization
+ * @property {string} dictionaryTitle
+ * @property {number} importStartTime
+ * @property {import('dictionary-importer').ImportDetails} importDetails
+ * @property {ImportResultWithDebug} importResult
+ * @property {number} workerImportStartTime
+ * @property {number} workerImportEndTime
+ * @property {boolean} useImportSession
+ * @property {boolean} finalizeImportSession
+ * @property {number} importRunGeneration
+ * @property {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
+ * @property {Array<{phase: string, elapsedMs: number, startEpochMs?: number, endEpochMs?: number, details?: Record<string, string|number|boolean|null>}>} localPhaseTimings
+ * @property {boolean} workerResultAlreadyRecorded
+ */
+
+/**
  * @param {string} fileName
  * @returns {string}
  */
@@ -200,11 +218,11 @@ function getHeapDeltaBytes(start, end) {
 
 /**
  * @param {unknown} value
- * @returns {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>}
+ * @returns {Array<{phase: string, elapsedMs: number, startEpochMs?: number, endEpochMs?: number, details?: Record<string, string|number|boolean|null>}>}
  */
 function normalizeImporterPhaseTimings(value) {
     if (!Array.isArray(value)) { return []; }
-    /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
+    /** @type {Array<{phase: string, elapsedMs: number, startEpochMs?: number, endEpochMs?: number, details?: Record<string, string|number|boolean|null>}>} */
     const results = [];
     for (const item of value) {
         if (!(typeof item === 'object' && item !== null && !Array.isArray(item))) {
@@ -213,6 +231,8 @@ function normalizeImporterPhaseTimings(value) {
         const phaseRaw = /** @type {unknown} */ (Reflect.get(item, 'phase'));
         const elapsedMsRaw = /** @type {unknown} */ (Reflect.get(item, 'elapsedMs'));
         const detailsRaw = /** @type {unknown} */ (Reflect.get(item, 'details'));
+        const startEpochMsRaw = /** @type {unknown} */ (Reflect.get(item, 'startEpochMs'));
+        const endEpochMsRaw = /** @type {unknown} */ (Reflect.get(item, 'endEpochMs'));
         if (typeof phaseRaw !== 'string' || typeof elapsedMsRaw !== 'number' || !Number.isFinite(elapsedMsRaw)) {
             continue;
         }
@@ -220,6 +240,8 @@ function normalizeImporterPhaseTimings(value) {
             results.push({
                 phase: phaseRaw,
                 elapsedMs: Math.max(0, elapsedMsRaw),
+                ...(typeof startEpochMsRaw === 'number' && Number.isFinite(startEpochMsRaw) ? {startEpochMs: startEpochMsRaw} : {}),
+                ...(typeof endEpochMsRaw === 'number' && Number.isFinite(endEpochMsRaw) ? {endEpochMs: endEpochMsRaw} : {}),
                 details: /** @type {Record<string, string|number|boolean|null>} */ (detailsRaw),
             });
             continue;
@@ -227,6 +249,8 @@ function normalizeImporterPhaseTimings(value) {
         results.push({
             phase: phaseRaw,
             elapsedMs: Math.max(0, elapsedMsRaw),
+            ...(typeof startEpochMsRaw === 'number' && Number.isFinite(startEpochMsRaw) ? {startEpochMs: startEpochMsRaw} : {}),
+            ...(typeof endEpochMsRaw === 'number' && Number.isFinite(endEpochMsRaw) ? {endEpochMs: endEpochMsRaw} : {}),
         });
     }
     return results;
@@ -737,6 +761,7 @@ export class DictionaryImportController {
                             importProgressTracker,
                         ),
                         `Recommended dictionary import (${summarizeUrlForDiagnostics(url)})`,
+                        importProgressTracker,
                     );
                 } catch (error) {
                     const e2 = toError(error);
@@ -1344,6 +1369,7 @@ export class DictionaryImportController {
                 importDetailsOverrides,
             ),
             `URL dictionary import (${String(urls.length)})`,
+            importProgressTracker,
         );
     }
 
@@ -1393,6 +1419,7 @@ export class DictionaryImportController {
                 errors,
             ),
             `File dictionary import (${String(sources.length)})`,
+            importProgressTracker,
         );
     }
 
@@ -1428,6 +1455,7 @@ export class DictionaryImportController {
                 initialErrors,
             ),
             `Selected dictionary import (${String(sources.length)})`,
+            importProgressTracker,
         ).catch((error) => {
             log.error(error);
             this._showErrors([toError(error)]);
@@ -1481,16 +1509,33 @@ export class DictionaryImportController {
     /**
      * @param {Promise<void>} importPromise
      * @param {string} label
+     * @param {{lastActivityTime: number, lastForwardProgressTime: number}|null} [progressTracker=null]
      * @returns {Promise<void>}
      */
-    async _runImportWithWatchdog(importPromise, label) {
+    async _runImportWithWatchdog(importPromise, label, progressTracker = null) {
         const timeoutMs = 180_000;
+        const absoluteTimeoutMs = 2 * 60 * 60 * 1000;
+        const startedAt = safePerformance.now();
+        let settled = false;
+        const watchdogPromise = (async () => {
+            while (!settled) {
+                const now = safePerformance.now();
+                if ((now - startedAt) >= absoluteTimeoutMs) {
+                    throw new Error(`${label} did not complete within ${String(absoluteTimeoutMs)}ms`);
+                }
+                const lastActivityTime = progressTracker?.lastForwardProgressTime ?? progressTracker?.lastActivityTime ?? startedAt;
+                const idleMs = Math.max(0, now - lastActivityTime);
+                const remainingMs = timeoutMs - idleMs;
+                if (remainingMs <= 0) {
+                    throw new Error(`${label} did not complete within ${String(timeoutMs)}ms without progress`);
+                }
+                await promiseTimeout(Math.min(1_000, remainingMs));
+            }
+        })();
         try {
             await Promise.race([
                 importPromise,
-                promiseTimeout(timeoutMs).then(() => {
-                    throw new Error(`${label} did not complete within ${String(timeoutMs)}ms`);
-                }),
+                watchdogPromise,
             ]);
         } catch (error) {
             const normalizedError = toError(error);
@@ -1498,6 +1543,8 @@ export class DictionaryImportController {
                 this._forceRecoverHungImportSession(normalizedError, label);
             }
             throw normalizedError;
+        } finally {
+            settled = true;
         }
     }
 
@@ -2154,6 +2201,8 @@ export class DictionaryImportController {
         /** @type {string[]} */
         const importedTitles = [];
         const useImportSession = this._getUseImportSession();
+        /** @type {DeferredDictionaryFinalization[]|null} */
+        const deferredFinalizations = useImportSession ? [] : null;
         log.log(`[ImportTiming] import session reuse enabled=${String(useImportSession)} (globalOverride=${String(this._getUseImportSession())})`);
         reportDiagnostics('dictionary-import-session-begin', {
             dictionaryCount: importProgressTracker.dictionaryCount,
@@ -2181,8 +2230,10 @@ export class DictionaryImportController {
                 termContentStorageMode,
                 zipMaxWorkers,
                 zipChunkSize,
+                zipUseWebWorkers,
                 artifactFixedPackMinTotalRows,
                 wasmPreallocateChunkRows,
+                termContentBlockTargetBytes,
             } = this._getImportPerformanceFlags();
             const importDetails = {
                 prefixWildcardsSupported: optionsFull.global.database.prefixWildcardsSupported,
@@ -2195,8 +2246,10 @@ export class DictionaryImportController {
                 termContentStorageMode,
                 zipMaxWorkers,
                 zipChunkSize,
+                zipUseWebWorkers,
                 artifactFixedPackMinTotalRows,
                 wasmPreallocateChunkRows,
+                termContentBlockTargetBytes,
                 ...(importDetailsOverrides && typeof importDetailsOverrides === 'object' && !Array.isArray(importDetailsOverrides) ? importDetailsOverrides : {}),
             };
 
@@ -2261,6 +2314,7 @@ export class DictionaryImportController {
                         finalizeImportSession,
                         importRunGeneration,
                         onProgress,
+                        deferredFinalizations,
                     );
                 } else if (importSource?.type === 'mdx') {
                     importItemResult = await this._importDictionaryFromMdx(
@@ -2271,6 +2325,7 @@ export class DictionaryImportController {
                         finalizeImportSession,
                         importRunGeneration,
                         onProgress,
+                        deferredFinalizations,
                     );
                 } else if (importSource?.type === 'zip') {
                     importItemResult = await this._importDictionaryFromZip(
@@ -2281,6 +2336,7 @@ export class DictionaryImportController {
                         finalizeImportSession,
                         importRunGeneration,
                         onProgress,
+                        deferredFinalizations,
                     );
                 } else {
                     errors.push(new Error(`Unsupported dictionary import source at item ${i + 1}.`));
@@ -2308,6 +2364,24 @@ export class DictionaryImportController {
                 message: toError(error).message,
             });
         } finally {
+            if (
+                deferredFinalizations !== null &&
+                deferredFinalizations.length > 0 &&
+                this._isImportRunCurrent(importRunGeneration)
+            ) {
+                try {
+                    const deferredResult = await this._finalizeDeferredImportedDictionaries(deferredFinalizations, importRunGeneration);
+                    errors = [...errors, ...deferredResult.errors];
+                    importedTitles.push(...deferredResult.importedTitles);
+                } catch (error) {
+                    const finalizationError = toError(error);
+                    errors.push(finalizationError);
+                    reportDiagnostics('dictionary-import-deferred-finalization-failed', {
+                        message: finalizationError.message,
+                        importRunGeneration,
+                    });
+                }
+            }
             importProgressTracker.onImportComplete(errors.length);
             Reflect.set(globalThis, '__manabitanImportStepTimingHistory', importProgressTracker.getStepTimingHistory());
             const importEndTime = safePerformance.now();
@@ -2400,7 +2474,7 @@ export class DictionaryImportController {
     }
 
     /**
-     * @returns {{skipImageMetadata: boolean, skipMediaImport: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean}}
+     * @returns {{skipImageMetadata: boolean, skipMediaImport: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, zipUseWebWorkers: boolean|null, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean, termContentBlockTargetBytes: number|null}}
      */
     _getImportPerformanceFlags() {
         const flags = /** @type {unknown} */ (Reflect.get(globalThis, 'manabitanImportPerformanceFlags'));
@@ -2415,8 +2489,10 @@ export class DictionaryImportController {
                 preserveCompressedMedia: false,
                 zipMaxWorkers: null,
                 zipChunkSize: null,
+                zipUseWebWorkers: null,
                 artifactFixedPackMinTotalRows: null,
                 wasmPreallocateChunkRows: true,
+                termContentBlockTargetBytes: null,
             };
         }
         const flagsRecord = /** @type {Record<string, unknown>} */ (flags);
@@ -2424,6 +2500,7 @@ export class DictionaryImportController {
         const zipMaxWorkers = Number.isFinite(flagsRecord.zipMaxWorkers) ? Math.trunc(/** @type {number} */ (flagsRecord.zipMaxWorkers)) : null;
         const zipChunkSize = Number.isFinite(flagsRecord.zipChunkSize) ? Math.trunc(/** @type {number} */ (flagsRecord.zipChunkSize)) : null;
         const artifactFixedPackMinTotalRows = Number.isFinite(flagsRecord.artifactFixedPackMinTotalRows) ? Math.trunc(/** @type {number} */ (flagsRecord.artifactFixedPackMinTotalRows)) : null;
+        const termContentBlockTargetBytes = Number.isFinite(flagsRecord.termContentBlockTargetBytes) ? Math.trunc(/** @type {number} */ (flagsRecord.termContentBlockTargetBytes)) : null;
         const termContentStorageModeRaw = flagsRecord.termContentStorageMode;
         const termContentStorageMode = (termContentStorageModeRaw === 'raw-bytes') ?
             termContentStorageModeRaw :
@@ -2438,8 +2515,10 @@ export class DictionaryImportController {
             preserveCompressedMedia: flagsRecord.preserveCompressedMedia === true,
             zipMaxWorkers: zipMaxWorkers === null ? null : Math.max(1, Math.min(32, zipMaxWorkers)),
             zipChunkSize: zipChunkSize === null ? null : Math.max(16 * 1024, Math.min(8 * 1024 * 1024, zipChunkSize)),
+            zipUseWebWorkers: typeof flagsRecord.zipUseWebWorkers === 'boolean' ? flagsRecord.zipUseWebWorkers : null,
             artifactFixedPackMinTotalRows: artifactFixedPackMinTotalRows === null ? null : Math.max(0, Math.min(4_000_000, artifactFixedPackMinTotalRows)),
             wasmPreallocateChunkRows: flagsRecord.wasmPreallocateChunkRows !== false,
+            termContentBlockTargetBytes: termContentBlockTargetBytes === null ? null : Math.max(64 * 1024, Math.min(16 * 1024 * 1024, termContentBlockTargetBytes)),
         };
     }
 
@@ -2474,6 +2553,7 @@ export class DictionaryImportController {
                 dictionaryTitle: normalizedTitle,
                 activeProfileIndex,
             });
+            throw new Error(`Imported dictionary ${normalizedTitle} was not enabled for the active profile`);
         }
         reportDiagnostics('dictionary-import-visibility-verified', {
             dictionaryTitle: normalizedTitle,
@@ -2547,7 +2627,7 @@ export class DictionaryImportController {
 
     /**
      * @param {string} dictionaryTitle
-     * @param {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} localPhaseTimings
+     * @param {Array<{phase: string, elapsedMs: number, startEpochMs?: number, endEpochMs?: number, details?: Record<string, string|number|boolean|null>}>} localPhaseTimings
      * @param {string} phase
      * @param {number} startTime
      * @param {number} endTime
@@ -2556,7 +2636,9 @@ export class DictionaryImportController {
      */
     _recordImportLocalPhase(dictionaryTitle, localPhaseTimings, phase, startTime, endTime, details = {}) {
         const elapsedMs = Math.max(0, endTime - startTime);
-        localPhaseTimings.push({phase, elapsedMs, details});
+        const endEpochMs = Date.now();
+        const startEpochMs = endEpochMs - elapsedMs;
+        localPhaseTimings.push({phase, elapsedMs, startEpochMs, endEpochMs, details});
         log.log(`[ImportTiming] [${dictionaryTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
     }
 
@@ -2568,9 +2650,10 @@ export class DictionaryImportController {
      * @param {boolean} finalizeImportSession
      * @param {number} importRunGeneration
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {DeferredDictionaryFinalization[]|null} [deferredFinalizations]
      * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
-    async _importDictionaryFromMdx(source, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress) {
+    async _importDictionaryFromMdx(source, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress, deferredFinalizations = null) {
         if (typeof importRunGeneration === 'function' && typeof onProgress === 'undefined') {
             onProgress = importRunGeneration;
             importRunGeneration = this._activeImportRunGeneration;
@@ -2652,6 +2735,7 @@ export class DictionaryImportController {
             importRunGeneration,
             profilesDictionarySettings,
             localPhaseTimings,
+            deferredFinalizations,
         });
     }
 
@@ -2663,9 +2747,10 @@ export class DictionaryImportController {
      * @param {boolean} finalizeImportSession
      * @param {number} importRunGeneration
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {DeferredDictionaryFinalization[]|null} [deferredFinalizations]
      * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
-    async _importDictionaryFromZip(file, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress) {
+    async _importDictionaryFromZip(file, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress, deferredFinalizations = null) {
         if (typeof importRunGeneration === 'function' && typeof onProgress === 'undefined') {
             onProgress = importRunGeneration;
             importRunGeneration = this._activeImportRunGeneration;
@@ -2719,6 +2804,7 @@ export class DictionaryImportController {
             importRunGeneration,
             profilesDictionarySettings,
             localPhaseTimings,
+            deferredFinalizations,
         });
     }
 
@@ -2730,9 +2816,10 @@ export class DictionaryImportController {
      * @param {boolean} finalizeImportSession
      * @param {number} importRunGeneration
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {DeferredDictionaryFinalization[]|null} [deferredFinalizations]
      * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
-    async _importDictionaryFromUrl(downloadUrl, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress) {
+    async _importDictionaryFromUrl(downloadUrl, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress, deferredFinalizations = null) {
         if (typeof importRunGeneration === 'function' && typeof onProgress === 'undefined') {
             onProgress = importRunGeneration;
             importRunGeneration = this._activeImportRunGeneration;
@@ -2772,6 +2859,7 @@ export class DictionaryImportController {
             importRunGeneration,
             profilesDictionarySettings,
             localPhaseTimings,
+            deferredFinalizations,
         });
     }
 
@@ -2787,7 +2875,11 @@ export class DictionaryImportController {
      *   finalizeImportSession: boolean,
      *   importRunGeneration: number,
      *   profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings,
-     *   localPhaseTimings: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>
+     *   localPhaseTimings: Array<{phase: string, elapsedMs: number, startEpochMs?: number, endEpochMs?: number, details?: Record<string, string|number|boolean|null>}>,
+     *   deferredFinalizations?: DeferredDictionaryFinalization[]|null,
+     *   workerResultAlreadyRecorded?: boolean,
+     *   notifyDatabaseUpdated?: boolean|null,
+     *   showErrors?: boolean,
      * }} context
      * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
@@ -2803,6 +2895,10 @@ export class DictionaryImportController {
         importRunGeneration,
         profilesDictionarySettings,
         localPhaseTimings,
+        deferredFinalizations = null,
+        workerResultAlreadyRecorded = false,
+        notifyDatabaseUpdated = null,
+        showErrors = true,
     }) {
         const recordLocalPhase = this._recordImportLocalPhase.bind(this, dictionaryTitle, localPhaseTimings);
         /**
@@ -2826,18 +2922,20 @@ export class DictionaryImportController {
 
         const {result, errors, debug} = importResult;
         const importerPhaseTimings = normalizeImporterPhaseTimings(debug?.importerDebug?.phaseTimings ?? null);
-        reportDiagnostics('dictionary-import-worker-phase-summary', {
-            dictionaryTitle,
-            elapsedMs: Math.max(0, workerImportEndTime - workerImportStartTime),
-            importerPhaseTimings,
-            localPhaseTimings,
-            memory: getImportMemorySnapshot(),
-        });
-        for (const phase of importerPhaseTimings) {
-            log.log(
-                `[ImportTiming] [${dictionaryTitle}] worker phase "${phase.phase}" ${formatDurationMs(phase.elapsedMs)}` +
-                `${phase.details ? ` details=${JSON.stringify(phase.details)}` : ''}`,
-            );
+        if (!workerResultAlreadyRecorded) {
+            reportDiagnostics('dictionary-import-worker-phase-summary', {
+                dictionaryTitle,
+                elapsedMs: Math.max(0, workerImportEndTime - workerImportStartTime),
+                importerPhaseTimings,
+                localPhaseTimings,
+                memory: getImportMemorySnapshot(),
+            });
+            for (const phase of importerPhaseTimings) {
+                log.log(
+                    `[ImportTiming] [${dictionaryTitle}] worker phase "${phase.phase}" ${formatDurationMs(phase.elapsedMs)}` +
+                    `${phase.details ? ` details=${JSON.stringify(phase.details)}` : ''}`,
+                );
+            }
         }
         if (!result) {
             reportDiagnostics('dictionary-import-zip-no-result', {
@@ -2890,6 +2988,35 @@ export class DictionaryImportController {
 
         const staleImportResult = getStaleImportResult('before-page-side-finalization');
         if (staleImportResult !== null) { return staleImportResult; }
+
+        if (deferredFinalizations !== null) {
+            deferredFinalizations.push({
+                dictionaryTitle,
+                importStartTime,
+                importDetails,
+                importResult,
+                workerImportStartTime,
+                workerImportEndTime,
+                useImportSession,
+                finalizeImportSession,
+                importRunGeneration,
+                profilesDictionarySettings,
+                localPhaseTimings,
+                workerResultAlreadyRecorded: true,
+            });
+            localPhaseTimings.push({
+                phase: 'page-side-finalization-queued',
+                elapsedMs: 0,
+                details: {deferred: true},
+            });
+            reportDiagnostics('dictionary-import-page-finalization-deferred', {
+                dictionaryTitle,
+                resultTitle: result.title || null,
+                finalizeImportSession,
+                queuedCount: deferredFinalizations.length,
+            });
+            return {errors: [], importedTitle: null};
+        }
 
         const replacementDictionaryTitle = (
             typeof importDetails.replacementDictionaryTitle === 'string' &&
@@ -2985,7 +3112,8 @@ export class DictionaryImportController {
             localPhaseTimings,
         });
 
-        if (!(useImportSession && !finalizeImportSession)) {
+        const shouldNotifyDatabaseUpdated = notifyDatabaseUpdated ?? !(useImportSession && !finalizeImportSession);
+        if (shouldNotifyDatabaseUpdated) {
             const triggerDatabaseUpdatedStartTime = safePerformance.now();
             await this._settingsController.application.api.triggerDatabaseUpdated('dictionary', 'import');
             const triggerDatabaseUpdatedEndTime = safePerformance.now();
@@ -3065,16 +3193,113 @@ export class DictionaryImportController {
             memory: getImportMemorySnapshot(),
         });
 
-        if (errors.length > 0) {
+        if (showErrors && errors.length > 0) {
             errors.push(new Error(`Dictionary may not have been imported properly: ${errors.length} error${errors.length === 1 ? '' : 's'} reported.`));
             this._showErrors([...errors, ...errors2]);
-        } else if (errors2.length > 0) {
+        } else if (showErrors && errors2.length > 0) {
             this._showErrors(errors2);
+        } else if (errors.length > 0) {
+            errors.push(new Error(`Dictionary may not have been imported properly: ${errors.length} error${errors.length === 1 ? '' : 's'} reported.`));
         }
         return {
             errors: [...errors, ...errors2],
             importedTitle: errors.length === 0 && errors2.length === 0 ? (result.title || sourceDictionaryTitle || dictionaryTitle) : null,
         };
+    }
+
+    /**
+     * @param {DeferredDictionaryFinalization[]} deferredFinalizations
+     * @param {number} importRunGeneration
+     * @returns {Promise<{errors: Error[], importedTitles: string[]}>}
+     */
+    async _finalizeDeferredImportedDictionaries(deferredFinalizations, importRunGeneration) {
+        const pending = deferredFinalizations.splice(0, deferredFinalizations.length);
+        /** @type {Error[]} */
+        const errors = [];
+        /** @type {string[]} */
+        const importedTitles = [];
+        /** @type {Array<{context: DeferredDictionaryFinalization, importedTitle: string}>} */
+        const successfulFinalizations = [];
+        for (const context of pending) {
+            if (!this._isImportRunCurrent(importRunGeneration)) {
+                errors.push(new Error(`Ignored stale deferred finalization for ${context.dictionaryTitle}`));
+                continue;
+            }
+            try {
+                const result = await this._finalizeImportedDictionaryResult({
+                    ...context,
+                    deferredFinalizations: null,
+                    notifyDatabaseUpdated: false,
+                    showErrors: false,
+                });
+                errors.push(...result.errors);
+                if (result.importedTitle !== null) {
+                    importedTitles.push(result.importedTitle);
+                    successfulFinalizations.push({context, importedTitle: result.importedTitle});
+                }
+            } catch (error) {
+                const finalizationError = toError(error);
+                errors.push(new Error(`Failed to finalize imported dictionary ${context.dictionaryTitle}: ${finalizationError.message}`, {cause: finalizationError}));
+                reportDiagnostics('dictionary-import-item-deferred-finalization-failed', {
+                    dictionaryTitle: context.dictionaryTitle,
+                    message: finalizationError.message,
+                    importRunGeneration,
+                });
+            }
+        }
+        if (pending.length > 0 && this._isImportRunCurrent(importRunGeneration)) {
+            const triggerStartTime = safePerformance.now();
+            try {
+                await this._settingsController.application.api.triggerDatabaseUpdated('dictionary', 'import');
+                const triggerEndTime = safePerformance.now();
+                reportDiagnostics('dictionary-import-batch-database-updated', {
+                    dictionaryCount: pending.length,
+                    importedTitleCount: importedTitles.length,
+                    elapsedMs: Math.max(0, triggerEndTime - triggerStartTime),
+                    importRunGeneration,
+                });
+            } catch (error) {
+                const triggerError = toError(error);
+                errors.push(triggerError);
+                reportDiagnostics('dictionary-import-batch-database-update-failed', {
+                    dictionaryCount: pending.length,
+                    message: triggerError.message,
+                    importRunGeneration,
+                });
+            }
+        }
+        for (const {context, importedTitle} of successfulFinalizations) {
+            const verifyStartTime = safePerformance.now();
+            try {
+                await this._verifyImportedDictionaryVisible(importedTitle, context.profilesDictionarySettings === null);
+                const verifyEndTime = safePerformance.now();
+                this._recordImportLocalPhase(
+                    context.dictionaryTitle,
+                    context.localPhaseTimings,
+                    'verify-imported-dictionary-visible',
+                    verifyStartTime,
+                    verifyEndTime,
+                    {
+                        dictionaryTitle: importedTitle,
+                        requireEnabledForActiveProfile: context.profilesDictionarySettings === null,
+                        batchFinalization: true,
+                    },
+                );
+            } catch (error) {
+                const verifyError = toError(error);
+                errors.push(verifyError);
+                const importedTitleIndex = importedTitles.indexOf(importedTitle);
+                if (importedTitleIndex >= 0) {
+                    importedTitles.splice(importedTitleIndex, 1);
+                }
+                reportDiagnostics('dictionary-import-batch-visibility-verification-failed', {
+                    dictionaryTitle: importedTitle,
+                    message: verifyError.message,
+                    importRunGeneration,
+                });
+            }
+        }
+        return {errors, importedTitles};
     }
 
     /**
@@ -3418,6 +3643,12 @@ export class ImportProgressTracker {
         this._lastStatusText = '';
         /** @type {number} */
         this._lastPercent = -1;
+        /** @type {number} */
+        this._lastActivityTime = this._importStartTime;
+        /** @type {number} */
+        this._lastForwardProgressTime = this._importStartTime;
+        /** @type {string} */
+        this._lastProgressSignature = '';
 
         this.onProgress({nextStep: false, index: 0, count: 0});
     }
@@ -3442,6 +3673,16 @@ export class ImportProgressTracker {
         return this._dictionaryCount;
     }
 
+    /** @type {number} */
+    get lastActivityTime() {
+        return this._lastActivityTime;
+    }
+
+    /** @type {number} */
+    get lastForwardProgressTime() {
+        return this._lastForwardProgressTime;
+    }
+
     /**
      * @returns {Array<Record<string, unknown>>}
      */
@@ -3451,10 +3692,17 @@ export class ImportProgressTracker {
 
     /** @type {import('dictionary-worker').ImportProgressCallback} */
     onProgress(data) {
+        const now = safePerformance.now();
+        this._lastActivityTime = now;
         const {nextStep, index, count} = data;
         const previousStepIndex = this._stepIndex;
         if (nextStep && this._steps.length > 0) {
             this._stepIndex = Math.min(this._stepIndex + 1, this._steps.length - 1);
+        }
+        const progressSignature = `${this._dictionaryIndex}:${this._stepIndex}:${index}:${count}`;
+        if (progressSignature !== this._lastProgressSignature) {
+            this._lastProgressSignature = progressSignature;
+            this._lastForwardProgressTime = now;
         }
         const currentStep = this.currentStep;
         const currentLabel = currentStep?.label ?? 'Working';
@@ -3488,7 +3736,6 @@ export class ImportProgressTracker {
         }
 
         if (nextStep && this._steps.length > 0 && this._stepIndex !== previousStepIndex) {
-            const now = safePerformance.now();
             const completedStep = this._steps[previousStepIndex];
             const completedLabel = (typeof completedStep?.label === 'string' && completedStep.label.length > 0) ? completedStep.label : 'Starting import state';
             const stepDuration = now - this._stepStartTime;

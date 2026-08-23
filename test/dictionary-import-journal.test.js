@@ -46,19 +46,21 @@ describe('DictionaryImportJournal', () => {
         expect(Reflect.get(journal, '_isRecord').call(journal, record)).toBe(false);
     });
 
-    test('rejects an existing empty journal as corrupt recovery state', async () => {
+    test('clears an empty pre-import journal as an abandoned safe state', async () => {
+        const removeEntry = vi.fn(async () => {});
         vi.stubGlobal('navigator', {
             storage: {
                 getDirectory: vi.fn(async () => ({
                     getFileHandle: vi.fn(async () => ({
                         getFile: vi.fn(async () => ({size: 0, text: vi.fn(async () => '')})),
                     })),
+                    removeEntry,
                 })),
             },
         });
         try {
-            await expect(new DictionaryImportJournal().read())
-                .rejects.toThrow('Invalid empty dictionary import journal');
+            await expect(new DictionaryImportJournal().read()).resolves.toBeNull();
+            expect(removeEntry).toHaveBeenCalledWith('manabitan-dictionary-import-journal.json');
         } finally {
             vi.unstubAllGlobals();
         }

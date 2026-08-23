@@ -351,7 +351,7 @@ export class DictionaryWorkerHandler {
         finalizeImportSession,
         importError,
     ) {
-        const shouldCloseImportSession = useImportSession && finalizeImportSession;
+        const shouldCloseImportSession = useImportSession && (finalizeImportSession || importError !== null);
         const shouldCloseStandaloneDatabase = !useImportSession && dictionaryDatabase.isPrepared();
         if (!shouldCloseImportSession && !shouldCloseStandaloneDatabase) { return; }
         if (shouldCloseImportSession && this._importSessionDictionaryDatabase === dictionaryDatabase) {

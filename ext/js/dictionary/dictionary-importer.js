@@ -47,10 +47,23 @@ import {
 } from './zstd-term-content.js';
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
 import {compareRevisions} from './dictionary-data-util.js';
-import {consumeLastTermBankWasmParseProfile, parseTermBankWithWasmChunks, parseTermBankWithWasmColumnChunks, TermBankWasmResourceError} from './term-bank-wasm-parser.js';
+import {
+    consumeLastParallelParserSkipReason,
+    consumeLastTermBankWasmParseProfile,
+    disposeParallelTermBankParser,
+    parseTermBankWithWasmChunks,
+    parseTermBankWithWasmColumnChunks,
+    parseTermBankWithWasmColumnChunksOverlapped,
+    parseTermBankWithWasmColumnChunksParallel,
+    parseTermBankWithWasmColumnChunksParallelDeferred,
+    prewarmParallelTermBankParser,
+    TermBankWasmResourceError,
+} from './term-bank-wasm-parser.js';
 import {hashPairToHex, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} from './term-import-metrics.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
+import {DictionaryImportSession} from './dictionary-import-session.js';
+import {TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 
 const BlobReader = /** @type {typeof import('@zip.js/zip.js').BlobReader} */ (/** @type {unknown} */ (BlobReader0));
 const BlobWriter = /** @type {typeof import('@zip.js/zip.js').BlobWriter} */ (/** @type {unknown} */ (BlobWriter0));
@@ -68,12 +81,16 @@ const TERM_ARTIFACT_ROW_CHUNK_SIZE = 75000;
 const NO_MEDIA_FAST_PATH_TERM_BANK_WASM_ROW_CHUNK_SIZE = 8192;
 const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_UPPER_BOUND_BYTES = 128 * 1024 * 1024;
-const SOURCE_TERM_BANK_BATCH_MAX_FILES = 64;
-const SOURCE_TERM_BANK_BATCH_MAX_BYTES = 192 * 1024 * 1024;
-const SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE = 8192;
-const TERM_BANK_BYTE_PREFETCH_COUNT = 8;
+const SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE = 262_144;
+const DEFAULT_ZIP_MAX_WORKERS = (() => {
+    const hardwareConcurrency = globalThis.navigator?.hardwareConcurrency;
+    return typeof hardwareConcurrency === 'number' && Number.isFinite(hardwareConcurrency) ?
+        Math.max(1, Math.min(32, Math.trunc(hardwareConcurrency))) :
+        2;
+})();
 const LARGE_ARCHIVE_ZIP_MAX_WORKERS = 2;
 const LARGE_ARCHIVE_ZIP_MAX_WORKERS_THRESHOLD_BYTES = 128 * 1024 * 1024;
+const IMPORT_DATA_PROGRESS_MIN_INTERVAL_MS = 100;
 const REVERSE_STRING_CACHE_MAX_ENTRIES = 4096;
 const TERM_BANK_ARTIFACT_MAGIC_V1 = 'MBTB0001';
 const TERM_BANK_ARTIFACT_MAGIC_V2 = 'MBTB0002';
@@ -319,25 +336,102 @@ function byteRangeEqual(bytes, aStart, bStart, length) {
 }
 
 /**
- * Allows queued worker messages to run between CPU-heavy import chunks.
- * @returns {Promise<void>}
+ * Reuses one MessageChannel for the lifetime of an import. Calls are expected
+ * to be sequential, but the queue keeps cleanup deterministic if that changes.
+ * @returns {{yield: () => Promise<void>, close: () => void}}
  */
-function yieldToEventLoop() {
-    return new Promise((resolve, reject) => {
-        const channel = new MessageChannel();
-        channel.port1.onmessage = () => {
-            resolve();
-            try { channel.port1.close(); } catch (_) { /* NOP */ }
-            try { channel.port2.close(); } catch (_) { /* NOP */ }
-        };
-        try {
-            channel.port2.postMessage(null);
-        } catch (error) {
-            try { channel.port1.close(); } catch (_) { /* NOP */ }
-            try { channel.port2.close(); } catch (_) { /* NOP */ }
-            reject(error);
+function createEventLoopYielder() {
+    /** @type {MessageChannel|null} */
+    let channel = null;
+    /** @type {Array<{resolve: () => void, reject: (error: Error) => void}>} */
+    const pending = [];
+    const close = () => {
+        if (channel === null) { return; }
+        try { channel.port1.close(); } catch (_) { /* NOP */ }
+        try { channel.port2.close(); } catch (_) { /* NOP */ }
+        channel = null;
+        const error = new Error('Dictionary import event-loop yielder closed');
+        for (const item of pending.splice(0)) { item.reject(error); }
+    };
+    return {
+        yield: () => new Promise((resolve, reject) => {
+            if (channel === null) {
+                channel = new MessageChannel();
+                channel.port1.onmessage = () => { pending.shift()?.resolve(); };
+            }
+            const item = {resolve, reject};
+            pending.push(item);
+            try {
+                channel.port2.postMessage(null);
+            } catch (error) {
+                const index = pending.indexOf(item);
+                if (index >= 0) { pending.splice(index, 1); }
+                close();
+                reject(toError(error));
+            }
+        }),
+        close,
+    };
+}
+
+/** @typedef {import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>} DictionaryArchiveReader */
+
+class DictionaryArchiveOwnership {
+    constructor() {
+        /** @type {DictionaryArchiveReader|null} */
+        this._reader = null;
+        /** @type {Promise<Error|null>|null} */
+        this._closePromise = null;
+        /** @type {boolean} */
+        this._transferred = false;
+    }
+
+    /**
+     * @param {DictionaryArchiveReader} reader
+     * @throws {Error} If another reader is owned or ownership was transferred.
+     */
+    own(reader) {
+        if (this._transferred) {
+            throw new Error('Dictionary archive ownership was already transferred');
         }
-    });
+        if (this._reader !== null && this._reader !== reader) {
+            throw new Error('Dictionary archive ownership is already registered');
+        }
+        this._reader = reader;
+    }
+
+    /**
+     * @param {DictionaryArchiveReader} reader
+     * @throws {Error} If the reader is not currently owned.
+     */
+    transfer(reader) {
+        if (this._reader !== reader || this._transferred) {
+            throw new Error('Cannot transfer an unowned dictionary archive');
+        }
+        this._reader = null;
+        this._transferred = true;
+    }
+
+    /** @returns {Promise<Error|null>} */
+    closeIfOwned() {
+        if (this._closePromise !== null) { return this._closePromise; }
+        const reader = this._reader;
+        this._reader = null;
+        if (reader === null || this._transferred) {
+            this._closePromise = Promise.resolve(null);
+            return this._closePromise;
+        }
+        this._closePromise = (async () => {
+            try {
+                await reader.close();
+                return null;
+            } catch (error) {
+                const closeError = toError(error);
+                return new Error(`Failed to close dictionary archive: ${closeError.message}`, {cause: closeError});
+            }
+        })();
+        return this._closePromise;
+    }
 }
 
 export class DictionaryImporter {
@@ -359,6 +453,10 @@ export class DictionaryImporter {
         this._progressData = this._createProgressData();
         /** @type {number} */
         this._lastProgressTimestamp = 0;
+        /** @type {number} */
+        this._lastProgressIndex = Number.NaN;
+        /** @type {number} */
+        this._lastProgressCount = Number.NaN;
         /** @type {boolean} */
         this._skipImageMetadata = false;
         /** @type {boolean} */
@@ -371,6 +469,8 @@ export class DictionaryImporter {
         this._imageMetadataByPath = new Map();
         /** @type {boolean} */
         this._debugImportLogging = false;
+        /** @type {boolean} */
+        this._zipUseWebWorkers = true;
         /** @type {TextEncoder} */
         this._textEncoder = new TextEncoder();
         /** @type {TextDecoder} */
@@ -430,8 +530,36 @@ export class DictionaryImporter {
      * @param {ArrayBuffer|Blob|null} archiveContent
      * @param {import('dictionary-importer').ImportDetails} details
      * @returns {Promise<import('dictionary-importer').ImportResult>}
+     * @throws {Error} If import setup throws before returning a structured import error.
      */
     async importDictionary(dictionaryDatabase, archiveContent, details) {
+        const archiveOwnership = new DictionaryArchiveOwnership();
+        try {
+            const result = await this._importDictionary(dictionaryDatabase, archiveContent, details, archiveOwnership);
+            const closeError = await archiveOwnership.closeIfOwned();
+            if (closeError !== null) { result.errors.push(closeError); }
+            return result;
+        } catch (error) {
+            const closeError = await archiveOwnership.closeIfOwned();
+            if (closeError !== null) {
+                throw new AggregateError(
+                    [toError(error), closeError],
+                    'Dictionary import setup and archive cleanup failed',
+                );
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * @param {import('./dictionary-database.js').DictionaryDatabase} dictionaryDatabase
+     * @param {ArrayBuffer|Blob|null} archiveContent
+     * @param {import('dictionary-importer').ImportDetails} details
+     * @param {DictionaryArchiveOwnership} archiveOwnership
+     * @returns {Promise<import('dictionary-importer').ImportResult>}
+     * @throws {Error} If import setup throws before returning a structured import error.
+     */
+    async _importDictionary(dictionaryDatabase, archiveContent, details, archiveOwnership) {
         this._ignoreCancellation = false;
         if (!dictionaryDatabase) {
             throw new Error('Invalid database');
@@ -453,11 +581,14 @@ export class DictionaryImporter {
         this._skipMediaImport = details.skipMediaImport === true;
         this._mediaResolutionConcurrency = Math.max(1, Math.min(32, Math.trunc(details.mediaResolutionConcurrency ?? 16)));
         this._debugImportLogging = details.debugImportLogging === true;
-        let zipMaxWorkers = Number.isFinite(details.zipMaxWorkers) ? Math.max(1, Math.min(32, Math.trunc(/** @type {number} */ (details.zipMaxWorkers)))) : null;
+        const requestedZipMaxWorkers = Number.isFinite(details.zipMaxWorkers) ? Math.max(1, Math.min(32, Math.trunc(/** @type {number} */ (details.zipMaxWorkers)))) : null;
+        let zipMaxWorkers = requestedZipMaxWorkers ?? DEFAULT_ZIP_MAX_WORKERS;
         const zipChunkSize = Number.isFinite(details.zipChunkSize) ? Math.max(16 * 1024, Math.min(8 * 1024 * 1024, Math.trunc(/** @type {number} */ (details.zipChunkSize)))) : null;
+        const requestedZipUseWebWorkers = typeof details.zipUseWebWorkers === 'boolean' ? details.zipUseWebWorkers : null;
+        this._zipUseWebWorkers = requestedZipUseWebWorkers ?? true;
         const archiveSizeBytes = archiveContent instanceof Blob ? archiveContent.size : archiveContent?.byteLength;
         const autoZipMaxWorkersForLargeArchive = (
-            zipMaxWorkers === null &&
+            requestedZipMaxWorkers === null &&
             typeof archiveSizeBytes === 'number' &&
             archiveSizeBytes >= LARGE_ARCHIVE_ZIP_MAX_WORKERS_THRESHOLD_BYTES
         );
@@ -466,6 +597,9 @@ export class DictionaryImporter {
         }
         const artifactFixedPackMinTotalRows = Number.isFinite(details.artifactFixedPackMinTotalRows) ?
             Math.max(0, Math.min(4_000_000, Math.trunc(/** @type {number} */ (details.artifactFixedPackMinTotalRows)))) :
+            null;
+        const termContentBlockTargetBytes = Number.isFinite(details.termContentBlockTargetBytes) ?
+            Math.max(64 * 1024, Math.min(16 * 1024 * 1024, Math.trunc(/** @type {number} */ (details.termContentBlockTargetBytes)))) :
             null;
         const isStagedDictionaryUpdate = (
             typeof details.dictionaryTitleOverride === 'string' &&
@@ -479,17 +613,20 @@ export class DictionaryImporter {
         this._jsonQuotedStringCache.clear();
         this._utf8StringBytesCache.clear();
         this._reverseStringCache.clear();
-        dictionaryDatabase.setImportOptimizationFlags({
+        const importOptimizationFlags = {
             termContentStorageMode,
             expectedTermContentImportBytes: void 0,
             artifactFixedPackMinTotalRows,
             queueTermContentWrites: !isStagedDictionaryUpdate,
-        });
+            termContentBlockTargetBytes,
+        };
+        dictionaryDatabase.setImportOptimizationFlags(importOptimizationFlags);
         const tImportStart = Date.now();
-        /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, unknown>}>} */
+        /** @type {Array<{phase: string, elapsedMs: number, startEpochMs: number, endEpochMs: number, details?: Record<string, unknown>}>} */
         const phaseTimings = [];
-        /** @type {{termParseMs: number, termSerializationMs: number, bulkAddTermsMs: number, bulkAddTagsMetaMs: number, mediaResolveMs: number, mediaWriteMs: number, termFileNonParseWriteMs: number, termMetaReadMs: number, kanjiReadMs: number, kanjiMetaReadMs: number, tagReadMs: number}} */
+        /** @type {{termArchiveReadMs: number, termParseMs: number, termSerializationMs: number, bulkAddTermsMs: number, bulkAddTagsMetaMs: number, mediaResolveMs: number, mediaWriteMs: number, termFileNonParseWriteMs: number, termMetaReadMs: number, kanjiReadMs: number, kanjiMetaReadMs: number, tagReadMs: number}} */
         const step4TimingBreakdown = {
+            termArchiveReadMs: 0,
             termParseMs: 0,
             termSerializationMs: 0,
             bulkAddTermsMs: 0,
@@ -513,8 +650,9 @@ export class DictionaryImporter {
          * @param {Record<string, unknown>} [phaseDetails]
          */
         const recordPhaseTiming = (phase, startTime, phaseDetails = {}) => {
-            const elapsedMs = Math.max(0, Date.now() - startTime);
-            const phaseTiming = {phase, elapsedMs, details: phaseDetails};
+            const endEpochMs = Date.now();
+            const elapsedMs = Math.max(0, endEpochMs - startTime);
+            const phaseTiming = {phase, elapsedMs, startEpochMs: startTime, endEpochMs, details: phaseDetails};
             phaseTimings.push(phaseTiming);
             this._logImport(`phase ${phase} ${elapsedMs}ms details=${JSON.stringify(phaseDetails)}`);
         };
@@ -565,7 +703,8 @@ export class DictionaryImporter {
                 deflate: ['../../lib/z-worker.js'],
                 inflate: ['../../lib/z-worker.js'],
             },
-            ...(zipMaxWorkers !== null ? {maxWorkers: zipMaxWorkers} : {}),
+            maxWorkers: zipMaxWorkers,
+            useWebWorkers: this._zipUseWebWorkers,
             ...(zipChunkSize !== null ? {chunkSize: zipChunkSize} : {}),
         });
 
@@ -582,12 +721,14 @@ export class DictionaryImporter {
                 throw new Error('Archive content is no longer available');
             }
             ({fileMap, zipReader: archiveReader} = await this._getFilesFromArchive(archiveContent));
+            archiveOwnership.own(archiveReader);
             index = await this._readAndValidateIndex(fileMap);
         } catch (e) {
             recordPhaseTiming('archive-and-index', tArchiveStart, {ok: false});
+            errors.push(toError(e));
             return {
                 result: null,
-                errors: [toError(e)],
+                errors,
                 debug: {phaseTimings},
             };
         }
@@ -597,6 +738,7 @@ export class DictionaryImporter {
             indexVersion: typeof index.version === 'number' ? index.version : null,
             zipMaxWorkers,
             zipChunkSize,
+            zipUseWebWorkers: this._zipUseWebWorkers,
             autoZipMaxWorkersForLargeArchive,
             archiveSizeBytes: archiveSizeBytes ?? null,
         });
@@ -617,8 +759,9 @@ export class DictionaryImporter {
 
         // Verify database is not already imported
         if (await dictionaryDatabase.dictionaryExists(dictionaryTitle)) {
+            errors.push(new Error(`Dictionary ${dictionaryTitle} is already imported, skipped it.`));
             return {
-                errors: [new Error(`Dictionary ${dictionaryTitle} is already imported, skipped it.`)],
+                errors,
                 result: null,
                 debug: {phaseTimings},
             };
@@ -667,9 +810,8 @@ export class DictionaryImporter {
             termContentStorageMode;
         if (effectiveTermContentStorageMode !== termContentStorageMode) {
             dictionaryDatabase.setImportOptimizationFlags({
+                ...importOptimizationFlags,
                 termContentStorageMode: effectiveTermContentStorageMode,
-                expectedTermContentImportBytes: void 0,
-                artifactFixedPackMinTotalRows,
             });
         }
         const packedTermArtifactEntry = (
@@ -816,7 +958,13 @@ export class DictionaryImporter {
                 ) ?
                     /** @type {number} */ (sharedGlossaryUncompressedLength) :
                     (sharedGlossaryArtifactBytes.byteLength * 16);
-                sharedGlossaryArtifactBytes = zstdDecompress(sharedGlossaryArtifactBytes, {defaultHeapSize});
+                const decompressedGlossary = /** @type {unknown} */ (
+                    zstdDecompress(sharedGlossaryArtifactBytes, {defaultHeapSize})
+                );
+                if (!(decompressedGlossary instanceof Uint8Array)) {
+                    throw new TypeError('Shared glossary decompressor returned invalid bytes');
+                }
+                sharedGlossaryArtifactBytes = decompressedGlossary;
             } catch (e) {
                 logTermContentZstdError(e);
                 throw e;
@@ -882,7 +1030,7 @@ export class DictionaryImporter {
         // This transition enters "Importing data".
         this._progressNextStep((activeTermFiles.length * 2 + termMetaFiles.length + kanjiFiles.length + kanjiMetaFiles.length + tagFiles.length) * bulkAddProgressAllowance);
         const previousProgressInterval = this._progressMinIntervalMs;
-        this._setProgressInterval(1000);
+        this._setProgressInterval(IMPORT_DATA_PROGRESS_MIN_INTERVAL_MS);
 
         let importSuccess = false;
         let preloadedStyles = null;
@@ -911,32 +1059,56 @@ export class DictionaryImporter {
         }
         const dictionarySummaryPrimaryKey = await dictionaryDatabase.addWithResult('dictionaries', summary);
         let styles = '';
-        let importFailed = false;
         let sharedGlossaryArtifactBaseOffset = 0;
         let sharedGlossaryArtifactAppendMs = 0;
         const tImportBanksStart = Date.now();
-
-        const closeArchiveReader = async () => {
-            if (archiveReader === null) { return; }
-            try {
-                await archiveReader.close();
-            } finally {
-                archiveReader = null;
-            }
-        };
-
-        if (packedTermArtifactBytes !== null && usePrunedArtifactAuxFastPath && (!preserveCompressedMedia || this._skipImageMetadata)) {
-            const stylesFile = fileMap.get('styles.css');
-            if (typeof stylesFile !== 'undefined') {
-                preloadedStyles = await this._getData(stylesFile, new TextWriter());
-            }
-            fileMap.clear();
-            await closeArchiveReader();
-            this._logImport('released source archive after packed artifact preload');
-        }
+        const eventLoopYielder = createEventLoopYielder();
+        const importSession = new DictionaryImportSession({
+            dictionaryDatabase,
+            dictionaryTitle,
+            dictionarySummaryPrimaryKey,
+            errors,
+            archiveReader,
+            disposeParser: disposeParallelTermBankParser,
+        });
+        const termBankSourcePipeline = new TermBankSourcePipeline({
+            termFiles: activeTermFiles,
+            enabled: !this._disableTermBankWasmFastPath && !useTermArtifactFiles && !usePackedTermArtifact,
+            read: async (termFile, signal) => await this._getData(
+                /** @type {import('@zip.js/zip.js').Entry} */ (termFile),
+                new Uint8ArrayWriter(),
+                signal,
+            ),
+        });
+        const zipWorkerPolicy = this._selectSourceZipWorkerPolicy(
+            termBankSourcePipeline,
+            activeTermFiles,
+            requestedZipUseWebWorkers,
+        );
+        this._zipUseWebWorkers = zipWorkerPolicy.useWebWorkers;
+        this._logImport(
+            `source zip workers=${String(zipWorkerPolicy.useWebWorkers)} ` +
+            `autoDisabled=${String(zipWorkerPolicy.autoDisabled)} ` +
+            `firstBatchFiles=${zipWorkerPolicy.firstBatchFileCount}/${activeTermFiles.length}`,
+        );
+        importSession.setSourcePipeline(termBankSourcePipeline);
+        archiveOwnership.transfer(archiveReader);
+        let initialSourcePrefetch = {fileCount: 0, estimatedBytes: 0};
 
         try {
-            await dictionaryDatabase.startBulkImport();
+            // Start the bounded first read before transaction and media setup so
+            // ZIP worker startup is not paid on the term-processing critical path.
+            initialSourcePrefetch = termBankSourcePipeline.prefetchNext(0);
+            if (packedTermArtifactBytes !== null && usePrunedArtifactAuxFastPath && (!preserveCompressedMedia || this._skipImageMetadata)) {
+                const stylesFile = fileMap.get('styles.css');
+                if (typeof stylesFile !== 'undefined') {
+                    preloadedStyles = await this._getData(stylesFile, new TextWriter());
+                }
+                fileMap.clear();
+                await importSession.closeArchive();
+                this._logImport('released source archive after packed artifact preload');
+            }
+            await importSession.startBulkImport();
             if (sharedGlossaryArtifactBytes instanceof Uint8Array && sharedGlossaryArtifactBytes.byteLength > 0) {
                 const tSharedGlossaryAppendStart = Date.now();
                 const sharedGlossarySpan = await dictionaryDatabase.appendRawSharedGlossaryArtifact(
@@ -959,7 +1131,7 @@ export class DictionaryImporter {
                 !this._skipMediaImport &&
                 (hasArchiveImageMediaFiles || hasUsableArtifactMediaFiles)
             );
-            /** @type {Array<{path: string, mediaType: string, packedOffset?: number, packedLength?: number, compressionMethod?: number, uncompressedLength?: number, fileEntry?: ImportFileEntry}>} */
+                /** @type {Array<{path: string, mediaType: string, packedOffset?: number, packedLength?: number, compressionMethod?: number, uncompressedLength?: number, fileEntry?: ImportFileEntry}>} */
             const artifactArchiveImageFileEntries = (() => {
                 if (
                     !useMediaPipeline ||
@@ -1241,13 +1413,13 @@ export class DictionaryImporter {
                     );
                 }
             };
-            /**
-             * @param {number} startIndex
-             * @param {number} processedRows
-             * @param {number} totalRows
-             * @param {boolean} [finalize]
-             * @param {number} [progressAllowance]
-             */
+                /**
+                 * @param {number} startIndex
+                 * @param {number} processedRows
+                 * @param {number} totalRows
+                 * @param {boolean} [finalize]
+                 * @param {number} [progressAllowance]
+                 */
             const updateStreamedTermFileProgress = (startIndex, processedRows, totalRows, finalize = false, progressAllowance = termFileProgressAllowance) => {
                 const normalizedTotalRows = Number.isFinite(totalRows) ? Math.max(1, Math.trunc(totalRows)) : 1;
                 const normalizedProcessedRows = finalize ?
@@ -1264,15 +1436,15 @@ export class DictionaryImporter {
                     this._progress();
                 }
             };
-            /**
-             * @param {{filename: string}} termFile
-             * @param {import('dictionary-database').DatabaseTermEntry[]|DirectTermChunk} termChunk
-             * @param {import('dictionary-importer').ImportRequirement[]|null} requirements
-             * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}|null} streamedProgress
-             * @param {number} streamedProgressStartIndex
-             * @param {number} [streamedProgressAllowance]
-             * @returns {Promise<Record<string, number>>}
-             */
+                /**
+                 * @param {{filename: string}} termFile
+                 * @param {import('dictionary-database').DatabaseTermEntry[]|DirectTermChunk} termChunk
+                 * @param {import('dictionary-importer').ImportRequirement[]|null} requirements
+                 * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}|null} streamedProgress
+                 * @param {number} streamedProgressStartIndex
+                 * @param {number} [streamedProgressAllowance]
+                 * @returns {Promise<Record<string, number>>}
+                 */
             const processTermChunk = async (termFile, termChunk, requirements, streamedProgress = null, streamedProgressStartIndex = 0, streamedProgressAllowance = termFileProgressAllowance) => {
                 const trackProgress = streamedProgress === null;
                 /** @type {DirectTermChunk|null} */
@@ -1403,94 +1575,17 @@ export class DictionaryImporter {
                 packedMediaArtifactBytes = null;
                 packedMediaArtifactBlob = null;
             }
-            /** @type {Map<string, Promise<Uint8Array>>} */
-            const termFileBytePrefetches = new Map();
-            /**
-             * @param {import('@zip.js/zip.js').Entry|{filename: string}} termFile
-             * @returns {boolean}
-             */
-            const canPrefetchTermFileBytes = (termFile) => (
+            if (
                 !this._disableTermBankWasmFastPath &&
                 !useTermArtifactFiles &&
                 !usePackedTermArtifact &&
-                /\.json$/i.test(termFile.filename) &&
-                termFile instanceof Object &&
-                'getData' in termFile
-            );
-            /**
-             * @param {import('@zip.js/zip.js').Entry|{filename: string}} termFile
-             * @returns {Promise<Uint8Array>}
-             */
-            const prefetchTermFileBytes = (termFile) => {
-                let promise = termFileBytePrefetches.get(termFile.filename);
-                if (typeof promise === 'undefined') {
-                    promise = this._getData(/** @type {import('@zip.js/zip.js').Entry} */ (termFile), new Uint8ArrayWriter());
-                    termFileBytePrefetches.set(termFile.filename, promise);
-                    void promise.catch(() => {});
-                }
-                return promise;
-            };
-            /**
-             * @param {number} startIndex
-             */
-            const prefetchNextTermFileBytes = (startIndex) => {
-                let prefetchedCount = 0;
-                for (let i = startIndex; i < activeTermFiles.length; ++i) {
-                    const candidate = activeTermFiles[i];
-                    if (!canPrefetchTermFileBytes(candidate)) { continue; }
-                    void prefetchTermFileBytes(candidate);
-                    ++prefetchedCount;
-                    if (prefetchedCount >= TERM_BANK_BYTE_PREFETCH_COUNT) { return; }
-                }
-            };
-            /**
-             * @param {import('@zip.js/zip.js').Entry|{filename: string}} termFile
-             * @returns {number}
-             */
-            const getTermFileEstimatedBytes = (termFile) => {
-                const uncompressedSize = /** @type {unknown} */ (Reflect.get(termFile, 'uncompressedSize'));
-                if (typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) && uncompressedSize > 0) {
-                    return Math.trunc(uncompressedSize);
-                }
-                const size = /** @type {unknown} */ (Reflect.get(termFile, 'size'));
-                return (typeof size === 'number' && Number.isFinite(size) && size > 0) ? Math.trunc(size) : 0;
-            };
-            /**
-             * @param {number} startIndex
-             * @returns {Array<import('@zip.js/zip.js').Entry|{filename: string}>}
-             */
-            const getSourceTermFileBatch = (startIndex) => {
-                /** @type {Array<import('@zip.js/zip.js').Entry|{filename: string}>} */
-                const batch = [];
-                let estimatedBytes = 0;
-                for (let i = startIndex; i < activeTermFiles.length; ++i) {
-                    const candidate = activeTermFiles[i];
-                    if (!canPrefetchTermFileBytes(candidate)) { break; }
-                    const candidateBytes = getTermFileEstimatedBytes(candidate);
-                    if (
-                        batch.length > 0 &&
-                        candidateBytes > 0 &&
-                        estimatedBytes + candidateBytes > SOURCE_TERM_BANK_BATCH_MAX_BYTES
-                    ) {
-                        break;
-                    }
-                    batch.push(candidate);
-                    estimatedBytes += candidateBytes;
-                    if (batch.length >= SOURCE_TERM_BANK_BATCH_MAX_FILES) { break; }
-                }
-                return batch;
-            };
-            /**
-             * @param {Array<import('@zip.js/zip.js').Entry|{filename: string}>} batch
-             * @returns {Promise<Uint8Array|Uint8Array[]|null>}
-             */
-            const getCombinedSourceTermFileBytes = async (batch) => {
-                if (batch.length <= 1) {
-                    return batch.length === 1 && canPrefetchTermFileBytes(batch[0]) ? await prefetchTermFileBytes(batch[0]) : null;
-                }
-                const byteArrays = await Promise.all(batch.map((candidate) => prefetchTermFileBytes(candidate)));
-                return byteArrays.every((bytes) => getJsonArrayContentSpan(bytes) !== null) ? byteArrays : null;
-            };
+                !useTermMediaRequirements &&
+                enableTermEntryContentDedup &&
+                effectiveTermContentStorageMode === 'raw-bytes' &&
+                activeTermFiles.length >= 4
+            ) {
+                void prewarmParallelTermBankParser();
+            }
             for (let termFileIndex = 0; termFileIndex < activeTermFiles.length; ++termFileIndex) {
                 const termFile = activeTermFiles[termFileIndex];
                 const tTermFile = Date.now();
@@ -1503,6 +1598,7 @@ export class DictionaryImporter {
                 let artifactMetadataRebaseMs = 0;
                 let streamedProgressAllowance = termFileProgressAllowance;
                 let streamedTermFileLabel = termFile.filename;
+                let sourceArchiveReadMs = 0;
                 const tFastParseStart = Date.now();
                 if ((useTermArtifactFiles || usePackedTermArtifact) && /\.mbtb$/i.test(termFile.filename)) {
                     const termArtifactFileEntry = /** @type {import('@zip.js/zip.js').Entry|undefined} */ (
@@ -1617,13 +1713,17 @@ export class DictionaryImporter {
                 } else if (!this._disableTermBankWasmFastPath) {
                     try {
                         const termFileEntry = /** @type {import('@zip.js/zip.js').Entry} */ (termFile);
-                        let sourceTermFileBatch = canPrefetchTermFileBytes(termFile) ? getSourceTermFileBatch(termFileIndex) : [];
-                        let preloadedTermFileBytes = canPrefetchTermFileBytes(termFile) ?
-                            await getCombinedSourceTermFileBytes(sourceTermFileBatch) :
+                        let sourceTermFileBatch = termBankSourcePipeline.canPrefetch(termFile) ? termBankSourcePipeline.getBatch(termFileIndex) : [];
+                        let tSourceArchiveReadStart = Date.now();
+                        let preloadedTermFileBytes = termBankSourcePipeline.canPrefetch(termFile) ?
+                            await termBankSourcePipeline.readBatch(sourceTermFileBatch) :
                             null;
+                        sourceArchiveReadMs += Math.max(0, Date.now() - tSourceArchiveReadStart);
                         if (preloadedTermFileBytes === null) {
                             sourceTermFileBatch = [termFile];
-                            preloadedTermFileBytes = canPrefetchTermFileBytes(termFile) ? await prefetchTermFileBytes(termFile) : null;
+                            tSourceArchiveReadStart = Date.now();
+                            preloadedTermFileBytes = termBankSourcePipeline.canPrefetch(termFile) ? await termBankSourcePipeline.read(termFile) : null;
+                            sourceArchiveReadMs += Math.max(0, Date.now() - tSourceArchiveReadStart);
                         }
                         const sourceTermFileBatchCount = Math.max(1, sourceTermFileBatch.length);
                         const sourceTermFileProgressAllowance = termFileProgressAllowance * sourceTermFileBatchCount;
@@ -1633,7 +1733,7 @@ export class DictionaryImporter {
                         const sourceTermFileForProcessing = sourceTermFileBatchCount > 1 ? {filename: sourceTermFileLabel} : termFile;
                         streamedProgressAllowance = sourceTermFileProgressAllowance;
                         streamedTermFileLabel = sourceTermFileLabel;
-                        prefetchNextTermFileBytes(termFileIndex + sourceTermFileBatchCount);
+                        termBankSourcePipeline.prefetchNext(termFileIndex + sourceTermFileBatchCount);
                         await this._readTermBankFileFast(
                             sourceTermFileBatchCount > 1 ? /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ (sourceTermFileForProcessing)) : termFileEntry,
                             version,
@@ -1652,22 +1752,29 @@ export class DictionaryImporter {
                                 if (requirementsChunk !== null) {
                                     requirementsChunk.length = 0;
                                 }
-                                await yieldToEventLoop();
+                                await eventLoopYielder.yield();
                             },
                             preloadedTermFileBytes,
                             sourceTermFileBatchCount > 1 ? SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE : null,
                         );
-                        for (const batchedTermFile of sourceTermFileBatch) {
-                            termFileBytePrefetches.delete(batchedTermFile.filename);
-                        }
+                        termBankSourcePipeline.releaseBatch(sourceTermFileBatch);
                         lastFastTermBankReadProfile = this._lastFastTermBankReadProfile ?? null;
+                        const parallelSourceReadWallMs = lastFastTermBankReadProfile?.parserProfile?.parallelSourceReadWallMs;
+                        if (typeof parallelSourceReadWallMs === 'number' && Number.isFinite(parallelSourceReadWallMs)) {
+                            sourceArchiveReadMs = Math.max(sourceArchiveReadMs, parallelSourceReadWallMs);
+                        }
+                        step4TimingBreakdown.termArchiveReadMs += sourceArchiveReadMs;
                         if (sourceTermFileBatchCount > 1) {
                             termFileIndex += sourceTermFileBatchCount - 1;
                         }
                         streamedImportCompleted = true;
                     } catch (error) {
                         const e = toError(error);
+                        await termBankSourcePipeline.abortAndJoin();
+                        this._throwIfCancelled();
                         if (e instanceof TermBankWasmResourceError) { throw e; }
+                        // Parallel workers transfer source buffers. Re-inflate
+                        // clean buffers if the fast path needs to fall back.
                         if (streamedFastPathChunkCount > 0) {
                             throw new Error(`term file ${termFile.filename}: streaming fast path failed after partial import (${e.message})`);
                         }
@@ -1690,13 +1797,32 @@ export class DictionaryImporter {
                             chunkCount: lastFastTermBankReadProfile.chunkCount ?? null,
                             importerMaterializationMs: lastFastTermBankReadProfile.materializationMs ?? null,
                             importerChunkSinkMs: lastFastTermBankReadProfile.chunkSinkMs ?? null,
+                            sourceArchiveReadMs,
+                            sourceBatchMaxBytes: termBankSourcePipeline.batchMaxBytes,
+                            sourcePrefetchMaxBytes: termBankSourcePipeline.prefetchMaxBytes,
+                            sourceInitialPrefetchFileCount: initialSourcePrefetch.fileCount,
+                            sourceInitialPrefetchEstimatedBytes: initialSourcePrefetch.estimatedBytes,
+                            zipUseWebWorkers: zipWorkerPolicy.useWebWorkers,
+                            zipWebWorkersAutoDisabled: zipWorkerPolicy.autoDisabled,
+                            sourceFirstBatchFileCount: zipWorkerPolicy.firstBatchFileCount,
+                            sourceFirstBatchEstimatedBytes: zipWorkerPolicy.firstBatchEstimatedBytes,
+                            sourceFirstBatchSizeKnown: zipWorkerPolicy.firstBatchSizeKnown,
                             parserBufferSetupMs: parserProfile.bufferSetupMs ?? null,
                             parserAllocationMs: parserProfile.allocationMs ?? null,
                             parserCopyJsonMs: parserProfile.copyJsonMs ?? null,
                             parserParseBankMs: parserProfile.parseBankMs ?? null,
                             parserEncodeContentMs: parserProfile.encodeContentMs ?? null,
+                            parserRecentContentDedupHitCount: parserProfile.recentContentDedupHitCount ?? null,
                             parserRowDecodeMs: parserProfile.rowDecodeMs ?? null,
                             parserChunkDispatchMs: parserProfile.chunkDispatchMs ?? null,
+                            parserResultCopyMs: parserProfile.resultCopyMs ?? null,
+                            parserResultDeliveryMs: parserProfile.resultDeliveryMs ?? null,
+                            parserParallelWorkerCount: parserProfile.parallelWorkerCount ?? null,
+                            parserParallelPipelineGroupsPerWorker: parserProfile.parallelPipelineGroupsPerWorker ?? null,
+                            parserParallelGroupCount: parserProfile.parallelGroupCount ?? null,
+                            parserParallelWorkerWallMs: parserProfile.parallelWorkerWallMs ?? null,
+                            parserParallelSourceReadWallMs: parserProfile.parallelSourceReadWallMs ?? null,
+                            parserParallelSkipReason: parserProfile.parallelSkipReason ?? null,
                             parserMetaCapacity: parserProfile.metaCapacity ?? null,
                             parserMetaAllocatedBytes: parserProfile.metaAllocatedBytes ?? null,
                             parserEncodedContentBytes: parserProfile.encodedContentBytes ?? null,
@@ -1767,6 +1893,8 @@ export class DictionaryImporter {
                 this._logImport(`term file ${termFile.filename}: total elapsed=${termFileElapsedMs}ms`);
             }
 
+            await dictionaryDatabase.queuePendingTermContentImportWrites();
+
             if (deferredNoMetadataMediaRequirements.length > 0) {
                 const tMediaResolveStart = Date.now();
                 const {media} = await this._resolveAsyncRequirements(deferredNoMetadataMediaRequirements, fileMap);
@@ -1784,6 +1912,8 @@ export class DictionaryImporter {
                 );
                 deferredNoMetadataMediaRequirements.length = 0;
             }
+
+            await dictionaryDatabase.queuePendingTermContentImportWrites();
 
             for (const termMetaFile of termMetaFiles) {
                 const tTermMetaFile = Date.now();
@@ -1866,6 +1996,7 @@ export class DictionaryImporter {
                 tagList = [];
             }
             const importDataBanksElapsedMs = Math.max(0, Date.now() - tImportBanksStart);
+            const fastPathProfile = lastFastTermBankReadProfile?.parserProfile ?? null;
             const step4AccountedMs = (
                 step4TimingBreakdown.termParseMs +
                 step4TimingBreakdown.termSerializationMs +
@@ -1882,6 +2013,7 @@ export class DictionaryImporter {
                 tagMeta: counts.tagMeta.total,
                 media: counts.media.total,
                 step4TermParseMs: Math.max(0, step4TimingBreakdown.termParseMs),
+                step4TermArchiveReadMs: Math.max(0, step4TimingBreakdown.termArchiveReadMs),
                 step4TermSerializationMs: Math.max(0, step4TimingBreakdown.termSerializationMs),
                 step4BulkAddTermsMs: Math.max(0, step4TimingBreakdown.bulkAddTermsMs),
                 step4BulkAddTagsMetaMs: Math.max(0, step4TimingBreakdown.bulkAddTagsMetaMs),
@@ -1899,6 +2031,32 @@ export class DictionaryImporter {
                 step4TagReadMs: Math.max(0, step4TimingBreakdown.tagReadMs),
                 step4AccountedMs: Math.max(0, step4AccountedMs),
                 step4OtherMs: Math.max(0, importDataBanksElapsedMs - step4AccountedMs),
+                fastPathChunkCount: lastFastTermBankReadProfile?.chunkCount ?? null,
+                fastPathChunkSinkMs: lastFastTermBankReadProfile?.chunkSinkMs ?? null,
+                fastPathParserBufferSetupMs: fastPathProfile?.bufferSetupMs ?? null,
+                fastPathParserAllocationMs: fastPathProfile?.allocationMs ?? null,
+                fastPathParserCopyJsonMs: fastPathProfile?.copyJsonMs ?? null,
+                fastPathParserParseBankMs: fastPathProfile?.parseBankMs ?? null,
+                fastPathParserEncodeContentMs: fastPathProfile?.encodeContentMs ?? null,
+                fastPathParserRecentContentDedupHitCount: fastPathProfile?.recentContentDedupHitCount ?? null,
+                fastPathParserRowDecodeMs: fastPathProfile?.rowDecodeMs ?? null,
+                fastPathParserStringPlanMs: fastPathProfile?.nativeStringPlanMs ?? null,
+                fastPathParserChunkDispatchMs: fastPathProfile?.chunkDispatchMs ?? null,
+                fastPathParserResultCopyMs: fastPathProfile?.resultCopyMs ?? null,
+                fastPathParserResultDeliveryMs: fastPathProfile?.resultDeliveryMs ?? null,
+                fastPathParserParallelWorkerCount: fastPathProfile?.parallelWorkerCount ?? null,
+                fastPathParserParallelPipelineGroupsPerWorker: fastPathProfile?.parallelPipelineGroupsPerWorker ?? null,
+                fastPathParserParallelGroupCount: fastPathProfile?.parallelGroupCount ?? null,
+                fastPathParserParallelWorkerWallMs: fastPathProfile?.parallelWorkerWallMs ?? null,
+                fastPathParserParallelSourceReadWallMs: fastPathProfile?.parallelSourceReadWallMs ?? null,
+                fastPathParserParallelSkipReason: fastPathProfile?.parallelSkipReason ?? null,
+                sourceInitialPrefetchFileCount: initialSourcePrefetch.fileCount,
+                sourceInitialPrefetchEstimatedBytes: initialSourcePrefetch.estimatedBytes,
+                zipUseWebWorkers: zipWorkerPolicy.useWebWorkers,
+                zipWebWorkersAutoDisabled: zipWorkerPolicy.autoDisabled,
+                sourceFirstBatchFileCount: zipWorkerPolicy.firstBatchFileCount,
+                sourceFirstBatchEstimatedBytes: zipWorkerPolicy.firstBatchEstimatedBytes,
+                sourceFirstBatchSizeKnown: zipWorkerPolicy.firstBatchSizeKnown,
                 useMediaPipeline,
                 hasArchiveImageMediaFiles,
             });
@@ -1928,48 +2086,35 @@ export class DictionaryImporter {
                 hasStyles: styles.length > 0,
             });
         } catch (e) {
-            importFailed = true;
-            errors.push(toError(e));
+            importSession.recordFailure(e);
             recordPhaseTiming('import-data-banks', tImportBanksStart, {
                 ok: false,
             });
         } finally {
-            if (!importFailed && this._isCancelled()) {
-                importFailed = true;
-                errors.push(new Error('Dictionary import was cancelled'));
+            eventLoopYielder.close();
+            if (!importSession.failed && this._isCancelled()) {
+                importSession.recordFailure(new Error('Dictionary import was cancelled'));
             }
             this._ignoreCancellation = true;
-            try {
-                await closeArchiveReader();
-            } catch (e) {
-                importFailed = true;
-                errors.push(new Error(`Failed to close dictionary archive: ${toError(e).message}`));
-            }
+            await importSession.disposeImportResources();
             this._setProgressInterval(previousProgressInterval);
             const tBulkFinalizationStart = Date.now();
-            /** @type {{commitMs?: number, termContentEndImportSessionMs?: number, termRecordEndImportSessionMs?: number, termsVirtualTableSyncMs?: number, createIndexesMs?: number, createIndexesCheckpointCount?: number, cacheResetMs?: number, runtimePragmasMs?: number, totalMs?: number}|null} */
-            let bulkFinalizationDetails = null;
             this._progressNextStep(20, false);
             this._progressData.index = 0;
             this._progress();
-            try {
-                bulkFinalizationDetails = await dictionaryDatabase.finishBulkImport((checkpointIndex, total) => {
-                    this._progressData.index = Math.max(1, Math.floor((checkpointIndex / total) * this._progressData.count));
-                    this._progress();
-                    this._logImport(`bulk finalization ${checkpointIndex}/${total}`);
-                });
-            } catch (e) {
-                importFailed = true;
-                errors.push(toError(e));
-            }
+            const bulkFinalizationDetails = await importSession.finalizeBulkImport((checkpointIndex, total) => {
+                this._progressData.index = Math.max(1, Math.floor((checkpointIndex / total) * this._progressData.count));
+                this._progress();
+                this._logImport(`bulk finalization ${checkpointIndex}/${total}`);
+            });
             this._progressData.index = this._progressData.count;
             this._progress();
-            const bulkFinalizationPhaseDetails = {ok: !importFailed};
+            const bulkFinalizationPhaseDetails = {ok: !importSession.failed};
             if (bulkFinalizationDetails !== null) {
                 Object.assign(bulkFinalizationPhaseDetails, bulkFinalizationDetails);
             }
             recordPhaseTiming('bulk-finalization', tBulkFinalizationStart, bulkFinalizationPhaseDetails);
-            if (!importFailed) {
+            if (!importSession.failed) {
                 recordPhaseTiming('post-finalization-integrity-sample', Date.now(), {
                     skipped: true,
                     reason: 'transaction-commit-completed',
@@ -1979,18 +2124,12 @@ export class DictionaryImporter {
             dictionaryDatabase.setImportDebugLogging(false);
         }
 
-        if (!importFailed && this._isCancelled()) {
-            importFailed = true;
-            errors.push(new Error('Dictionary import was cancelled'));
+        if (!importSession.failed && this._isCancelled()) {
+            importSession.recordFailure(new Error('Dictionary import was cancelled'));
         }
 
-        if (importFailed) {
-            try {
-                await dictionaryDatabase.deleteDictionary(dictionaryTitle, 1000, () => {});
-            } catch (e) {
-                const cleanupError = toError(e);
-                errors.push(new Error(`Failed to clean up partially imported dictionary ${dictionaryTitle}: ${cleanupError.message}`));
-            }
+        if (importSession.failed) {
+            await importSession.cleanupIncompleteSummary();
             return {
                 result: null,
                 errors,
@@ -2015,16 +2154,16 @@ export class DictionaryImporter {
         }
         const tSummaryUpdateStart = Date.now();
         if (this._isCancelled()) {
-            try {
-                await dictionaryDatabase.deleteDictionary(dictionaryTitle, 1000, () => {});
-            } catch (e) {
-                const cleanupError = toError(e);
-                errors.push(new Error(`Failed to clean up cancelled dictionary ${dictionaryTitle}: ${cleanupError.message}`));
-            }
-            errors.push(new Error('Dictionary import was cancelled'));
+            importSession.recordFailure(new Error('Dictionary import was cancelled'));
+            await importSession.cleanupIncompleteSummary();
             return {result: null, errors, debug: {phaseTimings}};
         }
-        await dictionaryDatabase.bulkUpdate('dictionaries', [{data: summary, primaryKey: dictionarySummaryPrimaryKey}], 0, 1);
+        try {
+            await importSession.publishSummary(summary);
+        } catch (_) {
+            await importSession.cleanupIncompleteSummary();
+            return {result: null, errors, debug: {phaseTimings}};
+        }
         recordPhaseTiming('write-summary', tSummaryUpdateStart, {ok: true});
         this._logImport(`import done ${Date.now() - tImportStart}ms terms=${counts.terms.total} media=${counts.media.total}`);
 
@@ -2168,6 +2307,8 @@ export class DictionaryImporter {
     _progressReset() {
         this._progressData = this._createProgressData();
         this._lastProgressTimestamp = 0;
+        this._lastProgressIndex = Number.NaN;
+        this._lastProgressCount = Number.NaN;
         this._progress(true);
     }
 
@@ -2195,11 +2336,17 @@ export class DictionaryImporter {
      */
     _progress(nextStep = false) {
         this._throwIfCancelled();
+        const {index, count} = this._progressData;
+        if (!nextStep && index === this._lastProgressIndex && count === this._lastProgressCount) {
+            return;
+        }
         const now = Date.now();
         if (!nextStep && (now - this._lastProgressTimestamp) < this._progressMinIntervalMs) {
             return;
         }
         this._lastProgressTimestamp = now;
+        this._lastProgressIndex = index;
+        this._lastProgressCount = count;
         this._onProgress({...this._progressData, nextStep});
     }
 
@@ -3445,18 +3592,38 @@ export class DictionaryImporter {
      * @param {boolean} enableTermEntryContentDedup
      * @param {'baseline'|'raw-bytes'} termContentStorageMode
      * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} [onChunk]
-     * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|null} [preloadedBytes]
+     * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|{promises: Promise<Uint8Array>[], estimatedByteLengths: number[]}|null} [preloadedBytes]
      * @param {number|null} [wasmRowChunkSizeOverride]
      * @returns {Promise<{termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null}>}
      */
     async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null, wasmRowChunkSizeOverride = null) {
         this._lastFastTermBankReadProfile = null;
-        const bytes = preloadedBytes !== null ? await preloadedBytes : await this._getData(termFile, new Uint8ArrayWriter());
-        const sourceByteArrays = Array.isArray(bytes) ? bytes : [bytes];
-        if (!sourceByteArrays.every((sourceBytes) => getJsonArrayContentSpan(sourceBytes) !== null)) {
+        /** @type {{promises: Promise<Uint8Array>[], estimatedByteLengths: number[]}|null} */
+        let deferredSourceBatch = null;
+        if (
+            typeof preloadedBytes === 'object' &&
+            preloadedBytes !== null &&
+            !Array.isArray(preloadedBytes) &&
+            'promises' in preloadedBytes &&
+            'estimatedByteLengths' in preloadedBytes
+        ) {
+            deferredSourceBatch = preloadedBytes;
+        }
+        /** @type {Uint8Array|Uint8Array[]|null} */
+        let bytes = null;
+        if (deferredSourceBatch === null) {
+            bytes = /** @type {Uint8Array|Uint8Array[]} */ (
+                preloadedBytes !== null ? await preloadedBytes : await this._getData(termFile, new Uint8ArrayWriter())
+            );
+        }
+        /** @type {Uint8Array[]|null} */
+        let sourceByteArrays = bytes === null ? null : (Array.isArray(bytes) ? bytes : [bytes]);
+        if (sourceByteArrays !== null && !sourceByteArrays.every((sourceBytes) => getJsonArrayContentSpan(sourceBytes) !== null)) {
             throw new Error(`Expected a JSON array in '${termFile.filename}'`);
         }
-        const totalSourceBytes = sourceByteArrays.reduce((sum, sourceBytes) => sum + sourceBytes.byteLength, 0);
+        const totalSourceBytes = sourceByteArrays !== null ?
+            sourceByteArrays.reduce((sum, sourceBytes) => sum + sourceBytes.byteLength, 0) :
+            (deferredSourceBatch?.estimatedByteLengths ?? []).reduce((sum, length) => sum + length, 0);
         let wasmRowChunkSize = this._termBankWasmRowChunkSize;
         if (this._adaptiveTermBankWasmRowChunkSizeTiered) {
             if (
@@ -3752,8 +3919,50 @@ export class DictionaryImporter {
                 maxPendingChunks: useDirectArtifactChunkImport ? 2 : 1,
             };
             const parseTermBankChunks = useDirectArtifactChunkImport ? parseTermBankWithWasmColumnChunks : parseTermBankWithWasmChunks;
-            await /** @type {typeof parseTermBankWithWasmChunks} */ (parseTermBankChunks)(bytes, version, handleParsedChunk, wasmRowChunkSize, parserOptions);
+            let usedParallelParser = false;
+            if (useDirectArtifactChunkImport && (!useMediaPipeline || useMediaDirectArtifactChunkImport)) {
+                if (deferredSourceBatch !== null) {
+                    usedParallelParser = await parseTermBankWithWasmColumnChunksParallelDeferred(
+                        deferredSourceBatch.promises,
+                        deferredSourceBatch.estimatedByteLengths,
+                        version,
+                        handleParsedChunk,
+                        parserOptions,
+                        () => this._isCancelled(),
+                    );
+                } else if (Array.isArray(bytes)) {
+                    usedParallelParser = await parseTermBankWithWasmColumnChunksParallel(
+                        bytes,
+                        version,
+                        handleParsedChunk,
+                        parserOptions,
+                        () => this._isCancelled(),
+                    );
+                }
+            }
+            const parallelParserSkipReason = usedParallelParser ? null : consumeLastParallelParserSkipReason();
+            if (!usedParallelParser && deferredSourceBatch !== null) {
+                sourceByteArrays = await Promise.all(deferredSourceBatch.promises);
+                if (!sourceByteArrays.every((sourceBytes) => getJsonArrayContentSpan(sourceBytes) !== null)) {
+                    throw new Error(`Expected a JSON array in '${termFile.filename}'`);
+                }
+                bytes = sourceByteArrays;
+            }
+            const usedOverlappedParser = (
+                !usedParallelParser &&
+                useDirectArtifactChunkImport &&
+                !useMediaPipeline &&
+                Array.isArray(bytes)
+            ) ?
+                await parseTermBankWithWasmColumnChunksOverlapped(bytes, version, handleParsedChunk, parserOptions) :
+                false;
+            if (!usedParallelParser && !usedOverlappedParser) {
+                await /** @type {typeof parseTermBankWithWasmChunks} */ (parseTermBankChunks)(/** @type {Uint8Array|Uint8Array[]} */ (bytes), version, handleParsedChunk, wasmRowChunkSize, parserOptions);
+            }
             const parserProfile = consumeLastTermBankWasmParseProfile();
+            if (parserProfile !== null && parallelParserSkipReason !== null) {
+                Object.assign(parserProfile, {parallelSkipReason: parallelParserSkipReason});
+            }
             this._lastFastTermBankReadProfile = {
                 parserProfile,
                 materializationMs: importerMaterializationMs,
@@ -4028,10 +4237,11 @@ null;
                 const expressionStart = artifactTermRecordStringOffsets[expressionIndex];
                 expressionLength = stringLengths[expressionIndex];
                 expressionBytes = stringsBuffer.subarray(expressionStart, expressionStart + expressionLength);
-                readingMatchesExpression = expressionIndex === readingIndex;
+                readingMatchesExpression = expressionIndex === readingIndex || stringLengths[readingIndex] === 0;
                 if (readingMatchesExpression) {
                     readingLength = expressionLength;
                     readingBytes = expressionBytes;
+                    artifactTermRecordPreinternedPlan.readingIndexes[i] = expressionIndex;
                 } else {
                     const readingStart = artifactTermRecordStringOffsets[readingIndex];
                     readingLength = stringLengths[readingIndex];
@@ -4624,9 +4834,11 @@ null;
      * @template [T=unknown]
      * @param {ImportFileEntry} entry
      * @param {import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter} writer
+     * @param {AbortSignal} [signal]
      * @returns {Promise<T>}
      */
-    async _getData(entry, writer) {
+    async _getData(entry, writer, signal) {
+        signal?.throwIfAborted();
         const entryBytes = /** @type {unknown} */ (Reflect.get(entry, 'bytes'));
         const bytes = entryBytes instanceof Uint8Array ? entryBytes : void 0;
         if (bytes instanceof Uint8Array) {
@@ -4645,7 +4857,38 @@ null;
         if (typeof entryGetData !== 'function') {
             throw new Error(`Cannot read ${entry.filename}`);
         }
-        const getData = /** @type {(writer: import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter) => Promise<T>} */ (entryGetData);
-        return await getData.call(entry, writer);
+        const getData = /** @type {(writer: import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter, options?: import('@zip.js/zip.js').EntryGetDataOptions) => Promise<T>} */ (entryGetData);
+        return await getData.call(entry, writer, {
+            useWebWorkers: this._zipUseWebWorkers,
+            ...(typeof signal === 'undefined' ? {} : {signal}),
+        });
+    }
+
+    /**
+     * Native decompression avoids worker transport for a bounded one-batch
+     * source import. Multi-batch imports keep inflation isolated so it can
+     * overlap parser and storage work without blocking their coordinator.
+     * @param {TermBankSourcePipeline} sourcePipeline
+     * @param {Array<ImportFileEntry|{filename: string}>} termFiles
+     * @param {boolean|null} requestedUseWebWorkers
+     * @returns {{useWebWorkers: boolean, autoDisabled: boolean, firstBatchFileCount: number, firstBatchEstimatedBytes: number, firstBatchSizeKnown: boolean}}
+     */
+    _selectSourceZipWorkerPolicy(sourcePipeline, termFiles, requestedUseWebWorkers) {
+        const firstBatchPlan = sourcePipeline.getBatchPlan(0);
+        const firstBatchFileCount = firstBatchPlan.files.length;
+        const firstBatchSizeKnown = firstBatchFileCount > 0 && firstBatchPlan.unknownSizeCount === 0;
+        const autoDisabled = (
+            requestedUseWebWorkers === null &&
+            firstBatchFileCount === termFiles.length &&
+            firstBatchSizeKnown &&
+            firstBatchPlan.estimatedBytes <= sourcePipeline.batchMaxBytes
+        );
+        return {
+            useWebWorkers: requestedUseWebWorkers ?? !autoDisabled,
+            autoDisabled,
+            firstBatchFileCount,
+            firstBatchEstimatedBytes: firstBatchPlan.estimatedBytes,
+            firstBatchSizeKnown,
+        };
     }
 }

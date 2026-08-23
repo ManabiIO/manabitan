@@ -47,6 +47,13 @@ const maintenancePolicy = Object.freeze({
     requiresDatabase: true,
 });
 
+const cooperativeMaintenanceReadPolicy = Object.freeze({
+    concurrency: /** @type {const} */ ('lookup'),
+    timeoutClass: /** @type {const} */ ('maintenance'),
+    retryable: false,
+    requiresDatabase: true,
+});
+
 /** @type {Readonly<Record<string, Readonly<DictionaryRuntimeActionPolicy>>>} */
 export const dictionaryRuntimeActionPolicies = Object.freeze({
     databasePrepareOffscreen: Object.freeze({
@@ -66,7 +73,10 @@ export const dictionaryRuntimeActionPolicies = Object.freeze({
     findTermsBulkOffscreen: Object.freeze({
         concurrency: 'exclusive', timeoutClass: 'maintenance', retryable: false, requiresDatabase: true,
     }),
-    warmTermLookupCachesOffscreen: maintenancePolicy,
+    // Cache warming only reads persistent state and uses the same coalesced
+    // cache loaders as visible lookups. Let interactive reads run alongside it
+    // so a best-effort post-import warm cannot become a first-hover barrier.
+    warmTermLookupCachesOffscreen: cooperativeMaintenanceReadPolicy,
     debugDictionaryStorageStateOffscreen: maintenancePolicy,
     debugDictionaryLookupStateOffscreen: maintenancePolicy,
     databasePurgeOffscreen: maintenancePolicy,

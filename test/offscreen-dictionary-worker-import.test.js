@@ -27,8 +27,13 @@ const importControl = vi.hoisted(() => ({
     lookupStartedCount: 0,
     lookupGate: /** @type {Promise<void>|null} */ (null),
     releaseLookup: /** @type {(() => void)|null} */ (null),
+    waitForWarmRelease: false,
+    warmStarted: false,
+    warmGate: /** @type {Promise<void>|null} */ (null),
+    releaseWarm: /** @type {(() => void)|null} */ (null),
     prepareError: false,
     cancelledAtStart: false,
+    translatorClearCount: 0,
     lastFindTermsOptions: /** @type {import('translation').FindTermsOptions|null} */ (null),
 }));
 
@@ -54,6 +59,17 @@ vi.mock('../ext/js/dictionary/dictionary-database.js', () => ({
         usesFallbackStorage() { return false; }
         /** @returns {null} */
         getOpenStorageDiagnostics() { return null; }
+        /** @returns {Promise<void>} */
+        async warmTermLookupCaches() {
+            importControl.warmStarted = true;
+            if (!importControl.waitForWarmRelease) { return; }
+            if (importControl.warmGate === null) {
+                importControl.warmGate = new Promise((resolve) => {
+                    importControl.releaseWarm = resolve;
+                });
+            }
+            await importControl.warmGate;
+        }
     },
 }));
 
@@ -62,7 +78,7 @@ vi.mock('../ext/js/language/translator.js', () => ({
         /** */
         prepare() {}
         /** */
-        clearDatabaseCaches() {}
+        clearDatabaseCaches() { ++importControl.translatorClearCount; }
         /**
          * @param {import('translator').FindTermsMode} _mode
          * @param {string} _text
@@ -139,8 +155,13 @@ describe('Offscreen dictionary worker import response port handling', () => {
         importControl.lookupStartedCount = 0;
         importControl.lookupGate = null;
         importControl.releaseLookup = null;
+        importControl.waitForWarmRelease = false;
+        importControl.warmStarted = false;
+        importControl.warmGate = null;
+        importControl.releaseWarm = null;
         importControl.prepareError = false;
         importControl.cancelledAtStart = false;
+        importControl.translatorClearCount = 0;
         importControl.lastFindTermsOptions = null;
     });
 
@@ -240,6 +261,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
             progress: {nextStep: false, index: 2, count: 2},
         });
         expect(responsePort.close).toHaveBeenCalledTimes(1);
+        expect(importControl.translatorClearCount).toBe(1);
         expect(workerPostMessage).toHaveBeenCalledWith({id: 1, result: undefined});
         expect(logWarn).toHaveBeenCalledTimes(1);
         expect(logError).not.toHaveBeenCalled();
@@ -390,6 +412,54 @@ describe('Offscreen dictionary worker import response port handling', () => {
         expect(responsePort.close).toHaveBeenCalledOnce();
     });
 
+    test('fans out adjacent lookups after an import instead of serializing them', async () => {
+        importControl.waitForCancellation = true;
+        importControl.waitForLookupRelease = true;
+        /** @type {Map<string, (event: MessageEvent) => void>} */
+        const listeners = new Map();
+        const workerPostMessage = vi.fn();
+        vi.stubGlobal('self', {
+            addEventListener: vi.fn((type, listener) => {
+                listeners.set(type, listener);
+            }),
+            postMessage: workerPostMessage,
+        });
+
+        await import('../ext/js/background/offscreen-dictionary-worker.js');
+        const onMessage = listeners.get('message');
+        const responsePort = {postMessage: vi.fn(), close: vi.fn()};
+        onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: {id: 1, action: 'importDictionaryOffscreen', params: {archiveContent: new Blob(['dictionary']), details: {}}},
+            ports: [responsePort],
+        })));
+        await vi.waitFor(() => expect(importControl.started).toBe(true));
+
+        const lookupParams = {
+            mode: 'group',
+            text: '日本',
+            options: {enabledDictionaryMap: [], excludeDictionaryDefinitions: null, textReplacements: []},
+        };
+        for (const id of [2, 3]) {
+            onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+                data: {id, action: 'findTermsOffscreen', params: lookupParams},
+                ports: [],
+            })));
+        }
+        onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: {id: 4, action: 'cancelDictionaryImportOffscreen', params: {}},
+            ports: [],
+        })));
+
+        await vi.waitFor(() => expect(responsePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'error'})));
+        await vi.waitFor(() => expect(importControl.lookupStartedCount).toBe(2));
+        expect(workerPostMessage).not.toHaveBeenCalledWith(expect.objectContaining({id: 2}));
+        expect(workerPostMessage).not.toHaveBeenCalledWith(expect.objectContaining({id: 3}));
+
+        importControl.releaseLookup?.();
+        await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({id: 2})));
+        await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({id: 3})));
+    });
+
     test('drains an active lookup before starting an import mutation', async () => {
         importControl.waitForLookupRelease = true;
         /** @type {Map<string, (event: MessageEvent) => void>} */
@@ -467,6 +537,49 @@ describe('Offscreen dictionary worker import response port handling', () => {
         await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledTimes(2));
         expect(workerPostMessage).toHaveBeenCalledWith({id: 1, result: {dictionaryEntries: [], originalTextLength: 0}});
         expect(workerPostMessage).toHaveBeenCalledWith({id: 2, result: {dictionaryEntries: [], originalTextLength: 0}});
+    });
+
+    test('does not block a visible lookup behind cooperative cache warming', async () => {
+        importControl.waitForWarmRelease = true;
+        importControl.waitForLookupRelease = true;
+        /** @type {Map<string, (event: MessageEvent) => void>} */
+        const listeners = new Map();
+        const workerPostMessage = vi.fn();
+        vi.stubGlobal('self', {
+            addEventListener: vi.fn((type, listener) => {
+                listeners.set(type, listener);
+            }),
+            postMessage: workerPostMessage,
+        });
+
+        await import('../ext/js/background/offscreen-dictionary-worker.js');
+        const onMessage = listeners.get('message');
+        onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: {id: 1, action: 'warmTermLookupCachesOffscreen', params: {dictionaryNames: ['JMdict']}},
+            ports: [],
+        })));
+        await vi.waitFor(() => expect(importControl.warmStarted).toBe(true));
+
+        onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: {
+                id: 2,
+                action: 'findTermsOffscreen',
+                params: {
+                    mode: 'group',
+                    text: '日本',
+                    options: {enabledDictionaryMap: [], excludeDictionaryDefinitions: null, textReplacements: []},
+                },
+            },
+            ports: [],
+        })));
+        await vi.waitFor(() => expect(importControl.lookupStarted).toBe(true));
+        expect(workerPostMessage).not.toHaveBeenCalledWith(expect.objectContaining({id: 1}));
+        expect(workerPostMessage).not.toHaveBeenCalledWith(expect.objectContaining({id: 2}));
+
+        importControl.releaseLookup?.();
+        importControl.releaseWarm?.();
+        await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({id: 1})));
+        await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({id: 2})));
     });
 
     test('honors cancellation while an import is queued behind an active lookup', async () => {

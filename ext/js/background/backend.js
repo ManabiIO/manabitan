@@ -3538,7 +3538,12 @@ export class Backend {
      * @param {import('backend').DatabaseUpdateCause} cause
      */
     async _triggerDatabaseUpdated(type, cause) {
-        await Promise.resolve(this._translator.clearDatabaseCaches());
+        // The dictionary worker clears translator caches before acknowledging a
+        // successful import. Avoid queueing a redundant request behind that
+        // import; all other update paths still invalidate explicitly here.
+        if (type !== 'dictionary' || cause !== 'import') {
+            await Promise.resolve(this._translator.clearDatabaseCaches());
+        }
         if (type === 'dictionary') {
             if (this._dictionaryImportModeActive) {
                 this._deferredDictionaryRefreshDuringImport = true;
@@ -3547,7 +3552,9 @@ export class Backend {
                 return;
             } else {
                 try {
-                    await this._refreshDictionaryDatabaseAfterUpdate();
+                    await this._refreshDictionaryDatabaseAfterUpdate({
+                        reuseActiveImportConnection: cause === 'import',
+                    });
                 } catch (error) {
                     this._deferredDictionaryRefreshDuringImport = true;
                     this._queueDeferredDatabaseUpdatedNotification(type, cause);
@@ -3668,12 +3675,31 @@ export class Backend {
      * worker/offscreen contexts become visible to lookup queries.
      * @returns {Promise<void>}
      */
-    async _refreshDictionaryDatabaseAfterUpdate() {
+    async _refreshDictionaryDatabaseAfterUpdate({reuseActiveImportConnection = false} = {}) {
         if (this._dictionaryImportModeActive) {
             this._deferredDictionaryRefreshDuringImport = true;
             return;
         }
         const dictionaryDatabase = this._dictionaryDatabase;
+        const adoptCurrentConnectionMethod = /** @type {unknown} */ (
+            Reflect.get(dictionaryDatabase, 'adoptCurrentConnectionAfterImport')
+        );
+        if (reuseActiveImportConnection && typeof adoptCurrentConnectionMethod === 'function') {
+            try {
+                await /** @type {() => Promise<void>} */ (adoptCurrentConnectionMethod).call(dictionaryDatabase);
+                reportDiagnostics('dictionary-import-connection-adopted', {});
+                log.log('[ImportTiming] dictionary refresh reused active import connection');
+                this._warmEnabledDictionaryLookupCaches('dictionary-import-connection-adopted');
+                return;
+            } catch (error) {
+                reportDiagnostics('dictionary-import-connection-adoption-failed', {
+                    error: `${error}`,
+                });
+                log.log(`[ImportTiming] dictionary refresh active-connection adoption failed: ${error}`);
+            }
+        } else if (reuseActiveImportConnection) {
+            log.log('[ImportTiming] dictionary refresh active-connection adoption unsupported');
+        }
         const refreshConnectionMethod = /** @type {unknown} */ (Reflect.get(dictionaryDatabase, 'refreshConnection'));
         let rerunRefresh = false;
         do {
@@ -4804,7 +4830,14 @@ export class Backend {
             this._deferredDictionaryRefreshDuringImport = false;
             reportDiagnostics('dictionary-refresh-on-import-mode-exit', {hadDeferredRefresh});
             try {
-                await this._refreshDictionaryDatabaseAfterUpdate();
+                const pendingNotifications = this._pendingDatabaseUpdatedNotifications;
+                const canReuseActiveImportConnection = (
+                    pendingNotifications.length > 0 &&
+                    pendingNotifications.every(({type, cause}) => type === 'dictionary' && cause === 'import')
+                );
+                await this._refreshDictionaryDatabaseAfterUpdate({
+                    reuseActiveImportConnection: canReuseActiveImportConnection,
+                });
             } catch (error) {
                 if (hadDeferredRefresh) {
                     this._deferredDictionaryRefreshDuringImport = true;

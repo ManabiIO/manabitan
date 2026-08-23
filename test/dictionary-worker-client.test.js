@@ -98,7 +98,7 @@ describe('dictionary runtime action policies', () => {
         }
     });
 
-    test('limits automatic retry and lookup concurrency to interactive reads', () => {
+    test('limits automatic retry to interactive reads while allowing cooperative warming', () => {
         const retryableActions = dictionaryRuntimeActionNames.filter((action) => getDictionaryRuntimeActionPolicy(action).retryable);
         const lookupActions = dictionaryRuntimeActionNames.filter((action) => getDictionaryRuntimeActionPolicy(action).concurrency === 'lookup');
         expect(retryableActions.sort()).toEqual([
@@ -107,7 +107,10 @@ describe('dictionary runtime action policies', () => {
             'findTermsStructuredOffscreen',
             'getTermFrequenciesOffscreen',
         ].sort());
-        expect(lookupActions.sort()).toEqual(retryableActions.sort());
+        expect(lookupActions.sort()).toEqual([
+            ...retryableActions,
+            'warmTermLookupCachesOffscreen',
+        ].sort());
     });
 });
 

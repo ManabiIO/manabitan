@@ -19,7 +19,6 @@ import {
     BlobWriter as BlobWriter0,
     Uint8ArrayReader as Uint8ArrayReader0,
     ZipWriter as ZipWriter0,
-    configure,
 } from '../../../lib/zip.js';
 import * as parse5 from '../../../lib/parse5.js';
 import {base64ToArrayBuffer} from '../../data/array-buffer-util.js';
@@ -29,8 +28,6 @@ import {MDD} from './vendor/js-mdict/mdd.js';
 const BlobWriter = /** @type {typeof import('@zip.js/zip.js').BlobWriter} */ (/** @type {unknown} */ (BlobWriter0));
 const Uint8ArrayReader = /** @type {typeof import('@zip.js/zip.js').Uint8ArrayReader} */ (/** @type {unknown} */ (Uint8ArrayReader0));
 const ZipWriter = /** @type {typeof import('@zip.js/zip.js').ZipWriter} */ (/** @type {unknown} */ (ZipWriter0));
-
-configure({useWebWorkers: false});
 
 /**
  * @typedef {{keyText: string}} MdictKeyword
@@ -1170,7 +1167,7 @@ export async function convertMdxToArchive(fileName, options, mdxBytes, mddSource
     const writer = new BlobWriter();
     const zipWriter = new ZipWriter(writer, {level: 0});
     for (const [archivePath, bytes] of files) {
-        await zipWriter.add(archivePath, new Uint8ArrayReader(bytes));
+        await zipWriter.add(archivePath, new Uint8ArrayReader(bytes), {useWebWorkers: false});
     }
     await zipWriter.close();
     const archiveContent = await (await writer.getData()).arrayBuffer();
