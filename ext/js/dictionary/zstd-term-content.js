@@ -379,10 +379,22 @@ export async function compressWrappedTermContentZstdBatch(contents, dictName) {
             return await pool.compressWrapped(contents, dictName);
         }
     } catch (error) {
-        log.warn(new Error(`Parallel wrapped term content compression failed; using synchronous compression: ${error}`));
+        const hasDetachedInput = contents.some((content) => content.byteLength === 0);
+        log.warn(new Error(
+            hasDetachedInput ?
+                `Parallel wrapped term content compression failed after input transfer; caller repack required: ${error}` :
+                `Parallel wrapped term content compression failed; using synchronous compression: ${error}`,
+        ));
         compressionPool?.close();
         compressionPool = null;
         compressionPoolPromise = null;
+        // A successful postMessage transfer detaches the sender's packed slab.
+        // The block-store owner can reconstruct those slabs from stable source
+        // bytes; attempting the local fallback here would only fail or encode an
+        // empty block before that owner gets a chance to repack.
+        if (hasDetachedInput) {
+            throw error;
+        }
     }
     let envelopeMs = 0;
     const chunks = contents.map((content) => {

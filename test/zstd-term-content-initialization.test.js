@@ -15,6 +15,7 @@ const zstd = vi.hoisted(() => ({
     freeCCtx: vi.fn(),
     freeDCtx: vi.fn(),
     init: vi.fn(async () => {}),
+    compressUsingDictWithPrefix: vi.fn(),
 }));
 
 vi.mock('../ext/lib/zstd-wasm.js', () => ({
@@ -22,7 +23,7 @@ vi.mock('../ext/lib/zstd-wasm.js', () => ({
     compress: vi.fn(),
     compressSpansUsingDictWithPrefix: vi.fn(),
     compressUsingDict: vi.fn(),
-    compressUsingDictWithPrefix: vi.fn(),
+    compressUsingDictWithPrefix: zstd.compressUsingDictWithPrefix,
     decompress: vi.fn(),
     decompressUsingDict: vi.fn(),
 }));
@@ -69,5 +70,50 @@ describe('term content zstd initialization', () => {
         expect(zstd.createCCtx).toHaveBeenCalledTimes(2);
         expect(zstd.createDCtx).toHaveBeenCalledTimes(2);
         expect(zstd.freeCCtx).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not synchronously recompress slabs detached by a failed worker dispatch', async () => {
+        class DetachingCompressionWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>|ErrorEvent) => void>>} */
+                this.listeners = new Map();
+                queueMicrotask(() => { this._emit('message', {data: {type: 'ready'}}); });
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message, transfer = []) {
+                structuredClone(message, {transfer});
+                queueMicrotask(() => { this._emit('error', {message: 'injected worker failure'}); });
+            }
+
+            terminate() {}
+
+            _emit(type, event) {
+                for (const listener of this.listeners.get(type) ?? []) { listener(event); }
+            }
+        }
+        zstd.createCCtx.mockReturnValue(11);
+        zstd.createDCtx.mockReturnValue(22);
+        zstd.compressUsingDictWithPrefix.mockReturnValue(new Uint8Array([1]));
+        vi.stubGlobal('Worker', DetachingCompressionWorker);
+        const {
+            compressWrappedTermContentZstdBatch,
+            initializeTermContentZstd,
+        } = await import('../ext/js/dictionary/zstd-term-content.js');
+        await initializeTermContentZstd();
+        const contents = [Uint8Array.of(1, 2), Uint8Array.of(3, 4)];
+
+        await expect(compressWrappedTermContentZstdBatch(contents, 'jmdict'))
+            .rejects.toThrow('injected worker failure');
+
+        expect(contents.every(({byteLength}) => byteLength === 0)).toBe(true);
+        expect(zstd.compressUsingDictWithPrefix).not.toHaveBeenCalled();
     });
 });
