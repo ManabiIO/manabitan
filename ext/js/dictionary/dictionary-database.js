@@ -5615,7 +5615,7 @@ export class DictionaryDatabase {
      * @param {number[]} pendingContentHash2s
      * @param {Uint8Array[]} pendingContentBytes
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
-     * @returns {{indexes: Int32Array, active: boolean}}
+     * @returns {{indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}}
      * @throws {RangeError} If hash arrays or source spans are inconsistent.
      */
     _stageArtifactTermContentMetadata(pendingContentHash1s, pendingContentHash2s, pendingContentBytes, pendingContentSpans) {
@@ -5793,11 +5793,20 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{indexes: Int32Array, active: boolean}|null} staged
+     * @param {{indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null} staged
      */
     _rollbackStagedArtifactTermContentMetadata(staged) {
         if (staged === null || !staged.active) { return; }
         staged.active = false;
+        for (const {key, meta} of staged.collisionEntries ?? []) {
+            const collisions = this._termEntryContentMetaCollisionsByHashPair.get(key);
+            if (typeof collisions === 'undefined') { continue; }
+            const index = collisions.indexOf(meta);
+            if (index >= 0) { collisions.splice(index, 1); }
+            if (collisions.length === 0) {
+                this._termEntryContentMetaCollisionsByHashPair.delete(key);
+            }
+        }
         /** @type {number[]} */
         const indexesToClear = [];
         for (const index of staged.indexes) {
@@ -6009,6 +6018,47 @@ export class DictionaryDatabase {
         this._termEntryContentMetaSignature2Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset + Math.floor(lastOffset / 2));
         this._termEntryContentMetaSignature3Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
         ++this._termEntryContentMetaHashPairCount;
+    }
+
+    /**
+     * Records a parser-verified distinct value which shares a hash pair with
+     * another pending value. The returned identity lets import rollback remove
+     * only the collision owned by that import.
+     * @param {number} hash1
+     * @param {number} hash2
+     * @param {number} offset
+     * @param {number} length
+     * @param {string} dictName
+     * @param {Uint8Array} contentBytes
+     * @param {number} contentByteOffset
+     * @returns {{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}}
+     * @throws {RangeError} If the persisted metadata or source span is invalid.
+     */
+    _appendStagedTermEntryContentMetaCollision(hash1, hash2, offset, length, dictName, contentBytes, contentByteOffset) {
+        if (!Number.isSafeInteger(offset) || offset < 0) {
+            throw new RangeError(`Invalid term content metadata offset: ${offset}`);
+        }
+        if (!Number.isSafeInteger(length) || length < 0 || length >= TERM_CONTENT_META_U32_NULL) {
+            throw new RangeError(`Invalid term content metadata length: ${length}`);
+        }
+        if (
+            !Number.isSafeInteger(contentByteOffset) ||
+            contentByteOffset < 0 ||
+            contentByteOffset > contentBytes.byteLength ||
+            length > contentBytes.byteLength - contentByteOffset
+        ) {
+            throw new RangeError(`Invalid term content metadata source span: ${contentByteOffset}+${length}`);
+        }
+        const meta = {id: 0, offset, length, dictName};
+        this._setTermContentSignatures(meta, contentBytes.subarray(contentByteOffset, contentByteOffset + length));
+        const key = `${hash1 >>> 0}:${hash2 >>> 0}`;
+        let collisions = this._termEntryContentMetaCollisionsByHashPair.get(key);
+        if (typeof collisions === 'undefined') {
+            collisions = [];
+            this._termEntryContentMetaCollisionsByHashPair.set(key, collisions);
+        }
+        collisions.push(meta);
+        return {key, meta};
     }
 
     /**
@@ -6492,7 +6542,7 @@ export class DictionaryDatabase {
             throw new Error('Artifact chunk content hash arrays are smaller than row count');
         }
         const importMetrics = createTermImportMetrics();
-        /** @type {{indexes: Int32Array, active: boolean}|null} */
+        /** @type {{indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null} */
         let stagedContentMetadata = null;
         /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[], count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */
         let dedupPlanRollbackState = null;
@@ -6771,7 +6821,7 @@ export class DictionaryDatabase {
      * Resolves intra-chunk duplicates and content already persisted by earlier chunks.
      * @param {ArtifactTermContentChunk} chunk
      * @param {boolean} [reserveMetadata]
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean}}>}
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
      */
     async _resolveArtifactTermContentDedup(chunk, reserveMetadata = false) {
         const count = chunk.rowCount;
@@ -7540,7 +7590,7 @@ export class DictionaryDatabase {
 
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean}} state
+     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean}} state
      * @returns {string|(string|null)[]}
      * @throws {Error} If dedup projections or persisted metadata are invalid.
      */
@@ -7629,6 +7679,7 @@ export class DictionaryDatabase {
             const contentByteOffset = pendingContentSpans === null ?
                 0 :
                 pendingContentSpans.offsets[i];
+            const reservedIndex = stagedContentMetadata?.indexes[i] ?? -1;
             const stagedIndex = stagedContentMetadata === null ?
                 -1 :
                 this._resolveStagedArtifactTermContentIndex(
@@ -7662,6 +7713,19 @@ export class DictionaryDatabase {
                 this._termEntryContentMetaStateTable[stagedIndex] = TERM_CONTENT_META_SLOT_PUBLISHED;
                 --this._termEntryContentMetaHashPairPendingCount;
                 ++this._termEntryContentMetaHashPairCount;
+                continue;
+            }
+            if (stagedContentMetadata !== null && reservedIndex < 0) {
+                const collisionEntry = this._appendStagedTermEntryContentMetaCollision(
+                    pendingContentHash1s[i],
+                    pendingContentHash2s[i],
+                    pendingOffsets[i],
+                    pendingLengths[i],
+                    dictName,
+                    contentBytes,
+                    contentByteOffset,
+                );
+                (stagedContentMetadata.collisionEntries ??= []).push(collisionEntry);
                 continue;
             }
             this._insertTermEntryContentMetaByHashPairFast(

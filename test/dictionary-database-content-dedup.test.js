@@ -604,6 +604,41 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
     });
 
+    test('rolls back parser-verified hash collisions with staged metadata', () => {
+        const database = new DictionaryDatabase();
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
+        const first = new Uint8Array([1, 2, 3, 4, 5]);
+        const second = new Uint8Array([6, 7, 8, 9, 10]);
+        const staged = stage([101, 101], [202, 202], [first, second], null);
+
+        expect([...staged.indexes]).toEqual([0, -1]);
+        publish({
+            count: 2,
+            contentOffsets: new Float64Array(2),
+            contentLengths: new Uint32Array(2),
+            resolvedContentDictNames: 'raw',
+            pendingRowToUniqueIndex: new Int32Array([0, 1]),
+            pendingContentBytes: [first, second],
+            pendingContentHash1s: [101, 101],
+            pendingContentHash2s: [202, 202],
+            pendingOffsets: [1000, 2000],
+            pendingLengths: [first.byteLength, second.byteLength],
+            pendingResolvedDictNames: 'raw',
+            pendingContentSpans: null,
+            stagedContentMetadata: staged,
+        });
+
+        expect(findMatching(101, 202, first)).toMatchObject({offset: 1000});
+        expect(findMatching(101, 202, second)).toMatchObject({offset: 2000});
+        rollback(staged);
+        expect(findMatching(101, 202, first)).toBeUndefined();
+        expect(findMatching(101, 202, second)).toBeUndefined();
+        expect(Reflect.get(database, '_termEntryContentMetaCollisionsByHashPair').size).toBe(0);
+    });
+
     test('updates existing hash pairs without growing the cache', () => {
         const database = new DictionaryDatabase();
 
