@@ -49,7 +49,7 @@ const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
-/** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
+/** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
 /** @typedef {{wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan}} ParsedTermBankWasmBuffers */
@@ -1649,10 +1649,8 @@ class ParallelTermBankPipelineRun {
         this._poolLease = poolLease;
         /** @type {number} */
         this._pipelineGroupsPerWorker = pipelineGroupsPerWorker;
-        /** @type {Array<{promise: Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number}>, resolve: (value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number}) => void}>} */
+        /** @type {Array<{promise: Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number}>, resolve: (value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number}) => void}>} */
         this._resultSlots = [];
-        /** @type {Array<{promise: Promise<{rowCount: number, sourceBytes: number, error: unknown}>, resolve: (value: {rowCount: number, sourceBytes: number, error: unknown}) => void}>} */
-        this._initialParseSlots = [];
         /** @type {Promise<void>[]} */
         this._workerLoops = [];
         /** @type {Error|null} */
@@ -1685,21 +1683,21 @@ class ParallelTermBankPipelineRun {
 
     /** @param {Worker[]} workers */
     async _runPipeline(workers) {
-        this._createSlots(workers.length);
+        this._createSlots();
         this._workerLoops = workers.map((worker, workerIndex) => this._runWorkerLoop(worker, workerIndex, workers.length));
         try {
-            // Start the ordered sink as soon as group zero is parsed. Waiting
+            // Start the ordered sink as soon as group zero is available. Waiting
             // for every worker's first group creates a full parse/storage
             // barrier; byte-balanced groups make the first group sufficient
             // for the temporary progress estimate. Any peer failure resolves
             // all result slots through `_fail` and is still observed below.
-            const initialParse = await this._initialParseSlots[0].promise;
-            if (initialParse.error !== null) {
-                throw createParallelParserError(initialParse.error);
+            const initialResult = await this._resultSlots[0].promise;
+            if (initialResult.error !== null) {
+                throw createParallelParserError(initialResult.error);
             }
             this._throwIfCancelled();
-            const initialRows = initialParse.rowCount;
-            const initialBytes = initialParse.sourceBytes;
+            const initialRows = initialResult.rowCount;
+            const initialBytes = initialResult.sourceBytes;
             const estimatedTotalRows = initialBytes > 0 ?
                 Math.max(initialRows, Math.round(initialRows * this._totalBytes / initialBytes)) :
                 initialRows;
@@ -1751,17 +1749,9 @@ class ParallelTermBankPipelineRun {
         }
     }
 
-    /** @param {number} workerCount */
-    _createSlots(workerCount) {
+    _createSlots() {
         this._resultSlots = this._groups.map(() => {
-            /** @type {(value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number}) => void} */
-            let resolve = () => {};
-            const promise = new Promise((value) => { resolve = value; });
-            return {promise, resolve};
-        });
-        const initialGroupCount = Math.min(workerCount, this._groups.length);
-        this._initialParseSlots = Array.from({length: initialGroupCount}, () => {
-            /** @type {(value: {rowCount: number, sourceBytes: number, error: unknown}) => void} */
+            /** @type {(value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number}) => void} */
             let resolve = () => {};
             const promise = new Promise((value) => { resolve = value; });
             return {promise, resolve};
@@ -1789,7 +1779,7 @@ class ParallelTermBankPipelineRun {
                 // source buffers. The byte ratio estimates total rows until
                 // every parallel group has reported its exact row count.
                 const sourceBytes = sumByteLengths(group);
-                const job = runParallelParserJob(
+                const result = await runParallelParserJob(
                     worker,
                     groupIndex + 1,
                     group,
@@ -1797,24 +1787,14 @@ class ParallelTermBankPipelineRun {
                     this._options,
                     () => this._pipelineShouldCancel(),
                 );
-                const parsed = await job.parsed;
-                if (groupIndex < this._initialParseSlots.length) {
-                    this._initialParseSlots[groupIndex].resolve({
-                        rowCount: parsed.rowCount,
-                        sourceBytes,
-                        error: parsed.error,
-                    });
-                }
-                if (parsed.error !== null) { throw createParallelParserError(parsed.error); }
-                const result = await job.result;
                 if (result.error !== null) { throw createParallelParserError(result.error); }
                 if (result.chunk === null || result.profile === null) {
                     throw new Error('Parallel term-bank parser returned an incomplete result');
                 }
-                if (result.chunk.rowCount !== parsed.rowCount) {
+                if (result.chunk.rowCount !== result.rowCount) {
                     throw new Error('Parallel term-bank parser row count changed during result transfer');
                 }
-                this._resultSlots[groupIndex].resolve({...result, rowCount: parsed.rowCount});
+                this._resultSlots[groupIndex].resolve({...result, sourceBytes});
             }
         } catch (error) {
             this._fail(error);
@@ -1836,10 +1816,8 @@ class ParallelTermBankPipelineRun {
         if (this._failed) { return; }
         this._failed = true;
         this._error = createParallelParserError(error);
-        const result = {chunk: null, profile: null, error: this._error, finishedAt: safePerformance.now(), rowCount: 0};
+        const result = {chunk: null, profile: null, error: this._error, finishedAt: safePerformance.now(), rowCount: 0, sourceBytes: 0};
         for (const slot of this._resultSlots) { slot.resolve(result); }
-        const initialParse = {rowCount: 0, sourceBytes: 0, error: this._error};
-        for (const slot of this._initialParseSlots) { slot.resolve(initialParse); }
     }
 }
 
@@ -1862,8 +1840,8 @@ export async function disposeParallelTermBankParser() {
 
 /**
  * Parses byte-balanced source-bank groups concurrently. Workers publish exact
- * row counts before copying their output, allowing archive-ordered storage to
- * begin as soon as the first group is complete and overlap later parsing.
+ * complete column chunks in one message, allowing archive-ordered storage to
+ * begin as soon as the first group is available and overlap later parsing.
  * @param {Uint8Array[]} contentBytes
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
@@ -2134,26 +2112,10 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
  * @param {number} version
  * @param {Record<string, unknown>} options
  * @param {() => boolean} shouldCancel
- * @returns {{parsed: Promise<{rowCount: number, error: unknown}>, result: Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number}>}}
+ * @returns {Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number}>}
  */
 function runParallelParserJob(worker, id, sourceBytes, version, options, shouldCancel) {
-    /** @type {(value: {rowCount: number, error: unknown}) => void} */
-    let resolveParsed;
-    /** @type {Promise<{rowCount: number, error: unknown}>} */
-    const parsed = new Promise((resolve) => { resolveParsed = resolve; });
-    let parsedSettled = false;
-    let parsedAt = 0;
-    /**
-     * @param {number} rowCount
-     * @param {unknown} error
-     */
-    const settleParsed = (rowCount, error) => {
-        if (parsedSettled) { return; }
-        parsedSettled = true;
-        resolveParsed({rowCount, error});
-    };
-    /** @type {Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number}>} */
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const sourceBuffers = [];
         const seenBuffers = new Set();
         for (const bytes of sourceBytes) {
@@ -2173,7 +2135,6 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
             cleanup();
             worker.terminate();
             const error = new Error(`Term-bank parser worker timed out after ${PARALLEL_WORKER_PARSE_TIMEOUT_MS}ms`);
-            settleParsed(0, error);
             reject(error);
         }, PARALLEL_WORKER_PARSE_TIMEOUT_MS);
         const cancellationIntervalId = setInterval(() => {
@@ -2183,7 +2144,6 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
             } catch (error) {
                 cleanup();
                 worker.terminate();
-                settleParsed(0, error);
                 reject(error);
                 return;
             }
@@ -2191,51 +2151,41 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
             cleanup();
             worker.terminate();
             const error = createParallelParserCancellationError();
-            settleParsed(0, error);
             reject(error);
         }, PARALLEL_WORKER_CANCELLATION_POLL_MS);
         /** @param {MessageEvent<unknown>} event */
         const onMessage = (event) => {
             const data = /** @type {ParallelParserWorkerMessage} */ (event.data);
             if (data?.id !== id) { return; }
-            if (data.type === 'parsed') {
-                if (!Number.isSafeInteger(data.rowCount) || /** @type {number} */ (data.rowCount) < 0) {
-                    cleanup();
-                    worker.terminate();
-                    const error = new Error('Term-bank parser worker returned an invalid row count');
-                    settleParsed(0, error);
-                    reject(error);
-                    return;
-                }
-                parsedAt = safePerformance.now();
-                settleParsed(/** @type {number} */ (data.rowCount), null);
-                return;
-            }
             if (data.type !== 'result' && data.type !== 'parse-error') { return; }
             cleanup();
             if (data.type === 'result') {
-                if (!parsedSettled) {
+                if (!Number.isSafeInteger(data.rowCount) || /** @type {number} */ (data.rowCount) < 0) {
                     worker.terminate();
-                    const error = new Error('Term-bank parser worker returned a result before parse metadata');
-                    settleParsed(0, error);
+                    const error = new Error('Term-bank parser worker returned an invalid row count');
                     reject(error);
+                    return;
+                }
+                if (!Number.isSafeInteger(data.resultSentEpochMs) || /** @type {number} */ (data.resultSentEpochMs) < 0) {
+                    worker.terminate();
+                    reject(new Error('Term-bank parser worker returned an invalid result timestamp'));
                     return;
                 }
                 const profile = /** @type {NonNullable<typeof lastTermBankWasmParseProfile>|null} */ (data.profile ?? null);
                 if (profile !== null) {
-                    profile.resultDeliveryMs = Math.max(0, safePerformance.now() - parsedAt);
+                    profile.resultDeliveryMs = Math.max(0, Date.now() - /** @type {number} */ (data.resultSentEpochMs));
                 }
                 resolve({
                     chunk: /** @type {TermBankColumnChunk|null} */ (data.chunk ?? null),
                     profile,
                     error: null,
                     finishedAt: safePerformance.now(),
+                    rowCount: /** @type {number} */ (data.rowCount),
                 });
             } else {
                 worker.terminate();
                 const error = data.error ?? {message: 'Parallel term-bank parse failed'};
-                settleParsed(0, error);
-                resolve({chunk: null, profile: null, error, finishedAt: safePerformance.now()});
+                resolve({chunk: null, profile: null, error, finishedAt: safePerformance.now(), rowCount: 0});
             }
         };
         /** @param {ErrorEvent} event */
@@ -2243,7 +2193,6 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
             cleanup();
             worker.terminate();
             const error = new Error(event.message || 'Term-bank parser worker failed');
-            settleParsed(0, error);
             reject(error);
         };
         /** @param {MessageEvent<unknown>} _event */
@@ -2251,7 +2200,6 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
             cleanup();
             worker.terminate();
             const error = new Error('Term-bank parser worker returned an invalid message');
-            settleParsed(0, error);
             reject(error);
         };
         const cleanup = () => {
@@ -2269,7 +2217,6 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
                 cleanup();
                 worker.terminate();
                 const error = createParallelParserCancellationError();
-                settleParsed(0, error);
                 reject(error);
                 return;
             }
@@ -2278,14 +2225,9 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
             cleanup();
             worker.terminate();
             const dispatchError = new Error(`Failed to dispatch term-bank parser worker: ${error}`);
-            settleParsed(0, dispatchError);
             reject(dispatchError);
         }
     });
-    // `parsed` is intentionally consumed before `result`; avoid a transient
-    // unhandled rejection if a worker fails while peers are still parsing.
-    void result.catch(() => {});
-    return {parsed, result};
 }
 
 /**

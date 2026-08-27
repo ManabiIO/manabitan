@@ -444,13 +444,10 @@ describe('term-bank WASM parser', () => {
                     }
                     ++parseCount;
                     emitWorkerMessage(this.listeners, {
-                        type: 'parsed',
-                        id: message.id,
-                        rowCount: 0,
-                    });
-                    emitWorkerMessage(this.listeners, {
                         type: 'result',
                         id: message.id,
+                        rowCount: 0,
+                        resultSentEpochMs: Date.now(),
                         chunk: {rowCount: 0},
                         profile: {chunkDispatchMs: 0},
                     });
@@ -515,10 +512,11 @@ describe('term-bank WASM parser', () => {
                         return;
                     }
                     ++parseCount;
-                    emitWorkerMessage(this.listeners, {type: 'parsed', id: message.id, rowCount: 1});
                     emitWorkerMessage(this.listeners, {
                         type: 'result',
                         id: message.id,
+                        rowCount: 1,
+                        resultSentEpochMs: Date.now(),
                         chunk: {rowCount: 1},
                         profile: {chunkDispatchMs: 0},
                     });
@@ -594,10 +592,11 @@ describe('term-bank WASM parser', () => {
             }
 
             emitResult(id) {
-                emitWorkerMessage(this.listeners, {type: 'parsed', id, rowCount: 1});
                 emitWorkerMessage(this.listeners, {
                     type: 'result',
                     id,
+                    rowCount: 1,
+                    resultSentEpochMs: Date.now(),
                     chunk: {rowCount: 1},
                     profile: {chunkDispatchMs: 0},
                 });
@@ -684,10 +683,11 @@ describe('term-bank WASM parser', () => {
                         });
                         return;
                     }
-                    emitWorkerMessage(this.listeners, {type: 'parsed', id: message.id, rowCount: 0});
                     emitWorkerMessage(this.listeners, {
                         type: 'result',
                         id: message.id,
+                        rowCount: 0,
+                        resultSentEpochMs: Date.now(),
                         chunk: {rowCount: 0},
                         profile: {chunkDispatchMs: 0},
                     });
@@ -719,7 +719,71 @@ describe('term-bank WASM parser', () => {
         }
     });
 
-    maybeTest('streams archive-ordered results while later workers copy output', async () => {
+    maybeTest('rejects malformed single-result worker metadata without stalling peers', async () => {
+        const cases = [
+            {
+                result: {rowCount: -1, resultSentEpochMs: Date.now(), chunk: {rowCount: 0}},
+                error: 'invalid row count',
+            },
+            {
+                result: {rowCount: 0, resultSentEpochMs: null, chunk: {rowCount: 0}},
+                error: 'invalid result timestamp',
+            },
+            {
+                result: {rowCount: 2, resultSentEpochMs: Date.now(), chunk: {rowCount: 1}},
+                error: 'row count changed during result transfer',
+            },
+        ];
+        for (const {result, error} of cases) {
+            class MalformedWorker {
+                constructor() {
+                    /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                    this.listeners = new Map();
+                }
+
+                addEventListener(type, listener) {
+                    this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+                }
+
+                removeEventListener(type, listener) {
+                    this.listeners.get(type)?.delete(listener);
+                }
+
+                postMessage(message) {
+                    queueMicrotask(() => {
+                        if (message.type === 'initialize') {
+                            emitWorkerMessage(this.listeners, {type: 'ready'});
+                            return;
+                        }
+                        emitWorkerMessage(this.listeners, {
+                            type: 'result',
+                            id: message.id,
+                            ...result,
+                            profile: {chunkDispatchMs: 0},
+                        });
+                    });
+                }
+
+                terminate() {}
+            }
+
+            vi.stubGlobal('Worker', MalformedWorker);
+            try {
+                const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
+                await expect(parseTermBankWithWasmColumnChunksParallel(
+                    sourceBanks,
+                    3,
+                    () => {},
+                    {emitContentSlab: true},
+                )).rejects.toThrow(error);
+            } finally {
+                await disposeParallelTermBankParser();
+                vi.stubGlobal('Worker', void 0);
+            }
+        }
+    });
+
+    maybeTest('streams archive-ordered results while later workers finish output', async () => {
         let workerIndex = 0;
         /** @type {() => void} */
         let releaseSecondResult;
@@ -753,11 +817,9 @@ describe('term-bank WASM parser', () => {
                         return;
                     }
                     if (this.index === 0) {
-                        emitWorkerMessage(this.listeners, {type: 'parsed', id: dispatchedMessage.id, rowCount: 1});
                         this.emitResult(dispatchedMessage.id);
                     } else {
                         void secondResultGate.then(() => {
-                            emitWorkerMessage(this.listeners, {type: 'parsed', id: dispatchedMessage.id, rowCount: 1});
                             this.emitResult(dispatchedMessage.id);
                         });
                     }
@@ -768,6 +830,8 @@ describe('term-bank WASM parser', () => {
                 emitWorkerMessage(this.listeners, {
                     type: 'result',
                     id,
+                    rowCount: 1,
+                    resultSentEpochMs: Date.now(),
                     chunk: {rowCount: 1},
                     profile: {chunkDispatchMs: 0},
                 });
@@ -828,10 +892,11 @@ describe('term-bank WASM parser', () => {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
                         return;
                     }
-                    emitWorkerMessage(this.listeners, {type: 'parsed', id: message.id, rowCount: 1});
                     emitWorkerMessage(this.listeners, {
                         type: 'result',
                         id: message.id,
+                        rowCount: 1,
+                        resultSentEpochMs: Date.now(),
                         chunk: {rowCount: 1},
                         profile: {chunkDispatchMs: 0},
                     });
@@ -914,10 +979,11 @@ describe('term-bank WASM parser', () => {
                         });
                         return;
                     }
-                    emitWorkerMessage(this.listeners, {type: 'parsed', id: message.id, rowCount: 1});
                     emitWorkerMessage(this.listeners, {
                         type: 'result',
                         id: message.id,
+                        rowCount: 1,
+                        resultSentEpochMs: Date.now(),
                         chunk: {rowCount: 1},
                         profile: {chunkDispatchMs: 0},
                     });
@@ -1072,10 +1138,11 @@ describe('term-bank WASM parser', () => {
                     }
                     ++this.parseCount;
                     if (this.parseCount > 1) { return; }
-                    emitWorkerMessage(this.listeners, {type: 'parsed', id: message.id, rowCount: 1});
                     emitWorkerMessage(this.listeners, {
                         type: 'result',
                         id: message.id,
+                        rowCount: 1,
+                        resultSentEpochMs: Date.now(),
                         chunk: {rowCount: 1},
                         profile: {chunkDispatchMs: 0},
                     });
@@ -1126,7 +1193,6 @@ describe('term-bank WASM parser', () => {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
                         return;
                     }
-                    emitWorkerMessage(this.listeners, {type: 'parsed', id: message.id, rowCount: 1});
                     if (this.index !== 0) { return; }
                     for (const listener of this.listeners.get('messageerror') ?? []) {
                         listener(/** @type {MessageEvent<unknown>} */ ({}));

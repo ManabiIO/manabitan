@@ -91,6 +91,7 @@ async function parse(data) {
         const sourceBytes = sourceBuffers.map((buffer) => new Uint8Array(buffer));
         /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */
         let resultChunk = null;
+        let resultRowCount = 0;
         let resultCopyMs = 0;
         await parseTermBankWithWasmColumnChunks(
             sourceBytes,
@@ -99,7 +100,7 @@ async function parse(data) {
                 if (resultChunk !== null) {
                     throw new Error('Parallel term-bank parser emitted multiple chunks');
                 }
-                self.postMessage({type: 'parsed', id, rowCount: chunk.rowCount});
+                resultRowCount = chunk.rowCount;
                 const tResultCopyStart = safePerformance.now();
                 resultChunk = copyWasmBackedColumnChunk(chunk, true);
                 resultCopyMs = Math.max(0, safePerformance.now() - tResultCopyStart);
@@ -113,7 +114,14 @@ async function parse(data) {
         const profile = consumeLastTermBankWasmParseProfile();
         if (profile !== null) { profile.resultCopyMs = resultCopyMs; }
         const transfer = collectChunkTransferables(resultChunk);
-        self.postMessage({type: 'result', id, chunk: resultChunk, profile}, transfer);
+        self.postMessage({
+            type: 'result',
+            id,
+            rowCount: resultRowCount,
+            resultSentEpochMs: Date.now(),
+            chunk: resultChunk,
+            profile,
+        }, transfer);
     } catch (error) {
         self.postMessage({type: 'parse-error', id, error: serializeError(error)});
     }
