@@ -44,12 +44,16 @@ describe('DictionaryImportController staged update profile rewrites', () => {
     const finalizeImportedDictionaryResult = /** @type {(this: DictionaryImportController, context: Record<string, unknown>) => Promise<{errors: Error[], importedTitle: string|null}>} */ (getDictionaryImportControllerMethod('_finalizeImportedDictionaryResult'));
     const finalizeDeferredImportedDictionaries = /** @type {(this: DictionaryImportController, contexts: Record<string, unknown>[], importRunGeneration: number) => Promise<{errors: Error[], importedTitles: string[]}>} */ (getDictionaryImportControllerMethod('_finalizeDeferredImportedDictionaries'));
     const verifyImportedDictionaryVisible = /** @type {(this: DictionaryImportController, dictionaryTitle: string, requireEnabledForActiveProfile: boolean) => Promise<void>} */ (getDictionaryImportControllerMethod('_verifyImportedDictionaryVisible'));
+    const signalImportSessionCompletion = /** @type {(this: DictionaryImportController, details: {importRunGeneration: number, importRunCurrent: boolean, errorCount: number, importedTitles: string[]}) => void} */ (getDictionaryImportControllerMethod('_signalImportSessionCompletion'));
 
     afterEach(() => {
         vi.useRealTimers();
         vi.restoreAllMocks();
         vi.unstubAllGlobals();
         Reflect.deleteProperty(globalThis, 'manabitanImportPerformanceFlags');
+        Reflect.deleteProperty(globalThis, '__manabitanImportCompletionSignalEnabled');
+        Reflect.deleteProperty(globalThis, '__manabitanImportCompletionSequence');
+        Reflect.deleteProperty(globalThis, '__manabitanLastImportCompletion');
     });
 
     test('uses the profiled media concurrency default and clamps debug overrides', () => {
@@ -73,6 +77,41 @@ describe('DictionaryImportController staged update profile rewrites', () => {
 
         Reflect.set(globalThis, 'manabitanImportPerformanceFlags', {zipUseWebWorkers: true});
         expect(getImportPerformanceFlags.call(controller).zipUseWebWorkers).toBe(true);
+    });
+
+    test('publishes a monotonic import completion boundary only when enabled', () => {
+        const controller = createControllerForInternalTests();
+        const dispatchEvent = vi.fn();
+        class TestCustomEvent {
+            constructor(type, options) {
+                this.type = type;
+                this.detail = options?.detail;
+            }
+        }
+        vi.stubGlobal('dispatchEvent', dispatchEvent);
+        vi.stubGlobal('CustomEvent', TestCustomEvent);
+        const details = {
+            importRunGeneration: 7,
+            importRunCurrent: true,
+            errorCount: 0,
+            importedTitles: ['JMdict'],
+        };
+
+        signalImportSessionCompletion.call(controller, details);
+        expect(Reflect.has(globalThis, '__manabitanLastImportCompletion')).toBe(false);
+        expect(dispatchEvent).not.toHaveBeenCalled();
+
+        Reflect.set(globalThis, '__manabitanImportCompletionSignalEnabled', true);
+        Reflect.set(globalThis, '__manabitanImportCompletionSequence', 4);
+        signalImportSessionCompletion.call(controller, details);
+
+        expect(Reflect.get(globalThis, '__manabitanImportCompletionSequence')).toBe(5);
+        expect(Reflect.get(globalThis, '__manabitanLastImportCompletion')).toMatchObject({...details, sequence: 5});
+        expect(dispatchEvent).toHaveBeenCalledOnce();
+        expect(dispatchEvent.mock.calls[0][0]).toMatchObject({
+            type: 'manabitan:dictionary-import-complete',
+            detail: {...details, sequence: 5},
+        });
     });
 
     test('watchdog recovery terminates an active MDX conversion worker', async () => {

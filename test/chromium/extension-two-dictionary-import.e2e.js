@@ -152,6 +152,8 @@ const maxReportLogLinesRaw = Number.parseInt(process.env.MANABITAN_CHROMIUM_E2E_
 const maxReportLogLines = Number.isFinite(maxReportLogLinesRaw) && maxReportLogLinesRaw > 0 ? maxReportLogLinesRaw : 1000;
 const quickImportBenchmarkMode = parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_BENCH_QUICK, false);
 const importCompletionIdleMs = quickImportBenchmarkMode ? 100 : 250;
+const importCompletionPollMs = quickImportBenchmarkMode ? 16 : 50;
+let lastObservedImportCompletionEpochMs = 0;
 const stopAfterIsolatedProbes = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_ISOLATED_PROBES, false);
 const stopAfterInitialImports = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_INITIAL_IMPORTS, false);
 const stopAfterUpdate = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_UPDATE, false);
@@ -1716,14 +1718,40 @@ async function getImportProgressLabel(page) {
     });
 }
 
-async function isImportUiIdle(page) {
+async function getImportWaitState(page) {
     return await page.evaluate(() => {
-        const fileInput = document.querySelector('#dictionary-import-file-input');
-        if (fileInput instanceof HTMLInputElement && fileInput.disabled) {
-            return false;
+        const selectors = [
+            '#recommended-dictionaries-modal .dictionary-import-progress',
+            '#dictionaries-modal .dictionary-import-progress',
+        ];
+        let label = '';
+        for (const selector of selectors) {
+            const container = document.querySelector(selector);
+            if (!(container instanceof HTMLElement) || container.hidden) { continue; }
+            const labelNode = container.querySelector('.progress-info');
+            if (!(labelNode instanceof HTMLElement)) { continue; }
+            const text = (labelNode.textContent || '').trim();
+            if (text.length > 0) {
+                label = text;
+                break;
+            }
         }
+        const errorNode = document.querySelector('#dictionary-error');
+        const errorText = errorNode instanceof HTMLElement && !errorNode.hidden ?
+            (errorNode.textContent || '').trim() :
+            '';
+        const fileInput = document.querySelector('#dictionary-import-file-input');
         const activeProgress = document.querySelector('#dictionaries-modal .dictionary-import-progress:not([hidden]), #recommended-dictionaries-modal .dictionary-import-progress:not([hidden])');
-        return activeProgress === null;
+        const completionRaw = Reflect.get(globalThis, '__manabitanLastImportCompletion');
+        const completion = typeof completionRaw === 'object' && completionRaw !== null && !Array.isArray(completionRaw) ?
+            completionRaw :
+            null;
+        return {
+            label,
+            errorText,
+            uiIdle: (!(fileInput instanceof HTMLInputElement) || !fileInput.disabled) && activeProgress === null,
+            completion,
+        };
     });
 }
 
@@ -1955,13 +1983,13 @@ async function waitForImportCompletion(page, dictionaryName, timeoutMs = 300000,
     let previousLabel = '';
     let previousLabelAt = start;
     while (safePerformance.now() < deadline) {
-        const errorText = await getDictionaryErrorText(page);
+        const state = await getImportWaitState(page);
+        const {errorText, label} = state;
         if (errorText.length > 0) {
             const opfsDiagnostics = await getOpfsOpenDiagnostics(page);
             const lastImportDebug = await getLastImportDebug(page);
             fail(`${dictionaryName} import reported error before completion: ${errorText}; opfsOpenDiagnostics=${JSON.stringify(opfsDiagnostics)}; lastImportDebug=${JSON.stringify(lastImportDebug)}`);
         }
-        const label = await getImportProgressLabel(page);
         const now = safePerformance.now();
         if (label !== previousLabel) {
             if (typeof onStepChange === 'function' && previousLabel.length > 0) {
@@ -1974,16 +2002,27 @@ async function waitForImportCompletion(page, dictionaryName, timeoutMs = 300000,
             sawStepText = true;
             emptySince = null;
         }
+        const completionEpochMs = Number(state.completion?.completedAtEpochMs ?? 0);
+        if (completionEpochMs > lastObservedImportCompletionEpochMs && state.uiIdle) {
+            if (Number(state.completion?.errorCount ?? 0) > 0) {
+                fail(`${dictionaryName} import completion signal reported errors: ${JSON.stringify(state.completion)}`);
+            }
+            lastObservedImportCompletionEpochMs = completionEpochMs;
+            if (typeof onStepChange === 'function' && previousLabel.length > 0) {
+                await onStepChange(previousLabel, previousLabelAt, safePerformance.now());
+            }
+            return;
+        }
         if (sawStepText && label.length === 0) {
             emptySince ??= safePerformance.now();
-            if (safePerformance.now() - emptySince >= importCompletionIdleMs && await isImportUiIdle(page)) {
+            if (safePerformance.now() - emptySince >= importCompletionIdleMs && state.uiIdle) {
                 if (typeof onStepChange === 'function' && previousLabel.length > 0) {
                     await onStepChange(previousLabel, previousLabelAt, safePerformance.now());
                 }
                 return;
             }
         }
-        await page.waitForTimeout(250);
+        await page.waitForTimeout(importCompletionPollMs);
     }
     fail(`Timed out waiting for ${dictionaryName} import completion`);
 }
@@ -3284,6 +3323,9 @@ async function main() {
         report.launchMode = launchModeLabel;
         appendLog(report, 'info', `${browserFlavor} launch mode: ${launchModeLabel}`);
         let extensionBaseUrl = `chrome-extension://${extensionId}`;
+        await context.addInitScript(() => {
+            Reflect.set(globalThis, '__manabitanImportCompletionSignalEnabled', true);
+        });
         page = context.pages()[0] ?? await context.newPage();
         /** @type {import('@playwright/test').Page|null} */
         let concurrentSearchPage = null;
@@ -3415,6 +3457,8 @@ async function main() {
                 globalThis.manabitanImportUseSession = false;
                 globalThis.manabitanDisableIntegrityCounts = true;
                 globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
+                Reflect.set(globalThis, '__manabitanImportCompletionSequence', 0);
+                Reflect.set(globalThis, '__manabitanLastImportCompletion', null);
             }, importFlags);
         });
         const configureImportSessionEnd = safePerformance.now();

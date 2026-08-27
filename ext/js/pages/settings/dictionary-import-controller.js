@@ -2448,6 +2448,12 @@ export class DictionaryImportController {
                     activeImportRunGeneration: this._activeImportRunGeneration,
                 });
             }
+            this._signalImportSessionCompletion({
+                importRunGeneration,
+                importRunCurrent: this._isImportRunCurrent(importRunGeneration),
+                errorCount: errors.length,
+                importedTitles: [...new Set(importedTitles)],
+            });
         }
     }
 
@@ -2611,6 +2617,22 @@ export class DictionaryImportController {
             history.splice(0, history.length - 20);
         }
         Reflect.set(globalThis, '__manabitanImportDebugHistory', history);
+    }
+
+    /**
+     * Exposes an exact post-UI completion boundary to development harnesses.
+     * @param {{importRunGeneration: number, importRunCurrent: boolean, errorCount: number, importedTitles: string[]}} details
+     */
+    _signalImportSessionCompletion(details) {
+        if (Reflect.get(globalThis, '__manabitanImportCompletionSignalEnabled') !== true) { return; }
+        const previousSequence = Reflect.get(globalThis, '__manabitanImportCompletionSequence');
+        const sequence = Number.isSafeInteger(previousSequence) && /** @type {number} */ (previousSequence) >= 0 ?
+            /** @type {number} */ (previousSequence) + 1 :
+            1;
+        const completion = {...details, sequence, completedAtEpochMs: Date.now()};
+        Reflect.set(globalThis, '__manabitanImportCompletionSequence', sequence);
+        Reflect.set(globalThis, '__manabitanLastImportCompletion', completion);
+        globalThis.dispatchEvent(new CustomEvent('manabitan:dictionary-import-complete', {detail: completion}));
     }
 
     /**
