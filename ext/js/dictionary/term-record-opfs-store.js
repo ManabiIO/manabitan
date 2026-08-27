@@ -38,6 +38,7 @@ import {
     warmPersistedTermPrefixIndex,
 } from './term-lookup-index.js';
 import {
+    hasCompletePreparedTermLookupIndexes,
     MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS,
     prepareTermLookupIndexesFromPreinternedPlan,
 } from './term-lookup-index-preparation.js';
@@ -1932,12 +1933,17 @@ export class TermRecordOpfsStore {
         let wasmEncodeMs = 0;
         let lookupIndexEncodeMs = 0;
         const count = chunk.rowCount;
+        const hasWholeChunkPreparedIndex = (
+            preparedLookupIndexes?.has(`0:${count}`) === true &&
+            hasCompletePreparedTermLookupIndexes(preparedLookupIndexes, count)
+        );
+        const runRowLimit = hasWholeChunkPreparedIndex ? count : MAX_COMPACT_LOOKUP_INDEX_ROWS;
         for (let runStart = 0; runStart < count;) {
             let runEnd = runStart;
             let minContentOffset = Number.POSITIVE_INFINITY;
             let maxContentOffset = Number.NEGATIVE_INFINITY;
             while (runEnd < count) {
-                if ((runEnd - runStart) >= MAX_COMPACT_LOOKUP_INDEX_ROWS) {
+                if ((runEnd - runStart) >= runRowLimit) {
                     break;
                 }
                 const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd);

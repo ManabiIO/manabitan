@@ -3107,6 +3107,62 @@ describe('TermRecordOpfsStore', () => {
         expect(Reflect.get(store, '_preinternedCompactionRemap')).toHaveLength(0);
     });
 
+    test('keeps a prepared whole-chunk record and lookup segment beyond 30K rows', async () => {
+        const rowCount = 30_001;
+        const expressionBytes = new TextEncoder().encode('共通語');
+        const plan = {
+            stringLengths: Uint16Array.of(expressionBytes.byteLength),
+            stringOffsets: Uint32Array.of(0),
+            stringsBuffer: expressionBytes,
+            expressionIndexes: new Uint32Array(rowCount),
+            readingIndexes: new Uint32Array(rowCount),
+        };
+        const chunk = {
+            dictionary: 'Prepared whole chunk test',
+            rowCount,
+            expressionBytesList: new Array(rowCount).fill(expressionBytes),
+            readingBytesList: new Array(rowCount).fill(expressionBytes),
+            readingEqualsExpressionList: new Uint8Array(rowCount).fill(1),
+            scoreList: new Int32Array(rowCount),
+            sequenceList: new Int32Array(rowCount).fill(-1),
+            fixedContentOffsetBase: 0,
+            fixedContentLength: 16,
+            termRecordPreinternedPlan: plan,
+        };
+        const store = new TermRecordOpfsStore();
+        const prepared = store.prepareArtifactChunkLookupIndexes(chunk);
+        /** @type {number[]} */
+        const encodedRowCounts = [];
+        vi.spyOn(store, '_encodeArtifactChunkRecords').mockImplementation(async (runChunk) => {
+            encodedRowCounts.push(runChunk.rowCount);
+            return {
+                bytes: new Uint8Array([1]),
+                contentOffsetBase: 0,
+                lookupIndexBytes: new Uint8Array([2]),
+                fixedFieldsHashes: null,
+                validationMs: 0,
+                wasmEncodeMs: 0,
+                lookupIndexEncodeMs: 0,
+            };
+        });
+        vi.spyOn(store, '_appendEncodedChunk').mockResolvedValue();
+
+        await store._encodeAndAppendArtifactChunkForState(
+            /** @type {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[0]} */ ({}),
+            chunk,
+            1,
+            new Uint32Array(0),
+            new Uint32Array(0),
+            plan,
+            'raw',
+            prepared?.indexes,
+        );
+
+        expect(prepared?.indexes.size).toBe(1);
+        expect(encodedRowCounts).toStrictEqual([rowCount]);
+        expect(store._appendEncodedChunk).toHaveBeenCalledTimes(1);
+    });
+
     test('round-trips fixed-span preinterned artifact chunk records without content offset arrays', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'VNDB Characters by Bee';

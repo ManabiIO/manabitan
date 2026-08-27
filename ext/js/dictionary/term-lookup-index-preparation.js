@@ -1,10 +1,18 @@
 /*
- * Copyright (C) 2026 Manabitan authors
+ * Copyright (C) 2026  Manabitan authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 import {safePerformance} from '../core/safe-performance.js';
@@ -15,6 +23,8 @@ import {
 } from './term-record-preinterned-plan.js';
 
 export const MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS = 30000;
+
+const MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS = 0xffff - 1;
 
 /**
  * @typedef {{bytes: Uint8Array, preinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}} PreparedTermLookupIndex
@@ -46,21 +56,30 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
     const scratch = remapScratch instanceof Uint32Array && remapScratch.length >= preinternedPlan.stringLengths.length ?
         remapScratch :
         new Uint32Array(preinternedPlan.stringLengths.length);
+    const reuseWholePlan = canReuseWholePlan(
+        preinternedPlan,
+        count,
+        scratch,
+        chunk.readingEqualsExpressionList,
+    );
+    const runRowLimit = reuseWholePlan ? count : MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS;
     /** @type {Map<string, PreparedTermLookupIndex>} */
     const indexes = new Map();
-    for (let runStart = 0; runStart < count; runStart += MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS) {
-        const runCount = Math.min(MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS, count - runStart);
+    for (let runStart = 0; runStart < count; runStart += runRowLimit) {
+        const runCount = Math.min(runRowLimit, count - runStart);
         const isWholeChunk = runStart === 0 && runCount === count;
         const compactStartedAt = safePerformance.now();
-        const runPlan = /** @type {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} */ (
-            compactTermRecordPreinternedPlan(
-                preinternedPlan,
-                runStart,
-                runCount,
-                scratch,
-                chunk.readingEqualsExpressionList,
-            )
-        );
+        const runPlan = reuseWholePlan ?
+            preinternedPlan :
+            /** @type {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} */ (
+                compactTermRecordPreinternedPlan(
+                    preinternedPlan,
+                    runStart,
+                    runCount,
+                    scratch,
+                    chunk.readingEqualsExpressionList,
+                )
+            );
         compactMs += safePerformance.now() - compactStartedAt;
         const readingEqualsExpressionList = isWholeChunk ?
             chunk.readingEqualsExpressionList :
@@ -87,6 +106,78 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
 }
 
 /**
+ * A complete parser plan can back one persisted lookup/record segment without
+ * compaction when every interned key is used and both compact-index dimensions
+ * fit below the uint16 null sentinel.
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} plan
+ * @param {number} rowCount
+ * @param {Uint32Array} scratch
+ * @param {boolean[]|Uint8Array} readingEqualsExpressionList
+ * @returns {boolean}
+ */
+function canReuseWholePlan(plan, rowCount, scratch, readingEqualsExpressionList) {
+    const keyCount = plan.stringLengths.length;
+    if (
+        rowCount > MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS ||
+        keyCount > MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS
+    ) {
+        return false;
+    }
+    let referencedKeyCount = 0;
+    try {
+        for (let row = 0; row < rowCount; ++row) {
+            const expressionIndex = plan.expressionIndexes[row];
+            const readingIndex = (
+                readingEqualsExpressionList[row] === true ||
+                readingEqualsExpressionList[row] === 1
+            ) ?
+                expressionIndex :
+                plan.readingIndexes[row];
+            if (
+                expressionIndex >= keyCount ||
+                readingIndex >= keyCount ||
+                plan.stringLengths[expressionIndex] === 0 ||
+                plan.stringLengths[readingIndex] === 0
+            ) {
+                return false;
+            }
+            if (scratch[expressionIndex] === 0) {
+                scratch[expressionIndex] = 1;
+                ++referencedKeyCount;
+            }
+            if (scratch[readingIndex] === 0) {
+                scratch[readingIndex] = 1;
+                ++referencedKeyCount;
+            }
+        }
+        return referencedKeyCount === keyCount;
+    } finally {
+        if (referencedKeyCount > 0) {
+            for (let key = 0; key < keyCount; ++key) { scratch[key] = 0; }
+        }
+    }
+}
+
+/**
+ * @param {unknown} value
+ * @param {number} rowCount
+ * @returns {value is PreparedTermLookupIndex}
+ */
+function isCompletePreparedTermLookupIndex(value, rowCount) {
+    if (typeof value !== 'object' || value === null) { return false; }
+    const bytes = /** @type {unknown} */ (Reflect.get(value, 'bytes'));
+    const planValue = /** @type {unknown} */ (Reflect.get(value, 'preinternedPlan'));
+    const plan = /** @type {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} */ (
+        typeof planValue === 'object' && planValue !== null ? planValue : null
+    );
+    return (
+        bytes instanceof Uint8Array &&
+        bytes.byteLength > 0 &&
+        hasCompleteTermRecordPreinternedPlan(plan, rowCount)
+    );
+}
+
+/**
  * Rejects partial or detached worker results before the storage sink trusts
  * them. Index payload integrity is validated when the sidecar is loaded.
  * @param {unknown} value
@@ -95,15 +186,21 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
  */
 export function hasCompletePreparedTermLookupIndexes(value, rowCount) {
     if (!(value instanceof Map) || !Number.isSafeInteger(rowCount) || rowCount <= 0) { return false; }
+    const wholeChunk = /** @type {unknown} */ (value.get(`0:${rowCount}`));
+    if (
+        value.size === 1 &&
+        rowCount <= MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS &&
+        isCompletePreparedTermLookupIndex(wholeChunk, rowCount) &&
+        wholeChunk.preinternedPlan.stringLengths.length <= MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS &&
+        wholeChunk.preinternedPlan.stringLengths.every((length) => length > 0)
+    ) {
+        return true;
+    }
     let coveredRows = 0;
     for (let runStart = 0; runStart < rowCount; runStart += MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS) {
         const runCount = Math.min(MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS, rowCount - runStart);
-        const prepared = value.get(`${runStart}:${runCount}`);
-        if (
-            !(prepared?.bytes instanceof Uint8Array) ||
-            prepared.bytes.byteLength === 0 ||
-            !hasCompleteTermRecordPreinternedPlan(prepared.preinternedPlan, runCount)
-        ) {
+        const prepared = /** @type {unknown} */ (value.get(`${runStart}:${runCount}`));
+        if (!isCompletePreparedTermLookupIndex(prepared, runCount)) {
             return false;
         }
         coveredRows += runCount;

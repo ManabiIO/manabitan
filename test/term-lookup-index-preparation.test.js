@@ -19,6 +19,7 @@ const textEncoder = new TextEncoder();
 
 /**
  * @param {number} rowCount
+ * @returns {{rowCount: number, readingEqualsExpressionList: Uint8Array, sequenceList: Int32Array, termRecordPreinternedPlan: import('../ext/js/dictionary/term-record-wasm-encoder.js').PreinternedTermRecordPlan & {stringOffsets: Uint32Array}}}
  */
 function createChunk(rowCount) {
     const expressions = [textEncoder.encode('共通語'), textEncoder.encode('終端語')];
@@ -55,10 +56,33 @@ function createChunk(rowCount) {
     };
 }
 
+/** @param {ReturnType<typeof createChunk>} chunk */
+function addUnusedEmptyString(chunk) {
+    const plan = chunk.termRecordPreinternedPlan;
+    plan.stringLengths = Uint16Array.from([...plan.stringLengths, 0]);
+    plan.stringOffsets = Uint32Array.from([...plan.stringOffsets, plan.stringsBuffer.byteLength]);
+}
+
 describe('parser-prepared term lookup indexes', () => {
+    test('reuses complete whole-chunk plans beyond the conservative split size', () => {
+        const rowCount = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS + 1;
+        const chunk = createChunk(rowCount);
+        for (let row = 1; row < rowCount - 1; row += 2) {
+            chunk.termRecordPreinternedPlan.expressionIndexes[row] = 1;
+            chunk.termRecordPreinternedPlan.readingIndexes[row] = 3;
+        }
+        const prepared = prepareTermLookupIndexesFromPreinternedPlan(chunk);
+
+        expect(prepared?.indexes.size).toBe(1);
+        expect(prepared?.indexes.get(`0:${rowCount}`)?.preinternedPlan).toBe(chunk.termRecordPreinternedPlan);
+        expect(hasCompletePreparedTermLookupIndexes(prepared?.indexes, rowCount)).toBe(true);
+    });
+
     test('covers every 30K row range and preserves exact keys', () => {
         const rowCount = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS + 1;
-        const prepared = prepareTermLookupIndexesFromPreinternedPlan(createChunk(rowCount));
+        const chunk = createChunk(rowCount);
+        addUnusedEmptyString(chunk);
+        const prepared = prepareTermLookupIndexesFromPreinternedPlan(chunk);
 
         expect(prepared).not.toBeNull();
         expect(prepared?.indexes.size).toBe(2);
@@ -82,7 +106,9 @@ describe('parser-prepared term lookup indexes', () => {
 
     test('rejects partial, extra, and detached worker results', () => {
         const rowCount = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS + 1;
-        const prepared = prepareTermLookupIndexesFromPreinternedPlan(createChunk(rowCount));
+        const chunk = createChunk(rowCount);
+        addUnusedEmptyString(chunk);
+        const prepared = prepareTermLookupIndexesFromPreinternedPlan(chunk);
         const indexes = prepared?.indexes ?? new Map();
         expect(hasCompletePreparedTermLookupIndexes(indexes, rowCount)).toBe(true);
 
