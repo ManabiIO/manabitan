@@ -121,6 +121,32 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
 }
 
 describe('TermRecordOpfsStore', () => {
+    test('starts record and lookup-index writes before sustained flush thresholds', async () => {
+        const store = new TermRecordOpfsStore();
+        const fileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({}));
+        const state = store._createShardState('dict-test.mbtr', fileHandle, 0, 'raw');
+        Reflect.set(store, '_importSessionActive', true);
+        Reflect.set(store, '_recordsDirectoryHandle', {});
+        vi.spyOn(store, '_validateShardAppendFormat').mockResolvedValue();
+        vi.spyOn(store, '_createLookupIndexChunk').mockReturnValue(new Uint8Array(512 * 1024));
+        const flushRecords = vi.spyOn(store, '_flushPendingWritesForShard').mockResolvedValue();
+        const flushIndex = vi.spyOn(store, '_flushPendingLookupIndexChunks').mockResolvedValue();
+
+        await store._appendEncodedChunk(
+            state,
+            new Uint8Array(1024 * 1024),
+            1,
+            1,
+            'raw',
+            0,
+            new Uint8Array([1]),
+            new Uint8Array(4),
+        );
+
+        expect(flushRecords).toHaveBeenCalledOnce();
+        expect(flushIndex).toHaveBeenCalledWith(state, false);
+    });
+
     test('journal abort restores both stores after concurrent durable import writes', async () => {
         const originalNavigator = globalThis.navigator;
         const initialContent = new Uint8Array([1, 2, 3]);

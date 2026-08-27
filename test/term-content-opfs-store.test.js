@@ -111,6 +111,19 @@ describe('TermContentOpfsStore', () => {
         expect(Reflect.get(store, '_flushThresholdBytes')).toBe(8 * 1024 * 1024);
     });
 
+    test('starts queued import writes before the sustained flush threshold', async () => {
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_fileHandle', {});
+        Reflect.set(store, '_importSessionActive', true);
+        Reflect.set(store, '_flushThresholdBytes', 8 * 1024 * 1024);
+        store.setQueueImportWritesEnabled(true);
+        const flush = vi.spyOn(store, '_flushPendingWrites').mockResolvedValue();
+
+        await store.appendBatch([new Uint8Array(1024 * 1024)]);
+
+        expect(flush).toHaveBeenCalledOnce();
+    });
+
     test('coalesces concurrent cold snapshot initialization', async () => {
         /** @type {() => void} */
         let releaseGetFile = () => {};

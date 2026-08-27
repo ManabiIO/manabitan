@@ -35,6 +35,7 @@ const DEFAULT_WRITE_FLUSH_THRESHOLD_BYTES = 16 * 1024 * 1024;
 const LOW_MEMORY_WRITE_FLUSH_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const HIGH_MEMORY_WRITE_FLUSH_THRESHOLD_BYTES = 128 * 1024 * 1024;
 const RAW_BYTES_WRITE_FLUSH_THRESHOLD_BYTES = 8 * 1024 * 1024;
+const EAGER_IMPORT_WRITE_START_BYTES = 1024 * 1024;
 const LARGE_IMPORT_WRITE_COALESCE_TARGET_BYTES = 64 * 1024 * 1024;
 const LARGE_IMPORT_WRITE_FLUSH_THRESHOLD_BYTES = 128 * 1024 * 1024;
 const LARGE_IMPORT_EXPECTED_BYTES_THRESHOLD = 128 * 1024 * 1024;
@@ -78,6 +79,8 @@ export class TermContentOpfsStore {
         this._importSessionActive = false;
         /** @type {boolean} */
         this._queueImportWritesEnabled = false;
+        /** @type {boolean} */
+        this._importWriteStarted = false;
         /** @type {boolean} */
         this._loadedForRead = false;
         /** @type {number} */
@@ -182,6 +185,7 @@ export class TermContentOpfsStore {
                 await this.ensureLoadedForRead();
             }
             this._importSessionActive = true;
+            this._importWriteStarted = false;
             this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
             this._writeCoalesceMaxChunks = this._computeWriteCoalesceMaxChunks();
             this._flushThresholdBytes = this._computeWriteFlushThresholdBytes();
@@ -793,6 +797,7 @@ export class TermContentOpfsStore {
                     this._importSessionActive &&
                     (
                         !this._queueImportWritesEnabled ||
+                        (!this._importWriteStarted && this._pendingWriteBytes >= EAGER_IMPORT_WRITE_START_BYTES) ||
                         this._pendingWriteBytes >= this._flushThresholdBytes ||
                         this._pendingWriteChunks.length >= this._writeCoalesceMaxChunks
                     )
@@ -935,6 +940,7 @@ export class TermContentOpfsStore {
         if (this._queuedWriteError !== null) {
             return;
         }
+        this._importWriteStarted = true;
         for (const chunk of chunks) {
             this._queuedWriteChunks.push(chunk);
             this._queuedWriteBytes += chunk.byteLength;

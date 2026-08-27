@@ -89,6 +89,8 @@ const LOOKUP_INDEX_MAGIC_BYTES = 8;
 const LOOKUP_INDEX_FILE_HEADER_BYTES = 40;
 const LOOKUP_INDEX_CHUNK_HEADER_BYTES = 32;
 const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
+const EAGER_IMPORT_RECORD_WRITE_START_BYTES = 1024 * 1024;
+const EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES = 512 * 1024;
 const MAX_COMPACT_LOOKUP_INDEX_ROWS = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS;
 const PERSISTED_ONLY_IMPORT_ROW_THRESHOLD = 250000;
 const SMALL_SHARD_FALLBACK_MAX_BYTES = 32 * 1024 * 1024;
@@ -454,6 +456,7 @@ class DenseIdRecordStore {
  * @property {Promise<void>|null} queuedWritePromise
  * @property {Error|null} queuedWriteError
  * @property {Uint8Array[]} queuedWriteChunks
+ * @property {boolean} importWriteStarted
  * @property {string|null} sharedContentDictName
  * @property {number} segmentIndex
  * @property {string} logicalKey
@@ -868,6 +871,7 @@ export class TermRecordOpfsStore {
                 state.queuedWritePromise = null;
                 state.queuedWriteError = null;
                 state.queuedWriteChunks = [];
+                state.importWriteStarted = false;
                 state.initialFileLength = state.fileLength;
                 state.pendingLookupIndexChunks = [];
                 state.pendingLookupIndexBytes = 0;
@@ -5040,10 +5044,21 @@ export class TermRecordOpfsStore {
             }
             if (state.pendingLookupIndexBytes >= LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES) {
                 await this._flushPendingLookupIndexChunks(state, !this._importSessionActive);
+            } else if (
+                this._importSessionActive &&
+                state.lookupIndexChunkCount === 0 &&
+                state.lookupIndexWritePromise === null &&
+                state.pendingLookupIndexBytes >= EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES
+            ) {
+                await this._flushPendingLookupIndexChunks(state, false);
             }
         }
 
-        if (!this._importSessionActive || state.pendingWriteBytes >= this._flushThresholdBytes) {
+        if (
+            !this._importSessionActive ||
+            (!state.importWriteStarted && state.pendingWriteBytes >= EAGER_IMPORT_RECORD_WRITE_START_BYTES) ||
+            state.pendingWriteBytes >= this._flushThresholdBytes
+        ) {
             await this._flushPendingWritesForShard(state);
             if (!this._importSessionActive) {
                 await this._closeShardWritable(state);
@@ -5823,6 +5838,7 @@ export class TermRecordOpfsStore {
         if (state.queuedWriteError !== null) {
             return;
         }
+        state.importWriteStarted = true;
         for (const chunk of chunks) {
             if (chunk.byteLength <= 0) { continue; }
             state.queuedWriteChunks.push(chunk);
@@ -6047,6 +6063,7 @@ export class TermRecordOpfsStore {
             queuedWritePromise: null,
             queuedWriteError: null,
             queuedWriteChunks: [],
+            importWriteStarted: false,
             sharedContentDictName,
             segmentIndex,
             logicalKey: logicalKey ?? fileName,
