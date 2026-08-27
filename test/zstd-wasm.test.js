@@ -79,6 +79,27 @@ describe('zstd wasm wrapper', () => {
         expect([...result]).toEqual([0, 0, 9, 10, 11]);
     });
 
+    test('gathers contiguous and discontiguous source runs without changing byte order', async () => {
+        const module = createMockModule();
+        mockState.createModule.mockResolvedValue(module);
+        const {compressSpansUsingDictWithPrefix, init} = await import('../dev/lib/zstd-wasm.js');
+        await init();
+
+        compressSpansUsingDictWithPrefix(
+            23,
+            new Uint8Array([10, 11, 12, 13, 14, 15, 16, 17]),
+            new Uint32Array([1, 3, 6, 7]),
+            new Uint32Array([2, 2, 1, 1]),
+            6,
+            new Uint8Array([30, 31]),
+            0,
+            1,
+        );
+
+        const source = module._ZSTD_compress_usingDict.mock.calls[0][3];
+        expect([...module.HEAPU8.subarray(source, source + 6)]).toEqual([11, 12, 13, 14, 16, 17]);
+    });
+
     test('writes a native integrity envelope before copying compressed bytes', async () => {
         const module = createMockModule();
         mockState.createModule.mockResolvedValue(module);

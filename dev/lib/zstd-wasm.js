@@ -282,20 +282,33 @@ export function compressSpansUsingDictWithPrefix(
     }
     const buffers = ensureContextBuffers(context, contentBytes, destinationSize, dictionary.byteLength);
     let outputOffset = 0;
-    for (let i = 0; i < sourceOffsets.length; ++i) {
-        const sourceOffset = sourceOffsets[i];
-        const sourceLength = sourceLengths[i];
-        if (sourceOffset > source.byteLength || sourceLength > source.byteLength - sourceOffset) {
-            throw new RangeError(`Zstd source span ${i} is out of bounds`);
-        }
-        if (sourceLength > contentBytes - outputOffset) {
-            throw new RangeError(`Zstd source span ${i} exceeds the gathered content size`);
-        }
+    for (let i = 0; i < sourceOffsets.length;) {
+        const runOffset = sourceOffsets[i];
+        let runLength = 0;
+        let runSpanCount = 0;
+        let runEnd = runOffset;
+        do {
+            const sourceOffset = sourceOffsets[i];
+            const sourceLength = sourceLengths[i];
+            if (sourceOffset > source.byteLength || sourceLength > source.byteLength - sourceOffset) {
+                throw new RangeError(`Zstd source span ${i} is out of bounds`);
+            }
+            if (sourceLength > contentBytes - outputOffset - runLength) {
+                throw new RangeError(`Zstd source span ${i} exceeds the gathered content size`);
+            }
+            if (runSpanCount > 0 && sourceOffset !== runEnd) {
+                break;
+            }
+            runLength += sourceLength;
+            runEnd = sourceOffset + sourceLength;
+            ++runSpanCount;
+            ++i;
+        } while (i < sourceOffsets.length);
         module.HEAPU8.set(
-            source.subarray(sourceOffset, sourceOffset + sourceLength),
+            source.subarray(runOffset, runOffset + runLength),
             buffers.source + outputOffset,
         );
-        outputOffset += sourceLength;
+        outputOffset += runLength;
     }
     if (outputOffset !== contentBytes) {
         throw new RangeError(`Zstd gathered ${outputOffset} bytes; expected ${contentBytes}`);
