@@ -6594,7 +6594,6 @@ export class DictionaryDatabase {
             const tContentStoreStart = safePerformance.now();
             let preparedLookupIndexes = null;
             let recordAppended = false;
-            let contentMetadataIndexesPublished = false;
             if (pendingContentCount > 0) {
                 const earlyContentPersistence = useLocalTransaction ?
                     null :
@@ -6667,15 +6666,6 @@ export class DictionaryDatabase {
                         const planUniqueCount = pendingPlanUniqueStart === null ?
                             pendingPlanUniqueIndexes.length :
                             pendingOffsets.length;
-                        const fuseMetadataIndexPublication =
-                            pendingPlanUniqueStart !== null &&
-                            stagedContentMetadata !== null &&
-                            stagedContentMetadata.indexes.length >= planUniqueCount &&
-                            !Array.isArray(pendingResolvedDictNames);
-                        const fusedDictName = fuseMetadataIndexPublication ? pendingResolvedDictNames : '';
-                        const fusedDictNameId = fuseMetadataIndexPublication ?
-                            this._internTermEntryContentMetaDictName(fusedDictName) :
-                            -1;
                         for (let i = 0; i < planUniqueCount; ++i) {
                             const uniqueIndex = pendingPlanUniqueStart === null ?
                                 pendingPlanUniqueIndexes[i] :
@@ -6690,56 +6680,7 @@ export class DictionaryDatabase {
                                     pendingResolvedDictNames,
                             );
                             resolvedFlags[uniqueIndex] = 1;
-                            if (!fuseMetadataIndexPublication) { continue; }
-                            const stagedIndex = stagedContentMetadata.indexes[i];
-                            const offset = pendingOffsets[i];
-                            const length = pendingLengths[i];
-                            if (stagedIndex >= 0) {
-                                if (
-                                    this._termEntryContentMetaStateTable[stagedIndex] !== TERM_CONTENT_META_SLOT_PENDING ||
-                                    this._termEntryContentMetaHash1Table[stagedIndex] !== (pendingContentHash1s[i] >>> 0) ||
-                                    this._termEntryContentMetaHash2Table[stagedIndex] !== (pendingContentHash2s[i] >>> 0)
-                                ) {
-                                    throw new Error(`Staged term content metadata ${i} is unavailable`);
-                                }
-                                if (!persistenceResult[VALIDATED_TERM_CONTENT_METADATA] && (!Number.isSafeInteger(offset) || offset < 0)) {
-                                    throw new RangeError(`Invalid term content metadata offset: ${offset}`);
-                                }
-                                if (
-                                    (
-                                        !persistenceResult[VALIDATED_TERM_CONTENT_METADATA] &&
-                                        (!Number.isSafeInteger(length) || length < 0 || length >= TERM_CONTENT_META_U32_NULL)
-                                    ) ||
-                                    this._termEntryContentMetaLengthTable[stagedIndex] !== length
-                                ) {
-                                    throw new RangeError(`Invalid staged term content metadata length: ${length}`);
-                                }
-                                this._termEntryContentMetaIdTable[stagedIndex] = 0;
-                                this._termEntryContentMetaOffsetTable[stagedIndex] = offset;
-                                this._termEntryContentMetaDictNameIdTable[stagedIndex] = fusedDictNameId;
-                                this._termEntryContentMetaStateTable[stagedIndex] = TERM_CONTENT_META_SLOT_PUBLISHED;
-                                --this._termEntryContentMetaHashPairPendingCount;
-                                ++this._termEntryContentMetaHashPairCount;
-                                continue;
-                            }
-                            const contentBytes = pendingContentSpans === null ?
-                                pendingContentBytes[i] :
-                                pendingContentSpans.buffer;
-                            const contentByteOffset = pendingContentSpans === null ?
-                                0 :
-                                pendingContentSpans.offsets[i];
-                            const collisionEntry = this._appendStagedTermEntryContentMetaCollision(
-                                pendingContentHash1s[i],
-                                pendingContentHash2s[i],
-                                offset,
-                                length,
-                                fusedDictName,
-                                contentBytes,
-                                contentByteOffset,
-                            );
-                            (stagedContentMetadata.collisionEntries ??= []).push(collisionEntry);
                         }
-                        contentMetadataIndexesPublished = fuseMetadataIndexPublication;
                     }
                     resolvedContentDictNames = this._publishArtifactTermContentMetadata({
                         count,
@@ -6759,7 +6700,6 @@ export class DictionaryDatabase {
                         stagedContentMetadata,
                         importMetrics,
                         metadataValidated: persistenceResult[VALIDATED_TERM_CONTENT_METADATA] === true,
-                        metadataIndexesPublished: contentMetadataIndexesPublished,
                     });
                     const contentMetadataPublishMs = safePerformance.now() - tContentMetadataStart;
                     importMetrics.contentMetadataPublishMs += contentMetadataPublishMs;
@@ -7650,7 +7590,7 @@ export class DictionaryDatabase {
 
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, metadataIndexesPublished?: boolean}} state
+     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean}} state
      * @returns {string|(string|null)[]}
      * @throws {Error} If dedup projections or persisted metadata are invalid.
      */
@@ -7672,7 +7612,6 @@ export class DictionaryDatabase {
             stagedContentMetadata = null,
             importMetrics = null,
             metadataValidated = false,
-            metadataIndexesPublished = false,
         } = state;
         let {resolvedContentDictNames} = state;
         const ensureResolvedContentDictNamesArray = (fillUntil) => {
@@ -7729,7 +7668,7 @@ export class DictionaryDatabase {
         const uniformPendingDictNameId = uniformPendingDictName === null ?
             -1 :
             this._internTermEntryContentMetaDictName(uniformPendingDictName);
-        for (let i = 0; !metadataIndexesPublished && i < pendingOffsets.length; ++i) {
+        for (let i = 0; i < pendingOffsets.length; ++i) {
             const dictName = uniformPendingDictName ?? pendingResolvedDictNames[i];
             const dictNameId = uniformPendingDictNameId >= 0 ?
                 uniformPendingDictNameId :
