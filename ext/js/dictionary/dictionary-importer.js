@@ -64,7 +64,6 @@ import {hashPairToHex, hashTermEntryContentBytesPair} from './term-entry-content
 import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} from './term-import-metrics.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
 import {DictionaryImportSession} from './dictionary-import-session.js';
-import {MediaArchivePrefetch} from './media-archive-prefetch.js';
 import {TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 
 const BlobReader = /** @type {typeof import('@zip.js/zip.js').BlobReader} */ (/** @type {unknown} */ (BlobReader0));
@@ -469,8 +468,6 @@ export class DictionaryImporter {
         this._pendingImageMediaByPath = new Map();
         /** @type {Map<string, {mediaType: string, width: number, height: number}>} */
         this._imageMetadataByPath = new Map();
-        /** @type {MediaArchivePrefetch|null} */
-        this._mediaArchivePrefetch = null;
         /** @type {boolean} */
         this._debugImportLogging = false;
         /** @type {boolean} */
@@ -614,7 +611,6 @@ export class DictionaryImporter {
         this._wasmPreallocateChunkRows = details.wasmPreallocateChunkRows !== false;
         this._pendingImageMediaByPath.clear();
         this._imageMetadataByPath.clear();
-        this._mediaArchivePrefetch = null;
         this._jsonQuotedStringCache.clear();
         this._utf8StringBytesCache.clear();
         this._reverseStringCache.clear();
@@ -1164,23 +1160,6 @@ export class DictionaryImporter {
             })();
             const artifactDirectMediaImport = artifactArchiveImageFileEntries.length > 0;
             const useTermMediaRequirements = useMediaPipeline && !artifactDirectMediaImport;
-            let mediaArchivePrefetchPlan = {fileCount: 0, pathCount: 0, estimatedBytes: 0, maxBytes: 0};
-            if (useTermMediaRequirements) {
-                /** @type {Array<{path: string, file: ImportFileEntry}>} */
-                const mediaEntries = [];
-                for (const [path, file] of fileMap) {
-                    if (getImageMediaTypeFromFileName(path) !== null) {
-                        mediaEntries.push({path, file});
-                    }
-                }
-                const mediaArchivePrefetch = new MediaArchivePrefetch({
-                    entries: mediaEntries,
-                    read: async (file, signal) => await this._getData(file, new Uint8ArrayWriter(), signal),
-                });
-                this._mediaArchivePrefetch = mediaArchivePrefetch;
-                importSession.setMediaPipeline(mediaArchivePrefetch);
-                mediaArchivePrefetchPlan = mediaArchivePrefetch.start();
-            }
             const useExternalPackedMediaStorage = (
                 artifactDirectMediaImport &&
                 (packedMediaArtifactBytes instanceof Uint8Array || packedMediaArtifactBlob instanceof Blob) &&
@@ -1191,9 +1170,7 @@ export class DictionaryImporter {
                 `hasArchiveImageMediaFiles=${String(hasArchiveImageMediaFiles)} ` +
                 `hasUsableArtifactMediaFiles=${String(hasUsableArtifactMediaFiles)} ` +
                 `artifactDirectMediaImport=${String(artifactDirectMediaImport)} ` +
-                `externalPackedMediaStorage=${String(useExternalPackedMediaStorage)} ` +
-                `prefetchFiles=${mediaArchivePrefetchPlan.fileCount} ` +
-                `prefetchBytes=${mediaArchivePrefetchPlan.estimatedBytes}`,
+                `externalPackedMediaStorage=${String(useExternalPackedMediaStorage)}`,
             );
             const uniqueMediaPaths = useTermMediaRequirements ? new Set() : null;
             /** @type {import('dictionary-importer').ImportRequirement[]} */
@@ -2030,7 +2007,6 @@ export class DictionaryImporter {
             }
             const importDataBanksElapsedMs = Math.max(0, Date.now() - tImportBanksStart);
             const fastPathProfile = lastFastTermBankReadProfile?.parserProfile ?? null;
-            const mediaArchivePrefetchStats = this._mediaArchivePrefetch?.getStats() ?? null;
             const step4AccountedMs = (
                 step4TimingBreakdown.termParseMs +
                 step4TimingBreakdown.termSerializationMs +
@@ -2046,13 +2022,6 @@ export class DictionaryImporter {
                 kanjiMeta: counts.kanjiMeta.total,
                 tagMeta: counts.tagMeta.total,
                 media: counts.media.total,
-                mediaArchivePrefetchPlannedFiles: mediaArchivePrefetchStats?.plannedFiles ?? 0,
-                mediaArchivePrefetchPlannedBytes: mediaArchivePrefetchStats?.plannedBytes ?? 0,
-                mediaArchivePrefetchRetainedBytes: mediaArchivePrefetchStats?.retainedBytes ?? 0,
-                mediaArchivePrefetchTotalLoadedBytes: mediaArchivePrefetchStats?.totalLoadedBytes ?? 0,
-                mediaArchivePrefetchCompletedCount: mediaArchivePrefetchStats?.completedCount ?? 0,
-                mediaArchivePrefetchFailedCount: mediaArchivePrefetchStats?.failedCount ?? 0,
-                mediaArchivePrefetchHitCount: mediaArchivePrefetchStats?.hitCount ?? 0,
                 step4TermParseMs: Math.max(0, step4TimingBreakdown.termParseMs),
                 step4TermArchiveReadMs: Math.max(0, step4TimingBreakdown.termArchiveReadMs),
                 step4TermSerializationMs: Math.max(0, step4TimingBreakdown.termSerializationMs),
@@ -2156,7 +2125,6 @@ export class DictionaryImporter {
             }
             this._ignoreCancellation = true;
             await importSession.disposeImportResources();
-            this._mediaArchivePrefetch = null;
             this._setProgressInterval(previousProgressInterval);
             const tBulkFinalizationStart = Date.now();
             this._progressNextStep(20, false);
@@ -2962,8 +2930,7 @@ export class DictionaryImporter {
             }
 
             // Load file content without staging through Blob.
-            const prefetchedBytes = await this._mediaArchivePrefetch?.consume(path) ?? null;
-            const bytes = prefetchedBytes ?? await this._getData(file, new Uint8ArrayWriter());
+            const bytes = await this._getData(file, new Uint8ArrayWriter());
             let content = (
                 bytes.byteOffset === 0 &&
                 bytes.byteLength === bytes.buffer.byteLength

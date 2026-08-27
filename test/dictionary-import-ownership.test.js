@@ -10,7 +10,6 @@
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {DictionaryImportSession} from '../ext/js/dictionary/dictionary-import-session.js';
-import {MediaArchivePrefetch} from '../ext/js/dictionary/media-archive-prefetch.js';
 import {TermBankSourcePipeline} from '../ext/js/dictionary/term-bank-source-pipeline.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
@@ -93,12 +92,11 @@ describe('DictionaryImportSession', () => {
             vi.fn(async () => { order.push('parser'); }),
         );
         session.setSourcePipeline({dispose: vi.fn(async () => { order.push('source'); })});
-        session.setMediaPipeline({dispose: vi.fn(async () => { order.push('media'); })});
 
         await session.startBulkImport();
         await session.finalizeBulkImport(() => {}, summary);
 
-        expect(order).toEqual(['media', 'source', 'parser', 'archive', 'commit']);
+        expect(order).toEqual(['source', 'parser', 'archive', 'commit']);
     });
 
     test('shares archive close completion and failure across concurrent and repeated callers', async () => {
@@ -158,9 +156,6 @@ describe('DictionaryImportSession', () => {
             {close: vi.fn(async () => { order.push('archive'); throw new Error('archive failure'); })},
             vi.fn(async () => { order.push('parser'); throw new Error('parser failure'); }),
         );
-        session.setMediaPipeline({
-            dispose: vi.fn(async () => { order.push('media'); throw new Error('media failure'); }),
-        });
         session.setSourcePipeline({
             dispose: vi.fn(async () => { order.push('source'); throw new Error('source failure'); }),
         });
@@ -170,9 +165,8 @@ describe('DictionaryImportSession', () => {
         await session.finalizeBulkImport(() => {}, summary);
         await session.cleanupIncompleteSummary();
 
-        expect(order).toEqual(['media', 'source', 'parser', 'archive']);
+        expect(order).toEqual(['source', 'parser', 'archive']);
         expect(errors.map(({message}) => message)).toEqual([
-            'media failure',
             'source failure',
             'parser failure',
             'Failed to close dictionary archive: archive failure',
@@ -388,117 +382,7 @@ describe('TermBankSourcePipeline', () => {
     });
 });
 
-describe('MediaArchivePrefetch', () => {
-    test('retains required bytes and reads aliased paths only once', async () => {
-        const file = {filename: 'image.png', uncompressedSize: 4, getData() {}};
-        const read = vi.fn(async () => new Uint8Array([1, 2, 3, 4]));
-        const pipeline = new MediaArchivePrefetch({
-            entries: [
-                {path: 'image.png', file},
-                {path: '画像.png', file},
-            ],
-            read,
-            maxBytes: 8,
-        });
-
-        expect(pipeline.start()).toEqual({fileCount: 1, pathCount: 2, estimatedBytes: 4, maxBytes: 8});
-        await expect(pipeline.consume('画像.png')).resolves.toStrictEqual(new Uint8Array([1, 2, 3, 4]));
-        await expect(pipeline.consume('image.png')).resolves.toStrictEqual(new Uint8Array([1, 2, 3, 4]));
-        expect(read).toHaveBeenCalledTimes(1);
-        await pipeline.dispose();
-    });
-
-    test('bounds the plan and leaves non-admitted files to the direct reader', async () => {
-        const files = [1, 2, 3].map((index) => ({
-            filename: `image-${index}.png`,
-            uncompressedSize: 4,
-            getData() {},
-        }));
-        const read = vi.fn(async () => new Uint8Array(4));
-        const pipeline = new MediaArchivePrefetch({
-            entries: files.map((file) => ({path: file.filename, file})),
-            read,
-            maxBytes: 8,
-        });
-
-        expect(pipeline.start()).toEqual({fileCount: 2, pathCount: 2, estimatedBytes: 8, maxBytes: 8});
-        await expect(pipeline.consume(files[2].filename)).resolves.toBeNull();
-        await pipeline.dispose();
-        expect(read).toHaveBeenCalledTimes(2);
-    });
-
-    test('surfaces a speculative failure only when the media is required', async () => {
-        const unused = {filename: 'unused.png', uncompressedSize: 4, getData() {}};
-        const required = {filename: 'required.png', uncompressedSize: 4, getData() {}};
-        const pipeline = new MediaArchivePrefetch({
-            entries: [
-                {path: unused.filename, file: unused},
-                {path: required.filename, file: required},
-            ],
-            read: async (file) => {
-                throw new Error(`failed ${file.filename}`);
-            },
-            maxBytes: 8,
-        });
-
-        pipeline.start();
-        await expect(pipeline.consume(required.filename)).rejects.toThrow('failed required.png');
-        await expect(pipeline.dispose()).resolves.toBeUndefined();
-    });
-
-    test('aborts and joins active reads before disposal completes', async () => {
-        const events = [];
-        const file = {filename: 'image.png', uncompressedSize: 4, getData() {}};
-        const pipeline = new MediaArchivePrefetch({
-            entries: [{path: file.filename, file}],
-            read: async (_file, signal) => await new Promise((_resolve, reject) => {
-                signal.addEventListener('abort', () => {
-                    queueMicrotask(() => {
-                        events.push('settled');
-                        reject(new Error('aborted'));
-                    });
-                }, {once: true});
-            }),
-            maxBytes: 8,
-        });
-
-        pipeline.start();
-        await pipeline.dispose();
-        events.push('disposed');
-        expect(events).toEqual(['settled', 'disposed']);
-    });
-});
-
 describe('DictionaryImporter ZIP read cancellation', () => {
-    test('uses prefetched image bytes for the first media row', async () => {
-        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
-        const bytes = new Uint8Array([1, 2, 3, 4]);
-        const consume = vi.fn(async () => bytes);
-        Reflect.set(importer, '_mediaArchivePrefetch', {consume});
-        Reflect.set(importer, '_getData', vi.fn(async () => {
-            throw new Error('direct ZIP read should not run');
-        }));
-        const getImageMedia = /** @type {(context: import('dictionary-importer').ImportRequirementContext, path: string, entry: import('dictionary-database').DatabaseTermEntry) => Promise<import('dictionary-database').MediaDataArrayBufferContent>} */ (
-            Reflect.get(importer, '_getImageMedia')
-        );
-        const context = {
-            fileMap: new Map([['image.png', {filename: 'image.png', bytes}]]),
-            media: new Map(),
-        };
-        const entry = /** @type {import('dictionary-database').DatabaseTermEntry} */ ({
-            dictionary: 'Test dictionary',
-            expression: '語',
-            reading: 'ご',
-        });
-
-        const media = await getImageMedia.call(importer, context, 'image.png', entry);
-
-        expect(consume).toHaveBeenCalledWith('image.png');
-        expect(new Uint8Array(media.content)).toStrictEqual(bytes);
-        expect(media.width).toBe(100);
-        expect(media.height).toBe(100);
-    });
-
     test('closes the archive when index validation fails before session ownership', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const close = vi.fn(async () => {});

@@ -45,8 +45,6 @@ export class DictionaryImportSession {
         this._disposeParser = disposeParser;
         /** @type {{dispose: () => Promise<void>}|null} */
         this._sourcePipeline = null;
-        /** @type {{dispose: () => Promise<void>}|null} */
-        this._mediaPipeline = null;
         /** @type {Promise<void>|null} */
         this._startPromise = null;
         /** @type {Promise<void>|null} */
@@ -93,20 +91,6 @@ export class DictionaryImportSession {
     }
 
     /**
-     * @param {{dispose: () => Promise<void>}} mediaPipeline
-     * @throws {Error} If resources are already owned or being disposed.
-     */
-    setMediaPipeline(mediaPipeline) {
-        if (this._mediaPipeline !== null && this._mediaPipeline !== mediaPipeline) {
-            throw new Error('Dictionary import media pipeline is already owned');
-        }
-        if (this._resourceDisposalPromise !== null) {
-            throw new Error('Dictionary import resources are already being disposed');
-        }
-        this._mediaPipeline = mediaPipeline;
-    }
-
-    /**
      * @param {unknown} error
      * @returns {Error}
      */
@@ -142,13 +126,6 @@ export class DictionaryImportSession {
      */
     disposeImportResources() {
         this._resourceDisposalPromise ??= (async () => {
-            if (this._mediaPipeline !== null) {
-                try {
-                    await this._mediaPipeline.dispose();
-                } catch (error) {
-                    this.recordFailure(error);
-                }
-            }
             if (this._sourcePipeline !== null) {
                 try {
                     await this._sourcePipeline.dispose();
