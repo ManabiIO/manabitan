@@ -34,6 +34,7 @@ import {
     parseTermBankWithWasmColumnChunks,
     parseTermBankWithWasmColumnChunksParallel,
     parseTermBankWithWasmColumnChunksParallelDeferred,
+    parseTermBankWithWasmColumnChunksParallelLazy,
     prewarmParallelTermBankParser,
     TermBankWasmResourceError,
 } from '../ext/js/dictionary/term-bank-wasm-parser.js';
@@ -940,6 +941,76 @@ describe('term-bank WASM parser', () => {
             expect(sinkIndexes).toStrictEqual([1, 2, 3, 4]);
         } finally {
             releaseLaterSources();
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('bounds lazy source loading while the ordered sink is blocked', async () => {
+        class SuccessfulWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                if (typeof message?.type !== 'string') { return; }
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: message.id,
+                        rowCount: 1,
+                        resultSentEpochMs: Date.now(),
+                        chunk: {rowCount: 1},
+                        profile: {chunkDispatchMs: 0},
+                    });
+                });
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('Worker', SuccessfulWorker);
+        /** @type {() => void} */
+        let releaseSink;
+        const sinkGate = new Promise((resolve) => { releaseSink = resolve; });
+        let loadCount = 0;
+        try {
+            const sourceCount = 24;
+            const emptyBank = textEncoder.encode('[]');
+            const parsing = parseTermBankWithWasmColumnChunksParallelLazy(
+                Array.from({length: sourceCount}, () => async () => {
+                    ++loadCount;
+                    return new Uint8Array(emptyBank);
+                }),
+                Array.from({length: sourceCount}, () => 24 * 1024 * 1024),
+                3,
+                async (_chunk, progress) => {
+                    if (progress.chunkIndex === 1) { await sinkGate; }
+                },
+                {emitContentSlab: true},
+            );
+            await vi.waitFor(() => { expect(loadCount).toBeGreaterThan(0); });
+            await new Promise((resolve) => { setTimeout(resolve, 25); });
+            expect(loadCount).toBeLessThan(sourceCount);
+            expect(loadCount).toBeLessThanOrEqual(getParallelTermBankParserWorkerCount() * 4);
+            releaseSink();
+            await expect(parsing).resolves.toBe(true);
+            expect(loadCount).toBe(sourceCount);
+        } finally {
+            releaseSink();
             await disposeParallelTermBankParser();
             vi.stubGlobal('Worker', void 0);
         }

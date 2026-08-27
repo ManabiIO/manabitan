@@ -313,6 +313,27 @@ describe('TermBankSourcePipeline', () => {
         await highMemoryPipeline.dispose();
     });
 
+    test('creates a lazy import-wide plan only for multi-batch sources', async () => {
+        const fourMegabytes = 4 * 1024 * 1024;
+        const files = Array.from({length: 64}, (_, index) => ({
+            filename: `term_bank_${index + 1}.json`,
+            uncompressedSize: fourMegabytes,
+            getData() {},
+        }));
+        const read = vi.fn(async () => new TextEncoder().encode('[]'));
+        const pipeline = new TermBankSourcePipeline({termFiles: files, enabled: true, read, deviceMemory: 8});
+
+        const plan = pipeline.createImportRunPlan(0);
+
+        expect(plan?.files).toEqual(files);
+        expect(plan?.estimatedByteLengths).toEqual(Array.from({length: files.length}, () => fourMegabytes));
+        expect(read).not.toHaveBeenCalled();
+        await plan?.loaders[0]();
+        expect(read).toHaveBeenCalledTimes(1);
+        expect(pipeline.createImportRunPlan(files.length - 1)).toBeNull();
+        await pipeline.dispose();
+    });
+
     test('bounds read-ahead when ZIP entries do not expose uncompressed sizes', async () => {
         const files = Array.from({length: 12}, (_, index) => ({
             filename: `term_bank_${index + 1}.json`,

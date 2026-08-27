@@ -40,6 +40,7 @@ const HIGH_CAPABILITY_MIN_HARDWARE_CONCURRENCY = 8;
 const LOW_MEMORY_DEVICE_GIB = 4;
 const PLAIN_PARALLEL_SOURCE_PIPELINE_GROUPS_PER_WORKER = 4;
 const MEDIA_PARALLEL_SOURCE_PIPELINE_GROUPS_PER_WORKER = 3;
+const LAZY_PARALLEL_SOURCE_TARGET_GROUP_BYTES = 24 * 1024 * 1024;
 const PARALLEL_WORKER_READY_TIMEOUT_MS = 60_000;
 const PARALLEL_WORKER_PARSE_TIMEOUT_MS = 300_000;
 const PARALLEL_WORKER_CANCELLATION_POLL_MS = 25;
@@ -1650,8 +1651,8 @@ class ParallelTermBankParserPool {
 
 class ParallelTermBankPipelineRun {
     /**
-     * @param {Array<{promise: Promise<Uint8Array>, estimatedBytes: number, resolvedAt: number}>} sources
-     * @param {Array<Array<{promise: Promise<Uint8Array>, estimatedBytes: number, resolvedAt: number}>>} groups
+     * @param {ParallelTermBankSource[]} sources
+     * @param {ParallelTermBankSource[][]} groups
      * @param {number} totalBytes
      * @param {number} version
      * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
@@ -1661,9 +1662,9 @@ class ParallelTermBankPipelineRun {
      * @param {number} pipelineGroupsPerWorker
      */
     constructor(sources, groups, totalBytes, version, onChunk, options, shouldCancel, poolLease, pipelineGroupsPerWorker) {
-        /** @type {Array<{promise: Promise<Uint8Array>, estimatedBytes: number, resolvedAt: number}>} */
+        /** @type {ParallelTermBankSource[]} */
         this._sources = sources;
-        /** @type {Array<Array<{promise: Promise<Uint8Array>, estimatedBytes: number, resolvedAt: number}>>} */
+        /** @type {ParallelTermBankSource[][]} */
         this._groups = groups;
         /** @type {number} */
         this._totalBytes = totalBytes;
@@ -1691,6 +1692,12 @@ class ParallelTermBankPipelineRun {
         this._keepWorkers = false;
         /** @type {number} */
         this._startedAt = safePerformance.now();
+        /** @type {number} */
+        this._nextSinkGroupIndex = 0;
+        /** @type {number} */
+        this._maxLeadGroups = 1;
+        /** @type {Set<() => void>} */
+        this._leadWaiters = new Set();
     }
 
     /** @returns {Promise<boolean>} */
@@ -1714,6 +1721,8 @@ class ParallelTermBankPipelineRun {
     /** @param {Worker[]} workers */
     async _runPipeline(workers) {
         this._createSlots();
+        this._maxLeadGroups = Math.max(1, workers.length * this._pipelineGroupsPerWorker);
+        this._activateLeadSources();
         this._workerLoops = workers.map((worker, workerIndex) => this._runWorkerLoop(worker, workerIndex, workers.length));
         try {
             // Start the ordered sink as soon as group zero is available. Waiting
@@ -1754,6 +1763,9 @@ class ParallelTermBankPipelineRun {
                     chunkIndex: i + 1,
                     chunkCount: this._resultSlots.length,
                 });
+                this._nextSinkGroupIndex = i + 1;
+                this._activateLeadSources();
+                this._wakeLeadWaiters();
             }
             await Promise.all(this._workerLoops);
             if (this._error !== null) { throw this._error; }
@@ -1779,6 +1791,7 @@ class ParallelTermBankPipelineRun {
         }
     }
 
+    /** Creates one ordered result slot per byte-balanced source group. */
     _createSlots() {
         this._resultSlots = this._groups.map(() => {
             /** @type {(value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number}) => void} */
@@ -1797,9 +1810,10 @@ class ParallelTermBankPipelineRun {
         try {
             for (let groupIndex = workerIndex; groupIndex < this._groups.length; groupIndex += workerCount) {
                 if (this._pipelineShouldCancel()) { throw createParallelParserCancellationError(); }
+                await this._waitForLead(groupIndex);
                 const sourceGroup = this._groups[groupIndex];
                 const group = await waitForParallelSources(
-                    sourceGroup.map(({promise}) => promise),
+                    sourceGroup.map((source) => loadParallelTermBankSource(source)),
                     () => this._pipelineShouldCancel(),
                 );
                 if (!group.every((bytes) => getJsonArrayContentSpan(bytes) !== null)) {
@@ -1846,8 +1860,54 @@ class ParallelTermBankPipelineRun {
         if (this._failed) { return; }
         this._failed = true;
         this._error = createParallelParserError(error);
+        this._wakeLeadWaiters();
         const result = {chunk: null, profile: null, error: this._error, finishedAt: safePerformance.now(), rowCount: 0, sourceBytes: 0};
         for (const slot of this._resultSlots) { slot.resolve(result); }
+    }
+
+    /**
+     * Waits until the ordered sink opens room in the bounded parser lead.
+     * @param {number} groupIndex
+     * @returns {Promise<void>}
+     */
+    async _waitForLead(groupIndex) {
+        while (
+            !this._failed &&
+            groupIndex >= this._nextSinkGroupIndex + this._maxLeadGroups
+        ) {
+            await new Promise(/** @param {(value?: void|PromiseLike<void>) => void} resolve */ (resolve) => {
+                const timeoutId = setTimeout(() => {
+                    this._leadWaiters.delete(wake);
+                    resolve();
+                }, PARALLEL_WORKER_CANCELLATION_POLL_MS);
+                const wake = () => {
+                    clearTimeout(timeoutId);
+                    resolve();
+                };
+                this._leadWaiters.add(wake);
+            });
+            if (this._pipelineShouldCancel()) { throw createParallelParserCancellationError(); }
+        }
+    }
+
+    /** Wakes parser workers after sink progress or terminal failure. */
+    _wakeLeadWaiters() {
+        const waiters = [...this._leadWaiters];
+        this._leadWaiters.clear();
+        for (const wake of waiters) { wake(); }
+    }
+
+    /** Starts ZIP reads for the bounded source window independently of parser workers. */
+    _activateLeadSources() {
+        const end = Math.min(
+            this._groups.length,
+            this._nextSinkGroupIndex + this._maxLeadGroups,
+        );
+        for (let groupIndex = this._nextSinkGroupIndex; groupIndex < end; ++groupIndex) {
+            for (const source of this._groups[groupIndex]) {
+                void loadParallelTermBankSource(source).catch(() => {});
+            }
+        }
     }
 }
 
@@ -1882,6 +1942,7 @@ export async function disposeParallelTermBankParser() {
 export async function parseTermBankWithWasmColumnChunksParallel(contentBytes, version, onChunk, options = {}, shouldCancel = () => false) {
     const sources = contentBytes.map((bytes) => ({
         promise: Promise.resolve(bytes),
+        load: null,
         estimatedBytes: bytes.byteLength,
         resolvedAt: 0,
     }));
@@ -1904,6 +1965,7 @@ export async function parseTermBankWithWasmColumnChunksParallelDeferred(contentB
     }
     const sources = contentBytePromises.map((promise, index) => ({
         promise,
+        load: null,
         estimatedBytes: estimatedByteLengths[index],
         resolvedAt: 0,
     }));
@@ -1911,14 +1973,39 @@ export async function parseTermBankWithWasmColumnChunksParallelDeferred(contentB
 }
 
 /**
- * @param {Array<{promise: Promise<Uint8Array>, estimatedBytes: number, resolvedAt: number}>} sources
+ * Parses an import-wide source sequence without eagerly inflating every bank.
+ * Parser workers activate only a bounded lead window of byte-balanced groups.
+ * @param {Array<() => Promise<Uint8Array>>} contentByteLoaders
+ * @param {number[]} estimatedByteLengths
+ * @param {number} version
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {() => boolean} [shouldCancel]
+ * @returns {Promise<boolean>}
+ */
+export async function parseTermBankWithWasmColumnChunksParallelLazy(contentByteLoaders, estimatedByteLengths, version, onChunk, options = {}, shouldCancel = () => false) {
+    if (contentByteLoaders.length !== estimatedByteLengths.length) {
+        throw new Error('Lazy term-bank source metadata length mismatch');
+    }
+    const sources = contentByteLoaders.map((load, index) => ({
+        promise: null,
+        load,
+        estimatedBytes: estimatedByteLengths[index],
+        resolvedAt: 0,
+    }));
+    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, true);
+}
+
+/**
+ * @param {ParallelTermBankSource[]} sources
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} options
  * @param {() => boolean} shouldCancel
+ * @param {boolean} [lazy=false]
  * @returns {Promise<boolean>}
  */
-async function parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel) {
+async function parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, lazy = false) {
     lastParallelParserSkipReason = null;
     if (sources.length < 4) {
         lastParallelParserSkipReason = 'source-count';
@@ -1939,11 +2026,12 @@ async function parseTermBankWithWasmColumnChunksParallelSources(sources, version
             return false;
         }
         totalBytes += source.estimatedBytes;
-        source.promise = source.promise.then((bytes) => {
-            source.resolvedAt = safePerformance.now();
-            return bytes;
-        });
-        void source.promise.catch(() => {});
+        if (source.promise !== null) {
+            source.promise = observeParallelTermBankSourcePromise(source, source.promise);
+        } else if (typeof source.load !== 'function') {
+            lastParallelParserSkipReason = 'source-loader';
+            return false;
+        }
     }
     if (!canUseParallelParserForSourceSize(totalBytes)) {
         lastParallelParserSkipReason = 'source-size-budget';
@@ -1951,10 +2039,16 @@ async function parseTermBankWithWasmColumnChunksParallelSources(sources, version
     }
     const workerCount = getParallelTermBankParserWorkerCount();
     const pipelineGroupsPerWorker = getParallelSourcePipelineGroupsPerWorker(options);
+    const requestedGroupCount = lazy ?
+        Math.max(
+            workerCount * pipelineGroupsPerWorker,
+            Math.ceil(totalBytes / LAZY_PARALLEL_SOURCE_TARGET_GROUP_BYTES),
+        ) :
+        workerCount * pipelineGroupsPerWorker;
     const groups = partitionSourceBanks(
         sources,
         totalBytes,
-        workerCount * pipelineGroupsPerWorker,
+        requestedGroupCount,
     );
     if (groups.length < 2) {
         lastParallelParserSkipReason = 'partition-count';
@@ -1979,6 +2073,42 @@ async function parseTermBankWithWasmColumnChunksParallelSources(sources, version
         pipelineGroupsPerWorker,
     );
     return await run.run();
+}
+
+/** @typedef {{promise: Promise<Uint8Array>|null, load: (() => Promise<Uint8Array>)|null, estimatedBytes: number, resolvedAt: number}} ParallelTermBankSource */
+
+/**
+ * @param {ParallelTermBankSource} source
+ * @param {Promise<Uint8Array>} promise
+ * @returns {Promise<Uint8Array>}
+ */
+function observeParallelTermBankSourcePromise(source, promise) {
+    const observed = promise.then((bytes) => {
+        source.resolvedAt = safePerformance.now();
+        return bytes;
+    });
+    void observed.catch(() => {});
+    return observed;
+}
+
+/**
+ * @param {ParallelTermBankSource} source
+ * @returns {Promise<Uint8Array>}
+ */
+function loadParallelTermBankSource(source) {
+    if (source.promise === null) {
+        if (source.load === null) {
+            return Promise.reject(new Error('Parallel term-bank source has no loader'));
+        }
+        let promise;
+        try {
+            promise = Promise.resolve(source.load());
+        } catch (error) {
+            promise = Promise.reject(error);
+        }
+        source.promise = observeParallelTermBankSourcePromise(source, promise);
+    }
+    return source.promise;
 }
 
 /** @returns {boolean} */

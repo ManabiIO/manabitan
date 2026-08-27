@@ -264,6 +264,32 @@ export class TermBankSourcePipeline {
     }
 
     /**
+     * Builds a lazy import-wide source plan only when ordinary batching would
+     * require more than one pass. Reads start when parser workers claim a
+     * bounded source group, while any initial prefetch remains shared through
+     * the identity-keyed read pool.
+     * @param {number} startIndex
+     * @returns {{files: TermBankSourceFile[], loaders: Array<() => Promise<Uint8Array>>, estimatedByteLengths: number[]}|null}
+     */
+    createImportRunPlan(startIndex) {
+        if (!this._enabled) { return null; }
+        const firstBatch = this.getBatchPlan(startIndex).files;
+        if (firstBatch.length === 0 || startIndex + firstBatch.length >= this._termFiles.length) {
+            return null;
+        }
+        const files = this._termFiles.slice(startIndex);
+        const estimatedByteLengths = [];
+        for (const file of files) {
+            if (!this.canPrefetch(file)) { return null; }
+            const estimatedBytes = this._getEstimatedBytes(file);
+            if (!Number.isSafeInteger(estimatedBytes) || estimatedBytes <= 0) { return null; }
+            estimatedByteLengths.push(estimatedBytes);
+        }
+        const loaders = files.map((file) => async () => await this._readPool.read(file));
+        return {files, loaders, estimatedByteLengths};
+    }
+
+    /**
      * @param {TermBankSourceFile[]} batch
      */
     releaseBatch(batch) {

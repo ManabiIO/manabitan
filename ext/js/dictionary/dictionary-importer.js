@@ -56,6 +56,7 @@ import {
     parseTermBankWithWasmColumnChunksOverlapped,
     parseTermBankWithWasmColumnChunksParallel,
     parseTermBankWithWasmColumnChunksParallelDeferred,
+    parseTermBankWithWasmColumnChunksParallelLazy,
     prewarmParallelTermBankParser,
     TermBankWasmResourceError,
 } from './term-bank-wasm-parser.js';
@@ -1586,6 +1587,7 @@ export class DictionaryImporter {
             ) {
                 void prewarmParallelTermBankParser();
             }
+            let importWideSourceRunEnabled = true;
             for (let termFileIndex = 0; termFileIndex < activeTermFiles.length; ++termFileIndex) {
                 const termFile = activeTermFiles[termFileIndex];
                 const tTermFile = Date.now();
@@ -1713,11 +1715,13 @@ export class DictionaryImporter {
                 } else if (!this._disableTermBankWasmFastPath) {
                     try {
                         const termFileEntry = /** @type {import('@zip.js/zip.js').Entry} */ (termFile);
-                        let sourceTermFileBatch = termBankSourcePipeline.canPrefetch(termFile) ? termBankSourcePipeline.getBatch(termFileIndex) : [];
+                        const importRunPlan = importWideSourceRunEnabled ? termBankSourcePipeline.createImportRunPlan(termFileIndex) : null;
+                        const usedImportWideSourceRun = importRunPlan !== null;
+                        let sourceTermFileBatch = importRunPlan?.files ?? (termBankSourcePipeline.canPrefetch(termFile) ? termBankSourcePipeline.getBatch(termFileIndex) : []);
                         let tSourceArchiveReadStart = Date.now();
-                        let preloadedTermFileBytes = termBankSourcePipeline.canPrefetch(termFile) ?
-                            await termBankSourcePipeline.readBatch(sourceTermFileBatch) :
-                            null;
+                        let preloadedTermFileBytes = importRunPlan === null ?
+                            (termBankSourcePipeline.canPrefetch(termFile) ? await termBankSourcePipeline.readBatch(sourceTermFileBatch) : null) :
+                            {loaders: importRunPlan.loaders, estimatedByteLengths: importRunPlan.estimatedByteLengths};
                         sourceArchiveReadMs += Math.max(0, Date.now() - tSourceArchiveReadStart);
                         if (preloadedTermFileBytes === null) {
                             sourceTermFileBatch = [termFile];
@@ -1733,7 +1737,9 @@ export class DictionaryImporter {
                         const sourceTermFileForProcessing = sourceTermFileBatchCount > 1 ? {filename: sourceTermFileLabel} : termFile;
                         streamedProgressAllowance = sourceTermFileProgressAllowance;
                         streamedTermFileLabel = sourceTermFileLabel;
-                        termBankSourcePipeline.prefetchNext(termFileIndex + sourceTermFileBatchCount);
+                        if (!usedImportWideSourceRun) {
+                            termBankSourcePipeline.prefetchNext(termFileIndex + sourceTermFileBatchCount);
+                        }
                         await this._readTermBankFileFast(
                             sourceTermFileBatchCount > 1 ? /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ (sourceTermFileForProcessing)) : termFileEntry,
                             version,
@@ -1770,6 +1776,7 @@ export class DictionaryImporter {
                         streamedImportCompleted = true;
                     } catch (error) {
                         const e = toError(error);
+                        importWideSourceRunEnabled = false;
                         await termBankSourcePipeline.abortAndJoin();
                         this._throwIfCancelled();
                         if (e instanceof TermBankWasmResourceError) { throw e; }
@@ -3590,7 +3597,7 @@ export class DictionaryImporter {
      * @param {boolean} enableTermEntryContentDedup
      * @param {'baseline'|'raw-bytes'} termContentStorageMode
      * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} [onChunk]
-     * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|{promises: Promise<Uint8Array>[], estimatedByteLengths: number[]}|null} [preloadedBytes]
+     * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|{promises: Promise<Uint8Array>[], estimatedByteLengths: number[]}|{loaders: Array<() => Promise<Uint8Array>>, estimatedByteLengths: number[]}|null} [preloadedBytes]
      * @param {number|null} [wasmRowChunkSizeOverride]
      * @returns {Promise<{termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null}>}
      */
@@ -3598,6 +3605,8 @@ export class DictionaryImporter {
         this._lastFastTermBankReadProfile = null;
         /** @type {{promises: Promise<Uint8Array>[], estimatedByteLengths: number[]}|null} */
         let deferredSourceBatch = null;
+        /** @type {{loaders: Array<() => Promise<Uint8Array>>, estimatedByteLengths: number[]}|null} */
+        let lazySourceBatch = null;
         if (
             typeof preloadedBytes === 'object' &&
             preloadedBytes !== null &&
@@ -3606,10 +3615,18 @@ export class DictionaryImporter {
             'estimatedByteLengths' in preloadedBytes
         ) {
             deferredSourceBatch = preloadedBytes;
+        } else if (
+            typeof preloadedBytes === 'object' &&
+            preloadedBytes !== null &&
+            !Array.isArray(preloadedBytes) &&
+            'loaders' in preloadedBytes &&
+            'estimatedByteLengths' in preloadedBytes
+        ) {
+            lazySourceBatch = preloadedBytes;
         }
         /** @type {Uint8Array|Uint8Array[]|null} */
         let bytes = null;
-        if (deferredSourceBatch === null) {
+        if (deferredSourceBatch === null && lazySourceBatch === null) {
             bytes = /** @type {Uint8Array|Uint8Array[]} */ (
                 preloadedBytes !== null ? await preloadedBytes : await this._getData(termFile, new Uint8ArrayWriter())
             );
@@ -3621,7 +3638,7 @@ export class DictionaryImporter {
         }
         const totalSourceBytes = sourceByteArrays !== null ?
             sourceByteArrays.reduce((sum, sourceBytes) => sum + sourceBytes.byteLength, 0) :
-            (deferredSourceBatch?.estimatedByteLengths ?? []).reduce((sum, length) => sum + length, 0);
+            (deferredSourceBatch?.estimatedByteLengths ?? lazySourceBatch?.estimatedByteLengths ?? []).reduce((sum, length) => sum + length, 0);
         let wasmRowChunkSize = this._termBankWasmRowChunkSize;
         if (this._adaptiveTermBankWasmRowChunkSizeTiered) {
             if (
@@ -3920,7 +3937,16 @@ export class DictionaryImporter {
             const parseTermBankChunks = useDirectArtifactChunkImport ? parseTermBankWithWasmColumnChunks : parseTermBankWithWasmChunks;
             let usedParallelParser = false;
             if (useDirectArtifactChunkImport && (!useMediaPipeline || useMediaDirectArtifactChunkImport)) {
-                if (deferredSourceBatch !== null) {
+                if (lazySourceBatch !== null) {
+                    usedParallelParser = await parseTermBankWithWasmColumnChunksParallelLazy(
+                        lazySourceBatch.loaders,
+                        lazySourceBatch.estimatedByteLengths,
+                        version,
+                        handleParsedChunk,
+                        parserOptions,
+                        () => this._isCancelled(),
+                    );
+                } else if (deferredSourceBatch !== null) {
                     usedParallelParser = await parseTermBankWithWasmColumnChunksParallelDeferred(
                         deferredSourceBatch.promises,
                         deferredSourceBatch.estimatedByteLengths,
@@ -3940,6 +3966,9 @@ export class DictionaryImporter {
                 }
             }
             const parallelParserSkipReason = usedParallelParser ? null : consumeLastParallelParserSkipReason();
+            if (!usedParallelParser && lazySourceBatch !== null) {
+                throw new Error(`Import-wide parallel parser unavailable (${parallelParserSkipReason ?? 'unknown'})`);
+            }
             if (!usedParallelParser && deferredSourceBatch !== null) {
                 sourceByteArrays = await Promise.all(deferredSourceBatch.promises);
                 if (!sourceByteArrays.every((sourceBytes) => getJsonArrayContentSpan(sourceBytes) !== null)) {
