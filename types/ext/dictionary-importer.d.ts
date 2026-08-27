@@ -88,6 +88,7 @@ export type DictionaryStorageHealth = 'available' | 'repairPending' | 'repairing
 
 export type Summary = {
     title: string;
+    termRecordStorageName?: string;
     sourceTitle?: string | null;
     replacedDictionaryTitle?: string | null;
     transientUpdateStage?: string | null;

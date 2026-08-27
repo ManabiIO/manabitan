@@ -489,6 +489,10 @@ export class DictionaryDatabase {
         this._directTermIndexGeneration = 0;
         /** @type {Map<string, {expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}>} */
         this._directTermIndexByDictionary = new Map();
+        /** @type {Map<string, string>} */
+        this._termRecordStorageNameByDictionary = new Map();
+        /** @type {Map<string, string>} */
+        this._dictionaryNameByTermRecordStorage = new Map();
         /** @type {import('@sqlite.org/sqlite-wasm').sqlite3_module|null} */
         this._termsVtabModule = null;
         /** @type {boolean} */
@@ -591,7 +595,9 @@ export class DictionaryDatabase {
                 await initializeTermContentZstd();
                 this._termContentZstdInitialized = true;
                 await this._deleteLegacyIndexedDb();
+                this._refreshTermRecordStorageNameMappings();
                 await this._cleanupIncompleteImports();
+                this._refreshTermRecordStorageNameMappings();
                 await this._cleanupMissingTermRecordShards();
 
                 // keep existing draw worker split behaviour.
@@ -1021,7 +1027,8 @@ export class DictionaryDatabase {
         const logicalStoreState = this._termContentStore.getDebugState();
         const logicalTotalLength = this._asNumber(logicalStoreState?.totalLength, -1);
         await this._termContentStore.ensureLoadedForRead();
-        await this._termRecordStore.ensureDictionariesLoaded([dictionaryName]);
+        const termRecordStorageName = this._getTermRecordStorageName(dictionaryName);
+        await this._termRecordStore.ensureDictionariesLoaded([termRecordStorageName]);
         const persistedStoreState = this._termContentStore.getDebugState();
         const persistedTotalLength = this._asNumber(persistedStoreState?.totalLength, -1);
         const ids = this._getDirectDictionarySampleIds(dictionaryName, sampleLimit);
@@ -1694,7 +1701,8 @@ export class DictionaryDatabase {
 
         /** @type {number[]} */
         const counts = [];
-        await this._termRecordStore.ensureDictionariesLoaded([dictionaryName]);
+        const termRecordStorageName = this._getTermRecordStorageName(dictionaryName);
+        await this._termRecordStore.ensureDictionariesLoaded([termRecordStorageName]);
         const termCount = this._getDirectDictionaryRecordCount(dictionaryName);
         progressData.count += termCount;
         counts.push(termCount);
@@ -1730,7 +1738,8 @@ export class DictionaryDatabase {
         // deletion first: a crash can then leave only an orphan shard, which
         // startup integrity cleanup can safely remove. The opposite order can
         // leave an installed dictionary pointing at records that no longer exist.
-        const deletedTerms = await this._termRecordStore.deleteByDictionary(dictionaryName);
+        const deletedTerms = await this._termRecordStore.deleteByDictionary(termRecordStorageName);
+        this._unregisterTermRecordStorageName(dictionaryName);
         this._termsVirtualTableDirty = true;
         progressData.processed += deletedTerms;
         ++progressData.storesProcesed;
@@ -1820,11 +1829,16 @@ export class DictionaryDatabase {
                     return null;
                 }
             })();
-            return (
+            const nextSummary = (
                 summaryValue && typeof summaryValue === 'object' && !Array.isArray(summaryValue) ?
                     {...summaryValue, title} :
                     (parsedSummary !== null ? {...parsedSummary, title} : {title, version: this._asNumber(Reflect.get(summaryRow, 'version'), 0)})
             );
+            const fallbackStorageName = parsedSummary !== null ?
+                this._getSummaryTermRecordStorageName(parsedSummary, this._asString(Reflect.get(parsedSummary, 'title')) || title) :
+                title;
+            nextSummary.termRecordStorageName = this._getSummaryTermRecordStorageName(nextSummary, fallbackStorageName);
+            return nextSummary;
         };
         const buildTransientSummaryForTitle = (summaryRow, title, stage, summaryValue = null) => ({
             ...buildSummaryForTitle(summaryRow, title, summaryValue),
@@ -1842,7 +1856,11 @@ export class DictionaryDatabase {
                 throw new Error(`Invalid dictionary row id for replacement: ${sourceTitle}`);
             }
             const nextSummary = buildSummaryForTitle(summaryRow, targetTitle, summaryValue);
-            let termRecordRenameCompleted = false;
+            const termRecordStorageName = this._getSummaryTermRecordStorageName(
+                nextSummary,
+                this._getTermRecordStorageName(sourceTitle),
+            );
+            nextSummary.termRecordStorageName = termRecordStorageName;
             await this._beginImmediateTransaction(db);
             try {
                 db.exec({sql: 'UPDATE dictionaries SET title = $toTitle, version = $version, summaryJson = $summaryJson WHERE id = $id', bind: {
@@ -1854,45 +1872,24 @@ export class DictionaryDatabase {
                 for (const table of ['termMeta', 'kanji', 'kanjiMeta', 'tagMeta', 'media', 'sharedGlossaryArtifacts']) {
                     db.exec({sql: `UPDATE ${table} SET dictionary = $toTitle WHERE dictionary = $fromTitle`, bind: {$fromTitle: sourceTitle, $toTitle: targetTitle}});
                 }
-                // OPFS is not covered by SQLite's transaction. Keep the source
-                // shard until the title update commits so a browser kill cannot
-                // leave SQLite pointing at a shard name which no longer exists.
-                await this._termRecordStore.replaceDictionaryName(sourceTitle, targetTitle, true);
-                termRecordRenameCompleted = true;
                 db.exec('COMMIT');
             } catch (e) {
-                const rollbackErrors = [];
+                let rollbackError = null;
                 try {
                     db.exec('ROLLBACK');
                 } catch (error) {
-                    rollbackErrors.push(toError(error));
+                    rollbackError = toError(error);
                 }
-                if (termRecordRenameCompleted) {
-                    try {
-                        await this._termRecordStore.rollbackPreservedDictionaryRename(sourceTitle, targetTitle);
-                    } catch (error) {
-                        rollbackErrors.push(toError(error));
-                    }
-                }
-                if (rollbackErrors.length > 0) {
+                if (rollbackError !== null) {
                     throw new AggregateError(
-                        [toError(e), ...rollbackErrors],
-                        `Dictionary title replacement and rollback failed for ${sourceTitle} to ${targetTitle}`,
+                        [toError(e), rollbackError],
+                        `Dictionary title metadata replacement and rollback failed for ${sourceTitle} to ${targetTitle}`,
                     );
                 }
                 throw e;
             }
-            try {
-                await this.cleanupTransientTermRecordShards(
-                    (dictionaryName) => String(dictionaryName || '').trim() === sourceTitle,
-                );
-            } catch (error) {
-                reportDiagnostics('dictionary-title-replacement-source-cleanup-failed', {
-                    sourceTitle,
-                    targetTitle,
-                    error: toError(error).message,
-                });
-            }
+            this._unregisterTermRecordStorageName(sourceTitle);
+            this._registerTermRecordStorageName(targetTitle, termRecordStorageName);
             this._lastReplaceDictionaryTitleDebug = {
                 ...(this._lastReplaceDictionaryTitleDebug ?? {}),
                 [debugKey]: snapshotRows(),
@@ -1939,7 +1936,7 @@ export class DictionaryDatabase {
                         rows: snapshotRows(),
                     },
                 };
-                await this._termRecordStore.deleteByDictionary(title);
+                await this._termRecordStore.deleteByDictionary(this._getTermRecordStorageName(title));
                 await this.cleanupTransientTermRecordShards((dictionaryName) => String(dictionaryName || '').trim() === title);
                 await this._beginImmediateTransaction(db);
                 try {
@@ -1959,6 +1956,7 @@ export class DictionaryDatabase {
                     try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
                     throw e;
                 }
+                this._unregisterTermRecordStorageName(title);
                 await this._cleanupTermContentAfterDictionaryDelete();
                 this._lastReplaceDictionaryTitleDebug = {
                     ...(this._lastReplaceDictionaryTitleDebug ?? {}),
@@ -2247,6 +2245,86 @@ export class DictionaryDatabase {
     }
 
     /**
+     * @param {unknown} summary
+     * @param {string} fallbackTitle
+     * @returns {string}
+     */
+    _getSummaryTermRecordStorageName(summary, fallbackTitle) {
+        if (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) {
+            const value = Reflect.get(summary, 'termRecordStorageName');
+            if (typeof value === 'string' && value.trim().length > 0) {
+                return value.trim();
+            }
+        }
+        return fallbackTitle;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {string} storageName
+     * @throws {Error} If a physical storage name is already owned by another dictionary.
+     */
+    _registerTermRecordStorageName(dictionaryName, storageName) {
+        const logicalName = `${dictionaryName}`.trim();
+        const physicalName = `${storageName}`.trim();
+        if (logicalName.length === 0 || physicalName.length === 0) { return; }
+        const previousLogicalName = this._dictionaryNameByTermRecordStorage.get(physicalName);
+        if (typeof previousLogicalName !== 'undefined' && previousLogicalName !== logicalName) {
+            throw new Error(`Term-record storage name collision: ${physicalName}`);
+        }
+        const previousStorageName = this._termRecordStorageNameByDictionary.get(logicalName);
+        if (typeof previousStorageName !== 'undefined' && previousStorageName !== physicalName) {
+            this._dictionaryNameByTermRecordStorage.delete(previousStorageName);
+        }
+        this._termRecordStorageNameByDictionary.set(logicalName, physicalName);
+        this._dictionaryNameByTermRecordStorage.set(physicalName, logicalName);
+    }
+
+    /**
+     * @param {string} dictionaryName
+     */
+    _unregisterTermRecordStorageName(dictionaryName) {
+        const storageName = this._termRecordStorageNameByDictionary.get(dictionaryName);
+        this._termRecordStorageNameByDictionary.delete(dictionaryName);
+        if (typeof storageName !== 'undefined' && this._dictionaryNameByTermRecordStorage.get(storageName) === dictionaryName) {
+            this._dictionaryNameByTermRecordStorage.delete(storageName);
+        }
+    }
+
+    /** */
+    _refreshTermRecordStorageNameMappings() {
+        const db = this._requireDb();
+        const rows = db.selectObjects('SELECT title, summaryJson FROM dictionaries ORDER BY id ASC');
+        this._termRecordStorageNameByDictionary.clear();
+        this._dictionaryNameByTermRecordStorage.clear();
+        for (const row of rows) {
+            const title = this._asString(row.title).trim();
+            if (title.length === 0) { continue; }
+            const summary = this._safeParseJson(this._asString(row.summaryJson), null);
+            this._registerTermRecordStorageName(
+                title,
+                this._getSummaryTermRecordStorageName(summary, title),
+            );
+        }
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @returns {string}
+     */
+    _getTermRecordStorageName(dictionaryName) {
+        return this._termRecordStorageNameByDictionary.get(dictionaryName) ?? dictionaryName;
+    }
+
+    /**
+     * @param {string} storageName
+     * @returns {string}
+     */
+    _getDictionaryNameForTermRecordStorage(storageName) {
+        return this._dictionaryNameByTermRecordStorage.get(storageName) ?? storageName;
+    }
+
+    /**
      * @param {string} dictionaryCacheKey
      * @param {string} term
      * @returns {string}
@@ -2275,7 +2353,7 @@ export class DictionaryDatabase {
         if (typeof existing !== 'undefined') {
             return existing;
         }
-        const index = this._termRecordStore.getDictionaryIndex(dictionaryName);
+        const index = this._termRecordStore.getDictionaryIndex(this._getTermRecordStorageName(dictionaryName));
         this._directTermIndexByDictionary.set(dictionaryName, index);
         return index;
     }
@@ -2289,7 +2367,7 @@ export class DictionaryDatabase {
     _findDirectTermIds(dictionaryName, query, field) {
         const directFind = Reflect.get(this._termRecordStore, 'findTermIds');
         if (typeof directFind === 'function') {
-            return directFind.call(this._termRecordStore, dictionaryName, query, field);
+            return directFind.call(this._termRecordStore, this._getTermRecordStorageName(dictionaryName), query, field);
         }
         return this._ensureDirectTermIndex(dictionaryName)[field].get(query) ?? [];
     }
@@ -2302,7 +2380,7 @@ export class DictionaryDatabase {
     _findDirectTermIdMatches(dictionaryName, query) {
         const directFind = Reflect.get(this._termRecordStore, 'findTermIdMatches');
         if (typeof directFind === 'function') {
-            return directFind.call(this._termRecordStore, dictionaryName, query);
+            return directFind.call(this._termRecordStore, this._getTermRecordStorageName(dictionaryName), query);
         }
         const index = this._ensureDirectTermIndex(dictionaryName);
         return {
@@ -2321,11 +2399,11 @@ export class DictionaryDatabase {
     _findDirectTermPrefixIdMatches(dictionaryName, query, field, reverse) {
         const directFind = Reflect.get(this._termRecordStore, 'findTermPrefixIdMatches');
         if (typeof directFind === 'function') {
-            return directFind.call(this._termRecordStore, dictionaryName, query, field, reverse);
+            return directFind.call(this._termRecordStore, this._getTermRecordStorageName(dictionaryName), query, field, reverse);
         }
         const index = this._ensureDirectTermIndex(dictionaryName);
         if (reverse) {
-            this._termRecordStore.ensureDictionaryReverseIndex(dictionaryName, index);
+            this._termRecordStore.ensureDictionaryReverseIndex(this._getTermRecordStorageName(dictionaryName), index);
         }
         const lookup = reverse ?
             (field === 'expression' ? index.expressionReverse : index.readingReverse) :
@@ -2348,7 +2426,7 @@ export class DictionaryDatabase {
     _findDirectTermIdsBySequence(dictionaryName, sequence) {
         const directFind = Reflect.get(this._termRecordStore, 'findTermIdsBySequence');
         if (typeof directFind === 'function') {
-            return directFind.call(this._termRecordStore, dictionaryName, sequence);
+            return directFind.call(this._termRecordStore, this._getTermRecordStorageName(dictionaryName), sequence);
         }
         return this._ensureDirectTermIndex(dictionaryName).sequence.get(sequence) ?? [];
     }
@@ -2361,7 +2439,7 @@ export class DictionaryDatabase {
     _getDirectDictionarySampleIds(dictionaryName, limit) {
         const getSampleIds = Reflect.get(this._termRecordStore, 'getDictionarySampleIds');
         if (typeof getSampleIds === 'function') {
-            return getSampleIds.call(this._termRecordStore, dictionaryName, limit);
+            return getSampleIds.call(this._termRecordStore, this._getTermRecordStorageName(dictionaryName), limit);
         }
         const ids = [];
         for (const valueIds of this._ensureDirectTermIndex(dictionaryName).expression.values()) {
@@ -2380,7 +2458,7 @@ export class DictionaryDatabase {
     _getDirectDictionaryRecordCount(dictionaryName) {
         const getRecordCount = Reflect.get(this._termRecordStore, 'getDictionaryRecordCount');
         if (typeof getRecordCount === 'function') {
-            return getRecordCount.call(this._termRecordStore, dictionaryName);
+            return getRecordCount.call(this._termRecordStore, this._getTermRecordStorageName(dictionaryName));
         }
         let count = 0;
         for (const ids of this._ensureDirectTermIndex(dictionaryName).expression.values()) {
@@ -2435,23 +2513,33 @@ export class DictionaryDatabase {
         if (namesToLoad.length > 0) {
             const generation = this._directTermIndexGeneration;
             const promise = (async () => {
-                await this._termRecordStore.ensureDictionariesLoaded(namesToLoad);
+                const storageNamesToLoad = namesToLoad.map((name) => this._getTermRecordStorageName(name));
+                await this._termRecordStore.ensureDictionariesLoaded(storageNamesToLoad);
                 if (generation !== this._directTermIndexGeneration) {
                     return;
                 }
                 const isDictionaryAvailable = Reflect.get(this._termRecordStore, 'isDictionaryAvailable');
                 const availableNames = typeof isDictionaryAvailable === 'function' ?
-                    namesToLoad.filter((dictionaryName) => isDictionaryAvailable.call(this._termRecordStore, dictionaryName)) :
+                    namesToLoad.filter((dictionaryName) => isDictionaryAvailable.call(
+                        this._termRecordStore,
+                        this._getTermRecordStorageName(dictionaryName),
+                    )) :
                     namesToLoad;
                 const hasPersistentTermLookupIndex = Reflect.get(this._termRecordStore, 'hasPersistentTermLookupIndex');
                 const fallbackNames = typeof hasPersistentTermLookupIndex === 'function' ?
                     availableNames.filter(
-                        (dictionaryName) => !hasPersistentTermLookupIndex.call(this._termRecordStore, dictionaryName),
+                        (dictionaryName) => !hasPersistentTermLookupIndex.call(
+                            this._termRecordStore,
+                            this._getTermRecordStorageName(dictionaryName),
+                        ),
                     ) :
                     availableNames;
                 const ensureDictionaryIndexes = /** @type {unknown} */ (Reflect.get(this._termRecordStore, 'ensureDictionaryIndexes'));
                 if (typeof ensureDictionaryIndexes === 'function' && fallbackNames.length > 0) {
-                    /** @type {(dictionaryNames: Iterable<string>) => void} */ (ensureDictionaryIndexes).call(this._termRecordStore, fallbackNames);
+                    /** @type {(dictionaryNames: Iterable<string>) => void} */ (ensureDictionaryIndexes).call(
+                        this._termRecordStore,
+                        fallbackNames.map((name) => this._getTermRecordStorageName(name)),
+                    );
                 }
                 for (const dictionaryName of fallbackNames) {
                     this._ensureDirectTermIndex(dictionaryName);
@@ -2499,7 +2587,7 @@ export class DictionaryDatabase {
             this._warmSharedGlossaryArtifacts(names),
             this._warmLookupProbeTerms(names),
         ]);
-        await this._termRecordStore.warmPrefixIndexes(names);
+        await this._termRecordStore.warmPrefixIndexes(names.map((name) => this._getTermRecordStorageName(name)));
     }
 
     /**
@@ -2666,7 +2754,10 @@ export class DictionaryDatabase {
         const isDictionaryAvailable = Reflect.get(this._termRecordStore, 'isDictionaryAvailable');
         const dictionaryNames = typeof isDictionaryAvailable === 'function' ?
             requestedDictionaryNames.filter(
-                (dictionaryName) => isDictionaryAvailable.call(this._termRecordStore, dictionaryName),
+                (dictionaryName) => isDictionaryAvailable.call(
+                    this._termRecordStore,
+                    this._getTermRecordStorageName(dictionaryName),
+                ),
             ) :
             requestedDictionaryNames;
         if (dictionaryNames.length === 0) {
@@ -2737,7 +2828,11 @@ export class DictionaryDatabase {
                     const dictionaryMatches = typeof directFindForDictionaries === 'function' ?
                         /** @type {(dictionaryNames: string[], query: string) => Array<{expression: number[], reading: number[]}>} */ (
                             directFindForDictionaries
-                        ).call(this._termRecordStore, dictionaryNames, term) :
+                        ).call(
+                            this._termRecordStore,
+                            dictionaryNames.map((name) => this._getTermRecordStorageName(name)),
+                            term,
+                        ) :
                         dictionaryNames.map(
                             (dictionaryName) => this._findDirectTermIdMatches(dictionaryName, term),
                         );
@@ -2842,7 +2937,12 @@ export class DictionaryDatabase {
             const matchesByDictionary = typeof directFindForDictionaries === 'function' ?
                 /** @type {(dictionaryNames: string[], query: string, reverse: boolean) => Array<{expression: Array<{id: number, exact: boolean}>, reading: Array<{id: number, exact: boolean}>}>} */ (
                     directFindForDictionaries
-                ).call(this._termRecordStore, dictionaryNames, directQuery, matchType === 'suffix') :
+                ).call(
+                    this._termRecordStore,
+                    dictionaryNames.map((name) => this._getTermRecordStorageName(name)),
+                    directQuery,
+                    matchType === 'suffix',
+                ) :
                 dictionaryNames.map((dictionaryName) => ({
                     expression: this._findDirectTermPrefixIdMatches(dictionaryName, directQuery, 'expression', matchType === 'suffix'),
                     reading: this._findDirectTermPrefixIdMatches(dictionaryName, directQuery, 'reading', matchType === 'suffix'),
@@ -3357,9 +3457,10 @@ export class DictionaryDatabase {
                     {}
             );
             const title = this._asString(summary.title);
+            const termRecordStorageName = this._getSummaryTermRecordStorageName(summary, title);
             const getDictionaryHealth = Reflect.get(this._termRecordStore, 'getDictionaryHealth');
             const health = typeof getDictionaryHealth === 'function' ?
-                getDictionaryHealth.call(this._termRecordStore, title) :
+                getDictionaryHealth.call(this._termRecordStore, termRecordStorageName) :
                 {status: 'available', reason: null};
             summary.storageHealth = health.status;
             summary.storageHealthReason = health.reason;
@@ -3374,8 +3475,9 @@ export class DictionaryDatabase {
      * @param {'available'|'repairPending'|'repairing'|'temporarilyUnavailable'|'reimportRequired'} status
      * @param {string|null} reason
      */
-    _onTermRecordDictionaryHealthChanged(dictionaryName, status, reason) {
+    _onTermRecordDictionaryHealthChanged(termRecordStorageName, status, reason) {
         if (this._db === null) { return; }
+        const dictionaryName = this._getDictionaryNameForTermRecordStorage(termRecordStorageName);
         if (status === 'reimportRequired') {
             // A lookup may have populated these caches immediately before a
             // concurrent integrity failure invalidated the backing shard.
@@ -3412,7 +3514,7 @@ export class DictionaryDatabase {
             const title = this._asString(row.title).trim();
             if (title.length === 0) { continue; }
             const reason = this._asString(row.reason).trim() || 'Dictionary record data is damaged';
-            this._termRecordStore.markDictionaryReimportRequired(title, reason);
+            this._termRecordStore.markDictionaryReimportRequired(this._getTermRecordStorageName(title), reason);
         }
     }
 
@@ -3421,7 +3523,7 @@ export class DictionaryDatabase {
      * @returns {Promise<import('dictionary-database').DictionaryTermProbe|null>}
      */
     async getDictionaryTermProbe(dictionaryName) {
-        await this._termRecordStore.ensureDictionariesLoaded([dictionaryName]);
+        await this._termRecordStore.ensureDictionariesLoaded([this._getTermRecordStorageName(dictionaryName)]);
         const probeId = this._getDirectDictionarySampleIds(dictionaryName, 1)[0] ?? null;
         if (probeId === null) { return null; }
         const record = (await this._termRecordStore.getByIdsAsync([probeId])).get(probeId);
@@ -3587,13 +3689,9 @@ export class DictionaryDatabase {
         for (const {title, originalTitle, summary} of restorableReplacedTitles) {
             if (installedTitles.has(originalTitle)) { continue; }
             try {
-                // A crash after SQLite committed the move-aside title but before
-                // its old OPFS copy was removed can leave an unreferenced shard
-                // under originalTitle. The recognized replaced row is the
-                // authoritative complete copy, so remove that stale collision.
-                await this.cleanupTransientTermRecordShards(
-                    (dictionaryName) => String(dictionaryName || '').trim() === originalTitle,
-                );
+                // Term-record storage has immutable identity. Restoring the
+                // logical title is a SQLite-only cutover and must retain the
+                // storage name recorded by the moved-aside summary.
                 await this.replaceDictionaryTitle(title, originalTitle, summary, null);
                 dictionaryTitlesToDelete.delete(title);
                 installedTitles.add(originalTitle);
@@ -3691,19 +3789,26 @@ export class DictionaryDatabase {
             const terms = (typeof counts === 'object' && counts !== null) ? /** @type {unknown} */ (Reflect.get(counts, 'terms')) : null;
             const total = (typeof terms === 'object' && terms !== null) ? this._asNumber(Reflect.get(terms, 'total'), 0) : 0;
             if (total > 0) {
-                expectedTermDictionaryNames.push(title);
+                expectedTermDictionaryNames.push(this._getTermRecordStorageName(title));
             }
         }
         const shardIntegrity = await this._termRecordStore.verifyIntegrity(expectedTermDictionaryNames);
-        const missingShardDictionaryNames = [...new Set(
+        const missingShardStorageNames = [...new Set(
             (Array.isArray(shardIntegrity.missingDictionaryNames) ? shardIntegrity.missingDictionaryNames : [])
                 .filter((name) => typeof name === 'string' && name.length > 0),
         )].sort((a, b) => a.localeCompare(b));
+        const missingShardDictionaryNames = missingShardStorageNames.map(
+            (name) => this._getDictionaryNameForTermRecordStorage(name),
+        );
 
         /** @type {string[]} */
         const markedReimportRequiredTitles = [];
-        for (const title of missingShardDictionaryNames) {
-            this._termRecordStore.markDictionaryReimportRequired(title, 'Dictionary record data is missing');
+        for (let i = 0; i < missingShardDictionaryNames.length; ++i) {
+            const title = missingShardDictionaryNames[i];
+            this._termRecordStore.markDictionaryReimportRequired(
+                missingShardStorageNames[i],
+                'Dictionary record data is missing',
+            );
             markedReimportRequiredTitles.push(title);
         }
 
@@ -3767,7 +3872,9 @@ export class DictionaryDatabase {
             }
         }
         if (fallbackDictionaryNames.size > 0) {
-            await this._termRecordStore.ensureDictionariesLoaded(fallbackDictionaryNames);
+            await this._termRecordStore.ensureDictionariesLoaded(
+                [...fallbackDictionaryNames].map((name) => this._getTermRecordStorageName(name)),
+            );
         }
         const getTermCount = (dictionaryName) => summaryTermCountByDictionary.get(dictionaryName) ?? this._getDirectDictionaryRecordCount(dictionaryName);
 
@@ -4409,6 +4516,13 @@ export class DictionaryDatabase {
     async addWithResult(objectStoreName, item) {
         await this.bulkAdd(objectStoreName, [item], 0, 1);
         const db = this._requireDb();
+        if (objectStoreName === 'dictionaries') {
+            const summary = /** @type {import('dictionary-importer').Summary} */ (item);
+            this._registerTermRecordStorageName(
+                summary.title,
+                this._getSummaryTermRecordStorageName(summary, summary.title),
+            );
+        }
         return this._asNumber(db.selectValue('SELECT last_insert_rowid()'), -1);
     }
 
@@ -5220,7 +5334,9 @@ export class DictionaryDatabase {
             blockStore: this._termContentBlockStore.getDiagnostics(),
             opfsStore: this._termContentStore.getDebugState(),
             opfsReadError: this._termContentStore.getLastReadErrorDetails(),
-            termRecordStore: this._termRecordStore.getDiagnostics(dictionaryNames),
+            termRecordStore: this._termRecordStore.getDiagnostics(
+                [...dictionaryNames].map((name) => this._getTermRecordStorageName(name)),
+            ),
         };
     }
 
@@ -8356,6 +8472,8 @@ export class DictionaryDatabase {
         const termsVtabCursorState = this._termsVtabCursorState;
         const asNumber = this._asNumber.bind(this);
         const asString = this._asString.bind(this);
+        const getTermRecordStorageName = this._getTermRecordStorageName.bind(this);
+        const getDictionaryNameForTermRecordStorage = this._getDictionaryNameForTermRecordStorage.bind(this);
         const eqOp = typeof capi.SQLITE_INDEX_CONSTRAINT_EQ === 'number' ? capi.SQLITE_INDEX_CONSTRAINT_EQ : 2;
         const toPtr = (value) => this._asNumber(value, 0);
         const schema = `
@@ -8466,7 +8584,9 @@ export class DictionaryDatabase {
                     let sequence = null;
                     const idxBits = toPtr(idxNum);
                     if ((idxBits & termsVtabIdxRowIdEq) !== 0) { rowId = asNumber(args[argIndex++], -1); }
-                    if ((idxBits & termsVtabIdxDictionaryEq) !== 0) { dictionary = asString(args[argIndex++]); }
+                    if ((idxBits & termsVtabIdxDictionaryEq) !== 0) {
+                        dictionary = getTermRecordStorageName(asString(args[argIndex++]));
+                    }
                     if ((idxBits & termsVtabIdxExpressionEq) !== 0) { expression = asString(args[argIndex++]); }
                     if ((idxBits & termsVtabIdxReadingEq) !== 0) { reading = asString(args[argIndex++]); }
                     if ((idxBits & termsVtabIdxSequenceEq) !== 0) { sequence = asNumber(args[argIndex++], -1); }
@@ -8512,7 +8632,7 @@ export class DictionaryDatabase {
                     }
                     let value = null;
                     switch (toPtr(column)) {
-                        case 0: value = record.dictionary; break;
+                        case 0: value = getDictionaryNameForTermRecordStorage(record.dictionary); break;
                         case 1: value = record.expression; break;
                         case 2: value = record.reading; break;
                         case 3: value = record.expressionReverse; break;
@@ -8608,7 +8728,7 @@ export class DictionaryDatabase {
                 for (const [id, record] of entryGroups[entryIndex]) {
                     const row = await this._deserializeTermRow({
                         id,
-                        dictionary: record.dictionary,
+                        dictionary: this._getDictionaryNameForTermRecordStorage(record.dictionary),
                         expression: record.expression,
                         reading: record.reading,
                         expressionReverse: record.expressionReverse,
@@ -8718,7 +8838,10 @@ export class DictionaryDatabase {
                             contentDictName,
                         });
                         if (readResult.status === 'corrupt' && dictionaryName.length > 0) {
-                            this._termRecordStore.markDictionaryReimportRequired(dictionaryName, readResult.reason);
+                            this._termRecordStore.markDictionaryReimportRequired(
+                                this._getTermRecordStorageName(dictionaryName),
+                                readResult.reason,
+                            );
                         }
                         throw new Error(
                             readResult.status === 'corrupt' ?
@@ -8865,7 +8988,10 @@ export class DictionaryDatabase {
                                 phase: 'shared-glossary',
                             });
                             if (e.status === 'corrupt' && dictionaryName.length > 0) {
-                                this._termRecordStore.markDictionaryReimportRequired(dictionaryName, e.message);
+                                this._termRecordStore.markDictionaryReimportRequired(
+                                    this._getTermRecordStorageName(dictionaryName),
+                                    e.message,
+                                );
                             }
                             throw new Error(
                                 e.status === 'corrupt' ?
@@ -8884,7 +9010,10 @@ export class DictionaryDatabase {
                             contentDictName,
                         });
                         if (dictionaryName.length > 0) {
-                            this._termRecordStore.markDictionaryReimportRequired(dictionaryName, reason);
+                            this._termRecordStore.markDictionaryReimportRequired(
+                                this._getTermRecordStorageName(dictionaryName),
+                                reason,
+                            );
                         }
                         throw new Error(reason, {cause: e});
                     }

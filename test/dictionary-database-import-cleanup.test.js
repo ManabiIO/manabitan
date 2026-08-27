@@ -11,7 +11,7 @@ import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 
 describe('DictionaryDatabase import cleanup', () => {
-    test('rolls back a preserved term-record rename when the SQLite title commit fails', async () => {
+    test('rolls back title metadata without touching immutable term-record storage when commit fails', async () => {
         const database = new DictionaryDatabase();
         let row = {
             id: 1,
@@ -70,12 +70,12 @@ describe('DictionaryDatabase import cleanup', () => {
         await expect(database.replaceDictionaryTitle('JMdict staging', 'JMdict'))
             .rejects.toThrow('commit failed');
 
-        expect(replaceDictionaryName).toHaveBeenCalledWith('JMdict staging', 'JMdict', true);
-        expect(rollbackPreservedDictionaryRename).toHaveBeenCalledWith('JMdict staging', 'JMdict');
+        expect(replaceDictionaryName).not.toHaveBeenCalled();
+        expect(rollbackPreservedDictionaryRename).not.toHaveBeenCalled();
         expect(row.title).toBe('JMdict staging');
     });
 
-    test('reports both SQLite and OPFS failures during title rollback', async () => {
+    test('reports both title commit and metadata rollback failures without OPFS mutation', async () => {
         const database = new DictionaryDatabase();
         let row = {
             id: 1,
@@ -108,22 +108,22 @@ describe('DictionaryDatabase import cleanup', () => {
         await expect(database.replaceDictionaryTitle('JMdict staging', 'JMdict'))
             .rejects.toMatchObject({
                 name: 'AggregateError',
-                message: 'Dictionary title replacement and rollback failed for JMdict staging to JMdict',
+                message: 'Dictionary title metadata replacement and rollback failed for JMdict staging to JMdict',
                 errors: [
                     expect.objectContaining({message: 'commit failed'}),
                     expect.objectContaining({message: 'rollback failed'}),
-                    expect.objectContaining({message: 'OPFS rollback failed'}),
                 ],
             });
+        expect(Reflect.get(database, '_termRecordStore').replaceDictionaryName).not.toHaveBeenCalled();
+        expect(Reflect.get(database, '_termRecordStore').rollbackPreservedDictionaryRename).not.toHaveBeenCalled();
     });
 
-    test('publishes an update without an intermediate cutover shard copy', async () => {
+    test('publishes an update by changing metadata without copying immutable shards', async () => {
         const token = 'update-token';
         const stagingTitle = `JMdict [update-staging ${token}]`;
-        const replacedTitle = `JMdict [replaced ${token}]`;
         let rows = [
-            {id: 1, title: stagingTitle, version: 3, summaryJson: JSON.stringify({title: stagingTitle, version: 3, importSuccess: true})},
-            {id: 2, title: 'JMdict', version: 3, summaryJson: JSON.stringify({title: 'JMdict', version: 3, importSuccess: true})},
+            {id: 1, title: stagingTitle, version: 3, summaryJson: JSON.stringify({title: stagingTitle, termRecordStorageName: 'records-new', version: 3, importSuccess: true})},
+            {id: 2, title: 'JMdict', version: 3, summaryJson: JSON.stringify({title: 'JMdict', termRecordStorageName: 'records-old', version: 3, importSuccess: true})},
         ];
         let transactionSnapshot = [];
         const exec = vi.fn((value) => {
@@ -164,12 +164,9 @@ describe('DictionaryDatabase import cleanup', () => {
             'JMdict',
         );
 
-        expect(replaceDictionaryName.mock.calls).toStrictEqual([
-            ['JMdict', replacedTitle, true],
-            [stagingTitle, 'JMdict', true],
-        ]);
-        expect(replaceDictionaryName.mock.calls.flat().some((value) => `${value}`.includes('[cutover '))).toBe(false);
+        expect(replaceDictionaryName).not.toHaveBeenCalled();
         expect(rows.map(({title}) => title)).toStrictEqual(['JMdict']);
+        expect(JSON.parse(rows[0].summaryJson).termRecordStorageName).toBe('records-new');
     });
 
     test('restores the old generation when direct staged publication fails', async () => {
@@ -177,8 +174,8 @@ describe('DictionaryDatabase import cleanup', () => {
         const stagingTitle = `JMdict [update-staging ${token}]`;
         const replacedTitle = `JMdict [replaced ${token}]`;
         let rows = [
-            {id: 1, title: stagingTitle, version: 3, summaryJson: JSON.stringify({title: stagingTitle, version: 3, importSuccess: true})},
-            {id: 2, title: 'JMdict', version: 3, summaryJson: JSON.stringify({title: 'JMdict', version: 3, importSuccess: true})},
+            {id: 1, title: stagingTitle, version: 3, summaryJson: JSON.stringify({title: stagingTitle, termRecordStorageName: 'records-new', version: 3, importSuccess: true})},
+            {id: 2, title: 'JMdict', version: 3, summaryJson: JSON.stringify({title: 'JMdict', termRecordStorageName: 'records-old', version: 3, importSuccess: true})},
         ];
         let transactionSnapshot = [];
         const exec = vi.fn((value) => {
@@ -192,17 +189,14 @@ describe('DictionaryDatabase import cleanup', () => {
                     version: value.bind.$version,
                     summaryJson: value.bind.$summaryJson,
                 });
+            } else if (sql === 'COMMIT' && rows.some(({title}) => title === 'JMdict') && rows.some(({title}) => title === replacedTitle)) {
+                throw new Error('injected staged publication failure');
             } else if (sql === 'ROLLBACK') {
                 rows = transactionSnapshot.map((row) => ({...row}));
             }
         });
         const database = new DictionaryDatabase();
-        const replaceDictionaryName = vi.fn(async (fromTitle, toTitle) => {
-            if (fromTitle === stagingTitle && toTitle === 'JMdict') {
-                throw new Error('injected staged publication failure');
-            }
-            return 1;
-        });
+        const replaceDictionaryName = vi.fn().mockResolvedValue(1);
         Reflect.set(database, '_db', {
             exec,
             selectObject: vi.fn((_sql, bind) => rows.find(({title}) => title === bind.$title) ?? null),
@@ -221,12 +215,10 @@ describe('DictionaryDatabase import cleanup', () => {
             'JMdict',
         )).rejects.toThrow('injected staged publication failure');
 
-        expect(replaceDictionaryName.mock.calls).toStrictEqual([
-            ['JMdict', replacedTitle, true],
-            [stagingTitle, 'JMdict', true],
-            [replacedTitle, 'JMdict', true],
-        ]);
+        expect(replaceDictionaryName).not.toHaveBeenCalled();
         expect(rows.map(({title}) => title).sort()).toStrictEqual(['JMdict', stagingTitle].sort());
+        const oldRow = rows.find(({title}) => title === 'JMdict');
+        expect(JSON.parse(oldRow.summaryJson).termRecordStorageName).toBe('records-old');
     });
 
     test('removes a failed-import placeholder by primary key only', async () => {

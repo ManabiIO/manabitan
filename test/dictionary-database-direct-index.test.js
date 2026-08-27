@@ -89,6 +89,29 @@ describe('DictionaryDatabase direct term indexes', () => {
         ]);
     });
 
+    test('queries immutable term-record storage while preserving the logical dictionary title', async () => {
+        const database = createDatabase({});
+        const findTermIdMatches = vi.fn().mockReturnValue({expression: [7], reading: []});
+        Reflect.set(database, '_termRecordStore', {findTermIdMatches});
+        Reflect.get(database, '_registerTermRecordStorageName').call(
+            database,
+            'JMdict [2026-02-26]',
+            'JMdict [update-staging token123]',
+        );
+        Reflect.set(database, '_getDictionaryNames', vi.fn().mockReturnValue(['JMdict [2026-02-26]']));
+
+        const results = await database.findTermsBulk(
+            ['食べる'],
+            new Set(['JMdict [2026-02-26]']),
+            'exact',
+        );
+
+        expect(findTermIdMatches).toHaveBeenCalledWith('JMdict [update-staging token123]', '食べる');
+        expect(results).toEqual([
+            {id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 0},
+        ]);
+    });
+
     test('exact lookup probes all enabled dictionaries through one shared-query call', async () => {
         const database = createDatabase({});
         Reflect.set(database, '_getDictionaryNames', vi.fn().mockReturnValue(['JMdict', 'Jitendex']));

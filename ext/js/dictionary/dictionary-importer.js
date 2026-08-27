@@ -2384,6 +2384,7 @@ export class DictionaryImporter {
         /** @type {import('dictionary-importer').Summary} */
         const summary = {
             title: dictionaryTitle,
+            termRecordStorageName: dictionaryTitle,
             revision: index.revision,
             sequenced: typeof indexSequenced === 'boolean' && indexSequenced,
             version,
