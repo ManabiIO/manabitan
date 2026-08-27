@@ -128,13 +128,13 @@ describe('TermRecordOpfsStore', () => {
         Reflect.set(store, '_importSessionActive', true);
         Reflect.set(store, '_recordsDirectoryHandle', {});
         vi.spyOn(store, '_validateShardAppendFormat').mockResolvedValue();
-        vi.spyOn(store, '_createLookupIndexChunk').mockReturnValue(new Uint8Array(512 * 1024));
+        vi.spyOn(store, '_createLookupIndexChunk').mockReturnValue(new Uint8Array(2 * 1024 * 1024));
         const flushRecords = vi.spyOn(store, '_flushPendingWritesForShard').mockResolvedValue();
         const flushIndex = vi.spyOn(store, '_flushPendingLookupIndexChunks').mockResolvedValue();
 
         await store._appendEncodedChunk(
             state,
-            new Uint8Array(1024 * 1024),
+            new Uint8Array(4 * 1024 * 1024),
             1,
             1,
             'raw',

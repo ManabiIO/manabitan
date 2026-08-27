@@ -119,7 +119,7 @@ describe('TermContentOpfsStore', () => {
         store.setQueueImportWritesEnabled(true);
         const flush = vi.spyOn(store, '_flushPendingWrites').mockResolvedValue();
 
-        await store.appendBatch([new Uint8Array(1024 * 1024)]);
+        await store.appendBatch([new Uint8Array(4 * 1024 * 1024)]);
 
         expect(flush).toHaveBeenCalledOnce();
     });
