@@ -107,6 +107,26 @@ describe('TermContentCompressionPool', () => {
         pool.close();
     });
 
+    test('balances consecutive compression batches across the worker pool', async () => {
+        const workers = Array.from({length: 4}, () => new MockCompressionWorker((message) => ({
+            compressed: Uint8Array.of(/** @type {number} */ (message.contentBytes)).buffer,
+        })));
+        const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ (workers)));
+        const source = new Uint8Array(new SharedArrayBuffer(48));
+        const sourceOffsets = Uint32Array.from({length: 6}, (_, index) => index * 4);
+        const sourceLengths = new Uint32Array(6).fill(4);
+        const blockStarts = Uint32Array.from({length: 7}, (_, index) => index);
+        const blockLengths = new Uint32Array(6).fill(4);
+
+        await Promise.all([
+            pool.compressWrappedSpans(source, sourceOffsets, sourceLengths, blockStarts, blockLengths, 'jmdict'),
+            pool.compressWrappedSpans(source, sourceOffsets, sourceLengths, blockStarts, blockLengths, 'jmdict'),
+        ]);
+
+        expect(workers.map(({calls}) => calls.length)).toStrictEqual([3, 3, 3, 3]);
+        pool.close();
+    });
+
     test('does not transfer a backing buffer shared by multiple inputs', async () => {
         const worker = new MockCompressionWorker((message) => ({
             compressed: Uint8Array.from(/** @type {Uint8Array} */ (message.content)).buffer,

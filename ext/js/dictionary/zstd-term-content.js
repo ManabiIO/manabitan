@@ -73,6 +73,8 @@ export class TermContentCompressionPool {
         this._pending = new Map();
         /** @type {number} */
         this._nextId = 1;
+        /** @type {number} */
+        this._nextWorkerIndex = 0;
         /** @type {boolean} */
         this._failed = false;
         for (const worker of workers) {
@@ -141,8 +143,9 @@ export class TermContentCompressionPool {
             }
         }
         const envelopeMsByWorker = new Float64Array(this._workers.length);
+        const firstWorkerIndex = this._reserveWorkers(blockCount);
         const chunks = await Promise.all(Array.from(blockLengths, async (contentBytes, blockIndex) => {
-            const workerIndex = blockIndex % this._workers.length;
+            const workerIndex = (firstWorkerIndex + blockIndex) % this._workers.length;
             const start = blockStartIndexes[blockIndex];
             const end = blockStartIndexes[blockIndex + 1];
             const blockOffsets = sourceOffsets.slice(start, end);
@@ -189,8 +192,9 @@ export class TermContentCompressionPool {
             }
         }
         const envelopeMsByWorker = new Float64Array(this._workers.length);
+        const firstWorkerIndex = this._reserveWorkers(contents.length);
         const chunks = await Promise.all(contents.map(async (content, index) => {
-            const workerIndex = index % this._workers.length;
+            const workerIndex = (firstWorkerIndex + index) % this._workers.length;
             const {buffer} = content;
             /** @type {Transferable[]} */
             const transfer = [];
@@ -211,6 +215,18 @@ export class TermContentCompressionPool {
             return result.bytes;
         }));
         return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker)};
+    }
+
+    /**
+     * Keeps consecutive batches balanced when parser/storage pipelining submits
+     * more than one compression batch before the preceding batch completes.
+     * @param {number} count
+     * @returns {number}
+     */
+    _reserveWorkers(count) {
+        const firstWorkerIndex = this._nextWorkerIndex;
+        this._nextWorkerIndex = (firstWorkerIndex + count) % this._workers.length;
+        return firstWorkerIndex;
     }
 
     /**
