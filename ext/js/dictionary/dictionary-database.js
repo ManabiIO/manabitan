@@ -1203,9 +1203,10 @@ export class DictionaryDatabase {
 
     /**
      * @param {((index: number, count: number) => void)?} [onCheckpoint]
+     * @param {{summary: import('dictionary-importer').Summary, primaryKey: number}|null} [publication]
      * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|null>}
      */
-    async finishBulkImport(onCheckpoint = null) {
+    async finishBulkImport(onCheckpoint = null, publication = null) {
         await this._waitForBulkImportSetup();
         const db = this._beginBulkImportFinalization();
         if (db !== null) {
@@ -1350,6 +1351,14 @@ export class DictionaryDatabase {
                 createIndexesMs = safePerformance.now() - tCreateIndexesStart;
                 createIndexesCheckpointCount = createIndexStatements.length;
                 if (this._bulkImportTransactionOpen) {
+                    if (publication !== null) {
+                        await this.bulkUpdate(
+                            'dictionaries',
+                            [{data: publication.summary, primaryKey: publication.primaryKey}],
+                            0,
+                            1,
+                        );
+                    }
                     const sessionId = this._bulkImportJournalRecord?.sessionId;
                     if (typeof sessionId !== 'string') {
                         throw new Error('Missing dictionary import journal before publication');

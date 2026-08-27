@@ -697,13 +697,54 @@ describe('DictionaryDatabase import cleanup', () => {
         Reflect.set(database, '_termContentStore', makeStore('content'));
         Reflect.set(database, '_termRecordStore', makeStore('record'));
         Reflect.set(database, '_applyRuntimePragmas', vi.fn());
+        vi.spyOn(database, 'bulkUpdate').mockImplementation(async () => { events.push('summary'); });
+        const summary = /** @type {import('dictionary-importer').Summary} */ ({title: 'JMdict'});
 
-        await database.finishBulkImport();
+        await database.finishBulkImport(null, {summary, primaryKey: 42});
 
         expect(events.indexOf('seal-content')).toBeLessThan(events.indexOf('commit'));
         expect(events.indexOf('seal-record')).toBeLessThan(events.indexOf('commit'));
-        expect(events.lastIndexOf('index')).toBeLessThan(events.indexOf('commit'));
+        expect(events.lastIndexOf('index')).toBeLessThan(events.indexOf('summary'));
+        expect(events.indexOf('summary')).toBeLessThan(events.indexOf('commit'));
         expect(events.indexOf('commit')).toBeLessThan(events.indexOf('clear-journal'));
+    });
+
+    test('rolls SQLite and both OPFS stores back when fused summary publication fails', async () => {
+        const database = new DictionaryDatabase();
+        const exec = vi.fn();
+        const contentRollback = vi.fn().mockResolvedValue();
+        const recordRollback = vi.fn().mockResolvedValue();
+        const makeStore = (rollbackImportSession) => ({
+            endImportSession: vi.fn().mockResolvedValue(),
+            getLastEndImportSessionMetrics: vi.fn(() => null),
+            rollbackImportSession,
+        });
+        Reflect.set(database, '_db', {exec});
+        Reflect.set(database, '_bulkImportState', 'active');
+        Reflect.set(database, '_bulkImportTransactionOpen', true);
+        Reflect.set(database, '_bulkImportJournalRecord', {
+            version: 1,
+            sessionId: 'summary-failure',
+            contentCheckpoint: {segments: []},
+            recordCheckpoint: {shards: []},
+            createdAt: 0,
+        });
+        Reflect.set(database, '_importJournal', {clear: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_termContentStore', makeStore(contentRollback));
+        Reflect.set(database, '_termRecordStore', makeStore(recordRollback));
+        Reflect.set(database, '_applyRuntimePragmas', vi.fn());
+        vi.spyOn(database, 'bulkUpdate').mockRejectedValue(new Error('summary update failed'));
+        const summary = /** @type {import('dictionary-importer').Summary} */ ({title: 'JMdict'});
+
+        await expect(database.finishBulkImport(null, {summary, primaryKey: 42}))
+            .rejects.toThrow('summary update failed');
+
+        expect(exec).not.toHaveBeenCalledWith('COMMIT');
+        expect(exec).toHaveBeenCalledWith('ROLLBACK');
+        expect(contentRollback).toHaveBeenCalledOnce();
+        expect(recordRollback).toHaveBeenCalledOnce();
+        expect(Reflect.get(database, '_bulkImportTransactionOpen')).toBe(false);
+        expect(Reflect.get(database, '_bulkImportState')).toBe('idle');
     });
 
     test('rolls back an interrupted session that SQLite did not publish', async () => {

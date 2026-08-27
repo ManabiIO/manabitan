@@ -44,6 +44,8 @@ function createSession(dictionaryDatabase, errors, archiveReader, disposeParser)
 }
 
 describe('DictionaryImportSession', () => {
+    const summary = /** @type {import('dictionary-importer').Summary} */ ({title: 'Test dictionary'});
+
     test('commits and publishes a completed import once', async () => {
         const order = [];
         const dictionaryDatabase = createDatabase();
@@ -58,18 +60,20 @@ describe('DictionaryImportSession', () => {
 
         await Promise.all([session.startBulkImport(), session.startBulkImport()]);
         const results = await Promise.all([
-            session.finalizeBulkImport(() => {}),
-            session.finalizeBulkImport(() => {}),
+            session.finalizeBulkImport(() => {}, summary),
+            session.finalizeBulkImport(() => {}, summary),
         ]);
-        const summary = /** @type {import('dictionary-importer').Summary} */ ({title: 'Test dictionary'});
-        await Promise.all([session.publishSummary(summary), session.publishSummary(summary)]);
 
         expect(order).toEqual(['source', 'parser', 'archive']);
         expect(results).toEqual([{commitMs: 12}, {commitMs: 12}]);
         expect(dictionaryDatabase.startBulkImport).toHaveBeenCalledTimes(1);
         expect(dictionaryDatabase.finishBulkImport).toHaveBeenCalledTimes(1);
+        expect(dictionaryDatabase.finishBulkImport).toHaveBeenCalledWith(expect.any(Function), {
+            summary,
+            primaryKey: 42,
+        });
         expect(dictionaryDatabase.abortBulkImport).not.toHaveBeenCalled();
-        expect(dictionaryDatabase.bulkUpdate).toHaveBeenCalledTimes(1);
+        expect(dictionaryDatabase.bulkUpdate).not.toHaveBeenCalled();
         expect(sourcePipeline.dispose).toHaveBeenCalledTimes(1);
         expect(session.state).toBe('published');
     });
@@ -90,7 +94,7 @@ describe('DictionaryImportSession', () => {
         session.setSourcePipeline({dispose: vi.fn(async () => { order.push('source'); })});
 
         await session.startBulkImport();
-        await session.finalizeBulkImport(() => {});
+        await session.finalizeBulkImport(() => {}, summary);
 
         expect(order).toEqual(['source', 'parser', 'archive', 'commit']);
     });
@@ -126,8 +130,8 @@ describe('DictionaryImportSession', () => {
         session.recordFailure(importError);
         session.recordFailure(importError);
         await Promise.all([
-            session.finalizeBulkImport(() => {}),
-            session.finalizeBulkImport(() => {}),
+            session.finalizeBulkImport(() => {}, summary),
+            session.finalizeBulkImport(() => {}, summary),
         ]);
         await Promise.all([
             session.cleanupIncompleteSummary(),
@@ -158,7 +162,7 @@ describe('DictionaryImportSession', () => {
 
         await session.startBulkImport();
         await Promise.all([session.disposeImportResources(), session.disposeImportResources()]);
-        await session.finalizeBulkImport(() => {});
+        await session.finalizeBulkImport(() => {}, summary);
         await session.cleanupIncompleteSummary();
 
         expect(order).toEqual(['source', 'parser', 'archive']);
@@ -171,30 +175,28 @@ describe('DictionaryImportSession', () => {
         expect(dictionaryDatabase.abortBulkImport).toHaveBeenCalledTimes(1);
     });
 
-    test('removes committed data when a failure is recorded after finalization', async () => {
+    test('does not remove an atomically published import after finalization', async () => {
         const dictionaryDatabase = createDatabase();
         const session = createSession(dictionaryDatabase, [], {close: vi.fn(async () => {})}, vi.fn(async () => {}));
 
         await session.startBulkImport();
-        await session.finalizeBulkImport(() => {});
+        await session.finalizeBulkImport(() => {}, summary);
         session.recordFailure(new Error('cancelled after commit'));
         await session.cleanupIncompleteSummary();
 
-        expect(dictionaryDatabase.deleteDictionary).toHaveBeenCalledWith('Test dictionary', 1000, expect.any(Function));
+        expect(dictionaryDatabase.deleteDictionary).not.toHaveBeenCalled();
         expect(dictionaryDatabase.deleteDictionaryImportPlaceholder).not.toHaveBeenCalled();
     });
 
-    test('records summary publication failure and removes committed data', async () => {
+    test('records fused summary publication failure and removes attempted data', async () => {
         const dictionaryDatabase = createDatabase();
         const publicationError = new Error('summary update failed');
-        dictionaryDatabase.bulkUpdate.mockRejectedValue(publicationError);
+        dictionaryDatabase.finishBulkImport.mockRejectedValue(publicationError);
         const errors = [];
         const session = createSession(dictionaryDatabase, errors, {close: vi.fn(async () => {})}, vi.fn(async () => {}));
 
         await session.startBulkImport();
-        await session.finalizeBulkImport(() => {});
-        await expect(session.publishSummary(/** @type {import('dictionary-importer').Summary} */ ({title: 'Test dictionary'})))
-            .rejects.toBe(publicationError);
+        await session.finalizeBulkImport(() => {}, summary);
         await session.cleanupIncompleteSummary();
 
         expect(errors).toEqual([publicationError]);

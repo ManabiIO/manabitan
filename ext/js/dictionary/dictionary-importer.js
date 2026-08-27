@@ -2085,6 +2085,21 @@ export class DictionaryImporter {
             recordPhaseTiming('finalize-descriptor', tFinalizeDescriptorStart, {
                 hasStyles: styles.length > 0,
             });
+            importSuccess = true;
+            summaryDetails = {prefixWildcardsSupported, counts, styles, yomitanVersion, importSuccess};
+            summary = this._createSummary(dictionaryTitle, version, index, summaryDetails);
+            if (sourceDictionaryTitle !== dictionaryTitle) {
+                summary.sourceTitle = sourceDictionaryTitle;
+            }
+            if (
+                typeof details.dictionaryTitleOverride === 'string' &&
+                /\[update-staging [^\]]+\]$/.test(details.dictionaryTitleOverride) &&
+                typeof details.updateSessionToken === 'string' &&
+                details.updateSessionToken.trim().length > 0
+            ) {
+                summary.transientUpdateStage = 'update-staging';
+                summary.updateSessionToken = details.updateSessionToken.trim();
+            }
         } catch (e) {
             importSession.recordFailure(e);
             recordPhaseTiming('import-data-banks', tImportBanksStart, {
@@ -2106,7 +2121,7 @@ export class DictionaryImporter {
                 this._progressData.index = Math.max(1, Math.floor((checkpointIndex / total) * this._progressData.count));
                 this._progress();
                 this._logImport(`bulk finalization ${checkpointIndex}/${total}`);
-            });
+            }, summary);
             this._progressData.index = this._progressData.count;
             this._progress();
             const bulkFinalizationPhaseDetails = {ok: !importSession.failed};
@@ -2115,6 +2130,10 @@ export class DictionaryImporter {
             }
             recordPhaseTiming('bulk-finalization', tBulkFinalizationStart, bulkFinalizationPhaseDetails);
             if (!importSession.failed) {
+                recordPhaseTiming('write-summary', Date.now(), {
+                    ok: true,
+                    fusedWithBulkFinalization: true,
+                });
                 recordPhaseTiming('post-finalization-integrity-sample', Date.now(), {
                     skipped: true,
                     reason: 'transaction-commit-completed',
@@ -2137,34 +2156,6 @@ export class DictionaryImporter {
             };
         }
 
-        importSuccess = true;
-        summaryDetails = {prefixWildcardsSupported, counts, styles, yomitanVersion, importSuccess};
-        summary = this._createSummary(dictionaryTitle, version, index, summaryDetails);
-        if (sourceDictionaryTitle !== dictionaryTitle) {
-            summary.sourceTitle = sourceDictionaryTitle;
-        }
-        if (
-            typeof details.dictionaryTitleOverride === 'string' &&
-            /\[update-staging [^\]]+\]$/.test(details.dictionaryTitleOverride) &&
-            typeof details.updateSessionToken === 'string' &&
-            details.updateSessionToken.trim().length > 0
-        ) {
-            summary.transientUpdateStage = 'update-staging';
-            summary.updateSessionToken = details.updateSessionToken.trim();
-        }
-        const tSummaryUpdateStart = Date.now();
-        if (this._isCancelled()) {
-            importSession.recordFailure(new Error('Dictionary import was cancelled'));
-            await importSession.cleanupIncompleteSummary();
-            return {result: null, errors, debug: {phaseTimings}};
-        }
-        try {
-            await importSession.publishSummary(summary);
-        } catch (_) {
-            await importSession.cleanupIncompleteSummary();
-            return {result: null, errors, debug: {phaseTimings}};
-        }
-        recordPhaseTiming('write-summary', tSummaryUpdateStart, {ok: true});
         this._logImport(`import done ${Date.now() - tImportStart}ms terms=${counts.terms.total} media=${counts.media.total}`);
 
         this._progress();

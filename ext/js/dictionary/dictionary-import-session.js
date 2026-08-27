@@ -55,8 +55,6 @@ export class DictionaryImportSession {
         this._bulkFinalizationPromise = null;
         /** @type {Promise<void>|null} */
         this._placeholderCleanupPromise = null;
-        /** @type {Promise<void>|null} */
-        this._publicationPromise = null;
         /** @type {'idle'|'starting'|'active'|'committed'|'aborted'|'failed'} */
         this._bulkState = 'idle';
         /** @type {boolean} */
@@ -164,9 +162,10 @@ export class DictionaryImportSession {
 
     /**
      * @param {(checkpointIndex: number, total: number) => void} onCheckpoint
+     * @param {import('dictionary-importer').Summary} summary
      * @returns {Promise<Record<string, unknown>|null>}
      */
-    finalizeBulkImport(onCheckpoint) {
+    finalizeBulkImport(onCheckpoint, summary) {
         this._bulkFinalizationPromise ??= (async () => {
             try {
                 await this.disposeImportResources();
@@ -183,8 +182,12 @@ export class DictionaryImportSession {
                     return {aborted: true};
                 }
                 this._commitAttempted = true;
-                const details = await this._dictionaryDatabase.finishBulkImport(onCheckpoint);
+                const details = await this._dictionaryDatabase.finishBulkImport(onCheckpoint, {
+                    summary,
+                    primaryKey: this._dictionarySummaryPrimaryKey,
+                });
                 this._bulkState = 'committed';
+                this._published = true;
                 return details;
             } catch (error) {
                 this._bulkState = 'failed';
@@ -193,31 +196,6 @@ export class DictionaryImportSession {
             }
         })();
         return this._bulkFinalizationPromise;
-    }
-
-    /**
-     * @param {import('dictionary-importer').Summary} summary
-     * @returns {Promise<void>}
-     */
-    publishSummary(summary) {
-        this._publicationPromise ??= (async () => {
-            if (this._published) { return; }
-            if (this._failed || this._bulkState !== 'committed') {
-                throw new Error('Cannot publish an incomplete dictionary import');
-            }
-            try {
-                await this._dictionaryDatabase.bulkUpdate(
-                    'dictionaries',
-                    [{data: summary, primaryKey: this._dictionarySummaryPrimaryKey}],
-                    0,
-                    1,
-                );
-                this._published = true;
-            } catch (error) {
-                throw this.recordFailure(error);
-            }
-        })();
-        return this._publicationPromise;
     }
 
     /** @returns {Promise<void>} */
