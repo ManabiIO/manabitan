@@ -71,8 +71,6 @@ export class TermContentCompressionPool {
         this._workers = workers;
         /** @type {Map<number, {resolve: (value: {bytes: Uint8Array, envelopeMs: number}) => void, reject: (reason?: unknown) => void, timeoutId: ReturnType<typeof setTimeout>}>} */
         this._pending = new Map();
-        /** @type {Map<number, {resolve: (value: {chunks: Uint8Array[], envelopeMs: number}) => void, reject: (reason?: unknown) => void, timeoutId: ReturnType<typeof setTimeout>}>} */
-        this._pendingBatches = new Map();
         /** @type {number} */
         this._nextId = 1;
         /** @type {boolean} */
@@ -142,47 +140,31 @@ export class TermContentCompressionPool {
                 throw new RangeError('Term content compression block span is invalid');
             }
         }
-        const groupCount = Math.min(blockCount, this._workers.length);
-        const results = await Promise.all(Array.from({length: groupCount}, async (_, groupIndex) => {
-            const firstBlock = Math.floor((groupIndex * blockCount) / groupCount);
-            const endBlock = Math.floor(((groupIndex + 1) * blockCount) / groupCount);
-            const firstSpan = blockStartIndexes[firstBlock];
-            const endSpan = blockStartIndexes[endBlock];
-            const groupBlockStartIndexes = blockStartIndexes.slice(firstBlock, endBlock + 1);
-            for (let i = 0; i < groupBlockStartIndexes.length; ++i) {
-                groupBlockStartIndexes[i] -= firstSpan;
-            }
-            const groupSourceOffsets = sourceOffsets.slice(firstSpan, endSpan);
-            const groupSourceLengths = sourceLengths.slice(firstSpan, endSpan);
-            const groupBlockLengths = blockLengths.slice(firstBlock, endBlock);
-            return await this._dispatchBatch(
-                groupIndex,
+        const envelopeMsByWorker = new Float64Array(this._workers.length);
+        const chunks = await Promise.all(Array.from(blockLengths, async (contentBytes, blockIndex) => {
+            const workerIndex = blockIndex % this._workers.length;
+            const start = blockStartIndexes[blockIndex];
+            const end = blockStartIndexes[blockIndex + 1];
+            const blockOffsets = sourceOffsets.slice(start, end);
+            const blockSourceLengths = sourceLengths.slice(start, end);
+            const result = await this._dispatch(
+                workerIndex,
                 {
                     source,
-                    sourceOffsets: groupSourceOffsets,
-                    sourceLengths: groupSourceLengths,
-                    blockStartIndexes: groupBlockStartIndexes,
-                    blockLengths: groupBlockLengths,
+                    sourceOffsets: blockOffsets,
+                    sourceLengths: blockSourceLengths,
+                    contentBytes,
                     dictName,
                     wrap: true,
                 },
-                [
-                    groupSourceOffsets.buffer,
-                    groupSourceLengths.buffer,
-                    groupBlockStartIndexes.buffer,
-                    groupBlockLengths.buffer,
-                ],
+                [blockOffsets.buffer, blockSourceLengths.buffer],
             );
+            envelopeMsByWorker[workerIndex] += result.envelopeMs;
+            return result.bytes;
         }));
-        const chunks = [];
-        let envelopeMs = 0;
-        for (const result of results) {
-            chunks.push(...result.chunks);
-            envelopeMs = Math.max(envelopeMs, result.envelopeMs);
-        }
         return {
             chunks,
-            envelopeMs,
+            envelopeMs: Math.max(0, ...envelopeMsByWorker),
             wrapped: true,
         };
     }
@@ -254,29 +236,6 @@ export class TermContentCompressionPool {
         });
     }
 
-    /**
-     * @param {number} workerIndex
-     * @param {Record<string, unknown>} message
-     * @param {Transferable[]} transfer
-     * @returns {Promise<{chunks: Uint8Array[], envelopeMs: number}>}
-     */
-    _dispatchBatch(workerIndex, message, transfer) {
-        const id = this._nextId++;
-        return new Promise((resolve, reject) => {
-            const timeoutId = setTimeout(() => {
-                this._fail(new Error(`Term content compression worker timed out after ${COMPRESSION_JOB_TIMEOUT_MS}ms`));
-            }, COMPRESSION_JOB_TIMEOUT_MS);
-            this._pendingBatches.set(id, {resolve, reject, timeoutId});
-            try {
-                this._workers[workerIndex].postMessage({id, ...message}, transfer);
-            } catch (error) {
-                clearTimeout(timeoutId);
-                this._pendingBatches.delete(id);
-                reject(error);
-            }
-        });
-    }
-
     /** */
     close() {
         this._fail(new Error('Term content compression pool closed'));
@@ -288,26 +247,8 @@ export class TermContentCompressionPool {
         const data = /** @type {{id?: unknown, compressed?: unknown, envelopeMs?: unknown, error?: unknown}} */ (rawData);
         const id = typeof data?.id === 'number' ? data.id : -1;
         const pending = this._pending.get(id);
-        const pendingBatch = this._pendingBatches.get(id);
-        const isBatch = typeof pendingBatch !== 'undefined';
-        if (typeof pending === 'undefined' && typeof pendingBatch === 'undefined') { return; }
-        (isBatch ? this._pendingBatches : this._pending).delete(id);
-        const envelopeMs = typeof data.envelopeMs === 'number' && Number.isFinite(data.envelopeMs) && data.envelopeMs >= 0 ? data.envelopeMs : 0;
-        if (isBatch) {
-            clearTimeout(pendingBatch.timeoutId);
-            if (typeof data.error === 'string') {
-                pendingBatch.reject(new Error(data.error));
-                return;
-            }
-            if (!Array.isArray(data.compressed) || data.compressed.some((value) => !(value instanceof ArrayBuffer))) {
-                pendingBatch.reject(new Error('Term content compression worker returned invalid batch bytes'));
-                return;
-            }
-            const compressed = /** @type {ArrayBuffer[]} */ (data.compressed);
-            pendingBatch.resolve({chunks: compressed.map((value) => new Uint8Array(value)), envelopeMs});
-            return;
-        }
         if (typeof pending === 'undefined') { return; }
+        this._pending.delete(id);
         clearTimeout(pending.timeoutId);
         if (typeof data.error === 'string') {
             pending.reject(new Error(data.error));
@@ -319,7 +260,7 @@ export class TermContentCompressionPool {
         }
         pending.resolve({
             bytes: new Uint8Array(data.compressed),
-            envelopeMs,
+            envelopeMs: typeof data.envelopeMs === 'number' && Number.isFinite(data.envelopeMs) && data.envelopeMs >= 0 ? data.envelopeMs : 0,
         });
     }
 
@@ -334,11 +275,6 @@ export class TermContentCompressionPool {
             reject(error);
         }
         this._pending.clear();
-        for (const {reject, timeoutId} of this._pendingBatches.values()) {
-            clearTimeout(timeoutId);
-            reject(error);
-        }
-        this._pendingBatches.clear();
     }
 }
 
