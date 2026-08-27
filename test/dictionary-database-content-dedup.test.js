@@ -397,10 +397,14 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         }
         expect(getMeta(database, 0x1000, 0x2001)).toBeUndefined();
         expect(getMeta(database, 0x1999, 0x2000)).toBeUndefined();
-        expect(Reflect.get(database, '_termEntryContentMetaHashPairTable')).toBeInstanceOf(Uint8Array);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairTable')).toBeInstanceOf(Uint32Array);
+        expect(Reflect.get(database, '_termEntryContentMetaStateTable')).toBeInstanceOf(Uint8Array);
         expect(Reflect.get(database, '_termEntryContentMetaOffsetTable')).toBeInstanceOf(Float64Array);
         expect(Reflect.get(database, '_termEntryContentMetaLengthTable')).toBeInstanceOf(Uint32Array);
         expect(Reflect.get(database, '_termEntryContentMetaDictNameIdTable')).toBeInstanceOf(Uint32Array);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairTable').length).toBeGreaterThan(
+            Reflect.get(database, '_termEntryContentMetaOffsetTable').length,
+        );
     });
 
     test('preserves large offsets and signatures through typed-table resizes', () => {
@@ -487,6 +491,38 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         });
         expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
         expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
+    });
+
+    test('keeps staged dense indexes stable across hash-table rehashes', () => {
+        const database = new DictionaryDatabase();
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const ensureCapacity = Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').bind(database);
+        const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
+        const contentBytes = new Uint8Array([1, 2, 3, 4]);
+        const staged = stage([101], [202], [contentBytes], null);
+        const denseIndex = staged.indexes[0];
+        const oldHashSlots = Reflect.get(database, '_termEntryContentMetaHashPairTable');
+
+        ensureCapacity(128);
+
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairTable')).not.toBe(oldHashSlots);
+        expect(staged.indexes[0]).toBe(denseIndex);
+        publish({
+            count: 1,
+            contentOffsets: new Float64Array(1),
+            contentLengths: new Uint32Array(1),
+            resolvedContentDictNames: 'raw',
+            pendingRowToUniqueIndex: new Int32Array([0]),
+            pendingContentBytes: [contentBytes],
+            pendingContentHash1s: [101],
+            pendingContentHash2s: [202],
+            pendingOffsets: [9876],
+            pendingLengths: [contentBytes.byteLength],
+            pendingResolvedDictNames: 'raw',
+            pendingContentSpans: null,
+            stagedContentMetadata: staged,
+        });
+        expect(getMeta(database, 101, 202)).toMatchObject({offset: 9876, length: 4});
     });
 
     test('rejects untrusted persisted offsets before publishing staged metadata', () => {
@@ -744,9 +780,9 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
 
     test('skips persisted probes only when a native bank plan starts against an empty store', async () => {
         const database = new DictionaryDatabase();
-        const findPersistedSlot = vi.spyOn(
-            /** @type {DictionaryDatabase & {_findTermEntryContentMetaHashPairSlot: (hash1: number, hash2: number) => number}} */ (database),
-            '_findTermEntryContentMetaHashPairSlot',
+        const findPersistedIndex = vi.spyOn(
+            /** @type {DictionaryDatabase & {_findTermEntryContentMetaHashPairIndex: (hash1: number, hash2: number) => number}} */ (database),
+            '_findTermEntryContentMetaHashPairIndex',
         );
         const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
         const plan = {
@@ -772,17 +808,17 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
 
         await resolve(makeChunk(0, 1, 10));
         cacheMeta(database, null, 100, 1, 'raw', 99, 100);
-        findPersistedSlot.mockClear();
+        findPersistedIndex.mockClear();
         await resolve(makeChunk(1, 2, 20));
 
         expect(plan.persistedLookupRequired).toBe(false);
-        expect(findPersistedSlot).not.toHaveBeenCalled();
+        expect(findPersistedIndex).not.toHaveBeenCalled();
 
         const secondDatabase = new DictionaryDatabase();
         cacheMeta(secondDatabase, null, 200, 1, 'raw', 30, 31);
-        const secondFindPersistedSlot = vi.spyOn(
-            /** @type {DictionaryDatabase & {_findTermEntryContentMetaHashPairSlot: (hash1: number, hash2: number) => number}} */ (secondDatabase),
-            '_findTermEntryContentMetaHashPairSlot',
+        const secondFindPersistedIndex = vi.spyOn(
+            /** @type {DictionaryDatabase & {_findTermEntryContentMetaHashPairIndex: (hash1: number, hash2: number) => number}} */ (secondDatabase),
+            '_findTermEntryContentMetaHashPairIndex',
         );
         const secondResolve = Reflect.get(secondDatabase, '_resolveArtifactTermContentDedup').bind(secondDatabase);
         const secondPlan = {
@@ -802,7 +838,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         });
 
         expect(secondPlan.persistedLookupRequired).toBe(true);
-        expect(secondFindPersistedSlot).toHaveBeenCalled();
+        expect(secondFindPersistedIndex).toHaveBeenCalled();
     });
 
     test('resolves empty-store native unique indexes as contiguous ranges across chunks', async () => {

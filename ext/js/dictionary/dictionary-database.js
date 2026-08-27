@@ -394,12 +394,14 @@ export class DictionaryDatabase {
         this._termEntryContentIdByHash = new Map();
         /** @type {Map<string, {id: number, offset: number, length: number, dictName: string}>} */
         this._termEntryContentMetaByHash = new Map();
+        /** @type {Uint32Array} Sparse hash slots containing dense metadata indexes plus one. */
+        this._termEntryContentMetaHashPairTable = new Uint32Array(0);
         /** @type {Uint32Array} */
         this._termEntryContentMetaHash1Table = new Uint32Array(0);
         /** @type {Uint32Array} */
         this._termEntryContentMetaHash2Table = new Uint32Array(0);
         /** @type {Uint8Array} */
-        this._termEntryContentMetaHashPairTable = new Uint8Array(0);
+        this._termEntryContentMetaStateTable = new Uint8Array(0);
         /** @type {Float64Array} */
         this._termEntryContentMetaIdTable = new Float64Array(0);
         /** @type {Float64Array} */
@@ -427,7 +429,9 @@ export class DictionaryDatabase {
         /** @type {number} */
         this._termEntryContentMetaHashPairPendingCount = 0;
         /** @type {number} */
-        this._termEntryContentMetaHashPairGeneration = 0;
+        this._termEntryContentMetaDenseCount = 0;
+        /** @type {number[]} */
+        this._termEntryContentMetaFreeIndexes = [];
         /** @type {Map<string, Array<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}>>} */
         this._termEntryContentMetaCollisionsByHashPair = new Map();
         /** @type {boolean} */
@@ -5099,9 +5103,10 @@ export class DictionaryDatabase {
     _clearTermEntryContentMetaCaches() {
         this._termEntryContentMetaByHash.clear();
         this._termContentBlockStore.clearCache();
+        this._termEntryContentMetaHashPairTable = new Uint32Array(0);
         this._termEntryContentMetaHash1Table = new Uint32Array(0);
         this._termEntryContentMetaHash2Table = new Uint32Array(0);
-        this._termEntryContentMetaHashPairTable = new Uint8Array(0);
+        this._termEntryContentMetaStateTable = new Uint8Array(0);
         this._termEntryContentMetaIdTable = new Float64Array(0);
         this._termEntryContentMetaOffsetTable = new Float64Array(0);
         this._termEntryContentMetaLengthTable = new Uint32Array(0);
@@ -5115,7 +5120,8 @@ export class DictionaryDatabase {
         this._termEntryContentMetaHashPairMask = 0;
         this._termEntryContentMetaHashPairCount = 0;
         this._termEntryContentMetaHashPairPendingCount = 0;
-        ++this._termEntryContentMetaHashPairGeneration;
+        this._termEntryContentMetaDenseCount = 0;
+        this._termEntryContentMetaFreeIndexes.length = 0;
         this._termEntryContentMetaCollisionsByHashPair.clear();
     }
 
@@ -5134,7 +5140,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{signature1?: number, signature2?: number, signature3?: number, tableSlot?: number}} meta
+     * @param {{signature1?: number, signature2?: number, signature3?: number, tableIndex?: number}} meta
      * @param {Uint8Array} contentBytes
      */
     _setTermContentSignatures(meta, contentBytes) {
@@ -5142,15 +5148,15 @@ export class DictionaryDatabase {
         meta.signature1 = this._readTermContentSignature(contentBytes, 0);
         meta.signature2 = this._readTermContentSignature(contentBytes, Math.floor(lastOffset / 2));
         meta.signature3 = this._readTermContentSignature(contentBytes, lastOffset);
-        const slot = meta.tableSlot;
+        const index = meta.tableIndex;
         if (
-            typeof slot === 'number' &&
-            this._termEntryContentMetaHashPairTable[slot] === TERM_CONTENT_META_SLOT_PUBLISHED
+            typeof index === 'number' &&
+            this._termEntryContentMetaStateTable[index] === TERM_CONTENT_META_SLOT_PUBLISHED
         ) {
-            this._termEntryContentMetaSignaturePresentTable[slot] = 1;
-            this._termEntryContentMetaSignature1Table[slot] = meta.signature1;
-            this._termEntryContentMetaSignature2Table[slot] = meta.signature2;
-            this._termEntryContentMetaSignature3Table[slot] = meta.signature3;
+            this._termEntryContentMetaSignaturePresentTable[index] = 1;
+            this._termEntryContentMetaSignature1Table[index] = meta.signature1;
+            this._termEntryContentMetaSignature2Table[index] = meta.signature2;
+            this._termEntryContentMetaSignature3Table[index] = meta.signature3;
         }
     }
 
@@ -5227,8 +5233,8 @@ export class DictionaryDatabase {
      * @param {number} hash1
      * @param {number} hash2
      * @param {Uint8Array} contentBytes
-     * @param {{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableSlot?: number}|undefined} [primary]
-     * @returns {{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableSlot?: number}|Promise<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableSlot?: number}|undefined>|undefined}
+     * @param {{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableIndex?: number}|undefined} [primary]
+     * @returns {{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableIndex?: number}|Promise<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableIndex?: number}|undefined>|undefined}
      */
     _findMatchingTermEntryContentMeta(hash1, hash2, contentBytes, primary = this._getTermEntryContentMetaByHashPair(hash1, hash2)) {
         const lastOffset = Math.max(0, contentBytes.byteLength - 4);
@@ -5282,9 +5288,9 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {Array<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableSlot?: number}>} candidates
+     * @param {Array<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableIndex?: number}>} candidates
      * @param {Uint8Array} contentBytes
-     * @returns {Promise<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableSlot?: number}|undefined>}
+     * @returns {Promise<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableIndex?: number}|undefined>}
      */
     async _findMatchingPersistedTermEntryContentMeta(candidates, contentBytes) {
         for (const meta of candidates) {
@@ -5377,34 +5383,34 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {number} slot
-     * @returns {{id: number, offset: number, length: number, dictName: string, hash2: number, signature1?: number, signature2?: number, signature3?: number, tableSlot: number}}
+     * @param {number} index
+     * @returns {{id: number, offset: number, length: number, dictName: string, hash2: number, signature1?: number, signature2?: number, signature3?: number, tableIndex: number}}
      */
-    _readTermEntryContentMetaHashPairSlot(slot) {
+    _readTermEntryContentMetaHashPairIndex(index) {
         const meta = {
-            id: this._termEntryContentMetaIdTable[slot],
-            offset: this._termEntryContentMetaOffsetTable[slot],
-            length: this._termEntryContentMetaLengthTable[slot] === TERM_CONTENT_META_U32_NULL ?
+            id: this._termEntryContentMetaIdTable[index],
+            offset: this._termEntryContentMetaOffsetTable[index],
+            length: this._termEntryContentMetaLengthTable[index] === TERM_CONTENT_META_U32_NULL ?
                 -1 :
-                this._termEntryContentMetaLengthTable[slot],
-            dictName: this._termEntryContentMetaDictNames[this._termEntryContentMetaDictNameIdTable[slot]] ?? 'raw',
-            hash2: this._termEntryContentMetaHash2Table[slot],
-            tableSlot: slot,
+                this._termEntryContentMetaLengthTable[index],
+            dictName: this._termEntryContentMetaDictNames[this._termEntryContentMetaDictNameIdTable[index]] ?? 'raw',
+            hash2: this._termEntryContentMetaHash2Table[index],
+            tableIndex: index,
         };
-        if (this._termEntryContentMetaSignaturePresentTable[slot] === 1) {
-            meta.signature1 = this._termEntryContentMetaSignature1Table[slot];
-            meta.signature2 = this._termEntryContentMetaSignature2Table[slot];
-            meta.signature3 = this._termEntryContentMetaSignature3Table[slot];
+        if (this._termEntryContentMetaSignaturePresentTable[index] === 1) {
+            meta.signature1 = this._termEntryContentMetaSignature1Table[index];
+            meta.signature2 = this._termEntryContentMetaSignature2Table[index];
+            meta.signature3 = this._termEntryContentMetaSignature3Table[index];
         }
         return meta;
     }
 
     /**
-     * @param {number} slot
+     * @param {number} index
      * @param {{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}} meta
      * @throws {RangeError} If the metadata cannot be represented by the typed tables.
      */
-    _writeTermEntryContentMetaHashPairSlot(slot, meta) {
+    _writeTermEntryContentMetaHashPairIndex(index, meta) {
         if (!Number.isSafeInteger(meta.id) || meta.id < 0) {
             throw new RangeError(`Invalid term content metadata id: ${meta.id}`);
         }
@@ -5417,21 +5423,78 @@ export class DictionaryDatabase {
         ) {
             throw new RangeError(`Invalid term content metadata length: ${meta.length}`);
         }
-        this._termEntryContentMetaIdTable[slot] = meta.id;
-        this._termEntryContentMetaOffsetTable[slot] = meta.offset;
-        this._termEntryContentMetaLengthTable[slot] = meta.length < 0 ? TERM_CONTENT_META_U32_NULL : meta.length;
-        this._termEntryContentMetaDictNameIdTable[slot] = this._internTermEntryContentMetaDictName(meta.dictName);
+        this._termEntryContentMetaIdTable[index] = meta.id;
+        this._termEntryContentMetaOffsetTable[index] = meta.offset;
+        this._termEntryContentMetaLengthTable[index] = meta.length < 0 ? TERM_CONTENT_META_U32_NULL : meta.length;
+        this._termEntryContentMetaDictNameIdTable[index] = this._internTermEntryContentMetaDictName(meta.dictName);
         const hasSignatures = (
             typeof meta.signature1 === 'number' &&
             typeof meta.signature2 === 'number' &&
             typeof meta.signature3 === 'number'
         );
-        this._termEntryContentMetaSignaturePresentTable[slot] = hasSignatures ? 1 : 0;
+        this._termEntryContentMetaSignaturePresentTable[index] = hasSignatures ? 1 : 0;
         if (hasSignatures) {
-            this._termEntryContentMetaSignature1Table[slot] = meta.signature1;
-            this._termEntryContentMetaSignature2Table[slot] = meta.signature2;
-            this._termEntryContentMetaSignature3Table[slot] = meta.signature3;
+            this._termEntryContentMetaSignature1Table[index] = meta.signature1;
+            this._termEntryContentMetaSignature2Table[index] = meta.signature2;
+            this._termEntryContentMetaSignature3Table[index] = meta.signature3;
         }
+    }
+
+    /**
+     * Grows only the cache-local metadata vectors. Hash-table growth reuses
+     * these stable indexes and therefore never copies metadata during rehash.
+     * @param {number} requiredCount
+     */
+    _ensureTermEntryContentMetaDenseCapacity(requiredCount) {
+        const oldCapacity = this._termEntryContentMetaStateTable.length;
+        if (oldCapacity >= requiredCount) { return; }
+        let capacity = Math.max(16, oldCapacity);
+        while (capacity < requiredCount) { capacity *= 2; }
+        const hash1Table = new Uint32Array(capacity);
+        hash1Table.set(this._termEntryContentMetaHash1Table);
+        this._termEntryContentMetaHash1Table = hash1Table;
+        const hash2Table = new Uint32Array(capacity);
+        hash2Table.set(this._termEntryContentMetaHash2Table);
+        this._termEntryContentMetaHash2Table = hash2Table;
+        const stateTable = new Uint8Array(capacity);
+        stateTable.set(this._termEntryContentMetaStateTable);
+        this._termEntryContentMetaStateTable = stateTable;
+        const idTable = new Float64Array(capacity);
+        idTable.set(this._termEntryContentMetaIdTable);
+        this._termEntryContentMetaIdTable = idTable;
+        const offsetTable = new Float64Array(capacity);
+        offsetTable.set(this._termEntryContentMetaOffsetTable);
+        this._termEntryContentMetaOffsetTable = offsetTable;
+        const lengthTable = new Uint32Array(capacity);
+        lengthTable.set(this._termEntryContentMetaLengthTable);
+        this._termEntryContentMetaLengthTable = lengthTable;
+        const dictNameIdTable = new Uint32Array(capacity);
+        dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable);
+        this._termEntryContentMetaDictNameIdTable = dictNameIdTable;
+        const signaturePresentTable = new Uint8Array(capacity);
+        signaturePresentTable.set(this._termEntryContentMetaSignaturePresentTable);
+        this._termEntryContentMetaSignaturePresentTable = signaturePresentTable;
+        const signature1Table = new Uint32Array(capacity);
+        signature1Table.set(this._termEntryContentMetaSignature1Table);
+        this._termEntryContentMetaSignature1Table = signature1Table;
+        const signature2Table = new Uint32Array(capacity);
+        signature2Table.set(this._termEntryContentMetaSignature2Table);
+        this._termEntryContentMetaSignature2Table = signature2Table;
+        const signature3Table = new Uint32Array(capacity);
+        signature3Table.set(this._termEntryContentMetaSignature3Table);
+        this._termEntryContentMetaSignature3Table = signature3Table;
+    }
+
+    /**
+     * @returns {number}
+     */
+    _allocateTermEntryContentMetaIndex() {
+        const reused = this._termEntryContentMetaFreeIndexes.pop();
+        if (typeof reused === 'number') { return reused; }
+        const index = this._termEntryContentMetaDenseCount;
+        this._ensureTermEntryContentMetaDenseCapacity(index + 1);
+        ++this._termEntryContentMetaDenseCount;
+        return index;
     }
 
     /**
@@ -5440,9 +5503,14 @@ export class DictionaryDatabase {
      */
     _ensureTermEntryContentMetaHashPairCapacity(requiredCount, forceRehash = false) {
         const additionalPublishedCount = Math.max(0, requiredCount - this._termEntryContentMetaHashPairCount);
-        const effectiveRequiredCount = this._termEntryContentMetaHashPairCount +
+        const effectiveRequiredCount = (
+            this._termEntryContentMetaHashPairCount +
             this._termEntryContentMetaHashPairPendingCount +
-            additionalPublishedCount;
+            additionalPublishedCount
+        );
+        this._ensureTermEntryContentMetaDenseCapacity(
+            this._termEntryContentMetaDenseCount + additionalPublishedCount,
+        );
         if (!forceRehash && this._termEntryContentMetaHashPairTable.length >= effectiveRequiredCount * 2) {
             return;
         }
@@ -5450,63 +5518,23 @@ export class DictionaryDatabase {
         while (tableSize < effectiveRequiredCount * 2) {
             tableSize *= 2;
         }
-        const oldHash1Table = this._termEntryContentMetaHash1Table;
-        const oldHash2Table = this._termEntryContentMetaHash2Table;
-        const oldOccupiedTable = this._termEntryContentMetaHashPairTable;
-        const oldIdTable = this._termEntryContentMetaIdTable;
-        const oldOffsetTable = this._termEntryContentMetaOffsetTable;
-        const oldLengthTable = this._termEntryContentMetaLengthTable;
-        const oldDictNameIdTable = this._termEntryContentMetaDictNameIdTable;
-        const oldSignaturePresentTable = this._termEntryContentMetaSignaturePresentTable;
-        const oldSignature1Table = this._termEntryContentMetaSignature1Table;
-        const oldSignature2Table = this._termEntryContentMetaSignature2Table;
-        const oldSignature3Table = this._termEntryContentMetaSignature3Table;
-        const hash1Table = new Uint32Array(tableSize);
-        const hash2Table = new Uint32Array(tableSize);
-        const occupiedTable = new Uint8Array(tableSize);
-        const idTable = new Float64Array(tableSize);
-        const offsetTable = new Float64Array(tableSize);
-        const lengthTable = new Uint32Array(tableSize);
-        const dictNameIdTable = new Uint32Array(tableSize);
-        const signaturePresentTable = new Uint8Array(tableSize);
-        const signature1Table = new Uint32Array(tableSize);
-        const signature2Table = new Uint32Array(tableSize);
-        const signature3Table = new Uint32Array(tableSize);
+        const oldSlotTable = this._termEntryContentMetaHashPairTable;
+        const slotTable = new Uint32Array(tableSize);
         const mask = tableSize - 1;
-        for (let i = 0; i < oldOccupiedTable.length; ++i) {
-            const occupancy = oldOccupiedTable[i];
-            if (occupancy === TERM_CONTENT_META_SLOT_EMPTY) { continue; }
-            const hash1 = oldHash1Table[i];
-            const hash2 = oldHash2Table[i];
+        for (const encodedIndex of oldSlotTable) {
+            if (encodedIndex === 0) { continue; }
+            const index = encodedIndex - 1;
+            if (this._termEntryContentMetaStateTable[index] === TERM_CONTENT_META_SLOT_EMPTY) { continue; }
+            const hash1 = this._termEntryContentMetaHash1Table[index];
+            const hash2 = this._termEntryContentMetaHash2Table[index];
             let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
-            while (occupiedTable[slot] !== TERM_CONTENT_META_SLOT_EMPTY) {
+            while (slotTable[slot] !== 0) {
                 slot = (slot + 1) & mask;
             }
-            hash1Table[slot] = hash1;
-            hash2Table[slot] = hash2;
-            occupiedTable[slot] = occupancy;
-            idTable[slot] = oldIdTable[i];
-            offsetTable[slot] = oldOffsetTable[i];
-            lengthTable[slot] = oldLengthTable[i];
-            dictNameIdTable[slot] = oldDictNameIdTable[i];
-            signaturePresentTable[slot] = oldSignaturePresentTable[i];
-            signature1Table[slot] = oldSignature1Table[i];
-            signature2Table[slot] = oldSignature2Table[i];
-            signature3Table[slot] = oldSignature3Table[i];
+            slotTable[slot] = encodedIndex;
         }
-        this._termEntryContentMetaHash1Table = hash1Table;
-        this._termEntryContentMetaHash2Table = hash2Table;
-        this._termEntryContentMetaHashPairTable = occupiedTable;
-        this._termEntryContentMetaIdTable = idTable;
-        this._termEntryContentMetaOffsetTable = offsetTable;
-        this._termEntryContentMetaLengthTable = lengthTable;
-        this._termEntryContentMetaDictNameIdTable = dictNameIdTable;
-        this._termEntryContentMetaSignaturePresentTable = signaturePresentTable;
-        this._termEntryContentMetaSignature1Table = signature1Table;
-        this._termEntryContentMetaSignature2Table = signature2Table;
-        this._termEntryContentMetaSignature3Table = signature3Table;
+        this._termEntryContentMetaHashPairTable = slotTable;
         this._termEntryContentMetaHashPairMask = mask;
-        ++this._termEntryContentMetaHashPairGeneration;
     }
 
     /**
@@ -5551,7 +5579,7 @@ export class DictionaryDatabase {
      * @param {number[]} pendingContentHash2s
      * @param {Uint8Array[]} pendingContentBytes
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
-     * @returns {{slots: Int32Array, generation: number, active: boolean}}
+     * @returns {{indexes: Int32Array, active: boolean}}
      * @throws {RangeError} If hash arrays or source spans are inconsistent.
      */
     _stageArtifactTermContentMetadata(pendingContentHash1s, pendingContentHash2s, pendingContentBytes, pendingContentSpans) {
@@ -5571,16 +5599,18 @@ export class DictionaryDatabase {
             throw new RangeError('Artifact term content source count is smaller than its hash count');
         }
         this._ensureTermEntryContentMetaHashPairCapacity(this._termEntryContentMetaHashPairCount + count);
-        const slots = new Int32Array(count);
-        slots.fill(-1);
+        const indexes = new Int32Array(count);
+        indexes.fill(-1);
         const hash1Table = this._termEntryContentMetaHash1Table;
         const hash2Table = this._termEntryContentMetaHash2Table;
-        const occupiedTable = this._termEntryContentMetaHashPairTable;
+        const slotTable = this._termEntryContentMetaHashPairTable;
+        const stateTable = this._termEntryContentMetaStateTable;
         const lengthTable = this._termEntryContentMetaLengthTable;
         const signaturePresentTable = this._termEntryContentMetaSignaturePresentTable;
         const signature1Table = this._termEntryContentMetaSignature1Table;
         const signature2Table = this._termEntryContentMetaSignature2Table;
         const signature3Table = this._termEntryContentMetaSignature3Table;
+        const freeIndexes = this._termEntryContentMetaFreeIndexes;
         const mask = this._termEntryContentMetaHashPairMask;
         let stagedCount = 0;
         try {
@@ -5605,77 +5635,72 @@ export class DictionaryDatabase {
                     throw new RangeError(`Invalid staged term content source span: ${contentByteOffset}+${contentLength}`);
                 }
                 let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
-                while (occupiedTable[slot] !== TERM_CONTENT_META_SLOT_EMPTY) {
-                    if (hash1Table[slot] === hash1 && hash2Table[slot] === hash2) {
+                while (slotTable[slot] !== 0) {
+                    const existingIndex = slotTable[slot] - 1;
+                    if (hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2) {
                         slot = -1;
                         break;
                     }
                     slot = (slot + 1) & mask;
                 }
                 if (slot < 0) { continue; }
+                const index = freeIndexes.length === 0 ?
+                    this._termEntryContentMetaDenseCount++ :
+                    /** @type {number} */ (freeIndexes.pop());
                 const lastOffset = Math.max(0, contentLength - 4);
-                hash1Table[slot] = hash1;
-                hash2Table[slot] = hash2;
-                lengthTable[slot] = contentLength;
-                signaturePresentTable[slot] = 1;
-                signature1Table[slot] = this._readTermContentSignature(contentBytes, contentByteOffset);
-                signature2Table[slot] = this._readTermContentSignature(
+                hash1Table[index] = hash1;
+                hash2Table[index] = hash2;
+                lengthTable[index] = contentLength;
+                signaturePresentTable[index] = 1;
+                signature1Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset);
+                signature2Table[index] = this._readTermContentSignature(
                     contentBytes,
                     contentByteOffset + Math.floor(lastOffset / 2),
                 );
-                signature3Table[slot] = this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
-                occupiedTable[slot] = TERM_CONTENT_META_SLOT_PENDING;
-                slots[i] = slot;
+                signature3Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
+                stateTable[index] = TERM_CONTENT_META_SLOT_PENDING;
+                slotTable[slot] = index + 1;
+                indexes[i] = index;
                 ++stagedCount;
             }
         } catch (error) {
-            for (const slot of slots) {
-                if (slot >= 0) { occupiedTable[slot] = TERM_CONTENT_META_SLOT_EMPTY; }
+            for (const index of indexes) {
+                if (index < 0) { continue; }
+                stateTable[index] = TERM_CONTENT_META_SLOT_EMPTY;
+                this._termEntryContentMetaFreeIndexes.push(index);
             }
+            this._ensureTermEntryContentMetaHashPairCapacity(
+                this._termEntryContentMetaHashPairCount,
+                true,
+            );
             throw error;
         }
         this._termEntryContentMetaHashPairPendingCount += stagedCount;
-        return {slots, generation: this._termEntryContentMetaHashPairGeneration, active: true};
+        return {indexes, active: true};
     }
 
     /**
-     * @param {{slots: Int32Array, generation: number, active: boolean}} staged
+     * @param {{indexes: Int32Array, active: boolean}} staged
      * @param {number} index
      * @param {number} hash1
      * @param {number} hash2
      * @returns {number}
      */
-    _resolveStagedArtifactTermContentSlot(staged, index, hash1, hash2) {
-        const originalSlot = staged.slots[index];
-        if (originalSlot < 0) { return -1; }
-        const occupiedTable = this._termEntryContentMetaHashPairTable;
-        const hash1Table = this._termEntryContentMetaHash1Table;
-        const hash2Table = this._termEntryContentMetaHash2Table;
+    _resolveStagedArtifactTermContentIndex(staged, index, hash1, hash2) {
+        const metadataIndex = staged.indexes[index];
         if (
-            staged.generation === this._termEntryContentMetaHashPairGeneration &&
-            occupiedTable[originalSlot] === TERM_CONTENT_META_SLOT_PENDING &&
-            hash1Table[originalSlot] === (hash1 >>> 0) &&
-            hash2Table[originalSlot] === (hash2 >>> 0)
+            metadataIndex >= 0 &&
+            this._termEntryContentMetaStateTable[metadataIndex] === TERM_CONTENT_META_SLOT_PENDING &&
+            this._termEntryContentMetaHash1Table[metadataIndex] === (hash1 >>> 0) &&
+            this._termEntryContentMetaHash2Table[metadataIndex] === (hash2 >>> 0)
         ) {
-            return originalSlot;
-        }
-        const mask = this._termEntryContentMetaHashPairMask;
-        let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
-        while (occupiedTable[slot] !== TERM_CONTENT_META_SLOT_EMPTY) {
-            if (
-                occupiedTable[slot] === TERM_CONTENT_META_SLOT_PENDING &&
-                hash1Table[slot] === (hash1 >>> 0) &&
-                hash2Table[slot] === (hash2 >>> 0)
-            ) {
-                return slot;
-            }
-            slot = (slot + 1) & mask;
+            return metadataIndex;
         }
         return -1;
     }
 
     /**
-     * @param {{slots: Int32Array, generation: number, active: boolean}|null} staged
+     * @param {{indexes: Int32Array, active: boolean}|null} staged
      * @param {number[]} hash1s
      * @param {number[]} hash2s
      */
@@ -5683,46 +5708,31 @@ export class DictionaryDatabase {
         if (staged === null || !staged.active) { return; }
         staged.active = false;
         /** @type {number[]} */
-        const slotsToClear = [];
-        for (let i = 0; i < staged.slots.length; ++i) {
-            const originalSlot = staged.slots[i];
-            if (originalSlot < 0) { continue; }
+        const indexesToClear = [];
+        for (let i = 0; i < staged.indexes.length; ++i) {
+            const index = staged.indexes[i];
+            if (index < 0) { continue; }
             const hash1 = hash1s[i] >>> 0;
             const hash2 = hash2s[i] >>> 0;
-            let slot = -1;
             if (
-                staged.generation === this._termEntryContentMetaHashPairGeneration &&
-                this._termEntryContentMetaHashPairTable[originalSlot] !== TERM_CONTENT_META_SLOT_EMPTY &&
-                this._termEntryContentMetaHash1Table[originalSlot] === hash1 &&
-                this._termEntryContentMetaHash2Table[originalSlot] === hash2
+                this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_EMPTY &&
+                this._termEntryContentMetaHash1Table[index] === hash1 &&
+                this._termEntryContentMetaHash2Table[index] === hash2
             ) {
-                slot = originalSlot;
-            } else {
-                const mask = this._termEntryContentMetaHashPairMask;
-                let candidate = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
-                while (this._termEntryContentMetaHashPairTable[candidate] !== TERM_CONTENT_META_SLOT_EMPTY) {
-                    if (
-                        this._termEntryContentMetaHash1Table[candidate] === hash1 &&
-                        this._termEntryContentMetaHash2Table[candidate] === hash2
-                    ) {
-                        slot = candidate;
-                        break;
-                    }
-                    candidate = (candidate + 1) & mask;
-                }
+                indexesToClear.push(index);
             }
-            if (slot >= 0) { slotsToClear.push(slot); }
         }
-        for (const slot of slotsToClear) {
-            const occupancy = this._termEntryContentMetaHashPairTable[slot];
-            if (occupancy === TERM_CONTENT_META_SLOT_PENDING) {
+        for (const index of indexesToClear) {
+            const state = this._termEntryContentMetaStateTable[index];
+            if (state === TERM_CONTENT_META_SLOT_PENDING) {
                 --this._termEntryContentMetaHashPairPendingCount;
-            } else if (occupancy === TERM_CONTENT_META_SLOT_PUBLISHED) {
+            } else if (state === TERM_CONTENT_META_SLOT_PUBLISHED) {
                 --this._termEntryContentMetaHashPairCount;
             }
-            this._termEntryContentMetaHashPairTable[slot] = TERM_CONTENT_META_SLOT_EMPTY;
+            this._termEntryContentMetaStateTable[index] = TERM_CONTENT_META_SLOT_EMPTY;
+            this._termEntryContentMetaFreeIndexes.push(index);
         }
-        if (slotsToClear.length > 0) {
+        if (indexesToClear.length > 0) {
             this._ensureTermEntryContentMetaHashPairCapacity(
                 this._termEntryContentMetaHashPairCount,
                 true,
@@ -5772,8 +5782,8 @@ export class DictionaryDatabase {
      * @returns {{id: number, offset: number, length: number, dictName: string, hash2?: number}|undefined}
      */
     _getTermEntryContentMetaByHashPair(hash1, hash2) {
-        const slot = this._findTermEntryContentMetaHashPairSlot(hash1, hash2);
-        return slot < 0 ? void 0 : this._readTermEntryContentMetaHashPairSlot(slot);
+        const index = this._findTermEntryContentMetaHashPairIndex(hash1, hash2);
+        return index < 0 ? void 0 : this._readTermEntryContentMetaHashPairIndex(index);
     }
 
     /**
@@ -5781,25 +5791,25 @@ export class DictionaryDatabase {
      * @param {number} hash2
      * @returns {number}
      */
-    _findTermEntryContentMetaHashPairSlot(hash1, hash2) {
+    _findTermEntryContentMetaHashPairIndex(hash1, hash2) {
         if (this._termEntryContentMetaHashPairCount <= 0) { return -1; }
         hash1 >>>= 0;
         hash2 >>>= 0;
         const hash1Table = this._termEntryContentMetaHash1Table;
         const hash2Table = this._termEntryContentMetaHash2Table;
-        const occupiedTable = this._termEntryContentMetaHashPairTable;
+        const stateTable = this._termEntryContentMetaStateTable;
+        const slotTable = this._termEntryContentMetaHashPairTable;
         const mask = this._termEntryContentMetaHashPairMask;
         let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
         while (true) {
-            const occupancy = occupiedTable[slot];
-            if (occupancy === TERM_CONTENT_META_SLOT_EMPTY) {
-                return -1;
-            }
+            const encodedIndex = slotTable[slot];
+            if (encodedIndex === 0) { return -1; }
+            const index = encodedIndex - 1;
             if (
-                occupancy === TERM_CONTENT_META_SLOT_PUBLISHED &&
-                hash1Table[slot] === hash1 && hash2Table[slot] === hash2
+                stateTable[index] === TERM_CONTENT_META_SLOT_PUBLISHED &&
+                hash1Table[index] === hash1 && hash2Table[index] === hash2
             ) {
-                return slot;
+                return index;
             }
             slot = (slot + 1) & mask;
         }
@@ -5816,24 +5826,28 @@ export class DictionaryDatabase {
         this._ensureTermEntryContentMetaHashPairCapacity(this._termEntryContentMetaHashPairCount + 1);
         const hash1Table = this._termEntryContentMetaHash1Table;
         const hash2Table = this._termEntryContentMetaHash2Table;
-        const occupiedTable = this._termEntryContentMetaHashPairTable;
+        const stateTable = this._termEntryContentMetaStateTable;
+        const slotTable = this._termEntryContentMetaHashPairTable;
         const mask = this._termEntryContentMetaHashPairMask;
         let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
         while (true) {
-            const occupancy = occupiedTable[slot];
-            if (occupancy === TERM_CONTENT_META_SLOT_EMPTY) {
-                hash1Table[slot] = hash1;
-                hash2Table[slot] = hash2;
-                occupiedTable[slot] = TERM_CONTENT_META_SLOT_PUBLISHED;
-                this._writeTermEntryContentMetaHashPairSlot(slot, meta);
+            const encodedIndex = slotTable[slot];
+            if (encodedIndex === 0) {
+                const index = this._allocateTermEntryContentMetaIndex();
+                hash1Table[index] = hash1;
+                hash2Table[index] = hash2;
+                stateTable[index] = TERM_CONTENT_META_SLOT_PUBLISHED;
+                slotTable[slot] = index + 1;
+                this._writeTermEntryContentMetaHashPairIndex(index, meta);
                 ++this._termEntryContentMetaHashPairCount;
                 return;
             }
+            const index = encodedIndex - 1;
             if (
-                occupancy === TERM_CONTENT_META_SLOT_PUBLISHED &&
-                hash1Table[slot] === hash1 && hash2Table[slot] === hash2
+                stateTable[index] === TERM_CONTENT_META_SLOT_PUBLISHED &&
+                hash1Table[index] === hash1 && hash2Table[index] === hash2
             ) {
-                this._writeTermEntryContentMetaHashPairSlot(slot, meta);
+                this._writeTermEntryContentMetaHashPairIndex(index, meta);
                 return;
             }
             slot = (slot + 1) & mask;
@@ -5858,13 +5872,15 @@ export class DictionaryDatabase {
         hash2 >>>= 0;
         const hash1Table = this._termEntryContentMetaHash1Table;
         const hash2Table = this._termEntryContentMetaHash2Table;
-        const occupiedTable = this._termEntryContentMetaHashPairTable;
+        const stateTable = this._termEntryContentMetaStateTable;
+        const slotTable = this._termEntryContentMetaHashPairTable;
         const mask = this._termEntryContentMetaHashPairMask;
         let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
-        while (occupiedTable[slot] !== TERM_CONTENT_META_SLOT_EMPTY) {
+        while (slotTable[slot] !== 0) {
+            const existingIndex = slotTable[slot] - 1;
             if (
-                occupiedTable[slot] === TERM_CONTENT_META_SLOT_PUBLISHED &&
-                hash1Table[slot] === hash1 && hash2Table[slot] === hash2
+                stateTable[existingIndex] === TERM_CONTENT_META_SLOT_PUBLISHED &&
+                hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2
             ) {
                 this._cacheTermEntryContentMeta(
                     null,
@@ -5895,17 +5911,19 @@ export class DictionaryDatabase {
             throw new RangeError(`Invalid term content metadata source span: ${contentByteOffset}+${length}`);
         }
         const lastOffset = Math.max(0, length - 4);
-        hash1Table[slot] = hash1;
-        hash2Table[slot] = hash2;
-        occupiedTable[slot] = TERM_CONTENT_META_SLOT_PUBLISHED;
-        this._termEntryContentMetaIdTable[slot] = 0;
-        this._termEntryContentMetaOffsetTable[slot] = offset;
-        this._termEntryContentMetaLengthTable[slot] = length;
-        this._termEntryContentMetaDictNameIdTable[slot] = dictNameId;
-        this._termEntryContentMetaSignaturePresentTable[slot] = 1;
-        this._termEntryContentMetaSignature1Table[slot] = this._readTermContentSignature(contentBytes, contentByteOffset);
-        this._termEntryContentMetaSignature2Table[slot] = this._readTermContentSignature(contentBytes, contentByteOffset + Math.floor(lastOffset / 2));
-        this._termEntryContentMetaSignature3Table[slot] = this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
+        const index = this._allocateTermEntryContentMetaIndex();
+        hash1Table[index] = hash1;
+        hash2Table[index] = hash2;
+        stateTable[index] = TERM_CONTENT_META_SLOT_PUBLISHED;
+        slotTable[slot] = index + 1;
+        this._termEntryContentMetaIdTable[index] = 0;
+        this._termEntryContentMetaOffsetTable[index] = offset;
+        this._termEntryContentMetaLengthTable[index] = length;
+        this._termEntryContentMetaDictNameIdTable[index] = dictNameId;
+        this._termEntryContentMetaSignaturePresentTable[index] = 1;
+        this._termEntryContentMetaSignature1Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset);
+        this._termEntryContentMetaSignature2Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset + Math.floor(lastOffset / 2));
+        this._termEntryContentMetaSignature3Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
         ++this._termEntryContentMetaHashPairCount;
     }
 
@@ -6390,7 +6408,7 @@ export class DictionaryDatabase {
             throw new Error('Artifact chunk content hash arrays are smaller than row count');
         }
         const importMetrics = createTermImportMetrics();
-        /** @type {{slots: Int32Array, generation: number, active: boolean}|null} */
+        /** @type {{indexes: Int32Array, active: boolean}|null} */
         let stagedContentMetadata = null;
         /** @type {number[]} */
         let stagedContentHash1s = [];
@@ -6990,13 +7008,13 @@ export class DictionaryDatabase {
                     pendingRowToUniqueIndex[i] = existingPendingIndex;
                     continue;
                 }
-                const existingSlot = persistedLookupRequired ?
-                    this._findTermEntryContentMetaHashPairSlot(hash1, hash2) :
+                const existingIndex = persistedLookupRequired ?
+                    this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
                     -1;
                 if (
-                    existingSlot >= 0 &&
-                    this._termEntryContentMetaLengthTable[existingSlot] === contentLength &&
-                    this._termEntryContentMetaSignaturePresentTable[existingSlot] === 1
+                    existingIndex >= 0 &&
+                    this._termEntryContentMetaLengthTable[existingIndex] === contentLength &&
+                    this._termEntryContentMetaSignaturePresentTable[existingIndex] === 1
                 ) {
                     const lastOffset = Math.max(0, contentLength - 4);
                     const useDirectSlabSignature = useContentSlab && contentLength >= 4;
@@ -7006,14 +7024,14 @@ export class DictionaryDatabase {
                     const signatureBytes = useDirectSlabSignature ? contentBytesBuffer : contentBytes;
                     const signatureBaseOffset = useDirectSlabSignature ? contentOffset : 0;
                     if (
-                        this._termEntryContentMetaSignature1Table[existingSlot] === this._readTermContentSignature(signatureBytes, signatureBaseOffset) &&
-                        this._termEntryContentMetaSignature2Table[existingSlot] === this._readTermContentSignature(signatureBytes, signatureBaseOffset + Math.floor(lastOffset / 2)) &&
-                        this._termEntryContentMetaSignature3Table[existingSlot] === this._readTermContentSignature(signatureBytes, signatureBaseOffset + lastOffset)
+                        this._termEntryContentMetaSignature1Table[existingIndex] === this._readTermContentSignature(signatureBytes, signatureBaseOffset) &&
+                        this._termEntryContentMetaSignature2Table[existingIndex] === this._readTermContentSignature(signatureBytes, signatureBaseOffset + Math.floor(lastOffset / 2)) &&
+                        this._termEntryContentMetaSignature3Table[existingIndex] === this._readTermContentSignature(signatureBytes, signatureBaseOffset + lastOffset)
                     ) {
-                        contentOffsets[i] = this._termEntryContentMetaOffsetTable[existingSlot];
+                        contentOffsets[i] = this._termEntryContentMetaOffsetTable[existingIndex];
                         contentLengths[i] = contentLength;
                         const existingDictName = this._termEntryContentMetaDictNames[
-                            this._termEntryContentMetaDictNameIdTable[existingSlot]
+                            this._termEntryContentMetaDictNameIdTable[existingIndex]
                         ] ?? 'raw';
                         if (Array.isArray(resolvedContentDictNames)) {
                             resolvedContentDictNames[i] = existingDictName;
@@ -7031,7 +7049,7 @@ export class DictionaryDatabase {
                         continue;
                     }
                 }
-                let existingMeta = existingSlot < 0 ? void 0 : this._readTermEntryContentMetaHashPairSlot(existingSlot);
+                let existingMeta = existingIndex < 0 ? void 0 : this._readTermEntryContentMetaHashPairIndex(existingIndex);
                 if (typeof existingMeta !== 'undefined') {
                     ++exactFallbackCount;
                     if (contentBytes === null) {
@@ -7256,7 +7274,7 @@ export class DictionaryDatabase {
 
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {slots: Int32Array, generation: number, active: boolean}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean}} state
+     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean}} state
      * @returns {string|(string|null)[]}
      * @throws {Error} If dedup projections or persisted metadata are invalid.
      */
@@ -7345,17 +7363,17 @@ export class DictionaryDatabase {
             const contentByteOffset = pendingContentSpans === null ?
                 0 :
                 pendingContentSpans.offsets[i];
-            const stagedSlot = stagedContentMetadata === null ?
+            const stagedIndex = stagedContentMetadata === null ?
                 -1 :
-                this._resolveStagedArtifactTermContentSlot(
+                this._resolveStagedArtifactTermContentIndex(
                     stagedContentMetadata,
                     i,
                     pendingContentHash1s[i],
                     pendingContentHash2s[i],
                 );
             if (
-                stagedSlot >= 0 &&
-                this._termEntryContentMetaHashPairTable[stagedSlot] === TERM_CONTENT_META_SLOT_PENDING
+                stagedIndex >= 0 &&
+                this._termEntryContentMetaStateTable[stagedIndex] === TERM_CONTENT_META_SLOT_PENDING
             ) {
                 const offset = pendingOffsets[i];
                 const length = pendingLengths[i];
@@ -7368,14 +7386,14 @@ export class DictionaryDatabase {
                         length < 0 ||
                         length >= TERM_CONTENT_META_U32_NULL
                     )) ||
-                    this._termEntryContentMetaLengthTable[stagedSlot] !== length
+                    this._termEntryContentMetaLengthTable[stagedIndex] !== length
                 ) {
                     throw new RangeError(`Invalid staged term content metadata length: ${length}`);
                 }
-                this._termEntryContentMetaIdTable[stagedSlot] = 0;
-                this._termEntryContentMetaOffsetTable[stagedSlot] = offset;
-                this._termEntryContentMetaDictNameIdTable[stagedSlot] = dictNameId;
-                this._termEntryContentMetaHashPairTable[stagedSlot] = TERM_CONTENT_META_SLOT_PUBLISHED;
+                this._termEntryContentMetaIdTable[stagedIndex] = 0;
+                this._termEntryContentMetaOffsetTable[stagedIndex] = offset;
+                this._termEntryContentMetaDictNameIdTable[stagedIndex] = dictNameId;
+                this._termEntryContentMetaStateTable[stagedIndex] = TERM_CONTENT_META_SLOT_PUBLISHED;
                 --this._termEntryContentMetaHashPairPendingCount;
                 ++this._termEntryContentMetaHashPairCount;
                 continue;
