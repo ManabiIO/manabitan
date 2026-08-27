@@ -48,7 +48,7 @@ const MAX_WASM32_BUFFER_BYTES = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
-/** @typedef {{rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
+/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
@@ -167,6 +167,34 @@ export function consumeLastParallelParserSkipReason() {
     const value = lastParallelParserSkipReason;
     lastParallelParserSkipReason = null;
     return value;
+}
+
+/**
+ * @param {Uint32Array} rowToUniqueIndex
+ * @param {number} uniqueCount
+ * @returns {Uint32Array}
+ * @throws {Error} If the native dedupe projection is incomplete or unordered.
+ */
+function buildContentUniqueRowIndexes(rowToUniqueIndex, uniqueCount) {
+    const uniqueRowIndexes = new Uint32Array(uniqueCount);
+    uniqueRowIndexes.fill(0xffffffff);
+    let nextUniqueIndex = 0;
+    for (let rowIndex = 0; rowIndex < rowToUniqueIndex.length; ++rowIndex) {
+        const uniqueIndex = rowToUniqueIndex[rowIndex];
+        if (uniqueIndex >= uniqueCount) {
+            throw new RangeError(`Native term content unique index is invalid at row ${rowIndex}`);
+        }
+        if (uniqueIndex === nextUniqueIndex) {
+            uniqueRowIndexes[uniqueIndex] = rowIndex;
+            ++nextUniqueIndex;
+        } else if (uniqueRowIndexes[uniqueIndex] === 0xffffffff) {
+            throw new Error(`Native term content unique index ${uniqueIndex} is out of order`);
+        }
+    }
+    if (nextUniqueIndex !== uniqueCount) {
+        throw new Error(`Native term content unique rows are incomplete: ${nextUniqueIndex}/${uniqueCount}`);
+    }
+    return uniqueRowIndexes;
 }
 
 /**
@@ -1208,6 +1236,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         {
             uniqueCount: contentUniqueCount,
             sourceRowCount: rowCount,
+            uniqueRowIndexes: buildContentUniqueRowIndexes(contentUniqueIndexes, contentUniqueCount),
             resolvedFlags: new Uint8Array(contentUniqueCount),
             resolvedOffsets: new Float64Array(contentUniqueCount),
             resolvedLengths: new Uint32Array(contentUniqueCount),
@@ -1385,6 +1414,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         }
         const chunk = {
             rowCount: count,
+            contentRowStart: start,
             expressionBytesList,
             readingBytesList,
             readingEqualsExpressionList,

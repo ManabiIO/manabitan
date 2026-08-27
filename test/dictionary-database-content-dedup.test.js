@@ -905,9 +905,18 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             contentBytesBuffer: source,
             contentBytesBaseOffset: 1,
             contentMetaList: new Uint32Array([
-                0, 3, 10, 20,
-                3, 2, 30, 40,
-                3, 2, 30, 40,
+                0,
+                3,
+                10,
+                20,
+                3,
+                2,
+                30,
+                40,
+                3,
+                2,
+                30,
+                40,
             ]),
             contentUniqueIndexList: new Uint32Array([0, 1, 1]),
             contentDedupPlan: plan,
@@ -1010,9 +1019,18 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             contentBytesBuffer: source,
             contentBytesBaseOffset: 1,
             contentMetaList: new Uint32Array([
-                0, 3, 10, 20,
-                3, 2, 30, 40,
-                3, 2, 30, 40,
+                0,
+                3,
+                10,
+                20,
+                3,
+                2,
+                30,
+                40,
+                3,
+                2,
+                30,
+                40,
             ]),
             contentUniqueIndexList: new Uint32Array([0, 1, 1]),
             contentDedupPlan: plan,
@@ -1027,6 +1045,248 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect([...result.pendingContentSpans.lengths]).toEqual([3, 2]);
         expect([...result.pendingRowToUniqueIndex]).toEqual([0, 1, 1]);
         expect(result.pendingHitCount).toBe(1);
+    });
+
+    test('checks persisted metadata once per parser-verified unique slab content', async () => {
+        const database = new DictionaryDatabase();
+        const findPersistedIndex = vi.spyOn(
+            /** @type {DictionaryDatabase & {_findTermEntryContentMetaHashPairIndex: (hash1: number, hash2: number) => number}} */ (database),
+            '_findTermEntryContentMetaHashPairIndex',
+        );
+        const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const source = new Uint8Array([99, 1, 2, 3, 4, 5, 88]);
+        const plan = {
+            uniqueCount: 2,
+            sourceRowCount: 3,
+            uniqueRowIndexes: new Uint32Array([0, 1]),
+            resolvedFlags: new Uint8Array(2),
+            resolvedOffsets: new Float64Array(2),
+            resolvedLengths: new Uint32Array(2),
+            resolvedDictNames: new Array(2),
+            pendingEpochs: new Uint32Array(2),
+            pendingIndexes: new Uint32Array(2),
+            nextEpoch: 1,
+            persistedLookupRequired: true,
+        };
+
+        const result = await resolve({
+            rowCount: 3,
+            contentRowStart: 0,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 1,
+            contentMetaList: new Uint32Array([
+                0,
+                3,
+                10,
+                20,
+                3,
+                2,
+                30,
+                40,
+                3,
+                2,
+                30,
+                40,
+            ]),
+            contentUniqueIndexList: new Uint32Array([0, 1, 1]),
+            contentDedupPlan: plan,
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        });
+
+        expect(findPersistedIndex).toHaveBeenCalledTimes(2);
+        expect(result.pendingContentCount).toBe(2);
+        expect(result.pendingRowToUniqueIndex).toBeNull();
+        expect([...result.pendingContentSpans.offsets]).toEqual([1, 4]);
+        expect([...result.pendingContentSpans.lengths]).toEqual([3, 2]);
+        expect(result.pendingPlanUniqueIndexes).toEqual([0, 1]);
+        expect(result.pendingHitCount).toBe(1);
+    });
+
+    test('projects one persisted canonical hit onto every duplicate row', async () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array([99, 1, 2, 3, 1, 2, 3, 88]);
+        Reflect.get(database, '_cacheTermEntryContentMeta').call(
+            database,
+            null,
+            400,
+            3,
+            'raw-v6',
+            0,
+            10,
+            20,
+            source.subarray(1, 4),
+        );
+        const findPersistedIndex = vi.spyOn(
+            /** @type {DictionaryDatabase & {_findTermEntryContentMetaHashPairIndex: (hash1: number, hash2: number) => number}} */ (database),
+            '_findTermEntryContentMetaHashPairIndex',
+        );
+        const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const result = await resolve({
+            rowCount: 2,
+            contentRowStart: 0,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 1,
+            contentMetaList: new Uint32Array([
+                0,
+                3,
+                10,
+                20,
+                3,
+                3,
+                10,
+                20,
+            ]),
+            contentUniqueIndexList: new Uint32Array([0, 0]),
+            contentDedupPlan: {
+                uniqueCount: 1,
+                sourceRowCount: 2,
+                uniqueRowIndexes: new Uint32Array([0]),
+                resolvedFlags: new Uint8Array(1),
+                resolvedOffsets: new Float64Array(1),
+                resolvedLengths: new Uint32Array(1),
+                resolvedDictNames: new Array(1),
+                pendingEpochs: new Uint32Array(1),
+                pendingIndexes: new Uint32Array(1),
+                nextEpoch: 1,
+                persistedLookupRequired: true,
+            },
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        });
+
+        expect(findPersistedIndex).toHaveBeenCalledOnce();
+        expect(result.pendingContentCount).toBe(0);
+        expect(result.persistedHitCount).toBe(1);
+        expect([...result.contentOffsets]).toEqual([400, 400]);
+        expect([...result.contentLengths]).toEqual([3, 3]);
+        expect(result.resolvedContentDictNames).toBe('raw-v6');
+    });
+
+    test('does not merge a canonical row with a persisted hash collision', async () => {
+        const database = new DictionaryDatabase();
+        const persisted = new Uint8Array([1, 2, 3, 4]);
+        Reflect.get(database, '_cacheTermEntryContentMeta').call(
+            database,
+            null,
+            400,
+            persisted.byteLength,
+            'raw',
+            0,
+            10,
+            20,
+            persisted,
+        );
+        Reflect.set(database, '_termContentStore', {
+            readSlice: vi.fn(async () => persisted),
+        });
+        const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const source = new Uint8Array([99, 1, 2, 3, 5, 88]);
+        const result = await resolve({
+            rowCount: 1,
+            contentRowStart: 0,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 1,
+            contentMetaList: new Uint32Array([0, 4, 10, 20]),
+            contentUniqueIndexList: new Uint32Array([0]),
+            contentDedupPlan: {
+                uniqueCount: 1,
+                sourceRowCount: 1,
+                uniqueRowIndexes: new Uint32Array([0]),
+                resolvedFlags: new Uint8Array(1),
+                resolvedOffsets: new Float64Array(1),
+                resolvedLengths: new Uint32Array(1),
+                resolvedDictNames: new Array(1),
+                pendingEpochs: new Uint32Array(1),
+                pendingIndexes: new Uint32Array(1),
+                nextEpoch: 1,
+                persistedLookupRequired: true,
+            },
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        });
+
+        expect(result.persistedHitCount).toBe(0);
+        expect(result.exactFallbackCount).toBe(1);
+        expect(result.pendingContentCount).toBe(1);
+        expect([...result.pendingContentSpans.offsets]).toEqual([1]);
+    });
+
+    test('uses global canonical row indexes with nonzero chunk starts', async () => {
+        const database = new DictionaryDatabase();
+        const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const plan = {
+            uniqueCount: 3,
+            sourceRowCount: 5,
+            uniqueRowIndexes: new Uint32Array([0, 2, 4]),
+            resolvedFlags: new Uint8Array([1, 0, 0]),
+            resolvedOffsets: new Float64Array([100, 0, 0]),
+            resolvedLengths: new Uint32Array([3, 0, 0]),
+            resolvedDictNames: ['raw-v6', void 0, void 0],
+            pendingEpochs: new Uint32Array(3),
+            pendingIndexes: new Uint32Array(3),
+            nextEpoch: 1,
+            persistedLookupRequired: true,
+        };
+        const source = new Uint8Array([99, 4, 5, 4, 5, 6, 88]);
+        const result = await resolve({
+            rowCount: 3,
+            contentRowStart: 2,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 1,
+            contentMetaList: new Uint32Array([
+                0,
+                2,
+                30,
+                40,
+                2,
+                2,
+                30,
+                40,
+                4,
+                1,
+                50,
+                60,
+            ]),
+            contentUniqueIndexList: new Uint32Array([1, 1, 2]),
+            contentDedupPlan: plan,
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        });
+
+        expect(result.pendingPlanUniqueIndexes).toEqual([1, 2]);
+        expect([...result.pendingContentSpans.offsets]).toEqual([1, 5]);
+        expect([...result.pendingContentSpans.lengths]).toEqual([2, 1]);
+        expect(result.pendingHitCount).toBe(1);
+    });
+
+    test('rolls back canonical-row plan publication after persistence failure', async () => {
+        const harness = createArtifactOverlapHarness();
+        Reflect.set(harness.plan, 'uniqueRowIndexes', new Uint32Array([0]));
+        Reflect.set(harness.plan, 'persistedLookupRequired', true);
+        Reflect.set(harness.chunk, 'contentRowStart', 0);
+        const importing = harness.run();
+
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        harness.rejectContent(new Error('injected canonical content failure'));
+        harness.resolveRecords();
+
+        await expect(importing).rejects.toThrow('injected canonical content failure');
+        expect(harness.plan.resolvedFlags).toStrictEqual(new Uint8Array([0]));
+        expect(harness.plan.resolvedOffsets).toStrictEqual(new Float64Array([0]));
+        expect(harness.plan.resolvedLengths).toStrictEqual(new Uint32Array([0]));
     });
 
     test('bounds persisted signatures for short slab content', async () => {

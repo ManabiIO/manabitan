@@ -183,7 +183,7 @@ function collectChunkTransferables(chunk) {
         for (const prepared of preparedLookupIndexes.values()) {
             if (typeof prepared !== 'object' || prepared === null) { continue; }
             addView(Reflect.get(prepared, 'bytes'));
-            const preparedPlan = Reflect.get(prepared, 'preinternedPlan');
+            const preparedPlan = /** @type {unknown} */ (Reflect.get(prepared, 'preinternedPlan'));
             if (typeof preparedPlan !== 'object' || preparedPlan === null) { continue; }
             addView(Reflect.get(preparedPlan, 'stringLengths'));
             addView(Reflect.get(preparedPlan, 'stringOffsets'));
@@ -194,10 +194,13 @@ function collectChunkTransferables(chunk) {
         }
     }
     const rawDedupPlan = /** @type {unknown} */ (chunk.contentDedupPlan);
-    const dedupPlan = /** @type {{resolvedFlags?: unknown, resolvedOffsets?: unknown, resolvedLengths?: unknown, pendingEpochs?: unknown, pendingIndexes?: unknown, pendingSpanOffsetsScratch?: unknown, pendingSpanLengthsScratch?: unknown}|null} */ (
+    const dedupPlan = /** @type {{uniqueRowIndexes?: unknown, resolvedFlags?: unknown, resolvedOffsets?: unknown, resolvedLengths?: unknown, pendingEpochs?: unknown, pendingIndexes?: unknown, pendingSpanOffsetsScratch?: unknown, pendingSpanLengthsScratch?: unknown}|null} */ (
         typeof rawDedupPlan === 'object' ? rawDedupPlan : null
     );
     if (typeof dedupPlan === 'object' && dedupPlan !== null) {
+        if (dedupPlan.uniqueRowIndexes instanceof Uint32Array) {
+            addView(dedupPlan.uniqueRowIndexes);
+        }
         addView(dedupPlan.resolvedFlags);
         addView(dedupPlan.resolvedOffsets);
         addView(dedupPlan.resolvedLengths);

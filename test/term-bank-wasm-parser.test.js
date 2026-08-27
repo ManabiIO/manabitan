@@ -1358,6 +1358,7 @@ describe('term-bank WASM parser', () => {
         expect(chunk.contentUniqueIndexList).toStrictEqual(new Uint32Array([0, 0, 0]));
         expect(chunk.contentDedupPlan?.uniqueCount).toBe(1);
         expect(chunk.contentDedupPlan?.sourceRowCount).toBe(3);
+        expect(chunk.contentDedupPlan?.uniqueRowIndexes).toStrictEqual(new Uint32Array([0]));
         expect(chunk.contentDedupPlan?.resolvedDictNames).toBeNull();
         expect(chunk.contentDedupPlan?.resolvedUniformDictName).toBeUndefined();
         expect(chunk.contentMetaList[0]).toBe(chunk.contentMetaList[4]);
@@ -1704,6 +1705,7 @@ describe('term-bank WASM parser', () => {
         expect(chunks).toHaveLength(1);
         expect(chunk.rowCount).toBe(3);
         expect(chunk.contentUniqueIndexList).toStrictEqual(new Uint32Array([0, 0, 1]));
+        expect(chunk.contentDedupPlan?.uniqueRowIndexes).toStrictEqual(new Uint32Array([0, 2]));
         expect(chunk.readingEqualsExpressionList).toStrictEqual(new Uint8Array([1, 1, 0]));
         expect(chunk.scoreList).toStrictEqual(new Int32Array([2, 3, 4]));
         expect(chunk.sequenceList).toStrictEqual(new Int32Array([11, 12, 13]));
