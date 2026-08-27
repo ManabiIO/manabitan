@@ -995,7 +995,7 @@ describe('term-bank WASM parser', () => {
                     ++loadCount;
                     return new Uint8Array(emptyBank);
                 }),
-                Array.from({length: sourceCount}, () => 32 * 1024 * 1024),
+                Array.from({length: sourceCount}, () => 24 * 1024 * 1024),
                 3,
                 async (_chunk, progress) => {
                     if (progress.chunkIndex === 1) { await sinkGate; }
