@@ -34,7 +34,7 @@ self.addEventListener('message', (event) => {
 /** @param {MessageEvent} event */
 async function compressContent(event) {
     const rawData = /** @type {unknown} */ (event.data);
-    const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown}} */ (rawData);
+    const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, blockStartIndexes?: unknown, blockLengths?: unknown, dictName?: unknown, wrap?: unknown}} */ (rawData);
     const id = typeof data?.id === 'number' ? data.id : -1;
     try {
         const {compressTermContentZstd, compressWrappedTermContentZstd, compressWrappedTermContentZstdSpans} = await modulePromise;
@@ -43,6 +43,46 @@ async function compressContent(event) {
         /** @type {{bytes: Uint8Array, envelopeMs: number}} */
         let result;
         if (
+            data.source instanceof Uint8Array &&
+            data.sourceOffsets instanceof Uint32Array &&
+            data.sourceLengths instanceof Uint32Array &&
+            data.blockStartIndexes instanceof Uint32Array &&
+            data.blockLengths instanceof Uint32Array
+        ) {
+            if (
+                data.wrap !== true ||
+                data.sourceOffsets.length !== data.sourceLengths.length ||
+                data.blockStartIndexes.length !== data.blockLengths.length + 1 ||
+                data.blockStartIndexes[0] !== 0 ||
+                data.blockStartIndexes[data.blockLengths.length] !== data.sourceOffsets.length
+            ) {
+                throw new RangeError('Compression worker span batch input is invalid');
+            }
+            /** @type {ArrayBuffer[]} */
+            const compressed = new Array(data.blockLengths.length);
+            let envelopeMs = 0;
+            for (let i = 0; i < data.blockLengths.length; ++i) {
+                const start = data.blockStartIndexes[i];
+                const end = data.blockStartIndexes[i + 1];
+                if (end < start || end > data.sourceOffsets.length) {
+                    throw new RangeError('Compression worker span batch partition is invalid');
+                }
+                const blockResult = compressWrappedTermContentZstdSpans(
+                    data.source,
+                    data.sourceOffsets.subarray(start, end),
+                    data.sourceLengths.subarray(start, end),
+                    data.blockLengths[i],
+                    dictName,
+                );
+                envelopeMs += blockResult.envelopeMs;
+                compressed[i] = toTransferableBuffer(blockResult.bytes);
+            }
+            self.postMessage(
+                {id, compressed, envelopeMs},
+                compressed,
+            );
+            return;
+        } else if (
             data.source instanceof Uint8Array &&
             data.sourceOffsets instanceof Uint32Array &&
             data.sourceLengths instanceof Uint32Array
@@ -72,15 +112,23 @@ async function compressContent(event) {
                 {bytes: compressTermContentZstd(data.content, dictName), envelopeMs: 0};
         }
         const {bytes, envelopeMs} = result;
-        const compressed = (
-            bytes.buffer instanceof ArrayBuffer &&
-            bytes.byteOffset === 0 &&
-            bytes.byteLength === bytes.buffer.byteLength
-        ) ?
-            bytes.buffer :
-            Uint8Array.from(bytes).buffer;
+        const compressed = toTransferableBuffer(bytes);
         self.postMessage({id, compressed, envelopeMs}, [compressed]);
     } catch (error) {
         self.postMessage({id, error: `${error}`});
     }
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {ArrayBuffer}
+ */
+function toTransferableBuffer(bytes) {
+    return (
+        bytes.buffer instanceof ArrayBuffer &&
+        bytes.byteOffset === 0 &&
+        bytes.byteLength === bytes.buffer.byteLength
+    ) ?
+        bytes.buffer :
+        Uint8Array.from(bytes).buffer;
 }
