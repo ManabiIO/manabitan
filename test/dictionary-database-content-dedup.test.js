@@ -549,7 +549,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             stagedContentMetadata,
         })).toThrow('Invalid term content metadata offset');
 
-        rollback(stagedContentMetadata, [101], [202]);
+        rollback(stagedContentMetadata);
         expect(getMeta(database, 101, 202)).toBeUndefined();
     });
 
@@ -564,7 +564,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             null,
         );
 
-        clear(staged, [101, 303], [202, 404]);
+        clear(staged);
 
         expect(getMeta(database, 101, 202)).toBeUndefined();
         expect(getMeta(database, 303, 404)).toBeUndefined();
@@ -596,8 +596,8 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             stagedContentMetadata,
         });
 
-        rollback(stagedContentMetadata, [101], [202]);
-        rollback(stagedContentMetadata, [101], [202]);
+        rollback(stagedContentMetadata);
+        rollback(stagedContentMetadata);
 
         expect(getMeta(database, 101, 202)).toBeUndefined();
         expect(getMeta(database, 11, 22)).toMatchObject({offset: 50, length: 3});
@@ -931,6 +931,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect([...result.pendingContentSpans.lengths]).toEqual([3, 2]);
         expect(result.pendingRowToUniqueIndex).toBeNull();
         expect(result.pendingHitCount).toBe(1);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
 
         const offsetScratch = plan.pendingSpanOffsetsScratch;
         const lengthScratch = plan.pendingSpanLengthsScratch;
@@ -955,6 +956,46 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(plan.pendingSpanLengthsScratch).toBe(lengthScratch);
         expect(repeated.pendingContentCount).toBe(0);
         expect(repeated.contentOffsets[0]).toBe(plan.resolvedOffsets[0]);
+    });
+
+    test('keeps resolver-reserved native metadata invisible until publication', async () => {
+        const database = new DictionaryDatabase();
+        const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        const source = new Uint8Array([1, 2, 3]);
+        const result = await resolve({
+            dictionary: 'JMdict',
+            rowCount: 1,
+            dictionaryTotalRows: 1,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 0,
+            contentMetaList: new Uint32Array([0, 3, 10, 20]),
+            contentUniqueIndexList: new Uint32Array([0]),
+            contentDedupPlan: {
+                uniqueCount: 1,
+                sourceRowCount: 1,
+                resolvedFlags: new Uint8Array(1),
+                resolvedOffsets: new Float64Array(1),
+                resolvedLengths: new Uint32Array(1),
+                resolvedDictNames: null,
+                pendingEpochs: new Uint32Array(1),
+                pendingIndexes: new Uint32Array(1),
+                nextEpoch: 1,
+                nextUnresolvedUniqueIndex: 0,
+                persistedLookupRequired: false,
+            },
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        }, true);
+
+        expect(result.stagedContentMetadata?.indexes[0]).toBeGreaterThanOrEqual(0);
+        expect(getMeta(database, 10, 20)).toBeUndefined();
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+        rollback(result.stagedContentMetadata);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
     });
 
     test('projects persisted native-plan metadata without allocating a row map', () => {
@@ -1355,6 +1396,16 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(getMeta(harness.database, 10, 20)).toBeUndefined();
         expect(harness.plan.resolvedFlags).toStrictEqual(new Uint8Array([0]));
         expect(harness.plan.nextUnresolvedUniqueIndex).toBe(0);
+
+        const resolve = Reflect.get(harness.database, '_resolveArtifactTermContentDedup').bind(harness.database);
+        const retry = await resolve(harness.chunk, true);
+        expect(retry.stagedContentMetadata?.indexes[0]).toBeGreaterThanOrEqual(0);
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        Reflect.get(harness.database, '_rollbackStagedArtifactTermContentMetadata').call(
+            harness.database,
+            retry.stagedContentMetadata,
+        );
+        expect(Reflect.get(harness.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
     });
 
     test('reports source-driven initial content reservation', async () => {
@@ -1366,6 +1417,11 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         harness.resolveRecords();
         await importing;
 
+        expect(getMeta(harness.database, 10, 20)).toMatchObject({
+            offset: 100,
+            length: 3,
+            dictName: 'raw-block-v2:jmdict',
+        });
         expect(harness.database.getLastBulkAddTermsMetrics()).toMatchObject({
             contentInitialReservationCount: 1,
         });

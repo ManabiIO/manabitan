@@ -5716,6 +5716,63 @@ export class DictionaryDatabase {
     }
 
     /**
+     * Reserves one metadata slot while the dedupe resolver already owns the
+     * source span. This avoids probing and sampling every unique definition a
+     * second time after resolution.
+     * @param {number} hash1
+     * @param {number} hash2
+     * @param {Uint8Array} contentBytes
+     * @param {number} contentByteOffset
+     * @param {number} contentLength
+     * @returns {number}
+     * @throws {RangeError} If the source span is invalid.
+     */
+    _reserveArtifactTermContentMetadata(hash1, hash2, contentBytes, contentByteOffset, contentLength) {
+        hash1 >>>= 0;
+        hash2 >>>= 0;
+        if (
+            !(contentBytes instanceof Uint8Array) ||
+            !Number.isSafeInteger(contentByteOffset) ||
+            contentByteOffset < 0 ||
+            contentByteOffset > contentBytes.byteLength ||
+            !Number.isSafeInteger(contentLength) ||
+            contentLength < 0 ||
+            contentLength >= TERM_CONTENT_META_U32_NULL ||
+            contentLength > contentBytes.byteLength - contentByteOffset
+        ) {
+            throw new RangeError(`Invalid reserved term content source span: ${contentByteOffset}+${contentLength}`);
+        }
+        const hash1Table = this._termEntryContentMetaHash1Table;
+        const hash2Table = this._termEntryContentMetaHash2Table;
+        const slotTable = this._termEntryContentMetaHashPairTable;
+        const mask = this._termEntryContentMetaHashPairMask;
+        let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
+        while (slotTable[slot] !== 0) {
+            const existingIndex = slotTable[slot] - 1;
+            if (hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2) {
+                return -1;
+            }
+            slot = (slot + 1) & mask;
+        }
+        const index = this._allocateTermEntryContentMetaIndex();
+        const lastOffset = Math.max(0, contentLength - 4);
+        hash1Table[index] = hash1;
+        hash2Table[index] = hash2;
+        this._termEntryContentMetaLengthTable[index] = contentLength;
+        this._termEntryContentMetaSignaturePresentTable[index] = 1;
+        this._termEntryContentMetaSignature1Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset);
+        this._termEntryContentMetaSignature2Table[index] = this._readTermContentSignature(
+            contentBytes,
+            contentByteOffset + Math.floor(lastOffset / 2),
+        );
+        this._termEntryContentMetaSignature3Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
+        this._termEntryContentMetaStateTable[index] = TERM_CONTENT_META_SLOT_PENDING;
+        slotTable[slot] = index + 1;
+        ++this._termEntryContentMetaHashPairPendingCount;
+        return index;
+    }
+
+    /**
      * @param {{indexes: Int32Array, active: boolean}} staged
      * @param {number} index
      * @param {number} hash1
@@ -5737,24 +5794,15 @@ export class DictionaryDatabase {
 
     /**
      * @param {{indexes: Int32Array, active: boolean}|null} staged
-     * @param {number[]} hash1s
-     * @param {number[]} hash2s
      */
-    _rollbackStagedArtifactTermContentMetadata(staged, hash1s, hash2s) {
+    _rollbackStagedArtifactTermContentMetadata(staged) {
         if (staged === null || !staged.active) { return; }
         staged.active = false;
         /** @type {number[]} */
         const indexesToClear = [];
-        for (let i = 0; i < staged.indexes.length; ++i) {
-            const index = staged.indexes[i];
+        for (const index of staged.indexes) {
             if (index < 0) { continue; }
-            const hash1 = hash1s[i] >>> 0;
-            const hash2 = hash2s[i] >>> 0;
-            if (
-                this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_EMPTY &&
-                this._termEntryContentMetaHash1Table[index] === hash1 &&
-                this._termEntryContentMetaHash2Table[index] === hash2
-            ) {
+            if (this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_EMPTY) {
                 indexesToClear.push(index);
             }
         }
@@ -6446,10 +6494,6 @@ export class DictionaryDatabase {
         const importMetrics = createTermImportMetrics();
         /** @type {{indexes: Int32Array, active: boolean}|null} */
         let stagedContentMetadata = null;
-        /** @type {number[]} */
-        let stagedContentHash1s = [];
-        /** @type {number[]} */
-        let stagedContentHash2s = [];
         /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[], count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */
         let dedupPlanRollbackState = null;
 
@@ -6458,7 +6502,7 @@ export class DictionaryDatabase {
         }
         try {
             const tContentAppendStart = safePerformance.now();
-            const dedup = await this._resolveArtifactTermContentDedup(chunk);
+            const dedup = await this._resolveArtifactTermContentDedup(chunk, true);
             const {
                 contentOffsets,
                 contentLengths,
@@ -6476,7 +6520,9 @@ export class DictionaryDatabase {
                 contentDedupPlan,
                 pendingPlanUniqueIndexes,
                 pendingPlanUniqueStart,
+                stagedContentMetadata: resolvedStagedContentMetadata,
             } = dedup;
+            stagedContentMetadata = resolvedStagedContentMetadata;
             let {resolvedContentDictNames} = dedup;
             importMetrics.dedupPendingHitCount += pendingHitCount;
             importMetrics.dedupPersistedHitCount += persistedHitCount;
@@ -6517,21 +6563,21 @@ export class DictionaryDatabase {
                 /** @type {Promise<void>|null} */
                 let pendingRecordAppend = null;
                 try {
-                    const tContentMetadataPrepareStart = safePerformance.now();
-                    this._ensureTermEntryContentMetaHashPairCapacity(
-                        this._getArtifactTermContentMetaCapacityHint(chunk, pendingContentCount),
-                    );
-                    stagedContentMetadata = this._stageArtifactTermContentMetadata(
-                        pendingContentHash1s,
-                        pendingContentHash2s,
-                        pendingContentBytes,
-                        pendingContentSpans,
-                    );
-                    stagedContentHash1s = pendingContentHash1s;
-                    stagedContentHash2s = pendingContentHash2s;
-                    const contentMetadataStageMs = safePerformance.now() - tContentMetadataPrepareStart;
-                    importMetrics.contentMetadataStageMs += contentMetadataStageMs;
-                    importMetrics.contentMetadataMs += contentMetadataStageMs;
+                    if (stagedContentMetadata === null) {
+                        const tContentMetadataPrepareStart = safePerformance.now();
+                        this._ensureTermEntryContentMetaHashPairCapacity(
+                            this._getArtifactTermContentMetaCapacityHint(chunk, pendingContentCount),
+                        );
+                        stagedContentMetadata = this._stageArtifactTermContentMetadata(
+                            pendingContentHash1s,
+                            pendingContentHash2s,
+                            pendingContentBytes,
+                            pendingContentSpans,
+                        );
+                        const contentMetadataStageMs = safePerformance.now() - tContentMetadataPrepareStart;
+                        importMetrics.contentMetadataStageMs += contentMetadataStageMs;
+                        importMetrics.contentMetadataMs += contentMetadataStageMs;
+                    }
                     const workerPreparedLookupIndexes = chunk.preparedLookupIndexes;
                     if (
                         hasCompletePreparedTermLookupIndexes(workerPreparedLookupIndexes, count)
@@ -6685,11 +6731,7 @@ export class DictionaryDatabase {
             dedupPlanRollbackState = null;
             this._lastBulkAddTermsMetrics = importMetrics;
         } catch (e) {
-            this._rollbackStagedArtifactTermContentMetadata(
-                stagedContentMetadata,
-                stagedContentHash1s,
-                stagedContentHash2s,
-            );
+            this._rollbackStagedArtifactTermContentMetadata(stagedContentMetadata);
             this._rollbackArtifactTermContentDedupPlan(dedupPlanRollbackState);
             if (useLocalTransaction) {
                 try { this._requireDb().exec('ROLLBACK'); } catch (_) { /* NOP */ }
@@ -6728,9 +6770,10 @@ export class DictionaryDatabase {
     /**
      * Resolves intra-chunk duplicates and content already persisted by earlier chunks.
      * @param {ArtifactTermContentChunk} chunk
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null}>}
+     * @param {boolean} [reserveMetadata]
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean}}>}
      */
-    async _resolveArtifactTermContentDedup(chunk) {
+    async _resolveArtifactTermContentDedup(chunk, reserveMetadata = false) {
         const count = chunk.rowCount;
         const contentBytesBuffer = chunk.contentBytesBuffer instanceof Uint8Array ? chunk.contentBytesBuffer : null;
         const contentMetaList = contentBytesBuffer !== null && chunk.contentMetaList instanceof Uint32Array ? chunk.contentMetaList : null;
@@ -6820,80 +6863,105 @@ export class DictionaryDatabase {
                 contentDedupPlan.nextUnresolvedUniqueIndex :
                 0;
             let nextPendingUniqueIndex = firstPendingUniqueIndex;
+            const maximumPendingContentCount = Math.min(
+                count,
+                Math.max(0, contentDedupPlan.resolvedFlags.length - firstPendingUniqueIndex),
+            );
+            /** @type {Int32Array|null} */
+            let stagedIndexes = null;
+            if (reserveMetadata) {
+                this._ensureTermEntryContentMetaHashPairCapacity(
+                    this._getArtifactTermContentMetaCapacityHint(chunk, maximumPendingContentCount),
+                );
+                stagedIndexes = new Int32Array(maximumPendingContentCount);
+                stagedIndexes.fill(-1);
+            }
             let pendingHitCount = 0;
-            for (let i = 0; i < count; ++i) {
-                const uniqueIndex = uniqueIndexList[i];
-                if (uniqueIndex >= contentDedupPlan.resolvedFlags.length) {
-                    throw new RangeError(`Artifact term content unique index is invalid at row ${i}`);
-                }
-                if (uniqueIndex < firstPendingUniqueIndex) {
-                    if (contentDedupPlan.resolvedFlags[uniqueIndex] !== 1) {
-                        throw new Error(`Artifact term content unique index ${uniqueIndex} was not resolved`);
+            try {
+                for (let i = 0; i < count; ++i) {
+                    const uniqueIndex = uniqueIndexList[i];
+                    if (uniqueIndex >= contentDedupPlan.resolvedFlags.length) {
+                        throw new RangeError(`Artifact term content unique index is invalid at row ${i}`);
                     }
-                    contentOffsets[i] = contentDedupPlan.resolvedOffsets[uniqueIndex];
-                    contentLengths[i] = contentDedupPlan.resolvedLengths[uniqueIndex];
-                    const existingDictName = getResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex);
-                    if (Array.isArray(resolvedContentDictNames)) {
-                        resolvedContentDictNames[i] = existingDictName;
-                    } else if (existingDictName !== resolvedContentDictNames) {
-                        ensureResolvedContentDictNamesArray(i)[i] = existingDictName;
-                    }
-                    ++pendingHitCount;
-                    continue;
-                }
-                if (uniqueIndex > nextPendingUniqueIndex) {
-                    throw new Error(`Artifact term content unique index ${uniqueIndex} is not contiguous`);
-                }
-                const pendingIndex = uniqueIndex - firstPendingUniqueIndex;
-                if (uniqueIndex === nextPendingUniqueIndex) {
-                    const contentMetaOffset = i * 4;
-                    const contentOffset = useContentSlab ?
-                        contentBytesBaseOffset + contentMetaList[contentMetaOffset] :
-                        0;
-                    const contentLength = useContentSlab ?
-                        contentMetaList[contentMetaOffset + 1] :
-                        chunk.contentBytesList[i]?.byteLength;
-                    if (
-                        useContentSlab &&
-                        (
-                            contentOffset < contentBytesBaseOffset ||
-                            contentOffset + contentLength > contentBytesBuffer.byteLength
-                        )
-                    ) {
-                        throw new TypeError(`Artifact term content bytes are invalid at row ${i}`);
-                    }
-                    if (useContentSpans) {
-                        if (contentOffset > 0xffffffff) {
-                            throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${i}`);
+                    if (uniqueIndex < firstPendingUniqueIndex) {
+                        if (contentDedupPlan.resolvedFlags[uniqueIndex] !== 1) {
+                            throw new Error(`Artifact term content unique index ${uniqueIndex} was not resolved`);
                         }
-                        pendingSpanOffsets[pendingIndex] = contentOffset;
-                        pendingSpanLengths[pendingIndex] = contentLength;
-                    } else {
-                        const contentBytes = useContentSlab ?
-                            contentBytesBuffer.subarray(contentOffset, contentOffset + contentLength) :
-                            chunk.contentBytesList[i];
+                        contentOffsets[i] = contentDedupPlan.resolvedOffsets[uniqueIndex];
+                        contentLengths[i] = contentDedupPlan.resolvedLengths[uniqueIndex];
+                        const existingDictName = getResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex);
+                        if (Array.isArray(resolvedContentDictNames)) {
+                            resolvedContentDictNames[i] = existingDictName;
+                        } else if (existingDictName !== resolvedContentDictNames) {
+                            ensureResolvedContentDictNamesArray(i)[i] = existingDictName;
+                        }
+                        ++pendingHitCount;
+                        continue;
+                    }
+                    if (uniqueIndex > nextPendingUniqueIndex) {
+                        throw new Error(`Artifact term content unique index ${uniqueIndex} is not contiguous`);
+                    }
+                    const pendingIndex = uniqueIndex - firstPendingUniqueIndex;
+                    if (uniqueIndex === nextPendingUniqueIndex) {
+                        const contentMetaOffset = i * 4;
+                        const contentOffset = useContentSlab ?
+                            contentBytesBaseOffset + contentMetaList[contentMetaOffset] :
+                            0;
+                        const contentLength = useContentSlab ?
+                            contentMetaList[contentMetaOffset + 1] :
+                            chunk.contentBytesList[i]?.byteLength;
+                        if (
+                            useContentSlab &&
+                            (
+                                contentOffset < contentBytesBaseOffset ||
+                                contentOffset + contentLength > contentBytesBuffer.byteLength
+                            )
+                        ) {
+                            throw new TypeError(`Artifact term content bytes are invalid at row ${i}`);
+                        }
+                        const contentBytes = useContentSlab ? contentBytesBuffer : chunk.contentBytesList[i];
                         if (!(contentBytes instanceof Uint8Array)) {
                             throw new TypeError(`Artifact term content bytes are invalid at row ${i}`);
                         }
-                        pendingContentBytes.push(contentBytes);
+                        if (useContentSpans) {
+                            if (contentOffset > 0xffffffff) {
+                                throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${i}`);
+                            }
+                            pendingSpanOffsets[pendingIndex] = contentOffset;
+                            pendingSpanLengths[pendingIndex] = contentLength;
+                        } else {
+                            pendingContentBytes.push(contentBytes);
+                        }
+                        const hash1 = (useContentSlab ? contentMetaList[contentMetaOffset + 2] : chunk.contentHash1List[i]) >>> 0;
+                        const hash2 = (useContentSlab ? contentMetaList[contentMetaOffset + 3] : chunk.contentHash2List[i]) >>> 0;
+                        pendingContentHash1s.push(hash1);
+                        pendingContentHash2s.push(hash2);
+                        if (stagedIndexes !== null) {
+                            stagedIndexes[pendingIndex] = this._reserveArtifactTermContentMetadata(
+                                hash1,
+                                hash2,
+                                contentBytes,
+                                contentOffset,
+                                contentLength,
+                            );
+                        }
+                        if (pendingContentDictNames !== null) {
+                            pendingContentDictNames.push(
+                                explicitContentDictNames !== null ?
+                                    (explicitContentDictNames[i] ?? null) :
+                                    uniformContentDictName,
+                            );
+                        }
+                        ++nextPendingUniqueIndex;
+                    } else {
+                        ++pendingHitCount;
                     }
-                    pendingContentHash1s.push(
-                        (useContentSlab ? contentMetaList[contentMetaOffset + 2] : chunk.contentHash1List[i]) >>> 0,
-                    );
-                    pendingContentHash2s.push(
-                        (useContentSlab ? contentMetaList[contentMetaOffset + 3] : chunk.contentHash2List[i]) >>> 0,
-                    );
-                    if (pendingContentDictNames !== null) {
-                        pendingContentDictNames.push(
-                            explicitContentDictNames !== null ?
-                                (explicitContentDictNames[i] ?? null) :
-                                uniformContentDictName,
-                        );
-                    }
-                    ++nextPendingUniqueIndex;
-                } else {
-                    ++pendingHitCount;
                 }
+            } catch (error) {
+                if (stagedIndexes !== null) {
+                    this._rollbackStagedArtifactTermContentMetadata({indexes: stagedIndexes, active: true});
+                }
+                throw error;
             }
             contentDedupPlan.nextUnresolvedUniqueIndex = nextPendingUniqueIndex;
             const pendingContentCount = nextPendingUniqueIndex - firstPendingUniqueIndex;
@@ -6922,6 +6990,12 @@ export class DictionaryDatabase {
                 contentDedupPlan,
                 pendingPlanUniqueIndexes,
                 pendingPlanUniqueStart: firstPendingUniqueIndex,
+                stagedContentMetadata: stagedIndexes === null ?
+                    void 0 :
+                    {
+                        indexes: stagedIndexes.subarray(0, pendingContentCount),
+                        active: true,
+                    },
             };
         }
         const uniqueRowIndexes = contentDedupPlan?.uniqueRowIndexes;
