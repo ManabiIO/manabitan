@@ -1817,6 +1817,9 @@ export class DictionaryImporter {
                             parserChunkDispatchMs: parserProfile.chunkDispatchMs ?? null,
                             parserResultCopyMs: parserProfile.resultCopyMs ?? null,
                             parserResultDeliveryMs: parserProfile.resultDeliveryMs ?? null,
+                            parserLookupIndexPrepareMs: parserProfile.lookupIndexPrepareMs ?? null,
+                            parserLookupIndexCompactMs: parserProfile.lookupIndexCompactMs ?? null,
+                            parserLookupIndexEncodeMs: parserProfile.lookupIndexEncodeMs ?? null,
                             parserParallelWorkerCount: parserProfile.parallelWorkerCount ?? null,
                             parserParallelPipelineGroupsPerWorker: parserProfile.parallelPipelineGroupsPerWorker ?? null,
                             parserParallelGroupCount: parserProfile.parallelGroupCount ?? null,
@@ -2044,6 +2047,9 @@ export class DictionaryImporter {
                 fastPathParserChunkDispatchMs: fastPathProfile?.chunkDispatchMs ?? null,
                 fastPathParserResultCopyMs: fastPathProfile?.resultCopyMs ?? null,
                 fastPathParserResultDeliveryMs: fastPathProfile?.resultDeliveryMs ?? null,
+                fastPathParserLookupIndexPrepareMs: fastPathProfile?.lookupIndexPrepareMs ?? null,
+                fastPathParserLookupIndexCompactMs: fastPathProfile?.lookupIndexCompactMs ?? null,
+                fastPathParserLookupIndexEncodeMs: fastPathProfile?.lookupIndexEncodeMs ?? null,
                 fastPathParserParallelWorkerCount: fastPathProfile?.parallelWorkerCount ?? null,
                 fastPathParserParallelPipelineGroupsPerWorker: fastPathProfile?.parallelPipelineGroupsPerWorker ?? null,
                 fastPathParserParallelGroupCount: fastPathProfile?.parallelGroupCount ?? null,
@@ -3908,6 +3914,7 @@ export class DictionaryImporter {
                 emitContentSlab: useDirectArtifactChunkImport && enableTermEntryContentDedup,
                 emitTokenBinaryContent: useDirectArtifactChunkImport,
                 emitTermByteLists: !useDirectArtifactChunkImport,
+                prepareLookupIndexes: useDirectArtifactChunkImport,
                 maxPendingChunks: useDirectArtifactChunkImport ? 2 : 1,
             };
             const parseTermBankChunks = useDirectArtifactChunkImport ? parseTermBankWithWasmColumnChunks : parseTermBankWithWasmChunks;

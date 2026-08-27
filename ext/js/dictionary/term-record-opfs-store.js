@@ -38,6 +38,10 @@ import {
     warmPersistedTermPrefixIndex,
 } from './term-lookup-index.js';
 import {
+    MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS,
+    prepareTermLookupIndexesFromPreinternedPlan,
+} from './term-lookup-index-preparation.js';
+import {
     compactTermRecordPreinternedPlan,
     getTermRecordPreinternedPlan,
     hasCompleteTermRecordPreinternedPlan,
@@ -84,7 +88,7 @@ const LOOKUP_INDEX_MAGIC_BYTES = 8;
 const LOOKUP_INDEX_FILE_HEADER_BYTES = 40;
 const LOOKUP_INDEX_CHUNK_HEADER_BYTES = 32;
 const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
-const MAX_COMPACT_LOOKUP_INDEX_ROWS = 30000;
+const MAX_COMPACT_LOOKUP_INDEX_ROWS = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS;
 const PERSISTED_ONLY_IMPORT_ROW_THRESHOLD = 250000;
 const SMALL_SHARD_FALLBACK_MAX_BYTES = 32 * 1024 * 1024;
 const STORAGE_READ_RETRY_COUNT = 2;
@@ -2017,42 +2021,11 @@ export class TermRecordOpfsStore {
      * @returns {{indexes: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}>, encodeMs: number}|null}
      */
     prepareArtifactChunkLookupIndexes(chunk) {
-        const count = chunk.rowCount;
-        const preinternedPlan = chunk.termRecordPreinternedPlan ?? null;
-        if (count <= 0 || !hasCompleteTermRecordPreinternedPlan(preinternedPlan, count)) {
-            return null;
-        }
-        const completePlan = /** @type {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} */ (preinternedPlan);
-        const startedAt = safePerformance.now();
-        /** @type {Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}>} */
-        const indexes = new Map();
-        for (let runStart = 0; runStart < count; runStart += MAX_COMPACT_LOOKUP_INDEX_ROWS) {
-            const runCount = Math.min(MAX_COMPACT_LOOKUP_INDEX_ROWS, count - runStart);
-            const isWholeChunk = runStart === 0 && runCount === count;
-            const runPlan = /** @type {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} */ (compactTermRecordPreinternedPlan(
-                completePlan,
-                runStart,
-                runCount,
-                this._getPreinternedCompactionRemap(completePlan.stringLengths.length),
-                chunk.readingEqualsExpressionList,
-            ));
-            const readingEqualsExpressionList = isWholeChunk ?
-                chunk.readingEqualsExpressionList :
-                chunk.readingEqualsExpressionList.slice(runStart, runStart + runCount);
-            const sequenceList = isWholeChunk ?
-                chunk.sequenceList :
-                chunk.sequenceList.slice(runStart, runStart + runCount);
-            indexes.set(`${runStart}:${runCount}`, {
-                bytes: encodePersistedTermLookupIndexFromPreinternedPlan(
-                    runPlan,
-                    readingEqualsExpressionList,
-                    sequenceList,
-                    runCount,
-                ),
-                preinternedPlan: runPlan,
-            });
-        }
-        return {indexes, encodeMs: safePerformance.now() - startedAt};
+        const result = prepareTermLookupIndexesFromPreinternedPlan(
+            chunk,
+            this._getPreinternedCompactionRemap(chunk.termRecordPreinternedPlan?.stringLengths.length ?? 0),
+        );
+        return result === null ? null : {indexes: result.indexes, encodeMs: result.totalMs};
     }
 
     /**

@@ -59,6 +59,7 @@ import {createTermImportMetrics} from './term-import-metrics.js';
 import {createDictionaryImportSessionId, DictionaryImportJournal} from './dictionary-import-journal.js';
 import {hashPairToHex, hashTermEntryContentBytes, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {TermRecordOpfsStore} from './term-record-opfs-store.js';
+import {hasCompletePreparedTermLookupIndexes} from './term-lookup-index-preparation.js';
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 9;
@@ -6474,12 +6475,20 @@ export class DictionaryDatabase {
                     stagedContentHash1s = pendingContentHash1s;
                     stagedContentHash2s = pendingContentHash2s;
                     importMetrics.contentMetadataMs += safePerformance.now() - tContentMetadataPrepareStart;
-                    const preparedLookupResult = typeof this._termRecordStore.prepareArtifactChunkLookupIndexes === 'function' ?
-                        this._termRecordStore.prepareArtifactChunkLookupIndexes(chunk) :
-                        null;
-                    if (preparedLookupResult !== null) {
-                        preparedLookupIndexes = preparedLookupResult.indexes;
-                        importMetrics.termLookupIndexEncodeMs += preparedLookupResult.encodeMs;
+                    const workerPreparedLookupIndexes = chunk.preparedLookupIndexes;
+                    if (
+                        hasCompletePreparedTermLookupIndexes(workerPreparedLookupIndexes, count)
+                    ) {
+                        preparedLookupIndexes = workerPreparedLookupIndexes;
+                        importMetrics.termLookupIndexEncodeMs += Math.max(0, chunk.preparedLookupIndexEncodeMs ?? 0);
+                    } else {
+                        const preparedLookupResult = typeof this._termRecordStore.prepareArtifactChunkLookupIndexes === 'function' ?
+                            this._termRecordStore.prepareArtifactChunkLookupIndexes(chunk) :
+                            null;
+                        if (preparedLookupResult !== null) {
+                            preparedLookupIndexes = preparedLookupResult.indexes;
+                            importMetrics.termLookupIndexEncodeMs += preparedLookupResult.encodeMs;
+                        }
                     }
                     /** @type {{pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], blockProfile?: {packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null}} */
                     const persistenceResult = earlyContentPersistence === null ?

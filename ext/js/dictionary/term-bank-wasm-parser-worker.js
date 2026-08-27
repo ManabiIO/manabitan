@@ -23,8 +23,9 @@ import {
     setTermBankWasmModule,
 } from './term-bank-wasm-parser.js';
 import {safePerformance} from '../core/safe-performance.js';
+import {prepareTermLookupIndexesFromPreinternedPlan} from './term-lookup-index-preparation.js';
 
-/** @typedef {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} ParserOptions */
+/** @typedef {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean}} ParserOptions */
 /** @typedef {{type: 'initialize', module: unknown}} InitializeRequest */
 /** @typedef {{type: 'parse', id: unknown, sourceBuffers: unknown, version: unknown, chunkSize?: unknown, options?: unknown}} ParseRequest */
 
@@ -111,15 +112,28 @@ async function parse(data) {
         if (resultChunk === null) {
             throw new Error('Parallel term-bank parser did not emit a chunk');
         }
+        const stableResultChunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (resultChunk);
         const profile = consumeLastTermBankWasmParseProfile();
         if (profile !== null) { profile.resultCopyMs = resultCopyMs; }
-        const transfer = collectChunkTransferables(resultChunk);
+        if (options.prepareLookupIndexes === true) {
+            const prepared = prepareTermLookupIndexesFromPreinternedPlan(stableResultChunk);
+            if (prepared !== null) {
+                stableResultChunk.preparedLookupIndexes = prepared.indexes;
+                stableResultChunk.preparedLookupIndexEncodeMs = prepared.totalMs;
+                if (profile !== null) {
+                    profile.lookupIndexPrepareMs = prepared.totalMs;
+                    profile.lookupIndexCompactMs = prepared.compactMs;
+                    profile.lookupIndexEncodeMs = prepared.indexEncodeMs;
+                }
+            }
+        }
+        const transfer = collectChunkTransferables(stableResultChunk);
         self.postMessage({
             type: 'result',
             id,
             rowCount: resultRowCount,
             resultSentEpochMs: Date.now(),
-            chunk: resultChunk,
+            chunk: stableResultChunk,
             profile,
         }, transfer);
     } catch (error) {
@@ -164,6 +178,21 @@ function collectChunkTransferables(chunk) {
     addView(plan.stringsBuffer);
     addView(plan.expressionIndexes);
     addView(plan.readingIndexes);
+    const preparedLookupIndexes = /** @type {unknown} */ (chunk.preparedLookupIndexes);
+    if (preparedLookupIndexes instanceof Map) {
+        for (const prepared of preparedLookupIndexes.values()) {
+            if (typeof prepared !== 'object' || prepared === null) { continue; }
+            addView(Reflect.get(prepared, 'bytes'));
+            const preparedPlan = Reflect.get(prepared, 'preinternedPlan');
+            if (typeof preparedPlan !== 'object' || preparedPlan === null) { continue; }
+            addView(Reflect.get(preparedPlan, 'stringLengths'));
+            addView(Reflect.get(preparedPlan, 'stringOffsets'));
+            addView(Reflect.get(preparedPlan, 'stringHashes'));
+            addView(Reflect.get(preparedPlan, 'stringsBuffer'));
+            addView(Reflect.get(preparedPlan, 'expressionIndexes'));
+            addView(Reflect.get(preparedPlan, 'readingIndexes'));
+        }
+    }
     const rawDedupPlan = /** @type {unknown} */ (chunk.contentDedupPlan);
     const dedupPlan = /** @type {{resolvedFlags?: unknown, resolvedOffsets?: unknown, resolvedLengths?: unknown, pendingEpochs?: unknown, pendingIndexes?: unknown, pendingSpanOffsetsScratch?: unknown, pendingSpanLengthsScratch?: unknown}|null} */ (
         typeof rawDedupPlan === 'object' ? rawDedupPlan : null
