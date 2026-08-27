@@ -1063,8 +1063,12 @@ function createTermContentReferenceOffsets(entryCount, slabOffsets, entriesPerSl
         if (!Number.isSafeInteger(slabOffset) || slabOffset < 0) {
             throw new RangeError(`Invalid term content reference slab offset: ${slabOffset}`);
         }
-        contentOffsets[i] = slabOffset +
+        const contentOffset = slabOffset +
         (i % entriesPerSlab) * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+        if (!Number.isSafeInteger(contentOffset)) {
+            throw new RangeError(`Term content reference offset exceeds the safe integer range: ${contentOffset}`);
+        }
+        contentOffsets[i] = contentOffset;
     }
     return contentOffsets;
 }

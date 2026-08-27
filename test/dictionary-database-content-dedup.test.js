@@ -489,6 +489,34 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
     });
 
+    test('rejects untrusted persisted offsets before publishing staged metadata', () => {
+        const database = new DictionaryDatabase();
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        const contentBytes = new Uint8Array([1, 2, 3]);
+        const stagedContentMetadata = stage([101], [202], [contentBytes], null);
+
+        expect(() => publish({
+            count: 1,
+            contentOffsets: new Float64Array(1),
+            contentLengths: new Uint32Array(1),
+            resolvedContentDictNames: 'raw',
+            pendingRowToUniqueIndex: new Int32Array([0]),
+            pendingContentBytes: [contentBytes],
+            pendingContentHash1s: [101],
+            pendingContentHash2s: [202],
+            pendingOffsets: [-1],
+            pendingLengths: [contentBytes.byteLength],
+            pendingResolvedDictNames: 'raw',
+            pendingContentSpans: null,
+            stagedContentMetadata,
+        })).toThrow('Invalid term content metadata offset');
+
+        rollback(stagedContentMetadata, [101], [202]);
+        expect(getMeta(database, 101, 202)).toBeUndefined();
+    });
+
     test('clears unpublished staged metadata after persistence failure', () => {
         const database = new DictionaryDatabase();
         const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);

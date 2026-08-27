@@ -179,6 +179,29 @@ describe('TermContentBlockStore', () => {
         expect(() => blockStore.setBlockTargetBytes(1.5)).toThrow(RangeError);
     });
 
+    test('rejects a safe slab base whose derived reference offset overflows', async () => {
+        const reserved = Promise.resolve({derivedOffsets: [Number.MAX_SAFE_INTEGER]});
+        const contentStore = {
+            beginAppendBatchWithDerivedPrefix: () => ({
+                reserved,
+                completion: new Promise(() => {}),
+            }),
+        };
+        const blockStore = new TermContentBlockStore(contentStore);
+        const begin = Reflect.get(blockStore, '_beginAppendSharedSpans').bind(blockStore);
+        const source = Uint8Array.of(1, 2);
+        const operation = begin(
+            source,
+            Uint32Array.of(0, 1),
+            Uint32Array.of(1, 1),
+            'jmdict',
+            2,
+            false,
+        );
+
+        await expect(operation.storage).rejects.toThrow('safe integer range');
+    });
+
     test('atomically appends blocks and reads each logical entry', async () => {
         const contentStore = new TermContentOpfsStore();
         const blockStore = new TermContentBlockStore(contentStore, {
