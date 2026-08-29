@@ -25,7 +25,7 @@ const U16_NULL = 0xffff;
 const RECORD_HEADER_BYTES = 24;
 const RECORD_STRING_TABLE_HEADER_BYTES = 8;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
-const COMPACT_INDEX_FORMAT_VERSION = 4;
+const COMPACT_INDEX_FORMAT_VERSION = 5;
 
 /**
  * @typedef {object} PersistedTermLookupIndex
@@ -383,7 +383,7 @@ function encodeIndexPlan(plan) {
     const keySlotCount = getHashSlotCount(keyCount);
     const sequenceSlotCount = getHashSlotCount(rowCount);
     const alignedKeyBytesLength = align4(keyBytes.byteLength);
-    const keyHashBytesLength = align4((keySlotCount + keyCount) * 2);
+    const keyMetadataBytesLength = align4((keyCount + keySlotCount + keyCount) * 2);
     const compactU16Count =
         (keyCount + 1) +
         rowCount +
@@ -395,8 +395,7 @@ function encodeIndexPlan(plan) {
     const output = new Uint8Array(
         HEADER_BYTES +
         alignedKeyBytesLength +
-        keyHashBytesLength +
-        ((keyCount + 1) * 4) +
+        keyMetadataBytesLength +
         compactU16BytesLength +
         (rowCount * 4),
     );
@@ -412,15 +411,6 @@ function encodeIndexPlan(plan) {
     let cursor = HEADER_BYTES + alignedKeyBytesLength;
     /**
      * @param {number} length
-     * @returns {Uint32Array}
-     */
-    const take = (length) => {
-        const value = new Uint32Array(output.buffer, output.byteOffset + cursor, length);
-        cursor += length * 4;
-        return value;
-    };
-    /**
-     * @param {number} length
      * @returns {Uint16Array}
      */
     const takeCompact = (length) => {
@@ -428,23 +418,24 @@ function encodeIndexPlan(plan) {
         cursor += length * 2;
         return value;
     };
-    const persistedKeyOffsets = take(keyCount + 1);
-    persistedKeyOffsets.set(keyOffsets.subarray(0, keyCount));
-    persistedKeyOffsets[keyCount] = keyBytes.byteLength;
-    const keyHeads = new Uint16Array(output.buffer, output.byteOffset + cursor, keySlotCount);
-    cursor += keySlotCount * 2;
-    const keyNext = new Uint16Array(output.buffer, output.byteOffset + cursor, keyCount);
-    cursor += keyCount * 2;
+    const persistedKeyLengths = takeCompact(keyCount);
+    const keyHeads = takeCompact(keySlotCount);
+    const keyNext = takeCompact(keyCount);
     cursor = align4(cursor);
     keyHeads.fill(U16_NULL);
     keyNext.fill(U16_NULL);
     let expectedKeyStart = 0;
     for (let key = 0; key < keyCount; ++key) {
-        const start = persistedKeyOffsets[key];
-        const end = key === keyCount - 1 ? keyBytes.byteLength : persistedKeyOffsets[key + 1];
+        const start = keyOffsets[key];
+        const end = key === keyCount - 1 ? keyBytes.byteLength : keyOffsets[key + 1];
         if (start !== expectedKeyStart || start >= end || end > keyBytes.byteLength) {
             throw new Error('Invalid term lookup index key boundary');
         }
+        const length = end - start;
+        if (length > 0xffff) {
+            throw new RangeError('Term lookup index key is too long');
+        }
+        persistedKeyLengths[key] = length;
         expectedKeyStart = end;
     }
     const expressionPostingOffsets = takeCompact(keyCount + 1);
@@ -463,7 +454,11 @@ function encodeIndexPlan(plan) {
             key,
             keyHashes instanceof Uint32Array && keyHashes.length === keyCount ?
                 keyHashes[key] :
-                hashByteRange(keyBytes, persistedKeyOffsets[key], persistedKeyOffsets[key + 1]),
+                hashByteRange(
+                    keyBytes,
+                    keyOffsets[key],
+                    key === keyCount - 1 ? keyBytes.byteLength : keyOffsets[key + 1],
+                ),
         );
     }
     fillPostingAndSequenceTables(
@@ -533,7 +528,7 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         throw new Error('Invalid persisted term lookup index dimensions');
     }
     const alignedKeyBytesLength = align4(keyBytesLength);
-    const keyHashBytesLength = align4((keySlotCount + keyCount) * 2);
+    const keyMetadataBytesLength = align4((keyCount + keySlotCount + keyCount) * 2);
     const compactU16Count =
         (keyCount + 1) +
         rowCount +
@@ -546,8 +541,7 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         bytes.byteLength !==
         HEADER_BYTES +
         alignedKeyBytesLength +
-        ((keyCount + 1) * 4) +
-        keyHashBytesLength +
+        keyMetadataBytesLength +
         compactU16BytesLength +
         (rowCount * 4)
     ) {
@@ -557,15 +551,6 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
     let cursor = HEADER_BYTES + alignedKeyBytesLength;
     /**
      * @param {number} length
-     * @returns {Uint32Array}
-     */
-    const take = (length) => {
-        const value = new Uint32Array(bytes.buffer, bytes.byteOffset + cursor, length);
-        cursor += length * 4;
-        return value;
-    };
-    /**
-     * @param {number} length
      * @returns {Uint16Array}
      */
     const takeCompact = (length) => {
@@ -573,12 +558,11 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         cursor += length * 2;
         return value;
     };
-    const keyOffsets = take(keyCount + 1);
-    const keyHeads = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, keySlotCount);
-    cursor += keySlotCount * 2;
-    const keyNext = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, keyCount);
-    cursor += keyCount * 2;
+    const keyLengths = takeCompact(keyCount);
+    const keyHeads = takeCompact(keySlotCount);
+    const keyNext = takeCompact(keyCount);
     cursor = align4(cursor);
+    const keyOffsets = reconstructKeyOffsets(keyLengths, keyBytesLength);
     const expressionPostingOffsets = takeCompact(keyCount + 1);
     const expressionPostingRows = takeCompact(rowCount);
     const readingPostingOffsets = takeCompact(keyCount + 1);
@@ -953,6 +937,31 @@ function reconstructPostingKeys(offsets, rows, rowCount, requireEveryRow) {
         }
     }
     return keys;
+}
+
+/**
+ * Reconstructs cumulative key offsets from compact persisted UTF-8 lengths.
+ * @param {Uint16Array} lengths
+ * @param {number} keyBytesLength
+ * @returns {Uint32Array}
+ * @throws {Error} If a key is empty or lengths do not cover the key arena.
+ */
+function reconstructKeyOffsets(lengths, keyBytesLength) {
+    const offsets = new Uint32Array(lengths.length + 1);
+    let offset = 0;
+    for (let key = 0; key < lengths.length; ++key) {
+        offsets[key] = offset;
+        const length = lengths[key];
+        if (length === 0 || (offset + length) > keyBytesLength) {
+            throw new Error('Invalid persisted term lookup key boundary');
+        }
+        offset += length;
+    }
+    offsets[lengths.length] = offset;
+    if (offset !== keyBytesLength) {
+        throw new Error('Invalid persisted term lookup key arena');
+    }
+    return offsets;
 }
 
 /**

@@ -242,12 +242,11 @@ describe('persisted term lookup index', () => {
             sequenceSlotCount +
             rowCount;
 
-        expect(header[6]).toBe(4);
+        expect(header[6]).toBe(5);
         expect(encoded.byteLength).toBe(
             64 +
             align4(keyBytesLength) +
-            align4((keySlotCount + keyCount) * 2) +
-            ((keyCount + 1) * 4) +
+            align4((keyCount + keySlotCount + keyCount) * 2) +
             align4(compactU16Count * 2) +
             (rowCount * 4),
         );
@@ -399,7 +398,7 @@ describe('persisted term lookup index', () => {
         const keyBytesLength = header[2];
         const alignedKeyBytesLength = (keyBytesLength + 3) & ~3;
         const keySlotCount = header[3];
-        const keyHeadsOffset = 64 + alignedKeyBytesLength + ((keyCount + 1) * 4);
+        const keyHeadsOffset = 64 + alignedKeyBytesLength + (keyCount * 2);
         const keyNextOffset = keyHeadsOffset + (keySlotCount * 2);
 
         const invalidReference = new Uint8Array(encoded);
@@ -441,6 +440,31 @@ describe('persisted term lookup index', () => {
 
         expect(() => parsePersistedTermLookupIndex(encoded)).toThrow(
             'Invalid persisted term lookup hash bucket',
+        );
+    });
+
+    test('rejects corrupt compact key lengths', () => {
+        const encoded = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('alpha'), readingBytes: bytes('あるふぁ'), sequence: null},
+        ]);
+        const header = new Uint32Array(encoded.buffer, encoded.byteOffset, 16);
+        const alignedKeyBytesLength = (header[2] + 3) & ~3;
+        const keyLengthsOffset = 64 + alignedKeyBytesLength;
+        const zeroLength = new Uint8Array(encoded);
+        new DataView(zeroLength.buffer).setUint16(keyLengthsOffset, 0, true);
+        expect(() => parsePersistedTermLookupIndex(zeroLength)).toThrow(
+            'Invalid persisted term lookup key boundary',
+        );
+
+        const incompleteArena = new Uint8Array(encoded);
+        const incompleteView = new DataView(incompleteArena.buffer);
+        incompleteView.setUint16(
+            keyLengthsOffset,
+            incompleteView.getUint16(keyLengthsOffset, true) - 1,
+            true,
+        );
+        expect(() => parseChecksummedPersistedTermLookupIndex(incompleteArena)).toThrow(
+            'Invalid persisted term lookup key arena',
         );
     });
 
