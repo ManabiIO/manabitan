@@ -25,7 +25,7 @@ const U16_NULL = 0xffff;
 const RECORD_HEADER_BYTES = 24;
 const RECORD_STRING_TABLE_HEADER_BYTES = 8;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
-const COMPACT_INDEX_FORMAT_VERSION = 3;
+const COMPACT_INDEX_FORMAT_VERSION = 4;
 
 /**
  * @typedef {object} PersistedTermLookupIndex
@@ -385,7 +385,6 @@ function encodeIndexPlan(plan) {
     const alignedKeyBytesLength = align4(keyBytes.byteLength);
     const keyHashBytesLength = align4((keySlotCount + keyCount) * 2);
     const compactU16Count =
-        (rowCount * 2) +
         (keyCount + 1) +
         rowCount +
         (keyCount + 1) +
@@ -448,20 +447,6 @@ function encodeIndexPlan(plan) {
         }
         expectedKeyStart = end;
     }
-    const persistedExpressionKeys = takeCompact(rowCount); persistedExpressionKeys.set(expressionKeys);
-    const persistedReadingKeys = takeCompact(rowCount);
-    if (typeof readingEqualsExpressionList === 'undefined') {
-        persistedReadingKeys.set(readingKeys);
-    } else {
-        for (let row = 0; row < rowCount; ++row) {
-            persistedReadingKeys[row] = (
-                readingEqualsExpressionList[row] === true ||
-                readingEqualsExpressionList[row] === 1
-            ) ?
-                U16_NULL :
-                readingKeys[row];
-        }
-    }
     const expressionPostingOffsets = takeCompact(keyCount + 1);
     const expressionPostingRows = takeCompact(rowCount);
     const readingPostingOffsets = takeCompact(keyCount + 1);
@@ -484,10 +469,11 @@ function encodeIndexPlan(plan) {
     fillPostingAndSequenceTables(
         expressionPostingOffsets,
         expressionPostingRows,
-        persistedExpressionKeys,
+        expressionKeys,
         readingPostingOffsets,
         readingPostingRows,
-        persistedReadingKeys,
+        readingKeys,
+        readingEqualsExpressionList,
         sequenceHeads,
         sequenceNext,
         sequenceValues,
@@ -549,7 +535,6 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
     const alignedKeyBytesLength = align4(keyBytesLength);
     const keyHashBytesLength = align4((keySlotCount + keyCount) * 2);
     const compactU16Count =
-        (rowCount * 2) +
         (keyCount + 1) +
         rowCount +
         (keyCount + 1) +
@@ -594,8 +579,6 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
     const keyNext = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, keyCount);
     cursor += keyCount * 2;
     cursor = align4(cursor);
-    const expressionKeys = takeCompact(rowCount);
-    const readingKeys = takeCompact(rowCount);
     const expressionPostingOffsets = takeCompact(keyCount + 1);
     const expressionPostingRows = takeCompact(rowCount);
     const readingPostingOffsets = takeCompact(keyCount + 1);
@@ -604,6 +587,20 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
     const sequenceNext = takeCompact(rowCount);
     cursor = align4(cursor);
     const sequenceValues = new Int32Array(bytes.buffer, bytes.byteOffset + cursor, rowCount);
+    validateOffsets(expressionPostingOffsets, expressionPostingRows.length);
+    validateOffsets(readingPostingOffsets, readingPostingRows.length);
+    const expressionKeys = reconstructPostingKeys(
+        expressionPostingOffsets,
+        expressionPostingRows,
+        rowCount,
+        true,
+    );
+    const readingKeys = reconstructPostingKeys(
+        readingPostingOffsets,
+        readingPostingRows,
+        rowCount,
+        false,
+    );
     const index = {
         keyBytes,
         keyOffsets,
@@ -625,7 +622,7 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         forwardReady: false,
         reverseReady: false,
     };
-    validateIndex(index, validateKeyHashBuckets);
+    validateIndex(index, validateKeyHashBuckets, true);
     return index;
 }
 
@@ -868,9 +865,10 @@ function appendPostingRows(index, key, field, output, rowOffset) {
 /**
  * @param {PersistedTermLookupIndex} index
  * @param {boolean} [validateKeyHashBuckets=true]
+ * @param {boolean} [postingKeysValidated=false]
  * @throws {Error} If an index reference or boundary is invalid.
  */
-function validateIndex(index, validateKeyHashBuckets = true) {
+function validateIndex(index, validateKeyHashBuckets = true, postingKeysValidated = false) {
     const keyCount = index.keyOffsets.length - 1;
     const rowCount = index.expressionKeys.length;
     if (
@@ -891,25 +889,29 @@ function validateIndex(index, validateKeyHashBuckets = true) {
         index.keyOffsets,
         validateKeyHashBuckets,
     );
-    validateOffsets(index.expressionPostingOffsets, index.expressionPostingRows.length);
-    validateOffsets(index.readingPostingOffsets, index.readingPostingRows.length);
+    if (!postingKeysValidated) {
+        validateOffsets(index.expressionPostingOffsets, index.expressionPostingRows.length);
+        validateOffsets(index.readingPostingOffsets, index.readingPostingRows.length);
+    }
     const rowSeen = new Uint8Array(rowCount);
-    validatePostingRows(
-        index.expressionPostingOffsets,
-        index.expressionPostingRows,
-        index.expressionKeys,
-        U16_NULL,
-        rowSeen,
-        1,
-    );
-    validatePostingRows(
-        index.readingPostingOffsets,
-        index.readingPostingRows,
-        index.readingKeys,
-        U16_NULL,
-        rowSeen,
-        2,
-    );
+    if (!postingKeysValidated) {
+        validatePostingRows(
+            index.expressionPostingOffsets,
+            index.expressionPostingRows,
+            index.expressionKeys,
+            U16_NULL,
+            rowSeen,
+            1,
+        );
+        validatePostingRows(
+            index.readingPostingOffsets,
+            index.readingPostingRows,
+            index.readingKeys,
+            U16_NULL,
+            rowSeen,
+            2,
+        );
+    }
     validateSequenceHashChains(index.sequenceHeads, index.sequenceNext, index.sequenceValues, rowSeen, 3);
     if (index.forwardReady) {
         validateForwardIndex(index);
@@ -920,6 +922,37 @@ function validateIndex(index, validateKeyHashBuckets = true) {
         }
         validateReferences(index.keyReverseOrder, keyCount);
     }
+}
+
+/**
+ * Reconstructs the row-to-key column already represented by posting lists.
+ * @param {Uint16Array} offsets
+ * @param {Uint16Array} rows
+ * @param {number} rowCount
+ * @param {boolean} requireEveryRow
+ * @returns {Uint16Array}
+ * @throws {Error} If a posting is duplicated, missing, or out of bounds.
+ */
+function reconstructPostingKeys(offsets, rows, rowCount, requireEveryRow) {
+    const keys = new Uint16Array(rowCount);
+    keys.fill(U16_NULL);
+    for (let key = 0; key < offsets.length - 1; ++key) {
+        for (let i = offsets[key]; i < offsets[key + 1]; ++i) {
+            const row = rows[i];
+            if (row >= rowCount || keys[row] !== U16_NULL) {
+                throw new Error('Invalid persisted term lookup posting row');
+            }
+            keys[row] = key;
+        }
+    }
+    if (requireEveryRow) {
+        for (const key of keys) {
+            if (key === U16_NULL) {
+                throw new Error('Incomplete persisted term lookup posting rows');
+            }
+        }
+    }
+    return keys;
 }
 
 /**
@@ -1114,10 +1147,11 @@ function validateOffsets(offsets, end) {
 /**
  * @param {Uint16Array} expressionOffsets
  * @param {Uint16Array} expressionRows
- * @param {Uint16Array} expressionKeys
+ * @param {Uint16Array|Uint32Array} expressionKeys
  * @param {Uint16Array} readingOffsets
  * @param {Uint16Array} readingRows
- * @param {Uint16Array} readingKeys
+ * @param {Uint16Array|Uint32Array} readingKeys
+ * @param {boolean[]|Uint8Array|undefined} readingEqualsExpressionList
  * @param {Uint16Array} sequenceHeads
  * @param {Uint16Array} sequenceNext
  * @param {Int32Array} sequenceValues
@@ -1129,6 +1163,7 @@ function fillPostingAndSequenceTables(
     readingOffsets,
     readingRows,
     readingKeys,
+    readingEqualsExpressionList,
     sequenceHeads,
     sequenceNext,
     sequenceValues,
@@ -1136,7 +1171,7 @@ function fillPostingAndSequenceTables(
     const rowCount = expressionKeys.length;
     for (let row = 0; row < rowCount; ++row) {
         ++expressionOffsets[expressionKeys[row] + 1];
-        const readingKey = readingKeys[row];
+        const readingKey = isReadingEqualToExpression(readingEqualsExpressionList, row) ? U16_NULL : readingKeys[row];
         if (readingKey !== U16_NULL) { ++readingOffsets[readingKey + 1]; }
         const sequence = sequenceValues[row];
         if (sequence >= 0) { insertHash(sequenceHeads, sequenceNext, row, hashSequence(sequence)); }
@@ -1148,7 +1183,7 @@ function fillPostingAndSequenceTables(
     for (let row = rowCount - 1; row >= 0; --row) {
         const expressionKey = expressionKeys[row];
         expressionRows[--expressionOffsets[expressionKey + 1]] = row;
-        const readingKey = readingKeys[row];
+        const readingKey = isReadingEqualToExpression(readingEqualsExpressionList, row) ? U16_NULL : readingKeys[row];
         if (readingKey !== U16_NULL) {
             readingRows[--readingOffsets[readingKey + 1]] = row;
         }
@@ -1160,6 +1195,15 @@ function fillPostingAndSequenceTables(
     }
     expressionOffsets[keyCount] = expressionRows.length;
     readingOffsets[keyCount] = readingRows.length;
+}
+
+/**
+ * @param {boolean[]|Uint8Array|undefined} values
+ * @param {number} row
+ * @returns {boolean}
+ */
+function isReadingEqualToExpression(values, row) {
+    return typeof values !== 'undefined' && (values[row] === true || values[row] === 1);
 }
 
 /**

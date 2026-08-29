@@ -227,8 +227,30 @@ describe('persisted term lookup index', () => {
         ]);
         const header = new Uint32Array(encoded.buffer, encoded.byteOffset, 16);
         const index = parsePersistedTermLookupIndex(encoded);
+        const rowCount = header[0];
+        const keyCount = header[1];
+        const keyBytesLength = header[2];
+        const keySlotCount = header[3];
+        const sequenceSlotCount = header[4];
+        const readingPostingCount = header[5];
+        const align4 = (value) => (value + 3) & ~3;
+        const compactU16Count =
+            (keyCount + 1) +
+            rowCount +
+            (keyCount + 1) +
+            readingPostingCount +
+            sequenceSlotCount +
+            rowCount;
 
-        expect(header[6]).toBe(3);
+        expect(header[6]).toBe(4);
+        expect(encoded.byteLength).toBe(
+            64 +
+            align4(keyBytesLength) +
+            align4((keySlotCount + keyCount) * 2) +
+            ((keyCount + 1) * 4) +
+            align4(compactU16Count * 2) +
+            (rowCount * 4),
+        );
         expect(index.expressionKeys).toBeInstanceOf(Uint16Array);
         expect(index.readingKeys).toBeInstanceOf(Uint16Array);
         expect(index.expressionPostingOffsets).toBeInstanceOf(Uint16Array);
@@ -431,29 +453,23 @@ describe('persisted term lookup index', () => {
         const firstRow = index.expressionPostingRows[0];
         const secondRow = index.expressionPostingRows[1];
         index.expressionPostingRows[0] = secondRow;
-        index.expressionPostingRows[1] = firstRow;
+        index.expressionPostingRows[1] = secondRow;
 
         expect(() => parsePersistedTermLookupIndex(encoded)).toThrow(
             'Invalid persisted term lookup posting row',
         );
+        expect(firstRow).not.toBe(secondRow);
     });
 
-    test('rejects out-of-range expression and reading keys through posting ownership', () => {
-        const expressionEncoded = encodePersistedTermLookupIndex([
+    test('rejects duplicate reading postings while reconstructing row ownership', () => {
+        const encoded = encodePersistedTermLookupIndex([
             {expressionBytes: bytes('alpha'), readingBytes: bytes('あるふぁ'), sequence: null},
-        ]);
-        const expressionIndex = parsePersistedTermLookupIndex(expressionEncoded);
-        expressionIndex.expressionKeys[0] = expressionIndex.keyOffsets.length - 1;
-        expect(() => parseChecksummedPersistedTermLookupIndex(expressionEncoded)).toThrow(
-            'Invalid persisted term lookup posting row',
-        );
-
-        const readingEncoded = encodePersistedTermLookupIndex([
             {expressionBytes: bytes('beta'), readingBytes: bytes('べーた'), sequence: null},
         ]);
-        const readingIndex = parsePersistedTermLookupIndex(readingEncoded);
-        readingIndex.readingKeys[0] = readingIndex.keyOffsets.length - 1;
-        expect(() => parseChecksummedPersistedTermLookupIndex(readingEncoded)).toThrow(
+        const index = parsePersistedTermLookupIndex(encoded);
+        index.readingPostingRows[1] = index.readingPostingRows[0];
+
+        expect(() => parseChecksummedPersistedTermLookupIndex(encoded)).toThrow(
             'Invalid persisted term lookup posting row',
         );
     });
