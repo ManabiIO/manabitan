@@ -343,6 +343,27 @@ describe('persisted term lookup index', () => {
         expect(findSequenceRows(index, 1.5)).toEqual([]);
     });
 
+    test('uses dense chained hash tables without losing collision matches', () => {
+        const rows = Array.from({length: 10}, (_, index) => ({
+            expressionBytes: bytes(`expression-${index}`),
+            readingBytes: bytes(`reading-${index}`),
+            sequence: index,
+        }));
+        const encoded = encodePersistedTermLookupIndex(rows);
+        const header = new Uint32Array(encoded.buffer, encoded.byteOffset, 16);
+        const index = parsePersistedTermLookupIndex(encoded);
+
+        expect(header[3]).toBeLessThan(header[1]);
+        expect(header[4]).toBeLessThan(header[0]);
+        for (let row = 0; row < rows.length; ++row) {
+            expect(findExactRows(index, rows[row].expressionBytes, 'expression')).toEqual([row]);
+            expect(findExactRows(index, rows[row].readingBytes, 'reading')).toEqual([row]);
+            expect(findSequenceRows(index, row)).toEqual([row]);
+        }
+        expect(findExactRows(index, bytes('missing'), 'expression')).toEqual([]);
+        expect(findSequenceRows(index, rows.length)).toEqual([]);
+    });
+
     test('finds forward prefixes and Unicode suffixes at code point boundaries', () => {
         const index = createIndex([
             {expression: '食べる', reading: 'たべる'},
@@ -429,13 +450,14 @@ describe('persisted term lookup index', () => {
         const encoded = encodePersistedTermLookupIndex([
             {expressionBytes: bytes('alpha'), readingBytes: null, sequence: null},
             {expressionBytes: bytes('beta'), readingBytes: null, sequence: null},
+            {expressionBytes: bytes('gamma'), readingBytes: null, sequence: null},
         ]);
         const index = parsePersistedTermLookupIndex(encoded);
         const sourceSlot = index.keyHeads.findIndex((value) => value !== 0xffff);
-        const targetSlot = index.keyHeads.indexOf(0xffff);
+        const targetSlot = (sourceSlot + 1) & (index.keyHeads.length - 1);
         const key = index.keyHeads[sourceSlot];
         index.keyHeads[sourceSlot] = index.keyNext[key];
-        index.keyNext[key] = 0xffff;
+        index.keyNext[key] = index.keyHeads[targetSlot];
         index.keyHeads[targetSlot] = key;
 
         expect(() => parsePersistedTermLookupIndex(encoded)).toThrow(
@@ -514,10 +536,12 @@ describe('persisted term lookup index', () => {
         const encoded = encodePersistedTermLookupIndex([
             {expressionBytes: bytes('alpha'), readingBytes: null, sequence: 42},
             {expressionBytes: bytes('beta'), readingBytes: null, sequence: null},
+            {expressionBytes: bytes('gamma'), readingBytes: null, sequence: 7},
+            {expressionBytes: bytes('delta'), readingBytes: null, sequence: null},
         ]);
         const index = parsePersistedTermLookupIndex(encoded);
         const sourceSlot = index.sequenceHeads.findIndex((value) => value !== 0xffff);
-        const targetSlot = sourceSlot === 0 ? 1 : 0;
+        const targetSlot = (sourceSlot + 1) & (index.sequenceHeads.length - 1);
         const row = index.sequenceHeads[sourceSlot];
         index.sequenceHeads[sourceSlot] = index.sequenceNext[row];
         index.sequenceNext[row] = index.sequenceHeads[targetSlot];

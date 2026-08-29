@@ -26,6 +26,7 @@ const RECORD_HEADER_BYTES = 24;
 const RECORD_STRING_TABLE_HEADER_BYTES = 8;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
 const COMPACT_INDEX_FORMAT_VERSION = 5;
+const HASH_SLOT_TARGET_LOAD = 2;
 
 /**
  * @typedef {object} PersistedTermLookupIndex
@@ -1236,8 +1237,9 @@ function isPowerOfTwo(value) {
  * @returns {number}
  */
 function getHashSlotCount(count) {
+    const target = Math.ceil(count / HASH_SLOT_TARGET_LOAD);
     let value = 1;
-    while (value < count) { value *= 2; }
+    while (value < target) { value *= 2; }
     return value;
 }
 
