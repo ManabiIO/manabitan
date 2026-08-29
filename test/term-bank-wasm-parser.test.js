@@ -57,6 +57,21 @@ function emitWorkerMessage(listeners, data) {
         listener(/** @type {MessageEvent<unknown>} */ ({data}));
     }
 }
+
+/**
+ * @param {Map<string, Set<(event: MessageEvent<unknown>) => void>>} listeners
+ * @param {number} id
+ */
+function emitSuccessfulWorkerResult(listeners, id) {
+    emitWorkerMessage(listeners, {
+        type: 'result',
+        id,
+        rowCount: 1,
+        resultSentEpochMs: Date.now(),
+        chunk: {rowCount: 1},
+        profile: {chunkDispatchMs: 0},
+    });
+}
 /** @typedef {{strings: string[], stringLengths: number[], stringHashes: number[], stringOffsets: number[], expressionIndexes: number[], readingIndexes: number[], readingEqualsExpressionList: number[]}} TermStringPlanSnapshot */
 
 /**
@@ -565,6 +580,60 @@ describe('term-bank WASM parser', () => {
         }
     });
 
+    maybeTest('assigns the next parser group to the first idle worker', async () => {
+        const originalNavigator = globalThis.navigator;
+        let workerIndex = 0;
+        const parseCounts = [0, 0, 0];
+        class SkewedWorker {
+            constructor() {
+                this.index = workerIndex++;
+                this.delay = this.index === 0 ? 20 : 0;
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                if (message.type === 'initialize') {
+                    queueMicrotask(() => { emitWorkerMessage(this.listeners, {type: 'ready'}); });
+                    return;
+                }
+                ++parseCounts[this.index];
+                setTimeout(() => {
+                    emitSuccessfulWorkerResult(this.listeners, message.id);
+                }, this.delay);
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('navigator', {hardwareConcurrency: 12, deviceMemory: 8});
+        vi.stubGlobal('Worker', SkewedWorker);
+        try {
+            const sourceBanks = Array.from({length: 12}, () => textEncoder.encode('[]'));
+            await expect(parseTermBankWithWasmColumnChunksParallel(
+                sourceBanks,
+                3,
+                () => {},
+                {emitContentSlab: true},
+            )).resolves.toBe(true);
+            expect(parseCounts.reduce((sum, count) => sum + count, 0)).toBe(12);
+            expect(parseCounts[0]).toBeLessThan(parseCounts[1]);
+            expect(parseCounts[0]).toBeLessThan(parseCounts[2]);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('navigator', originalNavigator);
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
     maybeTest('defers disposal until an active parallel run releases ownership', async () => {
         const workerCount = getParallelTermBankParserWorkerCount();
         let terminateCount = 0;
@@ -588,18 +657,7 @@ describe('term-bank WASM parser', () => {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
                         return;
                     }
-                    this.emitResult(message.id);
-                });
-            }
-
-            emitResult(id) {
-                emitWorkerMessage(this.listeners, {
-                    type: 'result',
-                    id,
-                    rowCount: 1,
-                    resultSentEpochMs: Date.now(),
-                    chunk: {rowCount: 1},
-                    profile: {chunkDispatchMs: 0},
+                    emitSuccessfulWorkerResult(this.listeners, message.id);
                 });
             }
 
@@ -818,23 +876,12 @@ describe('term-bank WASM parser', () => {
                         return;
                     }
                     if (this.index === 0) {
-                        this.emitResult(dispatchedMessage.id);
+                        emitSuccessfulWorkerResult(this.listeners, dispatchedMessage.id);
                     } else {
                         void secondResultGate.then(() => {
-                            this.emitResult(dispatchedMessage.id);
+                            emitSuccessfulWorkerResult(this.listeners, dispatchedMessage.id);
                         });
                     }
-                });
-            }
-
-            emitResult(id) {
-                emitWorkerMessage(this.listeners, {
-                    type: 'result',
-                    id,
-                    rowCount: 1,
-                    resultSentEpochMs: Date.now(),
-                    chunk: {rowCount: 1},
-                    profile: {chunkDispatchMs: 0},
                 });
             }
 

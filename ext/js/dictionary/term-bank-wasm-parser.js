@@ -1695,6 +1695,8 @@ class ParallelTermBankPipelineRun {
         /** @type {number} */
         this._nextSinkGroupIndex = 0;
         /** @type {number} */
+        this._nextWorkerGroupIndex = 0;
+        /** @type {number} */
         this._maxLeadGroups = 1;
         /** @type {Set<() => void>} */
         this._leadWaiters = new Set();
@@ -1723,7 +1725,7 @@ class ParallelTermBankPipelineRun {
         this._createSlots();
         this._maxLeadGroups = Math.max(1, workers.length * this._pipelineGroupsPerWorker);
         this._activateLeadSources();
-        this._workerLoops = workers.map((worker, workerIndex) => this._runWorkerLoop(worker, workerIndex, workers.length));
+        this._workerLoops = workers.map((worker) => this._runWorkerLoop(worker));
         try {
             // Start the ordered sink as soon as group zero is available. Waiting
             // for every worker's first group creates a full parse/storage
@@ -1803,12 +1805,11 @@ class ParallelTermBankPipelineRun {
 
     /**
      * @param {Worker} worker
-     * @param {number} workerIndex
-     * @param {number} workerCount
      */
-    async _runWorkerLoop(worker, workerIndex, workerCount) {
+    async _runWorkerLoop(worker) {
         try {
-            for (let groupIndex = workerIndex; groupIndex < this._groups.length; groupIndex += workerCount) {
+            while (this._nextWorkerGroupIndex < this._groups.length) {
+                const groupIndex = this._nextWorkerGroupIndex++;
                 if (this._pipelineShouldCancel()) { throw createParallelParserCancellationError(); }
                 await this._waitForLead(groupIndex);
                 const sourceGroup = this._groups[groupIndex];
