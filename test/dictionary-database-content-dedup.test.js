@@ -1363,6 +1363,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         Reflect.set(harness.plan, 'uniqueRowIndexes', new Uint32Array([0]));
         Reflect.set(harness.plan, 'persistedLookupRequired', true);
         Reflect.set(harness.chunk, 'contentRowStart', 0);
+        const stageMetadata = vi.spyOn(harness.database, '_stageArtifactTermContentMetadata');
         const importing = harness.run();
 
         await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
@@ -1370,6 +1371,9 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         harness.resolveRecords();
 
         await expect(importing).rejects.toThrow('injected canonical content failure');
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(Reflect.get(harness.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(stageMetadata).not.toHaveBeenCalled();
         expect(harness.plan.resolvedFlags).toStrictEqual(new Uint8Array([0]));
         expect(harness.plan.resolvedOffsets).toStrictEqual(new Float64Array([0]));
         expect(harness.plan.resolvedLengths).toStrictEqual(new Uint32Array([0]));

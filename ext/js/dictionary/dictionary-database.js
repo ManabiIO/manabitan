@@ -7085,91 +7085,117 @@ export class DictionaryDatabase {
                 'pendingSpanLengthsScratch',
                 lastUniqueIndex - firstUniqueIndex,
             );
+            /** @type {Int32Array|null} */
+            let stagedIndexes = null;
+            if (reserveMetadata) {
+                const maximumPendingContentCount = lastUniqueIndex - firstUniqueIndex;
+                this._ensureTermEntryContentMetaHashPairCapacity(
+                    this._getArtifactTermContentMetaCapacityHint(chunk, maximumPendingContentCount),
+                );
+                stagedIndexes = new Int32Array(maximumPendingContentCount);
+                stagedIndexes.fill(-1);
+            }
             let pendingContentCount = 0;
             let persistedHitCount = 0;
             let exactFallbackCount = 0;
             let alreadyResolvedUniqueCount = 0;
-            for (let uniqueIndex = firstUniqueIndex; uniqueIndex < lastUniqueIndex; ++uniqueIndex) {
-                const globalRowIndex = uniqueRowIndexes[uniqueIndex];
-                const rowIndex = globalRowIndex - contentRowStart;
-                if (
-                    rowIndex < 0 ||
-                    rowIndex >= count ||
-                    uniqueIndexList[rowIndex] !== uniqueIndex
-                ) {
-                    throw new Error(`Artifact term content canonical row is invalid for unique index ${uniqueIndex}`);
-                }
-                if (contentDedupPlan.resolvedFlags[uniqueIndex] === 1) {
-                    ++alreadyResolvedUniqueCount;
-                    continue;
-                }
-                const contentMetaOffset = rowIndex * 4;
-                const contentOffset = contentBytesBaseOffset + contentMetaList[contentMetaOffset];
-                const contentLength = contentMetaList[contentMetaOffset + 1];
-                const hash1 = contentMetaList[contentMetaOffset + 2] >>> 0;
-                const hash2 = contentMetaList[contentMetaOffset + 3] >>> 0;
-                if (
-                    contentOffset < contentBytesBaseOffset ||
-                    contentOffset + contentLength > contentBytesBuffer.byteLength
-                ) {
-                    throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
-                }
-                const existingIndex = this._findTermEntryContentMetaHashPairIndex(hash1, hash2);
-                if (
-                    existingIndex >= 0 &&
-                    this._termEntryContentMetaLengthTable[existingIndex] === contentLength &&
-                    this._termEntryContentMetaSignaturePresentTable[existingIndex] === 1
-                ) {
-                    const lastOffset = Math.max(0, contentLength - 4);
+            try {
+                for (let uniqueIndex = firstUniqueIndex; uniqueIndex < lastUniqueIndex; ++uniqueIndex) {
+                    const globalRowIndex = uniqueRowIndexes[uniqueIndex];
+                    const rowIndex = globalRowIndex - contentRowStart;
                     if (
-                        this._termEntryContentMetaSignature1Table[existingIndex] === this._readTermContentSignature(contentBytesBuffer, contentOffset) &&
-                        this._termEntryContentMetaSignature2Table[existingIndex] === this._readTermContentSignature(contentBytesBuffer, contentOffset + Math.floor(lastOffset / 2)) &&
-                        this._termEntryContentMetaSignature3Table[existingIndex] === this._readTermContentSignature(contentBytesBuffer, contentOffset + lastOffset)
+                        rowIndex < 0 ||
+                        rowIndex >= count ||
+                        uniqueIndexList[rowIndex] !== uniqueIndex
                     ) {
-                        const existingDictName = this._termEntryContentMetaDictNames[
-                            this._termEntryContentMetaDictNameIdTable[existingIndex]
-                        ] ?? 'raw';
-                        contentDedupPlan.resolvedOffsets[uniqueIndex] = this._termEntryContentMetaOffsetTable[existingIndex];
-                        contentDedupPlan.resolvedLengths[uniqueIndex] = contentLength;
-                        setResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex, existingDictName);
+                        throw new Error(`Artifact term content canonical row is invalid for unique index ${uniqueIndex}`);
+                    }
+                    if (contentDedupPlan.resolvedFlags[uniqueIndex] === 1) {
+                        ++alreadyResolvedUniqueCount;
+                        continue;
+                    }
+                    const contentMetaOffset = rowIndex * 4;
+                    const contentOffset = contentBytesBaseOffset + contentMetaList[contentMetaOffset];
+                    const contentLength = contentMetaList[contentMetaOffset + 1];
+                    const hash1 = contentMetaList[contentMetaOffset + 2] >>> 0;
+                    const hash2 = contentMetaList[contentMetaOffset + 3] >>> 0;
+                    if (
+                        contentOffset < contentBytesBaseOffset ||
+                        contentOffset + contentLength > contentBytesBuffer.byteLength
+                    ) {
+                        throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
+                    }
+                    const existingIndex = this._findTermEntryContentMetaHashPairIndex(hash1, hash2);
+                    if (
+                        existingIndex >= 0 &&
+                        this._termEntryContentMetaLengthTable[existingIndex] === contentLength &&
+                        this._termEntryContentMetaSignaturePresentTable[existingIndex] === 1
+                    ) {
+                        const lastOffset = Math.max(0, contentLength - 4);
+                        if (
+                            this._termEntryContentMetaSignature1Table[existingIndex] === this._readTermContentSignature(contentBytesBuffer, contentOffset) &&
+                            this._termEntryContentMetaSignature2Table[existingIndex] === this._readTermContentSignature(contentBytesBuffer, contentOffset + Math.floor(lastOffset / 2)) &&
+                            this._termEntryContentMetaSignature3Table[existingIndex] === this._readTermContentSignature(contentBytesBuffer, contentOffset + lastOffset)
+                        ) {
+                            const existingDictName = this._termEntryContentMetaDictNames[
+                                this._termEntryContentMetaDictNameIdTable[existingIndex]
+                            ] ?? 'raw';
+                            contentDedupPlan.resolvedOffsets[uniqueIndex] = this._termEntryContentMetaOffsetTable[existingIndex];
+                            contentDedupPlan.resolvedLengths[uniqueIndex] = contentLength;
+                            setResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex, existingDictName);
+                            contentDedupPlan.resolvedFlags[uniqueIndex] = 1;
+                            ++persistedHitCount;
+                            continue;
+                        }
+                    }
+                    let existingMeta = existingIndex < 0 ? void 0 : this._readTermEntryContentMetaHashPairIndex(existingIndex);
+                    if (typeof existingMeta !== 'undefined') {
+                        ++exactFallbackCount;
+                        const contentBytes = contentBytesBuffer.subarray(contentOffset, contentOffset + contentLength);
+                        const matchingMeta = this._findMatchingTermEntryContentMeta(hash1, hash2, contentBytes, existingMeta);
+                        existingMeta = matchingMeta instanceof Promise ? await matchingMeta : matchingMeta;
+                    }
+                    if (typeof existingMeta !== 'undefined') {
+                        contentDedupPlan.resolvedOffsets[uniqueIndex] = existingMeta.offset;
+                        contentDedupPlan.resolvedLengths[uniqueIndex] = existingMeta.length;
+                        setResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex, existingMeta.dictName);
                         contentDedupPlan.resolvedFlags[uniqueIndex] = 1;
                         ++persistedHitCount;
                         continue;
                     }
+                    if (contentOffset > 0xffffffff) {
+                        throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
+                    }
+                    pendingSpanOffsets[pendingContentCount] = contentOffset;
+                    pendingSpanLengths[pendingContentCount] = contentLength;
+                    pendingContentHash1s.push(hash1);
+                    pendingContentHash2s.push(hash2);
+                    if (stagedIndexes !== null) {
+                        stagedIndexes[pendingContentCount] = this._reserveArtifactTermContentMetadata(
+                            hash1,
+                            hash2,
+                            contentBytesBuffer,
+                            contentOffset,
+                            contentLength,
+                        );
+                    }
+                    if (pendingContentDictNames !== null) {
+                        pendingContentDictNames.push(
+                            explicitContentDictNames !== null ?
+                                (explicitContentDictNames[rowIndex] ?? null) :
+                                uniformContentDictName,
+                        );
+                    }
+                    contentDedupPlan.pendingEpochs[uniqueIndex] = pendingPlanEpoch;
+                    contentDedupPlan.pendingIndexes[uniqueIndex] = pendingContentCount;
+                    pendingPlanUniqueIndexes.push(uniqueIndex);
+                    ++pendingContentCount;
                 }
-                let existingMeta = existingIndex < 0 ? void 0 : this._readTermEntryContentMetaHashPairIndex(existingIndex);
-                if (typeof existingMeta !== 'undefined') {
-                    ++exactFallbackCount;
-                    const contentBytes = contentBytesBuffer.subarray(contentOffset, contentOffset + contentLength);
-                    const matchingMeta = this._findMatchingTermEntryContentMeta(hash1, hash2, contentBytes, existingMeta);
-                    existingMeta = matchingMeta instanceof Promise ? await matchingMeta : matchingMeta;
+            } catch (error) {
+                if (stagedIndexes !== null) {
+                    this._rollbackStagedArtifactTermContentMetadata({indexes: stagedIndexes, active: true});
                 }
-                if (typeof existingMeta !== 'undefined') {
-                    contentDedupPlan.resolvedOffsets[uniqueIndex] = existingMeta.offset;
-                    contentDedupPlan.resolvedLengths[uniqueIndex] = existingMeta.length;
-                    setResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex, existingMeta.dictName);
-                    contentDedupPlan.resolvedFlags[uniqueIndex] = 1;
-                    ++persistedHitCount;
-                    continue;
-                }
-                if (contentOffset > 0xffffffff) {
-                    throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
-                }
-                pendingSpanOffsets[pendingContentCount] = contentOffset;
-                pendingSpanLengths[pendingContentCount] = contentLength;
-                pendingContentHash1s.push(hash1);
-                pendingContentHash2s.push(hash2);
-                if (pendingContentDictNames !== null) {
-                    pendingContentDictNames.push(
-                        explicitContentDictNames !== null ?
-                            (explicitContentDictNames[rowIndex] ?? null) :
-                            uniformContentDictName,
-                    );
-                }
-                contentDedupPlan.pendingEpochs[uniqueIndex] = pendingPlanEpoch;
-                contentDedupPlan.pendingIndexes[uniqueIndex] = pendingContentCount;
-                pendingPlanUniqueIndexes.push(uniqueIndex);
-                ++pendingContentCount;
+                throw error;
             }
             let pendingHitCount = count - (lastUniqueIndex - firstUniqueIndex) + alreadyResolvedUniqueCount;
             for (let rowIndex = 0; rowIndex < count; ++rowIndex) {
@@ -7210,6 +7236,12 @@ export class DictionaryDatabase {
                 contentDedupPlan,
                 pendingPlanUniqueIndexes,
                 pendingPlanUniqueStart: null,
+                stagedContentMetadata: stagedIndexes === null ?
+                    void 0 :
+                    {
+                        indexes: stagedIndexes.subarray(0, pendingContentCount),
+                        active: true,
+                    },
             };
         }
         let tableSize = 1;
