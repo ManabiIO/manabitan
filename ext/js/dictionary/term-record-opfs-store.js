@@ -5271,27 +5271,46 @@ export class TermRecordOpfsStore {
             state.pendingLookupIndexRecordCount = 0;
             return;
         }
-        await this._flushPendingLookupIndexChunks(state, true);
-        const writable = state.lookupIndexWritable;
-        if (writable === null) { return; }
+        /** @type {Error|null} */
+        let operationError = null;
         try {
-            const header = new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES);
-            header.set(this._textEncoder.encode(LOOKUP_INDEX_MAGIC_TEXT), 0);
-            const view = new DataView(header.buffer, header.byteOffset, header.byteLength);
-            writeSafeU64Le(view, 8, state.fileLength);
-            view.setUint32(16, state.lookupIndexChunkCount, true);
-            view.setUint32(20, state.lookupIndexRecordCount, true);
-            header.set(state.generationId, 24);
-            await writable.seek(0);
-            await writable.write(header);
-        } finally {
+            await this._flushPendingLookupIndexChunks(state, true);
+            const writable = state.lookupIndexWritable;
+            if (writable !== null) {
+                const header = new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES);
+                header.set(this._textEncoder.encode(LOOKUP_INDEX_MAGIC_TEXT), 0);
+                const view = new DataView(header.buffer, header.byteOffset, header.byteLength);
+                writeSafeU64Le(view, 8, state.fileLength);
+                view.setUint32(16, state.lookupIndexChunkCount, true);
+                view.setUint32(20, state.lookupIndexRecordCount, true);
+                header.set(state.generationId, 24);
+                await writable.seek(0);
+                await writable.write(header);
+            }
+        } catch (error) {
+            operationError = error instanceof Error ? error : new Error(String(error));
+        }
+        /** @type {Error|null} */
+        let closeError = null;
+        const writable = state.lookupIndexWritable;
+        if (writable !== null) {
             try {
                 await writable.close();
+            } catch (error) {
+                closeError = error instanceof Error ? error : new Error(String(error));
             } finally {
                 state.lookupIndexWritable = null;
-                state.lookupIndexFileHandle = null;
             }
         }
+        state.lookupIndexFileHandle = null;
+        if (operationError !== null && closeError !== null) {
+            throw new AggregateError(
+                [operationError, closeError],
+                `Failed to finalize term-record lookup index ${indexFileName}`,
+            );
+        }
+        if (operationError !== null) { throw operationError; }
+        if (closeError !== null) { throw closeError; }
         state.pendingLookupIndexChunks = [];
         state.pendingLookupIndexBytes = 0;
         state.pendingLookupIndexRecordCount = 0;
@@ -5408,10 +5427,55 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async _closeAllWritables() {
+        /** @type {Error[]} */
+        const errors = [];
         for (const state of this._shardStateByFileName.values()) {
+            const results = await Promise.allSettled([
+                this._finalizeShardWritable(state),
+                this._flushLookupIndexFile(state),
+            ]);
+            for (const result of results) {
+                if (result.status === 'fulfilled') { continue; }
+                errors.push(
+                    result.reason instanceof Error ?
+                        result.reason :
+                        new Error(String(result.reason)),
+                );
+            }
+        }
+        if (errors.length === 1) {
+            throw errors[0];
+        }
+        if (errors.length > 1) {
+            throw new AggregateError(errors, 'Failed to finalize term-record storage');
+        }
+    }
+
+    /**
+     * @param {TermRecordShardState} state
+     * @returns {Promise<void>}
+     */
+    async _finalizeShardWritable(state) {
+        /** @type {Error[]} */
+        const errors = [];
+        try {
             await this._awaitQueuedWritesForShard(state);
+        } catch (error) {
+            errors.push(error instanceof Error ? error : new Error(String(error)));
+        }
+        try {
             await this._closeShardWritable(state);
-            await this._flushLookupIndexFile(state);
+        } catch (error) {
+            errors.push(error instanceof Error ? error : new Error(String(error)));
+        }
+        if (errors.length === 1) {
+            throw errors[0];
+        }
+        if (errors.length > 1) {
+            throw new AggregateError(
+                errors,
+                `Failed to finalize term-record file ${state.fileName}`,
+            );
         }
     }
 

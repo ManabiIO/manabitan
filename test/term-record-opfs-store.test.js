@@ -1786,6 +1786,183 @@ describe('TermRecordOpfsStore', () => {
         expect(state.pendingLookupIndexChunks).toHaveLength(1);
     });
 
+    test('finalizes record and lookup-index files concurrently and waits for both', async () => {
+        const store = new TermRecordOpfsStore();
+        const state = store._createShardState(
+            'concurrent-finalization.mbtr',
+            /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({})),
+            0,
+        );
+        Reflect.get(store, '_shardStateByFileName').set(state.fileName, state);
+        let recordStarted = false;
+        let lookupIndexStarted = false;
+        let finished = false;
+        /** @type {() => void} */
+        let releaseRecord = () => {};
+        /** @type {Promise<void>} */
+        const recordGate = new Promise((resolve) => { releaseRecord = () => { resolve(); }; });
+        /** @type {() => void} */
+        let releaseLookupIndex = () => {};
+        /** @type {Promise<void>} */
+        const lookupIndexGate = new Promise((resolve) => { releaseLookupIndex = () => { resolve(); }; });
+        vi.spyOn(store, '_awaitQueuedWritesForShard').mockImplementation(async () => {
+            recordStarted = true;
+            await recordGate;
+        });
+        const closeRecord = vi.spyOn(store, '_closeShardWritable').mockResolvedValue();
+        vi.spyOn(store, '_flushLookupIndexFile').mockImplementation(async () => {
+            lookupIndexStarted = true;
+            await lookupIndexGate;
+        });
+
+        const finalization = store._closeAllWritables().then(() => { finished = true; });
+        await vi.waitFor(() => {
+            expect(recordStarted).toBe(true);
+            expect(lookupIndexStarted).toBe(true);
+        });
+        releaseRecord();
+        await vi.waitFor(() => expect(closeRecord).toHaveBeenCalledOnce());
+        expect(finished).toBe(false);
+        releaseLookupIndex();
+        await finalization;
+        expect(finished).toBe(true);
+    });
+
+    test('waits for lookup-index settlement after record finalization fails', async () => {
+        const store = new TermRecordOpfsStore();
+        const state = store._createShardState(
+            'record-failure.mbtr',
+            /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({})),
+            0,
+        );
+        Reflect.get(store, '_shardStateByFileName').set(state.fileName, state);
+        const recordError = new Error('injected record finalization failure');
+        let settled = false;
+        let lookupIndexStarted = false;
+        /** @type {() => void} */
+        let releaseLookupIndex = () => {};
+        /** @type {Promise<void>} */
+        const lookupIndexGate = new Promise((resolve) => { releaseLookupIndex = () => { resolve(); }; });
+        vi.spyOn(store, '_awaitQueuedWritesForShard').mockRejectedValue(recordError);
+        const closeRecord = vi.spyOn(store, '_closeShardWritable').mockResolvedValue();
+        vi.spyOn(store, '_flushLookupIndexFile').mockImplementation(async () => {
+            lookupIndexStarted = true;
+            await lookupIndexGate;
+        });
+
+        const finalization = store._closeAllWritables().finally(() => { settled = true; });
+        await vi.waitFor(() => expect(lookupIndexStarted).toBe(true));
+        await Promise.resolve();
+        expect(settled).toBe(false);
+        releaseLookupIndex();
+        await expect(finalization).rejects.toBe(recordError);
+        expect(closeRecord).toHaveBeenCalledOnce();
+    });
+
+    test('waits for record settlement after lookup-index finalization fails', async () => {
+        const store = new TermRecordOpfsStore();
+        const state = store._createShardState(
+            'lookup-index-failure.mbtr',
+            /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({})),
+            0,
+        );
+        Reflect.get(store, '_shardStateByFileName').set(state.fileName, state);
+        const lookupIndexError = new Error('injected lookup-index finalization failure');
+        let settled = false;
+        let recordStarted = false;
+        /** @type {() => void} */
+        let releaseRecord = () => {};
+        /** @type {Promise<void>} */
+        const recordGate = new Promise((resolve) => { releaseRecord = () => { resolve(); }; });
+        vi.spyOn(store, '_awaitQueuedWritesForShard').mockImplementation(async () => {
+            recordStarted = true;
+            await recordGate;
+        });
+        const closeRecord = vi.spyOn(store, '_closeShardWritable').mockResolvedValue();
+        vi.spyOn(store, '_flushLookupIndexFile').mockRejectedValue(lookupIndexError);
+
+        const finalization = store._closeAllWritables().finally(() => { settled = true; });
+        await vi.waitFor(() => expect(recordStarted).toBe(true));
+        await Promise.resolve();
+        expect(settled).toBe(false);
+        releaseRecord();
+        await expect(finalization).rejects.toBe(lookupIndexError);
+        expect(closeRecord).toHaveBeenCalledOnce();
+    });
+
+    test('aggregates independent record and lookup-index finalization failures', async () => {
+        const store = new TermRecordOpfsStore();
+        const state = store._createShardState(
+            'dual-failure.mbtr',
+            /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({})),
+            0,
+        );
+        Reflect.get(store, '_shardStateByFileName').set(state.fileName, state);
+        const recordError = new Error('injected record failure');
+        const lookupIndexError = new Error('injected lookup-index failure');
+        vi.spyOn(store, '_awaitQueuedWritesForShard').mockRejectedValue(recordError);
+        vi.spyOn(store, '_flushLookupIndexFile').mockRejectedValue(lookupIndexError);
+
+        await expect(store._closeAllWritables()).rejects.toMatchObject({
+            name: 'AggregateError',
+            errors: [recordError, lookupIndexError],
+        });
+    });
+
+    test('attempts later shard finalization after an earlier shard fails', async () => {
+        const store = new TermRecordOpfsStore();
+        const firstState = store._createShardState(
+            'first-failed.mbtr',
+            /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({})),
+            0,
+        );
+        const secondState = store._createShardState(
+            'second-settled.mbtr',
+            /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({})),
+            0,
+        );
+        Reflect.get(store, '_shardStateByFileName').set(firstState.fileName, firstState);
+        Reflect.get(store, '_shardStateByFileName').set(secondState.fileName, secondState);
+        const firstError = new Error('injected first shard failure');
+        /** @type {string[]} */
+        const finalizedFileNames = [];
+        vi.spyOn(store, '_finalizeShardWritable').mockImplementation(async (state) => {
+            finalizedFileNames.push(state.fileName);
+            if (state === firstState) { throw firstError; }
+        });
+        /** @type {string[]} */
+        const finalizedIndexFileNames = [];
+        vi.spyOn(store, '_flushLookupIndexFile').mockImplementation(async (state) => {
+            finalizedIndexFileNames.push(state.fileName);
+        });
+
+        await expect(store._closeAllWritables()).rejects.toBe(firstError);
+        expect(finalizedFileNames).toStrictEqual([firstState.fileName, secondState.fileName]);
+        expect(finalizedIndexFileNames).toStrictEqual([firstState.fileName, secondState.fileName]);
+    });
+
+    test('closes an open lookup-index writable after its queued write fails', async () => {
+        const store = new TermRecordOpfsStore();
+        const state = store._createShardState(
+            'failed-open-sidecar.mbtr',
+            /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({})),
+            0,
+        );
+        Reflect.set(store, '_recordsDirectoryHandle', {});
+        const writeError = new Error('injected queued lookup-index write failure');
+        const close = vi.fn(async () => {});
+        state.lookupIndexWritable = /** @type {FileSystemWritableFileStream} */ (/** @type {unknown} */ ({close}));
+        state.lookupIndexFileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({}));
+        state.lookupIndexWritePromise = Promise.reject(writeError);
+        void state.lookupIndexWritePromise.catch(() => {});
+        state.lookupIndexWriteError = writeError;
+
+        await expect(store._flushLookupIndexFile(state)).rejects.toBe(writeError);
+        expect(close).toHaveBeenCalledOnce();
+        expect(state.lookupIndexWritable).toBeNull();
+        expect(state.lookupIndexFileHandle).toBeNull();
+    });
+
     test('does not start later queued lookup sidecar writes after an earlier write fails', async () => {
         const writeError = new Error('injected first lookup sidecar failure');
         /** @type {() => void} */
