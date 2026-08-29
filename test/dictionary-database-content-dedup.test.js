@@ -1255,6 +1255,87 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(result.resolvedContentDictNames).toBe('raw-v6');
     });
 
+    test('defers mixed canonical projection until pending offsets are published', async () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array([1, 2, 3, 1, 2, 3, 4, 5]);
+        Reflect.get(database, '_cacheTermEntryContentMeta').call(
+            database,
+            null,
+            400,
+            3,
+            'raw-v6',
+            0,
+            10,
+            20,
+            source.subarray(0, 3),
+        );
+        const plan = {
+            uniqueCount: 2,
+            sourceRowCount: 3,
+            uniqueRowIndexes: new Uint32Array([0, 2]),
+            resolvedFlags: new Uint8Array(2),
+            resolvedOffsets: new Float64Array(2),
+            resolvedLengths: new Uint32Array(2),
+            resolvedDictNames: new Array(2),
+            pendingEpochs: new Uint32Array(2),
+            pendingIndexes: new Uint32Array(2),
+            nextEpoch: 1,
+            persistedLookupRequired: true,
+        };
+        const chunk = {
+            rowCount: 3,
+            contentRowStart: 0,
+            dictionaryTotalRows: 3,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 0,
+            contentMetaList: new Uint32Array([
+                0, 3, 10, 20,
+                3, 3, 10, 20,
+                6, 2, 30, 40,
+            ]),
+            contentUniqueIndexList: new Uint32Array([0, 0, 1]),
+            contentDedupPlan: plan,
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        };
+        const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const result = await resolve(chunk, true);
+
+        expect(result.pendingContentCount).toBe(1);
+        expect(result.contentOffsets).toStrictEqual(new Float64Array(3));
+
+        plan.resolvedOffsets[1] = 500;
+        plan.resolvedLengths[1] = 2;
+        plan.resolvedDictNames[1] = 'raw-block-v2:jmdict';
+        plan.resolvedFlags[1] = 1;
+        const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
+        const names = publish({
+            count: 3,
+            contentOffsets: result.contentOffsets,
+            contentLengths: result.contentLengths,
+            resolvedContentDictNames: result.resolvedContentDictNames,
+            pendingRowToUniqueIndex: null,
+            pendingContentBytes: result.pendingContentBytes,
+            pendingContentHash1s: result.pendingContentHash1s,
+            pendingContentHash2s: result.pendingContentHash2s,
+            pendingOffsets: new Float64Array([500]),
+            pendingLengths: new Uint32Array([2]),
+            pendingResolvedDictNames: 'raw-block-v2:jmdict',
+            pendingContentSpans: result.pendingContentSpans,
+            contentDedupPlan: plan,
+            contentUniqueIndexList: chunk.contentUniqueIndexList,
+            stagedContentMetadata: result.stagedContentMetadata,
+            metadataValidated: true,
+        });
+
+        expect([...result.contentOffsets]).toEqual([400, 400, 500]);
+        expect([...result.contentLengths]).toEqual([3, 3, 2]);
+        expect(names).toEqual(['raw-v6', 'raw-v6', 'raw-block-v2:jmdict']);
+    });
+
     test('does not merge a canonical row with a persisted hash collision', async () => {
         const database = new DictionaryDatabase();
         const persisted = new Uint8Array([1, 2, 3, 4]);

@@ -7198,19 +7198,24 @@ export class DictionaryDatabase {
                 throw error;
             }
             let pendingHitCount = count - (lastUniqueIndex - firstUniqueIndex) + alreadyResolvedUniqueCount;
-            for (let rowIndex = 0; rowIndex < count; ++rowIndex) {
-                const uniqueIndex = uniqueIndexList[rowIndex];
-                if (uniqueIndex >= contentDedupPlan.resolvedFlags.length) {
-                    throw new RangeError(`Artifact term content unique index is invalid at row ${rowIndex}`);
-                }
-                if (contentDedupPlan.resolvedFlags[uniqueIndex] !== 1) { continue; }
-                contentOffsets[rowIndex] = contentDedupPlan.resolvedOffsets[uniqueIndex];
-                contentLengths[rowIndex] = contentDedupPlan.resolvedLengths[uniqueIndex];
-                const existingDictName = getResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex);
-                if (Array.isArray(resolvedContentDictNames)) {
-                    resolvedContentDictNames[rowIndex] = existingDictName;
-                } else if (existingDictName !== resolvedContentDictNames) {
-                    ensureResolvedContentDictNamesArray(rowIndex)[rowIndex] = existingDictName;
+            // Pending rows force a later whole-chunk projection after their
+            // persisted offsets arrive, so projecting resolved hits now would
+            // only traverse the same rows twice.
+            if (pendingContentCount === 0) {
+                for (let rowIndex = 0; rowIndex < count; ++rowIndex) {
+                    const uniqueIndex = uniqueIndexList[rowIndex];
+                    if (uniqueIndex >= contentDedupPlan.resolvedFlags.length) {
+                        throw new RangeError(`Artifact term content unique index is invalid at row ${rowIndex}`);
+                    }
+                    if (contentDedupPlan.resolvedFlags[uniqueIndex] !== 1) { continue; }
+                    contentOffsets[rowIndex] = contentDedupPlan.resolvedOffsets[uniqueIndex];
+                    contentLengths[rowIndex] = contentDedupPlan.resolvedLengths[uniqueIndex];
+                    const existingDictName = getResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex);
+                    if (Array.isArray(resolvedContentDictNames)) {
+                        resolvedContentDictNames[rowIndex] = existingDictName;
+                    } else if (existingDictName !== resolvedContentDictNames) {
+                        ensureResolvedContentDictNamesArray(rowIndex)[rowIndex] = existingDictName;
+                    }
                 }
             }
             if (pendingHitCount < 0) { pendingHitCount = 0; }
