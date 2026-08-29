@@ -16,7 +16,10 @@
  */
 
 import {safePerformance} from '../core/safe-performance.js';
-import {encodePersistedTermLookupIndexFromPreinternedPlan} from './term-lookup-index.js';
+import {
+    encodePersistedTermLookupIndexFromPreinternedPlan,
+    encodePersistedTermLookupIndexFromValidatedPreinternedPlan,
+} from './term-lookup-index.js';
 import {
     compactTermRecordPreinternedPlan,
     hasCompleteTermRecordPreinternedPlan,
@@ -56,12 +59,13 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
     const scratch = remapScratch instanceof Uint32Array && remapScratch.length >= preinternedPlan.stringLengths.length ?
         remapScratch :
         new Uint32Array(preinternedPlan.stringLengths.length);
-    const reuseWholePlan = canReuseWholePlan(
+    const validatedReadingPostingCount = validateReusableWholePlan(
         preinternedPlan,
         count,
         scratch,
         chunk.readingEqualsExpressionList,
     );
+    const reuseWholePlan = validatedReadingPostingCount !== null;
     const runRowLimit = reuseWholePlan ? count : MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS;
     /** @type {Map<string, PreparedTermLookupIndex>} */
     const indexes = new Map();
@@ -88,12 +92,20 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
             chunk.sequenceList :
             chunk.sequenceList.slice(runStart, runStart + runCount);
         const encodeStartedAt = safePerformance.now();
-        const bytes = encodePersistedTermLookupIndexFromPreinternedPlan(
-            runPlan,
-            readingEqualsExpressionList,
-            sequenceList,
-            runCount,
-        );
+        const bytes = reuseWholePlan ?
+            encodePersistedTermLookupIndexFromValidatedPreinternedPlan(
+                runPlan,
+                readingEqualsExpressionList,
+                sequenceList,
+                runCount,
+                /** @type {number} */ (validatedReadingPostingCount),
+            ) :
+            encodePersistedTermLookupIndexFromPreinternedPlan(
+                runPlan,
+                readingEqualsExpressionList,
+                sequenceList,
+                runCount,
+            );
         indexEncodeMs += safePerformance.now() - encodeStartedAt;
         indexes.set(`${runStart}:${runCount}`, {bytes, preinternedPlan: runPlan});
     }
@@ -113,24 +125,26 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
  * @param {number} rowCount
  * @param {Uint32Array} scratch
  * @param {boolean[]|Uint8Array} readingEqualsExpressionList
- * @returns {boolean}
+ * @returns {number|null} The validated reading posting count, or `null` when compaction is required.
  */
-function canReuseWholePlan(plan, rowCount, scratch, readingEqualsExpressionList) {
+function validateReusableWholePlan(plan, rowCount, scratch, readingEqualsExpressionList) {
     const keyCount = plan.stringLengths.length;
     if (
         rowCount > MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS ||
         keyCount > MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS
     ) {
-        return false;
+        return null;
     }
     let referencedKeyCount = 0;
+    let readingPostingCount = 0;
     try {
         for (let row = 0; row < rowCount; ++row) {
             const expressionIndex = plan.expressionIndexes[row];
-            const readingIndex = (
+            const readingEqualsExpression = (
                 readingEqualsExpressionList[row] === true ||
                 readingEqualsExpressionList[row] === 1
-            ) ?
+            );
+            const readingIndex = readingEqualsExpression ?
                 expressionIndex :
                 plan.readingIndexes[row];
             if (
@@ -139,7 +153,7 @@ function canReuseWholePlan(plan, rowCount, scratch, readingEqualsExpressionList)
                 plan.stringLengths[expressionIndex] === 0 ||
                 plan.stringLengths[readingIndex] === 0
             ) {
-                return false;
+                return null;
             }
             if (scratch[expressionIndex] === 0) {
                 scratch[expressionIndex] = 1;
@@ -149,8 +163,9 @@ function canReuseWholePlan(plan, rowCount, scratch, readingEqualsExpressionList)
                 scratch[readingIndex] = 1;
                 ++referencedKeyCount;
             }
+            if (!readingEqualsExpression) { ++readingPostingCount; }
         }
-        return referencedKeyCount === keyCount;
+        return referencedKeyCount === keyCount ? readingPostingCount : null;
     } finally {
         if (referencedKeyCount > 0) {
             for (let key = 0; key < keyCount; ++key) { scratch[key] = 0; }

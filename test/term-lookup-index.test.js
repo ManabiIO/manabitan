@@ -12,6 +12,7 @@ import {createTermRecordPreinternedPlanBuilder} from '../ext/js/dictionary/term-
 import {
     appendExactRowMatches,
     encodePersistedTermLookupIndexFromPreinternedPlan,
+    encodePersistedTermLookupIndexFromValidatedPreinternedPlan,
     encodePersistedTermLookupIndexFromRecordPayload,
     encodePersistedTermLookupIndex,
     findExactRows,
@@ -142,8 +143,16 @@ describe('persisted term lookup index', () => {
             new Int32Array([10, 11]),
             records.length,
         );
+        const validatedPlanEncoded = encodePersistedTermLookupIndexFromValidatedPreinternedPlan(
+            plan,
+            new Uint8Array([0, 1]),
+            new Int32Array([10, 11]),
+            records.length,
+            1,
+        );
 
         expect(planEncoded).toEqual(payloadEncoded);
+        expect(validatedPlanEncoded).toEqual(payloadEncoded);
     });
 
     test('rejects malformed preinterned parser plans', () => {
@@ -172,6 +181,13 @@ describe('persisted term lookup index', () => {
             new Int32Array([1]),
             1,
         )).toThrow('Invalid preinterned term-record plan for lookup index');
+        expect(() => encodePersistedTermLookupIndexFromValidatedPreinternedPlan(
+            plan,
+            new Uint8Array([1]),
+            new Int32Array([1]),
+            1,
+            2,
+        )).toThrow('Invalid validated reading posting count');
     });
 
     test('rejects malformed record-payload dimensions and key references', () => {

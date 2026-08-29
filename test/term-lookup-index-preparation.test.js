@@ -78,6 +78,28 @@ describe('parser-prepared term lookup indexes', () => {
         expect(hasCompletePreparedTermLookupIndexes(prepared?.indexes, rowCount)).toBe(true);
     });
 
+    test('retains malformed-plan validation while reusing whole plans', () => {
+        const chunk = createChunk(1);
+        chunk.termRecordPreinternedPlan.expressionIndexes[0] = 99;
+
+        expect(() => prepareTermLookupIndexesFromPreinternedPlan(chunk)).toThrow();
+    });
+
+    test('counts an explicitly distinct reading even when it shares the expression key', () => {
+        const chunk = createChunk(1);
+        const firstLength = chunk.termRecordPreinternedPlan.stringLengths[0];
+        chunk.termRecordPreinternedPlan.stringLengths = Uint16Array.of(firstLength);
+        chunk.termRecordPreinternedPlan.stringOffsets = Uint32Array.of(0);
+        chunk.termRecordPreinternedPlan.stringsBuffer = chunk.termRecordPreinternedPlan.stringsBuffer.slice(0, firstLength);
+        chunk.termRecordPreinternedPlan.expressionIndexes[0] = 0;
+        chunk.termRecordPreinternedPlan.readingIndexes[0] = 0;
+        chunk.readingEqualsExpressionList[0] = 0;
+
+        const prepared = prepareTermLookupIndexesFromPreinternedPlan(chunk);
+        const index = parsePersistedTermLookupIndex(prepared?.indexes.get('0:1')?.bytes ?? new Uint8Array());
+        expect(findExactRows(index, textEncoder.encode('共通語'), 'reading')).toEqual([0]);
+    });
+
     test('covers every 30K row range and preserves exact keys', () => {
         const rowCount = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS + 1;
         const chunk = createChunk(rowCount);

@@ -137,6 +137,65 @@ export function encodePersistedTermLookupIndexFromPreinternedPlan(
     sequenceList,
     rowCount,
 ) {
+    return encodePersistedTermLookupIndexFromPreinternedPlanInternal(
+        plan,
+        readingEqualsExpressionList,
+        sequenceList,
+        rowCount,
+        null,
+    );
+}
+
+/**
+ * Builds the lookup index after the caller has validated every row key and
+ * counted non-expression reading postings in the same traversal.
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} plan
+ * @param {boolean[]|Uint8Array} readingEqualsExpressionList
+ * @param {(number|undefined)[]|Int32Array} sequenceList
+ * @param {number} rowCount
+ * @param {number} readingPostingCount
+ * @returns {Uint8Array}
+ * @throws {Error} If the validated count or preinterned plan is malformed.
+ */
+export function encodePersistedTermLookupIndexFromValidatedPreinternedPlan(
+    plan,
+    readingEqualsExpressionList,
+    sequenceList,
+    rowCount,
+    readingPostingCount,
+) {
+    if (
+        !Number.isSafeInteger(readingPostingCount) ||
+        readingPostingCount < 0 ||
+        readingPostingCount > rowCount
+    ) {
+        throw new Error('Invalid validated reading posting count');
+    }
+    return encodePersistedTermLookupIndexFromPreinternedPlanInternal(
+        plan,
+        readingEqualsExpressionList,
+        sequenceList,
+        rowCount,
+        readingPostingCount,
+    );
+}
+
+/**
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} plan
+ * @param {boolean[]|Uint8Array} readingEqualsExpressionList
+ * @param {(number|undefined)[]|Int32Array} sequenceList
+ * @param {number} rowCount
+ * @param {number|null} validatedReadingPostingCount
+ * @returns {Uint8Array}
+ * @throws {Error} If the preinterned plan is malformed.
+ */
+function encodePersistedTermLookupIndexFromPreinternedPlanInternal(
+    plan,
+    readingEqualsExpressionList,
+    sequenceList,
+    rowCount,
+    validatedReadingPostingCount,
+) {
     const {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes} = plan;
     if (!Number.isSafeInteger(rowCount) || rowCount >= U16_NULL) {
         throw new RangeError('Term lookup index has too many rows for one chunk');
@@ -180,21 +239,24 @@ export function encodePersistedTermLookupIndexFromPreinternedPlan(
     const sequenceValues = sequenceList instanceof Int32Array ?
         sequenceList.subarray(0, rowCount) :
         Int32Array.from(sequenceList.slice(0, rowCount), (value) => value ?? -1);
-    let readingPostingCount = 0;
-    for (let row = 0; row < rowCount; ++row) {
-        const expressionKey = expressionKeys[row];
-        const readingEqualsExpression = (
-            readingEqualsExpressionList[row] === true ||
-            readingEqualsExpressionList[row] === 1
-        );
-        const readingKey = readingEqualsExpression ? READING_EQUALS_EXPRESSION_U32 : readingIndexes[row];
-        if (
-            expressionKey >= stringLengths.length ||
-            (readingKey !== READING_EQUALS_EXPRESSION_U32 && readingKey >= stringLengths.length)
-        ) {
-            throw new Error('Invalid preinterned term-record key reference');
+    let readingPostingCount = validatedReadingPostingCount;
+    if (readingPostingCount === null) {
+        readingPostingCount = 0;
+        for (let row = 0; row < rowCount; ++row) {
+            const expressionKey = expressionKeys[row];
+            const readingEqualsExpression = (
+                readingEqualsExpressionList[row] === true ||
+                readingEqualsExpressionList[row] === 1
+            );
+            const readingKey = readingEqualsExpression ? READING_EQUALS_EXPRESSION_U32 : readingIndexes[row];
+            if (
+                expressionKey >= stringLengths.length ||
+                (readingKey !== READING_EQUALS_EXPRESSION_U32 && readingKey >= stringLengths.length)
+            ) {
+                throw new Error('Invalid preinterned term-record key reference');
+            }
+            if (!readingEqualsExpression) { ++readingPostingCount; }
         }
-        if (!readingEqualsExpression) { ++readingPostingCount; }
     }
     return encodeIndexPlan({
         keyBytes: stringsBuffer,
