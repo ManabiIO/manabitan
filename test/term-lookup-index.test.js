@@ -19,6 +19,7 @@ import {
     findPrefixRows,
     findSequenceRows,
     getPersistedTermKeyBytes,
+    parseChecksummedPersistedTermLookupIndex,
     parsePersistedTermLookupIndex,
 } from '../ext/js/dictionary/term-lookup-index.js';
 
@@ -368,6 +369,9 @@ describe('persisted term lookup index', () => {
         expect(() => parsePersistedTermLookupIndex(invalidReference)).toThrow(
             'Invalid persisted 16-bit term lookup reference',
         );
+        expect(() => parseChecksummedPersistedTermLookupIndex(invalidReference)).toThrow(
+            'Invalid persisted 16-bit term lookup reference',
+        );
 
         const cyclic = new Uint8Array(encoded);
         const cyclicView = new DataView(cyclic.buffer);
@@ -377,6 +381,9 @@ describe('persisted term lookup index', () => {
         }
         cyclicView.setUint16(keyNextOffset + (head * 2), head, true);
         expect(() => parsePersistedTermLookupIndex(cyclic)).toThrow(
+            'Cyclic or duplicated persisted term lookup hash chain',
+        );
+        expect(() => parseChecksummedPersistedTermLookupIndex(cyclic)).toThrow(
             'Cyclic or duplicated persisted term lookup hash chain',
         );
     });
@@ -415,6 +422,26 @@ describe('persisted term lookup index', () => {
         );
     });
 
+    test('rejects out-of-range expression and reading keys through posting ownership', () => {
+        const expressionEncoded = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('alpha'), readingBytes: bytes('あるふぁ'), sequence: null},
+        ]);
+        const expressionIndex = parsePersistedTermLookupIndex(expressionEncoded);
+        expressionIndex.expressionKeys[0] = expressionIndex.keyOffsets.length - 1;
+        expect(() => parseChecksummedPersistedTermLookupIndex(expressionEncoded)).toThrow(
+            'Invalid persisted term lookup posting row',
+        );
+
+        const readingEncoded = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('beta'), readingBytes: bytes('べーた'), sequence: null},
+        ]);
+        const readingIndex = parsePersistedTermLookupIndex(readingEncoded);
+        readingIndex.readingKeys[0] = readingIndex.keyOffsets.length - 1;
+        expect(() => parseChecksummedPersistedTermLookupIndex(readingEncoded)).toThrow(
+            'Invalid persisted term lookup posting row',
+        );
+    });
+
     test('rejects out-of-range posting rows through semantic validation', () => {
         const encoded = encodePersistedTermLookupIndex([
             {expressionBytes: bytes('alpha'), readingBytes: null, sequence: null},
@@ -442,6 +469,19 @@ describe('persisted term lookup index', () => {
 
         expect(() => parsePersistedTermLookupIndex(encoded)).toThrow(
             'Invalid persisted sequence lookup hash chain',
+        );
+    });
+
+    test('rejects out-of-range sequence chain references during fused validation', () => {
+        const encoded = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('alpha'), readingBytes: null, sequence: 42},
+        ]);
+        const index = parsePersistedTermLookupIndex(encoded);
+        const slot = index.sequenceHeads.findIndex((value) => value !== 0xffff);
+        index.sequenceHeads[slot] = index.sequenceValues.length;
+
+        expect(() => parseChecksummedPersistedTermLookupIndex(encoded)).toThrow(
+            'Invalid persisted 16-bit term lookup reference',
         );
     });
 });

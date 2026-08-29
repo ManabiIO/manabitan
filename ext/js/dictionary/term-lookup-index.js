@@ -439,6 +439,28 @@ function encodeIndexPlan(plan) {
  * @throws {Error} If the persisted index is malformed.
  */
 export function parsePersistedTermLookupIndex(bytes) {
+    return parsePersistedTermLookupIndexInternal(bytes, true);
+}
+
+/**
+ * Parses an index whose complete byte payload has already passed its persisted
+ * checksum. Structural validation remains strict, but recalculating every key
+ * hash would duplicate the immediately preceding full-payload integrity pass.
+ * @param {Uint8Array} bytes
+ * @returns {PersistedTermLookupIndex}
+ * @throws {Error} If the persisted index is malformed.
+ */
+export function parseChecksummedPersistedTermLookupIndex(bytes) {
+    return parsePersistedTermLookupIndexInternal(bytes, false);
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {boolean} validateKeyHashBuckets
+ * @returns {PersistedTermLookupIndex}
+ * @throws {Error} If the persisted index is malformed.
+ */
+function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
     if (bytes.byteLength < HEADER_BYTES || (bytes.byteOffset & 3) !== 0) {
         throw new Error('Invalid persisted term lookup index header');
     }
@@ -541,7 +563,7 @@ export function parsePersistedTermLookupIndex(bytes) {
         forwardReady: false,
         reverseReady: false,
     };
-    validateIndex(index);
+    validateIndex(index, validateKeyHashBuckets);
     return index;
 }
 
@@ -783,9 +805,10 @@ function appendPostingRows(index, key, field, output, rowOffset) {
 
 /**
  * @param {PersistedTermLookupIndex} index
+ * @param {boolean} [validateKeyHashBuckets=true]
  * @throws {Error} If an index reference or boundary is invalid.
  */
-function validateIndex(index) {
+function validateIndex(index, validateKeyHashBuckets = true) {
     const keyCount = index.keyOffsets.length - 1;
     const rowCount = index.expressionKeys.length;
     if (
@@ -799,17 +822,13 @@ function validateIndex(index) {
     for (let key = 0; key < keyCount; ++key) {
         if (index.keyOffsets[key] >= index.keyOffsets[key + 1]) { throw new Error('Invalid persisted term lookup key boundary'); }
     }
-    for (const key of index.expressionKeys) {
-        if (key >= keyCount) { throw new Error('Invalid persisted expression key'); }
-    }
-    for (const key of index.readingKeys) {
-        if (key !== U16_NULL && key >= keyCount) { throw new Error('Invalid persisted reading key'); }
-    }
-    validateU16References(index.keyHeads, keyCount);
-    validateU16References(index.keyNext, keyCount);
-    validateKeyHashChains(index.keyHeads, index.keyNext, index.keyBytes, index.keyOffsets);
-    validateU16References(index.sequenceHeads, rowCount);
-    validateU16References(index.sequenceNext, rowCount);
+    validateKeyHashChains(
+        index.keyHeads,
+        index.keyNext,
+        index.keyBytes,
+        index.keyOffsets,
+        validateKeyHashBuckets,
+    );
     validateOffsets(index.expressionPostingOffsets, index.expressionPostingRows.length);
     validateOffsets(index.readingPostingOffsets, index.readingPostingRows.length);
     const rowSeen = new Uint8Array(rowCount);
@@ -842,36 +861,30 @@ function validateIndex(index) {
 }
 
 /**
- * @param {Uint16Array} values
- * @param {number} limit
- * @throws {Error} If a 16-bit reference is outside its valid range.
- */
-function validateU16References(values, limit) {
-    for (const value of values) {
-        if (value !== U16_NULL && value >= limit) {
-            throw new Error('Invalid persisted 16-bit term lookup reference');
-        }
-    }
-}
-
-/**
  * @param {Uint16Array} heads
  * @param {Uint16Array} next
  * @param {Uint8Array} keyBytes
  * @param {Uint32Array} keyOffsets
+ * @param {boolean} validateHashBuckets
  * @throws {Error} If a key is missing, duplicated, or part of a cycle.
  */
-function validateKeyHashChains(heads, next, keyBytes, keyOffsets) {
+function validateKeyHashChains(heads, next, keyBytes, keyOffsets, validateHashBuckets) {
     const keyCount = keyOffsets.length - 1;
     const seen = new Uint8Array(keyCount);
     let seenCount = 0;
     for (let slot = 0; slot < heads.length; ++slot) {
         const head = heads[slot];
         for (let key = head; key !== U16_NULL; key = next[key]) {
+            if (key >= keyCount) {
+                throw new Error('Invalid persisted 16-bit term lookup reference');
+            }
             if (seen[key] !== 0) {
                 throw new Error('Cyclic or duplicated persisted term lookup hash chain');
             }
-            if ((hashByteRange(keyBytes, keyOffsets[key], keyOffsets[key + 1]) & (heads.length - 1)) !== slot) {
+            if (
+                validateHashBuckets &&
+                (hashByteRange(keyBytes, keyOffsets[key], keyOffsets[key + 1]) & (heads.length - 1)) !== slot
+            ) {
                 throw new Error('Invalid persisted term lookup hash bucket');
             }
             seen[key] = 1;
@@ -920,6 +933,9 @@ function validatePostingRows(offsets, rows, keys, skipKey, seen, marker) {
 function validateSequenceHashChains(heads, next, values, seen, marker) {
     for (let slot = 0; slot < heads.length; ++slot) {
         for (let row = heads[slot]; row !== U16_NULL; row = next[row]) {
+            if (row >= values.length) {
+                throw new Error('Invalid persisted 16-bit term lookup reference');
+            }
             const value = values[row];
             if (
                 value < 0 ||

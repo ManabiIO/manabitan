@@ -34,7 +34,7 @@ import {
     findSequenceRows,
     getPersistedTermKeyBytes,
     hashTermLookupKeyBytes,
-    parsePersistedTermLookupIndex,
+    parseChecksummedPersistedTermLookupIndex,
     warmPersistedTermPrefixIndex,
 } from './term-lookup-index.js';
 import {
@@ -3469,7 +3469,7 @@ export class TermRecordOpfsStore {
                     }
                     let lookupIndex;
                     try {
-                        lookupIndex = parsePersistedTermLookupIndex(payload);
+                        lookupIndex = parseChecksummedPersistedTermLookupIndex(payload);
                     } catch (error) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index payload is invalid for ${state.fileName}`, error);
                     }

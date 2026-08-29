@@ -2786,7 +2786,9 @@ describe('TermRecordOpfsStore', () => {
         expect(indexFileName).toBeDefined();
         const indexBytes = fileBytesByName.get(/** @type {string} */ (indexFileName));
         expect(indexBytes).toBeDefined();
-        /** @type {Uint8Array} */ (indexBytes)[/** @type {Uint8Array} */ (indexBytes).byteLength - 1] ^= 0xff;
+        // Corrupt the checksummed lookup payload itself, rather than the
+        // separately checksummed fixed-record hash table that follows it.
+        /** @type {Uint8Array} */ (indexBytes)[40 + 32] ^= 0xff;
 
         const readerStore = new TermRecordOpfsStore();
         Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
@@ -2800,15 +2802,27 @@ describe('TermRecordOpfsStore', () => {
         expect(repairedIndexBytes).toBeDefined();
         expect(new TextDecoder().decode(/** @type {Uint8Array} */ (repairedIndexBytes).subarray(0, 8))).toBe('MBTIDX09');
 
-        // Unsafe u64 metadata is structural index corruption, not a transient
-        // storage error, and must remain eligible for authoritative repair.
-        /** @type {Uint8Array} */ (repairedIndexBytes).fill(0xff, 8, 16);
+        // The fixed-record checksum table has its own envelope and must also
+        // remain repairable independently of the lookup payload checksum.
+        /** @type {Uint8Array} */ (repairedIndexBytes)[/** @type {Uint8Array} */ (repairedIndexBytes).byteLength - 1] ^= 0xff;
         const secondReaderStore = new TermRecordOpfsStore();
         Reflect.set(secondReaderStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
         await secondReaderStore._loadShardFiles(false);
         await secondReaderStore.ensureDictionariesLoaded([dictionaryName]);
         expect(secondReaderStore.findTermIds(dictionaryName, '食う', 'expression')).toHaveLength(1);
         expect(secondReaderStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
+
+        // Unsafe u64 metadata is structural index corruption, not a transient
+        // storage error, and must remain eligible for authoritative repair.
+        const secondRepairedIndexBytes = fileBytesByName.get(/** @type {string} */ (indexFileName));
+        expect(secondRepairedIndexBytes).toBeDefined();
+        /** @type {Uint8Array} */ (secondRepairedIndexBytes).fill(0xff, 8, 16);
+        const thirdReaderStore = new TermRecordOpfsStore();
+        Reflect.set(thirdReaderStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await thirdReaderStore._loadShardFiles(false);
+        await thirdReaderStore.ensureDictionariesLoaded([dictionaryName]);
+        expect(thirdReaderStore.findTermIds(dictionaryName, '食う', 'expression')).toHaveLength(1);
+        expect(thirdReaderStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
     });
 
     test('drops a truncated fallback shard without publishing its first record', async () => {
