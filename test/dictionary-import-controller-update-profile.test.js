@@ -45,6 +45,8 @@ describe('DictionaryImportController staged update profile rewrites', () => {
     const finalizeDeferredImportedDictionaries = /** @type {(this: DictionaryImportController, contexts: Record<string, unknown>[], importRunGeneration: number) => Promise<{errors: Error[], importedTitles: string[]}>} */ (getDictionaryImportControllerMethod('_finalizeDeferredImportedDictionaries'));
     const verifyImportedDictionaryVisible = /** @type {(this: DictionaryImportController, dictionaryTitle: string, requireEnabledForActiveProfile: boolean) => Promise<void>} */ (getDictionaryImportControllerMethod('_verifyImportedDictionaryVisible'));
     const signalImportSessionCompletion = /** @type {(this: DictionaryImportController, details: {importRunGeneration: number, importRunCurrent: boolean, errorCount: number, importedTitles: string[]}) => void} */ (getDictionaryImportControllerMethod('_signalImportSessionCompletion'));
+    const readAllDirectoryEntries = /** @type {(this: DictionaryImportController, directoryReader: FileSystemDirectoryReader) => Promise<FileSystemEntry[]>} */ (getDictionaryImportControllerMethod('_readAllDirectoryEntries'));
+    const onFileDrop = /** @type {(this: DictionaryImportController, event: DragEvent) => Promise<void>} */ (getDictionaryImportControllerMethod('_onFileDrop'));
 
     afterEach(() => {
         vi.useRealTimers();
@@ -77,6 +79,39 @@ describe('DictionaryImportController staged update profile rewrites', () => {
 
         Reflect.set(globalThis, 'manabitanImportPerformanceFlags', {zipUseWebWorkers: true});
         expect(getImportPerformanceFlags.call(controller).zipUseWebWorkers).toBe(true);
+    });
+
+    test('rejects directory enumeration when the browser reports a read error', async () => {
+        const controller = createControllerForInternalTests();
+        const expectedError = new DOMException('Directory became unavailable', 'NotReadableError');
+        const directoryReader = /** @type {FileSystemDirectoryReader} */ ({
+            readEntries(_success, failure) {
+                failure?.(expectedError);
+            },
+        });
+
+        await expect(readAllDirectoryEntries.call(controller, directoryReader)).rejects.toBe(expectedError);
+    });
+
+    test('surfaces directory enumeration failures instead of leaving a rejected drop event', async () => {
+        const controller = createControllerForInternalTests();
+        const expectedError = new DOMException('Directory became unavailable', 'NotReadableError');
+        const remove = vi.fn();
+        const setVisible = vi.fn();
+        const showErrors = vi.fn();
+        Reflect.set(controller, '_importFileDrop', {classList: {remove}});
+        Reflect.set(controller, '_importModal', {setVisible});
+        Reflect.set(controller, '_getAllFileEntries', vi.fn().mockRejectedValue(expectedError));
+        Reflect.set(controller, '_showErrors', showErrors);
+        const event = /** @type {DragEvent} */ ({
+            preventDefault: vi.fn(),
+            dataTransfer: {items: []},
+        });
+
+        await expect(onFileDrop.call(controller, event)).resolves.toBeUndefined();
+        expect(showErrors).toHaveBeenCalledWith([expectedError]);
+        expect(setVisible).toHaveBeenCalledWith(false);
+        expect(remove).toHaveBeenCalledWith('drag-over');
     });
 
     test('publishes a monotonic import completion boundary only when enabled', () => {

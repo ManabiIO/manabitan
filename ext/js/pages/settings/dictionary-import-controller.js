@@ -1190,7 +1190,16 @@ export class DictionaryImportController {
         /** @type {import('./modal.js').Modal} */ (this._importModal).setVisible(false);
         /** @type {File[]} */
         const fileArray = [];
-        for (const fileEntry of await this._getAllFileEntries(e.dataTransfer.items)) {
+        let fileEntries;
+        try {
+            fileEntries = await this._getAllFileEntries(e.dataTransfer.items);
+        } catch (error) {
+            const normalizedError = toError(error);
+            log.error(normalizedError);
+            this._showErrors([normalizedError]);
+            return;
+        }
+        for (const fileEntry of fileEntries) {
             if (!fileEntry) { continue; }
             try {
                 fileArray.push(await new Promise((resolve, reject) => { fileEntry.file(resolve, reject); }));
@@ -1244,15 +1253,29 @@ export class DictionaryImportController {
     async _readAllDirectoryEntries(directoryReader) {
         const entries = [];
         /** @type {(FileSystemEntry)[]} */
-        let readEntries = await new Promise((resolve) => { directoryReader.readEntries(resolve); });
+        let readEntries = await this._readDirectoryEntries(directoryReader);
         while (readEntries.length > 0) {
             this._importFileDropItemCount += readEntries.length;
             this._validateDirectoryItemCount();
 
             entries.push(...readEntries);
-            readEntries = await new Promise((resolve) => { directoryReader.readEntries(resolve); });
+            readEntries = await this._readDirectoryEntries(directoryReader);
         }
         return entries;
+    }
+
+    /**
+     * @param {FileSystemDirectoryReader} directoryReader
+     * @returns {Promise<FileSystemEntry[]>}
+     */
+    _readDirectoryEntries(directoryReader) {
+        return new Promise((resolve, reject) => {
+            try {
+                directoryReader.readEntries(resolve, reject);
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 
     /**
@@ -2625,9 +2648,9 @@ export class DictionaryImportController {
      */
     _signalImportSessionCompletion(details) {
         if (Reflect.get(globalThis, '__manabitanImportCompletionSignalEnabled') !== true) { return; }
-        const previousSequence = Reflect.get(globalThis, '__manabitanImportCompletionSequence');
-        const sequence = Number.isSafeInteger(previousSequence) && /** @type {number} */ (previousSequence) >= 0 ?
-            /** @type {number} */ (previousSequence) + 1 :
+        const previousSequence = /** @type {unknown} */ (Reflect.get(globalThis, '__manabitanImportCompletionSequence'));
+        const sequence = typeof previousSequence === 'number' && Number.isSafeInteger(previousSequence) && previousSequence >= 0 ?
+            previousSequence + 1 :
             1;
         const completion = {...details, sequence, completedAtEpochMs: Date.now()};
         Reflect.set(globalThis, '__manabitanImportCompletionSequence', sequence);
