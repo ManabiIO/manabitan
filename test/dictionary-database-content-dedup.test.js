@@ -163,6 +163,16 @@ function createArtifactOverlapHarness() {
 }
 
 describe('DictionaryDatabase term content dedup metadata cache', () => {
+    test('fails fast when metadata insertion is attempted without reserved capacity', () => {
+        const database = new DictionaryDatabase();
+        const contentBytes = Uint8Array.of(1);
+        const reserve = Reflect.get(database, '_reserveArtifactTermContentMetadata').bind(database);
+        const insert = Reflect.get(database, '_insertTermEntryContentMetaByHashPairFast').bind(database);
+
+        expect(() => reserve(10, 20, contentBytes, 0, 1)).toThrow('has no free slot');
+        expect(() => insert(10, 20, 0, 1, 'raw', 0, contentBytes)).toThrow('has no free slot');
+    });
+
     test('leases cleared dedup scratch tables without sharing active leases', () => {
         const database = new DictionaryDatabase();
         const acquire = Reflect.get(database, '_acquireArtifactTermContentDedupScratch').bind(database);

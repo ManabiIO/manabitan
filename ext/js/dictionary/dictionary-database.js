@@ -5747,10 +5747,14 @@ export class DictionaryDatabase {
         const slotTable = this._termEntryContentMetaHashPairTable;
         const mask = this._termEntryContentMetaHashPairMask;
         let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
+        let probeCount = 0;
         while (slotTable[slot] !== 0) {
             const existingIndex = slotTable[slot] - 1;
             if (hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2) {
                 return -1;
+            }
+            if (++probeCount >= slotTable.length) {
+                throw new Error('Term content metadata hash table has no free slot');
             }
             slot = (slot + 1) & mask;
         }
@@ -5969,6 +5973,7 @@ export class DictionaryDatabase {
         const slotTable = this._termEntryContentMetaHashPairTable;
         const mask = this._termEntryContentMetaHashPairMask;
         let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
+        let probeCount = 0;
         while (slotTable[slot] !== 0) {
             const existingIndex = slotTable[slot] - 1;
             if (
@@ -5986,6 +5991,9 @@ export class DictionaryDatabase {
                     contentBytes.subarray(contentByteOffset, contentByteOffset + length),
                 );
                 return;
+            }
+            if (++probeCount >= slotTable.length) {
+                throw new Error('Term content metadata hash table has no free slot');
             }
             slot = (slot + 1) & mask;
         }
@@ -6572,7 +6580,7 @@ export class DictionaryDatabase {
                 pendingPlanUniqueStart,
                 stagedContentMetadata: resolvedStagedContentMetadata,
             } = dedup;
-            stagedContentMetadata = resolvedStagedContentMetadata;
+            stagedContentMetadata = resolvedStagedContentMetadata ?? null;
             let {resolvedContentDictNames} = dedup;
             importMetrics.dedupPendingHitCount += pendingHitCount;
             importMetrics.dedupPersistedHitCount += persistedHitCount;
