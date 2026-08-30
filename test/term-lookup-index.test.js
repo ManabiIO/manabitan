@@ -451,6 +451,8 @@ describe('persisted term lookup index', () => {
             {expressionBytes: bytes('alpha'), readingBytes: null, sequence: null},
             {expressionBytes: bytes('beta'), readingBytes: null, sequence: null},
             {expressionBytes: bytes('gamma'), readingBytes: null, sequence: null},
+            {expressionBytes: bytes('delta'), readingBytes: null, sequence: null},
+            {expressionBytes: bytes('epsilon'), readingBytes: null, sequence: null},
         ]);
         const index = parsePersistedTermLookupIndex(encoded);
         const sourceSlot = index.keyHeads.findIndex((value) => value !== 0xffff);
@@ -538,6 +540,7 @@ describe('persisted term lookup index', () => {
             {expressionBytes: bytes('beta'), readingBytes: null, sequence: null},
             {expressionBytes: bytes('gamma'), readingBytes: null, sequence: 7},
             {expressionBytes: bytes('delta'), readingBytes: null, sequence: null},
+            {expressionBytes: bytes('epsilon'), readingBytes: null, sequence: 11},
         ]);
         const index = parsePersistedTermLookupIndex(encoded);
         const sourceSlot = index.sequenceHeads.findIndex((value) => value !== 0xffff);

@@ -26,7 +26,7 @@ const RECORD_HEADER_BYTES = 24;
 const RECORD_STRING_TABLE_HEADER_BYTES = 8;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
 const COMPACT_INDEX_FORMAT_VERSION = 5;
-const HASH_SLOT_TARGET_LOAD = 2;
+const HASH_SLOT_TARGET_LOAD = 4;
 
 /**
  * @typedef {object} PersistedTermLookupIndex
