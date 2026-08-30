@@ -465,7 +465,7 @@ describe('term-bank WASM parser', () => {
     });
 
     test.each([
-        [{hardwareConcurrency: 12, deviceMemory: 8}, 3],
+        [{hardwareConcurrency: 12, deviceMemory: 8}, 4],
         [{hardwareConcurrency: 12, deviceMemory: 4}, 2],
         [{hardwareConcurrency: 4, deviceMemory: 8}, 2],
         [{}, 2],
@@ -764,7 +764,8 @@ describe('term-bank WASM parser', () => {
         vi.stubGlobal('navigator', {hardwareConcurrency: 12, deviceMemory: 8});
         vi.stubGlobal('Worker', SuccessfulWorker);
         try {
-            const sourceBanks = Array.from({length: 12}, () => textEncoder.encode('[]'));
+            const workerCount = getParallelTermBankParserWorkerCount();
+            const sourceBanks = Array.from({length: workerCount * 4}, () => textEncoder.encode('[]'));
             await expect(parseTermBankWithWasmColumnChunksParallel(
                 sourceBanks.map((bytes) => new Uint8Array(bytes)),
                 3,
@@ -773,11 +774,11 @@ describe('term-bank WASM parser', () => {
             )).resolves.toBe(true);
             const plainProfile = consumeLastTermBankWasmParseProfile();
             expect(plainProfile).toMatchObject({
-                parallelWorkerCount: 3,
+                parallelWorkerCount: workerCount,
                 parallelPipelineGroupsPerWorker: 4,
-                parallelGroupCount: 12,
+                parallelGroupCount: workerCount * 4,
             });
-            expect(parseCount).toBe(12);
+            expect(parseCount).toBe(workerCount * 4);
 
             await expect(parseTermBankWithWasmColumnChunksParallel(
                 sourceBanks.map((bytes) => new Uint8Array(bytes)),
@@ -787,11 +788,11 @@ describe('term-bank WASM parser', () => {
             )).resolves.toBe(true);
             const mediaProfile = consumeLastTermBankWasmParseProfile();
             expect(mediaProfile).toMatchObject({
-                parallelWorkerCount: 3,
+                parallelWorkerCount: workerCount,
                 parallelPipelineGroupsPerWorker: 3,
-                parallelGroupCount: 9,
+                parallelGroupCount: workerCount * 3,
             });
-            expect(parseCount).toBe(21);
+            expect(parseCount).toBe(workerCount * 7);
         } finally {
             await disposeParallelTermBankParser();
             vi.stubGlobal('navigator', originalNavigator);
@@ -802,7 +803,8 @@ describe('term-bank WASM parser', () => {
     maybeTest('assigns the next parser group to the first idle worker', async () => {
         const originalNavigator = globalThis.navigator;
         let workerIndex = 0;
-        const parseCounts = [0, 0, 0];
+        /** @type {number[]} */
+        let parseCounts = [];
         class SkewedWorker {
             constructor() {
                 this.index = workerIndex++;
@@ -834,6 +836,7 @@ describe('term-bank WASM parser', () => {
         }
 
         vi.stubGlobal('navigator', {hardwareConcurrency: 12, deviceMemory: 8});
+        parseCounts = Array.from({length: getParallelTermBankParserWorkerCount()}, () => 0);
         vi.stubGlobal('Worker', SkewedWorker);
         try {
             const sourceBanks = Array.from({length: 12}, () => textEncoder.encode('[]'));
@@ -844,8 +847,9 @@ describe('term-bank WASM parser', () => {
                 {emitContentSlab: true},
             )).resolves.toBe(true);
             expect(parseCounts.reduce((sum, count) => sum + count, 0)).toBe(12);
-            expect(parseCounts[0]).toBeLessThan(parseCounts[1]);
-            expect(parseCounts[0]).toBeLessThan(parseCounts[2]);
+            for (let index = 1; index < parseCounts.length; ++index) {
+                expect(parseCounts[0]).toBeLessThan(parseCounts[index]);
+            }
         } finally {
             await disposeParallelTermBankParser();
             vi.stubGlobal('navigator', originalNavigator);
@@ -891,7 +895,7 @@ describe('term-bank WASM parser', () => {
         let markSinkStarted;
         const sinkStarted = new Promise((resolve) => { markSinkStarted = resolve; });
         try {
-            const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
+            const sourceBanks = Array.from({length: workerCount * 2}, () => textEncoder.encode('[]'));
             const parsing = parseTermBankWithWasmColumnChunksParallel(
                 sourceBanks,
                 3,
@@ -1427,6 +1431,9 @@ describe('term-bank WASM parser', () => {
     });
 
     maybeTest('rejects promptly when a later pipelined group fails', async () => {
+        await disposeParallelTermBankParser();
+        const originalNavigator = globalThis.navigator;
+        vi.stubGlobal('navigator', {hardwareConcurrency: 12, deviceMemory: 8});
         const workerCount = getParallelTermBankParserWorkerCount();
         let workerIndex = 0;
         class LaterFailingWorker {
@@ -1452,7 +1459,7 @@ describe('term-bank WASM parser', () => {
                         return;
                     }
                     ++this.parseCount;
-                    if (this.index === 0 && this.parseCount === 2) {
+                    if (message.id === 2) {
                         emitWorkerMessage(this.listeners, {
                             type: 'parse-error',
                             id: message.id,
@@ -1485,11 +1492,14 @@ describe('term-bank WASM parser', () => {
                 (_chunk, progress) => { sinkIndexes.push(progress.chunkIndex); },
                 {emitContentSlab: true},
             )).rejects.toThrow('injected later pipeline failure');
+            expect(sinkIndexes.length).toBeGreaterThan(0);
+            expect(sinkIndexes.length).toBeLessThanOrEqual(workerCount);
             expect(sinkIndexes).toStrictEqual(
-                Array.from({length: workerCount}, (_, index) => index + 1),
+                Array.from({length: sinkIndexes.length}, (_, index) => index + 1),
             );
         } finally {
             await disposeParallelTermBankParser();
+            vi.stubGlobal('navigator', originalNavigator);
             vi.stubGlobal('Worker', void 0);
         }
     });

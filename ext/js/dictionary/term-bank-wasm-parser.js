@@ -36,7 +36,7 @@ const DEFAULT_ROW_CHUNK_SIZE = 2048;
 const INITIAL_META_ROWS_PER_SOURCE = 10_000;
 const OVERLAPPED_SOURCE_GROUP_COUNT = 1;
 const DEFAULT_PARALLEL_SOURCE_WORKER_COUNT = 2;
-const HIGH_CAPABILITY_PARALLEL_SOURCE_WORKER_COUNT = 3;
+const HIGH_CAPABILITY_PARALLEL_SOURCE_WORKER_COUNT = 4;
 const HIGH_CAPABILITY_MIN_HARDWARE_CONCURRENCY = 8;
 const LOW_MEMORY_DEVICE_GIB = 4;
 const PLAIN_PARALLEL_SOURCE_PIPELINE_GROUPS_PER_WORKER = 4;
@@ -2213,6 +2213,7 @@ class ParallelTermBankPipelineRun {
                     };
                     consume = consumeResult;
                     this._pendingResultConsumers.add(consume);
+                    if (this._failed) { consumeResult(); }
                 }
                 this._resultSlots[groupIndex].resolve({...result, sourceBytes, consume});
                 if (consumed !== null) { await consumed; }
@@ -2524,7 +2525,7 @@ function canUseParallelTermBankParser() {
 }
 
 /**
- * Uses a third parser heap only where the browser reports enough logical CPUs
+ * Uses additional parser heaps only where the browser reports enough logical CPUs
  * and does not report a constrained memory tier. Missing device-memory hints
  * are normal in Firefox and do not disable the higher-throughput path.
  * @returns {number}
