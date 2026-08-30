@@ -8,6 +8,7 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
+import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {ByteBoundedLruCache, TermContentBlockImportSession, TermContentBlockStore, wrapCompressedTermContentBlock} from '../ext/js/dictionary/term-content-block-store.js';
 import {TERM_CONTENT_BLOCK_ENVELOPE_BYTES, writeCompressedTermContentBlockEnvelope} from '../ext/js/dictionary/term-content-block-envelope.js';
 import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
@@ -174,6 +175,20 @@ describe('TermContentBlockImportSession', () => {
 });
 
 describe('TermContentBlockStore', () => {
+    test('preserves an explicit import block target across partial optimization updates', () => {
+        const database = new DictionaryDatabase();
+
+        database.setImportOptimizationFlags({termContentBlockTargetBytes: 2 * 1024 * 1024});
+        database.setImportOptimizationFlags({expectedTermContentImportBytes: 32 * 1024 * 1024});
+        expect(database.getTermContentDiagnostics().blockStore).toMatchObject({
+            blockTargetBytes: 2 * 1024 * 1024,
+        });
+
+        database.setImportOptimizationFlags({termContentBlockTargetBytes: null});
+        expect(database.getTermContentDiagnostics().blockStore).toMatchObject({
+            blockTargetBytes: 1024 * 1024,
+        });
+    });
     test('finishes a reserved checksum envelope without replacing its buffer', () => {
         const output = new Uint8Array(TERM_CONTENT_BLOCK_ENVELOPE_BYTES + 4);
         output.set([1, 2, 3, 4], TERM_CONTENT_BLOCK_ENVELOPE_BYTES);

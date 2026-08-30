@@ -1640,10 +1640,12 @@ export class DictionaryDatabase {
             Math.max(0, Math.min(4_000_000, Math.trunc(/** @type {number} */ (options.artifactFixedPackMinTotalRows)))) :
             DEFAULT_ARTIFACT_FIXED_PACK_MIN_TOTAL_ROWS;
         this._termContentStore.setImportStorageMode(this._termContentStorageMode);
-        const termContentBlockTargetBytes = Number.isFinite(options.termContentBlockTargetBytes) ?
-            Math.max(64 * 1024, Math.min(16 * 1024 * 1024, Math.trunc(/** @type {number} */ (options.termContentBlockTargetBytes)))) :
-            TERM_CONTENT_BLOCK_TARGET_BYTES;
-        this._termContentBlockStore.setBlockTargetBytes(termContentBlockTargetBytes);
+        if (Object.hasOwn(options, 'termContentBlockTargetBytes')) {
+            const termContentBlockTargetBytes = Number.isFinite(options.termContentBlockTargetBytes) ?
+                Math.max(64 * 1024, Math.min(16 * 1024 * 1024, Math.trunc(/** @type {number} */ (options.termContentBlockTargetBytes)))) :
+                TERM_CONTENT_BLOCK_TARGET_BYTES;
+            this._termContentBlockStore.setBlockTargetBytes(termContentBlockTargetBytes);
+        }
         this._termContentStore.setExpectedImportBytes(options.expectedTermContentImportBytes ?? null);
         this._termContentStore.setWriteCoalesceMaxChunksOverride(null);
         this._termContentStore.setQueueImportWritesEnabled(options.queueTermContentWrites === true);
