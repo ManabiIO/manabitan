@@ -24,6 +24,7 @@ import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {hashTermKeyBytes} from '../ext/js/dictionary/term-key-hash.js';
+import {encodePersistedTermLookupIndexFromPreinternedPlan} from '../ext/js/dictionary/term-lookup-index.js';
 import {decodeRawTermContentTokenBinary} from '../ext/js/dictionary/raw-term-content.js';
 import {
     consumeLastTermBankWasmParseProfile,
@@ -1845,6 +1846,117 @@ describe('term-bank WASM parser', () => {
             {emitContentSlab: true, emitTokenBinaryContent: true, emitTermByteLists: false, singleChunk: true},
         );
         expect(version1Chunks[0].sequenceList).toStrictEqual(new Int32Array([-1, -1, -1]));
+    });
+
+    maybeTest('encodes parser-owned lookup sidecars byte-identically in WASM', async () => {
+        const sources = [
+            textEncoder.encode(JSON.stringify([
+                ['first', '', '', '', 1, ['one'], 10, ''],
+                ['first', 'reading', '', '', 2, ['two'], 10, ''],
+            ])),
+            textEncoder.encode(JSON.stringify([
+                ['second', 'reading', '', '', 3, ['three'], 11, ''],
+                ['third', '', '', '', 4, ['four'], -1, ''],
+            ])),
+        ];
+        let result = null;
+        await parseTermBankWithWasmColumnChunks(
+            sources,
+            3,
+            (chunk) => { result = copyWasmBackedColumnChunk(chunk); },
+            8,
+            {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                emitTermByteLists: false,
+                prepareLookupIndexes: true,
+                singleChunk: true,
+            },
+        );
+        const chunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (/** @type {unknown} */ (result));
+        const nativeBytes = chunk.preparedLookupIndexes?.get(`0:${chunk.rowCount}`)?.bytes;
+        const javascriptBytes = encodePersistedTermLookupIndexFromPreinternedPlan(
+            chunk.termRecordPreinternedPlan,
+            chunk.readingEqualsExpressionList,
+            chunk.sequenceList,
+            chunk.rowCount,
+        );
+
+        expect(nativeBytes).toStrictEqual(javascriptBytes);
+        expect(chunk.preparedLookupIndexes?.get(`0:${chunk.rowCount}`)?.preinternedPlan).toBe(
+            chunk.termRecordPreinternedPlan,
+        );
+        expect(consumeLastTermBankWasmParseProfile()?.lookupIndexEncodeMs).toBeGreaterThanOrEqual(0);
+    });
+
+    maybeTest('encodes single-source native plans and leaves escaped plans to the fallback', async () => {
+        /**
+         * @param {string} expression
+         * @returns {Promise<ReturnType<typeof copyWasmBackedColumnChunk>>}
+         */
+        const parsePrepared = async (expression) => {
+            let result = null;
+            await parseTermBankWithWasmColumnChunks(
+                textEncoder.encode(JSON.stringify([
+                    [expression, '', '', '', 1, ['one'], 10, ''],
+                    ['second', 'reading', '', '', 2, ['two'], 11, ''],
+                ])),
+                3,
+                (chunk) => { result = copyWasmBackedColumnChunk(chunk); },
+                8,
+                {
+                    emitContentSlab: true,
+                    emitTokenBinaryContent: true,
+                    emitTermByteLists: false,
+                    prepareLookupIndexes: true,
+                    singleChunk: true,
+                },
+            );
+            return /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (/** @type {unknown} */ (result));
+        };
+        const nativeChunk = await parsePrepared('first');
+        const nativeBytes = nativeChunk.preparedLookupIndexes?.get('0:2')?.bytes;
+        expect(nativeBytes).toStrictEqual(encodePersistedTermLookupIndexFromPreinternedPlan(
+            nativeChunk.termRecordPreinternedPlan,
+            nativeChunk.readingEqualsExpressionList,
+            nativeChunk.sequenceList,
+            nativeChunk.rowCount,
+        ));
+
+        const escapedChunk = await parsePrepared('escaped\\expression');
+        expect(escapedChunk.preparedLookupIndexes).toBeUndefined();
+    });
+
+    maybeTest('keeps native lookup encoding byte-identical across dense mixed columns', async () => {
+        const rows = Array.from({length: 2048}, (_, row) => {
+            const expression = `term-${row % 317}`;
+            const reading = row % 5 === 0 ? '' : `reading-${row % 193}`;
+            const sequence = row % 7 === 0 ? -1 : row % 251;
+            return [expression, reading, '', '', row - 1024, [`definition-${row % 127}`], sequence, ''];
+        });
+        let result = null;
+        await parseTermBankWithWasmColumnChunks(
+            textEncoder.encode(JSON.stringify(rows)),
+            3,
+            (chunk) => { result = copyWasmBackedColumnChunk(chunk); },
+            rows.length,
+            {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                emitTermByteLists: false,
+                prepareLookupIndexes: true,
+                singleChunk: true,
+            },
+        );
+        const chunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (/** @type {unknown} */ (result));
+        expect(chunk.preparedLookupIndexes?.get(`0:${rows.length}`)?.bytes).toStrictEqual(
+            encodePersistedTermLookupIndexFromPreinternedPlan(
+                chunk.termRecordPreinternedPlan,
+                chunk.readingEqualsExpressionList,
+                chunk.sequenceList,
+                chunk.rowCount,
+            ),
+        );
     });
 
     maybeTest('keeps recent exact matches on a normalized duplicate canonical', async () => {

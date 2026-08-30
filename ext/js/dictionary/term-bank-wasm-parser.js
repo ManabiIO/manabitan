@@ -51,7 +51,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
 /** @typedef {{wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
@@ -124,6 +124,7 @@ async function getWasm() {
             typeof exports.parse_term_bank_with_media_hints !== 'function' ||
             typeof exports.parse_and_encode_term_bank_token_binary_dedup !== 'function' ||
             typeof exports.build_term_string_plan !== 'function' ||
+            typeof exports.encode_term_lookup_index !== 'function' ||
             typeof exports.encode_term_content !== 'function' ||
             typeof exports.encode_term_content_no_hash !== 'function' ||
             typeof exports.encode_term_content_token_binary !== 'function' ||
@@ -141,6 +142,7 @@ async function getWasm() {
             parse_term_bank_with_media_hints: exports.parse_term_bank_with_media_hints,
             parse_and_encode_term_bank_token_binary_dedup: exports.parse_and_encode_term_bank_token_binary_dedup,
             build_term_string_plan: exports.build_term_string_plan,
+            encode_term_lookup_index: exports.encode_term_lookup_index,
             encode_term_content: exports.encode_term_content,
             encode_term_content_no_hash: exports.encode_term_content_no_hash,
             encode_term_content_token_binary: exports.encode_term_content_token_binary,
@@ -827,6 +829,132 @@ function buildNativeTermStringPlan(wasm, jsonPtr, metasPtr, rowStart, rowCount, 
 }
 
 /**
+ * @param {number} value
+ * @returns {number}
+ */
+function align4(value) {
+    return (value + 3) & ~3;
+}
+
+/**
+ * @param {number} count
+ * @returns {number}
+ */
+function getLookupHashSlotCount(count) {
+    const target = Math.ceil(count / 4);
+    let value = 1;
+    while (value < target) { value *= 2; }
+    return value;
+}
+
+/**
+ * @param {number} count
+ * @returns {number}
+ */
+function getSequenceInternSlotCount(count) {
+    let value = 1;
+    while (value < count) { value *= 2; }
+    return value;
+}
+
+/**
+ * @param {number} rowCount
+ * @param {number} keyCount
+ * @param {number} keyBytesLength
+ * @returns {number}
+ */
+function getNativeLookupIndexCapacity(rowCount, keyCount, keyBytesLength) {
+    const keySlotCount = getLookupHashSlotCount(keyCount);
+    const sequenceSlotCount = getLookupHashSlotCount(rowCount);
+    const keyMetadataBytes = align4((keyCount + keySlotCount + keyCount) * 2);
+    const compactU16Count =
+        (keyCount + 1) + rowCount +
+        (keyCount + 1) + rowCount +
+        sequenceSlotCount + rowCount +
+        (rowCount + 1) + rowCount;
+    return 64 + align4(keyBytesLength) + keyMetadataBytes + align4(compactU16Count * 2) + (rowCount * 4);
+}
+
+/**
+ * @param {Awaited<ReturnType<typeof getWasm>>} wasm
+ * @param {number} rowCapacity
+ * @param {number} keyCapacity
+ * @param {number} keyBytesCapacity
+ * @returns {{outputPtr: number, outputCapacity: number, readingEqualsPtr: number, sequenceValuesPtr: number, sequenceKeysPtr: number, sequenceKeyByRowPtr: number, sequenceSlotsPtr: number, sequenceSlotsCount: number}}
+ */
+function createNativeLookupIndexScratch(wasm, rowCapacity, keyCapacity, keyBytesCapacity) {
+    const sequenceSlotsCount = getSequenceInternSlotCount(rowCapacity);
+    const outputCapacity = getNativeLookupIndexCapacity(rowCapacity, keyCapacity, keyBytesCapacity);
+    return {
+        outputPtr: allocateWasmBuffer(wasm, outputCapacity, 'term lookup index output'),
+        outputCapacity,
+        readingEqualsPtr: allocateWasmBuffer(wasm, rowCapacity, 'term lookup reading equality'),
+        sequenceValuesPtr: allocateWasmBuffer(wasm, rowCapacity * 4, 'term lookup sequence values'),
+        sequenceKeysPtr: allocateWasmBuffer(wasm, rowCapacity * 4, 'term lookup sequence keys'),
+        sequenceKeyByRowPtr: allocateWasmBuffer(wasm, rowCapacity * 2, 'term lookup sequence row keys'),
+        sequenceSlotsPtr: allocateWasmBuffer(wasm, sequenceSlotsCount * 2, 'term lookup sequence slots'),
+        sequenceSlotsCount,
+    };
+}
+
+/**
+ * @param {Awaited<ReturnType<typeof getWasm>>} wasm
+ * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan & {stringOffsets: Uint32Array}} plan
+ * @param {Uint8Array} readingEqualsExpressionList
+ * @param {Int32Array} sequenceList
+ * @param {number} rowCount
+ * @param {ReturnType<typeof createNativeLookupIndexScratch>} scratch
+ * @returns {Uint8Array|null}
+ */
+function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, sequenceList, rowCount, scratch) {
+    const memory = wasm.memory.buffer;
+    if (
+        plan.stringLengths.buffer !== memory ||
+        plan.stringOffsets.buffer !== memory ||
+        plan.stringHashes?.buffer !== memory ||
+        plan.stringsBuffer.buffer !== memory ||
+        plan.expressionIndexes.buffer !== memory ||
+        plan.readingIndexes.buffer !== memory ||
+        rowCount <= 0 || rowCount >= 0xffff ||
+        plan.stringLengths.length <= 0 || plan.stringLengths.length >= 0xffff
+    ) {
+        return null;
+    }
+    let readingEqualsPtr = readingEqualsExpressionList.byteOffset;
+    if (readingEqualsExpressionList.buffer !== memory) {
+        new Uint8Array(memory, scratch.readingEqualsPtr, rowCount).set(
+            readingEqualsExpressionList.subarray(0, rowCount),
+        );
+        readingEqualsPtr = scratch.readingEqualsPtr;
+    }
+    let sequenceValuesPtr = sequenceList.byteOffset;
+    if (sequenceList.buffer !== memory) {
+        new Int32Array(memory, scratch.sequenceValuesPtr, rowCount).set(sequenceList.subarray(0, rowCount));
+        sequenceValuesPtr = scratch.sequenceValuesPtr;
+    }
+    const length = wasm.encode_term_lookup_index(
+        plan.stringsBuffer.byteOffset,
+        plan.stringsBuffer.byteLength,
+        plan.stringLengths.byteOffset,
+        plan.stringOffsets.byteOffset,
+        /** @type {Uint32Array} */ (plan.stringHashes).byteOffset,
+        plan.stringLengths.length,
+        plan.expressionIndexes.byteOffset,
+        plan.readingIndexes.byteOffset,
+        readingEqualsPtr,
+        sequenceValuesPtr,
+        rowCount,
+        scratch.outputPtr,
+        scratch.outputCapacity,
+        scratch.sequenceKeysPtr,
+        scratch.sequenceKeyByRowPtr,
+        scratch.sequenceSlotsPtr,
+        scratch.sequenceSlotsCount,
+    );
+    return length > 0 ? Uint8Array.from(new Uint8Array(wasm.memory.buffer, scratch.outputPtr, length)) : null;
+}
+
+/**
  * @param {Uint8Array} source
  * @param {Uint32Array} metas
  * @param {Uint32Array} contentMetas
@@ -1170,7 +1298,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
  * @param {number} version
  * @param {(chunk: {rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
- * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean}} [options]
  * @returns {Promise<void>}
  */
 export async function parseTermBankWithWasmColumnChunks(contentBytes, version, onChunk, chunkSize = DEFAULT_ROW_CHUNK_SIZE, options = {}) {
@@ -1181,6 +1309,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
     const emitTokenBinaryContent = options.emitTokenBinaryContent === true;
     const useNativeStringPlan = options.useNativeStringPlan !== false;
     const emitTermByteLists = options.emitTermByteLists !== false;
+    const prepareLookupIndexes = options.prepareLookupIndexes === true;
     const maxPendingChunks = Number.isFinite(options.maxPendingChunks) ? Math.max(1, Math.min(4, Math.trunc(/** @type {number} */ (options.maxPendingChunks)))) : 1;
     const tBufferSetupStart = Date.now();
     const parsed = await parseTermBankWasmBuffers(
@@ -1198,10 +1327,11 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         Math.max(1, rowCount) :
         (Number.isFinite(chunkSize) ? Math.max(1, Math.trunc(chunkSize)) : DEFAULT_ROW_CHUNK_SIZE);
     const chunkCount = rowCount === 0 ? 0 : Math.ceil(rowCount / normalizedChunkSize);
-    const fusedStringPlan = parsed.fusedStringPlan ?? null;
+    let fusedStringPlan = parsed.fusedStringPlan ?? null;
     /** @type {ReturnType<typeof createNativeTermStringPlanScratch>[]} */
     const nativeStringPlanScratches = [];
     let nativeStringPlanAllocationMs = 0;
+    let maxNativeChunkStringBytes = fusedStringPlan?.stringsBuffer.byteLength ?? 0;
     if (fusedStringPlan === null && useNativeStringPlan && rowCount > 0 && parsed.wasm !== null) {
         let maxChunkStringBytes = 1;
         let chunkStringBytes = 0;
@@ -1221,6 +1351,62 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
             );
         }
         nativeStringPlanAllocationMs = Math.max(0, Date.now() - tNativeAllocationStart);
+        maxNativeChunkStringBytes = maxChunkStringBytes;
+    }
+    /** @type {ReturnType<typeof createNativeLookupIndexScratch>|null} */
+    let nativeLookupIndexScratch = null;
+    const nativeLookupRowCapacity = Math.min(normalizedChunkSize, rowCount);
+    if (
+        prepareLookupIndexes &&
+        parsed.wasm !== null &&
+        nativeLookupRowCapacity > 0 &&
+        nativeLookupRowCapacity < 0xffff &&
+        (fusedStringPlan === null || normalizedChunkSize >= rowCount)
+    ) {
+        const fusedPlanLayout = fusedStringPlan === null ?
+            null :
+            {
+                stringLengthsOffset: fusedStringPlan.stringLengths.byteOffset,
+                stringLengthsLength: fusedStringPlan.stringLengths.length,
+                stringOffsetsOffset: fusedStringPlan.stringOffsets.byteOffset,
+                stringHashesOffset: fusedStringPlan.stringHashes.byteOffset,
+                stringsOffset: fusedStringPlan.stringsBuffer.byteOffset,
+                stringsLength: fusedStringPlan.stringsBuffer.byteLength,
+                expressionIndexesOffset: fusedStringPlan.expressionIndexes.byteOffset,
+                expressionIndexesLength: fusedStringPlan.expressionIndexes.length,
+                readingIndexesOffset: fusedStringPlan.readingIndexes.byteOffset,
+                readingEqualsOffset: fusedStringPlan.readingEqualsExpressionList.byteOffset,
+                scoreOffset: fusedStringPlan.scoreList.byteOffset,
+                sequenceOffset: fusedStringPlan.sequenceList.byteOffset,
+            };
+        const nativeLookupKeyCapacity = Math.min(
+            0xffff - 1,
+            fusedStringPlan?.stringLengths.length ?? nativeLookupRowCapacity * 2,
+        );
+        try {
+            nativeLookupIndexScratch = createNativeLookupIndexScratch(
+                parsed.wasm,
+                nativeLookupRowCapacity,
+                nativeLookupKeyCapacity,
+                maxNativeChunkStringBytes,
+            );
+        } catch (error) {
+            if (!(error instanceof TermBankWasmResourceError)) { throw error; }
+        }
+        if (fusedPlanLayout !== null) {
+            const memory = parsed.wasm.memory.buffer;
+            fusedStringPlan = {
+                stringLengths: new Uint16Array(memory, fusedPlanLayout.stringLengthsOffset, fusedPlanLayout.stringLengthsLength),
+                stringOffsets: new Uint32Array(memory, fusedPlanLayout.stringOffsetsOffset, fusedPlanLayout.stringLengthsLength),
+                stringHashes: new Uint32Array(memory, fusedPlanLayout.stringHashesOffset, fusedPlanLayout.stringLengthsLength),
+                stringsBuffer: new Uint8Array(memory, fusedPlanLayout.stringsOffset, fusedPlanLayout.stringsLength),
+                expressionIndexes: new Uint32Array(memory, fusedPlanLayout.expressionIndexesOffset, fusedPlanLayout.expressionIndexesLength),
+                readingIndexes: new Uint32Array(memory, fusedPlanLayout.readingIndexesOffset, fusedPlanLayout.expressionIndexesLength),
+                readingEqualsExpressionList: new Uint8Array(memory, fusedPlanLayout.readingEqualsOffset, fusedPlanLayout.expressionIndexesLength),
+                scoreList: new Int32Array(memory, fusedPlanLayout.scoreOffset, fusedPlanLayout.expressionIndexesLength),
+                sequenceList: new Int32Array(memory, fusedPlanLayout.sequenceOffset, fusedPlanLayout.expressionIndexesLength),
+            };
+        }
     }
     const heap = parsed.wasm === null ? parsed.heap : new Uint8Array(parsed.wasm.memory.buffer);
     const source = parsed.wasm === null ? parsed.source : heap.subarray(parsed.jsonPtr, parsed.jsonPtr + parsed.jsonLength);
@@ -1256,6 +1442,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
     let nativeStringPlanMs = 0;
     let nativeStringPlanChunkCount = 0;
     let nativeStringPlanFallbackChunkCount = 0;
+    let nativeLookupIndexEncodeMs = 0;
     let chunkDispatchMs = 0;
     /** @type {Promise<void>[]} */
     const pendingDispatches = [];
@@ -1413,6 +1600,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         } else {
             termRecordPreinternedPlan = nativeStringPlan;
         }
+        /** @type {TermBankColumnChunk} */
         const chunk = {
             rowCount: count,
             contentRowStart: start,
@@ -1432,6 +1620,30 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
             termRecordPreinternedPlan,
             mediaRows,
         };
+        if (
+            nativeLookupIndexScratch !== null &&
+            parsed.wasm !== null &&
+            nativeStringPlan !== null &&
+            (fusedStringPlan === null || (start === 0 && end === rowCount))
+        ) {
+            const tLookupIndexStart = safePerformance.now();
+            const bytes = encodeNativeTermLookupIndex(
+                parsed.wasm,
+                nativeStringPlan,
+                readingEqualsExpressionList,
+                sequenceList,
+                count,
+                nativeLookupIndexScratch,
+            );
+            const elapsedMs = Math.max(0, safePerformance.now() - tLookupIndexStart);
+            if (bytes !== null) {
+                chunk.preparedLookupIndexes = new Map([
+                    [`0:${count}`, {bytes, preinternedPlan: termRecordPreinternedPlan}],
+                ]);
+                chunk.preparedLookupIndexEncodeMs = elapsedMs;
+                nativeLookupIndexEncodeMs += elapsedMs;
+            }
+        }
         ++chunkIndex;
         const progress = {processedRows: end, totalRows: rowCount, chunkIndex, chunkCount};
         const invokeColumnChunk = async () => {
@@ -1461,6 +1673,9 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         nativeStringPlanMs,
         nativeStringPlanChunkCount,
         nativeStringPlanFallbackChunkCount,
+        lookupIndexPrepareMs: nativeLookupIndexEncodeMs,
+        lookupIndexCompactMs: 0,
+        lookupIndexEncodeMs: nativeLookupIndexEncodeMs,
         chunkDispatchMs,
         rowCount,
         metaCapacity,
@@ -2626,6 +2841,27 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
             termEntryContentBytes: Uint8Array.from(row.termEntryContentBytes),
         },
     }));
+    const stablePlan = {
+        stringLengths: Uint16Array.from(plan.stringLengths),
+        stringOffsets: Uint32Array.from(stringOffsets),
+        stringHashes: plan.stringHashes instanceof Uint32Array ? Uint32Array.from(plan.stringHashes) : void 0,
+        stringsBuffer: Uint8Array.from(plan.stringsBuffer),
+        expressionIndexes: Uint32Array.from(plan.expressionIndexes),
+        readingIndexes: Uint32Array.from(plan.readingIndexes),
+    };
+    /** @type {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|undefined} */
+    let preparedLookupIndexes;
+    if (chunk.preparedLookupIndexes instanceof Map) {
+        preparedLookupIndexes = new Map();
+        for (const [key, prepared] of chunk.preparedLookupIndexes) {
+            preparedLookupIndexes.set(key, {
+                bytes: prepared.bytes.buffer === plan.stringsBuffer.buffer ?
+                    Uint8Array.from(prepared.bytes) :
+                    prepared.bytes,
+                preinternedPlan: stablePlan,
+            });
+        }
+    }
     return {
         ...chunk,
         expressionBytesList: chunk.expressionBytesList.map((bytes) => Uint8Array.from(bytes)),
@@ -2641,14 +2877,8 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
         contentMetaList,
         contentUniqueIndexList: chunk.contentUniqueIndexList === null ? null : Uint32Array.from(chunk.contentUniqueIndexList),
         mediaRows,
-        termRecordPreinternedPlan: {
-            stringLengths: Uint16Array.from(plan.stringLengths),
-            stringOffsets: Uint32Array.from(stringOffsets),
-            stringHashes: plan.stringHashes instanceof Uint32Array ? Uint32Array.from(plan.stringHashes) : void 0,
-            stringsBuffer: Uint8Array.from(plan.stringsBuffer),
-            expressionIndexes: Uint32Array.from(plan.expressionIndexes),
-            readingIndexes: Uint32Array.from(plan.readingIndexes),
-        },
+        termRecordPreinternedPlan: stablePlan,
+        ...(typeof preparedLookupIndexes === 'undefined' ? {} : {preparedLookupIndexes}),
     };
 }
 

@@ -115,7 +115,7 @@ async function parse(data) {
         const stableResultChunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (resultChunk);
         const profile = consumeLastTermBankWasmParseProfile();
         if (profile !== null) { profile.resultCopyMs = resultCopyMs; }
-        if (options.prepareLookupIndexes === true) {
+        if (options.prepareLookupIndexes === true && !(stableResultChunk.preparedLookupIndexes instanceof Map)) {
             const prepared = prepareTermLookupIndexesFromPreinternedPlan(stableResultChunk);
             if (prepared !== null) {
                 stableResultChunk.preparedLookupIndexes = prepared.indexes;
