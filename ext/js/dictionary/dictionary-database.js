@@ -7214,20 +7214,10 @@ export class DictionaryDatabase {
                         this._termEntryContentMetaSignaturePresentTable[existingIndex] === 1
                     ) {
                         const lastOffset = Math.max(0, contentLength - 4);
-                        const signatureOffset = uniqueIndex * 3;
-                        const signature1 = uniqueSignatures === null ?
-                            this._readTermContentSignature(contentBytesBuffer, contentOffset) :
-                            uniqueSignatures[signatureOffset];
-                        const signature2 = uniqueSignatures === null ?
-                            this._readTermContentSignature(contentBytesBuffer, contentOffset + Math.floor(lastOffset / 2)) :
-                            uniqueSignatures[signatureOffset + 1];
-                        const signature3 = uniqueSignatures === null ?
-                            this._readTermContentSignature(contentBytesBuffer, contentOffset + lastOffset) :
-                            uniqueSignatures[signatureOffset + 2];
                         if (
-                            this._termEntryContentMetaSignature1Table[existingIndex] === signature1 &&
-                            this._termEntryContentMetaSignature2Table[existingIndex] === signature2 &&
-                            this._termEntryContentMetaSignature3Table[existingIndex] === signature3
+                            this._termEntryContentMetaSignature1Table[existingIndex] === this._readTermContentSignature(contentBytesBuffer, contentOffset) &&
+                            this._termEntryContentMetaSignature2Table[existingIndex] === this._readTermContentSignature(contentBytesBuffer, contentOffset + Math.floor(lastOffset / 2)) &&
+                            this._termEntryContentMetaSignature3Table[existingIndex] === this._readTermContentSignature(contentBytesBuffer, contentOffset + lastOffset)
                         ) {
                             const existingDictName = this._termEntryContentMetaDictNames[
                                 this._termEntryContentMetaDictNameIdTable[existingIndex]

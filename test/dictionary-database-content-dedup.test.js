@@ -1230,7 +1230,6 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             /** @type {DictionaryDatabase & {_findTermEntryContentMetaHashPairIndex: (hash1: number, hash2: number) => number}} */ (database),
             '_findTermEntryContentMetaHashPairIndex',
         );
-        const readSignature = vi.spyOn(database, '_readTermContentSignature');
         const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
         const result = await resolve({
             rowCount: 2,
@@ -1255,7 +1254,6 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
                 uniqueCount: 1,
                 sourceRowCount: 2,
                 uniqueRowIndexes: new Uint32Array([0]),
-                uniqueSignatures: new Uint32Array([197121, 197121, 197121]),
                 resolvedFlags: new Uint8Array(1),
                 resolvedOffsets: new Float64Array(1),
                 resolvedLengths: new Uint32Array(1),
@@ -1270,7 +1268,6 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         });
 
         expect(findPersistedIndex).toHaveBeenCalledOnce();
-        expect(readSignature).not.toHaveBeenCalled();
         expect(result.pendingContentCount).toBe(0);
         expect(result.persistedHitCount).toBe(1);
         expect([...result.contentOffsets]).toEqual([400, 400]);
