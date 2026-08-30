@@ -18,7 +18,7 @@ import {
 } from '../ext/js/dictionary/term-record-preinterned-plan.js';
 
 /**
- * @returns {import('../ext/js/dictionary/term-record-wasm-encoder.js').PreinternedTermRecordPlan}
+ * @returns {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan}
  */
 function createPlan() {
     return {

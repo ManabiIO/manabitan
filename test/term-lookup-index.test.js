@@ -13,7 +13,6 @@ import {
     appendExactRowMatches,
     encodePersistedTermLookupIndexFromPreinternedPlan,
     encodePersistedTermLookupIndexFromValidatedPreinternedPlan,
-    encodePersistedTermLookupIndexFromRecordPayload,
     encodePersistedTermLookupIndex,
     findExactRows,
     findPrefixRowMatches,
@@ -50,39 +49,6 @@ function createIndex(rows) {
     }))));
 }
 
-/**
- * Creates the current term-record payload layout: u32 string count, u32 string
- * arena length, u16 string lengths, string arena, then fixed 24-byte records.
- * @param {string[]} strings
- * @param {Array<{expressionKey: number, readingKey: number, sequence: number}>} records
- * @returns {Uint8Array}
- */
-function createRecordPayload(strings, records) {
-    const stringBytes = strings.map(bytes);
-    const stringBytesLength = stringBytes.reduce((length, value) => length + value.byteLength, 0);
-    const stringsOffset = 8 + (strings.length * 2);
-    const recordsOffset = stringsOffset + stringBytesLength;
-    const output = new Uint8Array(recordsOffset + (records.length * 24));
-    const view = new DataView(output.buffer);
-    view.setUint32(0, strings.length, true);
-    view.setUint32(4, stringBytesLength, true);
-    let stringOffset = stringsOffset;
-    for (let index = 0; index < stringBytes.length; ++index) {
-        const value = stringBytes[index];
-        view.setUint16(8 + (index * 2), value.byteLength, true);
-        output.set(value, stringOffset);
-        stringOffset += value.byteLength;
-    }
-    for (let row = 0; row < records.length; ++row) {
-        const {expressionKey, readingKey, sequence} = records[row];
-        const offset = recordsOffset + (row * 24);
-        view.setUint32(offset, expressionKey, true);
-        view.setUint32(offset + 4, readingKey, true);
-        view.setInt32(offset + 20, sequence, true);
-    }
-    return output;
-}
-
 describe('persisted term lookup index', () => {
     test('preinterns duplicate strings exactly across capacity growth', () => {
         const planBuilder = createTermRecordPreinternedPlanBuilder(2);
@@ -102,27 +68,6 @@ describe('persisted term lookup index', () => {
         );
     });
 
-    test('builds a lookup index from a current interned record payload', () => {
-        const payload = createRecordPayload(
-            ['食べる', 'たべる', 'する'],
-            [
-                {expressionKey: 0, readingKey: 1, sequence: 10},
-                {expressionKey: 2, readingKey: 0xffffffff, sequence: 11},
-            ],
-        );
-        const index = parsePersistedTermLookupIndex(
-            encodePersistedTermLookupIndexFromRecordPayload(payload, 2),
-        );
-
-        expect(findExactRows(index, bytes('食べる'), 'expression')).toEqual([0]);
-        expect(findExactRows(index, bytes('たべる'), 'reading')).toEqual([0]);
-        expect(findExactRows(index, bytes('する'), 'expression')).toEqual([1]);
-        expect(findExactRows(index, bytes('する'), 'reading')).toEqual([]);
-        expect(findSequenceRows(index, 10)).toEqual([0]);
-        expect(findSequenceRows(index, 11)).toEqual([1]);
-        expect(getPersistedTermKeyBytes(index, 1, 'reading')).toBeNull();
-    });
-
     test('builds byte-identical indexes directly from preinterned parser plans', () => {
         const strings = ['食べる', 'たべる', 'する'];
         const stringBytes = strings.map(bytes);
@@ -132,30 +77,26 @@ describe('persisted term lookup index', () => {
             new Uint32Array([stringIndexes[0], stringIndexes[2]]),
             new Uint32Array([stringIndexes[1], stringIndexes[2]]),
         );
-        const records = [
-            {expressionKey: 0, readingKey: 1, sequence: 10},
-            {expressionKey: 2, readingKey: 0xffffffff, sequence: 11},
-        ];
-        const payloadEncoded = encodePersistedTermLookupIndexFromRecordPayload(
-            createRecordPayload(strings, records),
-            records.length,
-        );
+        const rowEncoded = encodePersistedTermLookupIndex([
+            {expressionBytes: stringBytes[0], readingBytes: stringBytes[1], sequence: 10},
+            {expressionBytes: stringBytes[2], readingBytes: null, sequence: 11},
+        ]);
         const planEncoded = encodePersistedTermLookupIndexFromPreinternedPlan(
             plan,
             new Uint8Array([0, 1]),
             new Int32Array([10, 11]),
-            records.length,
+            2,
         );
         const validatedPlanEncoded = encodePersistedTermLookupIndexFromValidatedPreinternedPlan(
             plan,
             new Uint8Array([0, 1]),
             new Int32Array([10, 11]),
-            records.length,
+            2,
             1,
         );
 
-        expect(planEncoded).toEqual(payloadEncoded);
-        expect(validatedPlanEncoded).toEqual(payloadEncoded);
+        expect(planEncoded).toEqual(rowEncoded);
+        expect(validatedPlanEncoded).toEqual(rowEncoded);
     });
 
     test('rejects malformed preinterned parser plans', () => {
@@ -191,22 +132,6 @@ describe('persisted term lookup index', () => {
             1,
             2,
         )).toThrow('Invalid validated reading posting count');
-    });
-
-    test('rejects malformed record-payload dimensions and key references', () => {
-        const payload = createRecordPayload(
-            ['食べる'],
-            [{expressionKey: 0, readingKey: 0xffffffff, sequence: 1}],
-        );
-        const invalidReference = new Uint8Array(payload);
-        new DataView(invalidReference.buffer).setUint32(payload.byteLength - 24, 1, true);
-
-        expect(() => encodePersistedTermLookupIndexFromRecordPayload(payload, 2)).toThrow(
-            'Invalid term-record string table for lookup index',
-        );
-        expect(() => encodePersistedTermLookupIndexFromRecordPayload(invalidReference, 1)).toThrow(
-            'Invalid term-record lookup key reference',
-        );
     });
 
     test('round trips exact expression and reading lookups without decoding stored keys', () => {

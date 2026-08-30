@@ -134,13 +134,12 @@ describe('TermRecordOpfsStore', () => {
 
         await store._appendEncodedChunk(
             state,
-            new Uint8Array(4 * 1024 * 1024),
             1,
             1,
             'raw',
             0,
             new Uint8Array([1]),
-            new Uint8Array(4),
+            new Uint8Array(12),
         );
 
         expect(flushRecords).not.toHaveBeenCalled();
@@ -201,7 +200,6 @@ describe('TermRecordOpfsStore', () => {
             await Promise.all([contentStore.beginImportSession(), recordStore.beginImportSession()]);
             Reflect.set(contentStore, '_flushThresholdBytes', 1);
             Reflect.set(recordStore, '_flushThresholdBytes', 1);
-            Reflect.set(recordStore, '_wasmEncoderUnavailable', true);
             Reflect.set(database, '_db', {exec: vi.fn()});
             Reflect.set(database, '_bulkImportState', 'active');
             Reflect.set(database, '_bulkImportTransactionOpen', true);
@@ -422,7 +420,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const store = new TermRecordOpfsStore();
         Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(store, '_wasmEncoderUnavailable', true);
         /**
          * @param {string} dictionary
          * @param {string} expression
@@ -474,7 +471,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.beginImportSession();
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
@@ -2085,7 +2081,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const store = new TermRecordOpfsStore();
         Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(store, '_wasmEncoderUnavailable', true);
         const appendLargeDictionary = async (dictionary, expression, reading, offset) => {
             await store.appendBatchFromArtifactChunkResolvedContent(
                 {
@@ -2263,7 +2258,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
 
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
@@ -2297,7 +2291,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
 
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
@@ -2328,7 +2321,6 @@ describe('TermRecordOpfsStore', () => {
         const textEncoder = new TextEncoder();
         const store = new TermRecordOpfsStore();
         Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
-        Reflect.set(store, '_wasmEncoderUnavailable', true);
 
         await expect(store.appendBatchFromArtifactChunkResolvedContent(
             {
@@ -2354,7 +2346,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
 
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
@@ -2412,7 +2403,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
 
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
@@ -2450,7 +2440,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.appendBatchFromArtifactChunkResolvedContent({
             dictionary: dictionaryName,
             dictionaryTotalRows: 1_000_000,
@@ -2485,7 +2474,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.appendBatchFromArtifactChunkResolvedContent({
             dictionary: dictionaryName,
             dictionaryTotalRows: 1_000_000,
@@ -2519,7 +2507,6 @@ describe('TermRecordOpfsStore', () => {
         const writerDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', writerDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.appendBatchFromArtifactChunkResolvedContent({
             dictionary: dictionaryName,
             dictionaryTotalRows: 1_000_000,
@@ -2553,7 +2540,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.appendBatchFromArtifactChunkResolvedContent({
             dictionary: dictionaryName,
             dictionaryTotalRows: 1_000_000,
@@ -2584,7 +2570,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
 
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
@@ -2633,7 +2618,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         for (const [dictionary, expression, reading] of [
             ['JMdict', '食べる', 'たべる'],
             ['Jitendex', '食べる', 'たべる'],
@@ -2677,7 +2661,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         for (const dictionary of ['JMdict', 'Jitendex']) {
             await writerStore.appendBatchFromArtifactChunkResolvedContent(
                 {
@@ -2749,7 +2732,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures});
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
 
         const appendDictionary = async (dictionary, expression, reading, sequence) => {
             const expressionBytes = textEncoder.encode(expression);
@@ -2811,7 +2793,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
                 dictionary: dictionaryName,
@@ -2851,7 +2832,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
                 dictionary: dictionaryName,
@@ -2889,7 +2869,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         for (const [dictionary, expression, reading] of [
             ['Damaged', '食う', 'くう'],
             ['Healthy', '飲む', 'のむ'],
@@ -2935,7 +2914,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
                 dictionary: dictionaryName,
@@ -2975,7 +2953,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
                 dictionary: dictionaryName,
@@ -3053,7 +3030,6 @@ describe('TermRecordOpfsStore', () => {
         });
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.appendBatchFromArtifactChunkResolvedContent({
             dictionary: dictionaryName,
             dictionaryTotalRows: 1_000_000,
@@ -3098,7 +3074,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.appendBatchFromArtifactChunkResolvedContent({
             dictionary: dictionaryName,
             dictionaryTotalRows: 1_000_000,
@@ -3130,7 +3105,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
                 dictionary: dictionaryName,
@@ -3174,7 +3148,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
                 dictionary: fromName,
@@ -3218,7 +3191,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {getFileFailures});
         const store = new TermRecordOpfsStore();
         Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(store, '_wasmEncoderUnavailable', true);
         await store.appendBatchFromArtifactChunkResolvedContent({
             dictionary: fromName,
             dictionaryTotalRows: 1_000_000,
@@ -3254,7 +3226,6 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const store = new TermRecordOpfsStore();
         Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(store, '_wasmEncoderUnavailable', true);
         await store.appendBatchFromArtifactChunkResolvedContent({
             dictionary: fromName,
             rowCount: 1,
@@ -3322,7 +3293,7 @@ describe('TermRecordOpfsStore', () => {
         expect(record).toMatchObject({expression: '暗記', reading: 'あんき'});
     });
 
-    test('round-trips preinterned artifact chunk records through JS fallback', async () => {
+    test('round-trips preinterned artifact chunk records through direct authoritative encoding', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Jitendex.org [2026-04-04]';
         const expression0 = textEncoder.encode('為る');
@@ -3346,7 +3317,6 @@ describe('TermRecordOpfsStore', () => {
 
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
         const chunk = {
             dictionary: dictionaryName,
             rowCount: 2,
@@ -3436,7 +3406,7 @@ describe('TermRecordOpfsStore', () => {
         readingBytesList[rowCount - 1] = finalReading;
 
         const store = new TermRecordOpfsStore();
-        /** @type {Array<import('../ext/js/dictionary/term-record-wasm-encoder.js').PreinternedTermRecordPlan|null>} */
+        /** @type {Array<import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan|null>} */
         const encodedPlans = [];
         /** @type {number[]} */
         const encodedRowCounts = [];
@@ -3444,12 +3414,11 @@ describe('TermRecordOpfsStore', () => {
             encodedRowCounts.push(chunk.rowCount);
             encodedPlans.push(plan ?? null);
             return {
-                bytes: new Uint8Array([1]),
                 contentOffsetBase: 0,
                 lookupIndexBytes: new Uint8Array([2]),
-                recordFields: null,
+                recordFields: new Uint8Array(chunk.rowCount * 12),
                 validationMs: 0,
-                wasmEncodeMs: 0,
+                recordFieldEncodeMs: 0,
                 lookupIndexEncodeMs: 0,
             };
         });
@@ -3491,7 +3460,7 @@ describe('TermRecordOpfsStore', () => {
             throw new Error('Expected compact preinterned plans for both artifact runs');
         }
         /**
-         * @param {import('../ext/js/dictionary/term-record-wasm-encoder.js').PreinternedTermRecordPlan} plan
+         * @param {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan} plan
          * @returns {string[]}
          */
         const decodePlanStrings = (plan) => {
@@ -3544,12 +3513,11 @@ describe('TermRecordOpfsStore', () => {
         vi.spyOn(store, '_encodeArtifactChunkRecords').mockImplementation(async (runChunk) => {
             encodedRowCounts.push(runChunk.rowCount);
             return {
-                bytes: new Uint8Array([1]),
                 contentOffsetBase: 0,
                 lookupIndexBytes: new Uint8Array([2]),
-                recordFields: null,
+                recordFields: new Uint8Array(runChunk.rowCount * 12),
                 validationMs: 0,
-                wasmEncodeMs: 0,
+                recordFieldEncodeMs: 0,
                 lookupIndexEncodeMs: 0,
             };
         });
@@ -3589,7 +3557,6 @@ describe('TermRecordOpfsStore', () => {
 
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
 
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {

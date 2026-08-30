@@ -21,11 +21,22 @@ import {hashTermKeyBytes} from './term-key-hash.js';
 const DEFAULT_INITIAL_STRING_CAPACITY = 16384;
 
 /**
+ * @typedef {{
+ *   stringLengths: Uint16Array,
+ *   stringOffsets?: Uint32Array,
+ *   stringHashes?: Uint32Array,
+ *   stringsBuffer: Uint8Array,
+ *   expressionIndexes: Uint32Array,
+ *   readingIndexes: Uint32Array,
+ * }} PreinternedTermRecordPlan
+ */
+
+/**
  * @param {number} [initialStringCapacity]
  * @returns {{
  *   internStringBytes: (bytes: Uint8Array) => number,
  *   internStringBytesWithHash: (bytes: Uint8Array, hash: number) => number,
- *   buildPlan: (expressionIndexes: number[]|Uint32Array, readingIndexes: number[]|Uint32Array, count?: number) => import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan,
+ *   buildPlan: (expressionIndexes: number[]|Uint32Array, readingIndexes: number[]|Uint32Array, count?: number) => PreinternedTermRecordPlan,
  * }}
  * @throws {RangeError} If the initial capacity is not finite.
  */
@@ -181,15 +192,15 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
 
 /**
  * @param {unknown[]} rows
- * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
+ * @returns {PreinternedTermRecordPlan|null}
  */
 export function getTermRecordPreinternedPlan(rows) {
-    const value = /** @type {{termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}} */ (/** @type {unknown} */ (rows)).termRecordPreinternedPlan;
+    const value = /** @type {{termRecordPreinternedPlan?: PreinternedTermRecordPlan}} */ (/** @type {unknown} */ (rows)).termRecordPreinternedPlan;
     return value ?? null;
 }
 
 /**
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} plan
+ * @param {PreinternedTermRecordPlan} plan
  * @param {number} start
  * @param {number} count
  * @throws {RangeError} If the requested row range is invalid.
@@ -208,9 +219,9 @@ function validatePlanRowRange(plan, start, count) {
 }
 
 /**
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
+ * @param {PreinternedTermRecordPlan|null} plan
  * @param {number[]} indexes
- * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
+ * @returns {PreinternedTermRecordPlan|null}
  * @throws {RangeError} If a selected row index is invalid.
  */
 export function selectTermRecordPreinternedPlan(plan, indexes) {
@@ -242,10 +253,10 @@ export function selectTermRecordPreinternedPlan(plan, indexes) {
 }
 
 /**
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
+ * @param {PreinternedTermRecordPlan|null} plan
  * @param {number} start
  * @param {number} count
- * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
+ * @returns {PreinternedTermRecordPlan|null}
  * @throws {RangeError} If the requested row range is invalid.
  */
 export function sliceTermRecordPreinternedPlan(plan, start, count) {
@@ -263,7 +274,7 @@ export function sliceTermRecordPreinternedPlan(plan, start, count) {
 }
 
 /**
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} plan
+ * @param {PreinternedTermRecordPlan} plan
  * @returns {Uint32Array}
  * @throws {TypeError|RangeError} If string metadata or the arena is malformed.
  */
@@ -311,12 +322,12 @@ function getValidatedStringOffsets(plan) {
 
 /**
  * Copies and remaps only the strings referenced by a row slice.
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
+ * @param {PreinternedTermRecordPlan|null} plan
  * @param {number} start
  * @param {number} count
  * @param {Uint32Array} remapScratch
  * @param {boolean[]|Uint8Array} [readingEqualsExpressionList]
- * @returns {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}
+ * @returns {PreinternedTermRecordPlan|null}
  * @throws {TypeError|RangeError|Error} If the plan, range, or scratch storage is invalid.
  */
 export function compactTermRecordPreinternedPlan(plan, start, count, remapScratch, readingEqualsExpressionList = void 0) {
@@ -397,9 +408,9 @@ export function compactTermRecordPreinternedPlan(plan, start, count, remapScratc
 }
 
 /**
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} plan
+ * @param {PreinternedTermRecordPlan|null} plan
  * @param {number} count
- * @returns {plan is import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}
+ * @returns {plan is PreinternedTermRecordPlan}
  */
 export function hasCompleteTermRecordPreinternedPlan(plan, count) {
     if (plan === null || !Number.isSafeInteger(count) || count < 0) { return false; }

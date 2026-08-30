@@ -26,8 +26,8 @@ import {
 } from './raw-term-content.js';
 import {
     appendExactRowMatches,
+    encodePersistedTermLookupIndex,
     encodePersistedTermLookupIndexFromPreinternedPlan,
-    encodePersistedTermLookupIndexFromRecordPayload,
     findExactRows,
     findPrefixRowMatches,
     findPrefixRows,
@@ -53,7 +53,6 @@ import {
     selectTermRecordPreinternedPlan,
     sliceTermRecordPreinternedPlan,
 } from './term-record-preinterned-plan.js';
-import {encodeTermRecordArtifactChunkWithWasmPreinterned, encodeTermRecordsWithWasm, encodeTermRecordsWithWasmPreinterned} from './term-record-wasm-encoder.js';
 
 const SHARD_DIRECTORY_NAME = 'manabitan-term-records';
 const SHARD_FILE_PREFIX = 'dict-';
@@ -65,13 +64,10 @@ const BINARY_MAGIC_TEXT = 'MBTRD16X';
 const BINARY_MAGIC_BYTES = 8;
 const SHARD_GENERATION_BYTES = 16;
 const BINARY_HEADER_PREFIX_BYTES = BINARY_MAGIC_BYTES + SHARD_GENERATION_BYTES;
-const STRING_TABLE_HEADER_BYTES = 8;
-const RECORD_HEADER_BYTES = 24;
 const U32_NULL = 0xffffffff;
 const MAX_CONTENT_OFFSET_DELTA = U32_NULL - 1;
 const U32_RANGE = 0x100000000;
 const U16_NULL = 0xffff;
-const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
 const DEFAULT_FLUSH_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const LOW_MEMORY_FLUSH_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const PREFIX_WARM_YIELD_BUDGET_MS = 8;
@@ -159,32 +155,6 @@ function reconstructTermStringOffsets(lengths, byteLength) {
         cursor += length;
     }
     return cursor === byteLength ? offsets : null;
-}
-
-/**
- * @param {Uint8Array} output
- * @param {number} offset
- * @param {number} value
- * @returns {number}
- */
-function writeU16Le(output, offset, value) {
-    output[offset] = value & 0xff;
-    output[offset + 1] = (value >>> 8) & 0xff;
-    return offset + 2;
-}
-
-/**
- * @param {Uint8Array} output
- * @param {number} offset
- * @param {number} value
- * @returns {number}
- */
-function writeU32Le(output, offset, value) {
-    output[offset] = value & 0xff;
-    output[offset + 1] = (value >>> 8) & 0xff;
-    output[offset + 2] = (value >>> 16) & 0xff;
-    output[offset + 3] = (value >>> 24) & 0xff;
-    return offset + 4;
 }
 
 /**
@@ -600,8 +570,6 @@ export class TermRecordOpfsStore {
         this._textEncoder = new TextEncoder();
         /** @type {TextDecoder} */
         this._textDecoder = new TextDecoder();
-        /** @type {boolean} */
-        this._wasmEncoderUnavailable = false;
         /** @type {Uint32Array} */
         this._preinternedCompactionRemap = new Uint32Array(0);
         /** @type {string[]} */
@@ -1203,7 +1171,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {{dictionary: string, expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, expressionReverse: string|null, readingReverse: string|null, entryContentOffset: number, entryContentLength: number, entryContentDictName: string|null, score: number, sequence: number|null}[]} records
-     * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
+     * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @returns {Promise<void>}
      */
     async appendBatch(records, preinternedPlan = null) {
@@ -1349,7 +1317,7 @@ export class TermRecordOpfsStore {
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {(string|null)[]} contentDictNames
-     * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
+     * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @returns {Promise<{buildRecordsMs: number, encodeMs: number, appendWriteMs: number}>}
      */
     async appendBatchFromResolvedImportTermEntries(rows, start, count, contentOffsets, contentLengths, contentDictNames, preinternedPlan = null) {
@@ -1651,11 +1619,11 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null, preparedLookupIndexes?: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}>}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, preparedLookupIndexes?: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}>}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {string | (string|null)[]} contentDictNames
-     * @returns {Promise<{buildRecordsMs: number, encodeMs: number, appendWriteMs: number, validationMs: number, wasmEncodeMs: number, lookupIndexEncodeMs: number}>}
+     * @returns {Promise<{buildRecordsMs: number, encodeMs: number, appendWriteMs: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
     async appendBatchFromArtifactChunkResolvedContent(chunk, contentOffsets, contentLengths, contentDictNames) {
         const count = chunk.rowCount;
@@ -1665,7 +1633,7 @@ export class TermRecordOpfsStore {
                 encodeMs: 0,
                 appendWriteMs: 0,
                 validationMs: 0,
-                wasmEncodeMs: 0,
+                recordFieldEncodeMs: 0,
                 lookupIndexEncodeMs: 0,
             };
         }
@@ -1758,12 +1726,12 @@ export class TermRecordOpfsStore {
         let encodeMs = 0;
         let appendWriteMs = 0;
         let validationMs = 0;
-        let wasmEncodeMs = 0;
+        let recordFieldEncodeMs = 0;
         let lookupIndexEncodeMs = 0;
         if (uniformContentDictName !== null) {
             const state = await this._getOrCreateShardState(chunk.dictionary, uniformContentDictName);
             if (state === null) {
-                return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, wasmEncodeMs, lookupIndexEncodeMs};
+                return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, recordFieldEncodeMs, lookupIndexEncodeMs};
             }
             const metrics = await this._encodeAndAppendArtifactChunkForState(
                 state,
@@ -1778,9 +1746,9 @@ export class TermRecordOpfsStore {
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
             validationMs += metrics.validationMs;
-            wasmEncodeMs += metrics.wasmEncodeMs;
+            recordFieldEncodeMs += metrics.recordFieldEncodeMs;
             lookupIndexEncodeMs += metrics.lookupIndexEncodeMs;
-            return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, wasmEncodeMs, lookupIndexEncodeMs};
+            return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, recordFieldEncodeMs, lookupIndexEncodeMs};
         }
         let singleContentDictName = true;
         for (let i = 1; i < count; ++i) {
@@ -1792,7 +1760,7 @@ export class TermRecordOpfsStore {
         if (singleContentDictName) {
             const state = await this._getOrCreateShardState(chunk.dictionary, firstContentDictName);
             if (state === null) {
-                return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, wasmEncodeMs, lookupIndexEncodeMs};
+                return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, recordFieldEncodeMs, lookupIndexEncodeMs};
             }
             const metrics = await this._encodeAndAppendArtifactChunkForState(
                 state,
@@ -1807,9 +1775,9 @@ export class TermRecordOpfsStore {
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
             validationMs += metrics.validationMs;
-            wasmEncodeMs += metrics.wasmEncodeMs;
+            recordFieldEncodeMs += metrics.recordFieldEncodeMs;
             lookupIndexEncodeMs += metrics.lookupIndexEncodeMs;
-            return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, wasmEncodeMs, lookupIndexEncodeMs};
+            return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, recordFieldEncodeMs, lookupIndexEncodeMs};
         }
         for (let runStart = 0; runStart < count;) {
             const contentDictName = contentDictNames[runStart] ?? 'raw';
@@ -1823,7 +1791,7 @@ export class TermRecordOpfsStore {
                 runStart = runEnd;
                 continue;
             }
-            /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} */
+            /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
             const chunkSlice = {
                 dictionary: chunk.dictionary,
                 rowCount: runCount,
@@ -1846,27 +1814,26 @@ export class TermRecordOpfsStore {
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
             validationMs += metrics.validationMs;
-            wasmEncodeMs += metrics.wasmEncodeMs;
+            recordFieldEncodeMs += metrics.recordFieldEncodeMs;
             lookupIndexEncodeMs += metrics.lookupIndexEncodeMs;
             runStart = runEnd;
         }
-        return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, wasmEncodeMs, lookupIndexEncodeMs};
+        return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, recordFieldEncodeMs, lookupIndexEncodeMs};
     }
 
     /**
      * @param {TermRecordShardState} state
      * @param {TermRecord[]} records
-     * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
+     * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @returns {Promise<{encodeMs: number, appendWriteMs: number}>}
      */
     async _encodeAndAppendChunkForState(state, records, preinternedPlan = null) {
         const tEncodeStart = safePerformance.now();
-        const {bytes, contentOffsetBase, lookupIndexBytes, recordFields} = await this._encodeRecords(records, preinternedPlan);
+        const {contentOffsetBase, lookupIndexBytes, recordFields} = await this._encodeRecords(records, preinternedPlan);
         const encodeMs = safePerformance.now() - tEncodeStart;
         const tAppendStart = safePerformance.now();
         await this._appendEncodedChunk(
             state,
-            bytes,
             records[0]?.id ?? 0,
             records.length,
             null,
@@ -1883,7 +1850,7 @@ export class TermRecordOpfsStore {
      * records written in a single chunk must have contiguous IDs.
      * @param {TermRecordShardState} state
      * @param {TermRecord[]} records
-     * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
+     * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {number[]|null} [recordIndexes=null]
      * @returns {Promise<{encodeMs: number, appendWriteMs: number}>}
      */
@@ -1928,16 +1895,16 @@ export class TermRecordOpfsStore {
      * @param {number} firstId
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
-     * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
+     * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {string} [contentDictName='raw']
-     * @param {Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}>|null} [preparedLookupIndexes=null]
-     * @returns {Promise<{encodeMs: number, appendWriteMs: number, validationMs: number, wasmEncodeMs: number, lookupIndexEncodeMs: number}>}
+     * @param {Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}>|null} [preparedLookupIndexes=null]
+     * @returns {Promise<{encodeMs: number, appendWriteMs: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
     async _encodeAndAppendArtifactChunkForState(state, chunk, firstId, contentOffsets, contentLengths, preinternedPlan = null, contentDictName = 'raw', preparedLookupIndexes = null) {
         let encodeMs = 0;
         let appendWriteMs = 0;
         let validationMs = 0;
-        let wasmEncodeMs = 0;
+        let recordFieldEncodeMs = 0;
         let lookupIndexEncodeMs = 0;
         const count = chunk.rowCount;
         const hasWholeChunkPreparedIndex = (
@@ -2007,12 +1974,11 @@ export class TermRecordOpfsStore {
             );
             encodeMs += safePerformance.now() - tEncodeStart;
             validationMs += encodedChunk.validationMs;
-            wasmEncodeMs += encodedChunk.wasmEncodeMs;
+            recordFieldEncodeMs += encodedChunk.recordFieldEncodeMs;
             lookupIndexEncodeMs += encodedChunk.lookupIndexEncodeMs;
             const tAppendStart = safePerformance.now();
             await this._appendEncodedChunk(
                 state,
-                encodedChunk.bytes,
                 firstId + runStart,
                 runCount,
                 contentDictName,
@@ -2023,15 +1989,15 @@ export class TermRecordOpfsStore {
             appendWriteMs += safePerformance.now() - tAppendStart;
             runStart = runEnd;
         }
-        return {encodeMs, appendWriteMs, validationMs, wasmEncodeMs, lookupIndexEncodeMs};
+        return {encodeMs, appendWriteMs, validationMs, recordFieldEncodeMs, lookupIndexEncodeMs};
     }
 
     /**
      * Builds offset-independent lookup sidecars before term content persistence
      * completes. Exact range keys ensure offset-driven shard splits safely fall
      * back to the normal encoder.
-     * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
-     * @returns {{indexes: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}>, encodeMs: number}|null}
+     * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} chunk
+     * @returns {{indexes: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}>, encodeMs: number}|null}
      */
     prepareArtifactChunkLookupIndexes(chunk) {
         const result = prepareTermLookupIndexesFromPreinternedPlan(
@@ -3588,7 +3554,6 @@ export class TermRecordOpfsStore {
                     count,
                     contentOffsetBase,
                     lookupPayload,
-                    new Uint8Array(0),
                     recordFields,
                 );
                 await writable.write(indexChunk);
@@ -4324,113 +4289,66 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {TermRecord[]} records
-     * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
-     * @returns {Promise<{bytes: Uint8Array, contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array|null}>}
+     * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
+     * @returns {Promise<{contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array}>}
      */
     async _encodeRecords(records, preinternedPlan = null) {
         if (records.length === 0) {
             return {
-                bytes: new Uint8Array(0),
                 contentOffsetBase: 0,
                 lookupIndexBytes: new Uint8Array(0),
                 recordFields: new Uint8Array(0),
             };
         }
         const contentOffsetBase = getContentOffsetBase(records.map(({entryContentOffset}) => entryContentOffset));
-        for (const {entryContentOffset, entryContentLength} of records) {
+        const recordFields = new Uint8Array(records.length * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
+        const recordFieldsU32 = new Uint32Array(recordFields.buffer);
+        const recordFieldsI32 = new Int32Array(recordFields.buffer);
+        const readingEqualsExpressionList = new Uint8Array(records.length);
+        const sequenceList = new Int32Array(records.length);
+        /** @type {Array<{expressionBytes: Uint8Array, readingBytes: Uint8Array|null, sequence: number|null}>|null} */
+        const lookupRows = hasCompleteTermRecordPreinternedPlan(preinternedPlan, records.length) ? null : new Array(records.length);
+        for (let i = 0; i < records.length; ++i) {
+            const record = records[i];
+            const {entryContentOffset, entryContentLength} = record;
             getContentOffsetDelta(entryContentOffset, contentOffsetBase);
             validateContentLength(entryContentLength);
-        }
-        if (!this._wasmEncoderUnavailable) {
-            try {
-                const encoded = preinternedPlan === null ?
-                    await encodeTermRecordsWithWasm(records, this._textEncoder, contentOffsetBase) :
-                    await encodeTermRecordsWithWasmPreinterned(records, this._textEncoder, preinternedPlan, contentOffsetBase);
-                if (encoded !== null) {
-                    return {
-                        bytes: encoded.bytes,
-                        contentOffsetBase,
-                        lookupIndexBytes: encodePersistedTermLookupIndexFromRecordPayload(encoded.bytes, records.length),
-                        recordFields: encoded.recordFields,
-                    };
-                }
-            } catch (_) {
-                this._wasmEncoderUnavailable = true;
-            }
-        }
-        /** @type {Array<{record: TermRecord, expressionIndex: number, readingIndex: number}>} */
-        const encodedRows = [];
-        /** @type {Map<string, number>} */
-        const stringIndexByValue = new Map();
-        /** @type {Uint8Array[]} */
-        const stringBytesList = [];
-        /** @type {number[]} */
-        const stringLengths = [];
-        let stringsByteLength = 0;
-        let totalBytes = STRING_TABLE_HEADER_BYTES;
-        /**
-         * @param {string} value
-         * @param {Uint8Array} bytes
-         * @returns {number}
-         */
-        const internStringBytes = (value, bytes) => {
-            /** @type {number|undefined} */
-            const cached = stringIndexByValue.get(value);
-            if (typeof cached === 'number') { return cached; }
-            const index = stringBytesList.length;
-            stringIndexByValue.set(value, index);
-            stringBytesList.push(bytes);
-            stringLengths.push(bytes.byteLength);
-            stringsByteLength += bytes.byteLength;
-            return index;
-        };
-        for (const record of records) {
             const expression = record.expression ?? '';
             const reading = record.reading ?? expression;
             const readingEqualsExpression = record.readingEqualsExpression ?? (reading === expression);
-            const expressionBytes = record.expressionBytes instanceof Uint8Array ? record.expressionBytes : this._textEncoder.encode(expression);
-            const readingBytes = record.readingBytes instanceof Uint8Array ? record.readingBytes : this._textEncoder.encode(reading);
-            const expressionKey = expression.length > 0 ? expression : this._decodeString(expressionBytes, 0, expressionBytes.byteLength);
-            const readingKey = reading.length > 0 ? reading : this._decodeString(readingBytes, 0, readingBytes.byteLength);
-            const expressionIndex = internStringBytes(expressionKey, expressionBytes);
-            const readingIndex = readingEqualsExpression ?
-                READING_EQUALS_EXPRESSION_U32 :
-                internStringBytes(readingKey, readingBytes);
-            totalBytes += RECORD_HEADER_BYTES;
-            encodedRows.push({
-                record,
-                expressionIndex,
-                readingIndex,
-            });
+            const sequence = record.sequence ?? -1;
+            const fieldOffset = i * 3;
+            recordFieldsU32[fieldOffset] = getContentOffsetDelta(entryContentOffset, contentOffsetBase);
+            recordFieldsU32[fieldOffset + 1] = entryContentLength < 0 ? U32_NULL : entryContentLength;
+            recordFieldsI32[fieldOffset + 2] = record.score;
+            readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
+            sequenceList[i] = sequence;
+            if (lookupRows !== null) {
+                lookupRows[i] = {
+                    expressionBytes: record.expressionBytes instanceof Uint8Array ? record.expressionBytes : this._textEncoder.encode(expression),
+                    readingBytes: readingEqualsExpression ?
+                        null :
+                        (
+                            record.readingBytes instanceof Uint8Array ?
+                                record.readingBytes :
+                                this._textEncoder.encode(reading)
+                        ),
+                    sequence: sequence >= 0 ? sequence : null,
+                };
+            }
         }
-        totalBytes += (stringLengths.length * 2) + stringsByteLength;
-
-        const output = new Uint8Array(totalBytes);
-        const view = new DataView(output.buffer, output.byteOffset, output.byteLength);
-        let cursor = 0;
-        view.setUint32(cursor, stringLengths.length, true); cursor += 4;
-        view.setUint32(cursor, stringsByteLength, true); cursor += 4;
-        for (const stringLength of stringLengths) {
-            view.setUint16(cursor, stringLength, true); cursor += 2;
-        }
-        for (const bytes of stringBytesList) {
-            output.set(bytes, cursor);
-            cursor += bytes.byteLength;
-        }
-        for (const row of encodedRows) {
-            const {record, expressionIndex, readingIndex} = row;
-            view.setUint32(cursor, expressionIndex, true); cursor += 4;
-            view.setUint32(cursor, readingIndex, true); cursor += 4;
-            view.setUint32(cursor, getContentOffsetDelta(record.entryContentOffset, contentOffsetBase), true); cursor += 4;
-            view.setUint32(cursor, record.entryContentLength < 0 ? U32_NULL : record.entryContentLength, true); cursor += 4;
-            view.setInt32(cursor, record.score, true); cursor += 4;
-            view.setInt32(cursor, record.sequence ?? -1, true); cursor += 4;
-        }
+        const lookupIndexBytes = lookupRows === null ?
+            encodePersistedTermLookupIndexFromPreinternedPlan(
+                /** @type {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (preinternedPlan),
+                readingEqualsExpressionList,
+                sequenceList,
+                records.length,
+            ) :
+            encodePersistedTermLookupIndex(lookupRows);
         return {
-            bytes: output,
             contentOffsetBase,
-            lookupIndexBytes: encodePersistedTermLookupIndexFromRecordPayload(output, records.length),
-            recordFields: null,
+            lookupIndexBytes,
+            recordFields,
         };
     }
 
@@ -4438,24 +4356,22 @@ export class TermRecordOpfsStore {
      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
-     * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
+     * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {Uint8Array|null} [preparedLookupIndexBytes=null]
-     * @returns {Promise<{bytes: Uint8Array, contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array|null, validationMs: number, wasmEncodeMs: number, lookupIndexEncodeMs: number}>}
+     * @returns {Promise<{contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
     async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null) {
         if (chunk.rowCount === 0) {
             return {
-                bytes: new Uint8Array(0),
                 contentOffsetBase: 0,
                 lookupIndexBytes: new Uint8Array(0),
                 recordFields: new Uint8Array(0),
                 validationMs: 0,
-                wasmEncodeMs: 0,
+                recordFieldEncodeMs: 0,
                 lookupIndexEncodeMs: 0,
             };
         }
         const tValidationStart = safePerformance.now();
-        const fixedContentSpan = hasFixedContentSpan(chunk, chunk.rowCount);
         let contentOffsetBase = Number.POSITIVE_INFINITY;
         for (let i = 0; i < chunk.rowCount; ++i) {
             const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
@@ -4467,154 +4383,52 @@ export class TermRecordOpfsStore {
             }
         }
         if (contentOffsetBase === Number.POSITIVE_INFINITY) { contentOffsetBase = 0; }
-        for (let i = 0; i < chunk.rowCount; ++i) {
-            getContentOffsetDelta(getArtifactContentOffset(chunk, contentOffsets, i), contentOffsetBase);
-        }
         const validationMs = safePerformance.now() - tValidationStart;
-        if (preinternedPlan !== null && !fixedContentSpan && !this._wasmEncoderUnavailable) {
-            const tWasmEncodeStart = safePerformance.now();
-            try {
-                const encoded = await encodeTermRecordArtifactChunkWithWasmPreinterned(
-                    chunk,
-                    contentOffsets,
-                    contentLengths,
-                    this._textEncoder,
-                    preinternedPlan,
-                    contentOffsetBase,
-                );
-                const wasmEncodeMs = safePerformance.now() - tWasmEncodeStart;
-                if (encoded !== null) {
-                    const tLookupIndexEncodeStart = safePerformance.now();
-                    const lookupIndexBytes = preparedLookupIndexBytes ?? encodePersistedTermLookupIndexFromPreinternedPlan(
-                        preinternedPlan,
-                        chunk.readingEqualsExpressionList,
-                        chunk.sequenceList,
-                        chunk.rowCount,
-                    );
-                    return {
-                        bytes: encoded.bytes,
-                        contentOffsetBase,
-                        lookupIndexBytes,
-                        recordFields: encoded.recordFields,
-                        validationMs,
-                        wasmEncodeMs,
-                        lookupIndexEncodeMs: preparedLookupIndexBytes === null ? safePerformance.now() - tLookupIndexEncodeStart : 0,
-                    };
-                }
-            } catch (_) {
-                this._wasmEncoderUnavailable = true;
-            }
-        }
-        if (hasCompleteTermRecordPreinternedPlan(preinternedPlan, chunk.rowCount)) {
-            const tRecordEncodeStart = safePerformance.now();
-            const bytes = this._encodePreinternedArtifactChunkRecords(
-                chunk,
-                contentOffsets,
-                contentLengths,
-                preinternedPlan,
-                contentOffsetBase,
-            );
-            const wasmEncodeMs = safePerformance.now() - tRecordEncodeStart;
-            const tLookupIndexEncodeStart = safePerformance.now();
-            const lookupIndexBytes = preparedLookupIndexBytes ?? encodePersistedTermLookupIndexFromPreinternedPlan(
-                preinternedPlan,
-                chunk.readingEqualsExpressionList,
-                chunk.sequenceList,
-                chunk.rowCount,
-            );
-            return {
-                bytes,
-                contentOffsetBase,
-                lookupIndexBytes,
-                recordFields: null,
-                validationMs,
-                wasmEncodeMs,
-                lookupIndexEncodeMs: preparedLookupIndexBytes === null ? safePerformance.now() - tLookupIndexEncodeStart : 0,
-            };
-        }
-        /** @type {TermRecord[]} */
-        const records = new Array(chunk.rowCount);
-        for (let i = 0; i < chunk.rowCount; ++i) {
-            const id = i + 1;
-            const sequenceValue = chunk.sequenceList[i];
-            records[i] = {
-                id,
-                dictionary: chunk.dictionary,
-                expression: '',
-                reading: '',
-                readingEqualsExpression: chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1,
-                expressionBytes: chunk.expressionBytesList[i],
-                readingBytes: (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ? void 0 : chunk.readingBytesList[i],
-                expressionReverse: null,
-                readingReverse: null,
-                entryContentOffset: getArtifactContentOffset(chunk, contentOffsets, i),
-                entryContentLength: getArtifactContentLength(chunk, contentLengths, i),
-                entryContentDictName: 'raw',
-                score: chunk.scoreList[i] ?? 0,
-                sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
-            };
-        }
         const tRecordEncodeStart = safePerformance.now();
-        const encoded = await this._encodeRecords(records, preinternedPlan);
+        const recordFields = new Uint8Array(chunk.rowCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
+        const recordFieldsU32 = new Uint32Array(recordFields.buffer);
+        const recordFieldsI32 = new Int32Array(recordFields.buffer);
+        for (let i = 0; i < chunk.rowCount; ++i) {
+            const fieldOffset = i * 3;
+            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+            recordFieldsU32[fieldOffset] = getContentOffsetDelta(contentOffset, contentOffsetBase);
+            recordFieldsU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength;
+            recordFieldsI32[fieldOffset + 2] = chunk.scoreList[i] ?? 0;
+        }
+        const recordFieldEncodeMs = safePerformance.now() - tRecordEncodeStart;
+        const tLookupIndexEncodeStart = safePerformance.now();
+        let lookupIndexBytes = preparedLookupIndexBytes;
+        if (lookupIndexBytes === null) {
+            lookupIndexBytes = hasCompleteTermRecordPreinternedPlan(preinternedPlan, chunk.rowCount) ?
+                encodePersistedTermLookupIndexFromPreinternedPlan(
+                    /** @type {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (preinternedPlan),
+                    chunk.readingEqualsExpressionList,
+                    chunk.sequenceList,
+                    chunk.rowCount,
+                ) :
+                encodePersistedTermLookupIndex(Array.from({length: chunk.rowCount}, (_, i) => {
+                    const readingEqualsExpression = chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1;
+                    const sequence = chunk.sequenceList[i];
+                    return {
+                        expressionBytes: chunk.expressionBytesList[i],
+                        readingBytes: readingEqualsExpression ? null : chunk.readingBytesList[i],
+                        sequence: typeof sequence === 'number' && sequence >= 0 ? sequence : null,
+                    };
+                }));
+        }
         return {
-            ...encoded,
+            contentOffsetBase,
+            lookupIndexBytes,
+            recordFields,
             validationMs,
-            wasmEncodeMs: safePerformance.now() - tRecordEncodeStart,
-            lookupIndexEncodeMs: 0,
+            recordFieldEncodeMs,
+            lookupIndexEncodeMs: preparedLookupIndexBytes === null ? safePerformance.now() - tLookupIndexEncodeStart : 0,
         };
     }
 
     /**
-     * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
-     * @param {number[]|Uint32Array|Float64Array} contentOffsets
-     * @param {number[]|Uint32Array} contentLengths
-     * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} preinternedPlan
-     * @param {number} contentOffsetBase
-     * @returns {Uint8Array}
-     */
-    _encodePreinternedArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan, contentOffsetBase) {
-        const count = chunk.rowCount;
-        const stringLengths = preinternedPlan.stringLengths;
-        const stringsBuffer = preinternedPlan.stringsBuffer;
-        const expressionIndexes = preinternedPlan.expressionIndexes;
-        const readingIndexes = preinternedPlan.readingIndexes;
-        const fixedContentSpan = hasFixedContentSpan(chunk, count);
-        const fixedContentOffsetBase = fixedContentSpan ? /** @type {number} */ (chunk.fixedContentOffsetBase) : 0;
-        const fixedContentLength = fixedContentSpan ? /** @type {number} */ (chunk.fixedContentLength) : 0;
-        let totalBytes = STRING_TABLE_HEADER_BYTES + (stringLengths.length * 2) + stringsBuffer.byteLength;
-        totalBytes += count * RECORD_HEADER_BYTES;
-
-        const output = new Uint8Array(totalBytes);
-        let cursor = 0;
-        cursor = writeU32Le(output, cursor, stringLengths.length);
-        cursor = writeU32Le(output, cursor, stringsBuffer.byteLength);
-        for (let i = 0, ii = stringLengths.length; i < ii; ++i) {
-            cursor = writeU16Le(output, cursor, stringLengths[i]);
-        }
-        output.set(stringsBuffer, cursor);
-        cursor += stringsBuffer.byteLength;
-        for (let i = 0; i < count; ++i) {
-            const entryContentLength = fixedContentSpan ? fixedContentLength : contentLengths[i];
-            cursor = writeU32Le(output, cursor, expressionIndexes[i] >>> 0);
-            cursor = writeU32Le(
-                output,
-                cursor,
-                (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ?
-                    READING_EQUALS_EXPRESSION_U32 :
-                (readingIndexes[i] >>> 0),
-            );
-            const entryContentOffset = fixedContentSpan ? fixedContentOffsetBase + (i * fixedContentLength) : contentOffsets[i];
-            cursor = writeU32Le(output, cursor, getContentOffsetDelta(entryContentOffset, contentOffsetBase));
-            cursor = writeU32Le(output, cursor, entryContentLength < 0 ? U32_NULL : entryContentLength);
-            cursor = writeU32Le(output, cursor, chunk.scoreList[i] ?? 0);
-            cursor = writeU32Le(output, cursor, chunk.sequenceList[i] ?? -1);
-        }
-        return output;
-    }
-
-    /**
      * @param {TermRecordShardState} state
-     * @param {Uint8Array} chunk
      * @param {number} firstId
      * @param {number} count
      * @param {string|null} [contentDictNameOverride=null]
@@ -4625,7 +4439,6 @@ export class TermRecordOpfsStore {
      */
     async _appendEncodedChunk(
         state,
-        chunk,
         firstId,
         count,
         contentDictNameOverride = null,
@@ -4633,7 +4446,7 @@ export class TermRecordOpfsStore {
         lookupIndexBytes = null,
         recordFields = null,
     ) {
-        if (chunk.byteLength <= 0) { return; }
+        if (count <= 0) { return; }
         await this._validateShardAppendFormat(state);
         const firstRecord = this._recordsById.get(firstId) ?? null;
         const contentDictName = contentDictNameOverride ?? firstRecord?.entryContentDictName ?? 'raw';
@@ -4665,7 +4478,6 @@ export class TermRecordOpfsStore {
                 count,
                 contentOffsetBase,
                 lookupIndexBytes,
-                chunk,
                 recordFields,
             );
             state.pendingLookupIndexChunks.push(lookupIndexChunk);
@@ -4752,53 +4564,19 @@ export class TermRecordOpfsStore {
      * @param {number} count
      * @param {number} contentOffsetBase
      * @param {Uint8Array} payload
-     * @param {Uint8Array} recordPayload
-     * @param {Uint8Array|null} [precomputedRecordFields=null]
+     * @param {Uint8Array|null} recordFields
      * @returns {Uint8Array}
-     * @throws {Error} If the encoded record payload does not match the declared record count.
+     * @throws {Error} If the authoritative fields do not match the declared record count.
      */
     _createLookupIndexChunk(
         firstId,
         count,
         contentOffsetBase,
         payload,
-        recordPayload,
-        precomputedRecordFields = null,
+        recordFields,
     ) {
-        let recordFields = precomputedRecordFields;
-        if (recordFields === null) {
-            const recordPayloadView = new DataView(
-                recordPayload.buffer,
-                recordPayload.byteOffset,
-                recordPayload.byteLength,
-            );
-            if (recordPayload.byteLength < STRING_TABLE_HEADER_BYTES) {
-                throw new Error('Invalid term-record payload while creating lookup sidecar');
-            }
-            const stringCount = recordPayloadView.getUint32(0, true);
-            const stringBytesLength = recordPayloadView.getUint32(4, true);
-            const recordsOffset = STRING_TABLE_HEADER_BYTES + (stringCount * 2) + stringBytesLength;
-            if (
-                recordsOffset > recordPayload.byteLength ||
-                (recordPayload.byteLength - recordsOffset) !== (count * RECORD_HEADER_BYTES)
-            ) {
-                throw new Error('Invalid term-record payload while creating lookup sidecar');
-            }
-            recordFields = new Uint8Array(count * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
-            const recordFieldsView = new DataView(
-                recordFields.buffer,
-                recordFields.byteOffset,
-                recordFields.byteLength,
-            );
-            for (let i = 0; i < count; ++i) {
-                const recordOffset = recordsOffset + (i * RECORD_HEADER_BYTES);
-                const fieldsOffset = i * LOOKUP_INDEX_RECORD_FIELDS_BYTES;
-                recordFieldsView.setUint32(fieldsOffset, recordPayloadView.getUint32(recordOffset + 8, true), true);
-                recordFieldsView.setUint32(fieldsOffset + 4, recordPayloadView.getUint32(recordOffset + 12, true), true);
-                recordFieldsView.setInt32(fieldsOffset + 8, recordPayloadView.getInt32(recordOffset + 16, true), true);
-            }
-        } else if (recordFields.byteLength !== count * LOOKUP_INDEX_RECORD_FIELDS_BYTES) {
-            throw new Error('Invalid precomputed term-record fields');
+        if (!(recordFields instanceof Uint8Array) || recordFields.byteLength !== count * LOOKUP_INDEX_RECORD_FIELDS_BYTES) {
+            throw new Error('Invalid authoritative term-record fields');
         }
         const {base, derived} = splitPersistedTermLookupIndex(payload);
         const output = new Uint8Array(

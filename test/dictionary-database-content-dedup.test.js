@@ -84,7 +84,7 @@ function createArtifactOverlapHarness() {
                 internMs: 0,
                 packLengthsMs: 0,
                 heapCopyMs: 0,
-                wasmEncodeMs: 0,
+                recordFieldEncodeMs: 0,
                 validationMs: 0,
                 lookupIndexEncodeMs: 0,
             });
@@ -1596,7 +1596,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
                 internMs: 0,
                 packLengthsMs: 0,
                 heapCopyMs: 0,
-                wasmEncodeMs: 0,
+                recordFieldEncodeMs: 0,
             })),
         });
         const bytes = new Uint8Array([1, 2, 3]);
@@ -1667,7 +1667,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
                     internMs: 0,
                     packLengthsMs: 0,
                     heapCopyMs: 0,
-                    wasmEncodeMs: 0,
+                    recordFieldEncodeMs: 0,
                 };
             }),
         });

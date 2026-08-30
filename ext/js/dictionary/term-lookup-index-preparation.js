@@ -30,14 +30,14 @@ export const MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS = 30000;
 const MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS = 0xffff - 1;
 
 /**
- * @typedef {{bytes: Uint8Array, preinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan}} PreparedTermLookupIndex
+ * @typedef {{bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}} PreparedTermLookupIndex
  */
 
 /**
  * Builds offset-independent lookup sidecars from a parser-owned string plan.
  * The same helper runs in parser workers and remains available to the storage
  * owner as a fallback.
- * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+ * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} chunk
  * @param {Uint32Array|null} [remapScratch=null]
  * @returns {{indexes: Map<string, PreparedTermLookupIndex>, compactMs: number, indexEncodeMs: number, totalMs: number}|null}
  */
@@ -75,7 +75,7 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
         const compactStartedAt = safePerformance.now();
         const runPlan = reuseWholePlan ?
             preinternedPlan :
-            /** @type {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} */ (
+            /** @type {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (
                 compactTermRecordPreinternedPlan(
                     preinternedPlan,
                     runStart,
@@ -121,7 +121,7 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
  * A complete parser plan can back one persisted lookup/record segment without
  * compaction when every interned key is used and both compact-index dimensions
  * fit below the uint16 null sentinel.
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} plan
+ * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} plan
  * @param {number} rowCount
  * @param {Uint32Array} scratch
  * @param {boolean[]|Uint8Array} readingEqualsExpressionList
@@ -182,7 +182,7 @@ function isCompletePreparedTermLookupIndex(value, rowCount) {
     if (typeof value !== 'object' || value === null) { return false; }
     const bytes = /** @type {unknown} */ (Reflect.get(value, 'bytes'));
     const planValue = /** @type {unknown} */ (Reflect.get(value, 'preinternedPlan'));
-    const plan = /** @type {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} */ (
+    const plan = /** @type {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} */ (
         typeof planValue === 'object' && planValue !== null ? planValue : null
     );
     return (

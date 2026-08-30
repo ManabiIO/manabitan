@@ -4022,7 +4022,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
      * @returns {Promise<void>}
      */
     async bulkAddArtifactTermsChunk(chunk) {
@@ -4058,7 +4058,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @returns {{contentAppendMs: number, dedupScanMs?: number, contentStoreMs?: number, contentMetadataMs?: number, termRecordBuildMs: number, termRecordEncodeMs: number, termRecordWriteMs: number, termsVtabInsertMs: number, termRecordInternMs?: number, termRecordPackLengthsMs?: number, termRecordHeapCopyMs?: number, termRecordWasmEncodeMs?: number, termRecordValidationMs?: number, termLookupIndexEncodeMs?: number}|null}
+     * @returns {{contentAppendMs: number, dedupScanMs?: number, contentStoreMs?: number, contentMetadataMs?: number, termRecordBuildMs: number, termRecordEncodeMs: number, termRecordWriteMs: number, termsVtabInsertMs: number, termRecordInternMs?: number, termRecordPackLengthsMs?: number, termRecordHeapCopyMs?: number, termRecordFieldEncodeMs?: number, termRecordValidationMs?: number, termLookupIndexEncodeMs?: number}|null}
      */
     getLastBulkAddTermsMetrics() {
         return this._lastBulkAddTermsMetrics;
@@ -6192,7 +6192,7 @@ export class DictionaryDatabase {
         let termRecordInternMs = 0;
         let termRecordPackLengthsMs = 0;
         let termRecordHeapCopyMs = 0;
-        let termRecordWasmEncodeMs = 0;
+        let termRecordFieldEncodeMs = 0;
         let minAssignedContentOffset = Number.POSITIVE_INFINITY;
         let maxAssignedContentEnd = -1;
         let maxObservedStoreLengthBeforeAppend = -1;
@@ -6293,7 +6293,7 @@ export class DictionaryDatabase {
                 termRecordInternMs += metrics.internMs ?? 0;
                 termRecordPackLengthsMs += metrics.packLengthsMs ?? 0;
                 termRecordHeapCopyMs += metrics.heapCopyMs ?? 0;
-                termRecordWasmEncodeMs += metrics.wasmEncodeMs ?? 0;
+                termRecordFieldEncodeMs += metrics.recordFieldEncodeMs ?? 0;
                 const deferVirtualTableWrite = this._deferTermsVirtualTableSync || this._isBulkImportInProgress();
                 if (deferVirtualTableWrite) {
                     this._termsVirtualTableDirty = true;
@@ -6315,7 +6315,7 @@ export class DictionaryDatabase {
                 termRecordInternMs,
                 termRecordPackLengthsMs,
                 termRecordHeapCopyMs,
-                termRecordWasmEncodeMs,
+                termRecordFieldEncodeMs,
             };
             if (this._importDebugLogging) {
                 log.log(
@@ -6339,7 +6339,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} chunk
      * @returns {Promise<void>}
      */
     async _bulkAddArtifactTermsChunkWithoutContentDedup(chunk) {
@@ -6355,7 +6355,7 @@ export class DictionaryDatabase {
                 termRecordInternMs: 0,
                 termRecordPackLengthsMs: 0,
                 termRecordHeapCopyMs: 0,
-                termRecordWasmEncodeMs: 0,
+                termRecordFieldEncodeMs: 0,
                 termRecordValidationMs: 0,
                 termLookupIndexEncodeMs: 0,
             };
@@ -6369,7 +6369,7 @@ export class DictionaryDatabase {
         let termRecordInternMs = 0;
         let termRecordPackLengthsMs = 0;
         let termRecordHeapCopyMs = 0;
-        let termRecordWasmEncodeMs = 0;
+        let termRecordFieldEncodeMs = 0;
         let termRecordValidationMs = 0;
         let termLookupIndexEncodeMs = 0;
 
@@ -6495,7 +6495,7 @@ export class DictionaryDatabase {
             termRecordInternMs += metrics.internMs ?? 0;
             termRecordPackLengthsMs += metrics.packLengthsMs ?? 0;
             termRecordHeapCopyMs += metrics.heapCopyMs ?? 0;
-            termRecordWasmEncodeMs += metrics.wasmEncodeMs ?? 0;
+            termRecordFieldEncodeMs += metrics.recordFieldEncodeMs ?? 0;
             termRecordValidationMs += metrics.validationMs ?? 0;
             termLookupIndexEncodeMs += metrics.lookupIndexEncodeMs ?? 0;
             const deferVirtualTableWrite = this._deferTermsVirtualTableSync || this._isBulkImportInProgress();
@@ -6518,7 +6518,7 @@ export class DictionaryDatabase {
                 termRecordInternMs,
                 termRecordPackLengthsMs,
                 termRecordHeapCopyMs,
-                termRecordWasmEncodeMs,
+                termRecordFieldEncodeMs,
                 termRecordValidationMs,
                 termLookupIndexEncodeMs,
             };
@@ -6531,7 +6531,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {ArtifactTermContentChunk & {dictionary: string, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}} chunk
+     * @param {ArtifactTermContentChunk & {dictionary: string, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} chunk
      * @returns {Promise<void>}
      */
     async _bulkAddArtifactTermsChunkWithContentDedup(chunk) {
@@ -7825,7 +7825,7 @@ export class DictionaryDatabase {
         importMetrics.termRecordInternMs += metrics.internMs ?? 0;
         importMetrics.termRecordPackLengthsMs += metrics.packLengthsMs ?? 0;
         importMetrics.termRecordHeapCopyMs += metrics.heapCopyMs ?? 0;
-        importMetrics.termRecordWasmEncodeMs += metrics.wasmEncodeMs ?? 0;
+        importMetrics.termRecordFieldEncodeMs += metrics.recordFieldEncodeMs ?? 0;
         importMetrics.termRecordValidationMs += metrics.validationMs ?? 0;
         importMetrics.termLookupIndexEncodeMs += metrics.lookupIndexEncodeMs ?? 0;
         if (this._deferTermsVirtualTableSync || this._isBulkImportInProgress()) {

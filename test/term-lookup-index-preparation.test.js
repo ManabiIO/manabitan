@@ -19,7 +19,7 @@ const textEncoder = new TextEncoder();
 
 /**
  * @param {number} rowCount
- * @returns {{rowCount: number, readingEqualsExpressionList: Uint8Array, sequenceList: Int32Array, termRecordPreinternedPlan: import('../ext/js/dictionary/term-record-wasm-encoder.js').PreinternedTermRecordPlan & {stringOffsets: Uint32Array}}}
+ * @returns {{rowCount: number, readingEqualsExpressionList: Uint8Array, sequenceList: Int32Array, termRecordPreinternedPlan: import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan & {stringOffsets: Uint32Array}}}
  */
 function createChunk(rowCount) {
     const expressions = [textEncoder.encode('共通語'), textEncoder.encode('終端語')];

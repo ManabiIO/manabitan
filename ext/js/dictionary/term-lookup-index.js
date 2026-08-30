@@ -27,8 +27,6 @@ const CONTAINER_MAGIC = 0x37494c4d;
 const RADIX_SIZE = 257;
 const U32_NULL = 0xffffffff;
 const U16_NULL = 0xffff;
-const RECORD_HEADER_BYTES = 24;
-const RECORD_STRING_TABLE_HEADER_BYTES = 8;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
 const COMPACT_INDEX_FORMAT_VERSION = 7;
 const HASH_SLOT_TARGET_LOAD = 4;
@@ -66,80 +64,8 @@ const HASH_SLOT_TARGET_LOAD = 4;
  */
 
 /**
- * Builds a key-centric lookup index directly from the current term-record
- * payload. The payload's interned string table becomes the lookup key arena.
- * @param {Uint8Array} recordPayload
- * @param {number} rowCount
- * @returns {Uint8Array}
- * @throws {Error} If the record payload is malformed.
- */
-export function encodePersistedTermLookupIndexFromRecordPayload(recordPayload, rowCount) {
-    if (
-        recordPayload.byteLength < RECORD_STRING_TABLE_HEADER_BYTES ||
-        !Number.isSafeInteger(rowCount) ||
-        rowCount <= 0
-    ) {
-        throw new Error('Invalid term-record payload for lookup index');
-    }
-    if (rowCount >= U16_NULL) {
-        throw new RangeError('Term lookup index has too many rows for one chunk');
-    }
-    const view = new DataView(recordPayload.buffer, recordPayload.byteOffset, recordPayload.byteLength);
-    const keyCount = view.getUint32(0, true);
-    const keyBytesLength = view.getUint32(4, true);
-    const lengthsOffset = RECORD_STRING_TABLE_HEADER_BYTES;
-    const keyBytesOffset = lengthsOffset + (keyCount * 2);
-    const recordsOffset = keyBytesOffset + keyBytesLength;
-    if (
-        keyCount === 0 ||
-        keyCount >= U16_NULL ||
-        recordsOffset > recordPayload.byteLength ||
-        (recordPayload.byteLength - recordsOffset) !== rowCount * RECORD_HEADER_BYTES
-    ) {
-        throw new Error('Invalid term-record string table for lookup index');
-    }
-    const keyOffsets = new Uint32Array(keyCount + 1);
-    let keyCursor = 0;
-    for (let i = 0; i < keyCount; ++i) {
-        keyOffsets[i] = keyCursor;
-        keyCursor += view.getUint16(lengthsOffset + (i * 2), true);
-        if (keyCursor > keyBytesLength) { throw new Error('Invalid term-record lookup key length'); }
-    }
-    keyOffsets[keyCount] = keyCursor;
-    if (keyCursor !== keyBytesLength) { throw new Error('Invalid term-record lookup key arena'); }
-    const keyBytes = recordPayload.subarray(keyBytesOffset, recordsOffset);
-    const expressionKeys = new Uint32Array(rowCount);
-    const readingKeys = new Uint32Array(rowCount);
-    const sequenceValues = new Int32Array(rowCount);
-    let readingPostingCount = 0;
-    for (let row = 0; row < rowCount; ++row) {
-        const offset = recordsOffset + (row * RECORD_HEADER_BYTES);
-        const expressionKey = view.getUint32(offset, true);
-        const readingKey = view.getUint32(offset + 4, true);
-        if (
-            expressionKey >= keyCount ||
-            (readingKey !== READING_EQUALS_EXPRESSION_U32 && readingKey >= keyCount)
-        ) {
-            throw new Error('Invalid term-record lookup key reference');
-        }
-        expressionKeys[row] = expressionKey;
-        readingKeys[row] = readingKey;
-        sequenceValues[row] = view.getInt32(offset + 20, true);
-        if (readingKey !== READING_EQUALS_EXPRESSION_U32) { ++readingPostingCount; }
-    }
-    return encodeIndexPlan({
-        keyBytes,
-        keyOffsets,
-        expressionKeys,
-        readingKeys,
-        sequenceValues,
-        readingPostingCount,
-    });
-}
-
-/**
  * Builds the lookup index directly from the parser's interned record plan.
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} plan
+ * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} plan
  * @param {boolean[]|Uint8Array} readingEqualsExpressionList
  * @param {(number|undefined)[]|Int32Array} sequenceList
  * @param {number} rowCount
@@ -164,7 +90,7 @@ export function encodePersistedTermLookupIndexFromPreinternedPlan(
 /**
  * Builds the lookup index after the caller has validated every row key and
  * counted non-expression reading postings in the same traversal.
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} plan
+ * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} plan
  * @param {boolean[]|Uint8Array} readingEqualsExpressionList
  * @param {(number|undefined)[]|Int32Array} sequenceList
  * @param {number} rowCount
@@ -196,7 +122,7 @@ export function encodePersistedTermLookupIndexFromValidatedPreinternedPlan(
 }
 
 /**
- * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan} plan
+ * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} plan
  * @param {boolean[]|Uint8Array} readingEqualsExpressionList
  * @param {(number|undefined)[]|Int32Array} sequenceList
  * @param {number} rowCount

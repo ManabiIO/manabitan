@@ -47,7 +47,7 @@ export const TERM_IMPORT_METRIC_KEYS = Object.freeze([
     'termRecordInternMs',
     'termRecordPackLengthsMs',
     'termRecordHeapCopyMs',
-    'termRecordWasmEncodeMs',
+    'termRecordFieldEncodeMs',
     'termRecordValidationMs',
     'termLookupIndexEncodeMs',
 ]);
