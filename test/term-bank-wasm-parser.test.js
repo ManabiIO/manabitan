@@ -427,41 +427,121 @@ describe('term-bank WASM parser', () => {
     });
 
     test('borrows shared content metadata only when its lifetime is explicitly fenced', () => {
-        const heap = new Uint8Array(new SharedArrayBuffer(128));
-        heap.set([1, 2, 3, 4], 64);
+        const heap = new Uint8Array(new SharedArrayBuffer(256));
+        heap.set([1, 2, 3, 4], 192);
         const contentMetaList = new Uint32Array(heap.buffer, 8, 8);
         contentMetaList.set([0, 2, 11, 12, 2, 2, 13, 14]);
         const readingEqualsExpressionList = new Uint8Array(heap.buffer, 48, 2);
+        const scoreList = new Int32Array(heap.buffer, 52, 2);
+        const sequenceList = new Int32Array(heap.buffer, 60, 2);
+        const contentUniqueIndexList = new Uint32Array(heap.buffer, 68, 2);
+        const stringLengths = new Uint16Array(heap.buffer, 76, 2);
+        const stringOffsets = new Uint32Array(heap.buffer, 80, 2);
+        const stringHashes = new Uint32Array(heap.buffer, 88, 2);
+        const stringsBuffer = heap.subarray(96, 100);
+        const expressionIndexes = new Uint32Array(heap.buffer, 100, 2);
+        const readingIndexes = new Uint32Array(heap.buffer, 108, 2);
         const result = copyWasmBackedColumnChunk({
             rowCount: 2,
             expressionBytesList: [],
             readingBytesList: [],
             readingEqualsExpressionList,
-            scoreList: new Int32Array(2),
-            sequenceList: new Int32Array(2),
+            scoreList,
+            sequenceList,
             contentBytesList: [],
             contentHash1List: new Uint32Array(0),
             contentHash2List: new Uint32Array(0),
             contentBytesBuffer: heap,
-            contentBytesBaseOffset: 64,
+            contentBytesBaseOffset: 192,
             contentMetaList,
-            contentUniqueIndexList: new Uint32Array([0, 1]),
+            contentUniqueIndexList,
             contentDedupPlan: null,
             termRecordPreinternedPlan: {
-                stringLengths: new Uint16Array(0),
-                stringOffsets: new Uint32Array(0),
-                stringHashes: new Uint32Array(0),
-                stringsBuffer: new Uint8Array(0),
-                expressionIndexes: new Uint32Array(2),
-                readingIndexes: new Uint32Array(2),
+                stringLengths,
+                stringOffsets,
+                stringHashes,
+                stringsBuffer,
+                expressionIndexes,
+                readingIndexes,
             },
             mediaRows: [],
         }, true, true);
 
-        expect(result.contentMetaList?.buffer).toBe(heap.buffer);
-        expect(result.readingEqualsExpressionList.buffer).not.toBe(heap.buffer);
+        for (const view of [
+            result.contentMetaList,
+            result.readingEqualsExpressionList,
+            result.scoreList,
+            result.sequenceList,
+            result.contentUniqueIndexList,
+            result.termRecordPreinternedPlan.stringLengths,
+            result.termRecordPreinternedPlan.stringOffsets,
+            result.termRecordPreinternedPlan.stringHashes,
+            result.termRecordPreinternedPlan.stringsBuffer,
+            result.termRecordPreinternedPlan.expressionIndexes,
+            result.termRecordPreinternedPlan.readingIndexes,
+        ]) {
+            expect(view?.buffer).toBe(heap.buffer);
+        }
         contentMetaList[0] = 1;
+        readingEqualsExpressionList[0] = 1;
         expect(result.contentMetaList?.[0]).toBe(1);
+        expect(result.readingEqualsExpressionList[0]).toBe(1);
+    });
+
+    test('copies fenced metadata from an unrelated shared buffer', () => {
+        const contentHeap = new Uint8Array(new SharedArrayBuffer(128));
+        contentHeap.set([1, 2, 3, 4], 96);
+        const metadataHeap = new Uint8Array(new SharedArrayBuffer(128));
+        const contentMetaList = new Uint32Array(metadataHeap.buffer, 8, 8);
+        contentMetaList.set([0, 2, 11, 12, 2, 2, 13, 14]);
+        const readingEqualsExpressionList = new Uint8Array(metadataHeap.buffer, 48, 2);
+        readingEqualsExpressionList.set([0, 1]);
+        const result = copyWasmBackedColumnChunk({
+            rowCount: 2,
+            expressionBytesList: [],
+            readingBytesList: [],
+            readingEqualsExpressionList,
+            scoreList: new Int32Array(metadataHeap.buffer, 52, 2),
+            sequenceList: new Int32Array(metadataHeap.buffer, 60, 2),
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: contentHeap,
+            contentBytesBaseOffset: 96,
+            contentMetaList,
+            contentUniqueIndexList: new Uint32Array(metadataHeap.buffer, 68, 2),
+            contentDedupPlan: null,
+            termRecordPreinternedPlan: {
+                stringLengths: new Uint16Array(metadataHeap.buffer, 76, 2),
+                stringOffsets: new Uint32Array(metadataHeap.buffer, 80, 2),
+                stringHashes: new Uint32Array(metadataHeap.buffer, 88, 2),
+                stringsBuffer: metadataHeap.subarray(96, 100),
+                expressionIndexes: new Uint32Array(metadataHeap.buffer, 100, 2),
+                readingIndexes: new Uint32Array(metadataHeap.buffer, 108, 2),
+            },
+            mediaRows: [],
+        }, true, true);
+
+        expect(result.contentBytesBuffer?.buffer).toBe(contentHeap.buffer);
+        for (const view of [
+            result.contentMetaList,
+            result.readingEqualsExpressionList,
+            result.scoreList,
+            result.sequenceList,
+            result.contentUniqueIndexList,
+            result.termRecordPreinternedPlan.stringLengths,
+            result.termRecordPreinternedPlan.stringOffsets,
+            result.termRecordPreinternedPlan.stringHashes,
+            result.termRecordPreinternedPlan.stringsBuffer,
+            result.termRecordPreinternedPlan.expressionIndexes,
+            result.termRecordPreinternedPlan.readingIndexes,
+        ]) {
+            expect(view?.buffer).not.toBe(metadataHeap.buffer);
+        }
+        contentMetaList[0] = 1;
+        readingEqualsExpressionList[0] = 1;
+        expect(result.contentMetaList?.[0]).toBe(0);
+        expect(result.readingEqualsExpressionList[0]).toBe(0);
     });
 
     test.each([
