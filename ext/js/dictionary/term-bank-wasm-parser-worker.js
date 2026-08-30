@@ -24,12 +24,10 @@ import {
 } from './term-bank-wasm-parser.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {prepareTermLookupIndexesFromPreinternedPlan} from './term-lookup-index-preparation.js';
-import {inflateCompressedTermBankSources} from './term-bank-compressed-source.js';
 
-/** @typedef {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean, sourceCrc32Signatures?: number[]}} ParserOptions */
-/** @typedef {{compressionMethod: unknown, compressedSize: unknown, uncompressedSize: unknown, signature: unknown, filename?: unknown}} CompressedSourceMetadata */
+/** @typedef {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean}} ParserOptions */
 /** @typedef {{type: 'initialize', module: unknown}} InitializeRequest */
-/** @typedef {{type: 'parse', id: unknown, sourceBuffers: unknown, sourceMetadata?: unknown, sourceSentEpochMs?: unknown, version: unknown, chunkSize?: unknown, options?: unknown}} ParseRequest */
+/** @typedef {{type: 'parse', id: unknown, sourceBuffers: unknown, sourceSentEpochMs?: unknown, version: unknown, chunkSize?: unknown, options?: unknown}} ParseRequest */
 
 Reflect.set(globalThis, '__manabitanTermBankParserWorker', true);
 
@@ -94,23 +92,7 @@ async function parse(data) {
         const options = /** @type {ParserOptions} */ (
             typeof rawOptions === 'object' && rawOptions !== null ? rawOptions : {}
         );
-        let sourceBytes;
-        let parseOptions = options;
-        let sourceInflateMs = 0;
-        if (typeof data.sourceMetadata === 'undefined') {
-            sourceBytes = sourceBuffers.map((buffer) => new Uint8Array(buffer));
-        } else {
-            const rawSourceMetadata = /** @type {unknown} */ (data.sourceMetadata);
-            if (!Array.isArray(rawSourceMetadata)) {
-                throw new TypeError('Term-bank parser worker compressed source metadata is invalid');
-            }
-            const sourceMetadata = /** @type {CompressedSourceMetadata[]} */ (rawSourceMetadata);
-            const tInflateStart = safePerformance.now();
-            const inflated = await inflateCompressedTermBankSources(sourceBuffers, sourceMetadata);
-            sourceInflateMs = Math.max(0, safePerformance.now() - tInflateStart);
-            sourceBytes = inflated.sourceBytes;
-            parseOptions = {...options, sourceCrc32Signatures: inflated.signatures};
-        }
+        const sourceBytes = sourceBuffers.map((buffer) => new Uint8Array(buffer));
         /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */
         let resultChunk = null;
         let resultRowCount = 0;
@@ -134,7 +116,7 @@ async function parse(data) {
                 resultCopyMs = Math.max(0, safePerformance.now() - tResultCopyStart);
             },
             chunkSize,
-            {...parseOptions, maxPendingChunks: 1, singleChunk: true},
+            {...options, maxPendingChunks: 1, singleChunk: true},
         );
         if (resultChunk === null) {
             throw new Error('Parallel term-bank parser did not emit a chunk');
@@ -144,7 +126,6 @@ async function parse(data) {
         if (profile !== null) {
             profile.resultCopyMs = resultCopyMs;
             profile.sourceDeliveryMs = sourceDeliveryMs ?? 0;
-            profile.sourceInflateMs = sourceInflateMs;
             profile.borrowedContentResultCount = borrowsWorkerMemory ? 1 : 0;
         }
         if (options.prepareLookupIndexes === true && !(stableResultChunk.preparedLookupIndexes instanceof Map)) {

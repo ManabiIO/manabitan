@@ -2254,7 +2254,6 @@ export class DictionaryImportController {
                 zipMaxWorkers,
                 zipChunkSize,
                 zipUseWebWorkers,
-                fusedZipParserInflate,
                 artifactFixedPackMinTotalRows,
                 wasmPreallocateChunkRows,
                 termContentBlockTargetBytes,
@@ -2271,7 +2270,6 @@ export class DictionaryImportController {
                 zipMaxWorkers,
                 zipChunkSize,
                 zipUseWebWorkers,
-                fusedZipParserInflate,
                 artifactFixedPackMinTotalRows,
                 wasmPreallocateChunkRows,
                 termContentBlockTargetBytes,
@@ -2505,7 +2503,7 @@ export class DictionaryImportController {
     }
 
     /**
-     * @returns {{skipImageMetadata: boolean, skipMediaImport: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, zipUseWebWorkers: boolean|null, fusedZipParserInflate: boolean, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean, termContentBlockTargetBytes: number|null}}
+     * @returns {{skipImageMetadata: boolean, skipMediaImport: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, zipUseWebWorkers: boolean|null, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean, termContentBlockTargetBytes: number|null}}
      */
     _getImportPerformanceFlags() {
         const flags = /** @type {unknown} */ (Reflect.get(globalThis, 'manabitanImportPerformanceFlags'));
@@ -2521,7 +2519,6 @@ export class DictionaryImportController {
                 zipMaxWorkers: null,
                 zipChunkSize: null,
                 zipUseWebWorkers: null,
-                fusedZipParserInflate: false,
                 artifactFixedPackMinTotalRows: null,
                 wasmPreallocateChunkRows: true,
                 termContentBlockTargetBytes: null,
@@ -2548,7 +2545,6 @@ export class DictionaryImportController {
             zipMaxWorkers: zipMaxWorkers === null ? null : Math.max(1, Math.min(32, zipMaxWorkers)),
             zipChunkSize: zipChunkSize === null ? null : Math.max(16 * 1024, Math.min(8 * 1024 * 1024, zipChunkSize)),
             zipUseWebWorkers: typeof flagsRecord.zipUseWebWorkers === 'boolean' ? flagsRecord.zipUseWebWorkers : null,
-            fusedZipParserInflate: flagsRecord.fusedZipParserInflate === true,
             artifactFixedPackMinTotalRows: artifactFixedPackMinTotalRows === null ? null : Math.max(0, Math.min(4_000_000, artifactFixedPackMinTotalRows)),
             wasmPreallocateChunkRows: flagsRecord.wasmPreallocateChunkRows !== false,
             termContentBlockTargetBytes: termContentBlockTargetBytes === null ? null : Math.max(64 * 1024, Math.min(16 * 1024 * 1024, termContentBlockTargetBytes)),

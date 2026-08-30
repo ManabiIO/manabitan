@@ -24,7 +24,6 @@ import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {hashTermKeyBytes} from '../ext/js/dictionary/term-key-hash.js';
-import {inflateCompressedTermBankSources} from '../ext/js/dictionary/term-bank-compressed-source.js';
 import {encodePersistedTermLookupIndexFromPreinternedPlan} from '../ext/js/dictionary/term-lookup-index.js';
 import {decodeRawTermContentTokenBinary} from '../ext/js/dictionary/raw-term-content.js';
 import {
@@ -35,12 +34,10 @@ import {
     parseTermBankWithWasmChunks,
     parseTermBankWithWasmColumnChunks,
     parseTermBankWithWasmColumnChunksParallel,
-    parseTermBankWithWasmColumnChunksParallelCompressedLazy,
     parseTermBankWithWasmColumnChunksParallelDeferred,
     parseTermBankWithWasmColumnChunksParallelLazy,
     prewarmParallelTermBankParser,
     TermBankWasmResourceError,
-    validateTermBankSourceCrc32,
 } from '../ext/js/dictionary/term-bank-wasm-parser.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
@@ -77,31 +74,6 @@ function emitSuccessfulWorkerResult(listeners, id) {
     });
 }
 /** @typedef {{strings: string[], stringLengths: number[], stringHashes: number[], stringOffsets: number[], expressionIndexes: number[], readingIndexes: number[], readingEqualsExpressionList: number[]}} TermStringPlanSnapshot */
-
-/**
- * Independent test-only ZIP CRC32 implementation.
- * @param {Uint8Array} bytes
- * @returns {number}
- */
-function crc32(bytes) {
-    let result = 0xffffffff;
-    for (const byte of bytes) {
-        result ^= byte;
-        for (let i = 0; i < 8; ++i) {
-            result = (result >>> 1) ^ ((result & 1) === 0 ? 0 : 0xedb88320);
-        }
-    }
-    return (result ^ 0xffffffff) >>> 0;
-}
-
-/**
- * @param {Uint8Array} bytes
- * @returns {Promise<Uint8Array>}
- */
-async function deflateRaw(bytes) {
-    const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
-    return new Uint8Array(await new Response(stream).arrayBuffer());
-}
 
 /**
  * @param {Array<unknown>} rows
@@ -165,113 +137,6 @@ describe('term-bank WASM parser', () => {
 
     afterAll(() => {
         vi.unstubAllGlobals();
-    });
-
-    maybeTest('validates independent ZIP CRC32 vectors with one reusable scratch buffer', async () => {
-        await expect(validateTermBankSourceCrc32([
-            new Uint8Array(0),
-            textEncoder.encode('123456789'),
-        ], [0, 0xcbf43926])).resolves.toBeUndefined();
-    });
-
-    maybeTest('rejects ZIP CRC32 mismatches and malformed metadata', async () => {
-        await expect(validateTermBankSourceCrc32(
-            [textEncoder.encode('123456789')],
-            [0xcbf43927],
-        )).rejects.toThrow('CRC32 mismatch at source 1');
-        await expect(validateTermBankSourceCrc32(
-            [textEncoder.encode('123456789')],
-            [],
-        )).rejects.toThrow('metadata length mismatch');
-        await expect(validateTermBankSourceCrc32(
-            [textEncoder.encode('123456789')],
-            [-1],
-        )).rejects.toThrow('signature is invalid');
-    });
-
-    maybeTest('validates stored and deflated banks in final WASM memory before in-place compaction', async () => {
-        const sourceBanks = [
-            textEncoder.encode(` \n${JSON.stringify([
-                ['alpha', 'alpha-reading', '', '', 3, ['first'], 1, ''],
-            ])}\t`),
-            textEncoder.encode('  [ ]\r\n'),
-            textEncoder.encode(JSON.stringify([
-                ['beta', '', '', '', -2, [{type: 'text', text: 'second'}], 2, ''],
-            ])),
-            textEncoder.encode('\n[]\n'),
-        ];
-        const compressedBanks = await Promise.all(sourceBanks.map(async (bytes, index) => (
-            index % 2 === 0 ? Uint8Array.from(bytes) : await deflateRaw(bytes)
-        )));
-        const inflated = await inflateCompressedTermBankSources(
-            compressedBanks.map((bytes) => Uint8Array.from(bytes).buffer),
-            compressedBanks.map((bytes, index) => ({
-                compressionMethod: /** @type {0|8} */ (index % 2 === 0 ? 0 : 8),
-                compressedSize: bytes.byteLength,
-                uncompressedSize: sourceBanks[index].byteLength,
-                signature: crc32(sourceBanks[index]),
-            })),
-        );
-
-        /**
-         * @param {Uint8Array[]} sources
-         * @param {number[]|undefined} signatures
-         * @returns {Promise<null|Record<string, unknown>>}
-         */
-        const parseSnapshot = async (sources, signatures) => {
-            let snapshot = null;
-            await parseTermBankWithWasmColumnChunks(
-                sources,
-                3,
-                (chunk) => {
-                    const stable = copyWasmBackedColumnChunk(chunk, true);
-                    snapshot = {
-                        expressions: stable.expressionBytesList.map((bytes) => textDecoder.decode(bytes)),
-                        readings: stable.readingBytesList.map((bytes) => textDecoder.decode(bytes)),
-                        readingEqualsExpression: [...stable.readingEqualsExpressionList],
-                        scores: [...stable.scoreList],
-                        sequences: [...stable.sequenceList],
-                        contentHashes1: [...stable.contentHash1List],
-                        contentHashes2: [...stable.contentHash2List],
-                        contentBytes: [...(stable.contentBytesBuffer ?? new Uint8Array(0))],
-                        contentMetadata: [...(stable.contentMetaList ?? new Uint32Array(0))],
-                        uniqueIndexes: [...(stable.contentUniqueIndexList ?? new Uint32Array(0))],
-                    };
-                },
-                8,
-                {
-                    emitContentSlab: true,
-                    emitTokenBinaryContent: true,
-                    ...(typeof signatures === 'undefined' ? {} : {sourceCrc32Signatures: signatures}),
-                },
-            );
-            return snapshot;
-        };
-
-        const ordinary = await parseSnapshot(sourceBanks, void 0);
-        const validated = await parseSnapshot(inflated.sourceBytes, inflated.signatures);
-        expect(validated).toStrictEqual(ordinary);
-        expect(validated?.expressions).toStrictEqual(['alpha', 'beta']);
-        expect(consumeLastTermBankWasmParseProfile()?.sourceCrc32Ms).toBeGreaterThanOrEqual(0);
-    });
-
-    maybeTest('rejects an in-place source CRC mismatch before publishing a chunk', async () => {
-        const sources = [
-            textEncoder.encode('[[' + '"first","","","",0,["one"],1,""' + ']]'),
-            textEncoder.encode('[]'),
-            textEncoder.encode('[[' + '"third","","","",0,["three"],3,""' + ']]'),
-        ];
-        const signatures = sources.map(crc32);
-        signatures[2] ^= 1;
-        let sinkCalls = 0;
-        await expect(parseTermBankWithWasmColumnChunks(
-            sources,
-            3,
-            () => { ++sinkCalls; },
-            8,
-            {emitContentSlab: true, emitTokenBinaryContent: true, sourceCrc32Signatures: signatures},
-        )).rejects.toThrow('CRC32 mismatch at source 3');
-        expect(sinkCalls).toBe(0);
     });
 
     test('copies every WASM-backed column before a parser heap can be reused', () => {
@@ -1303,85 +1168,6 @@ describe('term-bank WASM parser', () => {
             expect(loadCount).toBe(sourceCount);
         } finally {
             releaseSink();
-            await disposeParallelTermBankParser();
-            vi.stubGlobal('Worker', void 0);
-        }
-    });
-
-    maybeTest('transfers compressed source metadata and compressed bytes to parser workers', async () => {
-        const parseMessages = [];
-        const transferredSourceBuffers = [];
-        class SuccessfulWorker {
-            constructor() {
-                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
-                this.listeners = new Map();
-            }
-
-            addEventListener(type, listener) {
-                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
-            }
-
-            removeEventListener(type, listener) {
-                this.listeners.get(type)?.delete(listener);
-            }
-
-            postMessage(message, transfer = []) {
-                if (message.type !== 'initialize') {
-                    transferredSourceBuffers.push(...message.sourceBuffers);
-                    const clonedMessage = structuredClone(message, {transfer});
-                    queueMicrotask(() => {
-                        parseMessages.push(clonedMessage);
-                        emitWorkerMessage(this.listeners, {
-                            type: 'result',
-                            id: clonedMessage.id,
-                            rowCount: 1,
-                            resultSentEpochMs: Date.now(),
-                            chunk: {rowCount: 1},
-                            profile: {chunkDispatchMs: 0},
-                        });
-                    });
-                    return;
-                }
-                queueMicrotask(() => {
-                    emitWorkerMessage(this.listeners, {type: 'ready'});
-                });
-            }
-
-            terminate() {}
-        }
-
-        vi.stubGlobal('Worker', SuccessfulWorker);
-        try {
-            const sourceCount = 4;
-            const sinks = [];
-            await expect(parseTermBankWithWasmColumnChunksParallelCompressedLazy(
-                Array.from({length: sourceCount}, (_, index) => async () => ({
-                    bytes: new Uint8Array([index + 1]),
-                    compressionMethod: 8,
-                    compressedSize: 1,
-                    uncompressedSize: 16,
-                    signature: index,
-                    filename: `term_bank_${index + 1}.json`,
-                })),
-                Array.from({length: sourceCount}, () => 16),
-                3,
-                (_chunk, progress) => { sinks.push(progress.chunkIndex); },
-                {emitContentSlab: true},
-            )).resolves.toBe(true);
-            expect(parseMessages).toHaveLength(sourceCount);
-            expect(parseMessages.flatMap(({sourceBuffers}) => sourceBuffers.map((buffer) => buffer.byteLength))).toStrictEqual([1, 1, 1, 1]);
-            expect(transferredSourceBuffers.every((buffer) => buffer.byteLength === 0)).toBe(true);
-            expect(parseMessages.flatMap(({sourceMetadata}) => sourceMetadata)).toStrictEqual(
-                Array.from({length: sourceCount}, (_, index) => ({
-                    compressionMethod: 8,
-                    compressedSize: 1,
-                    uncompressedSize: 16,
-                    signature: index,
-                    filename: `term_bank_${index + 1}.json`,
-                })),
-            );
-            expect(sinks).toStrictEqual([1, 2, 3, 4]);
-        } finally {
             await disposeParallelTermBankParser();
             vi.stubGlobal('Worker', void 0);
         }

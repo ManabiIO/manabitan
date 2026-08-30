@@ -30,8 +30,6 @@ extern unsigned char __heap_base;
 static uint32_t heap_ptr = 0u;
 static uint32_t last_parse_capacity = 0u;
 static uint32_t last_content_capacity = 0u;
-static uint32_t crc32_table[8][256];
-static uint32_t crc32_table_initialized = 0u;
 
 void* memset(void* dest, int value, unsigned long count) {
     unsigned char* bytes = (unsigned char*)dest;
@@ -101,57 +99,6 @@ uint32_t wasm_alloc(uint32_t size) {
     }
     heap_ptr = end;
     return start;
-}
-
-__attribute__((visibility("default")))
-uint32_t wasm_crc32(uint32_t data_ptr, uint32_t length) {
-    const uint8_t* data = (const uint8_t*)(uintptr_t)data_ptr;
-    if (crc32_table_initialized == 0u) {
-        for (uint32_t i = 0u; i < 256u; ++i) {
-            uint32_t value = i;
-            for (uint32_t bit = 0u; bit < 8u; ++bit) {
-                value = (value >> 1u) ^ ((value & 1u) != 0u ? 0xedb88320u : 0u);
-            }
-            crc32_table[0][i] = value;
-        }
-        for (uint32_t slice = 1u; slice < 8u; ++slice) {
-            for (uint32_t i = 0u; i < 256u; ++i) {
-                const uint32_t value = crc32_table[slice - 1u][i];
-                crc32_table[slice][i] = (value >> 8u) ^ crc32_table[0][value & 0xffu];
-            }
-        }
-        crc32_table_initialized = 1u;
-    }
-
-    uint32_t crc = 0xffffffffu;
-    uint32_t offset = 0u;
-    while (length - offset >= 8u) {
-        const uint32_t first =
-            (uint32_t)data[offset] |
-            ((uint32_t)data[offset + 1u] << 8u) |
-            ((uint32_t)data[offset + 2u] << 16u) |
-            ((uint32_t)data[offset + 3u] << 24u);
-        const uint32_t second =
-            (uint32_t)data[offset + 4u] |
-            ((uint32_t)data[offset + 5u] << 8u) |
-            ((uint32_t)data[offset + 6u] << 16u) |
-            ((uint32_t)data[offset + 7u] << 24u);
-        crc ^= first;
-        crc =
-            crc32_table[7][crc & 0xffu] ^
-            crc32_table[6][(crc >> 8u) & 0xffu] ^
-            crc32_table[5][(crc >> 16u) & 0xffu] ^
-            crc32_table[4][crc >> 24u] ^
-            crc32_table[3][second & 0xffu] ^
-            crc32_table[2][(second >> 8u) & 0xffu] ^
-            crc32_table[1][(second >> 16u) & 0xffu] ^
-            crc32_table[0][second >> 24u];
-        offset += 8u;
-    }
-    while (offset < length) {
-        crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset++]) & 0xffu];
-    }
-    return ~crc;
 }
 
 __attribute__((visibility("default")))
