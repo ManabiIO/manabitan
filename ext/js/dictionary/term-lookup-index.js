@@ -45,6 +45,7 @@ const HASH_SLOT_TARGET_LOAD = 4;
  * @property {Uint16Array} sequenceNext
  * @property {Uint16Array} sequencePostingOffsets
  * @property {Uint16Array} sequencePostingRows
+ * @property {Int32Array|null} sequenceValues
  * @property {Uint32Array|null} keyOrder
  * @property {Uint32Array|null} keyReverseOrder
  * @property {Uint32Array|null} keyRadix
@@ -665,6 +666,7 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         sequenceNext,
         sequencePostingOffsets,
         sequencePostingRows,
+        sequenceValues: null,
         keyOrder: null,
         keyReverseOrder: null,
         keyRadix: null,
@@ -863,6 +865,33 @@ export function getPersistedTermKeyBytes(index, row, field) {
     const key = field === 'reading' ? index.readingKeys[row] : index.expressionKeys[row];
     if (key === U16_NULL) { return null; }
     return getKeyBytes(index.keyBytes, index.keyOffsets, key);
+}
+
+/**
+ * Reconstructs the optional row sequence column lazily from its persisted
+ * posting lists. Most lookups never materialize records from most chunks, so
+ * paying this linear cost only for a matching chunk keeps cold misses cheap.
+ * @param {PersistedTermLookupIndex} index
+ * @param {number} row
+ * @returns {number|null}
+ */
+export function getPersistedTermSequence(index, row) {
+    if (!Number.isInteger(row) || row < 0 || row >= index.expressionKeys.length) { return null; }
+    if (index.sequenceKeys.length === 0) { return null; }
+    let values = index.sequenceValues;
+    if (!(values instanceof Int32Array)) {
+        values = new Int32Array(index.expressionKeys.length);
+        values.fill(-1);
+        for (let key = 0; key < index.sequenceKeys.length; ++key) {
+            const sequence = index.sequenceKeys[key];
+            for (let i = index.sequencePostingOffsets[key]; i < index.sequencePostingOffsets[key + 1]; ++i) {
+                values[index.sequencePostingRows[i]] = sequence;
+            }
+        }
+        index.sequenceValues = values;
+    }
+    const sequence = values[row];
+    return sequence >= 0 ? sequence : null;
 }
 
 /**

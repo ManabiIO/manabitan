@@ -20,6 +20,7 @@ import {
     findPrefixRows,
     findSequenceRows,
     getPersistedTermKeyBytes,
+    getPersistedTermSequence,
     parseChecksummedPersistedTermLookupIndex,
     parsePersistedTermLookupIndex,
 } from '../ext/js/dictionary/term-lookup-index.js';
@@ -266,6 +267,9 @@ describe('persisted term lookup index', () => {
         expect(index.sequencePostingOffsets).toBeInstanceOf(Uint16Array);
         expect(index.sequencePostingRows).toBeInstanceOf(Uint16Array);
         expect(index.readingKeys[1]).toBe(0xffff);
+        expect(getPersistedTermSequence(index, 0)).toBe(1);
+        expect(getPersistedTermSequence(index, 1)).toBeNull();
+        expect(index.sequenceValues).toEqual(new Int32Array([1, -1]));
     });
 
     test('omits sequence keys and postings when every row has no sequence', () => {

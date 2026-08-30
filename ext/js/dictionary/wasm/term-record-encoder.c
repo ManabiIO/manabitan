@@ -100,17 +100,6 @@ static inline void copy_bytes(uint8_t* out, uint32_t* cursor, const uint8_t* src
     *cursor = c + len;
 }
 
-static inline uint32_t hash_record_fixed_fields(const struct RecordMeta* meta) {
-    uint32_t hash = 0x811c9dc5u;
-    hash = (hash ^ meta->expression_index) * 0x01000193u;
-    hash = (hash ^ meta->reading_index) * 0x01000193u;
-    hash = (hash ^ meta->entry_content_offset_delta) * 0x01000193u;
-    hash = (hash ^ meta->entry_content_length) * 0x01000193u;
-    hash = (hash ^ (uint32_t)meta->score) * 0x01000193u;
-    hash = (hash ^ (uint32_t)meta->sequence) * 0x01000193u;
-    return hash;
-}
-
 __attribute__((visibility("default")))
 uint32_t calc_encoded_size(uint32_t record_count, uint32_t string_count, uint32_t lengths_ptr, uint32_t strings_byte_length, uint32_t metas_ptr) {
     const struct RecordMeta* metas = (const struct RecordMeta*)(uintptr_t)metas_ptr;
@@ -125,12 +114,12 @@ uint32_t calc_encoded_size(uint32_t record_count, uint32_t string_count, uint32_
 }
 
 __attribute__((visibility("default")))
-uint32_t encode_records(uint32_t record_count, uint32_t string_count, uint32_t lengths_ptr, uint32_t strings_ptr, uint32_t strings_byte_length, uint32_t metas_ptr, uint32_t out_ptr, uint32_t fixed_hashes_ptr) {
+uint32_t encode_records(uint32_t record_count, uint32_t string_count, uint32_t lengths_ptr, uint32_t strings_ptr, uint32_t strings_byte_length, uint32_t metas_ptr, uint32_t out_ptr, uint32_t record_fields_ptr) {
     const struct RecordMeta* metas = (const struct RecordMeta*)(uintptr_t)metas_ptr;
     const uint16_t* lengths = (const uint16_t*)(uintptr_t)lengths_ptr;
     const uint8_t* strings = (const uint8_t*)(uintptr_t)strings_ptr;
     uint8_t* out = (uint8_t*)(uintptr_t)out_ptr;
-    uint32_t* fixed_hashes = (uint32_t*)(uintptr_t)fixed_hashes_ptr;
+    uint32_t* record_fields = (uint32_t*)(uintptr_t)record_fields_ptr;
     uint32_t cursor = 0u;
 
     write_u32(out, &cursor, string_count);
@@ -148,7 +137,10 @@ uint32_t encode_records(uint32_t record_count, uint32_t string_count, uint32_t l
         write_u32(out, &cursor, m->entry_content_length);
         write_i32(out, &cursor, m->score);
         write_i32(out, &cursor, m->sequence);
-        fixed_hashes[i] = hash_record_fixed_fields(m);
+        uint32_t fields_offset = i * 3u;
+        record_fields[fields_offset + 0u] = m->entry_content_offset_delta;
+        record_fields[fields_offset + 1u] = m->entry_content_length;
+        record_fields[fields_offset + 2u] = (uint32_t)m->score;
     }
     return cursor;
 }

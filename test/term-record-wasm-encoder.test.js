@@ -76,9 +76,9 @@ describe('term record WASM encoder', () => {
         expect(Reflect.get(wasmStore, '_wasmEncoderUnavailable')).toBe(false);
         expect(wasm.contentOffsetBase).toBe(base);
         expect(wasm.bytes).toStrictEqual(js.bytes);
-        expect(wasm.fixedFieldsHashes).toHaveLength(records.length * 4);
+        expect(wasm.recordFields).toHaveLength(records.length * 12);
         const lookupPayload = new Uint8Array([1, 2, 3, 4]);
-        const sidecarWithPrecomputedHashes = Reflect.get(wasmStore, '_createLookupIndexChunk').call(
+        const sidecarWithPrecomputedFields = Reflect.get(wasmStore, '_createLookupIndexChunk').call(
             wasmStore,
             1,
             records.length,
@@ -86,9 +86,9 @@ describe('term record WASM encoder', () => {
             base,
             lookupPayload,
             wasm.bytes,
-            wasm.fixedFieldsHashes,
+            wasm.recordFields,
         );
-        const sidecarWithScannedHashes = Reflect.get(wasmStore, '_createLookupIndexChunk').call(
+        const sidecarWithScannedFields = Reflect.get(wasmStore, '_createLookupIndexChunk').call(
             wasmStore,
             1,
             records.length,
@@ -97,6 +97,6 @@ describe('term record WASM encoder', () => {
             lookupPayload,
             wasm.bytes,
         );
-        expect(sidecarWithPrecomputedHashes).toStrictEqual(sidecarWithScannedHashes);
+        expect(sidecarWithPrecomputedFields).toStrictEqual(sidecarWithScannedFields);
     });
 });
