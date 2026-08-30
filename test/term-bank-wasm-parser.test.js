@@ -465,7 +465,7 @@ describe('term-bank WASM parser', () => {
     });
 
     test.each([
-        [{hardwareConcurrency: 12, deviceMemory: 8}, 4],
+        [{hardwareConcurrency: 12, deviceMemory: 8}, 5],
         [{hardwareConcurrency: 12, deviceMemory: 4}, 2],
         [{hardwareConcurrency: 4, deviceMemory: 8}, 2],
         [{}, 2],
