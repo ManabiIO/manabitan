@@ -10,7 +10,7 @@
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {DictionaryImportSession} from '../ext/js/dictionary/dictionary-import-session.js';
-import {TermBankSourcePipeline} from '../ext/js/dictionary/term-bank-source-pipeline.js';
+import {RawZipPayloadReader, TermBankSourcePipeline} from '../ext/js/dictionary/term-bank-source-pipeline.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
 /** @returns {{startBulkImport: ReturnType<typeof vi.fn>, finishBulkImport: ReturnType<typeof vi.fn>, abortBulkImport: ReturnType<typeof vi.fn>, bulkUpdate: ReturnType<typeof vi.fn>, deleteDictionary: ReturnType<typeof vi.fn>, deleteDictionaryImportPlaceholder: ReturnType<typeof vi.fn>}} */
@@ -332,6 +332,254 @@ describe('TermBankSourcePipeline', () => {
         expect(read).toHaveBeenCalledTimes(1);
         expect(pipeline.createImportRunPlan(files.length - 1)).toBeNull();
         await pipeline.dispose();
+    });
+
+    test('keeps large imports batched on low-memory Chromium', async () => {
+        const files = Array.from({length: 64}, (_, index) => ({
+            filename: `term_bank_${index + 1}.json`,
+            offset: index * 64,
+            compressionMethod: 8,
+            compressedSize: 4,
+            uncompressedSize: 4 * 1024 * 1024,
+            signature: index + 100,
+            getData() {},
+        }));
+        const pipeline = new TermBankSourcePipeline({
+            termFiles: files,
+            enabled: true,
+            read: async () => new TextEncoder().encode('[]'),
+            readCompressed: async () => new Uint8Array(4),
+            deviceMemory: 4,
+        });
+
+        expect(pipeline.createImportRunPlan(0)).toBeNull();
+        expect(pipeline.createCompressedImportRunPlan(0)).toBeNull();
+        expect(pipeline.getBatch(0)).toEqual(files.slice(0, 16));
+        await pipeline.dispose();
+    });
+
+    test('creates a lazy raw-payload plan only with complete validation metadata', async () => {
+        const files = Array.from({length: 4}, (_, index) => ({
+            filename: `term_bank_${index + 1}.json`,
+            offset: index * 64,
+            compressionMethod: index === 0 ? 0 : 8,
+            compressedSize: index === 0 ? 2 : 4,
+            uncompressedSize: index === 0 ? 2 : 8,
+            signature: index + 100,
+            getData() {},
+        }));
+        const read = vi.fn(async () => new TextEncoder().encode('[]'));
+        const readCompressed = vi.fn(async (file) => new Uint8Array(file.compressedSize));
+        const pipeline = new TermBankSourcePipeline({termFiles: files, enabled: true, read, readCompressed});
+
+        const plan = pipeline.createCompressedImportRunPlan(0);
+
+        expect(plan?.files).toEqual(files);
+        expect(plan?.estimatedByteLengths).toEqual([2, 8, 8, 8]);
+        expect(readCompressed).not.toHaveBeenCalled();
+        await expect(plan?.loaders[1]()).resolves.toMatchObject({
+            compressionMethod: 8,
+            compressedSize: 4,
+            uncompressedSize: 8,
+            signature: 101,
+            filename: 'term_bank_2.json',
+        });
+        expect(readCompressed).toHaveBeenCalledTimes(1);
+        expect(read).not.toHaveBeenCalled();
+        await pipeline.dispose();
+    });
+
+    test.each([
+        ['missing CRC', {signature: void 0}],
+        ['missing central offset', {offset: void 0}],
+        ['unsafe central offset', {offset: Number.MAX_SAFE_INTEGER + 1}],
+        ['invalid raw filename', {rawFilename: 'term_bank_3.json'}],
+        ['encrypted entry', {encrypted: true}],
+        ['unsupported compression', {compressionMethod: 12}],
+        ['stored size mismatch', {compressionMethod: 0, compressedSize: 4, uncompressedSize: 8}],
+    ])('does not activate raw-payload parsing for a %s', async (_name, override) => {
+        const files = Array.from({length: 4}, (_, index) => ({
+            filename: `term_bank_${index + 1}.json`,
+            offset: index * 64,
+            compressionMethod: 8,
+            compressedSize: 4,
+            uncompressedSize: 8,
+            signature: index + 100,
+            getData() {},
+            ...(index === 2 ? override : {}),
+        }));
+        const pipeline = new TermBankSourcePipeline({
+            termFiles: files,
+            enabled: true,
+            read: async () => new TextEncoder().encode('[]'),
+            readCompressed: async () => new Uint8Array(4),
+        });
+
+        expect(pipeline.createCompressedImportRunPlan(0)).toBeNull();
+        await pipeline.dispose();
+    });
+
+    test('rejects a raw payload whose byte count disagrees with ZIP metadata', async () => {
+        const files = Array.from({length: 4}, (_, index) => ({
+            filename: `term_bank_${index + 1}.json`,
+            offset: index * 64,
+            compressionMethod: 8,
+            compressedSize: 4,
+            uncompressedSize: 8,
+            signature: index + 100,
+            getData() {},
+        }));
+        const pipeline = new TermBankSourcePipeline({
+            termFiles: files,
+            enabled: true,
+            read: async () => new TextEncoder().encode('[]'),
+            readCompressed: async () => new Uint8Array(3),
+        });
+
+        await expect(pipeline.createCompressedImportRunPlan(0)?.loaders[0]()).rejects.toThrow('ZIP size mismatch');
+        await pipeline.dispose();
+    });
+
+    test('reads an owned raw payload from a validated ZIP local header', async () => {
+        const filename = new TextEncoder().encode('term_bank_1.json');
+        const extra = new Uint8Array([1, 2, 3, 4]);
+        const payload = new Uint8Array([9, 8, 7, 6, 5]);
+        const archive = new Uint8Array(30 + filename.byteLength + extra.byteLength + payload.byteLength);
+        const view = new DataView(archive.buffer);
+        view.setUint32(0, 0x04034b50, true);
+        view.setUint16(6, 0x08, true);
+        view.setUint16(8, 8, true);
+        view.setUint16(26, filename.byteLength, true);
+        view.setUint16(28, extra.byteLength, true);
+        archive.set(filename, 30);
+        archive.set(extra, 30 + filename.byteLength);
+        archive.set(payload, 30 + filename.byteLength + extra.byteLength);
+        const reader = new RawZipPayloadReader(archive.buffer);
+        const controller = new AbortController();
+
+        const result = await reader.read({
+            filename: 'term_bank_1.json',
+            offset: 0,
+            compressionMethod: 8,
+            compressedSize: payload.byteLength,
+        }, controller.signal);
+
+        expect(result).toEqual(payload);
+        expect(result.buffer).not.toBe(archive.buffer);
+    });
+
+    test('rejects raw payload reads with invalid local metadata or cancellation', async () => {
+        const archive = new Uint8Array(32);
+        const reader = new RawZipPayloadReader(archive.buffer);
+        const file = {filename: 'term_bank_1.json', offset: 0, compressionMethod: 8, compressedSize: 2};
+        await expect(reader.read(file, new AbortController().signal)).rejects.toThrow('local header is invalid');
+
+        const controller = new AbortController();
+        controller.abort();
+        await expect(reader.read(file, controller.signal)).rejects.toThrow();
+    });
+
+    test.each([
+        ['encrypted local entry', {flags: 0x1, localMethod: 8, compressedSize: 2, filenameLength: 0}, 'disagrees with central metadata'],
+        ['different local compression method', {flags: 0, localMethod: 0, compressedSize: 2, filenameLength: 0}, 'disagrees with central metadata'],
+        ['out-of-bounds local name', {flags: 0, localMethod: 8, compressedSize: 2, filenameLength: 3}, 'payload is out of bounds'],
+        ['out-of-bounds payload', {flags: 0, localMethod: 8, compressedSize: 3, filenameLength: 0}, 'payload is out of bounds'],
+    ])('rejects a %s', async (_name, {flags, localMethod, compressedSize, filenameLength}, message) => {
+        const archive = new Uint8Array(32);
+        const view = new DataView(archive.buffer);
+        view.setUint32(0, 0x04034b50, true);
+        view.setUint16(6, flags, true);
+        view.setUint16(8, localMethod, true);
+        view.setUint16(26, filenameLength, true);
+        const reader = new RawZipPayloadReader(archive.buffer);
+        const file = {filename: 'term_bank_1.json', offset: 0, compressionMethod: 8, compressedSize};
+
+        await expect(reader.read(file, new AbortController().signal)).rejects.toThrow(message);
+    });
+
+    test('rejects a local filename which disagrees with the central directory', async () => {
+        const localFilename = new TextEncoder().encode('term_bank_2.json');
+        const centralFilename = new TextEncoder().encode('term_bank_1.json');
+        const archive = new Uint8Array(30 + localFilename.byteLength);
+        const view = new DataView(archive.buffer);
+        view.setUint32(0, 0x04034b50, true);
+        view.setUint16(8, 8, true);
+        view.setUint16(26, localFilename.byteLength, true);
+        archive.set(localFilename, 30);
+        const reader = new RawZipPayloadReader(archive.buffer);
+
+        await expect(reader.read({
+            filename: 'term_bank_1.json',
+            rawFilename: centralFilename,
+            offset: 0,
+            compressionMethod: 8,
+            compressedSize: 0,
+        }, new AbortController().signal)).rejects.toThrow('local filename disagrees');
+    });
+
+    test('shares a rejected Blob materialization across concurrent raw reads', async () => {
+        const archiveError = new Error('archive read failed');
+        const archive = new Blob([new Uint8Array(30)]);
+        const arrayBuffer = vi.spyOn(archive, 'arrayBuffer').mockRejectedValue(archiveError);
+        const reader = new RawZipPayloadReader(archive);
+        const file = {filename: 'term_bank_1.json', offset: 0, compressionMethod: 8, compressedSize: 0};
+
+        const first = reader.read(file, new AbortController().signal);
+        const second = reader.read(file, new AbortController().signal);
+
+        await expect(first).rejects.toBe(archiveError);
+        await expect(second).rejects.toBe(archiveError);
+        expect(arrayBuffer).toHaveBeenCalledTimes(1);
+    });
+
+    test('waits for a shared Blob materialization to settle after compressed reads are aborted', async () => {
+        /** @type {(value: ArrayBuffer) => void} */
+        let releaseArchive = () => {};
+        /** @type {Promise<ArrayBuffer>} */
+        const archiveGate = new Promise((resolve) => { releaseArchive = resolve; });
+        const archive = new Blob([new Uint8Array(30)]);
+        const arrayBuffer = vi.spyOn(archive, 'arrayBuffer').mockImplementation(async () => await archiveGate);
+        const rawReader = new RawZipPayloadReader(archive);
+        const files = Array.from({length: 4}, (_, index) => ({
+            filename: `term_bank_${index + 1}.json`,
+            offset: 0,
+            compressionMethod: 8,
+            compressedSize: 0,
+            uncompressedSize: 2,
+            signature: index,
+            getData() {},
+        }));
+        const pipeline = new TermBankSourcePipeline({
+            termFiles: files,
+            enabled: true,
+            read: async () => new TextEncoder().encode('[]'),
+            readCompressed: async (file, signal) => await rawReader.read(file, signal),
+        });
+        const plan = pipeline.createCompressedImportRunPlan(0);
+        if (plan === null) { throw new Error('Expected compressed import plan'); }
+        const firstRead = plan.loaders[0]();
+        const secondRead = plan.loaders[1]();
+        const firstRejection = expect(firstRead).rejects.toMatchObject({name: 'AbortError'});
+        const secondRejection = expect(secondRead).rejects.toMatchObject({name: 'AbortError'});
+        const disposal = pipeline.dispose();
+        let disposed = false;
+        void disposal.then(() => { disposed = true; });
+
+        await Promise.resolve();
+        expect(disposed).toBe(false);
+        releaseArchive(new ArrayBuffer(30));
+        await disposal;
+        await firstRejection;
+        await secondRejection;
+        expect(arrayBuffer).toHaveBeenCalledTimes(1);
+    });
+
+    test('bounds whole-archive materialization for direct ZIP reads', () => {
+        expect(RawZipPayloadReader.supportsArchive(new ArrayBuffer(30))).toBe(true);
+        expect(RawZipPayloadReader.supportsArchive(new ArrayBuffer(29))).toBe(false);
+        expect(RawZipPayloadReader.supportsArchive(
+            /** @type {ArrayBuffer} */ (/** @type {unknown} */ ({byteLength: 129 * 1024 * 1024})),
+        )).toBe(false);
     });
 
     test('bounds read-ahead when ZIP entries do not expose uncompressed sizes', async () => {

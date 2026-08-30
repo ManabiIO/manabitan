@@ -19,6 +19,7 @@ import {existsSync} from 'node:fs';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {crc32, deflateRawSync} from 'node:zlib';
 import {afterAll, beforeAll, describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
@@ -31,9 +32,11 @@ import {
     copyWasmBackedColumnChunk,
     disposeParallelTermBankParser,
     getParallelTermBankParserWorkerCount,
+    inflateCompressedTermBankSourcesWasm,
     parseTermBankWithWasmChunks,
     parseTermBankWithWasmColumnChunks,
     parseTermBankWithWasmColumnChunksParallel,
+    parseTermBankWithWasmColumnChunksParallelCompressedLazy,
     parseTermBankWithWasmColumnChunksParallelDeferred,
     parseTermBankWithWasmColumnChunksParallelLazy,
     prewarmParallelTermBankParser,
@@ -139,6 +142,59 @@ function getContentSignatures(bytes) {
  */
 const hashBytes = hashTermKeyBytes;
 
+/**
+ * @param {string} json
+ * @param {0|8} compressionMethod
+ * @returns {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number}}
+ */
+function createCompressedTermBankSource(json, compressionMethod) {
+    const inflated = textEncoder.encode(json);
+    const bytes = compressionMethod === 8 ? Uint8Array.from(deflateRawSync(inflated)) : Uint8Array.from(inflated);
+    return {
+        bytes,
+        compressionMethod,
+        compressedSize: bytes.byteLength,
+        uncompressedSize: inflated.byteLength,
+        signature: crc32(inflated) >>> 0,
+    };
+}
+
+/**
+ * @param {Uint8Array[]} sources
+ * @param {Awaited<ReturnType<typeof inflateCompressedTermBankSourcesWasm>>|null} preloadedSource
+ * @returns {Promise<object|null>}
+ */
+async function parseColumnSnapshot(sources, preloadedSource = null) {
+    let copiedChunk = null;
+    await parseTermBankWithWasmColumnChunks(
+        preloadedSource === null ? sources : new Uint8Array(0),
+        3,
+        (chunk) => { copiedChunk = copyWasmBackedColumnChunk(chunk); },
+        2048,
+        {
+            computeContentHashes: true,
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            singleChunk: true,
+            ...(preloadedSource === null ? {} : {preloadedSource}),
+        },
+    );
+    if (copiedChunk === null) { return null; }
+    const chunk = /** @type {NonNullable<typeof copiedChunk>} */ (copiedChunk);
+    return {
+        rowCount: chunk.rowCount,
+        expressions: chunk.expressionBytesList.map((bytes) => textDecoder.decode(bytes)),
+        readings: chunk.readingBytesList.map((bytes) => textDecoder.decode(bytes)),
+        readingEqualsExpression: [...chunk.readingEqualsExpressionList],
+        scores: [...chunk.scoreList],
+        sequences: [...chunk.sequenceList],
+        content: chunk.contentBytesList.map((bytes) => [...bytes]),
+        contentHash1: [...chunk.contentHash1List],
+        contentHash2: [...chunk.contentHash2List],
+        contentUniqueIndexes: chunk.contentUniqueIndexList === null ? null : [...chunk.contentUniqueIndexList],
+    };
+}
+
 describe('term-bank WASM parser', () => {
     beforeAll(() => {
         vi.stubGlobal('fetch', async (resource) => {
@@ -152,6 +208,78 @@ describe('term-bank WASM parser', () => {
 
     afterAll(() => {
         vi.unstubAllGlobals();
+    });
+
+    maybeTest('inflates, validates, and joins mixed raw ZIP term-bank payloads', async () => {
+        const sources = [
+            createCompressedTermBankSource(' \n [["a","", "", "", 1, ["one"], 10, ""]] \r', 8),
+            createCompressedTermBankSource('\t[]\n', 0),
+            createCompressedTermBankSource('[["b","び", "tag", "v1", -2, [{"type":"text","text":"two"}], 11, "common"]]', 8),
+        ];
+        const preloaded = await inflateCompressedTermBankSourcesWasm(sources);
+        const joined = new Uint8Array(preloaded.wasm.memory.buffer, preloaded.jsonPtr, preloaded.jsonLength);
+
+        expect(JSON.parse(textDecoder.decode(joined))).toEqual([
+            ['a', '', '', '', 1, ['one'], 10, ''],
+            ['b', 'び', 'tag', 'v1', -2, [{type: 'text', text: 'two'}], 11, 'common'],
+        ]);
+    });
+
+    maybeTest('matches ordinary inflated parsing across every emitted column', async () => {
+        const jsonSources = [
+            JSON.stringify([
+                ['食べる', 'たべる', 'v1', 'v1', 5, ['to eat'], 101, 'common'],
+                ['同じ', '', '', '', 2, ['duplicate'], 102, ''],
+            ]),
+            '[]',
+            JSON.stringify([
+                ['同じ', '', '', '', 2, ['duplicate'], 102, ''],
+                ['画像', 'がぞう', '', '', -1, [{type: 'image', path: 'image.png'}], 103, ''],
+            ]),
+        ];
+        const inflated = jsonSources.map((json) => textEncoder.encode(json));
+        const compressed = jsonSources.map((json, index) => createCompressedTermBankSource(json, index === 1 ? 0 : 8));
+        const expected = await parseColumnSnapshot(inflated);
+        const preloaded = await inflateCompressedTermBankSourcesWasm(compressed);
+        const actual = await parseColumnSnapshot([], preloaded);
+
+        expect(actual).toEqual(expected);
+    });
+
+    maybeTest.each([
+        {
+            name: 'CRC mismatch',
+            mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => ({...source, signature: (source.signature + 1) >>> 0}),
+            message: 'CRC32',
+        },
+        {
+            name: 'uncompressed size mismatch',
+            mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => ({...source, uncompressedSize: source.uncompressedSize + 1}),
+            message: 'size does not match',
+        },
+        {
+            name: 'truncated DEFLATE stream',
+            mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => ({...source, bytes: source.bytes.slice(0, -2), compressedSize: source.compressedSize - 2}),
+            message: 'DEFLATE decoding failed',
+        },
+        {
+            name: 'DEFLATE stream with trailing bytes',
+            mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => {
+                const bytes = new Uint8Array(source.bytes.byteLength + 2);
+                bytes.set(source.bytes);
+                bytes.set([0xde, 0xad], source.bytes.byteLength);
+                return {...source, bytes, compressedSize: bytes.byteLength};
+            },
+            message: 'trailing bytes',
+        },
+    ])('rejects a $name', async ({mutate, message}) => {
+        const source = createCompressedTermBankSource('[["a","","","",0,["x"],1,""]]', 8);
+        await expect(inflateCompressedTermBankSourcesWasm([mutate(source)])).rejects.toThrow(message);
+    });
+
+    maybeTest('rejects inflated JSON which is not an array', async () => {
+        const source = createCompressedTermBankSource('{"term":"a"}', 8);
+        await expect(inflateCompressedTermBankSourcesWasm([source])).rejects.toThrow('not a JSON array');
     });
 
     test('copies every WASM-backed column before a parser heap can be reused', () => {
@@ -1221,6 +1349,78 @@ describe('term-bank WASM parser', () => {
             expect(loadCount).toBe(sourceCount);
         } finally {
             releaseSink();
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('transfers compressed sources with aligned metadata in deterministic order', async () => {
+        const parseMessages = [];
+        class SuccessfulWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message, transfer = []) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    const delivered = structuredClone(message, {transfer});
+                    parseMessages.push(delivered);
+                    emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: delivered.id,
+                        rowCount: 1,
+                        resultSentEpochMs: Date.now(),
+                        chunk: {rowCount: 1},
+                        profile: {chunkDispatchMs: 0},
+                    });
+                });
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('Worker', SuccessfulWorker);
+        const loadedSources = [];
+        try {
+            const sourceCount = 4;
+            const sinkIndexes = [];
+            await expect(parseTermBankWithWasmColumnChunksParallelCompressedLazy(
+                Array.from({length: sourceCount}, (_, index) => async () => {
+                    const source = createCompressedTermBankSource('[]', index === 0 ? 0 : 8);
+                    loadedSources.push(source);
+                    return {...source, filename: `term_bank_${index + 1}.json`};
+                }),
+                Array.from({length: sourceCount}, () => 2),
+                3,
+                (_chunk, progress) => { sinkIndexes.push(progress.chunkIndex); },
+                {emitContentSlab: true},
+            )).resolves.toBe(true);
+
+            expect(parseMessages).toHaveLength(sourceCount);
+            expect(parseMessages.map(({sourceMetadata}) => sourceMetadata[0].filename)).toEqual(
+                Array.from({length: sourceCount}, (_, index) => `term_bank_${index + 1}.json`),
+            );
+            expect(parseMessages.every(({sourceBuffers, sourceMetadata}) => (
+                sourceBuffers.length === 1 &&
+                sourceMetadata.length === 1 &&
+                sourceBuffers[0].byteLength === sourceMetadata[0].compressedSize
+            ))).toBe(true);
+            expect(loadedSources.every(({bytes}) => bytes.byteLength === 0)).toBe(true);
+            expect(sinkIndexes).toEqual([1, 2, 3, 4]);
+        } finally {
             await disposeParallelTermBankParser();
             vi.stubGlobal('Worker', void 0);
         }

@@ -39,6 +39,185 @@ void* memset(void* dest, int value, unsigned long count) {
     return dest;
 }
 
+void* memcpy(void* dest, const void* source, unsigned long count) {
+    unsigned char* output = (unsigned char*)dest;
+    const unsigned char* input = (const unsigned char*)source;
+    for (unsigned long i = 0u; i < count; ++i) {
+        output[i] = input[i];
+    }
+    return dest;
+}
+
+#define MINIZ_NO_MALLOC
+#define MINIZ_NO_STDIO
+#define MINIZ_NO_TIME
+#define MINIZ_NO_ARCHIVE_APIS
+#define MINIZ_NO_DEFLATE_APIS
+#define MINIZ_LITTLE_ENDIAN 1
+#define MINIZ_USE_UNALIGNED_LOADS_AND_STORES 1
+#include "vendor/miniz/miniz_tinfl.c"
+
+static uint32_t crc32_table[8][256];
+static uint32_t crc32_table_initialized = 0u;
+
+static uint32_t crc32_bytes(const uint8_t* data, uint32_t length) {
+    if (crc32_table_initialized == 0u) {
+        for (uint32_t i = 0u; i < 256u; ++i) {
+            uint32_t value = i;
+            for (uint32_t bit = 0u; bit < 8u; ++bit) {
+                value = (value >> 1u) ^ ((value & 1u) != 0u ? 0xedb88320u : 0u);
+            }
+            crc32_table[0][i] = value;
+        }
+        for (uint32_t slice = 1u; slice < 8u; ++slice) {
+            for (uint32_t i = 0u; i < 256u; ++i) {
+                const uint32_t value = crc32_table[slice - 1u][i];
+                crc32_table[slice][i] = (value >> 8u) ^ crc32_table[0][value & 0xffu];
+            }
+        }
+        crc32_table_initialized = 1u;
+    }
+
+    uint32_t crc = 0xffffffffu;
+    uint32_t offset = 0u;
+    while (length - offset >= 8u) {
+        const uint32_t first =
+            (uint32_t)data[offset] |
+            ((uint32_t)data[offset + 1u] << 8u) |
+            ((uint32_t)data[offset + 2u] << 16u) |
+            ((uint32_t)data[offset + 3u] << 24u);
+        const uint32_t second =
+            (uint32_t)data[offset + 4u] |
+            ((uint32_t)data[offset + 5u] << 8u) |
+            ((uint32_t)data[offset + 6u] << 16u) |
+            ((uint32_t)data[offset + 7u] << 24u);
+        crc ^= first;
+        crc =
+            crc32_table[7][crc & 0xffu] ^
+            crc32_table[6][(crc >> 8u) & 0xffu] ^
+            crc32_table[5][(crc >> 16u) & 0xffu] ^
+            crc32_table[4][crc >> 24u] ^
+            crc32_table[3][second & 0xffu] ^
+            crc32_table[2][(second >> 8u) & 0xffu] ^
+            crc32_table[1][(second >> 16u) & 0xffu] ^
+            crc32_table[0][second >> 24u];
+        offset += 8u;
+    }
+    while (offset < length) {
+        crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset++]) & 0xffu];
+    }
+    return ~crc;
+}
+
+static int is_json_whitespace(uint8_t value) {
+    return value == 0x20u || value == 0x09u || value == 0x0au || value == 0x0du;
+}
+
+__attribute__((visibility("default")))
+int32_t inflate_and_join_term_banks(
+    uint32_t input_ptr,
+    uint32_t input_length,
+    uint32_t input_offsets_ptr,
+    uint32_t compressed_lengths_ptr,
+    uint32_t uncompressed_lengths_ptr,
+    uint32_t compression_methods_ptr,
+    uint32_t signatures_ptr,
+    uint32_t source_count,
+    uint32_t output_ptr,
+    uint32_t output_capacity
+) {
+    if (source_count == 0u || output_capacity < 2u) {
+        return -1;
+    }
+    const uint8_t* input = (const uint8_t*)(uintptr_t)input_ptr;
+    const uint32_t* input_offsets = (const uint32_t*)(uintptr_t)input_offsets_ptr;
+    const uint32_t* compressed_lengths = (const uint32_t*)(uintptr_t)compressed_lengths_ptr;
+    const uint32_t* uncompressed_lengths = (const uint32_t*)(uintptr_t)uncompressed_lengths_ptr;
+    const uint32_t* compression_methods = (const uint32_t*)(uintptr_t)compression_methods_ptr;
+    const uint32_t* signatures = (const uint32_t*)(uintptr_t)signatures_ptr;
+    uint8_t* output = (uint8_t*)(uintptr_t)output_ptr;
+    uint32_t cursor = 1u;
+    uint32_t nonempty_sources = 0u;
+    output[0] = '[';
+
+    for (uint32_t i = 0u; i < source_count; ++i) {
+        const uint32_t input_offset = input_offsets[i];
+        const uint32_t compressed_length = compressed_lengths[i];
+        const uint32_t uncompressed_length = uncompressed_lengths[i];
+        if (
+            input_offset > input_length ||
+            compressed_length > input_length - input_offset ||
+            uncompressed_length > output_capacity - cursor
+        ) {
+            return -1;
+        }
+        uint8_t* inflated = output + cursor;
+        if (compression_methods[i] == 0u) {
+            if (compressed_length != uncompressed_length) {
+                return -3;
+            }
+            memcpy(inflated, input + input_offset, uncompressed_length);
+        } else if (compression_methods[i] == 8u) {
+            tinfl_decompressor decompressor;
+            tinfl_init(&decompressor);
+            size_t consumed = compressed_length;
+            size_t produced = uncompressed_length;
+            const tinfl_status status = tinfl_decompress(
+                &decompressor,
+                input + input_offset,
+                &consumed,
+                inflated,
+                inflated,
+                &produced,
+                TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF
+            );
+            if (status != TINFL_STATUS_DONE) {
+                return -2;
+            }
+            if (produced != uncompressed_length) {
+                return -3;
+            }
+            if (consumed != compressed_length) {
+                return -6;
+            }
+        } else {
+            return -1;
+        }
+        if (crc32_bytes(inflated, uncompressed_length) != signatures[i]) {
+            return -4;
+        }
+
+        uint32_t start = 0u;
+        uint32_t end = uncompressed_length;
+        while (start < end && is_json_whitespace(inflated[start])) { ++start; }
+        while (end > start && is_json_whitespace(inflated[end - 1u])) { --end; }
+        if (end - start < 2u || inflated[start] != '[' || inflated[end - 1u] != ']') {
+            return -5;
+        }
+        ++start;
+        --end;
+        while (start < end && is_json_whitespace(inflated[start])) { ++start; }
+        while (end > start && is_json_whitespace(inflated[end - 1u])) { --end; }
+        const uint32_t content_length = end - start;
+        if (content_length == 0u) {
+            continue;
+        }
+        if (nonempty_sources > 0u) {
+            output[cursor++] = ',';
+        }
+        for (uint32_t j = 0u; j < content_length; ++j) {
+            output[cursor + j] = inflated[start + j];
+        }
+        cursor += content_length;
+        ++nonempty_sources;
+    }
+    if (cursor >= output_capacity) {
+        return -1;
+    }
+    output[cursor++] = ']';
+    return (int32_t)cursor;
+}
+
 typedef struct {
     uint32_t expression_start;
     uint32_t expression_length;

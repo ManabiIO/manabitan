@@ -18,6 +18,7 @@
 import {
     consumeLastTermBankWasmParseProfile,
     copyWasmBackedColumnChunk,
+    inflateCompressedTermBankSourcesWasm,
     initializeTermBankWasmParser,
     parseTermBankWithWasmColumnChunks,
     setTermBankWasmModule,
@@ -26,8 +27,9 @@ import {safePerformance} from '../core/safe-performance.js';
 import {prepareTermLookupIndexesFromPreinternedPlan} from './term-lookup-index-preparation.js';
 
 /** @typedef {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean}} ParserOptions */
+/** @typedef {{compressionMethod: unknown, compressedSize: unknown, uncompressedSize: unknown, signature: unknown, filename?: unknown}} CompressedSourceMetadata */
 /** @typedef {{type: 'initialize', module: unknown}} InitializeRequest */
-/** @typedef {{type: 'parse', id: unknown, sourceBuffers: unknown, sourceSentEpochMs?: unknown, version: unknown, chunkSize?: unknown, options?: unknown}} ParseRequest */
+/** @typedef {{type: 'parse', id: unknown, sourceBuffers: unknown, sourceMetadata?: unknown, sourceSentEpochMs?: unknown, version: unknown, chunkSize?: unknown, options?: unknown}} ParseRequest */
 
 Reflect.set(globalThis, '__manabitanTermBankParserWorker', true);
 
@@ -93,13 +95,31 @@ async function parse(data) {
             typeof rawOptions === 'object' && rawOptions !== null ? rawOptions : {}
         );
         const sourceBytes = sourceBuffers.map((buffer) => new Uint8Array(buffer));
+        let preloadedSource;
+        if (typeof data.sourceMetadata !== 'undefined') {
+            if (!Array.isArray(data.sourceMetadata) || data.sourceMetadata.length !== sourceBytes.length) {
+                throw new TypeError('Term-bank parser worker compressed source metadata is invalid');
+            }
+            const sourceMetadata = /** @type {CompressedSourceMetadata[]} */ (data.sourceMetadata);
+            preloadedSource = await inflateCompressedTermBankSourcesWasm(sourceBytes.map((bytes, index) => {
+                const metadata = sourceMetadata[index];
+                return {
+                    bytes,
+                    compressionMethod: /** @type {0|8} */ (metadata.compressionMethod),
+                    compressedSize: /** @type {number} */ (metadata.compressedSize),
+                    uncompressedSize: /** @type {number} */ (metadata.uncompressedSize),
+                    signature: /** @type {number} */ (metadata.signature),
+                    filename: typeof metadata.filename === 'string' ? metadata.filename : void 0,
+                };
+            }));
+        }
         /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */
         let resultChunk = null;
         let resultRowCount = 0;
         let resultCopyMs = 0;
         let borrowsWorkerMemory = false;
         await parseTermBankWithWasmColumnChunks(
-            sourceBytes,
+            typeof preloadedSource === 'undefined' ? sourceBytes : new Uint8Array(0),
             data.version,
             (chunk) => {
                 if (resultChunk !== null) {
@@ -116,7 +136,7 @@ async function parse(data) {
                 resultCopyMs = Math.max(0, safePerformance.now() - tResultCopyStart);
             },
             chunkSize,
-            {...options, maxPendingChunks: 1, singleChunk: true},
+            {...options, maxPendingChunks: 1, singleChunk: true, preloadedSource},
         );
         if (resultChunk === null) {
             throw new Error('Parallel term-bank parser did not emit a chunk');
@@ -127,6 +147,13 @@ async function parse(data) {
             profile.resultCopyMs = resultCopyMs;
             profile.sourceDeliveryMs = sourceDeliveryMs ?? 0;
             profile.borrowedContentResultCount = borrowsWorkerMemory ? 1 : 0;
+            if (typeof preloadedSource !== 'undefined') {
+                Object.assign(profile, {
+                    sourceInflateMs: preloadedSource.inflateMs,
+                    sourceCompressedBytes: preloadedSource.compressedBytes,
+                    sourceUncompressedBytes: preloadedSource.uncompressedBytes,
+                });
+            }
         }
         if (options.prepareLookupIndexes === true && !(stableResultChunk.preparedLookupIndexes instanceof Map)) {
             const prepared = prepareTermLookupIndexesFromPreinternedPlan(stableResultChunk);

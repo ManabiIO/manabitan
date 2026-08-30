@@ -52,7 +52,10 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
+/** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
+/** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
 /** @typedef {{wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
@@ -64,7 +67,7 @@ let suppliedWasmModule = null;
 const textDecoder = new TextDecoder();
 /** @type {TextEncoder} */
 const textEncoder = new TextEncoder();
-/** @type {{bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number}|null} */
+/** @type {{bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number}|null} */
 let lastTermBankWasmParseProfile = null;
 /** @type {string|null} */
 let lastParallelParserSkipReason = null;
@@ -121,6 +124,7 @@ async function getWasm() {
             typeof exports.wasm_alloc !== 'function' ||
             typeof exports.wasm_get_last_parse_capacity !== 'function' ||
             typeof exports.wasm_get_last_content_capacity !== 'function' ||
+            typeof exports.inflate_and_join_term_banks !== 'function' ||
             typeof exports.parse_term_bank !== 'function' ||
             typeof exports.parse_term_bank_with_media_hints !== 'function' ||
             typeof exports.parse_and_encode_term_bank_token_binary_dedup !== 'function' ||
@@ -139,6 +143,7 @@ async function getWasm() {
             wasm_alloc: exports.wasm_alloc,
             wasm_get_last_parse_capacity: exports.wasm_get_last_parse_capacity,
             wasm_get_last_content_capacity: exports.wasm_get_last_content_capacity,
+            inflate_and_join_term_banks: exports.inflate_and_join_term_banks,
             parse_term_bank: exports.parse_term_bank,
             parse_term_bank_with_media_hints: exports.parse_term_bank_with_media_hints,
             parse_and_encode_term_bank_token_binary_dedup: exports.parse_and_encode_term_bank_token_binary_dedup,
@@ -152,13 +157,113 @@ async function getWasm() {
     });
 }
 
+/**
+ * Inflates complete raw ZIP payloads into one parser-owned JSON array. The
+ * returned allocation stays valid only until the next parser WASM operation.
+ * @param {CompressedTermBankSource[]} sources
+ * @returns {Promise<PreloadedTermBankSource>}
+ */
+export async function inflateCompressedTermBankSourcesWasm(sources) {
+    if (!Array.isArray(sources) || sources.length === 0) {
+        throw new TypeError('Compressed term-bank sources are empty');
+    }
+    let compressedBytes = 0;
+    let uncompressedBytes = 0;
+    for (const [index, source] of sources.entries()) {
+        if (
+            typeof source !== 'object' || source === null ||
+            !(source.bytes instanceof Uint8Array) ||
+            (source.compressionMethod !== 0 && source.compressionMethod !== 8) ||
+            !Number.isSafeInteger(source.compressedSize) || source.compressedSize < 0 ||
+            !Number.isSafeInteger(source.uncompressedSize) || source.uncompressedSize < 0 ||
+            !Number.isInteger(source.signature) || source.signature < 0 || source.signature > 0xffffffff ||
+            source.bytes.byteLength !== source.compressedSize
+        ) {
+            throw new TypeError(`Compressed term-bank source ${index + 1} metadata is invalid`);
+        }
+        compressedBytes += source.compressedSize;
+        uncompressedBytes += source.uncompressedSize;
+    }
+    if (
+        !Number.isSafeInteger(compressedBytes) || compressedBytes > MAX_WASM32_BUFFER_BYTES ||
+        !Number.isSafeInteger(uncompressedBytes) || uncompressedBytes > MAX_WASM32_BUFFER_BYTES - 2
+    ) {
+        throw new TermBankWasmResourceError('Compressed term-bank source exceeds the 32-bit WASM parser limit');
+    }
+
+    const wasm = await getWasm();
+    wasm.wasm_reset_heap();
+    const inputPtr = allocateWasmBuffer(wasm, compressedBytes, 'compressed term-bank input');
+    const inputOffsetsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'compressed term-bank offset');
+    const compressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'compressed term-bank length');
+    const uncompressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'uncompressed term-bank length');
+    const compressionMethodsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'term-bank compression method');
+    const signaturesPtr = allocateWasmBuffer(wasm, sources.length * 4, 'term-bank CRC');
+    const outputCapacity = uncompressedBytes + 2;
+    const outputPtr = allocateWasmBuffer(wasm, outputCapacity, 'inflated term-bank output');
+    const heap = new Uint8Array(wasm.memory.buffer);
+    const inputOffsets = new Uint32Array(wasm.memory.buffer, inputOffsetsPtr, sources.length);
+    const compressedLengths = new Uint32Array(wasm.memory.buffer, compressedLengthsPtr, sources.length);
+    const uncompressedLengths = new Uint32Array(wasm.memory.buffer, uncompressedLengthsPtr, sources.length);
+    const compressionMethods = new Uint32Array(wasm.memory.buffer, compressionMethodsPtr, sources.length);
+    const signatures = new Uint32Array(wasm.memory.buffer, signaturesPtr, sources.length);
+    let inputOffset = 0;
+    for (let i = 0; i < sources.length; ++i) {
+        const source = sources[i];
+        heap.set(source.bytes, inputPtr + inputOffset);
+        inputOffsets[i] = inputOffset;
+        compressedLengths[i] = source.compressedSize;
+        uncompressedLengths[i] = source.uncompressedSize;
+        compressionMethods[i] = source.compressionMethod;
+        signatures[i] = source.signature >>> 0;
+        inputOffset += source.compressedSize;
+    }
+    const startedAt = safePerformance.now();
+    const jsonLength = wasm.inflate_and_join_term_banks(
+        inputPtr,
+        compressedBytes,
+        inputOffsetsPtr,
+        compressedLengthsPtr,
+        uncompressedLengthsPtr,
+        compressionMethodsPtr,
+        signaturesPtr,
+        sources.length,
+        outputPtr,
+        outputCapacity,
+    );
+    const inflateMs = Math.max(0, safePerformance.now() - startedAt);
+    if (jsonLength < 0) {
+        const messages = new Map([
+            [-1, 'metadata or output bounds are invalid'],
+            [-2, 'raw DEFLATE decoding failed'],
+            [-3, 'inflated size does not match ZIP metadata'],
+            [-4, 'inflated bytes do not match the ZIP CRC32'],
+            [-5, 'inflated term bank is not a JSON array'],
+            [-6, 'raw DEFLATE payload has trailing bytes'],
+        ]);
+        throw new Error(`Compressed term-bank source failed validation: ${messages.get(jsonLength) ?? `code ${jsonLength}`}`);
+    }
+    if (jsonLength < 2 || jsonLength > outputCapacity) {
+        throw new Error('Compressed term-bank source returned an invalid JSON length');
+    }
+    return {
+        wasm,
+        jsonPtr: outputPtr,
+        jsonLength,
+        sourceCount: sources.length,
+        inflateMs,
+        compressedBytes,
+        uncompressedBytes,
+    };
+}
+
 /** @returns {Promise<void>} */
 export async function initializeTermBankWasmParser() {
     await getWasm();
 }
 
 /**
- * @returns {{bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean}|null}
+ * @returns {typeof lastTermBankWasmParseProfile}
  */
 export function consumeLastTermBankWasmParseProfile() {
     const value = lastTermBankWasmParseProfile;
@@ -329,15 +434,16 @@ function tokenBytesEqual(source, startA, lengthA, startB, lengthB) {
  * @param {boolean} emitTokenBinaryContent
  * @param {boolean} deduplicateContent
  * @param {boolean} [allowFusedParse]
+ * @param {PreloadedTermBankSource|null} [preloadedSource]
  * @returns {Promise<ParsedTermBankWasmBuffers>}
  * @throws {Error}
  */
-async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true) {
+async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null) {
     const sourceArrays = Array.isArray(contentBytes) ? contentBytes : [contentBytes];
     /** @type {Array<{bytes: Uint8Array, start: number, end: number}>} */
     const sourceSpans = [];
-    let jsonLength = sourceArrays.length > 1 ? 2 : 0;
-    for (const bytes of sourceArrays) {
+    let jsonLength = preloadedSource?.jsonLength ?? (sourceArrays.length > 1 ? 2 : 0);
+    for (const bytes of preloadedSource === null ? sourceArrays : []) {
         if (sourceArrays.length === 1) {
             sourceSpans.push({bytes, start: 0, end: bytes.byteLength});
             jsonLength = bytes.byteLength;
@@ -350,7 +456,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             jsonLength += span.end - span.start;
         }
     }
-    if (sourceArrays.length > 1) { jsonLength += Math.max(0, sourceSpans.length - 1); }
+    if (preloadedSource === null && sourceArrays.length > 1) { jsonLength += Math.max(0, sourceSpans.length - 1); }
     if (!Number.isSafeInteger(jsonLength) || jsonLength > MAX_WASM32_BUFFER_BYTES) {
         throw new TermBankWasmResourceError('Term-bank source exceeds the 32-bit WASM parser limit');
     }
@@ -382,41 +488,46 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         };
     }
     const wasm = await getWasm();
-    wasm.wasm_reset_heap();
+    if (preloadedSource !== null && preloadedSource.wasm !== wasm) {
+        throw new Error('Preloaded term-bank source belongs to another parser instance');
+    }
+    if (preloadedSource === null) { wasm.wasm_reset_heap(); }
     let allocationMs = 0;
     let copyJsonMs = 0;
     let parseBankMs = 0;
     let encodeContentMs = 0;
     let tStart = Date.now();
-    const jsonPtr = wasm.wasm_alloc(jsonLength);
-    allocationMs += Math.max(0, Date.now() - tStart);
-    if (jsonPtr === 0) {
-        throw new TermBankWasmResourceError('Failed to allocate wasm json buffer');
-    }
-    tStart = Date.now();
-    const inputHeap = new Uint8Array(wasm.memory.buffer);
-    if (sourceArrays.length === 1) {
-        inputHeap.set(sourceArrays[0], jsonPtr);
-    } else {
-        let cursor = jsonPtr;
-        inputHeap[cursor++] = U8_ARRAY_OPEN;
-        for (let i = 0; i < sourceSpans.length; ++i) {
-            if (i > 0) { inputHeap[cursor++] = U8_COMMA; }
-            const {bytes, start, end} = sourceSpans[i];
-            inputHeap.set(bytes.subarray(start, end), cursor);
-            cursor += end - start;
+    const jsonPtr = preloadedSource?.jsonPtr ?? wasm.wasm_alloc(jsonLength);
+    if (preloadedSource === null) {
+        allocationMs += Math.max(0, Date.now() - tStart);
+        if (jsonPtr === 0) {
+            throw new TermBankWasmResourceError('Failed to allocate wasm json buffer');
         }
-        inputHeap[cursor] = U8_ARRAY_CLOSE;
+        tStart = Date.now();
+        const inputHeap = new Uint8Array(wasm.memory.buffer);
+        if (sourceArrays.length === 1) {
+            inputHeap.set(sourceArrays[0], jsonPtr);
+        } else {
+            let cursor = jsonPtr;
+            inputHeap[cursor++] = U8_ARRAY_OPEN;
+            for (let i = 0; i < sourceSpans.length; ++i) {
+                if (i > 0) { inputHeap[cursor++] = U8_COMMA; }
+                const {bytes, start, end} = sourceSpans[i];
+                inputHeap.set(bytes.subarray(start, end), cursor);
+                cursor += end - start;
+            }
+            inputHeap[cursor] = U8_ARRAY_CLOSE;
+        }
+        copyJsonMs += Math.max(0, Date.now() - tStart);
     }
-    copyJsonMs += Math.max(0, Date.now() - tStart);
 
     const initialMetaCapacity = Math.min(
         MAX_META_ROW_CAPACITY,
-        Math.max(8192, sourceSpans.length * INITIAL_META_ROWS_PER_SOURCE),
+        Math.max(8192, (preloadedSource?.sourceCount ?? sourceSpans.length) * INITIAL_META_ROWS_PER_SOURCE),
     );
     const useFusedParse = (
         allowFusedParse &&
-        sourceArrays.length > 1 &&
+        (preloadedSource?.sourceCount ?? sourceArrays.length) > 1 &&
         includeContentMetadata &&
         computeContentHashes &&
         emitTokenBinaryContent &&
@@ -508,8 +619,11 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         );
         parseBankMs += Math.max(0, Date.now() - tStart);
         if (encodedContentBytes === -4 || encodedContentBytes === -5) {
+            const fallbackContentBytes = preloadedSource === null ?
+                contentBytes :
+                Uint8Array.from(new Uint8Array(wasm.memory.buffer, jsonPtr, jsonLength));
             return await parseTermBankWasmBuffers(
-                contentBytes,
+                fallbackContentBytes,
                 includeContentMetadata,
                 initialContentBytesPerRow,
                 mediaHintFastScan,
@@ -1307,7 +1421,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
  * @param {number} version
  * @param {(chunk: {rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
- * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean}} [options]
+ * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean, preloadedSource?: PreloadedTermBankSource}} [options]
  * @returns {Promise<void>}
  */
 export async function parseTermBankWithWasmColumnChunks(contentBytes, version, onChunk, chunkSize = DEFAULT_ROW_CHUNK_SIZE, options = {}) {
@@ -1329,6 +1443,8 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         computeContentHashes,
         emitTokenBinaryContent,
         emitContentSlab && computeContentHashes,
+        true,
+        options.preloadedSource ?? null,
     );
     const bufferSetupMs = Math.max(0, Date.now() - tBufferSetupStart);
     const {contentOutPtr, contentUniqueCount, rowCount, metaCapacity, contentCapacity} = parsed;
@@ -2054,13 +2170,17 @@ class ParallelTermBankPipelineRun {
                     sourceGroup.map((source) => loadParallelTermBankSource(source)),
                     () => this._pipelineShouldCancel(),
                 );
-                if (!group.every((bytes) => getJsonArrayContentSpan(bytes) !== null)) {
+                if (!group.every((source) => (
+                    source instanceof Uint8Array ?
+                        getJsonArrayContentSpan(source) !== null :
+                        isCompressedTermBankSource(source)
+                ))) {
                     throw new Error('Expected every deferred term-bank source to contain a JSON array');
                 }
                 // Capture this before postMessage transfers and detaches the
                 // source buffers. The byte ratio estimates total rows until
                 // every parallel group has reported its exact row count.
-                const sourceBytes = sumByteLengths(group);
+                const sourceBytes = sumParallelSourceByteLengths(group);
                 const result = await runParallelParserJob(
                     worker,
                     groupIndex + 1,
@@ -2255,6 +2375,31 @@ export async function parseTermBankWithWasmColumnChunksParallelLazy(contentByteL
 }
 
 /**
+ * Sends raw ZIP payloads to parser workers for fused WASM inflate, CRC
+ * validation, and parsing without materializing uncompressed banks in the
+ * import coordinator.
+ * @param {Array<() => Promise<CompressedTermBankSource>>} sourceLoaders
+ * @param {number[]} estimatedByteLengths
+ * @param {number} version
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {() => boolean} [shouldCancel]
+ * @returns {Promise<boolean>}
+ */
+export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(sourceLoaders, estimatedByteLengths, version, onChunk, options = {}, shouldCancel = () => false) {
+    if (sourceLoaders.length !== estimatedByteLengths.length) {
+        throw new Error('Compressed lazy term-bank source metadata length mismatch');
+    }
+    const sources = sourceLoaders.map((load, index) => ({
+        promise: null,
+        load,
+        estimatedBytes: estimatedByteLengths[index],
+        resolvedAt: 0,
+    }));
+    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, true);
+}
+
+/**
  * @param {ParallelTermBankSource[]} sources
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
@@ -2333,12 +2478,12 @@ async function parseTermBankWithWasmColumnChunksParallelSources(sources, version
     return await run.run();
 }
 
-/** @typedef {{promise: Promise<Uint8Array>|null, load: (() => Promise<Uint8Array>)|null, estimatedBytes: number, resolvedAt: number}} ParallelTermBankSource */
+/** @typedef {{promise: Promise<ParallelTermBankSourceValue>|null, load: (() => Promise<ParallelTermBankSourceValue>)|null, estimatedBytes: number, resolvedAt: number}} ParallelTermBankSource */
 
 /**
  * @param {ParallelTermBankSource} source
- * @param {Promise<Uint8Array>} promise
- * @returns {Promise<Uint8Array>}
+ * @param {Promise<ParallelTermBankSourceValue>} promise
+ * @returns {Promise<ParallelTermBankSourceValue>}
  */
 function observeParallelTermBankSourcePromise(source, promise) {
     const observed = promise.then((bytes) => {
@@ -2351,7 +2496,7 @@ function observeParallelTermBankSourcePromise(source, promise) {
 
 /**
  * @param {ParallelTermBankSource} source
- * @returns {Promise<Uint8Array>}
+ * @returns {Promise<ParallelTermBankSourceValue>}
  */
 function loadParallelTermBankSource(source) {
     if (source.promise === null) {
@@ -2526,19 +2671,23 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
 /**
  * @param {Worker} worker
  * @param {number} id
- * @param {Uint8Array[]} sourceBytes
+ * @param {ParallelTermBankSourceValue[]} sources
  * @param {number} version
  * @param {Record<string, unknown>} options
  * @param {() => boolean} shouldCancel
  * @returns {Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, borrowsWorkerMemory: boolean}>}
  */
-function runParallelParserJob(worker, id, sourceBytes, version, options, shouldCancel) {
+function runParallelParserJob(worker, id, sources, version, options, shouldCancel) {
     return new Promise((resolve, reject) => {
         const sourcePreparationStart = safePerformance.now();
         const sourceBuffers = [];
+        /** @type {Array<{compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}>} */
+        const sourceMetadata = [];
         const seenBuffers = new Set();
         let sourceTransferredBytes = 0;
-        for (const bytes of sourceBytes) {
+        let hasCompressedSources = false;
+        for (const source of sources) {
+            const bytes = source instanceof Uint8Array ? source : source.bytes;
             let buffer = bytes.buffer;
             if (
                 !(buffer instanceof ArrayBuffer) ||
@@ -2551,6 +2700,23 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
             seenBuffers.add(buffer);
             sourceBuffers.push(buffer);
             sourceTransferredBytes += buffer.byteLength;
+            if (source instanceof Uint8Array) {
+                if (hasCompressedSources) {
+                    throw new Error('Parallel parser cannot mix compressed and inflated term-bank sources');
+                }
+            } else {
+                if (sourceMetadata.length !== sourceBuffers.length - 1) {
+                    throw new Error('Parallel parser cannot mix inflated and compressed term-bank sources');
+                }
+                hasCompressedSources = true;
+                sourceMetadata.push({
+                    compressionMethod: source.compressionMethod,
+                    compressedSize: source.compressedSize,
+                    uncompressedSize: source.uncompressedSize,
+                    signature: source.signature,
+                    filename: source.filename,
+                });
+            }
         }
         const sourcePreparationMs = Math.max(0, safePerformance.now() - sourcePreparationStart);
         const timeoutId = setTimeout(() => {
@@ -2652,7 +2818,15 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
                 reject(error);
                 return;
             }
-            worker.postMessage({type: 'parse', id, sourceBuffers, sourceSentEpochMs: Date.now(), version, options}, sourceBuffers);
+            worker.postMessage({
+                type: 'parse',
+                id,
+                sourceBuffers,
+                ...(hasCompressedSources ? {sourceMetadata} : {}),
+                sourceSentEpochMs: Date.now(),
+                version,
+                options,
+            }, sourceBuffers);
         } catch (error) {
             cleanup();
             worker.terminate();
@@ -2666,15 +2840,15 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
  * Keeps cancellation responsive while source ZIP workers are still inflating.
  * The source promises remain observed after cancellation so late rejections do
  * not become unhandled; their owning importer may abort the underlying reads.
- * @param {Promise<Uint8Array>[]} promises
+ * @param {Promise<ParallelTermBankSourceValue>[]} promises
  * @param {() => boolean} shouldCancel
- * @returns {Promise<Uint8Array[]>}
+ * @returns {Promise<ParallelTermBankSourceValue[]>}
  */
 function waitForParallelSources(promises, shouldCancel) {
     return new Promise((resolve, reject) => {
         let settled = false;
         const cleanup = () => { clearInterval(cancellationIntervalId); };
-        /** @param {Uint8Array[]} value */
+        /** @param {ParallelTermBankSourceValue[]} value */
         const settleResolve = (value) => {
             if (settled) { return; }
             settled = true;
@@ -2845,13 +3019,35 @@ function getPartitionSourceByteLength(source) {
 }
 
 /**
- * @param {Uint8Array[]} values
+ * @param {ParallelTermBankSourceValue[]} values
  * @returns {number}
  */
-function sumByteLengths(values) {
+function sumParallelSourceByteLengths(values) {
     let total = 0;
-    for (const value of values) { total += value.byteLength; }
+    for (const value of values) {
+        total += value instanceof Uint8Array ? value.byteLength : value.uncompressedSize;
+    }
     return total;
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is CompressedTermBankSource}
+ */
+function isCompressedTermBankSource(value) {
+    if (typeof value !== 'object' || value === null) { return false; }
+    const bytes = /** @type {unknown} */ (Reflect.get(value, 'bytes'));
+    const compressionMethod = /** @type {unknown} */ (Reflect.get(value, 'compressionMethod'));
+    const compressedSize = /** @type {unknown} */ (Reflect.get(value, 'compressedSize'));
+    const uncompressedSize = /** @type {unknown} */ (Reflect.get(value, 'uncompressedSize'));
+    const signature = /** @type {unknown} */ (Reflect.get(value, 'signature'));
+    return (
+        bytes instanceof Uint8Array &&
+        (compressionMethod === 0 || compressionMethod === 8) &&
+        typeof compressedSize === 'number' && Number.isSafeInteger(compressedSize) && compressedSize >= 0 && bytes.byteLength === compressedSize &&
+        typeof uncompressedSize === 'number' && Number.isSafeInteger(uncompressedSize) && uncompressedSize >= 0 &&
+        typeof signature === 'number' && Number.isInteger(signature) && signature >= 0 && signature <= 0xffffffff
+    );
 }
 
 /**
@@ -2986,6 +3182,9 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         sourcePreparationMs: sum('sourcePreparationMs'),
         sourceDeliveryMs: sum('sourceDeliveryMs'),
         sourceTransferredBytes: sum('sourceTransferredBytes'),
+        sourceInflateMs: sum('sourceInflateMs'),
+        sourceCompressedBytes: sum('sourceCompressedBytes'),
+        sourceUncompressedBytes: sum('sourceUncompressedBytes'),
         resultCopyMs: sum('resultCopyMs'),
         resultDeliveryMs: sum('resultDeliveryMs'),
         orderedSinkWaitMs: sum('orderedSinkWaitMs'),

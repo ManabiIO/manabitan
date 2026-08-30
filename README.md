@@ -262,4 +262,5 @@ Manabitan uses several third-party libraries to function.
 ## Attribution
 
 MDX import support uses [PyGlossary](https://github.com/ilius/pyglossary), licensed under the [GNU GPLv3](https://raw.githubusercontent.com/ilius/pyglossary/master/LICENSE).
+Raw DEFLATE decoding uses [miniz](https://github.com/richgel999/miniz), licensed under the MIT License.
 `fallback-bloop.mp3` is provided by [UNIVERSFIELD](https://pixabay.com/sound-effects/error-8-206492/) and licensed under the [Pixabay Content License](https://pixabay.com/service/license-summary/).
