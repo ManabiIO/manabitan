@@ -53,7 +53,7 @@ function cacheMeta(database, contentHash, offset, length, dictName, hash1, hash2
 }
 
 /**
- * @returns {{database: DictionaryDatabase, chunk: Record<string, unknown>, plan: Record<string, unknown>, appendRecords: ReturnType<typeof vi.fn>, resolveContent: () => void, rejectContent: (error: Error) => void, resolveRecords: () => void, rejectRecords: (error: Error) => void, run: () => Promise<void>}}
+ * @returns {{database: DictionaryDatabase, chunk: Record<string, unknown>, plan: Record<string, unknown>, appendRecords: ReturnType<typeof vi.fn>, releaseBorrowedContent: ReturnType<typeof vi.fn>, resolveContent: () => void, rejectContent: (error: Error) => void, resolveRecords: () => void, rejectRecords: (error: Error) => void, run: () => Promise<void>}}
  */
 function createArtifactOverlapHarness() {
     const database = new DictionaryDatabase();
@@ -98,6 +98,7 @@ function createArtifactOverlapHarness() {
     Reflect.set(database, '_termContentBlockImportSession', {
         tryBeginAppendSpans: vi.fn(() => ({
             initialSelection: true,
+            sourceConsumed: Promise.resolve(),
             storage: Promise.resolve({
                 contentOffsets: new Float64Array([100]),
                 contentLengths: new Uint32Array([3]),
@@ -114,6 +115,7 @@ function createArtifactOverlapHarness() {
 
     const source = new Uint8Array(new SharedArrayBuffer(3));
     source.set([1, 2, 3]);
+    const releaseBorrowedContent = vi.fn();
     const plan = {
         uniqueCount: 1,
         sourceRowCount: 1,
@@ -144,6 +146,7 @@ function createArtifactOverlapHarness() {
         contentMetaList: new Uint32Array([0, 3, 10, 20]),
         contentUniqueIndexList: new Uint32Array([0]),
         contentDedupPlan: plan,
+        releaseBorrowedContent,
         contentDictNameList: null,
         uniformContentDictName: 'raw-v6',
         termRecordPreinternedPlan: null,
@@ -154,6 +157,7 @@ function createArtifactOverlapHarness() {
         chunk,
         plan,
         appendRecords,
+        releaseBorrowedContent,
         resolveContent,
         rejectContent,
         resolveRecords,
@@ -1468,6 +1472,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         const importing = harness.run();
 
         await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
         const [recordChunk, contentOffsets, contentLengths, contentDictName] = harness.appendRecords.mock.calls[0];
         expect(contentOffsets).toStrictEqual(new Float64Array(0));
         expect(contentLengths).toStrictEqual(new Uint32Array(0));

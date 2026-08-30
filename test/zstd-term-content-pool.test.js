@@ -38,6 +38,11 @@ class MockCompressionWorker {
         this.calls.push({message, transfer});
         const response = this.respond(message, transfer);
         queueMicrotask(() => {
+            if (response.sourceConsumed === true) {
+                for (const listener of this.listeners.get('message') ?? []) {
+                    listener(/** @type {MessageEvent<unknown>} */ ({data: {type: 'source-consumed', id: message.id}}));
+                }
+            }
             for (const listener of this.listeners.get('message') ?? []) {
                 listener(/** @type {MessageEvent<unknown>} */ ({data: {id: message.id, ...response}}));
             }
@@ -74,6 +79,7 @@ describe('TermContentCompressionPool', () => {
         const workers = Array.from({length: 2}, () => new MockCompressionWorker((message) => {
             return {
                 compressed: Uint8Array.of(/** @type {number} */ (message.contentBytes)).buffer,
+                sourceConsumed: true,
             };
         }));
         const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ (workers)));
@@ -83,7 +89,7 @@ describe('TermContentCompressionPool', () => {
         const blockStarts = Uint32Array.of(0, 2, 3, 5, 6, 8);
         const blockLengths = Uint32Array.of(5, 4, 11, 7, 17);
 
-        const result = await pool.compressWrappedSpans(
+        const operation = pool.beginCompressWrappedSpans(
             source,
             sourceOffsets,
             sourceLengths,
@@ -91,6 +97,8 @@ describe('TermContentCompressionPool', () => {
             blockLengths,
             'jmdict',
         );
+        await expect(operation.sourceConsumed).resolves.toBeUndefined();
+        const result = await operation.completion;
 
         expect(result.chunks.map((bytes) => bytes[0])).toStrictEqual([...blockLengths]);
         expect(workers.map(({calls}) => calls.length)).toStrictEqual([3, 2]);
@@ -157,6 +165,43 @@ describe('TermContentCompressionPool', () => {
         )).rejects.toThrow('block span is invalid');
         expect(worker.calls).toHaveLength(0);
 
+        pool.close();
+    });
+
+    test('keeps shared source pinned when a worker fails before acknowledging it', async () => {
+        const worker = new MockCompressionWorker(() => ({error: 'injected pre-ack failure'}));
+        const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ ([worker])));
+        const operation = pool.beginCompressWrappedSpans(
+            new Uint8Array(new SharedArrayBuffer(4)),
+            Uint32Array.of(0),
+            Uint32Array.of(4),
+            Uint32Array.of(0, 1),
+            Uint32Array.of(4),
+            'jmdict',
+        );
+
+        await expect(operation.sourceConsumed).rejects.toThrow('pre-ack failure');
+        await expect(operation.completion).rejects.toThrow('pre-ack failure');
+        pool.close();
+    });
+
+    test('preserves source acknowledgement when compression fails afterward', async () => {
+        const worker = new MockCompressionWorker(() => ({
+            sourceConsumed: true,
+            error: 'injected post-ack failure',
+        }));
+        const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ ([worker])));
+        const operation = pool.beginCompressWrappedSpans(
+            new Uint8Array(new SharedArrayBuffer(4)),
+            Uint32Array.of(0),
+            Uint32Array.of(4),
+            Uint32Array.of(0, 1),
+            Uint32Array.of(4),
+            'jmdict',
+        );
+
+        await expect(operation.sourceConsumed).resolves.toBeUndefined();
+        await expect(operation.completion).rejects.toThrow('post-ack failure');
         pool.close();
     });
 });

@@ -34,7 +34,7 @@ import {
     wrapCompressedTermContentBlock,
 } from './term-content-block-envelope.js';
 import {hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
-import {compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
+import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
 
 export {wrapCompressedTermContentBlock} from './term-content-block-envelope.js';
 
@@ -125,7 +125,7 @@ export class TermContentBlockImportSession {
      * @param {Uint32Array} sourceOffsets
      * @param {Uint32Array} sourceLengths
      * @param {string|null} compressionDictName
-     * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}
+     * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}
      * @throws {Error} If the session is closed or the source spans are invalid.
      */
     tryBeginAppendSpans(dictionary, sourceBytes, sourceOffsets, sourceLengths, compressionDictName) {
@@ -510,7 +510,7 @@ export class TermContentBlockStore {
      * @param {Uint32Array} sourceLengths
      * @param {string|null} compressionDictName
      * @param {boolean} force
-     * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}|null}
+     * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}|null}
      */
     tryBeginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
         const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
@@ -552,18 +552,29 @@ export class TermContentBlockStore {
      * @param {string} compressionDictName
      * @param {number} uncompressedBytes
      * @param {boolean} initialSelection
-     * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}}
+     * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}}
      */
     _beginAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection) {
         const planStart = safePerformance.now();
         const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
         let packMs = safePerformance.now() - planStart;
+        /** @type {(value?: void|PromiseLike<void>) => void} */
+        let resolveSourceConsumed = () => {};
+        /** @type {(reason?: unknown) => void} */
+        let rejectSourceConsumed = () => {};
+        /** @type {Promise<void>} */
+        const sourceConsumed = new Promise((resolve, reject) => {
+            resolveSourceConsumed = resolve;
+            rejectSourceConsumed = reject;
+        });
+        void sourceConsumed.catch(() => {});
         const compression = (async () => {
             let compressedChunks;
             let envelopeMs = 0;
             let compressionStart = safePerformance.now();
+            let sourceWasConsumed = false;
             try {
-                const result = await compressWrappedTermContentZstdSpansBatch(
+                const operation = beginCompressWrappedTermContentZstdSpansBatch(
                     sourceBytes,
                     sourceOffsets,
                     sourceLengths,
@@ -571,6 +582,18 @@ export class TermContentBlockStore {
                     packed.packedChunkLengths,
                     compressionDictName,
                 );
+                const consumed = operation.sourceConsumed.then(() => {
+                    sourceWasConsumed = true;
+                    resolveSourceConsumed();
+                });
+                void consumed.catch(() => {});
+                let result;
+                try {
+                    result = await operation.completion;
+                } catch (error) {
+                    await consumed.catch(() => {});
+                    throw error;
+                }
                 compressedChunks = result.chunks;
                 envelopeMs = result.envelopeMs;
                 if (!result.wrapped) {
@@ -579,7 +602,10 @@ export class TermContentBlockStore {
                     envelopeMs += safePerformance.now() - envelopeStart;
                 }
                 validateCompressedChunks(compressedChunks, packed.packedChunkLengths.length);
-            } catch (_) {
+            } catch (error) {
+                if (sourceWasConsumed) {
+                    throw error;
+                }
                 const retryPackStart = safePerformance.now();
                 const packedChunks = packPlannedContentSpansIntoSlabs(
                     sourceBytes,
@@ -598,6 +624,7 @@ export class TermContentBlockStore {
                     return wrapped;
                 });
                 validateCompressedChunks(compressedChunks, packed.packedChunkLengths.length);
+                resolveSourceConsumed();
             }
             const completedAt = safePerformance.now();
             const compressMs = Math.max(0, completedAt - compressionStart - envelopeMs);
@@ -605,7 +632,7 @@ export class TermContentBlockStore {
             for (const chunk of compressedChunks) { compressedBytes += chunk.byteLength; }
             return {chunks: compressedChunks, compressedBytes, packMs, compressMs, envelopeMs, completedAt};
         })();
-        void compression.catch(() => {});
+        void compression.catch((error) => { rejectSourceConsumed(error); });
 
         const referenceLayout = createTermContentReferenceLayout(
             sourceLengths.length,
@@ -676,7 +703,7 @@ export class TermContentBlockStore {
             };
         })();
         void completion.catch(() => {});
-        return {storage, completion};
+        return {storage, sourceConsumed, completion};
     }
 
     /**

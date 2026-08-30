@@ -79,6 +79,31 @@ describe('zstd wasm wrapper', () => {
         expect([...result]).toEqual([0, 0, 9, 10, 11]);
     });
 
+    test('can release span sources before finishing prepared compression', async () => {
+        const module = createMockModule();
+        mockState.createModule.mockResolvedValue(module);
+        const {finishPreparedSpanCompression, init, prepareSpanCompression} = await import('../dev/lib/zstd-wasm.js');
+        await init();
+        const sourceBytes = new Uint8Array([20, 21, 22, 23, 24]);
+
+        const prepared = prepareSpanCompression(
+            23,
+            sourceBytes,
+            new Uint32Array([1, 4]),
+            new Uint32Array([2, 1]),
+            3,
+            new Uint8Array([30, 31]),
+            2,
+            1,
+        );
+        sourceBytes.fill(0);
+        const result = finishPreparedSpanCompression(prepared);
+
+        const compressedSource = module._ZSTD_compress_usingDict.mock.calls[0][3];
+        expect([...module.HEAPU8.subarray(compressedSource, compressedSource + 3)]).toEqual([21, 22, 24]);
+        expect([...result]).toEqual([0, 0, 9, 10, 11]);
+    });
+
     test('gathers contiguous and discontiguous source runs without changing byte order', async () => {
         const module = createMockModule();
         mockState.createModule.mockResolvedValue(module);

@@ -17,16 +17,17 @@
 
 import {
     compress,
-    compressSpansUsingDictWithPrefix,
     createCCtx,
     createDCtx,
     compressUsingDict,
     compressUsingDictWithPrefix,
     decompress,
     decompressUsingDict,
+    finishPreparedSpanCompression,
     freeCCtx,
     freeDCtx,
     init,
+    prepareSpanCompression,
 } from '../../lib/zstd-wasm.js';
 import {log} from '../core/log.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -69,7 +70,7 @@ export class TermContentCompressionPool {
         if (workers.length === 0) { throw new RangeError('Term content compression pool requires a worker'); }
         /** @type {Worker[]} */
         this._workers = workers;
-        /** @type {Map<number, {resolve: (value: {bytes: Uint8Array, envelopeMs: number}) => void, reject: (reason?: unknown) => void, timeoutId: ReturnType<typeof setTimeout>}>} */
+        /** @type {Map<number, {resolve: (value: {bytes: Uint8Array, envelopeMs: number}) => void, reject: (reason?: unknown) => void, resolveSourceConsumed: (() => void)|null, rejectSourceConsumed: ((reason?: unknown) => void)|null, sourceConsumedSettled: boolean, timeoutId: ReturnType<typeof setTimeout>}>} */
         this._pending = new Map();
         /** @type {number} */
         this._nextId = 1;
@@ -122,6 +123,27 @@ export class TermContentCompressionPool {
      * @returns {Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: true}>}
      */
     async compressWrappedSpans(source, sourceOffsets, sourceLengths, blockStartIndexes, blockLengths, dictName) {
+        return await this.beginCompressWrappedSpans(
+            source,
+            sourceOffsets,
+            sourceLengths,
+            blockStartIndexes,
+            blockLengths,
+            dictName,
+        ).completion;
+    }
+
+    /**
+     * @param {Uint8Array} source
+     * @param {Uint32Array} sourceOffsets
+     * @param {Uint32Array} sourceLengths
+     * @param {Uint32Array} blockStartIndexes
+     * @param {Uint32Array} blockLengths
+     * @param {string|null} dictName
+     * @returns {{sourceConsumed: Promise<void>, completion: Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: true}>}}
+     * @throws {Error} If the pool or block plan is invalid.
+     */
+    beginCompressWrappedSpans(source, sourceOffsets, sourceLengths, blockStartIndexes, blockLengths, dictName) {
         if (this._failed) { throw new Error('Term content compression pool is unavailable'); }
         const blockCount = blockLengths.length;
         if (
@@ -141,13 +163,13 @@ export class TermContentCompressionPool {
             }
         }
         const envelopeMsByWorker = new Float64Array(this._workers.length);
-        const chunks = await Promise.all(Array.from(blockLengths, async (contentBytes, blockIndex) => {
+        const jobs = Array.from(blockLengths, (contentBytes, blockIndex) => {
             const workerIndex = blockIndex % this._workers.length;
             const start = blockStartIndexes[blockIndex];
             const end = blockStartIndexes[blockIndex + 1];
             const blockOffsets = sourceOffsets.slice(start, end);
             const blockSourceLengths = sourceLengths.slice(start, end);
-            const result = await this._dispatch(
+            return this._dispatchWithSourceConsumed(
                 workerIndex,
                 {
                     source,
@@ -159,14 +181,18 @@ export class TermContentCompressionPool {
                 },
                 [blockOffsets.buffer, blockSourceLengths.buffer],
             );
-            envelopeMsByWorker[workerIndex] += result.envelopeMs;
-            return result.bytes;
-        }));
-        return {
-            chunks,
-            envelopeMs: Math.max(0, ...envelopeMsByWorker),
-            wrapped: true,
-        };
+        });
+        const sourceConsumed = Promise.all(jobs.map(({sourceConsumed: promise}) => promise)).then(() => {});
+        const completion = Promise.all(jobs.map(({completion: promise}) => promise)).then((results) => {
+            const chunks = results.map((result, blockIndex) => {
+                envelopeMsByWorker[blockIndex % this._workers.length] += result.envelopeMs;
+                return result.bytes;
+            });
+            return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: /** @type {true} */ (true)};
+        });
+        void sourceConsumed.catch(() => {});
+        void completion.catch(() => {});
+        return {sourceConsumed, completion};
     }
 
     /**
@@ -220,20 +246,56 @@ export class TermContentCompressionPool {
      * @returns {Promise<{bytes: Uint8Array, envelopeMs: number}>}
      */
     _dispatch(workerIndex, message, transfer) {
+        return this._startDispatch(workerIndex, message, transfer, false).completion;
+    }
+
+    /**
+     * @param {number} workerIndex
+     * @param {Record<string, unknown>} message
+     * @param {Transferable[]} transfer
+     * @returns {{sourceConsumed: Promise<void>, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}}
+     */
+    _dispatchWithSourceConsumed(workerIndex, message, transfer) {
+        const {sourceConsumed, completion} = this._startDispatch(workerIndex, message, transfer, true);
+        return {sourceConsumed: /** @type {Promise<void>} */ (sourceConsumed), completion};
+    }
+
+    /**
+     * @param {number} workerIndex
+     * @param {Record<string, unknown>} message
+     * @param {Transferable[]} transfer
+     * @param {boolean} trackSourceConsumed
+     * @returns {{sourceConsumed: Promise<void>|null, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}}
+     */
+    _startDispatch(workerIndex, message, transfer, trackSourceConsumed) {
         const id = this._nextId++;
-        return new Promise((resolve, reject) => {
+        /** @type {((value?: void|PromiseLike<void>) => void)|null} */
+        let resolveSourceConsumed = null;
+        /** @type {((reason?: unknown) => void)|null} */
+        let rejectSourceConsumed = null;
+        const sourceConsumed = trackSourceConsumed ?
+            new Promise((resolve, reject) => {
+                resolveSourceConsumed = resolve;
+                rejectSourceConsumed = reject;
+            }) :
+            null;
+        /** @type {Promise<{bytes: Uint8Array, envelopeMs: number}>} */
+        const completion = new Promise((resolve, reject) => {
             const timeoutId = setTimeout(() => {
                 this._fail(new Error(`Term content compression worker timed out after ${COMPRESSION_JOB_TIMEOUT_MS}ms`));
             }, COMPRESSION_JOB_TIMEOUT_MS);
-            this._pending.set(id, {resolve, reject, timeoutId});
+            this._pending.set(id, {resolve, reject, resolveSourceConsumed, rejectSourceConsumed, sourceConsumedSettled: false, timeoutId});
             try {
                 this._workers[workerIndex].postMessage({id, ...message}, transfer);
             } catch (error) {
                 clearTimeout(timeoutId);
                 this._pending.delete(id);
+                rejectSourceConsumed?.(error);
                 reject(error);
             }
         });
+        if (sourceConsumed !== null) { void sourceConsumed.catch(() => {}); }
+        return {sourceConsumed, completion};
     }
 
     /** */
@@ -244,19 +306,34 @@ export class TermContentCompressionPool {
     /** @param {MessageEvent} event */
     _onMessage(event) {
         const rawData = /** @type {unknown} */ (event.data);
-        const data = /** @type {{id?: unknown, compressed?: unknown, envelopeMs?: unknown, error?: unknown}} */ (rawData);
+        const data = /** @type {{type?: unknown, id?: unknown, compressed?: unknown, envelopeMs?: unknown, error?: unknown}} */ (rawData);
         const id = typeof data?.id === 'number' ? data.id : -1;
         const pending = this._pending.get(id);
         if (typeof pending === 'undefined') { return; }
+        if (data.type === 'source-consumed') {
+            if (!pending.sourceConsumedSettled) {
+                pending.sourceConsumedSettled = true;
+                pending.resolveSourceConsumed?.();
+            }
+            return;
+        }
         this._pending.delete(id);
         clearTimeout(pending.timeoutId);
         if (typeof data.error === 'string') {
-            pending.reject(new Error(data.error));
+            const error = new Error(data.error);
+            if (!pending.sourceConsumedSettled) { pending.rejectSourceConsumed?.(error); }
+            pending.reject(error);
             return;
         }
         if (!(data.compressed instanceof ArrayBuffer)) {
-            pending.reject(new Error('Term content compression worker returned invalid bytes'));
+            const error = new Error('Term content compression worker returned invalid bytes');
+            if (!pending.sourceConsumedSettled) { pending.rejectSourceConsumed?.(error); }
+            pending.reject(error);
             return;
+        }
+        if (!pending.sourceConsumedSettled) {
+            pending.sourceConsumedSettled = true;
+            pending.resolveSourceConsumed?.();
         }
         pending.resolve({
             bytes: new Uint8Array(data.compressed),
@@ -270,8 +347,9 @@ export class TermContentCompressionPool {
         this._failed = true;
         for (const worker of this._workers) { worker.terminate(); }
         this._workers = [];
-        for (const {reject, timeoutId} of this._pending.values()) {
+        for (const {reject, rejectSourceConsumed, sourceConsumedSettled, timeoutId} of this._pending.values()) {
             clearTimeout(timeoutId);
+            if (!sourceConsumedSettled) { rejectSourceConsumed?.(error); }
             reject(error);
         }
         this._pending.clear();
@@ -422,35 +500,70 @@ export async function compressWrappedTermContentZstdSpansBatch(
     blockLengths,
     dictName,
 ) {
+    return await beginCompressWrappedTermContentZstdSpansBatch(
+        source,
+        sourceOffsets,
+        sourceLengths,
+        blockStartIndexes,
+        blockLengths,
+        dictName,
+    ).completion;
+}
+
+/**
+ * @param {Uint8Array} source
+ * @param {Uint32Array} sourceOffsets
+ * @param {Uint32Array} sourceLengths
+ * @param {Uint32Array} blockStartIndexes
+ * @param {Uint32Array} blockLengths
+ * @param {string|null} dictName
+ * @returns {{sourceConsumed: Promise<void>, completion: Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: true}>}}
+ */
+export function beginCompressWrappedTermContentZstdSpansBatch(
+    source,
+    sourceOffsets,
+    sourceLengths,
+    blockStartIndexes,
+    blockLengths,
+    dictName,
+) {
     if (blockLengths.length === 1) {
-        const result = compressWrappedTermContentZstdSpans(
-            source,
-            sourceOffsets,
-            sourceLengths,
-            blockLengths[0],
-            dictName,
-        );
-        return {chunks: [result.bytes], envelopeMs: result.envelopeMs, wrapped: true};
-    }
-    try {
-        const pool = await initializeCompressionPool();
-        if (pool !== null && !pool.failed) {
-            return await pool.compressWrappedSpans(
+        const completion = Promise.resolve().then(() => {
+            const result = compressWrappedTermContentZstdSpans(
                 source,
                 sourceOffsets,
                 sourceLengths,
-                blockStartIndexes,
-                blockLengths,
+                blockLengths[0],
                 dictName,
             );
+            return {chunks: [result.bytes], envelopeMs: result.envelopeMs, wrapped: /** @type {true} */ (true)};
+        });
+        return {sourceConsumed: completion.then(() => {}), completion};
+    }
+    const operation = (async () => {
+        const pool = await initializeCompressionPool();
+        if (pool === null || pool.failed) {
+            throw new Error('Parallel span compression is unavailable');
         }
-    } catch (error) {
+        return pool.beginCompressWrappedSpans(
+            source,
+            sourceOffsets,
+            sourceLengths,
+            blockStartIndexes,
+            blockLengths,
+            dictName,
+        );
+    })();
+    const sourceConsumed = operation.then(({sourceConsumed: value}) => value);
+    const completion = operation.then(({completion: value}) => value).catch((error) => {
         compressionPool?.close();
         compressionPool = null;
         compressionPoolPromise = null;
         throw error;
-    }
-    throw new Error('Parallel span compression is unavailable');
+    });
+    void sourceConsumed.catch(() => {});
+    void completion.catch(() => {});
+    return {sourceConsumed, completion};
 }
 
 /** @returns {Promise<TermContentCompressionPool|null>} */
@@ -594,10 +707,27 @@ export function compressWrappedTermContentZstd(content, dictName) {
  * @throws {Error} If the dictionary is unavailable or compression fails.
  */
 export function compressWrappedTermContentZstdSpans(source, sourceOffsets, sourceLengths, contentBytes, dictName) {
+    return finishWrappedTermContentZstdSpans(
+        prepareWrappedTermContentZstdSpans(source, sourceOffsets, sourceLengths, contentBytes, dictName),
+    );
+}
+
+/**
+ * Copies span bytes into retained Zstd memory so the shared parser source can
+ * be released before compression completes.
+ * @param {Uint8Array} source
+ * @param {Uint32Array} sourceOffsets
+ * @param {Uint32Array} sourceLengths
+ * @param {number} contentBytes
+ * @param {string|null} dictName
+ * @returns {ReturnType<typeof prepareSpanCompression>}
+ * @throws {Error} If the dictionary is unavailable or a span is invalid.
+ */
+export function prepareWrappedTermContentZstdSpans(source, sourceOffsets, sourceLengths, contentBytes, dictName) {
     if (!isInitialized || cctx === null || dictName !== 'jmdict' || jmdictDict === null) {
         throw new Error('Term content zstd dictionary is unavailable');
     }
-    const output = requireCompressedBytes(compressSpansUsingDictWithPrefix(
+    return prepareSpanCompression(
         cctx,
         source,
         sourceOffsets,
@@ -607,7 +737,15 @@ export function compressWrappedTermContentZstdSpans(source, sourceOffsets, sourc
         TERM_CONTENT_BLOCK_ENVELOPE_BYTES,
         JMDICT_COMPRESSION_LEVEL,
         true,
-    ));
+    );
+}
+
+/**
+ * @param {ReturnType<typeof prepareSpanCompression>} prepared
+ * @returns {{bytes: Uint8Array, envelopeMs: number}}
+ */
+export function finishWrappedTermContentZstdSpans(prepared) {
+    const output = requireCompressedBytes(finishPreparedSpanCompression(prepared));
     return {bytes: output, envelopeMs: 0};
 }
 

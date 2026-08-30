@@ -37,7 +37,7 @@ async function compressContent(event) {
     const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown}} */ (rawData);
     const id = typeof data?.id === 'number' ? data.id : -1;
     try {
-        const {compressTermContentZstd, compressWrappedTermContentZstd, compressWrappedTermContentZstdSpans} = await modulePromise;
+        const {compressTermContentZstd, compressWrappedTermContentZstd, finishWrappedTermContentZstdSpans, prepareWrappedTermContentZstdSpans} = await modulePromise;
         await initialization;
         const dictName = typeof data.dictName === 'string' ? data.dictName : null;
         /** @type {{bytes: Uint8Array, envelopeMs: number}} */
@@ -56,13 +56,15 @@ async function compressContent(event) {
             ) {
                 throw new RangeError('Compression worker span input is invalid');
             }
-            result = compressWrappedTermContentZstdSpans(
+            const prepared = prepareWrappedTermContentZstdSpans(
                 data.source,
                 data.sourceOffsets,
                 data.sourceLengths,
                 data.contentBytes,
                 dictName,
             );
+            self.postMessage({type: 'source-consumed', id});
+            result = finishWrappedTermContentZstdSpans(prepared);
         } else {
             if (!(data.content instanceof Uint8Array)) {
                 throw new TypeError('Compression worker input is not a Uint8Array');

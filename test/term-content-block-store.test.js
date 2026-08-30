@@ -12,7 +12,7 @@ import {ByteBoundedLruCache, TermContentBlockImportSession, TermContentBlockStor
 import {TERM_CONTENT_BLOCK_ENVELOPE_BYTES, writeCompressedTermContentBlockEnvelope} from '../ext/js/dictionary/term-content-block-envelope.js';
 import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
 import {encodeRawTermContentBlockReference} from '../ext/js/dictionary/raw-term-content.js';
-import {compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from '../ext/js/dictionary/zstd-term-content.js';
+import {beginCompressWrappedTermContentZstdSpansBatch, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from '../ext/js/dictionary/zstd-term-content.js';
 
 vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
     compressTermContentZstd: (bytes) => Uint8Array.from(bytes),
@@ -34,6 +34,22 @@ vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
         envelopeMs: 0,
         wrapped: false,
     })),
+    beginCompressWrappedTermContentZstdSpansBatch: vi.fn((source, offsets, lengths, blockStarts, blockLengths) => {
+        const completion = Promise.resolve({
+            chunks: Array.from(blockLengths, (blockLength, blockIndex) => {
+                const output = new Uint8Array(blockLength);
+                let outputOffset = 0;
+                for (let i = blockStarts[blockIndex]; i < blockStarts[blockIndex + 1]; ++i) {
+                    output.set(source.subarray(offsets[i], offsets[i] + lengths[i]), outputOffset);
+                    outputOffset += lengths[i];
+                }
+                return output;
+            }),
+            envelopeMs: 0,
+            wrapped: false,
+        });
+        return {sourceConsumed: completion.then(() => {}), completion};
+    }),
     decompressTermContentZstd: vi.fn((bytes) => Uint8Array.from(bytes)),
 }));
 
@@ -353,10 +369,15 @@ describe('TermContentBlockStore', () => {
     test('publishes reserved references while shared compression is pending', async () => {
         /** @type {() => void} */
         let releaseCompression = () => {};
-        vi.mocked(compressWrappedTermContentZstdSpansBatch).mockImplementationOnce(
-            (source, offsets, lengths, blockStarts, blockLengths) => new Promise((resolve) => {
+        vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(
+            (source, offsets, lengths, blockStarts, blockLengths) => {
+                /** @type {(value: {chunks: Uint8Array[], envelopeMs: number, wrapped: true}) => void} */
+                let resolveCompletion = () => {};
+                const completion = new Promise((resolve) => {
+                    resolveCompletion = resolve;
+                });
                 releaseCompression = () => {
-                    resolve({
+                    resolveCompletion({
                         chunks: Array.from(blockLengths, (blockLength, blockIndex) => {
                             const output = new Uint8Array(blockLength);
                             let outputOffset = 0;
@@ -370,7 +391,8 @@ describe('TermContentBlockStore', () => {
                         wrapped: true,
                     });
                 };
-            }),
+                return {sourceConsumed: Promise.resolve(), completion};
+            },
         );
         const contentStore = new TermContentOpfsStore();
         const blockStore = new TermContentBlockStore(contentStore, {
@@ -413,9 +435,10 @@ describe('TermContentBlockStore', () => {
     });
 
     test('uses the reserved block plan after parallel shared compression fails', async () => {
-        vi.mocked(compressWrappedTermContentZstdSpansBatch).mockRejectedValueOnce(
-            new Error('injected reservation compression failure'),
-        );
+        vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(() => {
+            const error = new Error('injected reservation compression failure');
+            return {sourceConsumed: Promise.reject(error), completion: Promise.reject(error)};
+        });
         const contentStore = new TermContentOpfsStore();
         const blockStore = new TermContentBlockStore(contentStore, {
             blockTargetBytes: 3,
@@ -442,6 +465,32 @@ describe('TermContentBlockStore', () => {
             storage.contentLengths[1],
             storage.contentDictName,
         )).toStrictEqual(new Uint8Array([4, 5, 6]));
+    });
+
+    test('does not reread shared source after compression acknowledged consumption', async () => {
+        vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(() => {
+            const error = new Error('injected failure after source consumption');
+            return {sourceConsumed: Promise.resolve(), completion: Promise.reject(error)};
+        });
+        const blockStore = new TermContentBlockStore(new TermContentOpfsStore(), {
+            blockTargetBytes: 3,
+            referencePackTargetBytes: 56,
+            minInputBytes: 0,
+        });
+        const source = new Uint8Array(new SharedArrayBuffer(6));
+        source.set([1, 2, 3, 4, 5, 6]);
+
+        const operation = blockStore.tryBeginAppendSpans(
+            source,
+            new Uint32Array([0, 3]),
+            new Uint32Array([3, 3]),
+            'jmdict',
+            true,
+        );
+        if (operation === null) { throw new Error('Expected an early block append operation'); }
+
+        await expect(operation.sourceConsumed).resolves.toBeUndefined();
+        await expect(operation.completion).rejects.toThrow('failure after source consumption');
     });
 
     test('falls back to packed compression when shared-span dispatch fails', async () => {

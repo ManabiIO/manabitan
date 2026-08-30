@@ -123,6 +123,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {Uint32Array|number[]} contentHash2List
  * @property {Uint8Array} [contentBytesBuffer]
  * @property {number} [contentBytesBaseOffset]
+ * @property {() => void} [releaseBorrowedContent]
  * @property {Uint32Array} [contentMetaList]
  * @property {Uint32Array|null} [contentUniqueIndexList]
  * @property {ArtifactTermContentDedupPlan|null} [contentDedupPlan]
@@ -6634,7 +6635,11 @@ export class DictionaryDatabase {
             if (pendingContentCount > 0) {
                 const earlyContentPersistence = useLocalTransaction ?
                     null :
-                    this._tryBeginPersistArtifactTermContent(chunk.dictionary, pendingContentSpans);
+                    this._tryBeginPersistArtifactTermContent(
+                        chunk.dictionary,
+                        pendingContentSpans,
+                        chunk.releaseBorrowedContent,
+                    );
                 if (earlyContentPersistence?.initialSelection === true) {
                     importMetrics.contentInitialReservationCount += 1;
                 }
@@ -7567,9 +7572,10 @@ export class DictionaryDatabase {
      * import. A null result means the caller must use normal persistence.
      * @param {string} dictionary
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
+     * @param {(() => void)|undefined} releaseBorrowedContent
      * @returns {{storage: Promise<{pendingOffsets: Float64Array, pendingLengths: Uint32Array, pendingResolvedDictNames: string}>, completion: Promise<{packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}
      */
-    _tryBeginPersistArtifactTermContent(dictionary, pendingContentSpans) {
+    _tryBeginPersistArtifactTermContent(dictionary, pendingContentSpans, releaseBorrowedContent) {
         if (
             !this._termContentZstdInitialized ||
             pendingContentSpans === null ||
@@ -7586,6 +7592,9 @@ export class DictionaryDatabase {
             compressionDictName,
         );
         if (operation === null) { return null; }
+        if (typeof releaseBorrowedContent === 'function') {
+            void operation.sourceConsumed.then(releaseBorrowedContent, () => {});
+        }
         const storage = operation.storage.then((blockStorage) => ({
             pendingOffsets: blockStorage.contentOffsets,
             pendingLengths: blockStorage.contentLengths,

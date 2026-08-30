@@ -126,6 +126,7 @@ const EMPTY_TERM_GLOSSARY = [];
  *   contentBytesBuffer?: Uint8Array,
  *   contentBytesBaseOffset?: number,
  *   contentMetaList?: Uint32Array,
+ *   releaseBorrowedContent?: () => void,
  *   contentDictNameList: ((string|null)[]|null),
  *   uniformContentDictName?: string|null,
  *   termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null,

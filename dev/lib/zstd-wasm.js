@@ -262,6 +262,45 @@ export function compressSpansUsingDictWithPrefix(
     level = 3,
     writeBlockEnvelope = false,
 ) {
+    return finishPreparedSpanCompression(prepareSpanCompression(
+        context,
+        source,
+        sourceOffsets,
+        sourceLengths,
+        contentBytes,
+        dictionary,
+        prefixBytes,
+        level,
+        writeBlockEnvelope,
+    ));
+}
+
+/**
+ * Gathers source spans into retained WASM memory without starting compression.
+ * Once this returns, callers may safely release or reuse the source bytes.
+ * @param {number} context
+ * @param {Uint8Array} source
+ * @param {Uint32Array} sourceOffsets
+ * @param {Uint32Array} sourceLengths
+ * @param {number} contentBytes
+ * @param {Uint8Array} dictionary
+ * @param {number} prefixBytes
+ * @param {number} [level=3]
+ * @param {boolean} [writeBlockEnvelope=false]
+ * @returns {{context: number, buffers: ReturnType<typeof ensureContextBuffers>, contentBytes: number, dictionaryBytes: number, prefixBytes: number, level: number, writeBlockEnvelope: boolean}}
+ * @throws {Error} If a span is invalid or allocation fails.
+ */
+export function prepareSpanCompression(
+    context,
+    source,
+    sourceOffsets,
+    sourceLengths,
+    contentBytes,
+    dictionary,
+    prefixBytes,
+    level = 3,
+    writeBlockEnvelope = false,
+) {
     if (sourceOffsets.length !== sourceLengths.length) {
         throw new RangeError('Zstd source span offsets and lengths must have equal sizes');
     }
@@ -317,6 +356,20 @@ export function compressSpansUsingDictWithPrefix(
     if (prefixBytes > 0) {
         module.HEAPU8.fill(0, buffers.destination, buffers.destination + prefixBytes);
     }
+    return {context, buffers, contentBytes, dictionaryBytes: dictionary.byteLength, prefixBytes, level, writeBlockEnvelope};
+}
+
+/**
+ * @param {{context: number, buffers: ReturnType<typeof ensureContextBuffers>, contentBytes: number, dictionaryBytes: number, prefixBytes: number, level: number, writeBlockEnvelope: boolean}} prepared
+ * @returns {Uint8Array}
+ * @throws {Error} If the prepared buffers are stale or compression fails.
+ */
+export function finishPreparedSpanCompression(prepared) {
+    const {context, buffers, contentBytes, dictionaryBytes, prefixBytes, level, writeBlockEnvelope} = prepared;
+    const module = getModule();
+    if (contextBuffers.get(context) !== buffers) {
+        throw new Error('Prepared Zstd span buffers are no longer active');
+    }
     const size = module._ZSTD_compress_usingDict(
         context,
         buffers.destination + prefixBytes,
@@ -324,7 +377,7 @@ export function compressSpansUsingDictWithPrefix(
         buffers.source,
         contentBytes,
         buffers.dictionary,
-        dictionary.byteLength,
+        dictionaryBytes,
         level,
     );
     checkResult(size);
