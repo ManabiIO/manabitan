@@ -3101,6 +3101,7 @@ describe('TermRecordOpfsStore', () => {
         const expressionIndex = builder.internStringBytes(expressionBytes);
         const readingIndex = builder.internStringBytes(readingBytes);
         const plan = builder.buildPlan([expressionIndex], [readingIndex]);
+        plan.stringOffsets = void 0;
         const fileBytesByName = new Map();
         const store = new TermRecordOpfsStore();
         Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));

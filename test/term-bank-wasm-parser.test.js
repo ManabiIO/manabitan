@@ -1886,6 +1886,8 @@ describe('term-bank WASM parser', () => {
         expect(chunk.preparedLookupIndexes?.get(`0:${chunk.rowCount}`)?.preinternedPlan).toBe(
             chunk.termRecordPreinternedPlan,
         );
+        expect(chunk.termRecordPreinternedPlan.stringOffsets).toBeUndefined();
+        expect(chunk.termRecordPreinternedPlan.stringHashes).toBeUndefined();
         expect(consumeLastTermBankWasmParseProfile()?.lookupIndexEncodeMs).toBeGreaterThanOrEqual(0);
     });
 

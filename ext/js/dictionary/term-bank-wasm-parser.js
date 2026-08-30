@@ -2843,8 +2843,10 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
     }));
     const stablePlan = {
         stringLengths: Uint16Array.from(plan.stringLengths),
-        stringOffsets: Uint32Array.from(stringOffsets),
-        stringHashes: plan.stringHashes instanceof Uint32Array ? Uint32Array.from(plan.stringHashes) : void 0,
+        stringOffsets: chunk.preparedLookupIndexes instanceof Map ? void 0 : Uint32Array.from(stringOffsets),
+        stringHashes: chunk.preparedLookupIndexes instanceof Map ?
+            void 0 :
+            (plan.stringHashes instanceof Uint32Array ? Uint32Array.from(plan.stringHashes) : void 0),
         stringsBuffer: Uint8Array.from(plan.stringsBuffer),
         expressionIndexes: Uint32Array.from(plan.expressionIndexes),
         readingIndexes: Uint32Array.from(plan.readingIndexes),

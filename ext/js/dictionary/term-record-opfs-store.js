@@ -140,6 +140,26 @@ function getArtifactContentLength(chunk, contentLengths, index) {
 }
 
 /**
+ * Reconstructs parser string offsets only for small imports which retain
+ * materialized records. Persisted-only imports do not need this metadata.
+ * @param {Uint16Array|undefined} lengths
+ * @param {number} byteLength
+ * @returns {Uint32Array|null}
+ */
+function reconstructTermStringOffsets(lengths, byteLength) {
+    if (!(lengths instanceof Uint16Array) || lengths.length === 0) { return null; }
+    const offsets = new Uint32Array(lengths.length);
+    let cursor = 0;
+    for (let i = 0; i < lengths.length; ++i) {
+        const length = lengths[i];
+        if (length <= 0 || cursor > byteLength - length) { return null; }
+        offsets[i] = cursor;
+        cursor += length;
+    }
+    return cursor === byteLength ? offsets : null;
+}
+
+/**
  * @param {Uint8Array} output
  * @param {number} offset
  * @param {number} value
@@ -1685,11 +1705,21 @@ export class TermRecordOpfsStore {
         const firstId = this._nextId;
         const firstContentDictName = uniformContentDictName ?? (contentDictNames[0] ?? 'raw');
         const preinternedPlan = chunk.termRecordPreinternedPlan ?? null;
-        const stableStringOffsets = preinternedPlan?.stringOffsets;
         const stableStringLengths = preinternedPlan?.stringLengths;
         const stableStringsBuffer = preinternedPlan?.stringsBuffer;
         const stableExpressionIndexes = preinternedPlan?.expressionIndexes;
         const stableReadingIndexes = preinternedPlan?.readingIndexes;
+        const skipRecordMaterialization = (
+            this._importSessionActive &&
+            (chunk.dictionaryTotalRows ?? count) >= PERSISTED_ONLY_IMPORT_ROW_THRESHOLD
+        );
+        const stableStringOffsets = skipRecordMaterialization ?
+            null :
+            (
+                preinternedPlan?.stringOffsets instanceof Uint32Array ?
+                    preinternedPlan.stringOffsets :
+                    reconstructTermStringOffsets(stableStringLengths, stableStringsBuffer?.byteLength ?? -1)
+            );
         const hasStableStringSlices = (
             stableStringOffsets instanceof Uint32Array &&
             stableStringLengths instanceof Uint16Array &&
@@ -1699,10 +1729,6 @@ export class TermRecordOpfsStore {
             stableStringOffsets.length === stableStringLengths.length &&
             stableExpressionIndexes.length >= count &&
             stableReadingIndexes.length >= count
-        );
-        const skipRecordMaterialization = (
-            this._importSessionActive &&
-            (chunk.dictionaryTotalRows ?? count) >= PERSISTED_ONLY_IMPORT_ROW_THRESHOLD
         );
         if (skipRecordMaterialization) {
             this._nextId += count;
