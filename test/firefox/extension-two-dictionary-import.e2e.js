@@ -1942,6 +1942,51 @@ async function getSearchPageDiagnostics(driver) {
 
 /**
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @returns {Promise<Record<string, string>>}
+ */
+async function getPageFrontendDebugState(driver) {
+    // Selenium executeScript return value is untyped (`any`).
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const state = await driver.executeScript(`
+        return Object.fromEntries(
+            Object.entries(document.documentElement?.dataset ?? {})
+                .filter(([key]) => key.startsWith('manabitan')),
+        );
+    `);
+    return typeof state === 'object' && state !== null && !Array.isArray(state) ?
+        /** @type {Record<string, string>} */ (state) :
+        {};
+}
+
+/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @param {number} [timeoutMs]
+ * @returns {Promise<Record<string, string>>}
+ */
+async function waitForPageFrontendHoverReady(driver, timeoutMs = 15_000) {
+    /** @type {Record<string, string>} */
+    let state = {};
+    await driver.wait(async () => {
+        state = await getPageFrontendDebugState(driver);
+        return (
+            state.manabitanContentScriptLoaded === 'true' &&
+            state.manabitanContentScriptPrepared === 'true' &&
+            state.manabitanPrepared === 'true' &&
+            state.manabitanOptionsLoaded === 'true' &&
+            state.manabitanScannerEnabled === 'true' &&
+            (
+                state.manabitanPopupPrewarmReady === 'true' ||
+                state.manabitanPopupPrewarmSettled === 'true' ||
+                state.manabitanPopupPrewarmTimedOut === 'true'
+            ) &&
+            state.manabitanLookupPrewarmReady === 'true'
+        );
+    }, timeoutMs, () => `Frontend did not become hover-ready: ${JSON.stringify(state)}`);
+    return state;
+}
+
+/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
  * @param {string} pageUrl
  * @param {string} targetSelector
  * @param {string[]} expectedDictionaryNames
@@ -1949,7 +1994,11 @@ async function getSearchPageDiagnostics(driver) {
  * @returns {Promise<{popupText: string, hasDictionaryEntries: boolean, noResultsVisible: boolean, noDictionariesVisible: boolean, entriesTextPreview: string, usedModifier: string|null}>}
  */
 async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictionaryNames, motionProfile = null) {
-    await driver.get(pageUrl);
+    const currentUrl = String(await driver.getCurrentUrl());
+    if (currentUrl !== pageUrl) {
+        await driver.get(pageUrl);
+    }
+    await waitForPageFrontendHoverReady(driver);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const targetElement = /** @type {import('selenium-webdriver').WebElement} */ (await driver.wait(until.elementLocated(By.css(targetSelector)), 30_000));
     await driver.executeScript(`
@@ -4225,10 +4274,7 @@ async function main() {
         } catch (e) {
             hoverSpeedStressError = errorMessage(e);
             const hoverDiagnostics = await getBackendLookupDiagnostics(driver, '暗記');
-            if (!diagnosticsShowExpectedDictionaryCoverage(hoverDiagnostics, expectedLookupDictionaries)) {
-                fail(`Hover-speed stress after multi-file import failed: ${hoverSpeedStressError}; backend=${JSON.stringify(hoverDiagnostics)}`);
-            }
-            hoverSpeedStressError = '';
+            fail(`Hover-speed stress after multi-file import failed: ${hoverSpeedStressError}; backend=${JSON.stringify(hoverDiagnostics)}`);
         } finally {
             const hoverSpeedResourceSummary = await hoverSpeedSampler.stop();
             const hoverSpeedPageSummary = await endPageProfilePhase(driver);
@@ -4285,28 +4331,16 @@ async function main() {
                 await recoverExtensionSearchContext(driver, extensionBaseUrl, '暗記');
                 hoverDiagnostics = await getBackendLookupDiagnostics(driver, '暗記');
             }
-            if (diagnosticsShowExpectedDictionaryCoverage(hoverDiagnostics, expectedLookupDictionaries)) {
-                const hoverLookupEnd = safePerformance.now();
-                await addReportPhase(
-                    report,
-                    driver,
-                    'Verify repeated hover lookup on Wagahai page',
-                    `Hover popup verification was flaky in Firefox headless, but backend dictionary coverage remained intact. backend=${JSON.stringify(hoverDiagnostics)} completedIterations=${JSON.stringify(hoverIterationSummaries)} error=${errorMessage(hoverError)}`,
-                    hoverLookupStart,
-                    hoverLookupEnd,
-                );
-            } else {
-                const hoverLookupEnd = safePerformance.now();
-                await addReportPhase(
-                    report,
-                    driver,
-                    'Verify repeated hover lookup on Wagahai page (failed)',
-                    `Hover popup verification failed during repeated run. backend=${JSON.stringify(hoverDiagnostics)} error=${errorMessage(hoverError)} completedIterations=${JSON.stringify(hoverIterationSummaries)}`,
-                    hoverLookupStart,
-                    hoverLookupEnd,
-                );
-                fail(`Expected repeated hover popup lookups to include both dictionaries. backend=${JSON.stringify(hoverDiagnostics)} error=${errorMessage(hoverError)} completedIterations=${JSON.stringify(hoverIterationSummaries)}`);
-            }
+            const hoverLookupEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                driver,
+                'Verify repeated hover lookup on Wagahai page (failed)',
+                `Hover popup verification failed during repeated run. backend=${JSON.stringify(hoverDiagnostics)} error=${errorMessage(hoverError)} completedIterations=${JSON.stringify(hoverIterationSummaries)}`,
+                hoverLookupStart,
+                hoverLookupEnd,
+            );
+            fail(`Expected repeated hover popup lookups to include both dictionaries. backend=${JSON.stringify(hoverDiagnostics)} error=${errorMessage(hoverError)} completedIterations=${JSON.stringify(hoverIterationSummaries)}`);
         }
 
         const postHoverSearchStart = safePerformance.now();
