@@ -1089,9 +1089,8 @@ export class DictionaryImporter {
                 {} :
                 {readCompressed: async (termFile, signal) => await rawZipPayloadReader.read(termFile, signal)}),
         });
-        const compressedImportRunPlan = termBankSourcePipeline.createImportRunPlan(0) === null ?
-            null :
-            termBankSourcePipeline.createCompressedImportRunPlan(0);
+        const uncompressedImportRunPlan = termBankSourcePipeline.createImportRunPlan(0);
+        const compressedImportRunPlan = termBankSourcePipeline.createCompressedImportRunPlan(0);
         const zipWorkerPolicy = this._selectSourceZipWorkerPolicy(
             termBankSourcePipeline,
             activeTermFiles,
@@ -1729,7 +1728,7 @@ export class DictionaryImporter {
                     try {
                         const termFileEntry = /** @type {import('@zip.js/zip.js').Entry} */ (termFile);
                         const importRunPlan = importWideSourceRunEnabled ?
-                            (termFileIndex === 0 ? compressedImportRunPlan : null) ?? termBankSourcePipeline.createImportRunPlan(termFileIndex) :
+                            (termFileIndex === 0 ? compressedImportRunPlan ?? uncompressedImportRunPlan : null) ?? termBankSourcePipeline.createImportRunPlan(termFileIndex) :
                             null;
                         const usedImportWideSourceRun = importRunPlan !== null;
                         let sourceTermFileBatch = importRunPlan?.files ?? (termBankSourcePipeline.canPrefetch(termFile) ? termBankSourcePipeline.getBatch(termFileIndex) : []);
