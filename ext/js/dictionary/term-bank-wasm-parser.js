@@ -31,6 +31,7 @@ const U8_ARRAY_CLOSE = 0x5d;
 const U8_COMMA = 0x2c;
 
 const CONTENT_META_U32_FIELDS = 4;
+const CONTENT_SIGNATURE_U32_FIELDS = 3;
 const DEFAULT_ROW_CHUNK_SIZE = 2048;
 const INITIAL_META_ROWS_PER_SOURCE = 10_000;
 const OVERLAPPED_SOURCE_GROUP_COUNT = 1;
@@ -53,7 +54,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
-/** @typedef {{wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan}} ParsedTermBankWasmBuffers */
+/** @typedef {{wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
 /** @type {WebAssembly.Module|null} */
@@ -430,6 +431,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         const contentHashTablePtr = wasm.wasm_alloc(contentHashTableSize * 4);
         const contentUniqueIndexesPtr = wasm.wasm_alloc(initialMetaCapacity * 4);
         const contentUniqueCountPtr = wasm.wasm_alloc(4);
+        const contentUniqueSignaturesPtr = wasm.wasm_alloc(initialMetaCapacity * CONTENT_SIGNATURE_U32_FIELDS * 4);
         const rowCountPtr = wasm.wasm_alloc(4);
         const stringsCapacity = Math.max(1024 * 1024, Math.min(jsonLength, initialMetaCapacity * 64));
         const stringsPtr = wasm.wasm_alloc(stringsCapacity);
@@ -456,7 +458,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         allocationMs += Math.max(0, Date.now() - tStart);
         if (
             outPtr === 0 || contentMetaPtr === 0 || contentHashTablePtr === 0 ||
-            contentUniqueIndexesPtr === 0 || contentUniqueCountPtr === 0 ||
+            contentUniqueIndexesPtr === 0 || contentUniqueCountPtr === 0 || contentUniqueSignaturesPtr === 0 ||
             rowCountPtr === 0 || stringsPtr === 0 || stringLengthsPtr === 0 ||
             stringOffsetsPtr === 0 || stringHashesPtr === 0 || expressionIndexesPtr === 0 ||
             readingIndexesPtr === 0 || stringHashTablePtr === 0 || stringUniqueCountPtr === 0 ||
@@ -485,6 +487,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             contentHashTableSize,
             contentUniqueIndexesPtr,
             contentUniqueCountPtr,
+            contentUniqueSignaturesPtr,
             rowCountPtr,
             stringsPtr,
             stringsCapacity,
@@ -536,6 +539,11 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             metasPtr: outPtr,
             contentMetasPtr: contentMetaPtr,
             contentUniqueIndexesPtr,
+            contentUniqueSignatures: Uint32Array.from(new Uint32Array(
+                wasm.memory.buffer,
+                contentUniqueSignaturesPtr,
+                contentUniqueCount * CONTENT_SIGNATURE_U32_FIELDS,
+            )),
             heap,
             source: heap.subarray(jsonPtr, jsonPtr + jsonLength),
             metas: new Uint32Array(wasm.memory.buffer, outPtr, rowCount * META_U32_FIELDS),
@@ -1425,6 +1433,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
             uniqueCount: contentUniqueCount,
             sourceRowCount: rowCount,
             uniqueRowIndexes: buildContentUniqueRowIndexes(contentUniqueIndexes, contentUniqueCount),
+            uniqueSignatures: parsed.contentUniqueSignatures,
             resolvedFlags: new Uint8Array(contentUniqueCount),
             resolvedOffsets: new Float64Array(contentUniqueCount),
             resolvedLengths: new Uint32Array(contentUniqueCount),

@@ -208,13 +208,14 @@ function collectChunkTransferables(chunk) {
         }
     }
     const rawDedupPlan = /** @type {unknown} */ (chunk.contentDedupPlan);
-    const dedupPlan = /** @type {{uniqueRowIndexes?: unknown, resolvedFlags?: unknown, resolvedOffsets?: unknown, resolvedLengths?: unknown, pendingEpochs?: unknown, pendingIndexes?: unknown, pendingSpanOffsetsScratch?: unknown, pendingSpanLengthsScratch?: unknown}|null} */ (
+    const dedupPlan = /** @type {{uniqueRowIndexes?: unknown, uniqueSignatures?: unknown, resolvedFlags?: unknown, resolvedOffsets?: unknown, resolvedLengths?: unknown, pendingEpochs?: unknown, pendingIndexes?: unknown, pendingSpanOffsetsScratch?: unknown, pendingSpanLengthsScratch?: unknown}|null} */ (
         typeof rawDedupPlan === 'object' ? rawDedupPlan : null
     );
     if (typeof dedupPlan === 'object' && dedupPlan !== null) {
         if (dedupPlan.uniqueRowIndexes instanceof Uint32Array) {
             addView(dedupPlan.uniqueRowIndexes);
         }
+        addView(dedupPlan.uniqueSignatures);
         addView(dedupPlan.resolvedFlags);
         addView(dedupPlan.resolvedOffsets);
         addView(dedupPlan.resolvedLengths);

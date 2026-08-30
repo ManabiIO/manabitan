@@ -177,6 +177,22 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(() => insert(10, 20, 0, 1, 'raw', 0, contentBytes)).toThrow('has no free slot');
     });
 
+    test('uses parser-prepared signatures without resampling reserved content', () => {
+        const database = new DictionaryDatabase();
+        const ensureCapacity = Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').bind(database);
+        const reserve = Reflect.get(database, '_reserveArtifactTermContentMetadata').bind(database);
+        const readSignature = vi.spyOn(database, '_readTermContentSignature');
+        ensureCapacity(1);
+
+        const index = reserve(10, 20, Uint8Array.of(1), 0, 1, 101, 202, 303);
+
+        expect(index).toBe(0);
+        expect(readSignature).not.toHaveBeenCalled();
+        expect(Reflect.get(database, '_termEntryContentMetaSignature1Table')[index]).toBe(101);
+        expect(Reflect.get(database, '_termEntryContentMetaSignature2Table')[index]).toBe(202);
+        expect(Reflect.get(database, '_termEntryContentMetaSignature3Table')[index]).toBe(303);
+    });
+
     test('leases cleared dedup scratch tables without sharing active leases', () => {
         const database = new DictionaryDatabase();
         const acquire = Reflect.get(database, '_acquireArtifactTermContentDedupScratch').bind(database);

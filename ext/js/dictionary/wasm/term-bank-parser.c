@@ -75,6 +75,18 @@ static int ensure_memory(uint32_t required_bytes) {
     return rc >= 0;
 }
 
+static uint32_t read_content_signature(
+    const uint8_t* bytes,
+    uint32_t length,
+    uint32_t offset
+) {
+    uint32_t result = 0u;
+    for (uint32_t i = 0u; i < 4u && offset + i < length; ++i) {
+        result |= (uint32_t)bytes[offset + i] << (i * 8u);
+    }
+    return result;
+}
+
 __attribute__((visibility("default")))
 void wasm_reset_heap(void) {
     heap_ptr = (uint32_t)(uintptr_t)&__heap_base;
@@ -1954,6 +1966,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t hash_table_size,
     uint32_t unique_indexes_ptr,
     uint32_t unique_count_ptr,
+    uint32_t unique_signatures_ptr,
     uint32_t row_count_ptr,
     uint32_t strings_ptr,
     uint32_t strings_capacity,
@@ -1975,7 +1988,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     if (
         json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
         out_ptr == 0u || row_meta_ptr == 0u || hash_table_ptr == 0u ||
-        unique_indexes_ptr == 0u || unique_count_ptr == 0u || row_count_ptr == 0u ||
+        unique_indexes_ptr == 0u || unique_count_ptr == 0u || unique_signatures_ptr == 0u || row_count_ptr == 0u ||
         strings_ptr == 0u || string_lengths_ptr == 0u || string_offsets_ptr == 0u ||
         string_hashes_ptr == 0u || expression_indexes_ptr == 0u || reading_indexes_ptr == 0u ||
         string_hash_table_ptr == 0u || string_unique_count_ptr == 0u || string_bytes_count_ptr == 0u ||
@@ -1992,6 +2005,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t* row_meta = (uint32_t*)(uintptr_t)row_meta_ptr;
     uint32_t* hash_table = (uint32_t*)(uintptr_t)hash_table_ptr;
     uint32_t* unique_indexes = (uint32_t*)(uintptr_t)unique_indexes_ptr;
+    uint32_t* unique_signatures = (uint32_t*)(uintptr_t)unique_signatures_ptr;
     uint8_t* strings = (uint8_t*)(uintptr_t)strings_ptr;
     uint16_t* string_lengths = (uint16_t*)(uintptr_t)string_lengths_ptr;
     uint32_t* string_offsets = (uint32_t*)(uintptr_t)string_offsets_ptr;
@@ -2206,6 +2220,11 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 row_meta[row_offset + 2u] = hash1;
                 row_meta[row_offset + 3u] = hash2;
                 unique_indexes[row_count] = unique_count;
+                const uint32_t last_offset = length > 4u ? length - 4u : 0u;
+                const uint32_t signature_offset = unique_count * 3u;
+                unique_signatures[signature_offset] = read_content_signature(out + start, length, 0u);
+                unique_signatures[signature_offset + 1u] = read_content_signature(out + start, length, last_offset / 2u);
+                unique_signatures[signature_offset + 2u] = read_content_signature(out + start, length, last_offset);
                 hash_table[slot] = row_count + 1u;
                 ++unique_count;
             }
