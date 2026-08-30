@@ -456,15 +456,24 @@ describe('TermContentOpfsStore', () => {
             store.setQueueImportWritesEnabled(true);
         });
 
-        await store.appendBatch([new Uint8Array([5, 6])]);
+        await store.appendBatch([new Uint8Array([5, 6]), new Uint8Array([7, 8])]);
         await writeStarted;
 
         await expect(store.readSlice(1, 2)).resolves.toStrictEqual(new Uint8Array([2, 3]));
+        await expect(store.readSlice(4, 4)).resolves.toStrictEqual(new Uint8Array([5, 6, 7, 8]));
         expect(Reflect.get(store, '_loadedForRead')).toBe(true);
+        expect(store.getDebugState()).toMatchObject({
+            importReadOverlayChunkCount: 2,
+            importReadOverlayBytes: 4,
+        });
 
         releaseWrite?.();
         await store.endImportSession();
         expect(Reflect.get(store, '_loadedForRead')).toBe(false);
+        expect(store.getDebugState()).toMatchObject({
+            importReadOverlayChunkCount: 0,
+            importReadOverlayBytes: 0,
+        });
     });
 
     test('import append offsets include bytes in active queued writes', async () => {

@@ -53,9 +53,12 @@ function cacheMeta(database, contentHash, offset, length, dictName, hash1, hash2
 }
 
 /**
+ * @param {number[]} [sourceValues]
+ * @param {number} [hash1]
+ * @param {number} [hash2]
  * @returns {{database: DictionaryDatabase, chunk: Record<string, unknown>, plan: Record<string, unknown>, appendRecords: ReturnType<typeof vi.fn>, releaseBorrowedContent: ReturnType<typeof vi.fn>, resolveContent: () => void, rejectContent: (error: Error) => void, resolveRecords: () => void, rejectRecords: (error: Error) => void, run: () => Promise<void>}}
  */
-function createArtifactOverlapHarness() {
+function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash2 = 20) {
     const database = new DictionaryDatabase();
     Reflect.set(database, '_bulkImportTransactionOpen', true);
     Reflect.set(database, '_deferTermsVirtualTableSync', true);
@@ -101,20 +104,20 @@ function createArtifactOverlapHarness() {
             sourceConsumed: Promise.resolve(),
             storage: Promise.resolve({
                 contentOffsets: new Float64Array([100]),
-                contentLengths: new Uint32Array([3]),
+                contentLengths: new Uint32Array([sourceValues.length]),
                 contentDictName: 'raw-block-v2:jmdict',
             }),
             completion: contentCompletion.then((profile) => ({
                 contentOffsets: new Float64Array([100]),
-                contentLengths: new Uint32Array([3]),
+                contentLengths: new Uint32Array([sourceValues.length]),
                 contentDictName: 'raw-block-v2:jmdict',
                 ...profile,
             })),
         })),
     });
 
-    const source = new Uint8Array(new SharedArrayBuffer(3));
-    source.set([1, 2, 3]);
+    const source = new Uint8Array(new SharedArrayBuffer(sourceValues.length));
+    source.set(sourceValues);
     const releaseBorrowedContent = vi.fn();
     const plan = {
         uniqueCount: 1,
@@ -143,7 +146,7 @@ function createArtifactOverlapHarness() {
         contentHash2List: new Uint32Array(0),
         contentBytesBuffer: source,
         contentBytesBaseOffset: 0,
-        contentMetaList: new Uint32Array([0, 3, 10, 20]),
+        contentMetaList: new Uint32Array([0, sourceValues.length, hash1, hash2]),
         contentUniqueIndexList: new Uint32Array([0]),
         contentDedupPlan: plan,
         releaseBorrowedContent,
@@ -1522,7 +1525,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(harness.plan.resolvedLengths).toStrictEqual(new Uint32Array([0]));
     });
 
-    test('releases parser content after metadata publication and before record completion', async () => {
+    test('retains parser content until reserved content is durable', async () => {
         const harness = createArtifactOverlapHarness();
         Reflect.set(harness.plan, 'uniqueRowIndexes', new Uint32Array([0]));
         Reflect.set(harness.chunk, 'contentRowStart', 0);
@@ -1530,7 +1533,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         const importing = harness.run();
 
         await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
-        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled();
         const [recordChunk, contentOffsets, contentLengths, contentDictName] = harness.appendRecords.mock.calls[0];
         expect(contentOffsets).toStrictEqual(new Float64Array(0));
         expect(contentLengths).toStrictEqual(new Uint32Array(0));
@@ -1542,6 +1545,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         });
 
         harness.resolveContent();
+        await vi.waitFor(() => expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce());
         harness.resolveRecords();
         await importing;
         expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
@@ -1578,10 +1582,51 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             contentDictName: 'raw-block-v2:jmdict',
         });
         await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
-        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+        await vi.waitFor(() => expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce());
 
         harness.resolveRecords();
         await importing;
+    });
+
+    test('verifies a duplicate against canonical bytes while its OPFS write is pending', async () => {
+        const harness = createArtifactOverlapHarness();
+        const readPersisted = vi.spyOn(harness.database, '_readTermEntryContentBytesDetailed');
+        const importing = harness.run();
+
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceByStorageKey').size).toBe(1);
+        const findMatching = Reflect.get(harness.database, '_findMatchingTermEntryContentMeta').bind(harness.database);
+        await expect(findMatching(10, 20, Uint8Array.of(1, 2, 3))).resolves.toMatchObject({
+            offset: 100,
+            length: 3,
+        });
+        expect(readPersisted).not.toHaveBeenCalled();
+
+        harness.resolveContent();
+        await vi.waitFor(() => {
+            expect(Reflect.get(harness.database, '_inFlightTermContentSourceByStorageKey').size).toBe(0);
+        });
+        harness.resolveRecords();
+        await importing;
+    });
+
+    test('does not merge an exact hash collision while its OPFS write is pending', async () => {
+        const original = Array.from({length: 16}, (_, index) => index);
+        const collision = [...original];
+        collision[4] = 0xff;
+        const harness = createArtifactOverlapHarness(original);
+        const readPersisted = vi.spyOn(harness.database, '_readTermEntryContentBytesDetailed');
+        const importing = harness.run();
+
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        const findMatching = Reflect.get(harness.database, '_findMatchingTermEntryContentMeta').bind(harness.database);
+        await expect(findMatching(10, 20, Uint8Array.from(collision))).resolves.toBeUndefined();
+        expect(readPersisted).not.toHaveBeenCalled();
+
+        harness.resolveContent();
+        harness.resolveRecords();
+        await importing;
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceByStorageKey').size).toBe(0);
     });
 
     test('bounds persisted signatures for short slab content', async () => {
@@ -1644,6 +1689,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
 
         await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
         expect(harness.appendRecords.mock.calls[0][1]).toStrictEqual(new Float64Array([100]));
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceByStorageKey').size).toBe(1);
         harness.rejectContent(new Error('injected reserved content failure'));
         harness.resolveRecords();
 
@@ -1651,6 +1697,8 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(getMeta(harness.database, 10, 20)).toBeUndefined();
         expect(harness.plan.resolvedFlags).toStrictEqual(new Uint8Array([0]));
         expect(harness.plan.nextUnresolvedUniqueIndex).toBe(0);
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceByStorageKey').size).toBe(0);
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
 
         const resolve = Reflect.get(harness.database, '_resolveArtifactTermContentDedup').bind(harness.database);
         const retry = await resolve(harness.chunk, true);

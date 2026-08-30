@@ -81,6 +81,12 @@ export class TermContentOpfsStore {
         this._queueImportWritesEnabled = false;
         /** @type {boolean} */
         this._importWriteStarted = false;
+        /** @type {Uint8Array[]} */
+        this._importReadOverlayChunks = [];
+        /** @type {number[]} */
+        this._importReadOverlayOffsets = [];
+        /** @type {number} */
+        this._importReadOverlayBytes = 0;
         /** @type {boolean} */
         this._loadedForRead = false;
         /** @type {number} */
@@ -158,6 +164,7 @@ export class TermContentOpfsStore {
             this._syncActiveSegmentState();
             this._chunks = [];
             this._chunkOffsets = [];
+            this._clearImportReadOverlay();
             this._invalidateReadState();
             this._pendingWriteBytes = 0;
             this._pendingWriteChunks = [];
@@ -186,6 +193,7 @@ export class TermContentOpfsStore {
             }
             this._importSessionActive = true;
             this._importWriteStarted = false;
+            this._clearImportReadOverlay();
             this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
             this._writeCoalesceMaxChunks = this._computeWriteCoalesceMaxChunks();
             this._flushThresholdBytes = this._computeWriteFlushThresholdBytes();
@@ -237,6 +245,7 @@ export class TermContentOpfsStore {
                 throw new TypeError('Invalid term-content import checkpoint');
             }
             this._importSessionActive = false;
+            this._clearImportReadOverlay();
             this._pendingWriteBytes = 0;
             this._pendingWriteChunks = [];
             this._queuedWriteChunks = [];
@@ -378,6 +387,7 @@ export class TermContentOpfsStore {
                 logicalLengthAfterClose,
                 ...this._writeDrainMetrics,
             };
+            this._clearImportReadOverlay();
             this._invalidateReadState();
         });
     }
@@ -482,6 +492,7 @@ export class TermContentOpfsStore {
                 this._queuedWriteBytes = 0;
                 this._inFlightWriteBytes = 0;
                 this._importSessionActive = false;
+                this._clearImportReadOverlay();
                 this._lastEndImportSessionMetrics = null;
                 this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
                 this._invalidateReadState();
@@ -512,6 +523,7 @@ export class TermContentOpfsStore {
             this._queuedWriteBytes = 0;
             this._inFlightWriteBytes = 0;
             this._importSessionActive = false;
+            this._clearImportReadOverlay();
             this._lastEndImportSessionMetrics = null;
             this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
         });
@@ -747,6 +759,10 @@ export class TermContentOpfsStore {
                 if (this._fileHandle === null) {
                     this._chunkOffsets.push(nextOffset);
                     this._chunks.push(chunk);
+                } else if (this._importSessionActive) {
+                    this._importReadOverlayOffsets.push(nextOffset);
+                    this._importReadOverlayChunks.push(chunk);
+                    this._importReadOverlayBytes += length;
                 }
                 nextOffset += length;
             }
@@ -1129,8 +1145,10 @@ export class TermContentOpfsStore {
             return this._lastSliceCacheValue;
         }
         /** @type {Uint8Array|null} */
-        let result;
-        if (this._fileHandle === null) {
+        let result = this._readSliceFromImportOverlay(offset, length);
+        if (result !== null) {
+            this._lastReadErrorDetails = null;
+        } else if (this._fileHandle === null) {
             if (this._chunks.length === 0 && this._hasStorageDirectoryApi()) {
                 await this.ensureLoadedForRead();
             }
@@ -1188,6 +1206,68 @@ export class TermContentOpfsStore {
             this._lastSliceCacheValue = result;
         }
         return result;
+    }
+
+    /**
+     * @param {number} offset
+     * @param {number} length
+     * @returns {Uint8Array|null}
+     */
+    _readSliceFromImportOverlay(offset, length) {
+        const chunks = this._importReadOverlayChunks;
+        if (chunks.length === 0) { return null; }
+        const offsets = this._importReadOverlayOffsets;
+        let low = 0;
+        let high = offsets.length - 1;
+        while (low <= high) {
+            const mid = (low + high) >>> 1;
+            const start = offsets[mid];
+            const end = start + chunks[mid].byteLength;
+            if (offset < start) {
+                high = mid - 1;
+            } else if (offset >= end) {
+                low = mid + 1;
+            } else {
+                low = mid;
+                break;
+            }
+        }
+        let chunkIndex = low;
+        if (
+            chunkIndex >= chunks.length ||
+            offset < offsets[chunkIndex] ||
+            offset >= offsets[chunkIndex] + chunks[chunkIndex].byteLength
+        ) {
+            return null;
+        }
+        const firstChunk = chunks[chunkIndex];
+        const firstOffset = offset - offsets[chunkIndex];
+        if (firstOffset + length <= firstChunk.byteLength) {
+            return firstChunk.subarray(firstOffset, firstOffset + length);
+        }
+        const output = new Uint8Array(length);
+        let outputOffset = 0;
+        let cursor = offset;
+        while (outputOffset < length && chunkIndex < chunks.length) {
+            const chunk = chunks[chunkIndex];
+            const chunkOffset = offsets[chunkIndex];
+            if (cursor < chunkOffset) { return null; }
+            const startInChunk = cursor - chunkOffset;
+            const copyLength = Math.min(length - outputOffset, chunk.byteLength - startInChunk);
+            if (copyLength <= 0) { return null; }
+            output.set(chunk.subarray(startInChunk, startInChunk + copyLength), outputOffset);
+            outputOffset += copyLength;
+            cursor += copyLength;
+            ++chunkIndex;
+        }
+        return outputOffset === length ? output : null;
+    }
+
+    /** */
+    _clearImportReadOverlay() {
+        this._importReadOverlayChunks = [];
+        this._importReadOverlayOffsets = [];
+        this._importReadOverlayBytes = 0;
     }
 
     /**
@@ -1437,6 +1517,8 @@ export class TermContentOpfsStore {
             chunkOffsetCount: this._chunkOffsets.length,
             segmentCount: this._segmentStates.length,
             queuedWriteBytes: this._queuedWriteBytes,
+            importReadOverlayChunkCount: this._importReadOverlayChunks.length,
+            importReadOverlayBytes: this._importReadOverlayBytes,
             queuedWriteBudgetBytes: this._queuedWriteBudgetBytes,
             writeFlushThresholdBytes: this._flushThresholdBytes,
             activeSegmentIndex: this._getActiveSegmentState()?.index ?? null,

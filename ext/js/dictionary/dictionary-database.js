@@ -496,6 +496,8 @@ export class DictionaryDatabase {
         this._termEntryContentMetaFreeIndexes = [];
         /** @type {Map<string, Array<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}>>} */
         this._termEntryContentMetaCollisionsByHashPair = new Map();
+        /** @type {Map<string, {buffer: Uint8Array, offset: number, length: number}>} */
+        this._inFlightTermContentSourceByStorageKey = new Map();
         /** @type {boolean} */
         this._termEntryContentHasExistingRows = true;
         /** @type {boolean} */
@@ -5187,6 +5189,7 @@ export class DictionaryDatabase {
         this._termEntryContentMetaDenseCount = 0;
         this._termEntryContentMetaFreeIndexes.length = 0;
         this._termEntryContentMetaCollisionsByHashPair.clear();
+        this._inFlightTermContentSourceByStorageKey.clear();
     }
 
     /**
@@ -5366,15 +5369,120 @@ export class DictionaryDatabase {
      */
     async _findMatchingPersistedTermEntryContentMeta(candidates, contentBytes) {
         for (const meta of candidates) {
+            const inFlightSource = this._inFlightTermContentSourceByStorageKey.size === 0 ?
+                void 0 :
+                this._inFlightTermContentSourceByStorageKey.get(
+                    this._getTermContentStorageKey(meta.offset, meta.length, meta.dictName),
+                );
+            if (typeof inFlightSource !== 'undefined') {
+                if (
+                    this._termContentBytesEqualSpan(
+                        contentBytes,
+                        inFlightSource.buffer,
+                        inFlightSource.offset,
+                        inFlightSource.length,
+                    )
+                ) {
+                    return meta;
+                }
+                continue;
+            }
             const readResult = await this._readTermEntryContentBytesDetailed(meta.offset, meta.length, meta.dictName);
             if (readResult.status !== 'ok') {
-                throw new TermContentLookupReadError(readResult.status, readResult.reason);
+                const candidateKey = this._getTermContentStorageKey(meta.offset, meta.length, meta.dictName);
+                const activeKeys = [...this._inFlightTermContentSourceByStorageKey.keys()].slice(0, 3);
+                throw new TermContentLookupReadError(
+                    readResult.status,
+                    `${readResult.reason}; exact dedupe candidate=${JSON.stringify(candidateKey)} ` +
+                    `inFlightCount=${this._inFlightTermContentSourceByStorageKey.size} ` +
+                    `inFlightKeys=${JSON.stringify(activeKeys)}`,
+                );
             }
             const existingBytes = readResult.bytes;
             this._setTermContentSignatures(meta, existingBytes);
             if (this._termContentBytesEqual(existingBytes, contentBytes)) { return meta; }
         }
         return void 0;
+    }
+
+    /**
+     * @param {number} offset
+     * @param {number} length
+     * @param {string} dictName
+     * @returns {string}
+     */
+    _getTermContentStorageKey(offset, length, dictName) {
+        return `${dictName}\0${offset}:${length}`;
+    }
+
+    /**
+     * Keeps byte-exact verification available after reserved metadata becomes
+     * visible but before its OPFS block is durable.
+     * @param {number[]|Float64Array} pendingOffsets
+     * @param {number[]|Uint32Array} pendingLengths
+     * @param {string|string[]} pendingResolvedDictNames
+     * @param {Uint8Array[]} pendingContentBytes
+     * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
+     * @returns {() => void}
+     * @throws {Error} If source metadata is inconsistent or aliases an active reservation.
+     */
+    _registerInFlightTermContentSources(
+        pendingOffsets,
+        pendingLengths,
+        pendingResolvedDictNames,
+        pendingContentBytes,
+        pendingContentSpans,
+    ) {
+        const count = pendingOffsets.length;
+        if (pendingLengths.length !== count) {
+            throw new RangeError('In-flight term content offset and length counts do not match');
+        }
+        /** @type {Array<{key: string, source: {buffer: Uint8Array, offset: number, length: number}}>} */
+        const registrations = [];
+        try {
+            for (let i = 0; i < count; ++i) {
+                const buffer = pendingContentSpans === null ? pendingContentBytes[i] : pendingContentSpans.buffer;
+                const sourceOffset = pendingContentSpans === null ? 0 : pendingContentSpans.offsets[i];
+                const sourceLength = pendingContentSpans === null ? buffer?.byteLength : pendingContentSpans.lengths[i];
+                const persistedLength = pendingLengths[i];
+                const dictName = Array.isArray(pendingResolvedDictNames) ?
+                    pendingResolvedDictNames[i] :
+                    pendingResolvedDictNames;
+                if (
+                    !(buffer instanceof Uint8Array) ||
+                    !Number.isSafeInteger(sourceOffset) ||
+                    sourceOffset < 0 ||
+                    !Number.isSafeInteger(sourceLength) ||
+                    sourceLength < 0 ||
+                    sourceLength > buffer.byteLength - sourceOffset ||
+                    sourceLength !== persistedLength ||
+                    typeof dictName !== 'string'
+                ) {
+                    throw new RangeError(`Invalid in-flight term content source at index ${i}`);
+                }
+                const key = this._getTermContentStorageKey(pendingOffsets[i], persistedLength, dictName);
+                if (this._inFlightTermContentSourceByStorageKey.has(key)) {
+                    throw new Error(`Duplicate in-flight term content storage reference: ${key}`);
+                }
+                const source = {buffer, offset: sourceOffset, length: sourceLength};
+                this._inFlightTermContentSourceByStorageKey.set(key, source);
+                registrations.push({key, source});
+            }
+        } catch (error) {
+            for (const {key, source} of registrations) {
+                if (this._inFlightTermContentSourceByStorageKey.get(key) === source) {
+                    this._inFlightTermContentSourceByStorageKey.delete(key);
+                }
+            }
+            throw error;
+        }
+        return () => {
+            for (const {key, source} of registrations) {
+                if (this._inFlightTermContentSourceByStorageKey.get(key) === source) {
+                    this._inFlightTermContentSourceByStorageKey.delete(key);
+                }
+            }
+        };
     }
 
     /**
@@ -6687,6 +6795,17 @@ export class DictionaryDatabase {
                     null;
                 /** @type {Promise<void>|null} */
                 let pendingRecordAppend = null;
+                /** @type {(() => void)|null} */
+                let unregisterInFlightContentSources = null;
+                let borrowedContentReleased = false;
+                const releaseInFlightContentSources = () => {
+                    unregisterInFlightContentSources?.();
+                    unregisterInFlightContentSources = null;
+                    if (!borrowedContentReleased) {
+                        borrowedContentReleased = true;
+                        chunk.releaseBorrowedContent?.();
+                    }
+                };
                 try {
                     if (stagedContentMetadata === null) {
                         const tContentMetadataPrepareStart = safePerformance.now();
@@ -6757,6 +6876,15 @@ export class DictionaryDatabase {
                             resolvedFlags[uniqueIndex] = 1;
                         }
                     }
+                    if (earlyContentPersistence !== null) {
+                        unregisterInFlightContentSources = this._registerInFlightTermContentSources(
+                            pendingOffsets,
+                            pendingLengths,
+                            pendingResolvedDictNames,
+                            pendingContentBytes,
+                            pendingContentSpans,
+                        );
+                    }
                     resolvedContentDictNames = this._publishArtifactTermContentMetadata({
                         count,
                         contentOffsets,
@@ -6777,19 +6905,18 @@ export class DictionaryDatabase {
                         metadataValidated: persistenceResult[VALIDATED_TERM_CONTENT_METADATA] === true,
                         useResolvedContentReferences,
                     });
-                    if (earlyContentPersistence !== null) {
-                        chunk.releaseBorrowedContent?.();
-                    }
                     const contentMetadataPublishMs = safePerformance.now() - tContentMetadataStart;
                     importMetrics.contentMetadataPublishMs += contentMetadataPublishMs;
                     importMetrics.contentMetadataMs += contentMetadataPublishMs;
                     if (earlyContentPersistence !== null) {
                         const metadataPublishedAt = safePerformance.now();
                         let contentCompletedAt = metadataPublishedAt;
-                        const measuredContentCompletion = earlyContentPersistence.completion.then((blockProfile) => {
-                            contentCompletedAt = safePerformance.now();
-                            return blockProfile;
-                        });
+                        const measuredContentCompletion = earlyContentPersistence.completion
+                            .then((blockProfile) => {
+                                contentCompletedAt = safePerformance.now();
+                                return blockProfile;
+                            })
+                            .finally(releaseInFlightContentSources);
                         const recordChunk = this._createResolvedArtifactTermRecordChunk(
                             chunk,
                             preparedLookupIndexes,
@@ -6842,6 +6969,10 @@ export class DictionaryDatabase {
                     }
                     await Promise.allSettled(pendingOperations);
                     throw error;
+                } finally {
+                    if (earlyContentPersistence !== null) {
+                        releaseInFlightContentSources();
+                    }
                 }
             } else {
                 importMetrics.contentStoreMs += safePerformance.now() - tContentStoreStart;
