@@ -1480,7 +1480,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(harness.plan.resolvedLengths).toStrictEqual(new Uint32Array([0]));
     });
 
-    test('passes parser-owned resolved content references directly to record persistence', async () => {
+    test('releases parser content after metadata publication and before record completion', async () => {
         const harness = createArtifactOverlapHarness();
         Reflect.set(harness.plan, 'uniqueRowIndexes', new Uint32Array([0]));
         Reflect.set(harness.chunk, 'contentRowStart', 0);
@@ -1500,6 +1500,44 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         });
 
         harness.resolveContent();
+        harness.resolveRecords();
+        await importing;
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+    });
+
+    test('does not release parser content on source consumption before metadata publication', async () => {
+        const harness = createArtifactOverlapHarness();
+        /** @type {(value: Record<string, unknown>) => void} */
+        let resolveStorage = () => {};
+        const storage = new Promise((resolve) => { resolveStorage = resolve; });
+        Reflect.set(harness.database, '_termContentBlockImportSession', {
+            tryBeginAppendSpans: vi.fn(() => ({
+                initialSelection: true,
+                sourceConsumed: Promise.resolve(),
+                storage,
+                completion: storage.then((result) => ({
+                    ...result,
+                    packMs: 1,
+                    compressMs: 2,
+                    envelopeMs: 3,
+                    referenceMs: 4,
+                    opfsAppendMs: 5,
+                })),
+            })),
+        });
+        const importing = harness.run();
+
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled();
+        resolveStorage({
+            contentOffsets: new Float64Array([100]),
+            contentLengths: new Uint32Array([3]),
+            contentDictName: 'raw-block-v2:jmdict',
+        });
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+
         harness.resolveRecords();
         await importing;
     });

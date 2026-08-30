@@ -107,7 +107,7 @@ async function parse(data) {
                 }
                 resultRowCount = chunk.rowCount;
                 const tResultCopyStart = safePerformance.now();
-                resultChunk = copyWasmBackedColumnChunk(chunk, true);
+                resultChunk = copyWasmBackedColumnChunk(chunk, true, true);
                 borrowsWorkerMemory = (
                     typeof SharedArrayBuffer === 'function' &&
                     chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&

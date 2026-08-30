@@ -2857,11 +2857,18 @@ function sumByteLengths(values) {
 /**
  * @param {TermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
+ * @param {boolean} [shareContentMetadata=false]
  * @returns {TermBankColumnChunk}
  * @throws {Error} If the native string plan is incomplete.
  */
-export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
-    const contentMetaList = Uint32Array.from(chunk.contentMetaList ?? []);
+export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, shareContentMetadata = false) {
+    const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
+    const contentMetaList =
+        shareContentMetadata &&
+        typeof SharedArrayBuffer === 'function' &&
+        sourceContentMetaList.buffer instanceof SharedArrayBuffer ?
+            sourceContentMetaList :
+            Uint32Array.from(sourceContentMetaList);
     let contentBytesLength = 0;
     for (let i = 0; i < contentMetaList.length; i += CONTENT_META_U32_FIELDS) {
         contentBytesLength = Math.max(contentBytesLength, contentMetaList[i] + contentMetaList[i + 1]);

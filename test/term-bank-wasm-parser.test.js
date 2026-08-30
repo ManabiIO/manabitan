@@ -298,6 +298,44 @@ describe('term-bank WASM parser', () => {
         expect(result.contentMetaList?.buffer).not.toBe(heap.buffer);
     });
 
+    test('borrows shared content metadata only when its lifetime is explicitly fenced', () => {
+        const heap = new Uint8Array(new SharedArrayBuffer(128));
+        heap.set([1, 2, 3, 4], 64);
+        const contentMetaList = new Uint32Array(heap.buffer, 8, 8);
+        contentMetaList.set([0, 2, 11, 12, 2, 2, 13, 14]);
+        const readingEqualsExpressionList = new Uint8Array(heap.buffer, 48, 2);
+        const result = copyWasmBackedColumnChunk({
+            rowCount: 2,
+            expressionBytesList: [],
+            readingBytesList: [],
+            readingEqualsExpressionList,
+            scoreList: new Int32Array(2),
+            sequenceList: new Int32Array(2),
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: heap,
+            contentBytesBaseOffset: 64,
+            contentMetaList,
+            contentUniqueIndexList: new Uint32Array([0, 1]),
+            contentDedupPlan: null,
+            termRecordPreinternedPlan: {
+                stringLengths: new Uint16Array(0),
+                stringOffsets: new Uint32Array(0),
+                stringHashes: new Uint32Array(0),
+                stringsBuffer: new Uint8Array(0),
+                expressionIndexes: new Uint32Array(2),
+                readingIndexes: new Uint32Array(2),
+            },
+            mediaRows: [],
+        }, true, true);
+
+        expect(result.contentMetaList?.buffer).toBe(heap.buffer);
+        expect(result.readingEqualsExpressionList.buffer).not.toBe(heap.buffer);
+        contentMetaList[0] = 1;
+        expect(result.contentMetaList?.[0]).toBe(1);
+    });
+
     test.each([
         [{hardwareConcurrency: 12, deviceMemory: 8}, 3],
         [{hardwareConcurrency: 12, deviceMemory: 4}, 2],
@@ -1963,9 +2001,37 @@ describe('term-bank WASM parser', () => {
         expect(chunk.scoreList).toStrictEqual(new Int32Array([2, 3, 4]));
         expect(chunk.sequenceList).toStrictEqual(new Int32Array([11, 12, 13]));
         const plan = chunk.termRecordPreinternedPlan;
+        const wasmBuffer = chunk.contentBytesBuffer.buffer;
+        expect(wasmBuffer).toBeInstanceOf(SharedArrayBuffer);
+        for (const [name, view] of [
+            ['readingEqualsExpressionList', chunk.readingEqualsExpressionList],
+            ['scoreList', chunk.scoreList],
+            ['sequenceList', chunk.sequenceList],
+            ['contentMetaList', chunk.contentMetaList],
+            ['contentUniqueIndexList', chunk.contentUniqueIndexList],
+            ['stringLengths', plan.stringLengths],
+            ['stringOffsets', plan.stringOffsets],
+            ['stringHashes', plan.stringHashes],
+            ['stringsBuffer', plan.stringsBuffer],
+            ['expressionIndexes', plan.expressionIndexes],
+            ['readingIndexes', plan.readingIndexes],
+        ]) {
+            expect(view?.buffer, name).toBe(wasmBuffer);
+        }
+        expect(chunk.contentDedupPlan?.uniqueRowIndexes.buffer).toBeInstanceOf(ArrayBuffer);
+        expect(chunk.contentDedupPlan?.uniqueSignatures.buffer).toBeInstanceOf(ArrayBuffer);
         expect(plan.expressionIndexes[0]).toBe(plan.expressionIndexes[1]);
         expect(plan.readingIndexes[0]).toBe(plan.expressionIndexes[0]);
         expect(plan.readingIndexes[2]).not.toBe(plan.expressionIndexes[2]);
+        const cloned = structuredClone(chunk);
+        expect(cloned.contentBytesBaseOffset).toBe(chunk.contentBytesBaseOffset);
+        expect(cloned.contentBytesBuffer.buffer).toBeInstanceOf(SharedArrayBuffer);
+        expect(cloned.termRecordPreinternedPlan.stringsBuffer.buffer).toBeInstanceOf(SharedArrayBuffer);
+        const originalScore = chunk.scoreList[0];
+        chunk.scoreList[0] = 123456;
+        expect(cloned.scoreList[0]).toBe(123456);
+        chunk.scoreList[0] = originalScore;
+        expect(cloned.contentDedupPlan.uniqueSignatures).toStrictEqual(chunk.contentDedupPlan.uniqueSignatures);
         const profile = consumeLastTermBankWasmParseProfile();
         expect(profile?.rowDecodeMs).toBe(0);
         expect(profile?.nativeStringPlanMs).toBe(0);
