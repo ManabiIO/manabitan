@@ -3331,9 +3331,12 @@ async function main() {
         report.launchMode = launchModeLabel;
         appendLog(report, 'info', `${browserFlavor} launch mode: ${launchModeLabel}`);
         let extensionBaseUrl = `chrome-extension://${extensionId}`;
-        await context.addInitScript(() => {
+        await context.addInitScript((flagsFromRunner) => {
             Reflect.set(globalThis, '__manabitanImportCompletionSignalEnabled', true);
-        });
+            globalThis.manabitanImportUseSession = false;
+            globalThis.manabitanDisableIntegrityCounts = true;
+            globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
+        }, e2eImportFlags);
         page = context.pages()[0] ?? await context.newPage();
         /** @type {import('@playwright/test').Page|null} */
         let concurrentSearchPage = null;
