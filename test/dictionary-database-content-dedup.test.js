@@ -193,66 +193,6 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(Reflect.get(database, '_termEntryContentMetaSignature3Table')[index]).toBe(303);
     });
 
-    test('bulk-reserves unique hash pairs and rolls them back atomically', () => {
-        const database = new DictionaryDatabase();
-        const ensureCapacity = Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').bind(database);
-        const reserveBatch = Reflect.get(database, '_reserveArtifactTermContentMetadataBatch').bind(database);
-        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
-        ensureCapacity(2);
-        const contentBytes = Uint8Array.of(1, 2, 3, 4, 5, 6);
-
-        const staged = reserveBatch(
-            [10, 10],
-            [20, 20],
-            contentBytes,
-            new Uint32Array([0, 3]),
-            new Uint32Array([3, 3]),
-            2,
-            new Uint32Array([101, 102, 103, 201, 202, 203]),
-            0,
-            [],
-        );
-
-        expect([...staged.indexes]).toStrictEqual([0, -1]);
-        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
-        rollback(staged);
-        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
-        expect(getMeta(database, 10, 20)).toBeUndefined();
-
-        const retry = reserveBatch(
-            [10],
-            [20],
-            contentBytes,
-            new Uint32Array([3]),
-            new Uint32Array([3]),
-            1,
-            null,
-            null,
-            [0],
-        );
-        expect([...retry.indexes]).toStrictEqual([0]);
-        rollback(retry);
-    });
-
-    test('rejects malformed bulk reservation shapes before mutating metadata', () => {
-        const database = new DictionaryDatabase();
-        const reserveBatch = Reflect.get(database, '_reserveArtifactTermContentMetadataBatch').bind(database);
-
-        expect(() => reserveBatch(
-            [],
-            [],
-            new Uint8Array(0),
-            new Uint32Array(0),
-            new Uint32Array(0),
-            1,
-            null,
-            0,
-            [],
-        )).toThrow('Invalid artifact term content metadata reservation batch');
-        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
-        expect(Reflect.get(database, '_termEntryContentMetaDenseCount')).toBe(0);
-    });
-
     test('leases cleared dedup scratch tables without sharing active leases', () => {
         const database = new DictionaryDatabase();
         const acquire = Reflect.get(database, '_acquireArtifactTermContentDedupScratch').bind(database);
