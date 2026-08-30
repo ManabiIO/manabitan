@@ -1913,6 +1913,7 @@ export class TermRecordOpfsStore {
         );
         const runRowLimit = hasWholeChunkPreparedIndex ? count : MAX_COMPACT_LOOKUP_INDEX_ROWS;
         for (let runStart = 0; runStart < count;) {
+            const tValidationStart = safePerformance.now();
             let runEnd = runStart;
             let minContentOffset = Number.POSITIVE_INFINITY;
             let maxContentOffset = Number.NEGATIVE_INFINITY;
@@ -1921,7 +1922,9 @@ export class TermRecordOpfsStore {
                     break;
                 }
                 const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd);
+                const contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
                 validateContentOffset(contentOffset);
+                validateContentLength(contentLength);
                 const nextMinContentOffset = contentOffset >= 0 ? Math.min(minContentOffset, contentOffset) : minContentOffset;
                 const nextMaxContentOffset = contentOffset >= 0 ? Math.max(maxContentOffset, contentOffset) : maxContentOffset;
                 if (
@@ -1935,6 +1938,8 @@ export class TermRecordOpfsStore {
                 maxContentOffset = nextMaxContentOffset;
                 ++runEnd;
             }
+            const runContentOffsetBase = minContentOffset === Number.POSITIVE_INFINITY ? 0 : minContentOffset;
+            const runValidationMs = safePerformance.now() - tValidationStart;
             const runCount = runEnd - runStart;
             const isWholeChunk = runStart === 0 && runEnd === count;
             const runChunk = isWholeChunk ?
@@ -1971,9 +1976,10 @@ export class TermRecordOpfsStore {
                 runLengths,
                 runPlan,
                 preparedLookupIndex?.bytes ?? null,
+                runContentOffsetBase,
             );
             encodeMs += safePerformance.now() - tEncodeStart;
-            validationMs += encodedChunk.validationMs;
+            validationMs += runValidationMs + encodedChunk.validationMs;
             recordFieldEncodeMs += encodedChunk.recordFieldEncodeMs;
             lookupIndexEncodeMs += encodedChunk.lookupIndexEncodeMs;
             const tAppendStart = safePerformance.now();
@@ -4358,9 +4364,10 @@ export class TermRecordOpfsStore {
      * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {Uint8Array|null} [preparedLookupIndexBytes=null]
+     * @param {number|null} [validatedContentOffsetBase=null]
      * @returns {Promise<{contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
-    async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null) {
+    async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null, validatedContentOffsetBase = null) {
         if (chunk.rowCount === 0) {
             return {
                 contentOffsetBase: 0,
@@ -4372,17 +4379,23 @@ export class TermRecordOpfsStore {
             };
         }
         const tValidationStart = safePerformance.now();
-        let contentOffsetBase = Number.POSITIVE_INFINITY;
-        for (let i = 0; i < chunk.rowCount; ++i) {
-            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
-            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
-            validateContentOffset(contentOffset);
-            validateContentLength(contentLength);
-            if (contentOffset >= 0 && contentOffset < contentOffsetBase) {
-                contentOffsetBase = contentOffset;
+        let contentOffsetBase = validatedContentOffsetBase;
+        if (contentOffsetBase === null) {
+            contentOffsetBase = Number.POSITIVE_INFINITY;
+            let maxContentOffset = Number.NEGATIVE_INFINITY;
+            for (let i = 0; i < chunk.rowCount; ++i) {
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+                validateContentOffset(contentOffset);
+                validateContentLength(contentLength);
+                if (contentOffset >= 0) {
+                    contentOffsetBase = Math.min(contentOffsetBase, contentOffset);
+                    maxContentOffset = Math.max(maxContentOffset, contentOffset);
+                }
             }
+            if (contentOffsetBase === Number.POSITIVE_INFINITY) { contentOffsetBase = 0; }
+            getContentOffsetDelta(maxContentOffset, contentOffsetBase);
         }
-        if (contentOffsetBase === Number.POSITIVE_INFINITY) { contentOffsetBase = 0; }
         const validationMs = safePerformance.now() - tValidationStart;
         const tRecordEncodeStart = safePerformance.now();
         const recordFields = new Uint8Array(chunk.rowCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
@@ -4392,7 +4405,7 @@ export class TermRecordOpfsStore {
             const fieldOffset = i * 3;
             const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
             const contentLength = getArtifactContentLength(chunk, contentLengths, i);
-            recordFieldsU32[fieldOffset] = getContentOffsetDelta(contentOffset, contentOffsetBase);
+            recordFieldsU32[fieldOffset] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
             recordFieldsU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength;
             recordFieldsI32[fieldOffset + 2] = chunk.scoreList[i] ?? 0;
         }

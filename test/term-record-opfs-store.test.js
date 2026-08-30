@@ -2338,6 +2338,27 @@ describe('TermRecordOpfsStore', () => {
         )).rejects.toThrow(/Invalid term content offset/);
     });
 
+    test('rejects unsafe content lengths during the shard-planning traversal', async () => {
+        const textEncoder = new TextEncoder();
+        const store = new TermRecordOpfsStore();
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
+
+        await expect(store.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: 'Unsafe content length',
+                rowCount: 1,
+                expressionBytesList: [textEncoder.encode('unsafe')],
+                readingBytesList: [textEncoder.encode('unsafe')],
+                readingEqualsExpressionList: new Uint8Array([1]),
+                scoreList: new Int32Array([0]),
+                sequenceList: new Int32Array([-1]),
+            },
+            [0],
+            [0xffffffff],
+            'raw',
+        )).rejects.toThrow(/Invalid term content length/);
+    });
+
     test('loads persistent indexes and matching records without reading the repair shard', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Persistent random lookup';
