@@ -3000,20 +3000,32 @@ export class DictionaryImporter {
         }
         let nextIndex = 0;
         const workerCount = Math.min(concurrency, items.length);
+        const noFailure = Symbol();
+        /** @type {unknown} */
+        let firstFailure = noFailure;
         /** @type {Promise<void>[]} */
         const workers = [];
         for (let i = 0; i < workerCount; ++i) {
             workers.push((async () => {
                 while (true) {
+                    if (firstFailure !== noFailure) { return; }
                     const index = nextIndex++;
                     if (index >= items.length) {
                         return;
                     }
-                    await fn(items[index]);
+                    try {
+                        await fn(items[index]);
+                    } catch (error) {
+                        if (firstFailure === noFailure) { firstFailure = error; }
+                        return;
+                    }
                 }
             })());
         }
         await Promise.all(workers);
+        if (firstFailure !== noFailure) {
+            throw firstFailure;
+        }
     }
 
     /**

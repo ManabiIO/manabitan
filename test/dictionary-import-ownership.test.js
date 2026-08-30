@@ -383,6 +383,42 @@ describe('TermBankSourcePipeline', () => {
 });
 
 describe('DictionaryImporter ZIP read cancellation', () => {
+    test('waits for every concurrent worker to settle before propagating a failure', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const runWithConcurrencyLimit = /** @type {(items: number[], concurrency: number, fn: (item: number) => Promise<void>) => Promise<void>} */ (
+            Reflect.get(importer, '_runWithConcurrencyLimit')
+        );
+        /** @type {() => void} */
+        let releaseSecond = () => {};
+        /** @type {Promise<void>} */
+        const secondGate = new Promise((resolve) => { releaseSecond = resolve; });
+        const firstError = new Error('first worker failed');
+        /** @type {number[]} */
+        const settledItems = [];
+        /** @type {number[]} */
+        const startedItems = [];
+
+        const result = runWithConcurrencyLimit.call(importer, [1, 2, 3], 2, async (item) => {
+            startedItems.push(item);
+            if (item === 1) { throw firstError; }
+            await secondGate;
+            settledItems.push(item);
+        });
+        let resultSettled = false;
+        void result.then(
+            () => { resultSettled = true; },
+            () => { resultSettled = true; },
+        );
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(resultSettled).toBe(false);
+        releaseSecond();
+        await expect(result).rejects.toBe(firstError);
+        expect(startedItems).toEqual([1, 2]);
+        expect(settledItems).toEqual([2]);
+    });
+
     test('closes the archive when index validation fails before session ownership', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const close = vi.fn(async () => {});
