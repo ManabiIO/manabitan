@@ -474,7 +474,7 @@ function encodeIndexPlan(plan) {
                 ),
         );
     }
-    fillPostingTables(
+    fillPostingAndSequenceTables(
         expressionPostingOffsets,
         expressionPostingRows,
         expressionKeys,
@@ -482,8 +482,6 @@ function encodeIndexPlan(plan) {
         readingPostingRows,
         readingKeys,
         readingEqualsExpressionList,
-    );
-    fillSequenceTables(
         sequenceHeads,
         sequenceNext,
         persistedSequenceKeys,
@@ -1260,8 +1258,14 @@ function validateOffsets(offsets, end) {
  * @param {Uint16Array} readingRows
  * @param {Uint16Array|Uint32Array} readingKeys
  * @param {boolean[]|Uint8Array|undefined} readingEqualsExpressionList
+ * @param {Uint16Array} heads
+ * @param {Uint16Array} next
+ * @param {Int32Array} keys
+ * @param {Uint16Array} postingOffsets
+ * @param {Uint16Array} postingRows
+ * @param {Uint16Array} keyByRow
  */
-function fillPostingTables(
+function fillPostingAndSequenceTables(
     expressionOffsets,
     expressionRows,
     expressionKeys,
@@ -1269,16 +1273,30 @@ function fillPostingTables(
     readingRows,
     readingKeys,
     readingEqualsExpressionList,
+    heads,
+    next,
+    keys,
+    postingOffsets,
+    postingRows,
+    keyByRow,
 ) {
+    for (let key = 0; key < keys.length; ++key) {
+        insertHash(heads, next, key, hashSequence(keys[key]));
+    }
     const rowCount = expressionKeys.length;
     for (let row = 0; row < rowCount; ++row) {
         ++expressionOffsets[expressionKeys[row] + 1];
         const readingKey = isReadingEqualToExpression(readingEqualsExpressionList, row) ? U16_NULL : readingKeys[row];
         if (readingKey !== U16_NULL) { ++readingOffsets[readingKey + 1]; }
+        const sequenceKey = keyByRow[row];
+        if (sequenceKey !== U16_NULL) { ++postingOffsets[sequenceKey + 1]; }
     }
     for (let key = 1; key < expressionOffsets.length; ++key) {
         expressionOffsets[key] += expressionOffsets[key - 1];
         readingOffsets[key] += readingOffsets[key - 1];
+    }
+    for (let key = 1; key < postingOffsets.length; ++key) {
+        postingOffsets[key] += postingOffsets[key - 1];
     }
     for (let row = rowCount - 1; row >= 0; --row) {
         const expressionKey = expressionKeys[row];
@@ -1286,6 +1304,12 @@ function fillPostingTables(
         const readingKey = isReadingEqualToExpression(readingEqualsExpressionList, row) ? U16_NULL : readingKeys[row];
         if (readingKey !== U16_NULL) {
             readingRows[--readingOffsets[readingKey + 1]] = row;
+        }
+        const sequenceKey = keyByRow[row];
+        if (sequenceKey !== U16_NULL) {
+            // Forward filling while rows descend preserves the previous
+            // row-chained index's newest-first sequence result order.
+            postingRows[postingOffsets[sequenceKey]++] = row;
         }
     }
     const keyCount = expressionOffsets.length - 1;
@@ -1295,38 +1319,10 @@ function fillPostingTables(
     }
     expressionOffsets[keyCount] = expressionRows.length;
     readingOffsets[keyCount] = readingRows.length;
-}
-
-/**
- * @param {Uint16Array} heads
- * @param {Uint16Array} next
- * @param {Int32Array} keys
- * @param {Uint16Array} postingOffsets
- * @param {Uint16Array} postingRows
- * @param {Uint16Array} keyByRow
- */
-function fillSequenceTables(heads, next, keys, postingOffsets, postingRows, keyByRow) {
-    for (let key = 0; key < keys.length; ++key) {
-        insertHash(heads, next, key, hashSequence(keys[key]));
+    for (let key = keys.length; key > 0; --key) {
+        postingOffsets[key] = postingOffsets[key - 1];
     }
-    for (const key of keyByRow) {
-        if (key !== U16_NULL) { ++postingOffsets[key + 1]; }
-    }
-    for (let key = 1; key < postingOffsets.length; ++key) {
-        postingOffsets[key] += postingOffsets[key - 1];
-    }
-    // The previous row-chained index returned equal-sequence rows newest first.
-    // Preserve that stable result order while compacting them into postings.
-    for (let row = 0; row < keyByRow.length; ++row) {
-        const key = keyByRow[row];
-        if (key !== U16_NULL) {
-            postingRows[--postingOffsets[key + 1]] = row;
-        }
-    }
-    for (let key = 1; key < keys.length; ++key) {
-        postingOffsets[key] = postingOffsets[key + 1];
-    }
-    postingOffsets[keys.length] = postingRows.length;
+    postingOffsets[0] = 0;
 }
 
 /**
