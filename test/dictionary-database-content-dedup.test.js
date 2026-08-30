@@ -437,12 +437,13 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         );
     });
 
-    test('preserves large offsets and signatures through typed-table resizes', () => {
+    test('preserves large offsets and signatures through typed-table resizes', async () => {
         const database = new DictionaryDatabase();
         const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
         const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
         const contentBytes = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
         const largeOffset = 0x100000000 + 123;
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async () => ({status: 'ok', bytes: contentBytes})));
         cache(null, largeOffset, contentBytes.byteLength, 'raw-block-v1:jmdict', 0, 123, 456, contentBytes);
         for (let i = 0; i < 128; ++i) {
             cacheMeta(database, null, i * 10, i + 1, `raw-${i}`, 1000 + i, 2000 + i);
@@ -453,7 +454,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             length: contentBytes.byteLength,
             dictName: 'raw-block-v1:jmdict',
         });
-        expect(findMatching(123, 456, new Uint8Array(contentBytes))).toMatchObject({offset: largeOffset});
+        await expect(findMatching(123, 456, new Uint8Array(contentBytes))).resolves.toMatchObject({offset: largeOffset});
     });
 
     test('preallocates bounded metadata capacity using the parser unique ratio', () => {
@@ -634,7 +635,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
     });
 
-    test('rolls back parser-verified hash collisions with staged metadata', () => {
+    test('rolls back parser-verified hash collisions with staged metadata', async () => {
         const database = new DictionaryDatabase();
         const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
         const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
@@ -642,6 +643,10 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
         const first = new Uint8Array([1, 2, 3, 4, 5]);
         const second = new Uint8Array([6, 7, 8, 9, 10]);
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async (offset) => ({
+            status: 'ok',
+            bytes: offset === 1000 ? first : second,
+        })));
         const staged = stage([101, 101], [202, 202], [first, second], null);
 
         expect([...staged.indexes]).toEqual([0, -1]);
@@ -661,8 +666,8 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             stagedContentMetadata: staged,
         });
 
-        expect(findMatching(101, 202, first)).toMatchObject({offset: 1000});
-        expect(findMatching(101, 202, second)).toMatchObject({offset: 2000});
+        await expect(findMatching(101, 202, first)).resolves.toMatchObject({offset: 1000});
+        await expect(findMatching(101, 202, second)).resolves.toMatchObject({offset: 2000});
         rollback(staged);
         expect(findMatching(101, 202, first)).toBeUndefined();
         expect(findMatching(101, 202, second)).toBeUndefined();
@@ -689,14 +694,45 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
         const firstBytes = new Uint8Array([1, 2, 3]);
         const secondBytes = new Uint8Array([1, 2, 4]);
-        Reflect.set(database, '_readTermEntryContentBytes', vi.fn(async () => firstBytes));
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async (offset) => ({
+            status: 'ok',
+            bytes: offset === 10 ? firstBytes : secondBytes,
+        })));
 
         cache(null, 10, firstBytes.byteLength, 'raw', 0, 123, 456, firstBytes);
         expect(findMatching(123, 456, secondBytes)).toBeUndefined();
         cache(null, 20, secondBytes.byteLength, 'raw', 0, 123, 456, secondBytes);
 
-        expect(findMatching(123, 456, firstBytes)).toMatchObject({offset: 10});
-        expect(findMatching(123, 456, secondBytes)).toMatchObject({offset: 20});
+        await expect(findMatching(123, 456, firstBytes)).resolves.toMatchObject({offset: 10});
+        await expect(findMatching(123, 456, secondBytes)).resolves.toMatchObject({offset: 20});
+    });
+
+    test('does not trust matching hashes and sampled signatures without exact bytes', async () => {
+        const database = new DictionaryDatabase();
+        const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
+        const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
+        const persistedBytes = Uint8Array.from({length: 16}, (_, index) => index);
+        const collidingBytes = new Uint8Array(persistedBytes);
+        collidingBytes[4] ^= 0xff;
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async () => ({status: 'ok', bytes: persistedBytes})));
+
+        cache(null, 10, persistedBytes.byteLength, 'raw', 0, 123, 456, persistedBytes);
+
+        await expect(findMatching(123, 456, collidingBytes)).resolves.toBeUndefined();
+    });
+
+    test.each(['temporarilyUnavailable', 'corrupt'])('fails closed when exact persisted content is %s', async (status) => {
+        const database = new DictionaryDatabase();
+        const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
+        const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
+        const contentBytes = new Uint8Array([1, 2, 3, 4]);
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async () => ({status, reason: 'injected read failure'})));
+        cache(null, 10, contentBytes.byteLength, 'raw', 0, 123, 456, contentBytes);
+
+        await expect(findMatching(123, 456, new Uint8Array(contentBytes))).rejects.toMatchObject({
+            name: 'TermContentLookupReadError',
+            status,
+        });
     });
 
     test('exactly compares persisted candidates which predate content signatures', async () => {
@@ -706,7 +742,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         const persistedBytes = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
         const collidingBytes = persistedBytes.slice();
         collidingBytes[5] = 99;
-        Reflect.set(database, '_readTermEntryContentBytes', vi.fn(async () => persistedBytes));
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async () => ({status: 'ok', bytes: persistedBytes})));
 
         cache(null, 10, persistedBytes.byteLength, 'raw', 0, 123, 456);
 
@@ -720,15 +756,15 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
         const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
         const persistedBytes = new Uint8Array([1, 2, 3, 4]);
-        const readTermEntryContentBytes = vi.fn(async () => persistedBytes);
-        Reflect.set(database, '_readTermEntryContentBytes', readTermEntryContentBytes);
+        const readTermEntryContentBytesDetailed = vi.fn(async () => ({status: 'ok', bytes: persistedBytes}));
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', readTermEntryContentBytesDetailed);
 
         cache(null, 10, persistedBytes.byteLength, 'raw-block-v1:jmdict', 0, 123, 456);
 
         const result = findMatching(123, 456, persistedBytes.slice());
         expect(result).toBeInstanceOf(Promise);
         await expect(result).resolves.toMatchObject({offset: 10, dictName: 'raw-block-v1:jmdict'});
-        expect(readTermEntryContentBytes).toHaveBeenCalledWith(10, persistedBytes.byteLength, 'raw-block-v1:jmdict');
+        expect(readTermEntryContentBytesDetailed).toHaveBeenCalledWith(10, persistedBytes.byteLength, 'raw-block-v1:jmdict');
     });
 
     test('returns synchronously when a hash pair has no persisted candidate', () => {
@@ -881,6 +917,10 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
 
         const secondDatabase = new DictionaryDatabase();
         cacheMeta(secondDatabase, null, 200, 1, 'raw', 30, 31);
+        Reflect.set(secondDatabase, '_readTermEntryContentBytesDetailed', vi.fn(async () => ({
+            status: 'ok',
+            bytes: new Uint8Array([3]),
+        })));
         const secondFindPersistedIndex = vi.spyOn(
             /** @type {DictionaryDatabase & {_findTermEntryContentMetaHashPairIndex: (hash1: number, hash2: number) => number}} */ (secondDatabase),
             '_findTermEntryContentMetaHashPairIndex',
@@ -1215,6 +1255,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
     test('projects one persisted canonical hit onto every duplicate row', async () => {
         const database = new DictionaryDatabase();
         const source = new Uint8Array([99, 1, 2, 3, 1, 2, 3, 88]);
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async () => ({status: 'ok', bytes: source.subarray(1, 4)})));
         Reflect.get(database, '_cacheTermEntryContentMeta').call(
             database,
             null,
@@ -1278,6 +1319,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
     test('defers mixed canonical projection until pending offsets are published', async () => {
         const database = new DictionaryDatabase();
         const source = new Uint8Array([1, 2, 3, 1, 2, 3, 4, 5]);
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async () => ({status: 'ok', bytes: source.subarray(0, 3)})));
         Reflect.get(database, '_cacheTermEntryContentMeta').call(
             database,
             null,
@@ -1403,7 +1445,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         });
 
         expect(result.persistedHitCount).toBe(0);
-        expect(result.exactFallbackCount).toBe(1);
+        expect(result.exactFallbackCount).toBe(0);
         expect(result.pendingContentCount).toBe(1);
         expect([...result.pendingContentSpans.offsets]).toEqual([1]);
     });
@@ -1545,6 +1587,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
     test('bounds persisted signatures for short slab content', async () => {
         const database = new DictionaryDatabase();
         const contentBytes = new Uint8Array([1, 2, 3]);
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async () => ({status: 'ok', bytes: contentBytes})));
         Reflect.get(database, '_cacheTermEntryContentMeta').call(
             database,
             null,
@@ -1732,6 +1775,12 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
                 return call.chunks[index].slice(0, length);
             }),
         });
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async (offset, length) => {
+            const call = appendCalls.find(({offsets, lengths}) => offsets.some((value, index) => value === offset && lengths[index] >= length));
+            if (typeof call === 'undefined') { throw new Error('Missing test content span'); }
+            const index = call.offsets.indexOf(offset);
+            return {status: 'ok', bytes: call.chunks[index].slice(0, length)};
+        }));
 
         /** @type {Array<{contentOffsets: number[], contentLengths: number[], contentDictNames: string|string[]}>} */
         const termRecordCalls = [];

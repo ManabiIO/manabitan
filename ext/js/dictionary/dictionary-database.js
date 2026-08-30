@@ -5291,9 +5291,8 @@ export class DictionaryDatabase {
     }
 
     /**
-     * The hash pair selects candidates. Length and three fixed-position words
-     * isolate collisions in the streaming hot path without retaining content.
-     * Persisted rows without signatures receive a one-time exact comparison.
+     * The hash pair and sampled signatures only reject candidates. Persisted
+     * content is always compared byte-for-byte before it is reused.
      * @param {number} hash1
      * @param {number} hash2
      * @param {Uint8Array} contentBytes
@@ -5307,14 +5306,20 @@ export class DictionaryDatabase {
         const signature3 = this._readTermContentSignature(contentBytes, lastOffset);
         /** @type {Array<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}>|null} */
         let persistedCandidates = null;
-        if (typeof primary !== 'undefined' && primary.length === contentBytes.byteLength) {
-            if (typeof primary.signature1 === 'number') {
-                if (primary.signature1 === signature1 && primary.signature2 === signature2 && primary.signature3 === signature3) {
-                    return primary;
-                }
-            } else if (this._canExactlyComparePersistedTermContent(primary.dictName)) {
-                persistedCandidates = [primary];
-            }
+        if (
+            typeof primary !== 'undefined' &&
+            primary.length === contentBytes.byteLength &&
+            this._canExactlyComparePersistedTermContent(primary.dictName) &&
+            (
+                typeof primary.signature1 !== 'number' ||
+                (
+                    primary.signature1 === signature1 &&
+                    primary.signature2 === signature2 &&
+                    primary.signature3 === signature3
+                )
+            )
+        ) {
+            persistedCandidates = [primary];
         }
         const collisions = this._termEntryContentMetaCollisionsByHashPair.size > 0 ?
             this._termEntryContentMetaCollisionsByHashPair.get(`${hash1 >>> 0}:${hash2 >>> 0}`) :
@@ -5322,13 +5327,15 @@ export class DictionaryDatabase {
         if (typeof collisions !== 'undefined') {
             for (const meta of collisions) {
                 if (meta.length !== contentBytes.byteLength) { continue; }
-                if (typeof meta.signature1 === 'number') {
-                    if (meta.signature1 === signature1 && meta.signature2 === signature2 && meta.signature3 === signature3) {
-                        return meta;
-                    }
-                    continue;
-                }
                 if (!this._canExactlyComparePersistedTermContent(meta.dictName)) { continue; }
+                if (
+                    typeof meta.signature1 === 'number' &&
+                    (
+                        meta.signature1 !== signature1 ||
+                        meta.signature2 !== signature2 ||
+                        meta.signature3 !== signature3
+                    )
+                ) { continue; }
                 if (persistedCandidates === null) { persistedCandidates = []; }
                 persistedCandidates.push(meta);
             }
@@ -5347,6 +5354,7 @@ export class DictionaryDatabase {
             dictName === 'raw' ||
             dictName === RAW_TERM_CONTENT_DICT_NAME ||
             dictName === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME ||
+            dictName === RAW_TERM_CONTENT_TOKEN_DICT_NAME ||
             typeof getRawTermContentBlockCompressionDictName(dictName) !== 'undefined'
         );
     }
@@ -5358,8 +5366,11 @@ export class DictionaryDatabase {
      */
     async _findMatchingPersistedTermEntryContentMeta(candidates, contentBytes) {
         for (const meta of candidates) {
-            const existingBytes = await this._readTermEntryContentBytes(meta.offset, meta.length, meta.dictName);
-            if (!(existingBytes instanceof Uint8Array)) { continue; }
+            const readResult = await this._readTermEntryContentBytesDetailed(meta.offset, meta.length, meta.dictName);
+            if (readResult.status !== 'ok') {
+                throw new TermContentLookupReadError(readResult.status, readResult.reason);
+            }
+            const existingBytes = readResult.bytes;
             this._setTermContentSignatures(meta, existingBytes);
             if (this._termContentBytesEqual(existingBytes, contentBytes)) { return meta; }
         }
@@ -7212,34 +7223,16 @@ export class DictionaryDatabase {
                     const existingIndex = persistedLookupRequired ?
                         this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
                         -1;
-                    if (
-                        existingIndex >= 0 &&
-                        this._termEntryContentMetaLengthTable[existingIndex] === contentLength &&
-                        this._termEntryContentMetaSignaturePresentTable[existingIndex] === 1
-                    ) {
-                        const lastOffset = Math.max(0, contentLength - 4);
-                        if (
-                            this._termEntryContentMetaSignature1Table[existingIndex] === this._readTermContentSignature(contentBytesBuffer, contentOffset) &&
-                            this._termEntryContentMetaSignature2Table[existingIndex] === this._readTermContentSignature(contentBytesBuffer, contentOffset + Math.floor(lastOffset / 2)) &&
-                            this._termEntryContentMetaSignature3Table[existingIndex] === this._readTermContentSignature(contentBytesBuffer, contentOffset + lastOffset)
-                        ) {
-                            const existingDictName = this._termEntryContentMetaDictNames[
-                                this._termEntryContentMetaDictNameIdTable[existingIndex]
-                            ] ?? 'raw';
-                            contentDedupPlan.resolvedOffsets[uniqueIndex] = this._termEntryContentMetaOffsetTable[existingIndex];
-                            contentDedupPlan.resolvedLengths[uniqueIndex] = contentLength;
-                            setResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex, existingDictName);
-                            contentDedupPlan.resolvedFlags[uniqueIndex] = 1;
-                            ++persistedHitCount;
-                            continue;
-                        }
-                    }
                     let existingMeta = existingIndex < 0 ? void 0 : this._readTermEntryContentMetaHashPairIndex(existingIndex);
                     if (typeof existingMeta !== 'undefined') {
-                        ++exactFallbackCount;
                         const contentBytes = contentBytesBuffer.subarray(contentOffset, contentOffset + contentLength);
                         const matchingMeta = this._findMatchingTermEntryContentMeta(hash1, hash2, contentBytes, existingMeta);
-                        existingMeta = matchingMeta instanceof Promise ? await matchingMeta : matchingMeta;
+                        if (matchingMeta instanceof Promise) {
+                            ++exactFallbackCount;
+                            existingMeta = await matchingMeta;
+                        } else {
+                            existingMeta = matchingMeta;
+                        }
                     }
                     if (typeof existingMeta !== 'undefined') {
                         contentDedupPlan.resolvedOffsets[uniqueIndex] = existingMeta.offset;
@@ -7469,52 +7462,18 @@ export class DictionaryDatabase {
                 const existingIndex = persistedLookupRequired ?
                     this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
                     -1;
-                if (
-                    existingIndex >= 0 &&
-                    this._termEntryContentMetaLengthTable[existingIndex] === contentLength &&
-                    this._termEntryContentMetaSignaturePresentTable[existingIndex] === 1
-                ) {
-                    const lastOffset = Math.max(0, contentLength - 4);
-                    const useDirectSlabSignature = useContentSlab && contentLength >= 4;
-                    if (!useDirectSlabSignature && contentBytes === null) {
-                        contentBytes = contentBytesBuffer.subarray(contentOffset, contentOffset + contentLength);
-                    }
-                    const signatureBytes = useDirectSlabSignature ? contentBytesBuffer : contentBytes;
-                    const signatureBaseOffset = useDirectSlabSignature ? contentOffset : 0;
-                    if (
-                        this._termEntryContentMetaSignature1Table[existingIndex] === this._readTermContentSignature(signatureBytes, signatureBaseOffset) &&
-                        this._termEntryContentMetaSignature2Table[existingIndex] === this._readTermContentSignature(signatureBytes, signatureBaseOffset + Math.floor(lastOffset / 2)) &&
-                        this._termEntryContentMetaSignature3Table[existingIndex] === this._readTermContentSignature(signatureBytes, signatureBaseOffset + lastOffset)
-                    ) {
-                        contentOffsets[i] = this._termEntryContentMetaOffsetTable[existingIndex];
-                        contentLengths[i] = contentLength;
-                        const existingDictName = this._termEntryContentMetaDictNames[
-                            this._termEntryContentMetaDictNameIdTable[existingIndex]
-                        ] ?? 'raw';
-                        if (Array.isArray(resolvedContentDictNames)) {
-                            resolvedContentDictNames[i] = existingDictName;
-                        } else if (existingDictName !== resolvedContentDictNames) {
-                            ensureResolvedContentDictNamesArray(i)[i] = existingDictName;
-                        }
-                        ++persistedHitCount;
-                        if (contentDedupPlan !== null && uniqueIndexList !== null) {
-                            const uniqueIndex = uniqueIndexList[i];
-                            contentDedupPlan.resolvedOffsets[uniqueIndex] = contentOffsets[i];
-                            contentDedupPlan.resolvedLengths[uniqueIndex] = contentLengths[i];
-                            setResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex, existingDictName);
-                            contentDedupPlan.resolvedFlags[uniqueIndex] = 1;
-                        }
-                        continue;
-                    }
-                }
                 let existingMeta = existingIndex < 0 ? void 0 : this._readTermEntryContentMetaHashPairIndex(existingIndex);
                 if (typeof existingMeta !== 'undefined') {
-                    ++exactFallbackCount;
                     if (contentBytes === null) {
                         contentBytes = contentBytesBuffer.subarray(contentOffset, contentOffset + contentLength);
                     }
-                    existingMeta = this._findMatchingTermEntryContentMeta(hash1, hash2, contentBytes, existingMeta);
-                    if (existingMeta instanceof Promise) { existingMeta = await existingMeta; }
+                    const matchingMeta = this._findMatchingTermEntryContentMeta(hash1, hash2, contentBytes, existingMeta);
+                    if (matchingMeta instanceof Promise) {
+                        ++exactFallbackCount;
+                        existingMeta = await matchingMeta;
+                    } else {
+                        existingMeta = matchingMeta;
+                    }
                 }
                 if (typeof existingMeta !== 'undefined') {
                     ++persistedHitCount;
