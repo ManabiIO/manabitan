@@ -23,6 +23,8 @@ import {
     getPersistedTermSequence,
     parseChecksummedPersistedTermLookupIndex,
     parsePersistedTermLookupIndex,
+    rebuildPersistedTermLookupIndexFromBase,
+    splitPersistedTermLookupIndex,
 } from '../ext/js/dictionary/term-lookup-index.js';
 
 const encoder = new TextEncoder();
@@ -90,11 +92,11 @@ describe('persisted term lookup index', () => {
         expect(values.map((value) => planBuilder.internStringBytes(new Uint8Array(value)))).toEqual(indexes);
         const plan = planBuilder.buildPlan(
             Uint32Array.from(indexes),
-            Uint32Array.from(indexes.toReversed()),
+            Uint32Array.from([...indexes].reverse()),
         );
         expect(plan.stringLengths).toHaveLength(values.length);
         expect(plan.expressionIndexes).toEqual(Uint32Array.from(indexes));
-        expect(plan.readingIndexes).toEqual(Uint32Array.from(indexes.toReversed()));
+        expect(plan.readingIndexes).toEqual(Uint32Array.from([...indexes].reverse()));
         expect(decoder.decode(plan.stringsBuffer)).toBe(
             values.map((value) => decoder.decode(value)).join(''),
         );
@@ -217,7 +219,9 @@ describe('persisted term lookup index', () => {
         expect(findExactRows(index, bytes('食べる'), 'expression').sort((a, b) => a - b)).toEqual([0, 1]);
         expect(findExactRows(index, bytes('たべる'), 'reading').sort((a, b) => a - b)).toEqual([0, 1]);
         expect(findExactRows(index, bytes('ない'), 'expression')).toEqual([]);
-        expect(decoder.decode(getPersistedTermKeyBytes(index, 2, 'expression'))).toBe('飲む');
+        const expressionBytes = getPersistedTermKeyBytes(index, 2, 'expression');
+        expect(expressionBytes).not.toBeNull();
+        expect(decoder.decode(/** @type {Uint8Array} */ (expressionBytes))).toBe('飲む');
         expect(getPersistedTermKeyBytes(index, 3, 'expression')).toBeNull();
     });
 
@@ -226,16 +230,23 @@ describe('persisted term lookup index', () => {
             {expressionBytes: bytes('食べる'), readingBytes: bytes('たべる'), sequence: 1},
             {expressionBytes: bytes('する'), readingBytes: null, sequence: null},
         ]);
-        const header = new Uint32Array(encoded.buffer, encoded.byteOffset, 16);
+        const containerHeader = new Uint32Array(encoded.buffer, encoded.byteOffset, 4);
+        const baseHeader = new Uint32Array(encoded.buffer, encoded.byteOffset + 16, 8);
+        const derivedOffset = 16 + containerHeader[2];
+        const derivedHeader = new Uint32Array(encoded.buffer, encoded.byteOffset + derivedOffset, 8);
         const index = parsePersistedTermLookupIndex(encoded);
-        const rowCount = header[0];
-        const keyCount = header[1];
-        const keyBytesLength = header[2];
-        const keySlotCount = header[3];
-        const sequenceSlotCount = header[4];
-        const readingPostingCount = header[5];
-        const sequenceKeyCount = header[7];
-        const sequencePostingCount = header[8];
+        const rowCount = baseHeader[0];
+        const keyCount = baseHeader[1];
+        const keyBytesLength = baseHeader[2];
+        const sequenceKeyCount = baseHeader[4];
+        const keySlotCount = derivedHeader[2];
+        const sequenceSlotCount = derivedHeader[3];
+        const readingPostingCount = derivedHeader[4];
+        const sequencePostingCount = derivedHeader[6];
+        /**
+         * @param {number} value
+         * @returns {number}
+         */
         const align4 = (value) => (value + 3) & ~3;
         const compactU16Count =
             (keyCount + 1) +
@@ -247,13 +258,12 @@ describe('persisted term lookup index', () => {
             (sequenceKeyCount + 1) +
             sequencePostingCount;
 
-        expect(header[6]).toBe(6);
+        expect(baseHeader[3]).toBe(7);
+        expect(derivedHeader[7]).toBe(7);
         expect(encoded.byteLength).toBe(
-            64 +
-            align4(keyBytesLength) +
-            align4((keyCount + keySlotCount + keyCount) * 2) +
-            align4(compactU16Count * 2) +
-            (sequenceKeyCount * 4),
+            16 +
+            32 + align4(keyBytesLength) + align4((keyCount + (rowCount * 3)) * 2) + (sequenceKeyCount * 4) +
+            32 + align4((keySlotCount + keyCount + compactU16Count) * 2),
         );
         expect(index.expressionKeys).toBeInstanceOf(Uint16Array);
         expect(index.readingKeys).toBeInstanceOf(Uint16Array);
@@ -269,7 +279,7 @@ describe('persisted term lookup index', () => {
         expect(index.readingKeys[1]).toBe(0xffff);
         expect(getPersistedTermSequence(index, 0)).toBe(1);
         expect(getPersistedTermSequence(index, 1)).toBeNull();
-        expect(index.sequenceValues).toEqual(new Int32Array([1, -1]));
+        expect(index.sequenceRowKeys).toEqual(new Uint16Array([0, 0xffff]));
     });
 
     test('omits sequence keys and postings when every row has no sequence', () => {
@@ -277,11 +287,13 @@ describe('persisted term lookup index', () => {
             {expressionBytes: bytes('alpha'), readingBytes: null, sequence: null},
             {expressionBytes: bytes('beta'), readingBytes: null, sequence: null},
         ]);
-        const header = new Uint32Array(encoded.buffer, encoded.byteOffset, 16);
+        const containerHeader = new Uint32Array(encoded.buffer, encoded.byteOffset, 4);
+        const baseHeader = new Uint32Array(encoded.buffer, encoded.byteOffset + 16, 8);
+        const derivedHeader = new Uint32Array(encoded.buffer, encoded.byteOffset + 16 + containerHeader[2], 8);
         const index = parsePersistedTermLookupIndex(encoded);
 
-        expect(header[7]).toBe(0);
-        expect(header[8]).toBe(0);
+        expect(baseHeader[4]).toBe(0);
+        expect(derivedHeader[6]).toBe(0);
         expect(index.sequenceKeys).toHaveLength(0);
         expect(index.sequenceNext).toHaveLength(0);
         expect(index.sequencePostingOffsets).toEqual(new Uint16Array([0]));
@@ -371,6 +383,38 @@ describe('persisted term lookup index', () => {
         expect(findSequenceRows(index, 1.5)).toEqual([]);
     });
 
+    test('rebuilds equivalent derived postings from the authoritative base', () => {
+        const encoded = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('同じ'), readingBytes: bytes('おなじ'), sequence: 42},
+            {expressionBytes: bytes('同じ'), readingBytes: bytes('おなじ'), sequence: 42},
+            {expressionBytes: bytes('別'), readingBytes: null, sequence: null},
+        ]);
+        const {base, derived} = splitPersistedTermLookupIndex(encoded);
+        const rebuilt = rebuildPersistedTermLookupIndexFromBase(base);
+        const rebuiltSections = splitPersistedTermLookupIndex(rebuilt);
+        const index = parsePersistedTermLookupIndex(rebuilt);
+
+        expect(rebuiltSections.base).toStrictEqual(base);
+        expect(rebuiltSections.derived).toStrictEqual(derived);
+        expect(findExactRows(index, bytes('同じ'), 'expression')).toEqual([0, 1]);
+        expect(findSequenceRows(index, 42)).toEqual([1, 0]);
+    });
+
+    test('rejects authoritative base corruption without consulting derived postings', () => {
+        const encoded = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('alpha'), readingBytes: bytes('あるふぁ'), sequence: 1},
+        ]);
+        const {base} = splitPersistedTermLookupIndex(encoded);
+        const corruptBase = new Uint8Array(base);
+        const baseHeader = new Uint32Array(corruptBase.buffer, corruptBase.byteOffset, 8);
+        const keyLengthsOffset = 32 + ((baseHeader[2] + 3) & ~3);
+        new DataView(corruptBase.buffer).setUint16(keyLengthsOffset, 0, true);
+
+        expect(() => rebuildPersistedTermLookupIndexFromBase(corruptBase)).toThrow(
+            'Invalid persisted term lookup key boundary',
+        );
+    });
+
     test('uses dense chained hash tables without losing collision matches', () => {
         const rows = Array.from({length: 10}, (_, index) => ({
             expressionBytes: bytes(`expression-${index}`),
@@ -378,11 +422,13 @@ describe('persisted term lookup index', () => {
             sequence: index,
         }));
         const encoded = encodePersistedTermLookupIndex(rows);
-        const header = new Uint32Array(encoded.buffer, encoded.byteOffset, 16);
+        const containerHeader = new Uint32Array(encoded.buffer, encoded.byteOffset, 4);
+        const baseHeader = new Uint32Array(encoded.buffer, encoded.byteOffset + 16, 8);
+        const derivedHeader = new Uint32Array(encoded.buffer, encoded.byteOffset + 16 + containerHeader[2], 8);
         const index = parsePersistedTermLookupIndex(encoded);
 
-        expect(header[3]).toBeLessThan(header[1]);
-        expect(header[4]).toBeLessThan(header[0]);
+        expect(derivedHeader[2]).toBeLessThan(baseHeader[1]);
+        expect(derivedHeader[3]).toBeLessThan(baseHeader[0]);
         for (let row = 0; row < rows.length; ++row) {
             expect(findExactRows(index, rows[row].expressionBytes, 'expression')).toEqual([row]);
             expect(findExactRows(index, rows[row].readingBytes, 'reading')).toEqual([row]);
@@ -431,10 +477,10 @@ describe('persisted term lookup index', () => {
         ]);
         const truncated = encoded.slice(0, encoded.byteLength - 1);
         const malformed = new Uint8Array(encoded);
-        new Uint32Array(malformed.buffer, malformed.byteOffset, 16)[2] = 3;
+        new Uint32Array(malformed.buffer, malformed.byteOffset, 4)[2] = 3;
 
-        expect(() => parsePersistedTermLookupIndex(truncated)).toThrow('Invalid persisted term lookup index length');
-        expect(() => parsePersistedTermLookupIndex(malformed)).toThrow('Invalid persisted term lookup index length');
+        expect(() => parsePersistedTermLookupIndex(truncated)).toThrow('Invalid persisted term lookup index container');
+        expect(() => parsePersistedTermLookupIndex(malformed)).toThrow('Invalid persisted term lookup index container');
     });
 
     test('rejects corrupt persisted key hash references and cycles', () => {
@@ -442,12 +488,13 @@ describe('persisted term lookup index', () => {
             {expressionBytes: bytes('alpha'), readingBytes: bytes('あるふぁ'), sequence: 1},
             {expressionBytes: bytes('beta'), readingBytes: bytes('べーた'), sequence: 2},
         ]);
-        const header = new Uint32Array(encoded.buffer, encoded.byteOffset, 16);
-        const keyCount = header[1];
-        const keyBytesLength = header[2];
-        const alignedKeyBytesLength = (keyBytesLength + 3) & ~3;
-        const keySlotCount = header[3];
-        const keyHeadsOffset = 64 + alignedKeyBytesLength + (keyCount * 2);
+        const containerHeader = new Uint32Array(encoded.buffer, encoded.byteOffset, 4);
+        const baseHeader = new Uint32Array(encoded.buffer, encoded.byteOffset + 16, 8);
+        const derivedOffset = 16 + containerHeader[2];
+        const derivedHeader = new Uint32Array(encoded.buffer, encoded.byteOffset + derivedOffset, 8);
+        const keyCount = baseHeader[1];
+        const keySlotCount = derivedHeader[2];
+        const keyHeadsOffset = derivedOffset + 32;
         const keyNextOffset = keyHeadsOffset + (keySlotCount * 2);
 
         const invalidReference = new Uint8Array(encoded);
@@ -499,9 +546,9 @@ describe('persisted term lookup index', () => {
         const encoded = encodePersistedTermLookupIndex([
             {expressionBytes: bytes('alpha'), readingBytes: bytes('あるふぁ'), sequence: null},
         ]);
-        const header = new Uint32Array(encoded.buffer, encoded.byteOffset, 16);
-        const alignedKeyBytesLength = (header[2] + 3) & ~3;
-        const keyLengthsOffset = 64 + alignedKeyBytesLength;
+        const baseHeader = new Uint32Array(encoded.buffer, encoded.byteOffset + 16, 8);
+        const alignedKeyBytesLength = (baseHeader[2] + 3) & ~3;
+        const keyLengthsOffset = 16 + 32 + alignedKeyBytesLength;
         const zeroLength = new Uint8Array(encoded);
         new DataView(zeroLength.buffer).setUint16(keyLengthsOffset, 0, true);
         expect(() => parsePersistedTermLookupIndex(zeroLength)).toThrow(

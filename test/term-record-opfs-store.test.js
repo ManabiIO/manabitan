@@ -121,7 +121,7 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
 }
 
 describe('TermRecordOpfsStore', () => {
-    test('starts record and lookup-index writes before sustained flush thresholds', async () => {
+    test('starts authoritative-container writes without persisting record payloads', async () => {
         const store = new TermRecordOpfsStore();
         const fileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({}));
         const state = store._createShardState('dict-test.mbtr', fileHandle, 0, 'raw');
@@ -143,7 +143,9 @@ describe('TermRecordOpfsStore', () => {
             new Uint8Array(4),
         );
 
-        expect(flushRecords).toHaveBeenCalledOnce();
+        expect(flushRecords).not.toHaveBeenCalled();
+        expect(state.pendingWriteBytes).toBeGreaterThan(0);
+        expect(state.pendingWriteBytes).toBeLessThan(64);
         expect(flushIndex).toHaveBeenCalledWith(state, false);
     });
 
@@ -337,7 +339,7 @@ describe('TermRecordOpfsStore', () => {
         expect(fileBytesByName.has(createdName)).toBe(false);
     });
 
-    test('treats lookup sidecars as derived during checkpoint rollback', async () => {
+    test('restores the authoritative container during checkpoint rollback', async () => {
         const store = new TermRecordOpfsStore();
         const recordName = store._getShardSegmentFileName('JMdict', 'raw', 0);
         const indexName = `${recordName}.mbti`;
@@ -348,14 +350,14 @@ describe('TermRecordOpfsStore', () => {
         const directory = createFakeDirectoryHandle(fileBytesByName);
         Reflect.set(store, '_recordsDirectoryHandle', directory);
         const checkpoint = await store.createImportCheckpoint();
-        expect(checkpoint.shards.map(({fileName}) => fileName)).toStrictEqual([recordName]);
+        expect(checkpoint.shards.map(({fileName}) => fileName).sort()).toStrictEqual([indexName, recordName].sort());
 
         fileBytesByName.set(recordName, new Uint8Array([1, 2, 3, 7, 8]));
-        fileBytesByName.delete(indexName);
+        fileBytesByName.set(indexName, new Uint8Array([4, 5, 6, 7, 8]));
 
         await expect(store.rollbackImportSession(checkpoint)).resolves.toBeUndefined();
         expect(fileBytesByName.get(recordName)).toStrictEqual(new Uint8Array([1, 2, 3]));
-        expect(fileBytesByName.has(indexName)).toBe(false);
+        expect(fileBytesByName.get(indexName)).toStrictEqual(new Uint8Array([4, 5, 6]));
     });
 
     test('rollback restores checkpoints after a queued write rejects', async () => {
@@ -543,24 +545,35 @@ describe('TermRecordOpfsStore', () => {
         expect(repair).toHaveBeenCalledTimes(1);
     });
 
-    test('does not reload a dictionary during an all-dictionary load', async () => {
+    test('loads only incomplete dictionary indexes during an all-dictionary load', async () => {
         const store = new TermRecordOpfsStore();
         const jmFileName = store._getShardSegmentFileName('JMdict', 'raw', 0);
         const jitendexFileName = store._getShardSegmentFileName('Jitendex', 'raw', 0);
-        const makeState = (fileName) => ({fileName});
-        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
-        Reflect.get(store, '_shardStateByFileName').set(jmFileName, makeState(jmFileName));
-        Reflect.get(store, '_shardStateByFileName').set(jitendexFileName, makeState(jitendexFileName));
-        const loadedFileNames = [];
-        vi.spyOn(store, '_loadShardStatesContents').mockImplementation(async (states) => {
-            loadedFileNames.push(states.map(({fileName}) => fileName));
-            await Promise.resolve();
+        const directory = createFakeDirectoryHandle(new Map());
+        const makeState = async (fileName) => store._createShardState(
+            fileName,
+            await directory.getFileHandle(fileName, {create: true}),
+            1,
+        );
+        Reflect.set(store, '_recordsDirectoryHandle', directory);
+        Reflect.get(store, '_shardStateByFileName').set(jmFileName, await makeState(jmFileName));
+        Reflect.get(store, '_shardStateByFileName').set(jitendexFileName, await makeState(jitendexFileName));
+        /** @type {string[][]} */
+        const loadedDictionaryNames = [];
+        vi.spyOn(store, 'ensureDictionariesLoaded').mockImplementation(async (dictionaryNames) => {
+            loadedDictionaryNames.push([...dictionaryNames]);
+            for (const dictionaryName of dictionaryNames) {
+                Reflect.get(store, '_persistentIndexLoadedDictionaryNames').add(dictionaryName);
+                Reflect.get(store, '_persistentRecordChunksByDictionary').set(dictionaryName, []);
+            }
         });
 
         Reflect.get(store, '_loadedDictionaryNames').add('JMdict');
+        Reflect.get(store, '_persistentIndexLoadedDictionaryNames').add('JMdict');
+        Reflect.get(store, '_persistentRecordChunksByDictionary').set('JMdict', []);
         await store.ensureAllDictionariesLoaded();
 
-        expect(loadedFileNames).toEqual([[jitendexFileName]]);
+        expect(loadedDictionaryNames).toEqual([['JMdict', 'Jitendex']]);
         expect(Reflect.get(store, '_allShardContentsLoaded')).toBe(true);
     });
 
@@ -746,7 +759,7 @@ describe('TermRecordOpfsStore', () => {
         });
     });
 
-    test('requires reimport when an authoritative term-record shard disappears', async () => {
+    test('requires reimport when both descriptor and authoritative container disappear', async () => {
         const store = new TermRecordOpfsStore();
         const dictionaryName = 'Missing authoritative shard';
         const fileName = store._getShardSegmentFileName(dictionaryName, 'raw', 0);
@@ -786,7 +799,7 @@ describe('TermRecordOpfsStore', () => {
         expect(store.isDictionaryAvailable(dictionaryName)).toBe(true);
     });
 
-    test('keeps a small materialized fallback available while index repair remains pending', async () => {
+    test('does not expose a materialized fallback when authoritative repair fails', async () => {
         const store = new TermRecordOpfsStore();
         const dictionaryName = 'Small degraded dictionary';
         const fileName = store._getShardSegmentFileName(dictionaryName, 'raw', 0);
@@ -803,8 +816,8 @@ describe('TermRecordOpfsStore', () => {
 
         await store.ensureDictionariesLoaded([dictionaryName]);
 
-        expect(store.getDictionaryHealth(dictionaryName).status).toBe('repairPending');
-        expect(store.isDictionaryAvailable(dictionaryName)).toBe(true);
+        expect(store.getDictionaryHealth(dictionaryName).status).toBe('temporarilyUnavailable');
+        expect(store.isDictionaryAvailable(dictionaryName)).toBe(false);
         await store.ensureDictionariesLoaded([dictionaryName]);
         expect(tryRepair).toHaveBeenCalledTimes(2);
     });
@@ -886,12 +899,16 @@ describe('TermRecordOpfsStore', () => {
 
     test('replaceDictionaryName renames shard files and in-memory records', async () => {
         const store = new TermRecordOpfsStore();
+        vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockResolvedValue(true);
         const recordsById = Reflect.get(store, '_recordsById');
         const shardStateByFileName = Reflect.get(store, '_shardStateByFileName');
         const activeAppendShardStateByKey = Reflect.get(store, '_activeAppendShardStateByKey');
         const oldFileName = store._getShardSegmentFileName('JMdict staging', 'raw', 0);
         const oldLogicalKey = store._getShardFileName('JMdict staging', 'raw');
-        const fileBytesByName = new Map([[oldFileName, new Uint8Array([1, 2, 3, 4])]]);
+        const fileBytesByName = new Map([
+            [oldFileName, new Uint8Array([1, 2, 3, 4])],
+            [`${oldFileName}.mbti`, new Uint8Array([5, 6, 7, 8])],
+        ]);
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const fileHandle = await recordsDirectoryHandle.getFileHandle(oldFileName, {create: false});
         const shardState = store._createShardState(oldFileName, fileHandle, 4, 'raw', 0, oldLogicalKey);
@@ -927,13 +944,17 @@ describe('TermRecordOpfsStore', () => {
 
     test('replaceDictionaryName can preserve the source shard until an external transaction commits', async () => {
         const store = new TermRecordOpfsStore();
+        vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockResolvedValue(true);
         const recordsById = Reflect.get(store, '_recordsById');
         const shardStateByFileName = Reflect.get(store, '_shardStateByFileName');
         const oldFileName = store._getShardSegmentFileName('JMdict staging', 'raw', 0);
         const newDictionaryName = 'JMdict [2026-02-26]';
         const newFileName = store._getShardSegmentFileName(newDictionaryName, 'raw', 0);
         const oldLogicalKey = store._getShardFileName('JMdict staging', 'raw');
-        const fileBytesByName = new Map([[oldFileName, new Uint8Array([1, 2, 3, 4])]]);
+        const fileBytesByName = new Map([
+            [oldFileName, new Uint8Array([1, 2, 3, 4])],
+            [`${oldFileName}.mbti`, new Uint8Array([5, 6, 7, 8])],
+        ]);
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const fileHandle = await recordsDirectoryHandle.getFileHandle(oldFileName, {create: false});
 
@@ -1044,7 +1065,7 @@ describe('TermRecordOpfsStore', () => {
         });
 
         await expect(store.replaceDictionaryName('JMdict staging', 'JMdict')).rejects.toThrow(
-            /Cannot read source shard during dictionary rename/,
+            /Cannot rename dictionary with unreadable authoritative term records/,
         );
         expect(recordsById.get(1)?.dictionary).toBe('JMdict staging');
         expect(fileBytesByName.has(oldFileName)).toBe(true);
@@ -1266,9 +1287,16 @@ describe('TermRecordOpfsStore', () => {
             score: 0,
             sequence: null,
         }]);
-        const shardBytes = sourceFileBytesByName.get(sourceStore._getShardSegmentFileName('JMdict', 'raw', 0));
+        await sourceStore._closeAllWritables();
+        const sourceFileName = sourceStore._getShardSegmentFileName('JMdict', 'raw', 0);
+        const shardBytes = sourceFileBytesByName.get(sourceFileName);
+        const indexBytes = sourceFileBytesByName.get(`${sourceFileName}.mbti`);
         expect(shardBytes).toBeInstanceOf(Uint8Array);
-        const fileBytesByName = new Map([[sourceStore._getShardSegmentFileName('JMdict', 'raw', 0), /** @type {Uint8Array} */ (shardBytes)]]);
+        expect(indexBytes).toBeInstanceOf(Uint8Array);
+        const fileBytesByName = new Map([
+            [sourceFileName, /** @type {Uint8Array} */ (shardBytes)],
+            [`${sourceFileName}.mbti`, /** @type {Uint8Array} */ (indexBytes)],
+        ]);
         const store = new TermRecordOpfsStore();
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
@@ -1293,13 +1321,37 @@ describe('TermRecordOpfsStore', () => {
         expect(store.getDictionaryIndex('Jitendex').expression.get('猫')).toEqual([43]);
     });
 
-    test('current binary max-id scan reads appended shard chunks without materializing records', async () => {
+    test('rejects appending to a finalized authoritative container', async () => {
+        const store = new TermRecordOpfsStore();
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
+        const createRecord = (expression, reading) => ({
+            dictionary: 'JMdict',
+            expression,
+            reading,
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+        await store.appendBatch([createRecord('日本', 'にほん')]);
+
+        await expect(store.appendBatch([createRecord('日本語', 'にほんご')])).rejects.toThrow(
+            'Cannot append to finalized authoritative term records',
+        );
+        expect(store.size).toBe(1);
+        expect(store.getDictionaryIndex('JMdict').expression.get('日本')).toHaveLength(1);
+        expect(store.getDictionaryIndex('JMdict').expression.get('日本語')).toBeUndefined();
+    });
+
+    test('persistent-container max-id scan reads chunk metadata without materializing records', async () => {
         const sourceStore = new TermRecordOpfsStore();
         const sourceFileBytesByName = new Map();
         Reflect.set(sourceStore, '_recordsDirectoryHandle', createFakeDirectoryHandle(sourceFileBytesByName));
         Reflect.set(sourceStore, '_nextId', 42);
         await sourceStore.appendBatch([{
-            id: 42,
             dictionary: 'JMdict',
             expression: '日本',
             reading: 'にほん',
@@ -1311,19 +1363,24 @@ describe('TermRecordOpfsStore', () => {
             score: 0,
             sequence: null,
         }]);
-        const shardBytes = sourceFileBytesByName.get(sourceStore._getShardSegmentFileName('JMdict', 'raw', 0));
-        expect(shardBytes).toBeInstanceOf(Uint8Array);
-        expect(sourceStore._scanCurrentBinaryMaxRecordId(/** @type {Uint8Array} */ (shardBytes))).toBe(42);
+        await sourceStore._closeAllWritables();
+        const indexBytes = sourceFileBytesByName.get(`${sourceStore._getShardSegmentFileName('JMdict', 'raw', 0)}.mbti`);
+        expect(indexBytes).toBeInstanceOf(Uint8Array);
+        expect(sourceStore._scanPersistentIndexMaxRecordId(/** @type {Uint8Array} */ (indexBytes))).toBe(42);
     });
 
     test('replaceDictionaryName restores original shard files and records when source removal fails', async () => {
         const store = new TermRecordOpfsStore();
+        vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockResolvedValue(true);
         const recordsById = Reflect.get(store, '_recordsById');
         const shardStateByFileName = Reflect.get(store, '_shardStateByFileName');
         const activeAppendShardStateByKey = Reflect.get(store, '_activeAppendShardStateByKey');
         const oldFileName = store._getShardSegmentFileName('JMdict staging', 'raw', 0);
         const oldLogicalKey = store._getShardFileName('JMdict staging', 'raw');
-        const fileBytesByName = new Map([[oldFileName, new Uint8Array([9, 8, 7, 6])]]);
+        const fileBytesByName = new Map([
+            [oldFileName, new Uint8Array([9, 8, 7, 6])],
+            [`${oldFileName}.mbti`, new Uint8Array([5, 6, 7, 8])],
+        ]);
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
             removeEntryFailures: new Map([[oldFileName, 1]]),
         });
@@ -1360,6 +1417,7 @@ describe('TermRecordOpfsStore', () => {
 
     test('replaceDictionaryName preserves existing target shard files when live target records already exist', async () => {
         const store = new TermRecordOpfsStore();
+        vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockResolvedValue(true);
         const recordsById = Reflect.get(store, '_recordsById');
         const shardStateByFileName = Reflect.get(store, '_shardStateByFileName');
         const activeAppendShardStateByKey = Reflect.get(store, '_activeAppendShardStateByKey');
@@ -1370,7 +1428,9 @@ describe('TermRecordOpfsStore', () => {
         const newLogicalKey = store._getShardFileName('JMdict [2026-02-26]', 'raw');
         const fileBytesByName = new Map([
             [oldFileName, new Uint8Array([1, 2, 3, 4])],
+            [`${oldFileName}.mbti`, new Uint8Array([9, 10, 11, 12])],
             [newFileName, new Uint8Array([5, 6, 7, 8])],
+            [`${newFileName}.mbti`, new Uint8Array([13, 14, 15, 16])],
         ]);
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const oldFileHandle = await recordsDirectoryHandle.getFileHandle(oldFileName, {create: false});
@@ -1428,6 +1488,7 @@ describe('TermRecordOpfsStore', () => {
 
     test('replaceDictionaryName removes stale colliding target shard files when no live target records exist', async () => {
         const store = new TermRecordOpfsStore();
+        vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockResolvedValue(true);
         const recordsById = Reflect.get(store, '_recordsById');
         const shardStateByFileName = Reflect.get(store, '_shardStateByFileName');
         const activeAppendShardStateByKey = Reflect.get(store, '_activeAppendShardStateByKey');
@@ -1437,7 +1498,9 @@ describe('TermRecordOpfsStore', () => {
         const newLogicalKey = store._getShardFileName('JMdict [2026-02-26]', 'raw');
         const fileBytesByName = new Map([
             [oldFileName, new Uint8Array([1, 2, 3, 4])],
+            [`${oldFileName}.mbti`, new Uint8Array([5, 6, 7, 8])],
             [newFileName, new Uint8Array([9, 9, 9, 9])],
+            [`${newFileName}.mbti`, new Uint8Array([8, 8, 8, 8])],
         ]);
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const oldFileHandle = await recordsDirectoryHandle.getFileHandle(oldFileName, {create: false});
@@ -1474,6 +1537,7 @@ describe('TermRecordOpfsStore', () => {
 
     test('replaceDictionaryName does not publish after a transient target snapshot failure', async () => {
         const store = new TermRecordOpfsStore();
+        vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockResolvedValue(true);
         const recordsById = Reflect.get(store, '_recordsById');
         const shardStateByFileName = Reflect.get(store, '_shardStateByFileName');
         const activeAppendShardStateByKey = Reflect.get(store, '_activeAppendShardStateByKey');
@@ -1481,7 +1545,10 @@ describe('TermRecordOpfsStore', () => {
         const oldLogicalKey = store._getShardFileName('JMdict staging', 'raw');
         const newFileName = store._getShardSegmentFileName('JMdict [2026-02-26]', 'raw', 0);
         const oldBytes = new Uint8Array([1, 2, 3, 4]);
-        const fileBytesByName = new Map([[oldFileName, oldBytes]]);
+        const fileBytesByName = new Map([
+            [oldFileName, oldBytes],
+            [`${oldFileName}.mbti`, new Uint8Array([5, 6, 7, 8])],
+        ]);
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
             getFileFailures: new Map([[newFileName, 1]]),
         });
@@ -1694,7 +1761,7 @@ describe('TermRecordOpfsStore', () => {
         await writerStore.endImportSession();
 
         const finalizedIndexBytes = fileBytesByName.get(indexFileName);
-        expect(new TextDecoder().decode(finalizedIndexBytes?.subarray(0, 8))).toBe('MBTIDX10');
+        expect(new TextDecoder().decode(finalizedIndexBytes?.subarray(0, 8))).toBe('MBTIDX11');
         const finalizedIndexView = new DataView(
             finalizedIndexBytes.buffer,
             finalizedIndexBytes.byteOffset,
@@ -1800,11 +1867,15 @@ describe('TermRecordOpfsStore', () => {
         /** @type {() => void} */
         let releaseRecord = () => {};
         /** @type {Promise<void>} */
-        const recordGate = new Promise((resolve) => { releaseRecord = () => { resolve(); }; });
+        const recordGate = new Promise((resolve) => {
+            releaseRecord = () => { resolve(); };
+        });
         /** @type {() => void} */
         let releaseLookupIndex = () => {};
         /** @type {Promise<void>} */
-        const lookupIndexGate = new Promise((resolve) => { releaseLookupIndex = () => { resolve(); }; });
+        const lookupIndexGate = new Promise((resolve) => {
+            releaseLookupIndex = () => { resolve(); };
+        });
         vi.spyOn(store, '_awaitQueuedWritesForShard').mockImplementation(async () => {
             recordStarted = true;
             await recordGate;
@@ -1842,7 +1913,9 @@ describe('TermRecordOpfsStore', () => {
         /** @type {() => void} */
         let releaseLookupIndex = () => {};
         /** @type {Promise<void>} */
-        const lookupIndexGate = new Promise((resolve) => { releaseLookupIndex = () => { resolve(); }; });
+        const lookupIndexGate = new Promise((resolve) => {
+            releaseLookupIndex = () => { resolve(); };
+        });
         vi.spyOn(store, '_awaitQueuedWritesForShard').mockRejectedValue(recordError);
         const closeRecord = vi.spyOn(store, '_closeShardWritable').mockResolvedValue();
         vi.spyOn(store, '_flushLookupIndexFile').mockImplementation(async () => {
@@ -1873,7 +1946,9 @@ describe('TermRecordOpfsStore', () => {
         /** @type {() => void} */
         let releaseRecord = () => {};
         /** @type {Promise<void>} */
-        const recordGate = new Promise((resolve) => { releaseRecord = () => { resolve(); }; });
+        const recordGate = new Promise((resolve) => {
+            releaseRecord = () => { resolve(); };
+        });
         vi.spyOn(store, '_awaitQueuedWritesForShard').mockImplementation(async () => {
             recordStarted = true;
             await recordGate;
@@ -2241,7 +2316,7 @@ describe('TermRecordOpfsStore', () => {
         await writerStore._closeAllWritables();
 
         const shardBytes = [...fileBytesByName.values()][0];
-        expect(new TextDecoder().decode(shardBytes.subarray(0, 8))).toBe('MBTRR15X');
+        expect(new TextDecoder().decode(shardBytes.subarray(0, 8))).toBe('MBTRD16X');
         const readerStore = new TermRecordOpfsStore();
         Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
         await readerStore._loadShardFiles(true);
@@ -2303,7 +2378,7 @@ describe('TermRecordOpfsStore', () => {
             new TextDecoder().decode(
                 fileBytesByName.get(/** @type {string} */ (indexFileName))?.subarray(0, 8),
             ),
-        ).toBe('MBTIDX10');
+        ).toBe('MBTIDX11');
 
         const readerStore = new TermRecordOpfsStore();
         Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
@@ -2316,14 +2391,6 @@ describe('TermRecordOpfsStore', () => {
         expect(matchingId).toBeGreaterThan(0);
         const persistentChunk = Reflect.get(readerStore, '_persistentRecordChunksByDictionary').get(dictionaryName)?.[0];
         expect(persistentChunk).toBeDefined();
-        const getFile = persistentChunk?.fileHandle.getFile.bind(persistentChunk.fileHandle);
-        let randomReadFileSnapshotCount = 0;
-        if (typeof getFile === 'function' && typeof persistentChunk !== 'undefined') {
-            Reflect.set(persistentChunk.fileHandle, 'getFile', async () => {
-                ++randomReadFileSnapshotCount;
-                return await getFile();
-            });
-        }
         const records = await readerStore.getByIdsAsync([matchingId]);
         expect(records.get(matchingId)).toMatchObject({
             expression: '食べる',
@@ -2334,12 +2401,11 @@ describe('TermRecordOpfsStore', () => {
             score: 2,
             sequence: 20,
         });
-        expect(randomReadFileSnapshotCount).toBe(0);
         expect(Reflect.get(readerStore, '_recordsById').size).toBe(1);
         expect(readerStore.size).toBe(3);
     });
 
-    test('gets cold MBTIDX10 dictionary counts and samples without materializing Maps', async () => {
+    test('gets cold MBTIDX11 dictionary counts and samples without materializing Maps', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Persistent metadata lookup';
         const fileBytesByName = new Map();
@@ -2377,7 +2443,7 @@ describe('TermRecordOpfsStore', () => {
         expect(Reflect.get(readerStore, '_indexByDictionary').has(dictionaryName)).toBe(false);
     });
 
-    test('repairs a same-sized lookup sidecar from a different shard generation', async () => {
+    test('requires reimport when the authoritative container generation changes', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Generation-bound index';
         const fileBytesByName = new Map();
@@ -2408,12 +2474,76 @@ describe('TermRecordOpfsStore', () => {
         await readerStore._loadShardFiles(false);
         await readerStore.ensureDictionariesLoaded([dictionaryName]);
 
-        const recordFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbtr'));
-        if (typeof recordFileName !== 'string') { throw new Error('Expected record shard'); }
-        expect(fileBytesByName.get(indexFileName)?.subarray(24, 40)).toStrictEqual(
-            fileBytesByName.get(recordFileName)?.subarray(8, 24),
-        );
-        expect(readerStore.findTermIds(dictionaryName, '世代', 'expression')).toHaveLength(1);
+        expect(readerStore.findTermIds(dictionaryName, '世代', 'expression')).toEqual([]);
+        expect(readerStore.getDictionaryHealth(dictionaryName).status).toBe('reimportRequired');
+    });
+
+    test('recreates a missing descriptor from a finalized authoritative container', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Recovered descriptor';
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
+        await writerStore.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: dictionaryName,
+            dictionaryTotalRows: 1_000_000,
+            rowCount: 1,
+            expressionBytesList: [textEncoder.encode('復旧')],
+            readingBytesList: [textEncoder.encode('ふくきゅう')],
+            readingEqualsExpressionList: new Uint8Array([0]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([1]),
+        }, [0], [8], 'raw');
+        await writerStore._closeAllWritables();
+
+        const descriptorFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbtr'));
+        if (typeof descriptorFileName !== 'string') { throw new Error('Expected descriptor'); }
+        fileBytesByName.delete(descriptorFileName);
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(false);
+        await readerStore.ensureDictionariesLoaded([dictionaryName]);
+
+        expect(new TextDecoder().decode(fileBytesByName.get(descriptorFileName)?.subarray(0, 8))).toBe('MBTRD16X');
+        expect(readerStore.findTermIds(dictionaryName, '復旧', 'expression')).toHaveLength(1);
+        expect(readerStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
+    });
+
+    test('retries a transient descriptor stat failure without requesting reimport', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Transient descriptor stat';
+        const fileBytesByName = new Map();
+        const writerDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', writerDirectoryHandle);
+        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
+        await writerStore.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: dictionaryName,
+            dictionaryTotalRows: 1_000_000,
+            rowCount: 1,
+            expressionBytesList: [textEncoder.encode('一時')],
+            readingBytesList: [textEncoder.encode('いちじ')],
+            readingEqualsExpressionList: new Uint8Array([0]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([1]),
+        }, [0], [8], 'raw');
+        await writerStore._closeAllWritables();
+        const descriptorFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbtr'));
+        if (typeof descriptorFileName !== 'string') { throw new Error('Expected descriptor'); }
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
+            getFileFailures: new Map([[descriptorFileName, 1]]),
+        });
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(false);
+        await readerStore.ensureDictionariesLoaded([dictionaryName]);
+
+        expect(readerStore.findTermIds(dictionaryName, '一時', 'expression')).toHaveLength(1);
+        expect(readerStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
     });
 
     test('does not publish sidecar records after its dictionary is invalidated', async () => {
@@ -2533,22 +2663,12 @@ describe('TermRecordOpfsStore', () => {
         const chunksByDictionary = Reflect.get(readerStore, '_persistentRecordChunksByDictionary');
         const chunks = ['JMdict', 'Jitendex'].map((dictionary) => chunksByDictionary.get(dictionary)?.[0]);
         expect(chunks.every((chunk) => typeof chunk !== 'undefined')).toBe(true);
-        let recordShardReadCount = 0;
-        for (const chunk of chunks) {
-            if (typeof chunk === 'undefined') { continue; }
-            const getFile = chunk.fileHandle.getFile.bind(chunk.fileHandle);
-            Reflect.set(chunk.fileHandle, 'getFile', async () => {
-                ++recordShardReadCount;
-                return await getFile();
-            });
-        }
         const ids = ['JMdict', 'Jitendex'].map(
             (dictionary) => readerStore.findTermIds(dictionary, '食べる', 'expression')[0] ?? -1,
         );
         const records = await readerStore.getByIdsAsync(ids);
 
         expect(records.size).toBe(2);
-        expect(recordShardReadCount).toBe(0);
     });
 
     test('loads persistent indexes concurrently across dictionaries', async () => {
@@ -2684,7 +2804,7 @@ describe('TermRecordOpfsStore', () => {
         expect(Reflect.get(readerStore, '_recordsById').size).toBe(0);
     });
 
-    test('retries random-read chunk metadata after a transient file failure', async () => {
+    test('materializes matching records from the loaded authoritative container without more file reads', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Transient random read';
         const fileBytesByName = new Map();
@@ -2718,37 +2838,13 @@ describe('TermRecordOpfsStore', () => {
         if (typeof chunk === 'undefined') {
             throw new Error('Expected a persistent record chunk');
         }
-        const fileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ (chunk.fileHandle));
-        const getFile = fileHandle.getFile.bind(fileHandle);
-        let getFileCallCount = 0;
-        Reflect.set(fileHandle, 'getFile', async () => {
-            ++getFileCallCount;
-            if (getFileCallCount === 1) {
-                throw new Error('transient file snapshot failure');
-            }
-            return await getFile();
-        });
-
-        await expect(readerStore._loadRandomReadChunkMetadata(chunk)).rejects.toThrow(
-            'transient file snapshot failure',
-        );
-        expect(Reflect.get(readerStore, '_randomReadChunkMetadataCache').size).toBe(0);
-        await expect(readerStore._loadRandomReadChunkMetadata(chunk)).resolves.toMatchObject({
-            firstId: chunk.firstId,
-            count: chunk.count,
-        });
-        expect(getFileCallCount).toBe(2);
-
-        getFileCallCount = 0;
-        Reflect.get(readerStore, '_randomReadChunkMetadataCache').clear();
         const matchingId = readerStore.findTermIds(dictionaryName, '食う', 'expression')[0] ?? -1;
         const records = await readerStore.getByIdsAsync([matchingId]);
         expect(records.size).toBe(1);
-        expect(getFileCallCount).toBe(0);
         expect(readerStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
     });
 
-    test('keeps a cold dictionary available from its checked sidecar when the repair shard is damaged', async () => {
+    test('keeps a cold dictionary available from its authoritative container', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Corrupt random record';
         const fileBytesByName = new Map();
@@ -2773,21 +2869,6 @@ describe('TermRecordOpfsStore', () => {
         );
         await writerStore._closeAllWritables();
 
-        const shardFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbtr'));
-        expect(shardFileName).toBeDefined();
-        const shardBytes = fileBytesByName.get(/** @type {string} */ (shardFileName));
-        expect(shardBytes).toBeDefined();
-        const shardView = new DataView(
-            /** @type {Uint8Array} */ (shardBytes).buffer,
-            /** @type {Uint8Array} */ (shardBytes).byteOffset,
-            /** @type {Uint8Array} */ (shardBytes).byteLength,
-        );
-        const stringTableOffset = 8 + 16 + 2 + 20;
-        const stringCount = shardView.getUint32(stringTableOffset, true);
-        const stringBytesLength = shardView.getUint32(stringTableOffset + 4, true);
-        const recordsOffset = stringTableOffset + 8 + (stringCount * 2) + stringBytesLength;
-        /** @type {Uint8Array} */ (shardBytes)[recordsOffset + 24 + 16] ^= 0xff;
-
         const readerStore = new TermRecordOpfsStore();
         Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
         await readerStore._loadShardFiles(false);
@@ -2802,7 +2883,7 @@ describe('TermRecordOpfsStore', () => {
         expect(readerStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
     });
 
-    test('checked sidecars isolate healthy lookups from repair-shard corruption', async () => {
+    test('authoritative containers isolate dictionary lookup state', async () => {
         const textEncoder = new TextEncoder();
         const fileBytesByName = new Map();
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
@@ -2831,21 +2912,6 @@ describe('TermRecordOpfsStore', () => {
         }
         await writerStore._closeAllWritables();
 
-        const damagedShardName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbtr') && name.includes('Damaged'));
-        expect(damagedShardName).toBeDefined();
-        const damagedBytes = fileBytesByName.get(/** @type {string} */ (damagedShardName));
-        expect(damagedBytes).toBeDefined();
-        const view = new DataView(
-            /** @type {Uint8Array} */ (damagedBytes).buffer,
-            /** @type {Uint8Array} */ (damagedBytes).byteOffset,
-            /** @type {Uint8Array} */ (damagedBytes).byteLength,
-        );
-        const stringTableOffset = 8 + 16 + 2 + 20;
-        const stringCount = view.getUint32(stringTableOffset, true);
-        const stringBytesLength = view.getUint32(stringTableOffset + 4, true);
-        const recordsOffset = stringTableOffset + 8 + (stringCount * 2) + stringBytesLength;
-        /** @type {Uint8Array} */ (damagedBytes)[recordsOffset + 16] ^= 0xff;
-
         const readerStore = new TermRecordOpfsStore();
         Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
         await readerStore._loadShardFiles(false);
@@ -2862,7 +2928,7 @@ describe('TermRecordOpfsStore', () => {
         expect(readerStore.getDictionaryHealth('Healthy').status).toBe('available');
     });
 
-    test('ensureAllDictionariesLoaded materializes records behind persistent indexes exactly once', async () => {
+    test('ensureAllDictionariesLoaded keeps authoritative records persisted-only', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Persistent count';
         const fileBytesByName = new Map();
@@ -2896,7 +2962,7 @@ describe('TermRecordOpfsStore', () => {
         expect(Reflect.get(readerStore, '_recordsById').size).toBe(1);
 
         await readerStore.ensureAllDictionariesLoaded();
-        expect(Reflect.get(readerStore, '_recordsById').size).toBe(2);
+        expect(Reflect.get(readerStore, '_recordsById').size).toBe(1);
         expect(readerStore.size).toBe(2);
         expect(readerStore.findTermIds(dictionaryName, '食う', 'expression')).toHaveLength(1);
         expect(readerStore.findTermIds(dictionaryName, '飲む', 'expression')).toHaveLength(1);
@@ -2930,9 +2996,14 @@ describe('TermRecordOpfsStore', () => {
         expect(indexFileName).toBeDefined();
         const indexBytes = fileBytesByName.get(/** @type {string} */ (indexFileName));
         expect(indexBytes).toBeDefined();
-        // Corrupt the checksummed lookup payload itself, rather than the
-        // separately checksummed hot-record field table that follows it.
-        /** @type {Uint8Array} */ (indexBytes)[40 + 40] ^= 0xff;
+        const indexView = new DataView(
+            /** @type {Uint8Array} */ (indexBytes).buffer,
+            /** @type {Uint8Array} */ (indexBytes).byteOffset,
+            /** @type {Uint8Array} */ (indexBytes).byteLength,
+        );
+        const baseLength = indexView.getUint32(40 + 20, true);
+        const derivedOffset = 40 + 40 + 16 + baseLength;
+        /** @type {Uint8Array} */ (indexBytes)[derivedOffset + 8] ^= 0xff;
 
         const readerStore = new TermRecordOpfsStore();
         Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
@@ -2944,32 +3015,115 @@ describe('TermRecordOpfsStore', () => {
         expect(readerStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
         const repairedIndexBytes = fileBytesByName.get(/** @type {string} */ (indexFileName));
         expect(repairedIndexBytes).toBeDefined();
-        expect(new TextDecoder().decode(/** @type {Uint8Array} */ (repairedIndexBytes).subarray(0, 8))).toBe('MBTIDX10');
+        expect(new TextDecoder().decode(/** @type {Uint8Array} */ (repairedIndexBytes).subarray(0, 8))).toBe('MBTIDX11');
+        const cleanRepairedIndexBytes = new Uint8Array(/** @type {Uint8Array} */ (repairedIndexBytes));
 
-        // The hot record fields have their own envelope and must also
-        // remain repairable independently of the lookup payload checksum.
+        // Hot record fields are authoritative and cannot be reconstructed.
         /** @type {Uint8Array} */ (repairedIndexBytes)[/** @type {Uint8Array} */ (repairedIndexBytes).byteLength - 1] ^= 0xff;
         const secondReaderStore = new TermRecordOpfsStore();
         Reflect.set(secondReaderStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
         await secondReaderStore._loadShardFiles(false);
         await secondReaderStore.ensureDictionariesLoaded([dictionaryName]);
-        expect(secondReaderStore.findTermIds(dictionaryName, '食う', 'expression')).toHaveLength(1);
-        expect(secondReaderStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
+        expect(secondReaderStore.findTermIds(dictionaryName, '食う', 'expression')).toEqual([]);
+        expect(secondReaderStore.getDictionaryHealth(dictionaryName).status).toBe('reimportRequired');
 
-        // Unsafe u64 metadata is structural index corruption, not a transient
-        // storage error, and must remain eligible for authoritative repair.
-        const secondRepairedIndexBytes = fileBytesByName.get(/** @type {string} */ (indexFileName));
-        expect(secondRepairedIndexBytes).toBeDefined();
-        /** @type {Uint8Array} */ (secondRepairedIndexBytes).fill(0xff, 8, 16);
+        // The authoritative base has the same fail-closed policy.
+        fileBytesByName.set(/** @type {string} */ (indexFileName), cleanRepairedIndexBytes);
+        const baseDamagedBytes = fileBytesByName.get(/** @type {string} */ (indexFileName));
+        /** @type {Uint8Array} */ (baseDamagedBytes)[40 + 40 + 16 + 32] ^= 0xff;
         const thirdReaderStore = new TermRecordOpfsStore();
         Reflect.set(thirdReaderStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
         await thirdReaderStore._loadShardFiles(false);
         await thirdReaderStore.ensureDictionariesLoaded([dictionaryName]);
-        expect(thirdReaderStore.findTermIds(dictionaryName, '食う', 'expression')).toHaveLength(1);
-        expect(thirdReaderStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
+        expect(thirdReaderStore.findTermIds(dictionaryName, '食う', 'expression')).toEqual([]);
+        expect(thirdReaderStore.getDictionaryHealth(dictionaryName).status).toBe('reimportRequired');
     });
 
-    test('drops a truncated fallback shard without publishing its first record', async () => {
+    test('preserves authoritative bytes when derived repair publication fails', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Interrupted derived repair';
+        const fileBytesByName = new Map();
+        let failRepairWrite = false;
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
+            beforeWrite: async (name) => {
+                if (failRepairWrite && name.endsWith('.mbti')) {
+                    throw new Error('Injected repair publication failure');
+                }
+            },
+        });
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
+        await writerStore.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: dictionaryName,
+            dictionaryTotalRows: 1_000_000,
+            rowCount: 1,
+            expressionBytesList: [textEncoder.encode('修復')],
+            readingBytesList: [textEncoder.encode('しゅうふく')],
+            readingEqualsExpressionList: new Uint8Array([0]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([1]),
+        }, [0], [8], 'raw');
+        await writerStore._closeAllWritables();
+        const indexFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbti'));
+        if (typeof indexFileName !== 'string') { throw new Error('Expected authoritative container'); }
+        const indexBytes = fileBytesByName.get(indexFileName);
+        if (typeof indexBytes === 'undefined') { throw new Error('Expected authoritative bytes'); }
+        const indexView = new DataView(indexBytes.buffer, indexBytes.byteOffset, indexBytes.byteLength);
+        const derivedOffset = 40 + 40 + 16 + indexView.getUint32(40 + 20, true);
+        indexBytes[derivedOffset + 8] ^= 0xff;
+        const damagedBytes = new Uint8Array(indexBytes);
+
+        failRepairWrite = true;
+        const interruptedStore = new TermRecordOpfsStore();
+        Reflect.set(interruptedStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await interruptedStore._loadShardFiles(false);
+        await interruptedStore.ensureDictionariesLoaded([dictionaryName]);
+        expect(fileBytesByName.get(indexFileName)).toStrictEqual(damagedBytes);
+        expect(interruptedStore.getDictionaryHealth(dictionaryName).status).toBe('temporarilyUnavailable');
+
+        failRepairWrite = false;
+        const retryStore = new TermRecordOpfsStore();
+        Reflect.set(retryStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await retryStore._loadShardFiles(false);
+        await retryStore.ensureDictionariesLoaded([dictionaryName]);
+        expect(retryStore.findTermIds(dictionaryName, '修復', 'expression')).toHaveLength(1);
+        expect(retryStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
+    });
+
+    test('requires reimport when the authoritative container is missing', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Missing authoritative container';
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        Reflect.set(writerStore, '_wasmEncoderUnavailable', true);
+        await writerStore.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: dictionaryName,
+            dictionaryTotalRows: 1_000_000,
+            rowCount: 1,
+            expressionBytesList: [textEncoder.encode('喪失')],
+            readingBytesList: [textEncoder.encode('そうしつ')],
+            readingEqualsExpressionList: new Uint8Array([0]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([1]),
+        }, [0], [8], 'raw');
+        await writerStore._closeAllWritables();
+        const indexFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbti'));
+        if (typeof indexFileName !== 'string') { throw new Error('Expected authoritative container'); }
+        fileBytesByName.delete(indexFileName);
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(false);
+        await readerStore.ensureDictionariesLoaded([dictionaryName]);
+
+        expect(readerStore.findTermIds(dictionaryName, '喪失', 'expression')).toEqual([]);
+        expect(readerStore.getDictionaryHealth(dictionaryName).status).toBe('reimportRequired');
+    });
+
+    test('requires reimport for a truncated authoritative container', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Truncated fallback shard';
         const fileBytesByName = new Map();
@@ -2994,14 +3148,13 @@ describe('TermRecordOpfsStore', () => {
         );
         await writerStore._closeAllWritables();
 
-        const shardFileName = [...fileBytesByName.keys()].find((name) => !name.endsWith('.mbti'));
-        expect(shardFileName).toBeDefined();
-        const shardBytes = fileBytesByName.get(/** @type {string} */ (shardFileName));
-        expect(shardBytes).toBeDefined();
-        fileBytesByName.delete(`${shardFileName}.mbti`);
+        const shardFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbtr'));
+        const indexFileName = `${shardFileName}.mbti`;
+        const indexBytes = fileBytesByName.get(indexFileName);
+        expect(indexBytes).toBeDefined();
         fileBytesByName.set(
-            /** @type {string} */ (shardFileName),
-            /** @type {Uint8Array} */ (shardBytes).slice(0, -1),
+            indexFileName,
+            /** @type {Uint8Array} */ (indexBytes).slice(0, -1),
         );
 
         const readerStore = new TermRecordOpfsStore();
@@ -3010,9 +3163,6 @@ describe('TermRecordOpfsStore', () => {
         await readerStore.ensureDictionariesLoaded([dictionaryName]);
 
         expect(Reflect.get(readerStore, '_recordsById').size).toBe(0);
-        expect(Reflect.get(readerStore, '_invalidShardFileNames')).toContain(shardFileName);
-        expect(Reflect.get(readerStore, '_shardStateByFileName').has(shardFileName)).toBe(false);
-        expect(fileBytesByName.has(/** @type {string} */ (shardFileName))).toBe(false);
         expect(readerStore.getDictionaryHealth(dictionaryName).status).toBe('reimportRequired');
     });
 
@@ -3057,6 +3207,79 @@ describe('TermRecordOpfsStore', () => {
             expression: '飲む',
             entryContentOffset: 0x100000010,
         });
+    });
+
+    test('does not rename a descriptor without its authoritative container', async () => {
+        const textEncoder = new TextEncoder();
+        const fromName = 'JMdict [update-staging unreadable]';
+        const toName = 'JMdict';
+        const fileBytesByName = new Map();
+        const getFileFailures = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {getFileFailures});
+        const store = new TermRecordOpfsStore();
+        Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        Reflect.set(store, '_wasmEncoderUnavailable', true);
+        await store.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: fromName,
+            dictionaryTotalRows: 1_000_000,
+            rowCount: 1,
+            expressionBytesList: [textEncoder.encode('安全')],
+            readingBytesList: [textEncoder.encode('あんぜん')],
+            readingEqualsExpressionList: new Uint8Array([0]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([1]),
+        }, [0], [8], 'raw');
+        await store._closeAllWritables();
+        await expect(store._tryLoadPersistentDictionaryIndex(fromName)).resolves.toBe(true);
+
+        const sourceIndexName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbti'));
+        if (typeof sourceIndexName !== 'string') { throw new Error('Expected authoritative container'); }
+        const sourceBytes = new Uint8Array(/** @type {Uint8Array} */ (fileBytesByName.get(sourceIndexName)));
+        getFileFailures.set(sourceIndexName, 1);
+
+        await expect(store.replaceDictionaryName(fromName, toName)).rejects.toThrow(
+            'Cannot read authoritative source container during dictionary rename',
+        );
+        expect(fileBytesByName.get(sourceIndexName)).toStrictEqual(sourceBytes);
+        const targetDescriptorName = store._getShardSegmentFileName(toName, 'raw', 0);
+        expect(fileBytesByName.has(targetDescriptorName)).toBe(false);
+        expect(fileBytesByName.has(`${targetDescriptorName}.mbti`)).toBe(false);
+    });
+
+    test('does not use materialized records to rename a corrupt authoritative container', async () => {
+        const textEncoder = new TextEncoder();
+        const fromName = 'JMdict [update-staging corrupt]';
+        const toName = 'JMdict';
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const store = new TermRecordOpfsStore();
+        Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        Reflect.set(store, '_wasmEncoderUnavailable', true);
+        await store.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: fromName,
+            rowCount: 1,
+            expressionBytesList: [textEncoder.encode('壊れる')],
+            readingBytesList: [textEncoder.encode('こわれる')],
+            readingEqualsExpressionList: new Uint8Array([0]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([1]),
+        }, [0], [8], 'raw');
+        await store._closeAllWritables();
+        expect(Reflect.get(store, '_recordsById').size).toBe(1);
+
+        const sourceIndexName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbti'));
+        if (typeof sourceIndexName !== 'string') { throw new Error('Expected authoritative container'); }
+        const sourceBytes = fileBytesByName.get(sourceIndexName);
+        if (typeof sourceBytes === 'undefined') { throw new Error('Expected authoritative bytes'); }
+        sourceBytes[sourceBytes.byteLength - 1] ^= 0xff;
+
+        await expect(store.replaceDictionaryName(fromName, toName)).rejects.toThrow(
+            'Cannot rename dictionary with unreadable authoritative term records',
+        );
+        const targetDescriptorName = store._getShardSegmentFileName(toName, 'raw', 0);
+        expect(fileBytesByName.has(targetDescriptorName)).toBe(false);
+        expect(fileBytesByName.has(`${targetDescriptorName}.mbti`)).toBe(false);
+        expect(store.getDictionaryHealth(fromName).status).toBe('reimportRequired');
     });
 
     test('retains live imported strings through the owned preinterned buffer', async () => {

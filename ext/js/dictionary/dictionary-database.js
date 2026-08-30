@@ -62,7 +62,7 @@ import {TermRecordOpfsStore} from './term-record-opfs-store.js';
 import {hasCompletePreparedTermLookupIndexes} from './term-lookup-index-preparation.js';
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 
-const CURRENT_DICTIONARY_SCHEMA_VERSION = 9;
+const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
 const TRANSIENT_UPDATE_TITLE_PATTERN = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
 const TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES = 4096;
 const TERM_ENTRY_CONTENT_CACHE_MAX_BYTES = 32 * 1024 * 1024;
@@ -8257,6 +8257,8 @@ export class DictionaryDatabase {
                 return await this._wipeDictionaryDataForSchemaMigration('reset-dictionary-data-for-generation-bound-term-indexes');
             case 9:
                 return await this._wipeDictionaryDataForSchemaMigration('reset-dictionary-data-for-xxh32-term-storage-integrity');
+            case 10:
+                return await this._wipeDictionaryDataForSchemaMigration('reset-dictionary-data-for-authoritative-term-containers');
             default:
                 throw new Error(`Unhandled dictionary schema migration target version: ${version}`);
         }

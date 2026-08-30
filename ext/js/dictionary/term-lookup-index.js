@@ -17,15 +17,20 @@
 
 import {hashTermKeyByteRange, hashTermKeyBytes} from './term-key-hash.js';
 
-const HEADER_U32_COUNT = 16;
-const HEADER_BYTES = HEADER_U32_COUNT * 4;
+const CONTAINER_HEADER_U32_COUNT = 4;
+const CONTAINER_HEADER_BYTES = CONTAINER_HEADER_U32_COUNT * 4;
+const BASE_HEADER_U32_COUNT = 8;
+const BASE_HEADER_BYTES = BASE_HEADER_U32_COUNT * 4;
+const DERIVED_HEADER_U32_COUNT = 8;
+const DERIVED_HEADER_BYTES = DERIVED_HEADER_U32_COUNT * 4;
+const CONTAINER_MAGIC = 0x37494c4d;
 const RADIX_SIZE = 257;
 const U32_NULL = 0xffffffff;
 const U16_NULL = 0xffff;
 const RECORD_HEADER_BYTES = 24;
 const RECORD_STRING_TABLE_HEADER_BYTES = 8;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
-const COMPACT_INDEX_FORMAT_VERSION = 6;
+const COMPACT_INDEX_FORMAT_VERSION = 7;
 const HASH_SLOT_TARGET_LOAD = 4;
 
 /**
@@ -45,13 +50,19 @@ const HASH_SLOT_TARGET_LOAD = 4;
  * @property {Uint16Array} sequenceNext
  * @property {Uint16Array} sequencePostingOffsets
  * @property {Uint16Array} sequencePostingRows
- * @property {Int32Array|null} sequenceValues
+ * @property {Uint16Array} sequenceRowKeys
  * @property {Uint32Array|null} keyOrder
  * @property {Uint32Array|null} keyReverseOrder
  * @property {Uint32Array|null} keyRadix
  * @property {Uint32Array|null} keyReverseRadix
  * @property {boolean} forwardReady
  * @property {boolean} reverseReady
+ */
+
+/**
+ * @typedef {object} PersistedTermLookupIndexSections
+ * @property {Uint8Array} base
+ * @property {Uint8Array} derived
  */
 
 /**
@@ -390,51 +401,39 @@ function encodeIndexPlan(plan) {
     const keySlotCount = getHashSlotCount(keyCount);
     const sequenceSlotCount = getHashSlotCount(sequenceKeyCount);
     const alignedKeyBytesLength = align4(keyBytes.byteLength);
-    const keyMetadataBytesLength = align4((keyCount + keySlotCount + keyCount) * 2);
-    const compactU16Count =
-        (keyCount + 1) +
-        rowCount +
-        (keyCount + 1) +
-        readingPostingCount +
-        sequenceSlotCount +
-        sequenceKeyCount +
-        (sequenceKeyCount + 1) +
-        sequencePostingCount;
-    const compactU16BytesLength = align4(compactU16Count * 2);
-    const output = new Uint8Array(
-        HEADER_BYTES +
+    const baseU16Count = keyCount + (rowCount * 3);
+    const baseU16BytesLength = align4(baseU16Count * 2);
+    const base = new Uint8Array(
+        BASE_HEADER_BYTES +
         alignedKeyBytesLength +
-        keyMetadataBytesLength +
-        compactU16BytesLength +
+        baseU16BytesLength +
         (sequenceKeyCount * 4),
     );
-    const header = new Uint32Array(output.buffer, output.byteOffset, HEADER_U32_COUNT);
-    header[0] = rowCount;
-    header[1] = keyCount;
-    header[2] = keyBytes.byteLength;
-    header[3] = keySlotCount;
-    header[4] = sequenceSlotCount;
-    header[5] = readingPostingCount;
-    header[6] = COMPACT_INDEX_FORMAT_VERSION;
-    header[7] = sequenceKeyCount;
-    header[8] = sequencePostingCount;
-    output.set(keyBytes, HEADER_BYTES);
-    let cursor = HEADER_BYTES + alignedKeyBytesLength;
+    const baseHeader = new Uint32Array(base.buffer, base.byteOffset, BASE_HEADER_U32_COUNT);
+    baseHeader[0] = rowCount;
+    baseHeader[1] = keyCount;
+    baseHeader[2] = keyBytes.byteLength;
+    baseHeader[3] = COMPACT_INDEX_FORMAT_VERSION;
+    baseHeader[4] = sequenceKeyCount;
+    baseHeader[5] = readingPostingCount;
+    base.set(keyBytes, BASE_HEADER_BYTES);
+    let baseCursor = BASE_HEADER_BYTES + alignedKeyBytesLength;
     /**
      * @param {number} length
      * @returns {Uint16Array}
      */
-    const takeCompact = (length) => {
-        const value = new Uint16Array(output.buffer, output.byteOffset + cursor, length);
-        cursor += length * 2;
+    const takeBaseU16 = (length) => {
+        const value = new Uint16Array(base.buffer, base.byteOffset + baseCursor, length);
+        baseCursor += length * 2;
         return value;
     };
-    const persistedKeyLengths = takeCompact(keyCount);
-    const keyHeads = takeCompact(keySlotCount);
-    const keyNext = takeCompact(keyCount);
-    cursor = align4(cursor);
-    keyHeads.fill(U16_NULL);
-    keyNext.fill(U16_NULL);
+    const persistedKeyLengths = takeBaseU16(keyCount);
+    const persistedExpressionKeys = takeBaseU16(rowCount);
+    const persistedReadingKeys = takeBaseU16(rowCount);
+    const persistedSequenceRowKeys = takeBaseU16(rowCount);
+    baseCursor = align4(baseCursor);
+    const persistedSequenceKeys = new Int32Array(base.buffer, base.byteOffset + baseCursor, sequenceKeyCount);
+    persistedSequenceKeys.set(sequencePlan.keys);
     let expectedKeyStart = 0;
     for (let key = 0; key < keyCount; ++key) {
         const start = keyOffsets[key];
@@ -449,6 +448,59 @@ function encodeIndexPlan(plan) {
         persistedKeyLengths[key] = length;
         expectedKeyStart = end;
     }
+    for (let row = 0; row < rowCount; ++row) {
+        const expressionKey = expressionKeys[row];
+        const readingKey =
+            isReadingEqualToExpression(readingEqualsExpressionList, row) ||
+            readingKeys[row] === READING_EQUALS_EXPRESSION_U32 ?
+                U16_NULL :
+                readingKeys[row];
+        if (
+            expressionKey >= keyCount ||
+            (readingKey !== U16_NULL && readingKey >= keyCount)
+        ) {
+            throw new Error('Invalid term lookup index row key');
+        }
+        persistedExpressionKeys[row] = expressionKey;
+        persistedReadingKeys[row] = readingKey;
+        persistedSequenceRowKeys[row] = sequencePlan.keyByRow[row];
+    }
+
+    const derivedU16Count =
+        keySlotCount +
+        keyCount +
+        (keyCount + 1) +
+        rowCount +
+        (keyCount + 1) +
+        readingPostingCount +
+        sequenceSlotCount +
+        sequenceKeyCount +
+        (sequenceKeyCount + 1) +
+        sequencePostingCount;
+    const derived = new Uint8Array(DERIVED_HEADER_BYTES + align4(derivedU16Count * 2));
+    const derivedHeader = new Uint32Array(derived.buffer, derived.byteOffset, DERIVED_HEADER_U32_COUNT);
+    derivedHeader[0] = rowCount;
+    derivedHeader[1] = keyCount;
+    derivedHeader[2] = keySlotCount;
+    derivedHeader[3] = sequenceSlotCount;
+    derivedHeader[4] = readingPostingCount;
+    derivedHeader[5] = sequenceKeyCount;
+    derivedHeader[6] = sequencePostingCount;
+    derivedHeader[7] = COMPACT_INDEX_FORMAT_VERSION;
+    let cursor = DERIVED_HEADER_BYTES;
+    /**
+     * @param {number} length
+     * @returns {Uint16Array}
+     */
+    const takeCompact = (length) => {
+        const value = new Uint16Array(derived.buffer, derived.byteOffset + cursor, length);
+        cursor += length * 2;
+        return value;
+    };
+    const keyHeads = takeCompact(keySlotCount);
+    const keyNext = takeCompact(keyCount);
+    keyHeads.fill(U16_NULL);
+    keyNext.fill(U16_NULL);
     const expressionPostingOffsets = takeCompact(keyCount + 1);
     const expressionPostingRows = takeCompact(rowCount);
     const readingPostingOffsets = takeCompact(keyCount + 1);
@@ -457,9 +509,6 @@ function encodeIndexPlan(plan) {
     const sequenceNext = takeCompact(sequenceKeyCount); sequenceNext.fill(U16_NULL);
     const sequencePostingOffsets = takeCompact(sequenceKeyCount + 1);
     const sequencePostingRows = takeCompact(sequencePostingCount);
-    cursor = align4(cursor);
-    const persistedSequenceKeys = new Int32Array(output.buffer, output.byteOffset + cursor, sequenceKeyCount);
-    persistedSequenceKeys.set(sequencePlan.keys);
 
     for (let key = 0; key < keyCount; ++key) {
         insertHash(
@@ -478,18 +527,26 @@ function encodeIndexPlan(plan) {
     fillPostingAndSequenceTables(
         expressionPostingOffsets,
         expressionPostingRows,
-        expressionKeys,
+        persistedExpressionKeys,
         readingPostingOffsets,
         readingPostingRows,
-        readingKeys,
-        readingEqualsExpressionList,
+        persistedReadingKeys,
+        void 0,
         sequenceHeads,
         sequenceNext,
         persistedSequenceKeys,
         sequencePostingOffsets,
         sequencePostingRows,
-        sequencePlan.keyByRow,
+        persistedSequenceRowKeys,
     );
+    const output = new Uint8Array(CONTAINER_HEADER_BYTES + base.byteLength + derived.byteLength);
+    const containerHeader = new Uint32Array(output.buffer, output.byteOffset, CONTAINER_HEADER_U32_COUNT);
+    containerHeader[0] = CONTAINER_MAGIC;
+    containerHeader[1] = COMPACT_INDEX_FORMAT_VERSION;
+    containerHeader[2] = base.byteLength;
+    containerHeader[3] = derived.byteLength;
+    output.set(base, CONTAINER_HEADER_BYTES);
+    output.set(derived, CONTAINER_HEADER_BYTES + base.byteLength);
     return output;
 }
 
@@ -533,6 +590,151 @@ function createSequencePlan(sequenceValues) {
 }
 
 /**
+ * Returns the independently persistable authoritative and derived sections.
+ * @param {Uint8Array} bytes
+ * @returns {PersistedTermLookupIndexSections}
+ * @throws {Error} If the container framing is malformed.
+ */
+export function splitPersistedTermLookupIndex(bytes) {
+    if (bytes.byteLength < CONTAINER_HEADER_BYTES || (bytes.byteOffset & 3) !== 0) {
+        throw new Error('Invalid persisted term lookup index container');
+    }
+    const header = new Uint32Array(bytes.buffer, bytes.byteOffset, CONTAINER_HEADER_U32_COUNT);
+    const baseLength = header[2];
+    const derivedLength = header[3];
+    if (
+        header[0] !== CONTAINER_MAGIC ||
+        header[1] !== COMPACT_INDEX_FORMAT_VERSION ||
+        baseLength < BASE_HEADER_BYTES ||
+        derivedLength < DERIVED_HEADER_BYTES ||
+        CONTAINER_HEADER_BYTES + baseLength + derivedLength !== bytes.byteLength
+    ) {
+        throw new Error('Invalid persisted term lookup index container');
+    }
+    return {
+        base: bytes.subarray(CONTAINER_HEADER_BYTES, CONTAINER_HEADER_BYTES + baseLength),
+        derived: bytes.subarray(CONTAINER_HEADER_BYTES + baseLength),
+    };
+}
+
+/**
+ * Extracts the independently checksummed base using outer-container metadata.
+ * This remains usable when only the derived framing bytes are damaged.
+ * @param {Uint8Array} bytes
+ * @param {number} baseLength
+ * @returns {Uint8Array}
+ * @throws {Error} If the authoritative base framing is invalid.
+ */
+export function getPersistedTermLookupBaseBytes(bytes, baseLength) {
+    if (
+        !Number.isSafeInteger(baseLength) ||
+        baseLength < BASE_HEADER_BYTES ||
+        bytes.byteLength < CONTAINER_HEADER_BYTES + baseLength
+    ) {
+        throw new Error('Invalid persisted term lookup base framing');
+    }
+    return bytes.subarray(CONTAINER_HEADER_BYTES, CONTAINER_HEADER_BYTES + baseLength);
+}
+
+/**
+ * Rebuilds derived hash/posting tables from an independently validated base.
+ * This path is intentionally allocation-heavier than normal lookup because it
+ * only runs as bounded background repair after derived-byte corruption.
+ * @param {Uint8Array} base
+ * @returns {Uint8Array}
+ */
+export function rebuildPersistedTermLookupIndexFromBase(base) {
+    const {keyBytes, keyOffsets, expressionKeys, readingKeys, sequenceKeys, sequenceRowKeys} = parsePersistedTermLookupBase(base);
+    /** @type {Array<{expressionBytes: Uint8Array, readingBytes: Uint8Array|null, sequence: number|null}>} */
+    const rows = new Array(expressionKeys.length);
+    for (let row = 0; row < rows.length; ++row) {
+        const expressionKey = expressionKeys[row];
+        const readingKey = readingKeys[row];
+        const sequenceKey = sequenceRowKeys[row];
+        rows[row] = {
+            expressionBytes: getKeyBytes(keyBytes, keyOffsets, expressionKey),
+            readingBytes: readingKey === U16_NULL ? null : getKeyBytes(keyBytes, keyOffsets, readingKey),
+            sequence: sequenceKey === U16_NULL ? null : sequenceKeys[sequenceKey],
+        };
+    }
+    return encodePersistedTermLookupIndex(rows);
+}
+
+/**
+ * @param {Uint8Array} base
+ * @returns {{keyBytes: Uint8Array, keyOffsets: Uint32Array, expressionKeys: Uint16Array, readingKeys: Uint16Array, sequenceKeys: Int32Array, sequenceRowKeys: Uint16Array}}
+ * @throws {Error} If the authoritative base is malformed.
+ */
+function parsePersistedTermLookupBase(base) {
+    if (base.byteLength < BASE_HEADER_BYTES || (base.byteOffset & 3) !== 0) {
+        throw new Error('Invalid persisted term lookup base header');
+    }
+    const header = new Uint32Array(base.buffer, base.byteOffset, BASE_HEADER_U32_COUNT);
+    const rowCount = header[0];
+    const keyCount = header[1];
+    const keyBytesLength = header[2];
+    const sequenceKeyCount = header[4];
+    const readingPostingCount = header[5];
+    const alignedKeyBytesLength = align4(keyBytesLength);
+    const baseU16BytesLength = align4((keyCount + (rowCount * 3)) * 2);
+    if (
+        rowCount === 0 ||
+        rowCount >= U16_NULL ||
+        keyCount === 0 ||
+        keyCount >= U16_NULL ||
+        sequenceKeyCount >= U16_NULL ||
+        readingPostingCount > rowCount ||
+        header[3] !== COMPACT_INDEX_FORMAT_VERSION ||
+        base.byteLength !== BASE_HEADER_BYTES + alignedKeyBytesLength + baseU16BytesLength + (sequenceKeyCount * 4)
+    ) {
+        throw new Error('Invalid persisted term lookup base dimensions');
+    }
+    const keyBytes = base.subarray(BASE_HEADER_BYTES, BASE_HEADER_BYTES + keyBytesLength);
+    let cursor = BASE_HEADER_BYTES + alignedKeyBytesLength;
+    /**
+     * @param {number} length
+     * @returns {Uint16Array}
+     */
+    const takeU16 = (length) => {
+        const value = new Uint16Array(base.buffer, base.byteOffset + cursor, length);
+        cursor += length * 2;
+        return value;
+    };
+    const keyLengths = takeU16(keyCount);
+    const expressionKeys = takeU16(rowCount);
+    const readingKeys = takeU16(rowCount);
+    const sequenceRowKeys = takeU16(rowCount);
+    cursor = align4(cursor);
+    const sequenceKeys = new Int32Array(base.buffer, base.byteOffset + cursor, sequenceKeyCount);
+    const keyOffsets = reconstructKeyOffsets(keyLengths, keyBytesLength);
+    let actualReadingPostingCount = 0;
+    const usedSequenceKeys = new Uint8Array(sequenceKeyCount);
+    for (let row = 0; row < rowCount; ++row) {
+        if (
+            expressionKeys[row] >= keyCount ||
+            (readingKeys[row] !== U16_NULL && readingKeys[row] >= keyCount) ||
+            (sequenceRowKeys[row] !== U16_NULL && sequenceRowKeys[row] >= sequenceKeyCount)
+        ) {
+            throw new Error('Invalid persisted term lookup base row reference');
+        }
+        if (readingKeys[row] !== U16_NULL) { ++actualReadingPostingCount; }
+        if (sequenceRowKeys[row] !== U16_NULL) { usedSequenceKeys[sequenceRowKeys[row]] = 1; }
+    }
+    if (actualReadingPostingCount !== readingPostingCount) {
+        throw new Error('Invalid persisted term lookup base reading count');
+    }
+    const seenSequences = new Set();
+    for (let key = 0; key < sequenceKeyCount; ++key) {
+        const value = sequenceKeys[key];
+        if (value < 0 || usedSequenceKeys[key] === 0 || seenSequences.has(value)) {
+            throw new Error('Invalid persisted term lookup base sequence key');
+        }
+        seenSequences.add(value);
+    }
+    return {keyBytes, keyOffsets, expressionKeys, readingKeys, sequenceKeys, sequenceRowKeys};
+}
+
+/**
  * @param {Uint8Array} bytes
  * @returns {PersistedTermLookupIndex}
  * @throws {Error} If the persisted index is malformed.
@@ -560,19 +762,33 @@ export function parseChecksummedPersistedTermLookupIndex(bytes) {
  * @throws {Error} If the persisted index is malformed.
  */
 function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
-    if (bytes.byteLength < HEADER_BYTES || (bytes.byteOffset & 3) !== 0) {
+    if (bytes.byteLength < (CONTAINER_HEADER_BYTES + BASE_HEADER_BYTES + DERIVED_HEADER_BYTES) || (bytes.byteOffset & 3) !== 0) {
         throw new Error('Invalid persisted term lookup index header');
     }
-    const header = new Uint32Array(bytes.buffer, bytes.byteOffset, HEADER_U32_COUNT);
-    const rowCount = header[0];
-    const keyCount = header[1];
-    const keyBytesLength = header[2];
-    const keySlotCount = header[3];
-    const sequenceSlotCount = header[4];
-    const readingPostingCount = header[5];
-    const flags = header[6];
-    const sequenceKeyCount = header[7];
-    const sequencePostingCount = header[8];
+    const containerHeader = new Uint32Array(bytes.buffer, bytes.byteOffset, CONTAINER_HEADER_U32_COUNT);
+    const baseLength = containerHeader[2];
+    const derivedLength = containerHeader[3];
+    if (
+        containerHeader[0] !== CONTAINER_MAGIC ||
+        containerHeader[1] !== COMPACT_INDEX_FORMAT_VERSION ||
+        baseLength < BASE_HEADER_BYTES ||
+        derivedLength < DERIVED_HEADER_BYTES ||
+        CONTAINER_HEADER_BYTES + baseLength + derivedLength !== bytes.byteLength
+    ) {
+        throw new Error('Invalid persisted term lookup index container');
+    }
+    const baseOffset = CONTAINER_HEADER_BYTES;
+    const derivedOffset = baseOffset + baseLength;
+    const baseHeader = new Uint32Array(bytes.buffer, bytes.byteOffset + baseOffset, BASE_HEADER_U32_COUNT);
+    const derivedHeader = new Uint32Array(bytes.buffer, bytes.byteOffset + derivedOffset, DERIVED_HEADER_U32_COUNT);
+    const rowCount = baseHeader[0];
+    const keyCount = baseHeader[1];
+    const keyBytesLength = baseHeader[2];
+    const sequenceKeyCount = baseHeader[4];
+    const readingPostingCount = baseHeader[5];
+    const keySlotCount = derivedHeader[2];
+    const sequenceSlotCount = derivedHeader[3];
+    const sequencePostingCount = derivedHeader[6];
     if (
         rowCount === 0 ||
         rowCount >= U16_NULL ||
@@ -581,7 +797,12 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         sequenceKeyCount >= U16_NULL ||
         sequencePostingCount > rowCount ||
         sequenceKeyCount > sequencePostingCount ||
-        flags !== COMPACT_INDEX_FORMAT_VERSION ||
+        baseHeader[3] !== COMPACT_INDEX_FORMAT_VERSION ||
+        derivedHeader[0] !== rowCount ||
+        derivedHeader[1] !== keyCount ||
+        derivedHeader[4] !== readingPostingCount ||
+        derivedHeader[5] !== sequenceKeyCount ||
+        derivedHeader[7] !== COMPACT_INDEX_FORMAT_VERSION ||
         keyCount >= U16_NULL ||
         !isPowerOfTwo(keySlotCount) ||
         !isPowerOfTwo(sequenceSlotCount)
@@ -589,8 +810,15 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         throw new Error('Invalid persisted term lookup index dimensions');
     }
     const alignedKeyBytesLength = align4(keyBytesLength);
-    const keyMetadataBytesLength = align4((keyCount + keySlotCount + keyCount) * 2);
-    const compactU16Count =
+    const baseU16BytesLength = align4((keyCount + (rowCount * 3)) * 2);
+    if (
+        baseLength !== BASE_HEADER_BYTES + alignedKeyBytesLength + baseU16BytesLength + (sequenceKeyCount * 4)
+    ) {
+        throw new Error('Invalid persisted term lookup base length');
+    }
+    const derivedU16Count =
+        keySlotCount +
+        keyCount +
         (keyCount + 1) +
         rowCount +
         (keyCount + 1) +
@@ -599,19 +827,28 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         sequenceKeyCount +
         (sequenceKeyCount + 1) +
         sequencePostingCount;
-    const compactU16BytesLength = align4(compactU16Count * 2);
-    if (
-        bytes.byteLength !==
-        HEADER_BYTES +
-        alignedKeyBytesLength +
-        keyMetadataBytesLength +
-        compactU16BytesLength +
-        (sequenceKeyCount * 4)
-    ) {
-        throw new Error('Invalid persisted term lookup index length');
+    if (derivedLength !== DERIVED_HEADER_BYTES + align4(derivedU16Count * 2)) {
+        throw new Error('Invalid persisted term lookup derived length');
     }
-    const keyBytes = bytes.subarray(HEADER_BYTES, HEADER_BYTES + keyBytesLength);
-    let cursor = HEADER_BYTES + alignedKeyBytesLength;
+    const keyBytes = bytes.subarray(baseOffset + BASE_HEADER_BYTES, baseOffset + BASE_HEADER_BYTES + keyBytesLength);
+    let baseCursor = baseOffset + BASE_HEADER_BYTES + alignedKeyBytesLength;
+    /**
+     * @param {number} length
+     * @returns {Uint16Array}
+     */
+    const takeBaseU16 = (length) => {
+        const value = new Uint16Array(bytes.buffer, bytes.byteOffset + baseCursor, length);
+        baseCursor += length * 2;
+        return value;
+    };
+    const keyLengths = takeBaseU16(keyCount);
+    const expressionKeys = takeBaseU16(rowCount);
+    const readingKeys = takeBaseU16(rowCount);
+    const sequenceRowKeys = takeBaseU16(rowCount);
+    baseCursor = align4(baseCursor);
+    const sequenceKeys = new Int32Array(bytes.buffer, bytes.byteOffset + baseCursor, sequenceKeyCount);
+    const keyOffsets = reconstructKeyOffsets(keyLengths, keyBytesLength);
+    let cursor = derivedOffset + DERIVED_HEADER_BYTES;
     /**
      * @param {number} length
      * @returns {Uint16Array}
@@ -621,11 +858,8 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         cursor += length * 2;
         return value;
     };
-    const keyLengths = takeCompact(keyCount);
     const keyHeads = takeCompact(keySlotCount);
     const keyNext = takeCompact(keyCount);
-    cursor = align4(cursor);
-    const keyOffsets = reconstructKeyOffsets(keyLengths, keyBytesLength);
     const expressionPostingOffsets = takeCompact(keyCount + 1);
     const expressionPostingRows = takeCompact(rowCount);
     const readingPostingOffsets = takeCompact(keyCount + 1);
@@ -634,22 +868,8 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
     const sequenceNext = takeCompact(sequenceKeyCount);
     const sequencePostingOffsets = takeCompact(sequenceKeyCount + 1);
     const sequencePostingRows = takeCompact(sequencePostingCount);
-    cursor = align4(cursor);
-    const sequenceKeys = new Int32Array(bytes.buffer, bytes.byteOffset + cursor, sequenceKeyCount);
     validateOffsets(expressionPostingOffsets, expressionPostingRows.length);
     validateOffsets(readingPostingOffsets, readingPostingRows.length);
-    const expressionKeys = reconstructPostingKeys(
-        expressionPostingOffsets,
-        expressionPostingRows,
-        rowCount,
-        true,
-    );
-    const readingKeys = reconstructPostingKeys(
-        readingPostingOffsets,
-        readingPostingRows,
-        rowCount,
-        false,
-    );
     const index = {
         keyBytes,
         keyOffsets,
@@ -666,7 +886,7 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         sequenceNext,
         sequencePostingOffsets,
         sequencePostingRows,
-        sequenceValues: null,
+        sequenceRowKeys,
         keyOrder: null,
         keyReverseOrder: null,
         keyRadix: null,
@@ -674,7 +894,7 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         forwardReady: false,
         reverseReady: false,
     };
-    validateIndex(index, validateKeyHashBuckets, true);
+    validateIndex(index, validateKeyHashBuckets, false);
     return index;
 }
 
@@ -877,21 +1097,8 @@ export function getPersistedTermKeyBytes(index, row, field) {
  */
 export function getPersistedTermSequence(index, row) {
     if (!Number.isInteger(row) || row < 0 || row >= index.expressionKeys.length) { return null; }
-    if (index.sequenceKeys.length === 0) { return null; }
-    let values = index.sequenceValues;
-    if (!(values instanceof Int32Array)) {
-        values = new Int32Array(index.expressionKeys.length);
-        values.fill(-1);
-        for (let key = 0; key < index.sequenceKeys.length; ++key) {
-            const sequence = index.sequenceKeys[key];
-            for (let i = index.sequencePostingOffsets[key]; i < index.sequencePostingOffsets[key + 1]; ++i) {
-                values[index.sequencePostingRows[i]] = sequence;
-            }
-        }
-        index.sequenceValues = values;
-    }
-    const sequence = values[row];
-    return sequence >= 0 ? sequence : null;
+    const key = index.sequenceRowKeys[row];
+    return key === U16_NULL ? null : index.sequenceKeys[key];
 }
 
 /**
@@ -955,6 +1162,7 @@ function validateIndex(index, validateKeyHashBuckets = true, postingKeysValidate
         index.keyOffsets[0] !== 0 ||
         index.keyOffsets[keyCount] !== index.keyBytes.byteLength ||
         index.readingKeys.length !== rowCount ||
+        index.sequenceRowKeys.length !== rowCount ||
         index.sequenceNext.length !== index.sequenceKeys.length ||
         index.sequencePostingOffsets.length !== index.sequenceKeys.length + 1
     ) {
@@ -999,6 +1207,7 @@ function validateIndex(index, validateKeyHashBuckets = true, postingKeysValidate
         index.sequenceKeys,
         index.sequencePostingOffsets,
         index.sequencePostingRows,
+        index.sequenceRowKeys,
         rowSeen,
         3,
     );
@@ -1011,37 +1220,6 @@ function validateIndex(index, validateKeyHashBuckets = true, postingKeysValidate
         }
         validateReferences(index.keyReverseOrder, keyCount);
     }
-}
-
-/**
- * Reconstructs the row-to-key column already represented by posting lists.
- * @param {Uint16Array} offsets
- * @param {Uint16Array} rows
- * @param {number} rowCount
- * @param {boolean} requireEveryRow
- * @returns {Uint16Array}
- * @throws {Error} If a posting is duplicated, missing, or out of bounds.
- */
-function reconstructPostingKeys(offsets, rows, rowCount, requireEveryRow) {
-    const keys = new Uint16Array(rowCount);
-    keys.fill(U16_NULL);
-    for (let key = 0; key < offsets.length - 1; ++key) {
-        for (let i = offsets[key]; i < offsets[key + 1]; ++i) {
-            const row = rows[i];
-            if (row >= rowCount || keys[row] !== U16_NULL) {
-                throw new Error('Invalid persisted term lookup posting row');
-            }
-            keys[row] = key;
-        }
-    }
-    if (requireEveryRow) {
-        for (const key of keys) {
-            if (key === U16_NULL) {
-                throw new Error('Incomplete persisted term lookup posting rows');
-            }
-        }
-    }
-    return keys;
 }
 
 /**
@@ -1137,11 +1315,12 @@ function validatePostingRows(offsets, rows, keys, skipKey, seen, marker) {
  * @param {Int32Array} keys
  * @param {Uint16Array} postingOffsets
  * @param {Uint16Array} postingRows
+ * @param {Uint16Array} rowKeys
  * @param {Uint8Array} seen
  * @param {number} marker
  * @throws {Error} If a sequence key or posting is invalid, duplicated, or missing.
  */
-function validateSequenceIndex(heads, next, keys, postingOffsets, postingRows, seen, marker) {
+function validateSequenceIndex(heads, next, keys, postingOffsets, postingRows, rowKeys, seen, marker) {
     validateOffsets(postingOffsets, postingRows.length);
     const keySeen = new Uint8Array(keys.length);
     let seenKeyCount = 0;
@@ -1176,10 +1355,19 @@ function validateSequenceIndex(heads, next, keys, postingOffsets, postingRows, s
         }
         for (let i = postingOffsets[key]; i < postingOffsets[key + 1]; ++i) {
             const row = postingRows[i];
-            if (row >= seen.length || seen[row] === marker) {
+            if (row >= seen.length || seen[row] === marker || rowKeys[row] !== key) {
                 throw new Error('Invalid persisted sequence lookup posting row');
             }
             seen[row] = marker;
+        }
+    }
+    for (let row = 0; row < rowKeys.length; ++row) {
+        const key = Number(rowKeys[row]);
+        if (
+            (key === U16_NULL) !== (seen[row] !== marker) ||
+            (key !== U16_NULL && key >= keys.length)
+        ) {
+            throw new Error('Incomplete persisted sequence lookup postings');
         }
     }
 }

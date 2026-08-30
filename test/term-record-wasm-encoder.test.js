@@ -77,14 +77,12 @@ describe('term record WASM encoder', () => {
         expect(wasm.contentOffsetBase).toBe(base);
         expect(wasm.bytes).toStrictEqual(js.bytes);
         expect(wasm.recordFields).toHaveLength(records.length * 12);
-        const lookupPayload = new Uint8Array([1, 2, 3, 4]);
         const sidecarWithPrecomputedFields = Reflect.get(wasmStore, '_createLookupIndexChunk').call(
             wasmStore,
             1,
             records.length,
-            32,
             base,
-            lookupPayload,
+            wasm.lookupIndexBytes,
             wasm.bytes,
             wasm.recordFields,
         );
@@ -92,9 +90,8 @@ describe('term record WASM encoder', () => {
             wasmStore,
             1,
             records.length,
-            32,
             base,
-            lookupPayload,
+            wasm.lookupIndexBytes,
             wasm.bytes,
         );
         expect(sidecarWithPrecomputedFields).toStrictEqual(sidecarWithScannedFields);

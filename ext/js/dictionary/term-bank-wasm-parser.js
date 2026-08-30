@@ -866,13 +866,14 @@ function getSequenceInternSlotCount(count) {
 function getNativeLookupIndexCapacity(rowCount, keyCount, keyBytesLength) {
     const keySlotCount = getLookupHashSlotCount(keyCount);
     const sequenceSlotCount = getLookupHashSlotCount(rowCount);
-    const keyMetadataBytes = align4((keyCount + keySlotCount + keyCount) * 2);
-    const compactU16Count =
+    const baseU16Bytes = align4((keyCount + (rowCount * 3)) * 2);
+    const derivedU16Count =
+        keySlotCount + keyCount +
         (keyCount + 1) + rowCount +
         (keyCount + 1) + rowCount +
         sequenceSlotCount + rowCount +
         (rowCount + 1) + rowCount;
-    return 64 + align4(keyBytesLength) + keyMetadataBytes + align4(compactU16Count * 2) + (rowCount * 4);
+    return 16 + 32 + align4(keyBytesLength) + baseU16Bytes + (rowCount * 4) + 32 + align4(derivedU16Count * 2);
 }
 
 /**

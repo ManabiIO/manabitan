@@ -1541,9 +1541,11 @@ int32_t build_term_string_plan(
     return (int32_t)strings_cursor;
 }
 
-#define TERM_LOOKUP_HEADER_U32_COUNT 16u
-#define TERM_LOOKUP_HEADER_BYTES (TERM_LOOKUP_HEADER_U32_COUNT * 4u)
-#define TERM_LOOKUP_FORMAT_VERSION 6u
+#define TERM_LOOKUP_CONTAINER_HEADER_BYTES 16u
+#define TERM_LOOKUP_BASE_HEADER_BYTES 32u
+#define TERM_LOOKUP_DERIVED_HEADER_BYTES 32u
+#define TERM_LOOKUP_CONTAINER_MAGIC 0x37494c4du
+#define TERM_LOOKUP_FORMAT_VERSION 7u
 #define TERM_LOOKUP_U16_NULL 0xffffu
 #define TERM_LOOKUP_HASH_SLOT_TARGET_LOAD 4u
 
@@ -1580,7 +1582,7 @@ static void term_lookup_insert_hash(
 }
 
 /**
- * Encodes the persisted v6 lookup sidecar directly from parser-owned columns.
+ * Encodes the persisted v7 lookup container directly from parser-owned columns.
  * The output is byte-identical to the validated JavaScript encoder. Scratch
  * buffers are caller-owned so repeated parser chunks do not retain C state.
  */
@@ -1672,46 +1674,61 @@ int32_t encode_term_lookup_index(
     const uint32_t key_slot_count = term_lookup_hash_slot_count(key_count);
     const uint32_t sequence_hash_slot_count = term_lookup_hash_slot_count(sequence_key_count);
     const uint64_t aligned_string_length_64 = ((uint64_t)strings_length + 3u) & ~UINT64_C(3);
-    const uint32_t key_metadata_bytes = align4(
-        (key_count + key_slot_count + key_count) * (uint32_t)sizeof(uint16_t)
+    const uint32_t base_u16_bytes = align4(
+        (key_count + (row_count * 3u)) * (uint32_t)sizeof(uint16_t)
     );
-    const uint32_t compact_u16_count =
+    const uint32_t derived_u16_count =
+        key_slot_count + key_count +
         (key_count + 1u) + row_count +
         (key_count + 1u) + reading_posting_count +
         sequence_hash_slot_count + sequence_key_count +
         (sequence_key_count + 1u) + sequence_posting_count;
-    const uint32_t compact_u16_bytes = align4(compact_u16_count * (uint32_t)sizeof(uint16_t));
+    const uint32_t derived_u16_bytes = align4(derived_u16_count * (uint32_t)sizeof(uint16_t));
+    const uint64_t base_length_64 =
+        TERM_LOOKUP_BASE_HEADER_BYTES + aligned_string_length_64 + base_u16_bytes +
+        sequence_key_count * (uint32_t)sizeof(int32_t);
+    const uint64_t derived_length_64 = TERM_LOOKUP_DERIVED_HEADER_BYTES + derived_u16_bytes;
     const uint64_t output_length_64 =
-        TERM_LOOKUP_HEADER_BYTES + aligned_string_length_64 + key_metadata_bytes +
-        compact_u16_bytes + sequence_key_count * (uint32_t)sizeof(int32_t);
+        TERM_LOOKUP_CONTAINER_HEADER_BYTES + base_length_64 + derived_length_64;
     if (output_length_64 > output_capacity || output_length_64 > 0x7fffffffu) { return -4; }
     const uint32_t aligned_string_length = (uint32_t)aligned_string_length_64;
+    const uint32_t base_length = (uint32_t)base_length_64;
+    const uint32_t derived_length = (uint32_t)derived_length_64;
     const uint32_t output_length = (uint32_t)output_length_64;
 
     uint8_t* output = (uint8_t*)(uintptr_t)output_ptr;
     memset(output, 0, output_length);
-    uint32_t* header = (uint32_t*)output;
-    header[0] = row_count;
-    header[1] = key_count;
-    header[2] = strings_length;
-    header[3] = key_slot_count;
-    header[4] = sequence_hash_slot_count;
-    header[5] = reading_posting_count;
-    header[6] = TERM_LOOKUP_FORMAT_VERSION;
-    header[7] = sequence_key_count;
-    header[8] = sequence_posting_count;
-    __builtin_memcpy(output + TERM_LOOKUP_HEADER_BYTES, strings, strings_length);
+    uint32_t* container_header = (uint32_t*)output;
+    container_header[0] = TERM_LOOKUP_CONTAINER_MAGIC;
+    container_header[1] = TERM_LOOKUP_FORMAT_VERSION;
+    container_header[2] = base_length;
+    container_header[3] = derived_length;
+    uint8_t* base = output + TERM_LOOKUP_CONTAINER_HEADER_BYTES;
+    uint32_t* base_header = (uint32_t*)base;
+    base_header[0] = row_count;
+    base_header[1] = key_count;
+    base_header[2] = strings_length;
+    base_header[3] = TERM_LOOKUP_FORMAT_VERSION;
+    base_header[4] = sequence_key_count;
+    base_header[5] = reading_posting_count;
+    __builtin_memcpy(base + TERM_LOOKUP_BASE_HEADER_BYTES, strings, strings_length);
 
-    uint32_t cursor = TERM_LOOKUP_HEADER_BYTES + aligned_string_length;
-    uint16_t* persisted_key_lengths = (uint16_t*)(output + cursor);
+    uint32_t cursor = TERM_LOOKUP_BASE_HEADER_BYTES + aligned_string_length;
+    uint16_t* persisted_key_lengths = (uint16_t*)(base + cursor);
     cursor += key_count * (uint32_t)sizeof(uint16_t);
-    uint16_t* key_heads = (uint16_t*)(output + cursor);
-    cursor += key_slot_count * (uint32_t)sizeof(uint16_t);
-    uint16_t* key_next = (uint16_t*)(output + cursor);
-    cursor += key_count * (uint32_t)sizeof(uint16_t);
+    uint16_t* persisted_expression_keys = (uint16_t*)(base + cursor);
+    cursor += row_count * (uint32_t)sizeof(uint16_t);
+    uint16_t* persisted_reading_keys = (uint16_t*)(base + cursor);
+    cursor += row_count * (uint32_t)sizeof(uint16_t);
+    uint16_t* persisted_sequence_row_keys = (uint16_t*)(base + cursor);
+    cursor += row_count * (uint32_t)sizeof(uint16_t);
     cursor = align4(cursor);
-    memset(key_heads, 0xff, key_slot_count * sizeof(uint16_t));
-    memset(key_next, 0xff, key_count * sizeof(uint16_t));
+    int32_t* persisted_sequence_keys = (int32_t*)(base + cursor);
+    __builtin_memcpy(
+        persisted_sequence_keys,
+        sequence_keys,
+        sequence_key_count * sizeof(int32_t)
+    );
     uint32_t expected_start = 0u;
     for (uint32_t key = 0u; key < key_count; ++key) {
         const uint32_t start = string_offsets[key];
@@ -1722,35 +1739,47 @@ int32_t encode_term_lookup_index(
         if (start > strings_length || length > strings_length - start) { return -5; }
         persisted_key_lengths[key] = (uint16_t)length;
         expected_start = start + length;
-        term_lookup_insert_hash(key_heads, key_next, key, string_hashes[key], key_slot_count);
     }
     if (expected_start != strings_length) { return -5; }
 
-    uint16_t* expression_offsets = (uint16_t*)(output + cursor);
+    uint8_t* derived = base + base_length;
+    uint32_t* derived_header = (uint32_t*)derived;
+    derived_header[0] = row_count;
+    derived_header[1] = key_count;
+    derived_header[2] = key_slot_count;
+    derived_header[3] = sequence_hash_slot_count;
+    derived_header[4] = reading_posting_count;
+    derived_header[5] = sequence_key_count;
+    derived_header[6] = sequence_posting_count;
+    derived_header[7] = TERM_LOOKUP_FORMAT_VERSION;
+    cursor = TERM_LOOKUP_DERIVED_HEADER_BYTES;
+    uint16_t* key_heads = (uint16_t*)(derived + cursor);
+    cursor += key_slot_count * (uint32_t)sizeof(uint16_t);
+    uint16_t* key_next = (uint16_t*)(derived + cursor);
+    cursor += key_count * (uint32_t)sizeof(uint16_t);
+    uint16_t* expression_offsets = (uint16_t*)(derived + cursor);
     cursor += (key_count + 1u) * (uint32_t)sizeof(uint16_t);
-    uint16_t* expression_rows = (uint16_t*)(output + cursor);
+    uint16_t* expression_rows = (uint16_t*)(derived + cursor);
     cursor += row_count * (uint32_t)sizeof(uint16_t);
-    uint16_t* reading_offsets = (uint16_t*)(output + cursor);
+    uint16_t* reading_offsets = (uint16_t*)(derived + cursor);
     cursor += (key_count + 1u) * (uint32_t)sizeof(uint16_t);
-    uint16_t* reading_rows = (uint16_t*)(output + cursor);
+    uint16_t* reading_rows = (uint16_t*)(derived + cursor);
     cursor += reading_posting_count * (uint32_t)sizeof(uint16_t);
-    uint16_t* sequence_heads = (uint16_t*)(output + cursor);
+    uint16_t* sequence_heads = (uint16_t*)(derived + cursor);
     cursor += sequence_hash_slot_count * (uint32_t)sizeof(uint16_t);
-    uint16_t* sequence_next = (uint16_t*)(output + cursor);
+    uint16_t* sequence_next = (uint16_t*)(derived + cursor);
     cursor += sequence_key_count * (uint32_t)sizeof(uint16_t);
-    uint16_t* sequence_offsets = (uint16_t*)(output + cursor);
+    uint16_t* sequence_offsets = (uint16_t*)(derived + cursor);
     cursor += (sequence_key_count + 1u) * (uint32_t)sizeof(uint16_t);
-    uint16_t* sequence_rows = (uint16_t*)(output + cursor);
+    uint16_t* sequence_rows = (uint16_t*)(derived + cursor);
     cursor += sequence_posting_count * (uint32_t)sizeof(uint16_t);
-    cursor = align4(cursor);
-    int32_t* persisted_sequence_keys = (int32_t*)(output + cursor);
-    __builtin_memcpy(
-        persisted_sequence_keys,
-        sequence_keys,
-        sequence_key_count * sizeof(int32_t)
-    );
+    memset(key_heads, 0xff, key_slot_count * sizeof(uint16_t));
+    memset(key_next, 0xff, key_count * sizeof(uint16_t));
     memset(sequence_heads, 0xff, sequence_hash_slot_count * sizeof(uint16_t));
     memset(sequence_next, 0xff, sequence_key_count * sizeof(uint16_t));
+    for (uint32_t key = 0u; key < key_count; ++key) {
+        term_lookup_insert_hash(key_heads, key_next, key, string_hashes[key], key_slot_count);
+    }
     for (uint32_t key = 0u; key < sequence_key_count; ++key) {
         term_lookup_insert_hash(
             sequence_heads,
@@ -1762,9 +1791,15 @@ int32_t encode_term_lookup_index(
     }
 
     for (uint32_t row = 0u; row < row_count; ++row) {
-        ++expression_offsets[expression_indexes[row] + 1u];
-        if (reading_equals[row] == 0u) { ++reading_offsets[reading_indexes[row] + 1u]; }
+        persisted_expression_keys[row] = (uint16_t)expression_indexes[row];
+        persisted_reading_keys[row] = reading_equals[row] == 0u ?
+            (uint16_t)reading_indexes[row] : TERM_LOOKUP_U16_NULL;
         const uint16_t sequence_key = sequence_key_by_row[row];
+        persisted_sequence_row_keys[row] = sequence_key;
+        ++expression_offsets[(uint32_t)persisted_expression_keys[row] + 1u];
+        if (persisted_reading_keys[row] != TERM_LOOKUP_U16_NULL) {
+            ++reading_offsets[(uint32_t)persisted_reading_keys[row] + 1u];
+        }
         if (sequence_key != TERM_LOOKUP_U16_NULL) { ++sequence_offsets[(uint32_t)sequence_key + 1u]; }
     }
     for (uint32_t key = 1u; key <= key_count; ++key) {
@@ -1776,10 +1811,10 @@ int32_t encode_term_lookup_index(
     }
     for (uint32_t row = row_count; row > 0u;) {
         --row;
-        const uint32_t expression_key = expression_indexes[row];
+        const uint32_t expression_key = persisted_expression_keys[row];
         expression_rows[--expression_offsets[expression_key + 1u]] = (uint16_t)row;
-        if (reading_equals[row] == 0u) {
-            const uint32_t reading_key = reading_indexes[row];
+        if (persisted_reading_keys[row] != TERM_LOOKUP_U16_NULL) {
+            const uint32_t reading_key = persisted_reading_keys[row];
             reading_rows[--reading_offsets[reading_key + 1u]] = (uint16_t)row;
         }
         const uint16_t sequence_key = sequence_key_by_row[row];
