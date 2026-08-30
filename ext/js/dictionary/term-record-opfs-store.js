@@ -98,7 +98,7 @@ const MAX_LOOKUP_INDEX_OVERHEAD_BYTES = 64 * 1024 * 1024;
 const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 
 /**
- * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
+ * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
  * @param {number} count
  * @returns {boolean}
  */
@@ -115,7 +115,7 @@ function hasFixedContentSpan(chunk, count) {
 }
 
 /**
- * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
+ * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
  * @param {number[]|Uint32Array|Float64Array} contentOffsets
  * @param {number} index
  * @returns {number}
@@ -124,17 +124,68 @@ function getArtifactContentOffset(chunk, contentOffsets, index) {
     if (hasFixedContentSpan(chunk, index + 1)) {
         return /** @type {number} */ (chunk.fixedContentOffsetBase) + (index * /** @type {number} */ (chunk.fixedContentLength));
     }
+    const references = chunk.resolvedContentReferences;
+    if (typeof references === 'object' && references !== null) {
+        const uniqueIndex = references.uniqueIndexList[index];
+        if (uniqueIndex >= references.offsets.length) {
+            throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`);
+        }
+        return references.offsets[uniqueIndex];
+    }
     return contentOffsets[index];
 }
 
 /**
- * @param {{fixedContentLength?: number}} chunk
+ * @param {{fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
  * @param {number[]|Uint32Array} contentLengths
  * @param {number} index
  * @returns {number}
  */
 function getArtifactContentLength(chunk, contentLengths, index) {
-    return typeof chunk.fixedContentLength === 'number' ? chunk.fixedContentLength : contentLengths[index];
+    if (typeof chunk.fixedContentLength === 'number') { return chunk.fixedContentLength; }
+    const references = chunk.resolvedContentReferences;
+    if (typeof references === 'object' && references !== null) {
+        const uniqueIndex = references.uniqueIndexList[index];
+        if (uniqueIndex >= references.lengths.length) {
+            throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`);
+        }
+        return references.lengths[uniqueIndex];
+    }
+    return contentLengths[index];
+}
+
+/**
+ * @param {{resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+ * @param {number} count
+ * @returns {boolean}
+ */
+function hasResolvedContentReferences(chunk, count) {
+    const references = chunk.resolvedContentReferences;
+    return (
+        typeof references === 'object' &&
+        references !== null &&
+        references.uniqueIndexList instanceof Uint32Array &&
+        references.uniqueIndexList.length >= count &&
+        references.offsets instanceof Float64Array &&
+        references.lengths instanceof Uint32Array &&
+        references.offsets.length === references.lengths.length
+    );
+}
+
+/**
+ * @param {{resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+ * @param {number} start
+ * @param {number} end
+ * @returns {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}|undefined}
+ */
+function sliceResolvedContentReferences(chunk, start, end) {
+    const references = chunk.resolvedContentReferences;
+    if (typeof references !== 'object' || references === null) { return void 0; }
+    return {
+        uniqueIndexList: references.uniqueIndexList.subarray(start, end),
+        offsets: references.offsets,
+        lengths: references.lengths,
+    };
 }
 
 /**
@@ -1619,7 +1670,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, preparedLookupIndexes?: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}>}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, preparedLookupIndexes?: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}>}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {string | (string|null)[]} contentDictNames
@@ -1638,8 +1689,9 @@ export class TermRecordOpfsStore {
             };
         }
         const fixedContentSpan = hasFixedContentSpan(chunk, count);
+        const resolvedContentReferences = hasResolvedContentReferences(chunk, count);
         if (
-            (!fixedContentSpan && (contentOffsets.length < count || contentLengths.length < count)) ||
+            (!fixedContentSpan && !resolvedContentReferences && (contentOffsets.length < count || contentLengths.length < count)) ||
             (Array.isArray(contentDictNames) && contentDictNames.length < count)
         ) {
             throw new Error('appendBatchFromArtifactChunkResolvedContent content arrays are smaller than row count');
@@ -1791,7 +1843,7 @@ export class TermRecordOpfsStore {
                 runStart = runEnd;
                 continue;
             }
-            /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
+            /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
             const chunkSlice = {
                 dictionary: chunk.dictionary,
                 rowCount: runCount,
@@ -1801,6 +1853,7 @@ export class TermRecordOpfsStore {
                 scoreList: chunk.scoreList.slice(runStart, runEnd),
                 sequenceList: chunk.sequenceList.slice(runStart, runEnd),
                 termRecordPreinternedPlan: sliceTermRecordPreinternedPlan(chunk.termRecordPreinternedPlan ?? null, runStart, runCount),
+                resolvedContentReferences: sliceResolvedContentReferences(chunk, runStart, runEnd),
             };
             const metrics = await this._encodeAndAppendArtifactChunkForState(
                 state,
@@ -1891,7 +1944,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {TermRecordShardState} state
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
      * @param {number} firstId
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
@@ -1958,9 +2011,11 @@ export class TermRecordOpfsStore {
                             void 0
                     ),
                     fixedContentLength: chunk.fixedContentLength,
+                    resolvedContentReferences: sliceResolvedContentReferences(chunk, runStart, runEnd),
                 };
-            const runOffsets = isWholeChunk || hasFixedContentSpan(runChunk, runCount) ? contentOffsets : contentOffsets.slice(runStart, runEnd);
-            const runLengths = isWholeChunk || hasFixedContentSpan(runChunk, runCount) ? contentLengths : contentLengths.slice(runStart, runEnd);
+            const runUsesContentReferences = hasResolvedContentReferences(runChunk, runCount);
+            const runOffsets = isWholeChunk || hasFixedContentSpan(runChunk, runCount) || runUsesContentReferences ? contentOffsets : contentOffsets.slice(runStart, runEnd);
+            const runLengths = isWholeChunk || hasFixedContentSpan(runChunk, runCount) || runUsesContentReferences ? contentLengths : contentLengths.slice(runStart, runEnd);
             const preparedLookupIndex = preparedLookupIndexes?.get(`${runStart}:${runCount}`) ?? null;
             const runPlan = preparedLookupIndex?.preinternedPlan ?? compactTermRecordPreinternedPlan(
                 preinternedPlan,
@@ -4359,7 +4414,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]

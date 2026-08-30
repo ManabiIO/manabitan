@@ -2317,6 +2317,70 @@ describe('TermRecordOpfsStore', () => {
         expect(records.map(({entryContentOffset}) => entryContentOffset)).toStrictEqual(offsets);
     });
 
+    test('encodes duplicate rows directly from resolved unique content references', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Resolved unique content references';
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        await writerStore.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: dictionaryName,
+                rowCount: 3,
+                expressionBytesList: ['first', 'duplicate', 'far'].map((value) => textEncoder.encode(value)),
+                readingBytesList: ['first', 'duplicate', 'far'].map((value) => textEncoder.encode(value)),
+                readingEqualsExpressionList: new Uint8Array([1, 1, 1]),
+                scoreList: new Int32Array([1, 2, 3]),
+                sequenceList: new Int32Array([-1, -1, -1]),
+                resolvedContentReferences: {
+                    uniqueIndexList: new Uint32Array([0, 0, 1]),
+                    offsets: new Float64Array([16, 0x100000010]),
+                    lengths: new Uint32Array([7, 9]),
+                },
+            },
+            new Float64Array(0),
+            new Uint32Array(0),
+            'raw',
+        );
+        await writerStore._closeAllWritables();
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(true);
+        const records = [...Reflect.get(readerStore, '_recordsById').values()];
+        expect(records.map(({entryContentOffset}) => entryContentOffset)).toStrictEqual([16, 16, 0x100000010]);
+        expect(records.map(({entryContentLength}) => entryContentLength)).toStrictEqual([7, 7, 9]);
+    });
+
+    test('rejects unresolved content reference indexes', async () => {
+        const textEncoder = new TextEncoder();
+        const store = new TermRecordOpfsStore();
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
+
+        await expect(store.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: 'Invalid resolved content reference',
+                rowCount: 1,
+                expressionBytesList: [textEncoder.encode('invalid')],
+                readingBytesList: [textEncoder.encode('invalid')],
+                readingEqualsExpressionList: new Uint8Array([1]),
+                scoreList: new Int32Array([0]),
+                sequenceList: new Int32Array([-1]),
+                resolvedContentReferences: {
+                    uniqueIndexList: new Uint32Array([1]),
+                    offsets: new Float64Array([16]),
+                    lengths: new Uint32Array([7]),
+                },
+            },
+            new Float64Array(0),
+            new Uint32Array(0),
+            'raw',
+        )).rejects.toThrow('Invalid resolved term content reference index: 1');
+        expect(store.size).toBe(0);
+    });
+
     test('rejects unsafe content offsets instead of truncating them', async () => {
         const textEncoder = new TextEncoder();
         const store = new TermRecordOpfsStore();

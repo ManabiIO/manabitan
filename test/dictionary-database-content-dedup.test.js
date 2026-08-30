@@ -1460,6 +1460,29 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(harness.plan.resolvedLengths).toStrictEqual(new Uint32Array([0]));
     });
 
+    test('passes parser-owned resolved content references directly to record persistence', async () => {
+        const harness = createArtifactOverlapHarness();
+        Reflect.set(harness.plan, 'uniqueRowIndexes', new Uint32Array([0]));
+        Reflect.set(harness.chunk, 'contentRowStart', 0);
+        Reflect.set(harness.chunk, 'useResolvedContentReferences', true);
+        const importing = harness.run();
+
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        const [recordChunk, contentOffsets, contentLengths, contentDictName] = harness.appendRecords.mock.calls[0];
+        expect(contentOffsets).toStrictEqual(new Float64Array(0));
+        expect(contentLengths).toStrictEqual(new Uint32Array(0));
+        expect(contentDictName).toBe('raw-block-v2:jmdict');
+        expect(recordChunk.resolvedContentReferences).toEqual({
+            uniqueIndexList: harness.chunk.contentUniqueIndexList,
+            offsets: harness.plan.resolvedOffsets,
+            lengths: harness.plan.resolvedLengths,
+        });
+
+        harness.resolveContent();
+        harness.resolveRecords();
+        await importing;
+    });
+
     test('bounds persisted signatures for short slab content', async () => {
         const database = new DictionaryDatabase();
         const contentBytes = new Uint8Array([1, 2, 3]);

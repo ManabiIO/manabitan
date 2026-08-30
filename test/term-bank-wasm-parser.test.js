@@ -1480,6 +1480,7 @@ describe('term-bank WASM parser', () => {
         expect(chunk.contentDedupPlan?.uniqueRowIndexes).toStrictEqual(new Uint32Array([0]));
         expect(chunk.contentDedupPlan?.resolvedDictNames).toBeNull();
         expect(chunk.contentDedupPlan?.resolvedUniformDictName).toBeUndefined();
+        expect(chunk.useResolvedContentReferences).toBe(true);
         expect(chunk.contentMetaList[0]).toBe(chunk.contentMetaList[4]);
         expect(chunk.contentMetaList[0]).toBe(chunk.contentMetaList[8]);
         expect(chunk.contentMetaList[1]).toBe(chunk.contentMetaList[5]);
@@ -2268,6 +2269,7 @@ describe('term-bank WASM parser', () => {
         expect(chunk.contentMetaList[8]).toBeGreaterThan(chunk.contentMetaList[0]);
         expect(chunk.contentUniqueIndexList).toBeNull();
         expect(chunk.contentDedupPlan).toBeNull();
+        expect(chunk.useResolvedContentReferences).toBe(false);
     });
 
     maybeTest('emits compact token-binary content with strict round-trip decoding', async () => {

@@ -126,6 +126,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {Uint32Array} [contentMetaList]
  * @property {Uint32Array|null} [contentUniqueIndexList]
  * @property {ArtifactTermContentDedupPlan|null} [contentDedupPlan]
+ * @property {boolean} [useResolvedContentReferences]
  * @property {(string|null)[]|null} contentDictNameList
  * @property {string|null} [uniformContentDictName]
  */
@@ -212,6 +213,29 @@ function setResolvedTermContentPlanDictName(plan, uniqueIndex, value) {
     const promotedNames = new Array(plan.resolvedFlags.length).fill(uniform);
     promotedNames[uniqueIndex] = value;
     plan.resolvedDictNames = promotedNames;
+}
+
+/**
+ * Returns a scalar for the common single-codec case and projects only names
+ * when persisted content genuinely spans multiple codecs.
+ * @param {ArtifactTermContentDedupPlan} plan
+ * @param {Uint32Array} uniqueIndexList
+ * @param {number} count
+ * @returns {string|string[]}
+ */
+function resolveArtifactTermContentPlanDictNames(plan, uniqueIndexList, count) {
+    if (!Array.isArray(plan.resolvedDictNames)) {
+        return plan.resolvedUniformDictName ?? 'raw';
+    }
+    const result = new Array(count);
+    for (let i = 0; i < count; ++i) {
+        const uniqueIndex = uniqueIndexList[i];
+        if (uniqueIndex >= plan.resolvedFlags.length || plan.resolvedFlags[uniqueIndex] !== 1) {
+            throw new Error(`Artifact term content unique index ${uniqueIndex} was not published`);
+        }
+        result[i] = getResolvedTermContentPlanDictName(plan, uniqueIndex);
+    }
+    return result;
 }
 
 /**
@@ -6580,6 +6604,11 @@ export class DictionaryDatabase {
                 pendingPlanUniqueStart,
                 stagedContentMetadata: resolvedStagedContentMetadata,
             } = dedup;
+            const useResolvedContentReferences = (
+                chunk.useResolvedContentReferences === true &&
+                contentDedupPlan !== null &&
+                chunk.contentUniqueIndexList instanceof Uint32Array
+            );
             stagedContentMetadata = resolvedStagedContentMetadata ?? null;
             let {resolvedContentDictNames} = dedup;
             importMetrics.dedupPendingHitCount += pendingHitCount;
@@ -6708,6 +6737,7 @@ export class DictionaryDatabase {
                         stagedContentMetadata,
                         importMetrics,
                         metadataValidated: persistenceResult[VALIDATED_TERM_CONTENT_METADATA] === true,
+                        useResolvedContentReferences,
                     });
                     const contentMetadataPublishMs = safePerformance.now() - tContentMetadataStart;
                     importMetrics.contentMetadataPublishMs += contentMetadataPublishMs;
@@ -6719,7 +6749,12 @@ export class DictionaryDatabase {
                             contentCompletedAt = safePerformance.now();
                             return blockProfile;
                         });
-                        const recordChunk = preparedLookupIndexes === null ? chunk : {...chunk, preparedLookupIndexes};
+                        const recordChunk = this._createResolvedArtifactTermRecordChunk(
+                            chunk,
+                            preparedLookupIndexes,
+                            contentDedupPlan,
+                            useResolvedContentReferences,
+                        );
                         resolvedContentDictNames = this._compactUniformContentDictNames(resolvedContentDictNames);
                         pendingRecordAppend = this._appendResolvedArtifactTermRecords(
                             recordChunk,
@@ -6773,7 +6808,12 @@ export class DictionaryDatabase {
             if (!recordAppended) {
                 resolvedContentDictNames = this._compactUniformContentDictNames(resolvedContentDictNames);
                 importMetrics.contentAppendMs += safePerformance.now() - tContentAppendStart;
-                const recordChunk = preparedLookupIndexes === null ? chunk : {...chunk, preparedLookupIndexes};
+                const recordChunk = this._createResolvedArtifactTermRecordChunk(
+                    chunk,
+                    preparedLookupIndexes,
+                    contentDedupPlan,
+                    useResolvedContentReferences,
+                );
                 await this._appendResolvedArtifactTermRecords(
                     recordChunk,
                     contentOffsets,
@@ -6849,8 +6889,6 @@ export class DictionaryDatabase {
         }
         const explicitContentDictNames = Array.isArray(chunk.contentDictNameList) ? chunk.contentDictNameList : null;
         const uniformContentDictName = typeof chunk.uniformContentDictName !== 'undefined' ? (chunk.uniformContentDictName ?? null) : null;
-        const contentOffsets = new Float64Array(count);
-        const contentLengths = new Uint32Array(count);
         const uniqueIndexList = chunk.contentUniqueIndexList instanceof Uint32Array &&
             chunk.contentUniqueIndexList.length >= count ?
             chunk.contentUniqueIndexList :
@@ -6872,6 +6910,9 @@ export class DictionaryDatabase {
             candidateDedupPlan.pendingEpochs instanceof Uint32Array &&
             candidateDedupPlan.pendingIndexes instanceof Uint32Array
         ) ? /** @type {ArtifactTermContentDedupPlan} */ (candidateDedupPlan) : null;
+        const useResolvedContentReferences = chunk.useResolvedContentReferences === true && contentDedupPlan !== null;
+        const contentOffsets = new Float64Array(useResolvedContentReferences ? 0 : count);
+        const contentLengths = new Uint32Array(useResolvedContentReferences ? 0 : count);
         let pendingPlanEpoch = 0;
         let persistedLookupRequired = true;
         if (contentDedupPlan !== null) {
@@ -6909,7 +6950,12 @@ export class DictionaryDatabase {
             resolvedContentDictNames = values;
             return values;
         };
-        if (contentDedupPlan !== null && uniqueIndexList !== null && !persistedLookupRequired) {
+        if (
+            contentDedupPlan !== null &&
+            uniqueIndexList !== null &&
+            !persistedLookupRequired &&
+            !useResolvedContentReferences
+        ) {
             const useContentSpans = useContentSlab;
             const pendingSpanOffsets = useContentSpans ?
                 getOrCreateTermContentPlanScratch(contentDedupPlan, 'pendingSpanOffsetsScratch', count) :
@@ -7061,7 +7107,7 @@ export class DictionaryDatabase {
         if (
             contentDedupPlan !== null &&
             uniqueIndexList !== null &&
-            persistedLookupRequired &&
+            (persistedLookupRequired || useResolvedContentReferences) &&
             useContentSlab &&
             uniqueRowIndexes instanceof Uint32Array &&
             uniqueRowIndexes.length === contentDedupPlan.resolvedFlags.length &&
@@ -7125,7 +7171,9 @@ export class DictionaryDatabase {
                     ) {
                         throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
                     }
-                    const existingIndex = this._findTermEntryContentMetaHashPairIndex(hash1, hash2);
+                    const existingIndex = persistedLookupRequired ?
+                        this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
+                        -1;
                     if (
                         existingIndex >= 0 &&
                         this._termEntryContentMetaLengthTable[existingIndex] === contentLength &&
@@ -7201,7 +7249,7 @@ export class DictionaryDatabase {
             // Pending rows force a later whole-chunk projection after their
             // persisted offsets arrive, so projecting resolved hits now would
             // only traverse the same rows twice.
-            if (pendingContentCount === 0) {
+            if (pendingContentCount === 0 && !useResolvedContentReferences) {
                 for (let rowIndex = 0; rowIndex < count; ++rowIndex) {
                     const uniqueIndex = uniqueIndexList[rowIndex];
                     if (uniqueIndex >= contentDedupPlan.resolvedFlags.length) {
@@ -7217,6 +7265,13 @@ export class DictionaryDatabase {
                         ensureResolvedContentDictNamesArray(rowIndex)[rowIndex] = existingDictName;
                     }
                 }
+            }
+            if (useResolvedContentReferences && pendingContentCount === 0) {
+                resolvedContentDictNames = resolveArtifactTermContentPlanDictNames(
+                    contentDedupPlan,
+                    uniqueIndexList,
+                    count,
+                );
             }
             if (pendingHitCount < 0) { pendingHitCount = 0; }
             return {
@@ -7635,7 +7690,7 @@ export class DictionaryDatabase {
 
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean}} state
+     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
      * @returns {string|(string|null)[]}
      * @throws {Error} If dedup projections or persisted metadata are invalid.
      */
@@ -7657,6 +7712,7 @@ export class DictionaryDatabase {
             stagedContentMetadata = null,
             importMetrics = null,
             metadataValidated = false,
+            useResolvedContentReferences = false,
         } = state;
         let {resolvedContentDictNames} = state;
         const ensureResolvedContentDictNamesArray = (fillUntil) => {
@@ -7675,18 +7731,26 @@ export class DictionaryDatabase {
             ) {
                 throw new Error('Artifact term content dedupe plan projection is unavailable');
             }
-            for (let i = 0; i < count; ++i) {
-                const uniqueIndex = contentUniqueIndexList[i];
-                if (contentDedupPlan.resolvedFlags[uniqueIndex] !== 1) {
-                    throw new Error(`Artifact term content unique index ${uniqueIndex} was not published`);
-                }
-                contentOffsets[i] = contentDedupPlan.resolvedOffsets[uniqueIndex];
-                contentLengths[i] = contentDedupPlan.resolvedLengths[uniqueIndex];
-                const resolvedContentDictName = getResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex);
-                if (Array.isArray(resolvedContentDictNames)) {
-                    resolvedContentDictNames[i] = resolvedContentDictName;
-                } else if (resolvedContentDictName !== resolvedContentDictNames) {
-                    ensureResolvedContentDictNamesArray(i)[i] = resolvedContentDictName;
+            if (useResolvedContentReferences) {
+                resolvedContentDictNames = resolveArtifactTermContentPlanDictNames(
+                    contentDedupPlan,
+                    contentUniqueIndexList,
+                    count,
+                );
+            } else {
+                for (let i = 0; i < count; ++i) {
+                    const uniqueIndex = contentUniqueIndexList[i];
+                    if (contentDedupPlan.resolvedFlags[uniqueIndex] !== 1) {
+                        throw new Error(`Artifact term content unique index ${uniqueIndex} was not published`);
+                    }
+                    contentOffsets[i] = contentDedupPlan.resolvedOffsets[uniqueIndex];
+                    contentLengths[i] = contentDedupPlan.resolvedLengths[uniqueIndex];
+                    const resolvedContentDictName = getResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex);
+                    if (Array.isArray(resolvedContentDictNames)) {
+                        resolvedContentDictNames[i] = resolvedContentDictName;
+                    } else if (resolvedContentDictName !== resolvedContentDictNames) {
+                        ensureResolvedContentDictNamesArray(i)[i] = resolvedContentDictName;
+                    }
                 }
             }
         } else {
@@ -7802,6 +7866,40 @@ export class DictionaryDatabase {
             if (contentDictNames[i] !== first) { return contentDictNames; }
         }
         return first;
+    }
+
+    /**
+     * Keeps parser-owned row-to-unique references intact so record encoding can
+     * consume resolved offsets without a separate row-level projection.
+     * @param {import('core').SafeAny} chunk
+     * @param {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|null} preparedLookupIndexes
+     * @param {ArtifactTermContentDedupPlan|null} contentDedupPlan
+     * @param {boolean} useResolvedContentReferences
+     * @returns {import('core').SafeAny}
+     */
+    _createResolvedArtifactTermRecordChunk(
+        chunk,
+        preparedLookupIndexes,
+        contentDedupPlan,
+        useResolvedContentReferences,
+    ) {
+        /** @type {import('core').SafeAny} */
+        const additions = {};
+        if (preparedLookupIndexes !== null) {
+            additions.preparedLookupIndexes = preparedLookupIndexes;
+        }
+        if (
+            useResolvedContentReferences &&
+            contentDedupPlan !== null &&
+            chunk.contentUniqueIndexList instanceof Uint32Array
+        ) {
+            additions.resolvedContentReferences = {
+                uniqueIndexList: chunk.contentUniqueIndexList,
+                offsets: contentDedupPlan.resolvedOffsets,
+                lengths: contentDedupPlan.resolvedLengths,
+            };
+        }
+        return Object.keys(additions).length === 0 ? chunk : {...chunk, ...additions};
     }
 
     /**
