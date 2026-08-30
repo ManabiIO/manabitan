@@ -1755,6 +1755,14 @@ async function getImportWaitState(page) {
     });
 }
 
+async function markCurrentImportCompletionObserved(page) {
+    const state = await getImportWaitState(page);
+    const completionEpochMs = Number(state.completion?.completedAtEpochMs ?? 0);
+    if (Number.isFinite(completionEpochMs) && completionEpochMs > lastObservedImportCompletionEpochMs) {
+        lastObservedImportCompletionEpochMs = completionEpochMs;
+    }
+}
+
 async function waitForSettingsPageReady(page, timeoutMs = 30000) {
     await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: timeoutMs});
     const deadline = safePerformance.now() + timeoutMs;
@@ -3500,10 +3508,13 @@ async function main() {
                     );
                 });
             });
-            const importTotalEnd = safePerformance.now();
             const importDebug = await getLastImportDebug(page);
             const importDebugHistory = await getImportDebugHistory(page);
             const importStepTimingHistory = await getImportStepTimingHistory(page);
+            // Keep the visible boundary honest if the browser has signalled UI
+            // completion but its main thread is still unable to serve the exact
+            // completed import snapshot under load.
+            const importTotalEnd = safePerformance.now();
             const importStepTimingSummary = summarizeImportStepTimingHistory(importStepTimingHistory);
             const importStep4Breakdown = summarizeImportStep4Breakdown(importDebugHistory);
             await addReportPhase(
@@ -3520,6 +3531,7 @@ async function main() {
         };
 
         const jmdictImportTriggerStart = safePerformance.now();
+        await markCurrentImportCompletionObserved(page);
         const jmdictImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
             await page.setInputFiles('#dictionary-import-file-input', [cachedDictionaries.jmdictPath]);
         });
@@ -3762,6 +3774,7 @@ async function main() {
 
         if (!focusedUpdateOnlyMode) {
             const jitendexImportTriggerStart = safePerformance.now();
+            await markCurrentImportCompletionObserved(page);
             const jitendexImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
                 await page.setInputFiles('#dictionary-import-file-input', [cachedDictionaries.jitendexPath]);
             });
@@ -4100,6 +4113,7 @@ async function main() {
 
         if (!skipUpdateAndBatchBeforeHover) {
         const updateTriggerStart = safePerformance.now();
+        await markCurrentImportCompletionObserved(page);
         const updateTriggerProfile = await runPhaseProfile(cdpSession, async () => {
             return await triggerDictionaryUpdate(page, resolvedJmdictTitle, `${localServer.baseUrl}/dictionaries/jmdict-slow.zip`);
         });
@@ -4548,6 +4562,7 @@ async function main() {
             const multiImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
                 await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
                 await waitForSettingsPageReady(page);
+                await markCurrentImportCompletionObserved(page);
                 await page.setInputFiles('#dictionary-import-file-input', [
                     cachedDictionaries.jmdictPath,
                     cachedDictionaries.jmnedictPath,

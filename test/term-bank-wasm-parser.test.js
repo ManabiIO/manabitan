@@ -34,10 +34,12 @@ import {
     parseTermBankWithWasmChunks,
     parseTermBankWithWasmColumnChunks,
     parseTermBankWithWasmColumnChunksParallel,
+    parseTermBankWithWasmColumnChunksParallelCompressedLazy,
     parseTermBankWithWasmColumnChunksParallelDeferred,
     parseTermBankWithWasmColumnChunksParallelLazy,
     prewarmParallelTermBankParser,
     TermBankWasmResourceError,
+    validateTermBankSourceCrc32,
 } from '../ext/js/dictionary/term-bank-wasm-parser.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
@@ -137,6 +139,28 @@ describe('term-bank WASM parser', () => {
 
     afterAll(() => {
         vi.unstubAllGlobals();
+    });
+
+    maybeTest('validates independent ZIP CRC32 vectors with one reusable scratch buffer', async () => {
+        await expect(validateTermBankSourceCrc32([
+            new Uint8Array(0),
+            textEncoder.encode('123456789'),
+        ], [0, 0xcbf43926])).resolves.toBeUndefined();
+    });
+
+    maybeTest('rejects ZIP CRC32 mismatches and malformed metadata', async () => {
+        await expect(validateTermBankSourceCrc32(
+            [textEncoder.encode('123456789')],
+            [0xcbf43927],
+        )).rejects.toThrow('CRC32 mismatch at source 1');
+        await expect(validateTermBankSourceCrc32(
+            [textEncoder.encode('123456789')],
+            [],
+        )).rejects.toThrow('metadata length mismatch');
+        await expect(validateTermBankSourceCrc32(
+            [textEncoder.encode('123456789')],
+            [-1],
+        )).rejects.toThrow('signature is invalid');
     });
 
     test('copies every WASM-backed column before a parser heap can be reused', () => {
@@ -1168,6 +1192,79 @@ describe('term-bank WASM parser', () => {
             expect(loadCount).toBe(sourceCount);
         } finally {
             releaseSink();
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest('transfers compressed source metadata and compressed bytes to parser workers', async () => {
+        const parseMessages = [];
+        class SuccessfulWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    parseMessages.push(message);
+                    emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: message.id,
+                        rowCount: 1,
+                        resultSentEpochMs: Date.now(),
+                        chunk: {rowCount: 1},
+                        profile: {chunkDispatchMs: 0},
+                    });
+                });
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('Worker', SuccessfulWorker);
+        try {
+            const sourceCount = 4;
+            const sinks = [];
+            await expect(parseTermBankWithWasmColumnChunksParallelCompressedLazy(
+                Array.from({length: sourceCount}, (_, index) => async () => ({
+                    bytes: new Uint8Array([index + 1]),
+                    compressionMethod: 8,
+                    compressedSize: 1,
+                    uncompressedSize: 16,
+                    signature: index,
+                    filename: `term_bank_${index + 1}.json`,
+                })),
+                Array.from({length: sourceCount}, () => 16),
+                3,
+                (_chunk, progress) => { sinks.push(progress.chunkIndex); },
+                {emitContentSlab: true},
+            )).resolves.toBe(true);
+            expect(parseMessages).toHaveLength(sourceCount);
+            expect(parseMessages.flatMap(({sourceBuffers}) => sourceBuffers.map((buffer) => buffer.byteLength))).toStrictEqual([1, 1, 1, 1]);
+            expect(parseMessages.flatMap(({sourceMetadata}) => sourceMetadata)).toStrictEqual(
+                Array.from({length: sourceCount}, (_, index) => ({
+                    compressionMethod: 8,
+                    compressedSize: 1,
+                    uncompressedSize: 16,
+                    signature: index,
+                    filename: `term_bank_${index + 1}.json`,
+                })),
+            );
+            expect(sinks).toStrictEqual([1, 2, 3, 4]);
+        } finally {
             await disposeParallelTermBankParser();
             vi.stubGlobal('Worker', void 0);
         }

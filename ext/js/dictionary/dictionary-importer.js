@@ -55,6 +55,7 @@ import {
     parseTermBankWithWasmColumnChunks,
     parseTermBankWithWasmColumnChunksOverlapped,
     parseTermBankWithWasmColumnChunksParallel,
+    parseTermBankWithWasmColumnChunksParallelCompressedLazy,
     parseTermBankWithWasmColumnChunksParallelDeferred,
     parseTermBankWithWasmColumnChunksParallelLazy,
     prewarmParallelTermBankParser,
@@ -587,6 +588,7 @@ export class DictionaryImporter {
         let zipMaxWorkers = requestedZipMaxWorkers ?? DEFAULT_ZIP_MAX_WORKERS;
         const zipChunkSize = Number.isFinite(details.zipChunkSize) ? Math.max(16 * 1024, Math.min(8 * 1024 * 1024, Math.trunc(/** @type {number} */ (details.zipChunkSize)))) : null;
         const requestedZipUseWebWorkers = typeof details.zipUseWebWorkers === 'boolean' ? details.zipUseWebWorkers : null;
+        const fusedZipParserInflate = details.fusedZipParserInflate === true;
         this._zipUseWebWorkers = requestedZipUseWebWorkers ?? true;
         const archiveSizeBytes = archiveContent instanceof Blob ? archiveContent.size : archiveContent?.byteLength;
         const autoZipMaxWorkersForLargeArchive = (
@@ -1073,6 +1075,16 @@ export class DictionaryImporter {
             archiveReader,
             disposeParser: disposeParallelTermBankParser,
         });
+        /** @type {{readCompressed?: (termFile: import('@zip.js/zip.js').Entry|{filename: string}, signal: AbortSignal) => Promise<Uint8Array>}} */
+        const compressedSourceOptions = {};
+        if (fusedZipParserInflate) {
+            compressedSourceOptions.readCompressed = async (termFile, signal) => await this._getData(
+                /** @type {import('@zip.js/zip.js').Entry} */ (termFile),
+                new Uint8ArrayWriter(),
+                signal,
+                {passThrough: true, useWebWorkers: false},
+            );
+        }
         const termBankSourcePipeline = new TermBankSourcePipeline({
             termFiles: activeTermFiles,
             enabled: !this._disableTermBankWasmFastPath && !useTermArtifactFiles && !usePackedTermArtifact,
@@ -1081,7 +1093,9 @@ export class DictionaryImporter {
                 new Uint8ArrayWriter(),
                 signal,
             ),
+            ...compressedSourceOptions,
         });
+        const compressedImportRunPlan = fusedZipParserInflate ? termBankSourcePipeline.createCompressedImportRunPlan(0) : null;
         const zipWorkerPolicy = this._selectSourceZipWorkerPolicy(
             termBankSourcePipeline,
             activeTermFiles,
@@ -1100,7 +1114,9 @@ export class DictionaryImporter {
         try {
             // Start the bounded first read before transaction and media setup so
             // ZIP worker startup is not paid on the term-processing critical path.
-            initialSourcePrefetch = termBankSourcePipeline.prefetchNext(0);
+            if (compressedImportRunPlan === null) {
+                initialSourcePrefetch = termBankSourcePipeline.prefetchNext(0);
+            }
             if (packedTermArtifactBytes !== null && usePrunedArtifactAuxFastPath && (!preserveCompressedMedia || this._skipImageMetadata)) {
                 const stylesFile = fileMap.get('styles.css');
                 if (typeof stylesFile !== 'undefined') {
@@ -1716,13 +1732,22 @@ export class DictionaryImporter {
                 } else if (!this._disableTermBankWasmFastPath) {
                     try {
                         const termFileEntry = /** @type {import('@zip.js/zip.js').Entry} */ (termFile);
-                        const importRunPlan = importWideSourceRunEnabled ? termBankSourcePipeline.createImportRunPlan(termFileIndex) : null;
+                        const compressedRunPlan = importWideSourceRunEnabled && termFileIndex === 0 ? compressedImportRunPlan : null;
+                        const normalImportRunPlan = compressedRunPlan === null && importWideSourceRunEnabled ? termBankSourcePipeline.createImportRunPlan(termFileIndex) : null;
+                        const importRunPlan = compressedRunPlan ?? normalImportRunPlan;
                         const usedImportWideSourceRun = importRunPlan !== null;
                         let sourceTermFileBatch = importRunPlan?.files ?? (termBankSourcePipeline.canPrefetch(termFile) ? termBankSourcePipeline.getBatch(termFileIndex) : []);
                         let tSourceArchiveReadStart = Date.now();
-                        let preloadedTermFileBytes = importRunPlan === null ?
-                            (termBankSourcePipeline.canPrefetch(termFile) ? await termBankSourcePipeline.readBatch(sourceTermFileBatch) : null) :
-                            {loaders: importRunPlan.loaders, estimatedByteLengths: importRunPlan.estimatedByteLengths};
+                        let preloadedTermFileBytes;
+                        if (importRunPlan === null) {
+                            preloadedTermFileBytes = termBankSourcePipeline.canPrefetch(termFile) ? await termBankSourcePipeline.readBatch(sourceTermFileBatch) : null;
+                        } else if (compressedRunPlan !== null) {
+                            preloadedTermFileBytes = {compressedLoaders: compressedRunPlan.loaders, estimatedByteLengths: compressedRunPlan.estimatedByteLengths};
+                        } else if (normalImportRunPlan !== null) {
+                            preloadedTermFileBytes = {loaders: normalImportRunPlan.loaders, estimatedByteLengths: normalImportRunPlan.estimatedByteLengths};
+                        } else {
+                            throw new Error('Term-bank source run plan is inconsistent');
+                        }
                         sourceArchiveReadMs += Math.max(0, Date.now() - tSourceArchiveReadStart);
                         if (preloadedTermFileBytes === null) {
                             sourceTermFileBatch = [termFile];
@@ -1826,6 +1851,8 @@ export class DictionaryImporter {
                             parserSourcePreparationMs: parserProfile.sourcePreparationMs ?? null,
                             parserSourceDeliveryMs: parserProfile.sourceDeliveryMs ?? null,
                             parserSourceTransferredBytes: parserProfile.sourceTransferredBytes ?? null,
+                            parserSourceInflateMs: parserProfile.sourceInflateMs ?? null,
+                            parserSourceCrc32Ms: parserProfile.sourceCrc32Ms ?? null,
                             parserResultCopyMs: parserProfile.resultCopyMs ?? null,
                             parserResultDeliveryMs: parserProfile.resultDeliveryMs ?? null,
                             parserOrderedSinkWaitMs: parserProfile.orderedSinkWaitMs ?? null,
@@ -3608,7 +3635,7 @@ export class DictionaryImporter {
      * @param {boolean} enableTermEntryContentDedup
      * @param {'baseline'|'raw-bytes'} termContentStorageMode
      * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} [onChunk]
-     * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|{promises: Promise<Uint8Array>[], estimatedByteLengths: number[]}|{loaders: Array<() => Promise<Uint8Array>>, estimatedByteLengths: number[]}|null} [preloadedBytes]
+     * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|{promises: Promise<Uint8Array>[], estimatedByteLengths: number[]}|{loaders: Array<() => Promise<Uint8Array>>, estimatedByteLengths: number[]}|{compressedLoaders: Array<() => Promise<{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[]}|null} [preloadedBytes]
      * @param {number|null} [wasmRowChunkSizeOverride]
      * @returns {Promise<{termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null}>}
      */
@@ -3618,6 +3645,8 @@ export class DictionaryImporter {
         let deferredSourceBatch = null;
         /** @type {{loaders: Array<() => Promise<Uint8Array>>, estimatedByteLengths: number[]}|null} */
         let lazySourceBatch = null;
+        /** @type {{compressedLoaders: Array<() => Promise<{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[]}|null} */
+        let compressedLazySourceBatch = null;
         if (
             typeof preloadedBytes === 'object' &&
             preloadedBytes !== null &&
@@ -3634,10 +3663,18 @@ export class DictionaryImporter {
             'estimatedByteLengths' in preloadedBytes
         ) {
             lazySourceBatch = preloadedBytes;
+        } else if (
+            typeof preloadedBytes === 'object' &&
+            preloadedBytes !== null &&
+            !Array.isArray(preloadedBytes) &&
+            'compressedLoaders' in preloadedBytes &&
+            'estimatedByteLengths' in preloadedBytes
+        ) {
+            compressedLazySourceBatch = preloadedBytes;
         }
         /** @type {Uint8Array|Uint8Array[]|null} */
         let bytes = null;
-        if (deferredSourceBatch === null && lazySourceBatch === null) {
+        if (deferredSourceBatch === null && lazySourceBatch === null && compressedLazySourceBatch === null) {
             bytes = /** @type {Uint8Array|Uint8Array[]} */ (
                 preloadedBytes !== null ? await preloadedBytes : await this._getData(termFile, new Uint8ArrayWriter())
             );
@@ -3649,7 +3686,7 @@ export class DictionaryImporter {
         }
         const totalSourceBytes = sourceByteArrays !== null ?
             sourceByteArrays.reduce((sum, sourceBytes) => sum + sourceBytes.byteLength, 0) :
-            (deferredSourceBatch?.estimatedByteLengths ?? lazySourceBatch?.estimatedByteLengths ?? []).reduce((sum, length) => sum + length, 0);
+            (deferredSourceBatch?.estimatedByteLengths ?? lazySourceBatch?.estimatedByteLengths ?? compressedLazySourceBatch?.estimatedByteLengths ?? []).reduce((sum, length) => sum + length, 0);
         let wasmRowChunkSize = this._termBankWasmRowChunkSize;
         if (this._adaptiveTermBankWasmRowChunkSizeTiered) {
             if (
@@ -3948,7 +3985,16 @@ export class DictionaryImporter {
             const parseTermBankChunks = useDirectArtifactChunkImport ? parseTermBankWithWasmColumnChunks : parseTermBankWithWasmChunks;
             let usedParallelParser = false;
             if (useDirectArtifactChunkImport && (!useMediaPipeline || useMediaDirectArtifactChunkImport)) {
-                if (lazySourceBatch !== null) {
+                if (compressedLazySourceBatch !== null) {
+                    usedParallelParser = await parseTermBankWithWasmColumnChunksParallelCompressedLazy(
+                        compressedLazySourceBatch.compressedLoaders,
+                        compressedLazySourceBatch.estimatedByteLengths,
+                        version,
+                        handleParsedChunk,
+                        parserOptions,
+                        () => this._isCancelled(),
+                    );
+                } else if (lazySourceBatch !== null) {
                     usedParallelParser = await parseTermBankWithWasmColumnChunksParallelLazy(
                         lazySourceBatch.loaders,
                         lazySourceBatch.estimatedByteLengths,
@@ -3977,7 +4023,7 @@ export class DictionaryImporter {
                 }
             }
             const parallelParserSkipReason = usedParallelParser ? null : consumeLastParallelParserSkipReason();
-            if (!usedParallelParser && lazySourceBatch !== null) {
+            if (!usedParallelParser && (lazySourceBatch !== null || compressedLazySourceBatch !== null)) {
                 throw new Error(`Import-wide parallel parser unavailable (${parallelParserSkipReason ?? 'unknown'})`);
             }
             if (!usedParallelParser && deferredSourceBatch !== null) {
@@ -4874,9 +4920,10 @@ null;
      * @param {ImportFileEntry} entry
      * @param {import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter} writer
      * @param {AbortSignal} [signal]
+     * @param {import('@zip.js/zip.js').EntryGetDataOptions} [options]
      * @returns {Promise<T>}
      */
-    async _getData(entry, writer, signal) {
+    async _getData(entry, writer, signal, options = {}) {
         signal?.throwIfAborted();
         const entryBytes = /** @type {unknown} */ (Reflect.get(entry, 'bytes'));
         const bytes = entryBytes instanceof Uint8Array ? entryBytes : void 0;
@@ -4899,6 +4946,7 @@ null;
         const getData = /** @type {(writer: import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter, options?: import('@zip.js/zip.js').EntryGetDataOptions) => Promise<T>} */ (entryGetData);
         return await getData.call(entry, writer, {
             useWebWorkers: this._zipUseWebWorkers,
+            ...options,
             ...(typeof signal === 'undefined' ? {} : {signal}),
         });
     }

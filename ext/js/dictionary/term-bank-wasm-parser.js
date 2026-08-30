@@ -50,8 +50,10 @@ const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
+/** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}} CompressedTermBankSource */
+/** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_crc32: (dataPtr: number, length: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
 /** @typedef {{wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
@@ -63,7 +65,7 @@ let suppliedWasmModule = null;
 const textDecoder = new TextDecoder();
 /** @type {TextEncoder} */
 const textEncoder = new TextEncoder();
-/** @type {{bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number}|null} */
+/** @type {{bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCrc32Ms?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number}|null} */
 let lastTermBankWasmParseProfile = null;
 /** @type {string|null} */
 let lastParallelParserSkipReason = null;
@@ -118,6 +120,7 @@ async function getWasm() {
             !(exports.memory instanceof WebAssembly.Memory) ||
             typeof exports.wasm_reset_heap !== 'function' ||
             typeof exports.wasm_alloc !== 'function' ||
+            typeof exports.wasm_crc32 !== 'function' ||
             typeof exports.wasm_get_last_parse_capacity !== 'function' ||
             typeof exports.wasm_get_last_content_capacity !== 'function' ||
             typeof exports.parse_term_bank !== 'function' ||
@@ -136,6 +139,7 @@ async function getWasm() {
             memory: exports.memory,
             wasm_reset_heap: exports.wasm_reset_heap,
             wasm_alloc: exports.wasm_alloc,
+            wasm_crc32: exports.wasm_crc32,
             wasm_get_last_parse_capacity: exports.wasm_get_last_parse_capacity,
             wasm_get_last_content_capacity: exports.wasm_get_last_content_capacity,
             parse_term_bank: exports.parse_term_bank,
@@ -149,6 +153,45 @@ async function getWasm() {
             encode_term_content_token_binary_dedup: exports.encode_term_content_token_binary_dedup,
         });
     });
+}
+
+/**
+ * Validates ZIP CRC32 signatures while reusing one WASM scratch allocation.
+ * @param {Uint8Array[]} sources
+ * @param {number[]} expectedSignatures
+ * @throws {Error} If metadata or a source signature is invalid.
+ */
+export async function validateTermBankSourceCrc32(sources, expectedSignatures) {
+    if (sources.length !== expectedSignatures.length) {
+        throw new Error('Term-bank source CRC metadata length mismatch');
+    }
+    let maxLength = 0;
+    for (let i = 0; i < sources.length; ++i) {
+        const source = sources[i];
+        const expected = expectedSignatures[i];
+        if (!(source instanceof Uint8Array) || source.byteLength > MAX_WASM32_BUFFER_BYTES) {
+            throw new TypeError('Term-bank CRC source is invalid');
+        }
+        if (!Number.isInteger(expected) || expected < 0 || expected > 0xffffffff) {
+            throw new TypeError('Term-bank CRC signature is invalid');
+        }
+        maxLength = Math.max(maxLength, source.byteLength);
+    }
+    const wasm = await getWasm();
+    wasm.wasm_reset_heap();
+    const scratchPtr = maxLength === 0 ? 0 : wasm.wasm_alloc(maxLength);
+    if (maxLength > 0 && scratchPtr === 0) {
+        throw new TermBankWasmResourceError('Failed to allocate term-bank CRC scratch buffer');
+    }
+    const heap = new Uint8Array(wasm.memory.buffer);
+    for (let i = 0; i < sources.length; ++i) {
+        const source = sources[i];
+        if (source.byteLength > 0) { heap.set(source, scratchPtr); }
+        const actual = wasm.wasm_crc32(scratchPtr, source.byteLength) >>> 0;
+        if (actual !== (expectedSignatures[i] >>> 0)) {
+            throw new Error(`Term-bank ZIP CRC32 mismatch at source ${i + 1}`);
+        }
+    }
 }
 
 /** @returns {Promise<void>} */
@@ -2045,13 +2088,17 @@ class ParallelTermBankPipelineRun {
                     sourceGroup.map((source) => loadParallelTermBankSource(source)),
                     () => this._pipelineShouldCancel(),
                 );
-                if (!group.every((bytes) => getJsonArrayContentSpan(bytes) !== null)) {
+                if (!group.every((source) => (
+                    source instanceof Uint8Array ?
+                        getJsonArrayContentSpan(source) !== null :
+                        isCompressedTermBankSource(source)
+                ))) {
                     throw new Error('Expected every deferred term-bank source to contain a JSON array');
                 }
                 // Capture this before postMessage transfers and detaches the
                 // source buffers. The byte ratio estimates total rows until
                 // every parallel group has reported its exact row count.
-                const sourceBytes = sumByteLengths(group);
+                const sourceBytes = sumParallelSourceByteLengths(group);
                 const result = await runParallelParserJob(
                     worker,
                     groupIndex + 1,
@@ -2246,6 +2293,31 @@ export async function parseTermBankWithWasmColumnChunksParallelLazy(contentByteL
 }
 
 /**
+ * Transfers compressed ZIP entry payloads into parser workers, where native
+ * raw DEFLATE, exact-size validation, and ZIP CRC32 validation happen before
+ * parsing or ordered sink publication.
+ * @param {Array<() => Promise<CompressedTermBankSource>>} sourceLoaders
+ * @param {number[]} estimatedByteLengths
+ * @param {number} version
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {() => boolean} [shouldCancel]
+ * @returns {Promise<boolean>}
+ */
+export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(sourceLoaders, estimatedByteLengths, version, onChunk, options = {}, shouldCancel = () => false) {
+    if (sourceLoaders.length !== estimatedByteLengths.length) {
+        throw new Error('Compressed lazy term-bank source metadata length mismatch');
+    }
+    const sources = sourceLoaders.map((load, index) => ({
+        promise: null,
+        load,
+        estimatedBytes: estimatedByteLengths[index],
+        resolvedAt: 0,
+    }));
+    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, true);
+}
+
+/**
  * @param {ParallelTermBankSource[]} sources
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
@@ -2324,12 +2396,12 @@ async function parseTermBankWithWasmColumnChunksParallelSources(sources, version
     return await run.run();
 }
 
-/** @typedef {{promise: Promise<Uint8Array>|null, load: (() => Promise<Uint8Array>)|null, estimatedBytes: number, resolvedAt: number}} ParallelTermBankSource */
+/** @typedef {{promise: Promise<ParallelTermBankSourceValue>|null, load: (() => Promise<ParallelTermBankSourceValue>)|null, estimatedBytes: number, resolvedAt: number}} ParallelTermBankSource */
 
 /**
  * @param {ParallelTermBankSource} source
- * @param {Promise<Uint8Array>} promise
- * @returns {Promise<Uint8Array>}
+ * @param {Promise<ParallelTermBankSourceValue>} promise
+ * @returns {Promise<ParallelTermBankSourceValue>}
  */
 function observeParallelTermBankSourcePromise(source, promise) {
     const observed = promise.then((bytes) => {
@@ -2342,7 +2414,7 @@ function observeParallelTermBankSourcePromise(source, promise) {
 
 /**
  * @param {ParallelTermBankSource} source
- * @returns {Promise<Uint8Array>}
+ * @returns {Promise<ParallelTermBankSourceValue>}
  */
 function loadParallelTermBankSource(source) {
     if (source.promise === null) {
@@ -2517,19 +2589,23 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
 /**
  * @param {Worker} worker
  * @param {number} id
- * @param {Uint8Array[]} sourceBytes
+ * @param {ParallelTermBankSourceValue[]} sources
  * @param {number} version
  * @param {Record<string, unknown>} options
  * @param {() => boolean} shouldCancel
  * @returns {Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, borrowsWorkerMemory: boolean}>}
  */
-function runParallelParserJob(worker, id, sourceBytes, version, options, shouldCancel) {
+function runParallelParserJob(worker, id, sources, version, options, shouldCancel) {
     return new Promise((resolve, reject) => {
         const sourcePreparationStart = safePerformance.now();
         const sourceBuffers = [];
+        /** @type {Array<{compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>} */
+        const sourceMetadata = [];
         const seenBuffers = new Set();
         let sourceTransferredBytes = 0;
-        for (const bytes of sourceBytes) {
+        let hasCompressedSources = false;
+        for (const source of sources) {
+            const bytes = source instanceof Uint8Array ? source : source.bytes;
             let buffer = bytes.buffer;
             if (
                 !(buffer instanceof ArrayBuffer) ||
@@ -2542,6 +2618,23 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
             seenBuffers.add(buffer);
             sourceBuffers.push(buffer);
             sourceTransferredBytes += buffer.byteLength;
+            if (source instanceof Uint8Array) {
+                if (hasCompressedSources) {
+                    throw new Error('Parallel parser cannot mix compressed and inflated term-bank sources');
+                }
+            } else {
+                if (sourceMetadata.length !== sourceBuffers.length - 1) {
+                    throw new Error('Parallel parser cannot mix inflated and compressed term-bank sources');
+                }
+                hasCompressedSources = true;
+                sourceMetadata.push({
+                    compressionMethod: source.compressionMethod,
+                    compressedSize: source.compressedSize,
+                    uncompressedSize: source.uncompressedSize,
+                    signature: source.signature,
+                    filename: source.filename,
+                });
+            }
         }
         const sourcePreparationMs = Math.max(0, safePerformance.now() - sourcePreparationStart);
         const timeoutId = setTimeout(() => {
@@ -2643,7 +2736,15 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
                 reject(error);
                 return;
             }
-            worker.postMessage({type: 'parse', id, sourceBuffers, sourceSentEpochMs: Date.now(), version, options}, sourceBuffers);
+            worker.postMessage({
+                type: 'parse',
+                id,
+                sourceBuffers,
+                ...(hasCompressedSources ? {sourceMetadata} : {}),
+                sourceSentEpochMs: Date.now(),
+                version,
+                options,
+            }, sourceBuffers);
         } catch (error) {
             cleanup();
             worker.terminate();
@@ -2657,15 +2758,15 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
  * Keeps cancellation responsive while source ZIP workers are still inflating.
  * The source promises remain observed after cancellation so late rejections do
  * not become unhandled; their owning importer may abort the underlying reads.
- * @param {Promise<Uint8Array>[]} promises
+ * @param {Promise<ParallelTermBankSourceValue>[]} promises
  * @param {() => boolean} shouldCancel
- * @returns {Promise<Uint8Array[]>}
+ * @returns {Promise<ParallelTermBankSourceValue[]>}
  */
 function waitForParallelSources(promises, shouldCancel) {
     return new Promise((resolve, reject) => {
         let settled = false;
         const cleanup = () => { clearInterval(cancellationIntervalId); };
-        /** @param {Uint8Array[]} value */
+        /** @param {ParallelTermBankSourceValue[]} value */
         const settleResolve = (value) => {
             if (settled) { return; }
             settled = true;
@@ -2836,13 +2937,35 @@ function getPartitionSourceByteLength(source) {
 }
 
 /**
- * @param {Uint8Array[]} values
+ * @param {ParallelTermBankSourceValue[]} values
  * @returns {number}
  */
-function sumByteLengths(values) {
+function sumParallelSourceByteLengths(values) {
     let total = 0;
-    for (const value of values) { total += value.byteLength; }
+    for (const value of values) {
+        total += value instanceof Uint8Array ? value.byteLength : value.uncompressedSize;
+    }
     return total;
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is CompressedTermBankSource}
+ */
+function isCompressedTermBankSource(value) {
+    if (typeof value !== 'object' || value === null) { return false; }
+    const bytes = /** @type {unknown} */ (Reflect.get(value, 'bytes'));
+    const compressionMethod = /** @type {unknown} */ (Reflect.get(value, 'compressionMethod'));
+    const compressedSize = /** @type {unknown} */ (Reflect.get(value, 'compressedSize'));
+    const uncompressedSize = /** @type {unknown} */ (Reflect.get(value, 'uncompressedSize'));
+    const signature = /** @type {unknown} */ (Reflect.get(value, 'signature'));
+    return (
+        bytes instanceof Uint8Array &&
+        (compressionMethod === 0 || compressionMethod === 8) &&
+        typeof compressedSize === 'number' && Number.isSafeInteger(compressedSize) && compressedSize >= 0 && bytes.byteLength === compressedSize &&
+        typeof uncompressedSize === 'number' && Number.isSafeInteger(uncompressedSize) && uncompressedSize >= 0 &&
+        typeof signature === 'number' && Number.isInteger(signature) && signature >= 0 && signature <= 0xffffffff
+    );
 }
 
 /**
@@ -2970,6 +3093,8 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         sourcePreparationMs: sum('sourcePreparationMs'),
         sourceDeliveryMs: sum('sourceDeliveryMs'),
         sourceTransferredBytes: sum('sourceTransferredBytes'),
+        sourceInflateMs: sum('sourceInflateMs'),
+        sourceCrc32Ms: sum('sourceCrc32Ms'),
         resultCopyMs: sum('resultCopyMs'),
         resultDeliveryMs: sum('resultDeliveryMs'),
         orderedSinkWaitMs: sum('orderedSinkWaitMs'),
