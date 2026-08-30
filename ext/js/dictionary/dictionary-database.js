@@ -90,6 +90,7 @@ const TERM_CONTENT_META_SLOT_EMPTY = 0;
 const TERM_CONTENT_META_SLOT_PUBLISHED = 1;
 const TERM_CONTENT_META_SLOT_PENDING = 2;
 const TERM_CONTENT_META_PREALLOC_MAX_ENTRIES = 1024 * 1024;
+const TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE = 32;
 const BULK_IMPORT_STATE_IDLE = 'idle';
 const BULK_IMPORT_STATE_ACTIVE = 'active';
 const BULK_IMPORT_STATE_FINALIZING = 'finalizing';
@@ -7325,6 +7326,78 @@ export class DictionaryDatabase {
             let persistedHitCount = 0;
             let exactFallbackCount = 0;
             let alreadyResolvedUniqueCount = 0;
+            const exactCandidates = [];
+            const appendPendingContent = ({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2}) => {
+                if (contentOffset > 0xffffffff) {
+                    throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
+                }
+                pendingSpanOffsets[pendingContentCount] = contentOffset;
+                pendingSpanLengths[pendingContentCount] = contentLength;
+                pendingContentHash1s.push(hash1);
+                pendingContentHash2s.push(hash2);
+                if (stagedIndexes !== null) {
+                    const signatureOffset = uniqueIndex * 3;
+                    stagedIndexes[pendingContentCount] = this._reserveArtifactTermContentMetadata(
+                        hash1,
+                        hash2,
+                        contentBytesBuffer,
+                        contentOffset,
+                        contentLength,
+                        uniqueSignatures?.[signatureOffset],
+                        uniqueSignatures?.[signatureOffset + 1],
+                        uniqueSignatures?.[signatureOffset + 2],
+                    );
+                }
+                if (pendingContentDictNames !== null) {
+                    pendingContentDictNames.push(
+                        explicitContentDictNames !== null ?
+                            (explicitContentDictNames[rowIndex] ?? null) :
+                            uniformContentDictName,
+                    );
+                }
+                contentDedupPlan.pendingEpochs[uniqueIndex] = pendingPlanEpoch;
+                contentDedupPlan.pendingIndexes[uniqueIndex] = pendingContentCount;
+                pendingPlanUniqueIndexes.push(uniqueIndex);
+                ++pendingContentCount;
+            };
+            const resolveExactCandidates = async () => {
+                if (exactCandidates.length === 0) { return; }
+                const matchResults = await Promise.allSettled(exactCandidates.map(async (descriptor) => {
+                    const {contentOffset, contentLength, hash1, hash2, existingMeta} = descriptor;
+                    const contentBytes = contentBytesBuffer.subarray(contentOffset, contentOffset + contentLength);
+                    const matchingMeta = this._findMatchingTermEntryContentMeta(hash1, hash2, contentBytes, existingMeta);
+                    return matchingMeta instanceof Promise ?
+                        {existingMeta: await matchingMeta, exactFallback: true} :
+                        {existingMeta: matchingMeta, exactFallback: false};
+                }));
+                const matchErrors = matchResults
+                    .filter((result) => result.status === 'rejected')
+                    .map((result) => toError(result.reason));
+                if (matchErrors.length === 1) { throw matchErrors[0]; }
+                if (matchErrors.length > 1) {
+                    throw new AggregateError(matchErrors, 'Multiple exact term content comparisons failed');
+                }
+                for (let i = 0; i < exactCandidates.length; ++i) {
+                    const descriptor = exactCandidates[i];
+                    const matchResult = matchResults[i];
+                    if (matchResult.status !== 'fulfilled') {
+                        throw new Error('Exact term content comparison did not settle');
+                    }
+                    const {existingMeta, exactFallback} = matchResult.value;
+                    if (exactFallback) { ++exactFallbackCount; }
+                    if (typeof existingMeta === 'undefined') {
+                        appendPendingContent(descriptor);
+                        continue;
+                    }
+                    const {uniqueIndex} = descriptor;
+                    contentDedupPlan.resolvedOffsets[uniqueIndex] = existingMeta.offset;
+                    contentDedupPlan.resolvedLengths[uniqueIndex] = existingMeta.length;
+                    setResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex, existingMeta.dictName);
+                    contentDedupPlan.resolvedFlags[uniqueIndex] = 1;
+                    ++persistedHitCount;
+                }
+                exactCandidates.length = 0;
+            };
             try {
                 for (let uniqueIndex = firstUniqueIndex; uniqueIndex < lastUniqueIndex; ++uniqueIndex) {
                     const globalRowIndex = uniqueRowIndexes[uniqueIndex];
@@ -7351,60 +7424,23 @@ export class DictionaryDatabase {
                     ) {
                         throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
                     }
+                    const descriptor = {uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2};
                     const existingIndex = persistedLookupRequired ?
                         this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
                         -1;
-                    let existingMeta = existingIndex < 0 ? void 0 : this._readTermEntryContentMetaHashPairIndex(existingIndex);
-                    if (typeof existingMeta !== 'undefined') {
-                        const contentBytes = contentBytesBuffer.subarray(contentOffset, contentOffset + contentLength);
-                        const matchingMeta = this._findMatchingTermEntryContentMeta(hash1, hash2, contentBytes, existingMeta);
-                        if (matchingMeta instanceof Promise) {
-                            ++exactFallbackCount;
-                            existingMeta = await matchingMeta;
-                        } else {
-                            existingMeta = matchingMeta;
-                        }
-                    }
-                    if (typeof existingMeta !== 'undefined') {
-                        contentDedupPlan.resolvedOffsets[uniqueIndex] = existingMeta.offset;
-                        contentDedupPlan.resolvedLengths[uniqueIndex] = existingMeta.length;
-                        setResolvedTermContentPlanDictName(contentDedupPlan, uniqueIndex, existingMeta.dictName);
-                        contentDedupPlan.resolvedFlags[uniqueIndex] = 1;
-                        ++persistedHitCount;
+                    const existingMeta = existingIndex < 0 ?
+                        void 0 :
+                        this._readTermEntryContentMetaHashPairIndex(existingIndex);
+                    if (typeof existingMeta === 'undefined') {
+                        appendPendingContent(descriptor);
                         continue;
                     }
-                    if (contentOffset > 0xffffffff) {
-                        throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
+                    exactCandidates.push({...descriptor, existingMeta});
+                    if (exactCandidates.length >= TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE) {
+                        await resolveExactCandidates();
                     }
-                    pendingSpanOffsets[pendingContentCount] = contentOffset;
-                    pendingSpanLengths[pendingContentCount] = contentLength;
-                    pendingContentHash1s.push(hash1);
-                    pendingContentHash2s.push(hash2);
-                    if (stagedIndexes !== null) {
-                        const signatureOffset = uniqueIndex * 3;
-                        stagedIndexes[pendingContentCount] = this._reserveArtifactTermContentMetadata(
-                            hash1,
-                            hash2,
-                            contentBytesBuffer,
-                            contentOffset,
-                            contentLength,
-                            uniqueSignatures?.[signatureOffset],
-                            uniqueSignatures?.[signatureOffset + 1],
-                            uniqueSignatures?.[signatureOffset + 2],
-                        );
-                    }
-                    if (pendingContentDictNames !== null) {
-                        pendingContentDictNames.push(
-                            explicitContentDictNames !== null ?
-                                (explicitContentDictNames[rowIndex] ?? null) :
-                                uniformContentDictName,
-                        );
-                    }
-                    contentDedupPlan.pendingEpochs[uniqueIndex] = pendingPlanEpoch;
-                    contentDedupPlan.pendingIndexes[uniqueIndex] = pendingContentCount;
-                    pendingPlanUniqueIndexes.push(uniqueIndex);
-                    ++pendingContentCount;
                 }
+                await resolveExactCandidates();
             } catch (error) {
                 if (stagedIndexes !== null) {
                     this._rollbackStagedArtifactTermContentMetadata({indexes: stagedIndexes, active: true});

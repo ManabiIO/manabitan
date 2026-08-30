@@ -1319,6 +1319,157 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(result.resolvedContentDictNames).toBe('raw-v6');
     });
 
+    test('resolves persisted canonical contents concurrently while preserving source order', async () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array([1, 2, 3, 4, 5, 6]);
+        const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
+        cache(null, 100, 3, 'raw-v6', 0, 10, 20, source.subarray(0, 3));
+        cache(null, 200, 3, 'raw-v6', 0, 30, 40, source.subarray(3, 6));
+        const resolvers = new Map();
+        const readDetailed = vi.fn(async (offset) => await new Promise((resolve) => {
+            resolvers.set(offset, resolve);
+        }));
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', readDetailed);
+        const resolveDedup = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const resolving = resolveDedup({
+            rowCount: 2,
+            contentRowStart: 0,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 0,
+            contentMetaList: new Uint32Array([0, 3, 10, 20, 3, 3, 30, 40]),
+            contentUniqueIndexList: new Uint32Array([0, 1]),
+            contentDedupPlan: {
+                uniqueCount: 2,
+                sourceRowCount: 2,
+                uniqueRowIndexes: new Uint32Array([0, 1]),
+                resolvedFlags: new Uint8Array(2),
+                resolvedOffsets: new Float64Array(2),
+                resolvedLengths: new Uint32Array(2),
+                resolvedDictNames: new Array(2),
+                pendingEpochs: new Uint32Array(2),
+                pendingIndexes: new Uint32Array(2),
+                nextEpoch: 1,
+                persistedLookupRequired: true,
+            },
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        });
+
+        await vi.waitFor(() => expect(readDetailed).toHaveBeenCalledTimes(2));
+        resolvers.get(200)({status: 'ok', bytes: source.subarray(3, 6)});
+        resolvers.get(100)({status: 'ok', bytes: source.subarray(0, 3)});
+        const result = await resolving;
+
+        expect(result.persistedHitCount).toBe(2);
+        expect(result.exactFallbackCount).toBe(2);
+        expect(result.pendingContentCount).toBe(0);
+        expect([...result.contentOffsets]).toEqual([100, 200]);
+        expect([...result.contentLengths]).toEqual([3, 3]);
+    });
+
+    test('preserves unique-content mapping when an exact candidate is a hash collision', async () => {
+        const database = new DictionaryDatabase();
+        const persisted = new Uint8Array([1, 2, 3]);
+        const source = new Uint8Array([1, 2, 4, 5, 6, 7]);
+        cacheMeta(database, null, 100, 3, 'raw-v6', 10, 20);
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async () => ({
+            status: 'ok',
+            bytes: persisted,
+        })));
+        const resolveDedup = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const result = await resolveDedup({
+            rowCount: 2,
+            contentRowStart: 0,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 0,
+            contentMetaList: new Uint32Array([0, 3, 10, 20, 3, 3, 30, 40]),
+            contentUniqueIndexList: new Uint32Array([0, 1]),
+            contentDedupPlan: {
+                uniqueCount: 2,
+                sourceRowCount: 2,
+                uniqueRowIndexes: new Uint32Array([0, 1]),
+                resolvedFlags: new Uint8Array(2),
+                resolvedOffsets: new Float64Array(2),
+                resolvedLengths: new Uint32Array(2),
+                resolvedDictNames: new Array(2),
+                pendingEpochs: new Uint32Array(2),
+                pendingIndexes: new Uint32Array(2),
+                nextEpoch: 1,
+                persistedLookupRequired: true,
+            },
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        });
+
+        expect(result.persistedHitCount).toBe(0);
+        expect(result.exactFallbackCount).toBe(1);
+        expect(result.pendingContentCount).toBe(2);
+        expect(result.pendingPlanUniqueIndexes).toEqual([1, 0]);
+        expect([...result.pendingContentSpans.offsets]).toEqual([3, 0]);
+        expect([...result.pendingContentSpans.lengths]).toEqual([3, 3]);
+        expect(result.pendingContentHash1s).toEqual([30, 10]);
+        expect(result.pendingContentHash2s).toEqual([40, 20]);
+    });
+
+    test('settles every concurrent exact comparison before reporting a failure', async () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array([1, 2, 3, 4, 5, 6]);
+        const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
+        cache(null, 100, 3, 'raw-v6', 0, 10, 20, source.subarray(0, 3));
+        cache(null, 200, 3, 'raw-v6', 0, 30, 40, source.subarray(3, 6));
+        const resolvers = new Map();
+        const rejecters = new Map();
+        const readDetailed = vi.fn(async (offset) => await new Promise((resolve, reject) => {
+            resolvers.set(offset, resolve);
+            rejecters.set(offset, reject);
+        }));
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', readDetailed);
+        const resolveDedup = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const resolving = resolveDedup({
+            rowCount: 2,
+            contentRowStart: 0,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 0,
+            contentMetaList: new Uint32Array([0, 3, 10, 20, 3, 3, 30, 40]),
+            contentUniqueIndexList: new Uint32Array([0, 1]),
+            contentDedupPlan: {
+                uniqueCount: 2,
+                sourceRowCount: 2,
+                uniqueRowIndexes: new Uint32Array([0, 1]),
+                resolvedFlags: new Uint8Array(2),
+                resolvedOffsets: new Float64Array(2),
+                resolvedLengths: new Uint32Array(2),
+                resolvedDictNames: new Array(2),
+                pendingEpochs: new Uint32Array(2),
+                pendingIndexes: new Uint32Array(2),
+                nextEpoch: 1,
+                persistedLookupRequired: true,
+            },
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        });
+        let settled = false;
+        void resolving.finally(() => { settled = true; }).catch(() => {});
+
+        await vi.waitFor(() => expect(readDetailed).toHaveBeenCalledTimes(2));
+        rejecters.get(100)(new Error('injected exact comparison failure'));
+        await Promise.resolve();
+        expect(settled).toBe(false);
+        resolvers.get(200)({status: 'ok', bytes: source.subarray(3, 6)});
+
+        await expect(resolving).rejects.toThrow('injected exact comparison failure');
+        expect(settled).toBe(true);
+    });
+
     test('defers mixed canonical projection until pending offsets are published', async () => {
         const database = new DictionaryDatabase();
         const source = new Uint8Array([1, 2, 3, 1, 2, 3, 4, 5]);
