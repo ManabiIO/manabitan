@@ -50,7 +50,7 @@ const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
-/** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
+/** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
 /** @typedef {{wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan}} ParsedTermBankWasmBuffers */
@@ -63,7 +63,7 @@ let suppliedWasmModule = null;
 const textDecoder = new TextDecoder();
 /** @type {TextEncoder} */
 const textEncoder = new TextEncoder();
-/** @type {{bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, resultCopyMs?: number, resultDeliveryMs?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number}|null} */
+/** @type {{bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number}|null} */
 let lastTermBankWasmParseProfile = null;
 /** @type {string|null} */
 let lastParallelParserSkipReason = null;
@@ -157,7 +157,7 @@ export async function initializeTermBankWasmParser() {
 }
 
 /**
- * @returns {{bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, resultCopyMs?: number, resultDeliveryMs?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean}|null}
+ * @returns {{bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean}|null}
  */
 export function consumeLastTermBankWasmParseProfile() {
     const value = lastTermBankWasmParseProfile;
@@ -1897,8 +1897,10 @@ class ParallelTermBankPipelineRun {
         this._poolLease = poolLease;
         /** @type {number} */
         this._pipelineGroupsPerWorker = pipelineGroupsPerWorker;
-        /** @type {Array<{promise: Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number}>, resolve: (value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number}) => void}>} */
+        /** @type {Array<{promise: Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, consume: (() => void)|null}>, resolve: (value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, consume: (() => void)|null}) => void}>} */
         this._resultSlots = [];
+        /** @type {Set<() => void>} */
+        this._pendingResultConsumers = new Set();
         /** @type {Promise<void>[]} */
         this._workerLoops = [];
         /** @type {Error|null} */
@@ -1972,16 +1974,23 @@ class ParallelTermBankPipelineRun {
                     throw new Error('Parallel term-bank parser returned an incomplete result');
                 }
                 const chunk = result.chunk;
+                if (result.profile !== null) {
+                    result.profile.orderedSinkWaitMs = Math.max(0, safePerformance.now() - result.finishedAt);
+                }
                 profiles.push(result.profile);
                 workersFinishedAt = Math.max(workersFinishedAt, result.finishedAt);
                 processedRows += chunk.rowCount;
                 exactTotalRows += chunk.rowCount;
-                await this._onChunk(chunk, {
-                    processedRows,
-                    totalRows: i + 1 === this._resultSlots.length ? processedRows : Math.max(processedRows, estimatedTotalRows),
-                    chunkIndex: i + 1,
-                    chunkCount: this._resultSlots.length,
-                });
+                try {
+                    await this._onChunk(chunk, {
+                        processedRows,
+                        totalRows: i + 1 === this._resultSlots.length ? processedRows : Math.max(processedRows, estimatedTotalRows),
+                        chunkIndex: i + 1,
+                        chunkCount: this._resultSlots.length,
+                    });
+                } finally {
+                    result.consume?.();
+                }
                 this._nextSinkGroupIndex = i + 1;
                 this._activateLeadSources();
                 this._wakeLeadWaiters();
@@ -2013,7 +2022,7 @@ class ParallelTermBankPipelineRun {
     /** Creates one ordered result slot per byte-balanced source group. */
     _createSlots() {
         this._resultSlots = this._groups.map(() => {
-            /** @type {(value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number}) => void} */
+            /** @type {(value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, consume: (() => void)|null}) => void} */
             let resolve = () => {};
             const promise = new Promise((value) => { resolve = value; });
             return {promise, resolve};
@@ -2056,7 +2065,26 @@ class ParallelTermBankPipelineRun {
                 if (result.chunk.rowCount !== result.rowCount) {
                     throw new Error('Parallel term-bank parser row count changed during result transfer');
                 }
-                this._resultSlots[groupIndex].resolve({...result, sourceBytes});
+                /** @type {(() => void)|null} */
+                let consume = null;
+                /** @type {Promise<void>|null} */
+                let consumed = null;
+                if (result.borrowsWorkerMemory) {
+                    /** @type {(value?: void|PromiseLike<void>) => void} */
+                    let resolveConsumed = () => {};
+                    consumed = new Promise((resolve) => { resolveConsumed = resolve; });
+                    let pending = true;
+                    const consumeResult = () => {
+                        if (!pending) { return; }
+                        pending = false;
+                        this._pendingResultConsumers.delete(consumeResult);
+                        resolveConsumed();
+                    };
+                    consume = consumeResult;
+                    this._pendingResultConsumers.add(consume);
+                }
+                this._resultSlots[groupIndex].resolve({...result, sourceBytes, consume});
+                if (consumed !== null) { await consumed; }
             }
         } catch (error) {
             this._fail(error);
@@ -2079,7 +2107,8 @@ class ParallelTermBankPipelineRun {
         this._failed = true;
         this._error = createParallelParserError(error);
         this._wakeLeadWaiters();
-        const result = {chunk: null, profile: null, error: this._error, finishedAt: safePerformance.now(), rowCount: 0, sourceBytes: 0};
+        for (const consume of this._pendingResultConsumers) { consume(); }
+        const result = {chunk: null, profile: null, error: this._error, finishedAt: safePerformance.now(), rowCount: 0, sourceBytes: 0, consume: null};
         for (const slot of this._resultSlots) { slot.resolve(result); }
     }
 
@@ -2490,12 +2519,14 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
  * @param {number} version
  * @param {Record<string, unknown>} options
  * @param {() => boolean} shouldCancel
- * @returns {Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number}>}
+ * @returns {Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, borrowsWorkerMemory: boolean}>}
  */
 function runParallelParserJob(worker, id, sourceBytes, version, options, shouldCancel) {
     return new Promise((resolve, reject) => {
+        const sourcePreparationStart = safePerformance.now();
         const sourceBuffers = [];
         const seenBuffers = new Set();
+        let sourceTransferredBytes = 0;
         for (const bytes of sourceBytes) {
             let buffer = bytes.buffer;
             if (
@@ -2508,7 +2539,9 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
             }
             seenBuffers.add(buffer);
             sourceBuffers.push(buffer);
+            sourceTransferredBytes += buffer.byteLength;
         }
+        const sourcePreparationMs = Math.max(0, safePerformance.now() - sourcePreparationStart);
         const timeoutId = setTimeout(() => {
             cleanup();
             worker.terminate();
@@ -2551,19 +2584,29 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
                 }
                 const profile = /** @type {NonNullable<typeof lastTermBankWasmParseProfile>|null} */ (data.profile ?? null);
                 if (profile !== null) {
+                    profile.sourcePreparationMs = sourcePreparationMs;
+                    profile.sourceTransferredBytes = sourceTransferredBytes;
                     profile.resultDeliveryMs = Math.max(0, Date.now() - /** @type {number} */ (data.resultSentEpochMs));
                 }
+                const chunk = /** @type {TermBankColumnChunk|null} */ (data.chunk ?? null);
                 resolve({
-                    chunk: /** @type {TermBankColumnChunk|null} */ (data.chunk ?? null),
+                    chunk,
                     profile,
                     error: null,
                     finishedAt: safePerformance.now(),
                     rowCount: /** @type {number} */ (data.rowCount),
+                    borrowsWorkerMemory: (
+                        data.borrowsWorkerMemory === true ||
+                        (
+                            typeof SharedArrayBuffer === 'function' &&
+                            chunk?.contentBytesBuffer?.buffer instanceof SharedArrayBuffer
+                        )
+                    ),
                 });
             } else {
                 worker.terminate();
                 const error = data.error ?? {message: 'Parallel term-bank parse failed'};
-                resolve({chunk: null, profile: null, error, finishedAt: safePerformance.now(), rowCount: 0});
+                resolve({chunk: null, profile: null, error, finishedAt: safePerformance.now(), rowCount: 0, borrowsWorkerMemory: false});
             }
         };
         /** @param {ErrorEvent} event */
@@ -2598,7 +2641,7 @@ function runParallelParserJob(worker, id, sourceBytes, version, options, shouldC
                 reject(error);
                 return;
             }
-            worker.postMessage({type: 'parse', id, sourceBuffers, version, options}, sourceBuffers);
+            worker.postMessage({type: 'parse', id, sourceBuffers, sourceSentEpochMs: Date.now(), version, options}, sourceBuffers);
         } catch (error) {
             cleanup();
             worker.terminate();
@@ -2823,8 +2866,12 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
         shareContentBytes &&
         typeof SharedArrayBuffer === 'function'
     ) {
-        contentBytesBuffer = new Uint8Array(new SharedArrayBuffer(contentBytesLength));
-        contentBytesBuffer.set(contentBytesSource);
+        if (contentBytesSource.buffer instanceof SharedArrayBuffer) {
+            contentBytesBuffer = contentBytesSource;
+        } else {
+            contentBytesBuffer = new Uint8Array(new SharedArrayBuffer(contentBytesLength));
+            contentBytesBuffer.set(contentBytesSource);
+        }
     } else {
         contentBytesBuffer = contentBytesSource?.slice();
     }
@@ -2918,8 +2965,13 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         nativeStringPlanChunkCount: sum('nativeStringPlanChunkCount'),
         nativeStringPlanFallbackChunkCount: sum('nativeStringPlanFallbackChunkCount'),
         chunkDispatchMs,
+        sourcePreparationMs: sum('sourcePreparationMs'),
+        sourceDeliveryMs: sum('sourceDeliveryMs'),
+        sourceTransferredBytes: sum('sourceTransferredBytes'),
         resultCopyMs: sum('resultCopyMs'),
         resultDeliveryMs: sum('resultDeliveryMs'),
+        orderedSinkWaitMs: sum('orderedSinkWaitMs'),
+        borrowedContentResultCount: sum('borrowedContentResultCount'),
         lookupIndexPrepareMs: sum('lookupIndexPrepareMs'),
         lookupIndexCompactMs: sum('lookupIndexCompactMs'),
         lookupIndexEncodeMs: sum('lookupIndexEncodeMs'),

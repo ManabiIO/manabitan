@@ -27,7 +27,7 @@ import {prepareTermLookupIndexesFromPreinternedPlan} from './term-lookup-index-p
 
 /** @typedef {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean}} ParserOptions */
 /** @typedef {{type: 'initialize', module: unknown}} InitializeRequest */
-/** @typedef {{type: 'parse', id: unknown, sourceBuffers: unknown, version: unknown, chunkSize?: unknown, options?: unknown}} ParseRequest */
+/** @typedef {{type: 'parse', id: unknown, sourceBuffers: unknown, sourceSentEpochMs?: unknown, version: unknown, chunkSize?: unknown, options?: unknown}} ParseRequest */
 
 Reflect.set(globalThis, '__manabitanTermBankParserWorker', true);
 
@@ -66,6 +66,9 @@ async function initialize(data) {
 /** @param {ParseRequest} data */
 async function parse(data) {
     const id = typeof data.id === 'number' && Number.isSafeInteger(data.id) ? data.id : -1;
+    const sourceDeliveryMs = Number.isSafeInteger(data.sourceSentEpochMs) && /** @type {number} */ (data.sourceSentEpochMs) >= 0 ?
+        Math.max(0, Date.now() - /** @type {number} */ (data.sourceSentEpochMs)) :
+        null;
     /** @type {ArrayBuffer[]} */
     const sourceBuffers = [];
     if (Array.isArray(data.sourceBuffers)) {
@@ -94,6 +97,7 @@ async function parse(data) {
         let resultChunk = null;
         let resultRowCount = 0;
         let resultCopyMs = 0;
+        let borrowsWorkerMemory = false;
         await parseTermBankWithWasmColumnChunks(
             sourceBytes,
             data.version,
@@ -104,6 +108,11 @@ async function parse(data) {
                 resultRowCount = chunk.rowCount;
                 const tResultCopyStart = safePerformance.now();
                 resultChunk = copyWasmBackedColumnChunk(chunk, true);
+                borrowsWorkerMemory = (
+                    typeof SharedArrayBuffer === 'function' &&
+                    chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
+                    resultChunk.contentBytesBuffer?.buffer === chunk.contentBytesBuffer.buffer
+                );
                 resultCopyMs = Math.max(0, safePerformance.now() - tResultCopyStart);
             },
             chunkSize,
@@ -114,7 +123,11 @@ async function parse(data) {
         }
         const stableResultChunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (resultChunk);
         const profile = consumeLastTermBankWasmParseProfile();
-        if (profile !== null) { profile.resultCopyMs = resultCopyMs; }
+        if (profile !== null) {
+            profile.resultCopyMs = resultCopyMs;
+            profile.sourceDeliveryMs = sourceDeliveryMs ?? 0;
+            profile.borrowedContentResultCount = borrowsWorkerMemory ? 1 : 0;
+        }
         if (options.prepareLookupIndexes === true && !(stableResultChunk.preparedLookupIndexes instanceof Map)) {
             const prepared = prepareTermLookupIndexesFromPreinternedPlan(stableResultChunk);
             if (prepared !== null) {
@@ -133,6 +146,7 @@ async function parse(data) {
             id,
             rowCount: resultRowCount,
             resultSentEpochMs: Date.now(),
+            borrowsWorkerMemory,
             chunk: stableResultChunk,
             profile,
         }, transfer);

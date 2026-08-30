@@ -246,6 +246,43 @@ describe('term-bank WASM parser', () => {
         expect([...copy.mediaRows[0].row.termEntryContentBytes]).toStrictEqual([40, 41, 42]);
     });
 
+    test('borrows an exact shared content span while copying mutable metadata', () => {
+        const heap = new Uint8Array(new SharedArrayBuffer(128));
+        heap.set([1, 2, 3, 4], 64);
+        const contentMetaList = new Uint32Array(heap.buffer, 8, 8);
+        contentMetaList.set([0, 2, 11, 12, 2, 2, 13, 14]);
+        const result = copyWasmBackedColumnChunk({
+            rowCount: 2,
+            expressionBytesList: [],
+            readingBytesList: [],
+            readingEqualsExpressionList: new Uint8Array(2),
+            scoreList: new Int32Array(2),
+            sequenceList: new Int32Array(2),
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: heap,
+            contentBytesBaseOffset: 64,
+            contentMetaList,
+            contentUniqueIndexList: new Uint32Array([0, 1]),
+            contentDedupPlan: null,
+            termRecordPreinternedPlan: {
+                stringLengths: new Uint16Array(0),
+                stringOffsets: new Uint32Array(0),
+                stringHashes: new Uint32Array(0),
+                stringsBuffer: new Uint8Array(0),
+                expressionIndexes: new Uint32Array(2),
+                readingIndexes: new Uint32Array(2),
+            },
+            mediaRows: [],
+        }, true);
+
+        expect(result.contentBytesBuffer?.buffer).toBe(heap.buffer);
+        expect(result.contentBytesBuffer?.byteOffset).toBe(64);
+        expect([...result.contentBytesBuffer]).toStrictEqual([1, 2, 3, 4]);
+        expect(result.contentMetaList?.buffer).not.toBe(heap.buffer);
+    });
+
     test.each([
         [{hardwareConcurrency: 12, deviceMemory: 8}, 3],
         [{hardwareConcurrency: 12, deviceMemory: 4}, 2],
@@ -994,6 +1031,77 @@ describe('term-bank WASM parser', () => {
         }
     });
 
+    maybeTest('does not reuse borrowed worker memory before the ordered sink consumes it', async () => {
+        const workerCount = getParallelTermBankParserWorkerCount();
+        let parseCount = 0;
+        const sharedContent = new Uint8Array(new SharedArrayBuffer(1));
+        class BorrowingWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(message) {
+                const respond = () => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    ++parseCount;
+                    emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: message.id,
+                        rowCount: 1,
+                        resultSentEpochMs: Date.now(),
+                        borrowsWorkerMemory: false,
+                        chunk: {rowCount: 1, contentBytesBuffer: sharedContent},
+                        profile: {chunkDispatchMs: 0},
+                    });
+                };
+                queueMicrotask(respond);
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('Worker', BorrowingWorker);
+        let releaseFirstSink = () => {};
+        const firstSinkGate = new Promise((resolve) => { releaseFirstSink = resolve; });
+        let firstSinkStarted = () => {};
+        const firstSinkStart = new Promise((resolve) => { firstSinkStarted = resolve; });
+        try {
+            const sourceBanks = Array.from({length: workerCount * 4}, () => textEncoder.encode('[]'));
+            const parsing = parseTermBankWithWasmColumnChunksParallel(
+                sourceBanks,
+                3,
+                async (_chunk, progress) => {
+                    if (progress.chunkIndex !== 1) { return; }
+                    firstSinkStarted();
+                    await firstSinkGate;
+                },
+                {emitContentSlab: true},
+            );
+            await firstSinkStart;
+            await new Promise((resolve) => { setTimeout(resolve, 10); });
+            expect(parseCount).toBe(workerCount);
+            releaseFirstSink();
+            await expect(parsing).resolves.toBe(true);
+            expect(parseCount).toBe(workerCount * 4);
+        } finally {
+            releaseFirstSink();
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
     maybeTest('bounds lazy source loading while the ordered sink is blocked', async () => {
         class SuccessfulWorker {
             constructor() {
@@ -1021,6 +1129,7 @@ describe('term-bank WASM parser', () => {
                         id: message.id,
                         rowCount: 1,
                         resultSentEpochMs: Date.now(),
+                        borrowsWorkerMemory: true,
                         chunk: {rowCount: 1},
                         profile: {chunkDispatchMs: 0},
                     });
@@ -1103,6 +1212,7 @@ describe('term-bank WASM parser', () => {
                         id: message.id,
                         rowCount: 1,
                         resultSentEpochMs: Date.now(),
+                        borrowsWorkerMemory: true,
                         chunk: {rowCount: 1},
                         profile: {chunkDispatchMs: 0},
                     });
@@ -1262,6 +1372,7 @@ describe('term-bank WASM parser', () => {
                         id: message.id,
                         rowCount: 1,
                         resultSentEpochMs: Date.now(),
+                        borrowsWorkerMemory: true,
                         chunk: {rowCount: 1},
                         profile: {chunkDispatchMs: 0},
                     });

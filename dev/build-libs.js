@@ -101,8 +101,12 @@ function canBuildWasmTarget(compiler) {
             [
                 ...(compiler.args ?? []),
                 `--target=${dictionaryWasmTarget}`,
+                '-matomics',
+                '-mbulk-memory',
                 '-nostdlib',
                 '-Wl,--no-entry',
+                '-Wl,--shared-memory',
+                '-Wl,--max-memory=4294967296',
                 '-Wl,--export=probe',
                 '-Wl,--strip-all',
                 '-o',
@@ -212,10 +216,13 @@ async function buildDictionaryWasm(out) {
         const args = [
             `--target=${dictionaryWasmTarget}`,
             '-O3',
+            '-matomics',
             '-mbulk-memory',
             '-msimd128',
             '-nostdlib',
             '-Wl,--no-entry',
+            '-Wl,--shared-memory',
+            '-Wl,--max-memory=4294967296',
         ];
         for (const exportName of target.exports) {
             args.push(`-Wl,--export=${exportName}`);
