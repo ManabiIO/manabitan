@@ -3476,7 +3476,7 @@ export class TermRecordOpfsStore {
                     if (
                         lookupIndex.expressionKeys.length !== count ||
                         lookupIndex.readingKeys.length !== count ||
-                        lookupIndex.sequenceValues.length !== count
+                        lookupIndex.sequencePostingRows.length > count
                     ) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index row counts are invalid for ${state.fileName}`);
                     }

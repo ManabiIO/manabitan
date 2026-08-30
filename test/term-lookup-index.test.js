@@ -233,6 +233,8 @@ describe('persisted term lookup index', () => {
         const keySlotCount = header[3];
         const sequenceSlotCount = header[4];
         const readingPostingCount = header[5];
+        const sequenceKeyCount = header[7];
+        const sequencePostingCount = header[8];
         const align4 = (value) => (value + 3) & ~3;
         const compactU16Count =
             (keyCount + 1) +
@@ -240,15 +242,17 @@ describe('persisted term lookup index', () => {
             (keyCount + 1) +
             readingPostingCount +
             sequenceSlotCount +
-            rowCount;
+            sequenceKeyCount +
+            (sequenceKeyCount + 1) +
+            sequencePostingCount;
 
-        expect(header[6]).toBe(5);
+        expect(header[6]).toBe(6);
         expect(encoded.byteLength).toBe(
             64 +
             align4(keyBytesLength) +
             align4((keyCount + keySlotCount + keyCount) * 2) +
             align4(compactU16Count * 2) +
-            (rowCount * 4),
+            (sequenceKeyCount * 4),
         );
         expect(index.expressionKeys).toBeInstanceOf(Uint16Array);
         expect(index.readingKeys).toBeInstanceOf(Uint16Array);
@@ -258,7 +262,27 @@ describe('persisted term lookup index', () => {
         expect(index.readingPostingRows).toBeInstanceOf(Uint16Array);
         expect(index.sequenceHeads).toBeInstanceOf(Uint16Array);
         expect(index.sequenceNext).toBeInstanceOf(Uint16Array);
+        expect(index.sequenceKeys).toBeInstanceOf(Int32Array);
+        expect(index.sequencePostingOffsets).toBeInstanceOf(Uint16Array);
+        expect(index.sequencePostingRows).toBeInstanceOf(Uint16Array);
         expect(index.readingKeys[1]).toBe(0xffff);
+    });
+
+    test('omits sequence keys and postings when every row has no sequence', () => {
+        const encoded = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('alpha'), readingBytes: null, sequence: null},
+            {expressionBytes: bytes('beta'), readingBytes: null, sequence: null},
+        ]);
+        const header = new Uint32Array(encoded.buffer, encoded.byteOffset, 16);
+        const index = parsePersistedTermLookupIndex(encoded);
+
+        expect(header[7]).toBe(0);
+        expect(header[8]).toBe(0);
+        expect(index.sequenceKeys).toHaveLength(0);
+        expect(index.sequenceNext).toHaveLength(0);
+        expect(index.sequencePostingOffsets).toEqual(new Uint16Array([0]));
+        expect(index.sequencePostingRows).toHaveLength(0);
+        expect(findSequenceRows(index, 0)).toEqual([]);
     });
 
     test('round trips a full production-sized 30,000-row lookup chunk', () => {
@@ -337,7 +361,7 @@ describe('persisted term lookup index', () => {
 
         expect(findExactRows(index, bytes('同じ'), 'expression').sort((a, b) => a - b)).toEqual([0, 1]);
         expect(findExactRows(index, bytes('おなじ'), 'reading').sort((a, b) => a - b)).toEqual([0, 1]);
-        expect(findSequenceRows(index, 42).sort((a, b) => a - b)).toEqual([0, 1]);
+        expect(findSequenceRows(index, 42)).toEqual([1, 0]);
         expect(findSequenceRows(index, 7)).toEqual([2]);
         expect(findSequenceRows(index, -1)).toEqual([]);
         expect(findSequenceRows(index, 1.5)).toEqual([]);
@@ -537,9 +561,9 @@ describe('persisted term lookup index', () => {
     test('rejects sequence rows assigned to the wrong hash bucket', () => {
         const encoded = encodePersistedTermLookupIndex([
             {expressionBytes: bytes('alpha'), readingBytes: null, sequence: 42},
-            {expressionBytes: bytes('beta'), readingBytes: null, sequence: null},
+            {expressionBytes: bytes('beta'), readingBytes: null, sequence: 3},
             {expressionBytes: bytes('gamma'), readingBytes: null, sequence: 7},
-            {expressionBytes: bytes('delta'), readingBytes: null, sequence: null},
+            {expressionBytes: bytes('delta'), readingBytes: null, sequence: 19},
             {expressionBytes: bytes('epsilon'), readingBytes: null, sequence: 11},
         ]);
         const index = parsePersistedTermLookupIndex(encoded);
@@ -561,10 +585,75 @@ describe('persisted term lookup index', () => {
         ]);
         const index = parsePersistedTermLookupIndex(encoded);
         const slot = index.sequenceHeads.findIndex((value) => value !== 0xffff);
-        index.sequenceHeads[slot] = index.sequenceValues.length;
+        index.sequenceHeads[slot] = index.sequenceKeys.length;
 
         expect(() => parseChecksummedPersistedTermLookupIndex(encoded)).toThrow(
             'Invalid persisted 16-bit term lookup reference',
+        );
+    });
+
+    test('rejects duplicate persisted sequence keys', () => {
+        const encoded = encodePersistedTermLookupIndex(
+            Array.from({length: 9}, (_, sequence) => ({
+                expressionBytes: bytes(`expression-${sequence}`),
+                readingBytes: null,
+                sequence,
+            })),
+        );
+        const index = parsePersistedTermLookupIndex(encoded);
+        const head = index.sequenceHeads.find((key) => key !== 0xffff && index.sequenceNext[key] !== 0xffff);
+        expect(head).toBeDefined();
+        if (typeof head === 'undefined') { throw new Error('Expected a colliding sequence hash chain'); }
+        const duplicate = index.sequenceNext[head];
+        index.sequenceKeys[duplicate] = index.sequenceKeys[head];
+
+        expect(() => parsePersistedTermLookupIndex(encoded)).toThrow(
+            'Duplicate persisted sequence lookup key',
+        );
+    });
+
+    test('rejects empty sequence posting lists', () => {
+        const encoded = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('alpha'), readingBytes: null, sequence: 1},
+            {expressionBytes: bytes('beta'), readingBytes: null, sequence: 2},
+        ]);
+        const index = parsePersistedTermLookupIndex(encoded);
+        index.sequencePostingOffsets[1] = 0;
+
+        expect(() => parsePersistedTermLookupIndex(encoded)).toThrow(
+            'Incomplete persisted sequence lookup postings',
+        );
+    });
+
+    test('rejects duplicate and out-of-range sequence posting rows', () => {
+        const duplicate = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('alpha'), readingBytes: null, sequence: 1},
+            {expressionBytes: bytes('beta'), readingBytes: null, sequence: 2},
+        ]);
+        const duplicateIndex = parsePersistedTermLookupIndex(duplicate);
+        duplicateIndex.sequencePostingRows[1] = duplicateIndex.sequencePostingRows[0];
+        expect(() => parseChecksummedPersistedTermLookupIndex(duplicate)).toThrow(
+            'Invalid persisted sequence lookup posting row',
+        );
+
+        const outOfRange = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('alpha'), readingBytes: null, sequence: 1},
+        ]);
+        const outOfRangeIndex = parsePersistedTermLookupIndex(outOfRange);
+        outOfRangeIndex.sequencePostingRows[0] = outOfRangeIndex.expressionKeys.length;
+        expect(() => parsePersistedTermLookupIndex(outOfRange)).toThrow(
+            'Invalid persisted sequence lookup posting row',
+        );
+    });
+
+    test('rejects malformed persisted sequence dimensions', () => {
+        const encoded = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('alpha'), readingBytes: null, sequence: 1},
+        ]);
+        new Uint32Array(encoded.buffer, encoded.byteOffset, 16)[8] = 2;
+
+        expect(() => parsePersistedTermLookupIndex(encoded)).toThrow(
+            'Invalid persisted term lookup index dimensions',
         );
     });
 });
