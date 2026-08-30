@@ -2671,28 +2671,14 @@ export class TermRecordOpfsStore {
      * @returns {Promise<Map<number, TermRecord>>}
      */
     async getByIdsAsync(ids) {
-        const idList = [...ids];
+        const idList = [...new Set(ids)];
         const result = this.getByIds(idList);
-        /** @type {Map<string, number>} */
-        const generationByDictionary = new Map();
-        for (const record of result.values()) {
-            generationByDictionary.set(
-                record.dictionary,
-                this._getPersistentLookupGeneration(record.dictionary),
-            );
-        }
         /** @type {Map<ReturnType<TermRecordOpfsStore['_findPersistentRecordChunk']>, number[]>} */
         const idsByChunk = new Map();
         for (const id of idList) {
             if (result.has(id)) { continue; }
             const chunk = this._findPersistentRecordChunk(id);
             if (chunk === null) { continue; }
-            if (!generationByDictionary.has(chunk.dictionaryName)) {
-                generationByDictionary.set(
-                    chunk.dictionaryName,
-                    this._getPersistentLookupGeneration(chunk.dictionaryName),
-                );
-            }
             const chunkIds = idsByChunk.get(chunk);
             if (typeof chunkIds === 'undefined') {
                 idsByChunk.set(chunk, [id]);
@@ -2703,13 +2689,10 @@ export class TermRecordOpfsStore {
         const chunkEntries = [...idsByChunk];
         for (const [chunk, chunkIds] of chunkEntries) {
             if (chunk === null) { continue; }
-            const expectedGeneration = generationByDictionary.get(chunk.dictionaryName);
-            const isCurrent = () => (
-                expectedGeneration === this._getPersistentLookupGeneration(chunk.dictionaryName) &&
-                this.getDictionaryHealth(chunk.dictionaryName).status !== 'reimportRequired' &&
-                (this._persistentRecordChunksByDictionary.get(chunk.dictionaryName) ?? []).includes(chunk)
-            );
-            if (!isCurrent()) { continue; }
+            if (
+                this.getDictionaryHealth(chunk.dictionaryName).status === 'reimportRequired' ||
+                !(this._persistentRecordChunksByDictionary.get(chunk.dictionaryName) ?? []).includes(chunk)
+            ) { continue; }
             const fieldsView = new DataView(
                 chunk.recordFields.buffer,
                 chunk.recordFields.byteOffset,
@@ -2719,18 +2702,19 @@ export class TermRecordOpfsStore {
                 const ordinal = id - chunk.firstId;
                 const fieldsOffset = ordinal * LOOKUP_INDEX_RECORD_FIELDS_BYTES;
                 const expressionBytes = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'expression');
-                const readingBytes = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'reading') ?? expressionBytes;
-                if (expressionBytes === null || readingBytes === null) { continue; }
+                if (expressionBytes === null) { continue; }
+                const readingBytes = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'reading');
                 const contentOffsetDelta = fieldsView.getUint32(fieldsOffset, true);
                 const rawContentLength = fieldsView.getUint32(fieldsOffset + 4, true);
                 const entryContentOffset = contentOffsetDelta === U32_NULL ?
                     -1 :
                     chunk.contentOffsetBase + contentOffsetDelta;
+                const expression = this._textDecoder.decode(expressionBytes);
                 const record = {
                     id,
                     dictionary: chunk.dictionaryName,
-                    expression: this._textDecoder.decode(expressionBytes),
-                    reading: this._textDecoder.decode(readingBytes),
+                    expression,
+                    reading: readingBytes === null ? expression : this._textDecoder.decode(readingBytes),
                     expressionReverse: null,
                     readingReverse: null,
                     entryContentOffset,
@@ -2739,17 +2723,8 @@ export class TermRecordOpfsStore {
                     score: fieldsView.getInt32(fieldsOffset + 8, true),
                     sequence: getPersistedTermSequence(chunk.lookupIndex, ordinal),
                 };
-                if (!isCurrent()) { break; }
                 this._storeRecord(record);
                 result.set(id, record);
-            }
-        }
-        for (const [id, record] of result) {
-            if (
-                generationByDictionary.get(record.dictionary) !== this._getPersistentLookupGeneration(record.dictionary) ||
-                this.getDictionaryHealth(record.dictionary).status === 'reimportRequired'
-            ) {
-                result.delete(id);
             }
         }
         return result;
