@@ -18,6 +18,7 @@
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
+import {hashTermLookupKeyBytes} from '../ext/js/dictionary/term-lookup-index.js';
 import {createTermRecordPreinternedPlanBuilder} from '../ext/js/dictionary/term-record-preinterned-plan.js';
 import {
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
@@ -121,6 +122,169 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
 }
 
 describe('TermRecordOpfsStore', () => {
+    test('uses compact artifact fields only when they reduce persisted bytes', () => {
+        const store = new TermRecordOpfsStore();
+        const encode = store._encodeArtifactRecordFields.bind(store);
+        const compact = encode(
+            {rowCount: 8, scoreList: new Int32Array([7, 7, -3, 7, -3, 7, 7, -3])},
+            new Uint32Array([0, 10, 20, 30, 40, 50, 60, 70]),
+            new Uint32Array([1, 2, 3, 4, 5, 6, 7, 8]),
+            0,
+        );
+        const compactView = new DataView(compact.buffer, compact.byteOffset, compact.byteLength);
+
+        expect(compact.byteLength).toBe(16 + (2 * 4) + (8 * 8));
+        expect(compactView.getUint32(0, true)).toBe(0x3246524d);
+        expect(compactView.getUint32(4, true)).toBe(8);
+        expect(compactView.getUint32(8, true)).toBe(2);
+        expect(compactView.getUint32(12, true)).toBe(2);
+
+        const small = encode(
+            {rowCount: 2, scoreList: new Int32Array([7, 7])},
+            new Uint32Array([0, 10]),
+            new Uint32Array([1, 2]),
+            0,
+        );
+        const largeLength = encode(
+            {rowCount: 8, scoreList: new Int32Array(8)},
+            new Uint32Array(8),
+            new Uint32Array([65535, 1, 1, 1, 1, 1, 1, 1]),
+            0,
+        );
+        expect(small.byteLength).toBe(2 * 12);
+        expect(largeLength.byteLength).toBe(8 * 12);
+    });
+
+    test('round-trips compact artifact fields through cold random-access reads', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Compact fields';
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writer = new TermRecordOpfsStore();
+        Reflect.set(writer, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        const expressions = Array.from({length: 8}, (_, i) => textEncoder.encode(`term-${String(i)}`));
+        const scores = new Int32Array([7, 7, -3, 7, -3, 7, 7, -3]);
+
+        await writer.beginImportSession();
+        await writer.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: dictionaryName,
+                rowCount: 8,
+                expressionBytesList: expressions,
+                readingBytesList: expressions,
+                readingEqualsExpressionList: new Uint8Array(8).fill(1),
+                scoreList: scores,
+                sequenceList: new Int32Array([10, 11, 12, 13, 14, 15, 16, 17]),
+            },
+            new Uint32Array([0, 10, 20, 30, 40, 50, 60, 70]),
+            new Uint32Array([1, 2, 3, 4, 5, 6, 7, 8]),
+            'raw',
+        );
+        await writer.endImportSession();
+
+        const indexBytes = [...fileBytesByName.entries()].find(([name]) => name.endsWith('.mbti'))?.[1];
+        expect(indexBytes).toBeDefined();
+        expect(new DataView(indexBytes.buffer, indexBytes.byteOffset, indexBytes.byteLength).getUint32(40 + 36, true)).toBe(2);
+
+        const reader = new TermRecordOpfsStore();
+        Reflect.set(reader, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await reader._loadShardFiles(true);
+        const records = await reader.getByIdsAsync([1, 8]);
+        expect(records.get(1)).toMatchObject({expression: 'term-0', entryContentOffset: 0, entryContentLength: 1, score: 7, sequence: 10});
+        expect(records.get(8)).toMatchObject({expression: 'term-7', entryContentOffset: 70, entryContentLength: 8, score: -3, sequence: 17});
+    });
+
+    test('preserves an explicit compact format when its byte length matches legacy rows', async () => {
+        const textEncoder = new TextEncoder();
+        const store = new TermRecordOpfsStore();
+        const expressions = Array.from({length: 8}, (_, i) => textEncoder.encode(`term-${String(i)}`));
+        const encoded = await store._encodeArtifactChunkRecords(
+            {
+                dictionary: 'Ambiguous compact fields',
+                rowCount: 8,
+                expressionBytesList: expressions,
+                readingBytesList: expressions,
+                readingEqualsExpressionList: new Uint8Array(8).fill(1),
+                scoreList: new Int32Array(8),
+                sequenceList: new Int32Array(8),
+            },
+            new Uint32Array(8),
+            new Uint32Array(8).fill(1),
+        );
+        const recordFields = new Uint8Array(8 * 12);
+        new Uint32Array(recordFields.buffer, 0, 4).set([0x3246524d, 8, 4, 2]);
+        new Int32Array(recordFields.buffer, 16, 4).set([10, 20, 30, 40]);
+        new Uint32Array(recordFields.buffer, 32, 8).set([0, 1, 2, 3, 4, 5, 6, 7]);
+        new Uint16Array(recordFields.buffer, 64, 8).fill(1);
+        new Uint16Array(recordFields.buffer, 80, 8).set([0, 1, 2, 3, 0, 1, 2, 3]);
+
+        const chunk = store._createLookupIndexChunk(1, 8, 0, encoded.lookupIndexBytes, recordFields, 2);
+
+        expect(new DataView(chunk.buffer, chunk.byteOffset, chunk.byteLength).getUint32(36, true)).toBe(2);
+    });
+
+    /** @type {Array<[string, (bytes: Uint8Array, fieldsOffset: number, count: number, scoreCount: number, fieldsLength: number) => Uint8Array]>} */
+    const compactRecordFieldCorruptions = [
+        ['header dimensions', (bytes, fieldsOffset) => {
+            new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).setUint32(fieldsOffset + 4, 9, true);
+            return bytes;
+        }],
+        ['score key bounds', (bytes, fieldsOffset, count, scoreCount, fieldsLength) => {
+            const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+            const scoreKeysOffset = fieldsOffset + 16 + (scoreCount * 4) + (count * 6);
+            view.setUint16(scoreKeysOffset, scoreCount, true);
+            view.setUint32(40 + 32, hashTermLookupKeyBytes(bytes.subarray(fieldsOffset, fieldsOffset + fieldsLength)), true);
+            return bytes;
+        }],
+        ['checksum', (bytes, fieldsOffset) => {
+            bytes[fieldsOffset + 16] ^= 0xff;
+            return bytes;
+        }],
+        ['truncation', (bytes) => bytes.slice(0, -1)],
+    ];
+    test.each(compactRecordFieldCorruptions)('requires reimport for compact record-field %s corruption', async (_name, mutate) => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Damaged compact fields';
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writer = new TermRecordOpfsStore();
+        Reflect.set(writer, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        const expressions = Array.from({length: 8}, (_, i) => textEncoder.encode(`term-${String(i)}`));
+        await writer.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: dictionaryName,
+                rowCount: 8,
+                expressionBytesList: expressions,
+                readingBytesList: expressions,
+                readingEqualsExpressionList: new Uint8Array(8).fill(1),
+                scoreList: new Int32Array([7, 7, -3, 7, -3, 7, 7, -3]),
+                sequenceList: new Int32Array(8),
+            },
+            new Uint32Array(8),
+            new Uint32Array(8).fill(8),
+            'raw',
+        );
+        await writer._closeAllWritables();
+        const indexFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbti'));
+        if (typeof indexFileName !== 'string') { throw new Error('Expected compact index'); }
+        const indexBytes = fileBytesByName.get(indexFileName);
+        if (typeof indexBytes === 'undefined') { throw new Error('Expected compact index bytes'); }
+        const view = new DataView(indexBytes.buffer, indexBytes.byteOffset, indexBytes.byteLength);
+        const count = view.getUint32(40 + 4, true);
+        const fieldsOffset = 40 + 40 + view.getUint32(40 + 16, true);
+        const scoreCount = view.getUint32(fieldsOffset + 8, true);
+        const fieldsLength = 16 + (scoreCount * 4) + (count * 8);
+        fileBytesByName.set(indexFileName, mutate(indexBytes, fieldsOffset, count, scoreCount, fieldsLength));
+
+        const reader = new TermRecordOpfsStore();
+        Reflect.set(reader, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await reader._loadShardFiles(false);
+        await reader.ensureDictionariesLoaded([dictionaryName]);
+
+        expect(reader.findTermIds(dictionaryName, 'term-0', 'expression')).toEqual([]);
+        expect(reader.getDictionaryHealth(dictionaryName).status).toBe('reimportRequired');
+    });
+
     test('starts authoritative-container writes without persisting record payloads', async () => {
         const store = new TermRecordOpfsStore();
         const fileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({}));
@@ -3502,6 +3666,7 @@ describe('TermRecordOpfsStore', () => {
                 contentOffsetBase: 0,
                 lookupIndexBytes: new Uint8Array([2]),
                 recordFields: new Uint8Array(chunk.rowCount * 12),
+                recordFieldsFormat: 1,
                 validationMs: 0,
                 recordFieldEncodeMs: 0,
                 lookupIndexEncodeMs: 0,
@@ -3601,6 +3766,7 @@ describe('TermRecordOpfsStore', () => {
                 contentOffsetBase: 0,
                 lookupIndexBytes: new Uint8Array([2]),
                 recordFields: new Uint8Array(runChunk.rowCount * 12),
+                recordFieldsFormat: 1,
                 validationMs: 0,
                 recordFieldEncodeMs: 0,
                 lookupIndexEncodeMs: 0,

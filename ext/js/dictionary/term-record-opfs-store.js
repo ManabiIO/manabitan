@@ -88,6 +88,11 @@ const LOOKUP_INDEX_MAGIC_BYTES = 8;
 const LOOKUP_INDEX_FILE_HEADER_BYTES = 40;
 const LOOKUP_INDEX_CHUNK_HEADER_BYTES = 40;
 const LOOKUP_INDEX_RECORD_FIELDS_BYTES = 12;
+const LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY = 1;
+const LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT = 2;
+const COMPACT_RECORD_FIELDS_MAGIC = 0x3246524d;
+const COMPACT_RECORD_FIELDS_HEADER_BYTES = 16;
+const COMPACT_RECORD_FIELDS_BYTES_PER_ROW = 8;
 const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
 const EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES = 2 * 1024 * 1024;
 const MAX_COMPACT_LOOKUP_INDEX_ROWS = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS;
@@ -96,6 +101,107 @@ const STORAGE_READ_RETRY_COUNT = 2;
 const REPAIR_YIELD_BUDGET_MS = 8;
 const MAX_LOOKUP_INDEX_OVERHEAD_BYTES = 64 * 1024 * 1024;
 const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
+
+/**
+ * @param {Uint8Array} content
+ * @param {number} offset
+ * @param {number} count
+ * @param {number} format
+ * @returns {number}
+ */
+function getRecordFieldsByteLength(content, offset, count, format) {
+    if (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY) {
+        return count * LOOKUP_INDEX_RECORD_FIELDS_BYTES;
+    }
+    if (
+        format !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT ||
+        offset < 0 ||
+        (offset + COMPACT_RECORD_FIELDS_HEADER_BYTES) > content.byteLength
+    ) {
+        throw new Error('Invalid compact term-record fields header');
+    }
+    const view = new DataView(
+        content.buffer,
+        content.byteOffset + offset,
+        COMPACT_RECORD_FIELDS_HEADER_BYTES,
+    );
+    const scoreCount = view.getUint32(8, true);
+    if (
+        view.getUint32(0, true) !== COMPACT_RECORD_FIELDS_MAGIC ||
+        view.getUint32(4, true) !== count ||
+        scoreCount === 0 ||
+        scoreCount >= U16_NULL ||
+        view.getUint32(12, true) !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT
+    ) {
+        throw new Error('Invalid compact term-record fields dimensions');
+    }
+    const byteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
+        (scoreCount * 4) +
+        (count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
+    if (!Number.isSafeInteger(byteLength)) {
+        throw new Error('Compact term-record fields length is unsafe');
+    }
+    return byteLength;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {number} count
+ * @returns {{offsets: Uint32Array, lengths: Uint16Array, scoreKeys: Uint16Array, scores: Int32Array}}
+ */
+function parseCompactRecordFields(bytes, count) {
+    const byteLength = getRecordFieldsByteLength(bytes, 0, count, LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT);
+    if (byteLength !== bytes.byteLength) {
+        throw new Error('Compact term-record fields length is invalid');
+    }
+    const header = new Uint32Array(bytes.buffer, bytes.byteOffset, COMPACT_RECORD_FIELDS_HEADER_BYTES / 4);
+    const scoreCount = header[2];
+    let cursor = COMPACT_RECORD_FIELDS_HEADER_BYTES;
+    const scores = new Int32Array(bytes.buffer, bytes.byteOffset + cursor, scoreCount);
+    cursor += scoreCount * 4;
+    const offsets = new Uint32Array(bytes.buffer, bytes.byteOffset + cursor, count);
+    cursor += count * 4;
+    const lengths = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, count);
+    cursor += count * 2;
+    const scoreKeys = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, count);
+    for (const scoreKey of scoreKeys) {
+        if (scoreKey >= scoreCount) {
+            throw new Error('Compact term-record score key is invalid');
+        }
+    }
+    return {offsets, lengths, scoreKeys, scores};
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {number} count
+ * @param {number} format
+ * @param {number} contentOffsetBase
+ * @returns {{offsets: Uint32Array, lengths: Uint16Array, scoreKeys: Uint16Array, scores: Int32Array}|null}
+ */
+function validateRecordFields(bytes, count, format, contentOffsetBase) {
+    const compactFields = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT ?
+        parseCompactRecordFields(bytes, count) :
+        null;
+    if (contentOffsetBase <= Number.MAX_SAFE_INTEGER - MAX_CONTENT_OFFSET_DELTA) {
+        return compactFields;
+    }
+    const legacyView = compactFields === null ?
+        new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength) :
+        null;
+    for (let row = 0; row < count; ++row) {
+        const contentOffsetDelta = compactFields === null ?
+            /** @type {DataView} */ (legacyView).getUint32(row * LOOKUP_INDEX_RECORD_FIELDS_BYTES, true) :
+            compactFields.offsets[row];
+        if (
+            contentOffsetDelta !== U32_NULL &&
+            !Number.isSafeInteger(contentOffsetBase + contentOffsetDelta)
+        ) {
+            throw new Error('Term-record content offset is unsafe');
+        }
+    }
+    return compactFields;
+}
 
 /**
  * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
@@ -539,6 +645,8 @@ class DenseIdRecordStore {
  * @property {string} contentDictName
  * @property {number} contentOffsetBase
  * @property {Uint8Array} recordFields
+ * @property {number} recordFieldsFormat
+ * @property {{offsets: Uint32Array, lengths: Uint16Array, scoreKeys: Uint16Array, scores: Int32Array}|null} compactRecordFields
  * @property {import('./term-lookup-index.js').PersistedTermLookupIndex} lookupIndex
  */
 
@@ -2046,6 +2154,7 @@ export class TermRecordOpfsStore {
                 encodedChunk.contentOffsetBase,
                 encodedChunk.lookupIndexBytes,
                 encodedChunk.recordFields,
+                encodedChunk.recordFieldsFormat,
             );
             appendWriteMs += safePerformance.now() - tAppendStart;
             runStart = runEnd;
@@ -2608,19 +2717,26 @@ export class TermRecordOpfsStore {
                 this.getDictionaryHealth(chunk.dictionaryName).status === 'reimportRequired' ||
                 !(this._persistentRecordChunksByDictionary.get(chunk.dictionaryName) ?? []).includes(chunk)
             ) { continue; }
-            const fieldsView = new DataView(
-                chunk.recordFields.buffer,
-                chunk.recordFields.byteOffset,
-                chunk.recordFields.byteLength,
-            );
+            const compactFields = chunk.compactRecordFields;
+            const fieldsView = compactFields === null ?
+                new DataView(
+                    chunk.recordFields.buffer,
+                    chunk.recordFields.byteOffset,
+                    chunk.recordFields.byteLength,
+                ) :
+                null;
             for (const id of chunkIds) {
                 const ordinal = id - chunk.firstId;
                 const fieldsOffset = ordinal * LOOKUP_INDEX_RECORD_FIELDS_BYTES;
                 const expressionBytes = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'expression');
                 if (expressionBytes === null) { continue; }
                 const readingBytes = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'reading');
-                const contentOffsetDelta = fieldsView.getUint32(fieldsOffset, true);
-                const rawContentLength = fieldsView.getUint32(fieldsOffset + 4, true);
+                const contentOffsetDelta = compactFields === null ?
+                    /** @type {DataView} */ (fieldsView).getUint32(fieldsOffset, true) :
+                    compactFields.offsets[ordinal];
+                const rawContentLength = compactFields === null ?
+                    /** @type {DataView} */ (fieldsView).getUint32(fieldsOffset + 4, true) :
+                    compactFields.lengths[ordinal];
                 const entryContentOffset = contentOffsetDelta === U32_NULL ?
                     -1 :
                     chunk.contentOffsetBase + contentOffsetDelta;
@@ -2633,9 +2749,11 @@ export class TermRecordOpfsStore {
                     expressionReverse: null,
                     readingReverse: null,
                     entryContentOffset,
-                    entryContentLength: rawContentLength === U32_NULL ? -1 : rawContentLength,
+                    entryContentLength: rawContentLength === (compactFields === null ? U32_NULL : U16_NULL) ? -1 : rawContentLength,
                     entryContentDictName: chunk.contentDictName,
-                    score: fieldsView.getInt32(fieldsOffset + 8, true),
+                    score: compactFields === null ?
+                        /** @type {DataView} */ (fieldsView).getInt32(fieldsOffset + 8, true) :
+                        compactFields.scores[compactFields.scoreKeys[ordinal]],
                     sequence: getPersistedTermSequence(chunk.lookupIndex, ordinal),
                 };
                 this._storeRecord(record);
@@ -2847,9 +2965,17 @@ export class TermRecordOpfsStore {
             const firstId = view.getUint32(cursor, true);
             const count = view.getUint32(cursor + 4, true);
             const payloadLength = view.getUint32(cursor + 16, true);
+            const recordFieldsFormat = view.getUint32(cursor + 36, true);
             if (firstId <= 0 || count === 0 || (firstId + count - 1) > 0xffffffff) { return null; }
             maxId = Math.max(maxId, firstId + count - 1);
-            cursor += LOOKUP_INDEX_CHUNK_HEADER_BYTES + payloadLength + (count * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
+            const recordFieldsOffset = cursor + LOOKUP_INDEX_CHUNK_HEADER_BYTES + payloadLength;
+            let recordFieldsLength;
+            try {
+                recordFieldsLength = getRecordFieldsByteLength(content, recordFieldsOffset, count, recordFieldsFormat);
+            } catch (_) {
+                return null;
+            }
+            cursor = recordFieldsOffset + recordFieldsLength;
             if (cursor > content.byteLength) { return null; }
         }
         return cursor === content.byteLength && maxId > 0 ? maxId : null;
@@ -3177,7 +3303,7 @@ export class TermRecordOpfsStore {
                 }
                 const minimumIndexBytes = LOOKUP_INDEX_FILE_HEADER_BYTES +
                 (chunkCount * LOOKUP_INDEX_CHUNK_HEADER_BYTES) +
-                (expectedRecordCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
+                (expectedRecordCount * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
                 const maximumIndexBytes = Math.max(
                     MAX_LOOKUP_INDEX_OVERHEAD_BYTES,
                     Math.min(
@@ -3220,14 +3346,23 @@ export class TermRecordOpfsStore {
                     const recordFieldsHash = view.getUint32(cursor, true); cursor += 4;
                     const formatFlags = view.getUint32(cursor, true); cursor += 4;
                     const payloadEnd = cursor + payloadLength;
-                    const recordFieldsEnd = payloadEnd + (count * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
+                    let recordFieldsLength;
+                    try {
+                        recordFieldsLength = getRecordFieldsByteLength(content, payloadEnd, count, formatFlags);
+                    } catch (error) {
+                        throw new PersistentLookupIndexError('invalid', `Lookup index record fields are invalid for ${state.fileName}`, error);
+                    }
+                    const recordFieldsEnd = payloadEnd + recordFieldsLength;
                     if (
                         firstId <= 0 ||
                         count === 0 ||
                         (firstId + count - 1) > 0xffffffff ||
                         baseLength === 0 ||
                         baseLength >= payloadLength ||
-                        formatFlags !== 1 ||
+                        (
+                            formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY &&
+                            formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT
+                        ) ||
                         recordFieldsEnd > content.byteLength
                     ) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index chunk metadata is invalid for ${state.fileName}`);
@@ -3252,27 +3387,16 @@ export class TermRecordOpfsStore {
                     if (hashLookupIndexBytes(recordFields) !== recordFieldsHash) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index record fields checksum failed for ${state.fileName}`);
                     }
-                    if (contentOffsetBase > Number.MAX_SAFE_INTEGER - MAX_CONTENT_OFFSET_DELTA) {
-                        const recordFieldsView = new DataView(
-                            recordFields.buffer,
-                            recordFields.byteOffset,
-                            recordFields.byteLength,
+                    let compactRecordFields;
+                    try {
+                        compactRecordFields = validateRecordFields(
+                            recordFields,
+                            count,
+                            formatFlags,
+                            contentOffsetBase,
                         );
-                        for (let row = 0; row < count; ++row) {
-                            const contentOffsetDelta = recordFieldsView.getUint32(
-                                row * LOOKUP_INDEX_RECORD_FIELDS_BYTES,
-                                true,
-                            );
-                            if (
-                                contentOffsetDelta !== U32_NULL &&
-                                !Number.isSafeInteger(contentOffsetBase + contentOffsetDelta)
-                            ) {
-                                throw new PersistentLookupIndexError(
-                                    'invalid',
-                                    `Lookup index record offset is unsafe for ${state.fileName}`,
-                                );
-                            }
-                        }
+                    } catch (error) {
+                        throw new PersistentLookupIndexError('invalid', `Lookup index record fields are invalid for ${state.fileName}`, error);
                     }
                     let lookupIndex;
                     try {
@@ -3295,6 +3419,8 @@ export class TermRecordOpfsStore {
                         contentDictName: state.sharedContentDictName ?? 'raw',
                         contentOffsetBase,
                         recordFields,
+                        recordFieldsFormat: formatFlags,
+                        compactRecordFields,
                         lookupIndex,
                     });
                     actualRecordCount += count;
@@ -3573,12 +3699,21 @@ export class TermRecordOpfsStore {
                     lastId > 0xffffffff ||
                     baseLength === 0 ||
                     baseLength >= payloadLength ||
-                    formatFlags !== 1
+                    (
+                        formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY &&
+                        formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT
+                    )
                 ) {
                     throw new TermRecordIntegrityError(`Authoritative chunk metadata is invalid: ${state.fileName}`);
                 }
                 const payloadEnd = cursor + payloadLength;
-                const recordFieldsEnd = payloadEnd + (count * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
+                let recordFieldsLength;
+                try {
+                    recordFieldsLength = getRecordFieldsByteLength(content, payloadEnd, count, formatFlags);
+                } catch (error) {
+                    throw new TermRecordIntegrityError(`Authoritative chunk fields are invalid: ${state.fileName}: ${String(error)}`);
+                }
+                const recordFieldsEnd = payloadEnd + recordFieldsLength;
                 if (!Number.isSafeInteger(recordFieldsEnd) || recordFieldsEnd > content.byteLength) {
                     throw new TermRecordIntegrityError(`Authoritative chunk payload is truncated: ${state.fileName}`);
                 }
@@ -3600,6 +3735,11 @@ export class TermRecordOpfsStore {
                 ) {
                     throw new TermRecordIntegrityError(`Authoritative term-record bytes are damaged: ${state.fileName}`);
                 }
+                try {
+                    validateRecordFields(recordFields, count, formatFlags, contentOffsetBase);
+                } catch (error) {
+                    throw new TermRecordIntegrityError(`Authoritative term-record fields are invalid: ${state.fileName}: ${String(error)}`);
+                }
                 let lookupPayload = payload;
                 if (!derivedValid) {
                     lookupPayload = rebuildPersistedTermLookupIndexFromBase(base);
@@ -3616,6 +3756,7 @@ export class TermRecordOpfsStore {
                     contentOffsetBase,
                     lookupPayload,
                     recordFields,
+                    formatFlags,
                 );
                 await writable.write(indexChunk);
                 ++chunkCount;
@@ -4414,13 +4555,93 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Encodes the hot artifact path as columnar random-access fields. Content
+     * lengths use u16 and repeated scores use per-chunk u16 dictionary keys;
+     * unusual chunks fall back to the legacy fixed-width rows.
+     * @param {{rowCount: number, scoreList: number[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+     * @param {number[]|Uint32Array|Float64Array} contentOffsets
+     * @param {number[]|Uint32Array} contentLengths
+     * @param {number} contentOffsetBase
+     * @returns {Uint8Array}
+     */
+    _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
+        const count = chunk.rowCount;
+        const offsets = new Uint32Array(count);
+        const lengths = new Uint16Array(count);
+        const scoreKeys = new Uint16Array(count);
+        /** @type {number[]} */
+        const scores = [];
+        /** @type {Map<number, number>} */
+        const scoreIndexes = new Map();
+        let compact = true;
+        for (let i = 0; i < count; ++i) {
+            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+            if (contentLength >= U16_NULL) {
+                compact = false;
+                break;
+            }
+            offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
+            lengths[i] = contentLength < 0 ? U16_NULL : contentLength;
+            const score = chunk.scoreList[i] ?? 0;
+            let scoreIndex = scoreIndexes.get(score);
+            if (typeof scoreIndex !== 'number') {
+                scoreIndex = scores.length;
+                if (scoreIndex >= U16_NULL) {
+                    compact = false;
+                    break;
+                }
+                scoreIndexes.set(score, scoreIndex);
+                scores.push(score);
+            }
+            scoreKeys[i] = scoreIndex;
+        }
+        const compactByteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
+            (scores.length * 4) +
+            (count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
+        if (
+            !compact ||
+            scores.length === 0 ||
+            compactByteLength >= count * LOOKUP_INDEX_RECORD_FIELDS_BYTES
+        ) {
+            const legacy = new Uint8Array(count * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
+            const legacyU32 = new Uint32Array(legacy.buffer);
+            const legacyI32 = new Int32Array(legacy.buffer);
+            for (let i = 0; i < count; ++i) {
+                const fieldOffset = i * 3;
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+                legacyU32[fieldOffset] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
+                legacyU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength;
+                legacyI32[fieldOffset + 2] = chunk.scoreList[i] ?? 0;
+            }
+            return legacy;
+        }
+        const output = new Uint8Array(compactByteLength);
+        const header = new Uint32Array(output.buffer, 0, COMPACT_RECORD_FIELDS_HEADER_BYTES / 4);
+        header[0] = COMPACT_RECORD_FIELDS_MAGIC;
+        header[1] = count;
+        header[2] = scores.length;
+        header[3] = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT;
+        let cursor = COMPACT_RECORD_FIELDS_HEADER_BYTES;
+        new Int32Array(output.buffer, cursor, scores.length).set(scores);
+        cursor += scores.length * 4;
+        new Uint32Array(output.buffer, cursor, count).set(offsets);
+        cursor += count * 4;
+        new Uint16Array(output.buffer, cursor, count).set(lengths);
+        cursor += count * 2;
+        new Uint16Array(output.buffer, cursor, count).set(scoreKeys);
+        return output;
+    }
+
+    /**
      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {Uint8Array|null} [preparedLookupIndexBytes=null]
      * @param {number|null} [validatedContentOffsetBase=null]
-     * @returns {Promise<{contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
+     * @returns {Promise<{contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array, recordFieldsFormat: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
     async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null, validatedContentOffsetBase = null) {
         if (chunk.rowCount === 0) {
@@ -4428,6 +4649,7 @@ export class TermRecordOpfsStore {
                 contentOffsetBase: 0,
                 lookupIndexBytes: new Uint8Array(0),
                 recordFields: new Uint8Array(0),
+                recordFieldsFormat: LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
                 validationMs: 0,
                 recordFieldEncodeMs: 0,
                 lookupIndexEncodeMs: 0,
@@ -4453,17 +4675,15 @@ export class TermRecordOpfsStore {
         }
         const validationMs = safePerformance.now() - tValidationStart;
         const tRecordEncodeStart = safePerformance.now();
-        const recordFields = new Uint8Array(chunk.rowCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
-        const recordFieldsU32 = new Uint32Array(recordFields.buffer);
-        const recordFieldsI32 = new Int32Array(recordFields.buffer);
-        for (let i = 0; i < chunk.rowCount; ++i) {
-            const fieldOffset = i * 3;
-            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
-            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
-            recordFieldsU32[fieldOffset] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
-            recordFieldsU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength;
-            recordFieldsI32[fieldOffset + 2] = chunk.scoreList[i] ?? 0;
-        }
+        const recordFields = this._encodeArtifactRecordFields(
+            chunk,
+            contentOffsets,
+            contentLengths,
+            contentOffsetBase,
+        );
+        const recordFieldsFormat = recordFields.byteLength === chunk.rowCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES ?
+            LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY :
+            LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT;
         const recordFieldEncodeMs = safePerformance.now() - tRecordEncodeStart;
         const tLookupIndexEncodeStart = safePerformance.now();
         let lookupIndexBytes = preparedLookupIndexBytes;
@@ -4489,6 +4709,7 @@ export class TermRecordOpfsStore {
             contentOffsetBase,
             lookupIndexBytes,
             recordFields,
+            recordFieldsFormat,
             validationMs,
             recordFieldEncodeMs,
             lookupIndexEncodeMs: preparedLookupIndexBytes === null ? safePerformance.now() - tLookupIndexEncodeStart : 0,
@@ -4503,6 +4724,7 @@ export class TermRecordOpfsStore {
      * @param {number} contentOffsetBase
      * @param {Uint8Array|null} [lookupIndexBytes=null]
      * @param {Uint8Array|null} [recordFields=null]
+     * @param {number} [recordFieldsFormat=LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY]
      * @returns {Promise<void>}
      */
     async _appendEncodedChunk(
@@ -4513,6 +4735,7 @@ export class TermRecordOpfsStore {
         contentOffsetBase = 0,
         lookupIndexBytes = null,
         recordFields = null,
+        recordFieldsFormat = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
     ) {
         if (count <= 0) { return; }
         await this._validateShardAppendFormat(state);
@@ -4547,6 +4770,7 @@ export class TermRecordOpfsStore {
                 contentOffsetBase,
                 lookupIndexBytes,
                 recordFields,
+                recordFieldsFormat,
             );
             state.pendingLookupIndexChunks.push(lookupIndexChunk);
             state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;
@@ -4633,6 +4857,7 @@ export class TermRecordOpfsStore {
      * @param {number} contentOffsetBase
      * @param {Uint8Array} payload
      * @param {Uint8Array|null} recordFields
+     * @param {number} [recordFieldsFormat=LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY]
      * @returns {Uint8Array}
      * @throws {Error} If the authoritative fields do not match the declared record count.
      */
@@ -4642,10 +4867,17 @@ export class TermRecordOpfsStore {
         contentOffsetBase,
         payload,
         recordFields,
+        recordFieldsFormat = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
     ) {
-        if (!(recordFields instanceof Uint8Array) || recordFields.byteLength !== count * LOOKUP_INDEX_RECORD_FIELDS_BYTES) {
+        if (!(recordFields instanceof Uint8Array)) {
             throw new Error('Invalid authoritative term-record fields');
         }
+        if (
+            getRecordFieldsByteLength(recordFields, 0, count, recordFieldsFormat) !== recordFields.byteLength
+        ) {
+            throw new Error('Invalid authoritative term-record fields');
+        }
+        validateRecordFields(recordFields, count, recordFieldsFormat, contentOffsetBase);
         const {base, derived} = splitPersistedTermLookupIndex(payload);
         const output = new Uint8Array(
             LOOKUP_INDEX_CHUNK_HEADER_BYTES +
@@ -4661,7 +4893,7 @@ export class TermRecordOpfsStore {
         view.setUint32(24, hashLookupIndexBytes(base), true);
         view.setUint32(28, hashLookupIndexBytes(derived), true);
         view.setUint32(32, hashLookupIndexBytes(recordFields), true);
-        view.setUint32(36, 1, true);
+        view.setUint32(36, recordFieldsFormat, true);
         output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);
         output.set(recordFields, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);
         return output;
