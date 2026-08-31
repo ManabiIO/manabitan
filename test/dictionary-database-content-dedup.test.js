@@ -1816,7 +1816,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         const importing = harness.run();
 
         await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
-        expect(Reflect.get(harness.database, '_inFlightTermContentSourceByStorageKey').size).toBe(1);
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(1);
         const findMatching = Reflect.get(harness.database, '_findMatchingTermEntryContentMeta').bind(harness.database);
         await expect(findMatching(10, 20, Uint8Array.of(1, 2, 3))).resolves.toMatchObject({
             offset: 100,
@@ -1826,7 +1826,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
 
         harness.resolveContent();
         await vi.waitFor(() => {
-            expect(Reflect.get(harness.database, '_inFlightTermContentSourceByStorageKey').size).toBe(0);
+            expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0);
         });
         harness.resolveRecords();
         await importing;
@@ -1848,7 +1848,46 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         harness.resolveContent();
         harness.resolveRecords();
         await importing;
-        expect(Reflect.get(harness.database, '_inFlightTermContentSourceByStorageKey').size).toBe(0);
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0);
+    });
+
+    test('finds ordered and unordered in-flight content without per-entry maps', () => {
+        const database = new DictionaryDatabase();
+        const register = Reflect.get(database, '_registerInFlightTermContentSources').bind(database);
+        const find = Reflect.get(database, '_findInFlightTermContentSource').bind(database);
+        const buffer = Uint8Array.of(1, 2, 3, 4, 5, 6);
+        const unregisterOrdered = register(
+            new Float64Array([100, 200, 300]),
+            new Uint32Array([2, 2, 2]),
+            'raw',
+            [],
+            {
+                buffer,
+                offsets: new Uint32Array([0, 2, 4]),
+                lengths: new Uint32Array([2, 2, 2]),
+            },
+        );
+
+        expect(find(200, 2, 'raw')).toEqual({buffer, offset: 2, length: 2});
+        expect(find(200, 1, 'raw')).toBeUndefined();
+        expect(find(200, 2, 'other')).toBeUndefined();
+
+        const unorderedBytes = [Uint8Array.of(7), Uint8Array.of(8)];
+        const unregisterUnordered = register(
+            [500, 400],
+            [1, 1],
+            ['a', 'b'],
+            unorderedBytes,
+            null,
+        );
+        expect(find(400, 1, 'b')).toEqual({buffer: unorderedBytes[1], offset: 0, length: 1});
+        expect(() => register([500], [1], ['a'], [Uint8Array.of(9)], null)).toThrow(
+            'Duplicate in-flight term content storage reference',
+        );
+
+        unregisterUnordered();
+        unregisterOrdered();
+        expect(Reflect.get(database, '_inFlightTermContentSourceBatches').size).toBe(0);
     });
 
     test('bounds persisted signatures for short slab content', async () => {
@@ -1911,7 +1950,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
 
         await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
         expect(harness.appendRecords.mock.calls[0][1]).toStrictEqual(new Float64Array([100]));
-        expect(Reflect.get(harness.database, '_inFlightTermContentSourceByStorageKey').size).toBe(1);
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(1);
         harness.rejectContent(new Error('injected reserved content failure'));
         harness.resolveRecords();
 
@@ -1919,7 +1958,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(getMeta(harness.database, 10, 20)).toBeUndefined();
         expect(harness.plan.resolvedFlags).toStrictEqual(new Uint8Array([0]));
         expect(harness.plan.nextUnresolvedUniqueIndex).toBe(0);
-        expect(Reflect.get(harness.database, '_inFlightTermContentSourceByStorageKey').size).toBe(0);
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0);
         expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
 
         const resolve = Reflect.get(harness.database, '_resolveArtifactTermContentDedup').bind(harness.database);

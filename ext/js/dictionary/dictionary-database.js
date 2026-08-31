@@ -97,6 +97,18 @@ const BULK_IMPORT_STATE_FINALIZING = 'finalizing';
 const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
 
 /**
+ * @typedef {object} InFlightTermContentSourceBatch
+ * @property {number[]|Float64Array} offsets
+ * @property {number[]|Uint32Array} lengths
+ * @property {string|string[]} dictNames
+ * @property {Uint8Array[]} contentBytes
+ * @property {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} contentSpans
+ * @property {boolean} sortedOffsets
+ * @property {number} minimumOffset
+ * @property {number} maximumOffset
+ */
+
+/**
  * @typedef {object} ArtifactTermContentDedupPlan
  * @property {Uint8Array} resolvedFlags
  * @property {Float64Array} resolvedOffsets
@@ -523,8 +535,8 @@ export class DictionaryDatabase {
         this._termEntryContentMetaFreeIndexes = [];
         /** @type {Map<string, Array<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}>>} */
         this._termEntryContentMetaCollisionsByHashPair = new Map();
-        /** @type {Map<string, {buffer: Uint8Array, offset: number, length: number}>} */
-        this._inFlightTermContentSourceByStorageKey = new Map();
+        /** @type {Set<InFlightTermContentSourceBatch>} */
+        this._inFlightTermContentSourceBatches = new Set();
         /** @type {boolean} */
         this._termEntryContentHasExistingRows = true;
         /** @type {boolean} */
@@ -5216,7 +5228,7 @@ export class DictionaryDatabase {
         this._termEntryContentMetaDenseCount = 0;
         this._termEntryContentMetaFreeIndexes.length = 0;
         this._termEntryContentMetaCollisionsByHashPair.clear();
-        this._inFlightTermContentSourceByStorageKey.clear();
+        this._inFlightTermContentSourceBatches.clear();
     }
 
     /**
@@ -5408,11 +5420,7 @@ export class DictionaryDatabase {
      */
     async _findMatchingPersistedTermEntryContentMeta(candidates, contentBytes) {
         for (const meta of candidates) {
-            const inFlightSource = this._inFlightTermContentSourceByStorageKey.size === 0 ?
-                void 0 :
-                this._inFlightTermContentSourceByStorageKey.get(
-                    this._getTermContentStorageKey(meta.offset, meta.length, meta.dictName),
-                );
+            const inFlightSource = this._findInFlightTermContentSource(meta.offset, meta.length, meta.dictName);
             if (typeof inFlightSource !== 'undefined') {
                 if (
                     this._termContentBytesEqualSpan(
@@ -5429,11 +5437,11 @@ export class DictionaryDatabase {
             const readResult = await this._readTermEntryContentBytesDetailed(meta.offset, meta.length, meta.dictName);
             if (readResult.status !== 'ok') {
                 const candidateKey = this._getTermContentStorageKey(meta.offset, meta.length, meta.dictName);
-                const activeKeys = [...this._inFlightTermContentSourceByStorageKey.keys()].slice(0, 3);
+                const {count: inFlightCount, sampleKeys: activeKeys} = this._getInFlightTermContentSourceDiagnostics();
                 throw new TermContentLookupReadError(
                     readResult.status,
                     `${readResult.reason}; exact dedupe candidate=${JSON.stringify(candidateKey)} ` +
-                    `inFlightCount=${this._inFlightTermContentSourceByStorageKey.size} ` +
+                    `inFlightCount=${inFlightCount} ` +
                     `inFlightKeys=${JSON.stringify(activeKeys)}`,
                 );
             }
@@ -5489,11 +5497,7 @@ export class DictionaryDatabase {
                 let queued = false;
                 while (nextCandidateIndexes[i] < candidates.length) {
                     const meta = candidates[nextCandidateIndexes[i]++];
-                    const inFlightSource = this._inFlightTermContentSourceByStorageKey.size === 0 ?
-                        void 0 :
-                        this._inFlightTermContentSourceByStorageKey.get(
-                            this._getTermContentStorageKey(meta.offset, meta.length, meta.dictName),
-                        );
+                    const inFlightSource = this._findInFlightTermContentSource(meta.offset, meta.length, meta.dictName);
                     if (typeof inFlightSource !== 'undefined') {
                         if (
                             this._termContentBytesEqualSpan(
@@ -5562,11 +5566,11 @@ export class DictionaryDatabase {
      */
     _createExactDedupeReadError(meta, readResult) {
         const candidateKey = this._getTermContentStorageKey(meta.offset, meta.length, meta.dictName);
-        const activeKeys = [...this._inFlightTermContentSourceByStorageKey.keys()].slice(0, 3);
+        const {count: inFlightCount, sampleKeys: activeKeys} = this._getInFlightTermContentSourceDiagnostics();
         return new TermContentLookupReadError(
             readResult.status,
             `${readResult.reason}; exact dedupe candidate=${JSON.stringify(candidateKey)} ` +
-            `inFlightCount=${this._inFlightTermContentSourceByStorageKey.size} ` +
+            `inFlightCount=${inFlightCount} ` +
             `inFlightKeys=${JSON.stringify(activeKeys)}`,
         );
     }
@@ -5579,6 +5583,65 @@ export class DictionaryDatabase {
      */
     _getTermContentStorageKey(offset, length, dictName) {
         return `${dictName}\0${offset}:${length}`;
+    }
+
+    /**
+     * @param {number} offset
+     * @param {number} length
+     * @param {string} dictName
+     * @returns {{buffer: Uint8Array, offset: number, length: number}|undefined}
+     */
+    _findInFlightTermContentSource(offset, length, dictName) {
+        for (const batch of this._inFlightTermContentSourceBatches) {
+            if (offset < batch.minimumOffset || offset > batch.maximumOffset) { continue; }
+            let start = 0;
+            let end = batch.offsets.length;
+            if (batch.sortedOffsets) {
+                while (start < end) {
+                    const mid = (start + end) >>> 1;
+                    if (batch.offsets[mid] < offset) {
+                        start = mid + 1;
+                    } else {
+                        end = mid;
+                    }
+                }
+            }
+            for (let i = start; i < batch.offsets.length; ++i) {
+                const candidateOffset = batch.offsets[i];
+                if (batch.sortedOffsets && candidateOffset > offset) { break; }
+                if (candidateOffset !== offset || batch.lengths[i] !== length) { continue; }
+                const candidateDictName = Array.isArray(batch.dictNames) ? batch.dictNames[i] : batch.dictNames;
+                if (candidateDictName !== dictName) { continue; }
+                if (batch.contentSpans === null) {
+                    const buffer = batch.contentBytes[i];
+                    return {buffer, offset: 0, length: buffer.byteLength};
+                }
+                return {
+                    buffer: batch.contentSpans.buffer,
+                    offset: batch.contentSpans.offsets[i],
+                    length: batch.contentSpans.lengths[i],
+                };
+            }
+        }
+        return void 0;
+    }
+
+    /**
+     * Builds diagnostic strings only on a read failure, not for every imported
+     * definition registered during the normal path.
+     * @returns {{count: number, sampleKeys: string[]}}
+     */
+    _getInFlightTermContentSourceDiagnostics() {
+        let count = 0;
+        const sampleKeys = [];
+        for (const batch of this._inFlightTermContentSourceBatches) {
+            count += batch.offsets.length;
+            for (let i = 0; i < batch.offsets.length && sampleKeys.length < 3; ++i) {
+                const dictName = Array.isArray(batch.dictNames) ? batch.dictNames[i] : batch.dictNames;
+                sampleKeys.push(this._getTermContentStorageKey(batch.offsets[i], batch.lengths[i], dictName));
+            }
+        }
+        return {count, sampleKeys};
     }
 
     /**
@@ -5603,51 +5666,92 @@ export class DictionaryDatabase {
         if (pendingLengths.length !== count) {
             throw new RangeError('In-flight term content offset and length counts do not match');
         }
-        /** @type {Array<{key: string, source: {buffer: Uint8Array, offset: number, length: number}}>} */
-        const registrations = [];
-        try {
-            for (let i = 0; i < count; ++i) {
-                const buffer = pendingContentSpans === null ? pendingContentBytes[i] : pendingContentSpans.buffer;
-                const sourceOffset = pendingContentSpans === null ? 0 : pendingContentSpans.offsets[i];
-                const sourceLength = pendingContentSpans === null ? buffer?.byteLength : pendingContentSpans.lengths[i];
-                const persistedLength = pendingLengths[i];
-                const dictName = Array.isArray(pendingResolvedDictNames) ?
-                    pendingResolvedDictNames[i] :
-                    pendingResolvedDictNames;
-                if (
-                    !(buffer instanceof Uint8Array) ||
-                    !Number.isSafeInteger(sourceOffset) ||
-                    sourceOffset < 0 ||
-                    !Number.isSafeInteger(sourceLength) ||
-                    sourceLength < 0 ||
-                    sourceLength > buffer.byteLength - sourceOffset ||
-                    sourceLength !== persistedLength ||
-                    typeof dictName !== 'string'
-                ) {
-                    throw new RangeError(`Invalid in-flight term content source at index ${i}`);
+        let sortedOffsets = true;
+        let minimumOffset = Infinity;
+        let maximumOffset = -Infinity;
+        /** @type {Set<string>|null} */
+        let unsortedKeys = null;
+        for (let i = 0; i < count; ++i) {
+            const buffer = pendingContentSpans === null ? pendingContentBytes[i] : pendingContentSpans.buffer;
+            const sourceOffset = pendingContentSpans === null ? 0 : pendingContentSpans.offsets[i];
+            const sourceLength = pendingContentSpans === null ? buffer?.byteLength : pendingContentSpans.lengths[i];
+            const persistedOffset = pendingOffsets[i];
+            const persistedLength = pendingLengths[i];
+            const dictName = Array.isArray(pendingResolvedDictNames) ?
+                pendingResolvedDictNames[i] :
+                pendingResolvedDictNames;
+            if (
+                !(buffer instanceof Uint8Array) ||
+                !Number.isSafeInteger(sourceOffset) ||
+                sourceOffset < 0 ||
+                !Number.isSafeInteger(sourceLength) ||
+                sourceLength < 0 ||
+                sourceLength > buffer.byteLength - sourceOffset ||
+                sourceLength !== persistedLength ||
+                !Number.isSafeInteger(persistedOffset) ||
+                persistedOffset < 0 ||
+                typeof dictName !== 'string'
+            ) {
+                throw new RangeError(`Invalid in-flight term content source at index ${i}`);
+            }
+            minimumOffset = Math.min(minimumOffset, persistedOffset);
+            maximumOffset = Math.max(maximumOffset, persistedOffset);
+            if (i > 0 && persistedOffset < pendingOffsets[i - 1]) {
+                sortedOffsets = false;
+                if (unsortedKeys === null) {
+                    unsortedKeys = new Set();
+                    for (let j = 0; j < i; ++j) {
+                        const previousDictName = Array.isArray(pendingResolvedDictNames) ?
+                            pendingResolvedDictNames[j] :
+                            pendingResolvedDictNames;
+                        unsortedKeys.add(
+                            this._getTermContentStorageKey(pendingOffsets[j], pendingLengths[j], previousDictName),
+                        );
+                    }
                 }
-                const key = this._getTermContentStorageKey(pendingOffsets[i], persistedLength, dictName);
-                if (this._inFlightTermContentSourceByStorageKey.has(key)) {
+            }
+            const key = unsortedKeys === null ?
+                null :
+                this._getTermContentStorageKey(persistedOffset, persistedLength, dictName);
+            if (key !== null) {
+                if (unsortedKeys.has(key)) {
                     throw new Error(`Duplicate in-flight term content storage reference: ${key}`);
                 }
-                const source = {buffer, offset: sourceOffset, length: sourceLength};
-                this._inFlightTermContentSourceByStorageKey.set(key, source);
-                registrations.push({key, source});
-            }
-        } catch (error) {
-            for (const {key, source} of registrations) {
-                if (this._inFlightTermContentSourceByStorageKey.get(key) === source) {
-                    this._inFlightTermContentSourceByStorageKey.delete(key);
+                unsortedKeys.add(key);
+            } else if (i > 0 && persistedOffset === pendingOffsets[i - 1]) {
+                for (let j = i - 1; j >= 0 && pendingOffsets[j] === persistedOffset; --j) {
+                    const previousDictName = Array.isArray(pendingResolvedDictNames) ?
+                        pendingResolvedDictNames[j] :
+                        pendingResolvedDictNames;
+                    if (persistedLength === pendingLengths[j] && dictName === previousDictName) {
+                        throw new Error(
+                            `Duplicate in-flight term content storage reference: ${this._getTermContentStorageKey(persistedOffset, persistedLength, dictName)}`,
+                        );
+                    }
                 }
             }
-            throw error;
+            if (
+                this._inFlightTermContentSourceBatches.size > 0 &&
+                this._findInFlightTermContentSource(persistedOffset, persistedLength, dictName) !== void 0
+            ) {
+                throw new Error(
+                    `Duplicate in-flight term content storage reference: ${this._getTermContentStorageKey(persistedOffset, persistedLength, dictName)}`,
+                );
+            }
         }
+        const batch = {
+            offsets: pendingOffsets,
+            lengths: pendingLengths,
+            dictNames: pendingResolvedDictNames,
+            contentBytes: pendingContentBytes,
+            contentSpans: pendingContentSpans,
+            sortedOffsets,
+            minimumOffset,
+            maximumOffset,
+        };
+        this._inFlightTermContentSourceBatches.add(batch);
         return () => {
-            for (const {key, source} of registrations) {
-                if (this._inFlightTermContentSourceByStorageKey.get(key) === source) {
-                    this._inFlightTermContentSourceByStorageKey.delete(key);
-                }
-            }
+            this._inFlightTermContentSourceBatches.delete(batch);
         };
     }
 
