@@ -289,14 +289,131 @@ export class TermContentBlockStore {
         try {
             return await this._readDetailed(contentOffset, contentLength, contentDictName);
         } catch (error) {
-            if (error instanceof TermContentReadError) {
-                return {status: error.status, reason: error.message};
-            }
-            return {
-                status: 'temporarilyUnavailable',
-                reason: error instanceof Error ? error.message : String(error),
-            };
+            return this._createReadFailure(error);
         }
+    }
+
+    /**
+     * Reads a verification wave while loading each referenced compressed block
+     * once. Results preserve request order and every started operation settles
+     * before this method returns.
+     * @param {Array<{contentOffset: number, contentLength: number, contentDictName: string}>} requests
+     * @returns {Promise<Array<{status: 'ok', bytes: Uint8Array}|{status: 'temporarilyUnavailable'|'corrupt', reason: string}>>}
+     */
+    async readDetailedBatch(requests) {
+        const results = new Array(requests.length);
+        /** @type {Array<{index: number, request: {contentOffset: number, contentLength: number, contentDictName: string}, compact: boolean|null, compressionDictName: string|null|undefined, sliceLength: number}>} */
+        const sliceRequests = [];
+        for (let index = 0; index < requests.length; ++index) {
+            const request = requests[index];
+            const {contentLength, contentDictName} = request;
+            const compressionDictName = getRawTermContentBlockCompressionDictName(contentDictName);
+            if (typeof compressionDictName === 'undefined') {
+                sliceRequests.push({
+                    index,
+                    request,
+                    compact: null,
+                    compressionDictName,
+                    sliceLength: contentLength,
+                });
+                continue;
+            }
+            const compact = contentDictName === RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX ||
+            contentDictName.startsWith(`${RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX}:`);
+            sliceRequests.push({
+                index,
+                request,
+                compact,
+                compressionDictName,
+                sliceLength: compact ? RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES : RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES,
+            });
+        }
+
+        const sliceResults = await this._contentStore.readSlicesDetailed(sliceRequests.map(({request, sliceLength}) => ({
+            offset: request.contentOffset,
+            length: sliceLength,
+        })));
+        if (sliceResults.length !== sliceRequests.length) {
+            throw new Error('Term content batch read returned an invalid result count');
+        }
+        /** @type {Map<string, {cacheKey: string, reference: {blockOffset: number, blockCompressedLength: number, blockUncompressedLength: number, entryOffset: number, entryLength: number}, compressionDictName: string|null, context: {contentOffset: number, contentLength: number, contentDictName: string}, entries: Array<{index: number, reference: {blockOffset: number, blockCompressedLength: number, blockUncompressedLength: number, entryOffset: number, entryLength: number}}>} >} */
+        const groups = new Map();
+        for (let i = 0; i < sliceRequests.length; ++i) {
+            const {index, request, compact, compressionDictName} = sliceRequests[i];
+            const {contentOffset, contentLength, contentDictName} = request;
+            const sliceResult = sliceResults[i];
+            if (sliceResult.status === 'error') {
+                results[index] = this._createReadFailure(sliceResult.error);
+                continue;
+            }
+            if (sliceResult.status === 'unavailable') {
+                results[index] = {
+                    status: 'temporarilyUnavailable',
+                    reason: compact === null ?
+                        'Term content could not be read from OPFS' :
+                        'Term content block reference could not be read from OPFS',
+                };
+                continue;
+            }
+            const referenceBytes = sliceResult.bytes;
+            if (compact === null || typeof compressionDictName === 'undefined') {
+                results[index] = {status: 'ok', bytes: referenceBytes};
+                continue;
+            }
+            const reference = compact ?
+                decodeRawTermContentCompactBlockReference(referenceBytes, contentLength) :
+                decodeRawTermContentBlockReference(referenceBytes);
+            if (reference === null || reference.entryLength !== contentLength) {
+                this._recordInvalidReference(contentOffset, contentLength, contentDictName, referenceBytes, reference);
+                results[index] = {status: 'corrupt', reason: 'Term content block reference is invalid'};
+                continue;
+            }
+            const cacheKey = this._createBlockCacheKey(contentDictName, reference);
+            let group = groups.get(cacheKey);
+            if (typeof group === 'undefined') {
+                group = {
+                    cacheKey,
+                    reference,
+                    compressionDictName,
+                    context: {contentOffset, contentLength, contentDictName},
+                    entries: [],
+                };
+                groups.set(cacheKey, group);
+            }
+            group.entries.push({index, reference});
+        }
+
+        const groupList = [...groups.values()];
+        const groupSettled = await Promise.allSettled(groupList.map(async ({cacheKey, reference, compressionDictName, context}) => {
+            const cached = this._cache.get(cacheKey);
+            if (typeof cached !== 'undefined') { return cached; }
+            const block = await this._getOrLoadBlock(cacheKey, reference, compressionDictName, context);
+            if (block === null) {
+                throw new TermContentReadError('temporarilyUnavailable', 'Term content block could not be loaded');
+            }
+            return block;
+        }));
+        for (let i = 0; i < groupList.length; ++i) {
+            const group = groupList[i];
+            const settled = groupSettled[i];
+            if (settled.status === 'rejected') {
+                const failure = this._createReadFailure(settled.reason);
+                for (const {index} of group.entries) { results[index] = failure; }
+                continue;
+            }
+            const block = settled.value;
+            for (const {index, reference} of group.entries) {
+                const request = requests[index];
+                const entryEnd = reference.entryOffset + reference.entryLength;
+                if (entryEnd > block.byteLength) {
+                    this._recordEntryBoundsError(request, reference, block.byteLength);
+                    results[index] = {status: 'corrupt', reason: 'Term content block entry is outside the decoded block'};
+                    continue;
+                }
+                results[index] = {status: 'ok', bytes: block.subarray(reference.entryOffset, entryEnd)};
+            }
+        }
+        return results;
     }
 
     /**
@@ -325,16 +442,10 @@ export class TermContentBlockStore {
             decodeRawTermContentCompactBlockReference(referenceBytes, contentLength) :
             decodeRawTermContentBlockReference(referenceBytes);
         if (reference === null || reference.entryLength !== contentLength) {
-            this._recordError('term-content-block-reference-invalid', {
-                contentOffset,
-                contentLength,
-                contentDictName,
-                referencePrefix: [...referenceBytes.subarray(0, 8)],
-                decodedEntryLength: reference?.entryLength ?? null,
-            });
+            this._recordInvalidReference(contentOffset, contentLength, contentDictName, referenceBytes, reference);
             throw new TermContentReadError('corrupt', 'Term content block reference is invalid');
         }
-        const cacheKey = `${contentDictName}:${reference.blockOffset}:${reference.blockCompressedLength}:${reference.blockUncompressedLength}`;
+        const cacheKey = this._createBlockCacheKey(contentDictName, reference);
         let block = this._cache.get(cacheKey);
         if (typeof block === 'undefined') {
             const loadedBlock = await this._getOrLoadBlock(cacheKey, reference, compressionDictName, {
@@ -349,17 +460,66 @@ export class TermContentBlockStore {
         }
         const entryEnd = reference.entryOffset + reference.entryLength;
         if (entryEnd > block.byteLength) {
-            this._recordError('term-content-block-entry-bounds-error', {
-                contentOffset,
-                contentLength,
-                contentDictName,
-                entryOffset: reference.entryOffset,
-                entryLength: reference.entryLength,
-                blockLength: block.byteLength,
-            });
+            this._recordEntryBoundsError({contentOffset, contentLength, contentDictName}, reference, block.byteLength);
             throw new TermContentReadError('corrupt', 'Term content block entry is outside the decoded block');
         }
         return {status: 'ok', bytes: block.subarray(reference.entryOffset, entryEnd)};
+    }
+
+    /**
+     * @param {unknown} error
+     * @returns {{status: 'temporarilyUnavailable'|'corrupt', reason: string}}
+     */
+    _createReadFailure(error) {
+        if (error instanceof TermContentReadError) {
+            return {status: error.status, reason: error.message};
+        }
+        return {
+            status: 'temporarilyUnavailable',
+            reason: error instanceof Error ? error.message : String(error),
+        };
+    }
+
+    /**
+     * @param {string} contentDictName
+     * @param {{blockOffset: number, blockCompressedLength: number, blockUncompressedLength: number}} reference
+     * @returns {string}
+     */
+    _createBlockCacheKey(contentDictName, reference) {
+        return `${contentDictName}:${reference.blockOffset}:${reference.blockCompressedLength}:${reference.blockUncompressedLength}`;
+    }
+
+    /**
+     * @param {number} contentOffset
+     * @param {number} contentLength
+     * @param {string} contentDictName
+     * @param {Uint8Array} referenceBytes
+     * @param {{entryLength: number}|null} reference
+     */
+    _recordInvalidReference(contentOffset, contentLength, contentDictName, referenceBytes, reference) {
+        this._recordError('term-content-block-reference-invalid', {
+            contentOffset,
+            contentLength,
+            contentDictName,
+            referencePrefix: [...referenceBytes.subarray(0, 8)],
+            decodedEntryLength: reference?.entryLength ?? null,
+        });
+    }
+
+    /**
+     * @param {{contentOffset: number, contentLength: number, contentDictName: string}} request
+     * @param {{entryOffset: number, entryLength: number}} reference
+     * @param {number} blockLength
+     */
+    _recordEntryBoundsError({contentOffset, contentLength, contentDictName}, reference, blockLength) {
+        this._recordError('term-content-block-entry-bounds-error', {
+            contentOffset,
+            contentLength,
+            contentDictName,
+            entryOffset: reference.entryOffset,
+            entryLength: reference.entryLength,
+            blockLength,
+        });
     }
 
     /**

@@ -1211,6 +1211,56 @@ export class TermContentOpfsStore {
     }
 
     /**
+     * Reads a verification wave directly from the import overlay when
+     * possible, avoiding one async operation per short block reference.
+     * Requests which need file I/O retain the scalar reader's snapshot and
+     * retry behavior, and all started reads settle before this method returns.
+     * @param {Array<{offset: number, length: number}>} spans
+     * @returns {Promise<Array<{status: 'ok', bytes: Uint8Array}|{status: 'unavailable'}|{status: 'error', error: unknown}>>}
+     */
+    async readSlicesDetailed(spans) {
+        const results = new Array(spans.length);
+        const pending = [];
+        for (let index = 0; index < spans.length; ++index) {
+            const {offset, length} = spans[index];
+            if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(length) || length <= 0) {
+                results[index] = {status: 'unavailable'};
+                continue;
+            }
+            const end = offset + length;
+            if (!Number.isSafeInteger(end) || end > this._length) {
+                pending.push({index, operation: this.readSlice(offset, length)});
+                continue;
+            }
+            const overlay = this._readSliceFromImportOverlay(offset, length);
+            if (overlay !== null) {
+                results[index] = {status: 'ok', bytes: overlay};
+                continue;
+            }
+            if (this._fileHandle === null && this._chunks.length > 0) {
+                const bytes = this._readSliceFromMemory(offset, length);
+                results[index] = bytes === null ? {status: 'unavailable'} : {status: 'ok', bytes};
+                continue;
+            }
+            pending.push({index, operation: this.readSlice(offset, length)});
+        }
+        const settled = await Promise.allSettled(pending.map(({operation}) => operation));
+        for (let i = 0; i < pending.length; ++i) {
+            const {index} = pending[i];
+            const result = settled[i];
+            if (result.status === 'rejected') {
+                const error = /** @type {unknown} */ (result.reason);
+                results[index] = {status: 'error', error};
+            } else {
+                results[index] = result.value === null ?
+                    {status: 'unavailable'} :
+                    {status: 'ok', bytes: result.value};
+            }
+        }
+        return results;
+    }
+
+    /**
      * @param {number} offset
      * @param {number} length
      * @returns {Uint8Array|null}

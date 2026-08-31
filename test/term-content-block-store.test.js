@@ -742,6 +742,116 @@ describe('TermContentBlockStore', () => {
         expect(blockStore.getDiagnostics()).toMatchObject({inFlightBlocks: 0});
     });
 
+    test('reads a verification batch from each compressed block once', async () => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 1024,
+            referencePackTargetBytes: 1024,
+            minInputBytes: 0,
+        });
+        const content = [
+            new Uint8Array([1, 2, 3]),
+            new Uint8Array([4, 5, 6]),
+            new Uint8Array([7, 8, 9]),
+        ];
+        const stored = await blockStore.tryAppend(content, null, true);
+        expect(stored).not.toBeNull();
+        blockStore.clearCache();
+        const readSlice = vi.spyOn(contentStore, 'readSlice');
+
+        const results = await blockStore.readDetailedBatch(Array.from(
+            stored.contentOffsets,
+            (contentOffset, index) => ({
+                contentOffset,
+                contentLength: stored.contentLengths[index],
+                contentDictName: stored.contentDictName,
+            }),
+        ));
+
+        expect(results).toStrictEqual(content.map((bytes) => ({status: 'ok', bytes})));
+        // Compact references are read directly from the import overlay; only
+        // the grouped compressed block enters the scalar storage reader.
+        expect(readSlice).toHaveBeenCalledOnce();
+        expect(blockStore.getDiagnostics()).toMatchObject({inFlightBlocks: 0});
+    });
+
+    test('settles valid batch peers when another compact reference is corrupt', async () => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 1024,
+            referencePackTargetBytes: 1024,
+            minInputBytes: 0,
+        });
+        const content = [new Uint8Array([1, 2, 3]), new Uint8Array([4, 5, 6])];
+        const stored = await blockStore.tryAppend(content, null, true);
+        expect(stored).not.toBeNull();
+        const [{offset: corruptOffset}] = await contentStore.appendBatch([new Uint8Array(20)]);
+        blockStore.clearCache();
+
+        const results = await blockStore.readDetailedBatch([
+            {
+                contentOffset: stored.contentOffsets[0],
+                contentLength: stored.contentLengths[0],
+                contentDictName: stored.contentDictName,
+            },
+            {
+                contentOffset: corruptOffset,
+                contentLength: 3,
+                contentDictName: stored.contentDictName,
+            },
+            {
+                contentOffset: stored.contentOffsets[1],
+                contentLength: stored.contentLengths[1],
+                contentDictName: stored.contentDictName,
+            },
+        ]);
+
+        expect(results[0]).toStrictEqual({status: 'ok', bytes: content[0]});
+        expect(results[1]).toMatchObject({status: 'corrupt', reason: expect.stringContaining('reference')});
+        expect(results[2]).toStrictEqual({status: 'ok', bytes: content[1]});
+        expect(blockStore.getDiagnostics()).toMatchObject({inFlightBlocks: 0});
+    });
+
+    test('classifies every entry when a grouped compressed-block load fails', async () => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 1024,
+            referencePackTargetBytes: 1024,
+            minInputBytes: 0,
+        });
+        const stored = await blockStore.tryAppend([
+            new Uint8Array([1, 2, 3]),
+            new Uint8Array([4, 5, 6]),
+        ], null, true);
+        expect(stored).not.toBeNull();
+        blockStore.clearCache();
+        const originalReadSlice = contentStore.readSlice.bind(contentStore);
+        const referenceOffsets = new Set(stored.contentOffsets);
+        vi.spyOn(contentStore, 'readSlice').mockImplementation(async (offset, length) => {
+            if (!referenceOffsets.has(offset)) {
+                throw new Error('injected block read failure');
+            }
+            return await originalReadSlice(offset, length);
+        });
+
+        const results = await blockStore.readDetailedBatch(Array.from(
+            stored.contentOffsets,
+            (contentOffset, index) => ({
+                contentOffset,
+                contentLength: stored.contentLengths[index],
+                contentDictName: stored.contentDictName,
+            }),
+        ));
+
+        expect(results).toHaveLength(2);
+        expect(results.every(({status}) => status === 'temporarilyUnavailable')).toBe(true);
+        expect(results.map((result) => result.reason)).toEqual([
+            'injected block read failure',
+            'injected block read failure',
+        ]);
+        expect(blockStore.getDiagnostics()).toMatchObject({inFlightBlocks: 0});
+    });
+
     test('rejects malformed compact block metadata before block decompression', async () => {
         const contentStore = new TermContentOpfsStore();
         await contentStore.appendBatch([new Uint8Array(20)]);

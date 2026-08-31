@@ -134,6 +134,32 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {string|null} [uniformContentDictName]
  */
 
+/**
+ * @typedef {object} TermContentMeta
+ * @property {number} id
+ * @property {number} offset
+ * @property {number} length
+ * @property {string} dictName
+ * @property {number} [signature1]
+ * @property {number} [signature2]
+ * @property {number} [signature3]
+ * @property {number} [tableIndex]
+ */
+
+/**
+ * @typedef {object} ExactTermContentDescriptor
+ * @property {number} hash1
+ * @property {number} hash2
+ * @property {Uint8Array} contentBytes
+ * @property {TermContentMeta} primary
+ */
+
+/**
+ * @typedef {object} ExactTermContentResult
+ * @property {TermContentMeta|undefined} existingMeta
+ * @property {boolean} exactFallback
+ */
+
 class TermContentLookupReadError extends Error {
     /**
      * @param {'temporarilyUnavailable'|'corrupt'} status
@@ -5304,6 +5330,20 @@ export class DictionaryDatabase {
      * @returns {{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableIndex?: number}|Promise<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableIndex?: number}|undefined>|undefined}
      */
     _findMatchingTermEntryContentMeta(hash1, hash2, contentBytes, primary = this._getTermEntryContentMetaByHashPair(hash1, hash2)) {
+        const persistedCandidates = this._getMatchingPersistedTermEntryContentMetaCandidates(hash1, hash2, contentBytes, primary);
+        return persistedCandidates === null ?
+            void 0 :
+            this._findMatchingPersistedTermEntryContentMeta(persistedCandidates, contentBytes);
+    }
+
+    /**
+     * @param {number} hash1
+     * @param {number} hash2
+     * @param {Uint8Array} contentBytes
+     * @param {{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableIndex?: number}|undefined} primary
+     * @returns {Array<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableIndex?: number}>|null}
+     */
+    _getMatchingPersistedTermEntryContentMetaCandidates(hash1, hash2, contentBytes, primary) {
         const lastOffset = Math.max(0, contentBytes.byteLength - 4);
         const signature1 = this._readTermContentSignature(contentBytes, 0);
         const signature2 = this._readTermContentSignature(contentBytes, Math.floor(lastOffset / 2));
@@ -5344,9 +5384,7 @@ export class DictionaryDatabase {
                 persistedCandidates.push(meta);
             }
         }
-        return persistedCandidates === null ?
-            void 0 :
-            this._findMatchingPersistedTermEntryContentMeta(persistedCandidates, contentBytes);
+        return persistedCandidates;
     }
 
     /**
@@ -5404,6 +5442,133 @@ export class DictionaryDatabase {
             if (this._termContentBytesEqual(existingBytes, contentBytes)) { return meta; }
         }
         return void 0;
+    }
+
+    /**
+     * Resolves an import verification wave in storage batches. Colliding hash
+     * candidates remain ordered and are still compared byte-for-byte.
+     * @param {ExactTermContentDescriptor[]} descriptors
+     * @returns {Promise<ExactTermContentResult[]>}
+     */
+    async _findMatchingPersistedTermEntryContentMetaBatch(descriptors) {
+        const count = descriptors.length;
+        /** @type {ExactTermContentResult[]} */
+        const results = new Array(count);
+        /** @type {Array<TermContentMeta[]|null>} */
+        const candidateLists = new Array(count);
+        const nextCandidateIndexes = new Uint32Array(count);
+        const completed = new Uint8Array(count);
+        let remaining = count;
+        for (let i = 0; i < count; ++i) {
+            const {hash1, hash2, contentBytes, primary} = descriptors[i];
+            const candidates = this._getMatchingPersistedTermEntryContentMetaCandidates(
+                hash1,
+                hash2,
+                contentBytes,
+                primary,
+            );
+            candidateLists[i] = candidates;
+            if (candidates === null) {
+                results[i] = {existingMeta: void 0, exactFallback: false};
+                completed[i] = 1;
+                --remaining;
+            }
+        }
+
+        /** @type {Error[]} */
+        const errors = [];
+        while (remaining > 0) {
+            /** @type {Array<{contentOffset: number, contentLength: number, contentDictName: string}>} */
+            const requests = [];
+            /** @type {Array<{descriptorIndex: number, meta: TermContentMeta}>} */
+            const requestOwners = [];
+            for (let i = 0; i < count; ++i) {
+                if (completed[i] === 1) { continue; }
+                const candidates = candidateLists[i];
+                const contentBytes = descriptors[i].contentBytes;
+                let queued = false;
+                while (nextCandidateIndexes[i] < candidates.length) {
+                    const meta = candidates[nextCandidateIndexes[i]++];
+                    const inFlightSource = this._inFlightTermContentSourceByStorageKey.size === 0 ?
+                        void 0 :
+                        this._inFlightTermContentSourceByStorageKey.get(
+                            this._getTermContentStorageKey(meta.offset, meta.length, meta.dictName),
+                        );
+                    if (typeof inFlightSource !== 'undefined') {
+                        if (
+                            this._termContentBytesEqualSpan(
+                                contentBytes,
+                                inFlightSource.buffer,
+                                inFlightSource.offset,
+                                inFlightSource.length,
+                            )
+                        ) {
+                            results[i] = {existingMeta: meta, exactFallback: true};
+                            completed[i] = 1;
+                            --remaining;
+                            break;
+                        }
+                        continue;
+                    }
+                    requests.push({
+                        contentOffset: meta.offset,
+                        contentLength: meta.length,
+                        contentDictName: meta.dictName,
+                    });
+                    requestOwners.push({descriptorIndex: i, meta});
+                    queued = true;
+                    break;
+                }
+                if (!queued && completed[i] === 0 && nextCandidateIndexes[i] >= candidates.length) {
+                    results[i] = {existingMeta: void 0, exactFallback: true};
+                    completed[i] = 1;
+                    --remaining;
+                }
+            }
+            if (requests.length === 0) { continue; }
+            const readResults = await this._readTermEntryContentBytesDetailedBatch(requests);
+            if (readResults.length !== requests.length) {
+                throw new Error('Exact dedupe batch read returned an invalid result count');
+            }
+            for (let i = 0; i < readResults.length; ++i) {
+                const readResult = readResults[i];
+                const {descriptorIndex, meta} = requestOwners[i];
+                if (readResult.status !== 'ok') {
+                    errors.push(this._createExactDedupeReadError(meta, readResult));
+                    completed[descriptorIndex] = 1;
+                    --remaining;
+                    continue;
+                }
+                const existingBytes = readResult.bytes;
+                this._setTermContentSignatures(meta, existingBytes);
+                if (this._termContentBytesEqual(existingBytes, descriptors[descriptorIndex].contentBytes)) {
+                    results[descriptorIndex] = {existingMeta: meta, exactFallback: true};
+                    completed[descriptorIndex] = 1;
+                    --remaining;
+                }
+            }
+        }
+        if (errors.length === 1) { throw errors[0]; }
+        if (errors.length > 1) {
+            throw new AggregateError(errors, 'Multiple exact term content comparisons failed');
+        }
+        return results;
+    }
+
+    /**
+     * @param {{offset: number, length: number, dictName: string}} meta
+     * @param {{status: 'temporarilyUnavailable'|'corrupt', reason: string}} readResult
+     * @returns {TermContentLookupReadError}
+     */
+    _createExactDedupeReadError(meta, readResult) {
+        const candidateKey = this._getTermContentStorageKey(meta.offset, meta.length, meta.dictName);
+        const activeKeys = [...this._inFlightTermContentSourceByStorageKey.keys()].slice(0, 3);
+        return new TermContentLookupReadError(
+            readResult.status,
+            `${readResult.reason}; exact dedupe candidate=${JSON.stringify(candidateKey)} ` +
+            `inFlightCount=${this._inFlightTermContentSourceByStorageKey.size} ` +
+            `inFlightKeys=${JSON.stringify(activeKeys)}`,
+        );
     }
 
     /**
@@ -5504,6 +5669,32 @@ export class DictionaryDatabase {
      */
     async _readTermEntryContentBytesDetailed(contentOffset, contentLength, contentDictName) {
         return await this._termContentBlockStore.readDetailed(contentOffset, contentLength, contentDictName);
+    }
+
+    /**
+     * @param {Array<{contentOffset: number, contentLength: number, contentDictName: string}>} requests
+     * @returns {Promise<Array<{status: 'ok', bytes: Uint8Array}|{status: 'temporarilyUnavailable'|'corrupt', reason: string}>>}
+     */
+    async _readTermEntryContentBytesDetailedBatch(requests) {
+        if (Object.hasOwn(this, '_readTermEntryContentBytesDetailed')) {
+            const settled = await Promise.allSettled(requests.map(({contentOffset, contentLength, contentDictName}) => (
+                this._readTermEntryContentBytesDetailed(contentOffset, contentLength, contentDictName)
+            )));
+            const errors = settled
+                .filter((result) => result.status === 'rejected')
+                .map((result) => toError(result.reason));
+            if (errors.length === 1) { throw errors[0]; }
+            if (errors.length > 1) {
+                throw new AggregateError(errors, 'Multiple exact term content reads failed');
+            }
+            return settled.map((result) => {
+                if (result.status !== 'fulfilled') {
+                    throw new Error('Exact term content read did not settle');
+                }
+                return result.value;
+            });
+        }
+        return await this._termContentBlockStore.readDetailedBatch(requests);
     }
 
     /**
@@ -7362,28 +7553,15 @@ export class DictionaryDatabase {
             };
             const resolveExactCandidates = async () => {
                 if (exactCandidates.length === 0) { return; }
-                const matchResults = await Promise.allSettled(exactCandidates.map(async (descriptor) => {
+                const matchResults = await this._findMatchingPersistedTermEntryContentMetaBatch(exactCandidates.map((descriptor) => {
                     const {contentOffset, contentLength, hash1, hash2, existingMeta} = descriptor;
                     const contentBytes = contentBytesBuffer.subarray(contentOffset, contentOffset + contentLength);
-                    const matchingMeta = this._findMatchingTermEntryContentMeta(hash1, hash2, contentBytes, existingMeta);
-                    return matchingMeta instanceof Promise ?
-                        {existingMeta: await matchingMeta, exactFallback: true} :
-                        {existingMeta: matchingMeta, exactFallback: false};
+                    return {hash1, hash2, contentBytes, primary: existingMeta};
                 }));
-                const matchErrors = matchResults
-                    .filter((result) => result.status === 'rejected')
-                    .map((result) => toError(result.reason));
-                if (matchErrors.length === 1) { throw matchErrors[0]; }
-                if (matchErrors.length > 1) {
-                    throw new AggregateError(matchErrors, 'Multiple exact term content comparisons failed');
-                }
                 for (let i = 0; i < exactCandidates.length; ++i) {
                     const descriptor = exactCandidates[i];
                     const matchResult = matchResults[i];
-                    if (matchResult.status !== 'fulfilled') {
-                        throw new Error('Exact term content comparison did not settle');
-                    }
-                    const {existingMeta, exactFallback} = matchResult.value;
+                    const {existingMeta, exactFallback} = matchResult;
                     if (exactFallback) { ++exactFallbackCount; }
                     if (typeof existingMeta === 'undefined') {
                         appendPendingContent(descriptor);

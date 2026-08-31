@@ -236,6 +236,63 @@ describe('TermContentOpfsStore', () => {
         expect(Reflect.get(store, '_readPageOperations')).toHaveLength(0);
     });
 
+    test('reads an import-overlay batch without entering the scalar async reader', async () => {
+        const first = new Uint8Array([1, 2, 3, 4]);
+        const second = new Uint8Array([5, 6, 7]);
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_importReadOverlayChunks', [first, second]);
+        Reflect.set(store, '_importReadOverlayOffsets', [10, 14]);
+        Reflect.set(store, '_importReadOverlayBytes', 7);
+        Reflect.set(store, '_length', 17);
+        const readSlice = vi.spyOn(store, 'readSlice');
+
+        const results = await store.readSlicesDetailed([
+            {offset: 11, length: 2},
+            {offset: 13, length: 3},
+            {offset: -1, length: 1},
+        ]);
+
+        expect(results).toStrictEqual([
+            {status: 'ok', bytes: first.subarray(1, 3)},
+            {status: 'ok', bytes: new Uint8Array([4, 5, 6])},
+            {status: 'unavailable'},
+        ]);
+        expect(readSlice).not.toHaveBeenCalled();
+    });
+
+    test('does not classify a short in-memory batch slice as successful', async () => {
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_chunks', [new Uint8Array([1, 2, 3])]);
+        Reflect.set(store, '_chunkOffsets', [0]);
+        Reflect.set(store, '_length', 3);
+
+        await expect(store.readSlicesDetailed([{offset: 2, length: 2}])).resolves.toStrictEqual([
+            {status: 'unavailable'},
+        ]);
+    });
+
+    test('settles every scalar fallback in a mixed storage batch', async () => {
+        const store = new TermContentOpfsStore();
+        const resolvers = new Map();
+        const rejecters = new Map();
+        vi.spyOn(store, 'readSlice').mockImplementation(async (offset) => await new Promise((resolve, reject) => {
+            resolvers.set(offset, resolve);
+            rejecters.set(offset, reject);
+        }));
+
+        const reading = store.readSlicesDetailed([
+            {offset: 10, length: 1},
+            {offset: 20, length: 1},
+        ]);
+        await vi.waitFor(() => expect(resolvers).toHaveLength(2));
+        rejecters.get(10)(new Error('injected read failure'));
+        resolvers.get(20)(new Uint8Array([2]));
+
+        const results = await reading;
+        expect(results[0]).toMatchObject({status: 'error', error: expect.any(Error)});
+        expect(results[1]).toStrictEqual({status: 'ok', bytes: new Uint8Array([2])});
+    });
+
     test('retries a page read invalidated by a newer file snapshot', async () => {
         const oldBytes = new Uint8Array([1, 2, 3, 4]);
         const newBytes = new Uint8Array([5, 6, 7, 8]);
