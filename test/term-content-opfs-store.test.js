@@ -194,6 +194,99 @@ describe('TermContentOpfsStore', () => {
         expect(Reflect.get(store, '_loadedForRead')).toBe(true);
     });
 
+    test('coalesces concurrent reads from the same cold file page', async () => {
+        const bytes = new Uint8Array([1, 2, 3, 4, 5, 6]);
+        /** @type {() => void} */
+        let releaseRead = () => {};
+        const readGate = new Promise((resolve) => {
+            releaseRead = () => { resolve(void 0); };
+        });
+        const arrayBuffer = vi.fn(async () => {
+            await readGate;
+            return bytes.buffer;
+        });
+        const file = /** @type {File} */ (/** @type {unknown} */ ({
+            size: bytes.byteLength,
+            slice: vi.fn(() => ({arrayBuffer})),
+        }));
+        const fileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            getFile: vi.fn(async () => file),
+        }));
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_fileHandle', fileHandle);
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle,
+            fileLength: bytes.byteLength,
+            startOffset: 0,
+            readFile: file,
+        }]);
+        Reflect.set(store, '_loadedForRead', true);
+        Reflect.set(store, '_length', bytes.byteLength);
+
+        const first = store.readSlice(1, 3);
+        const second = store.readSlice(2, 2);
+        await vi.waitFor(() => expect(arrayBuffer).toHaveBeenCalledOnce());
+        releaseRead();
+
+        await expect(first).resolves.toStrictEqual(new Uint8Array([2, 3, 4]));
+        await expect(second).resolves.toStrictEqual(new Uint8Array([3, 4]));
+        expect(arrayBuffer).toHaveBeenCalledOnce();
+        expect(Reflect.get(store, '_readPageOperations')).toHaveLength(0);
+    });
+
+    test('retries a page read invalidated by a newer file snapshot', async () => {
+        const oldBytes = new Uint8Array([1, 2, 3, 4]);
+        const newBytes = new Uint8Array([5, 6, 7, 8]);
+        /** @type {() => void} */
+        let releaseOldRead = () => {};
+        const oldReadGate = new Promise((resolve) => {
+            releaseOldRead = () => { resolve(void 0); };
+        });
+        const oldArrayBuffer = vi.fn(async () => {
+            await oldReadGate;
+            return oldBytes.buffer;
+        });
+        const oldFile = /** @type {File} */ (/** @type {unknown} */ ({
+            size: oldBytes.byteLength,
+            slice: vi.fn(() => ({arrayBuffer: oldArrayBuffer})),
+        }));
+        const newFile = /** @type {File} */ (/** @type {unknown} */ (createReadableFile(newBytes)));
+        const oldFileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            getFile: vi.fn(async () => oldFile),
+        }));
+        const newFileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            getFile: vi.fn(async () => newFile),
+        }));
+        const oldState = {
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle: oldFileHandle,
+            fileLength: oldBytes.byteLength,
+            startOffset: 0,
+            readFile: oldFile,
+        };
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_fileHandle', oldFileHandle);
+        Reflect.set(store, '_segmentStates', [oldState]);
+        Reflect.set(store, '_loadedForRead', true);
+        Reflect.set(store, '_length', oldBytes.byteLength);
+
+        const reading = store.readSlice(0, oldBytes.byteLength);
+        await vi.waitFor(() => expect(oldArrayBuffer).toHaveBeenCalledOnce());
+        const newState = {...oldState, fileHandle: newFileHandle, readFile: null};
+        Reflect.set(store, '_fileHandle', newFileHandle);
+        Reflect.set(store, '_segmentStates', [newState]);
+        Reflect.get(store, '_invalidateReadState').call(store);
+        releaseOldRead();
+
+        await expect(reading).resolves.toStrictEqual(newBytes);
+        expect(newFileHandle.getFile).toHaveBeenCalledOnce();
+        expect(Reflect.get(store, '_readPageOperations')).toHaveLength(0);
+        expect(Reflect.get(store, '_readPageCache').get('0:0')).toStrictEqual(newBytes);
+    });
+
     test('keeps queued write failures sticky until rollback resets storage', async () => {
         const store = new TermContentOpfsStore();
         const writeError = new Error('injected write failure');

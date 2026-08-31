@@ -1370,6 +1370,77 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect([...result.contentLengths]).toEqual([3, 3]);
     });
 
+    test('bounds concurrent persisted canonical reads to one verification wave', async () => {
+        const count = 4097;
+        const database = new DictionaryDatabase();
+        const source = Uint8Array.from({length: count}, (_, index) => index & 0xff);
+        const contentMetaList = new Uint32Array(count * 4);
+        const indexes = Uint32Array.from({length: count}, (_, index) => index);
+        const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
+        for (let i = 0; i < count; ++i) {
+            const hash1 = i + 1;
+            const hash2 = (i ^ 0x9e3779b9) >>> 0;
+            const metaOffset = i * 4;
+            contentMetaList[metaOffset] = i;
+            contentMetaList[metaOffset + 1] = 1;
+            contentMetaList[metaOffset + 2] = hash1;
+            contentMetaList[metaOffset + 3] = hash2;
+            cache(null, i, 1, 'raw-v6', 0, hash1, hash2, source.subarray(i, i + 1));
+        }
+        /** @type {() => void} */
+        let releaseReads = () => {};
+        const readGate = new Promise((resolve) => {
+            releaseReads = () => { resolve(void 0); };
+        });
+        let activeReadCount = 0;
+        let maxActiveReadCount = 0;
+        const readDetailed = vi.fn(async (offset, length) => {
+            ++activeReadCount;
+            maxActiveReadCount = Math.max(maxActiveReadCount, activeReadCount);
+            await readGate;
+            --activeReadCount;
+            return {status: 'ok', bytes: source.subarray(offset, offset + length)};
+        });
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', readDetailed);
+        const resolveDedup = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const resolving = resolveDedup({
+            rowCount: count,
+            contentRowStart: 0,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 0,
+            contentMetaList,
+            contentUniqueIndexList: indexes,
+            contentDedupPlan: {
+                uniqueCount: count,
+                sourceRowCount: count,
+                uniqueRowIndexes: indexes,
+                resolvedFlags: new Uint8Array(count),
+                resolvedOffsets: new Float64Array(count),
+                resolvedLengths: new Uint32Array(count),
+                resolvedDictNames: new Array(count),
+                pendingEpochs: new Uint32Array(count),
+                pendingIndexes: new Uint32Array(count),
+                nextEpoch: 1,
+                persistedLookupRequired: true,
+            },
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        });
+
+        await vi.waitFor(() => expect(readDetailed).toHaveBeenCalledTimes(4096));
+        expect(maxActiveReadCount).toBe(4096);
+        releaseReads();
+        const result = await resolving;
+
+        expect(readDetailed).toHaveBeenCalledTimes(count);
+        expect(maxActiveReadCount).toBe(4096);
+        expect(result.persistedHitCount).toBe(count);
+        expect(result.pendingContentCount).toBe(0);
+    });
+
     test('preserves unique-content mapping when an exact candidate is a hash collision', async () => {
         const database = new DictionaryDatabase();
         const persisted = new Uint8Array([1, 2, 3]);

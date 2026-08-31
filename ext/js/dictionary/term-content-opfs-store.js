@@ -95,6 +95,8 @@ export class TermContentOpfsStore {
         this._ensureLoadedForReadOperation = null;
         /** @type {Map<string, Uint8Array>} */
         this._readPageCache = new Map();
+        /** @type {Map<string, {generation: number, promise: Promise<Uint8Array|null>}>} */
+        this._readPageOperations = new Map();
         /** @type {string} */
         this._lastSliceCacheKey = '';
         /** @type {Uint8Array|null} */
@@ -1281,7 +1283,7 @@ export class TermContentOpfsStore {
         if (!this._loadedForRead) {
             await this.ensureLoadedForRead();
         }
-        /** @type {Array<{state: {index: number, readFile: File|null, fileLength: number}, pageIndex: number}>} */
+        /** @type {Array<{state: {index: number, fileName: string, fileHandle: FileSystemFileHandle, fileLength: number, startOffset: number, readFile: File|null}, pageIndex: number}>} */
         const pages = [];
         const seen = new Set();
         const maxPages = Math.max(0, this._readPageCacheMaxPages >>> 3);
@@ -1381,24 +1383,34 @@ export class TermContentOpfsStore {
             return null;
         }
         for (let attempt = 0; attempt < 2; ++attempt) {
+            const generation = this._readStateGeneration;
             try {
                 const output = new Uint8Array(length);
                 let outputOffset = 0;
                 let cursor = offset;
+                let unavailable = false;
                 while (outputOffset < length) {
                     const state = this._findSegmentStateForOffset(cursor);
                     if (state === null || state.readFile === null) {
-                        return null;
+                        unavailable = true;
+                        break;
                     }
                     const localOffset = cursor - state.startOffset;
                     const copyLength = Math.min(length - outputOffset, state.fileLength - localOffset);
                     if (copyLength <= 0) {
-                        return null;
+                        unavailable = true;
+                        break;
                     }
                     await this._copyFileRangeIntoOutput(state, localOffset, copyLength, output, outputOffset);
                     outputOffset += copyLength;
                     cursor += copyLength;
                 }
+                if (generation !== this._readStateGeneration) {
+                    if (attempt > 0) { return null; }
+                    if (!this._loadedForRead) { await this.ensureLoadedForRead(); }
+                    continue;
+                }
+                if (unavailable) { return null; }
                 return outputOffset === length ? output : null;
             } catch (error) {
                 if (attempt > 0 || !this._isNotReadableFileError(error)) {
@@ -1414,7 +1426,7 @@ export class TermContentOpfsStore {
     }
 
     /**
-     * @param {{index: number, readFile: File|null, fileLength: number}} state
+     * @param {{index: number, fileName: string, fileHandle: FileSystemFileHandle, fileLength: number, startOffset: number, readFile: File|null}} state
      * @param {number} pageIndex
      * @returns {Promise<Uint8Array|null>}
      */
@@ -1433,10 +1445,34 @@ export class TermContentOpfsStore {
         if (pageOffset >= state.fileLength) {
             return null;
         }
-        const pageEnd = Math.min(state.fileLength, pageOffset + READ_PAGE_SIZE_BYTES);
-        const bytes = new Uint8Array(await file.slice(pageOffset, pageEnd).arrayBuffer());
-        this._setReadPage(cacheKey, bytes);
-        return bytes;
+        const generation = this._readStateGeneration;
+        const pending = this._readPageOperations.get(cacheKey);
+        if (typeof pending !== 'undefined' && pending.generation === generation) {
+            return await pending.promise;
+        }
+        const operation = {
+            generation,
+            promise: (async () => {
+                const pageEnd = Math.min(state.fileLength, pageOffset + READ_PAGE_SIZE_BYTES);
+                const bytes = new Uint8Array(await file.slice(pageOffset, pageEnd).arrayBuffer());
+                if (
+                    generation === this._readStateGeneration &&
+                    state.readFile === file &&
+                    this._segmentStates.includes(state)
+                ) {
+                    this._setReadPage(cacheKey, bytes);
+                }
+                return bytes;
+            })(),
+        };
+        this._readPageOperations.set(cacheKey, operation);
+        try {
+            return await operation.promise;
+        } finally {
+            if (this._readPageOperations.get(cacheKey) === operation) {
+                this._readPageOperations.delete(cacheKey);
+            }
+        }
     }
 
     /**
@@ -1589,10 +1625,7 @@ export class TermContentOpfsStore {
             reason: this._asErrorText(error),
             action: 'retry-open-file',
         });
-        for (const state of this._segmentStates) {
-            state.readFile = null;
-        }
-        this._readPageCache.clear();
+        this._invalidateReadState();
         const refreshed = await this._refreshReadFileSnapshot({reacquireHandle: false});
         if (refreshed) {
             return true;
