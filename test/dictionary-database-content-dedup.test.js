@@ -196,6 +196,53 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(Reflect.get(database, '_termEntryContentMetaSignature3Table')[index]).toBe(303);
     });
 
+    test('routes typed parser plans through prepared metadata reservation', async () => {
+        const database = new DictionaryDatabase();
+        const genericReserve = vi.spyOn(database, '_reserveArtifactTermContentMetadata');
+        const preparedReserve = vi.spyOn(database, '_reservePreparedArtifactTermContentMetadata');
+        const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const source = Uint8Array.of(1, 2, 3);
+        const plan = {
+            uniqueCount: 1,
+            sourceRowCount: 1,
+            uniqueRowIndexes: new Uint32Array([0]),
+            uniqueSignatures: new Uint32Array([101, 202, 303]),
+            resolvedFlags: new Uint8Array(1),
+            resolvedOffsets: new Float64Array(1),
+            resolvedLengths: new Uint32Array(1),
+            resolvedDictNames: new Array(1),
+            pendingEpochs: new Uint32Array(1),
+            pendingIndexes: new Uint32Array(1),
+            nextEpoch: 1,
+            nextUnresolvedUniqueIndex: 0,
+            persistedLookupRequired: false,
+        };
+
+        const result = await resolve({
+            rowCount: 1,
+            contentRowStart: 0,
+            dictionaryTotalRows: 1,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 0,
+            contentMetaList: new Uint32Array([0, 3, 10, 20]),
+            contentUniqueIndexList: new Uint32Array([0]),
+            contentDedupPlan: plan,
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        }, true);
+
+        expect(genericReserve).not.toHaveBeenCalled();
+        expect(preparedReserve).toHaveBeenCalledWith(10, 20, 3, 101, 202, 303);
+        const index = result.stagedContentMetadata?.indexes[0];
+        expect(index).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentMetaSignature1Table')[index]).toBe(101);
+        expect(Reflect.get(database, '_termEntryContentMetaSignature2Table')[index]).toBe(202);
+        expect(Reflect.get(database, '_termEntryContentMetaSignature3Table')[index]).toBe(303);
+    });
+
     test('leases cleared dedup scratch tables without sharing active leases', () => {
         const database = new DictionaryDatabase();
         const acquire = Reflect.get(database, '_acquireArtifactTermContentDedupScratch').bind(database);

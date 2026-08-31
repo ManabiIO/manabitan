@@ -6183,8 +6183,6 @@ export class DictionaryDatabase {
         signature2 = void 0,
         signature3 = void 0,
     ) {
-        hash1 >>>= 0;
-        hash2 >>>= 0;
         if (
             !(contentBytes instanceof Uint8Array) ||
             !Number.isSafeInteger(contentByteOffset) ||
@@ -6197,6 +6195,48 @@ export class DictionaryDatabase {
         ) {
             throw new RangeError(`Invalid reserved term content source span: ${contentByteOffset}+${contentLength}`);
         }
+        const lastOffset = Math.max(0, contentLength - 4);
+        const hasPreparedSignatures = (
+            typeof signature1 === 'number' &&
+            typeof signature2 === 'number' &&
+            typeof signature3 === 'number'
+        );
+        return this._reservePreparedArtifactTermContentMetadata(
+            hash1,
+            hash2,
+            contentLength,
+            hasPreparedSignatures ? signature1 : this._readTermContentSignature(contentBytes, contentByteOffset),
+            hasPreparedSignatures ? signature2 : this._readTermContentSignature(
+                contentBytes,
+                contentByteOffset + Math.floor(lastOffset / 2),
+            ),
+            hasPreparedSignatures ? signature3 : this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset),
+        );
+    }
+
+    /**
+     * Reserves metadata whose bounds and signatures were already produced by
+     * the typed WASM parser plan. Hash matches still require exact byte
+     * verification before content is reused.
+     * @param {number} hash1
+     * @param {number} hash2
+     * @param {number} contentLength
+     * @param {number} signature1
+     * @param {number} signature2
+     * @param {number} signature3
+     * @returns {number}
+     * @throws {Error} If the preallocated metadata table has no free slot.
+     */
+    _reservePreparedArtifactTermContentMetadata(
+        hash1,
+        hash2,
+        contentLength,
+        signature1,
+        signature2,
+        signature3,
+    ) {
+        hash1 >>>= 0;
+        hash2 >>>= 0;
         const hash1Table = this._termEntryContentMetaHash1Table;
         const hash2Table = this._termEntryContentMetaHash2Table;
         const slotTable = this._termEntryContentMetaHashPairTable;
@@ -6214,25 +6254,13 @@ export class DictionaryDatabase {
             slot = (slot + 1) & mask;
         }
         const index = this._allocateTermEntryContentMetaIndex();
-        const lastOffset = Math.max(0, contentLength - 4);
         hash1Table[index] = hash1;
         hash2Table[index] = hash2;
         this._termEntryContentMetaLengthTable[index] = contentLength;
         this._termEntryContentMetaSignaturePresentTable[index] = 1;
-        const hasPreparedSignatures = (
-            typeof signature1 === 'number' &&
-            typeof signature2 === 'number' &&
-            typeof signature3 === 'number'
-        );
-        this._termEntryContentMetaSignature1Table[index] = hasPreparedSignatures ?
-            signature1 >>> 0 :
-            this._readTermContentSignature(contentBytes, contentByteOffset);
-        this._termEntryContentMetaSignature2Table[index] = hasPreparedSignatures ?
-            signature2 >>> 0 :
-            this._readTermContentSignature(contentBytes, contentByteOffset + Math.floor(lastOffset / 2));
-        this._termEntryContentMetaSignature3Table[index] = hasPreparedSignatures ?
-            signature3 >>> 0 :
-            this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
+        this._termEntryContentMetaSignature1Table[index] = signature1;
+        this._termEntryContentMetaSignature2Table[index] = signature2;
+        this._termEntryContentMetaSignature3Table[index] = signature3;
         this._termEntryContentMetaStateTable[index] = TERM_CONTENT_META_SLOT_PENDING;
         slotTable[slot] = index + 1;
         ++this._termEntryContentMetaHashPairPendingCount;
@@ -7514,16 +7542,22 @@ export class DictionaryDatabase {
                         pendingContentHash2s.push(hash2);
                         if (stagedIndexes !== null) {
                             const signatureOffset = uniqueIndex * 3;
-                            stagedIndexes[pendingIndex] = this._reserveArtifactTermContentMetadata(
-                                hash1,
-                                hash2,
-                                contentBytes,
-                                contentOffset,
-                                contentLength,
-                                uniqueSignatures?.[signatureOffset],
-                                uniqueSignatures?.[signatureOffset + 1],
-                                uniqueSignatures?.[signatureOffset + 2],
-                            );
+                            stagedIndexes[pendingIndex] = uniqueSignatures === null ?
+                                this._reserveArtifactTermContentMetadata(
+                                    hash1,
+                                    hash2,
+                                    contentBytes,
+                                    contentOffset,
+                                    contentLength,
+                                ) :
+                                this._reservePreparedArtifactTermContentMetadata(
+                                    hash1,
+                                    hash2,
+                                    contentLength,
+                                    uniqueSignatures[signatureOffset],
+                                    uniqueSignatures[signatureOffset + 1],
+                                    uniqueSignatures[signatureOffset + 2],
+                                );
                         }
                         if (pendingContentDictNames !== null) {
                             pendingContentDictNames.push(
@@ -7632,16 +7666,22 @@ export class DictionaryDatabase {
                 pendingContentHash2s.push(hash2);
                 if (stagedIndexes !== null) {
                     const signatureOffset = uniqueIndex * 3;
-                    stagedIndexes[pendingContentCount] = this._reserveArtifactTermContentMetadata(
-                        hash1,
-                        hash2,
-                        contentBytesBuffer,
-                        contentOffset,
-                        contentLength,
-                        uniqueSignatures?.[signatureOffset],
-                        uniqueSignatures?.[signatureOffset + 1],
-                        uniqueSignatures?.[signatureOffset + 2],
-                    );
+                    stagedIndexes[pendingContentCount] = uniqueSignatures === null ?
+                        this._reserveArtifactTermContentMetadata(
+                            hash1,
+                            hash2,
+                            contentBytesBuffer,
+                            contentOffset,
+                            contentLength,
+                        ) :
+                        this._reservePreparedArtifactTermContentMetadata(
+                            hash1,
+                            hash2,
+                            contentLength,
+                            uniqueSignatures[signatureOffset],
+                            uniqueSignatures[signatureOffset + 1],
+                            uniqueSignatures[signatureOffset + 2],
+                        );
                 }
                 if (pendingContentDictNames !== null) {
                     pendingContentDictNames.push(
