@@ -6054,8 +6054,8 @@ export class DictionaryDatabase {
      * Reserves collision-free metadata slots and computes content signatures
      * while block compression is running. Pending slots participate in probe
      * chains but are never returned to readers before their offsets exist.
-     * @param {number[]} pendingContentHash1s
-     * @param {number[]} pendingContentHash2s
+     * @param {number[]|Uint32Array} pendingContentHash1s
+     * @param {number[]|Uint32Array} pendingContentHash2s
      * @param {Uint8Array[]} pendingContentBytes
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
      * @returns {{indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}}
@@ -6331,7 +6331,7 @@ export class DictionaryDatabase {
     /**
      * Restores parser-owned dedupe plan slots when a chunk fails after the
      * resolver advanced its contiguous cursor or published reserved offsets.
-     * @param {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[], count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} state
+     * @param {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[]|Uint32Array, count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} state
      */
     _rollbackArtifactTermContentDedupPlan(state) {
         if (state === null) { return; }
@@ -7043,7 +7043,7 @@ export class DictionaryDatabase {
         const importMetrics = createTermImportMetrics();
         /** @type {{indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null} */
         let stagedContentMetadata = null;
-        /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[], count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */
+        /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[]|Uint32Array, count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */
         let dedupPlanRollbackState = null;
 
         if (useLocalTransaction) {
@@ -7365,7 +7365,7 @@ export class DictionaryDatabase {
      * Resolves intra-chunk duplicates and content already persisted by earlier chunks.
      * @param {ArtifactTermContentChunk} chunk
      * @param {boolean} [reserveMetadata]
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[]|Uint32Array, pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
      */
     async _resolveArtifactTermContentDedup(chunk, reserveMetadata = false) {
         const count = chunk.rowCount;
@@ -7641,47 +7641,116 @@ export class DictionaryDatabase {
                 'pendingSpanLengthsScratch',
                 lastUniqueIndex - firstUniqueIndex,
             );
-            /** @type {Int32Array|null} */
-            let stagedIndexes = null;
+            const maximumPendingContentCount = lastUniqueIndex - firstUniqueIndex;
+            const pendingHash1s = new Uint32Array(maximumPendingContentCount);
+            const pendingHash2s = new Uint32Array(maximumPendingContentCount);
+            const pendingUniqueIndexes = new Uint32Array(maximumPendingContentCount);
+            const genericStagedIndexes = reserveMetadata && uniqueSignatures === null ?
+                new Int32Array(maximumPendingContentCount) :
+                null;
+            genericStagedIndexes?.fill(-1);
+            const preparedStagedIndexes = reserveMetadata && uniqueSignatures !== null ?
+                new Int32Array(maximumPendingContentCount) :
+                null;
+            preparedStagedIndexes?.fill(-1);
+            let preparedHash1Table = this._termEntryContentMetaHash1Table;
+            let preparedHash2Table = this._termEntryContentMetaHash2Table;
+            let preparedSlotTable = this._termEntryContentMetaHashPairTable;
+            let preparedStateTable = this._termEntryContentMetaStateTable;
+            let preparedLengthTable = this._termEntryContentMetaLengthTable;
+            let preparedSignaturePresentTable = this._termEntryContentMetaSignaturePresentTable;
+            let preparedSignature1Table = this._termEntryContentMetaSignature1Table;
+            let preparedSignature2Table = this._termEntryContentMetaSignature2Table;
+            let preparedSignature3Table = this._termEntryContentMetaSignature3Table;
+            const preparedFreeIndexes = this._termEntryContentMetaFreeIndexes;
+            let preparedHashPairMask = this._termEntryContentMetaHashPairMask;
+            const preparedInitialDenseCount = this._termEntryContentMetaDenseCount;
+            let preparedDenseCount = preparedInitialDenseCount;
+            let preparedStagedCount = 0;
+            /** @type {number[]} */
+            const preparedReusedIndexes = [];
             if (reserveMetadata) {
-                const maximumPendingContentCount = lastUniqueIndex - firstUniqueIndex;
                 this._ensureTermEntryContentMetaHashPairCapacity(
                     this._getArtifactTermContentMetaCapacityHint(chunk, maximumPendingContentCount),
                 );
-                stagedIndexes = new Int32Array(maximumPendingContentCount);
-                stagedIndexes.fill(-1);
+                if (preparedStagedIndexes !== null) {
+                    preparedHash1Table = this._termEntryContentMetaHash1Table;
+                    preparedHash2Table = this._termEntryContentMetaHash2Table;
+                    preparedSlotTable = this._termEntryContentMetaHashPairTable;
+                    preparedStateTable = this._termEntryContentMetaStateTable;
+                    preparedLengthTable = this._termEntryContentMetaLengthTable;
+                    preparedSignaturePresentTable = this._termEntryContentMetaSignaturePresentTable;
+                    preparedSignature1Table = this._termEntryContentMetaSignature1Table;
+                    preparedSignature2Table = this._termEntryContentMetaSignature2Table;
+                    preparedSignature3Table = this._termEntryContentMetaSignature3Table;
+                    preparedHashPairMask = this._termEntryContentMetaHashPairMask;
+                    preparedDenseCount = preparedInitialDenseCount;
+                }
             }
             let pendingContentCount = 0;
             let persistedHitCount = 0;
             let exactFallbackCount = 0;
             let alreadyResolvedUniqueCount = 0;
             const exactCandidates = [];
-            const appendPendingContent = ({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2}) => {
+            const appendPendingContent = (uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2) => {
                 if (contentOffset > 0xffffffff) {
                     throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
                 }
                 pendingSpanOffsets[pendingContentCount] = contentOffset;
                 pendingSpanLengths[pendingContentCount] = contentLength;
-                pendingContentHash1s.push(hash1);
-                pendingContentHash2s.push(hash2);
-                if (stagedIndexes !== null) {
-                    const signatureOffset = uniqueIndex * 3;
-                    stagedIndexes[pendingContentCount] = uniqueSignatures === null ?
-                        this._reserveArtifactTermContentMetadata(
-                            hash1,
-                            hash2,
-                            contentBytesBuffer,
-                            contentOffset,
-                            contentLength,
-                        ) :
-                        this._reservePreparedArtifactTermContentMetadata(
-                            hash1,
-                            hash2,
-                            contentLength,
-                            uniqueSignatures[signatureOffset],
-                            uniqueSignatures[signatureOffset + 1],
-                            uniqueSignatures[signatureOffset + 2],
-                        );
+                pendingHash1s[pendingContentCount] = hash1;
+                pendingHash2s[pendingContentCount] = hash2;
+                if (genericStagedIndexes !== null) {
+                    genericStagedIndexes[pendingContentCount] = this._reserveArtifactTermContentMetadata(
+                        hash1,
+                        hash2,
+                        contentBytesBuffer,
+                        contentOffset,
+                        contentLength,
+                    );
+                }
+                if (
+                    preparedStagedIndexes !== null &&
+                    uniqueSignatures !== null
+                ) {
+                    if (contentLength >= TERM_CONTENT_META_U32_NULL) {
+                        throw new RangeError(`Invalid prepared term content length at unique index ${uniqueIndex}`);
+                    }
+                    let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, preparedHashPairMask);
+                    let probeCount = 0;
+                    while (preparedSlotTable[slot] !== 0) {
+                        const existingIndex = preparedSlotTable[slot] - 1;
+                        if (
+                            preparedHash1Table[existingIndex] === hash1 &&
+                            preparedHash2Table[existingIndex] === hash2
+                        ) {
+                            slot = -1;
+                            break;
+                        }
+                        if (++probeCount >= preparedSlotTable.length) {
+                            throw new Error('Term content metadata hash table has no free slot');
+                        }
+                        slot = (slot + 1) & preparedHashPairMask;
+                    }
+                    if (slot >= 0) {
+                        const reusedIndex = preparedFreeIndexes.pop();
+                        const index = typeof reusedIndex === 'number' ? reusedIndex : preparedDenseCount++;
+                        if (typeof reusedIndex === 'number') {
+                            preparedReusedIndexes.push(reusedIndex);
+                        }
+                        const signatureOffset = uniqueIndex * 3;
+                        preparedHash1Table[index] = hash1;
+                        preparedHash2Table[index] = hash2;
+                        preparedLengthTable[index] = contentLength;
+                        preparedSignaturePresentTable[index] = 1;
+                        preparedSignature1Table[index] = uniqueSignatures[signatureOffset];
+                        preparedSignature2Table[index] = uniqueSignatures[signatureOffset + 1];
+                        preparedSignature3Table[index] = uniqueSignatures[signatureOffset + 2];
+                        preparedStateTable[index] = TERM_CONTENT_META_SLOT_PENDING;
+                        preparedSlotTable[slot] = index + 1;
+                        preparedStagedIndexes[pendingContentCount] = index;
+                        ++preparedStagedCount;
+                    }
                 }
                 if (pendingContentDictNames !== null) {
                     pendingContentDictNames.push(
@@ -7692,7 +7761,7 @@ export class DictionaryDatabase {
                 }
                 contentDedupPlan.pendingEpochs[uniqueIndex] = pendingPlanEpoch;
                 contentDedupPlan.pendingIndexes[uniqueIndex] = pendingContentCount;
-                pendingPlanUniqueIndexes.push(uniqueIndex);
+                pendingUniqueIndexes[pendingContentCount] = uniqueIndex;
                 ++pendingContentCount;
             };
             const resolveExactCandidates = async () => {
@@ -7708,7 +7777,14 @@ export class DictionaryDatabase {
                     const {existingMeta, exactFallback} = matchResult;
                     if (exactFallback) { ++exactFallbackCount; }
                     if (typeof existingMeta === 'undefined') {
-                        appendPendingContent(descriptor);
+                        appendPendingContent(
+                            descriptor.uniqueIndex,
+                            descriptor.rowIndex,
+                            descriptor.contentOffset,
+                            descriptor.contentLength,
+                            descriptor.hash1,
+                            descriptor.hash2,
+                        );
                         continue;
                     }
                     const {uniqueIndex} = descriptor;
@@ -7746,7 +7822,6 @@ export class DictionaryDatabase {
                     ) {
                         throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
                     }
-                    const descriptor = {uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2};
                     const existingIndex = persistedLookupRequired ?
                         this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
                         -1;
@@ -7754,18 +7829,35 @@ export class DictionaryDatabase {
                         void 0 :
                         this._readTermEntryContentMetaHashPairIndex(existingIndex);
                     if (typeof existingMeta === 'undefined') {
-                        appendPendingContent(descriptor);
+                        appendPendingContent(uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2);
                         continue;
                     }
-                    exactCandidates.push({...descriptor, existingMeta});
+                    exactCandidates.push({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2, existingMeta});
                     if (exactCandidates.length >= TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE) {
                         await resolveExactCandidates();
                     }
                 }
                 await resolveExactCandidates();
             } catch (error) {
-                if (stagedIndexes !== null) {
-                    this._rollbackStagedArtifactTermContentMetadata({indexes: stagedIndexes, active: true});
+                if (genericStagedIndexes !== null) {
+                    this._rollbackStagedArtifactTermContentMetadata({
+                        indexes: genericStagedIndexes.subarray(0, pendingContentCount),
+                        active: true,
+                    });
+                }
+                if (preparedStagedIndexes !== null) {
+                    for (let i = 0; i < pendingContentCount; ++i) {
+                        const index = preparedStagedIndexes[i];
+                        if (index >= 0) { preparedStateTable[index] = TERM_CONTENT_META_SLOT_EMPTY; }
+                    }
+                    for (let i = preparedReusedIndexes.length - 1; i >= 0; --i) {
+                        preparedFreeIndexes.push(preparedReusedIndexes[i]);
+                    }
+                    this._termEntryContentMetaDenseCount = preparedInitialDenseCount;
+                    this._ensureTermEntryContentMetaHashPairCapacity(
+                        this._termEntryContentMetaHashPairCount,
+                        true,
+                    );
                 }
                 throw error;
             }
@@ -7798,13 +7890,32 @@ export class DictionaryDatabase {
                 );
             }
             if (pendingHitCount < 0) { pendingHitCount = 0; }
+            const pendingHash1View = pendingHash1s.subarray(0, pendingContentCount);
+            const pendingHash2View = pendingHash2s.subarray(0, pendingContentCount);
+            const pendingUniqueIndexView = pendingUniqueIndexes.subarray(0, pendingContentCount);
+            let stagedContentMetadata;
+            if (reserveMetadata) {
+                if (preparedStagedIndexes !== null) {
+                    this._termEntryContentMetaDenseCount = preparedDenseCount;
+                    this._termEntryContentMetaHashPairPendingCount += preparedStagedCount;
+                }
+                stagedContentMetadata = preparedStagedIndexes === null ?
+                    {
+                        indexes: /** @type {Int32Array} */ (genericStagedIndexes).subarray(0, pendingContentCount),
+                        active: true,
+                    } :
+                    {
+                        indexes: preparedStagedIndexes.subarray(0, pendingContentCount),
+                        active: true,
+                    };
+            }
             return {
                 contentOffsets,
                 contentLengths,
                 resolvedContentDictNames,
                 pendingContentBytes,
-                pendingContentHash1s,
-                pendingContentHash2s,
+                pendingContentHash1s: pendingHash1View,
+                pendingContentHash2s: pendingHash2View,
                 pendingContentDictNames,
                 pendingRowToUniqueIndex: null,
                 pendingContentCount,
@@ -7818,14 +7929,9 @@ export class DictionaryDatabase {
                 persistedHitCount,
                 exactFallbackCount,
                 contentDedupPlan,
-                pendingPlanUniqueIndexes,
+                pendingPlanUniqueIndexes: pendingUniqueIndexView,
                 pendingPlanUniqueStart: null,
-                stagedContentMetadata: stagedIndexes === null ?
-                    void 0 :
-                    {
-                        indexes: stagedIndexes.subarray(0, pendingContentCount),
-                        active: true,
-                    },
+                stagedContentMetadata,
             };
         }
         let tableSize = 1;
@@ -8180,7 +8286,7 @@ export class DictionaryDatabase {
 
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
+     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
      * @returns {string|(string|null)[]}
      * @throws {Error} If dedup projections or persisted metadata are invalid.
      */

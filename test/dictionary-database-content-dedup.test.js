@@ -230,17 +230,81 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             contentMetaList: new Uint32Array([0, 3, 10, 20]),
             contentUniqueIndexList: new Uint32Array([0]),
             contentDedupPlan: plan,
+            useResolvedContentReferences: true,
             contentDictNameList: null,
             uniformContentDictName: 'raw-v6',
         }, true);
 
         expect(genericReserve).not.toHaveBeenCalled();
-        expect(preparedReserve).toHaveBeenCalledWith(10, 20, 3, 101, 202, 303);
+        expect(preparedReserve).not.toHaveBeenCalled();
         const index = result.stagedContentMetadata?.indexes[0];
         expect(index).toBe(0);
         expect(Reflect.get(database, '_termEntryContentMetaSignature1Table')[index]).toBe(101);
         expect(Reflect.get(database, '_termEntryContentMetaSignature2Table')[index]).toBe(202);
         expect(Reflect.get(database, '_termEntryContentMetaSignature3Table')[index]).toBe(303);
+    });
+
+    test('rolls back partially reserved parser metadata atomically', async () => {
+        const database = new DictionaryDatabase();
+        const ensureCapacity = Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').bind(database);
+        const reservePrepared = Reflect.get(database, '_reservePreparedArtifactTermContentMetadata').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        ensureCapacity(1);
+        const recycledIndex = reservePrepared(90, 91, 1, 92, 93, 94);
+        rollback({indexes: Int32Array.of(recycledIndex), active: true});
+        const plan = {
+            uniqueCount: 3,
+            sourceRowCount: 3,
+            uniqueRowIndexes: new Uint32Array([0, 1, 2]),
+            uniqueSignatures: new Uint32Array([101, 102, 103, 201, 202, 203, 301, 302, 303]),
+            resolvedFlags: new Uint8Array(3),
+            resolvedOffsets: new Float64Array(3),
+            resolvedLengths: new Uint32Array(3),
+            resolvedDictNames: new Array(3),
+            pendingEpochs: new Uint32Array(3),
+            pendingIndexes: new Uint32Array(3),
+            nextEpoch: 1,
+            nextUnresolvedUniqueIndex: 0,
+            persistedLookupRequired: false,
+        };
+        const chunk = {
+            rowCount: 3,
+            contentRowStart: 0,
+            dictionaryTotalRows: 3,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: Uint8Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
+            contentBytesBaseOffset: 0,
+            contentMetaList: new Uint32Array([
+                0, 3, 10, 20,
+                3, 4, 30, 40,
+                7, 0xffffffff, 50, 60,
+            ]),
+            contentUniqueIndexList: new Uint32Array([0, 1, 2]),
+            contentDedupPlan: plan,
+            useResolvedContentReferences: true,
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        };
+
+        await expect(resolve(chunk, true)).rejects.toThrow('invalid at row 2');
+
+        expect(getMeta(database, 10, 20)).toBeUndefined();
+        expect(getMeta(database, 30, 40)).toBeUndefined();
+        expect(getMeta(database, 50, 60)).toBeUndefined();
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentMetaDenseCount')).toBe(1);
+        expect(Reflect.get(database, '_termEntryContentMetaFreeIndexes')).toEqual([0]);
+
+        chunk.contentMetaList[9] = 4;
+        const retry = await resolve(chunk, true);
+        expect([...retry.stagedContentMetadata.indexes]).toEqual([0, 1, 2]);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(3);
+        rollback(retry.stagedContentMetadata);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
     });
 
     test('leases cleared dedup scratch tables without sharing active leases', () => {
@@ -1298,7 +1362,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(result.pendingRowToUniqueIndex).toBeNull();
         expect([...result.pendingContentSpans.offsets]).toEqual([1, 4]);
         expect([...result.pendingContentSpans.lengths]).toEqual([3, 2]);
-        expect(result.pendingPlanUniqueIndexes).toEqual([0, 1]);
+        expect([...result.pendingPlanUniqueIndexes]).toEqual([0, 1]);
         expect(result.pendingHitCount).toBe(1);
     });
 
@@ -1528,11 +1592,11 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(result.persistedHitCount).toBe(0);
         expect(result.exactFallbackCount).toBe(1);
         expect(result.pendingContentCount).toBe(2);
-        expect(result.pendingPlanUniqueIndexes).toEqual([1, 0]);
+        expect([...result.pendingPlanUniqueIndexes]).toEqual([1, 0]);
         expect([...result.pendingContentSpans.offsets]).toEqual([3, 0]);
         expect([...result.pendingContentSpans.lengths]).toEqual([3, 3]);
-        expect(result.pendingContentHash1s).toEqual([30, 10]);
-        expect(result.pendingContentHash2s).toEqual([40, 20]);
+        expect([...result.pendingContentHash1s]).toEqual([30, 10]);
+        expect([...result.pendingContentHash2s]).toEqual([40, 20]);
     });
 
     test('settles every concurrent exact comparison before reporting a failure', async () => {
@@ -1767,7 +1831,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             uniformContentDictName: 'raw-v6',
         });
 
-        expect(result.pendingPlanUniqueIndexes).toEqual([1, 2]);
+        expect([...result.pendingPlanUniqueIndexes]).toEqual([1, 2]);
         expect([...result.pendingContentSpans.offsets]).toEqual([1, 5]);
         expect([...result.pendingContentSpans.lengths]).toEqual([2, 1]);
         expect(result.pendingHitCount).toBe(1);
