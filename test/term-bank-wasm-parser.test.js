@@ -426,7 +426,7 @@ describe('term-bank WASM parser', () => {
         expect(result.contentMetaList?.buffer).not.toBe(heap.buffer);
     });
 
-    test('borrows shared content metadata only when its lifetime is explicitly fenced', () => {
+    test('owns record metadata while borrowing only the explicitly fenced content slab', () => {
         const heap = new Uint8Array(new SharedArrayBuffer(256));
         heap.set([1, 2, 3, 4], 192);
         const contentMetaList = new Uint32Array(heap.buffer, 8, 8);
@@ -441,6 +441,16 @@ describe('term-bank WASM parser', () => {
         const stringsBuffer = heap.subarray(96, 100);
         const expressionIndexes = new Uint32Array(heap.buffer, 100, 2);
         const readingIndexes = new Uint32Array(heap.buffer, 108, 2);
+        readingEqualsExpressionList.set([0, 1]);
+        scoreList.set([-123456789, 987654321]);
+        sequenceList.set([101, -1]);
+        contentUniqueIndexList.set([7, 8]);
+        stringLengths.set([1, 3]);
+        stringOffsets.set([0, 1]);
+        stringHashes.set([0x11223344, 0xaabbccdd]);
+        stringsBuffer.set([10, 20, 30, 40]);
+        expressionIndexes.set([0, 1]);
+        readingIndexes.set([1, 0]);
         const result = copyWasmBackedColumnChunk({
             rowCount: 2,
             expressionBytesList: [],
@@ -465,7 +475,7 @@ describe('term-bank WASM parser', () => {
                 readingIndexes,
             },
             mediaRows: [],
-        }, true, true);
+        }, true);
 
         for (const view of [
             result.contentMetaList,
@@ -480,12 +490,21 @@ describe('term-bank WASM parser', () => {
             result.termRecordPreinternedPlan.expressionIndexes,
             result.termRecordPreinternedPlan.readingIndexes,
         ]) {
-            expect(view?.buffer).toBe(heap.buffer);
+            expect(view?.buffer).not.toBe(heap.buffer);
         }
-        contentMetaList[0] = 1;
-        readingEqualsExpressionList[0] = 1;
-        expect(result.contentMetaList?.[0]).toBe(1);
-        expect(result.readingEqualsExpressionList[0]).toBe(1);
+        heap.fill(0xff);
+        expect([...result.contentBytesBuffer]).toStrictEqual([255, 255, 255, 255]);
+        expect([...result.contentMetaList]).toStrictEqual([0, 2, 11, 12, 2, 2, 13, 14]);
+        expect([...result.readingEqualsExpressionList]).toStrictEqual([0, 1]);
+        expect([...result.scoreList]).toStrictEqual([-123456789, 987654321]);
+        expect([...result.sequenceList]).toStrictEqual([101, -1]);
+        expect([...result.contentUniqueIndexList]).toStrictEqual([7, 8]);
+        expect([...result.termRecordPreinternedPlan.stringLengths]).toStrictEqual([1, 3]);
+        expect([...result.termRecordPreinternedPlan.stringOffsets]).toStrictEqual([0, 1]);
+        expect([...result.termRecordPreinternedPlan.stringHashes]).toStrictEqual([0x11223344, 0xaabbccdd]);
+        expect([...result.termRecordPreinternedPlan.stringsBuffer]).toStrictEqual([10, 20, 30, 40]);
+        expect([...result.termRecordPreinternedPlan.expressionIndexes]).toStrictEqual([0, 1]);
+        expect([...result.termRecordPreinternedPlan.readingIndexes]).toStrictEqual([1, 0]);
     });
 
     test('copies fenced metadata from an unrelated shared buffer', () => {

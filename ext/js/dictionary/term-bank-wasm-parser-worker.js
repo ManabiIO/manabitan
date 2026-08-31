@@ -127,7 +127,10 @@ async function parse(data) {
                 }
                 resultRowCount = chunk.rowCount;
                 const tResultCopyStart = safePerformance.now();
-                resultChunk = copyWasmBackedColumnChunk(chunk, true, true);
+                // Only the content slab has an explicit release contract. Record
+                // fields and lookup metadata can outlive content persistence
+                // while record/index writes are still running.
+                resultChunk = copyWasmBackedColumnChunk(chunk, true);
                 borrowsWorkerMemory = (
                     typeof SharedArrayBuffer === 'function' &&
                     chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&

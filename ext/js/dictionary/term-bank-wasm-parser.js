@@ -3054,24 +3054,12 @@ function isCompressedTermBankSource(value) {
 /**
  * @param {TermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
- * @param {boolean} [shareContentMetadata=false]
  * @returns {TermBankColumnChunk}
  * @throws {Error} If the native string plan is incomplete.
  */
-export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, shareContentMetadata = false) {
+export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
-    const sourceContentBytesBuffer = chunk.contentBytesBuffer?.buffer;
-    const sharedWasmBuffer = (
-        shareContentMetadata &&
-        typeof SharedArrayBuffer === 'function' &&
-        sourceContentBytesBuffer instanceof SharedArrayBuffer
-    ) ? sourceContentBytesBuffer : null;
-    /** @param {ArrayBufferView} value */
-    const canShareWasmView = (value) => sharedWasmBuffer !== null && value.buffer === sharedWasmBuffer;
-    const contentMetaList =
-        canShareWasmView(sourceContentMetaList) ?
-            sourceContentMetaList :
-            Uint32Array.from(sourceContentMetaList);
+    const contentMetaList = Uint32Array.from(sourceContentMetaList);
     let contentBytesLength = 0;
     for (let i = 0; i < contentMetaList.length; i += CONTENT_META_U32_FIELDS) {
         contentBytesLength = Math.max(contentBytesLength, contentMetaList[i] + contentMetaList[i + 1]);
@@ -3112,20 +3100,20 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, shar
         },
     }));
     const stablePlan = {
-        stringLengths: canShareWasmView(plan.stringLengths) ? plan.stringLengths : Uint16Array.from(plan.stringLengths),
+        stringLengths: Uint16Array.from(plan.stringLengths),
         stringOffsets: chunk.preparedLookupIndexes instanceof Map ?
             void 0 :
-            (canShareWasmView(stringOffsets) ? stringOffsets : Uint32Array.from(stringOffsets)),
+            Uint32Array.from(stringOffsets),
         stringHashes: chunk.preparedLookupIndexes instanceof Map ?
             void 0 :
             (
                 plan.stringHashes instanceof Uint32Array ?
-                    (canShareWasmView(plan.stringHashes) ? plan.stringHashes : Uint32Array.from(plan.stringHashes)) :
+                    Uint32Array.from(plan.stringHashes) :
                     void 0
             ),
-        stringsBuffer: canShareWasmView(plan.stringsBuffer) ? plan.stringsBuffer : Uint8Array.from(plan.stringsBuffer),
-        expressionIndexes: canShareWasmView(plan.expressionIndexes) ? plan.expressionIndexes : Uint32Array.from(plan.expressionIndexes),
-        readingIndexes: canShareWasmView(plan.readingIndexes) ? plan.readingIndexes : Uint32Array.from(plan.readingIndexes),
+        stringsBuffer: Uint8Array.from(plan.stringsBuffer),
+        expressionIndexes: Uint32Array.from(plan.expressionIndexes),
+        readingIndexes: Uint32Array.from(plan.readingIndexes),
     };
     /** @type {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|undefined} */
     let preparedLookupIndexes;
@@ -3133,13 +3121,9 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, shar
         preparedLookupIndexes = new Map();
         for (const [key, prepared] of chunk.preparedLookupIndexes) {
             preparedLookupIndexes.set(key, {
-                bytes: canShareWasmView(prepared.bytes) ?
-                    prepared.bytes :
-                    (
-                        prepared.bytes.buffer === plan.stringsBuffer.buffer ?
-                            Uint8Array.from(prepared.bytes) :
-                            prepared.bytes
-                    ),
+                bytes: prepared.bytes.buffer === plan.stringsBuffer.buffer ?
+                    Uint8Array.from(prepared.bytes) :
+                    prepared.bytes,
                 preinternedPlan: stablePlan,
             });
         }
@@ -3148,11 +3132,9 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, shar
         ...chunk,
         expressionBytesList: chunk.expressionBytesList.map((bytes) => Uint8Array.from(bytes)),
         readingBytesList: chunk.readingBytesList.map((bytes) => Uint8Array.from(bytes)),
-        readingEqualsExpressionList: canShareWasmView(chunk.readingEqualsExpressionList) ?
-            chunk.readingEqualsExpressionList :
-            Uint8Array.from(chunk.readingEqualsExpressionList),
-        scoreList: canShareWasmView(chunk.scoreList) ? chunk.scoreList : Int32Array.from(chunk.scoreList),
-        sequenceList: canShareWasmView(chunk.sequenceList) ? chunk.sequenceList : Int32Array.from(chunk.sequenceList),
+        readingEqualsExpressionList: Uint8Array.from(chunk.readingEqualsExpressionList),
+        scoreList: Int32Array.from(chunk.scoreList),
+        sequenceList: Int32Array.from(chunk.sequenceList),
         contentBytesList: chunk.contentBytesList.map((bytes) => Uint8Array.from(bytes)),
         contentHash1List: Uint32Array.from(chunk.contentHash1List),
         contentHash2List: Uint32Array.from(chunk.contentHash2List),
@@ -3161,11 +3143,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, shar
         contentMetaList,
         contentUniqueIndexList: chunk.contentUniqueIndexList === null ?
             null :
-            (
-                canShareWasmView(chunk.contentUniqueIndexList) ?
-                    chunk.contentUniqueIndexList :
-                    Uint32Array.from(chunk.contentUniqueIndexList)
-            ),
+            Uint32Array.from(chunk.contentUniqueIndexList),
         mediaRows,
         termRecordPreinternedPlan: stablePlan,
         ...(typeof preparedLookupIndexes === 'undefined' ? {} : {preparedLookupIndexes}),
