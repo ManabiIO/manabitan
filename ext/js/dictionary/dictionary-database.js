@@ -7066,6 +7066,9 @@ export class DictionaryDatabase {
                 pendingHitCount,
                 persistedHitCount,
                 exactFallbackCount,
+                dedupCapacityMs = 0,
+                dedupCanonicalScanMs = 0,
+                dedupExactCompareMs = 0,
                 contentDedupPlan,
                 pendingPlanUniqueIndexes,
                 pendingPlanUniqueStart,
@@ -7082,6 +7085,9 @@ export class DictionaryDatabase {
             importMetrics.dedupPersistedHitCount += persistedHitCount;
             importMetrics.dedupUniqueCount += pendingContentCount;
             importMetrics.dedupExactFallbackCount += exactFallbackCount;
+            importMetrics.dedupCapacityMs += dedupCapacityMs;
+            importMetrics.dedupCanonicalScanMs += dedupCanonicalScanMs;
+            importMetrics.dedupExactCompareMs += dedupExactCompareMs;
             importMetrics.dedupScanMs += safePerformance.now() - tContentAppendStart;
             if (contentDedupPlan !== null && pendingContentCount > 0) {
                 dedupPlanRollbackState = {
@@ -7643,18 +7649,22 @@ export class DictionaryDatabase {
             );
             /** @type {Int32Array|null} */
             let stagedIndexes = null;
+            let dedupCapacityMs = 0;
             if (reserveMetadata) {
+                const capacityStart = safePerformance.now();
                 const maximumPendingContentCount = lastUniqueIndex - firstUniqueIndex;
                 this._ensureTermEntryContentMetaHashPairCapacity(
                     this._getArtifactTermContentMetaCapacityHint(chunk, maximumPendingContentCount),
                 );
                 stagedIndexes = new Int32Array(maximumPendingContentCount);
                 stagedIndexes.fill(-1);
+                dedupCapacityMs = safePerformance.now() - capacityStart;
             }
             let pendingContentCount = 0;
             let persistedHitCount = 0;
             let exactFallbackCount = 0;
             let alreadyResolvedUniqueCount = 0;
+            let dedupExactCompareMs = 0;
             const exactCandidates = [];
             const appendPendingContent = ({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2}) => {
                 if (contentOffset > 0xffffffff) {
@@ -7697,6 +7707,7 @@ export class DictionaryDatabase {
             };
             const resolveExactCandidates = async () => {
                 if (exactCandidates.length === 0) { return; }
+                const exactCompareStart = safePerformance.now();
                 const matchResults = await this._findMatchingPersistedTermEntryContentMetaBatch(exactCandidates.map((descriptor) => {
                     const {contentOffset, contentLength, hash1, hash2, existingMeta} = descriptor;
                     const contentBytes = contentBytesBuffer.subarray(contentOffset, contentOffset + contentLength);
@@ -7719,7 +7730,9 @@ export class DictionaryDatabase {
                     ++persistedHitCount;
                 }
                 exactCandidates.length = 0;
+                dedupExactCompareMs += safePerformance.now() - exactCompareStart;
             };
+            const canonicalScanStart = safePerformance.now();
             try {
                 for (let uniqueIndex = firstUniqueIndex; uniqueIndex < lastUniqueIndex; ++uniqueIndex) {
                     const globalRowIndex = uniqueRowIndexes[uniqueIndex];
@@ -7769,6 +7782,10 @@ export class DictionaryDatabase {
                 }
                 throw error;
             }
+            const dedupCanonicalScanMs = Math.max(
+                0,
+                safePerformance.now() - canonicalScanStart - dedupExactCompareMs,
+            );
             let pendingHitCount = count - (lastUniqueIndex - firstUniqueIndex) + alreadyResolvedUniqueCount;
             // Pending rows force a later whole-chunk projection after their
             // persisted offsets arrive, so projecting resolved hits now would
@@ -7817,6 +7834,9 @@ export class DictionaryDatabase {
                 pendingHitCount,
                 persistedHitCount,
                 exactFallbackCount,
+                dedupCapacityMs,
+                dedupCanonicalScanMs,
+                dedupExactCompareMs,
                 contentDedupPlan,
                 pendingPlanUniqueIndexes,
                 pendingPlanUniqueStart: null,
