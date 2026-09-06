@@ -53,6 +53,42 @@ function cacheMeta(database, contentHash, offset, length, dictName, hash1, hash2
 }
 
 /**
+ * @param {DictionaryDatabase} database
+ * @param {Uint8Array} source
+ * @param {number} sourceOffset
+ * @param {number} length
+ * @param {number} hash1
+ * @param {number} hash2
+ * @returns {{staged: {indexes: Int32Array, active: boolean}, meta: Record<string, unknown>}}
+ */
+function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2) {
+    const spans = {
+        buffer: source,
+        offsets: new Uint32Array([sourceOffset]),
+        lengths: new Uint32Array([length]),
+    };
+    const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+    const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
+    const staged = stage([hash1], [hash2], [], spans);
+    publish({
+        count: 1,
+        contentOffsets: new Float64Array(1),
+        contentLengths: new Uint32Array(1),
+        resolvedContentDictNames: 'raw',
+        pendingRowToUniqueIndex: new Int32Array([0]),
+        pendingContentBytes: [],
+        pendingContentHash1s: [hash1],
+        pendingContentHash2s: [hash2],
+        pendingOffsets: [1000 + hash1],
+        pendingLengths: [length],
+        pendingResolvedDictNames: 'raw',
+        pendingContentSpans: spans,
+        stagedContentMetadata: staged,
+    });
+    return {staged, meta: getMeta(database, hash1, hash2)};
+}
+
+/**
  * @param {number[]} [sourceValues]
  * @param {number} [hash1]
  * @param {number} [hash2]
@@ -170,6 +206,148 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
 }
 
 describe('DictionaryDatabase term content dedup metadata cache', () => {
+    test('owns recent published source bytes across borrowed slab reuse', async () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array([90, 1, 2, 3, 4, 91]);
+        const expected = source.slice(1, 5);
+        const {meta} = publishSlabMeta(database, source, 1, expected.length, 10, 20);
+        const readStorage = vi.fn(async () => {
+            throw new Error('recent source hit should not read storage');
+        });
+        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
+
+        source.fill(0);
+        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+        const [result] = await findBatch([{hash1: 10, hash2: 20, contentBytes: expected, primary: meta}]);
+
+        expect(result).toMatchObject({existingMeta: meta, exactFallback: true, recentSourceHit: true});
+        expect(readStorage).not.toHaveBeenCalled();
+    });
+
+    test('does not deduplicate unequal bytes with matching hashes and signatures', async () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array(20);
+        source.set([1, 2, 3, 4], 0);
+        source.set([5, 6, 7, 8], 9);
+        source.set([9, 10, 11, 12], 16);
+        const collision = source.slice();
+        collision[6] = 99;
+        const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
+        const readStorage = vi.fn();
+        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
+
+        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+        const [result] = await findBatch([{hash1: 10, hash2: 20, contentBytes: collision, primary: meta}]);
+
+        expect(result).toStrictEqual({existingMeta: void 0, exactFallback: true});
+        expect(readStorage).not.toHaveBeenCalled();
+    });
+
+    test('falls back to validated storage after a recent source batch is evicted', async () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array([1, 2, 3, 4]);
+        const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
+        Reflect.get(database, '_recentTermContentSourceBatches').clear();
+        Reflect.set(database, '_recentTermContentSourceBatchBytes', 0);
+        const readStorage = vi.fn(async () => [{status: 'ok', bytes: source.slice()}]);
+        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
+
+        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+        const [result] = await findBatch([{hash1: 10, hash2: 20, contentBytes: source, primary: meta}]);
+
+        expect(result).toStrictEqual({existingMeta: meta, exactFallback: true});
+        expect(readStorage).toHaveBeenCalledOnce();
+    });
+
+    test('preserves recent source mappings across dense metadata growth', async () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array([1, 2, 3, 4]);
+        const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
+        Reflect.get(database, '_ensureTermEntryContentMetaDenseCapacity').call(database, 4096);
+        const readStorage = vi.fn();
+        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
+
+        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+        const [result] = await findBatch([{hash1: 10, hash2: 20, contentBytes: source, primary: meta}]);
+
+        expect(result.recentSourceHit).toBe(true);
+        expect(readStorage).not.toHaveBeenCalled();
+    });
+
+    test('reports recent source hits from canonical plan deduplication', async () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array([1, 2, 3, 4]);
+        publishSlabMeta(database, source, 0, source.length, 10, 20);
+        const plan = {
+            uniqueCount: 1,
+            sourceRowCount: 1,
+            uniqueRowIndexes: new Uint32Array([0]),
+            resolvedFlags: new Uint8Array(1),
+            resolvedOffsets: new Float64Array(1),
+            resolvedLengths: new Uint32Array(1),
+            resolvedDictNames: new Array(1),
+            pendingEpochs: new Uint32Array(1),
+            pendingIndexes: new Uint32Array(1),
+            nextEpoch: 1,
+            persistedLookupRequired: true,
+        };
+        const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+
+        const result = await resolve({
+            rowCount: 1,
+            contentRowStart: 0,
+            dictionaryTotalRows: 1,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 0,
+            contentMetaList: new Uint32Array([0, source.length, 10, 20]),
+            contentUniqueIndexList: new Uint32Array([0]),
+            contentDedupPlan: plan,
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        }, true);
+
+        expect(result.pendingContentCount).toBe(0);
+        expect(result.persistedHitCount).toBe(1);
+        expect(result.exactFallbackCount).toBe(1);
+        expect(result.recentSourceHitCount).toBe(1);
+    });
+
+    test('removes recent source mappings on rollback and cache reset', () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array([1, 2, 3, 4]);
+        const first = publishSlabMeta(database, source, 0, source.length, 10, 20);
+        const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database);
+        expect(findRecent(first.meta)).toBeDefined();
+
+        Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').call(database, first.staged);
+        expect(findRecent(first.meta)).toBeUndefined();
+        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(0);
+
+        const second = publishSlabMeta(database, source, 0, source.length, 30, 40);
+        expect(findRecent(second.meta)).toBeDefined();
+        Reflect.get(database, '_clearTermEntryContentMetaCaches').call(database);
+        expect(findRecent(second.meta)).toBeUndefined();
+    });
+
+    test('ignores incomplete recent source span metadata', () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array([1, 2, 3, 4]);
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const cacheRecent = Reflect.get(database, '_cacheRecentPublishedTermContentSources').bind(database);
+        const staged = stage([10], [20], [source], null);
+
+        expect(cacheRecent(staged, {
+            buffer: source,
+            offsets: new Uint32Array(0),
+            lengths: new Uint32Array(0),
+        })).toBe(0);
+        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0);
+    });
+
     test('fails fast when metadata insertion is attempted without reserved capacity', () => {
         const database = new DictionaryDatabase();
         const contentBytes = Uint8Array.of(1);

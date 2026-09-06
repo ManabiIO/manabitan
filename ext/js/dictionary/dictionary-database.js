@@ -91,6 +91,7 @@ const TERM_CONTENT_META_SLOT_PUBLISHED = 1;
 const TERM_CONTENT_META_SLOT_PENDING = 2;
 const TERM_CONTENT_META_PREALLOC_MAX_ENTRIES = 1024 * 1024;
 const TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE = 4096;
+const TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES = 48 * 1024 * 1024;
 const BULK_IMPORT_STATE_IDLE = 'idle';
 const BULK_IMPORT_STATE_ACTIVE = 'active';
 const BULK_IMPORT_STATE_FINALIZING = 'finalizing';
@@ -170,6 +171,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @typedef {object} ExactTermContentResult
  * @property {TermContentMeta|undefined} existingMeta
  * @property {boolean} exactFallback
+ * @property {boolean} [recentSourceHit]
  */
 
 class TermContentLookupReadError extends Error {
@@ -519,6 +521,10 @@ export class DictionaryDatabase {
         this._termEntryContentMetaSignature2Table = new Uint32Array(0);
         /** @type {Uint32Array} */
         this._termEntryContentMetaSignature3Table = new Uint32Array(0);
+        /** @type {Uint32Array} */
+        this._termEntryContentMetaRecentSourceBatchIdTable = new Uint32Array(0);
+        /** @type {Uint32Array} */
+        this._termEntryContentMetaRecentSourceOffsetTable = new Uint32Array(0);
         /** @type {Map<string, number>} */
         this._termEntryContentMetaDictNameIdByValue = new Map([['raw', 0]]);
         /** @type {string[]} */
@@ -537,6 +543,10 @@ export class DictionaryDatabase {
         this._termEntryContentMetaCollisionsByHashPair = new Map();
         /** @type {Set<InFlightTermContentSourceBatch>} */
         this._inFlightTermContentSourceBatches = new Set();
+        /** @type {Map<number, Uint8Array>} */
+        this._recentTermContentSourceBatches = new Map();
+        this._recentTermContentSourceBatchBytes = 0;
+        this._nextRecentTermContentSourceBatchId = 1;
         /** @type {boolean} */
         this._termEntryContentHasExistingRows = true;
         /** @type {boolean} */
@@ -5220,6 +5230,8 @@ export class DictionaryDatabase {
         this._termEntryContentMetaSignature1Table = new Uint32Array(0);
         this._termEntryContentMetaSignature2Table = new Uint32Array(0);
         this._termEntryContentMetaSignature3Table = new Uint32Array(0);
+        this._termEntryContentMetaRecentSourceBatchIdTable = new Uint32Array(0);
+        this._termEntryContentMetaRecentSourceOffsetTable = new Uint32Array(0);
         this._termEntryContentMetaDictNameIdByValue = new Map([['raw', 0]]);
         this._termEntryContentMetaDictNames = ['raw'];
         this._termEntryContentMetaHashPairMask = 0;
@@ -5229,6 +5241,9 @@ export class DictionaryDatabase {
         this._termEntryContentMetaFreeIndexes.length = 0;
         this._termEntryContentMetaCollisionsByHashPair.clear();
         this._inFlightTermContentSourceBatches.clear();
+        this._recentTermContentSourceBatches.clear();
+        this._recentTermContentSourceBatchBytes = 0;
+        this._nextRecentTermContentSourceBatchId = 1;
     }
 
     /**
@@ -5420,6 +5435,13 @@ export class DictionaryDatabase {
      */
     async _findMatchingPersistedTermEntryContentMeta(candidates, contentBytes) {
         for (const meta of candidates) {
+            const recentSource = this._findRecentTermContentSource(meta);
+            if (typeof recentSource !== 'undefined') {
+                if (this._termContentBytesEqualSpan(contentBytes, recentSource.buffer, recentSource.offset, recentSource.length)) {
+                    return meta;
+                }
+                continue;
+            }
             const inFlightSource = this._findInFlightTermContentSource(meta.offset, meta.length, meta.dictName);
             if (typeof inFlightSource !== 'undefined') {
                 if (
@@ -5497,6 +5519,23 @@ export class DictionaryDatabase {
                 let queued = false;
                 while (nextCandidateIndexes[i] < candidates.length) {
                     const meta = candidates[nextCandidateIndexes[i]++];
+                    const recentSource = this._findRecentTermContentSource(meta);
+                    if (typeof recentSource !== 'undefined') {
+                        if (
+                            this._termContentBytesEqualSpan(
+                                contentBytes,
+                                recentSource.buffer,
+                                recentSource.offset,
+                                recentSource.length,
+                            )
+                        ) {
+                            results[i] = {existingMeta: meta, exactFallback: true, recentSourceHit: true};
+                            completed[i] = 1;
+                            --remaining;
+                            break;
+                        }
+                        continue;
+                    }
                     const inFlightSource = this._findInFlightTermContentSource(meta.offset, meta.length, meta.dictName);
                     if (typeof inFlightSource !== 'undefined') {
                         if (
@@ -5624,6 +5663,83 @@ export class DictionaryDatabase {
             }
         }
         return void 0;
+    }
+
+    /**
+     * @param {TermContentMeta} meta
+     * @returns {{buffer: Uint8Array, offset: number, length: number}|undefined}
+     */
+    _findRecentTermContentSource(meta) {
+        const index = meta.tableIndex;
+        if (typeof index !== 'number' || index < 0 || index >= this._termEntryContentMetaRecentSourceBatchIdTable.length) {
+            return void 0;
+        }
+        const batchId = this._termEntryContentMetaRecentSourceBatchIdTable[index];
+        if (batchId === 0) { return void 0; }
+        const buffer = this._recentTermContentSourceBatches.get(batchId);
+        if (typeof buffer === 'undefined') { return void 0; }
+        const offset = this._termEntryContentMetaRecentSourceOffsetTable[index];
+        const length = meta.length;
+        if (length < 0 || offset > buffer.byteLength || length > buffer.byteLength - offset) { return void 0; }
+        return {buffer, offset, length};
+    }
+
+    /**
+     * Retains a bounded owned copy so the next parser groups can verify exact
+     * duplicates without reading recently written OPFS blocks.
+     * @param {{indexes: Int32Array, active: boolean}|null} staged
+     * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
+     * @returns {number} Number of owned source bytes retained.
+     */
+    _cacheRecentPublishedTermContentSources(staged, spans) {
+        if (staged === null || spans === null || staged.indexes.length === 0) { return 0; }
+        if (
+            !(spans.buffer instanceof Uint8Array) ||
+            spans.offsets.length < staged.indexes.length ||
+            spans.lengths.length < staged.indexes.length
+        ) {
+            return 0;
+        }
+        let minimumOffset = Infinity;
+        let maximumEnd = 0;
+        for (let i = 0; i < staged.indexes.length; ++i) {
+            const index = staged.indexes[i];
+            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+            const offset = spans.offsets[i];
+            const length = spans.lengths[i];
+            if (offset > spans.buffer.byteLength || length > spans.buffer.byteLength - offset) { return 0; }
+            minimumOffset = Math.min(minimumOffset, offset);
+            maximumEnd = Math.max(maximumEnd, offset + length);
+        }
+        if (!Number.isFinite(minimumOffset) || maximumEnd <= minimumOffset) { return 0; }
+        const byteLength = maximumEnd - minimumOffset;
+        if (byteLength > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES) { return 0; }
+        while (
+            this._recentTermContentSourceBatchBytes + byteLength > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES &&
+            this._recentTermContentSourceBatches.size > 0
+        ) {
+            const first = this._recentTermContentSourceBatches.entries().next();
+            if (first.done) { break; }
+            this._recentTermContentSourceBatches.delete(first.value[0]);
+            this._recentTermContentSourceBatchBytes -= first.value[1].byteLength;
+        }
+        if (this._nextRecentTermContentSourceBatchId > 0xffffffff) {
+            this._recentTermContentSourceBatches.clear();
+            this._recentTermContentSourceBatchBytes = 0;
+            this._termEntryContentMetaRecentSourceBatchIdTable.fill(0);
+            this._nextRecentTermContentSourceBatchId = 1;
+        }
+        const batchId = this._nextRecentTermContentSourceBatchId++;
+        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
+        this._recentTermContentSourceBatches.set(batchId, owned);
+        this._recentTermContentSourceBatchBytes += owned.byteLength;
+        for (let i = 0; i < staged.indexes.length; ++i) {
+            const index = staged.indexes[i];
+            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+            this._termEntryContentMetaRecentSourceBatchIdTable[index] = batchId;
+            this._termEntryContentMetaRecentSourceOffsetTable[index] = spans.offsets[i] - minimumOffset;
+        }
+        return owned.byteLength;
     }
 
     /**
@@ -5962,6 +6078,12 @@ export class DictionaryDatabase {
         const signature3Table = new Uint32Array(capacity);
         signature3Table.set(this._termEntryContentMetaSignature3Table);
         this._termEntryContentMetaSignature3Table = signature3Table;
+        const recentSourceBatchIdTable = new Uint32Array(capacity);
+        recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable);
+        this._termEntryContentMetaRecentSourceBatchIdTable = recentSourceBatchIdTable;
+        const recentSourceOffsetTable = new Uint32Array(capacity);
+        recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable);
+        this._termEntryContentMetaRecentSourceOffsetTable = recentSourceOffsetTable;
     }
 
     /**
@@ -5969,7 +6091,11 @@ export class DictionaryDatabase {
      */
     _allocateTermEntryContentMetaIndex() {
         const reused = this._termEntryContentMetaFreeIndexes.pop();
-        if (typeof reused === 'number') { return reused; }
+        if (typeof reused === 'number') {
+            this._termEntryContentMetaRecentSourceBatchIdTable[reused] = 0;
+            this._termEntryContentMetaRecentSourceOffsetTable[reused] = 0;
+            return reused;
+        }
         const index = this._termEntryContentMetaDenseCount;
         this._ensureTermEntryContentMetaDenseCapacity(index + 1);
         ++this._termEntryContentMetaDenseCount;
@@ -6304,10 +6430,14 @@ export class DictionaryDatabase {
         }
         /** @type {number[]} */
         const indexesToClear = [];
+        /** @type {Set<number>} */
+        const recentSourceBatchIds = new Set();
         for (const index of staged.indexes) {
             if (index < 0) { continue; }
             if (this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_EMPTY) {
                 indexesToClear.push(index);
+                const batchId = this._termEntryContentMetaRecentSourceBatchIdTable[index];
+                if (batchId !== 0) { recentSourceBatchIds.add(batchId); }
             }
         }
         for (const index of indexesToClear) {
@@ -6318,7 +6448,15 @@ export class DictionaryDatabase {
                 --this._termEntryContentMetaHashPairCount;
             }
             this._termEntryContentMetaStateTable[index] = TERM_CONTENT_META_SLOT_EMPTY;
+            this._termEntryContentMetaRecentSourceBatchIdTable[index] = 0;
+            this._termEntryContentMetaRecentSourceOffsetTable[index] = 0;
             this._termEntryContentMetaFreeIndexes.push(index);
+        }
+        for (const batchId of recentSourceBatchIds) {
+            const source = this._recentTermContentSourceBatches.get(batchId);
+            if (typeof source === 'undefined') { continue; }
+            this._recentTermContentSourceBatches.delete(batchId);
+            this._recentTermContentSourceBatchBytes -= source.byteLength;
         }
         if (indexesToClear.length > 0) {
             this._ensureTermEntryContentMetaHashPairCapacity(
@@ -7066,6 +7204,7 @@ export class DictionaryDatabase {
                 pendingHitCount,
                 persistedHitCount,
                 exactFallbackCount,
+                recentSourceHitCount = 0,
                 dedupCapacityMs = 0,
                 dedupCanonicalScanMs = 0,
                 dedupExactCompareMs = 0,
@@ -7085,6 +7224,7 @@ export class DictionaryDatabase {
             importMetrics.dedupPersistedHitCount += persistedHitCount;
             importMetrics.dedupUniqueCount += pendingContentCount;
             importMetrics.dedupExactFallbackCount += exactFallbackCount;
+            importMetrics.dedupRecentSourceHitCount += recentSourceHitCount;
             importMetrics.dedupCapacityMs += dedupCapacityMs;
             importMetrics.dedupCanonicalScanMs += dedupCanonicalScanMs;
             importMetrics.dedupExactCompareMs += dedupExactCompareMs;
@@ -7371,7 +7511,7 @@ export class DictionaryDatabase {
      * Resolves intra-chunk duplicates and content already persisted by earlier chunks.
      * @param {ArtifactTermContentChunk} chunk
      * @param {boolean} [reserveMetadata]
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, recentSourceHitCount?: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
      */
     async _resolveArtifactTermContentDedup(chunk, reserveMetadata = false) {
         const count = chunk.rowCount;
@@ -7663,6 +7803,7 @@ export class DictionaryDatabase {
             let pendingContentCount = 0;
             let persistedHitCount = 0;
             let exactFallbackCount = 0;
+            let recentSourceHitCount = 0;
             let alreadyResolvedUniqueCount = 0;
             let dedupExactCompareMs = 0;
             const exactCandidates = [];
@@ -7716,8 +7857,9 @@ export class DictionaryDatabase {
                 for (let i = 0; i < exactCandidates.length; ++i) {
                     const descriptor = exactCandidates[i];
                     const matchResult = matchResults[i];
-                    const {existingMeta, exactFallback} = matchResult;
+                    const {existingMeta, exactFallback, recentSourceHit} = matchResult;
                     if (exactFallback) { ++exactFallbackCount; }
+                    if (recentSourceHit === true) { ++recentSourceHitCount; }
                     if (typeof existingMeta === 'undefined') {
                         appendPendingContent(descriptor);
                         continue;
@@ -7834,6 +7976,7 @@ export class DictionaryDatabase {
                 pendingHitCount,
                 persistedHitCount,
                 exactFallbackCount,
+                recentSourceHitCount,
                 dedupCapacityMs,
                 dedupCanonicalScanMs,
                 dedupExactCompareMs,
@@ -8358,7 +8501,14 @@ export class DictionaryDatabase {
                 contentByteOffset,
             );
         }
+        const recentSourceCacheStart = importMetrics === null ? 0 : safePerformance.now();
+        const recentSourceCacheBytes = this._cacheRecentPublishedTermContentSources(
+            stagedContentMetadata,
+            pendingContentSpans,
+        );
         if (importMetrics !== null) {
+            importMetrics.dedupRecentSourceCacheMs += safePerformance.now() - recentSourceCacheStart;
+            importMetrics.dedupRecentSourceCacheBytes += recentSourceCacheBytes;
             importMetrics.contentMetadataIndexPublishMs += safePerformance.now() - indexPublishStart;
         }
         return resolvedContentDictNames;
