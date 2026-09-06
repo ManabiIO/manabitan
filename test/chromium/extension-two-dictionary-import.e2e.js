@@ -796,7 +796,9 @@ async function writeSlowZipResponse(response, body) {
         offset = nextOffset;
         if (offset < body.byteLength) {
             await new Promise((resolve) => {
-                setTimeout(resolve, 350);
+                // Keep the update download phase long enough for the concurrent
+                // lookup probe to complete before active import processing begins.
+                setTimeout(resolve, 1000);
             });
         }
     }
@@ -3387,13 +3389,19 @@ async function main() {
                     typeof startupDiagnosticsSnapshot.dictionaryOpenStorageDiagnostics === 'object' &&
                     startupDiagnosticsSnapshot.dictionaryOpenStorageDiagnostics !== null
                 ) ? startupDiagnosticsSnapshot.dictionaryOpenStorageDiagnostics : null;
+                const hasPageCreateSyncAccessHandle = !!(
+                    globalThis.FileSystemFileHandle &&
+                    globalThis.FileSystemFileHandle.prototype &&
+                    typeof globalThis.FileSystemFileHandle.prototype.createSyncAccessHandle === 'function'
+                );
+                const hasBackendCreateSyncAccessHandle = startupOpenStorageDiagnostics?.runtimeContext?.hasCreateSyncAccessHandle === true;
                 return {
                     hasStorageGetDirectory: !!(navigator.storage && typeof navigator.storage.getDirectory === 'function'),
-                    hasCreateSyncAccessHandle: !!(
-                        globalThis.FileSystemFileHandle &&
-                        globalThis.FileSystemFileHandle.prototype &&
-                        typeof globalThis.FileSystemFileHandle.prototype.createSyncAccessHandle === 'function'
-                    ),
+                    // The capability used by dictionary storage lives in the dedicated
+                    // backend worker on modern Chromium; page support alone is not authoritative.
+                    hasCreateSyncAccessHandle: hasPageCreateSyncAccessHandle || hasBackendCreateSyncAccessHandle,
+                    hasPageCreateSyncAccessHandle,
+                    hasBackendCreateSyncAccessHandle,
                     hasOpfsSahpoolVfs: (
                         startupOpenStorageDiagnostics &&
                         typeof startupOpenStorageDiagnostics.hasOpfsSahpoolVfs === 'boolean'
