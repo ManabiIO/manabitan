@@ -420,21 +420,21 @@ export function decompressUsingDict(context, content, dictionary, options = {}) 
  */
 function decompressUsingContext(context, content, dictionary, defaultHeapSize) {
     const module = getModule();
-    const source = module._malloc(content.byteLength);
+    const source = module._malloc(Math.max(1, content.byteLength));
     if (source === 0) { throw new Error('Failed to allocate Zstd input buffer'); }
     try {
         module.HEAPU8.set(content, source);
         const frameSizeValue = module._ZSTD_getFrameContentSize(source, content.byteLength);
         const frameSize = typeof frameSizeValue === 'bigint' ? Number(frameSizeValue) : frameSizeValue;
-        const outputSize = frameSize < 0 ? defaultHeapSize : frameSize;
-        if (!Number.isSafeInteger(outputSize) || outputSize <= 0) {
+        const outputSize = frameSize === -1 ? defaultHeapSize : frameSize;
+        if (!Number.isSafeInteger(outputSize) || outputSize < 0 || outputSize > 0xffffffff) {
             throw new Error(`Invalid Zstd frame content size: ${frameSizeValue}`);
         }
-        const destination = module._malloc(outputSize);
+        const destination = module._malloc(Math.max(1, outputSize));
         if (destination === 0) { throw new Error('Failed to allocate Zstd destination buffer'); }
         let dictionaryPointer = 0;
         try {
-            dictionaryPointer = dictionary === null ? 0 : module._malloc(dictionary.byteLength);
+            dictionaryPointer = dictionary === null ? 0 : module._malloc(Math.max(1, dictionary.byteLength));
             if (dictionary !== null && dictionaryPointer === 0) {
                 throw new Error('Failed to allocate Zstd dictionary buffer');
             }
@@ -451,6 +451,10 @@ function decompressUsingContext(context, content, dictionary, defaultHeapSize) {
                     dictionary.byteLength,
                 );
             checkResult(size);
+            if (!Number.isSafeInteger(size) || size < 0 || size > outputSize) {
+                throw new Error(`Invalid Zstd decoded size: ${size}`);
+            }
+            // Return owned bytes, not a view invalidated by heap growth or reuse.
             return module.HEAPU8.slice(destination, destination + size);
         } finally {
             if (dictionaryPointer !== 0) { module._free(dictionaryPointer); }

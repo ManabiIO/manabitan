@@ -26,6 +26,7 @@ import os from 'os';
 import path from 'path';
 import {fileURLToPath} from 'url';
 import {parseJson} from './json.js';
+import {zipChunkStreamPlugin} from './zip-chunk-stream-plugin.js';
 
 const require = createRequire(import.meta.url);
 
@@ -246,6 +247,7 @@ async function buildLib(scriptPath) {
         format: 'esm',
         outfile: path.join(extDir, 'lib', path.basename(scriptPath)),
         external: ['fs'],
+        plugins: [zipChunkStreamPlugin],
         banner: {
             js: '// @ts-nocheck',
         },

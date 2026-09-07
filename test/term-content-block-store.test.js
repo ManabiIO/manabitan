@@ -77,6 +77,23 @@ describe('ByteBoundedLruCache', () => {
     });
 });
 
+describe('decoded content ownership', () => {
+    test('adopts the owned decoder output without copying the full block again', async () => {
+        const decoded = new Uint8Array([1, 2, 3]);
+        const stored = wrapCompressedTermContentBlock(new Uint8Array([7, 8]));
+        const contentStore = {readSlice: vi.fn().mockResolvedValue(stored)};
+        const store = new TermContentBlockStore(contentStore);
+        vi.mocked(decompressTermContentZstd).mockReturnValueOnce(decoded);
+        const block = await store._loadBlock('ownership', {
+            blockOffset: 0,
+            blockCompressedLength: stored.byteLength,
+            blockUncompressedLength: decoded.byteLength,
+        }, 'jmdict', {contentOffset: 0, contentLength: 3, contentDictName: 'raw-block-v1:jmdict'});
+        expect(block).toBe(decoded);
+        expect(store._cache.get('ownership')).toBe(decoded);
+    });
+});
+
 describe('TermContentBlockImportSession', () => {
     test('forces block mode only after that dictionary selected it', async () => {
         const tryAppend = vi.fn()

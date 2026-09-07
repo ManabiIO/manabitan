@@ -183,6 +183,49 @@ describe('zstd wasm wrapper', () => {
         expect(module._free.mock.calls.map(([pointer]) => pointer)).toEqual([40, 16]);
     });
 
+    test.each([0, 0n])('accepts a valid empty frame of size %s', async (size) => {
+        const module = createMockModule();
+        mockState.createModule.mockResolvedValue(module);
+        const {decompress, init} = await import('../dev/lib/zstd-wasm.js');
+        await init();
+        module._ZSTD_getFrameContentSize.mockReturnValue(size);
+        expect(decompress(new Uint8Array([1]))).toHaveLength(0);
+        expect(module._ZSTD_decompress.mock.calls[0][1]).toBe(0);
+        expect(module._malloc.mock.calls.every(([length]) => length > 0)).toBe(true);
+    });
+
+    test.each([-1, -1n])('uses a caller bound for unknown size %s', async (size) => {
+        const module = createMockModule();
+        mockState.createModule.mockResolvedValue(module);
+        const {decompress, init} = await import('../dev/lib/zstd-wasm.js');
+        await init();
+        module._ZSTD_getFrameContentSize.mockReturnValue(size);
+        decompress(new Uint8Array([1]), {defaultHeapSize: 7});
+        expect(module._ZSTD_decompress.mock.calls[0][1]).toBe(7);
+    });
+
+    test.each([-2, -2n, 0x100000000, 1.5, Number.NaN, Infinity])('rejects invalid frame size %s before allocating a destination', async (size) => {
+        const module = createMockModule();
+        mockState.createModule.mockResolvedValue(module);
+        const {decompress, init} = await import('../dev/lib/zstd-wasm.js');
+        await init();
+        module._ZSTD_getFrameContentSize.mockReturnValue(size);
+        expect(() => decompress(new Uint8Array([1]))).toThrow('Invalid Zstd frame content size');
+        expect(module._malloc).toHaveBeenCalledOnce();
+        expect(module._free).toHaveBeenCalledOnce();
+        expect(module._ZSTD_decompress).not.toHaveBeenCalled();
+    });
+
+    test('rejects a decoded size beyond the destination rather than truncating', async () => {
+        const module = createMockModule();
+        mockState.createModule.mockResolvedValue(module);
+        const {decompressUsingDict, init} = await import('../dev/lib/zstd-wasm.js');
+        await init();
+        module._ZSTD_decompress_usingDict.mockReturnValue(4);
+        expect(() => decompressUsingDict(19, new Uint8Array([1]), new Uint8Array([2]))).toThrow('Invalid Zstd decoded size');
+        expect(module._free).toHaveBeenCalledTimes(3);
+    });
+
     test('can retry a retained context after a growth allocation fails', async () => {
         const module = createMockModule({allocations: [16, 80, 160, 0, 240]});
         mockState.createModule.mockResolvedValue(module);

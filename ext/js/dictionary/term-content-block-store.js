@@ -583,8 +583,8 @@ export class TermContentBlockStore {
         /** @type {Uint8Array} */
         let block;
         try {
-            // zstd-wasm reuses its output heap between calls.
-            block = Uint8Array.from(decompressTermContentZstd(compressed, compressionDictName));
+            // The Zstd wrapper already returns an owned copy, not a WASM view.
+            block = decompressTermContentZstd(compressed, compressionDictName);
         } catch (error) {
             this._recordError('term-content-block-decompress-error', {
                 ...context,
