@@ -1,4 +1,4 @@
-name: Performance Refinement Review
+name: Export performance browser runtime
 
 on:
   push:
@@ -8,12 +8,8 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: perf-refinement-review
-  cancel-in-progress: true
-
 jobs:
-  review:
+  runtime:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -21,63 +17,17 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-
-      - uses: ./.github/actions/setup
+      - uses: actions/setup-node@v4
         with:
           node-version: '24.20.0'
-
-      - name: Apply staged refinements
-        run: |
-          python3 dev/perf/refine-temp.py
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path('test/chromium/extension-two-dictionary-import.e2e.js')
-          text = path.read_text()
-          start = text.index('function matchesDictionaryName(observedName, expectedName) {')
-          end = text.index('\n}', start) + 2
-          text = text[:start] + "function matchesDictionaryName(observedName, expectedName) {\n    const observed = String(observedName || '').trim();\n    const expected = String(expectedName || '').trim();\n    return observed.length > 0 && expected.length > 0 && observed.includes(expected);\n}" + text[end:]
-          old = 'await new Promise((resolve) => setTimeout(resolve, 50));'
-          assert text.count(old) == 1
-          text = text.replace(old, 'await new Promise((resolve) => { setTimeout(resolve, 50); });')
-          path.write_text(text)
-          PY
-          node ./node_modules/eslint/bin/eslint.js --fix dev/perf/*.js test/chromium/import-flags-ab-benchmark.js test/chromium/extension-two-dictionary-import.e2e.js
-
-      - name: Capture formatter diagnostic
-        run: |
-          mkdir -p builds/perf
-          node --input-type=module <<'NODE' > builds/perf/formatter-diagnostic.txt 2>&1
-          import * as prettier from 'prettier';
-          import {readFile} from 'node:fs/promises';
-          console.log('Prettier', prettier.version);
-          for (const filepath of ['dev/perf/README.md', '.github/workflows/perf-bundle.yml']) {
-            console.log('Formatting', filepath);
-            try {
-              const config = await prettier.resolveConfig(filepath);
-              console.log('Config', config);
-              const result = await prettier.format(await readFile(filepath, 'utf8'), {...config, filepath});
-              console.log('Formatted bytes', result.length);
-            } catch (error) {
-              console.error(error.stack);
-            }
-          }
-          NODE
-          cat builds/perf/formatter-diagnostic.txt
-
-      - name: Pack local review workspace
-        env:
-          SOURCE_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          node --input-type=module -e "import {writeFileSync} from 'node:fs'; writeFileSync('perf-bundle-manifest.json', JSON.stringify({gitSha: process.env.SOURCE_SHA, dirty: true, nodeVersion: process.version}))"
-          mkdir -p builds/perf/review-runtime
-          cp "$(command -v node)" builds/perf/review-runtime/node
-          git diff --binary > builds/perf/staged-refinements.patch
-          tar --exclude=.git -czf "${RUNNER_TEMP}/perf-review-workspace.tar.gz" .
-
+          cache: npm
+      - run: npm ci
+      - run: node ./node_modules/playwright/cli.js install chromium
+      - name: Pack browser runtime
+        run: tar -C "${HOME}/.cache" -czf "${RUNNER_TEMP}/manabitan-perf-browser.tar.gz" ms-playwright
       - uses: actions/upload-artifact@v6
         with:
-          name: perf-review-workspace
-          path: ${{ runner.temp }}/perf-review-workspace.tar.gz
+          name: manabitan-perf-browser-linux-x64
+          path: ${{ runner.temp }}/manabitan-perf-browser.tar.gz
           compression-level: 0
-          retention-days: 1
+          retention-days: 2
