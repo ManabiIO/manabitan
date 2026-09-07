@@ -1,0 +1,65 @@
+name: Restore locked performance runtime
+on:
+  push:
+    branches: [chatgpt-manabitan-runtime-20260907]
+    paths: [.github/workflows/chatgpt-runtime-restore.yml]
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 61588714864a58b22793dc8f17de4878ae29b315
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '24.20.0'
+      - name: Restore locked browser and fixtures
+        run: |
+          node node_modules/playwright/cli.js install chromium --no-shell
+          node dev/perf/prepare-dictionaries.js
+      - name: Package runtime inputs only
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/restore/runtime" "${RUNNER_TEMP}/restore/fixtures"
+          cp "$(command -v node)" "${RUNNER_TEMP}/restore/runtime/node"
+          cp -a "${HOME}/.cache/ms-playwright" "${RUNNER_TEMP}/restore/runtime/ms-playwright"
+          node --input-type=module <<'NODE'
+          import {readFileSync, copyFileSync, readdirSync, statSync, writeFileSync} from 'node:fs';
+          import {join} from 'node:path';
+          import {createHash} from 'node:crypto';
+          const root = process.env.RUNNER_TEMP + '/restore';
+          const lock = JSON.parse(readFileSync('test/perf/dictionaries.lock.json', 'utf8'));
+          const wanted = new Map(Object.values(lock.dictionaries).map((x) => [x.cacheFile, x]));
+          const found = [];
+          function walk(dir) {
+            for (const name of readdirSync(dir)) {
+              if (name === 'node_modules' || name === '.git') continue;
+              const path = join(dir, name);
+              if (statSync(path).isDirectory()) walk(path);
+              else if (wanted.has(name)) {
+                const bytes = readFileSync(path);
+                const expected = wanted.get(name);
+                const sha256 = createHash('sha256').update(bytes).digest('hex');
+                if (sha256 !== expected.sha256 || bytes.length !== expected.sizeBytes) throw new Error('Fixture mismatch: ' + path);
+                copyFileSync(path, join(root, 'fixtures', name));
+                found.push({name, sha256, sizeBytes: bytes.length});
+                wanted.delete(name);
+              }
+            }
+          }
+          walk('.');
+          if (wanted.size !== 0) throw new Error('Missing fixtures: ' + [...wanted.keys()].join(','));
+          writeFileSync(join(root, 'provenance.json'), JSON.stringify({sourceSha:'61588714864a58b22793dc8f17de4878ae29b315', node:process.version, fixtures:found}, null, 2));
+          NODE
+          tar -C "${RUNNER_TEMP}/restore" -czf "${RUNNER_TEMP}/locked-runtime-fixtures.tar.gz" .
+          sha256sum "${RUNNER_TEMP}/locked-runtime-fixtures.tar.gz"
+      - uses: actions/upload-artifact@v6
+        with:
+          name: manabitan-locked-runtime-fixtures
+          path: ${{ runner.temp }}/locked-runtime-fixtures.tar.gz
+          compression-level: 0
+          retention-days: 7
