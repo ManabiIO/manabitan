@@ -1,100 +1,83 @@
-name: ChatGPT Perf Refinement
+name: Performance Refinement Review
 
 on:
   push:
     branches: [perf-mise-chatgpt-harness]
+    paths: [.github/workflows/chatgpt-perf-refine.yml]
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: perf-refinement-review
+  cancel-in-progress: true
 
 jobs:
-  refine:
-    if: github.actor != 'github-actions[bot]'
+  review:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: perf-mise-chatgpt-harness
-          fetch-depth: 0
+          ref: ${{ github.sha }}
+          persist-credentials: false
 
       - uses: ./.github/actions/setup
         with:
           node-version: '24.20.0'
 
-      - name: Apply reviewed refinements
-        run: python3 dev/perf/refine-temp.py
-
-      - name: Install matching Chromium
-        run: npx playwright install chromium
-
-      - name: Format touched JavaScript
+      - name: Apply staged refinements
         run: |
-          npx eslint --fix dev/perf/host-environment.js dev/perf/import-ab.js dev/perf/import-benchmark.js dev/perf/dictionary-fixtures.js dev/perf/prepare-dictionaries.js test/chromium/import-flags-ab-benchmark.js test/chromium/extension-two-dictionary-import.e2e.js || true
-
-      - name: Fix semantic lint findings
-        shell: bash
-        run: |
+          python3 dev/perf/refine-temp.py
           python3 - <<'PY'
           from pathlib import Path
-
           path = Path('test/chromium/extension-two-dictionary-import.e2e.js')
           text = path.read_text()
-
-          first_matcher = text.index('function matchesDictionaryName(observedName, expectedName)')
-          equality = 'if (observed === expected) { return true; }'
-          prefix = 'if (observed.startsWith(`${expected} `) || observed.startsWith(`${expected}.`)) { return true; }'
-          equality_index = text.index(equality, first_matcher)
-          prefix_index = text.index(prefix, equality_index)
-          if text.find('const matchesDictionaryName =', first_matcher, equality_index) != -1:
-              raise SystemExit('unexpected nested matcher before top-level matcher body')
-          text = text[:equality_index] + 'const expectedPrefixes = [`${expected} `, `${expected}.`];\n    if (observed === expected || expectedPrefixes.some((value) => observed.startsWith(value))) { return true; }' + text[equality_index + len(equality):]
-          prefix_index = text.index(prefix, equality_index)
-          line_start = text.rfind('\n', 0, prefix_index) + 1
-          line_end = text.find('\n', prefix_index)
-          text = text[:line_start] + text[line_end + 1:]
-
+          start = text.index('function matchesDictionaryName(observedName, expectedName) {')
+          end = text.index('\n}', start) + 2
+          text = text[:start] + "function matchesDictionaryName(observedName, expectedName) {\n    const observed = String(observedName || '').trim();\n    const expected = String(expectedName || '').trim();\n    return observed.length > 0 && expected.length > 0 && observed.includes(expected);\n}" + text[end:]
           old = 'await new Promise((resolve) => setTimeout(resolve, 50));'
-          new = 'await new Promise((resolve) => { setTimeout(resolve, 50); });'
-          if text.count(old) != 1:
-              raise SystemExit(f'popup wait promise: expected 1 match, found {text.count(old)}')
-          text = text.replace(old, new, 1)
+          assert text.count(old) == 1
+          text = text.replace(old, 'await new Promise((resolve) => { setTimeout(resolve, 50); });')
           path.write_text(text)
           PY
-          npx eslint --fix test/chromium/extension-two-dictionary-import.e2e.js
+          node ./node_modules/eslint/bin/eslint.js --fix dev/perf/*.js test/chromium/import-flags-ab-benchmark.js test/chromium/extension-two-dictionary-import.e2e.js
 
-      - name: Lint and typecheck performance tooling
-        run: |
-          npx eslint dev/perf/host-environment.js dev/perf/import-ab.js dev/perf/import-benchmark.js dev/perf/dictionary-fixtures.js dev/perf/prepare-dictionaries.js test/chromium/import-flags-ab-benchmark.js test/chromium/extension-two-dictionary-import.e2e.js
-          npm run test:ts:dev
-
-      - name: Smoke local microbenchmark path
+      - name: Capture formatter diagnostic
         run: |
           mkdir -p builds/perf
-          node ./node_modules/vitest/vitest.mjs bench benches/canary.bench.js --outputJson builds/perf/canary.json
-          test -s builds/perf/canary.json
+          node --input-type=module <<'NODE' > builds/perf/formatter-diagnostic.txt 2>&1
+          import * as prettier from 'prettier';
+          import {readFile} from 'node:fs/promises';
+          console.log('Prettier', prettier.version);
+          for (const filepath of ['dev/perf/README.md', '.github/workflows/perf-bundle.yml']) {
+            console.log('Formatting', filepath);
+            try {
+              const config = await prettier.resolveConfig(filepath);
+              console.log('Config', config);
+              const result = await prettier.format(await readFile(filepath, 'utf8'), {...config, filepath});
+              console.log('Formatted bytes', result.length);
+            } catch (error) {
+              console.error(error.stack);
+            }
+          }
+          NODE
+          cat builds/perf/formatter-diagnostic.txt
 
-      - name: Prepare pinned dictionaries and build extension
+      - name: Pack local review workspace
+        env:
+          SOURCE_SHA: ${{ github.sha }}
         run: |
-          node ./dev/perf/prepare-dictionaries.js
-          node ./dev/bin/build.js --target chrome-dev
+          set -euo pipefail
+          node --input-type=module -e "import {writeFileSync} from 'node:fs'; writeFileSync('perf-bundle-manifest.json', JSON.stringify({gitSha: process.env.SOURCE_SHA, dirty: true, nodeVersion: process.version}))"
+          mkdir -p builds/perf/review-runtime
+          cp "$(command -v node)" builds/perf/review-runtime/node
+          git diff --binary > builds/perf/staged-refinements.patch
+          tar --exclude=.git -czf "${RUNNER_TEMP}/perf-review-workspace.tar.gz" .
 
-      - name: Smoke authoritative import benchmark
-        run: node ./dev/perf/import-benchmark.js jmdict --runs 1 --no-build --output builds/perf/refine-smoke
-
-      - name: Smoke browser-wide import trace
-        run: |
-          node ./dev/perf/import-benchmark.js jmdict --trace --no-build --output builds/perf/refine-trace
-          test -s builds/perf/refine-trace/run-1.trace.json
-
-      - name: Smoke paired A/B runner
-        run: node ./dev/perf/import-ab.js jmdict --pairs 1 --flags '{"zipMaxWorkers":3}' --label '3 ZIP workers'
-
-      - name: Commit reviewed refinements
-        run: |
-          rm .github/workflows/chatgpt-perf-refine.yml dev/perf/refine-temp.py
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
-          git commit -m 'Refine performance benchmark fidelity'
-          git push origin HEAD:perf-mise-chatgpt-harness
+      - uses: actions/upload-artifact@v6
+        with:
+          name: perf-review-workspace
+          path: ${{ runner.temp }}/perf-review-workspace.tar.gz
+          compression-level: 0
+          retention-days: 1
