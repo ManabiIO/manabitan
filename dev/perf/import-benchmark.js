@@ -17,15 +17,14 @@
  */
 
 import path from 'node:path';
-import {execFile, spawn} from 'node:child_process';
-import {promisify} from 'node:util';
+import {spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {mkdir, readFile, writeFile} from 'node:fs/promises';
+import {mkdir, readFile, rm, stat, writeFile} from 'node:fs/promises';
 import {parseJson} from '../../ext/js/core/json.js';
 import {getHostEnvironment} from './host-environment.js';
 import {loadDictionaryFixtures} from './dictionary-fixtures.js';
+import {createBenchmarkEnvironment, extractImportResult, getSourceProvenance, parsePositiveInteger} from './benchmark-support.js';
 
-const execFileAsync = promisify(execFile);
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
 const e2eScript = path.join(root, 'test', 'chromium', 'extension-two-dictionary-import.e2e.js');
@@ -56,7 +55,7 @@ function parseArgs() {
                 break;
             }
             case '--runs': {
-                runs = Number.parseInt(args[++i] ?? '', 10);
+                runs = parsePositiveInteger(args[++i] ?? '', '--runs');
 
                 break;
             }
@@ -67,6 +66,7 @@ function parseArgs() {
             }
             case '--output': {
                 outputDir = args[++i] ?? '';
+                if (outputDir.length === 0 || outputDir.startsWith('--')) { throw new Error('--output requires a directory'); }
 
                 break;
             }
@@ -92,9 +92,9 @@ async function runCommand(command, args, env) {
     await new Promise(
         /** @type {(resolve: (value: void|PromiseLike<void>) => void, reject: (reason?: unknown) => void) => void} */
         ((resolve, reject) => {
-            const child = spawn(command, args, {cwd: root, env, stdio: 'inherit'});
+            const child = spawn(command, args, {cwd: root, env, stdio: 'inherit', timeout: 10 * 60 * 1000, killSignal: 'SIGTERM'});
             child.on('error', reject);
-            child.on('exit', (code, signal) => {
+            child.on('close', (code, signal) => {
                 if (code === 0) {
                     resolve();
                     return;
@@ -103,36 +103,6 @@ async function runCommand(command, args, env) {
             });
         }),
     );
-}
-
-/**
- * @returns {Promise<string|null>}
- */
-async function getGitSha() {
-    try {
-        const {stdout} = await execFileAsync('git', ['rev-parse', 'HEAD'], {cwd: root});
-        const value = stdout.trim();
-        if (value.length > 0) {
-            return value;
-        }
-    } catch (_) {
-        // Exported performance bundles intentionally omit .git.
-    }
-    const explicitSourceSha = process.env.MANABITAN_PERF_SOURCE_SHA?.trim();
-    if (explicitSourceSha) {
-        return explicitSourceSha;
-    }
-    try {
-        const bundleManifest = /** @type {{gitSha?: unknown}} */ (
-            /** @type {unknown} */ (parseJson(await readFile(path.join(root, 'perf-bundle-manifest.json'), 'utf8')))
-        );
-        if (typeof bundleManifest.gitSha === 'string' && bundleManifest.gitSha.length > 0) {
-            return bundleManifest.gitSha;
-        }
-    } catch (_) {
-        // Normal source checkouts do not contain a bundle manifest.
-    }
-    return null;
 }
 
 /**
@@ -150,44 +120,6 @@ function summarizeDurations(values) {
         medianMs,
         p95Ms: sorted[p95Index],
         maxMs: sorted.at(-1) ?? 0,
-    };
-}
-
-/**
- * @param {Record<string, unknown>} report
- * @param {string} dictionaryLabel
- * @returns {{totalImportMs: number, stepTimingSummary: unknown, step4Breakdown: unknown, importDebug: unknown}}
- * @throws {Error}
- */
-function extractImportResult(report, dictionaryLabel) {
-    const phases = Array.isArray(report.phases) ? /** @type {unknown[]} */ (report.phases) : [];
-    /** @type {Record<string, unknown>|null} */
-    let phase = null;
-    /** @type {Record<string, unknown>|null} */
-    let phaseData = null;
-    for (const item of phases) {
-        if (!(item && typeof item === 'object' && !Array.isArray(item))) {
-            continue;
-        }
-        const candidate = /** @type {Record<string, unknown>} */ (item);
-        const dataRaw = candidate.data;
-        const data = (dataRaw && typeof dataRaw === 'object' && !Array.isArray(dataRaw)) ?
-            /** @type {Record<string, unknown>} */ (dataRaw) :
-            null;
-        if (candidate.name === `${dictionaryLabel}: total import` && data?.kind === 'dictionary-import') {
-            phase = candidate;
-            phaseData = data;
-            break;
-        }
-    }
-    if (!(phase && typeof phase.durationMs === 'number' && Number.isFinite(phase.durationMs))) {
-        throw new Error(`Missing structured ${dictionaryLabel} total-import phase in E2E report`);
-    }
-    return {
-        totalImportMs: phase.durationMs,
-        stepTimingSummary: phaseData?.stepTimingSummary ?? null,
-        step4Breakdown: phaseData?.step4Breakdown ?? null,
-        importDebug: phaseData?.importDebug ?? null,
     };
 }
 
@@ -215,15 +147,15 @@ const timestamp = new Date().toISOString().replaceAll(':', '')
     .replaceAll('-', '');
 const outputDir = path.resolve(root, options.outputDir ?? path.join('builds', 'perf', `${timestamp}-${options.dictionaryId}${options.trace ? '-trace' : ''}`));
 await mkdir(outputDir, {recursive: true});
-/** @type {Array<{index: number, reportPath: string, reportJsonPath: string, tracePath: string|null, browserVersion: unknown, totalImportMs: number, stepTimingSummary: unknown, step4Breakdown: unknown, importDebug: unknown}>} */
+await rm(path.join(outputDir, 'summary.json'), {force: true});
+/** @type {Array<{index: number, reportPath: string, reportJsonPath: string, tracePath: string|null, browserVersion: unknown, totalImportMs: number, workerImportMs: number|null, stepTimingSummary: unknown, step4Breakdown: unknown, importDebug: unknown}>} */
 const runs = [];
 for (let index = 1; index <= runCount; ++index) {
     const reportPath = path.join(outputDir, `run-${String(index)}.html`);
     const reportJsonPath = reportPath.replace(/\.html$/i, '.json');
     const tracePath = options.trace ? path.join(outputDir, `run-${String(index)}.trace.json`) : '';
     /** @type {Record<string, string|undefined>} */
-    const env = {
-        ...process.env,
+    const env = createBenchmarkEnvironment(process.env, {
         MANABITAN_CHROMIUM_HEADLESS: '1',
         MANABITAN_CHROMIUM_E2E_REPORT: reportPath,
         MANABITAN_E2E_IMPORT_BENCH_QUICK: '1',
@@ -235,15 +167,18 @@ for (let index = 1; index <= runCount; ++index) {
         MANABITAN_E2E_PROCESS_SAMPLING: '0',
         MANABITAN_E2E_SKIP_BUILD: (options.skipBuild || index > 1) ? '1' : '0',
         MANABITAN_CHROMIUM_E2E_MAX_LOG_LINES: '10000',
-    };
+    });
     if (options.importFlagsJson !== null) {
         env.MANABITAN_E2E_IMPORT_FLAGS_JSON = options.importFlagsJson;
     }
     if (tracePath.length > 0) {
         env.MANABITAN_E2E_IMPORT_TRACE_PATH = tracePath;
     }
+    await rm(reportJsonPath, {force: true});
+    if (tracePath.length > 0) { await rm(tracePath, {force: true}); }
     console.log(`[perf-import] ${fixture.label} run ${String(index)}/${String(runCount)}${options.trace ? ' (trace; timing is non-authoritative)' : ''}`);
     await runCommand(process.execPath, [e2eScript], env);
+    if (tracePath.length > 0 && (await stat(tracePath)).size === 0) { throw new Error('Import trace is empty'); }
     const report = /** @type {Record<string, unknown>} */ (parseJson(await readFile(reportJsonPath, 'utf8')));
     if (report.status !== 'success') {
         throw new Error(`E2E report did not complete successfully: ${reportJsonPath} status=${String(report.status)}`);
@@ -254,21 +189,25 @@ for (let index = 1; index <= runCount; ++index) {
         reportJsonPath,
         tracePath: tracePath || null,
         browserVersion: report.browserVersion ?? null,
-        ...extractImportResult(report, fixture.label),
+        ...extractImportResult(report, options.dictionaryId, fixture, options.trace, options.importFlagsJson === null ? null : parseJson(options.importFlagsJson)),
     });
 }
+const source = await getSourceProvenance(root);
 const summary = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     dictionary: options.dictionaryId,
     fixture,
     authoritativeTiming: !options.trace,
     traceEnabled: options.trace,
-    gitSha: await getGitSha(),
+    gitSha: source.gitSha,
+    source,
     hostEnvironment: getHostEnvironment(),
     browserVersion: runs[0]?.browserVersion ?? null,
-    importFlags: options.importFlagsJson === null ? {} : parseJson(options.importFlagsJson),
+    importFlags: options.importFlagsJson === null ? null : parseJson(options.importFlagsJson),
     runs,
+    timingBoundary: 'file-input import to observed visible completion; excludes diagnostic reads and post-import validation',
     timing: summarizeDurations(runs.map((run) => run.totalImportMs)),
+    workerTiming: runs.every((run) => run.workerImportMs !== null) ? summarizeDurations(/** @type {number[]} */ (runs.map((run) => run.workerImportMs))) : null,
 };
 const summaryPath = path.join(outputDir, 'summary.json');
 await writeFile(summaryPath, JSON.stringify(summary, null, 2), 'utf8');

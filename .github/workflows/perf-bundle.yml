@@ -30,7 +30,13 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "${GITHUB_EVENT_NAME}" == "issue_comment" ]]; then
-            source_sha="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq .head.sha)"
+            pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
+            head_repo="$(jq -r .head.repo.full_name <<<"${pr_json}")"
+            if [[ "${head_repo}" != "${GITHUB_REPOSITORY}" ]]; then
+              echo "Refusing to execute an offline-bundle build from fork ${head_repo}" >&2
+              exit 1
+            fi
+            source_sha="$(jq -r .head.sha <<<"${pr_json}")"
           else
             source_sha="${GITHUB_SHA}"
           fi
@@ -39,6 +45,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ steps.source.outputs.sha }}
+          persist-credentials: false
 
       - uses: ./.github/actions/setup
         with:

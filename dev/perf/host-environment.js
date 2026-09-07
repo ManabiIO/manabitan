@@ -20,17 +20,47 @@ import os from 'node:os';
 import {fileURLToPath} from 'node:url';
 
 /**
+ * @param {string} name
  * @returns {string|null}
  */
-function readCpuMax() {
+function readCgroupFile(name) {
     if (process.platform !== 'linux') {
         return null;
     }
     try {
-        return readFileSync('/sys/fs/cgroup/cpu.max', 'utf8').trim() || null;
+        return readFileSync(`/sys/fs/cgroup/${name}`, 'utf8').trim() || null;
     } catch (_) {
         return null;
     }
+}
+
+/**
+ * @param {string|null} value
+ * @returns {number|null}
+ */
+function parseCgroupBytes(value) {
+    if (value === null || value === 'max') {
+        return null;
+    }
+    const parsed = Number(value);
+    return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null;
+}
+
+/**
+ * @param {string|null} cpuMax
+ * @returns {number|null}
+ */
+function parseCpuQuotaCores(cpuMax) {
+    if (cpuMax === null) {
+        return null;
+    }
+    const [quotaRaw, periodRaw] = cpuMax.split(/\s+/);
+    if (quotaRaw === 'max') {
+        return null;
+    }
+    const quota = Number(quotaRaw);
+    const period = Number(periodRaw);
+    return Number.isFinite(quota) && quota > 0 && Number.isFinite(period) && period > 0 ? quota / period : null;
 }
 
 /**
@@ -40,15 +70,21 @@ function readCpuMax() {
  * @returns {Record<string, unknown>}
  */
 export function getHostEnvironment() {
+    const cpus = os.cpus();
+    const cgroupCpuMax = readCgroupFile('cpu.max');
     return {
         nodeVersion: process.version,
         v8Version: process.versions.v8,
         platform: process.platform,
         arch: process.arch,
-        logicalCpuCount: os.cpus().length,
+        cpuModel: cpus[0]?.model ?? null,
+        logicalCpuCount: cpus.length,
         availableParallelism: typeof os.availableParallelism === 'function' ? os.availableParallelism() : null,
         totalMemoryBytes: os.totalmem(),
-        cgroupCpuMax: readCpuMax(),
+        cgroupCpuMax,
+        cgroupCpuQuotaCores: parseCpuQuotaCores(cgroupCpuMax),
+        cgroupMemoryMaxBytes: parseCgroupBytes(readCgroupFile('memory.max')),
+        cgroupMemoryCurrentBytes: parseCgroupBytes(readCgroupFile('memory.current')),
     };
 }
 

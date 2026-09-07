@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {createHash} from 'node:crypto';
+import {createHash, randomUUID} from 'node:crypto';
 import path from 'node:path';
-import {mkdir, readFile, rm, writeFile} from 'node:fs/promises';
+import {mkdir, readFile, rename, rm, writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {parseJson} from '../../ext/js/core/json.js';
 
@@ -68,12 +68,11 @@ async function verifyFixtureFile(fixture, filePath) {
  * @param {string} filePath
  * @returns {Promise<void>}
  */
-async function ensureFixtureFile(fixture, filePath) {
+export async function ensureFixtureFile(fixture, filePath) {
     if (await verifyFixtureFile(fixture, filePath)) {
         return;
     }
-    await rm(filePath, {force: true});
-    const response = await fetch(fixture.url);
+    const response = await fetch(fixture.url, {signal: AbortSignal.timeout(120000)});
     if (!response.ok) {
         throw new Error(`Failed to download pinned dictionary ${fixture.label}: ${String(response.status)} ${response.statusText}`);
     }
@@ -81,7 +80,13 @@ async function ensureFixtureFile(fixture, filePath) {
     if (bytes.byteLength !== fixture.sizeBytes || sha256(bytes) !== fixture.sha256) {
         throw new Error(`Pinned dictionary integrity mismatch for ${fixture.label} (${fixture.url})`);
     }
-    await writeFile(filePath, bytes);
+    const temporaryPath = `${filePath}.${randomUUID()}.tmp`;
+    try {
+        await writeFile(temporaryPath, bytes, {flag: 'wx'});
+        await rename(temporaryPath, filePath);
+    } finally {
+        await rm(temporaryPath, {force: true});
+    }
 }
 
 /**

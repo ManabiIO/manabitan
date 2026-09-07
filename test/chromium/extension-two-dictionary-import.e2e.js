@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* eslint-disable @stylistic/max-statements-per-line, @stylistic/multiline-ternary, @typescript-eslint/ban-ts-comment, @typescript-eslint/no-base-to-string, @typescript-eslint/no-shadow, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, jsdoc/require-jsdoc, no-empty, no-shadow, no-undefined, unicorn/no-useless-undefined, unicorn/prefer-spread */
+/* eslint-disable @stylistic/max-statements-per-line, @stylistic/multiline-ternary, @typescript-eslint/ban-ts-comment, no-empty, unicorn/no-useless-undefined, unicorn/prefer-spread */
 
 // @ts-nocheck
 
@@ -292,7 +292,12 @@ function createReport() {
             pinnedDictionaries: usePinnedPerfDictionaries,
             productionImportDefaults: useProductionImportDefaults,
             traceEnabled: importTracePath.length > 0,
-            authoritativeTiming: importTracePath.length === 0,
+            authoritativeTiming: importTracePath.length === 0 && !capturePhaseProfiles && !capturePhaseScreenshots && !captureProcessSamples,
+            phaseProfiling: capturePhaseProfiles,
+            phaseScreenshots: capturePhaseScreenshots,
+            processSampling: captureProcessSamples,
+            importFlags: e2eImportFlags,
+            validation: null,
         } : null,
         runtimeDiagnostics: null,
         skippedVerification: false,
@@ -1045,6 +1050,12 @@ async function evalSendMessage(page, expression, arg = null) {
             await send('setAllSettings', {value: nextOptions, source: 'chromium-e2e'});
             return {ok: true};
         }
+        if (expression === 'benchmarkDictionaryState') {
+            const dictionaryInfo = await send('getDictionaryInfo', undefined);
+            const titles = dictionaryInfo.map((row) => row.title);
+            const counts = await send('getDictionaryCounts', {dictionaryNames: titles, getTotal: false});
+            return {dictionaryInfo, counts: counts.counts};
+        }
         if (expression === 'backendDiagnostics') {
             const term = String((arg && typeof arg === 'object') ? (arg.term || '打') : (arg || '打'));
             const includeExpensiveDebugState = !(arg && typeof arg === 'object' && arg.includeExpensiveDebugState === false);
@@ -1161,10 +1172,10 @@ async function evalSendMessage(page, expression, arg = null) {
                 const stateView = (
                     diagnostics && typeof diagnostics === 'object' &&
                     diagnostics.offscreenState && typeof diagnostics.offscreenState === 'object'
-                ) ? diagnostics.offscreenState : (
+                ) ? diagnostics.offscreenState : ((
                     diagnostics && typeof diagnostics === 'object' &&
                     diagnostics.localState && typeof diagnostics.localState === 'object'
-                ) ? diagnostics.localState : diagnostics;
+                ) ? diagnostics.localState : diagnostics);
                 const store = stateView?.termContentStoreDebugState;
                 const totalLength = Number(store?.totalLength ?? -1);
                 const rowSample = Array.isArray(stateView?.rowSample) ? stateView.rowSample : [];
@@ -1343,8 +1354,8 @@ async function evalSendMessage(page, expression, arg = null) {
                 .filter((value) => value.length > 0);
             const primaryTitle = installedTitles[0] || '';
             const secondaryTitle = installedTitles[1] || primaryTitle;
-            nextOptions.profiles.forEach((profile, index) => {
-                if (!profile?.options) { return; }
+            for (const [index, profile] of nextOptions.profiles.entries()) {
+                if (!profile?.options) { continue; }
                 const rows = Array.isArray(profile.options.dictionaries) ? profile.options.dictionaries : [];
                 if (index > 0) {
                     profile.options.dictionaries = rows.map((row, rowIndex) => ({
@@ -1374,7 +1385,7 @@ async function evalSendMessage(page, expression, arg = null) {
                         profile.options.general.sortFrequencyDictionary = secondaryTitle;
                     }
                 }
-            });
+            }
             await send('setAllSettings', {value: nextOptions, source: 'chromium-e2e-restart-profile-matrix'});
             return {ok: true, profileCount: nextOptions.profiles.length};
         }
@@ -1924,8 +1935,8 @@ function summarizeImportStepTimingHistory(historyRaw) {
 function summarizeImportStep4Breakdown(historyRaw) {
     const history = Array.isArray(historyRaw) ? historyRaw : [];
     const readTimingValue = (details, key) => {
-        const value = Number(details?.[key] ?? 0);
-        return Number.isFinite(value) ? Math.max(0, value) : 0;
+        const value = details?.[key];
+        return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
     };
     const dictionaries = [];
     const aggregate = {
@@ -1962,14 +1973,17 @@ function summarizeImportStep4Breakdown(historyRaw) {
             parserGroupCount: readTimingValue(details, 'fastPathParserParallelGroupCount'),
         };
         dictionaries.push(timingSummary);
-        aggregate.termParseMs += timingSummary.termParseMs;
-        aggregate.termSerializationMs += timingSummary.termSerializationMs;
-        aggregate.bulkAddTermsMs += timingSummary.bulkAddTermsMs;
-        aggregate.bulkAddTagsMetaMs += timingSummary.bulkAddTagsMetaMs;
-        aggregate.mediaResolveMs += timingSummary.mediaResolveMs;
-        aggregate.mediaWriteMs += timingSummary.mediaWriteMs;
-        aggregate.accountedMs += timingSummary.accountedMs;
-        aggregate.otherMs += timingSummary.otherMs;
+        aggregate.termParseMs = aggregate.termParseMs === null || timingSummary.termParseMs === null ? null : aggregate.termParseMs + timingSummary.termParseMs;
+        aggregate.termSerializationMs = aggregate.termSerializationMs === null || timingSummary.termSerializationMs === null ? null : aggregate.termSerializationMs + timingSummary.termSerializationMs;
+        aggregate.bulkAddTermsMs = aggregate.bulkAddTermsMs === null || timingSummary.bulkAddTermsMs === null ? null : aggregate.bulkAddTermsMs + timingSummary.bulkAddTermsMs;
+        aggregate.bulkAddTagsMetaMs = aggregate.bulkAddTagsMetaMs === null || timingSummary.bulkAddTagsMetaMs === null ? null : aggregate.bulkAddTagsMetaMs + timingSummary.bulkAddTagsMetaMs;
+        aggregate.mediaResolveMs = aggregate.mediaResolveMs === null || timingSummary.mediaResolveMs === null ? null : aggregate.mediaResolveMs + timingSummary.mediaResolveMs;
+        aggregate.mediaWriteMs = aggregate.mediaWriteMs === null || timingSummary.mediaWriteMs === null ? null : aggregate.mediaWriteMs + timingSummary.mediaWriteMs;
+        aggregate.accountedMs = aggregate.accountedMs === null || timingSummary.accountedMs === null ? null : aggregate.accountedMs + timingSummary.accountedMs;
+        aggregate.otherMs = aggregate.otherMs === null || timingSummary.otherMs === null ? null : aggregate.otherMs + timingSummary.otherMs;
+    }
+    if (dictionaries.length === 0) {
+        for (const key of Object.keys(aggregate)) { aggregate[key] = null; }
     }
     return {dictionaries, aggregate};
 }
@@ -2210,10 +2224,7 @@ async function waitForInstalledDictionarySet(page, expectedNames, timeoutMs = 30
 function matchesDictionaryName(observedName, expectedName) {
     const observed = String(observedName || '').trim();
     const expected = String(expectedName || '').trim();
-    if (observed.length === 0 || expected.length === 0) { return false; }
-    if (observed === expected) { return true; }
-    if (observed.startsWith(`${expected} `) || observed.startsWith(`${expected}.`)) { return true; }
-    return observed.includes(expected);
+    return observed.length > 0 && expected.length > 0 && observed.includes(expected);
 }
 
 async function requestDictionaryDeleteFromInstalledModal(page, dictionaryName) {
@@ -2749,7 +2760,7 @@ async function waitForPopupContentState(popupFrame, timeoutMs = 5000) {
             };
         });
         if (state.ready === true) { return; }
-        await new Promise((resolve) => setTimeout(resolve, 50));
+        await new Promise((resolve) => { setTimeout(resolve, 50); });
     }
     throw new Error(`Timed out waiting ${timeoutMs}ms for popup content state`);
 }
@@ -3015,6 +3026,30 @@ async function loadDictionaryProbeTermsFromArchive(zipPath, maxTerms = 80) {
     return terms;
 }
 
+async function loadBenchmarkProbeTerms(zipPath) {
+    const {stdout: listing} = await execFileAsync('unzip', ['-Z1', zipPath], {maxBuffer: 8 * 1024 * 1024});
+    const banks = listing.split('\n').filter((name) => /^term_bank_\d+\.json$/.test(name));
+    banks.sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]));
+    if (banks.length < 3) { fail('Benchmark fixture needs at least three term banks'); }
+    const bankIndices = [0, Math.floor(banks.length / 2), banks.length - 1];
+    const terms = new Set();
+    for (const bankIndex of bankIndices) {
+        const {stdout} = await execFileAsync('unzip', ['-p', zipPath, banks[bankIndex]], {maxBuffer: 32 * 1024 * 1024});
+        const rows = parseJson(stdout);
+        for (let sample = 0; sample < 4; ++sample) {
+            const start = Math.floor((rows.length - 1) * sample / 3);
+            for (let offset = 0; offset < rows.length; ++offset) {
+                const term = String(rows[(start + offset) % rows.length]?.[0] || '').trim();
+                if (term.length === 0 || term.length > 40 || terms.has(term)) { continue; }
+                terms.add(term);
+                break;
+            }
+        }
+    }
+    if (terms.size !== 12) { fail('Could not select twelve distinct benchmark content probes'); }
+    return [...terms];
+}
+
 async function ensureFreshChromeDevBuild(zipPath) {
     const skipBuild = (process.env.MANABITAN_E2E_SKIP_BUILD ?? '0').trim() === '1';
     if (skipBuild) {
@@ -3083,7 +3118,8 @@ async function main() {
         }
         await ensureFreshChromeDevBuild(defaultZipPath);
         extensionDir = await extractExtensionZip(defaultZipPath);
-        const profileIterationTag = String(process.env.MANABITAN_E2E_PROFILE_ITERATION_TAG || '').trim().replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '');
+        const profileIterationTag = String(process.env.MANABITAN_E2E_PROFILE_ITERATION_TAG || '').trim().replace(/[^a-z0-9_-]+/gi, '-')
+            .replace(/^-+|-+$/g, '');
         const profilePrefix = profileIterationTag.length > 0 ?
             `manabitan-chromium-profile-${profileIterationTag}-` :
             'manabitan-chromium-profile-';
@@ -3306,9 +3342,9 @@ async function main() {
                     String(before?.mainDictionary || '') !== String(after?.mainDictionary || '') ||
                     String(before?.sortFrequencyDictionary || '') !== String(after?.sortFrequencyDictionary || '') ||
                     JSON.stringify(normalizeDictionaryRows(before?.dictionaryRows)) !==
-                        JSON.stringify(normalizeDictionaryRows(after?.dictionaryRows)) ||
+                    JSON.stringify(normalizeDictionaryRows(after?.dictionaryRows)) ||
                     JSON.stringify(normalizeNameSet(before?.enabledDictionaryNames)) !==
-                        JSON.stringify(normalizeNameSet(after?.enabledDictionaryNames))
+                    JSON.stringify(normalizeNameSet(after?.enabledDictionaryNames))
                 ) {
                     throw new Error(`Profile selector state changed across restart. before=${JSON.stringify(profileSelectorStateBeforeRestart)} after=${JSON.stringify(profileSelectorStateAfterRestart)}`);
                 }
@@ -3408,11 +3444,17 @@ async function main() {
             Reflect.set(globalThis, '__manabitanImportCompletionSignalEnabled', true);
             if (useProductionDefaults) {
                 delete globalThis.manabitanImportUseSession;
+                delete globalThis.manabitanDisableIntegrityCounts;
+                if (flagsFromRunner && typeof flagsFromRunner === 'object') {
+                    globalThis.manabitanImportPerformanceFlags = {...flagsFromRunner};
+                } else {
+                    delete globalThis.manabitanImportPerformanceFlags;
+                }
             } else {
                 globalThis.manabitanImportUseSession = false;
+                globalThis.manabitanDisableIntegrityCounts = true;
+                globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
             }
-            globalThis.manabitanDisableIntegrityCounts = true;
-            globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
         }, {flagsFromRunner: e2eImportFlags, useProductionDefaults: useProductionImportDefaults});
         page = context.pages()[0] ?? await context.newPage();
         /** @type {import('@playwright/test').Page|null} */
@@ -3550,11 +3592,17 @@ async function main() {
             await page.evaluate(({flagsFromRunner, useProductionDefaults}) => {
                 if (useProductionDefaults) {
                     delete globalThis.manabitanImportUseSession;
+                    delete globalThis.manabitanDisableIntegrityCounts;
+                    if (flagsFromRunner && typeof flagsFromRunner === 'object') {
+                        globalThis.manabitanImportPerformanceFlags = {...flagsFromRunner};
+                    } else {
+                        delete globalThis.manabitanImportPerformanceFlags;
+                    }
                 } else {
                     globalThis.manabitanImportUseSession = false;
+                    globalThis.manabitanDisableIntegrityCounts = true;
+                    globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
                 }
-                globalThis.manabitanDisableIntegrityCounts = true;
-                globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
                 Reflect.set(globalThis, '__manabitanImportCompletionSequence', 0);
                 Reflect.set(globalThis, '__manabitanLastImportCompletion', null);
             }, {flagsFromRunner: importFlags, useProductionDefaults: useProductionImportDefaults});
@@ -3599,13 +3647,12 @@ async function main() {
                     );
                 });
             });
+            // Stop timing before test-only diagnostic reads and validation.
+            const benchmarkImportEnd = quickImportBenchmarkMode ? safePerformance.now() : null;
             const importDebug = await getLastImportDebug(page);
             const importDebugHistory = await getImportDebugHistory(page);
             const importStepTimingHistory = await getImportStepTimingHistory(page);
-            // Keep the visible boundary honest if the browser has signalled UI
-            // completion but its main thread is still unable to serve the exact
-            // completed import snapshot under load.
-            const importTotalEnd = safePerformance.now();
+            const importTotalEnd = benchmarkImportEnd ?? safePerformance.now();
             const importStepTimingSummary = summarizeImportStepTimingHistory(importStepTimingHistory);
             const importStep4Breakdown = summarizeImportStep4Breakdown(importDebugHistory);
             await addReportPhase(
@@ -3716,6 +3763,32 @@ async function main() {
         }
 
         if (quickImportBenchmarkMode) {
+            if (initialImportDebug.errorCount !== 0 || initialImportDebug.addSettingsErrorCount !== 0 || initialImportDebug.usesFallbackStorage !== false) {
+                fail(`Benchmark import reported errors: ${JSON.stringify(initialImportDebug)}`);
+            }
+            if (usePinnedPerfDictionaries) {
+                const fixture = cachedDictionaries.fixtures[quickImportBenchmarkDictionaryId];
+                const state = await evalSendMessage(page, 'benchmarkDictionaryState');
+                const info = state.dictionaryInfo;
+                if (info.length !== 1 || info[0].title !== fixture.expectedTitle || info[0].revision !== fixture.revision ||
+                state.counts[0]?.terms !== fixture.termRows) {
+                    fail(`Persisted benchmark fixture does not match lock: ${JSON.stringify(state)}`);
+                }
+                const probeTerms = await loadBenchmarkProbeTerms(initialImportSpec.filePath);
+                if (probeTerms.length !== 12) { fail('Insufficient benchmark content probes'); }
+                for (const term of probeTerms) {
+                    const integrity = await waitForBackendDictionaryContentIntegrity(page, [fixture.expectedTitle], [term], 15000);
+                    if (!integrity.ok) { fail(`Unreadable benchmark content for ${term}: ${JSON.stringify(integrity)}`); }
+                }
+                report.benchmark.validation = {
+                    title: info[0].title,
+                    revision: info[0].revision,
+                    termRows: state.counts[0].terms,
+                    contentReadable: true,
+                    probeCount: probeTerms.length,
+                    probeTerms,
+                };
+            }
             report.status = 'success';
             console.log(`${e2eLogTag} PASS: Quick import benchmark mode completed (${initialImportSpec.label}).`);
             return;
@@ -3855,7 +3928,7 @@ async function main() {
         const concurrentWarmupSearchDebug = await getSearchPageDebugState(concurrentSearchPage);
         if (!(concurrentWarmupReadyProfile.result && concurrentWarmupReadyProfile.result.ok === true)) {
             fail(
-                `Dedicated JMdict lookup tab did not become lookup-ready before probe discovery: ` +
+                'Dedicated JMdict lookup tab did not become lookup-ready before probe discovery: ' +
                 `${JSON.stringify(concurrentWarmupReadyProfile.result ?? null)} ` +
                 `searchDebug=${JSON.stringify(concurrentWarmupSearchDebug)}`,
             );
@@ -4270,133 +4343,133 @@ async function main() {
         }
 
         if (!skipUpdateAndBatchBeforeHover) {
-        const updateTriggerStart = safePerformance.now();
-        await markCurrentImportCompletionObserved(page);
-        const updateTriggerProfile = await runPhaseProfile(cdpSession, async () => {
-            return await triggerDictionaryUpdate(page, resolvedJmdictTitle, `${localServer.baseUrl}/dictionaries/jmdict-slow.zip`);
-        });
-        const updateTriggerEnd = safePerformance.now();
-        await addReportPhase(
-            report,
-            page,
-            'Trigger slow JMdict update',
-            `Queued a JMdict update for "${resolvedJmdictTitle}" against a throttled local ZIP endpoint while keeping the dedicated search tab open. probeTerm="${readinessTerm}" trigger=${JSON.stringify(updateTriggerProfile.result ?? null)}`,
-            updateTriggerStart,
-            updateTriggerEnd,
-            updateTriggerProfile,
-            processSampler,
-        );
-
-        if (concurrentSearchPage === null) {
-            fail('Concurrent search page was not available for update verification');
-        }
-        const updateImportCompletionPromise = recordImportProgress(
-            'JMdict update',
-            'Monitored JMdict update while concurrent popup verification was active',
-            async (onStepChange) => {
-                await waitForImportCompletion(page, 'JMdict', 300000, onStepChange);
-            },
-        );
-        await page.waitForTimeout(700);
-        const searchDuringUpdateStart = safePerformance.now();
-        const searchDuringUpdateProfile = await runPhaseProfile(cdpSession, async () => {
-            return await searchTermAndGetDictionaryHitCounts(concurrentSearchPage, readinessTerm, ['JMdict'], 6000);
-        });
-        const searchDuringUpdateLookup = searchDuringUpdateProfile.result;
-        const searchDuringUpdateEnd = safePerformance.now();
-        await addReportPhase(
-            report,
-            concurrentSearchPage,
-            'Verify JMdict lookup backend during JMdict update download',
-            `While slow JMdict update was in progress, dedicated search tab resolved backend diagnostics: ${JSON.stringify(searchDuringUpdateLookup)}`,
-            searchDuringUpdateStart,
-            searchDuringUpdateEnd,
-            searchDuringUpdateProfile,
-            processSampler,
-        );
-        if (Number(searchDuringUpdateLookup?.expectedCounts?.JMdict ?? 0) < 1) {
-            fail(`Expected JMdict lookup backend to remain available during JMdict update; saw ${JSON.stringify(searchDuringUpdateLookup)}`);
-        }
-
-        const searchDuringActiveUpdateImportStart = safePerformance.now();
-        const searchDuringActiveUpdateImportProfile = await runPhaseProfile(cdpSession, async () => {
-            return await verifyLookupRemainsResponsiveDuringImportPhase(
+            const updateTriggerStart = safePerformance.now();
+            await markCurrentImportCompletionObserved(page);
+            const updateTriggerProfile = await runPhaseProfile(cdpSession, async () => {
+                return await triggerDictionaryUpdate(page, resolvedJmdictTitle, `${localServer.baseUrl}/dictionaries/jmdict-slow.zip`);
+            });
+            const updateTriggerEnd = safePerformance.now();
+            await addReportPhase(
+                report,
                 page,
-                concurrentSearchPage,
-                /Importing data/i,
-                readinessTerm,
-                ['JMdict'],
-                4,
+                'Trigger slow JMdict update',
+                `Queued a JMdict update for "${resolvedJmdictTitle}" against a throttled local ZIP endpoint while keeping the dedicated search tab open. probeTerm="${readinessTerm}" trigger=${JSON.stringify(updateTriggerProfile.result ?? null)}`,
+                updateTriggerStart,
+                updateTriggerEnd,
+                updateTriggerProfile,
+                processSampler,
             );
-        });
-        const searchDuringActiveUpdateImportEnd = safePerformance.now();
-        await addReportPhase(
-            report,
-            concurrentSearchPage,
-            'Verify JMdict lookup backend during active JMdict update import step',
-            `While the update UI was in active import processing, dedicated search tab kept returning JMdict results: ${JSON.stringify(searchDuringActiveUpdateImportProfile.result ?? null)}`,
-            searchDuringActiveUpdateImportStart,
-            searchDuringActiveUpdateImportEnd,
-            searchDuringActiveUpdateImportProfile,
-            processSampler,
-        );
 
-        const updateImportDebug = await updateImportCompletionPromise;
-        if (!(updateImportDebug && updateImportDebug.hasResult === true && typeof updateImportDebug.resultTitle === 'string' && updateImportDebug.resultTitle.includes('JMdict'))) {
-            fail(`JMdict update did not finish with expected debug payload: ${JSON.stringify(updateImportDebug)}`);
-        }
-        updatedJmdictTitle = String(updateImportDebug.resultTitle || '').trim();
-        const backendReadyAfterUpdateStart = safePerformance.now();
-        const backendReadyAfterUpdateProfile = await runPhaseProfile(cdpSession, async () => {
-            return await waitForBackendDictionaryReady(page, [updatedJmdictTitle], readinessTerm, 60000, false);
-        });
-        const backendReadyAfterUpdateEnd = safePerformance.now();
-        if (!(backendReadyAfterUpdateProfile.result && backendReadyAfterUpdateProfile.result.ok === true)) {
-            fail(`Backend dictionary readiness did not stabilize after JMdict update using term "${readinessTerm}" and title "${updatedJmdictTitle}". diagnostics=${JSON.stringify(backendReadyAfterUpdateProfile.result?.diagnostics ?? null)}`);
-        }
-        await addReportPhase(
-            report,
-            page,
-            'Wait for backend dictionary readiness after update',
-            `Backend refreshed "${updatedJmdictTitle}" after update for "${readinessTerm}": ${JSON.stringify(backendReadyAfterUpdateProfile.result?.diagnostics ?? null)}`,
-            backendReadyAfterUpdateStart,
-            backendReadyAfterUpdateEnd,
-            backendReadyAfterUpdateProfile,
-            processSampler,
-        );
-        const enableUpdatedDictionariesStart = safePerformance.now();
-        const enableUpdatedDictionariesProfile = await runPhaseProfile(cdpSession, async () => {
-            return await evalSendMessage(page, 'enableInstalledDictionaries');
-        });
-        const enableUpdatedDictionariesEnd = safePerformance.now();
-        await addReportPhase(
-            report,
-            page,
-            'Refresh enabled dictionaries after update',
-            `Refreshed profile dictionary enablement after JMdict update renamed installed titles: ${JSON.stringify(enableUpdatedDictionariesProfile.result ?? null)}`,
-            enableUpdatedDictionariesStart,
-            enableUpdatedDictionariesEnd,
-            enableUpdatedDictionariesProfile,
-            processSampler,
-        );
-        const verifyUpdatedJmdictContentStart = safePerformance.now();
-        const verifyUpdatedJmdictContentProfile = await runPhaseProfile(cdpSession, async () => {
-            return await waitForBackendDictionaryContentIntegrity(page, [updatedJmdictTitle], [...jmdictProbeTerms, ...lookupProbeCandidates], 15000);
-        });
-        const verifyUpdatedJmdictContentEnd = safePerformance.now();
-        await addReportPhase(
-            report,
-            page,
-            'Verify JMdict backend content integrity after update',
-            `Checked that JMdict term-content spans remain readable and in bounds after the slow update path: ${JSON.stringify(verifyUpdatedJmdictContentProfile.result ?? null)}`,
-            verifyUpdatedJmdictContentStart,
-            verifyUpdatedJmdictContentEnd,
-            verifyUpdatedJmdictContentProfile,
-            processSampler,
-        );
-        if (!(verifyUpdatedJmdictContentProfile.result && verifyUpdatedJmdictContentProfile.result.ok === true)) {
-            fail(`JMdict backend content integrity failed after update. diagnostics=${JSON.stringify(verifyUpdatedJmdictContentProfile.result ?? null)}`);
-        }
+            if (concurrentSearchPage === null) {
+                fail('Concurrent search page was not available for update verification');
+            }
+            const updateImportCompletionPromise = recordImportProgress(
+                'JMdict update',
+                'Monitored JMdict update while concurrent popup verification was active',
+                async (onStepChange) => {
+                    await waitForImportCompletion(page, 'JMdict', 300000, onStepChange);
+                },
+            );
+            await page.waitForTimeout(700);
+            const searchDuringUpdateStart = safePerformance.now();
+            const searchDuringUpdateProfile = await runPhaseProfile(cdpSession, async () => {
+                return await searchTermAndGetDictionaryHitCounts(concurrentSearchPage, readinessTerm, ['JMdict'], 6000);
+            });
+            const searchDuringUpdateLookup = searchDuringUpdateProfile.result;
+            const searchDuringUpdateEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                concurrentSearchPage,
+                'Verify JMdict lookup backend during JMdict update download',
+                `While slow JMdict update was in progress, dedicated search tab resolved backend diagnostics: ${JSON.stringify(searchDuringUpdateLookup)}`,
+                searchDuringUpdateStart,
+                searchDuringUpdateEnd,
+                searchDuringUpdateProfile,
+                processSampler,
+            );
+            if (Number(searchDuringUpdateLookup?.expectedCounts?.JMdict ?? 0) < 1) {
+                fail(`Expected JMdict lookup backend to remain available during JMdict update; saw ${JSON.stringify(searchDuringUpdateLookup)}`);
+            }
+
+            const searchDuringActiveUpdateImportStart = safePerformance.now();
+            const searchDuringActiveUpdateImportProfile = await runPhaseProfile(cdpSession, async () => {
+                return await verifyLookupRemainsResponsiveDuringImportPhase(
+                    page,
+                    concurrentSearchPage,
+                    /Importing data/i,
+                    readinessTerm,
+                    ['JMdict'],
+                    4,
+                );
+            });
+            const searchDuringActiveUpdateImportEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                concurrentSearchPage,
+                'Verify JMdict lookup backend during active JMdict update import step',
+                `While the update UI was in active import processing, dedicated search tab kept returning JMdict results: ${JSON.stringify(searchDuringActiveUpdateImportProfile.result ?? null)}`,
+                searchDuringActiveUpdateImportStart,
+                searchDuringActiveUpdateImportEnd,
+                searchDuringActiveUpdateImportProfile,
+                processSampler,
+            );
+
+            const updateImportDebug = await updateImportCompletionPromise;
+            if (!(updateImportDebug && updateImportDebug.hasResult === true && typeof updateImportDebug.resultTitle === 'string' && updateImportDebug.resultTitle.includes('JMdict'))) {
+                fail(`JMdict update did not finish with expected debug payload: ${JSON.stringify(updateImportDebug)}`);
+            }
+            updatedJmdictTitle = String(updateImportDebug.resultTitle || '').trim();
+            const backendReadyAfterUpdateStart = safePerformance.now();
+            const backendReadyAfterUpdateProfile = await runPhaseProfile(cdpSession, async () => {
+                return await waitForBackendDictionaryReady(page, [updatedJmdictTitle], readinessTerm, 60000, false);
+            });
+            const backendReadyAfterUpdateEnd = safePerformance.now();
+            if (!(backendReadyAfterUpdateProfile.result && backendReadyAfterUpdateProfile.result.ok === true)) {
+                fail(`Backend dictionary readiness did not stabilize after JMdict update using term "${readinessTerm}" and title "${updatedJmdictTitle}". diagnostics=${JSON.stringify(backendReadyAfterUpdateProfile.result?.diagnostics ?? null)}`);
+            }
+            await addReportPhase(
+                report,
+                page,
+                'Wait for backend dictionary readiness after update',
+                `Backend refreshed "${updatedJmdictTitle}" after update for "${readinessTerm}": ${JSON.stringify(backendReadyAfterUpdateProfile.result?.diagnostics ?? null)}`,
+                backendReadyAfterUpdateStart,
+                backendReadyAfterUpdateEnd,
+                backendReadyAfterUpdateProfile,
+                processSampler,
+            );
+            const enableUpdatedDictionariesStart = safePerformance.now();
+            const enableUpdatedDictionariesProfile = await runPhaseProfile(cdpSession, async () => {
+                return await evalSendMessage(page, 'enableInstalledDictionaries');
+            });
+            const enableUpdatedDictionariesEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                page,
+                'Refresh enabled dictionaries after update',
+                `Refreshed profile dictionary enablement after JMdict update renamed installed titles: ${JSON.stringify(enableUpdatedDictionariesProfile.result ?? null)}`,
+                enableUpdatedDictionariesStart,
+                enableUpdatedDictionariesEnd,
+                enableUpdatedDictionariesProfile,
+                processSampler,
+            );
+            const verifyUpdatedJmdictContentStart = safePerformance.now();
+            const verifyUpdatedJmdictContentProfile = await runPhaseProfile(cdpSession, async () => {
+                return await waitForBackendDictionaryContentIntegrity(page, [updatedJmdictTitle], [...jmdictProbeTerms, ...lookupProbeCandidates], 15000);
+            });
+            const verifyUpdatedJmdictContentEnd = safePerformance.now();
+            await addReportPhase(
+                report,
+                page,
+                'Verify JMdict backend content integrity after update',
+                `Checked that JMdict term-content spans remain readable and in bounds after the slow update path: ${JSON.stringify(verifyUpdatedJmdictContentProfile.result ?? null)}`,
+                verifyUpdatedJmdictContentStart,
+                verifyUpdatedJmdictContentEnd,
+                verifyUpdatedJmdictContentProfile,
+                processSampler,
+            );
+            if (!(verifyUpdatedJmdictContentProfile.result && verifyUpdatedJmdictContentProfile.result.ok === true)) {
+                fail(`JMdict backend content integrity failed after update. diagnostics=${JSON.stringify(verifyUpdatedJmdictContentProfile.result ?? null)}`);
+            }
         } else {
             appendLog(report, 'info', 'Skipped update and batch import sections before hover by MANABITAN_E2E_SKIP_UPDATE_AND_BATCH_BEFORE_HOVER=1.');
         }
@@ -4691,190 +4764,190 @@ async function main() {
             );
 
             if (!skipUpdateAndBatchBeforeHover) {
-            const deleteJmdictBeforeBatchStart = safePerformance.now();
-            const deleteJmdictBeforeBatchProfile = await runPhaseProfile(cdpSession, async () => {
-                await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-                await waitForSettingsPageReady(page);
-                const installedTitles = await getInstalledDictionaryTitles(page);
-                const installedJmdictTitle = resolveInstalledDictionaryTitle(installedTitles, 'JMdict') ?? 'JMdict';
-                await openInstalledDictionariesModal(page);
-                await requestDictionaryDeleteFromInstalledModal(page, installedJmdictTitle);
-                return await waitForDictionaryDeleteCompletion(page, installedJmdictTitle, ['Jitendex'], 240000);
-            });
-            const deleteJmdictBeforeBatchEnd = safePerformance.now();
-            await addReportPhase(
-                report,
-                page,
-                'Delete JMdict before batch import',
-                `Removed JMdict before batch import so the multi-file stress uses two fresh archives: ${JSON.stringify(deleteJmdictBeforeBatchProfile.result ?? null)}`,
-                deleteJmdictBeforeBatchStart,
-                deleteJmdictBeforeBatchEnd,
-                deleteJmdictBeforeBatchProfile,
-                processSampler,
-            );
-            if (!(deleteJmdictBeforeBatchProfile.result && deleteJmdictBeforeBatchProfile.result.ok === true)) {
-                fail(`JMdict delete did not complete before batch import. result=${JSON.stringify(deleteJmdictBeforeBatchProfile.result ?? null)}`);
-            }
-
-            const multiImportTriggerStart = safePerformance.now();
-            const multiImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
-                await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-                await waitForSettingsPageReady(page);
-                await markCurrentImportCompletionObserved(page);
-                await page.setInputFiles('#dictionary-import-file-input', [
-                    cachedDictionaries.jmdictPath,
-                    cachedDictionaries.jmnedictPath,
-                ]);
-                return {
-                    filePaths: [cachedDictionaries.jmdictPath, cachedDictionaries.jmnedictPath],
-                };
-            });
-            const multiImportTriggerEnd = safePerformance.now();
-            await addReportPhase(
-                report,
-                page,
-                'Trigger multi-file dictionary import stress',
-                `Triggered a single multi-file import selection with ${JSON.stringify(multiImportTriggerProfile.result?.filePaths ?? [])} to stress importing two fresh dictionaries in one batch after deleting JMdict.`,
-                multiImportTriggerStart,
-                multiImportTriggerEnd,
-                multiImportTriggerProfile,
-                processSampler,
-            );
-            const multiImportDebug = await recordImportProgress(
-                'JMdict + JMnedict batch import',
-                'Waited for progress clear for a multi-file batch import containing fresh JMdict and JMnedict archives after deleting JMdict.',
-                async (onStepChange) => {
-                    await waitForImportCompletion(page, 'JMdict + JMnedict batch import', 300000, onStepChange);
-                },
-            );
-            await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-            await waitForSettingsPageReady(page);
-            const multiImportListStart = safePerformance.now();
-            const multiImportListProfile = await runPhaseProfile(cdpSession, async () => {
-                await openInstalledDictionariesModal(page);
-                return await waitForInstalledDictionarySet(page, extendedLookupDictionaries, 30000);
-            });
-            const multiImportListEnd = safePerformance.now();
-            if (!(multiImportListProfile.result && multiImportListProfile.result.ok === true)) {
-                fail(`Installed dictionary list did not stabilize to ${extendedLookupDictionaries.join(', ')} after multi-file import. result=${JSON.stringify(multiImportListProfile.result ?? null)} lastImportDebug=${JSON.stringify(multiImportDebug)}`);
-            }
-            await addReportPhase(
-                report,
-                page,
-                'Verify installed dictionaries after multi-file import',
-                `Installed dictionary set after multi-file import: ${JSON.stringify(multiImportListProfile.result?.titles ?? [])}. lastImportDebug=${JSON.stringify(multiImportDebug)}`,
-                multiImportListStart,
-                multiImportListEnd,
-                multiImportListProfile,
-                processSampler,
-            );
-            const verifyBatchJmdictContentStart = safePerformance.now();
-            const verifyBatchJmdictContentProfile = await runPhaseProfile(cdpSession, async () => {
-                return await waitForBackendDictionaryContentIntegrity(page, ['JMdict'], extendedLookupProbeCandidates, 15000);
-            });
-            const verifyBatchJmdictContentEnd = safePerformance.now();
-            await addReportPhase(
-                report,
-                page,
-                'Verify JMdict backend content integrity after multi-file import',
-                `Checked that JMdict term-content spans remain readable and in bounds after the JMdict + JMnedict batch import: ${JSON.stringify(verifyBatchJmdictContentProfile.result ?? null)}`,
-                verifyBatchJmdictContentStart,
-                verifyBatchJmdictContentEnd,
-                verifyBatchJmdictContentProfile,
-                processSampler,
-            );
-            if (!(verifyBatchJmdictContentProfile.result && verifyBatchJmdictContentProfile.result.ok === true)) {
-                fail(`JMdict backend content integrity failed after multi-file import. diagnostics=${JSON.stringify(verifyBatchJmdictContentProfile.result ?? null)}`);
-            }
-            const verifyBatchJmnedictContentStart = safePerformance.now();
-            const verifyBatchJmnedictContentProfile = await runPhaseProfile(cdpSession, async () => {
-                return await waitForBackendDictionaryContentIntegrity(page, ['JMnedict'], extendedLookupProbeCandidates, 15000);
-            });
-            const verifyBatchJmnedictContentEnd = safePerformance.now();
-            await addReportPhase(
-                report,
-                page,
-                'Verify JMnedict backend content integrity after multi-file import',
-                `Checked that JMnedict term-content spans are readable and in bounds after the JMdict + JMnedict batch import: ${JSON.stringify(verifyBatchJmnedictContentProfile.result ?? null)}`,
-                verifyBatchJmnedictContentStart,
-                verifyBatchJmnedictContentEnd,
-                verifyBatchJmnedictContentProfile,
-                processSampler,
-            );
-            if (!(verifyBatchJmnedictContentProfile.result && verifyBatchJmnedictContentProfile.result.ok === true)) {
-                fail(`JMnedict backend content integrity failed after multi-file import. diagnostics=${JSON.stringify(verifyBatchJmnedictContentProfile.result ?? null)}`);
-            }
-            const verifyUnaffectedLookupStart = safePerformance.now();
-            const verifyUnaffectedLookupProfile = await runPhaseProfile(cdpSession, async () => {
-                return await waitForBackendDictionaryReady(
-                    page,
-                    expectedLookupDictionaries,
-                    readinessTerm,
-                    15_000,
-                    true,
-                );
-            });
-            const verifyUnaffectedLookupEnd = safePerformance.now();
-            await addReportPhase(
-                report,
-                page,
-                'Verify existing dictionary lookup continuity after multi-file import',
-                `Required live ${expectedLookupDictionaries.join(' + ')} lookup results immediately after importing JMdict + JMnedict: ${JSON.stringify(verifyUnaffectedLookupProfile.result ?? null)}`,
-                verifyUnaffectedLookupStart,
-                verifyUnaffectedLookupEnd,
-                verifyUnaffectedLookupProfile,
-                processSampler,
-            );
-            if (!(verifyUnaffectedLookupProfile.result && verifyUnaffectedLookupProfile.result.ok === true)) {
-                fail(`Existing dictionary lookup coverage was lost after multi-file import. diagnostics=${JSON.stringify(verifyUnaffectedLookupProfile.result ?? null)}`);
-            }
-            const enableExtendedDictionariesStart = safePerformance.now();
-            const enableExtendedDictionariesProfile = await runPhaseProfile(cdpSession, async () => {
-                return await setEnabledDictionaries(page, extendedLookupDictionaries);
-            });
-            const enableExtendedDictionariesEnd = safePerformance.now();
-            await addReportPhase(
-                report,
-                page,
-                'Enable JMnedict for extended lookup stress',
-                `Enabled ${extendedLookupDictionaries.join(', ')} after multi-file import: ${JSON.stringify(enableExtendedDictionariesProfile.result ?? null)}`,
-                enableExtendedDictionariesStart,
-                enableExtendedDictionariesEnd,
-                enableExtendedDictionariesProfile,
-                processSampler,
-            );
-            if (verifyBatchRestartPersistence) {
-                const batchRestartPersistenceStart = safePerformance.now();
-                let batchRestartPersistenceError = '';
-                let batchRestartPersistenceResult = null;
-                try {
-                    const jmnedictRestartTerm = String(jmnedictProbeTerms[0] || extendedLookupProbeCandidates[0] || readinessTerm);
-                    batchRestartPersistenceResult = await relaunchAndVerifyPersistence({
-                        expectedInstalledTitles: extendedLookupDictionaries,
-                        backendReadyDictionaryNames: extendedLookupDictionaries,
-                        backendReadyTerm: readinessTerm,
-                        searchChecks: [
-                            {
-                                label: 'post-batch JMdict + Jitendex restart search',
-                                term: readinessTerm,
-                                dictionaryNames: expectedLookupDictionaries,
-                            },
-                            {
-                                label: 'post-batch JMnedict restart search',
-                                term: jmnedictRestartTerm,
-                                dictionaryNames: ['JMnedict'],
-                            },
-                        ],
-                    });
-                } catch (e) {
-                    batchRestartPersistenceError = errorMessage(e);
-                    verificationErrors.push(`Batch restart persistence verification failed: ${batchRestartPersistenceError}`);
-                }
-                const batchRestartPersistenceEnd = safePerformance.now();
+                const deleteJmdictBeforeBatchStart = safePerformance.now();
+                const deleteJmdictBeforeBatchProfile = await runPhaseProfile(cdpSession, async () => {
+                    await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
+                    await waitForSettingsPageReady(page);
+                    const installedTitles = await getInstalledDictionaryTitles(page);
+                    const installedJmdictTitle = resolveInstalledDictionaryTitle(installedTitles, 'JMdict') ?? 'JMdict';
+                    await openInstalledDictionariesModal(page);
+                    await requestDictionaryDeleteFromInstalledModal(page, installedJmdictTitle);
+                    return await waitForDictionaryDeleteCompletion(page, installedJmdictTitle, ['Jitendex'], 240000);
+                });
+                const deleteJmdictBeforeBatchEnd = safePerformance.now();
                 await addReportPhase(
                     report,
                     page,
-                    'Verify restart persistence after multi-file import',
+                    'Delete JMdict before batch import',
+                    `Removed JMdict before batch import so the multi-file stress uses two fresh archives: ${JSON.stringify(deleteJmdictBeforeBatchProfile.result ?? null)}`,
+                    deleteJmdictBeforeBatchStart,
+                    deleteJmdictBeforeBatchEnd,
+                    deleteJmdictBeforeBatchProfile,
+                    processSampler,
+                );
+                if (!(deleteJmdictBeforeBatchProfile.result && deleteJmdictBeforeBatchProfile.result.ok === true)) {
+                    fail(`JMdict delete did not complete before batch import. result=${JSON.stringify(deleteJmdictBeforeBatchProfile.result ?? null)}`);
+                }
+
+                const multiImportTriggerStart = safePerformance.now();
+                const multiImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
+                    await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
+                    await waitForSettingsPageReady(page);
+                    await markCurrentImportCompletionObserved(page);
+                    await page.setInputFiles('#dictionary-import-file-input', [
+                        cachedDictionaries.jmdictPath,
+                        cachedDictionaries.jmnedictPath,
+                    ]);
+                    return {
+                        filePaths: [cachedDictionaries.jmdictPath, cachedDictionaries.jmnedictPath],
+                    };
+                });
+                const multiImportTriggerEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    page,
+                    'Trigger multi-file dictionary import stress',
+                    `Triggered a single multi-file import selection with ${JSON.stringify(multiImportTriggerProfile.result?.filePaths ?? [])} to stress importing two fresh dictionaries in one batch after deleting JMdict.`,
+                    multiImportTriggerStart,
+                    multiImportTriggerEnd,
+                    multiImportTriggerProfile,
+                    processSampler,
+                );
+                const multiImportDebug = await recordImportProgress(
+                    'JMdict + JMnedict batch import',
+                    'Waited for progress clear for a multi-file batch import containing fresh JMdict and JMnedict archives after deleting JMdict.',
+                    async (onStepChange) => {
+                        await waitForImportCompletion(page, 'JMdict + JMnedict batch import', 300000, onStepChange);
+                    },
+                );
+                await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
+                await waitForSettingsPageReady(page);
+                const multiImportListStart = safePerformance.now();
+                const multiImportListProfile = await runPhaseProfile(cdpSession, async () => {
+                    await openInstalledDictionariesModal(page);
+                    return await waitForInstalledDictionarySet(page, extendedLookupDictionaries, 30000);
+                });
+                const multiImportListEnd = safePerformance.now();
+                if (!(multiImportListProfile.result && multiImportListProfile.result.ok === true)) {
+                    fail(`Installed dictionary list did not stabilize to ${extendedLookupDictionaries.join(', ')} after multi-file import. result=${JSON.stringify(multiImportListProfile.result ?? null)} lastImportDebug=${JSON.stringify(multiImportDebug)}`);
+                }
+                await addReportPhase(
+                    report,
+                    page,
+                    'Verify installed dictionaries after multi-file import',
+                    `Installed dictionary set after multi-file import: ${JSON.stringify(multiImportListProfile.result?.titles ?? [])}. lastImportDebug=${JSON.stringify(multiImportDebug)}`,
+                    multiImportListStart,
+                    multiImportListEnd,
+                    multiImportListProfile,
+                    processSampler,
+                );
+                const verifyBatchJmdictContentStart = safePerformance.now();
+                const verifyBatchJmdictContentProfile = await runPhaseProfile(cdpSession, async () => {
+                    return await waitForBackendDictionaryContentIntegrity(page, ['JMdict'], extendedLookupProbeCandidates, 15000);
+                });
+                const verifyBatchJmdictContentEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    page,
+                    'Verify JMdict backend content integrity after multi-file import',
+                    `Checked that JMdict term-content spans remain readable and in bounds after the JMdict + JMnedict batch import: ${JSON.stringify(verifyBatchJmdictContentProfile.result ?? null)}`,
+                    verifyBatchJmdictContentStart,
+                    verifyBatchJmdictContentEnd,
+                    verifyBatchJmdictContentProfile,
+                    processSampler,
+                );
+                if (!(verifyBatchJmdictContentProfile.result && verifyBatchJmdictContentProfile.result.ok === true)) {
+                    fail(`JMdict backend content integrity failed after multi-file import. diagnostics=${JSON.stringify(verifyBatchJmdictContentProfile.result ?? null)}`);
+                }
+                const verifyBatchJmnedictContentStart = safePerformance.now();
+                const verifyBatchJmnedictContentProfile = await runPhaseProfile(cdpSession, async () => {
+                    return await waitForBackendDictionaryContentIntegrity(page, ['JMnedict'], extendedLookupProbeCandidates, 15000);
+                });
+                const verifyBatchJmnedictContentEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    page,
+                    'Verify JMnedict backend content integrity after multi-file import',
+                    `Checked that JMnedict term-content spans are readable and in bounds after the JMdict + JMnedict batch import: ${JSON.stringify(verifyBatchJmnedictContentProfile.result ?? null)}`,
+                    verifyBatchJmnedictContentStart,
+                    verifyBatchJmnedictContentEnd,
+                    verifyBatchJmnedictContentProfile,
+                    processSampler,
+                );
+                if (!(verifyBatchJmnedictContentProfile.result && verifyBatchJmnedictContentProfile.result.ok === true)) {
+                    fail(`JMnedict backend content integrity failed after multi-file import. diagnostics=${JSON.stringify(verifyBatchJmnedictContentProfile.result ?? null)}`);
+                }
+                const verifyUnaffectedLookupStart = safePerformance.now();
+                const verifyUnaffectedLookupProfile = await runPhaseProfile(cdpSession, async () => {
+                    return await waitForBackendDictionaryReady(
+                        page,
+                        expectedLookupDictionaries,
+                        readinessTerm,
+                        15_000,
+                        true,
+                    );
+                });
+                const verifyUnaffectedLookupEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    page,
+                    'Verify existing dictionary lookup continuity after multi-file import',
+                    `Required live ${expectedLookupDictionaries.join(' + ')} lookup results immediately after importing JMdict + JMnedict: ${JSON.stringify(verifyUnaffectedLookupProfile.result ?? null)}`,
+                    verifyUnaffectedLookupStart,
+                    verifyUnaffectedLookupEnd,
+                    verifyUnaffectedLookupProfile,
+                    processSampler,
+                );
+                if (!(verifyUnaffectedLookupProfile.result && verifyUnaffectedLookupProfile.result.ok === true)) {
+                    fail(`Existing dictionary lookup coverage was lost after multi-file import. diagnostics=${JSON.stringify(verifyUnaffectedLookupProfile.result ?? null)}`);
+                }
+                const enableExtendedDictionariesStart = safePerformance.now();
+                const enableExtendedDictionariesProfile = await runPhaseProfile(cdpSession, async () => {
+                    return await setEnabledDictionaries(page, extendedLookupDictionaries);
+                });
+                const enableExtendedDictionariesEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    page,
+                    'Enable JMnedict for extended lookup stress',
+                    `Enabled ${extendedLookupDictionaries.join(', ')} after multi-file import: ${JSON.stringify(enableExtendedDictionariesProfile.result ?? null)}`,
+                    enableExtendedDictionariesStart,
+                    enableExtendedDictionariesEnd,
+                    enableExtendedDictionariesProfile,
+                    processSampler,
+                );
+                if (verifyBatchRestartPersistence) {
+                    const batchRestartPersistenceStart = safePerformance.now();
+                    let batchRestartPersistenceError = '';
+                    let batchRestartPersistenceResult = null;
+                    try {
+                        const jmnedictRestartTerm = String(jmnedictProbeTerms[0] || extendedLookupProbeCandidates[0] || readinessTerm);
+                        batchRestartPersistenceResult = await relaunchAndVerifyPersistence({
+                            expectedInstalledTitles: extendedLookupDictionaries,
+                            backendReadyDictionaryNames: extendedLookupDictionaries,
+                            backendReadyTerm: readinessTerm,
+                            searchChecks: [
+                                {
+                                    label: 'post-batch JMdict + Jitendex restart search',
+                                    term: readinessTerm,
+                                    dictionaryNames: expectedLookupDictionaries,
+                                },
+                                {
+                                    label: 'post-batch JMnedict restart search',
+                                    term: jmnedictRestartTerm,
+                                    dictionaryNames: ['JMnedict'],
+                                },
+                            ],
+                        });
+                    } catch (e) {
+                        batchRestartPersistenceError = errorMessage(e);
+                        verificationErrors.push(`Batch restart persistence verification failed: ${batchRestartPersistenceError}`);
+                    }
+                    const batchRestartPersistenceEnd = safePerformance.now();
+                    await addReportPhase(
+                        report,
+                        page,
+                        'Verify restart persistence after multi-file import',
                     batchRestartPersistenceError.length > 0 ?
                         `Batch restart persistence verification failed: ${batchRestartPersistenceError}` :
                         `Relaunched ${browserFlavor} after the JMdict + JMnedict batch import and re-verified installed dictionaries plus restart lookups: ${JSON.stringify(batchRestartPersistenceResult)}`,
@@ -4882,11 +4955,11 @@ async function main() {
                     batchRestartPersistenceEnd,
                     null,
                     processSampler,
-                );
-                if (batchRestartPersistenceError.length > 0) {
-                    fail(`Batch restart persistence verification failed: ${batchRestartPersistenceError}`);
+                    );
+                    if (batchRestartPersistenceError.length > 0) {
+                        fail(`Batch restart persistence verification failed: ${batchRestartPersistenceError}`);
+                    }
                 }
-            }
             }
             const preHoverEnableDictionariesStart = safePerformance.now();
             const preHoverEnableDictionariesProfile = await runPhaseProfile(cdpSession, async () => {
@@ -5381,4 +5454,4 @@ async function main() {
 }
 
 await main();
-/* eslint-enable @stylistic/max-statements-per-line, @stylistic/multiline-ternary, @typescript-eslint/ban-ts-comment, @typescript-eslint/no-base-to-string, @typescript-eslint/no-shadow, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, jsdoc/require-jsdoc, no-empty, no-shadow, no-undefined, unicorn/no-useless-undefined, unicorn/prefer-spread */
+/* eslint-enable @stylistic/max-statements-per-line, @stylistic/multiline-ternary, @typescript-eslint/ban-ts-comment, no-empty, unicorn/no-useless-undefined, unicorn/prefer-spread */

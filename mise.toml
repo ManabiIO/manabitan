@@ -3,7 +3,7 @@ node = "24.20.0"
 
 [tasks."perf:bench"]
 description = "Run local Vitest benchmarks without CodSpeed instrumentation"
-run = "npx vitest bench"
+run = "node ./node_modules/vitest/vitest.mjs bench --run"
 
 [tasks."perf:env"]
 description = "Print performance environment metadata"
@@ -27,8 +27,8 @@ run = "node ./dev/perf/prepare-dictionaries.js"
 
 [tasks."perf:bench:baseline"]
 description = "Save a Vitest microbenchmark baseline as JSON"
-run = "node -e \"require('node:fs').mkdirSync('builds/perf',{recursive:true})\" && npx vitest bench --outputJson builds/perf/vitest-baseline.json"
+run = "node -e \"require('node:fs').mkdirSync('builds/perf',{recursive:true})\" && node ./node_modules/vitest/vitest.mjs bench --run --outputJson builds/perf/vitest-baseline.json"
 
 [tasks."perf:bench:compare"]
 description = "Compare Vitest microbenchmarks with the saved JSON baseline"
-run = "npx vitest bench --compare builds/perf/vitest-baseline.json"
+run = "node ./node_modules/vitest/vitest.mjs bench --run --compare builds/perf/vitest-baseline.json"

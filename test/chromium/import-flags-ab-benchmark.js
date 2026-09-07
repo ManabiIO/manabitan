@@ -19,8 +19,10 @@ import path from 'node:path';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {fileURLToPath} from 'node:url';
-import {mkdir, readFile, writeFile} from 'node:fs/promises';
+import {mkdir, readFile, rm, writeFile} from 'node:fs/promises';
 import {parseJson} from '../../ext/js/core/json.js';
+import {loadDictionaryFixtures} from '../../dev/perf/dictionary-fixtures.js';
+import {createBenchmarkEnvironment, extractImportResult, getSourceProvenance, asRecord, optionalMetric, parsePositiveInteger, median, metricDelta, percentDelta, roundMetric} from '../../dev/perf/benchmark-support.js';
 
 const execFileAsync = promisify(execFile);
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -37,7 +39,7 @@ function parseCliArgs() {
         const arg = args[i];
         switch (arg) {
             case '--pairs': {
-                pairCount = Number.parseInt(args[++i] ?? '', 10);
+                pairCount = parsePositiveInteger(args[++i] ?? '', '--pairs');
 
                 break;
             }
@@ -64,6 +66,9 @@ function parseCliArgs() {
 }
 
 const cli = parseCliArgs();
+const fixtures = await loadDictionaryFixtures();
+const fixture = fixtures[cli.dictionaryId];
+if (!fixture) { throw new Error(`Unknown dictionary: ${cli.dictionaryId}`); }
 const timestamp = new Date().toISOString()
     .replaceAll(':', '')
     .replaceAll('.', '')
@@ -71,12 +76,13 @@ const timestamp = new Date().toISOString()
 const baselineImportFlags = {};
 const referenceIterations = Number.parseInt(process.env.MANABITAN_AB_REFERENCE_ITERATIONS ?? '10', 10);
 const iterationPercent = Number.parseFloat(process.env.MANABITAN_AB_ITERATION_PERCENT ?? '10');
-const pairIterationsOverride = cli.pairCount ?? Number.parseInt(process.env.MANABITAN_AB_PAIR_ITERATIONS ?? '', 10);
+const pairIterationsOverride = cli.pairCount ?? (typeof process.env.MANABITAN_AB_PAIR_ITERATIONS === 'string' ? parsePositiveInteger(process.env.MANABITAN_AB_PAIR_ITERATIONS, 'MANABITAN_AB_PAIR_ITERATIONS') : null);
 const pairIterationsFromPercent = Math.round(referenceIterations * (iterationPercent / 100));
-const pairIterations = Number.isFinite(pairIterationsOverride) && pairIterationsOverride > 0 ?
+const pairIterations = pairIterationsOverride !== null ?
     pairIterationsOverride :
     Math.max(1, Number.isFinite(pairIterationsFromPercent) ? pairIterationsFromPercent : 1);
 const quickMode = (process.env.MANABITAN_AB_QUICK_MODE ?? '1').trim() !== '0';
+if (!quickMode) { throw new Error('A/B timing requires quick single-dictionary mode'); }
 const collectBulkAddBytesMetrics = (process.env.MANABITAN_AB_BULKADD_BYTES_METRICS ?? '1').trim() !== '0';
 
 /**
@@ -122,28 +128,6 @@ function asNumber(value) {
 }
 
 /**
- * @param {unknown} details
- * @returns {Record<string, unknown>|null}
- */
-function parseStep4Breakdown(details) {
-    if (typeof details !== 'string') {
-        return null;
-    }
-    const text = details;
-    const match = text.match(/step4Breakdown=({[\s\S]*})$/);
-    if (!match) { return null; }
-    try {
-        const parsed = /** @type {unknown} */ (parseJson(match[1]));
-        if (!(typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed))) {
-            return null;
-        }
-        return /** @type {Record<string, unknown>} */ (parsed);
-    } catch (_) {
-        return null;
-    }
-}
-
-/**
  * @param {unknown} logsRaw
  * @returns {{rows: number, totalMs: number, estimatedBytes: number, bytesPerRow: number, rowsPerSecond: number, msPerKRows: number}}
  */
@@ -172,83 +156,23 @@ function summarizeBulkAddTermsLogs(logsRaw) {
 
 /**
  * @param {Record<string, unknown>} report
- * @returns {{totalImportMs: number, step4BulkAddTermsMs: number, step4AccountedMs: number, bulkAddTermsPayloadBytesPerRow: number, bulkAddTermsEstimatedBytes: number, bulkAddTermsRowsPerSecond: number, bulkAddTermsMsPerKRows: number}}
- * @throws {Error}
+ * @param {unknown} flags
+ * @returns {{totalImportMs: number, workerImportMs: number|null, step4BulkAddTermsMs: number|null, step4AccountedMs: number|null, bulkAddTermsPayloadBytesPerRow: number|null, bulkAddTermsEstimatedBytes: number|null, bulkAddTermsRowsPerSecond: number|null, bulkAddTermsMsPerKRows: number|null}}
  */
-function summarizeReport(report) {
-    const phases = Array.isArray(report.phases) ? /** @type {unknown[]} */ (report.phases) : [];
-    /** @type {Record<string, unknown>|null} */
-    let totalImportPhase = null;
-    for (const phase of phases) {
-        if (!(typeof phase === 'object' && phase !== null && !Array.isArray(phase))) {
-            continue;
-        }
-        const phaseRecord = /** @type {Record<string, unknown>} */ (phase);
-        const phaseName = typeof phaseRecord.name === 'string' ? phaseRecord.name : '';
-        if (phaseName.endsWith(': total import')) {
-            totalImportPhase = phaseRecord;
-            break;
-        }
-    }
-    if (totalImportPhase === null) {
-        throw new Error('Missing "*: total import" phase');
-    }
-    const phaseDataRaw = totalImportPhase.data;
-    const phaseData = (typeof phaseDataRaw === 'object' && phaseDataRaw !== null && !Array.isArray(phaseDataRaw)) ?
-        /** @type {Record<string, unknown>} */ (phaseDataRaw) :
-        null;
-    const structuredStep4BreakdownRaw = phaseData?.step4Breakdown;
-    /** @type {Record<string, unknown>|null} */
-    let structuredStep4Breakdown = null;
-    if (
-        typeof structuredStep4BreakdownRaw === 'object' &&
-        structuredStep4BreakdownRaw !== null &&
-        !Array.isArray(structuredStep4BreakdownRaw)
-    ) {
-        structuredStep4Breakdown = /** @type {Record<string, unknown>} */ (structuredStep4BreakdownRaw);
-    }
-    const step4Breakdown = structuredStep4Breakdown ?? parseStep4Breakdown(totalImportPhase.details);
-    if (step4Breakdown === null) {
-        throw new Error('Missing structured or legacy step4Breakdown in total import phase');
-    }
-    const aggregateRaw = step4Breakdown.aggregate;
-    if (!(typeof aggregateRaw === 'object' && aggregateRaw !== null && !Array.isArray(aggregateRaw))) {
-        throw new Error('Missing step4Breakdown.aggregate');
-    }
-    const aggregate = /** @type {Record<string, unknown>} */ (aggregateRaw);
-    const bulkAddTermsFromLogs = summarizeBulkAddTermsLogs(report.logs);
+function summarizeReport(report, flags) {
+    const result = extractImportResult(report, cli.dictionaryId, fixture, false, flags);
+    const aggregate = asRecord(asRecord(result.step4Breakdown)?.aggregate);
+    const bulk = summarizeBulkAddTermsLogs(report.logs);
     return {
-        totalImportMs: asNumber(totalImportPhase.durationMs),
-        step4BulkAddTermsMs: asNumber(aggregate.bulkAddTermsMs),
-        step4AccountedMs: asNumber(aggregate.accountedMs),
-        bulkAddTermsPayloadBytesPerRow: bulkAddTermsFromLogs.bytesPerRow,
-        bulkAddTermsEstimatedBytes: bulkAddTermsFromLogs.estimatedBytes,
-        bulkAddTermsRowsPerSecond: bulkAddTermsFromLogs.rowsPerSecond,
-        bulkAddTermsMsPerKRows: bulkAddTermsFromLogs.msPerKRows,
+        totalImportMs: result.totalImportMs,
+        workerImportMs: result.workerImportMs,
+        step4BulkAddTermsMs: optionalMetric(aggregate?.bulkAddTermsMs),
+        step4AccountedMs: optionalMetric(aggregate?.accountedMs),
+        bulkAddTermsPayloadBytesPerRow: bulk.rows > 0 ? bulk.bytesPerRow : null,
+        bulkAddTermsEstimatedBytes: bulk.rows > 0 ? bulk.estimatedBytes : null,
+        bulkAddTermsRowsPerSecond: bulk.rows > 0 ? bulk.rowsPerSecond : null,
+        bulkAddTermsMsPerKRows: bulk.rows > 0 ? bulk.msPerKRows : null,
     };
-}
-
-/**
- * @param {number} base
- * @param {number} next
- * @returns {number}
- */
-function percentDelta(base, next) {
-    return base > 0 ? ((next - base) / base) * 100 : 0;
-}
-
-/**
- * @param {number[]} values
- * @returns {number}
- */
-function median(values) {
-    if (values.length === 0) { return 0; }
-    const sorted = [...values].sort((a, b) => a - b);
-    const mid = Math.floor(sorted.length / 2);
-    if ((sorted.length % 2) === 1) {
-        return sorted[mid];
-    }
-    return (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
 /**
@@ -263,16 +187,16 @@ async function runOnce(runId, envOverrides) {
         throw new Error(`Missing report path for ${runId}`);
     }
     const reportJsonPath = toJsonPath(reportPath);
+    await rm(reportJsonPath, {force: true});
     console.log(`[flags-ab] running runId="${runId}" report=${reportPath}`);
     await execFileAsync(
         process.execPath,
         ['./test/chromium/extension-two-dictionary-import.e2e.js'],
         {
             cwd: root,
-            env: {
-                ...process.env,
-                ...envOverrides,
-            },
+            env: createBenchmarkEnvironment(process.env, envOverrides),
+            timeout: 10 * 60 * 1000,
+            killSignal: 'SIGTERM',
             maxBuffer: 64 * 1024 * 1024,
         },
     );
@@ -282,17 +206,17 @@ async function runOnce(runId, envOverrides) {
         runId,
         reportPath,
         reportJsonPath,
-        summary: summarizeReport(report),
+        summary: summarizeReport(report, envOverrides.MANABITAN_E2E_IMPORT_FLAGS_JSON ? parseJson(envOverrides.MANABITAN_E2E_IMPORT_FLAGS_JSON) : null),
     };
 }
 
 /**
  * @param {VariantSpec} variant
  * @param {boolean} skipBuildForFirstBaseline
- * @returns {Promise<{variant: VariantSpec, runPairs: Array<{iteration: number, baseline: Awaited<ReturnType<typeof runOnce>>, variant: Awaited<ReturnType<typeof runOnce>>, deltas: {totalImportMsDelta: number, totalImportPercentDelta: number, targetedMetricDelta: number, targetedMetricPercentDelta: number, bulkAddPayloadBytesPerRowDelta: number, bulkAddPayloadBytesPerRowPercentDelta: number, bulkAddRowsPerSecondDelta: number, bulkAddRowsPerSecondPercentDelta: number, bulkAddMsPerKRowsDelta: number, bulkAddMsPerKRowsPercentDelta: number}}>, medians: {baselineTotalImportMs: number, variantTotalImportMs: number, baselineTargetedMetricMs: number, variantTargetedMetricMs: number, totalImportMsDelta: number, totalImportPercentDelta: number, targetedMetricDelta: number, targetedMetricPercentDelta: number, baselineBulkAddPayloadBytesPerRow: number, variantBulkAddPayloadBytesPerRow: number, bulkAddPayloadBytesPerRowDelta: number, bulkAddPayloadBytesPerRowPercentDelta: number, baselineBulkAddRowsPerSecond: number, variantBulkAddRowsPerSecond: number, bulkAddRowsPerSecondDelta: number, bulkAddRowsPerSecondPercentDelta: number, baselineBulkAddMsPerKRows: number, variantBulkAddMsPerKRows: number, bulkAddMsPerKRowsDelta: number, bulkAddMsPerKRowsPercentDelta: number}}>}
+ * @returns {Promise<{variant: VariantSpec, runPairs: Array<{iteration: number, baseline: Awaited<ReturnType<typeof runOnce>>, variant: Awaited<ReturnType<typeof runOnce>>, deltas: {totalImportMsDelta: number|null, totalImportPercentDelta: number|null, targetedMetricDelta: number|null, targetedMetricPercentDelta: number|null, bulkAddPayloadBytesPerRowDelta: number|null, bulkAddPayloadBytesPerRowPercentDelta: number|null, bulkAddRowsPerSecondDelta: number|null, bulkAddRowsPerSecondPercentDelta: number|null, bulkAddMsPerKRowsDelta: number|null, bulkAddMsPerKRowsPercentDelta: number|null}}>, medians: {baselineWorkerImportMs: number|null, variantWorkerImportMs: number|null, workerImportPercentDelta: number|null, baselineTotalImportMs: number|null, variantTotalImportMs: number|null, baselineTargetedMetricMs: number|null, variantTargetedMetricMs: number|null, totalImportMsDelta: number|null, totalImportPercentDelta: number|null, targetedMetricDelta: number|null, targetedMetricPercentDelta: number|null, baselineBulkAddPayloadBytesPerRow: number|null, variantBulkAddPayloadBytesPerRow: number|null, bulkAddPayloadBytesPerRowDelta: number|null, bulkAddPayloadBytesPerRowPercentDelta: number|null, baselineBulkAddRowsPerSecond: number|null, variantBulkAddRowsPerSecond: number|null, bulkAddRowsPerSecondDelta: number|null, bulkAddRowsPerSecondPercentDelta: number|null, baselineBulkAddMsPerKRows: number|null, variantBulkAddMsPerKRows: number|null, bulkAddMsPerKRowsDelta: number|null, bulkAddMsPerKRowsPercentDelta: number|null}}>}
  */
 async function runPairedVariant(variant, skipBuildForFirstBaseline) {
-    /** @type {Array<{iteration: number, baseline: Awaited<ReturnType<typeof runOnce>>, variant: Awaited<ReturnType<typeof runOnce>>, deltas: {totalImportMsDelta: number, totalImportPercentDelta: number, targetedMetricDelta: number, targetedMetricPercentDelta: number, bulkAddPayloadBytesPerRowDelta: number, bulkAddPayloadBytesPerRowPercentDelta: number, bulkAddRowsPerSecondDelta: number, bulkAddRowsPerSecondPercentDelta: number, bulkAddMsPerKRowsDelta: number, bulkAddMsPerKRowsPercentDelta: number}}>} */
+    /** @type {Array<{iteration: number, baseline: Awaited<ReturnType<typeof runOnce>>, variant: Awaited<ReturnType<typeof runOnce>>, deltas: {totalImportMsDelta: number|null, totalImportPercentDelta: number|null, targetedMetricDelta: number|null, targetedMetricPercentDelta: number|null, bulkAddPayloadBytesPerRowDelta: number|null, bulkAddPayloadBytesPerRowPercentDelta: number|null, bulkAddRowsPerSecondDelta: number|null, bulkAddRowsPerSecondPercentDelta: number|null, bulkAddMsPerKRowsDelta: number|null, bulkAddMsPerKRowsPercentDelta: number|null}}>} */
     const runPairs = [];
     const baselineTotals = [];
     const variantTotals = [];
@@ -342,13 +266,21 @@ async function runPairedVariant(variant, skipBuildForFirstBaseline) {
             ...commonEnv,
             MANABITAN_CHROMIUM_E2E_REPORT: baselineReportPath,
             MANABITAN_E2E_SKIP_BUILD: skipBuild ? '1' : '0',
-            MANABITAN_E2E_IMPORT_FLAGS_JSON: JSON.stringify(baselineRunImportFlags),
+            ...(Object.keys(baselineRunImportFlags).length > 0 ?
+{
+    MANABITAN_E2E_IMPORT_FLAGS_JSON: JSON.stringify(baselineRunImportFlags),
+} :
+{}),
         });
         const runVariant = async (/** @type {boolean} */ skipBuild) => await runOnce(`${runIdPrefix}:variant`, {
             ...commonEnv,
             MANABITAN_CHROMIUM_E2E_REPORT: variantReportPath,
             MANABITAN_E2E_SKIP_BUILD: skipBuild ? '1' : '0',
-            MANABITAN_E2E_IMPORT_FLAGS_JSON: JSON.stringify(variantImportFlags),
+            ...(Object.keys(variantImportFlags).length > 0 ?
+{
+    MANABITAN_E2E_IMPORT_FLAGS_JSON: JSON.stringify(variantImportFlags),
+} :
+{}),
         });
         const variantFirst = (iteration % 2) === 0;
         const skipFirstBuild = iteration > 1 || skipBuildForFirstBaseline;
@@ -363,13 +295,13 @@ async function runPairedVariant(variant, skipBuildForFirstBaseline) {
         }
         const totalImportMsDelta = variantRun.summary.totalImportMs - baseline.summary.totalImportMs;
         const totalImportPercentDelta = percentDelta(baseline.summary.totalImportMs, variantRun.summary.totalImportMs);
-        const targetedMetricDelta = variantRun.summary.step4BulkAddTermsMs - baseline.summary.step4BulkAddTermsMs;
+        const targetedMetricDelta = metricDelta(baseline.summary.step4BulkAddTermsMs, variantRun.summary.step4BulkAddTermsMs);
         const targetedMetricPercentDelta = percentDelta(baseline.summary.step4BulkAddTermsMs, variantRun.summary.step4BulkAddTermsMs);
-        const bulkAddPayloadBytesPerRowDelta = variantRun.summary.bulkAddTermsPayloadBytesPerRow - baseline.summary.bulkAddTermsPayloadBytesPerRow;
+        const bulkAddPayloadBytesPerRowDelta = metricDelta(baseline.summary.bulkAddTermsPayloadBytesPerRow, variantRun.summary.bulkAddTermsPayloadBytesPerRow);
         const bulkAddPayloadBytesPerRowPercentDelta = percentDelta(baseline.summary.bulkAddTermsPayloadBytesPerRow, variantRun.summary.bulkAddTermsPayloadBytesPerRow);
-        const bulkAddRowsPerSecondDelta = variantRun.summary.bulkAddTermsRowsPerSecond - baseline.summary.bulkAddTermsRowsPerSecond;
+        const bulkAddRowsPerSecondDelta = metricDelta(baseline.summary.bulkAddTermsRowsPerSecond, variantRun.summary.bulkAddTermsRowsPerSecond);
         const bulkAddRowsPerSecondPercentDelta = percentDelta(baseline.summary.bulkAddTermsRowsPerSecond, variantRun.summary.bulkAddTermsRowsPerSecond);
-        const bulkAddMsPerKRowsDelta = variantRun.summary.bulkAddTermsMsPerKRows - baseline.summary.bulkAddTermsMsPerKRows;
+        const bulkAddMsPerKRowsDelta = metricDelta(baseline.summary.bulkAddTermsMsPerKRows, variantRun.summary.bulkAddTermsMsPerKRows);
         const bulkAddMsPerKRowsPercentDelta = percentDelta(baseline.summary.bulkAddTermsMsPerKRows, variantRun.summary.bulkAddTermsMsPerKRows);
         runPairs.push({
             iteration,
@@ -411,6 +343,9 @@ async function runPairedVariant(variant, skipBuildForFirstBaseline) {
     }
 
     const medians = {
+        baselineWorkerImportMs: median(runPairs.map((pair) => pair.baseline.summary.workerImportMs)),
+        variantWorkerImportMs: median(runPairs.map((pair) => pair.variant.summary.workerImportMs)),
+        workerImportPercentDelta: median(runPairs.map((pair) => percentDelta(pair.baseline.summary.workerImportMs, pair.variant.summary.workerImportMs))),
         baselineTotalImportMs: median(baselineTotals),
         variantTotalImportMs: median(variantTotals),
         baselineTargetedMetricMs: median(baselineTargeted),
@@ -465,6 +400,10 @@ async function main() {
     }
 
     const summary = {
+        schemaVersion: 2,
+        source: await getSourceProvenance(root),
+        authoritativeTiming: !collectBulkAddBytesMetrics,
+        fixture,
         timestamp,
         dictionary: cli.dictionaryId,
         baselineImportFlags,
@@ -500,6 +439,7 @@ async function main() {
     const summaryPath = path.join(buildsDir, `chromium-e2e-import-flags-isolated-summary-${timestamp}.json`);
     await writeFile(summaryPath, `${JSON.stringify(summary, null, 2)}\n`, 'utf8');
 
+    if (results.some((entry) => !entry.ok)) { process.exitCode = 1; }
     console.log('[flags-ab] summary');
     console.log(JSON.stringify({
         timestamp,
@@ -526,34 +466,34 @@ async function main() {
                 targetedMetricLabel: result.variant.targetedMetricLabel,
                 status: 'ok',
                 totalImportMs: {
-                    baselineMedian: Math.round(result.medians.baselineTotalImportMs),
-                    variantMedian: Math.round(result.medians.variantTotalImportMs),
-                    deltaMedian: Math.round(result.medians.totalImportMsDelta),
-                    percentDeltaMedian: Number(result.medians.totalImportPercentDelta.toFixed(2)),
+                    baselineMedian: roundMetric(result.medians.baselineTotalImportMs),
+                    variantMedian: roundMetric(result.medians.variantTotalImportMs),
+                    deltaMedian: roundMetric(result.medians.totalImportMsDelta),
+                    percentDeltaMedian: roundMetric(result.medians.totalImportPercentDelta, 2),
                 },
                 targetedMetricMs: {
-                    baselineMedian: Math.round(result.medians.baselineTargetedMetricMs),
-                    variantMedian: Math.round(result.medians.variantTargetedMetricMs),
-                    deltaMedian: Math.round(result.medians.targetedMetricDelta),
-                    percentDeltaMedian: Number(result.medians.targetedMetricPercentDelta.toFixed(2)),
+                    baselineMedian: roundMetric(result.medians.baselineTargetedMetricMs),
+                    variantMedian: roundMetric(result.medians.variantTargetedMetricMs),
+                    deltaMedian: roundMetric(result.medians.targetedMetricDelta),
+                    percentDeltaMedian: roundMetric(result.medians.targetedMetricPercentDelta, 2),
                 },
                 bulkAddPayloadBytesPerRow: {
-                    baselineMedian: Number(result.medians.baselineBulkAddPayloadBytesPerRow.toFixed(2)),
-                    variantMedian: Number(result.medians.variantBulkAddPayloadBytesPerRow.toFixed(2)),
-                    deltaMedian: Number(result.medians.bulkAddPayloadBytesPerRowDelta.toFixed(2)),
-                    percentDeltaMedian: Number(result.medians.bulkAddPayloadBytesPerRowPercentDelta.toFixed(2)),
+                    baselineMedian: roundMetric(result.medians.baselineBulkAddPayloadBytesPerRow, 2),
+                    variantMedian: roundMetric(result.medians.variantBulkAddPayloadBytesPerRow, 2),
+                    deltaMedian: roundMetric(result.medians.bulkAddPayloadBytesPerRowDelta, 2),
+                    percentDeltaMedian: roundMetric(result.medians.bulkAddPayloadBytesPerRowPercentDelta, 2),
                 },
                 bulkAddRowsPerSecond: {
-                    baselineMedian: Number(result.medians.baselineBulkAddRowsPerSecond.toFixed(1)),
-                    variantMedian: Number(result.medians.variantBulkAddRowsPerSecond.toFixed(1)),
-                    deltaMedian: Number(result.medians.bulkAddRowsPerSecondDelta.toFixed(1)),
-                    percentDeltaMedian: Number(result.medians.bulkAddRowsPerSecondPercentDelta.toFixed(2)),
+                    baselineMedian: roundMetric(result.medians.baselineBulkAddRowsPerSecond, 1),
+                    variantMedian: roundMetric(result.medians.variantBulkAddRowsPerSecond, 1),
+                    deltaMedian: roundMetric(result.medians.bulkAddRowsPerSecondDelta, 1),
+                    percentDeltaMedian: roundMetric(result.medians.bulkAddRowsPerSecondPercentDelta, 2),
                 },
                 bulkAddMsPerKRows: {
-                    baselineMedian: Number(result.medians.baselineBulkAddMsPerKRows.toFixed(2)),
-                    variantMedian: Number(result.medians.variantBulkAddMsPerKRows.toFixed(2)),
-                    deltaMedian: Number(result.medians.bulkAddMsPerKRowsDelta.toFixed(2)),
-                    percentDeltaMedian: Number(result.medians.bulkAddMsPerKRowsPercentDelta.toFixed(2)),
+                    baselineMedian: roundMetric(result.medians.baselineBulkAddMsPerKRows, 2),
+                    variantMedian: roundMetric(result.medians.variantBulkAddMsPerKRows, 2),
+                    deltaMedian: roundMetric(result.medians.bulkAddMsPerKRowsDelta, 2),
+                    percentDeltaMedian: roundMetric(result.medians.bulkAddMsPerKRowsPercentDelta, 2),
                 },
             };
         }),
