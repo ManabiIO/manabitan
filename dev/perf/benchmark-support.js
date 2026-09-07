@@ -84,7 +84,7 @@ export function optionalMetric(value) {
  * @param {import('./dictionary-fixtures.js').DictionaryFixture} fixture
  * @param {boolean} traceEnabled
  * @param {unknown} importFlags
- * @returns {{totalImportMs: number, workerImportMs: number|null, stepTimingSummary: unknown, step4Breakdown: unknown, importDebug: Record<string, unknown>, validation: Record<string, unknown>}}
+ * @returns {{totalImportMs: number, automationObservedImportMs: number, workerImportMs: number|null, stepTimingSummary: unknown, step4Breakdown: unknown, importDebug: Record<string, unknown>, validation: Record<string, unknown>}}
  * @throws {Error}
  */
 export function extractImportResult(value, dictionaryId, fixture, traceEnabled, importFlags) {
@@ -108,6 +108,25 @@ export function extractImportResult(value, dictionaryId, fixture, traceEnabled, 
     if (matching.length !== 1 || data?.kind !== 'dictionary-import' || data.dictionary !== fixture.label || duration === null || duration <= 0) {
         throw new Error(`Missing, duplicate or invalid ${fixture.label} total-import phase`);
     }
+    const triggers = phases.filter((entry) => entry?.name === `Import ${fixture.label} via file input`);
+    const trigger = triggers[0];
+    const start = optionalMetric(phase?.startMs);
+    const end = optionalMetric(phase?.endMs);
+    const triggerStart = optionalMetric(trigger?.startMs);
+    const triggerEnd = optionalMetric(trigger?.endMs);
+    if (triggers.length !== 1 || start === null || end === null || triggerStart === null || triggerEnd === null ||
+    start !== triggerStart || triggerEnd < triggerStart || end < triggerEnd || Math.abs(duration - (end - start)) > 0.001) {
+        throw new Error('Total-import timing must include file-input dispatch through visible completion');
+    }
+    const browserTiming = asRecord(data.browserTiming);
+    const browserStart = optionalMetric(browserTiming?.startedAtMs);
+    const browserEnd = optionalMetric(browserTiming?.completedAtMs);
+    if (browserStart === null || browserEnd === null || browserEnd <= browserStart ||
+    browserTiming?.trigger !== 'file-input-change' || browserTiming.errorCount !== 0 ||
+    !Number.isSafeInteger(browserTiming.sequence) || !Number.isSafeInteger(browserTiming.sequenceBefore) ||
+    Number(browserTiming.sequence) <= Number(browserTiming.sequenceBefore)) {
+        throw new Error('Missing current-operation browser monotonic import timing');
+    }
     const debug = asRecord(data.importDebug);
     if (debug?.hasResult !== true || debug.resultTitle !== fixture.expectedTitle || debug.errorCount !== 0 || debug.addSettingsErrorCount !== 0 || debug.usesFallbackStorage !== false) {
         throw new Error(`Import completion did not confirm an error-free ${fixture.expectedTitle}`);
@@ -121,7 +140,8 @@ export function extractImportResult(value, dictionaryId, fixture, traceEnabled, 
     const localPhases = Array.isArray(debug.localPhaseTimings) ? debug.localPhaseTimings.map(asRecord) : [];
     const workerPhases = localPhases.filter((entry) => entry?.phase === 'worker-import-dictionary');
     return {
-        totalImportMs: duration,
+        totalImportMs: browserEnd - browserStart,
+        automationObservedImportMs: duration,
         workerImportMs: workerPhases.length === 1 ? optionalMetric(workerPhases[0]?.elapsedMs) : null,
         stepTimingSummary: data.stepTimingSummary ?? null,
         step4Breakdown: data.step4Breakdown ?? null,
@@ -204,6 +224,8 @@ export async function getSourceProvenance(root) {
         'dev/perf/import-benchmark.js',
         'test/chromium/import-flags-ab-benchmark.js',
         'test/chromium/extension-two-dictionary-import.e2e.js',
+        'test/e2e/import-timing.js',
+        'ext/js/pages/settings/dictionary-import-controller.js',
         'builds/manabitan-chrome-dev.zip',
     ]) {
         try {

@@ -400,7 +400,8 @@ async function main() {
     }
 
     const summary = {
-        schemaVersion: 2,
+        schemaVersion: 3,
+        timingBoundary: 'page file-input change event to post-UI import-complete event; browser monotonic clock',
         source: await getSourceProvenance(root),
         authoritativeTiming: !collectBulkAddBytesMetrics,
         fixture,

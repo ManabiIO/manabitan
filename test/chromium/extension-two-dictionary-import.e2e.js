@@ -33,6 +33,7 @@ import {getHostEnvironment} from '../../dev/perf/host-environment.js';
 import {parseJson} from '../../ext/js/core/json.js';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
+import {armBrowserImportTiming} from '../e2e/import-timing.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
@@ -324,6 +325,8 @@ function createReportJsonSummary(report) {
         phases: (Array.isArray(report.phases) ? report.phases : []).map((phase) => ({
             name: phase.name,
             details: phase.details,
+            startMs: phase.startMs,
+            endMs: phase.endMs,
             durationMs: phase.durationMs,
             resourceUsage: phase.resourceUsage ?? null,
             perfMetrics: phase.perfMetrics ?? null,
@@ -1803,6 +1806,7 @@ async function getImportWaitState(page) {
             errorText,
             uiIdle: (!(fileInput instanceof HTMLInputElement) || !fileInput.disabled) && activeProgress === null,
             completion,
+            browserTiming: Reflect.get(globalThis, '__manabitanBrowserImportTiming') ?? null,
         };
     });
 }
@@ -1813,6 +1817,7 @@ async function markCurrentImportCompletionObserved(page) {
     if (Number.isFinite(completionEpochMs) && completionEpochMs > lastObservedImportCompletionEpochMs) {
         lastObservedImportCompletionEpochMs = completionEpochMs;
     }
+    await page.evaluate(armBrowserImportTiming);
 }
 
 async function waitForSettingsPageReady(page, timeoutMs = 30000) {
@@ -2066,7 +2071,11 @@ async function waitForImportCompletion(page, dictionaryName, timeoutMs = 300000,
             emptySince = null;
         }
         const completionEpochMs = Number(state.completion?.completedAtEpochMs ?? 0);
-        if (completionEpochMs > lastObservedImportCompletionEpochMs && state.uiIdle) {
+        const currentBrowserCompletion = state.browserTiming !== null &&
+        Number.isFinite(state.browserTiming.completedAtMs) &&
+        state.browserTiming.completedAtMs !== null &&
+        state.browserTiming.sequence > state.browserTiming.sequenceBefore;
+        if ((state.browserTiming !== null ? currentBrowserCompletion : completionEpochMs > lastObservedImportCompletionEpochMs) && state.uiIdle) {
             if (Number(state.completion?.errorCount ?? 0) > 0) {
                 fail(`${dictionaryName} import completion signal reported errors: ${JSON.stringify(state.completion)}`);
             }
@@ -2076,7 +2085,7 @@ async function waitForImportCompletion(page, dictionaryName, timeoutMs = 300000,
             }
             return;
         }
-        if (sawStepText && label.length === 0) {
+        if (state.browserTiming === null && sawStepText && label.length === 0) {
             emptySince ??= safePerformance.now();
             if (safePerformance.now() - emptySince >= importCompletionIdleMs && state.uiIdle) {
                 if (typeof onStepChange === 'function' && previousLabel.length > 0) {
@@ -3625,9 +3634,9 @@ async function main() {
             processSampler,
         );
 
-        const recordImportProgress = async (importLabel, details, runImport) => {
+        const recordImportProgress = async (importLabel, details, runImport, triggerStart) => {
             const importStepIndexByLabel = new Map();
-            const importTotalStart = safePerformance.now();
+            const importTotalStart = triggerStart;
             const importTotalProfile = await runPhaseProfile(cdpSession, async () => {
                 await runImport(async (label, stepStart, stepEnd) => {
                     const baseName = `Import progress: ${label}`;
@@ -3648,11 +3657,11 @@ async function main() {
                 });
             });
             // Stop timing before test-only diagnostic reads and validation.
-            const benchmarkImportEnd = quickImportBenchmarkMode ? safePerformance.now() : null;
+            const importTotalEnd = safePerformance.now();
+            const browserTiming = await page.evaluate(() => Reflect.get(globalThis, '__manabitanBrowserImportTiming') ?? null);
             const importDebug = await getLastImportDebug(page);
             const importDebugHistory = await getImportDebugHistory(page);
             const importStepTimingHistory = await getImportStepTimingHistory(page);
-            const importTotalEnd = benchmarkImportEnd ?? safePerformance.now();
             const importStepTimingSummary = summarizeImportStepTimingHistory(importStepTimingHistory);
             const importStep4Breakdown = summarizeImportStep4Breakdown(importDebugHistory);
             await addReportPhase(
@@ -3667,6 +3676,7 @@ async function main() {
                 {
                     kind: 'dictionary-import',
                     dictionary: importLabel,
+                    browserTiming,
                     importDebug,
                     importDebugHistory,
                     stepTimingSummary: importStepTimingSummary,
@@ -3708,8 +3718,8 @@ async function main() {
             });
         }
 
-        const initialImportTriggerStart = safePerformance.now();
         await markCurrentImportCompletionObserved(page);
+        const initialImportTriggerStart = safePerformance.now();
         const initialImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
             await page.setInputFiles('#dictionary-import-file-input', [initialImportSpec.filePath]);
         });
@@ -3730,6 +3740,7 @@ async function main() {
             async (onStepChange) => {
                 await waitForImportCompletion(page, initialImportSpec.label, 300000, onStepChange);
             },
+            initialImportTriggerStart,
         );
         if (importWorkerTraceStopPromise !== null) {
             await Promise.race([
@@ -4004,8 +4015,8 @@ async function main() {
         }
 
         if (!focusedUpdateOnlyMode) {
-            const jitendexImportTriggerStart = safePerformance.now();
             await markCurrentImportCompletionObserved(page);
+            const jitendexImportTriggerStart = safePerformance.now();
             const jitendexImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
                 await page.setInputFiles('#dictionary-import-file-input', [cachedDictionaries.jitendexPath]);
             });
@@ -4038,6 +4049,7 @@ async function main() {
                 async (onStepChange) => {
                     await waitForImportCompletion(page, 'Jitendex', 300000, onStepChange);
                 },
+                jitendexImportTriggerStart,
             );
             await page.waitForTimeout(700);
             const searchDuringImportStart = safePerformance.now();
@@ -4343,8 +4355,8 @@ async function main() {
         }
 
         if (!skipUpdateAndBatchBeforeHover) {
-            const updateTriggerStart = safePerformance.now();
             await markCurrentImportCompletionObserved(page);
+            const updateTriggerStart = safePerformance.now();
             const updateTriggerProfile = await runPhaseProfile(cdpSession, async () => {
                 return await triggerDictionaryUpdate(page, resolvedJmdictTitle, `${localServer.baseUrl}/dictionaries/jmdict-slow.zip`);
             });
@@ -4369,6 +4381,7 @@ async function main() {
                 async (onStepChange) => {
                     await waitForImportCompletion(page, 'JMdict', 300000, onStepChange);
                 },
+                updateTriggerStart,
             );
             await page.waitForTimeout(700);
             const searchDuringUpdateStart = safePerformance.now();
@@ -4789,11 +4802,11 @@ async function main() {
                     fail(`JMdict delete did not complete before batch import. result=${JSON.stringify(deleteJmdictBeforeBatchProfile.result ?? null)}`);
                 }
 
+                await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
+                await waitForSettingsPageReady(page);
+                await markCurrentImportCompletionObserved(page);
                 const multiImportTriggerStart = safePerformance.now();
                 const multiImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
-                    await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-                    await waitForSettingsPageReady(page);
-                    await markCurrentImportCompletionObserved(page);
                     await page.setInputFiles('#dictionary-import-file-input', [
                         cachedDictionaries.jmdictPath,
                         cachedDictionaries.jmnedictPath,
@@ -4819,6 +4832,7 @@ async function main() {
                     async (onStepChange) => {
                         await waitForImportCompletion(page, 'JMdict + JMnedict batch import', 300000, onStepChange);
                     },
+                    multiImportTriggerStart,
                 );
                 await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
                 await waitForSettingsPageReady(page);

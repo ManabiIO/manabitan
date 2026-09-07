@@ -148,7 +148,7 @@ const timestamp = new Date().toISOString().replaceAll(':', '')
 const outputDir = path.resolve(root, options.outputDir ?? path.join('builds', 'perf', `${timestamp}-${options.dictionaryId}${options.trace ? '-trace' : ''}`));
 await mkdir(outputDir, {recursive: true});
 await rm(path.join(outputDir, 'summary.json'), {force: true});
-/** @type {Array<{index: number, reportPath: string, reportJsonPath: string, tracePath: string|null, browserVersion: unknown, totalImportMs: number, workerImportMs: number|null, stepTimingSummary: unknown, step4Breakdown: unknown, importDebug: unknown}>} */
+/** @type {Array<{index: number, reportPath: string, reportJsonPath: string, tracePath: string|null, browserVersion: unknown, totalImportMs: number, automationObservedImportMs: number, workerImportMs: number|null, stepTimingSummary: unknown, step4Breakdown: unknown, importDebug: unknown}>} */
 const runs = [];
 for (let index = 1; index <= runCount; ++index) {
     const reportPath = path.join(outputDir, `run-${String(index)}.html`);
@@ -194,7 +194,7 @@ for (let index = 1; index <= runCount; ++index) {
 }
 const source = await getSourceProvenance(root);
 const summary = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     dictionary: options.dictionaryId,
     fixture,
     authoritativeTiming: !options.trace,
@@ -205,8 +205,9 @@ const summary = {
     browserVersion: runs[0]?.browserVersion ?? null,
     importFlags: options.importFlagsJson === null ? null : parseJson(options.importFlagsJson),
     runs,
-    timingBoundary: 'file-input import to observed visible completion; excludes diagnostic reads and post-import validation',
+    timingBoundary: 'page file-input change event to post-UI import-complete event; browser monotonic clock',
     timing: summarizeDurations(runs.map((run) => run.totalImportMs)),
+    automationObservedTiming: summarizeDurations(runs.map((run) => run.automationObservedImportMs)),
     workerTiming: runs.every((run) => run.workerImportMs !== null) ? summarizeDurations(/** @type {number[]} */ (runs.map((run) => run.workerImportMs))) : null,
 };
 const summaryPath = path.join(outputDir, 'summary.json');

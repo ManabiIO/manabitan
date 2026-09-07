@@ -51,10 +51,49 @@ function validReport() {
         phases: [{
             name: 'JMdict: total import',
             durationMs: 123.5,
-            data: {kind: 'dictionary-import', dictionary: 'JMdict', importDebug: {hasResult: true, resultTitle: fixture.expectedTitle, errorCount: 0, addSettingsErrorCount: 0, usesFallbackStorage: false}},
+            startMs: 100,
+            endMs: 223.5,
+            data: {kind: 'dictionary-import', dictionary: 'JMdict', browserTiming: {startedAtMs: 10, completedAtMs: 133.5, sequence: 1, sequenceBefore: 0, trigger: 'file-input-change', errorCount: 0}, importDebug: {hasResult: true, resultTitle: fixture.expectedTitle, errorCount: 0, addSettingsErrorCount: 0, usesFallbackStorage: false}},
+        }, {
+            name: 'Import JMdict via file input',
+            startMs: 100,
+            endMs: 140,
         }],
     };
 }
+
+describe('benchmark timing boundary', () => {
+    test('includes time spent dispatching the file input', () => {
+        expect(extractImportResult(validReport(), 'jmdict', fixture, false, null).totalImportMs).toBe(123.5);
+    });
+    test('rejects the old post-dispatch timing boundary', () => {
+        const report = validReport();
+        report.phases[0].startMs = 140;
+        report.phases[0].durationMs = 83.5;
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('include file-input dispatch');
+    });
+    test('rejects absent or duplicated trigger measurements', () => {
+        const report = validReport();
+        report.phases.pop();
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('include file-input dispatch');
+        const duplicate = validReport();
+        duplicate.phases.push(duplicate.phases[1]);
+        expect(() => extractImportResult(duplicate, 'jmdict', fixture, false, null)).toThrow('include file-input dispatch');
+    });
+    test('uses browser timing independently of automation overhead', () => {
+        const report = validReport();
+        report.phases[0].endMs = 1000;
+        report.phases[0].durationMs = 900;
+        const result = extractImportResult(report, 'jmdict', fixture, false, null);
+        expect(result.totalImportMs).toBe(123.5);
+        expect(result.automationObservedImportMs).toBe(900);
+    });
+    test.each([null, {startedAtMs: 1, completedAtMs: 2, sequence: 0, sequenceBefore: 0, trigger: 'file-input-change', errorCount: 0}])('rejects absent or stale browser timing', (timing) => {
+        const report = validReport();
+        report.phases[0].data.browserTiming = timing;
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('browser monotonic');
+    });
+});
 
 describe('benchmark count arguments', () => {
     test.each(['', '0', '-1', '1.5', '5junk', 'NaN', 'Infinity', '1e3', ' 5', '5 ', '9007199254740992'])('rejects %j', (value) => {

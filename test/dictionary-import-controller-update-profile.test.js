@@ -103,10 +103,10 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         Reflect.set(controller, '_importModal', {setVisible});
         Reflect.set(controller, '_getAllFileEntries', vi.fn().mockRejectedValue(expectedError));
         Reflect.set(controller, '_showErrors', showErrors);
-        const event = /** @type {DragEvent} */ ({
+        const event = /** @type {DragEvent} */ (/** @type {unknown} */ ({
             preventDefault: vi.fn(),
             dataTransfer: {items: []},
-        });
+        }));
 
         await expect(onFileDrop.call(controller, event)).resolves.toBeUndefined();
         expect(showErrors).toHaveBeenCalledWith([expectedError]);
@@ -118,6 +118,10 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         const controller = createControllerForInternalTests();
         const dispatchEvent = vi.fn();
         class TestCustomEvent {
+            /**
+             * @param {string} type
+             * @param {{detail?: unknown}} [options]
+             */
             constructor(type, options) {
                 this.type = type;
                 this.detail = options?.detail;
@@ -141,7 +145,13 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         signalImportSessionCompletion.call(controller, details);
 
         expect(Reflect.get(globalThis, '__manabitanImportCompletionSequence')).toBe(5);
-        expect(Reflect.get(globalThis, '__manabitanLastImportCompletion')).toMatchObject({...details, sequence: 5});
+        const completion = Reflect.get(globalThis, '__manabitanLastImportCompletion');
+        expect(completion).toMatchObject({...details, sequence: 5});
+        const completionRecord = /** @type {{completedAtMonotonicMs?: unknown}} */ (/** @type {unknown} */ (completion));
+        const {completedAtMonotonicMs} = completionRecord;
+        expect(completedAtMonotonicMs).toEqual(expect.any(Number));
+        expect(Number.isFinite(completedAtMonotonicMs)).toBe(true);
+        expect(completedAtMonotonicMs).toBeGreaterThanOrEqual(0);
         expect(dispatchEvent).toHaveBeenCalledOnce();
         expect(dispatchEvent.mock.calls[0][0]).toMatchObject({
             type: 'manabitan:dictionary-import-complete',
