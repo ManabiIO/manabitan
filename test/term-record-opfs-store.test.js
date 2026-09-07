@@ -3954,3 +3954,29 @@ describe('TermRecordOpfsStore', () => {
         expect(taberuRecord?.reading).toBe('たべる');
     });
 });
+
+
+describe('TermRecordOpfsStore string decoding buffer ownership', () => {
+    for (const shared of [false, true]) {
+        test(`decodes an offset string from ${shared ? 'shared' : 'ordinary'} bytes`, () => {
+            const buffer = shared ? new SharedArrayBuffer(64) : new ArrayBuffer(64);
+            const bytes = new Uint8Array(buffer, 3, 40);
+            const text = new TextEncoder().encode('日本語🙂');
+            bytes.fill(65);
+            bytes.set(text, 7);
+            const store = new TermRecordOpfsStore();
+            const decoder = new TextDecoder();
+            const decode = vi.fn((/** @type {Uint8Array} */ input) => {
+                // Node accepts shared views; enforce the stricter browser API contract.
+                expect(input.buffer).toBeInstanceOf(ArrayBuffer);
+                expect(input.byteLength).toBe(text.byteLength);
+                if (!shared) { expect(input.buffer).toBe(buffer); }
+                return decoder.decode(input);
+            });
+            Reflect.set(store, '_textDecoder', {decode});
+            expect(store._decodeString(bytes, 7, text.byteLength)).toBe('日本語🙂');
+            expect(store._decodeString(bytes, 0, 0)).toBe('');
+            expect(decode).toHaveBeenCalledOnce();
+        });
+    }
+});

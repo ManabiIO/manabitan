@@ -564,3 +564,123 @@ describe('DisplayAnki preload and save flow', () => {
         });
     });
 });
+
+
+describe('DisplayAnki render-overlapped duplicate preparation', () => {
+    /**
+     * @param {Document} document
+     * @param {Partial<Record<string, unknown>>} [apiOverrides]
+     * @returns {{display: ReturnType<typeof createDisplay>['display'], api: ReturnType<typeof createDisplay>['api'], anki: DisplayAnki, update: import('vitest').MockInstance<DisplayAnki['_updateSaveButtons']>}}
+     */
+    function setup(document, apiOverrides = {}) {
+        setupDocument(document);
+        const {display, api} = createDisplay(document, [createTermEntry()], apiOverrides);
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        anki._checkForDuplicates = true;
+        anki._duplicateBehavior = 'prevent';
+        anki._cardFormats = [createFastProbeCardFormat()];
+        vi.spyOn(anki, '_getNoteContext').mockReturnValue(null);
+        const update = vi.spyOn(anki, '_updateSaveButtons').mockImplementation(() => {});
+        return {display, api, anki, update};
+    }
+
+    test('starts the real probe before completion but publishes buttons only afterwards', async ({window}) => {
+        const {api, anki, update} = setup(window.document);
+        anki._onContentUpdateStart();
+        const preload = anki._dictionaryEntryDetailsPreload;
+        expect(api.getAnkiNoteInfo).toHaveBeenCalledTimes(1);
+        expect(preload).not.toBeNull();
+        if (preload === null) { throw new Error('Expected preload'); }
+        await preload.promise;
+        expect(api.getAnkiNoteInfo).toHaveBeenCalledTimes(1);
+        expect(update).not.toHaveBeenCalled();
+        expect(anki._dictionaryEntryDetails).toBeNull();
+        await anki._updateDictionaryEntryDetails();
+        expect(api.getAnkiNoteInfo).toHaveBeenCalledTimes(1);
+        expect(update).toHaveBeenCalledTimes(1);
+        expect(anki._dictionaryEntryDetailsPreload).toBeNull();
+        expect(anki._updateSaveButtonsPromise).toBeNull();
+    });
+
+    test('retains asynchronous custom first-field template preparation', async ({window}) => {
+        const {anki, api, update} = setup(window.document);
+        const cardFormat = createCardFormat();
+        anki._cardFormats = [cardFormat];
+        const common = {context: {}, cardFormat, template: 'custom', dictionaryStylesMap: new Map()};
+        vi.spyOn(anki, '_getCommonNoteBuildData').mockResolvedValue(/** @type {Awaited<ReturnType<DisplayAnki['_getCommonNoteBuildData']>>} */ (common));
+        const note = createCollectionNote('custom output');
+        const build = vi.spyOn(anki, '_createDuplicateCheckNoteWithCommonBuildData').mockResolvedValue(note);
+        anki._onContentUpdateStart();
+        expect(api.getAnkiNoteInfo).not.toHaveBeenCalled();
+        await anki._dictionaryEntryDetailsPreload?.promise;
+        expect(build).toHaveBeenCalledTimes(1);
+        expect(api.getAnkiNoteInfo).toHaveBeenCalledExactlyOnceWith([note], false);
+        expect(update).not.toHaveBeenCalled();
+        await anki._updateDictionaryEntryDetails();
+        expect(build).toHaveBeenCalledTimes(1);
+        expect(update).toHaveBeenCalledTimes(1);
+    });
+
+    test('superseded preload cannot publish to the next render', async ({window}) => {
+        /** @type {(details: import('display-anki').DictionaryEntryDetails[]) => void} */
+        let resolveOld = (_details) => { throw new Error('Preload was not started'); };
+        const {display, anki, update} = setup(window.document);
+        const oldDetails = [{noteMap: new Map()}];
+        const newDetails = [{noteMap: new Map()}];
+        const prepare = vi.spyOn(anki, '_getDictionaryEntryDetails')
+            .mockImplementationOnce(() => new Promise((resolve) => { resolveOld = resolve; }))
+            .mockResolvedValueOnce(newDetails);
+        anki._onContentUpdateStart();
+        const oldPromise = anki._dictionaryEntryDetailsPreload?.promise;
+        anki._onContentClear();
+        display.dictionaryEntries = [createTermEntry()];
+        anki._onContentUpdateStart();
+        const completion = anki._updateDictionaryEntryDetails();
+        expect(prepare).toHaveBeenCalledTimes(1);
+        expect(update).not.toHaveBeenCalled();
+        resolveOld(oldDetails);
+        await oldPromise;
+        await completion;
+        expect(prepare).toHaveBeenCalledTimes(2);
+        expect(anki._dictionaryEntryDetails).toBe(newDetails);
+        expect(update).toHaveBeenCalledExactlyOnceWith(newDetails);
+    });
+
+    test('cleared rejected preload is handled and does not publish', async ({window}) => {
+        /** @type {(error: Error) => void} */
+        let rejectOld = (_error) => { throw new Error('Preload was not started'); };
+        const {anki, update} = setup(window.document);
+        vi.spyOn(anki, '_getDictionaryEntryDetails').mockImplementation(() => new Promise((_, reject) => { rejectOld = reject; }));
+        anki._onContentUpdateStart();
+        const promise = anki._dictionaryEntryDetailsPreload?.promise;
+        anki._onContentClear();
+        rejectOld(new Error('obsolete preparation failed'));
+        await expect(promise).rejects.toThrow('obsolete');
+        expect(update).not.toHaveBeenCalled();
+        expect(anki._dictionaryEntryDetailsPreload).toBeNull();
+    });
+
+    test('completion rejection releases the update lock', async ({window}) => {
+        const {anki, update} = setup(window.document);
+        vi.spyOn(anki, '_getDictionaryEntryDetails').mockRejectedValue(new Error('preparation failed'));
+        anki._onContentUpdateStart();
+        await expect(anki._updateDictionaryEntryDetails()).rejects.toThrow('preparation failed');
+        expect(update).not.toHaveBeenCalled();
+        expect(anki._updateSaveButtonsPromise).toBeNull();
+    });
+
+    for (const mode of ['disabled', 'duplicates-disabled', 'quick-check', 'busy', 'empty']) {
+        test(`preserves the existing ${mode} path`, async ({window}) => {
+            const {anki, display} = setup(window.document);
+            if (mode === 'disabled') { display.getOptions = () => ({anki: {enable: false}}); }
+            if (mode === 'duplicates-disabled') { anki._checkForDuplicates = false; }
+            if (mode === 'quick-check') { anki._noteDupeCheckFirst = true; }
+            if (mode === 'busy') { anki._updateSaveButtonsPromise = Promise.resolve(); }
+            if (mode === 'empty') { display.dictionaryEntries = []; }
+            const get = vi.spyOn(anki, '_getDictionaryEntryDetails');
+            anki._onContentUpdateStart();
+            expect(get).not.toHaveBeenCalled();
+            expect(anki._dictionaryEntryDetailsPreload).toBeNull();
+        });
+    }
+});

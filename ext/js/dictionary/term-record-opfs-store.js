@@ -108,6 +108,7 @@ const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
  * @param {number} count
  * @param {number} format
  * @returns {number}
+ * @throws {Error}
  */
 function getRecordFieldsByteLength(content, offset, count, format) {
     if (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY) {
@@ -136,8 +137,8 @@ function getRecordFieldsByteLength(content, offset, count, format) {
         throw new Error('Invalid compact term-record fields dimensions');
     }
     const byteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
-        (scoreCount * 4) +
-        (count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
+    (scoreCount * 4) +
+    (count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
     if (!Number.isSafeInteger(byteLength)) {
         throw new Error('Compact term-record fields length is unsafe');
     }
@@ -148,6 +149,7 @@ function getRecordFieldsByteLength(content, offset, count, format) {
  * @param {Uint8Array} bytes
  * @param {number} count
  * @returns {{offsets: Uint32Array, lengths: Uint16Array, scoreKeys: Uint16Array, scores: Int32Array}}
+ * @throws {Error}
  */
 function parseCompactRecordFields(bytes, count) {
     const byteLength = getRecordFieldsByteLength(bytes, 0, count, LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT);
@@ -178,6 +180,7 @@ function parseCompactRecordFields(bytes, count) {
  * @param {number} format
  * @param {number} contentOffsetBase
  * @returns {{offsets: Uint32Array, lengths: Uint16Array, scoreKeys: Uint16Array, scores: Int32Array}|null}
+ * @throws {Error}
  */
 function validateRecordFields(bytes, count, format, contentOffsetBase) {
     const compactFields = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT ?
@@ -225,6 +228,7 @@ function hasFixedContentSpan(chunk, count) {
  * @param {number[]|Uint32Array|Float64Array} contentOffsets
  * @param {number} index
  * @returns {number}
+ * @throws {RangeError}
  */
 function getArtifactContentOffset(chunk, contentOffsets, index) {
     if (hasFixedContentSpan(chunk, index + 1)) {
@@ -246,6 +250,7 @@ function getArtifactContentOffset(chunk, contentOffsets, index) {
  * @param {number[]|Uint32Array} contentLengths
  * @param {number} index
  * @returns {number}
+ * @throws {RangeError}
  */
 function getArtifactContentLength(chunk, contentLengths, index) {
     if (typeof chunk.fixedContentLength === 'number') { return chunk.fixedContentLength; }
@@ -4462,7 +4467,11 @@ export class TermRecordOpfsStore {
         if (length <= 0) {
             return '';
         }
-        return this._textDecoder.decode(content.subarray(offset, offset + length));
+        const bytes = content.subarray(offset, offset + length);
+        // Some browser TextDecoder implementations reject shared WASM views.
+        // Copy only this string; ordinary buffers stay on the no-copy path.
+        const shared = typeof SharedArrayBuffer !== 'undefined' && bytes.buffer instanceof SharedArrayBuffer;
+        return this._textDecoder.decode(shared ? Uint8Array.from(bytes) : bytes);
     }
 
     /**
@@ -4597,8 +4606,8 @@ export class TermRecordOpfsStore {
             scoreKeys[i] = scoreIndex;
         }
         const compactByteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
-            (scores.length * 4) +
-            (count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
+        (scores.length * 4) +
+        (count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
         if (
             !compact ||
             scores.length === 0 ||
