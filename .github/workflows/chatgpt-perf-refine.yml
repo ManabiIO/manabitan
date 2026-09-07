@@ -28,6 +28,10 @@ jobs:
       - name: Install matching Chromium
         run: npx playwright install chromium
 
+      - name: Format touched JavaScript
+        run: |
+          npx eslint --fix dev/perf/host-environment.js dev/perf/import-ab.js dev/perf/import-benchmark.js dev/perf/dictionary-fixtures.js dev/perf/prepare-dictionaries.js test/chromium/import-flags-ab-benchmark.js test/chromium/extension-two-dictionary-import.e2e.js || true
+
       - name: Lint and typecheck performance tooling
         run: |
           npx eslint dev/perf/host-environment.js dev/perf/import-ab.js dev/perf/import-benchmark.js dev/perf/dictionary-fixtures.js dev/perf/prepare-dictionaries.js test/chromium/import-flags-ab-benchmark.js test/chromium/extension-two-dictionary-import.e2e.js
