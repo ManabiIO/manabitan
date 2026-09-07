@@ -1,0 +1,201 @@
+name: ChatGPT Perf Refinement
+
+on:
+  push:
+    branches: [perf-mise-chatgpt-harness]
+
+permissions:
+  contents: write
+
+jobs:
+  refine:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: perf-mise-chatgpt-harness
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '24.20.0'
+
+      - name: Apply reviewed refinements
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          e2e = Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          text = e2e.read_text()
+          old = """            if (useProductionDefaults) {
+                delete globalThis.manabitanImportUseSession;
+            } else {
+                globalThis.manabitanImportUseSession = false;
+            }
+            globalThis.manabitanDisableIntegrityCounts = true;
+            globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
+"""
+          new = """            if (useProductionDefaults) {
+                delete globalThis.manabitanImportUseSession;
+                delete globalThis.manabitanDisableIntegrityCounts;
+                if (flagsFromRunner && typeof flagsFromRunner === 'object') {
+                    globalThis.manabitanImportPerformanceFlags = {...flagsFromRunner};
+                } else {
+                    delete globalThis.manabitanImportPerformanceFlags;
+                }
+            } else {
+                globalThis.manabitanImportUseSession = false;
+                globalThis.manabitanDisableIntegrityCounts = true;
+                globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
+            }
+"""
+          if text.count(old) != 2:
+              raise SystemExit(f'expected production-default block twice, found {text.count(old)}')
+          text = text.replace(old, new)
+
+          old = """            });
+            const importDebug = await getLastImportDebug(page);
+            const importDebugHistory = await getImportDebugHistory(page);
+            const importStepTimingHistory = await getImportStepTimingHistory(page);
+            // Keep the visible boundary honest if the browser has signalled UI
+            // completion but its main thread is still unable to serve the exact
+            // completed import snapshot under load.
+            const importTotalEnd = safePerformance.now();
+"""
+          new = """            });
+            // Benchmark timing stops at the visible completion boundary. The
+            // diagnostic reads below are test-only work and must not contaminate
+            // authoritative import timings. Functional E2E keeps its historical
+            // boundary, which includes proving that the completed snapshot is readable.
+            const benchmarkImportEnd = quickImportBenchmarkMode ? safePerformance.now() : null;
+            const importDebug = await getLastImportDebug(page);
+            const importDebugHistory = await getImportDebugHistory(page);
+            const importStepTimingHistory = await getImportStepTimingHistory(page);
+            const importTotalEnd = benchmarkImportEnd ?? safePerformance.now();
+"""
+          if text.count(old) != 1:
+              raise SystemExit(f'expected import diagnostic timing block once, found {text.count(old)}')
+          text = text.replace(old, new)
+
+          old = """                    importDebug,
+                    importDebugHistory,
+                    stepTimingSummary: importStepTimingSummary,
+"""
+          new = """                    importDebug,
+                    stepTimingSummary: importStepTimingSummary,
+"""
+          if text.count(old) != 1:
+              raise SystemExit(f'expected structured debug-history block once, found {text.count(old)}')
+          text = text.replace(old, new)
+
+          text = text.replace(
+              "const importSessionMode = useProductionImportDefaults ? 'production default import session behavior' : 'manabitanImportUseSession=false';",
+              "const importSessionMode = useProductionImportDefaults ? 'production default import globals' : 'functional E2E import overrides';",
+          )
+          e2e.write_text(text)
+
+          ab = Path('test/chromium/import-flags-ab-benchmark.js')
+          text = ab.read_text()
+          old = """            MANABITAN_E2E_SKIP_BUILD: skipBuild ? '1' : '0',
+            MANABITAN_E2E_IMPORT_FLAGS_JSON: JSON.stringify(baselineRunImportFlags),
+        });
+"""
+          new = """            MANABITAN_E2E_SKIP_BUILD: skipBuild ? '1' : '0',
+            ...(Object.keys(baselineRunImportFlags).length > 0 ? {
+                MANABITAN_E2E_IMPORT_FLAGS_JSON: JSON.stringify(baselineRunImportFlags),
+            } : {}),
+        });
+"""
+          if text.count(old) != 1:
+              raise SystemExit('baseline import flags patch anchor missing')
+          text = text.replace(old, new)
+          old = """            MANABITAN_E2E_SKIP_BUILD: skipBuild ? '1' : '0',
+            MANABITAN_E2E_IMPORT_FLAGS_JSON: JSON.stringify(variantImportFlags),
+        });
+"""
+          new = """            MANABITAN_E2E_SKIP_BUILD: skipBuild ? '1' : '0',
+            ...(Object.keys(variantImportFlags).length > 0 ? {
+                MANABITAN_E2E_IMPORT_FLAGS_JSON: JSON.stringify(variantImportFlags),
+            } : {}),
+        });
+"""
+          if text.count(old) != 1:
+              raise SystemExit('variant import flags patch anchor missing')
+          text = text.replace(old, new)
+          ab.write_text(text)
+
+          mise = Path('mise.toml')
+          text = mise.read_text()
+          text = text.replace('[tools]\nnode = "24.20.0"\n', '[tools]\nnode = "24"\n\n[settings]\nlockfile = true\n')
+          text = text.replace('npx vitest ', 'node ./node_modules/vitest/vitest.mjs ')
+          mise.write_text(text)
+          Path('mise.lock').write_text('''lockfile_version = 1\n\n[[tools.node]]\nversion = "24.20.0"\nbackend = "core:node"\nspecifiers = ["24"]\n''')
+
+          host = Path('dev/perf/host-environment.js')
+          host.write_text('''/*\n * Copyright (C) 2026  Manabitan authors\n *\n * This program is free software: you can redistribute it and/or modify\n * it under the terms of the GNU General Public License as published by\n * the Free Software Foundation, either version 3 of the License, or\n * (at your option) any later version.\n *\n * This program is distributed in the hope that it will be useful,\n * but WITHOUT ANY WARRANTY; without even the implied warranty of\n * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n * GNU General Public License for more details.\n *\n * You should have received a copy of the GNU General Public License\n * along with this program.  If not, see <https://www.gnu.org/licenses/>.\n */\n\nimport {readFileSync} from 'node:fs';\nimport os from 'node:os';\nimport {fileURLToPath} from 'node:url';\n\n/**\n * @param {string} name\n * @returns {string|null}\n */\nfunction readCgroupFile(name) {\n    if (process.platform !== 'linux') {\n        return null;\n    }\n    try {\n        return readFileSync(`/sys/fs/cgroup/${name}`, 'utf8').trim() || null;\n    } catch (_) {\n        return null;\n    }\n}\n\n/**\n * @param {string|null} value\n * @returns {number|null}\n */\nfunction parseCgroupBytes(value) {\n    if (value === null || value === 'max') {\n        return null;\n    }\n    const parsed = Number(value);\n    return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null;\n}\n\n/**\n * @param {string|null} cpuMax\n * @returns {number|null}\n */\nfunction parseCpuQuotaCores(cpuMax) {\n    if (cpuMax === null) {\n        return null;\n    }\n    const [quotaRaw, periodRaw] = cpuMax.split(/\\s+/);\n    if (quotaRaw === 'max') {\n        return null;\n    }\n    const quota = Number(quotaRaw);\n    const period = Number(periodRaw);\n    return Number.isFinite(quota) && quota > 0 && Number.isFinite(period) && period > 0 ? quota / period : null;\n}\n\n/**\n * Returns stable environment metadata that belongs next to performance results.\n * Git metadata is intentionally excluded because exported/offline snapshots may\n * not contain a .git directory.\n * @returns {Record<string, unknown>}\n */\nexport function getHostEnvironment() {\n    const cpus = os.cpus();\n    const cgroupCpuMax = readCgroupFile('cpu.max');\n    return {\n        nodeVersion: process.version,\n        v8Version: process.versions.v8,\n        platform: process.platform,\n        arch: process.arch,\n        cpuModel: cpus[0]?.model ?? null,\n        logicalCpuCount: cpus.length,\n        availableParallelism: typeof os.availableParallelism === 'function' ? os.availableParallelism() : null,\n        totalMemoryBytes: os.totalmem(),\n        cgroupCpuMax,\n        cgroupCpuQuotaCores: parseCpuQuotaCores(cgroupCpuMax),\n        cgroupMemoryMaxBytes: parseCgroupBytes(readCgroupFile('memory.max')),\n        cgroupMemoryCurrentBytes: parseCgroupBytes(readCgroupFile('memory.current')),\n    };\n}\n\nif (process.argv[1] === fileURLToPath(import.meta.url)) {\n    console.log(JSON.stringify(getHostEnvironment(), null, 2));\n}\n''')
+
+          readme = Path('dev/perf/README.md')
+          text = readme.read_text()
+          text = text.replace(
+              'Without `mise`, invoke the corresponding Node/Vitest commands from `mise.toml` directly.',
+              'Without `mise`, run the `dev/perf/*.js` programs directly. Microbenchmarks can be run offline with `node ./node_modules/vitest/vitest.mjs bench`; no task requires npm package resolution at execution time.',
+          )
+          text = text.replace(
+              'Normal import benchmark runs disable the E2E page CPU profiler, phase screenshots, and browser-process sampling during the measured run.',
+              'Normal import benchmark runs use production import globals (except the completion signal required by the harness) and disable the E2E page CPU profiler, phase screenshots, and browser-process sampling. Their total-import timer stops before test-only diagnostic reads.',
+          )
+          readme.write_text(text)
+
+          bundle = Path('.github/workflows/perf-bundle.yml')
+          text = bundle.read_text()
+          old = '''          if [[ "${GITHUB_EVENT_NAME}" == "issue_comment" ]]; then\n            source_sha="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq .head.sha)"\n          else\n'''
+          new = '''          if [[ "${GITHUB_EVENT_NAME}" == "issue_comment" ]]; then\n            pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"\n            head_repo="$(jq -r .head.repo.full_name <<<"${pr_json}")"\n            if [[ "${head_repo}" != "${GITHUB_REPOSITORY}" ]]; then\n              echo "Refusing to execute an offline-bundle build from fork ${head_repo}" >&2\n              exit 1\n            fi\n            source_sha="$(jq -r .head.sha <<<"${pr_json}")"\n          else\n'''
+          if text.count(old) != 1:
+              raise SystemExit('perf-bundle PR SHA anchor missing')
+          bundle.write_text(text.replace(old, new))
+          PY
+
+      - name: Install matching Chromium
+        run: npx playwright install chromium
+
+      - name: Lint and typecheck performance tooling
+        run: |
+          npx eslint dev/perf test/chromium/import-flags-ab-benchmark.js test/chromium/extension-two-dictionary-import.e2e.js
+          npm run test:ts:dev
+
+      - name: Smoke local microbenchmark path
+        run: |
+          mkdir -p builds/perf
+          node ./node_modules/vitest/vitest.mjs bench benches/canary.bench.js --outputJson builds/perf/canary.json
+          test -s builds/perf/canary.json
+
+      - name: Prepare pinned dictionaries and build extension
+        run: |
+          node ./dev/perf/prepare-dictionaries.js
+          node ./dev/bin/build.js --target chrome-dev
+
+      - name: Smoke authoritative import benchmark
+        run: node ./dev/perf/import-benchmark.js jmdict --runs 1 --no-build --output builds/perf/refine-smoke
+
+      - name: Smoke browser-wide import trace
+        run: |
+          node ./dev/perf/import-benchmark.js jmdict --trace --no-build --output builds/perf/refine-trace
+          test -s builds/perf/refine-trace/run-1.trace.json
+
+      - name: Smoke paired A/B runner
+        env:
+          MANABITAN_AB_PAIR_ITERATIONS: '1'
+        run: node ./dev/perf/import-ab.js jmdict --pairs 1 --flags '{"zipMaxWorkers":3}' --label '3 ZIP workers'
+
+      - name: Commit reviewed refinements
+        shell: bash
+        run: |
+          rm .github/workflows/chatgpt-perf-refine.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Refine performance benchmark fidelity'
+          git push origin HEAD:perf-mise-chatgpt-harness
