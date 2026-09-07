@@ -41,33 +41,21 @@ jobs:
           path = Path('test/chromium/extension-two-dictionary-import.e2e.js')
           text = path.read_text()
 
-          old = """function matchesDictionaryName(observedName, expectedName) {
-            const observed = String(observedName || '').trim();
-            const expected = String(expectedName || '').trim();
-            if (observed.length === 0 || expected.length === 0) { return false; }
-            if (observed === expected) { return true; }
-            if (observed.startsWith(`${expected} `) || observed.startsWith(`${expected}.`)) { return true; }
-            return observed.includes(expected);
-          }
-          """
-          new = """function matchesDictionaryName(observedName, expectedName) {
-            const observed = String(observedName || '').trim();
-            const expected = String(expectedName || '').trim();
-            if (observed.length === 0 || expected.length === 0) { return false; }
-            const expectedPrefixes = [`${expected} `, `${expected}.`];
-            return (
-              observed === expected ||
-              expectedPrefixes.some((prefix) => observed.startsWith(prefix)) ||
-              observed.includes(expected)
-            );
-          }
-          """
-          if text.count(old) != 1:
-              raise SystemExit(f'top-level dictionary matcher: expected 1 post-format match, found {text.count(old)}')
-          text = text.replace(old, new, 1)
+          first_matcher = text.index('function matchesDictionaryName(observedName, expectedName)')
+          equality = 'if (observed === expected) { return true; }'
+          prefix = 'if (observed.startsWith(`${expected} `) || observed.startsWith(`${expected}.`)) { return true; }'
+          equality_index = text.index(equality, first_matcher)
+          prefix_index = text.index(prefix, equality_index)
+          if text.find('const matchesDictionaryName =', first_matcher, equality_index) != -1:
+              raise SystemExit('unexpected nested matcher before top-level matcher body')
+          text = text[:equality_index] + 'const expectedPrefixes = [`${expected} `, `${expected}.`];\n    if (observed === expected || expectedPrefixes.some((value) => observed.startsWith(value))) { return true; }' + text[equality_index + len(equality):]
+          prefix_index = text.index(prefix, equality_index)
+          line_start = text.rfind('\n', 0, prefix_index) + 1
+          line_end = text.find('\n', prefix_index)
+          text = text[:line_start] + text[line_end + 1:]
 
-          old = "await new Promise((resolve) => setTimeout(resolve, 50));"
-          new = "await new Promise((resolve) => { setTimeout(resolve, 50); });"
+          old = 'await new Promise((resolve) => setTimeout(resolve, 50));'
+          new = 'await new Promise((resolve) => { setTimeout(resolve, 50); });'
           if text.count(old) != 1:
               raise SystemExit(f'popup wait promise: expected 1 match, found {text.count(old)}')
           text = text.replace(old, new, 1)
