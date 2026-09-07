@@ -30,6 +30,7 @@
         ],
         "lib": [
             "ES2022",
+            "ES2024.Promise",
             "DOM",
             "DOM.Iterable",
             "WebWorker"

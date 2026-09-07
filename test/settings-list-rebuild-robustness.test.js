@@ -28,6 +28,9 @@ import {createDomTest} from './fixtures/dom-test.js';
 
 const test = createDomTest();
 
+/**
+ * @param {{options: unknown, instantiateTemplate: (name: string) => Node}} overrides
+ */
 function createSettingsController(overrides) {
     return {
         application: {
@@ -41,6 +44,16 @@ function createSettingsController(overrides) {
         getDefaultOptions: vi.fn(),
         refresh: vi.fn(),
     };
+}
+
+/**
+ * @param {HTMLTemplateElement} template
+ * @returns {HTMLElement}
+ */
+function cloneTemplateElement(template) {
+    const element = template.content.firstElementChild;
+    if (element === null) { throw new Error('Template has no root element'); }
+    return /** @type {HTMLElement} */ (element.cloneNode(true));
 }
 
 describe('Settings list rebuild robustness', () => {
@@ -85,7 +98,7 @@ describe('Settings list rebuild robustness', () => {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'translation-text-replacement-entry') { throw new Error(`Unexpected template: ${name}`); }
                 const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                const node = /** @type {HTMLElement} */ (template.content.firstElementChild.cloneNode(true));
+                const node = cloneTemplateElement(template);
                 if (callIndex === 2) {
                     node.querySelector('.translation-text-replacement-test-input')?.remove();
                 }
@@ -133,7 +146,7 @@ describe('Settings list rebuild robustness', () => {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'sentence-termination-character-entry') { throw new Error(`Unexpected template: ${name}`); }
                 const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                const node = /** @type {HTMLElement} */ (template.content.firstElementChild.cloneNode(true));
+                const node = cloneTemplateElement(template);
                 if (callIndex === 2) {
                     node.querySelector('.sentence-termination-character-input2')?.remove();
                 }
@@ -146,7 +159,7 @@ describe('Settings list rebuild robustness', () => {
 
         expect(settingsController.instantiateTemplate).toHaveBeenCalledTimes(2);
         expect(window.document.querySelectorAll('#sentence-termination-character-list .sentence-termination-character-entry')).toHaveLength(1);
-        expect(window.document.querySelector('#sentence-termination-character-list-empty')?.hidden).toBe(true);
+        expect(/** @type {HTMLElement|null} */ (window.document.querySelector('#sentence-termination-character-list-empty'))?.hidden).toBe(true);
     });
 
     test('extension keyboard shortcuts skips broken entries during rebuild', async ({window}) => {
@@ -181,7 +194,7 @@ describe('Settings list rebuild robustness', () => {
                 instantiateTemplate: vi.fn((name) => {
                     if (name !== 'extension-hotkey-list-item') { throw new Error(`Unexpected template: ${name}`); }
                     const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                    const node = /** @type {HTMLElement} */ (template.content.firstElementChild.cloneNode(true));
+                    const node = cloneTemplateElement(template);
                     if (callIndex === 2) {
                         node.querySelector('input')?.remove();
                     }
@@ -205,8 +218,8 @@ describe('Settings list rebuild robustness', () => {
             expect(settingsController.instantiateTemplate).toHaveBeenCalledTimes(2);
             expect(window.document.querySelectorAll('#extension-hotkey-list .extension-hotkey-list-item')).toHaveLength(1);
         } finally {
-            delete globalThis.browser;
-            delete globalThis.chrome;
+            Reflect.deleteProperty(globalThis, 'browser');
+            Reflect.deleteProperty(globalThis, 'chrome');
         }
     });
 
@@ -246,7 +259,7 @@ describe('Settings list rebuild robustness', () => {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'profile-entry') { throw new Error(`Unexpected template: ${name}`); }
                 const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                const node = /** @type {HTMLElement} */ (template.content.firstElementChild.cloneNode(true));
+                const node = cloneTemplateElement(template);
                 if (callIndex === 2) {
                     node.querySelector('.profile-entry-menu-button')?.remove();
                 }
@@ -304,14 +317,15 @@ describe('Settings list rebuild robustness', () => {
         Reflect.set(controller, '_dictionaryEntries', []);
         Reflect.set(controller, '_dictionaryEntryContainer', window.document.querySelector('#dictionary-list'));
         Reflect.set(controller, '_updateDictionaryEntryCount', vi.fn());
-        Reflect.set(controller, 'instantiateTemplateFragment', vi.fn(() => {
-            const callIndex = controller.instantiateTemplateFragment.mock.calls.length;
+        const instantiateTemplateFragment = vi.fn(() => {
+            const callIndex = instantiateTemplateFragment.mock.calls.length;
             const fragment = /** @type {DocumentFragment} */ (template.content.cloneNode(true));
             if (callIndex === 2) {
                 fragment.querySelector('.dictionary-menu-button')?.remove();
             }
             return fragment;
-        }));
+        });
+        Reflect.set(controller, 'instantiateTemplateFragment', instantiateTemplateFragment);
         Reflect.set(controller, 'isDictionaryInTaskQueue', vi.fn(() => false));
 
         const createDictionaryEntry = /** @type {(this: DictionaryController, index: number, dictionaryInfo: any, updateDownloadUrl: string|null, dictionaryDatabaseCounts: any) => void} */ (
@@ -327,7 +341,7 @@ describe('Settings list rebuild robustness', () => {
         }, null, null);
         createDictionaryEntry.call(controller, 1, {title: 'Dict 2', revision: '1', version: 3, importSuccess: true}, null, null);
 
-        expect(Reflect.get(controller, 'instantiateTemplateFragment')).toHaveBeenCalledTimes(2);
+        expect(instantiateTemplateFragment).toHaveBeenCalledTimes(2);
         expect(window.document.querySelectorAll('#dictionary-list .dictionary-item')).toHaveLength(1);
         expect(Reflect.get(controller, '_dictionaryEntries')).toHaveLength(1);
         const integrityError = /** @type {HTMLButtonElement} */ (window.document.querySelector('.dictionary-integrity-button-error'));
@@ -371,7 +385,7 @@ describe('Settings list rebuild robustness', () => {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'scan-input') { throw new Error(`Unexpected template: ${name}`); }
                 const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                const node = /** @type {HTMLElement} */ (template.content.firstElementChild.cloneNode(true));
+                const node = cloneTemplateElement(template);
                 if (callIndex === 2) {
                     node.querySelector('.mouse-button[data-property=exclude]')?.remove();
                 }
@@ -429,7 +443,7 @@ describe('Settings list rebuild robustness', () => {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'audio-source') { throw new Error(`Unexpected template: ${name}`); }
                 const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                const node = /** @type {HTMLElement} */ (template.content.firstElementChild.cloneNode(true));
+                const node = cloneTemplateElement(template);
                 if (callIndex === 2) {
                     node.querySelector('.audio-source-menu-button')?.remove();
                 }
@@ -477,11 +491,11 @@ describe('Settings list rebuild robustness', () => {
         const settingsController = {
             instantiateTemplate: vi.fn((name) => {
                 if (name === 'profile-condition-group') {
-                    return /** @type {HTMLElement} */ (groupTemplate.content.firstElementChild.cloneNode(true));
+                    return cloneTemplateElement(groupTemplate);
                 }
                 if (name === 'profile-condition') {
                     const callIndex = settingsController.instantiateTemplate.mock.calls.filter(([templateName]) => templateName === 'profile-condition').length;
-                    const node = /** @type {HTMLElement} */ (conditionTemplate.content.firstElementChild.cloneNode(true));
+                    const node = cloneTemplateElement(conditionTemplate);
                     if (callIndex === 2) {
                         node.querySelector('.profile-condition-menu-button')?.remove();
                     }

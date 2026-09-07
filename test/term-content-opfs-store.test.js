@@ -373,12 +373,12 @@ describe('TermContentOpfsStore', () => {
 
     test('queues a residual import write without waiting for persistence', async () => {
         const store = new TermContentOpfsStore();
-        /** @type {() => void} */
-        let releaseWrite = () => {};
+        /** @type {{promise: Promise<void>, resolve: () => void}} */
+        const releaseWriteDeferred = /** @type {{promise: Promise<void>, resolve: () => void}} */ (/** @type {unknown} */ (Promise.withResolvers()));
         const writeStarted = vi.fn();
         vi.spyOn(store, '_writePendingChunksCoalesced').mockImplementation(async () => {
             writeStarted();
-            await new Promise((resolve) => { releaseWrite = resolve; });
+            await releaseWriteDeferred.promise;
         });
         Reflect.set(store, '_fileHandle', {});
         Reflect.set(store, '_writable', {});
@@ -393,7 +393,7 @@ describe('TermContentOpfsStore', () => {
         const queuedWritePromise = Reflect.get(store, '_queuedWritePromise');
         expect(queuedWritePromise).toBeInstanceOf(Promise);
 
-        releaseWrite();
+        releaseWriteDeferred.resolve();
         await queuedWritePromise;
     });
 
@@ -507,8 +507,15 @@ describe('TermContentOpfsStore', () => {
 
     test('writes coalesced Blob data continuously across file segments', async () => {
         const maxSegmentBytes = 128 * 1024 * 1024;
-        const firstWritable = {write: vi.fn(async () => {}), close: vi.fn(async () => {})};
-        const secondWritable = {write: vi.fn(async () => {}), close: vi.fn(async () => {}), seek: vi.fn(async () => {})};
+        const firstWritable = {
+            write: vi.fn(/** @type {(data: Blob) => Promise<void>} */ (async (_data) => {})),
+            close: vi.fn(async () => {}),
+        };
+        const secondWritable = {
+            write: vi.fn(/** @type {(data: Blob) => Promise<void>} */ (async (_data) => {})),
+            close: vi.fn(async () => {}),
+            seek: vi.fn(async () => {}),
+        };
         const firstFileHandle = {createWritable: vi.fn(async () => firstWritable)};
         const secondFileHandle = {
             createWritable: vi.fn(async () => secondWritable),
@@ -573,17 +580,18 @@ describe('TermContentOpfsStore', () => {
     test('reads the pre-import snapshot without waiting for queued append writes', async () => {
         const initialBytes = new Uint8Array([1, 2, 3, 4]);
         const store = new TermContentOpfsStore();
-        /** @type {(() => void)|null} */
-        let releaseWrite = null;
-        const writeStarted = new Promise((resolve) => {
+        /** @type {{promise: Promise<void>, resolve: () => void}} */
+        const writeStartedDeferred = /** @type {{promise: Promise<void>, resolve: () => void}} */ (/** @type {unknown} */ (Promise.withResolvers()));
+        /** @type {{promise: Promise<void>, resolve: () => void}} */
+        const releaseWriteDeferred = /** @type {{promise: Promise<void>, resolve: () => void}} */ (/** @type {unknown} */ (Promise.withResolvers()));
+        const writeStarted = writeStartedDeferred.promise;
+        {
             const writable = {
                 seek: vi.fn(async () => {}),
                 close: vi.fn(async () => {}),
                 write: vi.fn(async () => {
-                    resolve(void 0);
-                    await new Promise((writeResolve) => {
-                        releaseWrite = writeResolve;
-                    });
+                    writeStartedDeferred.resolve();
+                    await releaseWriteDeferred.promise;
                 }),
             };
             const fileHandle = {
@@ -604,7 +612,7 @@ describe('TermContentOpfsStore', () => {
             Reflect.set(store, '_importSessionActive', true);
             Reflect.set(store, '_flushThresholdBytes', 1);
             store.setQueueImportWritesEnabled(true);
-        });
+        }
 
         await store.appendBatch([new Uint8Array([5, 6]), new Uint8Array([7, 8])]);
         await writeStarted;
@@ -617,7 +625,7 @@ describe('TermContentOpfsStore', () => {
             importReadOverlayBytes: 4,
         });
 
-        releaseWrite?.();
+        releaseWriteDeferred.resolve();
         await store.endImportSession();
         expect(Reflect.get(store, '_loadedForRead')).toBe(false);
         expect(store.getDebugState()).toMatchObject({
@@ -628,20 +636,21 @@ describe('TermContentOpfsStore', () => {
 
     test('import append offsets include bytes in active queued writes', async () => {
         const store = new TermContentOpfsStore();
-        /** @type {(() => void)|null} */
-        let releaseWrite = null;
+        /** @type {{promise: Promise<void>, resolve: () => void}} */
+        const writeStartedDeferred = /** @type {{promise: Promise<void>, resolve: () => void}} */ (/** @type {unknown} */ (Promise.withResolvers()));
+        /** @type {{promise: Promise<void>, resolve: () => void}} */
+        const releaseWriteDeferred = /** @type {{promise: Promise<void>, resolve: () => void}} */ (/** @type {unknown} */ (Promise.withResolvers()));
         let writeCount = 0;
-        const writeStarted = new Promise((resolve) => {
+        const writeStarted = writeStartedDeferred.promise;
+        {
             const writable = {
                 seek: vi.fn(async () => {}),
                 close: vi.fn(async () => {}),
                 write: vi.fn(async () => {
                     ++writeCount;
                     if (writeCount === 1) {
-                        resolve(void 0);
-                        await new Promise((writeResolve) => {
-                            releaseWrite = writeResolve;
-                        });
+                        writeStartedDeferred.resolve();
+                        await releaseWriteDeferred.promise;
                     }
                 }),
             };
@@ -661,7 +670,7 @@ describe('TermContentOpfsStore', () => {
             Reflect.set(store, '_importSessionActive', true);
             Reflect.set(store, '_flushThresholdBytes', 1);
             store.setQueueImportWritesEnabled(true);
-        });
+        }
 
         /** @type {number[]} */
         const firstOffsets = [];
@@ -681,7 +690,7 @@ describe('TermContentOpfsStore', () => {
         expect(secondOffsets).toStrictEqual([3]);
         expect(secondLengths).toStrictEqual([2]);
 
-        releaseWrite?.();
+        releaseWriteDeferred.resolve();
         await store.endImportSession();
     });
 

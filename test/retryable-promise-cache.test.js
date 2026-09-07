@@ -35,7 +35,7 @@ describe('RetryablePromiseCache', () => {
     test('evicts a shared rejection so a later initialization can recover', async () => {
         const cache = new RetryablePromiseCache();
         const failure = new Error('temporary failure');
-        let rejectInitialization = (_reason) => {};
+        let rejectInitialization = /** @type {(reason: unknown) => void} */ ((_reason) => {});
         const firstFactory = vi.fn(() => new Promise((_resolve, reject) => {
             rejectInitialization = reject;
         }));

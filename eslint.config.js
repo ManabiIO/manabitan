@@ -45,6 +45,7 @@ const compat = new FlatCompat({
 header.rules.header.meta.schema = false;
 
 const manabitanHeaderFiles = [
+    'dev/lib/zstd-simd-module.d.ts',
     'ext/js/dictionary/sqlite-wasm.js',
     'ext/js/dictionary/raw-term-content.js',
     'dev/bin/run-playwright.js',

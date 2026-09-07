@@ -34,6 +34,11 @@ function createPort(onPostMessage = () => {}) {
     }));
 }
 
+/** @returns {import('translation').FindTermsOptions} */
+function createPartialFindTermsOptions() {
+    return /** @type {import('translation').FindTermsOptions} */ (/** @type {unknown} */ ({}));
+}
+
 /**
  * @param {MessagePort} port
  * @param {Record<string, unknown>} response
@@ -102,7 +107,7 @@ describe('OffscreenProxy bridge reliability', () => {
             params: {
                 mode: 'group',
                 text: '日本',
-                options: /** @type {import('translation').FindTermsOptions} */ ({}),
+                options: createPartialFindTermsOptions(),
             },
         }, [])).resolves.toBe(result);
     });
@@ -192,7 +197,7 @@ describe('OffscreenProxy bridge reliability', () => {
         await proxy.registerOffscreenPort(stalePort);
         const lookup = proxy.sendMessageViaPort({
             action: 'findTermsStructuredOffscreen',
-            params: {mode: 'group', text: '日本', options: {}},
+            params: {mode: 'group', text: '日本', options: createPartialFindTermsOptions()},
         }, []);
 
         await vi.advanceTimersByTimeAsync(3_000);

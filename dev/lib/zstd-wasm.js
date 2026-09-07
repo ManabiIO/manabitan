@@ -19,7 +19,7 @@
 
 import createZstdModule from './zstd-simd-module.js';
 
-/** @type {import('core').SafeAny|null} */
+/** @type {import('./zstd-simd-module.js').ZstdModule|null} */
 let moduleInstance = null;
 /** @type {Promise<void>|null} */
 let initialization = null;
@@ -51,7 +51,7 @@ export async function init(path = '/lib/zstd.wasm') {
 }
 
 /**
- * @returns {import('core').SafeAny}
+ * @returns {import('./zstd-simd-module.js').ZstdModule}
  * @throws {Error} If the module is not initialized.
  */
 function getModule() {

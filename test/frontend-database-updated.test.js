@@ -19,6 +19,16 @@ import {describe, expect, test, vi} from 'vitest';
 import {Frontend} from '../ext/js/app/frontend.js';
 import {log} from '../ext/js/core/log.js';
 
+/** @typedef {{name: string, enabled: boolean}} PartialDictionaryOptions */
+
+/**
+ * @param {PartialDictionaryOptions[]} dictionaries
+ * @returns {import('settings').DictionaryOptions[]}
+ */
+function asDictionaryOptions(dictionaries) {
+    return /** @type {import('settings').DictionaryOptions[]} */ (/** @type {unknown} */ (dictionaries));
+}
+
 describe('Frontend dictionary update handling', () => {
     test('hover lookup prewarm marks ready after the first dictionary hit before all probes finish', async () => {
         /** @type {(value: Array<{term: string, dictionaryEntries: Array<{dictionary: string}>}>) => void} */
@@ -83,13 +93,13 @@ describe('Frontend dictionary update handling', () => {
             });
 
             const getLookupPrewarmTerms = Reflect.get(Frontend.prototype, '_getLookupPrewarmTerms');
-            const termsPromise = getLookupPrewarmTerms.call(frontend, {
-                dictionaries: [
+            const termsPromise = getLookupPrewarmTerms.call(frontend, /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
+                dictionaries: asDictionaryOptions([
                     {name: 'fast', enabled: true},
                     {name: 'slow', enabled: true},
                     {name: 'disabled', enabled: false},
-                ],
-            });
+                ]),
+            })));
 
             await vi.advanceTimersByTimeAsync(125);
             await expect(termsPromise).resolves.toEqual(['吾輩', '日本', 'する', 'ある', '見る', '速い', 'はやい']);
@@ -103,30 +113,31 @@ describe('Frontend dictionary update handling', () => {
         vi.useFakeTimers();
         try {
             const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
+            const getDictionaryTermProbe = vi.fn(/** @type {(name: string) => Promise<never>} */ ((_name) => new Promise(() => {})));
             Reflect.set(frontend, '_application', {
                 api: {
-                    getDictionaryTermProbe: vi.fn(() => new Promise(() => {})),
+                    getDictionaryTermProbe,
                 },
             });
 
             const getDictionaryLookupPrewarmTerms = Reflect.get(Frontend.prototype, '_getDictionaryLookupPrewarmTerms');
-            const termsPromise = getDictionaryLookupPrewarmTerms.call(frontend, {
-                dictionaries: [
+            const termsPromise = getDictionaryLookupPrewarmTerms.call(frontend, /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
+                dictionaries: asDictionaryOptions([
                     {name: 'dict-1', enabled: true},
                     {name: 'dict-2', enabled: true},
                     {name: 'dict-3', enabled: true},
                     {name: 'dict-4', enabled: true},
                     {name: 'dict-5', enabled: true},
                     {name: 'disabled', enabled: false},
-                ],
-            });
+                ]),
+            })));
 
             for (let i = 0; i < 4; ++i) {
                 await vi.advanceTimersByTimeAsync(125);
             }
             await expect(termsPromise).resolves.toEqual([]);
-            expect(Reflect.get(frontend, '_application').api.getDictionaryTermProbe).toHaveBeenCalledTimes(4);
-            expect(Reflect.get(frontend, '_application').api.getDictionaryTermProbe.mock.calls.map(([name]) => name)).toEqual([
+            expect(getDictionaryTermProbe).toHaveBeenCalledTimes(4);
+            expect(getDictionaryTermProbe.mock.calls.map(([name]) => name)).toEqual([
                 'dict-1',
                 'dict-2',
                 'dict-3',
@@ -172,7 +183,9 @@ describe('Frontend dictionary update handling', () => {
 
     test('hover lookup prewarm stops scheduling probes after the first dictionary hit', async () => {
         const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
+        /** @type {string[]} */
         const calls = [];
+        /** @type {unknown[]} */
         const detailsCalls = [];
         /** @type {Array<() => void>} */
         const resolvers = [];
@@ -191,7 +204,7 @@ describe('Frontend dictionary update handling', () => {
         });
 
         const runLookupPrewarmTerms = Reflect.get(Frontend.prototype, '_runLookupPrewarmTerms');
-        const {firstMatchedResultPromise, resultsPromise} = runLookupPrewarmTerms.call(frontend, ['日本', 'する', 'ある', '見る', '食べる'], {});
+        const {firstMatchedResultPromise, resultsPromise} = runLookupPrewarmTerms.call(frontend, ['日本', 'する', 'ある', '見る', '食べる'], /** @type {import('settings').OptionsContext} */ (/** @type {unknown} */ ({})));
 
         expect(calls).toEqual(['日本']);
         resolvers[0]();
@@ -251,7 +264,7 @@ describe('Frontend dictionary update handling', () => {
         Reflect.set(frontend, '_updatePageDebugState', vi.fn());
         Reflect.set(frontend, '_startPopupPrewarmForHover', vi.fn());
 
-        const onDatabaseUpdated = Reflect.get(Frontend.prototype, '_onDatabaseUpdated');
+        const onDatabaseUpdated = /** @type {(this: Frontend, details: {type: string, cause: string}) => Promise<void>} */ (/** @type {unknown} */ (Reflect.get(Frontend.prototype, '_onDatabaseUpdated')));
         await onDatabaseUpdated.call(frontend, {type: 'dictionary', cause: 'import'});
 
         expect(Reflect.get(frontend, '_updatePageDebugState')).toHaveBeenCalledWith({lastSearchState: 'dictionary-updated'});
@@ -309,7 +322,7 @@ describe('Frontend dictionary update handling', () => {
         Reflect.set(frontend, '_updatePageDebugState', vi.fn());
 
         const onDatabaseUpdated = Reflect.get(Frontend.prototype, '_onDatabaseUpdated');
-        await onDatabaseUpdated.call(frontend, {type: 'anki-note', cause: 'import'});
+        await onDatabaseUpdated.call(frontend, /** @type {{type: import('backend').DatabaseUpdateType, cause: import('backend').DatabaseUpdateCause}} */ (/** @type {unknown} */ ({type: 'anki-note', cause: 'import'})));
 
         expect(Reflect.get(frontend, '_updatePageDebugState')).not.toHaveBeenCalled();
         expect(Reflect.get(frontend, '_textScanner').searchLast).not.toHaveBeenCalled();
@@ -322,16 +335,16 @@ describe('Frontend dictionary update handling', () => {
         const logError = vi.spyOn(log, 'error').mockImplementation(() => {});
         try {
             const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
-            const textSource = {
+            const textSource = /** @type {import('text-source').TextSource} */ (/** @type {unknown} */ ({
                 getRects: vi.fn(() => []),
                 getWritingMode: vi.fn(() => 'horizontal-tb'),
-            };
+            }));
             Reflect.set(frontend, '_application', {webExtension: {unloaded: false}});
             Reflect.set(frontend, '_popup', {showContent: vi.fn().mockRejectedValue(error)});
             Reflect.set(frontend, '_updatePageDebugState', vi.fn());
 
             const showPopupContent = Reflect.get(Frontend.prototype, '_showPopupContent');
-            const showPromise = showPopupContent.call(frontend, textSource, {}, null);
+            const showPromise = showPopupContent.call(frontend, textSource, /** @type {import('settings').OptionsContext} */ (/** @type {unknown} */ ({})), null);
 
             await expect(showPromise).rejects.toThrow('show failed');
             expect(logError).toHaveBeenCalledWith(error);

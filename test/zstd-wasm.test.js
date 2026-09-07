@@ -180,7 +180,13 @@ describe('zstd wasm wrapper', () => {
         await init();
 
         expect(() => decompressUsingDict(29, new Uint8Array([1, 2]), new Uint8Array([3]))).toThrow('dictionary buffer');
-        expect(module._free.mock.calls.map(([pointer]) => pointer)).toEqual([40, 16]);
+        expect(module._free.mock.calls.map(
+            /**
+             * @param {[number]} args
+             * @returns {number}
+             */
+            ([pointer]) => pointer,
+        )).toEqual([40, 16]);
     });
 
     test('can retry a retained context after a growth allocation fails', async () => {

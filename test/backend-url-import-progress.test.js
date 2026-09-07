@@ -19,6 +19,8 @@ import {describe, expect, test, vi} from 'vitest';
 
 const {Backend} = await import('../ext/js/background/backend.js');
 
+/** @typedef {import('dictionary-importer').ImportDetails} ImportDetails */
+
 describe('Backend URL import progress', () => {
     test('_onPmImportDictionaryOffscreen does not throw when error delivery to a dead response port fails', async () => {
         const responsePort = {
@@ -29,6 +31,7 @@ describe('Backend URL import progress', () => {
                 throw new Error('response port close failed');
             }),
         };
+        const responsePorts = /** @type {MessagePort[]} */ (/** @type {unknown} */ ([responsePort]));
         const context = /** @type {any} */ ({
             _forwardDictionaryImportToRuntime: vi.fn(async () => {
                 throw new Error('dictionary runtime unavailable');
@@ -37,8 +40,8 @@ describe('Backend URL import progress', () => {
 
         await expect(Reflect.get(Backend.prototype, '_onPmImportDictionaryOffscreen').call(
             context,
-            {archiveContent: new Blob(['dictionary']), details: {}},
-            [responsePort],
+            {archiveContent: new Blob(['dictionary']), details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
+            responsePorts,
         )).resolves.toBeUndefined();
 
         expect(responsePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({
@@ -52,6 +55,7 @@ describe('Backend URL import progress', () => {
             postMessage: vi.fn(),
             close: vi.fn(),
         };
+        const responsePorts = /** @type {MessagePort[]} */ (/** @type {unknown} */ ([responsePort]));
         const archiveBlob = new Blob(['dictionary']);
         const forwardDictionaryImportToRuntime = vi.fn(async () => {});
         const downloadDictionaryArchiveBlobViaXhr = vi.fn(async (_url, _timeoutMs, _onPhase, onProgress) => {
@@ -67,8 +71,8 @@ describe('Backend URL import progress', () => {
 
         await Reflect.get(Backend.prototype, '_onPmImportDictionaryUrlOffscreen').call(
             context,
-            {url: 'https://example.com/jitendex.zip', details: {}},
-            [responsePort],
+            {url: 'https://example.com/jitendex.zip', details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
+            responsePorts,
         );
 
         expect(responsePort.postMessage).toHaveBeenNthCalledWith(1, {
@@ -94,6 +98,7 @@ describe('Backend URL import progress', () => {
             }),
             close: vi.fn(),
         };
+        const responsePorts = /** @type {MessagePort[]} */ (/** @type {unknown} */ ([responsePort]));
         const archiveBlob = new Blob(['dictionary']);
         const forwardDictionaryImportToRuntime = vi.fn(async () => {});
         const downloadDictionaryArchiveBlobViaXhr = vi.fn(async (_url, _timeoutMs, _onPhase, onProgress) => {
@@ -108,8 +113,8 @@ describe('Backend URL import progress', () => {
 
         await Reflect.get(Backend.prototype, '_onPmImportDictionaryUrlOffscreen').call(
             context,
-            {url: 'https://example.com/jitendex.zip', details: {}},
-            [responsePort],
+            {url: 'https://example.com/jitendex.zip', details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
+            responsePorts,
         );
 
         expect(responsePort.postMessage).toHaveBeenCalledTimes(2);

@@ -32,11 +32,12 @@ function dispatchControlMessage(offscreen, action, params = {}, ports = []) {
     const controlPort = /** @type {MessagePort & {postMessage: ReturnType<typeof vi.fn>}} */ (/** @type {unknown} */ ({
         postMessage: vi.fn(),
     }));
-    Reflect.get(Offscreen.prototype, '_onMcMessage').call(offscreen, {
+    const onMcMessage = /** @type {(this: Offscreen, event: unknown) => void} */ (/** @type {unknown} */ (Reflect.get(Offscreen.prototype, '_onMcMessage')));
+    onMcMessage.call(offscreen, /** @type {MessageEvent<import('offscreen').McApiMessageAny>} */ (/** @type {unknown} */ ({
         currentTarget: controlPort,
         data: {id: 7, action, params},
         ports,
-    });
+    })));
     return {controlPort};
 }
 

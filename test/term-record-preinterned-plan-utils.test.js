@@ -33,6 +33,7 @@ function createPlan() {
 describe('term record preinterned plan helpers', () => {
     test('gets optional plans without allocating replacements', () => {
         const plan = createPlan();
+        /** @type {unknown[]} */
         const rows = [];
         expect(getTermRecordPreinternedPlan(rows)).toBeNull();
         Reflect.set(rows, 'termRecordPreinternedPlan', plan);
@@ -196,7 +197,10 @@ describe('term record preinterned plan helpers', () => {
         const plan = createPlan();
         expect(hasCompleteTermRecordPreinternedPlan(plan, 3)).toBe(true);
         expect(hasCompleteTermRecordPreinternedPlan(plan, 4)).toBe(false);
-        expect(hasCompleteTermRecordPreinternedPlan({...plan, expressionIndexes: [0, 1, 2]}, 3)).toBe(false);
+        expect(hasCompleteTermRecordPreinternedPlan(
+            /** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (/** @type {unknown} */ ({...plan, expressionIndexes: [0, 1, 2]})),
+            3,
+        )).toBe(false);
         expect(hasCompleteTermRecordPreinternedPlan(null, 0)).toBe(false);
     });
 });

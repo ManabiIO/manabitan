@@ -75,19 +75,31 @@ describe('term content zstd initialization', () => {
     test('does not synchronously recompress slabs detached by a failed worker dispatch', async () => {
         class DetachingCompressionWorker {
             constructor() {
-                /** @type {Map<string, Set<(event: MessageEvent<unknown>|ErrorEvent) => void>>} */
+                /** @type {Map<string, Set<(event: unknown) => void>>} */
                 this.listeners = new Map();
                 queueMicrotask(() => { this._emit('message', {data: {type: 'ready'}}); });
             }
 
+            /**
+             * @param {string} type
+             * @param {(event: unknown) => void} listener
+             */
             addEventListener(type, listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
+            /**
+             * @param {string} type
+             * @param {(event: unknown) => void} listener
+             */
             removeEventListener(type, listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
+            /**
+             * @param {unknown} message
+             * @param {Transferable[]} [transfer]
+             */
             postMessage(message, transfer = []) {
                 structuredClone(message, {transfer});
                 queueMicrotask(() => { this._emit('error', {message: 'injected worker failure'}); });
@@ -95,6 +107,10 @@ describe('term content zstd initialization', () => {
 
             terminate() {}
 
+            /**
+             * @param {string} type
+             * @param {unknown} event
+             */
             _emit(type, event) {
                 for (const listener of this.listeners.get(type) ?? []) { listener(event); }
             }

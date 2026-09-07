@@ -32,6 +32,14 @@ function createBytes(length, seed = 0) {
     return bytes;
 }
 
+/**
+ * @param {Uint8Array} bytes
+ * @returns {ArrayBuffer}
+ */
+function getArrayBuffer(bytes) {
+    return /** @type {ArrayBuffer} */ (/** @type {unknown} */ (bytes.buffer));
+}
+
 class FakeWorker {
     /**
      * @param {string} url
@@ -316,8 +324,8 @@ describe('DictionaryWorker MDX import integration', () => {
         const dictionaryWorker = new DictionaryWorker();
         /** @type {import('dictionary-importer').ProgressData[]} */
         const progressEvents = [];
-        const mdxBytes = createBytes(12, 11).buffer;
-        const mddBytes = createBytes(8, 47).buffer;
+        const mdxBytes = getArrayBuffer(createBytes(12, 11));
+        const mddBytes = getArrayBuffer(createBytes(8, 47));
 
         const invocationPromise = dictionaryWorker.importMdxDictionary(
             'fixture.mdx',
@@ -496,7 +504,7 @@ describe('DictionaryWorker MDX import integration', () => {
         Reflect.set(dictionaryWorker, '_dictionaryImporterMediaLoader', {getImageDetails});
 
         const invocationPromise = dictionaryWorker.importDictionary(
-            createBytes(4, 9).buffer,
+            getArrayBuffer(createBytes(4, 9)),
             {prefixWildcardsSupported: true, yomitanVersion: '1.2.3.4'},
             null,
         );
@@ -544,7 +552,7 @@ describe('DictionaryWorker MDX import integration', () => {
         const dictionaryWorker = new DictionaryWorker();
         const invocationPromise = dictionaryWorker.importMdxDictionary(
             'fixture.mdx',
-            createBytes(4, 7).buffer,
+            getArrayBuffer(createBytes(4, 7)),
             [],
             {prefixWildcardsSupported: true, yomitanVersion: '1.2.3.4'},
             null,

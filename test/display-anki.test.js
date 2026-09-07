@@ -267,23 +267,19 @@ describe('DisplayAnki preload and save flow', () => {
     test('stale anki field-template refresh does not overwrite newer dictionary-backed templates', async ({window}) => {
         setupDocument(window.document);
         const dictionaryEntries = [createTermEntry()];
-        let resolveFirst;
-        let resolveSecond;
+        const firstRefreshDeferred = Promise.withResolvers();
+        const secondRefreshDeferred = Promise.withResolvers();
         const {display} = createDisplay(window.document, dictionaryEntries);
         const displayAnki = new DisplayAnki(display, createDisplayAudio());
         vi.spyOn(displayAnki, '_getAnkiFieldTemplates')
-            .mockImplementationOnce(() => new Promise((resolve) => {
-                resolveFirst = resolve;
-            }))
-            .mockImplementationOnce(() => new Promise((resolve) => {
-                resolveSecond = resolve;
-            }));
+            .mockImplementationOnce(() => firstRefreshDeferred.promise)
+            .mockImplementationOnce(() => secondRefreshDeferred.promise);
 
         const firstRefresh = displayAnki._updateAnkiFieldTemplates(/** @type {import('settings').ProfileOptions} */ ({}));
         const secondRefresh = displayAnki._updateAnkiFieldTemplates(/** @type {import('settings').ProfileOptions} */ ({}));
-        resolveSecond('newer templates');
+        secondRefreshDeferred.resolve('newer templates');
         await secondRefresh;
-        resolveFirst('older templates');
+        firstRefreshDeferred.resolve('older templates');
         await firstRefresh;
 
         expect(displayAnki._ankiFieldTemplates).toBe('newer templates');

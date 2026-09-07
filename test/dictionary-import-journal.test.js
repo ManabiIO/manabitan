@@ -11,8 +11,9 @@ import {describe, expect, test, vi} from 'vitest';
 import {DictionaryImportJournal} from '../ext/js/dictionary/dictionary-import-journal.js';
 
 describe('DictionaryImportJournal', () => {
+    /** @returns {import('dictionary-import-journal').DictionaryImportJournalRecord} */
     const createRecord = () => ({
-        version: 1,
+        version: /** @type {1} */ (1),
         sessionId: 'session-id',
         contentCheckpoint: {
             segments: [{fileName: 'manabitan-term-content.bin', fileLength: 1024}],
@@ -80,8 +81,8 @@ describe('DictionaryImportJournal', () => {
         const writeError = new Error('quota exhausted');
         const writable = {
             write: vi.fn().mockRejectedValue(writeError),
-            abort: vi.fn().mockResolvedValue(),
-            close: vi.fn().mockResolvedValue(),
+            abort: vi.fn(async () => {}),
+            close: vi.fn(async () => {}),
         };
         vi.stubGlobal('navigator', {
             storage: {
@@ -105,8 +106,8 @@ describe('DictionaryImportJournal', () => {
     test('aborts when committing a journal writable fails', async () => {
         const closeError = new Error('commit failed');
         const writable = {
-            write: vi.fn().mockResolvedValue(),
-            abort: vi.fn().mockResolvedValue(),
+            write: vi.fn(async () => {}),
+            abort: vi.fn(async () => {}),
             close: vi.fn().mockRejectedValue(closeError),
         };
         vi.stubGlobal('navigator', {

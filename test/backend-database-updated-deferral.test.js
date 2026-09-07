@@ -19,7 +19,7 @@ import {describe, expect, test, vi} from 'vitest';
 import {Backend} from '../ext/js/background/backend.js';
 
 function createGate() {
-    /** @type {() => void} */
+    /** @type {(value?: void|PromiseLike<void>) => void} */
     let resolve = () => {};
     const promise = new Promise((resolvePromise) => {
         resolve = resolvePromise;
@@ -267,7 +267,8 @@ describe('Backend database update deferral', () => {
         Reflect.set(backend, '_pendingDatabaseUpdatedNotifications', []);
         Reflect.set(backend, '_sendMessageAllTabsIgnoreResponse', sendMessageAllTabsIgnoreResponse);
 
-        await Backend.prototype._triggerDatabaseUpdated.call(backend, 'popup', 'purge');
+        const triggerDatabaseUpdated = /** @type {(this: Backend, type: string, cause: string) => Promise<void>} */ (/** @type {unknown} */ (Backend.prototype._triggerDatabaseUpdated));
+        await triggerDatabaseUpdated.call(backend, 'popup', 'purge');
 
         expect(sendMessageAllTabsIgnoreResponse).toHaveBeenCalledOnce();
         expect(sendMessageAllTabsIgnoreResponse).toHaveBeenCalledWith({

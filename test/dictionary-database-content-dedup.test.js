@@ -24,10 +24,24 @@ import {
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 
 /**
+ * @typedef {object} TermContentMeta
+ * @property {number} id
+ * @property {number} offset
+ * @property {number} length
+ * @property {string} dictName
+ * @property {number} [hash2]
+ */
+
+/** @typedef {Parameters<DictionaryDatabase['_resolveArtifactTermContentDedup']>[0]} ArtifactTermContentChunk */
+/** @typedef {NonNullable<ArtifactTermContentChunk['contentDedupPlan']>} ArtifactTermContentDedupPlan */
+/** @typedef {ArtifactTermContentChunk & {dictionary?: string, dictionaryTotalRows?: number}} ArtifactTermContentChunkWithExtras */
+/** @typedef {Parameters<DictionaryDatabase['_bulkAddArtifactTermsChunkWithContentDedup']>[0]} ArtifactTermContentChunkFixture */
+
+/**
  * @param {DictionaryDatabase} database
  * @param {number} hash1
  * @param {number} hash2
- * @returns {{id: number, offset: number, length: number, dictName: string, hash2?: number}|undefined}
+ * @returns {TermContentMeta|undefined}
  */
 function getMeta(database, hash1, hash2) {
     const getTermEntryContentMetaByHashPair = /** @type {(this: DictionaryDatabase, hash1: number, hash2: number) => {id: number, offset: number, length: number, dictName: string, hash2?: number}|undefined} */ (
@@ -59,7 +73,7 @@ function cacheMeta(database, contentHash, offset, length, dictName, hash1, hash2
  * @param {number} length
  * @param {number} hash1
  * @param {number} hash2
- * @returns {{staged: {indexes: Int32Array, active: boolean}, meta: Record<string, unknown>}}
+ * @returns {{staged: {indexes: Int32Array, active: boolean}, meta: TermContentMeta}}
  */
 function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2) {
     const spans = {
@@ -85,14 +99,16 @@ function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2) {
         pendingContentSpans: spans,
         stagedContentMetadata: staged,
     });
-    return {staged, meta: getMeta(database, hash1, hash2)};
+    const meta = getMeta(database, hash1, hash2);
+    if (typeof meta === 'undefined') { throw new Error('Expected published term content metadata'); }
+    return {staged, meta};
 }
 
 /**
  * @param {number[]} [sourceValues]
  * @param {number} [hash1]
  * @param {number} [hash2]
- * @returns {{database: DictionaryDatabase, chunk: Record<string, unknown>, plan: Record<string, unknown>, appendRecords: ReturnType<typeof vi.fn>, releaseBorrowedContent: ReturnType<typeof vi.fn>, resolveContent: () => void, rejectContent: (error: Error) => void, resolveRecords: () => void, rejectRecords: (error: Error) => void, run: () => Promise<void>}}
+ * @returns {{database: DictionaryDatabase, chunk: ArtifactTermContentChunkFixture, plan: ArtifactTermContentDedupPlan, appendRecords: ReturnType<typeof vi.fn>, releaseBorrowedContent: ReturnType<typeof vi.fn>, resolveContent: () => void, rejectContent: (error: Error) => void, resolveRecords: () => void, rejectRecords: (error: Error) => void, run: () => Promise<void>}}
  */
 function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash2 = 20) {
     const database = new DictionaryDatabase();
@@ -100,7 +116,7 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
     Reflect.set(database, '_deferTermsVirtualTableSync', true);
     Reflect.set(database, '_termContentZstdInitialized', true);
 
-    /** @type {(value: Record<string, number>) => void} */
+    /** @type {() => void} */
     let resolveContent = () => {};
     /** @type {(error: Error) => void} */
     let rejectContent = () => {};
@@ -110,7 +126,7 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
         };
         rejectContent = reject;
     });
-    /** @type {(value: Record<string, number>) => void} */
+    /** @type {() => void} */
     let resolveRecords = () => {};
     /** @type {(error: Error) => void} */
     let rejectRecords = () => {};
@@ -155,7 +171,7 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
     const source = new Uint8Array(new SharedArrayBuffer(sourceValues.length));
     source.set(sourceValues);
     const releaseBorrowedContent = vi.fn();
-    const plan = {
+    const plan = /** @type {ArtifactTermContentDedupPlan} */ ({
         uniqueCount: 1,
         sourceRowCount: 1,
         resolvedFlags: new Uint8Array(1),
@@ -167,7 +183,7 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
         nextEpoch: 1,
         nextUnresolvedUniqueIndex: 0,
         persistedLookupRequired: false,
-    };
+    });
     const chunk = {
         dictionary: 'JMdict',
         rowCount: 1,
@@ -278,7 +294,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         const database = new DictionaryDatabase();
         const source = new Uint8Array([1, 2, 3, 4]);
         publishSlabMeta(database, source, 0, source.length, 10, 20);
-        const plan = {
+        const plan = /** @type {ArtifactTermContentDedupPlan} */ ({
             uniqueCount: 1,
             sourceRowCount: 1,
             uniqueRowIndexes: new Uint32Array([0]),
@@ -290,10 +306,10 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             pendingIndexes: new Uint32Array(1),
             nextEpoch: 1,
             persistedLookupRequired: true,
-        };
+        });
         const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
 
-        const result = await resolve({
+        const result = await resolve(/** @type {ArtifactTermContentChunkWithExtras} */ ({
             rowCount: 1,
             contentRowStart: 0,
             dictionaryTotalRows: 1,
@@ -307,7 +323,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             contentDedupPlan: plan,
             contentDictNameList: null,
             uniformContentDictName: 'raw-v6',
-        }, true);
+        }), true);
 
         expect(result.pendingContentCount).toBe(0);
         expect(result.persistedHitCount).toBe(1);
@@ -396,7 +412,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             persistedLookupRequired: false,
         };
 
-        const result = await resolve({
+        const result = await resolve(/** @type {ArtifactTermContentChunkWithExtras} */ ({
             rowCount: 1,
             contentRowStart: 0,
             dictionaryTotalRows: 1,
@@ -410,11 +426,12 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             contentDedupPlan: plan,
             contentDictNameList: null,
             uniformContentDictName: 'raw-v6',
-        }, true);
+        }), true);
 
         expect(genericReserve).not.toHaveBeenCalled();
         expect(preparedReserve).toHaveBeenCalledWith(10, 20, 3, 101, 202, 303);
         const index = result.stagedContentMetadata?.indexes[0];
+        if (typeof index !== 'number') { throw new Error('Expected staged metadata index'); }
         expect(index).toBe(0);
         expect(Reflect.get(database, '_termEntryContentMetaSignature1Table')[index]).toBe(101);
         expect(Reflect.get(database, '_termEntryContentMetaSignature2Table')[index]).toBe(202);
@@ -446,7 +463,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
 
     test('promotes weighted content-cache hits without re-weighing them', () => {
         const database = new DictionaryDatabase();
-        const cache = Reflect.get(database, '_termEntryContentCache');
+        const cache = /** @type {import('../ext/js/core/weighted-lru-map.js').WeightedLruMap} */ (Reflect.get(database, '_termEntryContentCache'));
         const getCached = Reflect.get(database, '_getCachedTermEntryContent').bind(database);
         const setCached = Reflect.get(database, '_setCachedTermEntryContent').bind(database);
         const value = {definitionTags: null, termTags: '', rules: '', glossaryJson: '[]', glossary: []};
@@ -1063,7 +1080,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         const database = new DictionaryDatabase();
         const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
         const buffer = new Uint8Array([99, 1, 2, 3, 1, 2, 4, 1, 2, 3, 88]);
-        const result = await resolve({
+        const result = await resolve(/** @type {ArtifactTermContentChunkWithExtras} */ ({
             rowCount: 3,
             contentBytesList: [],
             contentHash1List: new Uint32Array(0),
@@ -1086,12 +1103,14 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             ]),
             contentDictNameList: null,
             uniformContentDictName: 'raw',
-        });
+        }));
 
         expect(result.pendingContentBytes).toHaveLength(2);
         expect([...result.pendingContentBytes[0]]).toEqual([1, 2, 3]);
         expect([...result.pendingContentBytes[1]]).toEqual([1, 2, 4]);
-        expect([...result.pendingRowToUniqueIndex]).toEqual([0, 1, 0]);
+        const pendingRowToUniqueIndex = result.pendingRowToUniqueIndex;
+        if (pendingRowToUniqueIndex === null) { throw new Error('Expected pending row indexes'); }
+        expect([...pendingRowToUniqueIndex]).toEqual([0, 1, 0]);
         expect(result.pendingHitCount).toBe(1);
 
         await expect(resolve({
@@ -1124,6 +1143,12 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             nextEpoch: 1,
             persistedLookupRequired: null,
         };
+        /**
+         * @param {number} uniqueIndex
+         * @param {number} byte
+         * @param {number} hash
+         * @returns {ArtifactTermContentChunk}
+         */
         const makeChunk = (uniqueIndex, byte, hash) => ({
             rowCount: 1,
             contentBytesList: [new Uint8Array([byte])],
@@ -1217,7 +1242,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         const database = new DictionaryDatabase();
         const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
         const source = new Uint8Array([99, 1, 2, 3, 4, 5, 88]);
-        const plan = {
+        const plan = /** @type {ArtifactTermContentDedupPlan} */ ({
             uniqueCount: 2,
             resolvedFlags: new Uint8Array(2),
             resolvedOffsets: new Float64Array(2),
@@ -1228,7 +1253,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             nextEpoch: 1,
             nextUnresolvedUniqueIndex: 0,
             persistedLookupRequired: false,
-        };
+        });
 
         const result = await resolve({
             rowCount: 3,
@@ -1259,9 +1284,11 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
 
         expect(result.pendingContentBytes).toHaveLength(0);
         expect(result.pendingContentCount).toBe(2);
-        expect(result.pendingContentSpans?.buffer).toBe(source);
-        expect([...result.pendingContentSpans.offsets]).toEqual([1, 4]);
-        expect([...result.pendingContentSpans.lengths]).toEqual([3, 2]);
+        const pendingContentSpans = result.pendingContentSpans;
+        if (pendingContentSpans === null) { throw new Error('Expected pending content spans'); }
+        expect(pendingContentSpans.buffer).toBe(source);
+        expect([...pendingContentSpans.offsets]).toEqual([1, 4]);
+        expect([...pendingContentSpans.lengths]).toEqual([3, 2]);
         expect(result.pendingRowToUniqueIndex).toBeNull();
         expect(result.pendingHitCount).toBe(1);
         expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
@@ -1271,6 +1298,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         plan.resolvedFlags.fill(1);
         plan.resolvedOffsets.set([100, 200]);
         plan.resolvedLengths.set([3, 2]);
+        if (plan.resolvedDictNames === null) { throw new Error('Expected resolved dictionary names'); }
         plan.resolvedDictNames.splice(0, 2, 'raw-v6', 'raw-v6');
         const repeated = await resolve({
             rowCount: 1,
@@ -1296,7 +1324,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
         const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
         const source = new Uint8Array([1, 2, 3]);
-        const result = await resolve({
+        const result = await resolve(/** @type {ArtifactTermContentChunkWithExtras} */ ({
             dictionary: 'JMdict',
             rowCount: 1,
             dictionaryTotalRows: 1,
@@ -1322,12 +1350,14 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             },
             contentDictNameList: null,
             uniformContentDictName: 'raw-v6',
-        }, true);
+        }), true);
 
         expect(result.stagedContentMetadata?.indexes[0]).toBeGreaterThanOrEqual(0);
         expect(getMeta(database, 10, 20)).toBeUndefined();
         expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
-        rollback(result.stagedContentMetadata);
+        const stagedContentMetadata = result.stagedContentMetadata;
+        if (typeof stagedContentMetadata === 'undefined') { throw new Error('Expected staged metadata'); }
+        rollback(stagedContentMetadata);
         expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
     });
 
@@ -1357,6 +1387,9 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
                 resolvedOffsets: new Float64Array([100, 200]),
                 resolvedLengths: new Uint32Array([3, 4]),
                 resolvedDictNames: ['raw', 'raw'],
+                pendingEpochs: new Uint32Array(2),
+                pendingIndexes: new Uint32Array(2),
+                nextEpoch: 1,
             },
             contentUniqueIndexList: new Uint32Array([0, 1, 0]),
         });
@@ -1414,10 +1447,14 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
 
         expect(result.pendingContentBytes).toHaveLength(0);
         expect(result.pendingContentCount).toBe(2);
-        expect(result.pendingContentSpans?.buffer).toBe(source);
-        expect([...result.pendingContentSpans.offsets]).toEqual([1, 4]);
-        expect([...result.pendingContentSpans.lengths]).toEqual([3, 2]);
-        expect([...result.pendingRowToUniqueIndex]).toEqual([0, 1, 1]);
+        const pendingContentSpans = result.pendingContentSpans;
+        if (pendingContentSpans === null) { throw new Error('Expected pending content spans'); }
+        expect(pendingContentSpans.buffer).toBe(source);
+        expect([...pendingContentSpans.offsets]).toEqual([1, 4]);
+        expect([...pendingContentSpans.lengths]).toEqual([3, 2]);
+        const pendingRowToUniqueIndex = result.pendingRowToUniqueIndex;
+        if (pendingRowToUniqueIndex === null) { throw new Error('Expected pending row indexes'); }
+        expect([...pendingRowToUniqueIndex]).toEqual([0, 1, 1]);
         expect(result.pendingHitCount).toBe(1);
     });
 
@@ -1474,8 +1511,10 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(findPersistedIndex).toHaveBeenCalledTimes(2);
         expect(result.pendingContentCount).toBe(2);
         expect(result.pendingRowToUniqueIndex).toBeNull();
-        expect([...result.pendingContentSpans.offsets]).toEqual([1, 4]);
-        expect([...result.pendingContentSpans.lengths]).toEqual([3, 2]);
+        const pendingContentSpans = result.pendingContentSpans;
+        if (pendingContentSpans === null) { throw new Error('Expected pending content spans'); }
+        expect([...pendingContentSpans.offsets]).toEqual([1, 4]);
+        expect([...pendingContentSpans.lengths]).toEqual([3, 2]);
         expect(result.pendingPlanUniqueIndexes).toEqual([0, 1]);
         expect(result.pendingHitCount).toBe(1);
     });
@@ -1707,8 +1746,10 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(result.exactFallbackCount).toBe(1);
         expect(result.pendingContentCount).toBe(2);
         expect(result.pendingPlanUniqueIndexes).toEqual([1, 0]);
-        expect([...result.pendingContentSpans.offsets]).toEqual([3, 0]);
-        expect([...result.pendingContentSpans.lengths]).toEqual([3, 3]);
+        const pendingContentSpans = result.pendingContentSpans;
+        if (pendingContentSpans === null) { throw new Error('Expected pending content spans'); }
+        expect([...pendingContentSpans.offsets]).toEqual([3, 0]);
+        expect([...pendingContentSpans.lengths]).toEqual([3, 3]);
         expect(result.pendingContentHash1s).toEqual([30, 10]);
         expect(result.pendingContentHash2s).toEqual([40, 20]);
     });
@@ -1897,25 +1938,27 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(result.persistedHitCount).toBe(0);
         expect(result.exactFallbackCount).toBe(0);
         expect(result.pendingContentCount).toBe(1);
-        expect([...result.pendingContentSpans.offsets]).toEqual([1]);
+        const pendingContentSpans = result.pendingContentSpans;
+        if (pendingContentSpans === null) { throw new Error('Expected pending content spans'); }
+        expect([...pendingContentSpans.offsets]).toEqual([1]);
     });
 
     test('uses global canonical row indexes with nonzero chunk starts', async () => {
         const database = new DictionaryDatabase();
         const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
-        const plan = {
+        const plan = /** @type {ArtifactTermContentDedupPlan} */ ({
             uniqueCount: 3,
             sourceRowCount: 5,
             uniqueRowIndexes: new Uint32Array([0, 2, 4]),
             resolvedFlags: new Uint8Array([1, 0, 0]),
             resolvedOffsets: new Float64Array([100, 0, 0]),
             resolvedLengths: new Uint32Array([3, 0, 0]),
-            resolvedDictNames: ['raw-v6', void 0, void 0],
+            resolvedDictNames: /** @type {string[]} */ (/** @type {unknown} */ (['raw-v6', void 0, void 0])),
             pendingEpochs: new Uint32Array(3),
             pendingIndexes: new Uint32Array(3),
             nextEpoch: 1,
             persistedLookupRequired: true,
-        };
+        });
         const source = new Uint8Array([99, 4, 5, 4, 5, 6, 88]);
         const result = await resolve({
             rowCount: 3,
@@ -1946,8 +1989,10 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         });
 
         expect(result.pendingPlanUniqueIndexes).toEqual([1, 2]);
-        expect([...result.pendingContentSpans.offsets]).toEqual([1, 5]);
-        expect([...result.pendingContentSpans.lengths]).toEqual([2, 1]);
+        const pendingContentSpans = result.pendingContentSpans;
+        if (pendingContentSpans === null) { throw new Error('Expected pending content spans'); }
+        expect([...pendingContentSpans.offsets]).toEqual([1, 5]);
+        expect([...pendingContentSpans.lengths]).toEqual([2, 1]);
         expect(result.pendingHitCount).toBe(1);
     });
 
@@ -2164,6 +2209,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         });
 
         expect(result.pendingContentBytes).toHaveLength(2);
+        if (result.pendingRowToUniqueIndex === null) { throw new Error('Expected pending row indexes'); }
         expect([...result.pendingRowToUniqueIndex]).toEqual([0, 1, 0, 1]);
         expect(result.pendingHitCount).toBe(2);
         expect(result.persistedHitCount).toBe(0);
@@ -2190,9 +2236,11 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         const retry = await resolve(harness.chunk, true);
         expect(retry.stagedContentMetadata?.indexes[0]).toBeGreaterThanOrEqual(0);
         expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        const stagedContentMetadata = retry.stagedContentMetadata;
+        if (typeof stagedContentMetadata === 'undefined') { throw new Error('Expected staged metadata'); }
         Reflect.get(harness.database, '_rollbackStagedArtifactTermContentMetadata').call(
             harness.database,
-            retry.stagedContentMetadata,
+            stagedContentMetadata,
         );
         expect(Reflect.get(harness.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
     });
@@ -2494,32 +2542,41 @@ describe('DictionaryDatabase term lookup warming', () => {
         const ensureDictionaryIndexes = vi.fn();
         const getDictionaryIndex = vi.fn(() => index);
         Reflect.set(database, '_termRecordStore', {ensureDictionariesLoaded, ensureDictionaryIndexes, getDictionaryIndex});
-        const fetchTermRowsByIds = vi.fn(async () => new Map([
-            [1, {
-                id: 1,
-                dictionary: 'JMdict',
-                expression: '日本',
-                reading: 'にほん',
-                definitionTags: '',
-                termTags: '',
-                rules: '',
-                score: 0,
-                glossary: ['Japan'],
-                sequence: 100,
-            }],
-            [2, {
-                id: 2,
-                dictionary: 'JMdict',
-                expression: '日本',
-                reading: 'にっぽん',
-                definitionTags: '',
-                termTags: '',
-                rules: '',
-                score: 0,
-                glossary: ['Japan'],
-                sequence: 101,
-            }],
-        ]));
+        const fetchTermRowsByIds = vi.fn(
+            /**
+             * @param {Iterable<number>} ids
+             * @returns {Promise<Map<number, unknown>>}
+             */
+            async (ids) => {
+                void ids;
+                return new Map([
+                    [1, {
+                        id: 1,
+                        dictionary: 'JMdict',
+                        expression: '日本',
+                        reading: 'にほん',
+                        definitionTags: '',
+                        termTags: '',
+                        rules: '',
+                        score: 0,
+                        glossary: ['Japan'],
+                        sequence: 100,
+                    }],
+                    [2, {
+                        id: 2,
+                        dictionary: 'JMdict',
+                        expression: '日本',
+                        reading: 'にっぽん',
+                        definitionTags: '',
+                        termTags: '',
+                        rules: '',
+                        score: 0,
+                        glossary: ['Japan'],
+                        sequence: 101,
+                    }],
+                ]);
+            },
+        );
         Reflect.set(database, '_fetchTermRowsByIds', fetchTermRowsByIds);
 
         const results = await database.findTermsExactBulk([{term: '日本', reading: 'にほん'}], new Set(['JMdict']));

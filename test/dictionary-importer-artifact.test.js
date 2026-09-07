@@ -67,7 +67,7 @@ describe('DictionaryImporter term artifacts', () => {
         );
 
         expect(capturedChunk).not.toBeNull();
-        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (capturedChunk);
+        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (/** @type {unknown} */ (capturedChunk));
         expect(chunk.readingEqualsExpressionList).toStrictEqual(new Uint8Array([1]));
         expect(chunk.readingBytesList[0]).toBe(chunk.expressionBytesList[0]);
         expect(chunk.termRecordPreinternedPlan.readingIndexes[0])
