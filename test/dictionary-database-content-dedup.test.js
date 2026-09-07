@@ -246,7 +246,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         source.set([1, 2, 3, 4], 0);
         source.set([5, 6, 7, 8], 9);
         source.set([9, 10, 11, 12], 16);
-        const collision = source.slice();
+        const collision = Uint8Array.from(source);
         collision[6] = 99;
         const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
         const readStorage = vi.fn();
@@ -265,7 +265,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
         Reflect.get(database, '_recentTermContentSourceBatches').clear();
         Reflect.set(database, '_recentTermContentSourceBatchBytes', 0);
-        const readStorage = vi.fn(async () => [{status: 'ok', bytes: source.slice()}]);
+        const readStorage = vi.fn(async () => [{status: 'ok', bytes: Uint8Array.from(source)}]);
         Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
 
         const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
@@ -985,7 +985,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
         const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
         const persistedBytes = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
-        const collidingBytes = persistedBytes.slice();
+        const collidingBytes = Uint8Array.from(persistedBytes);
         collidingBytes[5] = 99;
         Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async () => ({status: 'ok', bytes: persistedBytes})));
 
@@ -1006,7 +1006,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
 
         cache(null, 10, persistedBytes.byteLength, 'raw-block-v1:jmdict', 0, 123, 456);
 
-        const result = findMatching(123, 456, persistedBytes.slice());
+        const result = findMatching(123, 456, Uint8Array.from(persistedBytes));
         expect(result).toBeInstanceOf(Promise);
         await expect(result).resolves.toMatchObject({offset: 10, dictName: 'raw-block-v1:jmdict'});
         expect(readTermEntryContentBytesDetailed).toHaveBeenCalledWith(10, persistedBytes.byteLength, 'raw-block-v1:jmdict');
@@ -1845,9 +1845,18 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             contentBytesBuffer: source,
             contentBytesBaseOffset: 0,
             contentMetaList: new Uint32Array([
-                0, 3, 10, 20,
-                3, 3, 10, 20,
-                6, 2, 30, 40,
+                0,
+                3,
+                10,
+                20,
+                3,
+                3,
+                10,
+                20,
+                6,
+                2,
+                30,
+                40,
             ]),
             contentUniqueIndexList: new Uint32Array([0, 0, 1]),
             contentDedupPlan: plan,
@@ -2201,7 +2210,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
 
         const result = await resolve({
             rowCount: 4,
-            contentBytesList: [first, second, first.slice(), second.slice()],
+            contentBytesList: [first, second, Uint8Array.from(first), Uint8Array.from(second)],
             contentHash1List: new Uint32Array([10, 10, 10, 10]),
             contentHash2List: new Uint32Array([20, 20, 20, 20]),
             contentDictNameList: null,

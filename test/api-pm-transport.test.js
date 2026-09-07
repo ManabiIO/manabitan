@@ -380,11 +380,7 @@ describe('API PM transport reliability', () => {
                 {type: 'error', error: {name: 'Error', message: 'worker failed', stack: ''}},
         })));
 
-        if (responseType === 'complete') {
-            await expect(promise).resolves.toEqual({errors: []});
-        } else {
-            await expect(promise).rejects.toThrow('worker failed');
-        }
+        await (responseType === 'complete' ? expect(promise).resolves.toEqual({errors: []}) : expect(promise).rejects.toThrow('worker failed'));
         expect(channels[0].port1.close).toHaveBeenCalledOnce();
         expect(api._shutdownRejectors.size).toBe(0);
     });
@@ -451,7 +447,7 @@ describe('API PM transport reliability', () => {
                 callbackCount += 1;
                 if (callbackCount === 1) {
                     globalThis.chrome.runtime.lastError = {message: 'Could not establish connection. Receiving end does not exist.'};
-                    callback(undefined);
+                    callback();
                     return;
                 }
                 globalThis.chrome.runtime.lastError = undefined;
@@ -488,7 +484,7 @@ describe('API PM transport reliability', () => {
         const webExtension = {
             sendMessage: vi.fn((_message, callback) => {
                 globalThis.chrome.runtime.lastError = {message: 'Could not establish connection. Receiving end does not exist.'};
-                callback(undefined);
+                callback();
             }),
             getLastError: vi.fn(() => {
                 const lastError = globalThis.chrome.runtime.lastError;
@@ -521,7 +517,7 @@ describe('API PM transport reliability', () => {
         });
         const webExtension = {
             sendMessage: vi.fn((_message, callback) => {
-                callback(undefined);
+                callback();
             }),
             getLastError: vi.fn(() => new Error('Could not establish connection. Receiving end does not exist.')),
         };

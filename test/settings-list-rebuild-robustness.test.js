@@ -30,6 +30,7 @@ const test = createDomTest();
 
 /**
  * @param {{options: unknown, instantiateTemplate: (name: string) => Node}} overrides
+ * @returns {{application: {api: object}, on: ReturnType<typeof vi.fn>, getOptions: ReturnType<typeof vi.fn>, getOptionsContext: ReturnType<typeof vi.fn>, instantiateTemplate: ReturnType<typeof vi.fn>, modifyProfileSettings: ReturnType<typeof vi.fn>, getDefaultOptions: ReturnType<typeof vi.fn>, refresh: ReturnType<typeof vi.fn>}}
  */
 function createSettingsController(overrides) {
     return {

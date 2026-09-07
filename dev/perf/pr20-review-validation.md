@@ -59,6 +59,7 @@ Local Firefox Developer Edition 150.0 gets through import, update, deletion, bat
 
 - Full unit suite: 151 files, 5,389 passed, 46 skipped. Separate options suite: 25 passed.
 - Strict TypeScript main/dev/test/bench projects pass, with typed partial fixtures and a declared native Zstd module boundary; no blanket typechecking disablement was added.
+- All-target build dry run passes. Focused lint checks pass for the follow-up changes; repository-wide ESLint is still red elsewhere, including generated Zstd code and existing source/style violations. CI is not claimed green.
 - Strict Chromium full E2E passes without skips: imports, interrupted-update recovery, update, cold restart, batch import, search/hover stress, and deletion. The final run confirms non-null current-operation browser timing for initial JMdict, Jitendex, update confirmation, and batch import, including after fresh browser contexts. The harness now re-enables its signal at every operation and does not silently use the idle-polling fallback for an armed operation.
 - Source parser and content correctness tests remain enabled. The existing main checkout's uncommitted dictionary changes were not touched.
 
