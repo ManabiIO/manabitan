@@ -1,0 +1,107 @@
+name: Performance Bundle
+
+on:
+  workflow_dispatch:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  bundle:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.issue.pull_request && github.event.comment.body == '/perf-bundle' &&
+      (github.event.comment.author_association == 'OWNER' ||
+      github.event.comment.author_association == 'MEMBER' ||
+      github.event.comment.author_association == 'COLLABORATOR'))
+    name: Build offline performance workspace
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Resolve source SHA
+        id: source
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "issue_comment" ]]; then
+            source_sha="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq .head.sha)"
+          else
+            source_sha="${GITHUB_SHA}"
+          fi
+          echo "sha=${source_sha}" >> "${GITHUB_OUTPUT}"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.source.outputs.sha }}
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '24.20.0'
+
+      - name: Install matching Chromium
+        run: npx playwright install chromium
+
+      - name: Prepare pinned performance dictionaries
+        run: node ./dev/perf/prepare-dictionaries.js
+
+      - name: Build Chromium development extension
+        run: node ./dev/bin/build.js --target chrome-dev
+
+      - name: Pack offline performance workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          bundle_root="${RUNNER_TEMP}/manabitan-perf-bundle"
+          workspace="${bundle_root}/workspace"
+          runtime="${bundle_root}/runtime"
+          mkdir -p "${workspace}" "${runtime}/node"
+          tar --exclude=.git --exclude='builds/perf' -cf - . | tar -xf - -C "${workspace}"
+          chromium_executable="$(node --input-type=module -e "import {chromium} from 'playwright'; console.log(chromium.executablePath())")"
+          chromium_version="$("${chromium_executable}" --version)"
+          node_root="$(node --input-type=module -e "import path from 'node:path'; console.log(path.dirname(path.dirname(process.execPath)))")"
+          GIT_SHA="${{ steps.source.outputs.sha }}" CHROMIUM_VERSION="${chromium_version}" node --input-type=module <<'NODE' > "${workspace}/perf-bundle-manifest.json"
+          import {readFileSync} from 'node:fs';
+          import os from 'node:os';
+          import {createHash} from 'node:crypto';
+          import playwrightPackage from './node_modules/playwright/package.json' with {type: 'json'};
+          const packageLock = readFileSync('./package-lock.json');
+          const dictionaryLock = readFileSync('./test/perf/dictionaries.lock.json');
+          console.log(JSON.stringify({
+            schemaVersion: 1,
+            gitSha: process.env.GIT_SHA,
+            nodeVersion: process.version,
+            v8Version: process.versions.v8,
+            platform: process.platform,
+            arch: process.arch,
+            logicalCpuCount: os.cpus().length,
+            availableParallelism: os.availableParallelism(),
+            playwrightVersion: playwrightPackage.version,
+            chromiumVersion: process.env.CHROMIUM_VERSION,
+            packageLockSha256: createHash('sha256').update(packageLock).digest('hex'),
+            dictionaryLockSha256: createHash('sha256').update(dictionaryLock).digest('hex'),
+          }, null, 2));
+          NODE
+          tar -C "${node_root}" -cf - . | tar -xf - -C "${runtime}/node"
+          tar -C "${HOME}/.cache" -cf - ms-playwright | tar -xf - -C "${runtime}"
+          tar -C "${bundle_root}" -czf "${RUNNER_TEMP}/manabitan-perf-workspace.tar.gz" workspace
+          tar -C "${bundle_root}" -czf "${RUNNER_TEMP}/manabitan-perf-runtime.tar.gz" runtime
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: manabitan-perf-workspace-linux-x64
+          path: ${{ runner.temp }}/manabitan-perf-workspace.tar.gz
+          compression-level: 0
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: manabitan-perf-runtime-linux-x64
+          path: ${{ runner.temp }}/manabitan-perf-runtime.tar.gz
+          compression-level: 0
+          retention-days: 7

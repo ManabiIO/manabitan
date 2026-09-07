@@ -49,6 +49,7 @@ const manabitanHeaderFiles = [
     'ext/js/dictionary/raw-term-content.js',
     'dev/bin/run-playwright.js',
     'dev/bin/build-zstd-wasm.js',
+    'dev/perf/**/*.js',
     'dev/lib/zstd-wasm.js',
     'ext/js/dictionary/zstd-term-content.js',
     'ext/js/dictionary/zstd-term-content-compression-worker.js',

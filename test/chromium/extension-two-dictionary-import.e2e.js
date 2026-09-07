@@ -28,6 +28,8 @@ import {fileURLToPath} from 'node:url';
 import {existsSync, readFileSync} from 'node:fs';
 import {access, copyFile, mkdir, mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
 import {chromium} from '@playwright/test';
+import {ensurePinnedDictionaryCache} from '../../dev/perf/dictionary-fixtures.js';
+import {getHostEnvironment} from '../../dev/perf/host-environment.js';
 import {parseJson} from '../../ext/js/core/json.js';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
@@ -150,7 +152,25 @@ const strictUnsupportedRuntime = parseBooleanEnv(
 );
 const maxReportLogLinesRaw = Number.parseInt(process.env.MANABITAN_CHROMIUM_E2E_MAX_LOG_LINES ?? '1000', 10);
 const maxReportLogLines = Number.isFinite(maxReportLogLinesRaw) && maxReportLogLinesRaw > 0 ? maxReportLogLinesRaw : 1000;
-const quickImportBenchmarkMode = parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_BENCH_QUICK, false);
+const quickImportBenchmarkDictionaryIdRaw = (process.env.MANABITAN_E2E_IMPORT_BENCH_DICTIONARY ?? '').trim().toLowerCase();
+const quickImportBenchmarkMode = (
+    quickImportBenchmarkDictionaryIdRaw.length > 0 ||
+    parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_BENCH_QUICK, false)
+);
+const quickImportBenchmarkDictionaryId = quickImportBenchmarkDictionaryIdRaw || 'jmdict';
+const supportedQuickImportBenchmarkDictionaries = new Set(['jmdict', 'jmnedict', 'jitendex']);
+if (quickImportBenchmarkMode && !supportedQuickImportBenchmarkDictionaries.has(quickImportBenchmarkDictionaryId)) {
+    fail(`Unsupported MANABITAN_E2E_IMPORT_BENCH_DICTIONARY=${quickImportBenchmarkDictionaryId}`);
+}
+const usePinnedPerfDictionaries = parseBooleanEnv(process.env.MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK, false);
+const useProductionImportDefaults = parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS, false);
+const capturePhaseProfiles = parseBooleanEnv(process.env.MANABITAN_E2E_PHASE_PROFILING, !quickImportBenchmarkMode);
+const capturePhaseScreenshots = parseBooleanEnv(process.env.MANABITAN_E2E_PHASE_SCREENSHOTS, !quickImportBenchmarkMode);
+const captureProcessSamples = parseBooleanEnv(process.env.MANABITAN_E2E_PROCESS_SAMPLING, !quickImportBenchmarkMode);
+const importTracePath = (process.env.MANABITAN_E2E_IMPORT_TRACE_PATH ?? '').trim();
+if (importTracePath.length > 0 && !quickImportBenchmarkMode) {
+    fail('MANABITAN_E2E_IMPORT_TRACE_PATH requires quick import benchmark mode');
+}
 const importCompletionIdleMs = quickImportBenchmarkMode ? 100 : 250;
 const importCompletionPollMs = quickImportBenchmarkMode ? 16 : 50;
 let lastObservedImportCompletionEpochMs = 0;
@@ -264,7 +284,16 @@ function createReport() {
         status: 'running',
         failureReason: '',
         browserFlavor,
+        browserVersion: '',
         launchMode: 'unknown',
+        hostEnvironment: getHostEnvironment(),
+        benchmark: quickImportBenchmarkMode ? {
+            dictionary: quickImportBenchmarkDictionaryId,
+            pinnedDictionaries: usePinnedPerfDictionaries,
+            productionImportDefaults: useProductionImportDefaults,
+            traceEnabled: importTracePath.length > 0,
+            authoritativeTiming: importTracePath.length === 0,
+        } : null,
         runtimeDiagnostics: null,
         skippedVerification: false,
         skipReason: '',
@@ -279,7 +308,10 @@ function createReportJsonSummary(report) {
         status: report.status,
         failureReason: report.failureReason,
         browserFlavor: report.browserFlavor,
+        browserVersion: report.browserVersion,
         launchMode: report.launchMode,
+        hostEnvironment: report.hostEnvironment,
+        benchmark: report.benchmark,
         runtimeDiagnostics: report.runtimeDiagnostics,
         skippedVerification: report.skippedVerification,
         skipReason: report.skipReason,
@@ -291,6 +323,7 @@ function createReportJsonSummary(report) {
             resourceUsage: phase.resourceUsage ?? null,
             perfMetrics: phase.perfMetrics ?? null,
             hotspots: Array.isArray(phase.hotspots) ? phase.hotspots : [],
+            data: phase.data ?? null,
         })),
         logs: Array.isArray(report.logs) ? report.logs : [],
     };
@@ -582,19 +615,21 @@ async function runPhaseProfile(cdpSession, action) {
     return output;
 }
 
-async function addReportPhase(report, page, name, details, startMs, endMs, profileData = null, processSampler = null) {
+async function addReportPhase(report, page, name, details, startMs, endMs, profileData = null, processSampler = null, data = null) {
     console.log(`[chromium-e2e] phase: ${name} (${formatDuration(Math.max(0, endMs - startMs))})`);
     if (processSampler !== null && typeof processSampler.sampleNow === 'function') {
         try { await processSampler.sampleNow(); } catch (_) {}
     }
     let screenshotBase64 = '';
-    try {
-        const screenshotBuffer = await page.screenshot({fullPage: true});
-        screenshotBase64 = screenshotBuffer.toString('base64');
-    } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        if (!message.includes('page.screenshot: Timeout')) {
-            throw error;
+    if (capturePhaseScreenshots) {
+        try {
+            const screenshotBuffer = await page.screenshot({fullPage: true});
+            screenshotBase64 = screenshotBuffer.toString('base64');
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            if (!message.includes('page.screenshot: Timeout')) {
+                throw error;
+            }
         }
     }
     const resourceUsage = processSampler?.summarize(startMs, endMs) ?? null;
@@ -609,6 +644,7 @@ async function addReportPhase(report, page, name, details, startMs, endMs, profi
         perfMetrics: profileData?.perfMetrics ?? null,
         screenshotBase64,
         screenshotMimeType: 'image/png',
+        data,
     });
 }
 
@@ -776,6 +812,9 @@ async function ensureCachedDownload(url, outputPath) {
 
 async function ensureRealDictionaryCache() {
     await mkdir(dictionaryCacheDir, {recursive: true});
+    if (usePinnedPerfDictionaries) {
+        return await ensurePinnedDictionaryCache(dictionaryCacheDir);
+    }
     const {jitendexUrl, jmnedictUrl, jmdictUrl} = await loadRecommendedDictionaryUrls();
     const jitendexPath = path.join(dictionaryCacheDir, 'jitendex-yomitan.zip');
     const jmnedictPath = path.join(dictionaryCacheDir, 'JMnedict.zip');
@@ -2993,6 +3032,25 @@ async function ensureFreshChromeDevBuild(zipPath) {
     console.log(`${e2eLogTag} build complete (${formatDuration(endedAt - startedAt)})`);
 }
 
+async function stopBrowserTraceToFile(session, outputPath) {
+    const completed = new Promise((resolve) => { session.once('Tracing.tracingComplete', resolve); });
+    await session.send('Tracing.end');
+    const payload = await completed;
+    const stream = payload?.stream;
+    if (typeof stream !== 'string' || stream.length === 0) {
+        throw new Error('Tracing.tracingComplete returned no stream');
+    }
+    const chunks = [];
+    for (;;) {
+        const row = await session.send('IO.read', {handle: stream});
+        chunks.push(row.data || '');
+        if (row.eof === true) { break; }
+    }
+    await session.send('IO.close', {handle: stream}).catch(() => {});
+    await mkdir(path.dirname(outputPath), {recursive: true});
+    await writeFile(outputPath, chunks.join(''), 'utf8');
+}
+
 async function main() {
     const defaultZipPath = path.join(root, 'builds', 'manabitan-chrome-dev.zip');
     const defaultReportName = browserFlavor === 'edge' ? 'edge-e2e-import-report.html' : 'chromium-e2e-import-report.html';
@@ -3008,6 +3066,7 @@ async function main() {
     let context = null;
     let cdpSession = null;
     let processSampler = null;
+    let importTraceSession = null;
     let extensionDir = null;
     let userDataDir = null;
     let page = null;
@@ -3032,6 +3091,14 @@ async function main() {
 
         const cacheWarmupStart = safePerformance.now();
         const cachedDictionaries = await ensureRealDictionaryCache();
+        const quickImportBenchmarkSpecs = {
+            jmdict: {label: 'JMdict', filePath: cachedDictionaries.jmdictPath},
+            jmnedict: {label: 'JMnedict', filePath: cachedDictionaries.jmnedictPath},
+            jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},
+        };
+        const initialImportSpec = quickImportBenchmarkMode ?
+            quickImportBenchmarkSpecs[quickImportBenchmarkDictionaryId] :
+            quickImportBenchmarkSpecs.jmdict;
         const jitendexProbeTerms = await loadDictionaryProbeTermsFromArchive(cachedDictionaries.jitendexPath, 80);
         const jmdictProbeTerms = await loadDictionaryProbeTermsFromArchive(cachedDictionaries.jmdictPath, 80);
         const jmnedictProbeTerms = await loadDictionaryProbeTermsFromArchive(cachedDictionaries.jmnedictPath, 80);
@@ -3093,6 +3160,9 @@ async function main() {
          * @returns {Promise<import('@playwright/test').CDPSession|null>}
          */
         const createCdpSessionForPage = async (targetPage) => {
+            if (!capturePhaseProfiles) {
+                return null;
+            }
             try {
                 const nextCdpSession = await context.newCDPSession(targetPage);
                 await nextCdpSession.send('Profiler.enable');
@@ -3120,7 +3190,7 @@ async function main() {
             const browserProcess = context.browser()?.process?.();
             const browserPidFromPlaywright = (browserProcess && typeof browserProcess.pid === 'number') ? browserProcess.pid : null;
             const browserPid = browserPidFromPlaywright ?? await findChromiumPidByProfileDir(userDataDir);
-            processSampler = startProcessSampler(browserPid);
+            processSampler = captureProcessSamples ? startProcessSampler(browserPid) : null;
             cdpSession = await createCdpSessionForPage(page);
             return extensionBaseUrl;
         };
@@ -3331,14 +3401,19 @@ async function main() {
             launchModeLabel = 'headed-hidden-fallback';
         }
         report.launchMode = launchModeLabel;
+        report.browserVersion = context.browser()?.version() ?? '';
         appendLog(report, 'info', `${browserFlavor} launch mode: ${launchModeLabel}`);
         let extensionBaseUrl = `chrome-extension://${extensionId}`;
-        await context.addInitScript((flagsFromRunner) => {
+        await context.addInitScript(({flagsFromRunner, useProductionDefaults}) => {
             Reflect.set(globalThis, '__manabitanImportCompletionSignalEnabled', true);
-            globalThis.manabitanImportUseSession = false;
+            if (useProductionDefaults) {
+                delete globalThis.manabitanImportUseSession;
+            } else {
+                globalThis.manabitanImportUseSession = false;
+            }
             globalThis.manabitanDisableIntegrityCounts = true;
             globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
-        }, e2eImportFlags);
+        }, {flagsFromRunner: e2eImportFlags, useProductionDefaults: useProductionImportDefaults});
         page = context.pages()[0] ?? await context.newPage();
         /** @type {import('@playwright/test').Page|null} */
         let concurrentSearchPage = null;
@@ -3346,7 +3421,7 @@ async function main() {
         const browserProcess = context.browser()?.process?.();
         const browserPidFromPlaywright = (browserProcess && typeof browserProcess.pid === 'number') ? browserProcess.pid : null;
         const browserPid = browserPidFromPlaywright ?? await findChromiumPidByProfileDir(userDataDir);
-        processSampler = startProcessSampler(browserPid);
+        processSampler = captureProcessSamples ? startProcessSampler(browserPid) : null;
         cdpSession = await createCdpSessionForPage(page);
 
         const settingsOpenStart = safePerformance.now();
@@ -3472,25 +3547,30 @@ async function main() {
         const configureImportSessionStart = safePerformance.now();
         const configureImportSessionProfile = await runPhaseProfile(cdpSession, async () => {
             const importFlags = e2eImportFlags;
-            await page.evaluate((flagsFromRunner) => {
-                globalThis.manabitanImportUseSession = false;
+            await page.evaluate(({flagsFromRunner, useProductionDefaults}) => {
+                if (useProductionDefaults) {
+                    delete globalThis.manabitanImportUseSession;
+                } else {
+                    globalThis.manabitanImportUseSession = false;
+                }
                 globalThis.manabitanDisableIntegrityCounts = true;
                 globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
                 Reflect.set(globalThis, '__manabitanImportCompletionSequence', 0);
                 Reflect.set(globalThis, '__manabitanLastImportCompletion', null);
-            }, importFlags);
+            }, {flagsFromRunner: importFlags, useProductionDefaults: useProductionImportDefaults});
         });
         const configureImportSessionEnd = safePerformance.now();
+        const importSessionMode = useProductionImportDefaults ? 'production default import session behavior' : 'manabitanImportUseSession=false';
         const importSessionDetails = (e2eImportFlags !== null) ?
-            `Set globalThis.manabitanImportUseSession=false; applied explicit import flags ${JSON.stringify(e2eImportFlags)}` :
-            'Set globalThis.manabitanImportUseSession=false for functional import/update availability verification';
+            `Configured ${importSessionMode}; applied explicit import flags ${JSON.stringify(e2eImportFlags)}` :
+            `Configured ${importSessionMode} for functional import/update availability verification`;
         await addReportPhase(report, page, 'Configure functional import mode', importSessionDetails, configureImportSessionStart, configureImportSessionEnd, configureImportSessionProfile, processSampler);
 
         await addReportPhase(
             report,
             page,
             'Warmup real dictionary cache',
-            `Resolved and cached Jitendex/JMdict/JMnedict archives from recommended feed, then served locally at ${localServer.baseUrl}. quickImportBenchmarkMode=${quickImportBenchmarkMode}. probeTerms: jitendex=${String(jitendexProbeTerms.length)} jmdict=${String(jmdictProbeTerms.length)} jmnedict=${String(jmnedictProbeTerms.length)} merged=${String(extendedLookupProbeCandidates.length)}`,
+            `Resolved and cached Jitendex/JMdict/JMnedict archives from ${usePinnedPerfDictionaries ? 'pinned performance lock' : 'recommended feed'}, then served locally at ${localServer.baseUrl}. quickImportBenchmarkMode=${quickImportBenchmarkMode}. benchmarkDictionary=${quickImportBenchmarkDictionaryId}. probeTerms: jitendex=${String(jitendexProbeTerms.length)} jmdict=${String(jmdictProbeTerms.length)} jmnedict=${String(jmnedictProbeTerms.length)} merged=${String(extendedLookupProbeCandidates.length)}`,
             cacheWarmupStart,
             cacheWarmupEnd,
             null,
@@ -3537,40 +3617,107 @@ async function main() {
                 importTotalEnd,
                 importTotalProfile,
                 processSampler,
+                {
+                    kind: 'dictionary-import',
+                    dictionary: importLabel,
+                    importDebug,
+                    importDebugHistory,
+                    stepTimingSummary: importStepTimingSummary,
+                    step4Breakdown: importStep4Breakdown,
+                },
             );
             return importDebug;
         };
 
-        const jmdictImportTriggerStart = safePerformance.now();
+        if (importTracePath.length > 0) {
+            const browser = context.browser();
+            if (browser === null) {
+                throw new Error('No Browser object available for import trace');
+            }
+            importTraceSession = await browser.newBrowserCDPSession();
+            await importTraceSession.send('Tracing.start', {
+                transferMode: 'ReturnAsStream',
+                categories: 'devtools.timeline,v8.execute,blink.user_timing,disabled-by-default-v8.cpu_profiler,disabled-by-default-v8.cpu_profiler.hires,disabled-by-default-devtools.timeline,disabled-by-default-devtools.timeline.stack',
+            });
+        }
+
+        let importWorkerTraceStopPromise = null;
+        if (importTraceSession !== null) {
+            const expectedTraceLogFragment = `[ImportTiming] [${path.basename(initialImportSpec.filePath)}] worker importDictionary`;
+            importWorkerTraceStopPromise = new Promise((resolve) => {
+                const onWorkerImportConsole = (message) => {
+                    if (!message.text().includes(expectedTraceLogFragment)) { return; }
+                    page.off('console', onWorkerImportConsole);
+                    resolve();
+                };
+                page.on('console', onWorkerImportConsole);
+            }).then(async () => {
+                const traceSession = importTraceSession;
+                if (traceSession === null) { return; }
+                importTraceSession = null;
+                await stopBrowserTraceToFile(traceSession, importTracePath);
+                await traceSession.detach().catch(() => {});
+                console.log(`${e2eLogTag} wrote worker import browser trace: ${importTracePath}`);
+            });
+        }
+
+        const initialImportTriggerStart = safePerformance.now();
         await markCurrentImportCompletionObserved(page);
-        const jmdictImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
-            await page.setInputFiles('#dictionary-import-file-input', [cachedDictionaries.jmdictPath]);
+        const initialImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
+            await page.setInputFiles('#dictionary-import-file-input', [initialImportSpec.filePath]);
         });
-        const jmdictImportTriggerEnd = safePerformance.now();
+        const initialImportTriggerEnd = safePerformance.now();
         await addReportPhase(
             report,
             page,
-            'Import JMdict via file input',
-            `Triggered initial JMdict import using cached archive ${cachedDictionaries.jmdictPath}`,
-            jmdictImportTriggerStart,
-            jmdictImportTriggerEnd,
-            jmdictImportTriggerProfile,
+            `Import ${initialImportSpec.label} via file input`,
+            `Triggered initial ${initialImportSpec.label} import using cached archive ${initialImportSpec.filePath}`,
+            initialImportTriggerStart,
+            initialImportTriggerEnd,
+            initialImportTriggerProfile,
             processSampler,
         );
-        const jmdictImportDebug = await recordImportProgress(
-            'JMdict',
-            'Waited for progress clear for initial JMdict import',
+        const initialImportDebug = await recordImportProgress(
+            initialImportSpec.label,
+            `Waited for progress clear for initial ${initialImportSpec.label} import`,
             async (onStepChange) => {
-                await waitForImportCompletion(page, 'JMdict', 300000, onStepChange);
+                await waitForImportCompletion(page, initialImportSpec.label, 300000, onStepChange);
             },
         );
-        if (!(jmdictImportDebug && jmdictImportDebug.hasResult === true && typeof jmdictImportDebug.resultTitle === 'string' && jmdictImportDebug.resultTitle.includes('JMdict'))) {
-            fail(`Initial JMdict import did not finish with expected debug payload: ${JSON.stringify(jmdictImportDebug)}`);
+        if (importWorkerTraceStopPromise !== null) {
+            await Promise.race([
+                importWorkerTraceStopPromise,
+                new Promise((resolve) => {
+                    const timeout = setTimeout(resolve, 2000);
+                    timeout.unref?.();
+                }),
+            ]);
+            if (importTraceSession !== null) {
+                appendLog(report, 'warning', 'Import worker trace completion marker was not observed; stopping trace at visible import completion instead.');
+                const traceSession = importTraceSession;
+                importTraceSession = null;
+                await stopBrowserTraceToFile(traceSession, importTracePath);
+                await traceSession.detach().catch(() => {});
+                console.log(`${e2eLogTag} wrote import browser trace using visible-completion fallback: ${importTracePath}`);
+            } else {
+                // If the marker fired but writing the trace stream took longer than
+                // the fallback window, wait for that write to finish before cleanup.
+                await importWorkerTraceStopPromise;
+            }
+        } else if (importTraceSession !== null) {
+            const traceSession = importTraceSession;
+            importTraceSession = null;
+            await stopBrowserTraceToFile(traceSession, importTracePath);
+            await traceSession.detach().catch(() => {});
+            console.log(`${e2eLogTag} wrote import browser trace: ${importTracePath}`);
+        }
+        if (!(initialImportDebug && initialImportDebug.hasResult === true && typeof initialImportDebug.resultTitle === 'string' && initialImportDebug.resultTitle.includes(initialImportSpec.label))) {
+            fail(`Initial ${initialImportSpec.label} import did not finish with expected debug payload: ${JSON.stringify(initialImportDebug)}`);
         }
 
         if (quickImportBenchmarkMode) {
             report.status = 'success';
-            console.log(`${e2eLogTag} PASS: Quick import benchmark mode completed (JMdict).`);
+            console.log(`${e2eLogTag} PASS: Quick import benchmark mode completed (${initialImportSpec.label}).`);
             return;
         }
 
@@ -5202,6 +5349,14 @@ async function main() {
             console.log(`${e2eLogTag} Wrote combined report: ${combinedReportPath}`);
         } catch (reportError) {
             console.error(`${e2eLogTag} Failed to write report: ${errorMessage(reportError)}`);
+        }
+        if (importTraceSession !== null) {
+            const traceSession = importTraceSession;
+            importTraceSession = null;
+            await withCleanupTimeout('import trace stop', async () => {
+                await stopBrowserTraceToFile(traceSession, importTracePath);
+                await traceSession.detach().catch(() => {});
+            }, 30000);
         }
         if (localServer !== null) {
             await withCleanupTimeout('local server close', async () => { await localServer.close(); });

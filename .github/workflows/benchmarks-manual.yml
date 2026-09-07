@@ -16,4 +16,4 @@ jobs:
         uses: CodSpeedHQ/action@63ae6025a0ffee97d7736a37c9192dbd6ed4e75f # v3.2
         with:
           token: ${{ secrets.CODSPEED_TOKEN }}
-          run: npm run bench
+          run: MANABITAN_CODSPEED=1 npm run bench

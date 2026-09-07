@@ -26,6 +26,44 @@ const execFileAsync = promisify(execFile);
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
 const buildsDir = path.join(root, 'builds');
+
+function parseCliArgs() {
+    const args = process.argv.slice(2);
+    let dictionaryId = '';
+    let pairCount = null;
+    let flagsJson = null;
+    let label = '';
+    for (let i = 0; i < args.length; ++i) {
+        const arg = args[i];
+        switch (arg) {
+            case '--pairs': {
+                pairCount = Number.parseInt(args[++i] ?? '', 10);
+
+                break;
+            }
+            case '--flags': {
+                flagsJson = args[++i] ?? '';
+
+                break;
+            }
+            case '--label': {
+                label = args[++i] ?? '';
+
+                break;
+            }
+            default: if (arg.startsWith('--')) {
+                throw new Error(`Unknown argument: ${arg}`);
+            } else if (dictionaryId.length === 0) {
+                dictionaryId = arg.trim().toLowerCase();
+            } else {
+                throw new Error(`Unexpected positional argument: ${arg}`);
+            }
+        }
+    }
+    return {dictionaryId: dictionaryId || 'jmdict', pairCount, flagsJson, label};
+}
+
+const cli = parseCliArgs();
 const timestamp = new Date().toISOString()
     .replaceAll(':', '')
     .replaceAll('.', '')
@@ -33,7 +71,7 @@ const timestamp = new Date().toISOString()
 const baselineImportFlags = {};
 const referenceIterations = Number.parseInt(process.env.MANABITAN_AB_REFERENCE_ITERATIONS ?? '10', 10);
 const iterationPercent = Number.parseFloat(process.env.MANABITAN_AB_ITERATION_PERCENT ?? '10');
-const pairIterationsOverride = Number.parseInt(process.env.MANABITAN_AB_PAIR_ITERATIONS ?? '', 10);
+const pairIterationsOverride = cli.pairCount ?? Number.parseInt(process.env.MANABITAN_AB_PAIR_ITERATIONS ?? '', 10);
 const pairIterationsFromPercent = Math.round(referenceIterations * (iterationPercent / 100));
 const pairIterations = Number.isFinite(pairIterationsOverride) && pairIterationsOverride > 0 ?
     pairIterationsOverride :
@@ -52,8 +90,19 @@ const collectBulkAddBytesMetrics = (process.env.MANABITAN_AB_BULKADD_BYTES_METRI
 /**
  * @type {VariantSpec[]}
  */
-const variants = [
-];
+const variants = [];
+if (cli.flagsJson !== null) {
+    const parsedFlags = parseJson(cli.flagsJson);
+    if (!(parsedFlags && typeof parsedFlags === 'object' && !Array.isArray(parsedFlags))) {
+        throw new Error('--flags must contain a JSON object');
+    }
+    variants.push({
+        id: 'cli-variant',
+        label: cli.label || 'CLI variant',
+        importFlags: /** @type {Record<string, unknown>} */ (parsedFlags),
+        targetedMetricLabel: 'step4 bulkAdd terms',
+    });
+}
 
 /**
  * @param {string} reportPath
@@ -144,9 +193,23 @@ function summarizeReport(report) {
     if (totalImportPhase === null) {
         throw new Error('Missing "*: total import" phase');
     }
-    const step4Breakdown = parseStep4Breakdown(totalImportPhase.details);
+    const phaseDataRaw = totalImportPhase.data;
+    const phaseData = (typeof phaseDataRaw === 'object' && phaseDataRaw !== null && !Array.isArray(phaseDataRaw)) ?
+        /** @type {Record<string, unknown>} */ (phaseDataRaw) :
+        null;
+    const structuredStep4BreakdownRaw = phaseData?.step4Breakdown;
+    /** @type {Record<string, unknown>|null} */
+    let structuredStep4Breakdown = null;
+    if (
+        typeof structuredStep4BreakdownRaw === 'object' &&
+        structuredStep4BreakdownRaw !== null &&
+        !Array.isArray(structuredStep4BreakdownRaw)
+    ) {
+        structuredStep4Breakdown = /** @type {Record<string, unknown>} */ (structuredStep4BreakdownRaw);
+    }
+    const step4Breakdown = structuredStep4Breakdown ?? parseStep4Breakdown(totalImportPhase.details);
     if (step4Breakdown === null) {
-        throw new Error('Missing step4Breakdown in total import phase details');
+        throw new Error('Missing structured or legacy step4Breakdown in total import phase');
     }
     const aggregateRaw = step4Breakdown.aggregate;
     if (!(typeof aggregateRaw === 'object' && aggregateRaw !== null && !Array.isArray(aggregateRaw))) {
@@ -202,7 +265,7 @@ async function runOnce(runId, envOverrides) {
     const reportJsonPath = toJsonPath(reportPath);
     console.log(`[flags-ab] running runId="${runId}" report=${reportPath}`);
     await execFileAsync(
-        'node',
+        process.execPath,
         ['./test/chromium/extension-two-dictionary-import.e2e.js'],
         {
             cwd: root,
@@ -260,25 +323,44 @@ async function runPairedVariant(variant, skipBuildForFirstBaseline) {
             ...baselineImportFlags,
             ...(collectBulkAddBytesMetrics ? {debugImportLogging: true} : {}),
         };
-        const baseline = await runOnce(`${runIdPrefix}:baseline`, {
-            MANABITAN_CHROMIUM_E2E_REPORT: baselineReportPath,
-            MANABITAN_E2E_SKIP_BUILD: (iteration === 1 && !skipBuildForFirstBaseline) ? '0' : '1',
-            MANABITAN_E2E_IMPORT_FLAGS_JSON: JSON.stringify(baselineRunImportFlags),
-            MANABITAN_E2E_IMPORT_BENCH_QUICK: quickMode ? '1' : '0',
-            MANABITAN_CHROMIUM_E2E_MAX_LOG_LINES: collectBulkAddBytesMetrics ? '10000' : '1000',
-        });
         const variantImportFlags = {
             ...baselineImportFlags,
             ...variant.importFlags,
             ...(collectBulkAddBytesMetrics ? {debugImportLogging: true} : {}),
         };
-        const variantRun = await runOnce(`${runIdPrefix}:variant`, {
-            MANABITAN_CHROMIUM_E2E_REPORT: variantReportPath,
-            MANABITAN_E2E_SKIP_BUILD: '1',
-            MANABITAN_E2E_IMPORT_FLAGS_JSON: JSON.stringify(variantImportFlags),
+        const commonEnv = {
             MANABITAN_E2E_IMPORT_BENCH_QUICK: quickMode ? '1' : '0',
+            MANABITAN_E2E_IMPORT_BENCH_DICTIONARY: quickMode ? cli.dictionaryId : '',
+            MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1',
+            MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1',
+            MANABITAN_E2E_PHASE_PROFILING: '0',
+            MANABITAN_E2E_PHASE_SCREENSHOTS: '0',
+            MANABITAN_E2E_PROCESS_SAMPLING: '0',
             MANABITAN_CHROMIUM_E2E_MAX_LOG_LINES: collectBulkAddBytesMetrics ? '10000' : '1000',
+        };
+        const runBaseline = async (/** @type {boolean} */ skipBuild) => await runOnce(`${runIdPrefix}:baseline`, {
+            ...commonEnv,
+            MANABITAN_CHROMIUM_E2E_REPORT: baselineReportPath,
+            MANABITAN_E2E_SKIP_BUILD: skipBuild ? '1' : '0',
+            MANABITAN_E2E_IMPORT_FLAGS_JSON: JSON.stringify(baselineRunImportFlags),
         });
+        const runVariant = async (/** @type {boolean} */ skipBuild) => await runOnce(`${runIdPrefix}:variant`, {
+            ...commonEnv,
+            MANABITAN_CHROMIUM_E2E_REPORT: variantReportPath,
+            MANABITAN_E2E_SKIP_BUILD: skipBuild ? '1' : '0',
+            MANABITAN_E2E_IMPORT_FLAGS_JSON: JSON.stringify(variantImportFlags),
+        });
+        const variantFirst = (iteration % 2) === 0;
+        const skipFirstBuild = iteration > 1 || skipBuildForFirstBaseline;
+        let baseline;
+        let variantRun;
+        if (variantFirst) {
+            variantRun = await runVariant(skipFirstBuild);
+            baseline = await runBaseline(true);
+        } else {
+            baseline = await runBaseline(skipFirstBuild);
+            variantRun = await runVariant(true);
+        }
         const totalImportMsDelta = variantRun.summary.totalImportMs - baseline.summary.totalImportMs;
         const totalImportPercentDelta = percentDelta(baseline.summary.totalImportMs, variantRun.summary.totalImportMs);
         const targetedMetricDelta = variantRun.summary.step4BulkAddTermsMs - baseline.summary.step4BulkAddTermsMs;
@@ -362,6 +444,9 @@ async function main() {
     if (!Number.isFinite(pairIterations) || pairIterations < 1) {
         throw new Error(`Invalid pair iteration count derived from referenceIterations=${String(referenceIterations)} iterationPercent=${String(iterationPercent)}`);
     }
+    if (variants.length === 0) {
+        throw new Error("No A/B variant configured. Pass --flags JSON (for example: --flags '{\"zipMaxWorkers\":3}').");
+    }
     await mkdir(buildsDir, {recursive: true});
 
     /** @type {Array<{ok: true, result: Awaited<ReturnType<typeof runPairedVariant>>} | {ok: false, variant: VariantSpec, error: string}>} */
@@ -381,6 +466,7 @@ async function main() {
 
     const summary = {
         timestamp,
+        dictionary: cli.dictionaryId,
         baselineImportFlags,
         variants,
         referenceIterations,
@@ -388,7 +474,7 @@ async function main() {
         pairIterations,
         quickMode,
         collectBulkAddBytesMetrics,
-        note: 'Each variant is tested in isolation against an immediate paired baseline run. "Payload bytes/row" is data density, not speed.',
+        note: 'Each variant is paired with an immediate baseline; order alternates AB/BA by iteration to reduce drift. "Payload bytes/row" is data density, not speed.',
         results: results.map((entry) => {
             if (!entry.ok) {
                 return {
@@ -417,6 +503,7 @@ async function main() {
     console.log('[flags-ab] summary');
     console.log(JSON.stringify({
         timestamp,
+        dictionary: cli.dictionaryId,
         referenceIterations,
         iterationPercent,
         pairIterations,

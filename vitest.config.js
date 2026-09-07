@@ -18,6 +18,8 @@
 import codspeedPlugin from '@codspeed/vitest-plugin';
 import {configDefaults, defineConfig} from 'vitest/config';
 
+const enableCodSpeed = process.env.MANABITAN_CODSPEED === '1';
+
 const sharedExclude = [
     ...configDefaults.exclude,
     '.codex-worktrees/**',
@@ -30,7 +32,7 @@ const sharedExclude = [
 ];
 
 export default defineConfig({
-    plugins: [codspeedPlugin()],
+    plugins: enableCodSpeed ? [codspeedPlugin()] : [],
     test: {
         setupFiles: [
             './test/vitest.setup.js',
