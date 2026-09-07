@@ -41,29 +41,29 @@ jobs:
           path = Path('test/chromium/extension-two-dictionary-import.e2e.js')
           text = path.read_text()
 
-          old = """            const matchesDictionaryName = (observedName, expectedName) => {
-              const observed = String(observedName || '').trim();
-              const expected = String(expectedName || '').trim();
-              if (observed.length === 0 || expected.length === 0) { return false; }
-              if (observed === expected) { return true; }
-              if (observed.startsWith(`${expected} `) || observed.startsWith(`${expected}.`)) { return true; }
-              return observed.includes(expected);
-            };
+          old = """function matchesDictionaryName(observedName, expectedName) {
+            const observed = String(observedName || '').trim();
+            const expected = String(expectedName || '').trim();
+            if (observed.length === 0 || expected.length === 0) { return false; }
+            if (observed === expected) { return true; }
+            if (observed.startsWith(`${expected} `) || observed.startsWith(`${expected}.`)) { return true; }
+            return observed.includes(expected);
+          }
           """
-          new = """            const matchesDictionaryName = (observedName, expectedName) => {
-              const observed = String(observedName || '').trim();
-              const expected = String(expectedName || '').trim();
-              if (observed.length === 0 || expected.length === 0) { return false; }
-              const expectedPrefixes = [`${expected} `, `${expected}.`];
-              return (
-                observed === expected ||
-                expectedPrefixes.some((prefix) => observed.startsWith(prefix)) ||
-                observed.includes(expected)
-              );
-            };
+          new = """function matchesDictionaryName(observedName, expectedName) {
+            const observed = String(observedName || '').trim();
+            const expected = String(expectedName || '').trim();
+            if (observed.length === 0 || expected.length === 0) { return false; }
+            const expectedPrefixes = [`${expected} `, `${expected}.`];
+            return (
+              observed === expected ||
+              expectedPrefixes.some((prefix) => observed.startsWith(prefix)) ||
+              observed.includes(expected)
+            );
+          }
           """
           if text.count(old) != 1:
-              raise SystemExit(f'nested dictionary matcher: expected 1 post-format match, found {text.count(old)}')
+              raise SystemExit(f'top-level dictionary matcher: expected 1 post-format match, found {text.count(old)}')
           text = text.replace(old, new, 1)
 
           old = "await new Promise((resolve) => setTimeout(resolve, 50));"
