@@ -1,0 +1,38 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 2d5f8f00..49cdad01 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -6123,20 +6123,21 @@ export class DictionaryDatabase {
+         while (tableSize < effectiveRequiredCount * 2) {
+             tableSize *= 2;
+         }
+-        const oldSlotTable = this._termEntryContentMetaHashPairTable;
+-        const slotTable = new Uint32Array(tableSize);
+-        const mask = tableSize - 1;
+-        for (const encodedIndex of oldSlotTable) {
+-            if (encodedIndex === 0) { continue; }
+-            const index = encodedIndex - 1;
+-            if (this._termEntryContentMetaStateTable[index] === TERM_CONTENT_META_SLOT_EMPTY) { continue; }
+-            const hash1 = this._termEntryContentMetaHash1Table[index];
+-            const hash2 = this._termEntryContentMetaHash2Table[index];
+-            let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
++        const slotTable = new Uint32Array(tableSize)
++        const mask = tableSize - 1
++        const stateTable = this._termEntryContentMetaStateTable
++        const hash1Table = this._termEntryContentMetaHash1Table
++        const hash2Table = this._termEntryContentMetaHash2Table
++        // Dense indexes are stable across rehashes. Visit metadata sequentially
++        // instead of gathering it through the larger, sparse hash-slot table.
++        // Include unpublished reservations; exclude rolled-back/free slots.
++        for (let index = 0; index < this._termEntryContentMetaDenseCount; ++index) {
++            if (stateTable[index] === TERM_CONTENT_META_SLOT_EMPTY) { continue }
++            let slot = this._getTermEntryContentMetaHashPairSlot(hash1Table[index], hash2Table[index], mask)
+             while (slotTable[slot] !== 0) {
+-                slot = (slot + 1) & mask;
++                slot = (slot + 1) & mask
+             }
+-            slotTable[slot] = encodedIndex;
++            slotTable[slot] = index + 1
+         }
+         this._termEntryContentMetaHashPairTable = slotTable;
+         this._termEntryContentMetaHashPairMask = mask;
