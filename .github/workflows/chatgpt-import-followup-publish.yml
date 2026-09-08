@@ -1,0 +1,131 @@
+name: Validate and publish exact import follow-up source
+
+on:
+  push:
+    branches: [chatgpt-import-followup-publish-20260908]
+    paths:
+      - .github/workflows/chatgpt-import-followup-publish.yml
+      - dev/perf/experiments/term-record-compaction-copy.test.js
+
+permissions:
+  contents: write
+
+jobs:
+  publish-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      EXPECTED_PARENT: 308123e7547dba95dea74eb8929ea4a237df5c50
+      EXPECTED_TREE: bbfb816a03e7421168964deb167fa6ac216f7932
+      TARGET_BRANCH: perf-import-zip-splitter-20260908
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - name: Reconstruct only the exact tested product tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          product="$RUNNER_TEMP/import-product"
+          evidence="$RUNNER_TEMP/publication-evidence"
+          mkdir -p "$evidence"
+          git worktree add --detach "$product" "$EXPECTED_PARENT"
+          for change in worker-only compact dedup; do
+            git -C "$product" apply --index "$GITHUB_WORKSPACE/dev/perf/experiments/$change.patch"
+          done
+          cp dev/perf/experiments/term-record-compaction-copy.test.js "$product/test/term-record-compaction-copy.test.js"
+          git -C "$product" add test/term-record-compaction-copy.test.js
+          test "$(git -C "$product" write-tree)" = "$EXPECTED_TREE"
+          git -C "$product" diff --cached "$EXPECTED_PARENT" --binary > "$evidence/published-source.patch"
+          git -C "$product" diff --cached "$EXPECTED_PARENT" --stat > "$evidence/published-source-stat.txt"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$product/node_modules"
+      - name: Validate final source including all fourteen new regression cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/publication-evidence"
+          cd "$RUNNER_TEMP/import-product"
+          node dev/bin/build-libs.js > "$evidence/build-libs.log" 2>&1
+          printf '%s\n' 'f734104d5933719059406387dd07de2148c8612a7ae02f2bd5bb92eef80cfc56  ext/lib/term-bank-parser.wasm' | sha256sum --check
+          node node_modules/vitest/vitest.mjs run > "$evidence/unit-full.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$evidence/options.log" 2>&1
+          for project in jsconfig.json dev/jsconfig.json test/jsconfig.typecheck.json benches/jsconfig.json; do
+            node node_modules/typescript/bin/tsc --noEmit --project "$project" >> "$evidence/types.log" 2>&1
+          done
+          node dev/bin/build.js --dryRun --all > "$evidence/build-dry.log" 2>&1
+          test "$(git write-tree)" = "$EXPECTED_TREE"
+      - name: Publish six source files only with parent and tree guards
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import {execFileSync} from 'node:child_process'
+          import {readFile, writeFile} from 'node:fs/promises'
+          import path from 'node:path'
+          const product = path.join(process.env.RUNNER_TEMP, 'import-product')
+          const parent = process.env.EXPECTED_PARENT
+          const expectedTree = process.env.EXPECTED_TREE
+          const target = process.env.TARGET_BRANCH
+          const allowed = [
+            'dev/build-libs.js',
+            'dev/zip-chunk-stream-plugin.js',
+            'ext/js/dictionary/dictionary-database.js',
+            'ext/js/dictionary/term-record-preinterned-plan.js',
+            'test/term-record-compaction-copy.test.js',
+            'test/zip-chunk-stream-build.test.js',
+          ]
+          const git = (...args) => execFileSync('git', args, {cwd: product, encoding: 'utf8'}).trim()
+          assert.equal(git('write-tree'), expectedTree)
+          const files = git('diff', '--cached', '--name-only', parent).split('\n').sort()
+          assert.deepEqual(files, allowed.slice().sort())
+          const request = async (endpoint, method = 'GET', body = undefined) => {
+            const response = await fetch(`https://api.github.com/repos/ManabiIO/manabitan/${endpoint}`, {
+              method,
+              headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${process.env.GH_TOKEN}`,
+                'X-GitHub-Api-Version': '2022-11-28',
+                'Content-Type': 'application/json',
+              },
+              body: body === undefined ? undefined : JSON.stringify(body),
+            })
+            if (!response.ok) throw new Error(`${method} ${endpoint}: ${response.status} ${await response.text()}`)
+            return response.json()
+          }
+          assert.equal((await request(`git/ref/heads/${target}`)).object.sha, parent, 'Target branch changed; do not overwrite concurrent work')
+          const entries = []
+          for (const file of files) {
+            const blob = await request('git/blobs', 'POST', {content: await readFile(path.join(product, file), 'utf8'), encoding: 'utf-8'})
+            assert.equal(blob.sha, git('hash-object', file))
+            entries.push({path: file, mode: '100644', type: 'blob', sha: blob.sha})
+          }
+          const tree = await request('git/trees', 'POST', {base_tree: 'e8cb7ac21c23b2ffe0c9418881d595ac4d8ebe52', tree: entries})
+          assert.equal(tree.sha, expectedTree, 'Remote source tree does not match tested local tree')
+          const commit = await request('git/commits', 'POST', {
+            message: 'Narrow ZIP splitting to worker output and reduce importer copy/descriptor work\n\nKeep the host ZIP bundle unchanged. Coalesce adjacent selected string spans without changing first-use remapping or owned output bytes. Avoid temporary canonical dedup descriptors while preserving exact-match fallback and rollback. Add fourteen regression cases including shared memory and a thousand deterministic oracle comparisons.\n\nRemain a draft performance candidate: whole-import results are path-dependent, not a universal speedup. Publication includes only the six tested source/test files; no experiment workflow, runtime, or fixture payloads.',
+            tree: tree.sha,
+            parents: [parent],
+          })
+          assert.equal((await request(`git/ref/heads/${target}`)).object.sha, parent, 'Target changed before publication')
+          await request(`git/refs/heads/${target}`, 'PATCH', {sha: commit.sha, force: false})
+          assert.equal((await request(`git/ref/heads/${target}`)).object.sha, commit.sha)
+          const receipt = {repository: 'ManabiIO/manabitan', branch: target, parent, commit: commit.sha, tree: tree.sha, files}
+          await writeFile(path.join(process.env.RUNNER_TEMP, 'publication-evidence', 'publication.json'), JSON.stringify(receipt, null, 2) + '\n')
+          console.log(JSON.stringify(receipt, null, 2))
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exact-import-followup-publication
+          path: ${{ runner.temp }}/publication-evidence/
+          retention-days: 14
+          if-no-files-found: error
