@@ -1,0 +1,106 @@
+name: Export completed cache-tail evidence
+
+on:
+  push:
+    branches: [perf-cache-tail-evidence-export-20260908]
+    paths: [.github/workflows/export-cache-tail-evidence.yml]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  report:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read the exact verification run and preserve its measured results
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, math, os, random, re, statistics, subprocess
+          from pathlib import Path
+          repo = 'ManabiIO/manabitan'
+          def api(path):
+              return json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/{path}'], text=True))
+          runs = api('actions/runs?branch=perf-cache-tail-verify-20260908&per_page=100')['workflow_runs']
+          matches = [r for r in runs if r['head_sha'] == '026e2ace6ce3937fd0218e17fe49744e096e85b2' and r['path'] == '.github/workflows/cache-tail-verification.yml']
+          if not matches:
+              raise RuntimeError('Exact verification run not found')
+          run = max(matches, key=lambda r: r['id'])
+          report = {k: run[k] for k in ['id', 'status', 'conclusion', 'head_sha', 'html_url']}
+          report['scope'] = 'Recovered source-build comparisons, not release sign-off'
+          artifacts = api(f"actions/runs/{run['id']}/artifacts")['artifacts']
+          artifacts = [a for a in artifacts if a['name'] == 'cache-tail-verification' and not a['expired']]
+          if artifacts:
+              report['artifact'] = {k: artifacts[0].get(k) for k in ['id', 'name', 'digest']}
+              evidence = Path(os.environ['RUNNER_TEMP']) / 'evidence'
+              subprocess.run(['gh', 'run', 'download', str(run['id']), '--repo', repo, '--name', 'cache-tail-verification', '--dir', str(evidence)], check=True)
+              results_path = evidence / 'paired/results.json'
+              if results_path.exists():
+                  result = json.loads(results_path.read_text())
+                  report['comparisonStatus'] = result['status']
+                  report['measuredImports'] = len(result['runs'])
+                  report['warmupImports'] = len(result['warmupRuns'])
+                  report['source'] = result['source']
+                  report['dictionaries'] = []
+                  if result['status'] == 'complete':
+                      if len(result['runs']) != 72 or len(result['warmupRuns']) != 6:
+                          raise ValueError('Unexpected population')
+                      rng = random.Random(20260908)
+                      for name in ['jmdict', 'jmnedict', 'jitendex']:
+                          pairs = []
+                          diagnostics = {'baseline': [], 'candidate': []}
+                          for number in range(1, 13):
+                              selected = [r for r in result['runs'] if r['dataset'] == name and r['pair'] == number]
+                              if len(selected) != 2 or {r['arm'] for r in selected} != {'baseline', 'candidate'}:
+                                  raise ValueError('Invalid pair')
+                              arms = {r['arm']: r for r in selected}
+                              a, b = [arms[k]['totalImportMs'] for k in ['baseline', 'candidate']]
+                              pairs.append({'baselineMs': a, 'candidateMs': b, 'changePct': 100 * (b / a - 1)})
+                              for arm, r in arms.items():
+                                  summary = json.loads((evidence / 'paired' / Path(r['summary']).parent.name / 'summary.json').read_text())
+                                  phases = summary['runs'][0]['importDebug']['importerPhaseTimings']
+                                  details = [p['details'] for p in phases if p['phase'].startswith('term-file-fast-path:')]
+                                  if len(details) != 1:
+                                      raise ValueError('Missing complete import diagnostics')
+                                  diagnostics[arm].append({k: details[0][k] for k in ['dedupRecentSourceCacheBytes', 'dedupRecentSourceHitCount', 'dedupUniqueCount', 'dedupPersistedHitCount']})
+                          changes = [p['changePct'] for p in pairs]
+                          boot = sorted(statistics.median(rng.choices(changes, k=12)) for _ in range(20000))
+                          report['dictionaries'].append({'dictionary': name, 'baselineMedianMs': statistics.median(p['baselineMs'] for p in pairs), 'candidateMedianMs': statistics.median(p['candidateMs'] for p in pairs), 'medianPairedChangePct': statistics.median(changes), 'fasterPairs': sum(c < 0 for c in changes), 'pairs': pairs, 'exploratoryBootstrap95Pct': [boot[500], boot[19499]], 'diagnostics': diagnostics})
+              for filename in ['unit.log', 'options.log', 'types.log', 'build-dry-run.log', 'outcome-parity.log']:
+                  path = evidence / filename
+                  if path.exists():
+                      report[filename] = re.sub(r'\x1b\[[0-9;]*m', '', path.read_text(errors='replace'))[-1800:]
+              path = evidence / 'full-chromium.json'
+              if path.exists():
+                  data = json.loads(path.read_text())
+                  report['fullChromium'] = {'status': data.get('status'), 'phases': len(data.get('phases', [])), 'skippedVerification': data.get('skippedVerification'), 'skipReason': data.get('skipReason')}
+          try:
+              ref = api('git/ref/heads/perf-import-cache-tail-20260908')
+              commit = api('git/commits/' + ref['object']['sha'])
+              report['publishedSource'] = {'sha': commit['sha'], 'tree': commit['tree']['sha'], 'expectedTreeMatches': commit['tree']['sha'] == '4b88c982fd5eab752e794955dbe09ce3723d6fa1'}
+          except subprocess.CalledProcessError:
+              report['publishedSource'] = None
+          out = Path('dev/perf/cache-tail-recovered.json')
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(report, indent=2) + '\n')
+          print(json.dumps({k: report.get(k) for k in ['id', 'status', 'conclusion', 'comparisonStatus', 'measuredImports', 'publishedSource']}, indent=2))
+          PY
+          git add dev/perf/cache-tail-recovered.json
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'Preserve measured cache-tail outcomes and source provenance'
+          git push origin HEAD:refs/heads/perf-cache-tail-evidence-export-20260908
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cache-tail-readable-report
+          path: dev/perf/cache-tail-recovered.json
+          if-no-files-found: warn
+          retention-days: 14
