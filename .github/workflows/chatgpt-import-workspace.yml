@@ -1,0 +1,44 @@
+name: Export import profiling workspace
+
+on:
+  push:
+    branches: [chatgpt-import-workspace-20260908]
+    paths: [.github/workflows/chatgpt-import-workspace.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  workspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 394d8eb799dd1eb5e194cee11472a4beab915080
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Package exact source, dependency tree, and Node
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 394d8eb799dd1eb5e194cee11472a4beab915080
+          mkdir -p "$RUNNER_TEMP/export/bin"
+          git bundle create "$RUNNER_TEMP/export/source.bundle" HEAD
+          cp "$(command -v node)" "$RUNNER_TEMP/export/bin/node"
+          node -e 'const fs=require("node:fs");const cp=require("node:child_process");fs.writeFileSync("perf-bundle-manifest.json",JSON.stringify({source:{sha:cp.execFileSync("git",["rev-parse","HEAD"],{encoding:"utf8"}).trim()},node:process.version,versions:process.versions},null,2))'
+          tar --exclude=.git -czf "$RUNNER_TEMP/export/workspace.tar.gz" .
+          (cd "$RUNNER_TEMP/export" && sha256sum source.bundle workspace.tar.gz bin/node > SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manabitan-pr20-import-workspace
+          path: ${{ runner.temp }}/export/
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
