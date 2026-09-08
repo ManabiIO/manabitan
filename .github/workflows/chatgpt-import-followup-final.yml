@@ -1,0 +1,110 @@
+name: Narrow ZIP and combined import verification
+
+on:
+  push:
+    branches: [chatgpt-import-followup-final-20260908]
+    paths:
+      - .github/workflows/chatgpt-import-followup-final.yml
+      - dev/perf/experiments/**
+
+permissions:
+  contents: read
+
+jobs:
+  paired-imports:
+    name: Original baseline versus ${{ matrix.experiment }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        experiment: [worker-only, combined]
+    env:
+      EXPERIMENT: ${{ matrix.experiment }}
+      PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Prepare isolated source builds and immutable fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          arms="$RUNNER_TEMP/import-arms"
+          evidence="$RUNNER_TEMP/import-evidence"
+          mkdir -p "$arms" "$evidence"
+          git worktree add --detach "$arms/baseline" 394d8eb799dd1eb5e194cee11472a4beab915080
+          git worktree add --detach "$arms/candidate" 308123e7547dba95dea74eb8929ea4a237df5c50
+          git -C "$arms/candidate" apply --index "$GITHUB_WORKSPACE/dev/perf/experiments/worker-only.patch"
+          cp dev/perf/experiments/worker-only.patch "$evidence/"
+          if [ "$EXPERIMENT" = combined ]; then
+            for change in compact dedup; do
+              git -C "$arms/candidate" apply --index "$GITHUB_WORKSPACE/dev/perf/experiments/$change.patch"
+              cp "dev/perf/experiments/$change.patch" "$evidence/"
+            done
+          fi
+          for arm in baseline candidate; do
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$arms/$arm/node_modules"
+            (cd "$arms/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+            git -C "$arms/$arm" diff HEAD --binary > "$evidence/source-$arm.patch"
+          done
+          cmp "$arms/baseline/ext/lib/zip.js" "$arms/candidate/ext/lib/zip.js"
+          echo 'Host ZIP bundle byte-identical to original baseline' > "$evidence/host-zip-parity.txt"
+          (cd "$arms/baseline" && node dev/perf/prepare-dictionaries.js) > "$evidence/fixtures.log" 2>&1
+          ln -s "$arms/baseline/builds/e2e-dictionary-cache" "$arms/candidate/builds/e2e-dictionary-cache"
+          node --version > "$evidence/node-version.txt"
+          clang --version > "$evidence/compiler-version.txt"
+          lscpu > "$evidence/cpu.txt"
+          free -b > "$evidence/memory.txt"
+          cp dev/perf/experiments/run-paired.py "$evidence/"
+      - name: Focused correctness and strict main types before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/import-evidence"
+          cd "$RUNNER_TEMP/import-arms/candidate"
+          node node_modules/vitest/vitest.mjs run test/zip-chunk-stream.test.js test/zip-chunk-stream-build.test.js test/dictionary-database-content-dedup.test.js test/term-record-preinterned-plan-utils.test.js test/term-lookup-index-preparation.test.js > "$evidence/focused-tests.log" 2>&1
+          node node_modules/typescript/bin/tsc --noEmit --project jsconfig.json > "$evidence/main-types.log" 2>&1
+      - name: Eight predeclared adjacent pairs per dictionary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/experiments/run-paired.py \
+            --baseline "$RUNNER_TEMP/import-arms/baseline" \
+            --candidate "$RUNNER_TEMP/import-arms/candidate" \
+            --pairs 8 \
+            --output "$RUNNER_TEMP/import-evidence/paired" \
+            --label "Independent GitHub runner: original PR20 versus $EXPERIMENT; eight pairs per dictionary" \
+            | tee "$RUNNER_TEMP/import-evidence/driver.log"
+      - name: Full combined-source validation after all timing
+        if: matrix.experiment == 'combined'
+        shell: bash
+        env:
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/import-evidence"
+          cd "$RUNNER_TEMP/import-arms/candidate"
+          node node_modules/vitest/vitest.mjs run > "$evidence/unit-full.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$evidence/options.log" 2>&1
+          for project in dev/jsconfig.json test/jsconfig.typecheck.json benches/jsconfig.json; do
+            node node_modules/typescript/bin/tsc --noEmit --project "$project" >> "$evidence/additional-types.log" 2>&1
+          done
+          node dev/bin/build.js --dryRun --all > "$evidence/build-dry.log" 2>&1
+          MANABITAN_CHROMIUM_E2E_REPORT="$evidence/full-chromium.html" node test/chromium/extension-two-dictionary-import.e2e.js > "$evidence/full-chromium.log" 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: import-followup-${{ matrix.experiment }}
+          path: ${{ runner.temp }}/import-evidence/
+          retention-days: 14
+          if-no-files-found: error

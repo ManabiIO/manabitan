@@ -1,0 +1,86 @@
+diff --git a/dev/build-libs.js b/dev/build-libs.js
+index f4b34ba9..383e0f6f 100644
+--- a/dev/build-libs.js
++++ b/dev/build-libs.js
+@@ -26,7 +26,7 @@ import os from 'os';
+ import path from 'path';
+ import {fileURLToPath} from 'url';
+ import {parseJson} from './json.js';
+-import {zipChunkStreamPlugin} from './zip-chunk-stream-plugin.js'
++import {getZipChunkStreamPlugins} from './zip-chunk-stream-plugin.js'
+ 
+ const require = createRequire(import.meta.url);
+ 
+@@ -239,7 +239,7 @@ async function buildDictionaryWasm(out) {
+  */
+ async function buildLib(scriptPath) {
+     await esbuild.build({
+-        plugins: [zipChunkStreamPlugin],
++        plugins: getZipChunkStreamPlugins(scriptPath),
+         entryPoints: [scriptPath],
+         bundle: true,
+         minify: false,
+diff --git a/dev/zip-chunk-stream-plugin.js b/dev/zip-chunk-stream-plugin.js
+index ecf35c24..72182bf7 100644
+--- a/dev/zip-chunk-stream-plugin.js
++++ b/dev/zip-chunk-stream-plugin.js
+@@ -24,7 +24,7 @@ const codecSourceSha256 = '1c0d9de91141bf89f49dc1e239dd22d75a3e46d38dd153aca1a6d
+ const replacementPath = fileURLToPath(new URL('zip-chunk-stream.js', import.meta.url))
+ 
+ /**
+- * Replace only the pinned splitter, in both ZIP host and worker bundles.
++ * Replace only the pinned splitter in a selected bundle.
+  * Keep the dependency's codecs and license intact; fail closed on any source
+  * change so dependency upgrades require an explicit backport review/removal.
+  * @type {import('esbuild').Plugin}
+@@ -48,3 +48,13 @@ export const zipChunkStreamPlugin = {
+         })
+     },
+ }
++
++/**
++ * The host receives bounded compressed chunks. Preserve its existing copying
++ * behavior; only the codec worker needs to split large decompressed outputs.
++ * @param {string} scriptPath
++ * @returns {import('esbuild').Plugin[]}
++ */
++export function getZipChunkStreamPlugins(scriptPath) {
++    return path.basename(scriptPath) === 'z-worker.js' ? [zipChunkStreamPlugin] : []
++}
+diff --git a/test/zip-chunk-stream-build.test.js b/test/zip-chunk-stream-build.test.js
+index 04849ae9..67b1204b 100644
+--- a/test/zip-chunk-stream-build.test.js
++++ b/test/zip-chunk-stream-build.test.js
+@@ -20,20 +20,26 @@ import {mkdtemp, mkdir, readFile, rm, writeFile} from 'node:fs/promises'
+ import os from 'node:os'
+ import path from 'node:path'
+ import {describe, expect, test} from 'vitest'
+-import {zipChunkStreamPlugin} from '../dev/zip-chunk-stream-plugin.js'
++import {getZipChunkStreamPlugins, zipChunkStreamPlugin} from '../dev/zip-chunk-stream-plugin.js'
+ 
+ describe('ZIP splitter build integration', () => {
+-    test.each(['zip.js', 'z-worker.js'])('patches the pinned codec in %s', async (entry) => {
++    test.each(['zip.js', 'z-worker.js'])('restricts the pinned codec replacement to worker output: %s', async (entry) => {
+         const result = await build({
+             entryPoints: [`dev/lib/${entry}`],
+             bundle: true,
+             format: 'esm',
+             write: false,
+-            plugins: [zipChunkStreamPlugin],
++            plugins: getZipChunkStreamPlugins(`dev/lib/${entry}`),
+         })
+-        expect(result.outputFiles[0].text).toContain('ZIP chunk size must be a positive safe integer')
+-        expect(result.outputFiles[0].text).toContain('Redistribution and use in source and binary forms')
+-        expect(result.outputFiles[0].text).not.toContain('transform(chunk.slice(chunkSize), controller)')
++        const output = result.outputFiles[0].text
++        expect(output).toContain('Redistribution and use in source and binary forms')
++        if (entry === 'z-worker.js') {
++            expect(output).toContain('ZIP chunk size must be a positive safe integer')
++            expect(output).not.toContain('transform(chunk.slice(chunkSize), controller)')
++        } else {
++            expect(output).not.toContain('ZIP chunk size must be a positive safe integer')
++            expect(output).toContain('transform(chunk.slice(chunkSize), controller)')
++        }
+     })
+ 
+     test('fails closed if the pinned dependency source changes', async () => {
