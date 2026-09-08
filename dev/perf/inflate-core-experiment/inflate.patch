@@ -1,0 +1,39 @@
+diff --git a/ext/js/dictionary/wasm/vendor/miniz/miniz.h b/ext/js/dictionary/wasm/vendor/miniz/miniz.h
+index 6b71bda7..22d72694 100644
+--- a/ext/js/dictionary/wasm/vendor/miniz/miniz.h
++++ b/ext/js/dictionary/wasm/vendor/miniz/miniz.h
+@@ -225,7 +225,8 @@
+ #endif
+ #endif
+ 
+-#if defined(_M_X64) || defined(_WIN64) || defined(__MINGW64__) || defined(_LP64) || defined(__LP64__) || defined(__ia64__) || defined(__x86_64__)
++/* WebAssembly has i64 arithmetic independently of its pointer width. */
++#if defined(_M_X64) || defined(_WIN64) || defined(__MINGW64__) || defined(_LP64) || defined(__LP64__) || defined(__ia64__) || defined(__x86_64__) || defined(__wasm__)
+ /* Set MINIZ_HAS_64BIT_REGISTERS to 1 if operations on 64-bit integers are reasonably fast (and don't involve compiler generated calls to helper functions). */
+ #define MINIZ_HAS_64BIT_REGISTERS 1
+ #else
+
+diff --git a/ext/js/dictionary/wasm/vendor/miniz/miniz_tinfl.c b/ext/js/dictionary/wasm/vendor/miniz/miniz_tinfl.c
+index a8d2a593..e608573c 100644
+--- a/ext/js/dictionary/wasm/vendor/miniz/miniz_tinfl.c
++++ b/ext/js/dictionary/wasm/vendor/miniz/miniz_tinfl.c
+@@ -552,7 +552,18 @@ extern "C"
+                         }
+                         continue;
+                     }
+-#if MINIZ_USE_UNALIGNED_LOADS_AND_STORES
++#if defined(__wasm_bulk_memory__)
++                    else if ((counter >= 9) && (counter <= dist))
++                    {
++                        /* Manabitan: these match bytes already exist in the history.
++                           Short-distance matches must keep forward expansion below.
++                           memmove also preserves wrapped-buffer aliasing semantics. */
++                        __builtin_memmove(pOut_buf_cur, pSrc, counter);
++                        pOut_buf_cur += counter;
++                        counter = 0;
++                        continue;
++                    }
++#elif MINIZ_USE_UNALIGNED_LOADS_AND_STORES
+                     else if ((counter >= 9) && (counter <= dist))
+                     {
+                         const mz_uint8 *pSrc_end = pSrc + (counter & ~7);
