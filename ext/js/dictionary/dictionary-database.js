@@ -92,6 +92,7 @@ const TERM_CONTENT_META_SLOT_PENDING = 2;
 const TERM_CONTENT_META_PREALLOC_MAX_ENTRIES = 1024 * 1024;
 const TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE = 4096;
 const TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES = 48 * 1024 * 1024;
+const TERM_CONTENT_RECENT_SOURCE_BATCH_MAX_BYTES = 8 * 1024 * 1024
 const BULK_IMPORT_STATE_IDLE = 'idle';
 const BULK_IMPORT_STATE_ACTIVE = 'active';
 const BULK_IMPORT_STATE_FINALIZING = 'finalizing';
@@ -5711,6 +5712,18 @@ export class DictionaryDatabase {
             minimumOffset = Math.min(minimumOffset, offset);
             maximumEnd = Math.max(maximumEnd, offset + length);
         }
+        // Prefer the most recent complete entries instead of copying an entire
+        // large parser group. Uncached entries still use exact storage checks.
+        const tailStart = Math.max(minimumOffset, maximumEnd - TERM_CONTENT_RECENT_SOURCE_BATCH_MAX_BYTES)
+        if (tailStart > minimumOffset) {
+            minimumOffset = Infinity
+            for (let i = 0; i < staged.indexes.length; ++i) {
+                const index = staged.indexes[i]
+                const offset = spans.offsets[i]
+                if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED || offset < tailStart) { continue }
+                minimumOffset = Math.min(minimumOffset, offset)
+            }
+        }
         if (!Number.isFinite(minimumOffset) || maximumEnd <= minimumOffset) { return 0; }
         const byteLength = maximumEnd - minimumOffset;
         if (byteLength > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES) { return 0; }
@@ -5735,7 +5748,7 @@ export class DictionaryDatabase {
         this._recentTermContentSourceBatchBytes += owned.byteLength;
         for (let i = 0; i < staged.indexes.length; ++i) {
             const index = staged.indexes[i];
-            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED || spans.offsets[i] < minimumOffset) { continue }
             this._termEntryContentMetaRecentSourceBatchIdTable[index] = batchId;
             this._termEntryContentMetaRecentSourceOffsetTable[index] = spans.offsets[i] - minimumOffset;
         }
