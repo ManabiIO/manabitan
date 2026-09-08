@@ -36,15 +36,22 @@ jobs:
           git -C "$source" add test/term-bank-adjacent-glossary.test.js
           test "$(git -C "$source" write-tree)" = "$expected"
           test "$(git -C "$source" diff --cached --name-only | wc -l)" -eq 2
-          sha=$(printf '%s\n' 'Reuse validation of byte-identical adjacent glossaries' '' 'Require a complete byte comparison to the preceding validated row in the current parser call. Preserve current-row spans, media and normalization hints, delimiters, and logical input bounds. Add 21 regression tests. No ZIP, hashing, storage, or import-policy changes.' | git -c user.name='Alex Ehlke' -c user.email='alex.ehlke@gmail.com' commit-tree "$expected" -p "$base")
-          # A normal push to a new dedicated source branch: never force or merge.
-          git push origin "$sha:refs/heads/$branch"
+          if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+            sha=$(git rev-parse "refs/remotes/origin/$branch")
+            test "$(git rev-parse "$sha^{tree}")" = "$expected"
+            test "$(git rev-parse "$sha^")" = "$base"
+          else
+            sha=$(printf '%s\n' 'Reuse validation of byte-identical adjacent glossaries' '' 'Require a complete byte comparison to the preceding validated row in the current parser call. Preserve current-row spans, media and normalization hints, delimiters, and logical input bounds. Add 21 regression tests. No ZIP, hashing, storage, or import-policy changes.' | git -c user.name='Alex Ehlke' -c user.email='alex.ehlke@gmail.com' commit-tree "$expected" -p "$base")
+            # A normal push to a new dedicated source branch: never force or merge.
+            git push origin "$sha:refs/heads/$branch"
+          fi
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
           mkdir -p "$RUNNER_TEMP/publication"
           printf '%s\n' "$sha" > "$RUNNER_TEMP/publication/source-sha.txt"
           printf '%s\n' "$branch" > "$RUNNER_TEMP/publication/source-branch.txt"
           git -C "$source" diff --cached --binary > "$RUNNER_TEMP/publication/source.patch"
-          git bundle create "$RUNNER_TEMP/publication/source.bundle" "$sha" ^"$base"
+          git update-ref refs/heads/glossary-export "$sha"
+          git bundle create "$RUNNER_TEMP/publication/source.bundle" refs/heads/glossary-export ^"$base"
       - uses: actions/upload-artifact@v4
         with:
           name: glossary-source-publication
