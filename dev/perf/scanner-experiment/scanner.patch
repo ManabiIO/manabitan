@@ -1,0 +1,21 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 38d6cf27..ac3533c2 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -366,9 +366,15 @@ static int is_hex_digit(uint8_t value) {
+         (value >= 'A' && value <= 'F');
+ }
+ 
+-static int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
++__attribute__((always_inline))
++static inline int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+     if (start >= len || src[start] != '"') { return 0; }
+     uint32_t i = start + 1u;
++    // Empty tags/readings are common; do not set up a vector scan for them.
++    if (i < len && src[i] == '"') {
++        *out_end = i + 1u;
++        return 1;
++    }
+     while (i < len) {
+         // Skip ordinary UTF-8 bytes sixteen at a time. Only JSON quotes,
+         // backslashes and unescaped ASCII controls need scalar handling.
