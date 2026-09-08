@@ -26,6 +26,7 @@ import os from 'os';
 import path from 'path';
 import {fileURLToPath} from 'url';
 import {parseJson} from './json.js';
+import {zipChunkStreamPlugin} from './zip-chunk-stream-plugin.js'
 
 const require = createRequire(import.meta.url);
 
@@ -238,6 +239,7 @@ async function buildDictionaryWasm(out) {
  */
 async function buildLib(scriptPath) {
     await esbuild.build({
+        plugins: [zipChunkStreamPlugin],
         entryPoints: [scriptPath],
         bundle: true,
         minify: false,
