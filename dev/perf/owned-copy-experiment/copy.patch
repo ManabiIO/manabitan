@@ -1,0 +1,13 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 2d5f8f00..9045dd48 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -5730,7 +5730,7 @@ export class DictionaryDatabase {
+             this._nextRecentTermContentSourceBatchId = 1;
+         }
+         const batchId = this._nextRecentTermContentSourceBatchId++;
+-        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
++        const owned = new Uint8Array(spans.buffer.subarray(minimumOffset, maximumEnd))
+         this._recentTermContentSourceBatches.set(batchId, owned);
+         this._recentTermContentSourceBatchBytes += owned.byteLength;
+         for (let i = 0; i < staged.indexes.length; ++i) {

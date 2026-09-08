@@ -1,0 +1,115 @@
+name: Verify owned cache copy in full dictionary imports
+
+on:
+  push:
+    branches: [perf-owned-copy-verify-20260908]
+    paths:
+      - .github/workflows/owned-copy-verification.yml
+      - dev/perf/owned-copy-experiment/**
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Build isolated source arms with the same dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/arms" "$RUNNER_TEMP/evidence"
+          for arm in baseline candidate; do
+            git worktree add --detach "$RUNNER_TEMP/arms/$arm" 394d8eb799dd1eb5e194cee11472a4beab915080
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/arms/$arm/node_modules"
+          done
+          git -C "$RUNNER_TEMP/arms/candidate" apply --index "$GITHUB_WORKSPACE/dev/perf/owned-copy-experiment/copy.patch"
+          cp dev/perf/owned-copy-experiment/dictionary-database-recent-source-copy.test.js "$RUNNER_TEMP/arms/candidate/test/"
+          git -C "$RUNNER_TEMP/arms/candidate" add test/dictionary-database-recent-source-copy.test.js
+          test "$(git -C "$RUNNER_TEMP/arms/candidate" write-tree)" = 37367e078f8e5d6419b15cc513e1e93b02eaa7b1
+          for arm in baseline candidate; do
+            (cd "$RUNNER_TEMP/arms/$arm" && node dev/bin/build.js --target chrome-dev) > "$RUNNER_TEMP/evidence/build-$arm.log" 2>&1
+            git -C "$RUNNER_TEMP/arms/$arm" diff HEAD --binary > "$RUNNER_TEMP/evidence/source-$arm.patch"
+          done
+          for file in term-bank-parser.wasm zstd.wasm zip.js z-worker.js; do
+            cmp "$RUNNER_TEMP/arms/baseline/ext/lib/$file" "$RUNNER_TEMP/arms/candidate/ext/lib/$file"
+          done
+          (cd "$RUNNER_TEMP/arms/baseline" && node dev/perf/prepare-dictionaries.js) > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          ln -s "$RUNNER_TEMP/arms/baseline/builds/e2e-dictionary-cache" "$RUNNER_TEMP/arms/candidate/builds/e2e-dictionary-cache"
+          cp dev/perf/owned-copy-experiment/run-paired.py "$RUNNER_TEMP/evidence/"
+          clang --version > "$RUNNER_TEMP/evidence/compiler.txt"
+          lscpu > "$RUNNER_TEMP/evidence/cpu.txt"
+          free -b > "$RUNNER_TEMP/evidence/memory.txt"
+      - name: Full correctness before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/candidate"
+          node node_modules/vitest/vitest.mjs run > "$RUNNER_TEMP/evidence/unit.log" 2>&1
+          npm run test:ts > "$RUNNER_TEMP/evidence/types.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$RUNNER_TEMP/evidence/options.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$RUNNER_TEMP/evidence/build-dry-run.log" 2>&1
+      - name: Twelve adjacent pairs per dictionary, warmups excluded
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/owned-copy-experiment/run-paired.py \
+            --baseline "$RUNNER_TEMP/arms/baseline" \
+            --candidate "$RUNNER_TEMP/arms/candidate" \
+            --pairs 12 --warmups 1 \
+            --output "$RUNNER_TEMP/evidence/paired" \
+            --label "Independent PR20 vs owned cache copy constructor; twelve pairs per dictionary" \
+            | tee "$RUNNER_TEMP/evidence/driver.log"
+      - name: Strict full Chromium integration after timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/candidate"
+          MANABITAN_E2E_STRICT_RUNTIME=1 MANABITAN_CHROMIUM_HEADLESS=1 MANABITAN_E2E_SKIP_BUILD=1 MANABITAN_CHROMIUM_E2E_REPORT="$RUNNER_TEMP/evidence/full-chromium.html" node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/full-chromium.log" 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-copy-verification
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
+
+  preserve-tested-source:
+    needs: verify
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Preserve only the validated product diff on a new review branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach "$RUNNER_TEMP/source" 394d8eb799dd1eb5e194cee11472a4beab915080
+          git -C "$RUNNER_TEMP/source" apply --index "$GITHUB_WORKSPACE/dev/perf/owned-copy-experiment/copy.patch"
+          cp dev/perf/owned-copy-experiment/dictionary-database-recent-source-copy.test.js "$RUNNER_TEMP/source/test/"
+          cd "$RUNNER_TEMP/source"
+          git add test/dictionary-database-recent-source-copy.test.js
+          test "$(git write-tree)" = 37367e078f8e5d6419b15cc513e1e93b02eaa7b1
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'Copy recent dedup sources directly into owned byte arrays'
+          git push origin HEAD:refs/heads/perf-import-owned-cache-copy-20260908
+          git rev-parse HEAD > "$RUNNER_TEMP/source-sha.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: owned-copy-source-reference
+          path: ${{ runner.temp }}/source-sha.txt
+          retention-days: 14
+          if-no-files-found: error
