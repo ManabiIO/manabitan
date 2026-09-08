@@ -1,9 +1,9 @@
 name: Publish and confirm exact glossary source
 
+# The one-shot push-triggered confirmation is already running. Subsequent
+# maintenance must not launch duplicate benchmarks or republish the source.
 on:
-  push:
-    branches: [perf-glossary-verify-20260908]
-    paths: [.github/workflows/glossary-confirmation.yml]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -83,7 +83,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/arms" "$RUNNER_TEMP/evidence"
           git worktree add --detach "$RUNNER_TEMP/arms/baseline" 394d8eb799dd1eb5e194cee11472a4beab915080
           git worktree add --detach "$RUNNER_TEMP/arms/candidate" "$SOURCE_SHA"
-          test "$(git -C "$RUNNER_TEMP/arms/candidate" rev-parse HEAD^{tree})" = 0f96f37220d52f1a5e395ac698c242e2f6c7c4e8
+          test "$(git -C "$RUNNER_TEMP/arms/candidate" rev-parse 'HEAD^{tree}')" = 0f96f37220d52f1a5e395ac698c242e2f6c7c4e8
           for arm in baseline candidate; do
             ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/arms/$arm/node_modules"
             (cd "$RUNNER_TEMP/arms/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$RUNNER_TEMP/evidence/build-$arm.log" 2>&1
