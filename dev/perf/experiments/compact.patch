@@ -1,0 +1,37 @@
+diff --git a/ext/js/dictionary/term-record-preinterned-plan.js b/ext/js/dictionary/term-record-preinterned-plan.js
+index c35d6f82..320d76dd 100644
+--- a/ext/js/dictionary/term-record-preinterned-plan.js
++++ b/ext/js/dictionary/term-record-preinterned-plan.js
+@@ -397,12 +397,27 @@ export function compactTermRecordPreinternedPlan(plan, start, count, remapScratc
+         stringsByteLength += stringLengths[i];
+     }
+     const stringsBuffer = new Uint8Array(stringsByteLength);
+-    let cursor = 0;
++    // Adjacent selected strings are already adjacent in the source arena.
++    // Copy each contiguous run once instead of creating one view per string.
++    let cursor = 0
++    let runStart = 0
++    let runEnd = 0
+     for (const oldIndex of referencedOldIndexes) {
+-        const oldOffset = sourceStringOffsets[oldIndex];
+-        const length = plan.stringLengths[oldIndex];
+-        stringsBuffer.set(plan.stringsBuffer.subarray(oldOffset, oldOffset + length), cursor);
+-        cursor += length;
++        const oldOffset = sourceStringOffsets[oldIndex]
++        const oldEnd = oldOffset + plan.stringLengths[oldIndex]
++        if (oldOffset === runEnd) {
++            runEnd = oldEnd
++            continue
++        }
++        if (runEnd > runStart) {
++            stringsBuffer.set(plan.stringsBuffer.subarray(runStart, runEnd), cursor)
++            cursor += runEnd - runStart
++        }
++        runStart = oldOffset
++        runEnd = oldEnd
++    }
++    if (runEnd > runStart) {
++        stringsBuffer.set(plan.stringsBuffer.subarray(runStart, runEnd), cursor)
+     }
+     return {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes};
+ }

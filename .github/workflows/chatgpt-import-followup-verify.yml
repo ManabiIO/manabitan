@@ -1,0 +1,90 @@
+name: Independent import follow-up verification
+
+on:
+  push:
+    branches: [chatgpt-import-followup-verify-20260908]
+    paths:
+      - .github/workflows/chatgpt-import-followup-verify.yml
+      - dev/perf/experiments/**
+
+permissions:
+  contents: read
+
+jobs:
+  paired-imports:
+    name: Paired source comparison (${{ matrix.experiment }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        experiment: [zip, compact, dedup]
+    env:
+      EXPERIMENT: ${{ matrix.experiment }}
+      PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Prepare isolated source builds and immutable fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          arms="$RUNNER_TEMP/import-arms"
+          evidence="$RUNNER_TEMP/import-evidence"
+          mkdir -p "$arms" "$evidence"
+          base=308123e7547dba95dea74eb8929ea4a237df5c50
+          if [ "$EXPERIMENT" = zip ]; then
+            base=394d8eb799dd1eb5e194cee11472a4beab915080
+          fi
+          git worktree add --detach "$arms/baseline" "$base"
+          git worktree add --detach "$arms/candidate" 308123e7547dba95dea74eb8929ea4a237df5c50
+          if [ "$EXPERIMENT" != zip ]; then
+            git -C "$arms/candidate" apply --index "$GITHUB_WORKSPACE/dev/perf/experiments/$EXPERIMENT.patch"
+            cp "dev/perf/experiments/$EXPERIMENT.patch" "$evidence/"
+          fi
+          for arm in baseline candidate; do
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$arms/$arm/node_modules"
+            (cd "$arms/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+            git -C "$arms/$arm" diff HEAD --binary > "$evidence/source-$arm.patch"
+          done
+          (cd "$arms/baseline" && node dev/perf/prepare-dictionaries.js) > "$evidence/fixtures.log" 2>&1
+          ln -s "$arms/baseline/builds/e2e-dictionary-cache" "$arms/candidate/builds/e2e-dictionary-cache"
+          node --version > "$evidence/node-version.txt"
+          clang --version > "$evidence/compiler-version.txt"
+          lscpu > "$evidence/cpu.txt"
+          free -b > "$evidence/memory.txt"
+          cp dev/perf/experiments/run-paired.py "$evidence/"
+      - name: Focused correctness and strict main types before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/import-evidence"
+          cd "$RUNNER_TEMP/import-arms/candidate"
+          node node_modules/vitest/vitest.mjs run test/zip-chunk-stream.test.js test/zip-chunk-stream-build.test.js test/dictionary-database-content-dedup.test.js test/term-record-preinterned-plan-utils.test.js test/term-record-lookup-preparation.test.js > "$evidence/focused-tests.log" 2>&1
+          node node_modules/typescript/bin/tsc --noEmit --project jsconfig.json > "$evidence/main-types.log" 2>&1
+      - name: Six predeclared adjacent pairs per dictionary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/experiments/run-paired.py \
+            --baseline "$RUNNER_TEMP/import-arms/baseline" \
+            --candidate "$RUNNER_TEMP/import-arms/candidate" \
+            --pairs 6 \
+            --output "$RUNNER_TEMP/import-evidence/paired" \
+            --label "Independent GitHub runner: $EXPERIMENT source comparison, six pairs per dictionary" \
+            | tee "$RUNNER_TEMP/import-evidence/driver.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: import-followup-${{ matrix.experiment }}
+          path: ${{ runner.temp }}/import-evidence/
+          retention-days: 14
+          if-no-files-found: error

@@ -1,0 +1,52 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 2d5f8f00..d19877c1 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -7807,7 +7807,9 @@ export class DictionaryDatabase {
+             let alreadyResolvedUniqueCount = 0;
+             let dedupExactCompareMs = 0;
+             const exactCandidates = [];
+-            const appendPendingContent = ({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2}) => {
++            // Most canonical entries are new. Keep that hot path allocation-free;
++            // retain descriptors only for candidates needing exact comparison.
++            const appendPendingContent = (uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2) => {
+                 if (contentOffset > 0xffffffff) {
+                     throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
+                 }
+@@ -7861,7 +7863,14 @@ export class DictionaryDatabase {
+                     if (exactFallback) { ++exactFallbackCount; }
+                     if (recentSourceHit === true) { ++recentSourceHitCount; }
+                     if (typeof existingMeta === 'undefined') {
+-                        appendPendingContent(descriptor);
++                        appendPendingContent(
++                            descriptor.uniqueIndex,
++                            descriptor.rowIndex,
++                            descriptor.contentOffset,
++                            descriptor.contentLength,
++                            descriptor.hash1,
++                            descriptor.hash2,
++                        )
+                         continue;
+                     }
+                     const {uniqueIndex} = descriptor;
+@@ -7901,7 +7910,6 @@ export class DictionaryDatabase {
+                     ) {
+                         throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
+                     }
+-                    const descriptor = {uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2};
+                     const existingIndex = persistedLookupRequired ?
+                         this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
+                         -1;
+@@ -7909,10 +7917,10 @@ export class DictionaryDatabase {
+                         void 0 :
+                         this._readTermEntryContentMetaHashPairIndex(existingIndex);
+                     if (typeof existingMeta === 'undefined') {
+-                        appendPendingContent(descriptor);
++                        appendPendingContent(uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2)
+                         continue;
+                     }
+-                    exactCandidates.push({...descriptor, existingMeta});
++                    exactCandidates.push({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2, existingMeta})
+                     if (exactCandidates.length >= TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE) {
+                         await resolveExactCandidates();
+                     }
