@@ -48,10 +48,10 @@ index ecf35c24..72182bf7 100644
 +    return path.basename(scriptPath) === 'z-worker.js' ? [zipChunkStreamPlugin] : []
 +}
 diff --git a/test/zip-chunk-stream-build.test.js b/test/zip-chunk-stream-build.test.js
-index 04849ae9..67b1204b 100644
+index 04849ae9..02c6a813 100644
 --- a/test/zip-chunk-stream-build.test.js
 +++ b/test/zip-chunk-stream-build.test.js
-@@ -20,20 +20,26 @@ import {mkdtemp, mkdir, readFile, rm, writeFile} from 'node:fs/promises'
+@@ -20,20 +20,33 @@ import {mkdtemp, mkdir, readFile, rm, writeFile} from 'node:fs/promises'
  import os from 'node:os'
  import path from 'node:path'
  import {describe, expect, test} from 'vitest'
@@ -73,13 +73,20 @@ index 04849ae9..67b1204b 100644
 -        expect(result.outputFiles[0].text).toContain('Redistribution and use in source and binary forms')
 -        expect(result.outputFiles[0].text).not.toContain('transform(chunk.slice(chunkSize), controller)')
 +        const output = result.outputFiles[0].text
-+        expect(output).toContain('Redistribution and use in source and binary forms')
 +        if (entry === 'z-worker.js') {
++            expect(output).toContain('Redistribution and use in source and binary forms')
 +            expect(output).toContain('ZIP chunk size must be a positive safe integer')
 +            expect(output).not.toContain('transform(chunk.slice(chunkSize), controller)')
 +        } else {
 +            expect(output).not.toContain('ZIP chunk size must be a positive safe integer')
 +            expect(output).toContain('transform(chunk.slice(chunkSize), controller)')
++            const original = await build({
++                entryPoints: [`dev/lib/${entry}`],
++                bundle: true,
++                format: 'esm',
++                write: false,
++            })
++            expect(output).toBe(original.outputFiles[0].text)
 +        }
      })
  
