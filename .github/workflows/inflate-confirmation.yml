@@ -1,0 +1,74 @@
+name: Confirm published inflater source on a fresh runner
+
+on:
+  push:
+    branches: [perf-inflate-confirmation-20260908]
+    paths:
+      - .github/workflows/inflate-confirmation.yml
+      - dev/perf/inflate-confirmation/**
+
+permissions:
+  contents: read
+
+jobs:
+  confirm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Build immutable baseline and published candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/arms" "$RUNNER_TEMP/evidence"
+          git worktree add --detach "$RUNNER_TEMP/arms/baseline" 394d8eb799dd1eb5e194cee11472a4beab915080
+          git worktree add --detach "$RUNNER_TEMP/arms/candidate" 1a48eb3ef7da950a1ab55716c2ac2f725741b9ba
+          test "$(git -C "$RUNNER_TEMP/arms/candidate" rev-parse 'HEAD^{tree}')" = 0bd78b4f115919a4e984c929faff2af67f3881e1
+          for arm in baseline candidate; do
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/arms/$arm/node_modules"
+            (cd "$RUNNER_TEMP/arms/$arm" && node dev/bin/build.js --target chrome-dev) > "$RUNNER_TEMP/evidence/build-$arm.log" 2>&1
+            cp "$RUNNER_TEMP/arms/$arm/ext/lib/term-bank-parser.wasm" "$RUNNER_TEMP/evidence/$arm-parser.wasm"
+          done
+          for file in zstd.wasm zip.js z-worker.js; do
+            cmp "$RUNNER_TEMP/arms/baseline/ext/lib/$file" "$RUNNER_TEMP/arms/candidate/ext/lib/$file"
+          done
+          (cd "$RUNNER_TEMP/arms/baseline" && node dev/perf/prepare-dictionaries.js) > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          ln -s "$RUNNER_TEMP/arms/baseline/builds/e2e-dictionary-cache" "$RUNNER_TEMP/arms/candidate/builds/e2e-dictionary-cache"
+          git diff 394d8eb799dd1eb5e194cee11472a4beab915080 1a48eb3ef7da950a1ab55716c2ac2f725741b9ba --binary > "$RUNNER_TEMP/evidence/source-candidate.patch"
+          cp dev/perf/inflate-confirmation/run-paired.py "$RUNNER_TEMP/evidence/"
+          clang --version > "$RUNNER_TEMP/evidence/compiler.txt"
+          lscpu > "$RUNNER_TEMP/evidence/cpu.txt"
+          free -b > "$RUNNER_TEMP/evidence/memory.txt"
+      - name: Confirm boundary tests before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/candidate"
+          node node_modules/vitest/vitest.mjs run test/term-bank-inflate-matches.test.js > "$RUNNER_TEMP/evidence/focused-tests.log" 2>&1
+      - name: Twelve fixed adjacent pairs per dictionary, separately excluded warmups
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/inflate-confirmation/run-paired.py \
+            --baseline "$RUNNER_TEMP/arms/baseline" \
+            --candidate "$RUNNER_TEMP/arms/candidate" \
+            --pairs 12 --warmups 1 \
+            --output "$RUNNER_TEMP/evidence/paired" \
+            --label "Fresh-runner confirmation of immutable inflater source; twelve pairs per dictionary" \
+            | tee "$RUNNER_TEMP/evidence/driver.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inflate-core-confirmation
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
