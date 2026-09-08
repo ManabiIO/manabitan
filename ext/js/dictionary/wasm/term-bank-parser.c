@@ -741,11 +741,20 @@ static void clear_term_row_meta(TermRowMeta* meta) {
     meta->glossary_requires_text_normalization = 0u;
 }
 
+static int content_bytes_equal_between(
+    const uint8_t* first_bytes,
+    uint32_t first_offset,
+    const uint8_t* second_bytes,
+    uint32_t second_offset,
+    uint32_t length
+);
+
 static int parse_row_single_pass(
     const uint8_t* src,
     uint32_t len,
     uint32_t row_start,
     TermRowMeta* out_meta,
+    const TermRowMeta* previous_row,
     int media_hints,
     uint32_t* out_next
 ) {
@@ -765,16 +774,35 @@ static int parse_row_single_pass(
         if (field_index == 4u || field_index == 6u) {
             if (!scan_scalar_span(src, len, i, &value_end)) { return 0; }
         } else if (field_index == 5u) {
-            uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
-            if (!parse_value_span_with_glossary_hints(
-                    src,
-                    len,
-                    i,
-                    &value_end,
-                    media_hint,
-                    &out_meta->glossary_requires_normalization,
-                    &out_meta->glossary_requires_text_normalization
-                )) { return 0; }
+            const uint32_t previous_length = previous_row != 0 ? previous_row->glossary_length : 0u;
+            const uint32_t previous_start = previous_row != 0 ? previous_row->glossary_start : 0u;
+            const uint32_t tail_offset = previous_length > 8u ? previous_length - 8u : 0u;
+            // Adjacent headword variants often repeat an entire glossary. Reuse
+            // its validation only after exact comparison with the preceding
+            // validated row in this input. A tail probe rejects unequal values
+            // cheaply; it is never a substitute for the complete comparison.
+            if (
+                previous_length > 0u && previous_length <= len - i &&
+                src[i] == '[' &&
+                content_bytes_equal_between(src, previous_start + tail_offset, src, i + tail_offset, previous_length - tail_offset) &&
+                content_bytes_equal_between(src, previous_start, src, i, previous_length)
+            ) {
+                value_end = i + previous_length;
+                out_meta->glossary_may_contain_media = previous_row->glossary_may_contain_media;
+                out_meta->glossary_requires_normalization = previous_row->glossary_requires_normalization;
+                out_meta->glossary_requires_text_normalization = previous_row->glossary_requires_text_normalization;
+            } else {
+                uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
+                if (!parse_value_span_with_glossary_hints(
+                        src,
+                        len,
+                        i,
+                        &value_end,
+                        media_hint,
+                        &out_meta->glossary_requires_normalization,
+                        &out_meta->glossary_requires_text_normalization
+                    )) { return 0; }
+            }
         } else if (!parse_value_span(src, len, i, &value_end)) {
             return 0;
         }
@@ -1339,7 +1367,7 @@ static int32_t parse_term_bank_impl(uint32_t json_ptr, uint32_t json_len, uint32
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], row_count > 0u ? &rows[row_count - 1u] : 0, media_hints, &row_end)) {
             return -1;
         }
         ++row_count;
@@ -2226,7 +2254,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     while (i < json_len) {
         if (row_count >= metas_capacity) { return -4; }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints != 0u, &row_end)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], row_count > 0u ? &rows[row_count - 1u] : 0, media_hints != 0u, &row_end)) {
             return -1;
         }
 
