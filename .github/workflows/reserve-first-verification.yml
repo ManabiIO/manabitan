@@ -37,7 +37,8 @@ jobs:
           git -C "$RUNNER_TEMP/arms/candidate" apply --index "$GITHUB_WORKSPACE/dev/perf/reserve-first-experiment/reserve.patch"
           cp dev/perf/reserve-first-experiment/dictionary-database-reserve-first.test.js "$RUNNER_TEMP/arms/candidate/test/"
           git -C "$RUNNER_TEMP/arms/candidate" add test/dictionary-database-reserve-first.test.js
-          test "$(git -C "$RUNNER_TEMP/arms/candidate" write-tree)" = 9a97dafe8160a5a89e166b69042ca9eb8c7caa0e
+          git -C "$RUNNER_TEMP/arms/candidate" apply --index "$GITHUB_WORKSPACE/dev/perf/reserve-first-experiment/fixture-fix.patch"
+          test "$(git -C "$RUNNER_TEMP/arms/candidate" write-tree)" = 19c99a67891054a1fb86654f5acf9633a341e502
           for arm in baseline candidate; do
             (cd "$RUNNER_TEMP/arms/$arm" && node dev/bin/build.js --target chrome-dev) > "$RUNNER_TEMP/evidence/build-$arm.log" 2>&1
             git -C "$RUNNER_TEMP/arms/$arm" diff HEAD --binary > "$RUNNER_TEMP/evidence/source-$arm.patch"

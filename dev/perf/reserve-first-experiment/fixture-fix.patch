@@ -1,0 +1,14 @@
+diff --git a/test/dictionary-database-reserve-first.test.js b/test/dictionary-database-reserve-first.test.js
+--- a/test/dictionary-database-reserve-first.test.js
++++ b/test/dictionary-database-reserve-first.test.js
+@@ -82,7 +82,9 @@ function chunkFor(database, values, hashes, prepared = true) {
+  * @param {Uint8Array} bytes
+  */
+ function publish(database, hash, bytes) {
+-    return database._cacheTermEntryContentMeta(null, 500, bytes.length, 'raw', 0, hash, hash ^ 0x9e3779b9, bytes)
++    const meta = database._cacheTermEntryContentMeta(null, 500, bytes.length, 'raw', 0, hash, (hash ^ 0x9e3779b9) >>> 0, bytes)
++    expect(database._getTermEntryContentMetaByHashPair(hash, hash ^ 0x9e3779b9)).toMatchObject(meta)
++    return meta
+ }
+ 
+ describe('reserve-first canonical deduplication', () => {
