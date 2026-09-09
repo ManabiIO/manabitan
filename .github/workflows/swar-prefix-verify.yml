@@ -1,10 +1,10 @@
-name: SWAR prefix skip verification
+name: SWAR empty-prefix verification
 on:
   push:
-    branches: [verify/swar-prefix-skipping-20260909]
+    branches: [verify/swar-prefix-empty-20260909]
     paths:
       - .github/workflows/swar-prefix-verify.yml
-      - dev/perf/swar-prefix-source.patch
+      - dev/perf/swar-prefix-empty-source.patch
       - dev/perf/swar-prefix-verify.py
 permissions:
   contents: read
@@ -29,13 +29,13 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/evidence"
           git worktree add --detach "$RUNNER_TEMP/source" 03478be25506176610b2133be658ee697d9bb3f1
-          git -C "$RUNNER_TEMP/source" apply --index "$GITHUB_WORKSPACE/dev/perf/swar-prefix-source.patch"
-          test "$(git -C "$RUNNER_TEMP/source" write-tree)" = 68a31e0ec29969000adbd3ba7435a71d7ebdb966
-          git -C "$RUNNER_TEMP/source" -c user.name='Manabitan verification' -c user.email='verification@localhost' commit -m 'Verify exact SWAR prefix-skip source'
+          git -C "$RUNNER_TEMP/source" apply --index "$GITHUB_WORKSPACE/dev/perf/swar-prefix-empty-source.patch"
+          test "$(git -C "$RUNNER_TEMP/source" write-tree)" = cf9342901c86caa1be7ae85f6b94a3483d2dedfd
+          git -C "$RUNNER_TEMP/source" -c user.name='Manabitan verification' -c user.email='verification@localhost' commit -m 'Verify exact SWAR empty-prefix source'
           printf '\n/node_modules\n' >> "$(git rev-parse --git-common-dir)/info/exclude"
           ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/source/node_modules"
-          git -C "$RUNNER_TEMP/source" rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/evidence/source.txt"
-          cp dev/perf/swar-prefix-source.patch "$RUNNER_TEMP/evidence/source.patch"
+          git -C "$RUNNER_TEMP/source" rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/evidence/source.txt"
+          cp dev/perf/swar-prefix-empty-source.patch "$RUNNER_TEMP/evidence/source.patch"
           clang --version > "$RUNNER_TEMP/evidence/compiler.txt"
           node --version > "$RUNNER_TEMP/evidence/node.txt"
       - name: Full units, options, strict types, repository lint and builds
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: swar-prefix-correctness
+          name: swar-empty-correctness
           path: ${{ runner.temp }}/evidence/
           retention-days: 14
           if-no-files-found: error
@@ -100,9 +100,9 @@ jobs:
           mkdir -p "$RUNNER_TEMP/evidence" "$RUNNER_TEMP/arms"
           git worktree add --detach "$RUNNER_TEMP/arms/A" 03478be25506176610b2133be658ee697d9bb3f1
           git worktree add --detach "$RUNNER_TEMP/arms/B" 03478be25506176610b2133be658ee697d9bb3f1
-          git -C "$RUNNER_TEMP/arms/B" apply --index "$GITHUB_WORKSPACE/dev/perf/swar-prefix-source.patch"
-          test "$(git -C "$RUNNER_TEMP/arms/B" write-tree)" = 68a31e0ec29969000adbd3ba7435a71d7ebdb966
-          git -C "$RUNNER_TEMP/arms/B" -c user.name='Manabitan verification' -c user.email='verification@localhost' commit -m 'Verify exact SWAR prefix-skip source'
+          git -C "$RUNNER_TEMP/arms/B" apply --index "$GITHUB_WORKSPACE/dev/perf/swar-prefix-empty-source.patch"
+          test "$(git -C "$RUNNER_TEMP/arms/B" write-tree)" = cf9342901c86caa1be7ae85f6b94a3483d2dedfd
+          git -C "$RUNNER_TEMP/arms/B" -c user.name='Manabitan verification' -c user.email='verification@localhost' commit -m 'Verify exact SWAR empty-prefix source'
           printf '\n/node_modules\n' >> "$(git rev-parse --git-common-dir)/info/exclude"
           for arm in A B; do
             ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/arms/$arm/node_modules"
@@ -134,8 +134,8 @@ jobs:
           clang --version > "$RUNNER_TEMP/evidence/compiler.txt"
           lscpu > "$RUNNER_TEMP/evidence/cpu.txt"
           free -b > "$RUNNER_TEMP/evidence/memory.txt"
-          cp dev/perf/swar-prefix-source.patch "$RUNNER_TEMP/evidence/source.patch"
-          cp dev/perf/swar-prefix-verify.py "$RUNNER_TEMP/evidence/driver.py"
+          cp dev/perf/swar-prefix-empty-source.patch "$RUNNER_TEMP/evidence/source.patch"
+          sed 's/68a31e0ec29969000adbd3ba7435a71d7ebdb966/cf9342901c86caa1be7ae85f6b94a3483d2dedfd/g' dev/perf/swar-prefix-verify.py > "$RUNNER_TEMP/evidence/driver.py"
       - name: Six fixed adjacent pairs, same-build controls, excluded warmup, no retries
         shell: bash
         env:
@@ -145,11 +145,11 @@ jobs:
           set -euo pipefail
           extra=()
           if [ "$TRIAL" = 2 ]; then extra+=(reverse); fi
-          python3 dev/perf/swar-prefix-verify.py "$RUNNER_TEMP/arms/A" "$RUNNER_TEMP/arms/B" "$RUNNER_TEMP/evidence/paired" "$DICTIONARY" "${extra[@]}" 2>&1 | tee "$RUNNER_TEMP/evidence/driver.log"
+          python3 "$RUNNER_TEMP/evidence/driver.py" "$RUNNER_TEMP/arms/A" "$RUNNER_TEMP/arms/B" "$RUNNER_TEMP/evidence/paired" "$DICTIONARY" "${extra[@]}" 2>&1 | tee "$RUNNER_TEMP/evidence/driver.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: swar-prefix-${{ matrix.dictionary }}-${{ matrix.trial }}
+          name: swar-empty-${{ matrix.dictionary }}-${{ matrix.trial }}
           path: ${{ runner.temp }}/evidence/
           retention-days: 14
           if-no-files-found: error
