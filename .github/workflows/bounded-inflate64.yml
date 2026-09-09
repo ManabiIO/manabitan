@@ -1,0 +1,151 @@
+name: Bounded inflater i64 verification
+on:
+  push:
+    branches: [perf-bounded-inflate64-20260909]
+    paths:
+      - .github/workflows/bounded-inflate64.yml
+      - dev/perf/bounded-followup/**
+      - test/term-bank-inflate-matches.test.js
+      - ext/js/dictionary/wasm/**
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bounded-inflate64-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - name: Build committed source and run unit, types and sanitizer contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/evidence"
+          mkdir -p "$evidence"
+          git rev-parse HEAD > "$evidence/commit.txt"
+          clang --version > "$evidence/compiler.txt"
+          node --version > "$evidence/node.txt"
+          node dev/bin/build-libs.js > "$evidence/build.log" 2>&1
+          python3 -m unittest discover -s dev/perf/bounded-followup -v > "$evidence/protocol.log" 2>&1
+          node node_modules/vitest/vitest.mjs run > "$evidence/unit.log" 2>&1
+          npm run test:ts > "$evidence/types.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$evidence/options.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$evidence/dry-build.log" 2>&1
+          for bits in 32 64; do
+            clang -std=c11 -D_GNU_SOURCE -O1 -g -DTEST_BITS="$bits" \
+              -fsanitize=address,undefined -fno-omit-frame-pointer \
+              -Iext/js/dictionary/wasm/vendor/miniz \
+              dev/perf/bounded-followup/inflate-buffer-contract.c -lz -o "$evidence/core-$bits"
+            ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1 \
+              "$evidence/core-$bits" > "$evidence/core-$bits.log" 2>&1
+          done
+      - name: Full fixed-bank decoder oracles and component comparisons
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/evidence"
+          git worktree add --detach "$RUNNER_TEMP/control" ff9cbf2e848a86d6bbfd281179a6d753349e52f4
+          (cd "$RUNNER_TEMP/control" && npm ci && node dev/bin/build-libs.js) > "$evidence/control-build.log" 2>&1
+          node dev/perf/prepare-dictionaries.js > "$evidence/fixtures.log" 2>&1
+          python3 dev/perf/bounded-followup/prepare-inflate-banks.py --source . --output "$RUNNER_TEMP/banks"
+          cp "$RUNNER_TEMP/control/ext/lib/term-bank-parser.wasm" "$evidence/baseline.wasm"
+          cp ext/lib/term-bank-parser.wasm "$evidence/candidate.wasm"
+          node dev/perf/bounded-followup/wasm-inflate-oracle.mjs \
+            "$evidence/baseline.wasm" "$evidence/candidate.wasm" "$evidence/decoder.json" "$RUNNER_TEMP/banks/manifest.json" \
+            > "$evidence/decoder.log" 2>&1
+          test -z "$(git status --porcelain)"
+          test -z "$(git -C "$RUNNER_TEMP/control" status --porcelain)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inflate64-correctness-${{ github.sha }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: inflate64-fixed-banks-${{ github.sha }}
+          path: ${{ runner.temp }}/banks/
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: error
+  constrained:
+    needs: verify
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmnedict, jmdict, jitendex]
+        trial: [1, 2]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      TRIAL: ${{ matrix.trial }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - name: Prepare actual browser and compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v clang >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y clang lld
+          fi
+          node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Build exact product controls and observe real memory policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/evidence"
+          arms="$RUNNER_TEMP/arms"
+          mkdir -p "$evidence" "$arms"
+          node dev/perf/bounded-followup/memory-preflight.js "$evidence/preflight.json"
+          git worktree add --detach "$arms/baseline" ff9cbf2e848a86d6bbfd281179a6d753349e52f4
+          git worktree add --detach "$arms/candidate" dc226aaf88a0f8d2d4b2bcc37778352be0104622
+          for arm in baseline candidate; do
+            (cd "$arms/$arm" && npm ci && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+          done
+          (cd "$arms/baseline" && node dev/perf/prepare-dictionaries.js) > "$evidence/fixtures.log" 2>&1
+          ln -s "$arms/baseline/builds/e2e-dictionary-cache" "$arms/candidate/builds/e2e-dictionary-cache"
+          clang --version > "$evidence/compiler.txt"
+          lscpu > "$evidence/cpu.txt"
+          free -b > "$evidence/memory.txt"
+          git diff ff9cbf2e848a86d6bbfd281179a6d753349e52f4 dc226aaf88a0f8d2d4b2bcc37778352be0104622 -- ext > "$evidence/production.patch"
+      - name: Six fixed A-B pairs, same-binary controls and warmups
+        shell: bash
+        run: |
+          set -euo pipefail
+          extra=()
+          if [ "$TRIAL" = 2 ]; then extra+=(--reverse); fi
+          python3 dev/perf/bounded-followup/inflate64.py \
+            --baseline "$RUNNER_TEMP/arms/baseline" --candidate "$RUNNER_TEMP/arms/candidate" \
+            --dictionary "$DICTIONARY" --pairs 6 --output "$RUNNER_TEMP/evidence/paired" "${extra[@]}" \
+            2>&1 | tee "$RUNNER_TEMP/evidence/driver.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inflate64-${{ matrix.dictionary }}-${{ matrix.trial }}-${{ github.sha }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
