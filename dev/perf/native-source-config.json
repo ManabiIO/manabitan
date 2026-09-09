@@ -1,0 +1,16 @@
+{
+  "base": "03478be25506176610b2133be658ee697d9bb3f1",
+  "tree": "261de9d5a670fc0dd75ea87ae83ae22f036c900e",
+  "patchSha256": "89696f8011d7a8cd9264190bcdeb865637e89a5cfc6956b6c9cf992e21c2b752",
+  "transport": "dev/perf/native-lookup-segments.patch.gz.b64",
+  "fixups": [
+    ["ML9CLXmYRPNpfHg1c99n3kjLkFKR3CZLH", "ML9CLXmYRPNpfHg1j99n3kjLkFKR3CZLH"],
+    ["2QPGyS2/asOqbNmyb1VYxgaa7WLKyoyL1", "2QPGyS2/asOqbNmy1VYxgaa7WLKyoyL1"],
+    ["qygpwB0Nzww5CrZB1X6/wAild2DXZYAAA", "qygpwB0Nzww5CrZB/X6/wAild2DXZYAAA"]
+  ],
+  "supplements": [],
+  "files": ["dev/build-libs.js", "ext/js/dictionary/term-bank-wasm-parser.js", "ext/js/dictionary/wasm/term-bank-parser.c", "test/native-lookup-segments.test.js"],
+  "payloads": ["js/dictionary/term-bank-wasm-parser.js", "lib/term-bank-parser.wasm"],
+  "branch": "perf/native-lookup-segments-20260909",
+  "message": "perf(import): prepare large lookup segments in native WASM before worker handoff"
+}
