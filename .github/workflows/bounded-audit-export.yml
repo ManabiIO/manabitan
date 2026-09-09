@@ -1,0 +1,36 @@
+name: Bounded reconciliation source export
+on:
+  push:
+    branches: [audit/bounded-on-develop-20260909]
+    paths: [.github/workflows/bounded-audit-export.yml]
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: da8f7436d34e510441d30692c8d698806b70e13f
+          fetch-depth: 0
+          persist-credentials: false
+      - shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = da8f7436d34e510441d30692c8d698806b70e13f
+          test "$(git rev-parse HEAD:ext/js/dictionary/wasm/term-bank-parser.c)" = 836cb10f5aa52177bd82d6fbccb44dd5f3811e2b
+          mkdir -p /tmp/bounded-export
+          git archive --format=tar HEAD | gzip -n > /tmp/bounded-export/develop.tar.gz
+          git ls-tree -r HEAD > /tmp/bounded-export/tree.txt
+          git rev-parse HEAD HEAD^{tree} > /tmp/bounded-export/identity.txt
+          git diff --binary --full-index b8d68458cde8788b5d5301ceaf36beae7a1363f9 ff9cbf2e848a86d6bbfd281179a6d753349e52f4 > /tmp/bounded-export/pr24.patch
+          git archive --format=tar ff9cbf2e848a86d6bbfd281179a6d753349e52f4 test/term-bank-bounded-compressed-plan.test.js test/term-bank-bounded-ownership.test.js | gzip -n > /tmp/bounded-export/tests.tar.gz
+          test -z "$(git status --porcelain)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-export
+          path: /tmp/bounded-export
+          if-no-files-found: error
+          retention-days: 14
