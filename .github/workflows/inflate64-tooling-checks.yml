@@ -1,0 +1,39 @@
+name: Inflater verification tooling checks
+on:
+  push:
+    branches: [perf-bounded-inflate64-20260909]
+    paths:
+      - .github/workflows/inflate64-tooling-checks.yml
+      - dev/perf/bounded-followup/wasm-inflate-oracle.*
+      - test/term-bank-inflate-matches.test.js
+      - dev/jsconfig.json
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node dev/bin/build-libs.js
+      - name: Check only introduced JavaScript verification code
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx eslint dev/perf/bounded-followup/wasm-inflate-oracle.* test/term-bank-inflate-matches.test.js \
+            > "$RUNNER_TEMP/inflater-tooling-lint.log" 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inflater-tooling-lint-${{ github.sha }}
+          path: ${{ runner.temp }}/inflater-tooling-lint.log
+          retention-days: 14
+          if-no-files-found: warn
