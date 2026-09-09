@@ -32,11 +32,14 @@ jobs:
           mkdir -p "$evidence"
           base64 -d dev/perf/lookup-chunk-validation.patch.gz.b64 | gzip -d > "$evidence/source.patch"
           echo "6d221b24cf58a5a5f40e9ca50d237e73232068201945cc22878efd5001f8b923  $evidence/source.patch" | sha256sum --check
+          cp dev/perf/lookup-validation-test-fix.patch "$evidence/test-fix.patch"
           git worktree add --detach "$product" 03478be25506176610b2133be658ee697d9bb3f1
           cp -al node_modules "$product/node_modules"
           cd "$product"
           git apply --index "$evidence/source.patch"
           test "$(git write-tree)" = 8b4eebb60a10f07b41178bd746a9e07551f352f6
+          git apply --index "$evidence/test-fix.patch"
+          test "$(git write-tree)" = 8e0c2290c46c52dfc9f276030bafbb46727cd756
           git diff --cached --name-only > "$evidence/changed-files.txt"
           node dev/bin/build-libs.js > "$evidence/libraries.log" 2>&1
           node node_modules/vitest/vitest.mjs run > "$evidence/unit.log" 2>&1
@@ -44,7 +47,7 @@ jobs:
           npm run test:ts > "$evidence/types.log" 2>&1
           npm run test:js > "$evidence/lint.log" 2>&1
           node dev/bin/build.js --dryRun --all > "$evidence/build.log" 2>&1
-          test "$(git write-tree)" = 8b4eebb60a10f07b41178bd746a9e07551f352f6
+          test "$(git write-tree)" = 8e0c2290c46c52dfc9f276030bafbb46727cd756
           test -z "$(git diff --name-only)"
       - name: Publish only the validated source and tests
         id: publish
@@ -59,7 +62,7 @@ jobs:
           git config user.name OpenAI
           git config user.email agent@openai.com
           git -c core.hooksPath=/dev/null commit -m 'perf(import): validate interned string metadata once per synchronous chunk preparation'
-          test "$(git rev-parse HEAD^{tree})" = 8b4eebb60a10f07b41178bd746a9e07551f352f6
+          test "$(git rev-parse HEAD^{tree})" = 8e0c2290c46c52dfc9f276030bafbb46727cd756
           test -z "$(git status --porcelain)"
           git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$branch"
           git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/evidence/source.txt"
@@ -117,7 +120,7 @@ jobs:
           old_tree = 'e604fea040cffee4e557d0c3797632b17328036f'
           old_files = "assert changed == ['js/dictionary/term-content-block-store.js'], changed"
           assert source.count(old_tree) == 1 and source.count(old_files) == 1
-          source = source.replace(old_tree, '8b4eebb60a10f07b41178bd746a9e07551f352f6')
+          source = source.replace(old_tree, '8e0c2290c46c52dfc9f276030bafbb46727cd756')
           source = source.replace(old_files, "assert sorted(changed) == ['js/dictionary/term-lookup-index-preparation.js', 'js/dictionary/term-record-preinterned-plan.js'], changed")
           path.write_text(source)
           PY
