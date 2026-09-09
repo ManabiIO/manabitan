@@ -1,0 +1,44 @@
+name: Measure isolated gather optimization
+on:
+  push:
+    branches: [verify/import-allocation-workspace-20260909]
+    paths: [.github/workflows/import-gather-measured.yml]
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-slim]
+        dictionary: [jmnedict, jmdict, jitendex]
+    env:
+      CANDIDATE_SHA: 848b81cf5048a145e6ac11cc52a61e9130720b1e
+      CANDIDATE_TREE: 3055b20bb29e11e8dfd7282cd774249279835868
+      PACKAGE_CHANGE: lib/zstd-wasm.js,lib/zstd-wasm.js.map
+      DICTIONARY: ${{ matrix.dictionary }}
+      RUNNER_LABEL: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - name: Native policy, byte-isolated packages and complete fixed import pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .github/import-pair-bootstrap.sh "$RUNNER_TEMP/bootstrap.sh"
+          bash "$RUNNER_TEMP/bootstrap.sh"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gather-measured-${{ matrix.runner }}-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
