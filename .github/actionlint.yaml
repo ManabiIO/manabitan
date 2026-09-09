@@ -1,0 +1,7 @@
+# actionlint 1.7.3 predates GitHub's hosted ubuntu-slim label. Its legacy
+# extra-label configuration is named self-hosted-runner, but this declaration
+# does not change where jobs run or suppress other workflow checks.
+# Remove this compatibility entry after upgrading actionlint's built-in labels.
+self-hosted-runner:
+  labels:
+    - ubuntu-slim
