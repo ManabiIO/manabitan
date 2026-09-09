@@ -430,13 +430,15 @@ export class Offscreen {
         const responsePortValue = event.currentTarget;
         if (responsePortValue === null || typeof Reflect.get(responsePortValue, 'postMessage') !== 'function' || typeof id !== 'number') { return; }
         const responsePort = /** @type {MessagePort} */ (responsePortValue);
-        const acceptanceTimeoutId = action === 'findTermsStructuredOffscreen' ? globalThis.setTimeout(() => {
-            try {
-                responsePort.postMessage({id, accepted: true});
-            } catch (_) {
+        const acceptanceTimeoutId = action === 'findTermsStructuredOffscreen' ?
+            globalThis.setTimeout(() => {
+                try {
+                    responsePort.postMessage({id, accepted: true});
+                } catch (_) {
                 // The control port may have rotated while the lookup was running.
-            }
-        }, structuredLookupAcceptanceDelayMs) : null;
+                }
+            }, structuredLookupAcceptanceDelayMs) :
+            null;
         /** @param {import('core').Response<unknown>} response */
         const callback = (response) => {
             if (acceptanceTimeoutId !== null) {

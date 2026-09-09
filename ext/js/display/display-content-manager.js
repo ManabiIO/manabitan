@@ -119,7 +119,7 @@ export class DisplayContentManager {
         for (const [key, value] of url.searchParams.entries()) {
             params[key] = value;
         }
-        this._display.setContent({
+        void this._display.setContent({
             historyMode: 'new',
             focus: false,
             params,

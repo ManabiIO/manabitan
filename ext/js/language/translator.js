@@ -17,7 +17,7 @@
  */
 
 import {safePerformance} from '../core/safe-performance.js';
-import {reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
+import {reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {applyTextReplacement} from '../general/regex-util.js';
 import {isCodePointJapanese} from './ja/japanese.js';
 import {isCodePointKorean} from './ko/korean.js';
@@ -33,6 +33,21 @@ import {isCodePointChinese} from './zh/chinese.js';
  */
 function isCodePointAsciiDigit(codePoint) {
     return codePoint >= 0x30 && codePoint <= 0x39;
+}
+
+/**
+ * @param {Array<import('dictionary-database').TermEntry[]>} groups
+ * @returns {Array<{dictionary: string, count: number}>}
+ */
+function countDictionaryEntries(groups) {
+    /** @type {Map<string, number>} */
+    const counts = new Map();
+    for (const entries of groups) {
+        for (const {dictionary} of entries) {
+            counts.set(dictionary, (counts.get(dictionary) ?? 0) + 1);
+        }
+    }
+    return [...counts].map(([dictionary, count]) => ({dictionary, count}));
 }
 
 /**
@@ -468,10 +483,7 @@ export class Translator {
             queryTermsSample: uniqueDeinflectionTerms.slice(0, 12),
             enabledDictionaryNames: [...enabledDictionaryMap.keys()],
             databaseEntryCount: databaseEntries.length,
-            databaseEntryDictionaryCounts: [...databaseEntries.reduce((map, {dictionary}) => {
-                map.set(dictionary, (map.get(dictionary) || 0) + 1);
-                return map;
-            }, new Map()).entries()].map(([dictionary, count]) => ({dictionary, count})),
+            databaseEntryDictionaryCounts: countDictionaryEntries([databaseEntries]),
         }));
         this._matchEntriesToDeinflections(language, databaseEntries, uniqueDeinflectionArrays, enabledDictionaryMap);
         reportDiagnosticsLazy('dictionary-lookup-translator-stage', () => ({
@@ -480,12 +492,7 @@ export class Translator {
             matchType,
             deinflectionCount: deinflections.length,
             matchedDeinflectionCount: deinflections.filter(({databaseEntries: databaseEntries2}) => databaseEntries2.length > 0).length,
-            matchedDictionaryCounts: [...deinflections.reduce((map, {databaseEntries: databaseEntries2}) => {
-                for (const {dictionary} of databaseEntries2) {
-                    map.set(dictionary, (map.get(dictionary) || 0) + 1);
-                }
-                return map;
-            }, new Map()).entries()].map(([dictionary, count]) => ({dictionary, count})),
+            matchedDictionaryCounts: countDictionaryEntries(deinflections.map(({databaseEntries: entries}) => entries)),
         }));
     }
 

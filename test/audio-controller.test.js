@@ -105,7 +105,7 @@ describe('AudioController source write rollback', () => {
         const modalController = {getModal: vi.fn(() => ({node: window.document.createElement('div'), setVisible() {}}))};
         const controller = new AudioController(/** @type {any} */ (settingsController), /** @type {any} */ (modalController));
         controller._audioSystem = /** @type {any} */ ({prepare() {}, on() {}, createTextToSpeechAudio() { return {play() {}, volume: 1}; }});
-        controller._updateTextToSpeechVoices = vi.fn(function() {
+        controller._updateTextToSpeechVoices = vi.fn(function updateTextToSpeechVoices() {
             this._voices = [{voice: {voiceURI: 'voice-a', name: 'Voice A', lang: 'en', default: true}, isJapanese: false, index: 0}];
         });
 
@@ -180,7 +180,7 @@ describe('AudioController source write rollback', () => {
         const modalController = {getModal: vi.fn(() => ({node: window.document.createElement('div'), setVisible() {}}))};
         const controller = new AudioController(/** @type {any} */ (settingsController), /** @type {any} */ (modalController));
         controller._audioSystem = /** @type {any} */ ({prepare() {}, on() {}, createTextToSpeechAudio() { return {play() {}, volume: 1}; }});
-        controller._updateTextToSpeechVoices = vi.fn(function() {
+        controller._updateTextToSpeechVoices = vi.fn(function updateTextToSpeechVoices() {
             this._voices = [{voice: {voiceURI: 'voice-a', name: 'Voice A', lang: 'en', default: true}, isJapanese: false, index: 0}];
         });
 

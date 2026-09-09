@@ -46,6 +46,10 @@ header.rules.header.meta.schema = false;
 
 const manabitanHeaderFiles = [
     'dev/lib/zstd-simd-module.d.ts',
+    'ext/js/data/data-transmission-consent-util.js',
+    'ext/js/dictionary/term-entry-content-hash.js',
+    'ext/js/dictionary/term-key-hash.js',
+    'types/ext/dictionary-import-journal.d.ts',
     'ext/js/dictionary/sqlite-wasm.js',
     'ext/js/dictionary/raw-term-content.js',
     'dev/bin/run-playwright.js',
@@ -97,7 +101,9 @@ async function getDependencies(scriptPaths) {
  */
 export default [
     {
-        ignores: ['.tmp-*', 'ext/lib/', 'ext/js/dictionary/mdx/vendor/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],
+        // Emscripten output is reproduced by build:zstd-wasm and covered by
+        // WASM behavior tests. Keep its handwritten wrapper and types linted.
+        ignores: ['.tmp-*', 'dev/lib/zstd-simd-module.js', 'ext/lib/', 'ext/js/dictionary/mdx/vendor/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],
     },
     ...compat.extends(
         'eslint:recommended',

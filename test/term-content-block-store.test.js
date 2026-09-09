@@ -96,7 +96,7 @@ describe('TermContentBlockImportSession', () => {
     test('forces block mode only after that dictionary selected it', async () => {
         const store = new TermContentBlockStore(new TermContentOpfsStore());
         const tryAppend = vi.spyOn(store, 'tryAppend')
-            .mockResolvedValueOnce({contentOffsets: new Float64Array(0), contentLengths: new Uint32Array(0), contentDictName: 'raw-block-v1', compressedBytes: 0, uncompressedBytes: 0})
+            .mockResolvedValueOnce({contentOffsets: new Float64Array(0), contentLengths: new Uint32Array(0), contentDictName: 'raw-block-v1', compressedBytes: 0, uncompressedBytes: 0, packMs: 0, compressMs: 0, envelopeMs: 0, referenceMs: 0, opfsAppendMs: 0})
             .mockResolvedValueOnce(null)
             .mockResolvedValueOnce(null);
         const session = new TermContentBlockImportSession(store);
@@ -117,7 +117,7 @@ describe('TermContentBlockImportSession', () => {
     test('tracks forced block mode for shared-slab appends', async () => {
         const store = new TermContentBlockStore(new TermContentOpfsStore());
         const tryAppendSpans = vi.spyOn(store, 'tryAppendSpans')
-            .mockResolvedValueOnce({contentOffsets: new Float64Array(0), contentLengths: new Uint32Array(0), contentDictName: 'raw-block-v1', compressedBytes: 0, uncompressedBytes: 0})
+            .mockResolvedValueOnce({contentOffsets: new Float64Array(0), contentLengths: new Uint32Array(0), contentDictName: 'raw-block-v1', compressedBytes: 0, uncompressedBytes: 0, packMs: 0, compressMs: 0, envelopeMs: 0, referenceMs: 0, opfsAppendMs: 0})
             .mockResolvedValueOnce(null);
         const session = new TermContentBlockImportSession(store);
         const source = new Uint8Array([1]);
@@ -152,7 +152,7 @@ describe('TermContentBlockImportSession', () => {
             }),
         };
         const store = new TermContentBlockStore(new TermContentOpfsStore());
-        const tryAppendSpans = vi.spyOn(store, 'tryAppendSpans').mockResolvedValue({contentOffsets: new Float64Array(0), contentLengths: new Uint32Array(0), contentDictName: 'raw-block-v2', compressedBytes: 0, uncompressedBytes: 0});
+        const tryAppendSpans = vi.spyOn(store, 'tryAppendSpans').mockResolvedValue({contentOffsets: new Float64Array(0), contentLengths: new Uint32Array(0), contentDictName: 'raw-block-v2', compressedBytes: 0, uncompressedBytes: 0, packMs: 0, compressMs: 0, envelopeMs: 0, referenceMs: 0, opfsAppendMs: 0});
         const tryBeginAppendSpans = vi.spyOn(store, 'tryBeginAppendSpans')
             .mockReturnValueOnce(null)
             .mockReturnValue(operation);
