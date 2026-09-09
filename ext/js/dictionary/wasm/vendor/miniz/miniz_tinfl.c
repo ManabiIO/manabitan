@@ -552,7 +552,18 @@ extern "C"
                         }
                         continue;
                     }
-#if MINIZ_USE_UNALIGNED_LOADS_AND_STORES
+#if defined(__wasm_bulk_memory__)
+                    else if ((counter >= 9) && (counter <= dist))
+                    {
+                        /* Manabitan: these match bytes already exist in the history.
+                           Short-distance matches must keep forward expansion below.
+                           memmove also preserves wrapped-buffer aliasing semantics. */
+                        __builtin_memmove(pOut_buf_cur, pSrc, counter);
+                        pOut_buf_cur += counter;
+                        counter = 0;
+                        continue;
+                    }
+#elif MINIZ_USE_UNALIGNED_LOADS_AND_STORES
                     else if ((counter >= 9) && (counter <= dist))
                     {
                         const mz_uint8 *pSrc_end = pSrc + (counter & ~7);
