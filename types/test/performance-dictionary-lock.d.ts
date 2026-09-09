@@ -15,7 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/** Shape of the immutable import benchmark fixture manifest.
+/**
+ * Shape of the immutable import benchmark fixture manifest.
  * Semantic hash, size, title, revision and row-count checks remain in the
  * performance fixture loader and its regression tests.
  */
