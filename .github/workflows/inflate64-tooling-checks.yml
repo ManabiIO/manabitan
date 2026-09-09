@@ -4,9 +4,8 @@ on:
     branches: [perf-bounded-inflate64-20260909]
     paths:
       - .github/workflows/inflate64-tooling-checks.yml
-      - dev/perf/bounded-followup/wasm-inflate-oracle.*
+      - test/native/wasm-inflate-oracle.js
       - test/term-bank-inflate-matches.test.js
-      - dev/jsconfig.json
   workflow_dispatch:
 permissions:
   contents: read
@@ -24,16 +23,21 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node dev/bin/build-libs.js
-      - name: Check only introduced JavaScript verification code
+      - name: Check introduced verification code with existing test rules
         shell: bash
         run: |
           set -euo pipefail
-          npx eslint dev/perf/bounded-followup/wasm-inflate-oracle.* test/term-bank-inflate-matches.test.js \
+          npx eslint test/native/wasm-inflate-oracle.js test/term-bank-inflate-matches.test.js \
             > "$RUNNER_TEMP/inflater-tooling-lint.log" 2>&1
+          npm run test:ts:test > "$RUNNER_TEMP/inflater-tooling-types.log" 2>&1
+          node test/native/wasm-inflate-oracle.js ext/lib/term-bank-parser.wasm ext/lib/term-bank-parser.wasm "$RUNNER_TEMP/oracle-self-control.json" \
+            > "$RUNNER_TEMP/inflater-tooling-oracle.log" 2>&1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: inflater-tooling-lint-${{ github.sha }}
-          path: ${{ runner.temp }}/inflater-tooling-lint.log
+          path: |
+            ${{ runner.temp }}/inflater-tooling-*.log
+            ${{ runner.temp }}/oracle-self-control.json
           retention-days: 14
           if-no-files-found: warn

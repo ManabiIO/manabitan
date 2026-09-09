@@ -5,6 +5,7 @@ on:
     paths:
       - .github/workflows/bounded-inflate64.yml
       - dev/perf/bounded-followup/**
+      - test/native/wasm-inflate-oracle.js
       - test/term-bank-inflate-matches.test.js
       - ext/js/dictionary/wasm/**
   workflow_dispatch:
@@ -63,7 +64,7 @@ jobs:
           python3 dev/perf/bounded-followup/prepare-inflate-banks.py --source . --output "$RUNNER_TEMP/banks"
           cp "$RUNNER_TEMP/control/ext/lib/term-bank-parser.wasm" "$evidence/baseline.wasm"
           cp ext/lib/term-bank-parser.wasm "$evidence/candidate.wasm"
-          node dev/perf/bounded-followup/wasm-inflate-oracle.mjs \
+          node test/native/wasm-inflate-oracle.js \
             "$evidence/baseline.wasm" "$evidence/candidate.wasm" "$evidence/decoder.json" "$RUNNER_TEMP/banks/manifest.json" \
             > "$evidence/decoder.log" 2>&1
           test -z "$(git status --porcelain)"
