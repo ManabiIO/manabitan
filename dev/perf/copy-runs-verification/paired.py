@@ -3,7 +3,6 @@ import argparse
 import hashlib
 import json
 import math
-import os
 from pathlib import Path
 import statistics
 import subprocess
@@ -35,9 +34,9 @@ def audit(root, target, dictionary):
     run = summary['runs'][0]
     ms = run['totalImportMs']
     assert math.isfinite(ms) and ms > 0
-    expected = next(d for d in load(root / 'test/perf/dictionaries.lock.json')['dictionaries'] if d['id'] == dictionary)
+    expected = load(root / 'test/perf/dictionaries.lock.json')['dictionaries'][dictionary]
     v = run['validation']
-    assert (v['title'], v['revision'], v['termRows']) == (expected['title'], expected['revision'], expected['termRows'])
+    assert (v['title'], v['revision'], v['termRows']) == (expected['expectedTitle'], expected['revision'], expected['termRows'])
     assert v['contentReadable'] and v['probeCount'] == 12
     debug = run['importDebug']
     assert debug['errorCount'] == 0 and debug['addSettingsErrorCount'] == 0
