@@ -1,0 +1,37 @@
+name: Audit offline lint workspace
+on:
+  push:
+    branches: [audit/source-export-20260909]
+    paths: [.github/workflows/audit-offline-lint-workspace-20260909.yml]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c8090090924634014b791139d3b22d95d2ebc1ea
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Install exact locked dependencies and build libraries
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build:libs
+          mkdir -p "$RUNNER_TEMP/offline"
+          git show -s --format='%H %T' > "$RUNNER_TEMP/offline/source.txt"
+          node --version > "$RUNNER_TEMP/offline/node.txt"
+          sha256sum package.json package-lock.json > "$RUNNER_TEMP/offline/package-sha256.txt"
+          tar -czf "$RUNNER_TEMP/offline/dependencies.tgz" node_modules ext/lib
+          sha256sum "$RUNNER_TEMP/offline/dependencies.tgz" > "$RUNNER_TEMP/offline/dependencies.sha256"
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        with:
+          name: audit-offline-lint-workspace
+          path: ${{ runner.temp }}/offline
+          retention-days: 7
+          if-no-files-found: error
