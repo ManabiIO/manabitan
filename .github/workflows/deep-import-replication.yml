@@ -1,0 +1,272 @@
+name: Deep import source replication
+
+on:
+  push:
+    branches: [perf-import-deep-replication-20260908]
+    paths: [.github/workflows/deep-import-replication.yml]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify:
+    name: ${{ matrix.lane }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lane: composite-1
+            source_run: 34293672171
+            source_artifact: composite-state-verification
+            target: ext/js/dictionary/wasm/term-bank-parser.c
+          - lane: composite-2
+            source_run: 34293672171
+            source_artifact: composite-state-verification
+            target: ext/js/dictionary/wasm/term-bank-parser.c
+          - lane: reserve-first
+            source_run: 34294451176
+            source_artifact: reserve-first-verification
+            target: ext/js/dictionary/dictionary-database.js
+    env:
+      BASE: 394d8eb799dd1eb5e194cee11472a4beab915080
+      LANE: ${{ matrix.lane }}
+      TARGET: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 394d8eb799dd1eb5e194cee11472a4beab915080
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.source_artifact }}
+          run-id: ${{ matrix.source_run }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/recovered
+      - name: Reconstruct and verify the actual source patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence" "$RUNNER_TEMP/arms"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          recovered = root / 'recovered'
+          evidence = root / 'evidence'
+          patches = list(recovered.rglob('source-candidate.patch'))
+          if len(patches) != 1:
+              raise RuntimeError(f'Expected exactly one recorded source-candidate.patch, found {len(patches)}')
+          original = patches[0].read_bytes()
+          (evidence / 'original-candidate.patch').write_bytes(original)
+          for arm in ('baseline', 'candidate'):
+              path = root / 'arms' / arm
+              subprocess.run(['git', 'worktree', 'add', '--detach', str(path), os.environ['BASE']], check=True)
+              (path / 'node_modules').symlink_to(pathlib.Path(os.environ['GITHUB_WORKSPACE']) / 'node_modules', target_is_directory=True)
+          candidate = root / 'arms/candidate'
+          subprocess.run(['git', 'apply', '--index', '--check', str(patches[0])], cwd=candidate, check=True)
+          subprocess.run(['git', 'apply', '--index', str(patches[0])], cwd=candidate, check=True)
+          changed = subprocess.check_output(['git', 'diff', '--cached', '--name-only'], cwd=candidate, text=True).splitlines()
+          if os.environ['TARGET'] not in changed:
+              raise RuntimeError('The recorded patch does not change the intended product file')
+          if any(p != os.environ['TARGET'] and not (p.startswith('test/') and p.endswith('.js')) for p in changed):
+              raise RuntimeError(f'Unexpected source paths: {changed}')
+          tree = subprocess.check_output(['git', 'write-tree'], cwd=candidate, text=True).strip()
+          previous = list(recovered.rglob('paired/results.json'))
+          if previous:
+              result = json.loads(previous[0].read_text())
+              expected = result['source']['candidate']['indexTree']
+              if tree != expected:
+                  raise RuntimeError(f'Reconstructed source tree differs: {tree} != {expected}')
+          for name in ('unit.log', 'types.log', 'options.log'):
+              matches = list(recovered.rglob(name))
+              if len(matches) == 1:
+                  (evidence / ('previous-' + name)).write_bytes(matches[0].read_bytes())
+          runners = list(recovered.rglob('run-paired.py'))
+          if len(runners) != 1:
+              raise RuntimeError('Missing or ambiguous original source-comparison driver')
+          (evidence / 'run-paired.py').write_bytes(runners[0].read_bytes())
+          provenance = {'lane': os.environ['LANE'], 'baseline': os.environ['BASE'], 'originalCandidateTree': tree,
+                        'changedFiles': changed, 'originalPatchSha256': hashlib.sha256(original).hexdigest(),
+                        'driverSha256': hashlib.sha256(runners[0].read_bytes()).hexdigest()}
+          (evidence / 'reconstruction.json').write_text(json.dumps(provenance, indent=2))
+          PY
+          for arm in baseline candidate; do
+            (cd "$RUNNER_TEMP/arms/$arm" && node dev/bin/build.js --target chrome-dev) > "$RUNNER_TEMP/evidence/build-$arm.log" 2>&1
+          done
+          (cd "$RUNNER_TEMP/arms/baseline" && node dev/perf/prepare-dictionaries.js) > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          ln -s "$RUNNER_TEMP/arms/baseline/builds/e2e-dictionary-cache" "$RUNNER_TEMP/arms/candidate/builds/e2e-dictionary-cache"
+          node --version > "$RUNNER_TEMP/evidence/node.txt"
+          clang --version > "$RUNNER_TEMP/evidence/compiler.txt"
+          lscpu > "$RUNNER_TEMP/evidence/cpu.txt"
+          free -b > "$RUNNER_TEMP/evidence/memory.txt"
+      - name: Full correctness and retain the original failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/candidate"
+          node node_modules/vitest/vitest.mjs run > "$RUNNER_TEMP/evidence/unit.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$RUNNER_TEMP/evidence/options.log" 2>&1
+          npm run test:ts > "$RUNNER_TEMP/evidence/types.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$RUNNER_TEMP/evidence/build-dry-run.log" 2>&1
+          git diff HEAD --binary > "$RUNNER_TEMP/evidence/candidate.patch"
+          git write-tree > "$RUNNER_TEMP/evidence/candidate-tree.txt"
+      - name: Twelve fixed adjacent pairs per dictionary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "$RUNNER_TEMP/evidence/run-paired.py" \
+            --baseline "$RUNNER_TEMP/arms/baseline" \
+            --candidate "$RUNNER_TEMP/arms/candidate" \
+            --pairs 12 --warmups 1 \
+            --output "$RUNNER_TEMP/evidence/paired" \
+            --label "Clean-runner replication $LANE; fixed twelve pairs per dictionary" \
+            | tee "$RUNNER_TEMP/evidence/driver.log"
+      - name: Strict full Chromium integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/candidate"
+          MANABITAN_E2E_STRICT_RUNTIME=1 MANABITAN_CHROMIUM_HEADLESS=1 MANABITAN_E2E_SKIP_BUILD=1 MANABITAN_CHROMIUM_E2E_REPORT="$RUNNER_TEMP/evidence/full-chromium.html" node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/full-chromium.log" 2>&1
+      - name: Record complete comparisons without dropping outliers
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, math, os, pathlib, random, statistics
+          folder = pathlib.Path(os.environ['RUNNER_TEMP']) / 'evidence'
+          result = json.loads((folder / 'paired/results.json').read_text())
+          if result.get('status') != 'complete' or len(result.get('runs', [])) != 72:
+              raise RuntimeError('The planned 72-import comparison did not complete')
+          integration = json.loads((folder / 'full-chromium.json').read_text())
+          if integration.get('status') != 'success':
+              raise RuntimeError('Full Chromium integration did not report success')
+          output = {'lane': os.environ['LANE'], 'status': 'complete', 'measuredImports': 72,
+                    'warmupImports': len(result.get('warmupRuns', [])), 'source': result['source'],
+                    'fullChromiumStatus': integration['status'], 'dictionaries': []}
+          rng = random.Random(20260908)
+          for dictionary in ('jmdict', 'jmnedict', 'jitendex'):
+              pairs = []
+              for number in range(1, 13):
+                  selected = [r for r in result['runs'] if r['dataset'] == dictionary and r['pair'] == number]
+                  if len(selected) != 2 or {r['arm'] for r in selected} != {'baseline', 'candidate'}:
+                      raise RuntimeError(f'Incomplete or duplicate pair {dictionary}/{number}')
+                  arms = {r['arm']: r for r in selected}
+                  a, b = (arms[k]['totalImportMs'] for k in ('baseline', 'candidate'))
+                  if not all(isinstance(v, (int, float)) and math.isfinite(v) and v > 0 for v in (a, b)):
+                      raise RuntimeError('Invalid browser duration')
+                  pairs.append({'pair': number, 'baselineMs': a, 'candidateMs': b, 'changePct': (b/a-1)*100,
+                                'order': selected[0].get('order')})
+              changes = [p['changePct'] for p in pairs]
+              samples = sorted(statistics.median(rng.choices(changes, k=12)) for _ in range(20000))
+              output['dictionaries'].append({'dictionary': dictionary, 'pairCount': 12,
+                  'baselineMedianMs': statistics.median(p['baselineMs'] for p in pairs),
+                  'candidateMedianMs': statistics.median(p['candidateMs'] for p in pairs),
+                  'medianPairedChangePct': statistics.median(changes), 'fasterPairs': sum(v < 0 for v in changes),
+                  'bootstrap95Pct': [samples[499], samples[19499]], 'pairs': pairs})
+          output['candidatePatchSha256'] = hashlib.sha256((folder / 'candidate.patch').read_bytes()).hexdigest()
+          (folder / 'decision.json').write_text(json.dumps(output, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deep-import-${{ matrix.lane }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
+
+  report:
+    if: always()
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: perf-import-deep-replication-20260908
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: deep-import-*
+          path: ${{ runner.temp }}/results
+      - name: Persist readable evidence and exact patches even when validation fails
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, shutil
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'results'
+          out = pathlib.Path('dev/perf/deep-import-replication-20260908')
+          out.mkdir(parents=True, exist_ok=True)
+          lines = ['# Deep import replication', '',
+              'Baseline: `394d8eb799dd1eb5e194cee11472a4beab915080` (PR #20).',
+              'Two clean-runner replications of the composite-state parser and a separate single-probe reservation check.',
+              'No release branch is merged. Failed validation is not a performance result.',
+              'Negative percentages mean less whole-import time; independent hosts are not pooled.', '']
+          records = []
+          for lane in ('composite-1', 'composite-2', 'reserve-first'):
+              folder = root / ('deep-import-' + lane)
+              decision = folder / 'decision.json'
+              lines.extend(['## ' + lane, ''])
+              if decision.is_file():
+                  result = json.loads(decision.read_text())
+                  records.append(result)
+                  lines.extend([f"{result['measuredImports']} measured imports; {result['warmupImports']} separately retained warmups. Full Chromium: {result['fullChromiumStatus']}.", '',
+                      '| Dictionary | Baseline ms | Candidate ms | Paired change | Faster pairs | Exploratory 95% bootstrap interval |',
+                      '|---|---:|---:|---:|---:|---:|'])
+                  for row in result['dictionaries']:
+                      lo, hi = row['bootstrap95Pct']
+                      lines.append(f"| {row['dictionary']} | {row['baselineMedianMs']:.1f} | {row['candidateMedianMs']:.1f} | {row['medianPairedChangePct']:+.2f}% | {row['fasterPairs']}/12 | {lo:+.2f}% to {hi:+.2f}% |")
+                  lines.extend(['', 'Intervals describe this experiment, not every browser or device. All planned pairs are retained.', ''])
+              else:
+                  records.append({'lane': lane, 'status': 'incomplete-or-failed'})
+                  lines.extend(['Validation did not establish a complete passing comparison. No speedup is inferred.', ''])
+                  for name in ('unit.log', 'types.log', 'driver.log', 'build-candidate.log'):
+                      file = folder / name
+                      if file.is_file():
+                          text = file.read_text(errors='replace')
+                          text = re.sub(r'\x1b\[[0-9;]*[A-Za-z]', '', text)
+                          lines.extend(['### ' + name, '', '```text', '\n'.join(text.splitlines()[-45:]), '```', ''])
+              patch = folder / 'candidate.patch'
+              if not patch.is_file():
+                  patch = folder / 'original-candidate.patch'
+              if patch.is_file():
+                  shutil.copyfile(patch, out / (lane + '.patch'))
+              reconstruction = folder / 'reconstruction.json'
+              if reconstruction.is_file():
+                  shutil.copyfile(reconstruction, out / (lane + '-source.json'))
+          good = [r for r in records if r.get('status') == 'complete' and r['lane'].startswith('composite-')]
+          lines.extend(['## Decision boundary', ''])
+          if len(good) == 2:
+              same = good[0]['source']['candidate']['indexTree'] == good[1]['source']['candidate']['indexTree']
+              safe = same and all(all(d['medianPairedChangePct'] <= 1 for d in r['dictionaries']) for r in good)
+              repeated = safe and all(next(d for d in r['dictionaries'] if d['dictionary'] == 'jitendex')['fasterPairs'] >= 9 for r in good)
+              lines.append('The Jitendex direction repeated under the predefined descriptive screen.' if repeated else 'The two replications do not meet the predefined descriptive screen for retaining a general optimization.')
+              lines.append('The screen requires identical source trees, no dictionary above +1% paired median, and at least 9/12 faster Jitendex pairs on each host. It is not a universal non-regression guarantee or release approval.')
+          else:
+              lines.append('Two complete comparable parser replications were not obtained; no replication claim is made.')
+          lines.extend(['', 'Raw logs, each individual browser report, original patches, source hashes, and failed attempts are in this workflow’s artifacts. These checked-in patches contain no dictionary data, fonts, dependencies, or generated binaries.', ''])
+          (out / 'REPORT.md').write_text('\n'.join(lines) + '\n')
+          (out / 'RESULTS.json').write_text(json.dumps(records, indent=2) + '\n')
+          PY
+          git add dev/perf/deep-import-replication-20260908
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'Preserve completed and failed import replication evidence without release promotion'
+            git push origin HEAD:refs/heads/perf-import-deep-replication-20260908
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deep-import-replication-report
+          path: dev/perf/deep-import-replication-20260908/
+          retention-days: 14
+          if-no-files-found: error
