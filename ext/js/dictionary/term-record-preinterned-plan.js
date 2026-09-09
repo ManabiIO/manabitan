@@ -398,11 +398,26 @@ export function compactTermRecordPreinternedPlan(plan, start, count, remapScratc
     }
     const stringsBuffer = new Uint8Array(stringsByteLength);
     let cursor = 0;
+    let runStart = 0;
+    let runEnd = 0;
     for (const oldIndex of referencedOldIndexes) {
         const oldOffset = sourceStringOffsets[oldIndex];
         const length = plan.stringLengths[oldIndex];
-        stringsBuffer.set(plan.stringsBuffer.subarray(oldOffset, oldOffset + length), cursor);
-        cursor += length;
+        if (length === 0) { continue; }
+        // Parser plans intern strings in encounter order. Copy adjacent source
+        // ranges together instead of allocating one view per referenced key.
+        // A gap or reordered key must end the run; unreferenced bytes stay out.
+        if (oldOffset !== runEnd) {
+            if (runEnd > runStart) {
+                stringsBuffer.set(plan.stringsBuffer.subarray(runStart, runEnd), cursor);
+                cursor += runEnd - runStart;
+            }
+            runStart = oldOffset;
+        }
+        runEnd = oldOffset + length;
+    }
+    if (runEnd > runStart) {
+        stringsBuffer.set(plan.stringsBuffer.subarray(runStart, runEnd), cursor);
     }
     return {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes};
 }
