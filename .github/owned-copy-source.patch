@@ -1,0 +1,231 @@
+diff --git a/ext/js/core/copy-stable-byte-view.js b/ext/js/core/copy-stable-byte-view.js
+new file mode 100644
+--- /dev/null
++++ b/ext/js/core/copy-stable-byte-view.js
+@@ -0,0 +1,46 @@
++/*
++ * Copyright (C) 2023-2025  Yomitan Authors
++ * Copyright (C) 2016-2022  Yomichan Authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++
++/**
++ * Copies a stable byte view into an exact-sized, private buffer. The caller
++ * must keep the source alive and unmodified until this synchronous call ends;
++ * this is not a snapshot protocol for concurrently modified shared memory.
++ *
++ * For large unaligned shared views, first copy an aligned tail, then move it
++ * inside the private destination and fill the short prefix. This avoids the
++ * slow unaligned shared-byte copy in affected engines without retaining
++ * padding, borrowing the source, or reading outside the requested view.
++ * @param {Uint8Array} source
++ * @returns {Uint8Array}
++ */
++export function copyStableByteView(source) {
++    const length = source.byteLength;
++    const prefix = (8 - (source.byteOffset & 7)) & 7;
++    if (
++        prefix === 0 || length < 1024 ||
++        typeof SharedArrayBuffer === 'undefined' || !(source.buffer instanceof SharedArrayBuffer)
++    ) {
++        // eslint-disable-next-line unicorn/prefer-spread -- TypedArray ownership and return type must be preserved.
++        return source.slice();
++    }
++    const owned = new Uint8Array(length);
++    owned.set(source.subarray(prefix));
++    owned.copyWithin(prefix, 0, length - prefix);
++    owned.set(source.subarray(0, prefix));
++    return owned;
++}
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -21,6 +21,7 @@
+ 
+ import {initWasm, Resvg} from '../../lib/resvg-wasm.js';
+ import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
++import {copyStableByteView} from '../core/copy-stable-byte-view.js';
+ import {isDevDiagnosticsBuild, reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
+ import {ExtensionError} from '../core/extension-error.js';
+ import {parseJson} from '../core/json.js';
+@@ -5730,7 +5731,7 @@ export class DictionaryDatabase {
+             this._nextRecentTermContentSourceBatchId = 1;
+         }
+         const batchId = this._nextRecentTermContentSourceBatchId++;
+-        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
++        const owned = copyStableByteView(spans.buffer.subarray(minimumOffset, maximumEnd));
+         this._recentTermContentSourceBatches.set(batchId, owned);
+         this._recentTermContentSourceBatchBytes += owned.byteLength;
+         for (let i = 0; i < staged.indexes.length; ++i) {
+diff --git a/test/copy-stable-byte-view.test.js b/test/copy-stable-byte-view.test.js
+new file mode 100644
+--- /dev/null
++++ b/test/copy-stable-byte-view.test.js
+@@ -0,0 +1,97 @@
++/*
++ * Copyright (C) 2026  Manabitan Authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++
++import {afterEach, describe, expect, test, vi} from 'vitest';
++import {copyStableByteView} from '../ext/js/core/copy-stable-byte-view.js';
++
++/** @param {Uint8Array} bytes */
++function fillPattern(bytes) {
++    for (let i = 0; i < bytes.length; ++i) { bytes[i] = (i * 17 + Math.floor(i / 256)) & 255; }
++}
++
++afterEach(() => { vi.unstubAllGlobals(); });
++
++describe.each([false, true])('copyStableByteView shared=%s', (shared) => {
++    test.each(Array.from({length: 16}, (_, index) => index))('preserves exact bytes, ownership and allocation at offset %i', (offset) => {
++        const lengths = [...Array.from({length: 128}, (_, index) => index), 1023, 1024, 1025, 4095, 4096, 4097, 8191, 8192, 8193];
++        for (const length of lengths) {
++            const buffer = shared ? new SharedArrayBuffer(length + 64) : new ArrayBuffer(length + 64);
++            const all = new Uint8Array(buffer);
++            fillPattern(all);
++            // Both the view and selected subview have nonzero offsets. Sentinels
++            // before/after the selected bytes must never leak into the result.
++            const source = all.subarray(16, -16).subarray(offset, offset + length);
++            const expected = Uint8Array.from(source);
++            const copied = copyStableByteView(source);
++            expect(copied).toStrictEqual(expected);
++            expect(copied.buffer).toBeInstanceOf(ArrayBuffer);
++            expect(copied.byteOffset).toBe(0);
++            expect(copied.buffer.byteLength).toBe(length);
++            expect(copied.buffer).not.toBe(buffer);
++            expect(source).toStrictEqual(expected);
++            source.fill(0);
++            expect(copied).toStrictEqual(expected);
++            copied.fill(255);
++            expect(source.every((byte) => byte === 0)).toBe(true);
++        }
++    });
++});
++
++test('uses the unaligned shared path without source slice', () => {
++    const source = new Uint8Array(new SharedArrayBuffer(8200), 3, 8193);
++    fillPattern(source);
++    const expected = Uint8Array.from(source);
++    const slice = vi.spyOn(source, 'slice').mockImplementation(() => { throw new Error('unexpected byte slice'); });
++    expect(copyStableByteView(source)).toStrictEqual(expected);
++    expect(slice).not.toHaveBeenCalled();
++});
++
++test('retains ordinary and small/aligned shared slice paths', () => {
++    for (const source of [new Uint8Array(new ArrayBuffer(2050), 1, 2048), new Uint8Array(new SharedArrayBuffer(2056), 8, 2048), new Uint8Array(new SharedArrayBuffer(100), 1, 99)]) {
++        const slice = vi.spyOn(source, 'slice');
++        copyStableByteView(source);
++        expect(slice).toHaveBeenCalledOnce();
++    }
++});
++
++test('works when the SharedArrayBuffer constructor is unavailable', () => {
++    const source = new Uint8Array(new SharedArrayBuffer(2050), 1, 2048);
++    fillPattern(source);
++    const expected = Uint8Array.from(source);
++    vi.stubGlobal('SharedArrayBuffer', void 0);
++    expect(copyStableByteView(source)).toStrictEqual(expected);
++});
++
++test('owns shared WASM bytes across source reuse and memory growth', () => {
++    const memory = new WebAssembly.Memory({initial: 1, maximum: 2, shared: true});
++    for (let alignment = 0; alignment < 8; ++alignment) {
++        const source = new Uint8Array(memory.buffer, 1024 + alignment, 8197);
++        fillPattern(source);
++        const expected = Uint8Array.from(source);
++        const owned = copyStableByteView(source);
++        source.fill(0);
++        if (alignment === 0) { memory.grow(1); }
++        expect(owned).toStrictEqual(expected);
++        expect(owned.buffer.byteLength).toBe(source.byteLength);
++    }
++});
++
++test('keeps detached ordinary source failure semantics', () => {
++    const source = new Uint8Array(1024);
++    structuredClone(source.buffer, {transfer: [source.buffer]});
++    expect(() => copyStableByteView(source)).toThrow(TypeError);
++});
+diff --git a/test/dictionary-database-content-dedup.test.js b/test/dictionary-database-content-dedup.test.js
+--- a/test/dictionary-database-content-dedup.test.js
++++ b/test/dictionary-database-content-dedup.test.js
+@@ -222,6 +222,54 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
+ }
+ 
+ describe('DictionaryDatabase term content dedup metadata cache', () => {
++    test('owns large unaligned shared source spans without retaining source padding', async () => {
++        const database = new DictionaryDatabase();
++        const backing = new SharedArrayBuffer(8300);
++        const source = new Uint8Array(backing, 9, 8250);
++        for (let i = 0; i < source.length; ++i) { source[i] = (i * 31) & 255; }
++        const expected = source.slice(4, 8201);
++        const {meta, staged} = publishSlabMeta(database, source, 4, expected.length, 10, 20);
++        const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database);
++        const cached = findRecent(meta);
++        if (typeof cached === 'undefined') { throw new Error('Expected an owned recent source'); }
++        expect(cached.offset).toBe(0);
++        expect(cached.buffer.buffer).toBeInstanceOf(ArrayBuffer);
++        expect(cached.buffer.buffer.byteLength).toBe(expected.length);
++        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(expected.length);
++        source.fill(0);
++        const readStorage = vi.fn(async () => { throw new Error('recent source should stay readable'); });
++        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
++        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
++        const [result] = await findBatch([{hash1: 10, hash2: 20, contentBytes: expected, primary: meta}]);
++        expect(result).toMatchObject({existingMeta: meta, recentSourceHit: true});
++        expect(readStorage).not.toHaveBeenCalled();
++        Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').call(database, staged);
++        expect(findRecent(meta)).toBeUndefined();
++        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(0);
++    });
++
++    test('keeps an exact-budget unaligned shared batch and evicts it for the next batch', () => {
++        const database = new DictionaryDatabase();
++        const limit = 48 * 1024 * 1024;
++        const source = new Uint8Array(new SharedArrayBuffer(limit + 1), 1, limit);
++        source[0] = 42;
++        source[limit - 1] = 99;
++        const first = publishSlabMeta(database, source, 0, limit, 10, 20);
++        const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database);
++        const cached = findRecent(first.meta);
++        if (typeof cached === 'undefined') { throw new Error('Expected an exact-budget recent source'); }
++        expect(cached.buffer.byteLength).toBe(limit);
++        expect(cached.buffer.buffer.byteLength).toBe(limit);
++        expect(cached.buffer[0]).toBe(42);
++        expect(cached.buffer[limit - 1]).toBe(99);
++        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(limit);
++        const second = publishSlabMeta(database, source, 8, 1025, 30, 40);
++        expect(findRecent(first.meta)).toBeUndefined();
++        expect(findRecent(second.meta)).toBeDefined();
++        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(1025);
++        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(1);
++    });
++
+     test('owns recent published source bytes across borrowed slab reuse', async () => {
+         const database = new DictionaryDatabase();
+         const source = new Uint8Array([90, 1, 2, 3, 4, 91]);
