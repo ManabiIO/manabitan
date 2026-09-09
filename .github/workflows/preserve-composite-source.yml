@@ -1,0 +1,59 @@
+name: Preserve tested composite parser source
+
+on:
+  push:
+    branches: [perf-composite-state-verify-20260908]
+    paths: [.github/workflows/preserve-composite-source.yml]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  preserve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 66606a1525557362fede5308dd71a3447a3d0c39
+          fetch-depth: 0
+      - name: Require the exact completed validation run
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {data: run} = await github.rest.actions.getWorkflowRun({...context.repo, run_id: 34293672171})
+            if (run.conclusion !== 'success' || run.head_sha !== '66606a1525557362fede5308dd71a3447a3d0c39') {
+              throw new Error('Exact source validation is not successful')
+            }
+      - name: Commit only the tested C source and regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach "$RUNNER_TEMP/source" 394d8eb799dd1eb5e194cee11472a4beab915080
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          source = Path(os.environ['RUNNER_TEMP']) / 'source/ext/js/dictionary/wasm/term-bank-parser.c'
+          text = source.read_text()
+          start = text.index('static int parse_composite_span_impl(')
+          end = text.index('\nstatic int parse_composite_span(', start)
+          replacement = Path('dev/perf/composite-experiment/composite.c.txt').read_text()
+          source.write_text(text[:start] + replacement + text[end:])
+          PY
+          cp dev/perf/composite-experiment/term-bank-composite-state.test.js "$RUNNER_TEMP/source/test/"
+          cd "$RUNNER_TEMP/source"
+          git add ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-composite-state.test.js
+          test "$(git write-tree)" = 7861e3696323cef9dd0f26c1ab798ea8b1c52fca
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'Keep active composite JSON parser state local'
+          git push origin HEAD:refs/heads/perf-import-composite-local-state-20260908
+          git rev-parse HEAD > "$RUNNER_TEMP/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/source-tree.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: composite-source-reference
+          path: |
+            ${{ runner.temp }}/source-sha.txt
+            ${{ runner.temp }}/source-tree.txt
+          retention-days: 14
+          if-no-files-found: error
