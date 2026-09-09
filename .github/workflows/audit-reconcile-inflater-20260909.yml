@@ -1,0 +1,55 @@
+name: Audit reconcile inflater
+on:
+  push:
+    branches: [audit/source-export-20260909]
+    paths: [.github/workflows/audit-reconcile-inflater-20260909.yml]
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: c8090090924634014b791139d3b22d95d2ebc1ea
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - name: Preserve both histories without restoring the disputed parser
+        run: |
+          set -euo pipefail
+          git config user.name 'Alex Ehlke'
+          git config user.email 'alex.ehlke@gmail.com'
+          git merge --no-ff --no-edit a7e375ecb842c8bfed8142fd0cad4158d9b98f92
+          git diff --exit-code c8090090924634014b791139d3b22d95d2ebc1ea -- ext/js/dictionary/wasm/term-bank-parser.c package.json package-lock.json .github/workflows/ci.yml
+          git diff --exit-code 5c295fd17bed1aca2a5beae5963046574bcb2f36 -- ext/js/dictionary/wasm/term-bank-parser.c
+          mkdir -p "$RUNNER_TEMP/evidence"
+          git diff c8090090924634014b791139d3b22d95d2ebc1ea HEAD > "$RUNNER_TEMP/evidence/incremental.patch"
+          git diff --name-only c8090090924634014b791139d3b22d95d2ebc1ea HEAD > "$RUNNER_TEMP/evidence/changed-paths.txt"
+          test "$(wc -l < "$RUNNER_TEMP/evidence/changed-paths.txt")" -eq 4
+      - name: Build and verify retained parser and inflater contracts
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build:libs
+          npx vitest run test/term-bank-inflate-matches.test.js > "$RUNNER_TEMP/evidence/inflater-tests.log" 2>&1
+          npm run test:json > "$RUNNER_TEMP/evidence/json.log" 2>&1
+          for project in main dev test bench; do
+            npm run "test:ts:$project" > "$RUNNER_TEMP/evidence/types-$project.log" 2>&1
+          done
+          git diff --exit-code
+      - name: Publish exact tested source to audit ref only
+        run: |
+          set -euo pipefail
+          git show -s --format='%H %T %P' HEAD | tee "$RUNNER_TEMP/evidence/source-identity.txt"
+          git push origin HEAD:refs/heads/audit/reconciled-inflater-source-20260909
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audit-reconciled-inflater-source
+          path: ${{ runner.temp }}/evidence
+          retention-days: 30
+          if-no-files-found: error
