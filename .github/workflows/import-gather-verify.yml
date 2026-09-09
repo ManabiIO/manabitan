@@ -1,0 +1,145 @@
+name: Verify isolated shared-span gather optimization
+on:
+  push:
+    branches: [verify/import-allocation-workspace-20260909]
+    paths: [.github/workflows/import-gather-verify.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      sha: ${{ steps.publish.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - name: Reconstruct only the reviewed source and tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          cp .github/gather-source.patch "$RUNNER_TEMP/evidence/source.patch"
+          git switch --detach ff9cbf2e848a86d6bbfd281179a6d753349e52f4
+          git apply --check "$RUNNER_TEMP/evidence/source.patch"
+          git apply "$RUNNER_TEMP/evidence/source.patch"
+          git add dev/lib/zstd-wasm.js test/zstd-wasm.test.js
+          git write-tree | tee "$RUNNER_TEMP/evidence/tree.txt"
+          test "$(git write-tree)" = 3055b20bb29e11e8dfd7282cd774249279835868
+          git -c user.name='Manabitan optimization worker' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Use aligned shared loads when gathering spans into private compression memory'
+          git rev-parse HEAD > "$RUNNER_TEMP/evidence/commit.txt"
+      - run: npm ci
+      - name: Complete independent correctness checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/evidence"
+          node --version > "$out/node.txt"
+          clang --version > "$out/compiler.txt"
+          node dev/bin/build-libs.js > "$out/build-libs.log" 2>&1
+          node node_modules/vitest/vitest.mjs run > "$out/unit.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$out/options.log" 2>&1
+          npm run test:ts > "$out/types.log" 2>&1
+          node node_modules/eslint/bin/eslint.js dev/lib/zstd-wasm.js test/zstd-wasm.test.js > "$out/lint.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$out/build.log" 2>&1
+          test -z "$(git status --porcelain)"
+      - name: Publish isolated source branch
+        id: publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin HEAD:refs/heads/perf-import-aligned-gather-20260909
+          printf 'sha=%s\n' "$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gather-source-verification
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
+  paired:
+    needs: source
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-slim]
+        dictionary: [jmnedict, jmdict, jitendex]
+    env:
+      CANDIDATE_SHA: ${{ needs.source.outputs.sha }}
+      CANDIDATE_TREE: 3055b20bb29e11e8dfd7282cd774249279835868
+      PACKAGE_CHANGE: lib/zstd-wasm.js
+      DICTIONARY: ${{ matrix.dictionary }}
+      RUNNER_LABEL: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - name: Native-policy preflight, matched packages and fixed six-pair imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .github/import-pair-bootstrap.sh "$RUNNER_TEMP/bootstrap.sh"
+          bash "$RUNNER_TEMP/bootstrap.sh"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gather-${{ matrix.runner }}-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
+  integration:
+    needs: source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.source.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Strict full Chromium integration
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          node dev/perf/prepare-dictionaries.js > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          node dev/bin/build.js --target chrome-dev > "$RUNNER_TEMP/evidence/build.log" 2>&1
+          xvfb-run -a node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/integration.log" 2>&1
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const r=JSON.parse(readFileSync('builds/chromium-e2e-import-report.json','utf8'));
+          const d=r.runtimeDiagnostics;
+          if(r.status!=='success'||r.skippedVerification||!d?.hasStorageGetDirectory||!d.hasCreateSyncAccessHandle||!d.hasOpfsSahpoolVfs||d.openStorageMode!=='opfs-sahpool')throw new Error('Strict Chromium acceptance failed');
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gather-strict-integration
+          path: |
+            ${{ runner.temp }}/evidence/
+            builds/chromium-e2e-import-report.json
+            builds/chromium-e2e-import-report.html
+          retention-days: 14
+          if-no-files-found: error
