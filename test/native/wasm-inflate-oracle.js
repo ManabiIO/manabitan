@@ -93,9 +93,7 @@ function run(wasm, compressed, raw, options = {}) {
     ]);
     const cpu0 = process.cpuUsage();
     const start = performance.now();
-    const status = wasm.inflate_and_join_term_banks(
-        input, compressed.length, meta, meta + 4, meta + 8, meta + 12, meta + 16, 1, dest, cap,
-    );
+    const status = wasm.inflate_and_join_term_banks(input, compressed.length, meta, meta + 4, meta + 8, meta + 12, meta + 16, 1, dest, cap);
     const elapsedMs = performance.now() - start;
     const cpu = process.cpuUsage(cpu0);
     assert(heap.subarray(outputBase, dest).every((v) => v === 0xa5), 'prefix guard overwritten');
