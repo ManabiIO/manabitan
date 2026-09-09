@@ -222,6 +222,54 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
 }
 
 describe('DictionaryDatabase term content dedup metadata cache', () => {
+    test('owns large unaligned shared source spans without retaining source padding', async () => {
+        const database = new DictionaryDatabase();
+        const backing = new SharedArrayBuffer(8300);
+        const source = new Uint8Array(backing, 9, 8250);
+        for (let i = 0; i < source.length; ++i) { source[i] = (i * 31) & 255; }
+        const expected = source.slice(4, 8201);
+        const {meta, staged} = publishSlabMeta(database, source, 4, expected.length, 10, 20);
+        const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database);
+        const cached = findRecent(meta);
+        if (typeof cached === 'undefined') { throw new Error('Expected an owned recent source'); }
+        expect(cached.offset).toBe(0);
+        expect(cached.buffer.buffer).toBeInstanceOf(ArrayBuffer);
+        expect(cached.buffer.buffer.byteLength).toBe(expected.length);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(expected.length);
+        source.fill(0);
+        const readStorage = vi.fn(async () => { throw new Error('recent source should stay readable'); });
+        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
+        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+        const [result] = await findBatch([{hash1: 10, hash2: 20, contentBytes: expected, primary: meta}]);
+        expect(result).toMatchObject({existingMeta: meta, recentSourceHit: true});
+        expect(readStorage).not.toHaveBeenCalled();
+        Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').call(database, staged);
+        expect(findRecent(meta)).toBeUndefined();
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(0);
+    });
+
+    test('keeps an exact-budget unaligned shared batch and evicts it for the next batch', () => {
+        const database = new DictionaryDatabase();
+        const limit = 48 * 1024 * 1024;
+        const source = new Uint8Array(new SharedArrayBuffer(limit + 1), 1, limit);
+        source[0] = 42;
+        source[limit - 1] = 99;
+        const first = publishSlabMeta(database, source, 0, limit, 10, 20);
+        const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database);
+        const cached = findRecent(first.meta);
+        if (typeof cached === 'undefined') { throw new Error('Expected an exact-budget recent source'); }
+        expect(cached.buffer.byteLength).toBe(limit);
+        expect(cached.buffer.buffer.byteLength).toBe(limit);
+        expect(cached.buffer[0]).toBe(42);
+        expect(cached.buffer[limit - 1]).toBe(99);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(limit);
+        const second = publishSlabMeta(database, source, 8, 1025, 30, 40);
+        expect(findRecent(first.meta)).toBeUndefined();
+        expect(findRecent(second.meta)).toBeDefined();
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(1025);
+        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(1);
+    });
+
     test('owns recent published source bytes across borrowed slab reuse', async () => {
         const database = new DictionaryDatabase();
         const source = new Uint8Array([90, 1, 2, 3, 4, 91]);

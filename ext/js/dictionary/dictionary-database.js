@@ -21,6 +21,7 @@
 
 import {initWasm, Resvg} from '../../lib/resvg-wasm.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
+import {copyStableByteView} from '../core/copy-stable-byte-view.js';
 import {isDevDiagnosticsBuild, reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {parseJson} from '../core/json.js';
@@ -5730,7 +5731,7 @@ export class DictionaryDatabase {
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
-        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
+        const owned = copyStableByteView(spans.buffer.subarray(minimumOffset, maximumEnd));
         this._recentTermContentSourceBatches.set(batchId, owned);
         this._recentTermContentSourceBatchBytes += owned.byteLength;
         for (let i = 0; i < staged.indexes.length; ++i) {
