@@ -78,7 +78,7 @@ export class TermContentBlockImportSession {
      * @param {string} dictionary
      * @param {Uint8Array[]} contentBytesList
      * @param {string|null} compressionDictName
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number}|null>}
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
     async append(dictionary, contentBytesList, compressionDictName) {
         if (this._closed) { throw new Error('Term content block import session is closed'); }
@@ -99,7 +99,7 @@ export class TermContentBlockImportSession {
      * @param {Uint32Array} sourceOffsets
      * @param {Uint32Array} sourceLengths
      * @param {string|null} compressionDictName
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number}|null>}
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
     async appendSpans(dictionary, sourceBytes, sourceOffsets, sourceLengths, compressionDictName) {
         if (this._closed) { throw new Error('Term content block import session is closed'); }
@@ -614,7 +614,7 @@ export class TermContentBlockStore {
      * @param {Uint8Array[]} contentBytesList
      * @param {string|null} compressionDictName
      * @param {boolean} force
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number}|null>}
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
     async tryAppend(contentBytesList, compressionDictName, force = false) {
         if (contentBytesList.length === 0) { return null; }
@@ -635,7 +635,7 @@ export class TermContentBlockStore {
      * @param {Uint32Array} sourceLengths
      * @param {string|null} compressionDictName
      * @param {boolean} force
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number}|null>}
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
     async tryAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
         validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);

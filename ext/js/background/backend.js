@@ -495,7 +495,7 @@ export class Backend {
                     fail(new Error(`Failed to fetch dictionary archive: ${url} (status=${String(request.status)})`));
                     return;
                 }
-                const response = request.response;
+                const response = /** @type {unknown} */ (request.response);
                 const content = response instanceof Blob ? response : new Blob([]);
                 if (content.size === 0) {
                     fail(new Error(`Fetched dictionary archive had no content: ${url}`));
@@ -631,12 +631,10 @@ export class Backend {
                 this._setupSharedWorkerBridge();
                 recordPhase('sharedWorkerBridge.setup', startedAt);
             }
-            try {
+            {
                 const startedAt = safePerformance.now();
                 await this._ensureDictionaryDatabaseReady();
                 recordPhase('dictionaryDatabase.prepare', startedAt);
-            } catch (e) {
-                throw e;
             }
 
             void this._translator.prepare();
@@ -855,6 +853,7 @@ export class Backend {
 
     /**
      * @returns {void}
+     * @throws {Error} If the shared worker cannot be constructed.
      */
     _setupSharedWorkerBridge() {
         const sharedWorkerBridge = new SharedWorker(new URL('../comm/shared-worker-bridge.js', import.meta.url), {type: 'module'});
@@ -863,7 +862,7 @@ export class Backend {
             // connectToBackend2
             e.ports[0].onmessage = this._onPmMessage.bind(this);
         });
-        sharedWorkerBridge.port.addEventListener('messageerror', (/** @type {MessageEvent} */ event) => {
+        sharedWorkerBridge.port.addEventListener('messageerror', (/** @type {MessageEvent<import('api').PmApiMessageAny>} */ event) => {
             this._onPmMessageError(event);
             this._resetSharedWorkerBridge(sharedWorkerBridge, 'messageerror', new Error('Shared worker backend bridge message deserialization failed'));
         });
@@ -1508,6 +1507,7 @@ export class Backend {
 
     /**
      * @param {{text: string, dictionaryNames: string[]}} params
+     * @returns {Promise<unknown>}
      */
     async _onApiDebugDictionaryLookupState({text, dictionaryNames}) {
         await this._awaitDictionaryMutationSettled();
@@ -1566,6 +1566,7 @@ export class Backend {
         return await this._debugDictionaryLookupStateLocal(text, dictionaryNames);
     }
 
+    /** @returns {Promise<unknown>} */
     async _onApiDebugDictionaryStorageState() {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
@@ -1576,9 +1577,11 @@ export class Backend {
         const dictionaryRows = (typeof rowsMethod === 'function') ?
             await /** @type {() => Promise<unknown>} */ (rowsMethod).call(this._dictionaryDatabase) :
             null;
-        const offscreenDictionaryRows = (this._offscreen !== null) ? (() => this._offscreen.sendMessagePromise({
-            action: 'debugDictionaryStorageStateOffscreen',
-        }))() : null;
+        const offscreenDictionaryRows = (this._offscreen !== null) ?
+(() => this._offscreen.sendMessagePromise({
+    action: 'debugDictionaryStorageStateOffscreen',
+}))() :
+null;
         const offscreenDictionaryRowsResult = (offscreenDictionaryRows !== null) ? await offscreenDictionaryRows : null;
         const usesFallbackStorage = typeof usesFallbackStorageValue === 'function' ?
             /** @type {() => boolean} */ (usesFallbackStorageValue).call(this._dictionaryDatabase) :
@@ -1592,7 +1595,9 @@ export class Backend {
                 typeof openStorageDiagnostics === 'object' &&
                 openStorageDiagnostics !== null &&
                 !Array.isArray(openStorageDiagnostics)
-            ) ? openStorageDiagnostics : null,
+            ) ?
+openStorageDiagnostics :
+null,
             startupDiagnosticsSnapshot: this._startupDiagnosticsSnapshot,
             lastDictionaryUrlImportDebug: this._lastDictionaryUrlImportDebug,
             dictionaryRows: Array.isArray(dictionaryRows) ? dictionaryRows : [],
@@ -1601,26 +1606,35 @@ export class Backend {
                 offscreenDictionaryRowsResult !== null &&
                 typeof offscreenDictionaryRowsResult === 'object' &&
                 !Array.isArray(offscreenDictionaryRowsResult)
-            ) ? (offscreenDictionaryRowsResult.lastReplaceDictionaryTitleDebug ?? null) : null,
+            ) ?
+(offscreenDictionaryRowsResult.lastReplaceDictionaryTitleDebug ?? null) :
+null,
             offscreenStartupCleanupIncompleteImportsSummary: (
                 offscreenDictionaryRowsResult !== null &&
                 typeof offscreenDictionaryRowsResult === 'object' &&
                 !Array.isArray(offscreenDictionaryRowsResult)
-            ) ? (offscreenDictionaryRowsResult.startupCleanupIncompleteImportsSummary ?? null) : null,
+            ) ?
+(offscreenDictionaryRowsResult.startupCleanupIncompleteImportsSummary ?? null) :
+null,
             offscreenStartupCleanupMissingTermRecordShardsSummary: (
                 offscreenDictionaryRowsResult !== null &&
                 typeof offscreenDictionaryRowsResult === 'object' &&
                 !Array.isArray(offscreenDictionaryRowsResult)
-            ) ? (offscreenDictionaryRowsResult.startupCleanupMissingTermRecordShardsSummary ?? null) : null,
+            ) ?
+(offscreenDictionaryRowsResult.startupCleanupMissingTermRecordShardsSummary ?? null) :
+null,
             offscreenTermRecordShardFileNames: (
                 offscreenDictionaryRowsResult !== null &&
                 typeof offscreenDictionaryRowsResult === 'object' &&
                 !Array.isArray(offscreenDictionaryRowsResult) &&
                 Array.isArray(offscreenDictionaryRowsResult.termRecordShardFileNames)
-            ) ? offscreenDictionaryRowsResult.termRecordShardFileNames : [],
+            ) ?
+offscreenDictionaryRowsResult.termRecordShardFileNames :
+[],
         };
     }
 
+    /** @returns {Promise<void>} */
     async _awaitDictionaryRefreshSettled() {
         while (true) {
             const importModePromise = this._setDictionaryImportModePromise;
@@ -1670,6 +1684,7 @@ export class Backend {
         }
     }
 
+    /** @returns {Promise<void>} */
     async _awaitDictionaryMutationSettled() {
         while (true) {
             const promise = this._dictionaryMutationPromise;
@@ -1761,17 +1776,17 @@ export class Backend {
         const content = await RequestBuilder.readFetchResponseArrayBuffer(response, null);
         const fileName = (() => {
             const contentDisposition = response.headers.get('Content-Disposition') || '';
-            const match = /filename\\*?=(?:UTF-8''|\"?)([^\";]+)/i.exec(contentDisposition);
+            const match = /filename\\*?=(?:UTF-8''|"?)([^";]+)/i.exec(contentDisposition);
             if (match) {
                 try {
-                    return decodeURIComponent(match[1].replace(/^\"|\"$/g, ''));
+                    return decodeURIComponent(match[1].replace(/^"|"$/g, ''));
                 } catch (_) {
-                    return match[1].replace(/^\"|\"$/g, '');
+                    return match[1].replace(/^"|"$/g, '');
                 }
             }
             try {
                 const parsed = new URL(normalizedUrl);
-                const pathPart = parsed.pathname.split('/').filter((part) => part.length > 0).pop();
+                const pathPart = parsed.pathname.split('/').reverse().find((part) => part.length > 0);
                 if (typeof pathPart === 'string' && pathPart.length > 0) {
                     return pathPart;
                 }
@@ -3674,6 +3689,7 @@ export class Backend {
      * Reloads the background dictionary DB connection so updates performed in
      * worker/offscreen contexts become visible to lookup queries.
      * @returns {Promise<void>}
+     * @param {{reuseActiveImportConnection?: boolean}} [options]
      */
     async _refreshDictionaryDatabaseAfterUpdate({reuseActiveImportConnection = false} = {}) {
         if (this._dictionaryImportModeActive) {
@@ -3786,6 +3802,7 @@ export class Backend {
      */
     async _probeDictionaryVisibilityTranslator(dictionaryTitle, probe, options) {
         const enabledDictionary = options.dictionaries.find((dictionary) => dictionary.name === dictionaryTitle);
+        /** @type {import('translation').TermEnabledDictionaryMap} */
         const enabledDictionaryMap = new Map();
         enabledDictionaryMap.set(dictionaryTitle, {
             index: 0,
@@ -3909,7 +3926,7 @@ export class Backend {
             }
         }
         /** @type {string[]} */
-        let failedAfterRefresh = [];
+        const failedAfterRefresh = [];
         let refreshed = false;
         if (failedBeforeRefresh.length > 0) {
             refreshed = true;
@@ -4668,10 +4685,10 @@ export class Backend {
      */
     async _debugDictionaryLookupStateLocal(text, dictionaryNames) {
         const database = this._dictionaryDatabase;
-        const findDirectTermIds = Reflect.get(database, '_findDirectTermIds');
-        const fetchTermRowsByIds = Reflect.get(database, '_fetchTermRowsByIds');
-        const ensureRecordDictionariesLoaded = Reflect.get(database, '_ensureDirectTermIndexesLoaded');
-        if (typeof findDirectTermIds !== 'function' || typeof fetchTermRowsByIds !== 'function') {
+        const findDirectTermIdsValue = /** @type {unknown} */ (Reflect.get(database, '_findDirectTermIds'));
+        const fetchTermRowsByIdsValue = /** @type {unknown} */ (Reflect.get(database, '_fetchTermRowsByIds'));
+        const ensureRecordDictionariesLoadedValue = /** @type {unknown} */ (Reflect.get(database, '_ensureDirectTermIndexesLoaded'));
+        if (typeof findDirectTermIdsValue !== 'function' || typeof fetchTermRowsByIdsValue !== 'function') {
             return {
                 ok: false,
                 reason: 'debug lookup unavailable',
@@ -4679,18 +4696,30 @@ export class Backend {
                 dictionaryNames,
             };
         }
-        if (typeof ensureRecordDictionariesLoaded === 'function') {
+        // These hooks are present only on the local database, not its worker
+        // proxy. Check availability before applying their source contracts.
+        const findDirectTermIds = /** @type {(dictionary: string, query: string, field: 'expression'|'reading') => number[]} */ (findDirectTermIdsValue);
+        const fetchTermRowsByIds = /** @type {(ids: Iterable<number>) => Promise<Map<number, import('dictionary-database').DatabaseTermEntryWithId>>} */ (fetchTermRowsByIdsValue);
+        if (typeof ensureRecordDictionariesLoadedValue === 'function') {
+            const ensureRecordDictionariesLoaded = /** @type {(names: Iterable<string>) => Promise<void>} */ (ensureRecordDictionariesLoadedValue);
             await ensureRecordDictionariesLoaded.call(database, dictionaryNames);
         }
         /** @type {Map<number, {dictionary: string, matchSource: string}>} */
         const ids = new Map();
         /** @type {Array<Record<string, unknown>>} */
         const directHits = [];
-        const getRecordById = Reflect.get(database, '_termRecordStore')?.getById?.bind(Reflect.get(database, '_termRecordStore'));
-        const termContentStore = Reflect.get(database, '_termContentStore');
-        const readSlice = Reflect.get(termContentStore, 'readSlice');
-        const getLastReadErrorDetails = Reflect.get(termContentStore, 'getLastReadErrorDetails');
-        const getDebugState = Reflect.get(termContentStore, 'getDebugState');
+        const recordStoreValue = /** @type {unknown} */ (Reflect.get(database, '_termRecordStore'));
+        const contentStoreValue = /** @type {unknown} */ (Reflect.get(database, '_termContentStore'));
+        const termRecordStore = /** @type {Partial<import('../dictionary/term-record-opfs-store.js').TermRecordOpfsStore>|null} */ (
+            typeof recordStoreValue === 'object' && recordStoreValue !== null ? recordStoreValue : null
+        );
+        const termContentStore = /** @type {Partial<import('../dictionary/term-content-opfs-store.js').TermContentOpfsStore>|null} */ (
+            typeof contentStoreValue === 'object' && contentStoreValue !== null ? contentStoreValue : null
+        );
+        const getRecordById = termRecordStore?.getById?.bind(termRecordStore);
+        const readSlice = termContentStore?.readSlice;
+        const getLastReadErrorDetails = termContentStore?.getLastReadErrorDetails;
+        const getDebugState = termContentStore?.getDebugState;
         const textDecoder = new TextDecoder();
         for (const dictionaryNameRaw of dictionaryNames) {
             const dictionaryName = String(dictionaryNameRaw || '').trim();

@@ -105,321 +105,321 @@ function showSettingsStartupFailure(error) {
 }
 
 try {
-await Application.main(true, async (application) => {
+    await Application.main(true, async (application) => {
     /** @type {Array<{phase: string, durationMs: number}>} */
-    const startupPhases = [];
-    const startupStartedAt = getNowMs();
-    reportDiagnostics('settings-startup-begin', {
-        page: 'settings',
-        href: globalThis.location?.href ?? null,
-    });
-
-    const documentFocusController = new DocumentFocusController();
-    {
-        const startedAt = getNowMs();
-        documentFocusController.prepare();
-        recordPhase(startupPhases, 'documentFocusController.prepare', startedAt);
-    }
-
-    const extensionContentController = new ExtensionContentController();
-    {
-        const startedAt = getNowMs();
-        extensionContentController.prepare();
-        recordPhase(startupPhases, 'extensionContentController.prepare', startedAt);
-    }
-
-    /** @type {HTMLElement} */
-    const statusFooterElement = querySelectorNotNull(document, '.status-footer-container');
-    const statusFooter = new StatusFooter(statusFooterElement);
-    {
-        const startedAt = getNowMs();
-        statusFooter.prepare();
-        recordPhase(startupPhases, 'statusFooter.prepare', startedAt);
-    }
-
-    /** @type {?number} */
-    let prepareTimer = window.setTimeout(() => {
-        prepareTimer = null;
-        document.documentElement.dataset.loadingStalled = 'true';
-    }, 1000);
-
-    if (prepareTimer !== null) {
-        clearTimeout(prepareTimer);
-        prepareTimer = null;
-    }
-    delete document.documentElement.dataset.loadingStalled;
-
-    const preparePromises = [];
-
-    const modalController = new ModalController(['shared-modals', 'settings-modals']);
-    const settingsController = new SettingsController(application);
-    {
-        const modalStartedAt = getNowMs();
-        const settingsStartedAt = getNowMs();
-        await Promise.all([
-            (async () => {
-                await modalController.prepare();
-                recordPhase(startupPhases, 'modalController.prepare', modalStartedAt);
-            })(),
-            (async () => {
-                await settingsController.prepare();
-                recordPhase(startupPhases, 'settingsController.prepare', settingsStartedAt);
-            })(),
-        ]);
-    }
-
-    const settingsDisplayController = new SettingsDisplayController(settingsController, modalController);
-    {
-        const startedAt = getNowMs();
-        await settingsDisplayController.prepare();
-        recordPhase(startupPhases, 'settingsDisplayController.prepare', startedAt);
-    }
-
-    document.body.hidden = false;
-    reportDiagnostics('settings-startup-ui-unhidden', {
-        page: 'settings',
-        elapsedMs: Math.max(0, getNowMs() - startupStartedAt),
-        phases: startupPhases,
-    });
-
-    const popupPreviewController = new PopupPreviewController(settingsController);
-    {
-        const startedAt = getNowMs();
-        popupPreviewController.prepare();
-        recordPhase(startupPhases, 'popupPreviewController.prepare', startedAt);
-    }
-
-    const persistentStorageController = new PersistentStorageController(application);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await persistentStorageController.prepare();
-        recordPhase(startupPhases, 'persistentStorageController.prepare', startedAt);
-    })());
-
-    const storageController = new StorageController(persistentStorageController);
-    {
-        const startedAt = getNowMs();
-        storageController.prepare();
-        recordPhase(startupPhases, 'storageController.prepare', startedAt);
-    }
-
-    const dictionaryController = new DictionaryController(settingsController, modalController, statusFooter);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await dictionaryController.prepare();
-        recordPhase(startupPhases, 'dictionaryController.prepare', startedAt);
-    })());
-
-    const dictionaryImportController = new DictionaryImportController(settingsController, modalController, statusFooter);
-    {
-        const startedAt = getNowMs();
-        dictionaryImportController.prepare();
-        recordPhase(startupPhases, 'dictionaryImportController.prepare', startedAt);
-    }
-
-    const genericSettingController = new GenericSettingController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await setupGenericSettingController(genericSettingController);
-        recordPhase(startupPhases, 'genericSettingController.prepare+refresh', startedAt);
-    })());
-
-    const audioController = new AudioController(settingsController, modalController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await audioController.prepare();
-        recordPhase(startupPhases, 'audioController.prepare', startedAt);
-    })());
-
-    const profileController = new ProfileController(settingsController, modalController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await profileController.prepare();
-        recordPhase(startupPhases, 'profileController.prepare', startedAt);
-    })());
-
-    const settingsBackup = new BackupController(settingsController, modalController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await settingsBackup.prepare();
-        recordPhase(startupPhases, 'backupController.prepare', startedAt);
-    })());
-
-    const ankiController = new AnkiController(settingsController, application, modalController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await ankiController.prepare();
-        recordPhase(startupPhases, 'ankiController.prepare', startedAt);
-    })());
-
-    const ankiDeckGeneratorController = new AnkiDeckGeneratorController(application, settingsController, modalController, ankiController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await ankiDeckGeneratorController.prepare();
-        recordPhase(startupPhases, 'ankiDeckGeneratorController.prepare', startedAt);
-    })());
-
-    const ankiTemplatesController = new AnkiTemplatesController(application, settingsController, modalController, ankiController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await ankiTemplatesController.prepare();
-        recordPhase(startupPhases, 'ankiTemplatesController.prepare', startedAt);
-    })());
-
-    const scanInputsController = new ScanInputsController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await scanInputsController.prepare();
-        recordPhase(startupPhases, 'scanInputsController.prepare', startedAt);
-    })());
-
-    const simpleScanningInputController = new ScanInputsSimpleController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await simpleScanningInputController.prepare();
-        recordPhase(startupPhases, 'scanInputsSimpleController.prepare', startedAt);
-    })());
-
-    const nestedPopupsController = new NestedPopupsController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await nestedPopupsController.prepare();
-        recordPhase(startupPhases, 'nestedPopupsController.prepare', startedAt);
-    })());
-
-    const popupFrequencyBlurController = new PopupFrequencyBlurController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await popupFrequencyBlurController.prepare();
-        recordPhase(startupPhases, 'popupFrequencyBlurController.prepare', startedAt);
-    })());
-
-    const permissionsToggleController = new PermissionsToggleController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await permissionsToggleController.prepare();
-        recordPhase(startupPhases, 'permissionsToggleController.prepare', startedAt);
-    })());
-
-    const secondarySearchDictionaryController = new SecondarySearchDictionaryController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await secondarySearchDictionaryController.prepare();
-        recordPhase(startupPhases, 'secondarySearchDictionaryController.prepare', startedAt);
-    })());
-
-    const languagesController = new LanguagesController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await languagesController.prepare();
-        recordPhase(startupPhases, 'languagesController.prepare', startedAt);
-    })());
-
-    const translationTextReplacementsController = new TranslationTextReplacementsController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await translationTextReplacementsController.prepare();
-        recordPhase(startupPhases, 'translationTextReplacementsController.prepare', startedAt);
-    })());
-
-    const sentenceTerminationCharactersController = new SentenceTerminationCharactersController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await sentenceTerminationCharactersController.prepare();
-        recordPhase(startupPhases, 'sentenceTerminationCharactersController.prepare', startedAt);
-    })());
-
-    const keyboardShortcutController = new KeyboardShortcutController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await keyboardShortcutController.prepare();
-        recordPhase(startupPhases, 'keyboardShortcutController.prepare', startedAt);
-    })());
-
-    const extensionKeyboardShortcutController = new ExtensionKeyboardShortcutController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await extensionKeyboardShortcutController.prepare();
-        recordPhase(startupPhases, 'extensionKeyboardShortcutController.prepare', startedAt);
-    })());
-
-    const popupWindowController = new PopupWindowController(application.api);
-    {
-        const startedAt = getNowMs();
-        popupWindowController.prepare();
-        recordPhase(startupPhases, 'popupWindowController.prepare', startedAt);
-    }
-
-    const mecabController = new MecabController(application.api);
-    {
-        const startedAt = getNowMs();
-        mecabController.prepare();
-        recordPhase(startupPhases, 'mecabController.prepare', startedAt);
-    }
-
-    const yomitanApiController = new YomitanApiController(application.api);
-    {
-        const startedAt = getNowMs();
-        yomitanApiController.prepare();
-        recordPhase(startupPhases, 'yomitanApiController.prepare', startedAt);
-    }
-
-    const collapsibleDictionaryController = new CollapsibleDictionaryController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await collapsibleDictionaryController.prepare();
-        recordPhase(startupPhases, 'collapsibleDictionaryController.prepare', startedAt);
-    })());
-
-    const sortFrequencyDictionaryController = new SortFrequencyDictionaryController(settingsController);
-    preparePromises.push((async () => {
-        const startedAt = getNowMs();
-        await sortFrequencyDictionaryController.prepare();
-        recordPhase(startupPhases, 'sortFrequencyDictionaryController.prepare', startedAt);
-    })());
-
-    const recommendedSettingsController = new RecommendedSettingsController(settingsController);
-    let recommendedSettingsPrepared = false;
-    /** @type {Promise<void>|null} */
-    let recommendedSettingsPreparePromise = null;
-    const prepareRecommendedSettingsOnDemand = () => {
-        if (recommendedSettingsPrepared) { return; }
-        if (recommendedSettingsPreparePromise !== null) { return; }
-        const startedAt = getNowMs();
-        recommendedSettingsPreparePromise = recommendedSettingsController.prepare().then(() => {
-            recommendedSettingsPrepared = true;
-            recordPhase(startupPhases, 'recommendedSettingsController.prepare', startedAt);
-        }, (error) => {
-            recommendedSettingsPreparePromise = null;
-            reportDiagnostics('recommendedSettingsController.prepare-failed', {
-                message: error instanceof Error ? error.message : String(error),
-            });
+        const startupPhases = [];
+        const startupStartedAt = getNowMs();
+        reportDiagnostics('settings-startup-begin', {
+            page: 'settings',
+            href: globalThis.location?.href ?? null,
         });
-    };
-    globalThis.addEventListener('manabitan:modal-visibility-changed', (event) => {
-        if (!(event instanceof CustomEvent)) { return; }
-        const detail = /** @type {unknown} */ (event.detail);
-        if (!(typeof detail === 'object' && detail !== null)) { return; }
-        if (Reflect.get(detail, 'modalId') !== 'recommended-settings') { return; }
-        if (Reflect.get(detail, 'visible') !== true) { return; }
-        prepareRecommendedSettingsOnDemand();
-    }, false);
 
-    await Promise.all(preparePromises);
-    const totalElapsedMs = Math.max(0, getNowMs() - startupStartedAt);
-    const slowestPhases = [...startupPhases]
-        .sort((a, b) => b.durationMs - a.durationMs)
-        .slice(0, 10);
-    reportDiagnostics('settings-startup-complete', {
-        page: 'settings',
-        totalElapsedMs,
-        phaseCount: startupPhases.length,
-        slowestPhases,
-        phases: startupPhases,
+        const documentFocusController = new DocumentFocusController();
+        {
+            const startedAt = getNowMs();
+            documentFocusController.prepare();
+            recordPhase(startupPhases, 'documentFocusController.prepare', startedAt);
+        }
+
+        const extensionContentController = new ExtensionContentController();
+        {
+            const startedAt = getNowMs();
+            extensionContentController.prepare();
+            recordPhase(startupPhases, 'extensionContentController.prepare', startedAt);
+        }
+
+        /** @type {HTMLElement} */
+        const statusFooterElement = querySelectorNotNull(document, '.status-footer-container');
+        const statusFooter = new StatusFooter(statusFooterElement);
+        {
+            const startedAt = getNowMs();
+            statusFooter.prepare();
+            recordPhase(startupPhases, 'statusFooter.prepare', startedAt);
+        }
+
+        /** @type {?number} */
+        let prepareTimer = window.setTimeout(() => {
+            prepareTimer = null;
+            document.documentElement.dataset.loadingStalled = 'true';
+        }, 1000);
+
+        if (prepareTimer !== null) {
+            clearTimeout(prepareTimer);
+            prepareTimer = null;
+        }
+        delete document.documentElement.dataset.loadingStalled;
+
+        const preparePromises = [];
+
+        const modalController = new ModalController(['shared-modals', 'settings-modals']);
+        const settingsController = new SettingsController(application);
+        {
+            const modalStartedAt = getNowMs();
+            const settingsStartedAt = getNowMs();
+            await Promise.all([
+                (async () => {
+                    await modalController.prepare();
+                    recordPhase(startupPhases, 'modalController.prepare', modalStartedAt);
+                })(),
+                (async () => {
+                    await settingsController.prepare();
+                    recordPhase(startupPhases, 'settingsController.prepare', settingsStartedAt);
+                })(),
+            ]);
+        }
+
+        const settingsDisplayController = new SettingsDisplayController(settingsController, modalController);
+        {
+            const startedAt = getNowMs();
+            await settingsDisplayController.prepare();
+            recordPhase(startupPhases, 'settingsDisplayController.prepare', startedAt);
+        }
+
+        document.body.hidden = false;
+        reportDiagnostics('settings-startup-ui-unhidden', {
+            page: 'settings',
+            elapsedMs: Math.max(0, getNowMs() - startupStartedAt),
+            phases: startupPhases,
+        });
+
+        const popupPreviewController = new PopupPreviewController(settingsController);
+        {
+            const startedAt = getNowMs();
+            popupPreviewController.prepare();
+            recordPhase(startupPhases, 'popupPreviewController.prepare', startedAt);
+        }
+
+        const persistentStorageController = new PersistentStorageController(application);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await persistentStorageController.prepare();
+            recordPhase(startupPhases, 'persistentStorageController.prepare', startedAt);
+        })());
+
+        const storageController = new StorageController(persistentStorageController);
+        {
+            const startedAt = getNowMs();
+            storageController.prepare();
+            recordPhase(startupPhases, 'storageController.prepare', startedAt);
+        }
+
+        const dictionaryController = new DictionaryController(settingsController, modalController, statusFooter);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await dictionaryController.prepare();
+            recordPhase(startupPhases, 'dictionaryController.prepare', startedAt);
+        })());
+
+        const dictionaryImportController = new DictionaryImportController(settingsController, modalController, statusFooter);
+        {
+            const startedAt = getNowMs();
+            dictionaryImportController.prepare();
+            recordPhase(startupPhases, 'dictionaryImportController.prepare', startedAt);
+        }
+
+        const genericSettingController = new GenericSettingController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await setupGenericSettingController(genericSettingController);
+            recordPhase(startupPhases, 'genericSettingController.prepare+refresh', startedAt);
+        })());
+
+        const audioController = new AudioController(settingsController, modalController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await audioController.prepare();
+            recordPhase(startupPhases, 'audioController.prepare', startedAt);
+        })());
+
+        const profileController = new ProfileController(settingsController, modalController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await profileController.prepare();
+            recordPhase(startupPhases, 'profileController.prepare', startedAt);
+        })());
+
+        const settingsBackup = new BackupController(settingsController, modalController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await settingsBackup.prepare();
+            recordPhase(startupPhases, 'backupController.prepare', startedAt);
+        })());
+
+        const ankiController = new AnkiController(settingsController, application, modalController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await ankiController.prepare();
+            recordPhase(startupPhases, 'ankiController.prepare', startedAt);
+        })());
+
+        const ankiDeckGeneratorController = new AnkiDeckGeneratorController(application, settingsController, modalController, ankiController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await ankiDeckGeneratorController.prepare();
+            recordPhase(startupPhases, 'ankiDeckGeneratorController.prepare', startedAt);
+        })());
+
+        const ankiTemplatesController = new AnkiTemplatesController(application, settingsController, modalController, ankiController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await ankiTemplatesController.prepare();
+            recordPhase(startupPhases, 'ankiTemplatesController.prepare', startedAt);
+        })());
+
+        const scanInputsController = new ScanInputsController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await scanInputsController.prepare();
+            recordPhase(startupPhases, 'scanInputsController.prepare', startedAt);
+        })());
+
+        const simpleScanningInputController = new ScanInputsSimpleController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await simpleScanningInputController.prepare();
+            recordPhase(startupPhases, 'scanInputsSimpleController.prepare', startedAt);
+        })());
+
+        const nestedPopupsController = new NestedPopupsController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await nestedPopupsController.prepare();
+            recordPhase(startupPhases, 'nestedPopupsController.prepare', startedAt);
+        })());
+
+        const popupFrequencyBlurController = new PopupFrequencyBlurController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await popupFrequencyBlurController.prepare();
+            recordPhase(startupPhases, 'popupFrequencyBlurController.prepare', startedAt);
+        })());
+
+        const permissionsToggleController = new PermissionsToggleController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await permissionsToggleController.prepare();
+            recordPhase(startupPhases, 'permissionsToggleController.prepare', startedAt);
+        })());
+
+        const secondarySearchDictionaryController = new SecondarySearchDictionaryController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await secondarySearchDictionaryController.prepare();
+            recordPhase(startupPhases, 'secondarySearchDictionaryController.prepare', startedAt);
+        })());
+
+        const languagesController = new LanguagesController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await languagesController.prepare();
+            recordPhase(startupPhases, 'languagesController.prepare', startedAt);
+        })());
+
+        const translationTextReplacementsController = new TranslationTextReplacementsController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await translationTextReplacementsController.prepare();
+            recordPhase(startupPhases, 'translationTextReplacementsController.prepare', startedAt);
+        })());
+
+        const sentenceTerminationCharactersController = new SentenceTerminationCharactersController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await sentenceTerminationCharactersController.prepare();
+            recordPhase(startupPhases, 'sentenceTerminationCharactersController.prepare', startedAt);
+        })());
+
+        const keyboardShortcutController = new KeyboardShortcutController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await keyboardShortcutController.prepare();
+            recordPhase(startupPhases, 'keyboardShortcutController.prepare', startedAt);
+        })());
+
+        const extensionKeyboardShortcutController = new ExtensionKeyboardShortcutController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await extensionKeyboardShortcutController.prepare();
+            recordPhase(startupPhases, 'extensionKeyboardShortcutController.prepare', startedAt);
+        })());
+
+        const popupWindowController = new PopupWindowController(application.api);
+        {
+            const startedAt = getNowMs();
+            popupWindowController.prepare();
+            recordPhase(startupPhases, 'popupWindowController.prepare', startedAt);
+        }
+
+        const mecabController = new MecabController(application.api);
+        {
+            const startedAt = getNowMs();
+            mecabController.prepare();
+            recordPhase(startupPhases, 'mecabController.prepare', startedAt);
+        }
+
+        const yomitanApiController = new YomitanApiController(application.api);
+        {
+            const startedAt = getNowMs();
+            yomitanApiController.prepare();
+            recordPhase(startupPhases, 'yomitanApiController.prepare', startedAt);
+        }
+
+        const collapsibleDictionaryController = new CollapsibleDictionaryController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await collapsibleDictionaryController.prepare();
+            recordPhase(startupPhases, 'collapsibleDictionaryController.prepare', startedAt);
+        })());
+
+        const sortFrequencyDictionaryController = new SortFrequencyDictionaryController(settingsController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await sortFrequencyDictionaryController.prepare();
+            recordPhase(startupPhases, 'sortFrequencyDictionaryController.prepare', startedAt);
+        })());
+
+        const recommendedSettingsController = new RecommendedSettingsController(settingsController);
+        let recommendedSettingsPrepared = false;
+        /** @type {Promise<void>|null} */
+        let recommendedSettingsPreparePromise = null;
+        const prepareRecommendedSettingsOnDemand = () => {
+            if (recommendedSettingsPrepared) { return; }
+            if (recommendedSettingsPreparePromise !== null) { return; }
+            const startedAt = getNowMs();
+            recommendedSettingsPreparePromise = recommendedSettingsController.prepare().then(() => {
+                recommendedSettingsPrepared = true;
+                recordPhase(startupPhases, 'recommendedSettingsController.prepare', startedAt);
+            }, (error) => {
+                recommendedSettingsPreparePromise = null;
+                reportDiagnostics('recommendedSettingsController.prepare-failed', {
+                    message: error instanceof Error ? error.message : String(error),
+                });
+            });
+        };
+        globalThis.addEventListener('manabitan:modal-visibility-changed', (event) => {
+            if (!(event instanceof CustomEvent)) { return; }
+            const detail = /** @type {unknown} */ (event.detail);
+            if (!(typeof detail === 'object' && detail !== null)) { return; }
+            if (Reflect.get(detail, 'modalId') !== 'recommended-settings') { return; }
+            if (Reflect.get(detail, 'visible') !== true) { return; }
+            prepareRecommendedSettingsOnDemand();
+        }, false);
+
+        await Promise.all(preparePromises);
+        const totalElapsedMs = Math.max(0, getNowMs() - startupStartedAt);
+        const slowestPhases = [...startupPhases]
+            .sort((a, b) => b.durationMs - a.durationMs)
+            .slice(0, 10);
+        reportDiagnostics('settings-startup-complete', {
+            page: 'settings',
+            totalElapsedMs,
+            phaseCount: startupPhases.length,
+            slowestPhases,
+            phases: startupPhases,
+        });
+
+        document.documentElement.dataset.loaded = 'true';
     });
-
-    document.documentElement.dataset.loaded = 'true';
-});
 } catch (error) {
     showSettingsStartupFailure(error);
 }

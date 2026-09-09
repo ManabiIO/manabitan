@@ -70,11 +70,7 @@ export class RecommendedSettingsController {
 
             // Render description
             const descriptionElement = querySelectorNotNull(template, '.settings-item-description');
-            if (typeof description === 'string') {
-                descriptionElement.textContent = description;
-            } else {
-                descriptionElement.textContent = '';
-            }
+            descriptionElement.textContent = typeof description === 'string' ? description : '';
 
             // Render checkbox
             const checkbox = /** @type {HTMLInputElement} */ (querySelectorNotNull(template, 'input[type="checkbox"]'));

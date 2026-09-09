@@ -28,6 +28,7 @@ const RAW_TERM_CONTENT_TOKEN_HEADER_BYTES = 4;
 const U32_RANGE = 0x100000000;
 
 export const RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES = 28;
+
 export const RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES = 20;
 
 export const RAW_TERM_CONTENT_DICT_NAME = 'raw-v2';
@@ -113,6 +114,7 @@ export function encodeRawTermContentCompactBlockReference(blockOffset, blockComp
  * @param {number} blockCompressedLength
  * @param {number} blockUncompressedLength
  * @param {number} entryOffset
+ * @throws {RangeError} When a reference field or its destination lies outside the supported bounds.
  */
 export function writeRawTermContentCompactBlockReference(
     view,
