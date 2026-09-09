@@ -1,0 +1,199 @@
+diff --git a/ext/js/dictionary/term-bank-source-pipeline.js b/ext/js/dictionary/term-bank-source-pipeline.js
+index 566008c..59e0cfe 100644
+--- a/ext/js/dictionary/term-bank-source-pipeline.js
++++ b/ext/js/dictionary/term-bank-source-pipeline.js
+@@ -390,6 +390,12 @@ export class TermBankSourcePipeline {
+     createCompressedImportRunPlan(startIndex) {
+         if (!this._enabled || this._compressedReadPool === null) { return null; }
+         const boundedBatch = this._lowMemory ? this.getBatchPlan(startIndex) : null;
++        // Preserve the ordinary single-batch route on constrained devices.
++        // Only change source transport when an existing byte/file cap requires
++        // multiple batches. A final batch of a larger import remains eligible.
++        if (startIndex === 0 && boundedBatch !== null && boundedBatch.files.length === this._termFiles.length) {
++            return null;
++        }
+         if (boundedBatch !== null && (
+             boundedBatch.unknownSizeCount !== 0 ||
+             boundedBatch.estimatedBytes > this._batchMaxBytes
+ diff --git a/test/term-bank-bounded-compressed-plan.test.js b/test/term-bank-bounded-compressed-plan.test.js
+index 73d36c5..ab7e751 100644
+--- a/test/term-bank-bounded-compressed-plan.test.js
++++ b/test/term-bank-bounded-compressed-plan.test.js
+@@ -85,10 +85,10 @@ describe('bounded compressed term-bank plans', () => {
+     })
+ 
+     test('also bounds compressed input when it is larger than the claimed output', async () => {
+-        const files = filesFor([2, 2, 2, 2])
++        const files = filesFor([2, 2, 2, 2, 64 * MiB])
+         for (const file of files) { file.compressedSize = 16 * MiB }
+         const {pipeline, readCompressed} = setup(files)
+-        expect(pipeline.createCompressedImportRunPlan(0)?.files).toEqual(files)
++        expect(pipeline.createCompressedImportRunPlan(0)?.files).toEqual(files.slice(0, 4))
+         files[0].compressedSize += 1
+         expect(pipeline.createCompressedImportRunPlan(0)).toBeNull()
+         expect(readCompressed).not.toHaveBeenCalled()
+diff --git a/test/term-bank-bounded-compressed.test.js b/test/term-bank-bounded-compressed.test.js
+index addec1c..832aacb 100644
+--- a/test/term-bank-bounded-compressed.test.js
++++ b/test/term-bank-bounded-compressed.test.js
+@@ -81,7 +81,8 @@ describe('bounded compressed source plans', () => {
+     })
+ 
+     test('rejects a compressed allocation budget overflow even with tiny decoded sizes', async () => {
+-        const files = filesFor(4, 1024)
++        const files = filesFor(5, 1024)
++        files[4].uncompressedSize = 64 * mib
+         for (const file of files) { file.compressedSize = 17 * mib }
+         const {pipeline, readCompressed} = createPipeline(files)
+         try {
+@@ -133,7 +134,7 @@ describe('bounded compressed source plans', () => {
+     })
+ 
+     test('releases old reads before reopening the next bounded plan', async () => {
+-        const files = filesFor(4)
++        const files = filesFor(5, 16 * mib)
+         const {pipeline, readCompressed} = createPipeline(files)
+         try {
+             const first = pipeline.createCompressedImportRunPlan(0)
+@@ -152,7 +153,7 @@ describe('bounded compressed source plans', () => {
+     })
+ 
+     test('still cancels and joins every outstanding raw payload read', async () => {
+-        const files = filesFor(4)
++        const files = filesFor(5, 16 * mib)
+         let aborted = 0
+         const pipeline = new TermBankSourcePipeline({
+             termFiles: files,
+diff --git a/test/term-bank-multibatch-admission.test.js b/test/term-bank-multibatch-admission.test.js
+new file mode 100644
+index 0000000..fbd07fc
+--- /dev/null
++++ b/test/term-bank-multibatch-admission.test.js
+@@ -0,0 +1,127 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ */
++
++import {describe, expect, test, vi} from 'vitest';
++import {TermBankSourcePipeline} from '../ext/js/dictionary/term-bank-source-pipeline.js';
++
++const MiB = 1024 * 1024;
++
++/**
++ * Sizes are metadata only; no large test allocations are needed.
++ * @param {number[]} sizes
++ * @returns {Array<{filename: string, offset: number, compressionMethod: number, compressedSize: number, uncompressedSize: number, signature: number, getData: () => void}>}
++ */
++function filesFor(sizes) {
++    return sizes.map((size, index) => ({
++        filename: `term_bank_${index + 1}.json`, offset: index * 64,
++        compressionMethod: 8, compressedSize: 4, uncompressedSize: size,
++        signature: index, getData() {},
++    }));
++}
++
++/**
++ * @param {ReturnType<typeof filesFor>} files
++ * @param {number} [deviceMemory=4]
++ */
++function setup(files, deviceMemory = 4) {
++    const read = vi.fn(async () => new Uint8Array([91, 93]));
++    const readCompressed = vi.fn(async () => new Uint8Array(4));
++    return {
++        pipeline: new TermBankSourcePipeline({termFiles: files, enabled: true, read, readCompressed, deviceMemory}),
++        read, readCompressed,
++    };
++}
++
++describe('compressed-source admission uses the existing batch boundary', () => {
++    test.each([0.5, 1, 2, 4])('retains ordinary reads for every one-pass size at deviceMemory=%s', async (memory) => {
++        for (const size of [1, MiB, 16 * MiB]) {
++            const files = filesFor(new Array(4).fill(size));
++            const {pipeline, read, readCompressed} = setup(files, memory);
++            expect(pipeline.getBatch(0)).toEqual(files);
++            expect(pipeline.createCompressedImportRunPlan(0)).toBeNull();
++            expect(read).not.toHaveBeenCalled();
++            expect(readCompressed).not.toHaveBeenCalled();
++            await pipeline.dispose();
++        }
++    });
++
++    test('retains the existing prefetch and entry-identity read ownership for a one-pass import', async () => {
++        const files = filesFor(new Array(4).fill(16 * MiB));
++        const {pipeline, read, readCompressed} = setup(files);
++        expect(pipeline.createCompressedImportRunPlan(0)).toBeNull();
++        expect(pipeline.prefetchNext(0)).toEqual({fileCount: 1, estimatedBytes: 16 * MiB});
++        expect(read).toHaveBeenCalledTimes(1);
++        const batch = await pipeline.readBatch(pipeline.getBatch(0));
++        if (batch === null || Array.isArray(batch) || batch instanceof Uint8Array) {
++            throw new Error('Expected the ordinary lazy decoded-source batch');
++        }
++        expect(await Promise.all(batch.promises)).toEqual(new Array(4).fill(new Uint8Array([91, 93])));
++        expect(read).toHaveBeenCalledTimes(4);
++        expect(readCompressed).not.toHaveBeenCalled();
++        pipeline.releaseBatch(files);
++        await pipeline.dispose();
++    });
++
++    test('admits the same exact 64 MiB batch as soon as one further byte requires another pass', async () => {
++        const files = filesFor([16 * MiB, 16 * MiB, 16 * MiB, 16 * MiB, 1]);
++        const {pipeline, readCompressed} = setup(files);
++        const first = pipeline.createCompressedImportRunPlan(0);
++        expect(first?.files).toEqual(files.slice(0, 4));
++        expect(first?.estimatedByteLengths.reduce((a, b) => a + b, 0)).toBe(64 * MiB);
++        expect(pipeline.createCompressedImportRunPlan(4)).toBeNull();
++        expect(readCompressed).not.toHaveBeenCalled();
++        await pipeline.dispose();
++    });
++
++    test('uses the existing 80-file cap, not a dictionary identity or a new size threshold', async () => {
++        const files = filesFor(new Array(84).fill(1));
++        const onePass = setup(files.slice(0, 80));
++        expect(onePass.pipeline.createCompressedImportRunPlan(0)).toBeNull();
++        await onePass.pipeline.dispose();
++        const {pipeline} = setup(files);
++        expect(pipeline.createCompressedImportRunPlan(0)?.files).toEqual(files.slice(0, 80));
++        expect(pipeline.createCompressedImportRunPlan(80)?.files).toEqual(files.slice(80));
++        await pipeline.dispose();
++    });
++
++    test('keeps the small final batch of a larger import on the compressed path', async () => {
++        const files = filesFor([...new Array(16).fill(4 * MiB), 2, 2, 2, 2]);
++        const {pipeline, readCompressed} = setup(files);
++        const first = pipeline.createCompressedImportRunPlan(0);
++        if (first === null) { throw new Error('Expected the large import to be admitted'); }
++        const source = await first.loaders[0]();
++        expect(source.bytes.byteLength).toBe(4);
++        pipeline.releaseBatch(first.files);
++        const last = pipeline.createCompressedImportRunPlan(16);
++        expect(last?.files).toEqual(files.slice(16));
++        expect(last?.estimatedByteLengths).toEqual([2, 2, 2, 2]);
++        expect(readCompressed).toHaveBeenCalledTimes(1);
++        await pipeline.dispose();
++    });
++
++    test.each([8, 16, Number.NaN])('does not change the high/unknown-memory single-batch route: %s', async (memory) => {
++        const files = filesFor(new Array(4).fill(MiB));
++        const {pipeline, readCompressed} = setup(files, memory);
++        expect(pipeline.createCompressedImportRunPlan(0)?.files).toEqual(files);
++        expect(readCompressed).not.toHaveBeenCalled();
++        await pipeline.dispose();
++    });
++
++    test('continues to reject malformed current-batch metadata after multi-batch admission', async () => {
++        const files = filesFor(new Array(20).fill(4 * MiB));
++        const {pipeline, readCompressed} = setup(files);
++        files[1].signature = -1;
++        expect(pipeline.createCompressedImportRunPlan(0)).toBeNull();
++        files[1].signature = 1;
++        files[1].compressedSize = 64 * MiB;
++        expect(pipeline.createCompressedImportRunPlan(0)).toBeNull();
++        expect(readCompressed).not.toHaveBeenCalled();
++        await pipeline.dispose();
++    });
++});
