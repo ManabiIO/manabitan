@@ -1,0 +1,73 @@
+name: Audit final inflater recheck
+on:
+  push:
+    branches: [audit/source-export-20260909]
+    paths: [.github/workflows/audit-inflater-final-recheck-20260909.yml]
+permissions:
+  contents: read
+jobs:
+  compare:
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 6b6397544610d285fec07c826462cd08683eb391
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Build both immutable arms before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence" "$RUNNER_TEMP/arms"
+          npm ci > "$RUNNER_TEMP/evidence/npm-ci.log" 2>&1
+          node node_modules/playwright/cli.js install --with-deps chromium > "$RUNNER_TEMP/evidence/browser-install.log" 2>&1
+          git worktree add --detach "$RUNNER_TEMP/arms/baseline" d7ba330c952324e093ac96418462fe1c0f5e37d4
+          git worktree add --detach "$RUNNER_TEMP/arms/candidate" HEAD
+          test "$(git -C "$RUNNER_TEMP/arms/candidate" rev-parse 'HEAD^{tree}')" = b217181dee356a8a8f9836cffe5c5b382c27da69
+          for arm in baseline candidate; do
+            cp -a "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/arms/$arm/node_modules"
+            (cd "$RUNNER_TEMP/arms/$arm" && node dev/bin/build.js --target chrome-dev) > "$RUNNER_TEMP/evidence/build-$arm.log" 2>&1
+            git -C "$RUNNER_TEMP/arms/$arm" show -s --format='%H %T' > "$RUNNER_TEMP/evidence/source-$arm.txt"
+            git -C "$RUNNER_TEMP/arms/$arm" status --porcelain | tee "$RUNNER_TEMP/evidence/status-$arm-before.txt"
+            test ! -s "$RUNNER_TEMP/evidence/status-$arm-before.txt"
+          done
+          for file in zstd.wasm zip.js z-worker.js; do
+            cmp "$RUNNER_TEMP/arms/baseline/ext/lib/$file" "$RUNNER_TEMP/arms/candidate/ext/lib/$file"
+          done
+          (cd "$RUNNER_TEMP/arms/baseline" && node dev/perf/prepare-dictionaries.js) > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          ln -s "$RUNNER_TEMP/arms/baseline/builds/e2e-dictionary-cache" "$RUNNER_TEMP/arms/candidate/builds/e2e-dictionary-cache"
+          git show e459a1e332ccfe842a0a8c11e2cf1a5510b46cc1:dev/perf/inflate-confirmation/run-paired.py > "$RUNNER_TEMP/run-paired.py"
+          echo "e255f2a45ab308768cff89b4545f25d1779ae37ecb05b06d44399a085383d89b  $RUNNER_TEMP/run-paired.py" | sha256sum -c -
+          cp "$RUNNER_TEMP/run-paired.py" "$RUNNER_TEMP/evidence/"
+          clang --version > "$RUNNER_TEMP/evidence/compiler.txt"
+          node --version > "$RUNNER_TEMP/evidence/node.txt"
+          lscpu > "$RUNNER_TEMP/evidence/cpu.txt"
+          free -b > "$RUNNER_TEMP/evidence/memory.txt"
+      - name: Same-binary controls and six fixed adjacent pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "$RUNNER_TEMP/run-paired.py" --baseline "$RUNNER_TEMP/arms/baseline" --candidate "$RUNNER_TEMP/arms/baseline" --datasets "$DICTIONARY" --pairs 2 --warmups 0 --output "$RUNNER_TEMP/evidence/control-before" --label 'Same baseline binary control before A-B' | tee "$RUNNER_TEMP/evidence/control-before.log"
+          python3 "$RUNNER_TEMP/run-paired.py" --baseline "$RUNNER_TEMP/arms/baseline" --candidate "$RUNNER_TEMP/arms/candidate" --datasets "$DICTIONARY" --pairs 6 --warmups 1 --output "$RUNNER_TEMP/evidence/comparison" --label 'Six fixed pairs on lint-qualified rollup, no outlier removal' | tee "$RUNNER_TEMP/evidence/comparison.log"
+          python3 "$RUNNER_TEMP/run-paired.py" --baseline "$RUNNER_TEMP/arms/candidate" --candidate "$RUNNER_TEMP/arms/candidate" --datasets "$DICTIONARY" --pairs 2 --warmups 0 --output "$RUNNER_TEMP/evidence/control-after" --label 'Same candidate binary control after A-B' | tee "$RUNNER_TEMP/evidence/control-after.log"
+          for arm in baseline candidate; do
+            git -C "$RUNNER_TEMP/arms/$arm" status --porcelain | tee "$RUNNER_TEMP/evidence/status-$arm-after.txt"
+            test ! -s "$RUNNER_TEMP/evidence/status-$arm-after.txt"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: final-inflater-recheck-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/evidence
+          retention-days: 30
+          if-no-files-found: error
