@@ -111,13 +111,16 @@ jobs:
           NODE
           git worktree add --detach "$arms/A" ff9cbf2e848a86d6bbfd281179a6d753349e52f4
           git worktree add --detach "$arms/B" 3ef73a422410d2f0ac0be00fb8e618a4c7949416
-          # Shared locked dependencies ensure identical generated source comments.
-          # Only this local ignore entry is added, never a tracked source change.
-          echo /node_modules >> .git/info/exclude
+          # Use an explicit line boundary and the shared worktree metadata.
+          # Only the verified dependency symlink is ignored; tracked code stays clean.
+          printf '\n/node_modules\n' >> "$(git rev-parse --git-common-dir)/info/exclude"
           for arm in A B; do
             ln -s "$GITHUB_WORKSPACE/node_modules" "$arms/$arm/node_modules"
+            test "$(readlink -f "$arms/$arm/node_modules")" = "$(readlink -f "$GITHUB_WORKSPACE/node_modules")"
+            git -C "$arms/$arm" check-ignore -v node_modules > "$evidence/dependency-ignore-$arm.txt"
             (cd "$arms/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
-            test -z "$(git -C "$arms/$arm" status --porcelain)"
+            git -C "$arms/$arm" status --porcelain > "$evidence/status-$arm.txt"
+            test ! -s "$evidence/status-$arm.txt"
           done
           (cd "$arms/A" && node dev/perf/prepare-dictionaries.js) > "$evidence/fixtures.log" 2>&1
           ln -s "$arms/A/builds/e2e-dictionary-cache" "$arms/B/builds/e2e-dictionary-cache"
