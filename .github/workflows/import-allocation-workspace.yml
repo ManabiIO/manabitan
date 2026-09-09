@@ -1,0 +1,43 @@
+name: Import allocation offline workspace
+on:
+  push:
+    branches: [verify/import-allocation-workspace-20260909]
+    paths: [.github/workflows/import-allocation-workspace.yml]
+permissions:
+  contents: read
+jobs:
+  workspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ff9cbf2e848a86d6bbfd281179a6d753349e52f4
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - name: Export source, locked dependencies and Node runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/offline"
+          mkdir -p "$out"
+          git rev-parse HEAD > "$out/source-commit.txt"
+          git rev-parse HEAD^{tree} > "$out/source-tree.txt"
+          git archive HEAD | gzip > "$out/source.tar.gz"
+          tar -czf "$out/dependencies.tar.gz" node_modules
+          node_root="$(dirname "$(dirname "$(command -v node)")")"
+          tar -C "$node_root" -czf "$out/node.tar.gz" bin/node
+          sha256sum package-lock.json > "$out/package-lock.sha256"
+          node --version > "$out/node-version.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-allocation-offline-workspace
+          path: ${{ runner.temp }}/offline/
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
