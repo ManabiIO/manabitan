@@ -876,30 +876,37 @@ static void hash_content_xxh32_pair(const uint8_t* src, uint32_t length, uint32_
     uint32_t h2;
     if (length >= 16u) {
         const uint8_t* const limit = end - 16u;
-        uint32_t a1 = seed1 + 2654435761u + 2246822519u;
-        uint32_t b1 = seed1 + 2246822519u;
-        uint32_t c1 = seed1;
-        uint32_t d1 = seed1 - 2654435761u;
-        uint32_t a2 = seed2 + 2654435761u + 2246822519u;
-        uint32_t b2 = seed2 + 2246822519u;
-        uint32_t c2 = seed2;
-        uint32_t d2 = seed2 - 2654435761u;
+        // Each lane is one XXH32 stripe. Packing by seed uses all four lanes;
+        // the scalar pair loop otherwise commonly vectorizes across just the
+        // two seeds and leaves half of each vector unused.
+        v128_t first = wasm_i32x4_make(
+            seed1 + 2654435761u + 2246822519u,
+            seed1 + 2246822519u, seed1, seed1 - 2654435761u
+        );
+        v128_t second = wasm_i32x4_make(
+            seed2 + 2654435761u + 2246822519u,
+            seed2 + 2246822519u, seed2, seed2 - 2654435761u
+        );
+        const v128_t prime1 = wasm_i32x4_splat(2654435761u);
+        const v128_t prime2 = wasm_i32x4_splat(2246822519u);
         do {
-            uint32_t value = read_u32_le(p); p += 4u;
-            a1 = xxh32_round(a1, value);
-            a2 = xxh32_round(a2, value);
-            value = read_u32_le(p); p += 4u;
-            b1 = xxh32_round(b1, value);
-            b2 = xxh32_round(b2, value);
-            value = read_u32_le(p); p += 4u;
-            c1 = xxh32_round(c1, value);
-            c2 = xxh32_round(c2, value);
-            value = read_u32_le(p); p += 4u;
-            d1 = xxh32_round(d1, value);
-            d2 = xxh32_round(d2, value);
+            const v128_t mixed = wasm_i32x4_mul(wasm_v128_load(p), prime2);
+            first = wasm_i32x4_add(first, mixed);
+            second = wasm_i32x4_add(second, mixed);
+            first = wasm_v128_or(wasm_i32x4_shl(first, 13), wasm_u32x4_shr(first, 19));
+            second = wasm_v128_or(wasm_i32x4_shl(second, 13), wasm_u32x4_shr(second, 19));
+            first = wasm_i32x4_mul(first, prime1);
+            second = wasm_i32x4_mul(second, prime1);
+            p += 16u;
         } while (p <= limit);
-        h1 = rotl32(a1, 1u) + rotl32(b1, 7u) + rotl32(c1, 12u) + rotl32(d1, 18u);
-        h2 = rotl32(a2, 1u) + rotl32(b2, 7u) + rotl32(c2, 12u) + rotl32(d2, 18u);
+        h1 = rotl32(wasm_u32x4_extract_lane(first, 0), 1u) +
+            rotl32(wasm_u32x4_extract_lane(first, 1), 7u) +
+            rotl32(wasm_u32x4_extract_lane(first, 2), 12u) +
+            rotl32(wasm_u32x4_extract_lane(first, 3), 18u);
+        h2 = rotl32(wasm_u32x4_extract_lane(second, 0), 1u) +
+            rotl32(wasm_u32x4_extract_lane(second, 1), 7u) +
+            rotl32(wasm_u32x4_extract_lane(second, 2), 12u) +
+            rotl32(wasm_u32x4_extract_lane(second, 3), 18u);
     } else {
         h1 = seed1 + 374761393u;
         h2 = seed2 + 374761393u;
