@@ -1,0 +1,69 @@
+--- a/run-paired.py
++++ b/run-paired.py
+@@ -17,7 +17,10 @@
+ parser.add_argument('--label', default='source comparison')
+ parser.add_argument('--warmups', type=int, default=1)
+ parser.add_argument('--pause-file')
++parser.add_argument('--startup-retries', type=int, default=0)
+ args = parser.parse_args()
++if not 0 <= args.startup_retries <= 2:
++    raise ValueError('startup retries must be in [0, 2]')
+ if args.pairs <= 0:
+     raise ValueError('pairs must be positive')
+ roots = {'baseline': Path(args.baseline).resolve(), 'candidate': Path(args.candidate).resolve()}
+@@ -88,7 +91,8 @@
+     'runtime': subprocess.check_output([node, '--version'], text=True).strip(),
+     'affinity': affinity, 'cpuMax': cgroup('cpu.max'), 'memoryMax': cgroup('memory.max'),
+     'startedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+-    'pairsPlanned': args.pairs, 'warmupPairsPerDataset': args.warmups, 'schedule': schedule, 'runs': [], 'warmupRuns': [], 'status': 'running',
++    'startupRetriesAllowed': args.startup_retries, 'startupFailures': [],
++    'driverSha256': sha(Path(__file__)), 'pairsPlanned': args.pairs, 'warmupPairsPerDataset': args.warmups, 'schedule': schedule, 'runs': [], 'warmupRuns': [], 'status': 'running',
+ }
+ (output / 'plan.json').write_text(json.dumps(result, indent=2))
+ try:
+@@ -110,10 +114,41 @@
+         before = {'loadavg': list(os.getloadavg()), 'cpuStat': cgroup('cpu.stat'), 'memoryCurrent': cgroup('memory.current')}
+         started = time.monotonic()
+         print('START', name, flush=True)
+-        with log.open('w') as stream:
+-            process = subprocess.run(command, cwd=root, env=env, stdout=stream, stderr=subprocess.STDOUT, timeout=600)
+-        if process.returncode:
+-            raise RuntimeError(f'{name}: exit {process.returncode}; inspect {log}')
++        for attempt in range(args.startup_retries + 1):
++            attempt_log = log if attempt == 0 else output / f'{name}-retry-{attempt}.log'
++            with attempt_log.open('w') as stream:
++                process = subprocess.run(command, cwd=root, env=env, stdout=stream, stderr=subprocess.STDOUT, timeout=600)
++            if process.returncode == 0:
++                break
++            try:
++                failed = json.loads((folder / 'run-1.json').read_text())
++            except (OSError, ValueError):
++                failed = {}
++            reason = failed.get('failureReason', '')
++            # Retry only the known extension-startup failure, before any phase
++            # or file dispatch. Never retry an import, correctness failure, or
++            # slow measured observation. Every failed attempt is retained.
++            startup_only = (
++                failed.get('status') == 'failed' and
++                failed.get('phaseCount') == 0 and failed.get('phases') == [] and
++                failed.get('benchmark', {}).get('validation') is None and
++                isinstance(reason, str) and
++                'page.waitForSelector: Timeout' in reason and
++                '#dictionary-import-file-input' in reason
++            )
++            if not startup_only:
++                raise RuntimeError(f'{name}: exit {process.returncode}; inspect {attempt_log}')
++            preserved = output / f'{name}-startup-attempt-{attempt + 1}'
++            folder.rename(preserved)
++            result['startupFailures'].append({
++                **planned, 'attempt': attempt + 1, 'reason': reason,
++                'report': str(preserved / 'run-1.json'), 'log': str(attempt_log),
++                'retried': attempt < args.startup_retries,
++            })
++            (output / 'results.json').write_text(json.dumps(result, indent=2))
++            if attempt == args.startup_retries:
++                raise RuntimeError(f'{name}: extension startup retries exhausted; import was not dispatched')
++            print('RETRY_PRE_IMPORT_STARTUP', name, attempt + 1, flush=True)
+         summary = json.loads((folder / 'summary.json').read_text())
+         if not summary['authoritativeTiming'] or summary['traceEnabled'] or summary['schemaVersion'] != 3:
+             raise RuntimeError('Unexpected timing mode or schema')

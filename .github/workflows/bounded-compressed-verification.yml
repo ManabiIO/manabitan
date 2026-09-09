@@ -1,4 +1,4 @@
-name: Verify bounded low-memory compressed imports
+name: Verify existing bounded-source implementation with broader coverage
 on:
   push:
     branches: [perf-bounded-compressed-verify-20260909]
@@ -6,20 +6,10 @@ on:
 permissions:
   contents: read
 jobs:
-  verify:
+  correctness:
     runs-on: ubuntu-24.04
-    container:
-      image: ubuntu:24.04
-      options: --memory=4g --cpus=4
-    timeout-minutes: 45
-    defaults:
-      run:
-        shell: bash
+    timeout-minutes: 30
     steps:
-      - name: Container prerequisites
-        run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y git ca-certificates curl clang lld python3
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -30,58 +20,111 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node node_modules/playwright/cli.js install --with-deps chromium
-      - name: Record actual browser memory policy without overrides
-        run: |
-          mkdir -p "$RUNNER_TEMP/evidence"
-          node dev/perf/bounded-compressed-experiment/preflight.mjs "$RUNNER_TEMP/evidence/runtime-preflight.json"
-      - name: Build exact independent source arms
+      - name: Reuse the existing published product, not a duplicate implementation
+        shell: bash
         run: |
           set -euo pipefail
-          arms="$RUNNER_TEMP/arms"
+          mkdir -p "$RUNNER_TEMP/evidence"
+          git worktree add --detach "$RUNNER_TEMP/candidate" 29eb2f1e322847566b724934cbd7ac9a9b81ed2b
+          cp dev/perf/bounded-compressed-experiment/bounded-followup.test.js "$RUNNER_TEMP/candidate/test/term-bank-bounded-compressed-plan.test.js"
+          git -C "$RUNNER_TEMP/candidate" add test/term-bank-bounded-compressed-plan.test.js
+          test "$(git -C "$RUNNER_TEMP/candidate" write-tree)" = e6d11144e19efb196ffa17480eaa539e3596746b
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/candidate/node_modules"
+          cd "$RUNNER_TEMP/candidate"
+          node dev/bin/build-libs.js > "$RUNNER_TEMP/evidence/build-libs.log" 2>&1
+          node dev/bin/build.js --target chrome-dev > "$RUNNER_TEMP/evidence/build.log" 2>&1
+          node dev/perf/prepare-dictionaries.js > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          git diff HEAD --binary > "$RUNNER_TEMP/evidence/test-followup.patch"
+          git diff b8d68458cde8788b5d5301ceaf36beae7a1363f9 --binary > "$RUNNER_TEMP/evidence/complete-candidate.patch"
+      - name: Full tests, strict types and all-target builds
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/candidate"
+          node node_modules/vitest/vitest.mjs run > "$RUNNER_TEMP/evidence/unit.log" 2>&1
+          npm run test:ts > "$RUNNER_TEMP/evidence/types.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$RUNNER_TEMP/evidence/options.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$RUNNER_TEMP/evidence/dry-build.log" 2>&1
+      - name: Strict integration, higher-memory policy control
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/candidate"
+          MANABITAN_E2E_STRICT_RUNTIME=1 MANABITAN_CHROMIUM_HEADLESS=1 MANABITAN_E2E_SKIP_BUILD=1 MANABITAN_E2E_PHASE_PROFILING=0 MANABITAN_E2E_PHASE_SCREENSHOTS=0 MANABITAN_E2E_PROCESS_SAMPLING=0 MANABITAN_CHROMIUM_E2E_REPORT="$RUNNER_TEMP/evidence/full-chromium.html" node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/full-chromium.log" 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-followup-correctness
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
+  constrained:
+    needs: correctness
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - name: Prepare the browser and compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v clang >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y clang lld patch
+          fi
+          node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Check actual browser policy and build identical runtime dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
           evidence="$RUNNER_TEMP/evidence"
-          mkdir -p "$arms" "$evidence"
-          for arm in baseline candidate; do
-            git worktree add --detach "$arms/$arm" b8d68458cde8788b5d5301ceaf36beae7a1363f9
-            ln -s "$GITHUB_WORKSPACE/node_modules" "$arms/$arm/node_modules"
-          done
-          git -C "$arms/candidate" apply --index "$GITHUB_WORKSPACE/dev/perf/bounded-compressed-experiment/source.patch"
-          cp dev/perf/bounded-compressed-experiment/bounded.test.js "$arms/candidate/test/term-bank-bounded-compressed-plan.test.js"
+          arms="$RUNNER_TEMP/arms"
+          mkdir -p "$evidence" "$arms"
+          node dev/perf/bounded-compressed-experiment/preflight.mjs "$evidence/runtime-preflight.json"
+          node -e 'const p=require(process.env.RUNNER_TEMP+"/evidence/runtime-preflight.json");if(!p.nativeLowMemory)throw Error("Native browser low-memory policy was not selected")'
+          git worktree add --detach "$arms/baseline" b8d68458cde8788b5d5301ceaf36beae7a1363f9
+          git worktree add --detach "$arms/candidate" 29eb2f1e322847566b724934cbd7ac9a9b81ed2b
+          cp dev/perf/bounded-compressed-experiment/bounded-followup.test.js "$arms/candidate/test/term-bank-bounded-compressed-plan.test.js"
           git -C "$arms/candidate" add test/term-bank-bounded-compressed-plan.test.js
-          test "$(git -C "$arms/candidate" write-tree)" = b2946fcd9645eba26b6c124fb34d079d44cf2c51
+          test "$(git -C "$arms/candidate" write-tree)" = e6d11144e19efb196ffa17480eaa539e3596746b
           for arm in baseline candidate; do
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$arms/$arm/node_modules"
             (cd "$arms/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
           done
           for file in term-bank-parser.wasm zstd.wasm zip.js z-worker.js; do
             cmp "$arms/baseline/ext/lib/$file" "$arms/candidate/ext/lib/$file"
           done
-          git -C "$arms/candidate" diff HEAD --binary > "$evidence/source.patch"
-          git -C "$arms/candidate" write-tree > "$evidence/source-tree.txt"
           (cd "$arms/baseline" && node dev/perf/prepare-dictionaries.js) > "$evidence/fixtures.log" 2>&1
           ln -s "$arms/baseline/builds/e2e-dictionary-cache" "$arms/candidate/builds/e2e-dictionary-cache"
-          cp dev/perf/bounded-compressed-experiment/run-paired.py "$evidence/"
+          git -C "$arms/candidate" diff b8d68458cde8788b5d5301ceaf36beae7a1363f9 --binary > "$evidence/source.patch"
+          cp dev/perf/bounded-compressed-experiment/run-paired.py "$evidence/run-paired.py"
+          patch "$evidence/run-paired.py" dev/perf/bounded-compressed-experiment/startup-retry.patch
           clang --version > "$evidence/compiler.txt"
-      - name: Full correctness and types
+          lscpu > "$evidence/cpu.txt"
+          free -b > "$evidence/memory.txt"
+      - name: Four fixed pairs, one excluded warmup, explicit startup-only retries
+        shell: bash
         run: |
           set -euo pipefail
-          cd "$RUNNER_TEMP/arms/candidate"
-          node node_modules/vitest/vitest.mjs run > "$RUNNER_TEMP/evidence/unit.log" 2>&1
-          npm run test:ts > "$RUNNER_TEMP/evidence/types.log" 2>&1
-          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$RUNNER_TEMP/evidence/options.log" 2>&1
-          node dev/bin/build.js --dryRun --all > "$RUNNER_TEMP/evidence/dry-build.log" 2>&1
-      - name: Native low-memory comparison only
-        run: |
-          set -euo pipefail
-          node -e 'const p=require(process.env.RUNNER_TEMP+"/evidence/runtime-preflight.json");if(!p.nativeLowMemory)throw Error("Browser did not select low-memory policy; do not claim this lane measures bounded imports")'
-          python3 dev/perf/bounded-compressed-experiment/run-paired.py --baseline "$RUNNER_TEMP/arms/baseline" --candidate "$RUNNER_TEMP/arms/candidate" --pairs 8 --warmups 1 --output "$RUNNER_TEMP/evidence/paired" --label 'PR23 vs bounded compressed batches; real 4 GiB container; native low-memory selection; eight fixed pairs' | tee "$RUNNER_TEMP/evidence/driver.log"
-      - name: Strict full Chromium integration
-        run: |
-          set -euo pipefail
-          cd "$RUNNER_TEMP/arms/candidate"
-          MANABITAN_E2E_STRICT_RUNTIME=1 MANABITAN_CHROMIUM_HEADLESS=1 MANABITAN_E2E_SKIP_BUILD=1 MANABITAN_CHROMIUM_E2E_REPORT="$RUNNER_TEMP/evidence/full-chromium.html" node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/full-chromium.log" 2>&1
+          python3 "$RUNNER_TEMP/evidence/run-paired.py" --baseline "$RUNNER_TEMP/arms/baseline" --candidate "$RUNNER_TEMP/arms/candidate" --datasets "$DICTIONARY" --pairs 4 --warmups 1 --startup-retries 1 --output "$RUNNER_TEMP/evidence/paired" --label "Existing bounded-source implementation: $DICTIONARY; four fixed pairs; native low-memory; at most one logged pre-import startup retry" | tee "$RUNNER_TEMP/evidence/driver.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: bounded-compressed-verification
+          name: bounded-followup-${{ matrix.dictionary }}
           path: ${{ runner.temp }}/evidence/
           retention-days: 14
           if-no-files-found: error
