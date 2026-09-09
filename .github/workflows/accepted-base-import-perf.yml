@@ -1,0 +1,129 @@
+name: Accepted base import comparison
+on:
+  push:
+    branches: [verify/import-critical-path-20260909]
+    paths:
+      - .github/workflows/accepted-base-import-perf.yml
+      - dev/perf/accepted-base-paired.py
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: tools
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: da8f7436d34e510441d30692c8d698806b70e13f
+          path: bench/A
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 03478be25506176610b2133be658ee697d9bb3f1
+          path: bench/B
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - name: Build frozen source arms and pack the shared runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p bench/bin bench/evidence
+          (cd tools && npm ci)
+          export PLAYWRIGHT_BROWSERS_PATH="$GITHUB_WORKSPACE/bench/ms-playwright"
+          node tools/node_modules/playwright/cli.js install chromium
+          cp "$(command -v node)" bench/bin/node
+          cp tools/dev/perf/accepted-base-paired.py bench/paired.py
+          for arm in A B; do
+            ln -s ../../tools/node_modules "bench/$arm/node_modules"
+            printf '\n/node_modules\n' >> "bench/$arm/.git/info/exclude"
+            (cd "bench/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "bench/evidence/build-$arm.log" 2>&1
+            test -z "$(git -C "bench/$arm" status --porcelain)"
+          done
+          (cd bench/A && node dev/perf/prepare-dictionaries.js) > bench/evidence/fixtures.log 2>&1
+          ln -s ../../A/builds/e2e-dictionary-cache bench/B/builds/e2e-dictionary-cache
+          clang --version > bench/evidence/compiler.txt
+          node --version > bench/evidence/node.txt
+          tar -czf "$RUNNER_TEMP/import-comparison.tar.gz" bench tools/node_modules
+      - uses: actions/upload-artifact@v4
+        with:
+          name: accepted-import-runtime
+          path: ${{ runner.temp }}/import-comparison.tar.gz
+          compression-level: 0
+          retention-days: 3
+          if-no-files-found: error
+  comparison:
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-slim]
+        dictionary: [jmnedict, jmdict, jitendex]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: accepted-import-runtime
+          path: ${{ runner.temp }}/download
+      - name: Restore frozen sources and install only browser system dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/work"
+          tar -xzf "$RUNNER_TEMP/download/import-comparison.tar.gz" -C "$RUNNER_TEMP/work"
+          cd "$RUNNER_TEMP/work"
+          export PATH="$PWD/bench/bin:$PATH"
+          export PLAYWRIGHT_BROWSERS_PATH="$PWD/bench/ms-playwright"
+          node tools/node_modules/playwright/cli.js install-deps chromium > bench/evidence/browser-dependencies.log 2>&1
+          git config --global --add safe.directory "$PWD/bench/A"
+          git config --global --add safe.directory "$PWD/bench/B"
+          node --input-type=module <<'NODE' > bench/evidence/native-memory.json
+          import {createServer} from 'node:http';
+          import {chromium} from './tools/node_modules/playwright/index.mjs';
+          const server = createServer((request, response) => response.end('<!doctype html><title>native memory</title>'));
+          await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+          const browser = await chromium.launch({channel: 'chromium', headless: true});
+          try {
+            const page = await browser.newPage();
+            await page.goto(`http://127.0.0.1:${server.address().port}`);
+            const value = await page.evaluate(async () => {
+              const url = URL.createObjectURL(new Blob(['postMessage({deviceMemory:navigator.deviceMemory,hardwareConcurrency:navigator.hardwareConcurrency})'], {type:'text/javascript'}));
+              const worker = new Worker(url);
+              try {
+                const result = await new Promise((resolve, reject) => { worker.onmessage = event => resolve(event.data); worker.onerror = reject; });
+                return {page: {deviceMemory:navigator.deviceMemory, hardwareConcurrency:navigator.hardwareConcurrency}, worker:result};
+              } finally { worker.terminate(); URL.revokeObjectURL(url); }
+            });
+            console.log(JSON.stringify({browserVersion:browser.version(), ...value}, null, 2));
+          } finally { await browser.close(); server.close(); }
+          NODE
+          lscpu > bench/evidence/cpu.txt
+          free -b > bench/evidence/memory.txt
+      - name: Six fixed paired imports, same-binary controls and excluded warmups
+        shell: bash
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          RUNNER_KIND: ${{ matrix.runner }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/work"
+          export PATH="$PWD/bench/bin:$PATH"
+          export PLAYWRIGHT_BROWSERS_PATH="$PWD/bench/ms-playwright"
+          extra=()
+          if [ "$RUNNER_KIND" = ubuntu-slim ]; then extra+=(--reverse); fi
+          python3 bench/paired.py --baseline "$PWD/bench/A" --candidate "$PWD/bench/B" \
+            --dictionary "$DICTIONARY" --pairs 6 --output "$PWD/bench/evidence/paired" \
+            "${extra[@]}" 2>&1 | tee bench/evidence/driver.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accepted-import-${{ matrix.dictionary }}-${{ matrix.runner }}
+          path: ${{ runner.temp }}/work/bench/evidence/
+          retention-days: 14
+          if-no-files-found: error
