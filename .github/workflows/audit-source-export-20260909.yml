@@ -1,0 +1,30 @@
+name: Audit source export
+on:
+  push:
+    branches: [audit/source-export-20260909]
+    paths: [.github/workflows/audit-source-export-20260909.yml]
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Export reviewed source histories without credentials
+        run: |
+          git bundle create "$RUNNER_TEMP/manabitan.bundle" HEAD refs/remotes/origin/develop refs/remotes/origin/perf-import-inflate-core-20260908 refs/remotes/origin/perf-import-zip-splitter-20260908
+          git show-ref > "$RUNNER_TEMP/refs.txt"
+          sha256sum "$RUNNER_TEMP/manabitan.bundle" > "$RUNNER_TEMP/SHA256SUMS"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: audit-manabitan-source
+          path: |
+            ${{ runner.temp }}/manabitan.bundle
+            ${{ runner.temp }}/refs.txt
+            ${{ runner.temp }}/SHA256SUMS
+          retention-days: 30
+          if-no-files-found: error
