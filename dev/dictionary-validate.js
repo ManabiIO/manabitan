@@ -136,7 +136,7 @@ export async function testDictionaryFiles(mode, dictionaryFileNames) {
         try {
             console.log(`Validating ${dictionaryFileName}...`);
             const source = fs.readFileSync(dictionaryFileName);
-            await validateDictionary(mode, source.buffer, schemas);
+            await validateDictionary(mode, Uint8Array.from(source).buffer, schemas);
             // eslint-disable-next-line no-restricted-syntax
             const end = performance.now();
             console.log(`No issues detected (${((end - start) / 1000).toFixed(2)}s)`);

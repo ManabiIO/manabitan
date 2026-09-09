@@ -47,6 +47,7 @@ describe('DictionaryImportSession', () => {
     const summary = /** @type {import('dictionary-importer').Summary} */ ({title: 'Test dictionary'});
 
     test('commits and publishes a completed import once', async () => {
+        /** @type {string[]} */
         const order = [];
         const dictionaryDatabase = createDatabase();
         const session = createSession(
@@ -79,6 +80,7 @@ describe('DictionaryImportSession', () => {
     });
 
     test('does not commit until owned resources have been disposed', async () => {
+        /** @type {string[]} */
         const order = [];
         const dictionaryDatabase = createDatabase();
         dictionaryDatabase.finishBulkImport.mockImplementation(async () => {
@@ -101,8 +103,8 @@ describe('DictionaryImportSession', () => {
 
     test('shares archive close completion and failure across concurrent and repeated callers', async () => {
         const closeError = new Error('archive failure');
-        /** @type {() => void} */
-        let releaseClose;
+        /** @type {(value?: unknown) => void} */
+        let releaseClose = () => {};
         const closeGate = new Promise((resolve) => { releaseClose = resolve; });
         const close = vi.fn(async () => {
             await closeGate;
@@ -122,6 +124,7 @@ describe('DictionaryImportSession', () => {
 
     test('rolls back failures and removes the placeholder idempotently', async () => {
         const dictionaryDatabase = createDatabase();
+        /** @type {Error[]} */
         const errors = [];
         const session = createSession(dictionaryDatabase, errors, {close: vi.fn(async () => {})}, vi.fn(async () => {}));
         const importError = new Error('parse failed');
@@ -146,7 +149,9 @@ describe('DictionaryImportSession', () => {
     });
 
     test('continues cleanup in ownership order and aggregates cleanup failures', async () => {
+        /** @type {string[]} */
         const order = [];
+        /** @type {Error[]} */
         const errors = [];
         const dictionaryDatabase = createDatabase();
         dictionaryDatabase.deleteDictionaryImportPlaceholder.mockRejectedValue(new Error('placeholder failure'));
@@ -192,6 +197,7 @@ describe('DictionaryImportSession', () => {
         const dictionaryDatabase = createDatabase();
         const publicationError = new Error('summary update failed');
         dictionaryDatabase.finishBulkImport.mockRejectedValue(publicationError);
+        /** @type {Error[]} */
         const errors = [];
         const session = createSession(dictionaryDatabase, errors, {close: vi.fn(async () => {})}, vi.fn(async () => {}));
 
@@ -597,6 +603,7 @@ describe('TermBankSourcePipeline', () => {
     });
 
     test('joins reads started between a concurrent abort and disposal', async () => {
+        /** @type {string[]} */
         const abortedFiles = [];
         const files = [1, 2].map((index) => ({
             filename: `term_bank_${index}.json`,

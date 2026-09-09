@@ -10,16 +10,33 @@
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 
+/** @typedef {{id: number, title: string, version: number, summaryJson: string}} DictionaryRow */
+
+/** @returns {Promise<void>} */
+async function resolveVoid() {}
+
+/**
+ * @param {(...args: never[]) => Promise<void>} rollbackImportSession
+ * @returns {{endImportSession: ReturnType<typeof vi.fn>, getLastEndImportSessionMetrics: ReturnType<typeof vi.fn>, rollbackImportSession: (...args: never[]) => Promise<void>}}
+ */
+function makeStore(rollbackImportSession) {
+    return {
+        endImportSession: vi.fn(resolveVoid),
+        getLastEndImportSessionMetrics: vi.fn(() => null),
+        rollbackImportSession,
+    };
+}
+
 describe('DictionaryDatabase import cleanup', () => {
     test('rolls back title metadata without touching immutable term-record storage when commit fails', async () => {
         const database = new DictionaryDatabase();
-        let row = {
+        let row = /** @type {DictionaryRow} */ ({
             id: 1,
             title: 'JMdict staging',
             version: 3,
             summaryJson: JSON.stringify({title: 'JMdict staging', version: 3, importSuccess: true}),
-        };
-        let transactionSnapshot = {...row};
+        });
+        let transactionSnapshot = /** @type {DictionaryRow} */ ({...row});
         const exec = vi.fn((value) => {
             const sql = typeof value === 'string' ? value : value.sql;
             if (sql === 'BEGIN IMMEDIATE') {
@@ -60,7 +77,7 @@ describe('DictionaryDatabase import cleanup', () => {
             }]),
         };
         const replaceDictionaryName = vi.fn().mockResolvedValue(1);
-        const rollbackPreservedDictionaryRename = vi.fn().mockResolvedValue();
+        const rollbackPreservedDictionaryRename = vi.fn(resolveVoid);
         Reflect.set(database, '_db', db);
         Reflect.set(database, '_termRecordStore', {
             replaceDictionaryName,
@@ -77,12 +94,12 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('reports both title commit and metadata rollback failures without OPFS mutation', async () => {
         const database = new DictionaryDatabase();
-        let row = {
+        let row = /** @type {DictionaryRow} */ ({
             id: 1,
             title: 'JMdict staging',
             version: 3,
             summaryJson: JSON.stringify({title: 'JMdict staging', version: 3, importSuccess: true}),
-        };
+        });
         const exec = vi.fn((value) => {
             const sql = typeof value === 'string' ? value : value.sql;
             if (typeof value === 'object' && sql.startsWith('UPDATE dictionaries SET title')) {
@@ -121,10 +138,12 @@ describe('DictionaryDatabase import cleanup', () => {
     test('publishes an update by changing metadata without copying immutable shards', async () => {
         const token = 'update-token';
         const stagingTitle = `JMdict [update-staging ${token}]`;
+        /** @type {DictionaryRow[]} */
         let rows = [
             {id: 1, title: stagingTitle, version: 3, summaryJson: JSON.stringify({title: stagingTitle, termRecordStorageName: 'records-new', version: 3, importSuccess: true})},
             {id: 2, title: 'JMdict', version: 3, summaryJson: JSON.stringify({title: 'JMdict', termRecordStorageName: 'records-old', version: 3, importSuccess: true})},
         ];
+        /** @type {DictionaryRow[]} */
         let transactionSnapshot = [];
         const exec = vi.fn((value) => {
             const sql = typeof value === 'string' ? value : value.sql;
@@ -132,6 +151,7 @@ describe('DictionaryDatabase import cleanup', () => {
                 transactionSnapshot = rows.map((row) => ({...row}));
             } else if (typeof value === 'object' && sql.startsWith('UPDATE dictionaries SET title')) {
                 const row = rows.find(({id}) => id === value.bind.$id);
+                if (typeof row === 'undefined') { throw new Error('Expected dictionary row'); }
                 Object.assign(row, {
                     title: value.bind.$toTitle,
                     version: value.bind.$version,
@@ -150,7 +170,7 @@ describe('DictionaryDatabase import cleanup', () => {
         });
         Reflect.set(database, '_termRecordStore', {
             replaceDictionaryName,
-            rollbackPreservedDictionaryRename: vi.fn().mockResolvedValue(),
+            rollbackPreservedDictionaryRename: vi.fn(resolveVoid),
         });
         vi.spyOn(database, 'cleanupTransientTermRecordShards').mockResolvedValue([]);
         vi.spyOn(database, 'deleteDictionary').mockImplementation(async (title) => {
@@ -160,7 +180,7 @@ describe('DictionaryDatabase import cleanup', () => {
         await database.replaceDictionaryTitle(
             stagingTitle,
             'JMdict',
-            {title: 'JMdict', version: 3, importSuccess: true, updateSessionToken: token},
+            /** @type {import('dictionary-importer').Summary} */ ({title: 'JMdict', version: 3, importSuccess: true, updateSessionToken: token}),
             'JMdict',
         );
 
@@ -173,10 +193,12 @@ describe('DictionaryDatabase import cleanup', () => {
         const token = 'update-token';
         const stagingTitle = `JMdict [update-staging ${token}]`;
         const replacedTitle = `JMdict [replaced ${token}]`;
+        /** @type {DictionaryRow[]} */
         let rows = [
             {id: 1, title: stagingTitle, version: 3, summaryJson: JSON.stringify({title: stagingTitle, termRecordStorageName: 'records-new', version: 3, importSuccess: true})},
             {id: 2, title: 'JMdict', version: 3, summaryJson: JSON.stringify({title: 'JMdict', termRecordStorageName: 'records-old', version: 3, importSuccess: true})},
         ];
+        /** @type {DictionaryRow[]} */
         let transactionSnapshot = [];
         const exec = vi.fn((value) => {
             const sql = typeof value === 'string' ? value : value.sql;
@@ -184,6 +206,7 @@ describe('DictionaryDatabase import cleanup', () => {
                 transactionSnapshot = rows.map((row) => ({...row}));
             } else if (typeof value === 'object' && sql.startsWith('UPDATE dictionaries SET title')) {
                 const row = rows.find(({id}) => id === value.bind.$id);
+                if (typeof row === 'undefined') { throw new Error('Expected dictionary row'); }
                 Object.assign(row, {
                     title: value.bind.$toTitle,
                     version: value.bind.$version,
@@ -204,20 +227,21 @@ describe('DictionaryDatabase import cleanup', () => {
         });
         Reflect.set(database, '_termRecordStore', {
             replaceDictionaryName,
-            rollbackPreservedDictionaryRename: vi.fn().mockResolvedValue(),
+            rollbackPreservedDictionaryRename: vi.fn(resolveVoid),
         });
         vi.spyOn(database, 'cleanupTransientTermRecordShards').mockResolvedValue([]);
 
         await expect(database.replaceDictionaryTitle(
             stagingTitle,
             'JMdict',
-            {title: 'JMdict', version: 3, importSuccess: true, updateSessionToken: token},
+            /** @type {import('dictionary-importer').Summary} */ ({title: 'JMdict', version: 3, importSuccess: true, updateSessionToken: token}),
             'JMdict',
         )).rejects.toThrow('injected staged publication failure');
 
         expect(replaceDictionaryName).not.toHaveBeenCalled();
         expect(rows.map(({title}) => title).sort()).toStrictEqual(['JMdict', stagingTitle].sort());
         const oldRow = rows.find(({title}) => title === 'JMdict');
+        if (typeof oldRow === 'undefined') { throw new Error('Expected old dictionary row'); }
         expect(JSON.parse(oldRow.summaryJson).termRecordStorageName).toBe('records-old');
     });
 
@@ -243,10 +267,10 @@ describe('DictionaryDatabase import cleanup', () => {
         });
         Reflect.set(database, '_db', {
             exec,
-            selectValue: vi.fn((sql) => sql.includes('COUNT(*) FROM dictionaries') ? 1 : 0),
+            selectValue: vi.fn((sql) => (sql.includes('COUNT(*) FROM dictionaries') ? 1 : 0)),
         });
         Reflect.set(database, '_termRecordStore', {
-            ensureDictionariesLoaded: vi.fn().mockResolvedValue(),
+            ensureDictionariesLoaded: vi.fn(resolveVoid),
             getDictionaryRecordCount: vi.fn(() => 3),
             deleteByDictionary,
         });
@@ -259,7 +283,8 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('resets the last dictionary content store only after metadata commits', async () => {
         const database = new DictionaryDatabase();
-        const reset = vi.fn().mockResolvedValue();
+        const reset = vi.fn(resolveVoid);
+        /** @type {string[]} */
         const events = [];
         Reflect.set(database, '_db', {
             exec: vi.fn((value) => events.push(value)),
@@ -283,11 +308,11 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('does not claim ownership of an existing transaction for bulk import', async () => {
         const database = new DictionaryDatabase();
-        const db = {
+        const db = /** @type {import('@sqlite.org/sqlite-wasm').Database} */ (/** @type {unknown} */ ({
             exec: vi.fn(() => {
                 throw new Error('cannot start a transaction within a transaction');
             }),
-        };
+        }));
 
         await expect(Reflect.get(database, '_beginImmediateTransaction').call(database, db, false))
             .rejects.toThrow('cannot start a transaction within a transaction');
@@ -298,12 +323,12 @@ describe('DictionaryDatabase import cleanup', () => {
     test('unwinds the first OPFS store when the second store fails to start', async () => {
         const database = new DictionaryDatabase();
         const exec = vi.fn();
-        const termContentRollbackImportSession = vi.fn().mockResolvedValue();
-        const termRecordRollbackImportSession = vi.fn().mockResolvedValue();
+        const termContentRollbackImportSession = vi.fn(resolveVoid);
+        const termRecordRollbackImportSession = vi.fn(resolveVoid);
         Reflect.set(database, '_db', {exec});
         Reflect.set(database, '_termContentStore', {
             createImportCheckpoint: vi.fn().mockResolvedValue({segments: []}),
-            beginImportSession: vi.fn().mockResolvedValue(),
+            beginImportSession: vi.fn(resolveVoid),
             rollbackImportSession: termContentRollbackImportSession,
         });
         Reflect.set(database, '_termRecordStore', {
@@ -311,7 +336,7 @@ describe('DictionaryDatabase import cleanup', () => {
             beginImportSession: vi.fn().mockRejectedValue(new Error('term record setup failed')),
             rollbackImportSession: termRecordRollbackImportSession,
         });
-        Reflect.set(database, '_importJournal', {write: vi.fn().mockResolvedValue(), clear: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_importJournal', {write: vi.fn(resolveVoid), clear: vi.fn(resolveVoid)});
         Reflect.set(database, '_applyRuntimePragmas', vi.fn());
 
         await expect(database.startBulkImport()).rejects.toThrow('term record setup failed');
@@ -324,7 +349,9 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('reserves bulk-import ownership before awaiting storage checkpoints', async () => {
         const database = new DictionaryDatabase();
-        let releaseCheckpoint;
+        /** @type {() => void} */
+        let releaseCheckpoint = () => {};
+        /** @type {Promise<void>} */
         const checkpointGate = new Promise((resolve) => {
             releaseCheckpoint = resolve;
         });
@@ -335,21 +362,21 @@ describe('DictionaryDatabase import cleanup', () => {
                 await checkpointGate;
                 return {segments: []};
             }),
-            beginImportSession: vi.fn().mockResolvedValue(),
-            rollbackImportSession: vi.fn().mockResolvedValue(),
+            beginImportSession: vi.fn(resolveVoid),
+            rollbackImportSession: vi.fn(resolveVoid),
         });
         Reflect.set(database, '_termRecordStore', {
             createImportCheckpoint: vi.fn().mockResolvedValue({shards: []}),
-            beginImportSession: vi.fn().mockResolvedValue(),
-            rollbackImportSession: vi.fn().mockResolvedValue(),
+            beginImportSession: vi.fn(resolveVoid),
+            rollbackImportSession: vi.fn(resolveVoid),
         });
         Reflect.set(database, '_termContentBlockStore', {
             beginImportSession: vi.fn(() => ({close: vi.fn()})),
             clearCache: vi.fn(),
         });
         Reflect.set(database, '_importJournal', {
-            write: vi.fn().mockResolvedValue(),
-            clear: vi.fn().mockResolvedValue(),
+            write: vi.fn(resolveVoid),
+            clear: vi.fn(resolveVoid),
         });
 
         const firstStart = database.startBulkImport();
@@ -360,11 +387,11 @@ describe('DictionaryDatabase import cleanup', () => {
     });
 
     test('does not start an import through an opening, closing, or purging lifecycle', async () => {
-        for (const [property, value] of [
+        for (const [property, value] of /** @type {Array<[string, unknown]>} */ ([
             ['_isOpening', true],
             ['_closingPromise', Promise.resolve()],
             ['_purgingPromise', Promise.resolve(false)],
-        ]) {
+        ])) {
             const database = new DictionaryDatabase();
             Reflect.set(database, '_db', {exec: vi.fn()});
             Reflect.set(database, property, value);
@@ -377,9 +404,9 @@ describe('DictionaryDatabase import cleanup', () => {
     test('aborts failed imports without publishing SQLite and rolls back both OPFS stores', async () => {
         const database = new DictionaryDatabase();
         const exec = vi.fn();
-        const contentRollback = vi.fn().mockResolvedValue();
-        const recordRollback = vi.fn().mockResolvedValue();
-        const clearJournal = vi.fn().mockResolvedValue();
+        const contentRollback = vi.fn(resolveVoid);
+        const recordRollback = vi.fn(resolveVoid);
+        const clearJournal = vi.fn(resolveVoid);
         const closeContentBlocks = vi.fn();
         Reflect.set(database, '_db', {exec});
         Reflect.set(database, '_bulkImportState', 'active');
@@ -413,7 +440,9 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('rejects start, finish, and abort while finalization is active', async () => {
         const database = new DictionaryDatabase();
-        let releaseTermContent;
+        /** @type {() => void} */
+        let releaseTermContent = () => {};
+        /** @type {Promise<void>} */
         const termContentEndGate = new Promise((resolve) => {
             releaseTermContent = resolve;
         });
@@ -424,7 +453,7 @@ describe('DictionaryDatabase import cleanup', () => {
             getLastEndImportSessionMetrics: vi.fn(() => null),
         });
         Reflect.set(database, '_termRecordStore', {
-            endImportSession: vi.fn().mockResolvedValue(),
+            endImportSession: vi.fn(resolveVoid),
             getLastEndImportSessionMetrics: vi.fn(() => null),
         });
         Reflect.set(database, '_applyRuntimePragmas', vi.fn());
@@ -446,24 +475,26 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('waits for import setup before aborting its storage sessions', async () => {
         const database = new DictionaryDatabase();
-        let releaseCheckpoint;
+        /** @type {() => void} */
+        let releaseCheckpoint = () => {};
+        /** @type {Promise<void>} */
         const checkpointGate = new Promise((resolve) => {
             releaseCheckpoint = resolve;
         });
-        const contentRollback = vi.fn().mockResolvedValue();
-        const recordRollback = vi.fn().mockResolvedValue();
+        const contentRollback = vi.fn(resolveVoid);
+        const recordRollback = vi.fn(resolveVoid);
         Reflect.set(database, '_db', {exec: vi.fn(), selectValue: vi.fn(() => 0)});
         Reflect.set(database, '_termContentStore', {
             createImportCheckpoint: vi.fn(async () => {
                 await checkpointGate;
                 return {segments: []};
             }),
-            beginImportSession: vi.fn().mockResolvedValue(),
+            beginImportSession: vi.fn(resolveVoid),
             rollbackImportSession: contentRollback,
         });
         Reflect.set(database, '_termRecordStore', {
             createImportCheckpoint: vi.fn().mockResolvedValue({shards: []}),
-            beginImportSession: vi.fn().mockResolvedValue(),
+            beginImportSession: vi.fn(resolveVoid),
             rollbackImportSession: recordRollback,
         });
         Reflect.set(database, '_termContentBlockStore', {
@@ -471,8 +502,8 @@ describe('DictionaryDatabase import cleanup', () => {
             clearCache: vi.fn(),
         });
         Reflect.set(database, '_importJournal', {
-            write: vi.fn().mockResolvedValue(),
-            clear: vi.fn().mockResolvedValue(),
+            write: vi.fn(resolveVoid),
+            clear: vi.fn(resolveVoid),
         });
         Reflect.set(database, '_applyRuntimePragmas', vi.fn());
 
@@ -493,7 +524,7 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('retains recovery ownership when an abort rollback fails', async () => {
         const database = new DictionaryDatabase();
-        const clearJournal = vi.fn().mockResolvedValue();
+        const clearJournal = vi.fn(resolveVoid);
         const close = vi.fn();
         Reflect.set(database, '_db', {exec: vi.fn(), close});
         Reflect.set(database, '_bulkImportState', 'active');
@@ -508,7 +539,7 @@ describe('DictionaryDatabase import cleanup', () => {
         Reflect.set(database, '_termContentStore', {
             rollbackImportSession: vi.fn().mockRejectedValue(new Error('content rollback failed')),
         });
-        Reflect.set(database, '_termRecordStore', {rollbackImportSession: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_termRecordStore', {rollbackImportSession: vi.fn(resolveVoid)});
         Reflect.set(database, '_importJournal', {clear: clearJournal});
         Reflect.set(database, '_applyRuntimePragmas', vi.fn());
 
@@ -528,15 +559,15 @@ describe('DictionaryDatabase import cleanup', () => {
         Reflect.set(database, '_termContentStore', {
             createImportCheckpoint: vi.fn().mockResolvedValue({segments: []}),
             beginImportSession: vi.fn().mockRejectedValue(new Error('content setup failed')),
-            rollbackImportSession: vi.fn().mockResolvedValue(),
+            rollbackImportSession: vi.fn(resolveVoid),
         });
         Reflect.set(database, '_termRecordStore', {
             createImportCheckpoint: vi.fn().mockResolvedValue({shards: []}),
-            beginImportSession: vi.fn().mockResolvedValue(),
-            rollbackImportSession: vi.fn().mockResolvedValue(),
+            beginImportSession: vi.fn(resolveVoid),
+            rollbackImportSession: vi.fn(resolveVoid),
         });
         Reflect.set(database, '_importJournal', {
-            write: vi.fn().mockResolvedValue(),
+            write: vi.fn(resolveVoid),
             clear: vi.fn().mockRejectedValue(new Error('journal clear failed')),
         });
         Reflect.set(database, '_applyRuntimePragmas', vi.fn());
@@ -551,7 +582,7 @@ describe('DictionaryDatabase import cleanup', () => {
     test('quarantines the connection when failed import setup cannot roll back OPFS', async () => {
         const database = new DictionaryDatabase();
         const close = vi.fn();
-        const clear = vi.fn().mockResolvedValue();
+        const clear = vi.fn(resolveVoid);
         Reflect.set(database, '_db', {exec: vi.fn(), close, selectValue: vi.fn(() => 0)});
         Reflect.set(database, '_termContentStore', {
             createImportCheckpoint: vi.fn().mockResolvedValue({segments: []}),
@@ -560,10 +591,10 @@ describe('DictionaryDatabase import cleanup', () => {
         });
         Reflect.set(database, '_termRecordStore', {
             createImportCheckpoint: vi.fn().mockResolvedValue({shards: []}),
-            beginImportSession: vi.fn().mockResolvedValue(),
-            rollbackImportSession: vi.fn().mockResolvedValue(),
+            beginImportSession: vi.fn(resolveVoid),
+            rollbackImportSession: vi.fn(resolveVoid),
         });
-        Reflect.set(database, '_importJournal', {write: vi.fn().mockResolvedValue(), clear});
+        Reflect.set(database, '_importJournal', {write: vi.fn(resolveVoid), clear});
         Reflect.set(database, '_applyRuntimePragmas', vi.fn());
 
         await expect(database.startBulkImport())
@@ -584,16 +615,16 @@ describe('DictionaryDatabase import cleanup', () => {
             if (sql === 'ROLLBACK') { throw new Error('rollback failed'); }
         });
         const termContentEndImportSession = vi.fn().mockRejectedValue(new Error('term content seal failed'));
-        const termRecordEndImportSession = vi.fn().mockResolvedValue();
-        const termContentRollbackImportSession = vi.fn().mockResolvedValue();
-        const termRecordRollbackImportSession = vi.fn().mockResolvedValue();
+        const termRecordEndImportSession = vi.fn(resolveVoid);
+        const termContentRollbackImportSession = vi.fn(resolveVoid);
+        const termRecordRollbackImportSession = vi.fn(resolveVoid);
         Reflect.set(database, '_db', {exec});
         Reflect.set(database, '_bulkImportState', 'active');
         Reflect.set(database, '_bulkImportTransactionOpen', true);
         Reflect.set(database, '_bulkImportJournalRecord', {
             version: 1, sessionId: 'test', contentCheckpoint: {segments: []}, recordCheckpoint: {shards: []}, createdAt: 0,
         });
-        Reflect.set(database, '_importJournal', {clear: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_importJournal', {clear: vi.fn(resolveVoid)});
         Reflect.set(database, '_termContentStore', {endImportSession: termContentEndImportSession, rollbackImportSession: termContentRollbackImportSession});
         Reflect.set(database, '_termRecordStore', {endImportSession: termRecordEndImportSession, rollbackImportSession: termRecordRollbackImportSession});
 
@@ -614,7 +645,7 @@ describe('DictionaryDatabase import cleanup', () => {
         const database = new DictionaryDatabase();
         const close = vi.fn();
         const applyRuntimePragmas = vi.fn();
-        const clear = vi.fn().mockResolvedValue();
+        const clear = vi.fn(resolveVoid);
         Reflect.set(database, '_db', {exec: vi.fn(), close});
         Reflect.set(database, '_bulkImportState', 'active');
         Reflect.set(database, '_bulkImportTransactionOpen', true);
@@ -629,9 +660,9 @@ describe('DictionaryDatabase import cleanup', () => {
             rollbackImportSession: vi.fn().mockRejectedValue(new Error('content rollback failed')),
         });
         Reflect.set(database, '_termRecordStore', {
-            endImportSession: vi.fn().mockResolvedValue(),
+            endImportSession: vi.fn(resolveVoid),
             getLastEndImportSessionMetrics: vi.fn(() => null),
-            rollbackImportSession: vi.fn().mockResolvedValue(),
+            rollbackImportSession: vi.fn(resolveVoid),
         });
         Reflect.set(database, '_applyRuntimePragmas', applyRuntimePragmas);
 
@@ -662,8 +693,8 @@ describe('DictionaryDatabase import cleanup', () => {
         Reflect.set(database, '_bulkImportTransactionOpen', true);
         Reflect.set(database, '_deferTermsVirtualTableSync', true);
         Reflect.set(database, '_enableSqliteSecondaryIndexes', true);
-        Reflect.set(database, '_termContentStore', {endImportSession: vi.fn().mockResolvedValue()});
-        Reflect.set(database, '_termRecordStore', {endImportSession: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_termContentStore', {endImportSession: vi.fn(resolveVoid)});
+        Reflect.set(database, '_termRecordStore', {endImportSession: vi.fn(resolveVoid)});
         Reflect.set(database, '_applyRuntimePragmas', applyRuntimePragmas);
 
         await expect(database.finishBulkImport()).rejects.toThrow('Dictionary import finalization and cleanup failed');
@@ -675,12 +706,13 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('seals OPFS and recreates indexes before publishing SQLite', async () => {
         const database = new DictionaryDatabase();
+        /** @type {string[]} */
         const events = [];
         const exec = vi.fn((sql) => {
             if (sql === 'COMMIT') { events.push('commit'); }
             if (typeof sql === 'string' && sql.startsWith('CREATE INDEX')) { events.push('index'); }
         });
-        const makeStore = (name) => ({
+        const makeStore = (/** @type {string} */ name) => ({
             endImportSession: vi.fn(async () => { events.push(`seal-${name}`); }),
             getLastEndImportSessionMetrics: vi.fn(() => null),
         });
@@ -712,13 +744,8 @@ describe('DictionaryDatabase import cleanup', () => {
     test('rolls SQLite and both OPFS stores back when fused summary publication fails', async () => {
         const database = new DictionaryDatabase();
         const exec = vi.fn();
-        const contentRollback = vi.fn().mockResolvedValue();
-        const recordRollback = vi.fn().mockResolvedValue();
-        const makeStore = (rollbackImportSession) => ({
-            endImportSession: vi.fn().mockResolvedValue(),
-            getLastEndImportSessionMetrics: vi.fn(() => null),
-            rollbackImportSession,
-        });
+        const contentRollback = vi.fn(resolveVoid);
+        const recordRollback = vi.fn(resolveVoid);
         Reflect.set(database, '_db', {exec});
         Reflect.set(database, '_bulkImportState', 'active');
         Reflect.set(database, '_bulkImportTransactionOpen', true);
@@ -729,7 +756,7 @@ describe('DictionaryDatabase import cleanup', () => {
             recordCheckpoint: {shards: []},
             createdAt: 0,
         });
-        Reflect.set(database, '_importJournal', {clear: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_importJournal', {clear: vi.fn(resolveVoid)});
         Reflect.set(database, '_termContentStore', makeStore(contentRollback));
         Reflect.set(database, '_termRecordStore', makeStore(recordRollback));
         Reflect.set(database, '_applyRuntimePragmas', vi.fn());
@@ -752,8 +779,8 @@ describe('DictionaryDatabase import cleanup', () => {
         const record = {
             version: 1, sessionId: 'interrupted', contentCheckpoint: {segments: []}, recordCheckpoint: {shards: []}, createdAt: 0,
         };
-        const contentRollback = vi.fn().mockResolvedValue();
-        const recordRollback = vi.fn().mockResolvedValue();
+        const contentRollback = vi.fn(resolveVoid);
+        const recordRollback = vi.fn(resolveVoid);
         const clear = vi.fn(async () => {});
         Reflect.set(database, '_db', {selectValue: vi.fn(() => 0), exec: vi.fn()});
         Reflect.set(database, '_importJournal', {read: vi.fn(async () => record), clear});
@@ -797,10 +824,14 @@ describe('DictionaryDatabase import cleanup', () => {
         const record = {
             version: 1, sessionId: 'interrupted', contentCheckpoint: {segments: []}, recordCheckpoint: {shards: []}, createdAt: 0,
         };
-        let finishRecordRollback;
-        const recordRollback = vi.fn(() => new Promise((resolve) => {
-            finishRecordRollback = resolve;
-        }));
+        /** @type {() => void} */
+        let finishRecordRollback = () => {};
+        const recordRollback = vi.fn(
+            /** @returns {Promise<void>} */
+            () => new Promise((resolve) => {
+                finishRecordRollback = () => { resolve(); };
+            }),
+        );
         Reflect.set(database, '_db', {selectValue: vi.fn(() => 0), exec: vi.fn()});
         Reflect.set(database, '_importJournal', {read: vi.fn(async () => record), clear: vi.fn()});
         Reflect.set(database, '_termContentStore', {
@@ -835,7 +866,8 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('does not resurrect shared glossary cache entries after invalidation', async () => {
         const database = new DictionaryDatabase();
-        let finishInflation;
+        /** @type {(value: Uint8Array) => void} */
+        let finishInflation = () => {};
         Reflect.set(database, '_inflateSharedGlossaryArtifact', vi.fn(() => new Promise((resolve) => {
             finishInflation = resolve;
         })));
@@ -872,10 +904,10 @@ describe('DictionaryDatabase import cleanup', () => {
         const record = {
             version: 1, sessionId: 'published', contentCheckpoint: {segments: []}, recordCheckpoint: {shards: []}, createdAt: 0,
         };
-        const contentRollback = vi.fn().mockResolvedValue();
-        const recordRollback = vi.fn().mockResolvedValue();
+        const contentRollback = vi.fn(resolveVoid);
+        const recordRollback = vi.fn(resolveVoid);
         Reflect.set(database, '_db', {selectValue: vi.fn(() => 1), exec: vi.fn()});
-        Reflect.set(database, '_importJournal', {read: vi.fn(async () => record), clear: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_importJournal', {read: vi.fn(async () => record), clear: vi.fn(resolveVoid)});
         Reflect.set(database, '_termContentStore', {rollbackImportSession: contentRollback});
         Reflect.set(database, '_termRecordStore', {rollbackImportSession: recordRollback});
 
@@ -892,9 +924,9 @@ describe('DictionaryDatabase import cleanup', () => {
         };
         const exec = vi.fn(() => { throw new Error('database is busy'); });
         Reflect.set(database, '_db', {selectValue: vi.fn(() => 1), exec});
-        Reflect.set(database, '_importJournal', {read: vi.fn(async () => record), clear: vi.fn().mockResolvedValue()});
-        Reflect.set(database, '_termContentStore', {rollbackImportSession: vi.fn().mockResolvedValue()});
-        Reflect.set(database, '_termRecordStore', {rollbackImportSession: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_importJournal', {read: vi.fn(async () => record), clear: vi.fn(resolveVoid)});
+        Reflect.set(database, '_termContentStore', {rollbackImportSession: vi.fn(resolveVoid)});
+        Reflect.set(database, '_termRecordStore', {rollbackImportSession: vi.fn(resolveVoid)});
 
         await expect(Reflect.get(database, '_recoverInterruptedImportSession').call(database)).resolves.toBeUndefined();
         expect(exec).toHaveBeenCalledOnce();
@@ -902,17 +934,12 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('does not retain rollback ownership after SQLite commits when journal cleanup fails', async () => {
         const database = new DictionaryDatabase();
-        const rollbackContent = vi.fn().mockResolvedValue();
-        const rollbackRecord = vi.fn().mockResolvedValue();
+        const rollbackContent = vi.fn(resolveVoid);
+        const rollbackRecord = vi.fn(resolveVoid);
         const db = {
             exec: vi.fn(),
             close: vi.fn(),
         };
-        const makeStore = (rollbackImportSession) => ({
-            endImportSession: vi.fn().mockResolvedValue(),
-            getLastEndImportSessionMetrics: vi.fn(() => null),
-            rollbackImportSession,
-        });
         Reflect.set(database, '_db', db);
         Reflect.set(database, '_bulkImportState', 'active');
         Reflect.set(database, '_bulkImportTransactionOpen', true);
@@ -942,14 +969,9 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('does not roll published storage back when post-commit runtime cleanup fails', async () => {
         const database = new DictionaryDatabase();
-        const contentRollback = vi.fn().mockResolvedValue();
-        const recordRollback = vi.fn().mockResolvedValue();
+        const contentRollback = vi.fn(resolveVoid);
+        const recordRollback = vi.fn(resolveVoid);
         const exec = vi.fn();
-        const makeStore = (rollbackImportSession) => ({
-            endImportSession: vi.fn().mockResolvedValue(),
-            getLastEndImportSessionMetrics: vi.fn(() => null),
-            rollbackImportSession,
-        });
         Reflect.set(database, '_db', {exec});
         Reflect.set(database, '_bulkImportState', 'active');
         Reflect.set(database, '_bulkImportTransactionOpen', true);
@@ -960,7 +982,7 @@ describe('DictionaryDatabase import cleanup', () => {
             recordCheckpoint: {shards: []},
             createdAt: 0,
         });
-        Reflect.set(database, '_importJournal', {clear: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_importJournal', {clear: vi.fn(resolveVoid)});
         Reflect.set(database, '_termContentStore', makeStore(contentRollback));
         Reflect.set(database, '_termRecordStore', makeStore(recordRollback));
         Reflect.set(database, '_applyRuntimePragmas', vi.fn(() => {
@@ -981,9 +1003,9 @@ describe('DictionaryDatabase import cleanup', () => {
     test('closes SQLite and preserves the journal after a partial close rollback failure', async () => {
         const database = new DictionaryDatabase();
         const db = {exec: vi.fn(), close: vi.fn()};
-        const clear = vi.fn().mockResolvedValue();
+        const clear = vi.fn(resolveVoid);
         const contentRollback = vi.fn().mockRejectedValue(new Error('content rollback failed'));
-        const recordRollback = vi.fn().mockResolvedValue();
+        const recordRollback = vi.fn(resolveVoid);
         Reflect.set(database, '_db', db);
         Reflect.set(database, '_bulkImportJournalRecord', {
             version: 1,
@@ -1009,7 +1031,7 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('does not clear the recovery journal when close cannot roll SQLite back', async () => {
         const database = new DictionaryDatabase();
-        const clear = vi.fn().mockResolvedValue();
+        const clear = vi.fn(resolveVoid);
         const db = {
             exec: vi.fn((sql) => {
                 if (sql === 'ROLLBACK') { throw new Error('SQLite rollback failed'); }
@@ -1027,8 +1049,8 @@ describe('DictionaryDatabase import cleanup', () => {
             createdAt: 0,
         });
         Reflect.set(database, '_importJournal', {clear});
-        Reflect.set(database, '_termContentStore', {rollbackImportSession: vi.fn().mockResolvedValue()});
-        Reflect.set(database, '_termRecordStore', {rollbackImportSession: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_termContentStore', {rollbackImportSession: vi.fn(resolveVoid)});
+        Reflect.set(database, '_termRecordStore', {rollbackImportSession: vi.fn(resolveVoid)});
 
         await expect(database.close()).rejects.toThrow('SQLite rollback failed');
 
@@ -1043,7 +1065,9 @@ describe('DictionaryDatabase import cleanup', () => {
         const database = new DictionaryDatabase();
         Reflect.set(database, '_db', {exec: vi.fn(), close: vi.fn()});
         Reflect.set(database, '_bulkImportState', 'active');
-        let releaseSeal;
+        /** @type {() => void} */
+        let releaseSeal = () => {};
+        /** @type {Promise<void>} */
         const sealGate = new Promise((resolve) => {
             releaseSeal = resolve;
         });
@@ -1054,7 +1078,7 @@ describe('DictionaryDatabase import cleanup', () => {
             getLastEndImportSessionMetrics: vi.fn(() => null),
         });
         Reflect.set(database, '_termRecordStore', {
-            endImportSession: vi.fn().mockResolvedValue(),
+            endImportSession: vi.fn(resolveVoid),
             getLastEndImportSessionMetrics: vi.fn(() => null),
         });
         Reflect.set(database, '_applyRuntimePragmas', vi.fn());
@@ -1072,14 +1096,18 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('coalesces concurrent close calls into one cleanup operation', async () => {
         const database = new DictionaryDatabase();
-        let finishEndSession;
-        const endImportSession = vi.fn(() => new Promise((resolve) => {
-            finishEndSession = resolve;
-        }));
+        /** @type {() => void} */
+        let finishEndSession = () => {};
+        const endImportSession = vi.fn(
+            /** @returns {Promise<void>} */
+            () => new Promise((resolve) => {
+                finishEndSession = () => { resolve(); };
+            }),
+        );
         const db = {close: vi.fn()};
         Reflect.set(database, '_db', db);
         Reflect.set(database, '_termContentStore', {endImportSession});
-        Reflect.set(database, '_termRecordStore', {endImportSession: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_termRecordStore', {endImportSession: vi.fn(resolveVoid)});
 
         const first = database.close();
         const second = database.close();
@@ -1095,8 +1123,8 @@ describe('DictionaryDatabase import cleanup', () => {
         const database = new DictionaryDatabase();
         const db = {close: vi.fn()};
         Reflect.set(database, '_db', db);
-        Reflect.set(database, '_termContentStore', {endImportSession: vi.fn().mockResolvedValue()});
-        Reflect.set(database, '_termRecordStore', {endImportSession: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_termContentStore', {endImportSession: vi.fn(resolveVoid)});
+        Reflect.set(database, '_termRecordStore', {endImportSession: vi.fn(resolveVoid)});
 
         await database.close();
         await expect(database.close()).resolves.toBeUndefined();
@@ -1108,10 +1136,10 @@ describe('DictionaryDatabase import cleanup', () => {
         const db = {close: vi.fn()};
         Reflect.set(database, '_db', db);
         Reflect.set(database, '_termContentStore', {
-            endImportSession: vi.fn().mockResolvedValue(undefined),
+            endImportSession: vi.fn(resolveVoid),
         });
         Reflect.set(database, '_termRecordStore', {
-            endImportSession: vi.fn().mockResolvedValue(undefined),
+            endImportSession: vi.fn(resolveVoid),
         });
         Reflect.set(database, '_termContentBlockImportSession', {
             close: vi.fn(() => {
@@ -1144,7 +1172,7 @@ describe('DictionaryDatabase import cleanup', () => {
             }),
         };
         const termContentReset = vi.fn().mockRejectedValue(new Error('term content reset failed'));
-        const termRecordReset = vi.fn().mockResolvedValue(undefined);
+        const termRecordReset = vi.fn(resolveVoid);
         const journalClear = vi.fn().mockRejectedValue(new Error('journal clear failed'));
         const terminate = vi.fn();
         const prepare = vi.spyOn(database, '_prepareOnce').mockResolvedValue();
@@ -1176,9 +1204,11 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('coalesces purge and makes concurrent prepare wait for its result', async () => {
         const database = new DictionaryDatabase();
-        let releasePurge;
+        /** @type {() => void} */
+        let releasePurge = () => {};
+        /** @type {Promise<boolean>} */
         const purgeGate = new Promise((resolve) => {
-            releasePurge = resolve;
+            releasePurge = () => { resolve(true); };
         });
         const purgeOnce = vi.spyOn(database, '_purgeOnce').mockImplementation(async () => {
             await purgeGate;
@@ -1202,7 +1232,7 @@ describe('DictionaryDatabase import cleanup', () => {
     test('schema wipe attempts both persistent store resets before failing', async () => {
         const database = new DictionaryDatabase();
         const termContentReset = vi.fn().mockRejectedValue(new Error('term content reset failed'));
-        const termRecordReset = vi.fn().mockResolvedValue(undefined);
+        const termRecordReset = vi.fn(resolveVoid);
         const beginImmediateTransaction = vi.spyOn(database, '_beginImmediateTransaction').mockResolvedValue();
         Reflect.set(database, '_db', {
             selectValue: vi.fn(() => 0),
@@ -1221,13 +1251,17 @@ describe('DictionaryDatabase import cleanup', () => {
 
     test('waits for close to finish before resuming a suspended database', async () => {
         const database = new DictionaryDatabase();
-        let finishEndSession;
-        const endImportSession = vi.fn(() => new Promise((resolve) => {
-            finishEndSession = resolve;
-        }));
+        /** @type {() => void} */
+        let finishEndSession = () => {};
+        const endImportSession = vi.fn(
+            /** @returns {Promise<void>} */
+            () => new Promise((resolve) => {
+                finishEndSession = () => { resolve(); };
+            }),
+        );
         Reflect.set(database, '_db', {close: vi.fn()});
         Reflect.set(database, '_termContentStore', {endImportSession});
-        Reflect.set(database, '_termRecordStore', {endImportSession: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_termRecordStore', {endImportSession: vi.fn(resolveVoid)});
         const prepare = vi.spyOn(database, 'prepare').mockResolvedValue();
 
         const close = database.close();
@@ -1254,8 +1288,8 @@ describe('DictionaryDatabase import cleanup', () => {
             read: vi.fn(async () => record),
             clear: vi.fn().mockRejectedValue(new Error('clear failed')),
         });
-        Reflect.set(database, '_termContentStore', {rollbackImportSession: vi.fn().mockResolvedValue()});
-        Reflect.set(database, '_termRecordStore', {rollbackImportSession: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_termContentStore', {rollbackImportSession: vi.fn(resolveVoid)});
+        Reflect.set(database, '_termRecordStore', {rollbackImportSession: vi.fn(resolveVoid)});
 
         await expect(Reflect.get(database, '_recoverInterruptedImportSession').call(database))
             .resolves.toBeUndefined();
@@ -1268,7 +1302,7 @@ describe('DictionaryDatabase import cleanup', () => {
         const database = new DictionaryDatabase();
         const exec = vi.fn();
         Reflect.set(database, '_db', {exec});
-        Reflect.set(database, '_importJournal', {read: vi.fn(async () => null), clear: vi.fn().mockResolvedValue()});
+        Reflect.set(database, '_importJournal', {read: vi.fn(async () => null), clear: vi.fn(resolveVoid)});
 
         await Reflect.get(database, '_recoverInterruptedImportSession').call(database);
 

@@ -25,7 +25,7 @@ describe('WebExtension', () => {
 
     beforeEach(() => {
         originalChrome = globalThis.chrome;
-        globalThis.chrome = /** @type {typeof globalThis.chrome} */ ({
+        globalThis.chrome = /** @type {typeof globalThis.chrome} */ (/** @type {unknown} */ ({
             runtime: {
                 id: 'test',
                 getURL: vi.fn((path) => `chrome-extension://test${path}`),
@@ -33,7 +33,7 @@ describe('WebExtension', () => {
                 sendMessage: vi.fn(),
                 lastError: undefined,
             },
-        });
+        }));
     });
 
     afterEach(() => {
@@ -61,10 +61,10 @@ describe('WebExtension', () => {
 
     test('sendMessagePromise does not mark a live extension unloaded when a recipient disconnects', async () => {
         const webExtension = new WebExtension();
-        globalThis.chrome.runtime.sendMessage = vi.fn((_message, callback) => {
+        globalThis.chrome.runtime.sendMessage = /** @type {typeof globalThis.chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(/** @type {(message: unknown, callback: (response?: unknown) => void) => void} */ ((_message, callback) => {
             globalThis.chrome.runtime.lastError = {message: 'Could not establish connection. Receiving end does not exist.'};
-            callback(undefined);
-        });
+            callback();
+        }))));
 
         await expect(webExtension.sendMessagePromise({action: 'noop'})).rejects.toThrow(/Could not establish connection/);
         expect(webExtension.unloaded).toBe(false);
@@ -75,11 +75,11 @@ describe('WebExtension', () => {
         'The message port closed before a response was received.',
     ])('sendMessagePromise marks extension unloaded when its context is gone: %s', async (message) => {
         const webExtension = new WebExtension();
-        globalThis.chrome.runtime.sendMessage = vi.fn((_message, callback) => {
+        globalThis.chrome.runtime.sendMessage = /** @type {typeof globalThis.chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(/** @type {(message: unknown, callback: (response?: unknown) => void) => void} */ ((_message, callback) => {
             globalThis.chrome.runtime.id = '';
             globalThis.chrome.runtime.lastError = {message};
-            callback(undefined);
-        });
+            callback();
+        }))));
 
         await expect(webExtension.sendMessagePromise({action: 'noop'})).rejects.toThrow();
         expect(webExtension.unloaded).toBe(true);
@@ -87,10 +87,10 @@ describe('WebExtension', () => {
 
     test('sendMessagePromise marks an explicitly invalidated extension context unloaded', async () => {
         const webExtension = new WebExtension();
-        globalThis.chrome.runtime.sendMessage = vi.fn((_message, callback) => {
+        globalThis.chrome.runtime.sendMessage = /** @type {typeof globalThis.chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(/** @type {(message: unknown, callback: (response?: unknown) => void) => void} */ ((_message, callback) => {
             globalThis.chrome.runtime.lastError = {message: 'Extension context invalidated.'};
-            callback(undefined);
-        });
+            callback();
+        }))));
 
         await expect(webExtension.sendMessagePromise({action: 'noop'})).rejects.toThrow(/context invalidated/);
         expect(webExtension.unloaded).toBe(true);
@@ -98,7 +98,7 @@ describe('WebExtension', () => {
 
     test('sendMessagePromise rejects immediately when runtime unloads before callback returns', async () => {
         const webExtension = new WebExtension();
-        globalThis.chrome.runtime.sendMessage = vi.fn((_message, _callback) => {});
+        globalThis.chrome.runtime.sendMessage = /** @type {typeof globalThis.chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(/** @type {(message: unknown, callback?: (response?: unknown) => void) => void} */ ((_message, _callback) => {}))));
 
         const promise = webExtension.sendMessagePromise({action: 'noop'});
         const expectation = expect(promise).rejects.toThrow(/Lost connection to the extension runtime/);

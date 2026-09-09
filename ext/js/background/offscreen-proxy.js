@@ -348,12 +348,14 @@ export class OffscreenProxy {
             }
             this._offscreenControlResponseHandlers.set(id, {
                 port,
-                accept: isStructuredLookup ? () => {
-                    if (acceptanceTimeoutId !== null) {
-                        globalThis.clearTimeout(acceptanceTimeoutId);
-                        acceptanceTimeoutId = null;
-                    }
-                } : null,
+                accept: isStructuredLookup ?
+() => {
+    if (acceptanceTimeoutId !== null) {
+        globalThis.clearTimeout(acceptanceTimeoutId);
+        acceptanceTimeoutId = null;
+    }
+} :
+null,
                 resolve: (value) => {
                     clearTimers();
                     resolve(value);

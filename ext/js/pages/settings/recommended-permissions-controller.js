@@ -101,10 +101,10 @@ export class RecommendedPermissionsController {
         const permissions = ['clipboardRead', 'nativeMessaging'];
         try {
             await setPermissionsGranted({permissions}, value);
-        } catch (e2) {
+        } catch (error) {
             if (this._errorContainer !== null) {
                 this._errorContainer.hidden = false;
-                this._errorContainer.textContent = toError(e2).message;
+                this._errorContainer.textContent = toError(error).message;
             }
             return;
         }

@@ -154,12 +154,16 @@ export class StorageController {
                 typeof summary.openStorageDiagnostics === 'object' &&
                 summary.openStorageDiagnostics !== null &&
                 !Array.isArray(summary.openStorageDiagnostics)
-            ) ? /** @type {Record<string, unknown>} */ (summary.openStorageDiagnostics) : null;
+            ) ?
+                /** @type {Record<string, unknown>} */ (summary.openStorageDiagnostics) :
+                null;
             const startupDiagnosticsSnapshot = (
                 typeof summary.startupDiagnosticsSnapshot === 'object' &&
                 summary.startupDiagnosticsSnapshot !== null &&
                 !Array.isArray(summary.startupDiagnosticsSnapshot)
-            ) ? /** @type {Record<string, unknown>} */ (summary.startupDiagnosticsSnapshot) : null;
+            ) ?
+                /** @type {Record<string, unknown>} */ (summary.startupDiagnosticsSnapshot) :
+                null;
             const mode = typeof openStorageDiagnostics?.mode === 'string' ? openStorageDiagnostics.mode : 'unknown';
             const dictionaryBackendUsable = (
                 mode !== 'opfs-unavailable' &&
@@ -172,7 +176,7 @@ export class StorageController {
             const usesFallbackStorage = summary.usesFallbackStorage === true;
             this._storageRuntimeCheckNode.textContent = (
                 `${browserLabel} check:\n` +
-                `backend reachable=true\n` +
+                'backend reachable=true\n' +
                 `dictionary backend usable=${String(dictionaryBackendUsable)}\n` +
                 `storage.getDirectory=${String(hasStorageGetDirectory)}\n` +
                 `createSyncAccessHandle=${String(hasCreateSyncAccessHandle)}\n` +
@@ -190,11 +194,13 @@ export class StorageController {
             typeof startupFailure === 'object' &&
             !Array.isArray(startupFailure) &&
             typeof startupFailure.errorMessage === 'string'
-        ) ? startupFailure.errorMessage : '';
+        ) ?
+startupFailure.errorMessage :
+'';
         this._storageRuntimeCheckNode.textContent = (
             `${browserLabel} check:\n` +
-            `backend reachable=false\n` +
-            `dictionary backend usable=false\n` +
+            'backend reachable=false\n' +
+            'dictionary backend usable=false\n' +
             `storage.getDirectory=${String(hasStorageGetDirectory)}\n` +
             `createSyncAccessHandle=${String(hasCreateSyncAccessHandle)}\n` +
             `backendError=${backendError ?? 'unknown'}\n` +

@@ -2652,7 +2652,7 @@ export class DictionaryImportController {
         const sequence = typeof previousSequence === 'number' && Number.isSafeInteger(previousSequence) && previousSequence >= 0 ?
             previousSequence + 1 :
             1;
-        const completion = {...details, sequence, completedAtEpochMs: Date.now()};
+        const completion = {...details, sequence, completedAtEpochMs: Date.now(), completedAtMonotonicMs: safePerformance.now()};
         Reflect.set(globalThis, '__manabitanImportCompletionSequence', sequence);
         Reflect.set(globalThis, '__manabitanLastImportCompletion', completion);
         globalThis.dispatchEvent(new CustomEvent('manabitan:dictionary-import-complete', {detail: completion}));

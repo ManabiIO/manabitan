@@ -23,7 +23,7 @@ describe('DictionaryWorkerHandler transient update cleanup', () => {
                 updateSessionToken: 'update-token',
                 transientUpdateStage: 'replaced',
             }]),
-            deleteDictionary: vi.fn().mockResolvedValue(),
+            deleteDictionary: vi.fn(async () => {}),
             cleanupTransientTermRecordShards: vi.fn(async (predicate) => {
                 shardPredicate = predicate;
                 return [];
@@ -71,7 +71,7 @@ describe('DictionaryWorkerHandler transient update cleanup', () => {
         let shardPredicate;
         const database = {
             getDictionaryInfo: vi.fn(async () => [{title, updateSessionToken: 'update-token'}]),
-            deleteDictionary: vi.fn().mockResolvedValue(),
+            deleteDictionary: vi.fn(async () => {}),
             cleanupTransientTermRecordShards: vi.fn(async (predicate) => {
                 shardPredicate = predicate;
                 return [];
@@ -93,7 +93,7 @@ describe('DictionaryWorkerHandler import database cleanup', () => {
         const handler = new DictionaryWorkerHandler();
         const database = {
             isPrepared: vi.fn(() => true),
-            close: vi.fn().mockResolvedValue(),
+            close: vi.fn(async () => {}),
         };
         Reflect.set(handler, '_importSessionDictionaryDatabase', database);
 
@@ -114,7 +114,7 @@ describe('DictionaryWorkerHandler import database cleanup', () => {
         const importError = new Error('import failed');
         const database = {
             isPrepared: vi.fn(() => true),
-            close: vi.fn().mockResolvedValue(),
+            close: vi.fn(async () => {}),
         };
         Reflect.set(handler, '_importSessionDictionaryDatabase', database);
 
@@ -151,8 +151,9 @@ describe('DictionaryWorkerHandler import database cleanup', () => {
             )).resolves.toBeUndefined();
 
             expect(logError).toHaveBeenCalledOnce();
-            const aggregateError = logError.mock.calls[0][0];
+            const aggregateError = /** @type {unknown} */ (logError.mock.calls[0]?.[0]);
             expect(aggregateError).toBeInstanceOf(AggregateError);
+            if (!(aggregateError instanceof AggregateError)) { throw new Error('Expected an AggregateError'); }
             expect(aggregateError.errors).toStrictEqual([importError, closeError]);
             expect(Reflect.get(handler, '_importSessionDictionaryDatabase')).toBeNull();
         } finally {
@@ -164,7 +165,7 @@ describe('DictionaryWorkerHandler import database cleanup', () => {
         const handler = new DictionaryWorkerHandler();
         const failedDatabase = {
             isPrepared: vi.fn(() => true),
-            close: vi.fn().mockResolvedValue(),
+            close: vi.fn(async () => {}),
             usesFallbackStorage: vi.fn(() => {
                 throw new Error('failed session was reused');
             }),
@@ -173,7 +174,7 @@ describe('DictionaryWorkerHandler import database cleanup', () => {
             usesFallbackStorage: vi.fn(() => true),
             getOpenStorageDiagnostics: vi.fn(() => ({opfsVfsPtr: 0})),
             isPrepared: vi.fn(() => true),
-            close: vi.fn().mockResolvedValue(),
+            close: vi.fn(async () => {}),
         };
         Reflect.set(handler, '_importSessionDictionaryDatabase', failedDatabase);
 
@@ -245,7 +246,7 @@ describe('DictionaryWorkerHandler import database cleanup', () => {
             usesFallbackStorage: vi.fn(() => true),
             getOpenStorageDiagnostics: vi.fn(() => ({opfsVfsPtr: 0})),
             isPrepared: vi.fn(() => true),
-            close: vi.fn().mockResolvedValue(),
+            close: vi.fn(async () => {}),
         };
         Reflect.set(handler, '_importSessionDictionaryDatabase', database);
 

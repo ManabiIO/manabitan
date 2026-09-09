@@ -28,15 +28,13 @@ import {convertToKana, convertToKanaIME} from '../language/ja/japanese-wanakana.
  * @param {Record<string, unknown>} patch
  */
 function updateSearchDebugState(patch) {
-    const globalState = /** @type {import('core').SafeAny} */ (globalThis);
-    const state = (typeof globalState.__manabitanSearchDebug === 'object' && globalState.__manabitanSearchDebug !== null) ?
-        globalState.__manabitanSearchDebug :
-        {};
-    globalState.__manabitanSearchDebug = {
+    const previous = /** @type {unknown} */ (Reflect.get(globalThis, '__manabitanSearchDebug'));
+    const state = typeof previous === 'object' && previous !== null ? previous : {};
+    Reflect.set(globalThis, '__manabitanSearchDebug', {
         ...state,
         ...patch,
         updatedAt: Date.now(),
-    };
+    });
 }
 
 export class SearchDisplayController {
@@ -116,12 +114,13 @@ export class SearchDisplayController {
             prepareStarted: true,
         });
         window.addEventListener('manabitan-e2e-trigger-search', (event) => {
-            const detail = (event instanceof CustomEvent && typeof event.detail === 'object' && event.detail !== null) ? event.detail : {};
-            const query = String(detail.query ?? '');
+            const value = event instanceof CustomEvent ? /** @type {unknown} */ (event.detail) : null;
+            const detail = /** @type {Record<string, unknown>} */ (typeof value === 'object' && value !== null ? value : {});
+            const query = typeof detail.query === 'string' ? detail.query : '';
             const animate = Boolean(detail.animate ?? true);
-            const historyMode = typeof detail.historyMode === 'string' ? detail.historyMode : 'new';
+            const historyMode = detail.historyMode === 'clear' || detail.historyMode === 'overwrite' ? detail.historyMode : 'new';
             const lookup = Boolean(detail.lookup ?? true);
-            const flags = Array.isArray(detail.flags) ? detail.flags : null;
+            const flags = Array.isArray(detail.flags) ? detail.flags.filter((flag) => flag === 'clipboard') : null;
             updateSearchDebugState({
                 debugEventTriggerSearch: {
                     query,
@@ -134,7 +133,7 @@ export class SearchDisplayController {
             this._updateSearchHeight(true);
             this._search(animate, historyMode, lookup, flags);
         });
-        /** @type {import('core').SafeAny} */ (globalThis).__manabitanSearchDebugApi = {
+        Reflect.set(globalThis, '__manabitanSearchDebugApi', {
             /**
              * @param {string} query
              * @param {{animate?: boolean, historyMode?: import('display').HistoryMode, lookup?: boolean, flags?: string[]|null}} [details]
@@ -168,7 +167,7 @@ export class SearchDisplayController {
                     };
                 }
             },
-        };
+        });
 
         this._searchPersistentStateController.on('modeChange', this._onModeChange.bind(this));
 
@@ -825,7 +824,7 @@ export class SearchDisplayController {
             },
         };
         if (!lookup) { details.params.lookup = 'false'; }
-        this._display.setContent(details);
+        void this._display.setContent(details);
     }
 
     /**

@@ -35,9 +35,10 @@ describe('ExtensionKeyboardShortcutController', () => {
                 update: vi.fn(),
             },
         });
+        const getAll = /** @type {(callback: (commands: Array<{name: string, shortcut: string}>) => void) => void} */ ((callback) => callback([{name: 'openSearchPage', shortcut: 'Ctrl+Shift+F'}]));
         vi.stubGlobal('chrome', {
             commands: {
-                getAll: (callback) => callback([{name: 'openSearchPage', shortcut: 'Ctrl+Shift+F'}]),
+                getAll,
             },
             runtime: {
                 lastError: null,

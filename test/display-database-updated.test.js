@@ -154,15 +154,11 @@ describe('Display dictionary update handling', () => {
     });
 
     test('stale dictionary-info refresh does not overwrite newer display state', async () => {
-        let resolveFirst;
-        let resolveSecond;
+        const firstRefreshDeferred = Promise.withResolvers();
+        const secondRefreshDeferred = Promise.withResolvers();
         const getDictionaryInfo = vi.fn()
-            .mockImplementationOnce(() => new Promise((resolve) => {
-                resolveFirst = resolve;
-            }))
-            .mockImplementationOnce(() => new Promise((resolve) => {
-                resolveSecond = resolve;
-            }));
+            .mockImplementationOnce(() => firstRefreshDeferred.promise)
+            .mockImplementationOnce(() => secondRefreshDeferred.promise);
         const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
         Reflect.set(display, '_dictionaryInfo', []);
         Reflect.set(display, '_dictionaryInfoRefreshGeneration', 0);
@@ -172,9 +168,9 @@ describe('Display dictionary update handling', () => {
 
         const firstRefresh = Display.prototype._refreshDictionaryInfo.call(display);
         const secondRefresh = Display.prototype._refreshDictionaryInfo.call(display);
-        resolveSecond([{title: 'Jitendex'}]);
+        secondRefreshDeferred.resolve([{title: 'Jitendex'}]);
         await secondRefresh;
-        resolveFirst([{title: 'JMdict'}]);
+        firstRefreshDeferred.resolve([{title: 'JMdict'}]);
         await firstRefresh;
 
         expect(Reflect.get(display, '_dictionaryInfo')).toStrictEqual([{title: 'Jitendex'}]);

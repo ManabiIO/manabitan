@@ -38,7 +38,9 @@ function normalizeOptionalDownloadUrl(downloadUrl) {
         typeof downloadUrl === 'string' &&
         downloadUrl.length > 0 &&
         downloadUrl !== 'undefined'
-    ) ? downloadUrl : undefined;
+    ) ?
+downloadUrl :
+void 0;
 }
 
 /**
@@ -120,7 +122,7 @@ class DictionaryEntry {
         this._versionNode.textContent = `rev.${revision}`;
         this._outdatedButton.hidden = (version >= 3);
         this._enabledCheckbox.dataset.setting = `dictionaries[${index}].enabled`;
-        this._showUpdatesAvailableButton();
+        this.showUpdatesAvailableButton();
         this._eventListeners.addEventListener(this._enabledCheckbox, 'settingChanged', this._onEnabledChanged.bind(this), false);
         this._eventListeners.addEventListener(this._menuButton, 'menuOpen', this._onMenuOpen.bind(this), false);
         this._eventListeners.addEventListener(this._menuButton, 'menuClose', this._onMenuClose.bind(this), false);
@@ -237,7 +239,7 @@ class DictionaryEntry {
         const downloadUrl = latestDownloadUrl ?? currentDownloadUrl;
 
         this._updateDownloadUrl = downloadUrl;
-        this._showUpdatesAvailableButton();
+        this.showUpdatesAvailableButton();
         return true;
     }
 
@@ -259,7 +261,7 @@ class DictionaryEntry {
     // Private
 
     /** */
-    _showUpdatesAvailableButton() {
+    showUpdatesAvailableButton() {
         if (this._updateDownloadUrl === null || this._dictionaryController.isDictionaryInTaskQueue(this.dictionaryTitle)) {
             return;
         }
@@ -1320,7 +1322,7 @@ export class DictionaryController {
             const updateCount = results.reduce((sum, result) => (sum + (result.status === 'fulfilled' && result.value ? 1 : 0)), 0);
             const failures = results
                 .filter((result) => result.status === 'rejected')
-                .map((result) => /** @type {PromiseRejectedResult} */ (result).reason);
+                .map((result) => /** @type {unknown} */ (/** @type {PromiseRejectedResult} */ (result).reason));
             hadFailures = (failures.length > 0);
             if (hadFailures) {
                 reportDiagnostics('dictionary-update-check-failed', {
@@ -1442,10 +1444,7 @@ export class DictionaryController {
         if (existingTaskIndex >= 0) {
             const existingTask = this._dictionaryTaskQueue[existingTaskIndex];
             let taskReplaced = false;
-            if (task.type === 'delete') {
-                this._dictionaryTaskQueue.splice(existingTaskIndex, 1, task);
-                taskReplaced = true;
-            } else if (existingTask.type === 'update' && task.type === 'update') {
+            if (task.type === 'delete' || (existingTask.type === 'update' && task.type === 'update')) {
                 this._dictionaryTaskQueue.splice(existingTaskIndex, 1, task);
                 taskReplaced = true;
             }
@@ -1467,12 +1466,18 @@ export class DictionaryController {
             while (this._dictionaryTaskQueue.length > 0) {
                 const task = this._dictionaryTaskQueue[0];
                 try {
-                    if (task.type === 'delete') {
-                        await this._deleteDictionary(task.dictionaryTitle);
-                    } else if (task.type === 'update') {
-                        await this._updateDictionary(task.dictionaryTitle, task.downloadUrl);
-                    } else if (task.type === 'replaceFromFiles') {
-                        await this._reimportDictionaryFromFiles(task.dictionaryTitle, task.files);
+                    switch (task.type) {
+                        case 'delete':
+                            await this._deleteDictionary(task.dictionaryTitle);
+                            break;
+                        case 'update':
+                            await this._updateDictionary(task.dictionaryTitle, task.downloadUrl);
+                            break;
+                        case 'replaceFromFiles':
+                            await this._reimportDictionaryFromFiles(task.dictionaryTitle, task.files);
+                            break;
+                        default:
+                            break;
                     }
                 } catch (error) {
                     const normalizedError = error instanceof Error ? error : new Error(String(error));
@@ -1663,7 +1668,7 @@ export class DictionaryController {
      * @returns {string}
      */
     _getDictionaryTaskMatchTitle(title) {
-        return String(title ?? '')
+        return (typeof title === 'string' ? title : '')
             .replace(TRANSIENT_UPDATE_TITLE_PATTERN, '')
             .replace(/\s+/g, ' ')
             .trim()
@@ -1952,8 +1957,8 @@ export class DictionaryController {
      */
     _showUpdatesAvailableButton(dictionaryTitle) {
         for (const entry of this._dictionaryEntries) {
-            if (entry.dictionaryTitle === dictionaryTitle && typeof entry._showUpdatesAvailableButton === 'function') {
-                entry._showUpdatesAvailableButton();
+            if (entry.dictionaryTitle === dictionaryTitle && typeof entry.showUpdatesAvailableButton === 'function') {
+                entry.showUpdatesAvailableButton();
             }
         }
     }

@@ -170,6 +170,7 @@ describe('TextScanner lookup robustness', () => {
         });
         const termsFind = /** @type {import('../ext/js/comm/api.js').API['termsFind']} */ (/** @type {unknown} */ (termsFindImpl));
         const scanner = createScanner(termsFind, [createFakeTextSource('暗記')]);
+        /** @type {{durationMs?: string, resultCount?: string, type?: string, textSample?: string}[]} */
         const debugSnapshots = [];
         scanner.on('searchSuccess', () => {
             debugSnapshots.push({

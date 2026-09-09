@@ -678,5 +678,4 @@ export class BackupController {
             log.error(e);
         }
     }
-
 }

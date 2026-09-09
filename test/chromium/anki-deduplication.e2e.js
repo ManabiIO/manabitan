@@ -213,6 +213,7 @@ async function launchExtensionContext() {
     }
 
     const context = await chromium.launchPersistentContext('', {
+        channel: 'chromium',
         headless,
         args,
     });
@@ -273,6 +274,7 @@ async function gotoExtensionPage(page, url, readySelector) {
         try {
             await page.goto(url);
             await page.waitForSelector(readySelector, {state: 'attached', timeout: 30_000});
+            await page.waitForFunction(() => document.documentElement.dataset.loaded === 'true', {}, {timeout: 30_000});
             return;
         } catch (error) {
             lastError = error;

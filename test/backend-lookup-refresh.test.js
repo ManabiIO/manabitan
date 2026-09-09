@@ -18,8 +18,10 @@
 import {describe, expect, test, vi} from 'vitest';
 import {Backend} from '../ext/js/background/backend.js';
 
+const messageSender = /** @type {chrome.runtime.MessageSender} */ (/** @type {unknown} */ ({}));
+
 function createRefreshGate() {
-    /** @type {() => void} */
+    /** @type {(value?: unknown) => void} */
     let resolve = () => {};
     const promise = new Promise((r) => {
         resolve = r;
@@ -56,7 +58,7 @@ describe('Backend lookup refresh gating', () => {
             text: '暗記',
             details: {},
             optionsContext: {depth: 0, url: 'https://example.test/'},
-        });
+        }, messageSender);
         await Promise.resolve();
 
         expect(findTerms).not.toHaveBeenCalled();
@@ -86,7 +88,7 @@ describe('Backend lookup refresh gating', () => {
             text: '暗記',
             details: {},
             optionsContext: {depth: 0, url: 'https://example.test/'},
-        });
+        }, messageSender);
         await Promise.resolve();
 
         expect(findTerms).not.toHaveBeenCalled();
@@ -121,7 +123,7 @@ describe('Backend lookup refresh gating', () => {
             text: '暗記',
             details: {},
             optionsContext: {depth: 0, url: 'https://example.test/'},
-        });
+        }, messageSender);
         await Promise.resolve();
 
         expect(findTerms).not.toHaveBeenCalled();
@@ -161,7 +163,7 @@ describe('Backend lookup refresh gating', () => {
             text: '暗記',
             details: {},
             optionsContext: {depth: 0, url: 'https://example.test/'},
-        });
+        }, messageSender);
 
         expect(refreshDictionaryDatabaseAfterUpdate).toHaveBeenCalledOnce();
         expect(sendMessageAllTabsIgnoreResponse).toHaveBeenCalledWith({
@@ -202,7 +204,7 @@ describe('Backend lookup refresh gating', () => {
                 text: '暗記',
                 details: {},
                 optionsContext: {depth: 0, url: 'https://example.test/'},
-            });
+            }, messageSender);
 
             expect(findTerms).toHaveBeenCalledOnce();
             expect(Reflect.get(backend, '_deferredDictionaryRefreshDuringImport')).toBe(true);
@@ -242,7 +244,7 @@ describe('Backend lookup refresh gating', () => {
             text: '暗記',
             details: {},
             optionsContext: {depth: 0, url: 'https://example.test/'},
-        });
+        }, messageSender);
 
         expect(result).toStrictEqual({dictionaryEntries: [], originalTextLength: 2});
         expect(findTerms).toHaveBeenCalledOnce();
@@ -269,7 +271,7 @@ describe('Backend lookup refresh gating', () => {
             text: '暗記',
             details: {},
             optionsContext: {depth: 0, url: 'https://example.test/'},
-        });
+        }, messageSender);
 
         expect(findTerms).toHaveBeenCalledOnce();
         Reflect.set(backend, '_dictionaryLookupWarmPromise', null);
@@ -296,7 +298,7 @@ describe('Backend lookup refresh gating', () => {
             text: '暗記',
             details: {waitForLookupWarm: true},
             optionsContext: {depth: 0, url: 'https://example.test/'},
-        });
+        }, messageSender);
         await Promise.resolve();
 
         expect(findTerms).not.toHaveBeenCalled();
@@ -438,7 +440,7 @@ describe('Backend lookup refresh gating', () => {
         const promise = Backend.prototype._onApiKanjiFind.call(backend, {
             text: '暗',
             optionsContext: {depth: 0, url: 'https://example.test/'},
-        });
+        }, messageSender);
         await Promise.resolve();
 
         expect(findKanji).not.toHaveBeenCalled();
@@ -461,7 +463,7 @@ describe('Backend lookup refresh gating', () => {
         const promise = Backend.prototype._onApiGetTermFrequencies.call(backend, {
             termReadingList: [{term: '暗記', reading: 'あんき'}],
             dictionaries: ['JMdict'],
-        });
+        }, messageSender);
         await Promise.resolve();
 
         expect(getTermFrequencies).not.toHaveBeenCalled();
@@ -485,7 +487,7 @@ describe('Backend lookup refresh gating', () => {
         const promise = Backend.prototype._onApiGetTermFrequencies.call(backend, {
             termReadingList: [{term: '暗記', reading: 'あんき'}],
             dictionaries: ['JMdict'],
-        });
+        }, messageSender);
         await Promise.resolve();
 
         expect(getTermFrequencies).not.toHaveBeenCalled();
@@ -508,7 +510,7 @@ describe('Backend lookup refresh gating', () => {
 
         const promise = Backend.prototype._onApiGetMedia.call(backend, {
             targets: [{dictionary: 'JMdict', path: 'image.png'}],
-        });
+        }, messageSender);
         await Promise.resolve();
 
         expect(getMedia).not.toHaveBeenCalled();
@@ -529,7 +531,7 @@ describe('Backend lookup refresh gating', () => {
         Reflect.set(backend, '_dictionaryDatabase', {deleteDictionary});
         Reflect.set(backend, '_refreshDictionaryDatabaseAfterUpdate', refreshDictionaryDatabaseAfterUpdate);
 
-        await Backend.prototype._onApiDeleteDictionaryByTitle.call(backend, {dictionaryTitle: 'JMdict'});
+        await Backend.prototype._onApiDeleteDictionaryByTitle.call(backend, {dictionaryTitle: 'JMdict'}, messageSender);
 
         expect(deleteDictionary).toHaveBeenCalledOnce();
         expect(refreshDictionaryDatabaseAfterUpdate).toHaveBeenCalledOnce();

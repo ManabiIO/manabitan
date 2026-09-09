@@ -33,15 +33,13 @@ import {SearchPersistentStateController} from './search-persistent-state-control
  * @param {Record<string, unknown>} patch
  */
 function setSearchDebugState(patch) {
-    const globalState = /** @type {import('core').SafeAny} */ (globalThis);
-    const state = (typeof globalState.__manabitanSearchDebug === 'object' && globalState.__manabitanSearchDebug !== null) ?
-        globalState.__manabitanSearchDebug :
-        {};
-    globalState.__manabitanSearchDebug = {
+    const previous = /** @type {unknown} */ (Reflect.get(globalThis, '__manabitanSearchDebug'));
+    const state = typeof previous === 'object' && previous !== null ? previous : {};
+    Reflect.set(globalThis, '__manabitanSearchDebug', {
         ...state,
         ...patch,
         updatedAt: Date.now(),
-    };
+    });
 }
 
 /**

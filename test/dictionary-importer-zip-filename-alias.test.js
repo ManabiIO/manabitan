@@ -15,21 +15,39 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {readFile} from 'node:fs/promises';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {TextReader, Uint8ArrayWriter, ZipWriter} from '@zip.js/zip.js';
 import {describe, expect, test} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {TermBankWasmResourceError} from '../ext/js/dictionary/term-bank-wasm-parser.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const daijirinArchivePath = path.resolve(__dirname, '../../../data/daijirin4_bench.zip');
+/**
+ * Reproduce UTF-8 filename bytes incorrectly marked as legacy CP437, without
+ * depending on a private multi-gigabyte dictionary outside the repository.
+ * @returns {Promise<ArrayBuffer>}
+ */
+async function createLegacyFilenameArchive() {
+    const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0, extendedTimestamp: false});
+    await writer.add('daijirin2/文-default.svg', new TextReader('<svg/>'));
+    const bytes = await writer.close();
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const endOffset = bytes.byteLength - 22;
+    expect(view.getUint32(endOffset, true)).toBe(0x06054b50);
+    const centralOffset = view.getUint32(endOffset + 16, true);
+    expect(view.getUint32(centralOffset, true)).toBe(0x02014b50);
+    const localOffset = view.getUint32(centralOffset + 42, true);
+    expect(view.getUint32(localOffset, true)).toBe(0x04034b50);
+    // Clear general-purpose bit 11 in both the local and central headers.
+    for (const offset of [localOffset + 6, centralOffset + 8]) {
+        view.setUint16(offset, view.getUint16(offset, true) & ~0x0800, true);
+    }
+    return new Uint8Array(bytes).buffer;
+}
 
 describe('DictionaryImporter ZIP filename aliases', () => {
     test('indexes UTF-8 raw filenames alongside mojibake decoded ZIP names', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
-        const archiveContent = await readFile(daijirinArchivePath);
+        const archiveContent = await createLegacyFilenameArchive();
         const getFilesFromArchive = /** @type {(archiveContent: ArrayBuffer|Blob) => Promise<{fileMap: Map<string, unknown>, zipReader: {close: () => Promise<void>}}>} */ (
             Reflect.get(importer, '_getFilesFromArchive')
         );

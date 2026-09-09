@@ -21,6 +21,11 @@ import {createDomTest} from './fixtures/dom-test.js';
 
 const test = createDomTest();
 
+/**
+ * @param {import('../ext/js/pages/settings/settings-controller.js').SettingsController['modifyProfileSettings']} modifyProfileSettings
+ * @param {{scanning: {inputs: import('settings').ScanningInput[]}}} options
+ * @returns {Record<string, unknown>}
+ */
 function createSettingsController(modifyProfileSettings, options) {
     return {
         application: {
@@ -38,6 +43,8 @@ function createSettingsController(modifyProfileSettings, options) {
     };
 }
 
+/** @typedef {{cleanup: () => void, index: number}} TestScanInputEntry */
+
 describe('ScanInputsController', () => {
     test('removeInput refreshes the list after a failed delete write', async ({window}) => {
         window.document.body.innerHTML = `
@@ -52,15 +59,16 @@ describe('ScanInputsController', () => {
         const settingsController = createSettingsController(modifyProfileSettings, options);
         const controller = new ScanInputsController(/** @type {any} */ (settingsController));
         controller._scanningInputCountNodes = window.document.querySelectorAll('.scanning-input-count');
+        const entries = /** @type {TestScanInputEntry[]} */ (controller._entries);
         vi.spyOn(controller, '_addOption').mockImplementation((index) => {
-            controller._entries.push({cleanup: vi.fn(), index});
+            entries.push({cleanup: vi.fn(), index});
         });
         const cleanup = vi.fn();
-        controller._entries = [{cleanup, index: 0}];
+        entries.push({cleanup, index: 0});
         controller._updateCounts();
 
         controller.removeInput(0);
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(cleanup).toHaveBeenCalled();
         expect(controller._entries).toHaveLength(1);
@@ -83,15 +91,16 @@ describe('ScanInputsController', () => {
         const settingsController = createSettingsController(modifyProfileSettings, options);
         const controller = new ScanInputsController(/** @type {any} */ (settingsController));
         controller._scanningInputCountNodes = window.document.querySelectorAll('.scanning-input-count');
+        const entries = /** @type {TestScanInputEntry[]} */ (controller._entries);
         vi.spyOn(controller, '_addOption').mockImplementation((index) => {
-            controller._entries.push({cleanup: vi.fn(), index});
+            entries.push({cleanup: vi.fn(), index});
         });
         controller._updateCounts();
         controller._onAddButtonClick(/** @type {MouseEvent} */ (/** @type {unknown} */ ({
             preventDefault() {},
             currentTarget: window.document.querySelector('#scan-input-add'),
         })));
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(controller._entries).toHaveLength(0);
         expect(window.document.querySelector('.scanning-input-count')?.textContent).toBe('0');

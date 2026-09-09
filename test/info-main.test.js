@@ -25,7 +25,7 @@ describe('info page dictionary rendering', () => {
         const {renderDictionaryInfo} = await import('../ext/js/pages/info-dictionary-info.js');
         const {document} = window;
 
-        renderDictionaryInfo([{title: 'JMdict'}, {title: 'Jitendex'}]);
+        renderDictionaryInfo(/** @type {import('dictionary-importer').Summary[]} */ (/** @type {unknown} */ ([{title: 'JMdict'}, {title: 'Jitendex'}])));
 
         const container = /** @type {HTMLElement} */ (document.querySelector('#installed-dictionaries'));
         const noneElement = /** @type {HTMLElement} */ (document.querySelector('#installed-dictionaries-none'));
@@ -33,7 +33,7 @@ describe('info page dictionary rendering', () => {
         expect(container.textContent).toBe('JMdict, Jitendex');
         expect(noneElement.hidden).toBe(true);
 
-        renderDictionaryInfo([]);
+        renderDictionaryInfo(/** @type {import('dictionary-importer').Summary[]} */ ([]));
 
         expect(container.textContent).toBe('');
         expect(noneElement.hidden).toBe(false);
@@ -42,27 +42,24 @@ describe('info page dictionary rendering', () => {
     test('DictionaryInfoController ignores stale refresh results', async () => {
         const {DictionaryInfoController} = await import('../ext/js/pages/info-dictionary-info.js');
         const {document} = window;
-        let resolveFirst;
-        let resolveSecond;
+        const firstRefreshDeferred = Promise.withResolvers();
+        const secondRefreshDeferred = Promise.withResolvers();
         const controller = new DictionaryInfoController(/** @type {import('../ext/js/comm/api.js').API} */ (/** @type {unknown} */ ({
             getDictionaryInfo: (() => {
                 let call = 0;
-                return () => new Promise((resolve) => {
-                    if (call === 0) {
-                        resolveFirst = resolve;
-                    } else {
-                        resolveSecond = resolve;
-                    }
+                return () => {
+                    const deferred = call === 0 ? firstRefreshDeferred : secondRefreshDeferred;
                     ++call;
-                });
+                    return deferred.promise;
+                };
             })(),
         })));
 
         const firstRefresh = controller.refresh();
         const secondRefresh = controller.refresh();
-        resolveSecond([{title: 'Jitendex'}]);
+        secondRefreshDeferred.resolve(/** @type {import('dictionary-importer').Summary[]} */ (/** @type {unknown} */ ([{title: 'Jitendex'}])));
         await secondRefresh;
-        resolveFirst([{title: 'JMdict'}]);
+        firstRefreshDeferred.resolve(/** @type {import('dictionary-importer').Summary[]} */ (/** @type {unknown} */ ([{title: 'JMdict'}])));
         await firstRefresh;
 
         const container = /** @type {HTMLElement} */ (document.querySelector('#installed-dictionaries'));

@@ -106,7 +106,7 @@ describe('DictionaryDatabaseProxy', () => {
 
 describe('TranslatorProxy', () => {
     test('sends native lookup settings through the structured-clone transport', async () => {
-        const sendMessageViaPort = vi.fn(async () => ({dictionaryEntries: [], originalTextLength: 0}));
+        const sendMessageViaPort = vi.fn(/** @type {(message: import('offscreen').McApiMessageAny, transfers: Transferable[]) => Promise<unknown>} */ (async () => ({dictionaryEntries: [], originalTextLength: 0})));
         const messenger = /** @type {ConstructorParameters<typeof TranslatorProxy>[0]} */ (/** @type {unknown} */ ({sendMessageViaPort}));
         const proxy = new TranslatorProxy(messenger);
         const enabledDictionaryMap = new Map([['JMdict', {
@@ -132,9 +132,12 @@ describe('TranslatorProxy', () => {
             action: 'findTermsStructuredOffscreen',
             params: {mode: 'group', text: 'first', options},
         });
-        expect(sendMessageViaPort.mock.calls[0][1]).toEqual([]);
-        expect(sendMessageViaPort.mock.calls[0][0].params.options.enabledDictionaryMap).toBe(enabledDictionaryMap);
-        expect(sendMessageViaPort.mock.calls[0][0].params.options.excludeDictionaryDefinitions).toBe(excludeDictionaryDefinitions);
-        expect(sendMessageViaPort.mock.calls[0][0].params.options.textReplacements[0][0].pattern).toBeInstanceOf(RegExp);
+        const firstCall = /** @type {[{params: {options: import('translation').FindTermsOptions}}, Transferable[]]} */ (sendMessageViaPort.mock.calls[0]);
+        expect(firstCall[1]).toEqual([]);
+        expect(firstCall[0].params.options.enabledDictionaryMap).toBe(enabledDictionaryMap);
+        expect(firstCall[0].params.options.excludeDictionaryDefinitions).toBe(excludeDictionaryDefinitions);
+        const firstReplacementGroup = firstCall[0].params.options.textReplacements[0];
+        expect(firstReplacementGroup).toHaveLength(1);
+        expect(firstReplacementGroup?.[0]?.pattern).toBeInstanceOf(RegExp);
     });
 });

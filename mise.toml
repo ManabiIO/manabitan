@@ -1,0 +1,34 @@
+[tools]
+node = "24.20.0"
+
+[tasks."perf:bench"]
+description = "Run local Vitest benchmarks without CodSpeed instrumentation"
+run = "node ./node_modules/vitest/vitest.mjs bench --run"
+
+[tasks."perf:env"]
+description = "Print performance environment metadata"
+run = "node ./dev/perf/host-environment.js"
+
+[tasks."perf:import"]
+description = "Benchmark a pinned real dictionary import"
+run = "node ./dev/perf/import-benchmark.js"
+
+[tasks."perf:import:trace"]
+description = "Capture a browser-wide CPU trace for a pinned dictionary import"
+run = "node ./dev/perf/import-benchmark.js --trace"
+
+[tasks."perf:import:ab"]
+description = "Run paired baseline/variant importer A/B measurements"
+run = "node ./dev/perf/import-ab.js"
+
+[tasks."perf:dictionaries"]
+description = "Verify or prepare pinned real dictionary fixtures"
+run = "node ./dev/perf/prepare-dictionaries.js"
+
+[tasks."perf:bench:baseline"]
+description = "Save a Vitest microbenchmark baseline as JSON"
+run = "node -e \"require('node:fs').mkdirSync('builds/perf',{recursive:true})\" && node ./node_modules/vitest/vitest.mjs bench --run --outputJson builds/perf/vitest-baseline.json"
+
+[tasks."perf:bench:compare"]
+description = "Compare Vitest microbenchmarks with the saved JSON baseline"
+run = "node ./node_modules/vitest/vitest.mjs bench --run --compare builds/perf/vitest-baseline.json"

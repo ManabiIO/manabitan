@@ -16,13 +16,19 @@ import {encodeRawTermContentBlockReference} from '../ext/js/dictionary/raw-term-
 import {beginCompressWrappedTermContentZstdSpansBatch, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from '../ext/js/dictionary/zstd-term-content.js';
 
 vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
-    compressTermContentZstd: (bytes) => Uint8Array.from(bytes),
-    compressWrappedTermContentZstdBatch: vi.fn(async (chunks) => ({
+    compressTermContentZstd: (/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes),
+    compressWrappedTermContentZstdBatch: vi.fn(async (/** @type {Uint8Array[]} */ chunks) => ({
         chunks: chunks.map((bytes) => Uint8Array.from(bytes)),
         envelopeMs: 0,
         wrapped: false,
     })),
-    compressWrappedTermContentZstdSpansBatch: vi.fn(async (source, offsets, lengths, blockStarts, blockLengths) => ({
+    compressWrappedTermContentZstdSpansBatch: vi.fn(async (
+        /** @type {Uint8Array} */ source,
+        /** @type {Uint32Array} */ offsets,
+        /** @type {Uint32Array} */ lengths,
+        /** @type {Uint32Array} */ blockStarts,
+        /** @type {Uint32Array} */ blockLengths,
+    ) => ({
         chunks: Array.from(blockLengths, (blockLength, blockIndex) => {
             const output = new Uint8Array(blockLength);
             let outputOffset = 0;
@@ -35,7 +41,13 @@ vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
         envelopeMs: 0,
         wrapped: false,
     })),
-    beginCompressWrappedTermContentZstdSpansBatch: vi.fn((source, offsets, lengths, blockStarts, blockLengths) => {
+    beginCompressWrappedTermContentZstdSpansBatch: vi.fn((
+        /** @type {Uint8Array} */ source,
+        /** @type {Uint32Array} */ offsets,
+        /** @type {Uint32Array} */ lengths,
+        /** @type {Uint32Array} */ blockStarts,
+        /** @type {Uint32Array} */ blockLengths,
+    ) => {
         const completion = Promise.resolve({
             chunks: Array.from(blockLengths, (blockLength, blockIndex) => {
                 const output = new Uint8Array(blockLength);
@@ -51,8 +63,11 @@ vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
         });
         return {sourceConsumed: completion.then(() => {}), completion};
     }),
-    decompressTermContentZstd: vi.fn((bytes) => Uint8Array.from(bytes)),
+    decompressTermContentZstd: vi.fn((/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes)),
 }));
+
+/** @typedef {NonNullable<Awaited<ReturnType<TermContentBlockStore['_tryAppendPacked']>>>} TermContentBlockAppendResult */
+/** @typedef {NonNullable<ReturnType<TermContentBlockStore['tryBeginAppendSpans']>>} TermContentBlockAppendOperation */
 
 describe('ByteBoundedLruCache', () => {
     test('evicts least-recently-used blocks by bytes', () => {
@@ -79,11 +94,12 @@ describe('ByteBoundedLruCache', () => {
 
 describe('TermContentBlockImportSession', () => {
     test('forces block mode only after that dictionary selected it', async () => {
-        const tryAppend = vi.fn()
-            .mockResolvedValueOnce({contentOffsets: [], contentLengths: [], contentDictName: 'raw-block-v1'})
+        const store = new TermContentBlockStore(new TermContentOpfsStore());
+        const tryAppend = vi.spyOn(store, 'tryAppend')
+            .mockResolvedValueOnce({contentOffsets: new Float64Array(0), contentLengths: new Uint32Array(0), contentDictName: 'raw-block-v1', compressedBytes: 0, uncompressedBytes: 0, packMs: 0, compressMs: 0, envelopeMs: 0, referenceMs: 0, opfsAppendMs: 0})
             .mockResolvedValueOnce(null)
             .mockResolvedValueOnce(null);
-        const session = new TermContentBlockImportSession({tryAppend});
+        const session = new TermContentBlockImportSession(store);
 
         await session.append('A', [], null);
         await session.append('A', [], null);
@@ -93,16 +109,17 @@ describe('TermContentBlockImportSession', () => {
     });
 
     test('rejects writes after close', async () => {
-        const session = new TermContentBlockImportSession({tryAppend: vi.fn()});
+        const session = new TermContentBlockImportSession(new TermContentBlockStore(new TermContentOpfsStore()));
         session.close();
         await expect(session.append('A', [], null)).rejects.toThrow('closed');
     });
 
     test('tracks forced block mode for shared-slab appends', async () => {
-        const tryAppendSpans = vi.fn()
-            .mockResolvedValueOnce({contentOffsets: [], contentLengths: [], contentDictName: 'raw-block-v1'})
+        const store = new TermContentBlockStore(new TermContentOpfsStore());
+        const tryAppendSpans = vi.spyOn(store, 'tryAppendSpans')
+            .mockResolvedValueOnce({contentOffsets: new Float64Array(0), contentLengths: new Uint32Array(0), contentDictName: 'raw-block-v1', compressedBytes: 0, uncompressedBytes: 0, packMs: 0, compressMs: 0, envelopeMs: 0, referenceMs: 0, opfsAppendMs: 0})
             .mockResolvedValueOnce(null);
-        const session = new TermContentBlockImportSession({tryAppendSpans});
+        const session = new TermContentBlockImportSession(store);
         const source = new Uint8Array([1]);
         const offsets = new Uint32Array([0]);
         const lengths = new Uint32Array([1]);
@@ -121,6 +138,7 @@ describe('TermContentBlockImportSession', () => {
         };
         const operation = {
             storage: Promise.resolve(storage),
+            sourceConsumed: Promise.resolve(),
             completion: Promise.resolve({
                 ...storage,
                 compressedBytes: 0,
@@ -130,13 +148,15 @@ describe('TermContentBlockImportSession', () => {
                 envelopeMs: 0,
                 referenceMs: 0,
                 opfsAppendMs: 0,
+                initialSelectionSavingsMiss: false,
             }),
         };
-        const tryAppendSpans = vi.fn().mockResolvedValue({contentOffsets: [], contentLengths: [], contentDictName: 'raw-block-v2'});
-        const tryBeginAppendSpans = vi.fn()
+        const store = new TermContentBlockStore(new TermContentOpfsStore());
+        const tryAppendSpans = vi.spyOn(store, 'tryAppendSpans').mockResolvedValue({contentOffsets: new Float64Array(0), contentLengths: new Uint32Array(0), contentDictName: 'raw-block-v2', compressedBytes: 0, uncompressedBytes: 0, packMs: 0, compressMs: 0, envelopeMs: 0, referenceMs: 0, opfsAppendMs: 0});
+        const tryBeginAppendSpans = vi.spyOn(store, 'tryBeginAppendSpans')
             .mockReturnValueOnce(null)
             .mockReturnValue(operation);
-        const session = new TermContentBlockImportSession({tryAppendSpans, tryBeginAppendSpans});
+        const session = new TermContentBlockImportSession(store);
         const source = new Uint8Array(new SharedArrayBuffer(1));
         const offsets = new Uint32Array([0]);
         const lengths = new Uint32Array([1]);
@@ -152,12 +172,31 @@ describe('TermContentBlockImportSession', () => {
     });
 
     test('keeps forcing blocks after source-driven early selection succeeds', () => {
+        /** @type {TermContentBlockAppendOperation} */
         const operation = {
-            storage: Promise.resolve({}),
-            completion: Promise.resolve({}),
+            storage: Promise.resolve({
+                contentOffsets: new Float64Array(0),
+                contentLengths: new Uint32Array(0),
+                contentDictName: 'raw-block-v2:jmdict',
+            }),
+            sourceConsumed: Promise.resolve(),
+            completion: Promise.resolve({
+                contentOffsets: new Float64Array(0),
+                contentLengths: new Uint32Array(0),
+                contentDictName: 'raw-block-v2:jmdict',
+                compressedBytes: 0,
+                uncompressedBytes: 0,
+                packMs: 0,
+                compressMs: 0,
+                envelopeMs: 0,
+                referenceMs: 0,
+                opfsAppendMs: 0,
+                initialSelectionSavingsMiss: false,
+            }),
         };
-        const tryBeginAppendSpans = vi.fn(() => operation);
-        const session = new TermContentBlockImportSession({tryBeginAppendSpans});
+        const store = new TermContentBlockStore(new TermContentOpfsStore());
+        const tryBeginAppendSpans = vi.spyOn(store, 'tryBeginAppendSpans').mockReturnValue(operation);
+        const session = new TermContentBlockImportSession(store);
         const source = new Uint8Array(new SharedArrayBuffer(1));
         const offsets = new Uint32Array([0]);
         const lengths = new Uint32Array([1]);
@@ -211,13 +250,14 @@ describe('TermContentBlockStore', () => {
     });
 
     test('rejects a safe slab base whose derived reference offset overflows', async () => {
-        const reserved = Promise.resolve({derivedOffsets: [Number.MAX_SAFE_INTEGER]});
-        const contentStore = {
-            beginAppendBatchWithDerivedPrefix: () => ({
-                reserved,
-                completion: new Promise(() => {}),
-            }),
-        };
+        const reserved = Promise.resolve({derivedOffsets: [Number.MAX_SAFE_INTEGER], derivedLengths: [2]});
+        const contentStore = new TermContentOpfsStore();
+        /** @type {Promise<{primaryOffsets: number[], primaryLengths: number[], derivedOffsets: number[], derivedLengths: number[]}>} */
+        const completion = new Promise(() => {});
+        vi.spyOn(contentStore, 'beginAppendBatchWithDerivedPrefix').mockReturnValue({
+            reserved,
+            completion,
+        });
         const blockStore = new TermContentBlockStore(contentStore);
         const begin = Reflect.get(blockStore, '_beginAppendSharedSpans').bind(blockStore);
         const source = Uint8Array.of(1, 2);
@@ -249,6 +289,7 @@ describe('TermContentBlockStore', () => {
         const result = await blockStore.tryAppend(content, null, true);
 
         expect(result).not.toBeNull();
+        if (result === null) { throw new Error('Expected appended content'); }
         expect(result.contentOffsets).toStrictEqual(new Float64Array([33, 53, 73]));
         expect(result.contentLengths).toBeInstanceOf(Uint32Array);
         expect(result.contentDictName).toBe('raw-block-v2');
@@ -278,6 +319,7 @@ describe('TermContentBlockStore', () => {
         const result = await blockStore.tryAppendSpans(source, offsets, lengths, null, true);
 
         expect(result).not.toBeNull();
+        if (result === null) { throw new Error('Expected appended content'); }
         expect(await blockStore.read(
             result.contentOffsets[0],
             result.contentLengths[0],
@@ -312,6 +354,7 @@ describe('TermContentBlockStore', () => {
 
         expect(compressWrappedTermContentZstdSpansBatch).toHaveBeenCalledOnce();
         expect(result).not.toBeNull();
+        if (result === null) { throw new Error('Expected appended content'); }
         for (let i = 0; i < lengths.length; ++i) {
             expect(await blockStore.read(
                 result.contentOffsets[i],
@@ -527,6 +570,7 @@ describe('TermContentBlockStore', () => {
         );
 
         expect(result).not.toBeNull();
+        if (result === null) { throw new Error('Expected appended content'); }
         expect(await blockStore.read(
             result.contentOffsets[1],
             result.contentLengths[1],
@@ -570,6 +614,7 @@ describe('TermContentBlockStore', () => {
         );
 
         expect(result).not.toBeNull();
+        if (result === null) { throw new Error('Expected appended content'); }
         expect(await blockStore.read(
             result.contentOffsets[0],
             result.contentLengths[0],
@@ -607,6 +652,7 @@ describe('TermContentBlockStore', () => {
         );
 
         expect(result).not.toBeNull();
+        if (result === null) { throw new Error('Expected appended content'); }
         expect(await blockStore.read(
             result.contentOffsets[0],
             result.contentLengths[0],
@@ -636,7 +682,8 @@ describe('TermContentBlockStore', () => {
         const result = await blockStore.tryAppend(content, null, true);
 
         expect(result).not.toBeNull();
-        expect(result.envelopeMs).toBe(0.25);
+        if (result === null) { throw new Error('Expected appended content'); }
+        expect(/** @type {TermContentBlockAppendResult} */ (result).envelopeMs).toBe(0.25);
         // One six-byte block, one 12-byte envelope, and two 20-byte references.
         expect(Reflect.get(contentStore, '_length')).toBe(58);
         expect(await blockStore.read(
@@ -670,6 +717,7 @@ describe('TermContentBlockStore', () => {
         );
 
         expect(result).not.toBeNull();
+        if (result === null) { throw new Error('Expected appended content'); }
         expect(await blockStore.read(
             result.contentOffsets[0],
             result.contentLengths[0],
@@ -703,6 +751,7 @@ describe('TermContentBlockStore', () => {
         const result = await blockStore.tryAppend(content, null, true);
 
         expect(result).not.toBeNull();
+        if (result === null) { throw new Error('Expected appended content'); }
         expect(await blockStore.read(
             result.contentOffsets[0],
             result.contentLengths[0],
@@ -727,6 +776,7 @@ describe('TermContentBlockStore', () => {
             new Uint8Array([4, 5, 6]),
         ], null, true);
         expect(result).not.toBeNull();
+        if (result === null) { throw new Error('Expected appended content'); }
         blockStore.clearCache();
         const readSlice = vi.spyOn(contentStore, 'readSlice');
 
@@ -756,6 +806,7 @@ describe('TermContentBlockStore', () => {
         ];
         const stored = await blockStore.tryAppend(content, null, true);
         expect(stored).not.toBeNull();
+        if (stored === null) { throw new Error('Expected stored content'); }
         blockStore.clearCache();
         const readSlice = vi.spyOn(contentStore, 'readSlice');
 
@@ -785,6 +836,7 @@ describe('TermContentBlockStore', () => {
         const content = [new Uint8Array([1, 2, 3]), new Uint8Array([4, 5, 6])];
         const stored = await blockStore.tryAppend(content, null, true);
         expect(stored).not.toBeNull();
+        if (stored === null) { throw new Error('Expected stored content'); }
         const [{offset: corruptOffset}] = await contentStore.appendBatch([new Uint8Array(20)]);
         blockStore.clearCache();
 
@@ -824,6 +876,7 @@ describe('TermContentBlockStore', () => {
             new Uint8Array([4, 5, 6]),
         ], null, true);
         expect(stored).not.toBeNull();
+        if (stored === null) { throw new Error('Expected stored content'); }
         blockStore.clearCache();
         const originalReadSlice = contentStore.readSlice.bind(contentStore);
         const referenceOffsets = new Set(stored.contentOffsets);
@@ -845,7 +898,10 @@ describe('TermContentBlockStore', () => {
 
         expect(results).toHaveLength(2);
         expect(results.every(({status}) => status === 'temporarilyUnavailable')).toBe(true);
-        expect(results.map((result) => result.reason)).toEqual([
+        expect(results.map((result) => {
+            if (result.status === 'ok') { throw new Error('Expected a failed detailed read'); }
+            return result.reason;
+        })).toEqual([
             'injected block read failure',
             'injected block read failure',
         ]);

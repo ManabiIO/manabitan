@@ -41,7 +41,10 @@ describe('LanguagesController', () => {
         await controller.prepare();
         await controller.prepare();
 
-        const options = [...window.document.querySelectorAll('#language-select option')].map((option) => option.value);
+        const options = [...window.document.querySelectorAll('#language-select option')].map((option) => {
+            const optionElement = /** @type {HTMLOptionElement} */ (option);
+            return optionElement.value;
+        });
         expect(options).toEqual(['en', 'ja']);
     });
 

@@ -32,7 +32,7 @@ function createDatabaseConnection(dictionaryRows) {
 describe('DictionaryDatabase dictionary counts', () => {
     test('uses committed summary counts without materializing term shards', async () => {
         const database = new DictionaryDatabase();
-        const ensureDictionariesLoaded = vi.fn(async () => {});
+        const ensureDictionariesLoaded = vi.fn(/** @type {(dictionaryNames: Iterable<string>) => Promise<void>} */ (async (_dictionaryNames) => {}));
         Reflect.set(database, '_db', createDatabaseConnection([
             {title: 'JMdict', summaryJson: JSON.stringify({counts: {terms: {total: 10}}})},
             {title: 'Jitendex', summaryJson: JSON.stringify({counts: {terms: {total: 20}}})},
@@ -51,8 +51,10 @@ describe('DictionaryDatabase dictionary counts', () => {
 
     test('loads only dictionaries whose committed summary count is unavailable', async () => {
         const database = new DictionaryDatabase();
-        const ensureDictionariesLoaded = vi.fn(async () => {});
-        const getDictionaryRecordCount = vi.fn((dictionaryName) => dictionaryName === 'Jitendex' ? 7 : 0);
+        const ensureDictionariesLoaded = vi.fn(/** @type {(dictionaryNames: Iterable<string>) => Promise<void>} */ (async (_dictionaryNames) => {}));
+        const getDictionaryRecordCount = vi.fn((dictionaryName) => {
+            return dictionaryName === 'Jitendex' ? 7 : 0;
+        });
         Reflect.set(database, '_db', createDatabaseConnection([
             {title: 'JMdict', summaryJson: JSON.stringify({counts: {terms: {total: 10}}})},
             {title: 'Jitendex', summaryJson: '{invalid'},

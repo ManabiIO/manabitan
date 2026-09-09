@@ -432,15 +432,21 @@ export class DisplayController {
         let repairPendingEnabledCount = 0;
         for (const {title, storageHealth} of dictionaries) {
             if (enabledDictionaries.has(title)) {
-                if (storageHealth === 'reimportRequired') {
-                    ++unavailableEnabledCount;
-                } else if (storageHealth === 'repairPending') {
-                    ++enabledCount;
-                    ++repairPendingEnabledCount;
-                } else if (storageHealth === 'repairing' || storageHealth === 'temporarilyUnavailable') {
-                    ++temporarilyUnavailableEnabledCount;
-                } else {
-                    ++enabledCount;
+                switch (storageHealth) {
+                    case 'reimportRequired':
+                        ++unavailableEnabledCount;
+                        break;
+                    case 'repairPending':
+                        ++enabledCount;
+                        ++repairPendingEnabledCount;
+                        break;
+                    case 'repairing':
+                    case 'temporarilyUnavailable':
+                        ++temporarilyUnavailableEnabledCount;
+                        break;
+                    default:
+                        ++enabledCount;
+                        break;
                 }
             }
         }

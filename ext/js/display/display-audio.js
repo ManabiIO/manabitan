@@ -407,7 +407,7 @@ export class DisplayAudio {
             const optionsFull = await this._display.application.api.optionsGetFull();
             if (this._consentStateToken !== token) { return; }
             this._setDataTransmissionConsentState(getDataTransmissionConsentStateFromOptionsFull(optionsFull));
-        } catch (_e) {
+        } catch (_) {
             // NOP
         }
     }
@@ -468,7 +468,7 @@ export class DisplayAudio {
                 }
             }
             this._setDataTransmissionConsentState(state);
-        } catch (_e) {
+        } catch (_) {
             this._showNotification('Failed to update audio consent. Check extension settings and try again.', true);
         }
     }

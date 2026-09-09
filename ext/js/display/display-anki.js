@@ -60,6 +60,8 @@ export class DisplayAnki {
         this._eventListeners = new EventListenerCollection();
         /** @type {?import('display-anki').DictionaryEntryDetails[]} */
         this._dictionaryEntryDetails = null;
+        /** @type {{dictionaryEntries: import('dictionary').DictionaryEntry[], fetchDuplicateNoteIds: boolean, promise: Promise<import('display-anki').DictionaryEntryDetails[]>}|null} */
+        this._dictionaryEntryDetailsPreload = null;
         /** @type {?import('anki-templates-internal').Context} */
         this._noteContext = null;
         /** @type {boolean} */
@@ -196,6 +198,7 @@ export class DisplayAnki {
      * @param {import('display').EventArgument<'optionsUpdated'>} details
      */
     _onOptionsUpdated({options}) {
+        this._dictionaryEntryDetailsPreload = null;
         const {
             general: {
                 resultOutputMode,
@@ -248,6 +251,7 @@ export class DisplayAnki {
 
     /** */
     _onContentClear() {
+        this._dictionaryEntryDetailsPreload = null;
         this._updateDictionaryEntryDetailsToken = null;
         this._dictionaryEntryDetails = null;
         this._hideErrorNotification(false);
@@ -257,11 +261,33 @@ export class DisplayAnki {
     /** */
     _onContentUpdateStart() {
         this._noteContext = this._getNoteContext();
+        this._dictionaryEntryDetailsPreload = null;
+        // Preload data only. DOM publication still waits for contentUpdateComplete.
+        // The optional quick-check path owns interim indicators, so leave its
+        // ordering unchanged, as well as an already-running button update.
+        if (!this._display.getOptions()?.anki.enable || !this._checkForDuplicates ||
+        this._noteDupeCheckFirst || this._updateSaveButtonsPromise !== null) { return; }
+        const {dictionaryEntries} = this._display;
+        if (dictionaryEntries.length === 0) { return; }
+        const fetchAdditionalInfo = this._isAdditionalInfoEnabled();
+        const fetchDuplicateNoteIds = !this._shouldFetchDuplicateNoteIdsLazily(fetchAdditionalInfo) &&
+        this._isDuplicateNoteIdLookupEnabled(fetchAdditionalInfo);
+        const promise = this._getDictionaryEntryDetails(dictionaryEntries, fetchDuplicateNoteIds);
+        this._dictionaryEntryDetailsPreload = {dictionaryEntries, fetchDuplicateNoteIds, promise};
+        // Keep speculative work bounded by the existing update lock. A render
+        // can be superseded before completion consumes its result or rejection.
+        const pending = promise.then(() => {}, () => {});
+        this._updateSaveButtonsPromise = pending;
+        void pending.then(() => {
+            if (this._updateSaveButtonsPromise === pending) {
+                this._updateSaveButtonsPromise = null;
+            }
+        });
     }
 
     /** */
     _onContentUpdateComplete() {
-        void this._updateDictionaryEntryDetails();
+        void this._updateDictionaryEntryDetails().catch((error) => { log.error(error); });
     }
 
     /**
@@ -542,9 +568,13 @@ export class DisplayAnki {
                     log.error(error);
                 }
             }
-            const dictionaryEntryDetails = await this._getDictionaryEntryDetails(
-                dictionaryEntries,
-                (lazyFetchDuplicateNoteIds ? false : this._isDuplicateNoteIdLookupEnabled(fetchAdditionalInfo)),
+            const fetchDuplicateNoteIds = !lazyFetchDuplicateNoteIds && this._isDuplicateNoteIdLookupEnabled(fetchAdditionalInfo);
+            const preload = this._dictionaryEntryDetailsPreload;
+            this._dictionaryEntryDetailsPreload = null;
+            const dictionaryEntryDetails = await (
+                preload !== null && preload.dictionaryEntries === dictionaryEntries && preload.fetchDuplicateNoteIds === fetchDuplicateNoteIds ?
+                    preload.promise :
+                    this._getDictionaryEntryDetails(dictionaryEntries, fetchDuplicateNoteIds)
             );
             if (this._updateDictionaryEntryDetailsToken !== token) { return; }
             this._dictionaryEntryDetails = dictionaryEntryDetails;
@@ -1157,7 +1187,7 @@ export class DisplayAnki {
 
     /**
      * @param {import('dictionary').DictionaryEntry[]} dictionaryEntries
-     * @param {boolean} [fetchDuplicateNoteIds]
+     * @param {boolean} [_fetchDuplicateNoteIds]
      * @param {((
      *  dictionaryEntryIndex: number,
      *  cardFormatIndex: number,
@@ -1166,8 +1196,10 @@ export class DisplayAnki {
      * ) => boolean)|null} [filter]
      * @returns {Promise<import('display-anki').DictionaryEntryDetails[]>}
      */
-    async _getDictionaryEntryDetails(dictionaryEntries, fetchDuplicateNoteIds = true, filter = null) {
+    async _getDictionaryEntryDetails(dictionaryEntries, _fetchDuplicateNoteIds = true, filter = null) {
+        /** @type {(import('anki').Note|Promise<import('anki').Note>)[]} */
         const notePromises = [];
+        let hasAsyncNotes = false;
         const noteTargets = [];
         /** @type {Map<number, ReturnType<DisplayAnki['_getCommonNoteBuildData']>>} */
         const commonNoteBuildDataPromises = new Map();
@@ -1190,9 +1222,10 @@ export class DisplayAnki {
                 if (cardFormat.type !== type) { continue; }
                 if (typeof filter === 'function' && !filter(i, cardFormatIndex, dictionaryEntry, cardFormat)) { continue; }
                 const fastNote = this._tryCreateDuplicateCheckNoteFast(dictionaryEntry, cardFormat);
+                if (fastNote === null) { hasAsyncNotes = true; }
                 const notePromise = (
                     fastNote !== null ?
-                        Promise.resolve(fastNote) :
+                        fastNote :
                         (async () => this._createDuplicateCheckNoteWithCommonBuildData(dictionaryEntry, await getCommonNoteBuildData(cardFormatIndex)))()
                 );
                 notePromises.push(notePromise);
@@ -1206,7 +1239,9 @@ export class DisplayAnki {
             return results;
         }
 
-        const notes = (await Promise.all(notePromises));
+        // Standard first-field probes need no template work. Dispatch them
+        // before the renderer occupies this thread instead of yielding first.
+        const notes = hasAsyncNotes ? await Promise.all(notePromises) : /** @type {import('anki').Note[]} */ (notePromises);
         const validNotes = [];
         const validNoteIndices = [];
         for (let i = 0, ii = notes.length; i < ii; ++i) {

@@ -11,10 +11,10 @@ import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 
 /**
- * @param {{expression?: Map<string, number[]>, reading?: Map<string, number[]>, expressionReverse?: Map<string, number[]>, readingReverse?: Map<string, number[]>}} index
+ * @param {{expression?: Map<string, number[]>, reading?: Map<string, number[]>, expressionReverse?: Map<string, number[]>, readingReverse?: Map<string, number[]>} } [index={}]
  * @returns {DictionaryDatabase}
  */
-function createDatabase(index) {
+function createDatabase(index = {}) {
     const database = new DictionaryDatabase();
     Reflect.set(database, '_db', {});
     const completeIndex = {
@@ -24,7 +24,7 @@ function createDatabase(index) {
         readingReverse: new Map(),
         ...index,
     };
-    Reflect.set(database, '_ensureDirectTermIndexesLoaded', vi.fn().mockResolvedValue());
+    Reflect.set(database, '_ensureDirectTermIndexesLoaded', vi.fn(async () => {}));
     Reflect.set(database, '_ensureDirectTermIndex', vi.fn().mockReturnValue(completeIndex));
     Reflect.set(database, '_getDictionaryNames', vi.fn().mockReturnValue(['Test']));
     Reflect.set(database, '_fetchTermRowsByIds', vi.fn(async (ids) => new Map([...ids].map((id) => [id, {id}]))));
@@ -173,14 +173,21 @@ describe('DictionaryDatabase direct term indexes', () => {
     test('retries loading after a previously loaded dictionary becomes temporarily unavailable', async () => {
         const database = new DictionaryDatabase();
         Reflect.set(database, '_db', {});
-        const ensureDictionariesLoaded = vi.fn().mockResolvedValue(undefined);
+        const ensureDictionariesLoaded = vi.fn(async () => {});
         Reflect.set(database, '_termRecordStore', {
             ensureDictionariesLoaded,
             isDictionaryAvailable: vi.fn(() => true),
             hasPersistentTermLookupIndex: vi.fn(() => true),
         });
         Reflect.get(database, '_directTermIndexLoadedDictionaryNames').add('Test');
-        Reflect.get(database, '_directTermIndexByDictionary').set('Test', {});
+        const directIndex = /** @type {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}} */ ({
+            expression: new Map(),
+            reading: new Map(),
+            expressionReverse: new Map(),
+            readingReverse: new Map(),
+            sequence: new Map(),
+        });
+        Reflect.get(database, '_directTermIndexByDictionary').set('Test', directIndex);
 
         database._onTermRecordDictionaryHealthChanged(
             'Test',

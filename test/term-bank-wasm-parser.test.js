@@ -51,6 +51,10 @@ const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 const nativeFetch = globalThis.fetch;
 /** @typedef {{expression: string, reading: string, glossaryMayContainMedia?: boolean, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array, readingEqualsExpression?: boolean, readingBytes?: Uint8Array}} ParsedRow */
+/** @typedef {Parameters<Parameters<typeof parseTermBankWithWasmColumnChunks>[2]>[0] & {useResolvedContentReferences?: boolean}} TermBankColumnChunk */
+/** @typedef {Parameters<Parameters<typeof parseTermBankWithWasmColumnChunksParallel>[2]>[1]} TermBankParseProgress */
+/** @typedef {{type: string, id?: number, [key: string]: unknown}} WorkerMessage */
+/** @typedef {{addEventListener: (type: string, listener: (event: MessageEvent<unknown>) => void) => void, removeEventListener: (type: string, listener: (event: MessageEvent<unknown>) => void) => void, postMessage: (message: WorkerMessage, transfer?: Transferable[]) => void, terminate: () => void}} WorkerMock */
 
 /**
  * @param {Map<string, Set<(event: MessageEvent<unknown>) => void>>} listeners
@@ -75,6 +79,15 @@ function emitSuccessfulWorkerResult(listeners, id) {
         chunk: {rowCount: 1},
         profile: {chunkDispatchMs: 0},
     });
+}
+
+/**
+ * @param {WorkerMessage} message
+ * @returns {number}
+ */
+function getWorkerMessageId(message) {
+    if (typeof message.id !== 'number') { throw new Error('Expected a worker message id'); }
+    return message.id;
 }
 /** @typedef {{strings: string[], stringLengths: number[], stringHashes: number[], stringOffsets: number[], expressionIndexes: number[], readingIndexes: number[], readingEqualsExpressionList: number[]}} TermStringPlanSnapshot */
 
@@ -126,7 +139,7 @@ function getContentString(row) {
  * @returns {number[]}
  */
 function getContentSignatures(bytes) {
-    const read = (offset) => (
+    const read = (/** @type {number} */ offset) => (
         (bytes[offset] ?? 0) |
         ((bytes[offset + 1] ?? 0) << 8) |
         ((bytes[offset + 2] ?? 0) << 16) |
@@ -165,11 +178,12 @@ function createCompressedTermBankSource(json, compressionMethod) {
  * @returns {Promise<object|null>}
  */
 async function parseColumnSnapshot(sources, preloadedSource = null) {
-    let copiedChunk = null;
+    /** @type {TermBankColumnChunk[]} */
+    const copiedChunks = [];
     await parseTermBankWithWasmColumnChunks(
         preloadedSource === null ? sources : new Uint8Array(0),
         3,
-        (chunk) => { copiedChunk = copyWasmBackedColumnChunk(chunk); },
+        (chunk) => { copiedChunks.push(copyWasmBackedColumnChunk(chunk)); },
         2048,
         {
             computeContentHashes: true,
@@ -179,8 +193,8 @@ async function parseColumnSnapshot(sources, preloadedSource = null) {
             ...(preloadedSource === null ? {} : {preloadedSource}),
         },
     );
-    if (copiedChunk === null) { return null; }
-    const chunk = /** @type {NonNullable<typeof copiedChunk>} */ (copiedChunk);
+    const chunk = copiedChunks.at(-1);
+    if (typeof chunk === 'undefined') { return null; }
     return {
         rowCount: chunk.rowCount,
         expressions: chunk.expressionBytesList.map((bytes) => textDecoder.decode(bytes)),
@@ -197,7 +211,7 @@ async function parseColumnSnapshot(sources, preloadedSource = null) {
 
 describe('term-bank WASM parser', () => {
     beforeAll(() => {
-        vi.stubGlobal('fetch', async (resource) => {
+        vi.stubGlobal('fetch', async (/** @type {RequestInfo|URL} */ resource) => {
             const url = resource instanceof URL ? resource : new URL(String(resource));
             if (url.protocol === 'file:') {
                 return new Response(await readFile(fileURLToPath(url)));
@@ -364,6 +378,18 @@ describe('term-bank WASM parser', () => {
         }, true);
 
         heap.fill(0);
+        if (!(copy.contentBytesBuffer instanceof Uint8Array) || !(copy.contentMetaList instanceof Uint32Array) || !(copy.contentUniqueIndexList instanceof Uint32Array)) {
+            throw new Error('Expected copied content metadata');
+        }
+        const {stringOffsets: copiedStringOffsets, stringHashes: copiedStringHashes} = copy.termRecordPreinternedPlan;
+        if (!(copiedStringOffsets instanceof Uint32Array) || !(copiedStringHashes instanceof Uint32Array)) {
+            throw new Error('Expected copied string metadata');
+        }
+        const mediaRow = copy.mediaRows[0];
+        if (typeof mediaRow === 'undefined' || !(mediaRow.row.expressionBytes instanceof Uint8Array) || !(mediaRow.row.readingBytes instanceof Uint8Array) || !(mediaRow.row.glossaryJsonBytes instanceof Uint8Array)) {
+            throw new Error('Expected copied media metadata');
+        }
+        const mediaContentBytes = mediaRow.row.termEntryContentBytes;
         expect(copy.contentBytesBuffer.buffer).toBeInstanceOf(SharedArrayBuffer);
         expect(copy.expressionBytesList.map((value) => [...value])).toStrictEqual([[1, 2, 3], [4, 5, 6]]);
         expect(copy.readingBytesList.map((value) => [...value])).toStrictEqual([[7, 8, 9], [10, 11, 12]]);
@@ -377,16 +403,16 @@ describe('term-bank WASM parser', () => {
         expect([...copy.contentMetaList]).toStrictEqual([0, 3, 101, 201, 3, 2, 102, 202]);
         expect([...copy.contentUniqueIndexList]).toStrictEqual([0, 1]);
         expect([...copy.termRecordPreinternedPlan.stringLengths]).toStrictEqual([3, 3]);
-        expect([...copy.termRecordPreinternedPlan.stringOffsets]).toStrictEqual([0, 3]);
-        expect([...copy.termRecordPreinternedPlan.stringHashes]).toStrictEqual([301, 302]);
+        expect([...copiedStringOffsets]).toStrictEqual([0, 3]);
+        expect([...copiedStringHashes]).toStrictEqual([301, 302]);
         expect([...copy.termRecordPreinternedPlan.stringsBuffer]).toStrictEqual([13, 14, 15, 16, 17, 18]);
         expect([...copy.termRecordPreinternedPlan.expressionIndexes]).toStrictEqual([0, 1]);
         expect([...copy.termRecordPreinternedPlan.readingIndexes]).toStrictEqual([1, 0]);
         expect(copy.mediaRows).toHaveLength(1);
-        expect([...copy.mediaRows[0].row.expressionBytes]).toStrictEqual([31, 32, 33]);
-        expect([...copy.mediaRows[0].row.readingBytes]).toStrictEqual([34, 35, 36]);
-        expect([...copy.mediaRows[0].row.glossaryJsonBytes]).toStrictEqual([37, 38, 39]);
-        expect([...copy.mediaRows[0].row.termEntryContentBytes]).toStrictEqual([40, 41, 42]);
+        expect([...mediaRow.row.expressionBytes]).toStrictEqual([31, 32, 33]);
+        expect([...mediaRow.row.readingBytes]).toStrictEqual([34, 35, 36]);
+        expect([...mediaRow.row.glossaryJsonBytes]).toStrictEqual([37, 38, 39]);
+        expect([...mediaContentBytes]).toStrictEqual([40, 41, 42]);
     });
 
     test('borrows an exact shared content span while copying mutable metadata', () => {
@@ -422,6 +448,7 @@ describe('term-bank WASM parser', () => {
 
         expect(result.contentBytesBuffer?.buffer).toBe(heap.buffer);
         expect(result.contentBytesBuffer?.byteOffset).toBe(64);
+        if (!(result.contentBytesBuffer instanceof Uint8Array)) { throw new Error('Expected borrowed content buffer'); }
         expect([...result.contentBytesBuffer]).toStrictEqual([1, 2, 3, 4]);
         expect(result.contentMetaList?.buffer).not.toBe(heap.buffer);
     });
@@ -493,6 +520,11 @@ describe('term-bank WASM parser', () => {
             expect(view?.buffer).not.toBe(heap.buffer);
         }
         heap.fill(0xff);
+        if (!(result.contentBytesBuffer instanceof Uint8Array) || !(result.contentMetaList instanceof Uint32Array) || !(result.contentUniqueIndexList instanceof Uint32Array)) {
+            throw new Error('Expected copied content metadata');
+        }
+        const copiedPlan = result.termRecordPreinternedPlan;
+        if (!(copiedPlan.stringOffsets instanceof Uint32Array) || !(copiedPlan.stringHashes instanceof Uint32Array)) { throw new Error('Expected copied string metadata'); }
         expect([...result.contentBytesBuffer]).toStrictEqual([255, 255, 255, 255]);
         expect([...result.contentMetaList]).toStrictEqual([0, 2, 11, 12, 2, 2, 13, 14]);
         expect([...result.readingEqualsExpressionList]).toStrictEqual([0, 1]);
@@ -500,8 +532,8 @@ describe('term-bank WASM parser', () => {
         expect([...result.sequenceList]).toStrictEqual([101, -1]);
         expect([...result.contentUniqueIndexList]).toStrictEqual([7, 8]);
         expect([...result.termRecordPreinternedPlan.stringLengths]).toStrictEqual([1, 3]);
-        expect([...result.termRecordPreinternedPlan.stringOffsets]).toStrictEqual([0, 1]);
-        expect([...result.termRecordPreinternedPlan.stringHashes]).toStrictEqual([0x11223344, 0xaabbccdd]);
+        expect([...copiedPlan.stringOffsets]).toStrictEqual([0, 1]);
+        expect([...copiedPlan.stringHashes]).toStrictEqual([0x11223344, 0xaabbccdd]);
         expect([...result.termRecordPreinternedPlan.stringsBuffer]).toStrictEqual([10, 20, 30, 40]);
         expect([...result.termRecordPreinternedPlan.expressionIndexes]).toStrictEqual([0, 1]);
         expect([...result.termRecordPreinternedPlan.readingIndexes]).toStrictEqual([1, 0]);
@@ -539,7 +571,7 @@ describe('term-bank WASM parser', () => {
                 readingIndexes: new Uint32Array(metadataHeap.buffer, 108, 2),
             },
             mediaRows: [],
-        }, true, true);
+        }, true);
 
         expect(result.contentBytesBuffer?.buffer).toBe(contentHeap.buffer);
         for (const view of [
@@ -582,6 +614,7 @@ describe('term-bank WASM parser', () => {
         const workerCount = getParallelTermBankParserWorkerCount();
         let constructionCount = 0;
         let terminateCount = 0;
+        /** @implements {WorkerMock} */
         class ReadyWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
@@ -593,7 +626,7 @@ describe('term-bank WASM parser', () => {
              * @param {string} type
              * @param {(event: MessageEvent<unknown>) => void} listener
              */
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
@@ -601,12 +634,12 @@ describe('term-bank WASM parser', () => {
              * @param {string} type
              * @param {(event: MessageEvent<unknown>) => void} listener
              */
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
             /** @param {{type: string, id?: number}} message */
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 if (message.type !== 'initialize') { return; }
                 queueMicrotask(() => emitWorkerMessage(this.listeners, {type: 'ready'}));
             }
@@ -634,9 +667,10 @@ describe('term-bank WASM parser', () => {
         const workerCount = getParallelTermBankParserWorkerCount();
         let constructionCount = 0;
         let terminateCount = 0;
-        /** @type {() => void} */
-        let markInitialWorkersCreated;
+        /** @type {(value?: void|PromiseLike<void>) => void} */
+        let markInitialWorkersCreated = () => {};
         const initialWorkersCreated = new Promise((resolve) => { markInitialWorkersCreated = resolve; });
+        /** @implements {WorkerMock} */
         class GenerationWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
@@ -646,15 +680,15 @@ describe('term-bank WASM parser', () => {
                 if (constructionCount === workerCount) { markInitialWorkersCreated(); }
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 if (message.type === 'initialize' && this.generation > 0) {
                     queueMicrotask(() => emitWorkerMessage(this.listeners, {type: 'ready'}));
                 }
@@ -688,23 +722,28 @@ describe('term-bank WASM parser', () => {
     });
 
     maybeTest('allows serial fallback after parallel parser resource pressure', async () => {
+        /** @implements {WorkerMock} */
         class ResourceFailingWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
-                if (!this.listeners.has(type)) { this.listeners.set(type, new Set()); }
-                this.listeners.get(type).add(listener);
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                let listeners = this.listeners.get(type);
+                if (typeof listeners === 'undefined') {
+                    listeners = new Set();
+                    this.listeners.set(type, listeners);
+                }
+                listeners.add(listener);
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 const listeners = this.listeners.get(type);
                 if (typeof listeners !== 'undefined') { listeners.delete(listener); }
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 queueMicrotask(() => {
                     if (message.type === 'initialize') {
                         this.emit('message', {type: 'ready'});
@@ -720,6 +759,7 @@ describe('term-bank WASM parser', () => {
 
             terminate() {}
 
+            /** @param {string} type @param {unknown} data */
             emit(type, data) {
                 for (const listener of this.listeners.get(type) ?? []) {
                     listener(/** @type {MessageEvent<unknown>} */ ({data}));
@@ -754,6 +794,7 @@ describe('term-bank WASM parser', () => {
         let constructionCount = 0;
         let parseCount = 0;
         let terminateCount = 0;
+        /** @implements {WorkerMock} */
         class SuccessfulWorker {
             constructor() {
                 ++constructionCount;
@@ -761,16 +802,16 @@ describe('term-bank WASM parser', () => {
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 const listeners = this.listeners.get(type);
                 if (typeof listeners !== 'undefined') { listeners.delete(listener); }
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 queueMicrotask(() => {
                     if (message.type === 'initialize') {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
@@ -816,6 +857,7 @@ describe('term-bank WASM parser', () => {
     maybeTest('uses shallower parallel grouping for media-aware term banks', async () => {
         const originalNavigator = globalThis.navigator;
         let parseCount = 0;
+        /** @implements {WorkerMock} */
         class SuccessfulWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
@@ -826,7 +868,7 @@ describe('term-bank WASM parser', () => {
              * @param {string} type
              * @param {(event: MessageEvent<unknown>) => void} listener
              */
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
@@ -834,12 +876,12 @@ describe('term-bank WASM parser', () => {
              * @param {string} type
              * @param {(event: MessageEvent<unknown>) => void} listener
              */
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
             /** @param {{type: string, id?: number}} message */
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 queueMicrotask(() => {
                     if (message.type === 'initialize') {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
@@ -904,6 +946,7 @@ describe('term-bank WASM parser', () => {
         let workerIndex = 0;
         /** @type {number[]} */
         let parseCounts = [];
+        /** @implements {WorkerMock} */
         class SkewedWorker {
             constructor() {
                 this.index = workerIndex++;
@@ -912,22 +955,22 @@ describe('term-bank WASM parser', () => {
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 if (message.type === 'initialize') {
                     queueMicrotask(() => { emitWorkerMessage(this.listeners, {type: 'ready'}); });
                     return;
                 }
                 ++parseCounts[this.index];
                 setTimeout(() => {
-                    emitSuccessfulWorkerResult(this.listeners, message.id);
+                    emitSuccessfulWorkerResult(this.listeners, getWorkerMessageId(message));
                 }, this.delay);
             }
 
@@ -959,27 +1002,28 @@ describe('term-bank WASM parser', () => {
     maybeTest('defers disposal until an active parallel run releases ownership', async () => {
         const workerCount = getParallelTermBankParserWorkerCount();
         let terminateCount = 0;
+        /** @implements {WorkerMock} */
         class SuccessfulWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 queueMicrotask(() => {
                     if (message.type === 'initialize') {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
                         return;
                     }
-                    emitSuccessfulWorkerResult(this.listeners, message.id);
+                    emitSuccessfulWorkerResult(this.listeners, getWorkerMessageId(message));
                 });
             }
 
@@ -987,11 +1031,11 @@ describe('term-bank WASM parser', () => {
         }
 
         vi.stubGlobal('Worker', SuccessfulWorker);
-        /** @type {() => void} */
-        let releaseSink;
+        /** @type {(value?: void|PromiseLike<void>) => void} */
+        let releaseSink = () => {};
         const sinkGate = new Promise((resolve) => { releaseSink = resolve; });
-        /** @type {() => void} */
-        let markSinkStarted;
+        /** @type {(value?: void|PromiseLike<void>) => void} */
+        let markSinkStarted = () => {};
         const sinkStarted = new Promise((resolve) => { markSinkStarted = resolve; });
         try {
             const sourceBanks = Array.from({length: workerCount * 2}, () => textEncoder.encode('[]'));
@@ -1034,6 +1078,7 @@ describe('term-bank WASM parser', () => {
         const workerCount = getParallelTermBankParserWorkerCount();
         let constructionCount = 0;
         let failNextParse = true;
+        /** @implements {WorkerMock} */
         class FailOnceWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
@@ -1041,15 +1086,15 @@ describe('term-bank WASM parser', () => {
                 constructionCount += 1;
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 queueMicrotask(() => {
                     if (message.type === 'initialize') {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
@@ -1116,21 +1161,22 @@ describe('term-bank WASM parser', () => {
             },
         ];
         for (const {result, error} of cases) {
+            /** @implements {WorkerMock} */
             class MalformedWorker {
                 constructor() {
                     /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                     this.listeners = new Map();
                 }
 
-                addEventListener(type, listener) {
+                addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                     this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
                 }
 
-                removeEventListener(type, listener) {
+                removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                     this.listeners.get(type)?.delete(listener);
                 }
 
-                postMessage(message) {
+                postMessage(/** @type {WorkerMessage} */ message) {
                     queueMicrotask(() => {
                         if (message.type === 'initialize') {
                             emitWorkerMessage(this.listeners, {type: 'ready'});
@@ -1166,8 +1212,8 @@ describe('term-bank WASM parser', () => {
 
     maybeTest('streams archive-ordered results while later workers finish output', async () => {
         let workerIndex = 0;
-        /** @type {() => void} */
-        let releaseSecondResult;
+        /** @type {(value?: void|PromiseLike<void>) => void} */
+        let releaseSecondResult = () => {};
         const secondResultGate = new Promise((resolve) => { releaseSecondResult = resolve; });
         let fallbackReleasedSecondResult = false;
         let firstSinkPrecededSecondParse = false;
@@ -1175,6 +1221,7 @@ describe('term-bank WASM parser', () => {
             fallbackReleasedSecondResult = true;
             releaseSecondResult();
         }, 100);
+        /** @implements {WorkerMock} */
         class StagedWorker {
             constructor() {
                 this.index = workerIndex++;
@@ -1182,15 +1229,15 @@ describe('term-bank WASM parser', () => {
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message, transfer = []) {
+            postMessage(/** @type {WorkerMessage} */ message, /** @type {Transferable[]} */ transfer = []) {
                 const dispatchedMessage = structuredClone(message, {transfer});
                 queueMicrotask(() => {
                     if (dispatchedMessage.type === 'initialize') {
@@ -1198,10 +1245,10 @@ describe('term-bank WASM parser', () => {
                         return;
                     }
                     if (this.index === 0) {
-                        emitSuccessfulWorkerResult(this.listeners, dispatchedMessage.id);
+                        emitSuccessfulWorkerResult(this.listeners, getWorkerMessageId(dispatchedMessage));
                     } else {
                         void secondResultGate.then(() => {
-                            emitSuccessfulWorkerResult(this.listeners, dispatchedMessage.id);
+                            emitSuccessfulWorkerResult(this.listeners, getWorkerMessageId(dispatchedMessage));
                         });
                     }
                 });
@@ -1212,6 +1259,7 @@ describe('term-bank WASM parser', () => {
 
         vi.stubGlobal('Worker', StagedWorker);
         try {
+            /** @type {TermBankParseProgress[]} */
             const progress = [];
             const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
             await expect(parseTermBankWithWasmColumnChunksParallel(
@@ -1242,21 +1290,22 @@ describe('term-bank WASM parser', () => {
     });
 
     maybeTest('streams early groups while later ZIP sources are unresolved', async () => {
+        /** @implements {WorkerMock} */
         class SuccessfulWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 queueMicrotask(() => {
                     if (message.type === 'initialize') {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
@@ -1277,11 +1326,11 @@ describe('term-bank WASM parser', () => {
         }
 
         vi.stubGlobal('Worker', SuccessfulWorker);
-        /** @type {() => void} */
-        let releaseLaterSources;
+        /** @type {(value?: void|PromiseLike<void>) => void} */
+        let releaseLaterSources = () => {};
         const laterSources = new Promise((resolve) => { releaseLaterSources = resolve; });
-        /** @type {() => void} */
-        let resolveFirstSink;
+        /** @type {(value?: void|PromiseLike<void>) => void} */
+        let resolveFirstSink = () => {};
         const firstSink = new Promise((resolve) => { resolveFirstSink = resolve; });
         try {
             const emptyBank = textEncoder.encode('[]');
@@ -1291,6 +1340,7 @@ describe('term-bank WASM parser', () => {
                 laterSources.then(() => new Uint8Array(emptyBank)),
                 laterSources.then(() => new Uint8Array(emptyBank)),
             ];
+            /** @type {number[]} */
             const sinkIndexes = [];
             const parsing = parseTermBankWithWasmColumnChunksParallelDeferred(
                 sourcePromises,
@@ -1319,21 +1369,22 @@ describe('term-bank WASM parser', () => {
         const workerCount = getParallelTermBankParserWorkerCount();
         let parseCount = 0;
         const sharedContent = new Uint8Array(new SharedArrayBuffer(1));
+        /** @implements {WorkerMock} */
         class BorrowingWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 const respond = () => {
                     if (message.type === 'initialize') {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
@@ -1357,8 +1408,10 @@ describe('term-bank WASM parser', () => {
         }
 
         vi.stubGlobal('Worker', BorrowingWorker);
+        /** @type {(value?: void|PromiseLike<void>) => void} */
         let releaseFirstSink = () => {};
         const firstSinkGate = new Promise((resolve) => { releaseFirstSink = resolve; });
+        /** @type {(value?: void|PromiseLike<void>) => void} */
         let firstSinkStarted = () => {};
         const firstSinkStart = new Promise((resolve) => { firstSinkStarted = resolve; });
         try {
@@ -1387,21 +1440,22 @@ describe('term-bank WASM parser', () => {
     });
 
     maybeTest('bounds lazy source loading while the ordered sink is blocked', async () => {
+        /** @implements {WorkerMock} */
         class SuccessfulWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 if (typeof message?.type !== 'string') { return; }
                 queueMicrotask(() => {
                     if (message.type === 'initialize') {
@@ -1424,8 +1478,8 @@ describe('term-bank WASM parser', () => {
         }
 
         vi.stubGlobal('Worker', SuccessfulWorker);
-        /** @type {() => void} */
-        let releaseSink;
+        /** @type {(value?: void|PromiseLike<void>) => void} */
+        let releaseSink = () => {};
         const sinkGate = new Promise((resolve) => { releaseSink = resolve; });
         let loadCount = 0;
         try {
@@ -1458,29 +1512,32 @@ describe('term-bank WASM parser', () => {
     });
 
     maybeTest('transfers compressed sources with aligned metadata in deterministic order', async () => {
+        /** @typedef {{sourceBuffers: Uint8Array[], sourceMetadata: Array<{filename: string, compressedSize: number}>}} ParseMessage */
+        /** @type {ParseMessage[]} */
         const parseMessages = [];
+        /** @implements {WorkerMock} */
         class SuccessfulWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message, transfer = []) {
+            postMessage(/** @type {WorkerMessage} */ message, /** @type {Transferable[]} */ transfer = []) {
                 queueMicrotask(() => {
                     if (message.type === 'initialize') {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
                         return;
                     }
                     const delivered = structuredClone(message, {transfer});
-                    parseMessages.push(delivered);
+                    parseMessages.push(/** @type {ParseMessage} */ (/** @type {unknown} */ (delivered)));
                     emitWorkerMessage(this.listeners, {
                         type: 'result',
                         id: delivered.id,
@@ -1496,9 +1553,11 @@ describe('term-bank WASM parser', () => {
         }
 
         vi.stubGlobal('Worker', SuccessfulWorker);
+        /** @type {Array<ReturnType<typeof createCompressedTermBankSource>>} */
         const loadedSources = [];
         try {
             const sourceCount = 4;
+            /** @type {number[]} */
             const sinkIndexes = [];
             await expect(parseTermBankWithWasmColumnChunksParallelCompressedLazy(
                 Array.from({length: sourceCount}, (_, index) => async () => {
@@ -1535,6 +1594,7 @@ describe('term-bank WASM parser', () => {
         vi.stubGlobal('navigator', {hardwareConcurrency: 12, deviceMemory: 8});
         const workerCount = getParallelTermBankParserWorkerCount();
         let workerIndex = 0;
+        /** @implements {WorkerMock} */
         class LaterFailingWorker {
             constructor() {
                 this.index = workerIndex++;
@@ -1543,15 +1603,15 @@ describe('term-bank WASM parser', () => {
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 queueMicrotask(() => {
                     if (message.type === 'initialize') {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
@@ -1583,6 +1643,7 @@ describe('term-bank WASM parser', () => {
 
         vi.stubGlobal('Worker', LaterFailingWorker);
         try {
+            /** @type {number[]} */
             const sinkIndexes = [];
             const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
             await expect(parseTermBankWithWasmColumnChunksParallel(
@@ -1605,26 +1666,27 @@ describe('term-bank WASM parser', () => {
 
     maybeTest('terminates parser workers promptly when import is cancelled', async () => {
         let terminateCount = 0;
+        /** @implements {WorkerMock} */
         class HangingWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
-                let listeners = this.listeners.get(type);
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                const listeners = this.listeners.get(type);
                 if (typeof listeners === 'undefined') {
-                    listeners = new Set();
-                    this.listeners.set(type, listeners);
+                    this.listeners.set(type, new Set([listener]));
+                    return;
                 }
                 listeners.add(listener);
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 if (message.type !== 'initialize') { return; }
                 queueMicrotask(() => {
                     for (const listener of this.listeners.get('message') ?? []) {
@@ -1660,21 +1722,22 @@ describe('term-bank WASM parser', () => {
 
     maybeTest('cancels while deferred ZIP sources are unresolved', async () => {
         let terminateCount = 0;
+        /** @implements {WorkerMock} */
         class ReadyWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 if (message.type === 'initialize') {
                     queueMicrotask(() => {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
@@ -1706,6 +1769,7 @@ describe('term-bank WASM parser', () => {
 
     maybeTest('settles active worker jobs when the chunk sink rejects', async () => {
         let terminateCount = 0;
+        /** @implements {WorkerMock} */
         class HangingAfterFirstWorker {
             constructor() {
                 this.parseCount = 0;
@@ -1713,15 +1777,15 @@ describe('term-bank WASM parser', () => {
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 queueMicrotask(() => {
                     if (message.type === 'initialize') {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
@@ -1764,6 +1828,7 @@ describe('term-bank WASM parser', () => {
     maybeTest('settles peer jobs when a worker result cannot be transferred', async () => {
         let workerIndex = 0;
         let terminateCount = 0;
+        /** @implements {WorkerMock} */
         class TransferFailingWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
@@ -1771,15 +1836,15 @@ describe('term-bank WASM parser', () => {
                 this.index = workerIndex++;
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 queueMicrotask(() => {
                     if (message.type === 'initialize') {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
@@ -1812,17 +1877,18 @@ describe('term-bank WASM parser', () => {
     });
 
     maybeTest('normalizes a null deferred-source rejection', async () => {
+        /** @implements {WorkerMock} */
         class ReadyWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) { this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener)); }
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) { this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener)); }
 
-            removeEventListener(type, listener) { this.listeners.get(type)?.delete(listener); }
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) { this.listeners.get(type)?.delete(listener); }
 
-            postMessage(message) {
+            postMessage(/** @type {WorkerMessage} */ message) {
                 if (message.type !== 'initialize') { return; }
                 queueMicrotask(() => emitWorkerMessage(this.listeners, {type: 'ready'}));
             }
@@ -1849,19 +1915,20 @@ describe('term-bank WASM parser', () => {
 
     maybeTest('aborts a hung parser prewarm during import cleanup', async () => {
         let terminateCount = 0;
+        /** @implements {WorkerMock} */
         class NeverReadyWorker {
             constructor() {
-                /** @type {Map<string, Set<(event: Event) => void>>} */
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
             }
 
-            addEventListener(type, listener) {
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 const listeners = this.listeners.get(type) ?? new Set();
                 listeners.add(listener);
                 this.listeners.set(type, listeners);
             }
 
-            removeEventListener(type, listener) {
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
                 this.listeners.get(type)?.delete(listener);
             }
 
@@ -1933,6 +2000,7 @@ describe('term-bank WASM parser', () => {
     });
 
     maybeTest('keeps source-identical duplicates canonical after a normalized match', async () => {
+        /** @type {TermBankColumnChunk[]} */
         const chunks = [];
         await parseTermBankWithWasmColumnChunks(
             textEncoder.encode(JSON.stringify([
@@ -1947,6 +2015,7 @@ describe('term-bank WASM parser', () => {
         );
 
         const [chunk] = chunks;
+        if (!(chunk.contentMetaList instanceof Uint32Array)) { throw new Error('Expected dedup content metadata'); }
         expect(chunk.contentUniqueIndexList).toStrictEqual(new Uint32Array([0, 0, 0]));
         expect(chunk.contentDedupPlan?.uniqueCount).toBe(1);
         expect(chunk.contentDedupPlan?.sourceRowCount).toBe(3);
@@ -2191,7 +2260,9 @@ describe('term-bank WASM parser', () => {
     });
 
     maybeTest('bounds and serializes pipelined chunk dispatch', async () => {
+        /** @type {number[]} */
         const calls = [];
+        /** @type {(value?: void|PromiseLike<void>) => void} */
         let releaseFirst = () => {};
         const firstGate = new Promise((resolve) => { releaseFirst = resolve; });
         let active = 0;
@@ -2232,8 +2303,11 @@ describe('term-bank WASM parser', () => {
             ['c', 'c', '', '', 0, ['c'], 3, ''],
         ]));
         const failure = new Error('chunk write failed');
+        /** @type {number[]} */
         const calls = [];
+        /** @type {unknown[]} */
         const unhandledRejections = [];
+        /** @param {unknown} reason */
         const onUnhandledRejection = (reason) => { unhandledRejections.push(reason); };
         process.on('unhandledRejection', onUnhandledRejection);
         try {
@@ -2256,6 +2330,7 @@ describe('term-bank WASM parser', () => {
     });
 
     maybeTest('combines source arrays directly in WASM input memory', async () => {
+        /** @type {ParsedRow[]} */
         const chunks = [];
         await parseTermBankWithWasmChunks(
             [
@@ -2285,6 +2360,7 @@ describe('term-bank WASM parser', () => {
                 ['second', 'reading', '', '', 4, ['distinct'], 13, ''],
             ])),
         ];
+        /** @type {TermBankColumnChunk[]} */
         const chunks = [];
         await parseTermBankWithWasmColumnChunks(
             sources,
@@ -2296,35 +2372,40 @@ describe('term-bank WASM parser', () => {
 
         const [chunk] = chunks;
         expect(chunks).toHaveLength(1);
+        if (typeof chunk.contentBytesBaseOffset !== 'number' || !(chunk.contentMetaList instanceof Uint32Array) || !(chunk.contentBytesBuffer instanceof Uint8Array)) {
+            throw new Error('Expected fused content metadata');
+        }
+        const {contentBytesBaseOffset, contentMetaList, contentBytesBuffer} = chunk;
         expect(chunk.rowCount).toBe(3);
         expect(chunk.contentUniqueIndexList).toStrictEqual(new Uint32Array([0, 0, 1]));
         expect(chunk.contentDedupPlan?.uniqueRowIndexes).toStrictEqual(new Uint32Array([0, 2]));
         const uniqueSignatures = [0, 2].flatMap((rowIndex) => {
             const metaOffset = rowIndex * 4;
-            const offset = chunk.contentBytesBaseOffset + chunk.contentMetaList[metaOffset];
-            const length = chunk.contentMetaList[metaOffset + 1];
-            return getContentSignatures(chunk.contentBytesBuffer.subarray(offset, offset + length));
+            const offset = contentBytesBaseOffset + contentMetaList[metaOffset];
+            const length = contentMetaList[metaOffset + 1];
+            return getContentSignatures(contentBytesBuffer.subarray(offset, offset + length));
         });
         expect(chunk.contentDedupPlan?.uniqueSignatures).toStrictEqual(Uint32Array.from(uniqueSignatures));
         expect(chunk.readingEqualsExpressionList).toStrictEqual(new Uint8Array([1, 1, 0]));
         expect(chunk.scoreList).toStrictEqual(new Int32Array([2, 3, 4]));
         expect(chunk.sequenceList).toStrictEqual(new Int32Array([11, 12, 13]));
         const plan = chunk.termRecordPreinternedPlan;
-        const wasmBuffer = chunk.contentBytesBuffer.buffer;
+        const wasmBuffer = contentBytesBuffer.buffer;
         expect(wasmBuffer).toBeInstanceOf(SharedArrayBuffer);
-        for (const [name, view] of [
+        const sharedViews = /** @type {Array<[string, {buffer: ArrayBufferLike}|null]>} */ ([
             ['readingEqualsExpressionList', chunk.readingEqualsExpressionList],
             ['scoreList', chunk.scoreList],
             ['sequenceList', chunk.sequenceList],
-            ['contentMetaList', chunk.contentMetaList],
+            ['contentMetaList', contentMetaList],
             ['contentUniqueIndexList', chunk.contentUniqueIndexList],
             ['stringLengths', plan.stringLengths],
-            ['stringOffsets', plan.stringOffsets],
-            ['stringHashes', plan.stringHashes],
+            ['stringOffsets', plan.stringOffsets ?? null],
+            ['stringHashes', plan.stringHashes ?? null],
             ['stringsBuffer', plan.stringsBuffer],
             ['expressionIndexes', plan.expressionIndexes],
             ['readingIndexes', plan.readingIndexes],
-        ]) {
+        ]);
+        for (const [name, view] of sharedViews) {
             expect(view?.buffer, name).toBe(wasmBuffer);
         }
         expect(chunk.contentDedupPlan?.uniqueRowIndexes.buffer).toBeInstanceOf(ArrayBuffer);
@@ -2333,7 +2414,8 @@ describe('term-bank WASM parser', () => {
         expect(plan.readingIndexes[0]).toBe(plan.expressionIndexes[0]);
         expect(plan.readingIndexes[2]).not.toBe(plan.expressionIndexes[2]);
         const cloned = structuredClone(chunk);
-        expect(cloned.contentBytesBaseOffset).toBe(chunk.contentBytesBaseOffset);
+        expect(cloned.contentBytesBaseOffset).toBe(contentBytesBaseOffset);
+        if (!(cloned.contentBytesBuffer instanceof Uint8Array)) { throw new Error('Expected cloned content buffer'); }
         expect(cloned.contentBytesBuffer.buffer).toBeInstanceOf(SharedArrayBuffer);
         expect(cloned.termRecordPreinternedPlan.stringsBuffer.buffer).toBeInstanceOf(SharedArrayBuffer);
         const originalScore = chunk.scoreList[0];
@@ -2346,6 +2428,7 @@ describe('term-bank WASM parser', () => {
         expect(profile?.nativeStringPlanMs).toBe(0);
         expect(profile?.recentContentDedupHitCount).toBe(1);
 
+        /** @type {TermBankColumnChunk[]} */
         const version1Chunks = [];
         await parseTermBankWithWasmColumnChunks(
             sources,
@@ -2481,6 +2564,7 @@ describe('term-bank WASM parser', () => {
                 ['object-copy', '', '', '', 0, [objectGlossary], 3, ''],
             ])),
         ];
+        /** @type {TermBankColumnChunk[]} */
         const chunks = [];
         await parseTermBankWithWasmColumnChunks(
             sources,
@@ -2491,6 +2575,7 @@ describe('term-bank WASM parser', () => {
         );
 
         const [chunk] = chunks;
+        if (!(chunk.contentMetaList instanceof Uint32Array)) { throw new Error('Expected content metadata'); }
         expect(chunk.contentUniqueIndexList).toStrictEqual(new Uint32Array([0, 0, 0]));
         expect(chunk.contentDedupPlan?.uniqueCount).toBe(1);
         expect(chunk.contentMetaList[0]).toBe(chunk.contentMetaList[4]);
@@ -2516,6 +2601,7 @@ describe('term-bank WASM parser', () => {
          * @returns {Promise<ReturnType<typeof copyWasmBackedColumnChunk>>}
          */
         const parseStableChunk = async (source) => {
+            /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */
             let result = null;
             await parseTermBankWithWasmColumnChunks(
                 source,
@@ -2529,9 +2615,17 @@ describe('term-bank WASM parser', () => {
                     singleChunk: true,
                 },
             );
-            return /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (result);
+            if (result === null) { throw new Error('Expected a parsed column chunk'); }
+            return result;
         };
+        /**
+         * @param {TermBankColumnChunk} chunk
+         * @returns {number[][]}
+         */
         const getContentRows = (chunk) => {
+            if (!(chunk.contentMetaList instanceof Uint32Array) || !(chunk.contentBytesBuffer instanceof Uint8Array)) {
+                throw new Error('Expected shared content metadata');
+            }
             const result = [];
             for (let i = 0; i < chunk.rowCount; ++i) {
                 const metaOffset = i * 4;
@@ -2541,10 +2635,15 @@ describe('term-bank WASM parser', () => {
             }
             return result;
         };
+        /**
+         * @param {TermBankColumnChunk} chunk
+         * @returns {number[][]}
+         */
         const getPlanStrings = (chunk) => {
             const {stringLengths, stringOffsets, stringsBuffer} = chunk.termRecordPreinternedPlan;
+            if (!(stringOffsets instanceof Uint32Array)) { throw new Error('Expected string offsets'); }
             return Array.from(stringLengths, (length, index) => (
-                [...stringsBuffer.subarray(stringOffsets[index], stringOffsets[index] + length)]
+                [...stringsBuffer.subarray(stringOffsets[index] ?? 0, (stringOffsets[index] ?? 0) + length)]
             ));
         };
 
@@ -2574,6 +2673,7 @@ describe('term-bank WASM parser', () => {
                 ['other', '', '', '', 3, ['other definition'], 3, ''],
             ])),
         ];
+        /** @type {TermBankColumnChunk[]} */
         const chunks = [];
         await parseTermBankWithWasmColumnChunks(
             sources,
@@ -2650,14 +2750,17 @@ describe('term-bank WASM parser', () => {
                     if (plan.stringOffsets === undefined || plan.stringHashes === undefined) {
                         throw new Error('Expected complete preinterned string metadata');
                     }
+                    const stringOffsets = plan.stringOffsets;
+                    const stringHashes = plan.stringHashes;
                     snapshot = {
                         strings: Array.from(plan.stringLengths, (length, index) => {
-                            const offset = plan.stringOffsets[index];
+                            const offset = stringOffsets[index];
+                            if (offset === undefined) { throw new Error('Missing string offset'); }
                             return textDecoder.decode(plan.stringsBuffer.subarray(offset, offset + length));
                         }),
                         stringLengths: [...plan.stringLengths],
-                        stringHashes: [...plan.stringHashes],
-                        stringOffsets: [...plan.stringOffsets],
+                        stringHashes: [...stringHashes],
+                        stringOffsets: [...stringOffsets],
                         expressionIndexes: [...plan.expressionIndexes],
                         readingIndexes: [...plan.readingIndexes],
                         readingEqualsExpressionList: [...chunk.readingEqualsExpressionList],
@@ -2666,7 +2769,8 @@ describe('term-bank WASM parser', () => {
                 8,
                 {emitTermByteLists: false, useNativeStringPlan},
             );
-            return /** @type {TermStringPlanSnapshot} */ (snapshot);
+            if (snapshot === null) { throw new Error('Expected a string plan'); }
+            return snapshot;
         };
 
         const nativePlan = await parsePlan(true);
@@ -2694,7 +2798,7 @@ describe('term-bank WASM parser', () => {
             ['minimum-score', '', '', '', -2147483648, ['minimum'], 9, ''],
             ['maximum-values', '', '', '', 2147483647, ['maximum'], 2147483647, ''],
         ]));
-        /** @type {Array<Parameters<Parameters<typeof parseTermBankWithWasmColumnChunks>[2]>[0]>} */
+        /** @type {TermBankColumnChunk[]} */
         const chunks = [];
         await parseTermBankWithWasmColumnChunks(
             source,
@@ -2705,12 +2809,18 @@ describe('term-bank WASM parser', () => {
         );
         const [chunk] = chunks;
         const plan = chunk.termRecordPreinternedPlan;
+        if (!(plan.stringHashes instanceof Uint32Array)) { throw new Error('Expected string hashes'); }
+        /** @type {number[]} */
         const stringOffsets = [];
         let offset = 0;
         for (const length of plan.stringLengths) {
             stringOffsets.push(offset);
             offset += length;
         }
+        /**
+         * @param {number} index
+         * @returns {string}
+         */
         const getPlanString = (index) => textDecoder.decode(
             plan.stringsBuffer.subarray(stringOffsets[index], stringOffsets[index] + plan.stringLengths[index]),
         );
@@ -2738,7 +2848,7 @@ describe('term-bank WASM parser', () => {
             ['third', '', '', '', 3, ['different'], 3, ''],
             ['fourth', '', '', '', 4, ['different'], 4, ''],
         ]));
-        /** @type {Array<Parameters<Parameters<typeof parseTermBankWithWasmColumnChunks>[2]>[0]>} */
+        /** @type {TermBankColumnChunk[]} */
         const chunks = [];
         await parseTermBankWithWasmColumnChunks(
             source,
@@ -2757,24 +2867,28 @@ describe('term-bank WASM parser', () => {
         expect(chunk.contentMetaList).toBeInstanceOf(Uint32Array);
         expect(chunk.contentMetaList).toHaveLength(16);
         expect(chunk.contentBytesBuffer).toBeInstanceOf(Uint8Array);
+        if (typeof chunk.contentBytesBaseOffset !== 'number' || !(chunk.contentMetaList instanceof Uint32Array) || !(chunk.contentBytesBuffer instanceof Uint8Array)) {
+            throw new Error('Expected shared content slab metadata');
+        }
+        const {contentBytesBaseOffset, contentMetaList, contentBytesBuffer} = chunk;
         const contentStrings = [0, 1, 2, 3].map((index) => {
             const metaOffset = index * 4;
-            const offset = chunk.contentBytesBaseOffset + chunk.contentMetaList[metaOffset];
-            const length = chunk.contentMetaList[metaOffset + 1];
-            return textDecoder.decode(chunk.contentBytesBuffer.subarray(offset, offset + length));
+            const offset = contentBytesBaseOffset + contentMetaList[metaOffset];
+            const length = contentMetaList[metaOffset + 1];
+            return textDecoder.decode(contentBytesBuffer.subarray(offset, offset + length));
         });
         expect(contentStrings[0]).toBe(contentStrings[1]);
         expect(contentStrings[0]).toContain('"same"');
         expect(contentStrings[2]).toBe(contentStrings[3]);
         expect(contentStrings[2]).toContain('"different"');
         expect(contentStrings[2]).not.toBe(contentStrings[0]);
-        expect(chunk.contentMetaList[2]).toBe(chunk.contentMetaList[6]);
-        expect(chunk.contentMetaList[3]).toBe(chunk.contentMetaList[7]);
-        expect(chunk.contentMetaList[10]).toBe(chunk.contentMetaList[14]);
-        expect(chunk.contentMetaList[11]).toBe(chunk.contentMetaList[15]);
-        expect(chunk.contentMetaList[0]).not.toBe(chunk.contentMetaList[4]);
-        expect(chunk.contentMetaList[8]).not.toBe(chunk.contentMetaList[12]);
-        expect(chunk.contentMetaList[8]).toBeGreaterThan(chunk.contentMetaList[0]);
+        expect(contentMetaList[2]).toBe(contentMetaList[6]);
+        expect(contentMetaList[3]).toBe(contentMetaList[7]);
+        expect(contentMetaList[10]).toBe(contentMetaList[14]);
+        expect(contentMetaList[11]).toBe(contentMetaList[15]);
+        expect(contentMetaList[0]).not.toBe(contentMetaList[4]);
+        expect(contentMetaList[8]).not.toBe(contentMetaList[12]);
+        expect(contentMetaList[8]).toBeGreaterThan(contentMetaList[0]);
         expect(chunk.contentUniqueIndexList).toBeNull();
         expect(chunk.contentDedupPlan).toBeNull();
         expect(chunk.useResolvedContentReferences).toBe(false);
@@ -2787,6 +2901,7 @@ describe('term-bank WASM parser', () => {
             ['third', '', 'tag\\value', 'rule\\value', 3, ['different'], 3, 'term-tag'],
             ['fourth', '', 'tag\\value', 'rule\\value', 4, [{type: 'text', text: 'different'}], 4, 'term-tag'],
         ]));
+        /** @type {TermBankColumnChunk[]} */
         const chunks = [];
         await parseTermBankWithWasmColumnChunks(
             source,
@@ -2797,11 +2912,15 @@ describe('term-bank WASM parser', () => {
         );
 
         const [chunk] = chunks;
+        if (typeof chunk.contentBytesBaseOffset !== 'number' || !(chunk.contentMetaList instanceof Uint32Array) || !(chunk.contentBytesBuffer instanceof Uint8Array)) {
+            throw new Error('Expected token-binary content metadata');
+        }
+        const {contentBytesBaseOffset, contentMetaList, contentBytesBuffer} = chunk;
         const contents = [0, 1].map((index) => {
             const metaOffset = index * 4;
-            const offset = chunk.contentBytesBaseOffset + chunk.contentMetaList[metaOffset];
-            const length = chunk.contentMetaList[metaOffset + 1];
-            const bytes = chunk.contentBytesBuffer.subarray(offset, offset + length);
+            const offset = contentBytesBaseOffset + contentMetaList[metaOffset];
+            const length = contentMetaList[metaOffset + 1];
+            const bytes = contentBytesBuffer.subarray(offset, offset + length);
             return {bytes, decoded: decodeRawTermContentTokenBinary(bytes, textDecoder)};
         });
         expect(contents[0].decoded).toStrictEqual({
@@ -2811,21 +2930,22 @@ describe('term-bank WASM parser', () => {
             glossaryJson: '["same","wrapped"]',
         });
         expect(contents[1].decoded).toStrictEqual(contents[0].decoded);
-        expect(chunk.contentMetaList[2]).toBe(chunk.contentMetaList[6]);
-        expect(chunk.contentMetaList[3]).toBe(chunk.contentMetaList[7]);
-        expect(chunk.contentMetaList[0]).toBe(chunk.contentMetaList[4]);
-        expect(chunk.contentMetaList[8]).toBe(chunk.contentMetaList[12]);
-        expect(chunk.contentMetaList[8]).toBeGreaterThan(chunk.contentMetaList[0]);
+        expect(contentMetaList[2]).toBe(contentMetaList[6]);
+        expect(contentMetaList[3]).toBe(contentMetaList[7]);
+        expect(contentMetaList[0]).toBe(contentMetaList[4]);
+        expect(contentMetaList[8]).toBe(contentMetaList[12]);
+        expect(contentMetaList[8]).toBeGreaterThan(contentMetaList[0]);
         expect(chunk.contentUniqueIndexList).toStrictEqual(new Uint32Array([0, 0, 1, 1]));
         expect(chunk.contentDedupPlan?.uniqueCount).toBe(2);
         expect(hashTermEntryContentBytesPair(contents[0].bytes)).toEqual([
-            chunk.contentMetaList[2],
-            chunk.contentMetaList[3],
+            contentMetaList[2],
+            contentMetaList[3],
         ]);
 
-        const malformed = Uint8Array.from(contents[0].bytes.filter((value) => value !== 0));
+        const malformed = Uint8Array.from(contents[0].bytes.filter((/** @type {number} */ value) => value !== 0));
         expect(decodeRawTermContentTokenBinary(malformed, textDecoder)).toBeNull();
 
+        /** @type {TermBankColumnChunk[]} */
         const formattedChunks = [];
         await parseTermBankWithWasmColumnChunks(
             textEncoder.encode(`[
@@ -2838,6 +2958,7 @@ describe('term-bank WASM parser', () => {
             {emitContentSlab: true, emitTokenBinaryContent: true},
         );
         const [formattedChunk] = formattedChunks;
+        if (!(formattedChunk.contentMetaList instanceof Uint32Array)) { throw new Error('Expected formatted content metadata'); }
         expect(formattedChunk.contentMetaList[2]).toBe(formattedChunk.contentMetaList[6]);
         expect(formattedChunk.contentMetaList[3]).toBe(formattedChunk.contentMetaList[7]);
         expect(formattedChunk.contentMetaList[1]).toBe(formattedChunk.contentMetaList[5]);

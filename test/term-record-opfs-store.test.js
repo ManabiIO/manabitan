@@ -25,86 +25,107 @@ import {
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
 } from '../ext/js/dictionary/raw-term-content.js';
 
+/** @typedef {ReturnType<TermRecordOpfsStore['_createShardState']>} TermRecordShardState */
+
+/**
+ * @param {Partial<TermRecordShardState>} state
+ * @returns {TermRecordShardState}
+ */
+function asShardState(state) {
+    return /** @type {TermRecordShardState} */ (/** @type {unknown} */ (state));
+}
+
+/**
+ * @param {Partial<FileSystemFileHandle>} handle
+ * @returns {FileSystemFileHandle}
+ */
+function asFileHandle(handle) {
+    return /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ (handle));
+}
+
 /**
  * @param {Map<string, Uint8Array>} fileBytesByName
  * @param {{removeEntryFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void}} [options]
  * @returns {FileSystemDirectoryHandle}
  */
 function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new Map(), getFileFailures = new Map(), beforeWrite = () => {}} = {}) {
-    return /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
-        async getFileHandle(
-            /** @type {string} */ name,
-            /** @type {{create?: boolean}} */ options = {},
-        ) {
-            const create = options.create === true;
-            if (!fileBytesByName.has(name)) {
-                if (!create) {
-                    throw new Error(`File not found: ${name}`);
-                }
-                fileBytesByName.set(name, new Uint8Array());
+    /**
+     * @param {string} name
+     * @param {{create?: boolean}} [options]
+     * @returns {Promise<FileSystemFileHandle>}
+     */
+    const getFileHandle = async (name, options = {}) => {
+        const create = options.create === true;
+        if (!fileBytesByName.has(name)) {
+            if (!create) {
+                throw new Error(`File not found: ${name}`);
             }
-            return /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
-                kind: 'file',
-                name,
-                async isSameEntry() {
-                    return false;
-                },
-                async createSyncAccessHandle() {
-                    throw new Error('SyncAccessHandle not implemented in test double');
-                },
-                async getFile() {
-                    const failuresRemaining = getFileFailures.get(name) ?? 0;
-                    if (failuresRemaining > 0) {
-                        getFileFailures.set(name, failuresRemaining - 1);
-                        throw new Error(`Injected getFile failure for ${name}`);
-                    }
-                    const bytes = fileBytesByName.get(name) ?? new Uint8Array();
-                    const file = new Blob([new Uint8Array(bytes)]);
-                    Object.defineProperty(file, 'name', {value: name});
-                    return /** @type {File} */ (file);
-                },
-                async createWritable() {
-                    let nextBytes = fileBytesByName.get(name) ?? new Uint8Array();
-                    let cursor = nextBytes.byteLength;
-                    return {
-                        async seek(/** @type {number} */ position) {
-                            cursor = Math.max(0, position);
-                        },
-                        async truncate(/** @type {number} */ length) {
-                            nextBytes = nextBytes.slice(0, Math.max(0, length));
-                            cursor = Math.min(cursor, nextBytes.byteLength);
-                        },
-                        async write(/** @type {FileSystemWriteChunkType} */ value) {
-                            await beforeWrite(name, value);
-                            /** @type {Uint8Array|null} */
-                            let bytes = null;
-                            if (value instanceof ArrayBuffer) {
-                                bytes = new Uint8Array(new Uint8Array(value));
-                            } else if (ArrayBuffer.isView(value)) {
-                                bytes = new Uint8Array(new Uint8Array(value.buffer, value.byteOffset, value.byteLength));
-                            } else if (value instanceof Blob) {
-                                bytes = new Uint8Array(await value.arrayBuffer());
+            fileBytesByName.set(name, new Uint8Array());
+        }
+        return /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            kind: 'file',
+            name,
+            async isSameEntry() {
+                return false;
+            },
+            async createSyncAccessHandle() {
+                throw new Error('SyncAccessHandle not implemented in test double');
+            },
+            async getFile() {
+                const failuresRemaining = getFileFailures.get(name) ?? 0;
+                if (failuresRemaining > 0) {
+                    getFileFailures.set(name, failuresRemaining - 1);
+                    throw new Error(`Injected getFile failure for ${name}`);
+                }
+                const bytes = fileBytesByName.get(name) ?? new Uint8Array();
+                const file = new Blob([new Uint8Array(bytes)]);
+                Object.defineProperty(file, 'name', {value: name});
+                return /** @type {File} */ (file);
+            },
+            async createWritable() {
+                let nextBytes = fileBytesByName.get(name) ?? new Uint8Array();
+                let cursor = nextBytes.byteLength;
+                return {
+                    async seek(/** @type {number} */ position) {
+                        cursor = Math.max(0, position);
+                    },
+                    async truncate(/** @type {number} */ length) {
+                        nextBytes = nextBytes.slice(0, Math.max(0, length));
+                        cursor = Math.min(cursor, nextBytes.byteLength);
+                    },
+                    async write(/** @type {FileSystemWriteChunkType} */ value) {
+                        await beforeWrite(name, value);
+                        /** @type {Uint8Array|null} */
+                        let bytes = null;
+                        if (value instanceof ArrayBuffer) {
+                            bytes = new Uint8Array(new Uint8Array(value));
+                        } else if (ArrayBuffer.isView(value)) {
+                            bytes = new Uint8Array(new Uint8Array(value.buffer, value.byteOffset, value.byteLength));
+                        } else if (value instanceof Blob) {
+                            bytes = new Uint8Array(await value.arrayBuffer());
+                        }
+                        if (bytes !== null) {
+                            const requiredLength = cursor + bytes.byteLength;
+                            if (requiredLength > nextBytes.byteLength) {
+                                const expanded = new Uint8Array(requiredLength);
+                                expanded.set(nextBytes, 0);
+                                nextBytes = expanded;
                             }
-                            if (bytes !== null) {
-                                const requiredLength = cursor + bytes.byteLength;
-                                if (requiredLength > nextBytes.byteLength) {
-                                    const expanded = new Uint8Array(requiredLength);
-                                    expanded.set(nextBytes, 0);
-                                    nextBytes = expanded;
-                                }
-                                nextBytes.set(bytes, cursor);
-                                cursor += bytes.byteLength;
-                                return;
-                            }
-                            throw new Error(`Unsupported write value: ${String(value)}`);
-                        },
-                        async close() {
-                            fileBytesByName.set(name, nextBytes);
-                        },
-                    };
-                },
-            }));
-        },
+                            nextBytes.set(bytes, cursor);
+                            cursor += bytes.byteLength;
+                            return;
+                        }
+                        throw new Error(`Unsupported write value: ${String(value)}`);
+                    },
+                    async close() {
+                        fileBytesByName.set(name, nextBytes);
+                    },
+                };
+            },
+        }));
+    };
+    return /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+        getFileHandle,
         async removeEntry(/** @type {string} */ name) {
             const failuresRemaining = removeEntryFailures.get(name) ?? 0;
             if (failuresRemaining > 0) {
@@ -115,7 +136,7 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
         },
         async *entries() {
             for (const name of fileBytesByName.keys()) {
-                yield [name, await this.getFileHandle(name, {create: false})];
+                yield [name, await getFileHandle(name, {create: false})];
             }
         },
     }));
@@ -710,7 +731,7 @@ describe('TermRecordOpfsStore', () => {
         const jmFileName = store._getShardSegmentFileName('JMdict', 'raw', 0);
         const jitendexFileName = store._getShardSegmentFileName('Jitendex', 'raw', 0);
         const directory = createFakeDirectoryHandle(new Map());
-        const makeState = async (fileName) => store._createShardState(
+        const makeState = async (/** @type {string} */ fileName) => store._createShardState(
             fileName,
             await directory.getFileHandle(fileName, {create: true}),
             1,
@@ -740,7 +761,7 @@ describe('TermRecordOpfsStore', () => {
     test('cold integrity verification reports a missing dictionary while other shards exist', async () => {
         const store = new TermRecordOpfsStore();
         const jitendexFileName = store._getShardSegmentFileName('Jitendex', 'raw', 0);
-        Reflect.get(store, '_shardStateByFileName').set(jitendexFileName, {fileName: jitendexFileName});
+        Reflect.get(store, '_shardStateByFileName').set(jitendexFileName, asShardState({fileName: jitendexFileName}));
 
         const summary = await store.verifyIntegrity(['JMdict', 'Jitendex']);
 
@@ -757,7 +778,7 @@ describe('TermRecordOpfsStore', () => {
         const sidecarFileName = `${fileName}.mbti`;
         fileBytesByName.set(fileName, new Uint8Array([1]));
         fileBytesByName.set(sidecarFileName, new Uint8Array([2]));
-        const state = {fileName, logicalKey: fileName};
+        const state = asShardState({fileName, logicalKey: fileName});
         Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
         Reflect.get(store, '_shardStateByFileName').set(fileName, state);
         Reflect.get(store, '_activeAppendShardStateByKey').set(fileName, state);
@@ -778,16 +799,16 @@ describe('TermRecordOpfsStore', () => {
         const fileName = store._getShardSegmentFileName(dictionaryName, 'raw', 0);
         const recordsDirectoryHandle = createFakeDirectoryHandle(new Map());
         Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        Reflect.get(store, '_shardStateByFileName').set(fileName, {
+        Reflect.get(store, '_shardStateByFileName').set(fileName, asShardState({
             fileName,
             fileLength: 1,
-            fileHandle: {
+            fileHandle: asFileHandle({
                 async getFile() {
                     throw new Error('temporary OPFS failure');
                 },
-            },
+            }),
             logicalKey: fileName,
-        });
+        }));
 
         await store.ensureDictionariesLoaded([dictionaryName]);
 
@@ -799,21 +820,21 @@ describe('TermRecordOpfsStore', () => {
         const store = new TermRecordOpfsStore();
         const dictionaryName = 'Payload read failure';
         const fileName = store._getShardSegmentFileName(dictionaryName, 'raw', 0);
-        const state = {
+        const state = asShardState({
             fileName,
             fileLength: 1,
-            fileHandle: {
+            fileHandle: asFileHandle({
                 async getFile() {
-                    return {
+                    return /** @type {File} */ (/** @type {unknown} */ ({
                         size: 1,
                         async arrayBuffer() {
                             throw new Error('temporary payload read failure');
                         },
-                    };
+                    }));
                 },
-            },
+            }),
             logicalKey: fileName,
-        };
+        });
         Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
         Reflect.get(store, '_shardStateByFileName').set(fileName, state);
         vi.spyOn(store, '_tryRepairPersistentDictionaryIndex').mockResolvedValue(false);
@@ -828,7 +849,7 @@ describe('TermRecordOpfsStore', () => {
         const store = new TermRecordOpfsStore();
         const dictionaryName = 'Invalid cleanup failure';
         const fileName = store._getShardSegmentFileName(dictionaryName, 'raw', 0);
-        const state = {fileName, logicalKey: fileName, writable: null};
+        const state = asShardState({fileName, logicalKey: fileName, writable: null});
         Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
         Reflect.get(store, '_shardStateByFileName').set(fileName, state);
         Reflect.get(store, '_activeAppendShardStateByKey').set(fileName, state);
@@ -846,12 +867,12 @@ describe('TermRecordOpfsStore', () => {
         const dictionaryName = 'Large unavailable dictionary';
         const fileName = store._getShardSegmentFileName(dictionaryName, 'raw', 0);
         Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
-        Reflect.get(store, '_shardStateByFileName').set(fileName, {
+        Reflect.get(store, '_shardStateByFileName').set(fileName, asShardState({
             fileName,
             fileLength: 33 * 1024 * 1024,
             fileHandle: /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({getFile: vi.fn()})),
             logicalKey: fileName,
-        });
+        }));
         vi.spyOn(store, '_tryRepairPersistentDictionaryIndex').mockResolvedValue(false);
         const loadShardStateContents = vi.spyOn(store, '_loadShardStateContents');
 
@@ -870,12 +891,12 @@ describe('TermRecordOpfsStore', () => {
         const dictionaryName = 'Transient index failure';
         const fileName = store._getShardSegmentFileName(dictionaryName, 'raw', 0);
         Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
-        Reflect.get(store, '_shardStateByFileName').set(fileName, {
+        Reflect.get(store, '_shardStateByFileName').set(fileName, asShardState({
             fileName,
             fileLength: 64 * 1024 * 1024,
             fileHandle: /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({getFile: vi.fn()})),
             logicalKey: fileName,
-        });
+        }));
         vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockImplementation(async () => {
             store._recordPersistentIndexFailure(dictionaryName, 'transient', 'Injected OPFS read failure');
             return false;
@@ -904,12 +925,12 @@ describe('TermRecordOpfsStore', () => {
             throw error;
         }));
         Reflect.set(store, '_recordsDirectoryHandle', directory);
-        Reflect.get(store, '_shardStateByFileName').set(fileName, {
+        Reflect.get(store, '_shardStateByFileName').set(fileName, asShardState({
             fileName,
             fileLength: 1,
             fileHandle: /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({getFile: vi.fn()})),
             logicalKey: fileName,
-        });
+        }));
 
         await expect(store._loadPersistentDictionaryIndex(dictionaryName, 0)).resolves.toBe(false);
 
@@ -926,14 +947,14 @@ describe('TermRecordOpfsStore', () => {
         const directory = createFakeDirectoryHandle(new Map());
         const notFoundError = new Error('Injected missing record shard');
         notFoundError.name = 'NotFoundError';
-        const state = {
+        const state = asShardState({
             fileName,
             fileLength: 1,
             fileHandle: /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
                 getFile: vi.fn().mockRejectedValue(notFoundError),
             })),
             logicalKey: fileName,
-        };
+        });
         Reflect.set(store, '_recordsDirectoryHandle', directory);
         Reflect.get(store, '_shardStateByFileName').set(fileName, state);
 
@@ -964,12 +985,12 @@ describe('TermRecordOpfsStore', () => {
         const dictionaryName = 'Small degraded dictionary';
         const fileName = store._getShardSegmentFileName(dictionaryName, 'raw', 0);
         Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
-        Reflect.get(store, '_shardStateByFileName').set(fileName, {
+        Reflect.get(store, '_shardStateByFileName').set(fileName, asShardState({
             fileName,
             fileLength: 1024,
             fileHandle: /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({getFile: vi.fn()})),
             logicalKey: fileName,
-        });
+        }));
         vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockResolvedValue(false);
         const tryRepair = vi.spyOn(store, '_tryRepairPersistentDictionaryIndex').mockResolvedValue(false);
         vi.spyOn(store, '_loadShardStateContents').mockResolvedValue(true);
@@ -1484,7 +1505,7 @@ describe('TermRecordOpfsStore', () => {
     test('rejects appending to a finalized authoritative container', async () => {
         const store = new TermRecordOpfsStore();
         Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
-        const createRecord = (expression, reading) => ({
+        const createRecord = (/** @type {string} */ expression, /** @type {string} */ reading) => ({
             dictionary: 'JMdict',
             expression,
             reading,
@@ -1942,6 +1963,7 @@ describe('TermRecordOpfsStore', () => {
         const fileBytesByName = new Map();
         /** @type {() => void} */
         let releaseWrite = () => {};
+        /** @type {Promise<void>} */
         const writeGate = new Promise((resolve) => {
             releaseWrite = () => { resolve(); };
         });
@@ -2202,6 +2224,7 @@ describe('TermRecordOpfsStore', () => {
         const writeError = new Error('injected first lookup sidecar failure');
         /** @type {() => void} */
         let releaseFailure = () => {};
+        /** @type {Promise<void>} */
         const failureGate = new Promise((resolve) => {
             releaseFailure = () => { resolve(); };
         });
@@ -2245,7 +2268,12 @@ describe('TermRecordOpfsStore', () => {
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const store = new TermRecordOpfsStore();
         Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        const appendLargeDictionary = async (dictionary, expression, reading, offset) => {
+        const appendLargeDictionary = async (
+            /** @type {string} */ dictionary,
+            /** @type {string} */ expression,
+            /** @type {string} */ reading,
+            /** @type {number} */ offset,
+        ) => {
             await store.appendBatchFromArtifactChunkResolvedContent(
                 {
                     dictionary,
@@ -2314,7 +2342,7 @@ describe('TermRecordOpfsStore', () => {
         const store = new TermRecordOpfsStore();
         const dictionaryName = 'Orphan cleanup failure';
         const fileName = store._getShardSegmentFileName(dictionaryName, 'raw', 0);
-        const state = {fileName};
+        const state = asShardState({fileName});
         Reflect.get(store, '_shardStateByFileName').set(fileName, state);
         Reflect.set(store, '_allShardContentsLoaded', true);
         vi.spyOn(store, '_removeStorageFileOrTruncate').mockRejectedValue(new Error('injected orphan removal failure'));
@@ -2364,6 +2392,7 @@ describe('TermRecordOpfsStore', () => {
         const dictionaryName = 'Rolled back active sidecar';
         /** @type {() => void} */
         let releaseWrite = () => {};
+        /** @type {Promise<void>} */
         const writeGate = new Promise((resolve) => {
             releaseWrite = () => { resolve(); };
         });
@@ -2843,7 +2872,10 @@ describe('TermRecordOpfsStore', () => {
         const loadPersistentDictionaryIndex = readerStore._loadPersistentDictionaryIndex.bind(readerStore);
         /** @type {() => void} */
         let releaseLoad = () => {};
-        const loadMayFinish = new Promise((resolve) => { releaseLoad = resolve; });
+        /** @type {Promise<void>} */
+        const loadMayFinish = new Promise((resolve) => {
+            releaseLoad = () => { resolve(); };
+        });
         const persistentIndexLoad = vi.spyOn(readerStore, '_loadPersistentDictionaryIndex').mockImplementation(
             async (name, generation) => {
                 await loadMayFinish;
@@ -2937,13 +2969,15 @@ describe('TermRecordOpfsStore', () => {
         let startedCount = 0;
         /** @type {() => void} */
         let releaseReads = () => {};
+        /** @type {Promise<void>} */
         const readsMayFinish = new Promise((resolve) => {
-            releaseReads = resolve;
+            releaseReads = () => { resolve(); };
         });
         /** @type {() => void} */
         let reportBothStarted = () => {};
+        /** @type {Promise<void>} */
         const bothStarted = new Promise((resolve) => {
-            reportBothStarted = resolve;
+            reportBothStarted = () => { resolve(); };
         });
         for (const state of states) {
             const getFile = state.fileHandle.getFile.bind(state.fileHandle);
@@ -2982,7 +3016,12 @@ describe('TermRecordOpfsStore', () => {
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
 
-        const appendDictionary = async (dictionary, expression, reading, sequence) => {
+        const appendDictionary = async (
+            /** @type {string} */ dictionary,
+            /** @type {string} */ expression,
+            /** @type {string} */ reading,
+            /** @type {number} */ sequence,
+        ) => {
             const expressionBytes = textEncoder.encode(expression);
             const readingBytes = textEncoder.encode(reading);
             const builder = createTermRecordPreinternedPlanBuilder(2);
@@ -3953,4 +3992,30 @@ describe('TermRecordOpfsStore', () => {
         expect(taberuRecord?.expression).toBe('食べる');
         expect(taberuRecord?.reading).toBe('たべる');
     });
+});
+
+
+describe('TermRecordOpfsStore string decoding buffer ownership', () => {
+    for (const shared of [false, true]) {
+        test(`decodes an offset string from ${shared ? 'shared' : 'ordinary'} bytes`, () => {
+            const buffer = shared ? new SharedArrayBuffer(64) : new ArrayBuffer(64);
+            const bytes = new Uint8Array(buffer, 3, 40);
+            const text = new TextEncoder().encode('日本語🙂');
+            bytes.fill(65);
+            bytes.set(text, 7);
+            const store = new TermRecordOpfsStore();
+            const decoder = new TextDecoder();
+            const decode = vi.fn((/** @type {Uint8Array} */ input) => {
+                // Node accepts shared views; enforce the stricter browser API contract.
+                expect(input.buffer).toBeInstanceOf(ArrayBuffer);
+                expect(input.byteLength).toBe(text.byteLength);
+                if (!shared) { expect(input.buffer).toBe(buffer); }
+                return decoder.decode(input);
+            });
+            Reflect.set(store, '_textDecoder', {decode});
+            expect(store._decodeString(bytes, 7, text.byteLength)).toBe('日本語🙂');
+            expect(store._decodeString(bytes, 0, 0)).toBe('');
+            expect(decode).toHaveBeenCalledOnce();
+        });
+    }
 });
