@@ -1,0 +1,33 @@
+name: Import critical path source export
+on:
+  push:
+    branches: [verify/import-critical-path-20260909]
+    paths: [.github/workflows/import-critical-path-export.yml]
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Export immutable accepted and bounded sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/source"
+          for sha in da8f7436d34e510441d30692c8d698806b70e13f 03478be25506176610b2133be658ee697d9bb3f1; do
+            git archive "$sha" | gzip > "$RUNNER_TEMP/source/$sha.tar.gz"
+            git ls-tree -rz "$sha" > "$RUNNER_TEMP/source/$sha.manifest"
+            git cat-file commit "$sha" > "$RUNNER_TEMP/source/$sha.commit"
+          done
+          git diff --binary da8f7436d34e510441d30692c8d698806b70e13f 03478be25506176610b2133be658ee697d9bb3f1 > "$RUNNER_TEMP/source/bounded.patch"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-critical-path-sources
+          path: ${{ runner.temp }}/source/
+          retention-days: 7
+          if-no-files-found: error
