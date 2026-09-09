@@ -1,0 +1,79 @@
+name: Preserve tested paired-hash SIMD source
+
+on:
+  push:
+    branches: [perf-hash-stripes-verify-20260908]
+    paths:
+      - .github/workflows/preserve-hash-stripes-source.yml
+      - dev/perf/hash-stripes-final.test.txt
+
+permissions:
+  contents: read
+
+jobs:
+  preserve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require the exact completed source validation
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {data: run} = await github.rest.actions.getWorkflowRun({...context.repo, run_id: 34296719431})
+            if (run.conclusion !== 'success' || run.head_sha !== '1833eec1a1e3ad6246f077209927acd7ee4f3051') {
+              throw new Error('Exact runtime source validation is not successful')
+            }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - name: Reconstruct the tested runtime and lint-refined regression test
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          git worktree add --detach "$RUNNER_TEMP/source" 394d8eb799dd1eb5e194cee11472a4beab915080
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/source/node_modules"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          source = Path(os.environ['RUNNER_TEMP']) / 'source/ext/js/dictionary/wasm/term-bank-parser.c'
+          text = source.read_text()
+          start = text.index('static void hash_content_xxh32_pair(')
+          start = text.index('        uint32_t a1 =', start)
+          end = text.index('    } else {', start)
+          source.write_text(text[:start] + Path('dev/perf/hash-stripes-experiment/stripes.c.txt').read_text() + text[end:])
+          PY
+          cp dev/perf/hash-stripes-final.test.txt "$RUNNER_TEMP/source/test/term-bank-hash-stripes.test.js"
+          cd "$RUNNER_TEMP/source"
+          git add ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-hash-stripes.test.js
+          test "$(git write-tree)" = ad080e4667c0c91b6422c8a6892bd1162c509b1e
+          node dev/bin/build-libs.js > "$RUNNER_TEMP/evidence/build.log" 2>&1
+          node node_modules/vitest/vitest.mjs run test/term-bank-hash-stripes.test.js > "$RUNNER_TEMP/evidence/focused.log" 2>&1
+          npm run test:ts > "$RUNNER_TEMP/evidence/types.log" 2>&1
+          node node_modules/eslint/bin/eslint.js test/term-bank-hash-stripes.test.js > "$RUNNER_TEMP/evidence/lint.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$RUNNER_TEMP/evidence/build-dry-run.log" 2>&1
+      - name: Preserve only the two-file source change on a new review branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/source"
+          test "$(git write-tree)" = ad080e4667c0c91b6422c8a6892bd1162c509b1e
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'Use every SIMD lane for exact paired XXH32 content hashes'
+          git push origin HEAD:refs/heads/perf-import-hash-stripes-20260908
+          git rev-parse HEAD > "$RUNNER_TEMP/evidence/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/evidence/source-tree.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hash-stripes-source-validation
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
