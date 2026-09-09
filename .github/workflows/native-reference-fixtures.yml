@@ -1,0 +1,50 @@
+name: Public native reference fixtures
+on:
+  push:
+    branches: [verify/native-reference-fixtures-20260909]
+    paths: [.github/workflows/native-reference-fixtures.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fixtures:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Fetch public immutable dictionary inputs only
+        shell: python
+        run: |
+          import hashlib, json, os, pathlib, urllib.request, zipfile
+          out = pathlib.Path(os.environ['RUNNER_TEMP']) / 'native-reference-fixtures'
+          out.mkdir()
+          sources = [
+              ('JMdict_english.zip', 'https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-07/', '026d221d929bebfa9355d527be9c0332a79c54cf857fa1b93b24e1cd02a8a387', 526952),
+              ('JMnedict.zip', 'https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-07/', 'a4a8b7a8c79f2c5673334d1d4aaa78b43705bd31481bc9b7d31c53465a05a7b0', 667947),
+              ('jitendex-yomitan.zip', 'https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.08.11.0/', '8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc', 435448),
+          ]
+          manifest = []
+          for name, base, expected, expected_rows in sources:
+              with urllib.request.urlopen(base + name, timeout=180) as response:
+                  data = response.read()
+              actual = hashlib.sha256(data).hexdigest()
+              if actual != expected:
+                  raise RuntimeError('Fixture hash mismatch: ' + name)
+              path = out / name
+              path.write_bytes(data)
+              with zipfile.ZipFile(path) as archive:
+                  banks = [n for n in archive.namelist() if n.startswith('term_bank_') and n.endswith('.json')]
+                  if len(set(banks)) != len(banks):
+                      raise RuntimeError('Duplicate bank names')
+                  rows = sum(len(json.loads(archive.read(n))) for n in banks)
+              if rows != expected_rows:
+                  raise RuntimeError('Fixture row count mismatch: ' + name)
+              manifest.append(dict(file=name, url=base + name, sha256=actual, bytes=len(data), rows=rows, banks=len(banks)))
+          (out / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          print(json.dumps(manifest, indent=2))
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-native-reference-fixtures
+          path: ${{ runner.temp }}/native-reference-fixtures/
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
