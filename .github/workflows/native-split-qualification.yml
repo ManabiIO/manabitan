@@ -1,0 +1,141 @@
+name: Native split lookup qualification
+on:
+  push:
+    branches: [verify/native-split-lookup-20260909]
+    paths: [.github/workflows/native-split-qualification.yml, dev/perf/native-split/**]
+permissions:
+  contents: read
+concurrency:
+  group: native-split-qualification-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+  HUSKY: '0'
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [correctness, jmnedict, jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Reconstruct and verify the exact source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/evidence"
+          arms="$RUNNER_TEMP/arms"
+          mkdir -p "$evidence" "$arms"
+          # Correct one duplicated transport character before enforcing both
+          # the decoded patch hash and the entire resulting Git tree.
+          sed 's/RXPFMM5Qqk/RXPFM5Qqk/' dev/perf/native-split/source.patch.gz.b64 | base64 --decode | gzip -d > "$evidence/source.patch"
+          echo '9044c808eff0e10c9b61dae3ee981568133adabdfabc58b55d6c1b7583b88a45  source.patch' > "$evidence/patch.sha256"
+          (cd "$evidence" && sha256sum -c patch.sha256)
+          git worktree add --detach "$arms/A" ff9cbf2e848a86d6bbfd281179a6d753349e52f4
+          git worktree add --detach "$arms/B" ff9cbf2e848a86d6bbfd281179a6d753349e52f4
+          git -C "$arms/B" apply --index "$evidence/source.patch"
+          test "$(git -C "$arms/B" write-tree)" = 9b0335628af064b6462cf48b0e1d5b9cac0e64af
+          GIT_AUTHOR_DATE='2026-09-09T19:50:00Z' GIT_COMMITTER_DATE='2026-09-09T19:50:00Z' \
+            git -C "$arms/B" -c user.name='Manabitan qualification' -c user.email='qualification@users.noreply.github.com' \
+            -c commit.gpgsign=false -c core.hooksPath=/dev/null commit -m 'perf(import): prepare large lookup results in bounded native segments'
+          git -C "$arms/B" rev-parse HEAD HEAD^{tree} > "$evidence/candidate-source.txt"
+          git -C "$arms/A" rev-parse HEAD HEAD^{tree} > "$evidence/baseline-source.txt"
+          git -C "$arms/B" format-patch -1 --stdout > "$evidence/candidate.patch"
+          for arm in A B; do
+            cp -al node_modules "$arms/$arm/node_modules"
+            (cd "$arms/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+            test -z "$(git -C "$arms/$arm" status --porcelain)"
+          done
+          (cd "$arms/A" && node dev/perf/prepare-dictionaries.js) > "$evidence/fixtures.log" 2>&1
+          cp -al "$arms/A/builds/e2e-dictionary-cache" "$arms/B/builds/e2e-dictionary-cache"
+          node --version > "$evidence/node.txt"
+          clang --version > "$evidence/compiler.txt"
+          lscpu > "$evidence/cpu.txt"
+          free -b > "$evidence/memory.txt"
+          git show 9631f046033e4f171e21a3a4523b6a810260903a:dev/perf/fused-screen/paired.py \
+            | sed -e 's/493b5c5d206a391cebd1b2aaa8fe45ef6203dbc3/9b0335628af064b6462cf48b0e1d5b9cac0e64af/g' \
+                  -e 's@js/dictionary/dictionary-database.js@js/dictionary/term-bank-wasm-parser.js@g' > "$evidence/paired.py"
+      - name: Observe native page and worker memory policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE' > "$RUNNER_TEMP/evidence/native-memory.json"
+          import {createServer} from 'node:http';
+          import {chromium} from 'playwright';
+          const server = createServer((req, res) => res.end('<!doctype html><title>memory preflight</title>'));
+          await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+          const browser = await chromium.launch({headless: true});
+          try {
+            const page = await browser.newPage();
+            await page.goto(`http://127.0.0.1:${server.address().port}`);
+            const values = await page.evaluate(async () => {
+              const url = URL.createObjectURL(new Blob(['postMessage({deviceMemory: navigator.deviceMemory, hardwareConcurrency: navigator.hardwareConcurrency})'], {type: 'text/javascript'}));
+              const worker = new Worker(url);
+              try {
+                const result = await new Promise((resolve, reject) => {
+                  worker.onmessage = event => resolve(event.data);
+                  worker.onerror = reject;
+                  setTimeout(() => reject(new Error('memory preflight timeout')), 10000);
+                });
+                return {page: {deviceMemory: navigator.deviceMemory, hardwareConcurrency: navigator.hardwareConcurrency}, worker: result};
+              } finally { worker.terminate(); URL.revokeObjectURL(url); }
+            });
+            console.log(JSON.stringify({browserVersion: browser.version(), ...values}, null, 2));
+          } finally { await browser.close(); server.close(); }
+          NODE
+      - name: Full unit, strict types, options, focused lint and all-target builds
+        if: matrix.lane == 'correctness'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/B"
+          node node_modules/vitest/vitest.mjs run > "$RUNNER_TEMP/evidence/unit.log" 2>&1
+          npm run test:ts > "$RUNNER_TEMP/evidence/types.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$RUNNER_TEMP/evidence/options.log" 2>&1
+          node node_modules/eslint/bin/eslint.js test/native-split-lookup.test.js > "$RUNNER_TEMP/evidence/new-test-lint.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$RUNNER_TEMP/evidence/dry-build.log" 2>&1
+      - name: Strict complete Chromium integration
+        if: matrix.lane == 'correctness'
+        shell: bash
+        env:
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: ${{ runner.temp }}/evidence/integration.html
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/B"
+          node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/integration.log" 2>&1
+          test -z "$(git status --porcelain)"
+      - name: Six fixed whole-import pairs, excluded warmup and same-binary controls
+        if: matrix.lane != 'correctness'
+        shell: bash
+        env:
+          DICTIONARY: ${{ matrix.lane }}
+        run: |
+          set -euo pipefail
+          python3 "$RUNNER_TEMP/evidence/paired.py" \
+            --baseline "$RUNNER_TEMP/arms/A" --candidate "$RUNNER_TEMP/arms/B" \
+            --dictionary "$DICTIONARY" --pairs 6 --output "$RUNNER_TEMP/evidence/paired" \
+            2>&1 | tee "$RUNNER_TEMP/evidence/driver.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-split-${{ matrix.lane }}-${{ github.sha }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
