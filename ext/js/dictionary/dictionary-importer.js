@@ -1727,9 +1727,15 @@ export class DictionaryImporter {
                 } else if (!this._disableTermBankWasmFastPath) {
                     try {
                         const termFileEntry = /** @type {import('@zip.js/zip.js').Entry} */ (termFile);
+                        // Constrained devices use the same compressed parser, but only
+                        // for one bounded source batch at a time. Re-plan after each
+                        // batch is released; never pin an import-wide low-memory slab.
+                        const compressedSourcePlan = importWideSourceRunEnabled ?
+                            (termFileIndex === 0 ? compressedImportRunPlan : termBankSourcePipeline.createCompressedImportRunPlan(termFileIndex)) :
+                            null
                         const importRunPlan = importWideSourceRunEnabled ?
-                            (termFileIndex === 0 ? compressedImportRunPlan ?? uncompressedImportRunPlan : null) ?? termBankSourcePipeline.createImportRunPlan(termFileIndex) :
-                            null;
+                            compressedSourcePlan ?? (termFileIndex === 0 ? uncompressedImportRunPlan : null) ?? termBankSourcePipeline.createImportRunPlan(termFileIndex) :
+                            null
                         const usedImportWideSourceRun = importRunPlan !== null;
                         let sourceTermFileBatch = importRunPlan?.files ?? (termBankSourcePipeline.canPrefetch(termFile) ? termBankSourcePipeline.getBatch(termFileIndex) : []);
                         let tSourceArchiveReadStart = Date.now();
@@ -1738,7 +1744,7 @@ export class DictionaryImporter {
                             {
                                 loaders: importRunPlan.loaders,
                                 estimatedByteLengths: importRunPlan.estimatedByteLengths,
-                                compressed: importRunPlan === compressedImportRunPlan,
+                                compressed: importRunPlan === compressedSourcePlan,
                             };
                         sourceArchiveReadMs += Math.max(0, Date.now() - tSourceArchiveReadStart);
                         if (preloadedTermFileBytes === null) {
