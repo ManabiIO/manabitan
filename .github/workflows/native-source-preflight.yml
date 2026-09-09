@@ -1,0 +1,29 @@
+name: Native source transport preflight
+on:
+  push:
+    branches: [verify/native-lookup-segments-20260909]
+    paths: [.github/workflows/native-source-preflight.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Export and check staged patch bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          cp dev/perf/native-lookup-segments.patch.gz.b64 "$RUNNER_TEMP/evidence/transport.b64"
+          base64 -d "$RUNNER_TEMP/evidence/transport.b64" | gzip -d > "$RUNNER_TEMP/evidence/source.patch"
+          echo "89696f8011d7a8cd9264190bcdeb865637e89a5cfc6956b6c9cf992e21c2b752  $RUNNER_TEMP/evidence/source.patch" | sha256sum --check
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-source-transport
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 7
