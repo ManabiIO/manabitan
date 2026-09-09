@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -30,6 +31,21 @@ def check_common(source: dict) -> None:
     changed = {p for p in COMMON if a[p] != b[p]}
     if changed != {WASM}:
         raise ValueError(f'Unexpected common build differences: {sorted(changed)}')
+
+
+
+def check_wasm_identity(root: Path, expected: dict) -> None:
+    """Hash the actual build and shipped member; schema 3 only reports ZIP SHA."""
+    if digest(root / WASM) != expected['common'][WASM]:
+        raise ValueError('Per-run WASM build changed')
+    if digest(root / PACKAGE) != expected['package_sha256']:
+        raise ValueError('Per-run extension package changed')
+    with zipfile.ZipFile(root / PACKAGE) as archive:
+        member = WASM.removeprefix('ext/')
+        if archive.namelist().count(member) != 1:
+            raise ValueError('Missing or ambiguous packaged WASM')
+        if hashlib.sha256(archive.read(member)).hexdigest() != expected['common'][WASM]:
+            raise ValueError('Shipped WASM differs from identified build')
 
 
 def main() -> None:
@@ -74,6 +90,8 @@ def main() -> None:
         if changed != [HEADER]:
             raise ValueError(f'Unexpected production changes: {changed}')
         check_common(source)
+        for arm, root in roots.items():
+            check_wasm_identity(root, source[arm])
         result['status'] = 'running'
         save(output / 'plan.json', result)
         for index, item in enumerate(plan):
@@ -99,8 +117,7 @@ def main() -> None:
             summary_path, report_path = folder / 'summary.json', folder / 'run-1.json'
             summary, report = json.loads(summary_path.read_text()), json.loads(report_path.read_text())
             measured = validate(summary, report, args.dictionary, fixture, 'low', source[item['arm']])
-            if summary.get('source', {}).get('sha256', {}).get(WASM) != source[item['arm']]['common'][WASM]:
-                raise ValueError('Per-run WASM identity differs from the pinned build')
+            check_wasm_identity(root, source[item['arm']])
             result['runs'].append(dict(**item, **measured, summary=str(summary_path.relative_to(output)),
                                       report_sha256=digest(report_path), summary_sha256=digest(summary_path),
                                       load_before=before, command=command))
