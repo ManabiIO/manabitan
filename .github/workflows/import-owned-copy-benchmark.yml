@@ -1,0 +1,159 @@
+name: Aligned owned-copy whole-import verification
+on:
+  push:
+    branches: [verify/import-allocation-workspace-20260909]
+    paths: [.github/workflows/import-owned-copy-benchmark.yml]
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-slim]
+        dictionary: [jmnedict, jmdict, jitendex]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      RUNNER_LABEL: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - name: Pin the two committed source trees
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence" "$RUNNER_TEMP/packages"
+          cp .github/owned-copy-paired.py "$RUNNER_TEMP/evidence/paired.py"
+          git switch --detach ff9cbf2e848a86d6bbfd281179a6d753349e52f4
+          test "$(git rev-parse HEAD^{tree})" = dc3098b9acc761caf193952537d568652196dc76
+          npm ci
+          if ! command -v clang >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y clang lld
+          fi
+          node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Record native page and worker memory policy without overrides
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {createServer} from 'node:http';
+          import {writeFileSync} from 'node:fs';
+          import {chromium} from 'playwright';
+          const server=createServer((req,res)=>{res.writeHead(200,{'Content-Type':'text/html','Cross-Origin-Opener-Policy':'same-origin','Cross-Origin-Embedder-Policy':'require-corp'});res.end('<!doctype html><title>Native policy preflight</title>');});
+          await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+          let browser;
+          try {
+            browser=await chromium.launch({channel:'chromium',headless:true,args:['--no-sandbox']});
+            const page=await browser.newPage();
+            await page.goto(`http://127.0.0.1:${server.address().port}`);
+            const native=await page.evaluate(async()=>{
+              const page={memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency,isolated:crossOriginIsolated};
+              const url=URL.createObjectURL(new Blob(['postMessage({memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency,isolated:crossOriginIsolated})'],{type:'text/javascript'}));
+              const worker=new Worker(url);
+              try {return {page,worker:await new Promise((resolve,reject)=>{worker.onmessage=e=>resolve(e.data);worker.onerror=reject;})};}
+              finally {worker.terminate();URL.revokeObjectURL(url);}
+            });
+            writeFileSync(`${process.env.RUNNER_TEMP}/evidence/native-policy.json`,JSON.stringify({browser:browser.version(),runner:process.env.RUNNER_LABEL,native},null,2));
+            if(native.page.memory!==native.worker.memory || !native.page.isolated || !native.worker.isolated)throw new Error('Native page/worker policy mismatch');
+            if(process.env.RUNNER_LABEL==='ubuntu-slim' && native.page.memory!==4)throw new Error('Constrained runner did not expose native 4 GiB policy');
+          } finally {await browser?.close();await new Promise(resolve=>server.close(resolve));}
+          NODE
+          node --version > "$RUNNER_TEMP/evidence/node.txt"
+          clang --version > "$RUNNER_TEMP/evidence/compiler.txt"
+          lscpu > "$RUNNER_TEMP/evidence/cpu.txt"
+          free -b > "$RUNNER_TEMP/evidence/memory.txt"
+          for file in memory.max cpu.max; do
+            if test -f "/sys/fs/cgroup/$file"; then cat "/sys/fs/cgroup/$file" > "$RUNNER_TEMP/evidence/cgroup-$file.txt"; fi
+          done
+      - name: Build both packages at the same dependency and source path
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          node dev/bin/build.js --target chrome-dev > "$RUNNER_TEMP/evidence/baseline-build.log" 2>&1
+          cp builds/manabitan-chrome-dev.zip "$RUNNER_TEMP/packages/baseline.zip"
+          git switch --detach 808f7864c68180543048074eff81413e31195b43
+          test "$(git rev-parse HEAD^{tree})" = de590b82fe22487b4f95f90bb8ea4195b1f390ab
+          node dev/bin/build.js --target chrome-dev > "$RUNNER_TEMP/evidence/candidate-build.log" 2>&1
+          cp builds/manabitan-chrome-dev.zip "$RUNNER_TEMP/packages/candidate.zip"
+          python3 - <<'PY'
+          import zipfile,os,json,hashlib
+          root=os.environ['RUNNER_TEMP']
+          with zipfile.ZipFile(root+'/packages/baseline.zip') as za, zipfile.ZipFile(root+'/packages/candidate.zip') as zb:
+            a={n:za.read(n) for n in za.namelist()};b={n:zb.read(n) for n in zb.namelist()}
+          changed=sorted(n for n in a.keys()|b.keys() if a.get(n)!=b.get(n))
+          assert changed==['js/core/copy-stable-byte-view.js','js/dictionary/dictionary-database.js'],changed
+          json.dump({'changed':changed,'baseline':{n:hashlib.sha256(v).hexdigest() for n,v in a.items()},'candidate':{n:hashlib.sha256(v).hexdigest() for n,v in b.items()}},open(root+'/evidence/package-payloads.json','w'),indent=2)
+          PY
+          git worktree add --detach "$RUNNER_TEMP/baseline" ff9cbf2e848a86d6bbfd281179a6d753349e52f4
+          printf '\nnode_modules\n' >> .git/info/exclude
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/baseline/node_modules"
+          cp -a ext/lib/. "$RUNNER_TEMP/baseline/ext/lib/"
+          mkdir -p "$RUNNER_TEMP/baseline/builds"
+          cp "$RUNNER_TEMP/packages/baseline.zip" "$RUNNER_TEMP/baseline/builds/manabitan-chrome-dev.zip"
+          ln -s "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$RUNNER_TEMP/baseline/builds/e2e-dictionary-cache"
+          test -z "$(git status --porcelain)"
+          test -z "$(git -C "$RUNNER_TEMP/baseline" status --porcelain)"
+          git diff ff9cbf2e848a86d6bbfd281179a6d753349e52f4 808f7864c68180543048074eff81413e31195b43 > "$RUNNER_TEMP/evidence/source.patch"
+      - name: Complete six pairs, excluded warmup and same-binary control without retries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "$RUNNER_TEMP/evidence/paired.py" --baseline "$RUNNER_TEMP/baseline" --candidate "$GITHUB_WORKSPACE" --output "$RUNNER_TEMP/evidence/paired" --dictionaries "$DICTIONARY" --pairs 6 --reverse 2>&1 | tee "$RUNNER_TEMP/evidence/driver.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-copy-${{ matrix.runner }}-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
+  integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 808f7864c68180543048074eff81413e31195b43
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Build and run strict full Chromium integration
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          node dev/perf/prepare-dictionaries.js > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          node dev/bin/build.js --target chrome-dev > "$RUNNER_TEMP/evidence/build.log" 2>&1
+          xvfb-run -a node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/integration.log" 2>&1
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const r=JSON.parse(readFileSync('builds/chromium-e2e-import-report.json','utf8'));
+          const d=r.runtimeDiagnostics;
+          if(r.status!=='success'||r.skippedVerification||!d?.hasStorageGetDirectory||!d.hasCreateSyncAccessHandle||!d.hasOpfsSahpoolVfs||d.openStorageMode!=='opfs-sahpool')throw new Error('Strict Chromium acceptance failed');
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-copy-strict-integration
+          path: |
+            ${{ runner.temp }}/evidence/
+            builds/chromium-e2e-import-report.json
+            builds/chromium-e2e-import-report.html
+          retention-days: 14
+          if-no-files-found: error
