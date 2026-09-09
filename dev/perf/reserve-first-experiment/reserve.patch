@@ -1,0 +1,50 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 2d5f8f00..2dd6af67 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -7807,7 +7807,7 @@ export class DictionaryDatabase {
+             let alreadyResolvedUniqueCount = 0;
+             let dedupExactCompareMs = 0;
+             const exactCandidates = [];
+-            const appendPendingContent = ({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2}) => {
++            const appendPendingContent = ({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2}, reservedIndex = -1) => {
+                 if (contentOffset > 0xffffffff) {
+                     throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
+                 }
+@@ -7817,7 +7817,7 @@ export class DictionaryDatabase {
+                 pendingContentHash2s.push(hash2);
+                 if (stagedIndexes !== null) {
+                     const signatureOffset = uniqueIndex * 3;
+-                    stagedIndexes[pendingContentCount] = uniqueSignatures === null ?
++                    stagedIndexes[pendingContentCount] = reservedIndex >= 0 ? reservedIndex : uniqueSignatures === null ?
+                         this._reserveArtifactTermContentMetadata(
+                             hash1,
+                             hash2,
+@@ -7902,6 +7902,27 @@ export class DictionaryDatabase {
+                         throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
+                     }
+                     const descriptor = {uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2};
++                    if (stagedIndexes !== null && uniqueSignatures !== null && persistedLookupRequired) {
++                        // New canonical content needs one hash-table probe, not a
++                        // failed published lookup followed by the same reservation probe.
++                        if (contentOffset > 0xffffffff) {
++                            throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`)
++                        }
++                        const signatureOffset = uniqueIndex * 3
++                        const reservedIndex = this._reservePreparedArtifactTermContentMetadata(
++                            hash1, hash2, contentLength,
++                            uniqueSignatures[signatureOffset],
++                            uniqueSignatures[signatureOffset + 1],
++                            uniqueSignatures[signatureOffset + 2],
++                        )
++                        if (reservedIndex >= 0) {
++                            // Own the reservation before any subsequent operation
++                            // can throw, so the existing batch rollback covers it.
++                            stagedIndexes[pendingContentCount] = reservedIndex
++                            appendPendingContent(descriptor, reservedIndex)
++                            continue
++                        }
++                    }
+                     const existingIndex = persistedLookupRequired ?
+                         this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
+                         -1;
