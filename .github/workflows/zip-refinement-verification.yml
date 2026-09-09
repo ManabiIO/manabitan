@@ -1,10 +1,10 @@
 name: Verify linear ZIP refinement with original small buffers
 
 on:
+  workflow_dispatch:
   push:
     branches: [perf-zip-refinement-verify-20260908]
     paths:
-      - .github/workflows/zip-refinement-verification.yml
       - dev/perf/zip-refinement-experiment/**
 
 permissions:
@@ -34,7 +34,7 @@ jobs:
           mkdir -p "$arms" "$evidence"
           git worktree add --detach "$arms/baseline" b8d68458cde8788b5d5301ceaf36beae7a1363f9
           git worktree add --detach "$arms/candidate" b9ee214535d8b64910888868316a987fb07988fe
-          test "$(git -C "$arms/candidate" rev-parse HEAD^{tree})" = ceaec96a180cd5b2390b05052fcfdfd84583b6c4
+          test "$(git -C "$arms/candidate" rev-parse 'HEAD^{tree}')" = ceaec96a180cd5b2390b05052fcfdfd84583b6c4
           for arm in baseline candidate; do
             ln -s "$GITHUB_WORKSPACE/node_modules" "$arms/$arm/node_modules"
             (cd "$arms/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
