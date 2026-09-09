@@ -35,12 +35,15 @@ try {
     for (const name of ['jmnedict', 'jmdict', 'jitendex']) {
         const fixture = lock.dictionaries[name];
         const file = await fs.readFile(path.join(baselineRoot, 'builds/e2e-dictionary-cache', fixture.cacheFile));
+        const fixtureSha256 = createHash('sha256').update(file).digest('hex');
+        assert.equal(fixtureSha256, fixture.sha256);
+        assert.equal(file.byteLength, fixture.sizeBytes);
         const archive = await JSZip.loadAsync(file, {checkCRC32: true});
         const index = JSON.parse(await archive.file('index.json').async('string'));
         assert.equal(index.title, fixture.expectedTitle);
         assert.equal(index.revision, fixture.revision);
         const banks = Object.keys(archive.files).filter(n => /^term_bank_\d+\.json$/.test(n)).sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]));
-        const item = {name, fixtureSha256: createHash('sha256').update(file).digest('hex'), banks: banks.length, rows: 0, segmentedGroups: 0, groups: []};
+        const item = {name, fixtureSha256, banks: banks.length, rows: 0, segmentedGroups: 0, groups: []};
         for (let start = 0; start < banks.length; start += 8) {
             const names = banks.slice(start, start + 8);
             const sources = await Promise.all(names.map(n => archive.file(n).async('uint8array')));
@@ -73,7 +76,7 @@ try {
             if (segmented) { ++item.segmentedGroups; ++report.nativeSegmentedGroups; }
             item.rows += actual.rowCount;
             item.groups.push({banks: names, rows: actual.rowCount, segments: indexes.size, nativeSegmented: segmented, indexSha256: digest.digest('hex')});
-            console.log(name, start, actual.rowCount, segmented, flushSafe());
+            console.log(name, start, actual.rowCount, segmented, 'byte-identical');
         }
         assert.equal(item.rows, fixture.termRows);
         report.dictionaries.push(item); report.rowCount += item.rows; report.bankCount += banks.length;
@@ -87,4 +90,3 @@ try {
 } finally {
     await fs.writeFile(output, JSON.stringify(report, null, 2) + '\n');
 }
-function flushSafe() { return 'byte-identical'; }
