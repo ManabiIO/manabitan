@@ -1,0 +1,124 @@
+name: Audit final inflater integration
+on:
+  push:
+    branches: [audit/source-export-20260909]
+    paths: [.github/workflows/audit-inflater-final-integration-20260909.yml]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      sha: ${{ steps.publish.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Reconstruct exact local integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          git config user.name 'Alex Ehlke'
+          git config user.email 'alex.ehlke@gmail.com'
+          git worktree add "$RUNNER_TEMP/candidate" b6d4c3e279af903ddab177d20747ae96e9530098
+          cd "$RUNNER_TEMP/candidate"
+          git merge --no-commit --no-ff d7ba330c952324e093ac96418462fe1c0f5e37d4
+          git diff --cached --check
+          test "$(git write-tree)" = b217181dee356a8a8f9836cffe5c5b382c27da69
+          python3 - <<'PY'
+          import subprocess
+          paths = set(subprocess.check_output(['git', 'diff', '--cached', '--name-only', 'd7ba330c952324e093ac96418462fe1c0f5e37d4'], text=True).splitlines())
+          assert paths == {'dev/perf/inflate-core-validation.md', 'ext/js/dictionary/wasm/vendor/miniz/miniz.h', 'ext/js/dictionary/wasm/vendor/miniz/miniz_tinfl.c', 'test/term-bank-inflate-matches.test.js'}, paths
+          PY
+          commit=$(git commit-tree b217181dee356a8a8f9836cffe5c5b382c27da69 -p b6d4c3e279af903ddab177d20747ae96e9530098 -p d7ba330c952324e093ac96418462fe1c0f5e37d4 -m 'Integrate reviewed inflater with lint-qualified rollup without restoring rejected parser')
+          git reset --hard "$commit"
+          git show -s --format='%H %T' > "$RUNNER_TEMP/evidence/source.txt"
+          test "$(git rev-parse HEAD:ext/js/dictionary/wasm/term-bank-parser.c)" = 836cb10f5aa52177bd82d6fbccb44dd5f3811e2b
+          npm ci > "$RUNNER_TEMP/evidence/npm-ci.log" 2>&1
+          npm run build:libs > "$RUNNER_TEMP/evidence/build-libs.log" 2>&1
+          node node_modules/vitest/vitest.mjs run test/term-bank-inflate-matches.test.js test/reviewed-runtime-boundaries.test.js test/generated-lint-boundary.test.js > "$RUNNER_TEMP/evidence/focused.log" 2>&1
+          test -z "$(git status --porcelain)"
+      - name: Publish source-only history-preserving integration
+        id: publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/candidate"
+          git push origin HEAD:refs/heads/audit/final-inflater-source-20260909
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: final-inflater-source
+          path: ${{ runner.temp }}/evidence
+          retention-days: 30
+          if-no-files-found: error
+  compare:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Build both immutable arms before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence" "$RUNNER_TEMP/arms"
+          npm ci > "$RUNNER_TEMP/evidence/npm-ci.log" 2>&1
+          node node_modules/playwright/cli.js install --with-deps chromium > "$RUNNER_TEMP/evidence/browser-install.log" 2>&1
+          git worktree add --detach "$RUNNER_TEMP/arms/baseline" d7ba330c952324e093ac96418462fe1c0f5e37d4
+          git worktree add --detach "$RUNNER_TEMP/arms/candidate" HEAD
+          test "$(git -C "$RUNNER_TEMP/arms/candidate" rev-parse 'HEAD^{tree}')" = b217181dee356a8a8f9836cffe5c5b382c27da69
+          for arm in baseline candidate; do
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/arms/$arm/node_modules"
+            (cd "$RUNNER_TEMP/arms/$arm" && node dev/bin/build.js --target chrome-dev) > "$RUNNER_TEMP/evidence/build-$arm.log" 2>&1
+            git -C "$RUNNER_TEMP/arms/$arm" show -s --format='%H %T' > "$RUNNER_TEMP/evidence/source-$arm.txt"
+            test -z "$(git -C "$RUNNER_TEMP/arms/$arm" status --porcelain)"
+          done
+          for file in zstd.wasm zip.js z-worker.js; do
+            cmp "$RUNNER_TEMP/arms/baseline/ext/lib/$file" "$RUNNER_TEMP/arms/candidate/ext/lib/$file"
+          done
+          (cd "$RUNNER_TEMP/arms/baseline" && node dev/perf/prepare-dictionaries.js) > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          ln -s "$RUNNER_TEMP/arms/baseline/builds/e2e-dictionary-cache" "$RUNNER_TEMP/arms/candidate/builds/e2e-dictionary-cache"
+          git show e459a1e332ccfe842a0a8c11e2cf1a5510b46cc1:dev/perf/inflate-confirmation/run-paired.py > "$RUNNER_TEMP/run-paired.py"
+          echo "e255f2a45ab308768cff89b4545f25d1779ae37ecb05b06d44399a085383d89b  $RUNNER_TEMP/run-paired.py" | sha256sum -c -
+          cp "$RUNNER_TEMP/run-paired.py" "$RUNNER_TEMP/evidence/"
+          clang --version > "$RUNNER_TEMP/evidence/compiler.txt"
+          lscpu > "$RUNNER_TEMP/evidence/cpu.txt"
+          free -b > "$RUNNER_TEMP/evidence/memory.txt"
+      - name: Same-binary controls and six fixed adjacent pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "$RUNNER_TEMP/run-paired.py" --baseline "$RUNNER_TEMP/arms/baseline" --candidate "$RUNNER_TEMP/arms/baseline" --datasets "$DICTIONARY" --pairs 2 --warmups 0 --output "$RUNNER_TEMP/evidence/control-before" --label 'Same baseline binary control before A-B' | tee "$RUNNER_TEMP/evidence/control-before.log"
+          python3 "$RUNNER_TEMP/run-paired.py" --baseline "$RUNNER_TEMP/arms/baseline" --candidate "$RUNNER_TEMP/arms/candidate" --datasets "$DICTIONARY" --pairs 6 --warmups 1 --output "$RUNNER_TEMP/evidence/comparison" --label 'Six fixed pairs on lint-qualified rollup, no outlier removal' | tee "$RUNNER_TEMP/evidence/comparison.log"
+          python3 "$RUNNER_TEMP/run-paired.py" --baseline "$RUNNER_TEMP/arms/candidate" --candidate "$RUNNER_TEMP/arms/candidate" --datasets "$DICTIONARY" --pairs 2 --warmups 0 --output "$RUNNER_TEMP/evidence/control-after" --label 'Same candidate binary control after A-B' | tee "$RUNNER_TEMP/evidence/control-after.log"
+          test -z "$(git -C "$RUNNER_TEMP/arms/baseline" status --porcelain)"
+          test -z "$(git -C "$RUNNER_TEMP/arms/candidate" status --porcelain)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: final-inflater-comparison-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/evidence
+          retention-days: 30
+          if-no-files-found: error
