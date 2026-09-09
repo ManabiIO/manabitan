@@ -32,6 +32,11 @@
         {"path": "dev/data/chrome-manifest-schema.json", "ignore": true},
 
         {
+            "path": "test/perf/dictionaries.lock.json",
+            "typeFile": "types/test/performance-dictionary-lock.d.ts",
+            "type": "PerformanceDictionaryLock"
+        },
+        {
             "path": "dev/data/manifest-variants.json",
             "typeFile": "types/dev/manifest.d.ts",
             "type": "ManifestConfig"

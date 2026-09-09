@@ -16,7 +16,6 @@
  */
 
 #include <stdint.h>
-#include <wasm_simd128.h>
 
 #define WASM_PAGE_SIZE 65536u
 #define FNV1A_OFFSET 0x811c9dc5u
@@ -206,9 +205,9 @@ int32_t inflate_and_join_term_banks(
         if (nonempty_sources > 0u) {
             output[cursor++] = ',';
         }
-        // Removing each source array wrapper shifts overlapping bytes left.
-        // Bulk memory copy handles overlap without a byte-at-a-time loop.
-        __builtin_memmove(output + cursor, inflated + start, content_length);
+        for (uint32_t j = 0u; j < content_length; ++j) {
+            output[cursor + j] = inflated[start + j];
+        }
         cursor += content_length;
         ++nonempty_sources;
     }
@@ -360,6 +359,14 @@ static uint32_t skip_ws(const uint8_t* src, uint32_t len, uint32_t i) {
     return i;
 }
 
+static inline uint64_t has_zero_byte64(uint64_t value) {
+    return (value - UINT64_C(0x0101010101010101)) & ~value & UINT64_C(0x8080808080808080);
+}
+
+static inline uint64_t has_control_byte64(uint64_t value) {
+    return (value - UINT64_C(0x2020202020202020)) & ~value & UINT64_C(0x8080808080808080);
+}
+
 static int is_hex_digit(uint8_t value) {
     return (value >= '0' && value <= '9') ||
         (value >= 'a' && value <= 'f') ||
@@ -370,24 +377,17 @@ static int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, u
     if (start >= len || src[start] != '"') { return 0; }
     uint32_t i = start + 1u;
     while (i < len) {
-        // Skip ordinary UTF-8 bytes sixteen at a time. Only JSON quotes,
-        // backslashes and unescaped ASCII controls need scalar handling.
-        // Unsigned comparison keeps non-ASCII UTF-8 bytes out of the control mask.
-        while (len - i >= 16u) {
-            const v128_t bytes = wasm_v128_load(src + i);
-            const v128_t special = wasm_v128_or(
-                wasm_v128_or(
-                    wasm_i8x16_eq(bytes, wasm_i8x16_splat('"')),
-                    wasm_i8x16_eq(bytes, wasm_i8x16_splat('\\'))
-                ),
-                wasm_u8x16_lt(bytes, wasm_i8x16_splat(0x20))
-            );
-            const uint32_t mask = (uint32_t)wasm_i8x16_bitmask(special);
-            if (mask != 0u) {
-                i += (uint32_t)__builtin_ctz(mask);
+        while (i + 8u <= len) {
+            uint64_t word;
+            __builtin_memcpy(&word, src + i, sizeof(word));
+            if (
+                has_zero_byte64(word ^ UINT64_C(0x2222222222222222)) != 0u ||
+                has_zero_byte64(word ^ UINT64_C(0x5c5c5c5c5c5c5c5c)) != 0u ||
+                has_control_byte64(word) != 0u
+            ) {
                 break;
             }
-            i += 16u;
+            i += 8u;
         }
         if (i >= len) { break; }
         uint8_t c = src[i];
