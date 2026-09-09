@@ -45,6 +45,7 @@ done
 node dev/perf/prepare-dictionaries.js > "$EVIDENCE/fixtures.log" 2>&1
 node dev/bin/build.js --target chrome-dev > "$EVIDENCE/baseline-build.log" 2>&1
 cp builds/manabitan-chrome-dev.zip "$RUNNER_TEMP/packages/baseline.zip"
+cp -a ext/lib "$RUNNER_TEMP/baseline-libs"
 git switch --detach "$CANDIDATE_SHA"
 test "$(git rev-parse HEAD^{tree})" = "$CANDIDATE_TREE"
 node dev/bin/build.js --target chrome-dev > "$EVIDENCE/candidate-build.log" 2>&1
@@ -56,12 +57,18 @@ with zipfile.ZipFile(root+'/packages/baseline.zip') as za, zipfile.ZipFile(root+
     a={n:za.read(n) for n in za.namelist()};b={n:zb.read(n) for n in zb.namelist()}
 changed=sorted(n for n in a.keys()|b.keys() if a.get(n)!=b.get(n))
 assert changed==os.environ['PACKAGE_CHANGE'].split(','),changed
-json.dump({'changed':changed,'baseline':{n:hashlib.sha256(v).hexdigest() for n,v in a.items()},'candidate':{n:hashlib.sha256(v).hexdigest() for n,v in b.items()}},open(root+'/evidence/package-payloads.json','w'),indent=2)
+map_changed_sources=[]
+if 'lib/zstd-wasm.js.map' in changed:
+    ma=json.loads(a['lib/zstd-wasm.js.map']);mb=json.loads(b['lib/zstd-wasm.js.map'])
+    assert ma['sources']==mb['sources']
+    map_changed_sources=[s for s,x,y in zip(ma['sources'],ma['sourcesContent'],mb['sourcesContent']) if x!=y]
+    assert map_changed_sources==['../../dev/lib/zstd-wasm.js'],map_changed_sources
+json.dump({'changed':changed,'mapChangedSources':map_changed_sources,'baseline':{n:hashlib.sha256(v).hexdigest() for n,v in a.items()},'candidate':{n:hashlib.sha256(v).hexdigest() for n,v in b.items()}},open(root+'/evidence/package-payloads.json','w'),indent=2)
 PY
 git worktree add --detach "$RUNNER_TEMP/baseline" ff9cbf2e848a86d6bbfd281179a6d753349e52f4
 printf '\nnode_modules\n' >> .git/info/exclude
 ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/baseline/node_modules"
-cp -a ext/lib/. "$RUNNER_TEMP/baseline/ext/lib/"
+cp -a "$RUNNER_TEMP/baseline-libs/." "$RUNNER_TEMP/baseline/ext/lib/"
 mkdir -p "$RUNNER_TEMP/baseline/builds"
 cp "$RUNNER_TEMP/packages/baseline.zip" "$RUNNER_TEMP/baseline/builds/manabitan-chrome-dev.zip"
 ln -s "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$RUNNER_TEMP/baseline/builds/e2e-dictionary-cache"
