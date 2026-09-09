@@ -1,0 +1,221 @@
+diff --git a/dev/zip-chunk-stream-plugin.js b/dev/zip-chunk-stream-plugin.js
+index 692c8ba4..82af1814 100644
+--- a/dev/zip-chunk-stream-plugin.js
++++ b/dev/zip-chunk-stream-plugin.js
+@@ -1,5 +1,6 @@
+ /*
+- * Copyright (C) 2026 Manabitan authors
++ * Copyright (C) 2023-2026  Yomitan Authors
++ * Copyright (C) 2020-2022  Yomichan Authors
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+@@ -8,11 +9,11 @@
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * You should have received a copy of the GNU General Public License
+- * along with this program. If not, see <https://www.gnu.org/licenses/>.
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  */
+ /* eslint @stylistic/semi: ["error", "never"] */
+ 
+diff --git a/dev/zip-chunk-stream.js b/dev/zip-chunk-stream.js
+index 1f7d8611..dbc670e4 100644
+--- a/dev/zip-chunk-stream.js
++++ b/dev/zip-chunk-stream.js
+@@ -1,5 +1,6 @@
+ /*
+- * Copyright (C) 2026 Manabitan authors
++ * Copyright (C) 2023-2026  Yomitan Authors
++ * Copyright (C) 2020-2022  Yomichan Authors
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+@@ -8,11 +9,11 @@
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * You should have received a copy of the GNU General Public License
+- * along with this program. If not, see <https://www.gnu.org/licenses/>.
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  */
+ /* eslint @stylistic/semi: ["error", "never"] */
+ 
+@@ -33,21 +34,36 @@ export class ChunkStream extends TransformStream {
+         let pending = null
+         super({
+             transform(chunk, controller) {
++                let offset = 0
++                let split = false
+                 if (pending !== null) {
+-                    const joined = new Uint8Array(pending.length + chunk.length)
+-                    joined.set(pending)
+-                    joined.set(chunk, pending.length)
+-                    chunk = joined
++                    const length = pending.length + chunk.length
++                    if (length <= chunkSize) {
++                        // Preserve the original exact-sized join for small inputs.
++                        const joined = new Uint8Array(length)
++                        joined.set(pending)
++                        joined.set(chunk, pending.length)
++                        pending = joined
++                        return
++                    }
++                    // Fill one output directly, rather than joining the entire
++                    // incoming buffer and then copying that temporary again.
++                    const first = new Uint8Array(chunkSize)
++                    first.set(pending)
++                    offset = chunkSize - pending.length
++                    first.set(chunk.subarray(0, offset), pending.length)
++                    controller.enqueue(first)
++                    split = true
+                 }
+-                let offset = 0
+                 while (chunk.length - offset > chunkSize) {
+                     controller.enqueue(chunk.slice(offset, offset + chunkSize))
+                     offset += chunkSize
++                    split = true
+                 }
+-                // Do not allocate a full-capacity buffer for small inputs.
+-                // The original splitter also borrows this last input until
+-                // more input arrives or flush transfers it to the consumer.
+-                pending = offset === 0 ? chunk : chunk.slice(offset)
++                // A split must own its tail even when a full pending chunk
++                // consumed zero incoming bytes. Only a lone small input may
++                // retain the pinned codec's borrowed-buffer behavior.
++                pending = split ? chunk.slice(offset) : chunk
+             },
+             flush(controller) {
+                 if (pending !== null && pending.length > 0) { controller.enqueue(pending) }
+diff --git a/test/zip-chunk-stream-build.test.js b/test/zip-chunk-stream-build.test.js
+index 870a0fa7..f6c4ea91 100644
+--- a/test/zip-chunk-stream-build.test.js
++++ b/test/zip-chunk-stream-build.test.js
+@@ -26,7 +26,10 @@ import {zipChunkStreamPlugin} from '../dev/zip-chunk-stream-plugin.js'
+ describe('ZIP splitter build integration', () => {
+     test.each(['zip.js', 'z-worker.js'])('patches only the pinned codec in %s', async (entry) => {
+         const result = await build({
+-            entryPoints: [`dev/lib/${entry}`], bundle: true, format: 'esm', write: false,
++            entryPoints: [`dev/lib/${entry}`],
++            bundle: true,
++            format: 'esm',
++            write: false,
+             plugins: [zipChunkStreamPlugin],
+         })
+         expect(result.outputFiles[0].text).toContain('ZIP chunk size must be a positive safe integer')
+diff --git a/test/zip-chunk-stream.test.js b/test/zip-chunk-stream.test.js
+index f20d1c7c..1e83f1ba 100644
+--- a/test/zip-chunk-stream.test.js
++++ b/test/zip-chunk-stream.test.js
+@@ -16,7 +16,7 @@
+  */
+ /* eslint @stylistic/semi: ["error", "never"] */
+ 
+-import {describe, expect, test} from 'vitest'
++import {describe, expect, test, vi} from 'vitest'
+ import {ChunkStream} from '../dev/zip-chunk-stream.js'
+ 
+ /**
+@@ -62,6 +62,7 @@ class PinnedChunkStream extends TransformStream {
+  * @param {Uint8Array[]} inputs
+  * @param {number} size
+  * @param {boolean} [transfer]
++ * @returns {Promise<Uint8Array[]>}
+  */
+ async function collect(Constructor, inputs, size, transfer = false) {
+     /** @type {Uint8Array[]} */
+@@ -80,7 +81,10 @@ async function collect(Constructor, inputs, size, transfer = false) {
+     return outputs
+ }
+ 
+-/** @param {number} length */
++/**
++ * @param {number} length
++ * @returns {Uint8Array}
++ */
+ function bytes(length) {
+     return Uint8Array.from({length}, (_, i) => (i * 31 + (i >>> 8)) & 255)
+ }
+@@ -156,6 +160,7 @@ describe('linear ZIP splitting with original small-buffer behavior', () => {
+             /**
+              * @param {number} [start]
+              * @param {number} [end]
++             * @returns {Uint8Array}
+              */
+             slice(start = 0, end = this.length) {
+                 copied += end - start
+@@ -201,6 +206,65 @@ describe('linear ZIP splitting with original small-buffer behavior', () => {
+         }
+     })
+ 
++    test.each([0, 1, 63, 64])('owns the joined tail when the pending prefix has %i bytes', async (prefixLength) => {
++        const prefix = bytes(prefixLength)
++        const input = bytes(64 * 5 + 7)
++        const expected = Buffer.concat([prefix, input])
++        const outputs = await collect(ChunkStream, [prefix, input], 64, true)
++        expect(Buffer.concat(outputs).equals(expected)).toBe(true)
++        expect(prefix.byteLength).toBe(prefixLength)
++        expect(input.byteLength).toBe(64 * 5 + 7)
++        expect(new Set(outputs.map((chunk) => chunk.buffer)).size).toBe(outputs.length)
++        expect(outputs.every((chunk) => chunk.byteOffset === 0 && chunk.buffer.byteLength === chunk.length)).toBe(true)
++    })
++
++    test('copies pending-prefix plus large input payload exactly once', async () => {
++        const prefix = bytes(17)
++        const input = bytes(1024 * 1024 + 11)
++        const nativeSet = Uint8Array.prototype.set
++        const nativeSlice = Uint8Array.prototype.slice
++        let copied = 0
++        /**
++         * @this {Uint8Array}
++         * @param {ArrayLike<number>} source
++         * @param {number} [offset]
++         */
++        function countSet(source, offset) {
++            copied += source.length
++            nativeSet.call(this, source, offset)
++        }
++        /**
++         * @this {Uint8Array}
++         * @param {number} [start]
++         * @param {number} [end]
++         * @returns {Uint8Array}
++         */
++        function countSlice(start, end) {
++            const output = nativeSlice.call(this, start, end)
++            copied += output.length
++            return output
++        }
++        const setSpy = vi.spyOn(Uint8Array.prototype, 'set').mockImplementation(countSet)
++        const sliceSpy = vi.spyOn(Uint8Array.prototype, 'slice').mockImplementation(countSlice)
++        let actual
++        let reference
++        let actualCopied
++        let referenceCopied
++        try {
++            actual = await collect(ChunkStream, [prefix, input], 65536)
++            actualCopied = copied
++            copied = 0
++            reference = await collect(PinnedChunkStream, [prefix, input], 65536)
++            referenceCopied = copied
++        } finally {
++            setSpy.mockRestore()
++            sliceSpy.mockRestore()
++        }
++        expect(actualCopied).toBe(prefix.length + input.length)
++        expect(referenceCopied).toBeGreaterThan(actualCopied * 8)
++        expect(Buffer.concat(actual).equals(Buffer.concat(reference))).toBe(true)
++    })
++
+     test.each([0, -1, 1.5, Number.NaN, Infinity])('rejects invalid internal chunk size %s', (size) => {
+         expect(() => new ChunkStream(size)).toThrow(RangeError)
+     })
