@@ -381,20 +381,31 @@ export class TermBankSourcePipeline {
     }
 
     /**
-     * Builds an import-wide plan over raw ZIP payloads only when every source
-     * has complete central-directory metadata required for exact validation.
+     * Builds a lazy raw-ZIP plan with complete validation metadata. On a
+     * low-memory device, admit only the current bounded batch, never the
+     * entire import. The parser's independent source-size guard still applies.
      * @param {number} startIndex
      * @returns {{files: TermBankSourceFile[], loaders: Array<() => Promise<CompressedTermBankSource>>, estimatedByteLengths: number[]}|null}
      */
     createCompressedImportRunPlan(startIndex) {
-        if (!this._enabled || this._lowMemory || this._compressedReadPool === null) { return null; }
-        const files = this._termFiles.slice(startIndex);
+        if (!this._enabled || this._compressedReadPool === null) { return null; }
+        const boundedBatch = this._lowMemory ? this.getBatchPlan(startIndex) : null;
+        if (boundedBatch !== null && (
+            boundedBatch.unknownSizeCount !== 0 ||
+            boundedBatch.estimatedBytes > this._batchMaxBytes
+        )) { return null; }
+        const files = boundedBatch === null ? this._termFiles.slice(startIndex) : boundedBatch.files;
         if (files.length < 4) { return null; }
         /** @type {Array<{compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number}>} */
         const metadata = [];
+        let compressedBytes = 0;
         for (const file of files) {
             const value = this._getCompressedSourceMetadata(file);
             if (value === null) { return null; }
+            // Bound compressed allocations independently of declared decoded
+            // sizes, including overlapping or adversarial ZIP entries.
+            if (this._lowMemory && value.compressedSize > this._batchMaxBytes - compressedBytes) { return null; }
+            compressedBytes += value.compressedSize;
             metadata.push(value);
         }
         const estimatedByteLengths = metadata.map(({uncompressedSize}) => uncompressedSize);
