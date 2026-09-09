@@ -1,0 +1,192 @@
+name: Bulk index checksum verification
+on:
+  push:
+    branches: [verify/import-critical-path-20260909]
+    paths:
+      - .github/workflows/bulk-index-checksum-verify.yml
+      - dev/perf/checksum-paired.py
+      - dev/perf/bulk-index-checksum.patch
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: verification
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: accepted-import-runtime
+          run-id: 34400141172
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/download
+      - name: Reconstruct and verify the exact source-only candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work
+          tar -xzf "$RUNNER_TEMP/download/import-comparison.tar.gz" -C work
+          cd work
+          export PATH="$PWD/bench/bin:$PATH"
+          export PLAYWRIGHT_BROWSERS_PATH="$PWD/bench/ms-playwright"
+          git config --global --add safe.directory "$PWD/bench/A"
+          git config --global --add safe.directory "$PWD/bench/B"
+          rm -rf bench/B
+          cp -a bench/A bench/B
+          cd bench/B
+          test "$(git rev-parse HEAD)" = da8f7436d34e510441d30692c8d698806b70e13f
+          git apply --check "$GITHUB_WORKSPACE/verification/dev/perf/bulk-index-checksum.patch"
+          git apply "$GITHUB_WORKSPACE/verification/dev/perf/bulk-index-checksum.patch"
+          git add ext/js/dictionary/term-key-hash.js ext/js/dictionary/term-record-opfs-store.js test/term-key-hash-bulk.test.js
+          test "$(git write-tree)" = bff51446158ec2255c4ffd0f24e38fea6db57d6a
+          git -c user.name='Manabitan performance verification' -c user.email='noreply@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'Use bulk little-endian loads for persisted index checksums only'
+          git rev-parse HEAD HEAD^{tree} > ../evidence/checksum-source.txt
+          node dev/bin/build-libs.js > ../evidence/checksum-build-libs.log 2>&1
+          node dev/bin/build.js --target chrome-dev > ../evidence/checksum-build.log 2>&1
+          node node_modules/vitest/vitest.mjs run > ../evidence/checksum-unit.log 2>&1
+          npm run test:ts > ../evidence/checksum-types.log 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-key-hash.js ext/js/dictionary/term-record-opfs-store.js test/term-key-hash-bulk.test.js > ../evidence/checksum-lint.log 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > ../evidence/checksum-options.log 2>&1
+          node dev/bin/build.js --dryRun --all > ../evidence/checksum-dry-build.log 2>&1
+          test -z "$(git status --porcelain)"
+      - name: Preserve the tested source on an isolated verification branch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cd work/bench/B
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" push https://github.com/ManabiIO/manabitan.git HEAD:refs/heads/verify/bulk-index-checksum-source-20260909
+      - name: Freeze the benchmark runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp verification/dev/perf/checksum-paired.py work/bench/paired.py
+          cp verification/dev/perf/bulk-index-checksum.patch work/bench/evidence/source.patch
+          cd work
+          tar -czf "$RUNNER_TEMP/checksum-comparison.tar.gz" bench tools/node_modules
+      - uses: actions/upload-artifact@v4
+        with:
+          name: checksum-import-runtime
+          path: ${{ runner.temp }}/checksum-comparison.tar.gz
+          compression-level: 0
+          retention-days: 3
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checksum-source-verification
+          path: work/bench/evidence/
+          retention-days: 14
+          if-no-files-found: error
+  comparison:
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-slim]
+        dictionary: [jmnedict, jmdict, jitendex]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: checksum-import-runtime
+          path: ${{ runner.temp }}/download
+      - name: Restore the frozen sources and install browser system dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/work"
+          tar -xzf "$RUNNER_TEMP/download/checksum-comparison.tar.gz" -C "$RUNNER_TEMP/work"
+          cd "$RUNNER_TEMP/work"
+          export PATH="$PWD/bench/bin:$PATH"
+          export PLAYWRIGHT_BROWSERS_PATH="$PWD/bench/ms-playwright"
+          node tools/node_modules/playwright/cli.js install-deps chromium > bench/evidence/browser-dependencies.log 2>&1
+          git config --global --add safe.directory "$PWD/bench/A"
+          git config --global --add safe.directory "$PWD/bench/B"
+          node --input-type=module <<'NODE' > bench/evidence/native-memory.json
+          import {createServer} from 'node:http';
+          import {chromium} from './tools/node_modules/playwright/index.mjs';
+          const server = createServer((request, response) => response.end('<!doctype html><title>native memory</title>'));
+          await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+          const browser = await chromium.launch({channel: 'chromium', headless: true});
+          try {
+            const page = await browser.newPage();
+            await page.goto(`http://127.0.0.1:${server.address().port}`);
+            const value = await page.evaluate(async () => {
+              const url = URL.createObjectURL(new Blob(['postMessage({deviceMemory:navigator.deviceMemory,hardwareConcurrency:navigator.hardwareConcurrency})'], {type:'text/javascript'}));
+              const worker = new Worker(url);
+              try {
+                const result = await new Promise((resolve, reject) => { worker.onmessage = event => resolve(event.data); worker.onerror = reject; });
+                return {page: {deviceMemory:navigator.deviceMemory, hardwareConcurrency:navigator.hardwareConcurrency}, worker:result};
+              } finally { worker.terminate(); URL.revokeObjectURL(url); }
+            });
+            console.log(JSON.stringify({browserVersion:browser.version(), ...value}, null, 2));
+          } finally { await browser.close(); server.close(); }
+          NODE
+          lscpu > bench/evidence/cpu.txt
+          free -b > bench/evidence/memory.txt
+      - name: Six fixed pairs, same-binary controls and excluded warmups
+        shell: bash
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          RUNNER_KIND: ${{ matrix.runner }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/work"
+          export PATH="$PWD/bench/bin:$PATH"
+          export PLAYWRIGHT_BROWSERS_PATH="$PWD/bench/ms-playwright"
+          extra=()
+          if [ "$RUNNER_KIND" = ubuntu-slim ]; then extra+=(--reverse); fi
+          python3 bench/paired.py --baseline "$PWD/bench/A" --candidate "$PWD/bench/B" \
+            --dictionary "$DICTIONARY" --pairs 6 --output "$PWD/bench/evidence/paired" \
+            "${extra[@]}" 2>&1 | tee bench/evidence/driver.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checksum-import-${{ matrix.dictionary }}-${{ matrix.runner }}
+          path: ${{ runner.temp }}/work/bench/evidence/
+          retention-days: 14
+          if-no-files-found: error
+  integration:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: checksum-import-runtime
+          path: ${{ runner.temp }}/download
+      - name: Strict production Chromium integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/work"
+          tar -xzf "$RUNNER_TEMP/download/checksum-comparison.tar.gz" -C "$RUNNER_TEMP/work"
+          cd "$RUNNER_TEMP/work"
+          export PATH="$PWD/bench/bin:$PATH"
+          export PLAYWRIGHT_BROWSERS_PATH="$PWD/bench/ms-playwright"
+          node tools/node_modules/playwright/cli.js install-deps chromium > bench/evidence/integration-dependencies.log 2>&1
+          git config --global --add safe.directory "$PWD/bench/B"
+          export MANABITAN_E2E_SKIP_BUILD=1 MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK=1 MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS=1
+          export MANABITAN_E2E_PHASE_PROFILING=0 MANABITAN_E2E_PHASE_SCREENSHOTS=0 MANABITAN_E2E_PROCESS_SAMPLING=0
+          export MANABITAN_CHROMIUM_E2E_REPORT="$PWD/bench/evidence/integration.html"
+          cd bench/B
+          node test/chromium/extension-two-dictionary-import.e2e.js > ../evidence/integration.log 2>&1
+          test -z "$(git status --porcelain)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checksum-integration
+          path: ${{ runner.temp }}/work/bench/evidence/
+          retention-days: 14
+          if-no-files-found: error
