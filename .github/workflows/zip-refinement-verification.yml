@@ -1,0 +1,87 @@
+name: Verify linear ZIP refinement with original small buffers
+
+on:
+  push:
+    branches: [perf-zip-refinement-verify-20260908]
+    paths:
+      - .github/workflows/zip-refinement-verification.yml
+      - dev/perf/zip-refinement-experiment/**
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Build immutable baseline and candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          arms="$RUNNER_TEMP/arms"
+          evidence="$RUNNER_TEMP/evidence"
+          mkdir -p "$arms" "$evidence"
+          git worktree add --detach "$arms/baseline" b8d68458cde8788b5d5301ceaf36beae7a1363f9
+          git worktree add --detach "$arms/candidate" b9ee214535d8b64910888868316a987fb07988fe
+          test "$(git -C "$arms/candidate" rev-parse HEAD^{tree})" = ceaec96a180cd5b2390b05052fcfdfd84583b6c4
+          for arm in baseline candidate; do
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$arms/$arm/node_modules"
+            (cd "$arms/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+            git -C "$arms/$arm" rev-parse HEAD > "$evidence/source-$arm.txt"
+            cp "$arms/$arm/ext/lib/zip.js" "$evidence/zip-$arm.js"
+            cp "$arms/$arm/ext/lib/z-worker.js" "$evidence/zip-worker-$arm.js"
+          done
+          for file in term-bank-parser.wasm zstd.wasm; do
+            cmp "$arms/baseline/ext/lib/$file" "$arms/candidate/ext/lib/$file"
+          done
+          git -C "$arms/candidate" diff b8d68458cde8788b5d5301ceaf36beae7a1363f9 HEAD --binary > "$evidence/source.patch"
+          (cd "$arms/baseline" && node dev/perf/prepare-dictionaries.js) > "$evidence/fixtures.log" 2>&1
+          ln -s "$arms/baseline/builds/e2e-dictionary-cache" "$arms/candidate/builds/e2e-dictionary-cache"
+          cp dev/perf/zip-refinement-experiment/run-paired.py "$evidence/"
+          clang --version > "$evidence/compiler.txt"
+          lscpu > "$evidence/cpu.txt"
+          free -b > "$evidence/memory.txt"
+      - name: Full correctness before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/candidate"
+          node node_modules/vitest/vitest.mjs run > "$RUNNER_TEMP/evidence/unit.log" 2>&1
+          npm run test:ts > "$RUNNER_TEMP/evidence/types.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$RUNNER_TEMP/evidence/options.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$RUNNER_TEMP/evidence/build-dry-run.log" 2>&1
+      - name: Eight fixed pairs per dictionary with excluded warmups
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/zip-refinement-experiment/run-paired.py \
+            --baseline "$RUNNER_TEMP/arms/baseline" \
+            --candidate "$RUNNER_TEMP/arms/candidate" \
+            --pairs 8 --warmups 1 \
+            --output "$RUNNER_TEMP/evidence/paired" \
+            --label "PR23 vs linear ZIP refinement; original small-buffer behavior; production-selected pipeline" \
+            | tee "$RUNNER_TEMP/evidence/driver.log"
+      - name: Strict full Chromium integration after timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/candidate"
+          MANABITAN_E2E_STRICT_RUNTIME=1 MANABITAN_CHROMIUM_HEADLESS=1 MANABITAN_E2E_SKIP_BUILD=1 MANABITAN_CHROMIUM_E2E_REPORT="$RUNNER_TEMP/evidence/full-chromium.html" node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/full-chromium.log" 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zip-refinement-verification
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
