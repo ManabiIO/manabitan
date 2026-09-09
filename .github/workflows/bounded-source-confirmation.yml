@@ -1,0 +1,101 @@
+name: Confirm bounded imports on constrained Chromium
+
+on:
+  push:
+    branches: [perf-bounded-confirmation-20260908]
+    paths:
+      - .github/workflows/bounded-source-confirmation.yml
+
+permissions:
+  contents: read
+
+jobs:
+  confirm:
+    name: Constrained ${{ matrix.mode }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [jmdict, jmnedict, jitendex, full-e2e]
+    env:
+      MODE: ${{ matrix.mode }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - name: Install the pinned browser and missing compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v clang >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y clang lld
+          fi
+          node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Reconstruct the same frozen source trees
+        shell: bash
+        run: |
+          set -euo pipefail
+          arms="$RUNNER_TEMP/arms"
+          evidence="$RUNNER_TEMP/evidence"
+          mkdir -p "$arms" "$evidence"
+          for arm in baseline candidate; do
+            git worktree add --detach "$arms/$arm" b8d68458cde8788b5d5301ceaf36beae7a1363f9
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$arms/$arm/node_modules"
+          done
+          git -C "$arms/candidate" apply --index "$GITHUB_WORKSPACE/dev/perf/bounded-source-experiment/product.patch"
+          cp dev/perf/bounded-source-experiment/term-bank-bounded-compressed.test.js "$arms/candidate/test/"
+          git -C "$arms/candidate" add test/term-bank-bounded-compressed.test.js
+          test "$(git -C "$arms/candidate" write-tree)" = b87991b7e840752f68132cc14e8437b3cf123056
+          for arm in baseline candidate; do
+            (cd "$arms/$arm" && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+          done
+          for file in term-bank-parser.wasm zstd.wasm zip.js z-worker.js; do
+            cmp "$arms/baseline/ext/lib/$file" "$arms/candidate/ext/lib/$file"
+          done
+          git -C "$arms/candidate" diff HEAD --binary > "$evidence/source.patch"
+          (cd "$arms/baseline" && node dev/perf/prepare-dictionaries.js) > "$evidence/fixtures.log" 2>&1
+          ln -s "$arms/baseline/builds/e2e-dictionary-cache" "$arms/candidate/builds/e2e-dictionary-cache"
+          cp dev/perf/bounded-source-experiment/run-paired.py "$evidence/"
+          clang --version > "$evidence/compiler.txt"
+          lscpu > "$evidence/cpu.txt"
+          free -b > "$evidence/memory.txt"
+      - name: Source ownership and boundary regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/candidate"
+          node node_modules/vitest/vitest.mjs run test/term-bank-bounded-compressed.test.js test/dictionary-import-ownership.test.js > "$RUNNER_TEMP/evidence/focused.log" 2>&1
+      - name: Four fresh adjacent pairs following an excluded warmup pair
+        if: matrix.mode != 'full-e2e'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/bounded-source-experiment/run-paired.py \
+            --baseline "$RUNNER_TEMP/arms/baseline" \
+            --candidate "$RUNNER_TEMP/arms/candidate" \
+            --datasets "$MODE" --pairs 4 --warmups 1 \
+            --output "$RUNNER_TEMP/evidence/paired" \
+            --label "Frozen bounded source confirmation: $MODE; real constrained runner; four fixed pairs" \
+            | tee "$RUNNER_TEMP/evidence/driver.log"
+      - name: Full strict extension integration on actual constrained runtime
+        if: matrix.mode == 'full-e2e'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/candidate"
+          MANABITAN_E2E_STRICT_RUNTIME=1 MANABITAN_CHROMIUM_HEADLESS=1 MANABITAN_E2E_SKIP_BUILD=1 MANABITAN_E2E_PHASE_PROFILING=0 MANABITAN_E2E_PHASE_SCREENSHOTS=0 MANABITAN_E2E_PROCESS_SAMPLING=0 MANABITAN_CHROMIUM_E2E_REPORT="$RUNNER_TEMP/evidence/full-chromium.html" node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/full-chromium.log" 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-confirm-${{ matrix.mode }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: warn

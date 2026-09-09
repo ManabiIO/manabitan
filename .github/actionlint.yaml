@@ -1,0 +1,4 @@
+# The pinned actionlint predates this GitHub-hosted label.
+self-hosted-runner:
+  labels:
+    - ubuntu-slim
