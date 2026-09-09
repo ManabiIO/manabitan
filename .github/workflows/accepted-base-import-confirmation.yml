@@ -1,0 +1,80 @@
+name: Accepted base import independent confirmation
+on:
+  push:
+    branches: [verify/import-critical-path-20260909]
+    paths: [.github/workflows/accepted-base-import-confirmation.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  comparison:
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-slim]
+        dictionary: [jmnedict, jmdict, jitendex]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: accepted-import-runtime
+          run-id: 34400141172
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/download
+      - name: Restore exact prior binaries and identify the native browser policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/work"
+          tar -xzf "$RUNNER_TEMP/download/import-comparison.tar.gz" -C "$RUNNER_TEMP/work"
+          cd "$RUNNER_TEMP/work"
+          export PATH="$PWD/bench/bin:$PATH"
+          export PLAYWRIGHT_BROWSERS_PATH="$PWD/bench/ms-playwright"
+          node tools/node_modules/playwright/cli.js install-deps chromium > bench/evidence/browser-dependencies.log 2>&1
+          git config --global --add safe.directory "$PWD/bench/A"
+          git config --global --add safe.directory "$PWD/bench/B"
+          node --input-type=module <<'NODE' > bench/evidence/native-memory.json
+          import {createServer} from 'node:http';
+          import {chromium} from './tools/node_modules/playwright/index.mjs';
+          const server = createServer((request, response) => response.end('<!doctype html><title>native memory</title>'));
+          await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+          const browser = await chromium.launch({channel: 'chromium', headless: true});
+          try {
+            const page = await browser.newPage();
+            await page.goto(`http://127.0.0.1:${server.address().port}`);
+            const value = await page.evaluate(async () => {
+              const url = URL.createObjectURL(new Blob(['postMessage({deviceMemory:navigator.deviceMemory,hardwareConcurrency:navigator.hardwareConcurrency})'], {type:'text/javascript'}));
+              const worker = new Worker(url);
+              try {
+                const result = await new Promise((resolve, reject) => { worker.onmessage = event => resolve(event.data); worker.onerror = reject; });
+                return {page: {deviceMemory:navigator.deviceMemory, hardwareConcurrency:navigator.hardwareConcurrency}, worker:result};
+              } finally { worker.terminate(); URL.revokeObjectURL(url); }
+            });
+            console.log(JSON.stringify({browserVersion:browser.version(), ...value}, null, 2));
+          } finally { await browser.close(); server.close(); }
+          NODE
+          lscpu > bench/evidence/cpu.txt
+          free -b > bench/evidence/memory.txt
+      - name: Fresh complete six-pair plan, reversed order, controls and warmups
+        shell: bash
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          RUNNER_KIND: ${{ matrix.runner }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/work"
+          export PATH="$PWD/bench/bin:$PATH"
+          export PLAYWRIGHT_BROWSERS_PATH="$PWD/bench/ms-playwright"
+          extra=()
+          if [ "$RUNNER_KIND" = ubuntu-24.04 ]; then extra+=(--reverse); fi
+          python3 bench/paired.py --baseline "$PWD/bench/A" --candidate "$PWD/bench/B" \
+            --dictionary "$DICTIONARY" --pairs 6 --output "$PWD/bench/evidence/paired" \
+            "${extra[@]}" 2>&1 | tee bench/evidence/driver.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accepted-confirmation-${{ matrix.dictionary }}-${{ matrix.runner }}
+          path: ${{ runner.temp }}/work/bench/evidence/
+          retention-days: 14
+          if-no-files-found: error
