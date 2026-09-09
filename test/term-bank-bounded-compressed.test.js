@@ -24,18 +24,24 @@ const mib = 1024 * 1024
 /**
  * @param {number} count
  * @param {number} [decodedBytes]
+ * @returns {Array<{filename: string, offset: number, compressionMethod: number, compressedSize: number, uncompressedSize: number, signature: number, getData: () => void}>}
  */
 function filesFor(count, decodedBytes = 4 * mib) {
     return Array.from({length: count}, (_, index) => ({
-        filename: `term_bank_${index + 1}.json`, offset: index * 64,
-        compressionMethod: 8, compressedSize: 4, uncompressedSize: decodedBytes,
-        signature: index + 100, getData() {},
+        filename: `term_bank_${index + 1}.json`,
+        offset: index * 64,
+        compressionMethod: 8,
+        compressedSize: 4,
+        uncompressedSize: decodedBytes,
+        signature: index + 100,
+        getData() {},
     }))
 }
 
 /**
  * @param {ReturnType<typeof filesFor>} files
  * @param {number} [deviceMemory]
+ * @returns {{pipeline: TermBankSourcePipeline, read: import('vitest').Mock<() => Promise<Uint8Array>>, readCompressed: import('vitest').Mock<() => Promise<Uint8Array>>}}
  */
 function createPipeline(files, deviceMemory = 4) {
     const read = vi.fn(async () => new Uint8Array([91, 93]))
@@ -109,8 +115,11 @@ describe('bounded compressed source plans', () => {
     test.each([0, -1, 1.5, Number.NaN, Infinity])('falls back for unknown or invalid decoded size %s', async (size) => {
         const files = filesFor(4, size)
         const {pipeline} = createPipeline(files)
-        try { expect(pipeline.createCompressedImportRunPlan(0)).toBeNull() }
-        finally { await pipeline.dispose() }
+        try {
+            expect(pipeline.createCompressedImportRunPlan(0)).toBeNull()
+        } finally {
+            await pipeline.dispose()
+        }
     })
 
     test('does not reject a valid earlier batch because a later batch has invalid metadata', async () => {
@@ -146,7 +155,9 @@ describe('bounded compressed source plans', () => {
         const files = filesFor(4)
         let aborted = 0
         const pipeline = new TermBankSourcePipeline({
-            termFiles: files, enabled: true, deviceMemory: 4,
+            termFiles: files,
+            enabled: true,
+            deviceMemory: 4,
             read: async () => new Uint8Array(),
             readCompressed: (_file, signal) => new Promise((_resolve, reject) => {
                 signal.addEventListener('abort', () => {
@@ -161,7 +172,7 @@ describe('bounded compressed source plans', () => {
         const settled = Promise.allSettled(reads)
         await pipeline.abortAndJoin()
         expect(aborted).toBe(4)
-        expect((await settled).map(({status}) => status)).toEqual(Array(4).fill('rejected'))
+        expect((await settled).map(({status}) => status)).toEqual(new Array(4).fill('rejected'))
         await pipeline.dispose()
     })
 })
