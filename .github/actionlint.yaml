@@ -1,0 +1,6 @@
+# The pinned actionlint release predates this GitHub-hosted runner label.
+# Explicitly allow this label without disabling workflow or shell validation.
+# https://docs.github.com/en/actions/reference/runners/github-hosted-runners
+self-hosted-runner:
+  labels:
+    - ubuntu-slim
