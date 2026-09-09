@@ -1,0 +1,31 @@
+        // Each lane is one XXH32 stripe. Packing by seed uses all four lanes;
+        // the scalar pair loop otherwise commonly vectorizes across just the
+        // two seeds and leaves half of each vector unused.
+        v128_t first = wasm_i32x4_make(
+            seed1 + 2654435761u + 2246822519u,
+            seed1 + 2246822519u, seed1, seed1 - 2654435761u
+        );
+        v128_t second = wasm_i32x4_make(
+            seed2 + 2654435761u + 2246822519u,
+            seed2 + 2246822519u, seed2, seed2 - 2654435761u
+        );
+        const v128_t prime1 = wasm_i32x4_splat(2654435761u);
+        const v128_t prime2 = wasm_i32x4_splat(2246822519u);
+        do {
+            const v128_t mixed = wasm_i32x4_mul(wasm_v128_load(p), prime2);
+            first = wasm_i32x4_add(first, mixed);
+            second = wasm_i32x4_add(second, mixed);
+            first = wasm_v128_or(wasm_i32x4_shl(first, 13), wasm_u32x4_shr(first, 19));
+            second = wasm_v128_or(wasm_i32x4_shl(second, 13), wasm_u32x4_shr(second, 19));
+            first = wasm_i32x4_mul(first, prime1);
+            second = wasm_i32x4_mul(second, prime1);
+            p += 16u;
+        } while (p <= limit);
+        h1 = rotl32(wasm_u32x4_extract_lane(first, 0), 1u) +
+            rotl32(wasm_u32x4_extract_lane(first, 1), 7u) +
+            rotl32(wasm_u32x4_extract_lane(first, 2), 12u) +
+            rotl32(wasm_u32x4_extract_lane(first, 3), 18u);
+        h2 = rotl32(wasm_u32x4_extract_lane(second, 0), 1u) +
+            rotl32(wasm_u32x4_extract_lane(second, 1), 7u) +
+            rotl32(wasm_u32x4_extract_lane(second, 2), 12u) +
+            rotl32(wasm_u32x4_extract_lane(second, 3), 18u);
