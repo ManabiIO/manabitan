@@ -1,0 +1,11 @@
+{
+  "lane": "reserve-first",
+  "baseline": "394d8eb799dd1eb5e194cee11472a4beab915080",
+  "originalCandidateTree": "9a97dafe8160a5a89e166b69042ca9eb8c7caa0e",
+  "changedFiles": [
+    "ext/js/dictionary/dictionary-database.js",
+    "test/dictionary-database-reserve-first.test.js"
+  ],
+  "originalPatchSha256": "e8f7cace94326b8fcc3602475127bd01c815b89a7191f057b62a81c0cbc115da",
+  "driverSha256": "e255f2a45ab308768cff89b4545f25d1779ae37ecb05b06d44399a085383d89b"
+}

@@ -1,0 +1,11 @@
+{
+  "lane": "composite-1",
+  "baseline": "394d8eb799dd1eb5e194cee11472a4beab915080",
+  "originalCandidateTree": "7861e3696323cef9dd0f26c1ab798ea8b1c52fca",
+  "changedFiles": [
+    "ext/js/dictionary/wasm/term-bank-parser.c",
+    "test/term-bank-composite-state.test.js"
+  ],
+  "originalPatchSha256": "2be3ddf54a96f461d45694bd071600ed4be4cd9e01afecd471e5eeab1b50f9d5",
+  "driverSha256": "e255f2a45ab308768cff89b4545f25d1779ae37ecb05b06d44399a085383d89b"
+}

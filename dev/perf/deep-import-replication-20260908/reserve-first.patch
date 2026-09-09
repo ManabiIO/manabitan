@@ -1,0 +1,226 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 2d5f8f00..2dd6af67 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -7807,7 +7807,7 @@ export class DictionaryDatabase {
+             let alreadyResolvedUniqueCount = 0;
+             let dedupExactCompareMs = 0;
+             const exactCandidates = [];
+-            const appendPendingContent = ({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2}) => {
++            const appendPendingContent = ({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2}, reservedIndex = -1) => {
+                 if (contentOffset > 0xffffffff) {
+                     throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
+                 }
+@@ -7817,7 +7817,7 @@ export class DictionaryDatabase {
+                 pendingContentHash2s.push(hash2);
+                 if (stagedIndexes !== null) {
+                     const signatureOffset = uniqueIndex * 3;
+-                    stagedIndexes[pendingContentCount] = uniqueSignatures === null ?
++                    stagedIndexes[pendingContentCount] = reservedIndex >= 0 ? reservedIndex : uniqueSignatures === null ?
+                         this._reserveArtifactTermContentMetadata(
+                             hash1,
+                             hash2,
+@@ -7902,6 +7902,27 @@ export class DictionaryDatabase {
+                         throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
+                     }
+                     const descriptor = {uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2};
++                    if (stagedIndexes !== null && uniqueSignatures !== null && persistedLookupRequired) {
++                        // New canonical content needs one hash-table probe, not a
++                        // failed published lookup followed by the same reservation probe.
++                        if (contentOffset > 0xffffffff) {
++                            throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`)
++                        }
++                        const signatureOffset = uniqueIndex * 3
++                        const reservedIndex = this._reservePreparedArtifactTermContentMetadata(
++                            hash1, hash2, contentLength,
++                            uniqueSignatures[signatureOffset],
++                            uniqueSignatures[signatureOffset + 1],
++                            uniqueSignatures[signatureOffset + 2],
++                        )
++                        if (reservedIndex >= 0) {
++                            // Own the reservation before any subsequent operation
++                            // can throw, so the existing batch rollback covers it.
++                            stagedIndexes[pendingContentCount] = reservedIndex
++                            appendPendingContent(descriptor, reservedIndex)
++                            continue
++                        }
++                    }
+                     const existingIndex = persistedLookupRequired ?
+                         this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
+                         -1;
+diff --git a/test/dictionary-database-reserve-first.test.js b/test/dictionary-database-reserve-first.test.js
+new file mode 100644
+index 00000000..1fbe45ae
+--- /dev/null
++++ b/test/dictionary-database-reserve-first.test.js
+@@ -0,0 +1,170 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program. If not, see <https://www.gnu.org/licenses/>.
++ */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import {describe, expect, test, vi} from 'vitest'
++import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js'
++
++/** @typedef {Parameters<DictionaryDatabase['_resolveArtifactTermContentDedup']>[0]} Chunk */
++/** @typedef {NonNullable<Chunk['contentDedupPlan']>} Plan */
++
++/**
++ * @param {DictionaryDatabase} database
++ * @param {Uint8Array[]} values
++ * @param {number[]} hashes
++ * @param {boolean} [prepared]
++ * @returns {Chunk & {contentDedupPlan: Plan}}
++ */
++function chunkFor(database, values, hashes, prepared = true) {
++    const count = values.length
++    const source = new Uint8Array(values.reduce((size, bytes) => size + bytes.length, 7))
++    const meta = new Uint32Array(count * 4)
++    const signatures = new Uint32Array(count * 3)
++    let cursor = 7
++    for (let i = 0; i < count; ++i) {
++        const bytes = values[i]
++        source.set(bytes, cursor)
++        meta.set([cursor - 7, bytes.length, hashes[i], hashes[i] ^ 0x9e3779b9], i * 4)
++        const last = Math.max(0, bytes.length - 4)
++        signatures.set([
++            database._readTermContentSignature(bytes, 0),
++            database._readTermContentSignature(bytes, Math.floor(last / 2)),
++            database._readTermContentSignature(bytes, last),
++        ], i * 3)
++        cursor += bytes.length
++    }
++    return {
++        rowCount: count,
++        contentRowStart: 0,
++        contentBytesList: [],
++        contentHash1List: new Uint32Array(0),
++        contentHash2List: new Uint32Array(0),
++        contentBytesBuffer: source,
++        contentBytesBaseOffset: 7,
++        contentMetaList: meta,
++        contentUniqueIndexList: Uint32Array.from({length: count}, (_, i) => i),
++        contentDedupPlan: {
++            uniqueCount: count,
++            sourceRowCount: count,
++            uniqueRowIndexes: Uint32Array.from({length: count}, (_, i) => i),
++            uniqueSignatures: prepared ? signatures : void 0,
++            resolvedFlags: new Uint8Array(count),
++            resolvedOffsets: new Float64Array(count),
++            resolvedLengths: new Uint32Array(count),
++            resolvedDictNames: null,
++            pendingEpochs: new Uint32Array(count),
++            pendingIndexes: new Uint32Array(count),
++            nextEpoch: 1,
++            persistedLookupRequired: true,
++        },
++        contentDictNameList: null,
++        uniformContentDictName: 'raw',
++    }
++}
++
++/**
++ * @param {DictionaryDatabase} database
++ * @param {number} hash
++ * @param {Uint8Array} bytes
++ */
++function publish(database, hash, bytes) {
++    return database._cacheTermEntryContentMeta(null, 500, bytes.length, 'raw', 0, hash, hash ^ 0x9e3779b9, bytes)
++}
++
++describe('reserve-first canonical deduplication', () => {
++    test('reserves each unseen canonical once without a redundant published lookup', async () => {
++        const database = new DictionaryDatabase()
++        publish(database, 99, new Uint8Array([0]))
++        const input = chunkFor(database, [new Uint8Array([1, 2, 3]), new Uint8Array([4])], [10, 20])
++        const lookup = vi.spyOn(database, '_findTermEntryContentMetaHashPairIndex')
++        const reserve = vi.spyOn(database, '_reservePreparedArtifactTermContentMetadata')
++        const result = await database._resolveArtifactTermContentDedup(input, true)
++        expect(result.pendingContentCount).toBe(2)
++        expect(lookup).not.toHaveBeenCalled()
++        expect(reserve).toHaveBeenCalledTimes(2)
++        expect(Array.from(result.pendingContentSpans?.offsets ?? [])).toEqual([7, 10])
++        const staged = result.stagedContentMetadata
++        if (typeof staged === 'undefined') { throw new Error('Missing reservations') }
++        expect(Array.from(staged.indexes).every((index) => index >= 0)).toBe(true)
++        expect(database._termEntryContentMetaHashPairPendingCount).toBe(2)
++        database._rollbackStagedArtifactTermContentMetadata(staged)
++        expect(database._termEntryContentMetaHashPairPendingCount).toBe(0)
++    })
++
++    test.each([false, true])('keeps exact byte verification for a published hash/signature match; unequal=%s', async (unequal) => {
++        const database = new DictionaryDatabase()
++        const persisted = new Uint8Array(40).fill(1)
++        const incoming = new Uint8Array(persisted)
++        // Outside all three four-byte signatures: only the exact comparison
++        // distinguishes this collision from equal content.
++        if (unequal) { incoming[10] = 2 }
++        publish(database, 10, persisted)
++        const read = vi.spyOn(database, '_readTermEntryContentBytesDetailedBatch').mockImplementation(async (requests) =>
++            requests.map(() => ({status: 'ok', bytes: persisted})),
++        )
++        const input = chunkFor(database, [incoming], [10])
++        const result = await database._resolveArtifactTermContentDedup(input, true)
++        expect(read).toHaveBeenCalledTimes(1)
++        expect(result.persistedHitCount).toBe(unequal ? 0 : 1)
++        expect(result.pendingContentCount).toBe(unequal ? 1 : 0)
++        expect(database._termEntryContentMetaHashPairPendingCount).toBe(0)
++        expect(input.contentDedupPlan.resolvedFlags[0]).toBe(unequal ? 0 : 1)
++    })
++
++    test('does not publish or steal another batch reservation', async () => {
++        const database = new DictionaryDatabase()
++        const bytes = new Uint8Array([1, 2, 3])
++        const first = await database._resolveArtifactTermContentDedup(chunkFor(database, [bytes], [10]), true)
++        const second = await database._resolveArtifactTermContentDedup(chunkFor(database, [bytes], [10]), true)
++        expect(first.pendingContentCount).toBe(1)
++        expect(second.pendingContentCount).toBe(1)
++        expect(second.persistedHitCount).toBe(0)
++        expect(Array.from(second.stagedContentMetadata?.indexes ?? [])).toEqual([-1])
++        if (!first.stagedContentMetadata || !second.stagedContentMetadata) { throw new Error('Missing stages') }
++        database._rollbackStagedArtifactTermContentMetadata(second.stagedContentMetadata)
++        expect(database._termEntryContentMetaHashPairPendingCount).toBe(1)
++        database._rollbackStagedArtifactTermContentMetadata(first.stagedContentMetadata)
++        expect(database._termEntryContentMetaHashPairPendingCount).toBe(0)
++    })
++
++    test('rolls back a newly owned reservation if appending its descriptor throws', async () => {
++        const database = new DictionaryDatabase()
++        const bytes = new Uint8Array([1])
++        const retained = await database._resolveArtifactTermContentDedup(chunkFor(database, [bytes], [99]), true)
++        const input = chunkFor(database, [bytes, bytes], [10, 20])
++        const names = ['raw', 'raw']
++        Object.defineProperty(names, 1, {get() { throw new Error('injected descriptor failure') }})
++        input.contentDictNameList = names
++        await expect(database._resolveArtifactTermContentDedup(input, true)).rejects.toThrow('injected descriptor failure')
++        expect(database._termEntryContentMetaHashPairPendingCount).toBe(1)
++        if (!retained.stagedContentMetadata) { throw new Error('Missing retained stage') }
++        database._rollbackStagedArtifactTermContentMetadata(retained.stagedContentMetadata)
++        expect(database._termEntryContentMetaHashPairPendingCount).toBe(0)
++        const retry = await database._resolveArtifactTermContentDedup(chunkFor(database, [bytes, bytes], [10, 20]), true)
++        expect(Array.from(retry.stagedContentMetadata?.indexes ?? []).every((index) => index >= 0)).toBe(true)
++    })
++
++    test.each([false, true])('preserves the existing path without prepared signatures; reserve=%s', async (reserve) => {
++        const database = new DictionaryDatabase()
++        publish(database, 99, new Uint8Array([0]))
++        const input = chunkFor(database, [new Uint8Array([1, 2])], [10], false)
++        const result = await database._resolveArtifactTermContentDedup(input, reserve)
++        expect(result.pendingContentCount).toBe(1)
++        expect(result.pendingContentSpans?.offsets[0]).toBe(7)
++        expect(database._termEntryContentMetaHashPairPendingCount).toBe(reserve ? 1 : 0)
++    })
++})

@@ -1,0 +1,890 @@
+[
+  {
+    "lane": "composite-1",
+    "status": "complete",
+    "measuredImports": 72,
+    "warmupImports": 6,
+    "source": {
+      "baseline": {
+        "root": "/home/runner/work/_temp/arms/baseline",
+        "gitSha": "394d8eb799dd1eb5e194cee11472a4beab915080",
+        "indexTree": "b02cf573e103cd18c2c04238a515855389b71b9c",
+        "diff": "",
+        "packageSha256": "04db2173be25390cd49c65b37775f9b4d500509300a59fea3d25dee56a30eb62",
+        "zipSha256": "3aa188a560e279888e347a172197490df75cf18560f3f3a482932b18be2fbf24",
+        "zipWorkerSha256": "ae106d2c922a7ccfbcba6bc22b229883e8f545724929546f83780bc4da4c6077",
+        "parserSourceSha256": "521d800c32634b28ae349180f791cd85568bd89e53dae79c6f1e57f26c49d21e",
+        "parserWasmSha256": "3f9e47b17109cdcada5c9c4c6bcd584bab9d8263a3add46e6bf8c772b0cd1f56",
+        "databaseSha256": "1d6295c380ea9e347dafbb727e15c5df0fa79b241ee22b55f58daa834f626574",
+        "preinternedPlanSha256": "8055fbf22213cbb94e44312e2315fb1ddb9074fa0a8a747e74c18b345109bf3d",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "candidate": {
+        "root": "/home/runner/work/_temp/arms/candidate",
+        "gitSha": "394d8eb799dd1eb5e194cee11472a4beab915080",
+        "indexTree": "7861e3696323cef9dd0f26c1ab798ea8b1c52fca",
+        "diff": "ext/js/dictionary/wasm/term-bank-parser.c | 127 +++++++++++++-----------------\n test/term-bank-composite-state.test.js    | 117 +++++++++++++++++++++++++++\n 2 files changed, 170 insertions(+), 74 deletions(-)",
+        "packageSha256": "a952fc0371db8d0b919f17b6ae2b5bb71572dffaa1bca737fabbda03b9c6aead",
+        "zipSha256": "3aa188a560e279888e347a172197490df75cf18560f3f3a482932b18be2fbf24",
+        "zipWorkerSha256": "ae106d2c922a7ccfbcba6bc22b229883e8f545724929546f83780bc4da4c6077",
+        "parserSourceSha256": "39cabcff5e502b18acbb5381136c6a5db8be437337c6a3a0049244082c22b1f1",
+        "parserWasmSha256": "cb27739068d1e2385a3589949ca55ecf51ae2015d145677c256294511121e88b",
+        "databaseSha256": "1d6295c380ea9e347dafbb727e15c5df0fa79b241ee22b55f58daa834f626574",
+        "preinternedPlanSha256": "8055fbf22213cbb94e44312e2315fb1ddb9074fa0a8a747e74c18b345109bf3d",
+        "diffSha256": "2be3ddf54a96f461d45694bd071600ed4be4cd9e01afecd471e5eeab1b50f9d5"
+      }
+    },
+    "fullChromiumStatus": "success",
+    "dictionaries": [
+      {
+        "dictionary": "jmdict",
+        "pairCount": 12,
+        "baselineMedianMs": 1581.6000000000204,
+        "candidateMedianMs": 1569.75,
+        "medianPairedChangePct": -0.5824863450488382,
+        "fasterPairs": 8,
+        "bootstrap95Pct": [
+          -1.5776670223009992,
+          0.7878213386054211
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineMs": 1581.3999999999942,
+            "candidateMs": 1680.7000000000116,
+            "changePct": 6.279246237512193,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 2,
+            "baselineMs": 1614.600000000035,
+            "candidateMs": 1532.899999999965,
+            "changePct": -5.060076799211455,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 3,
+            "baselineMs": 1563,
+            "candidateMs": 1564.0999999999767,
+            "changePct": 0.07037747920517479,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 4,
+            "baselineMs": 1543.5999999999767,
+            "candidateMs": 1534.4000000000233,
+            "changePct": -0.5960093288386648,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 5,
+            "baselineMs": 1575.7999999999884,
+            "candidateMs": 1547,
+            "changePct": -1.8276431019157657,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 6,
+            "baselineMs": 1547.9000000000233,
+            "candidateMs": 1571.1999999999534,
+            "changePct": 1.5052651980056675,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 7,
+            "baselineMs": 1552.2000000000116,
+            "candidateMs": 1637.7000000000116,
+            "changePct": 5.508310784692649,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 8,
+            "baselineMs": 1644.3000000000466,
+            "candidateMs": 1622.3000000000466,
+            "changePct": -1.3379553609438322,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 9,
+            "baselineMs": 1599.4000000000233,
+            "candidateMs": 1590.3000000000466,
+            "changePct": -0.5689633612590117,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 10,
+            "baselineMs": 1586.5,
+            "candidateMs": 1585.2999999999302,
+            "changePct": -0.07563819729403676,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 11,
+            "baselineMs": 1581.8000000000466,
+            "candidateMs": 1568.3000000000466,
+            "changePct": -0.8534580857251006,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 12,
+            "baselineMs": 1584.6999999999534,
+            "candidateMs": 1555.9000000000233,
+            "changePct": -1.8173786836581662,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          }
+        ]
+      },
+      {
+        "dictionary": "jmnedict",
+        "pairCount": 12,
+        "baselineMedianMs": 1410.4000000000233,
+        "candidateMedianMs": 1427.6000000000058,
+        "medianPairedChangePct": 0.4205147100288964,
+        "fasterPairs": 5,
+        "bootstrap95Pct": [
+          -1.9576388926570099,
+          1.5352406091111326
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineMs": 1407,
+            "candidateMs": 1400.9000000000233,
+            "changePct": -0.43354655294788325,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 2,
+            "baselineMs": 1339.2999999999884,
+            "candidateMs": 1420,
+            "changePct": 6.025535727619835,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 3,
+            "baselineMs": 1355.2000000000116,
+            "candidateMs": 1426.2000000000116,
+            "changePct": 5.239079102715416,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 4,
+            "baselineMs": 1453.2999999999884,
+            "candidateMs": 1402.7000000000116,
+            "changePct": -3.4817312323661365,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 5,
+            "baselineMs": 1370.2000000000116,
+            "candidateMs": 1374.6999999999534,
+            "changePct": 0.32841920887036746,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 6,
+            "baselineMs": 1402.399999999965,
+            "candidateMs": 1402.2000000000116,
+            "changePct": -0.014261266397130878,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 7,
+            "baselineMs": 1518.2999999999884,
+            "candidateMs": 1526.0999999999767,
+            "changePct": 0.513732463939176,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 8,
+            "baselineMs": 1572.7999999999302,
+            "candidateMs": 1463.5999999999767,
+            "changePct": -6.943031536111288,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 9,
+            "baselineMs": 1406.7999999999302,
+            "candidateMs": 1429,
+            "changePct": 1.578049473988563,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 10,
+            "baselineMs": 1463.1000000000931,
+            "candidateMs": 1470.5999999999767,
+            "changePct": 0.5126102111874253,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 11,
+            "baselineMs": 1499.6999999999534,
+            "candidateMs": 1436.8999999999069,
+            "changePct": -4.1875041675033975,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 12,
+            "baselineMs": 1413.8000000000466,
+            "candidateMs": 1434.9000000000233,
+            "changePct": 1.492431744233702,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          }
+        ]
+      },
+      {
+        "dictionary": "jitendex",
+        "pairCount": 12,
+        "baselineMedianMs": 2849.500000000058,
+        "candidateMedianMs": 2787.9499999999534,
+        "medianPairedChangePct": -1.971555173648587,
+        "fasterPairs": 11,
+        "bootstrap95Pct": [
+          -2.7004692644000627,
+          -1.573258964910812
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineMs": 2820.5,
+            "candidateMs": 2743.5999999999767,
+            "changePct": -2.7264669384869045,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 2,
+            "baselineMs": 2770.4000000000233,
+            "candidateMs": 2771.7999999999884,
+            "changePct": 0.05053421888410181,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 3,
+            "baselineMs": 2896.7999999999884,
+            "candidateMs": 2852.2999999999884,
+            "changePct": -1.5361778514222602,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 4,
+            "baselineMs": 2831.7000000000116,
+            "candidateMs": 2786.0999999999767,
+            "changePct": -1.6103400783993638,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 5,
+            "baselineMs": 2810.2999999999884,
+            "candidateMs": 2762.7999999999884,
+            "changePct": -1.690211009500775,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 6,
+            "baselineMs": 2840.7000000000116,
+            "candidateMs": 2793.2000000000116,
+            "changePct": -1.6721230682578136,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 7,
+            "baselineMs": 2919.4000000000233,
+            "candidateMs": 2907.1999999999534,
+            "changePct": -0.4178940878286519,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 8,
+            "baselineMs": 2989.100000000093,
+            "candidateMs": 2851.79999999993,
+            "changePct": -4.593355859628612,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 9,
+            "baselineMs": 2928.3000000000466,
+            "candidateMs": 2844.0999999999767,
+            "changePct": -2.875388450639227,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 10,
+            "baselineMs": 2854.0999999999767,
+            "candidateMs": 2789.79999999993,
+            "changePct": -2.252899337796399,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 11,
+            "baselineMs": 2852.9000000000233,
+            "candidateMs": 2776.5999999999767,
+            "changePct": -2.674471590313221,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 12,
+            "baselineMs": 2846.100000000093,
+            "candidateMs": 2770.0999999999767,
+            "changePct": -2.670320789856784,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          }
+        ]
+      }
+    ],
+    "candidatePatchSha256": "2be3ddf54a96f461d45694bd071600ed4be4cd9e01afecd471e5eeab1b50f9d5"
+  },
+  {
+    "lane": "composite-2",
+    "status": "complete",
+    "measuredImports": 72,
+    "warmupImports": 6,
+    "source": {
+      "baseline": {
+        "root": "/home/runner/work/_temp/arms/baseline",
+        "gitSha": "394d8eb799dd1eb5e194cee11472a4beab915080",
+        "indexTree": "b02cf573e103cd18c2c04238a515855389b71b9c",
+        "diff": "",
+        "packageSha256": "9889a34f3d13eb5c6c539a4fa8d1888ff38d08d209d0dd89c290e36a84e7c9c5",
+        "zipSha256": "3aa188a560e279888e347a172197490df75cf18560f3f3a482932b18be2fbf24",
+        "zipWorkerSha256": "ae106d2c922a7ccfbcba6bc22b229883e8f545724929546f83780bc4da4c6077",
+        "parserSourceSha256": "521d800c32634b28ae349180f791cd85568bd89e53dae79c6f1e57f26c49d21e",
+        "parserWasmSha256": "3f9e47b17109cdcada5c9c4c6bcd584bab9d8263a3add46e6bf8c772b0cd1f56",
+        "databaseSha256": "1d6295c380ea9e347dafbb727e15c5df0fa79b241ee22b55f58daa834f626574",
+        "preinternedPlanSha256": "8055fbf22213cbb94e44312e2315fb1ddb9074fa0a8a747e74c18b345109bf3d",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "candidate": {
+        "root": "/home/runner/work/_temp/arms/candidate",
+        "gitSha": "394d8eb799dd1eb5e194cee11472a4beab915080",
+        "indexTree": "7861e3696323cef9dd0f26c1ab798ea8b1c52fca",
+        "diff": "ext/js/dictionary/wasm/term-bank-parser.c | 127 +++++++++++++-----------------\n test/term-bank-composite-state.test.js    | 117 +++++++++++++++++++++++++++\n 2 files changed, 170 insertions(+), 74 deletions(-)",
+        "packageSha256": "3ca5c2fdbe7ff705741c50a939ba7c8a99faeff1c55db541b74511c2fe0b2878",
+        "zipSha256": "3aa188a560e279888e347a172197490df75cf18560f3f3a482932b18be2fbf24",
+        "zipWorkerSha256": "ae106d2c922a7ccfbcba6bc22b229883e8f545724929546f83780bc4da4c6077",
+        "parserSourceSha256": "39cabcff5e502b18acbb5381136c6a5db8be437337c6a3a0049244082c22b1f1",
+        "parserWasmSha256": "cb27739068d1e2385a3589949ca55ecf51ae2015d145677c256294511121e88b",
+        "databaseSha256": "1d6295c380ea9e347dafbb727e15c5df0fa79b241ee22b55f58daa834f626574",
+        "preinternedPlanSha256": "8055fbf22213cbb94e44312e2315fb1ddb9074fa0a8a747e74c18b345109bf3d",
+        "diffSha256": "2be3ddf54a96f461d45694bd071600ed4be4cd9e01afecd471e5eeab1b50f9d5"
+      }
+    },
+    "fullChromiumStatus": "success",
+    "dictionaries": [
+      {
+        "dictionary": "jmdict",
+        "pairCount": 12,
+        "baselineMedianMs": 1573.0,
+        "candidateMedianMs": 1535.1500000000233,
+        "medianPairedChangePct": -1.918041870087439,
+        "fasterPairs": 11,
+        "bootstrap95Pct": [
+          -4.1238720817332535,
+          -0.8633811353172705
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineMs": 1557.0999999999767,
+            "candidateMs": 1498.2999999999884,
+            "changePct": -3.776250722496255,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 2,
+            "baselineMs": 1621.0999999999767,
+            "candidateMs": 1537.2000000000116,
+            "changePct": -5.175498118559386,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 3,
+            "baselineMs": 1578.5,
+            "candidateMs": 1506.399999999965,
+            "changePct": -4.56762749445897,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 4,
+            "baselineMs": 1557.899999999965,
+            "candidateMs": 1553.0999999999767,
+            "changePct": -0.30810706720511005,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 5,
+            "baselineMs": 1565.2000000000116,
+            "candidateMs": 1577.2999999999884,
+            "changePct": 0.7730641451556775,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 6,
+            "baselineMs": 1567.5,
+            "candidateMs": 1524.5,
+            "changePct": -2.743221690590114,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 7,
+            "baselineMs": 1544,
+            "candidateMs": 1533.100000000035,
+            "changePct": -0.7059585492205311,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 8,
+            "baselineMs": 1585.5999999999767,
+            "candidateMs": 1514.6999999999534,
+            "changePct": -4.471493440970253,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 9,
+            "baselineMs": 1547.8000000000466,
+            "candidateMs": 1532,
+            "changePct": -1.0208037214140098,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 10,
+            "baselineMs": 1616.4000000000233,
+            "candidateMs": 1560.8000000000466,
+            "changePct": -3.4397426379594087,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 11,
+            "baselineMs": 1616.1999999999534,
+            "candidateMs": 1599.5,
+            "changePct": -1.0332879594081135,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 12,
+            "baselineMs": 1601.2999999999302,
+            "candidateMs": 1583.7999999999302,
+            "changePct": -1.092862049584764,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          }
+        ]
+      },
+      {
+        "dictionary": "jmnedict",
+        "pairCount": 12,
+        "baselineMedianMs": 1375.5500000000466,
+        "candidateMedianMs": 1389.5999999999767,
+        "medianPairedChangePct": -0.13585222672788388,
+        "fasterPairs": 6,
+        "bootstrap95Pct": [
+          -2.0615034840842315,
+          3.158060861921186
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineMs": 1369.2999999999884,
+            "candidateMs": 1412.7000000000116,
+            "changePct": 3.169502665597279,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 2,
+            "baselineMs": 1319.0999999999767,
+            "candidateMs": 1401.5999999999767,
+            "changePct": 6.254264271094034,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 3,
+            "baselineMs": 1405.9000000000233,
+            "candidateMs": 1343,
+            "changePct": -4.474002418381263,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 4,
+            "baselineMs": 1396.2999999999884,
+            "candidateMs": 1409,
+            "changePct": 0.9095466590282708,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 5,
+            "baselineMs": 1374.1999999999534,
+            "candidateMs": 1355.2000000000116,
+            "changePct": -1.3826226167910405,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 6,
+            "baselineMs": 1344.2999999999884,
+            "candidateMs": 1386.5999999999767,
+            "changePct": 3.1466190582450926,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 7,
+            "baselineMs": 1439.7999999999884,
+            "candidateMs": 1406.0999999999767,
+            "changePct": -2.3406028615093666,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 8,
+            "baselineMs": 1375.8000000000466,
+            "candidateMs": 1314.9000000000233,
+            "changePct": -4.426515481902982,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 9,
+            "baselineMs": 1375.3000000000466,
+            "candidateMs": 1386.2999999999302,
+            "changePct": 0.7998254926113058,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 10,
+            "baselineMs": 1342.5999999999767,
+            "candidateMs": 1392.5999999999767,
+            "changePct": 3.7241173841800146,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 11,
+            "baselineMs": 1409.1999999999534,
+            "candidateMs": 1394.0999999999767,
+            "changePct": -1.0715299460670735,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 12,
+            "baselineMs": 1402.5999999999767,
+            "candidateMs": 1377.5999999999767,
+            "changePct": -1.7824041066590968,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          }
+        ]
+      },
+      {
+        "dictionary": "jitendex",
+        "pairCount": 12,
+        "baselineMedianMs": 2791.4000000000524,
+        "candidateMedianMs": 2748.0499999999884,
+        "medianPairedChangePct": -1.4866960745511193,
+        "fasterPairs": 10,
+        "bootstrap95Pct": [
+          -3.2733836363899593,
+          -0.4372905463442045
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineMs": 2771.2999999999884,
+            "candidateMs": 2733.7000000000116,
+            "changePct": -1.356763973585573,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 2,
+            "baselineMs": 2727.899999999965,
+            "candidateMs": 2683.8000000000466,
+            "changePct": -1.6166281755166656,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 3,
+            "baselineMs": 2761.8000000000466,
+            "candidateMs": 2797.7999999999884,
+            "changePct": 1.303497718876856,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 4,
+            "baselineMs": 2764.7999999999884,
+            "candidateMs": 2733.9000000000233,
+            "changePct": -1.1176215277765245,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 5,
+            "baselineMs": 2814.2999999999884,
+            "candidateMs": 2696.899999999965,
+            "changePct": -4.171552428668724,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 6,
+            "baselineMs": 2844.2000000000116,
+            "candidateMs": 2764.399999999965,
+            "changePct": -2.8057098656932067,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 7,
+            "baselineMs": 2784.7000000000116,
+            "candidateMs": 2780.2999999999884,
+            "changePct": -0.15800624842975397,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 8,
+            "baselineMs": 2777.0999999999767,
+            "candidateMs": 2757.20000000007,
+            "changePct": -0.716574844258655,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 9,
+            "baselineMs": 2801.8000000000466,
+            "candidateMs": 2737.29999999993,
+            "changePct": -2.302091512603155,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 10,
+            "baselineMs": 2861.0999999999767,
+            "candidateMs": 2738.899999999907,
+            "changePct": -4.271084547903636,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          },
+          {
+            "pair": 11,
+            "baselineMs": 2798.100000000093,
+            "candidateMs": 2806.5,
+            "changePct": 0.3002037096567989,
+            "order": [
+              "baseline",
+              "candidate"
+            ]
+          },
+          {
+            "pair": 12,
+            "baselineMs": 2865.5,
+            "candidateMs": 2758.29999999993,
+            "changePct": -3.741057407086712,
+            "order": [
+              "candidate",
+              "baseline"
+            ]
+          }
+        ]
+      }
+    ],
+    "candidatePatchSha256": "2be3ddf54a96f461d45694bd071600ed4be4cd9e01afecd471e5eeab1b50f9d5"
+  },
+  {
+    "lane": "reserve-first",
+    "status": "incomplete-or-failed"
+  }
+]

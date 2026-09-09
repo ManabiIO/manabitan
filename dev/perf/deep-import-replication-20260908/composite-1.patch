@@ -1,0 +1,299 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 38d6cf27..3b65b1b7 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -481,26 +481,20 @@ static int parse_composite_span_impl(
+     uint32_t* normalization_hint,
+     uint32_t* text_normalization_hint
+ ) {
+-    if (start >= len) { return 0; }
+-    const uint8_t open = src[start];
+-    uint8_t close = 0;
+-    if (open == '[') { close = ']'; }
+-    else if (open == '{') { close = '}'; }
+-    else { return 0; }
+-
+-    uint8_t expected_closers[MAX_JSON_NESTING];
+-    /*
+-     * Array states: 0 = first value or end, 1 = comma or end,
+-     * 2 = value after comma. Object states: 0 = first key or end,
+-     * 1 = colon, 2 = value, 3 = comma or end, 4 = key after comma.
+-     */
+-    uint8_t states[MAX_JSON_NESTING];
+-    expected_closers[0] = close;
+-    states[0] = 0u;
++    enum {
++        ARRAY_FIRST, ARRAY_AFTER_VALUE, ARRAY_VALUE,
++        OBJECT_FIRST, OBJECT_COLON, OBJECT_VALUE, OBJECT_AFTER_VALUE, OBJECT_KEY
++    };
++    if (start >= len || (src[start] != '[' && src[start] != '{')) { return 0; }
++
++    // The active frame stays in a local. Only suspended parents need stack
++    // storage; the state also encodes the matching container type.
++    uint8_t parents[MAX_JSON_NESTING];
+     uint32_t depth = 1u;
++    uint8_t state = src[start] == '[' ? ARRAY_FIRST : OBJECT_FIRST;
+     uint32_t i = start + 1u;
+     while (i < len) {
+-        uint8_t c = src[i];
++        const uint8_t c = src[i];
+         if (is_ws(c)) {
+             if (normalization_hint != 0 && *normalization_hint == 0u) {
+                 *normalization_hint = 1u;
+@@ -508,91 +502,76 @@ static int parse_composite_span_impl(
+             ++i;
+             continue;
+         }
+-
+-        const uint8_t expected_closer = expected_closers[depth - 1u];
+-        uint8_t* const state = &states[depth - 1u];
+         if (c == '"') {
+             if (media_hint != 0 && *media_hint == 0u && is_media_marker_at(src, len, i)) {
+                 *media_hint = 1u;
+             }
+-            uint32_t s_end = 0;
++            uint32_t s_end = 0u;
+             if (!parse_string_span(src, len, i, &s_end)) { return 0; }
+-            if (expected_closer == '}') {
+-                if (*state == 0u || *state == 4u) {
+-                    if (
+-                        (
+-                            (normalization_hint != 0 && *normalization_hint == 0u) ||
+-                            (text_normalization_hint != 0 && *text_normalization_hint == 0u)
+-                        ) &&
+-                        type_text_pair_at(src, len, i, s_end)
+-                    ) {
+-                        if (normalization_hint != 0) { *normalization_hint = 1u; }
+-                        if (text_normalization_hint != 0) { *text_normalization_hint = 1u; }
+-                    }
+-                    *state = 1u;
+-                } else if (*state == 2u) {
+-                    *state = 3u;
+-                } else {
+-                    return 0;
++            if (state == OBJECT_FIRST || state == OBJECT_KEY) {
++                if (
++                    (
++                        (normalization_hint != 0 && *normalization_hint == 0u) ||
++                        (text_normalization_hint != 0 && *text_normalization_hint == 0u)
++                    ) &&
++                    type_text_pair_at(src, len, i, s_end)
++                ) {
++                    if (normalization_hint != 0) { *normalization_hint = 1u; }
++                    if (text_normalization_hint != 0) { *text_normalization_hint = 1u; }
+                 }
++                state = OBJECT_COLON;
++            } else if (state == OBJECT_VALUE) {
++                state = OBJECT_AFTER_VALUE;
++            } else if (state == ARRAY_FIRST || state == ARRAY_VALUE) {
++                state = ARRAY_AFTER_VALUE;
+             } else {
+-                if (*state != 0u && *state != 2u) { return 0; }
+-                *state = 1u;
++                return 0;
+             }
+             i = s_end;
+             continue;
+         }
+-        if (c == '[' || c == '{') {
+-            if (
+-                (expected_closer == ']' && *state != 0u && *state != 2u) ||
+-                (expected_closer == '}' && *state != 2u)
+-            ) { return 0; }
+-            *state = expected_closer == ']' ? 1u : 3u;
+-            if (depth >= MAX_JSON_NESTING) { return 0; }
+-            expected_closers[depth] = c == '[' ? ']' : '}';
+-            states[depth] = 0u;
+-            ++depth;
+-            ++i;
+-            continue;
+-        }
+         if (c == ']' || c == '}') {
+-            if (c != expected_closer) { return 0; }
+-            if (
+-                (expected_closer == ']' && *state != 0u && *state != 1u) ||
+-                (expected_closer == '}' && *state != 0u && *state != 3u)
+-            ) { return 0; }
+-            --depth;
++            if (c == ']') {
++                if (state != ARRAY_FIRST && state != ARRAY_AFTER_VALUE) { return 0; }
++            } else {
++                if (state != OBJECT_FIRST && state != OBJECT_AFTER_VALUE) { return 0; }
++            }
+             ++i;
+-            if (depth == 0u) {
++            if (--depth == 0u) {
+                 *out_end = i;
+                 return 1;
+             }
++            state = parents[depth - 1u];
+             continue;
+         }
+         if (c == ',') {
+-            if (expected_closer == ']') {
+-                if (*state != 1u) { return 0; }
+-                *state = 2u;
+-            } else {
+-                if (*state != 3u) { return 0; }
+-                *state = 4u;
+-            }
++            if (state == ARRAY_AFTER_VALUE) { state = ARRAY_VALUE; }
++            else if (state == OBJECT_AFTER_VALUE) { state = OBJECT_KEY; }
++            else { return 0; }
+             ++i;
+             continue;
+         }
+         if (c == ':') {
+-            if (expected_closer != '}' || *state != 1u) { return 0; }
+-            *state = 2u;
++            if (state != OBJECT_COLON) { return 0; }
++            state = OBJECT_VALUE;
++            ++i;
++            continue;
++        }
++        uint8_t next_state;
++        if (state == ARRAY_FIRST || state == ARRAY_VALUE) { next_state = ARRAY_AFTER_VALUE; }
++        else if (state == OBJECT_VALUE) { next_state = OBJECT_AFTER_VALUE; }
++        else { return 0; }
++        if (c == '[' || c == '{') {
++            if (depth >= MAX_JSON_NESTING) { return 0; }
++            parents[depth - 1u] = next_state;
++            ++depth;
++            state = c == '[' ? ARRAY_FIRST : OBJECT_FIRST;
+             ++i;
+             continue;
+         }
+-        if (
+-            (expected_closer == ']' && *state != 0u && *state != 2u) ||
+-            (expected_closer == '}' && *state != 2u)
+-        ) { return 0; }
+         uint32_t scalar_end = 0u;
+         if (!parse_scalar_span(src, len, i, &scalar_end)) { return 0; }
+-        *state = expected_closer == ']' ? 1u : 3u;
++        state = next_state;
+         i = scalar_end;
+     }
+     return 0;
+diff --git a/test/term-bank-composite-state.test.js b/test/term-bank-composite-state.test.js
+new file mode 100644
+index 00000000..687ba73a
+--- /dev/null
++++ b/test/term-bank-composite-state.test.js
+@@ -0,0 +1,117 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program. If not, see <https://www.gnu.org/licenses/>.
++ */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import {readFile} from 'node:fs/promises'
++import {beforeAll, describe, expect, test} from 'vitest'
++
++/** @typedef {{memory: WebAssembly.Memory, wasm_alloc: (length: number) => number, wasm_reset_heap: () => void, parse_term_bank: (input: number, length: number, output: number, capacity: number) => number, parse_term_bank_with_media_hints: (input: number, length: number, output: number, capacity: number) => number}} ParserExports */
++/** @type {ParserExports} */
++let parser
++const encoder = new TextEncoder()
++
++beforeAll(async () => {
++    const bytes = await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))
++    const {instance} = await WebAssembly.instantiate(bytes)
++    parser = /** @type {ParserExports} */ (/** @type {unknown} */ (instance.exports))
++})
++
++/**
++ * @param {string} glossary
++ * @param {boolean} [hints]
++ * @returns {{count: number, metadata: number[]}}
++ */
++function parseGlossary(glossary, hints = true) {
++    const bytes = encoder.encode(`[["entry","","","",0,${glossary},1,""]]`)
++    parser.wasm_reset_heap()
++    const input = parser.wasm_alloc(bytes.length)
++    const output = parser.wasm_alloc(17 * 4)
++    new Uint8Array(parser.memory.buffer, input, bytes.length).set(bytes)
++    const count = (hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank)(input, bytes.length, output, 1)
++    return {count, metadata: Array.from(new Uint32Array(parser.memory.buffer, output, 17))}
++}
++
++/** @param {number} depth */
++function nested(depth) {
++    let value = '0'
++    for (let i = 0; i < depth; ++i) { value = i % 2 === 0 ? `[${value}]` : `{"k":${value}}` }
++    return value
++}
++
++describe('composite parser state transitions', () => {
++    test.each([
++        '[]', '{}', '[[]]', '[{}]', '{"k":[]}', '{"k":{}}',
++        '[0,true,false,null,"",[],{}]',
++        '{"a":0,"b":true,"c":null,"d":"","e":[],"f":{}}',
++        '[{"a":[[],{},[1,2]],"b":{"c":false}},3,"last"]',
++        '["commas, colons: and brackets [{]} inside strings","\\\"\\\\\\n\\u1234"]',
++        '[ -1, 1.25, 1e+3, -0.25e-2 ]',
++        nested(1), nested(2), nested(255), nested(256),
++    ])('accepts complete container states: %s', (glossary) => {
++        expect(parseGlossary(glossary).count).toBe(1)
++        expect(parseGlossary(glossary, false).count).toBe(1)
++    })
++
++    test.each([
++        '[}', '{]', '[,]', '{,}', '[1,]', '{"k":0,}',
++        '[1 2]', '["a" "b"]', '[[]{}]', '[1:2]',
++        '{"k"}', '{"k",0}', '{"k":}', '{"k"::0}',
++        '{0:1}', '{true:1}', '{[]:1}', '{"a":1 "b":2}',
++        '{"a":{}[]}', '{"a":[],false}', '{"a":0,:1}',
++        '[[}]', '{"a":[}}', '[{"a":[]]}', '[{"a":0,}]',
++        '[truefalse]', '[+1]', '[01]', '[1.]', '[1e]',
++        '["\\q"]', '["\\u12zz"]', '["raw\ncontrol"]',
++        nested(257), nested(258),
++    ])('rejects malformed transitions or excessive depth: %s', (glossary) => {
++        expect(parseGlossary(glossary).count).toBeLessThan(0)
++        expect(parseGlossary(glossary, false).count).toBeLessThan(0)
++    })
++
++    test('preserves media and normalization hints across parent restoration', () => {
++        const cases = [
++            {json: '[{"a":[{"tag":"img"}],"b":0}]', flags: [1, 0, 0]},
++            {json: '[{"a":[{"type":"text","text":"value"}],"b":0}]', flags: [0, 1, 1]},
++            {json: '[ {"a": [1, {}], "b": "image"} ]', flags: [1, 1, 0]},
++            {json: '[{"a":[1,{}],"b":"value"}]', flags: [0, 0, 0]},
++        ]
++        for (const {json, flags} of cases) {
++            const result = parseGlossary(json)
++            expect(result.count).toBe(1)
++            expect(result.metadata.slice(14)).toEqual(flags)
++        }
++    })
++
++    test('matches JSON validity for deterministic mutations of nested values', () => {
++        let seed = 0x315ca7e1
++        const random = () => {
++            seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0
++            return seed
++        }
++        const tokens = ['[', ']', '{', '}', ':', ',', '"', ' ', '0', 't', '\\']
++        for (let i = 0; i < 600; ++i) {
++            const valid = JSON.stringify([{key: [i, `text ${random()}`, null, {tag: 'span', content: ['x', {}]}]}, false])
++            const offset = random() % valid.length
++            const token = tokens[random() % tokens.length]
++            const mutations = [valid, valid.slice(0, offset), valid.slice(0, offset) + token + valid.slice(offset + 1)]
++            for (const glossary of mutations) {
++                let accepted = true
++                try { JSON.parse(glossary) } catch { accepted = false }
++                expect(parseGlossary(glossary).count > 0).toBe(accepted)
++            }
++        }
++    })
++})
