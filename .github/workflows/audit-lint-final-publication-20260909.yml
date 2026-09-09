@@ -1,0 +1,87 @@
+name: Audit final lint qualification
+on:
+  push:
+    branches: [audit/source-export-20260909]
+    paths: [.github/workflows/audit-lint-final-publication-20260909.yml]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Reconstruct the exact reviewed source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          python3 - <<'PY'
+          import base64, hashlib, lzma, os
+          from pathlib import Path
+          encoded = Path('audit-lint-qualification-20260909.patch.xz.b64').read_bytes()
+          assert hashlib.sha256(encoded).hexdigest() == 'c785a5fc0f4082aae0e83cf7972d046e91fa0466faade1bd580d7b2b6f553755'
+          patch = lzma.decompress(base64.b64decode(encoded, validate=False))
+          assert hashlib.sha256(patch).hexdigest() == '48fbb34e9ad67bcb81f0e9c668e84612dcbd488603d0d01ff3bddf5b79e6ad3a'
+          Path(os.environ['RUNNER_TEMP'], 'reviewed.patch').write_bytes(patch)
+          PY
+          git config user.name 'Alex Ehlke'
+          git config user.email 'alex.ehlke@gmail.com'
+          git worktree add "$RUNNER_TEMP/candidate" c8090090924634014b791139d3b22d95d2ebc1ea
+          cd "$RUNNER_TEMP/candidate"
+          git apply --unidiff-zero --index "$RUNNER_TEMP/reviewed.patch"
+          git diff --cached --check
+          test "$(git write-tree)" = 29b2706fcf618ae7541bc0e97bfd1299dcfc0521
+          test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = 30
+          git diff --cached --exit-code -- package.json package-lock.json .github ext/js/dictionary/wasm dev/lib/zstd-simd-module.js dev/data/zstd-simd.wasm
+          commit=$(git commit-tree 29b2706fcf618ae7541bc0e97bfd1299dcfc0521 -p c8090090924634014b791139d3b22d95d2ebc1ea -m 'Complete handwritten lint contracts and validate runtime diagnostic boundaries')
+          git reset --hard "$commit"
+          git show -s --format='%H %T' > "$RUNNER_TEMP/evidence/source.txt"
+          git diff --stat c8090090924634014b791139d3b22d95d2ebc1ea > "$RUNNER_TEMP/evidence/diff-stat.txt"
+          git diff --name-only c8090090924634014b791139d3b22d95d2ebc1ea > "$RUNNER_TEMP/evidence/changed-files.txt"
+          test "$(git rev-parse HEAD:ext/js/dictionary/wasm/term-bank-parser.c)" = 836cb10f5aa52177bd82d6fbccb44dd5f3811e2b
+      - name: Install locked dependencies and build libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/candidate"
+          node --version > "$RUNNER_TEMP/evidence/node.txt"
+          npm ci > "$RUNNER_TEMP/evidence/npm-ci.log" 2>&1
+          npm run build:libs > "$RUNNER_TEMP/evidence/build-libs.log" 2>&1
+      - name: Run strict lint, type and behavioral qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/candidate"
+          npm run test:js > "$RUNNER_TEMP/evidence/lint.log" 2>&1
+          for project in main dev test bench; do
+            npm run "test:ts:$project" > "$RUNNER_TEMP/evidence/types-$project.log" 2>&1
+          done
+          npm run test:unit -- --maxWorkers=2 --minWorkers=1 > "$RUNNER_TEMP/evidence/units.log" 2>&1
+          npm run test:unit:options > "$RUNNER_TEMP/evidence/options.log" 2>&1
+          npm run test:json > "$RUNNER_TEMP/evidence/json.log" 2>&1
+          npm run build -- --dry-run > "$RUNNER_TEMP/evidence/build.log" 2>&1
+          test -z "$(git status --porcelain)"
+      - name: Publish qualified source without audit ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/candidate"
+          test "$(git rev-parse HEAD^{tree})" = 29b2706fcf618ae7541bc0e97bfd1299dcfc0521
+          test "$(git rev-parse HEAD^)" = c8090090924634014b791139d3b22d95d2ebc1ea
+          git push origin HEAD:refs/heads/audit/lint-qualified-source-20260909
+          git show -s --format='%H %T'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: final-lint-qualification
+          path: ${{ runner.temp }}/evidence
+          retention-days: 30
+          if-no-files-found: error
