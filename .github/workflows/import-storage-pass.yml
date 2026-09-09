@@ -22,7 +22,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/source"
           git branch export-pr31 03478be25506176610b2133be658ee697d9bb3f1
           git bundle create "$RUNNER_TEMP/source/pr31.bundle" export-pr31
-          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/source/identity.txt"
+          git rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/source/identity.txt"
           sha256sum package-lock.json > "$RUNNER_TEMP/source/package-lock.sha256"
       - uses: actions/upload-artifact@v4
         with:
