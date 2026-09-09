@@ -1,0 +1,205 @@
+name: Definition span packing verification
+on:
+  push:
+    branches: [verify/definition-span-packing-20260909-2150]
+    paths:
+      - .github/workflows/definition-span-packing-verify.yml
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      source: ${{ steps.publish.outputs.source }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - name: Reconstruct exact source and run complete validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/evidence"
+          product="$RUNNER_TEMP/product"
+          mkdir -p "$evidence"
+          base64 -d dev/perf/definition-span-packing.patch.gz.b64 | gzip -d > "$evidence/source.patch"
+          echo "893dc55a4c4439584b683290c793cbb29f981e05d74ea6d3bb5dc253fa4f40b6  $evidence/source.patch" | sha256sum --check
+          git worktree add --detach "$product" 03478be25506176610b2133be658ee697d9bb3f1
+          cp -al node_modules "$product/node_modules"
+          cd "$product"
+          git apply --index "$evidence/source.patch"
+          test "$(git write-tree)" = e604fea040cffee4e557d0c3797632b17328036f
+          git diff --cached --name-only > "$evidence/changed-files.txt"
+          node dev/bin/build-libs.js > "$evidence/libraries.log" 2>&1
+          node node_modules/vitest/vitest.mjs run > "$evidence/unit.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$evidence/options.log" 2>&1
+          npm run test:ts > "$evidence/types.log" 2>&1
+          npm run test:js > "$evidence/lint.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$evidence/build.log" 2>&1
+          test "$(git write-tree)" = e604fea040cffee4e557d0c3797632b17328036f
+          test -z "$(git diff --name-only)"
+      - name: Publish only validated product source on a new branch
+        id: publish
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/product"
+          branch=perf/definition-span-packing-20260909-2150
+          git switch -c "$branch"
+          git config user.name 'OpenAI'
+          git config user.email 'agent@openai.com'
+          git -c core.hooksPath=/dev/null commit -m 'perf(import): coalesce contiguous definition spans within storage blocks'
+          test "$(git rev-parse HEAD^{tree})" = e604fea040cffee4e557d0c3797632b17328036f
+          test -z "$(git status --porcelain)"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$branch"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/evidence/source.txt"
+          echo "source=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: definition-span-source
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
+  comparison:
+    needs: source
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-slim]
+        dictionary: [jmnedict, jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - name: Install compiler and pinned browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v clang >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y clang lld
+          fi
+          node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Build immutable A/B and record native memory policy
+        shell: bash
+        env:
+          SOURCE: ${{ needs.source.outputs.source }}
+          RUNNER_KIND: ${{ matrix.runner }}
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/evidence"
+          mkdir -p "$evidence"
+          node --input-type=module <<'NODE' > "$evidence/native-memory.json"
+          import {createServer} from 'node:http';
+          import {chromium} from 'playwright';
+          const server = createServer((req, res) => res.end('<!doctype html><title>memory</title>'));
+          await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+          const browser = await chromium.launch({headless: true});
+          try {
+            const page = await browser.newPage();
+            await page.goto(`http://127.0.0.1:${server.address().port}`);
+            const policy = await page.evaluate(async () => {
+              const url = URL.createObjectURL(new Blob(['postMessage({deviceMemory: navigator.deviceMemory, hardwareConcurrency: navigator.hardwareConcurrency})'], {type: 'text/javascript'}));
+              const worker = new Worker(url);
+              try {
+                const value = await new Promise((resolve, reject) => { worker.onmessage = e => resolve(e.data); worker.onerror = reject; });
+                return {page: {deviceMemory: navigator.deviceMemory, hardwareConcurrency: navigator.hardwareConcurrency}, worker: value};
+              } finally { worker.terminate(); URL.revokeObjectURL(url); }
+            });
+            console.log(JSON.stringify({browser: browser.version(), ...policy}, null, 2));
+            const low = process.env.RUNNER_KIND === 'ubuntu-slim';
+            if (policy.page.deviceMemory !== policy.worker.deviceMemory || typeof policy.worker.deviceMemory !== 'number' || (policy.worker.deviceMemory <= 4) !== low) {
+              throw new Error('Native memory policy does not match the planned lane');
+            }
+          } finally { await browser.close(); server.close(); }
+          NODE
+          git worktree add --detach "$RUNNER_TEMP/A" 03478be25506176610b2133be658ee697d9bb3f1
+          git worktree add --detach "$RUNNER_TEMP/B" "$SOURCE"
+          for arm in A B; do
+            cp -al node_modules "$RUNNER_TEMP/$arm/node_modules"
+            (cd "$RUNNER_TEMP/$arm" && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+            test -z "$(git -C "$RUNNER_TEMP/$arm" status --porcelain)"
+          done
+          (cd "$RUNNER_TEMP/A" && node dev/perf/prepare-dictionaries.js) > "$evidence/fixtures.log" 2>&1
+          ln -s "$RUNNER_TEMP/A/builds/e2e-dictionary-cache" "$RUNNER_TEMP/B/builds/e2e-dictionary-cache"
+          cp dev/perf/definition-span-verify/paired.py "$evidence/paired.py"
+          clang --version > "$evidence/compiler.txt"
+          node --version > "$evidence/node.txt"
+          lscpu > "$evidence/cpu.txt"
+          free -b > "$evidence/memory.txt"
+      - name: Six paired imports with excluded warmups and same-build controls
+        shell: bash
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          python3 dev/perf/definition-span-verify/paired.py --a "$RUNNER_TEMP/A" --b "$RUNNER_TEMP/B" --out "$RUNNER_TEMP/evidence/paired" --dictionaries "$DICTIONARY" --pairs 6 --controls 2>&1 | tee "$RUNNER_TEMP/evidence/driver.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: definition-span-${{ matrix.runner }}-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
+  integration:
+    needs: source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.source.outputs.source }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Strict full Chromium integration of the exact product commit
+        shell: bash
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: ${{ runner.temp }}/evidence/integration.html
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/evidence/source.txt"
+          node dev/bin/build.js --target chrome-dev > "$RUNNER_TEMP/evidence/build.log" 2>&1
+          node dev/perf/prepare-dictionaries.js > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/integration.log" 2>&1
+          test -z "$(git status --porcelain)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: definition-span-integration
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
