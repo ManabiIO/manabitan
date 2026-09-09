@@ -1,0 +1,119 @@
+name: Audit lint reconciliation
+on:
+  push:
+    branches: [audit/source-export-20260909]
+    paths: [.github/workflows/audit-lint-reconciliation-20260909.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 6acd1d3ea7804ac97108b37ed36a086f029ee401
+          path: candidate
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v6
+        with:
+          ref: fda6cb19552a6812a01e171bf2bbcbef8a163311
+          path: baseline
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+      - name: Collect baseline and candidate diagnostics with their locked dependencies
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/lint-evidence"
+          for side in baseline candidate; do
+            (
+              cd "$side"
+              npm ci
+              npm run build:libs
+              git diff --exit-code
+              set +e
+              npx eslint . --ignore-pattern '**/*.json' --format json > "$RUNNER_TEMP/lint-evidence/$side-before.json"
+              code=$?
+              set -e
+              test "$code" -le 1
+              printf '%s\n' "$code" > "$RUNNER_TEMP/lint-evidence/$side-before.exit"
+            )
+          done
+      - name: Apply layout-only fixes exclusively to changed source files
+        working-directory: candidate
+        env:
+          EVIDENCE: ${{ runner.temp }}/lint-evidence
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess
+          out = pathlib.Path(os.environ['EVIDENCE'])
+          paths = subprocess.check_output(['git','diff','--name-only','fda6cb19552a6812a01e171bf2bbcbef8a163311','HEAD'], text=True).splitlines()
+          paths = [p for p in paths if p.endswith(('.js','.mjs','.cjs','.ts')) and pathlib.Path(p).is_file()]
+          (out/'selected-paths.json').write_text(json.dumps(paths,indent=2))
+          result = subprocess.run(['npx','eslint',*paths,'--fix','--fix-type','layout','--format','json'], capture_output=True,text=True)
+          (out/'selected-after.json').write_text(result.stdout)
+          (out/'selected-after.stderr').write_text(result.stderr)
+          if result.returncode not in (0,1): raise RuntimeError('ESLint failed to execute')
+          changed = subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()
+          if not set(changed).issubset(paths): raise RuntimeError('Unexpected modified paths: '+repr(changed))
+          (out/'changed-paths.json').write_text(json.dumps(changed,indent=2))
+          PY
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          import {createRequire} from 'node:module';
+          const require=createRequire(process.cwd()+'/package.json');
+          const acorn=require('acorn');
+          const paths=JSON.parse(fs.readFileSync(process.env.EVIDENCE+'/changed-paths.json','utf8'));
+          const clean=(key,value)=>['start','end','loc','range','raw'].includes(key)?undefined:typeof value==='bigint'?{$bigint:String(value)}:value;
+          const checked=[];
+          for(const path of paths.filter(p=>/\.(js|mjs|cjs)$/.test(p))){
+            const before=execFileSync('git',['show','HEAD:'+path],{encoding:'utf8'});
+            const after=fs.readFileSync(path,'utf8');
+            const options={ecmaVersion:'latest',sourceType:path.endsWith('.cjs')?'script':'module',allowHashBang:true};
+            const a=JSON.stringify(acorn.parse(before,options),clean);
+            const b=JSON.stringify(acorn.parse(after,options),clean);
+            if(a!==b)throw new Error('Non-layout JavaScript AST change: '+path);
+            execFileSync(process.execPath,['--check',path]);
+            checked.push(path);
+          }
+          fs.writeFileSync(process.env.EVIDENCE+'/ast-checked.json',JSON.stringify(checked,null,2));
+          JS
+          git diff --check
+          git diff --binary > "$EVIDENCE/layout-only.patch"
+          git add --update
+          git write-tree > "$EVIDENCE/fixed-tree.txt"
+      - name: Collect complete remaining lint diagnostics
+        working-directory: candidate
+        run: |
+          set +e
+          npx eslint . --ignore-pattern '**/*.json' --format json > "$RUNNER_TEMP/lint-evidence/candidate-after.json"
+          code=$?
+          set -e
+          test "$code" -le 1
+          printf '%s\n' "$code" > "$RUNNER_TEMP/lint-evidence/candidate-after.exit"
+          python3 - <<'PY'
+          import collections,json,os,pathlib
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'lint-evidence'
+          result={}
+          for name in ['baseline-before','candidate-before','candidate-after']:
+              data=json.loads((root/(name+'.json')).read_text())
+              files=[];rules=collections.Counter()
+              for item in data:
+                  messages=[m for m in item['messages'] if m['severity']==2]
+                  if messages: files.append({'path':item['filePath'].split('/'+('baseline' if name.startswith('baseline') else 'candidate')+'/')[-1],'errors':len(messages),'rules':dict(collections.Counter(str(m.get('ruleId')) for m in messages))})
+                  rules.update(str(m.get('ruleId')) for m in messages)
+              result[name]={'errors':sum(rules.values()),'rules':dict(rules),'files':files}
+          (root/'summary.json').write_text(json.dumps(result,indent=2))
+          print(json.dumps(result,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audit-lint-reconciliation
+          path: ${{ runner.temp }}/lint-evidence
+          retention-days: 30
+          if-no-files-found: error
