@@ -1,0 +1,37 @@
+name: Pinned public native headers
+on:
+  push:
+    branches: [verify/native-public-headers-20260909]
+    paths: [.github/workflows/native-public-headers.yml]
+permissions:
+  contents: read
+jobs:
+  export-public-headers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: simdjson/simdjson
+          ref: b4ed3a99a9542aef6298df9db6662a3698ebcfb0
+          persist-credentials: false
+      - name: Verify immutable public source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = b4ed3a99a9542aef6298df9db6662a3698ebcfb0
+          git rev-parse HEAD HEAD:include HEAD:src > PUBLIC-SOURCE-IDENTITY.txt
+          git ls-tree -r HEAD include src > PUBLIC-TREE.txt
+          test -z "$(git diff --name-only)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pinned-public-simdjson-headers
+          path: |
+            include/
+            src/
+            LICENSE
+            LICENSE-MIT
+            PUBLIC-SOURCE-IDENTITY.txt
+            PUBLIC-TREE.txt
+          retention-days: 14
+          if-no-files-found: error
