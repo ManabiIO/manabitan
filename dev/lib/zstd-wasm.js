@@ -320,6 +320,11 @@ export function prepareSpanCompression(
         throw new RangeError('Zstd output buffer size exceeds the safe integer range');
     }
     const buffers = ensureContextBuffers(context, contentBytes, destinationSize, dictionary.byteLength);
+    // The parser may lend shared bytes, but the compression heap must own a
+    // stable copy before this synchronous gather releases that source.
+    const sharedSource = typeof SharedArrayBuffer !== 'undefined' &&
+    source.buffer instanceof SharedArrayBuffer && !(module.HEAPU8.buffer instanceof SharedArrayBuffer);
+    const alignmentDelta = (module.HEAPU8.byteOffset + buffers.source - source.byteOffset) & 7;
     let outputOffset = 0;
     for (let i = 0; i < sourceOffsets.length;) {
         const runOffset = sourceOffsets[i];
@@ -343,10 +348,18 @@ export function prepareSpanCompression(
             ++runSpanCount;
             ++i;
         } while (i < sourceOffsets.length);
-        module.HEAPU8.set(
-            source.subarray(runOffset, runOffset + runLength),
-            buffers.source + outputOffset,
-        );
+        const destinationOffset = buffers.source + outputOffset;
+        const prefix = sharedSource && runLength >= 1024 ? (alignmentDelta + outputOffset - runOffset) & 7 : 0;
+        if (prefix !== 0) {
+            // Match source/destination alignment for the shared bulk copy, then
+            // shift only private bytes and fill the short prefix. No scratch
+            // allocation, source padding or out-of-span read is required.
+            module.HEAPU8.set(source.subarray(runOffset + prefix, runOffset + runLength), destinationOffset);
+            module.HEAPU8.copyWithin(destinationOffset + prefix, destinationOffset, destinationOffset + runLength - prefix);
+            module.HEAPU8.set(source.subarray(runOffset, runOffset + prefix), destinationOffset);
+        } else {
+            module.HEAPU8.set(source.subarray(runOffset, runOffset + runLength), destinationOffset);
+        }
         outputOffset += runLength;
     }
     if (outputOffset !== contentBytes) {
