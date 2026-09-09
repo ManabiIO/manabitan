@@ -1,0 +1,96 @@
+name: Bounded accepted-base publication and checks
+on:
+  push:
+    branches: [audit/bounded-on-develop-20260909]
+    paths: [.github/workflows/bounded-audit-publish.yml]
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      commit: ${{ steps.publish.outputs.commit }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          git show "$GITHUB_SHA:.audit/bounded-review.md" > "$RUNNER_TEMP/review.md"
+          git diff --binary --full-index b8d68458cde8788b5d5301ceaf36beae7a1363f9 ff9cbf2e848a86d6bbfd281179a6d753349e52f4 -- ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-source-pipeline.js test/dictionary-import-ownership.test.js test/term-bank-bounded-compressed-plan.test.js test/term-bank-bounded-compressed.test.js > "$RUNNER_TEMP/selected.patch"
+          git worktree add --detach "$RUNNER_TEMP/product" da8f7436d34e510441d30692c8d698806b70e13f
+          cd "$RUNNER_TEMP/product"
+          test "$(git rev-parse HEAD^{tree})" = b217181dee356a8a8f9836cffe5c5b382c27da69
+          git apply --check "$RUNNER_TEMP/selected.patch"
+          git apply --index "$RUNNER_TEMP/selected.patch"
+          cp "$RUNNER_TEMP/review.md" dev/perf/bounded-on-develop-20260909.md
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('ext/js/dictionary/dictionary-importer.js');s=p.read_text();start=s.index('                        const compressedSourcePlan =');end=s.index('                        const usedImportWideSourceRun',start);part=s[start:end];assert part.count('                            null\n')==2;p.write_text(s[:start]+part.replace('                            null\n','                            null;\n')+s[end:])
+          p=Path('ext/js/dictionary/term-bank-source-pipeline.js');s=p.read_text();start=s.index('    createCompressedImportRunPlan(startIndex)');end=s.index('\n    /**',start);part=s[start:end].replace('return null }','return null; }');tails=[' : null',' : boundedBatch.files','let compressedBytes = 0','compressedBytes += value.compressedSize'];lines=[line+';' if any(line.endswith(tail) for tail in tails) else line for line in part.splitlines()];p.write_text(s[:start]+'\n'.join(lines)+'\n'+s[end:])
+          p=Path('test/dictionary-import-ownership.test.js');s=p.read_text();a='expect(pipeline.createCompressedImportRunPlan(0)?.files).toEqual(files.slice(0, 16))';b='expect(pipeline.createCompressedImportRunPlan(16)?.files).toEqual(files.slice(16, 32))';assert s.count(a)==s.count(b)==1;p.write_text(s.replace(a,a+';').replace(b,b+';'))
+          PY
+          git add ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-source-pipeline.js test/dictionary-import-ownership.test.js dev/perf/bounded-on-develop-20260909.md
+          git diff --cached --check
+          tree=$(git write-tree)
+          test "$tree" = d16c3c7c1db0ba5d555969b20e5a95540d017e56
+          test "$(git diff --cached --name-only | wc -l)" -eq 6
+          test "$(git rev-parse :ext/js/dictionary/wasm/term-bank-parser.c)" = 836cb10f5aa52177bd82d6fbccb44dd5f3811e2b
+          export GIT_AUTHOR_NAME='github-actions[bot]' GIT_COMMITTER_NAME='github-actions[bot]'
+          export GIT_AUTHOR_EMAIL='41898282+github-actions[bot]@users.noreply.github.com' GIT_COMMITTER_EMAIL='41898282+github-actions[bot]@users.noreply.github.com'
+          commit=$(printf '%s\n' 'Reconcile bounded compressed imports onto accepted develop without parser experiments' | git commit-tree "$tree" -p da8f7436d34e510441d30692c8d698806b70e13f)
+          git push origin "$commit:refs/heads/fix/bounded-import-accepted-base-20260909"
+          printf 'commit=%s\n' "$commit" >> "$GITHUB_OUTPUT"
+          printf '%s\n%s\n' "$commit" "$tree" > "$RUNNER_TEMP/evidence/identity.txt"
+          git diff --binary --full-index HEAD "$commit" > "$RUNNER_TEMP/evidence/source.patch"
+          git ls-tree -r "$commit" > "$RUNNER_TEMP/evidence/tree.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-publication
+          path: ${{ runner.temp }}/evidence
+          if-no-files-found: error
+          retention-days: 14
+  checks:
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.publish.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.16.0
+      - name: Frozen-source qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          git rev-parse HEAD HEAD^{tree} | tee "$RUNNER_TEMP/evidence/identity.txt"
+          test "$(git rev-parse HEAD^{tree})" = d16c3c7c1db0ba5d555969b20e5a95540d017e56
+          node --version | tee "$RUNNER_TEMP/evidence/node.txt"
+          npm ci 2>&1 | tee "$RUNNER_TEMP/evidence/install.log"
+          npm run build:libs 2>&1 | tee "$RUNNER_TEMP/evidence/libs.log"
+          npm run test:js 2>&1 | tee "$RUNNER_TEMP/evidence/lint.log"
+          npm run test:ts 2>&1 | tee "$RUNNER_TEMP/evidence/types.log"
+          npm run test:unit 2>&1 | tee "$RUNNER_TEMP/evidence/units.log"
+          npm run test:unit:options 2>&1 | tee "$RUNNER_TEMP/evidence/options.log"
+          npm run test:build 2>&1 | tee "$RUNNER_TEMP/evidence/build.log"
+          npx prettier dev/perf/bounded-on-develop-20260909.md --check 2>&1 | tee "$RUNNER_TEMP/evidence/markdown.log"
+          git diff --exit-code
+          git status --porcelain > "$RUNNER_TEMP/evidence/status.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-checks
+          path: ${{ runner.temp }}/evidence
+          if-no-files-found: error
+          retention-days: 14
