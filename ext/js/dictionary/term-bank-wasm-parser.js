@@ -19,6 +19,7 @@ import {parseJson} from '../core/json.js';
 import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
+import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparation.js';
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -1480,13 +1481,25 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
     }
     /** @type {ReturnType<typeof createNativeLookupIndexScratch>|null} */
     let nativeLookupIndexScratch = null;
-    const nativeLookupRowCapacity = Math.min(normalizedChunkSize, rowCount);
+    // Large fused plans cannot fit the persisted uint16 dimensions. Build
+    // native sidecars using the existing storage segmentation, rather than
+    // handing every segment to the JavaScript compactor and index encoder.
+    const segmentedNativeLookup = useNativeStringPlan && fusedStringPlan !== null && normalizedChunkSize >= rowCount && (
+        rowCount >= 0xffff || fusedStringPlan.stringLengths.length >= 0xffff
+    );
+    /** @type {ReturnType<typeof createNativeTermStringPlanScratch>|null} */
+    let segmentedNativeStringScratch = null;
+    const nativeLookupRowCapacity = Math.min(
+        normalizedChunkSize,
+        rowCount,
+segmentedNativeLookup ? MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS : rowCount,
+    );
     if (
         prepareLookupIndexes &&
         parsed.wasm !== null &&
         nativeLookupRowCapacity > 0 &&
         nativeLookupRowCapacity < 0xffff &&
-        (fusedStringPlan === null || normalizedChunkSize >= rowCount)
+        (segmentedNativeLookup || fusedStringPlan === null || normalizedChunkSize >= rowCount)
     ) {
         const fusedPlanLayout = fusedStringPlan === null ?
             null :
@@ -1506,9 +1519,14 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
             };
         const nativeLookupKeyCapacity = Math.min(
             0xffff - 1,
-            fusedStringPlan?.stringLengths.length ?? nativeLookupRowCapacity * 2,
+            segmentedNativeLookup ?
+nativeLookupRowCapacity * 2 :
+                (fusedStringPlan?.stringLengths.length ?? nativeLookupRowCapacity * 2),
         );
         try {
+            if (segmentedNativeLookup) {
+                segmentedNativeStringScratch = createNativeTermStringPlanScratch(parsed.wasm, nativeLookupRowCapacity, maxNativeChunkStringBytes);
+            }
             nativeLookupIndexScratch = createNativeLookupIndexScratch(
                 parsed.wasm,
                 nativeLookupRowCapacity,
@@ -1569,6 +1587,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
     let nativeStringPlanChunkCount = 0;
     let nativeStringPlanFallbackChunkCount = 0;
     let nativeLookupIndexEncodeMs = 0;
+    let nativeLookupIndexCompactMs = 0;
     let chunkDispatchMs = 0;
     /** @type {Promise<void>[]} */
     const pendingDispatches = [];
@@ -1747,7 +1766,62 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
             termRecordPreinternedPlan,
             mediaRows,
         };
-        if (
+        if (segmentedNativeStringScratch !== null && nativeLookupIndexScratch !== null && parsed.wasm !== null) {
+            /** @type {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>} */
+            const prepared = new Map();
+            const prepareStartedAt = safePerformance.now();
+            let encodedMs = 0;
+            let complete = true;
+            for (let runStart = 0; runStart < count; runStart += MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS) {
+                const runCount = Math.min(MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS, count - runStart);
+                const runPlan = buildNativeTermStringPlan(
+                    parsed.wasm,
+                    parsed.jsonPtr,
+                    parsed.metasPtr,
+                    start + runStart,
+                    runCount,
+                    segmentedNativeStringScratch,
+                );
+                if (runPlan === null) {
+                    complete = false;
+                    break;
+                }
+                const encodeStartedAt = safePerformance.now();
+                const bytes = encodeNativeTermLookupIndex(
+                    parsed.wasm,
+                    runPlan,
+                    readingEqualsExpressionList.subarray(runStart, runStart + runCount),
+                    sequenceList.subarray(runStart, runStart + runCount),
+                    runCount,
+                    nativeLookupIndexScratch,
+                );
+                encodedMs += safePerformance.now() - encodeStartedAt;
+                if (bytes === null) {
+                    complete = false;
+                    break;
+                }
+                // Scratch is reused for the next segment; retain independent
+                // plans before any subsequent native write or worker transfer.
+                prepared.set(`${runStart}:${runCount}`, {
+                    bytes,
+                    preinternedPlan: {
+                        stringLengths: Uint16Array.from(runPlan.stringLengths),
+                        stringOffsets: Uint32Array.from(runPlan.stringOffsets),
+                        stringHashes: runPlan.stringHashes?.slice(),
+                        stringsBuffer: Uint8Array.from(runPlan.stringsBuffer),
+                        expressionIndexes: Uint32Array.from(runPlan.expressionIndexes),
+                        readingIndexes: Uint32Array.from(runPlan.readingIndexes),
+                    },
+                });
+            }
+            const elapsedMs = safePerformance.now() - prepareStartedAt;
+            nativeLookupIndexEncodeMs += encodedMs;
+            nativeLookupIndexCompactMs += Math.max(0, elapsedMs - encodedMs);
+            if (complete) {
+                chunk.preparedLookupIndexes = prepared;
+                chunk.preparedLookupIndexEncodeMs = elapsedMs;
+            }
+        } else if (
             nativeLookupIndexScratch !== null &&
             parsed.wasm !== null &&
             nativeStringPlan !== null &&
@@ -1800,8 +1874,8 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         nativeStringPlanMs,
         nativeStringPlanChunkCount,
         nativeStringPlanFallbackChunkCount,
-        lookupIndexPrepareMs: nativeLookupIndexEncodeMs,
-        lookupIndexCompactMs: 0,
+        lookupIndexPrepareMs: nativeLookupIndexCompactMs + nativeLookupIndexEncodeMs,
+        lookupIndexCompactMs: nativeLookupIndexCompactMs,
         lookupIndexEncodeMs: nativeLookupIndexEncodeMs,
         chunkDispatchMs,
         rowCount,
@@ -3124,7 +3198,16 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
                 bytes: prepared.bytes.buffer === plan.stringsBuffer.buffer ?
                     Uint8Array.from(prepared.bytes) :
                     prepared.bytes,
-                preinternedPlan: stablePlan,
+                preinternedPlan: prepared.preinternedPlan === plan ?
+stablePlan :
+{
+    stringLengths: Uint16Array.from(prepared.preinternedPlan.stringLengths),
+    stringOffsets: prepared.preinternedPlan.stringOffsets?.slice(),
+    stringHashes: prepared.preinternedPlan.stringHashes?.slice(),
+    stringsBuffer: Uint8Array.from(prepared.preinternedPlan.stringsBuffer),
+    expressionIndexes: Uint32Array.from(prepared.preinternedPlan.expressionIndexes),
+    readingIndexes: Uint32Array.from(prepared.preinternedPlan.readingIndexes),
+},
             });
         }
     }
