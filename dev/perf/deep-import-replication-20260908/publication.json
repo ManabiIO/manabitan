@@ -1,0 +1,9 @@
+{
+  "publication": "draft-pr-created",
+  "reason": "Both identical-source replications pass the predefined descriptive screen; no release approval",
+  "proofCases": 154861,
+  "candidateTree": "7861e3696323cef9dd0f26c1ab798ea8b1c52fca",
+  "sourceSha": "b8d68458cde8788b5d5301ceaf36beae7a1363f9",
+  "branch": "perf-import-composite-state-20260908-review",
+  "pullRequest": "https://github.com/ManabiIO/manabitan/pull/23"
+}
