@@ -1,0 +1,220 @@
+name: Composite parser differential and review preservation
+
+on:
+  push:
+    branches: [perf-import-deep-replication-20260908]
+    paths:
+      - .github/workflows/composite-state-differential.yml
+      - dev/perf/composite-state-differential.py
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: composite-state-verification
+          run-id: 34293672171
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/recovered
+      - name: Reconstruct only the verified product source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach "$RUNNER_TEMP/baseline" 394d8eb799dd1eb5e194cee11472a4beab915080
+          git worktree add --detach "$RUNNER_TEMP/candidate" 394d8eb799dd1eb5e194cee11472a4beab915080
+          git -C "$RUNNER_TEMP/candidate" apply --index "$RUNNER_TEMP/recovered/source-candidate.patch"
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess
+          temp = pathlib.Path(os.environ['RUNNER_TEMP'])
+          result = json.loads((temp / 'recovered/paired/results.json').read_text())
+          expected = result['source']['candidate']['indexTree']
+          actual = subprocess.check_output(['git', 'write-tree'], cwd=temp / 'candidate', text=True).strip()
+          if actual != expected:
+              raise RuntimeError(f'Source tree mismatch: {actual} != {expected}')
+          PY
+      - name: Differential grammar and boundary tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/composite-state-differential.py \
+            --baseline "$RUNNER_TEMP/baseline/ext/js/dictionary/wasm/term-bank-parser.c" \
+            --candidate "$RUNNER_TEMP/candidate/ext/js/dictionary/wasm/term-bank-parser.c" \
+            --output "$RUNNER_TEMP/proof" \
+            > "$RUNNER_TEMP/proof.log" 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: composite-independent-differential
+          path: |
+            ${{ runner.temp }}/proof/
+            ${{ runner.temp }}/proof.log
+          retention-days: 14
+          if-no-files-found: error
+
+  preserve:
+    needs: proof
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ManabiIO/manabitan
+      VERIFY_BRANCH: perf-import-deep-replication-20260908
+      REVIEW_BRANCH: perf-import-composite-state-20260908-review
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: perf-import-deep-replication-20260908
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: composite-independent-differential
+          path: ${{ runner.temp }}/proof
+      - uses: actions/download-artifact@v4
+        with:
+          name: composite-state-verification
+          run-id: 34293672171
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/original
+      - name: Inspect both complete replications before preserving source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/final"
+          python3 - <<'PY'
+          import base64, json, os, pathlib, subprocess, time
+          temp = pathlib.Path(os.environ['RUNNER_TEMP'])
+          out = temp / 'final'
+          proof_files = list((temp / 'proof').rglob('results.json'))
+          if len(proof_files) != 1:
+              raise RuntimeError('Ambiguous differential result')
+          proof = json.loads(proof_files[0].read_text())
+          if proof.get('status') != 'passed' or proof.get('cases', 0) < 100000 or proof.get('mismatches'):
+              raise RuntimeError('The independent differential did not pass its case-count and mismatch guards')
+          (out / 'composite-differential.json').write_text(json.dumps(proof, indent=2))
+          path = 'dev/perf/deep-import-replication-20260908/RESULTS.json'
+          endpoint = f"repos/{os.environ['REPO']}/contents/{path}?ref={os.environ['VERIFY_BRANCH']}"
+          records = None
+          for attempt in range(120):
+              response = subprocess.run(['gh', 'api', endpoint], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+              if response.returncode == 0:
+                  envelope = json.loads(response.stdout)
+                  records = json.loads(base64.b64decode(envelope['content']))
+                  break
+              time.sleep(10)
+          state = {'publication': 'not-attempted', 'reason': '', 'proofCases': proof['cases']}
+          if records is None:
+              state['reason'] = 'Replication report was not available; no performance result or publication inferred'
+          else:
+              (out / 'replications.json').write_text(json.dumps(records, indent=2))
+              good = [r for r in records if r.get('status') == 'complete' and r['lane'].startswith('composite-')]
+              if len(good) != 2:
+                  state['reason'] = 'Two complete parser replications were not obtained'
+              else:
+                  same = good[0]['source']['candidate']['indexTree'] == good[1]['source']['candidate']['indexTree']
+                  screen = same and all(all(d['medianPairedChangePct'] <= 1 for d in r['dictionaries']) for r in good)
+                  screen = screen and all(next(d for d in r['dictionaries'] if d['dictionary'] == 'jitendex')['fasterPairs'] >= 9 for r in good)
+                  state['candidateTree'] = good[0]['source']['candidate']['indexTree']
+                  if screen:
+                      state['publication'] = 'eligible-for-draft-review'
+                      state['reason'] = 'Both identical-source replications pass the predefined descriptive screen; no release approval'
+                  else:
+                      state['reason'] = 'The fresh results did not meet the predefined descriptive screen; source remains experimental'
+          (out / 'publication.json').write_text(json.dumps(state, indent=2))
+          PY
+      - name: Preserve exact source and open a draft only when the screen passed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, json, os, pathlib, subprocess
+          temp = pathlib.Path(os.environ['RUNNER_TEMP'])
+          out = temp / 'final'
+          state = json.loads((out / 'publication.json').read_text())
+          if state['publication'] != 'eligible-for-draft-review':
+              print(state['reason'])
+              raise SystemExit(0)
+          base = '394d8eb799dd1eb5e194cee11472a4beab915080'
+          current = subprocess.check_output(['git', 'ls-remote', 'origin', 'refs/heads/perf-render-overlap'], text=True).split()[0]
+          if current != base:
+              state.update(publication='not-attempted', reason='PR20 head moved; refusing an unreviewed retarget')
+              (out / 'publication.json').write_text(json.dumps(state, indent=2))
+              raise SystemExit(0)
+          source = temp / 'review-source'
+          subprocess.run(['git', 'worktree', 'add', '--detach', str(source), base], check=True)
+          subprocess.run(['git', 'apply', '--index', str(temp / 'original/source-candidate.patch')], cwd=source, check=True)
+          tree = subprocess.check_output(['git', 'write-tree'], cwd=source, text=True).strip()
+          if tree != state['candidateTree']:
+              raise RuntimeError('Source to publish is not the source measured by both replications')
+          records = json.loads((out / 'replications.json').read_text())
+          lines = ['# Composite-state JSON parser: measured review candidate', '',
+              'Keep active composite state local and save only suspended parents. No changes to JSON grammar, media hints, nesting limits, ZIP, cache policy, or persistent storage format.', '',
+              'Baseline: PR20 commit `' + base + '`. Source-only tree: `' + tree + '`.',
+              'This is a draft review candidate, not a release merge or universal speedup claim.', '',
+              '| Runner | Dictionary | Baseline ms | Candidate ms | Paired change | Faster pairs |',
+              '|---|---|---:|---:|---:|---:|']
+          for record in records:
+              if record.get('status') != 'complete' or not record['lane'].startswith('composite-'):
+                  continue
+              for row in record['dictionaries']:
+                  lines.append(f"| {record['lane']} | {row['dictionary']} | {row['baselineMedianMs']:.1f} | {row['candidateMedianMs']:.1f} | {row['medianPairedChangePct']:+.2f}% | {row['fasterPairs']}/12 |")
+          lines += ['', 'Negative means less whole-import time. These are medians of adjacent paired ratios; independent hosts are not pooled. Each host ran 72 measured fresh-profile imports plus six excluded warmups with immutable fixtures and unchanged browser event-to-completion timing.', '',
+              f"Additional direct composite grammar differential: {state['proofCases']} cases, zero baseline/candidate mismatches. This is correctness instrumentation, not a timing benchmark or a claim of new UTF-8 validation.", '',
+              'Full unit, options, strict TypeScript, all-target dry builds and strict Chromium E2E passed on each completed replication. Existing PR20 Firefox and repository-wide lint limitations remain separate. No rejected cache, ZIP, dense-table, or reservation changes are included.', '',
+              'Exact paired values and source fingerprints are retained on verification branch `perf-import-deep-replication-20260908` under `dev/perf/deep-import-replication-20260908/`, plus the workflow artifacts.']
+          report = source / 'dev/perf/composite-state-review.md'
+          report.write_text('\n'.join(lines) + '\n')
+          subprocess.run(['git', 'add', 'dev/perf/composite-state-review.md'], cwd=source, check=True)
+          subprocess.run(['git', '-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com', '-c', 'core.hooksPath=/dev/null', 'commit', '-m', 'Keep active composite parser state local with replicated import evidence'], cwd=source, check=True)
+          sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=source, text=True).strip()
+          branch = os.environ['REVIEW_BRANCH']
+          push = subprocess.run(['git', 'push', 'origin', 'HEAD:refs/heads/' + branch], cwd=source, capture_output=True, text=True)
+          if push.returncode:
+              state.update(publication='push-failed', reason=push.stderr[-2000:])
+          else:
+              state.update(publication='source-branch-preserved', sourceSha=sha, branch=branch)
+              pr = subprocess.run(['gh', 'pr', 'create', '--repo', os.environ['REPO'], '--draft', '--base', 'perf-render-overlap', '--head', branch,
+                  '--title', 'Keep composite parser state local: replicated Jitendex import improvement', '--body-file', str(report)], cwd=source, capture_output=True, text=True)
+              if pr.returncode == 0:
+                  state.update(publication='draft-pr-created', pullRequest=pr.stdout.strip())
+              else:
+                  state['pullRequestError'] = pr.stderr[-2000:]
+          (out / 'publication.json').write_text(json.dumps(state, indent=2))
+          PY
+      - name: Persist final proof and publication status on the verification branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$VERIFY_BRANCH"
+          git checkout -B evidence-publication FETCH_HEAD
+          mkdir -p dev/perf/deep-import-replication-20260908
+          cp "$RUNNER_TEMP/final/composite-differential.json" dev/perf/deep-import-replication-20260908/
+          cp "$RUNNER_TEMP/final/publication.json" dev/perf/deep-import-replication-20260908/
+          git add dev/perf/deep-import-replication-20260908
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'Record independent parser differential and exact review publication status'
+            git push origin HEAD:refs/heads/"$VERIFY_BRANCH"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: composite-deep-final-status
+          path: ${{ runner.temp }}/final/
+          retention-days: 14
+          if-no-files-found: error
