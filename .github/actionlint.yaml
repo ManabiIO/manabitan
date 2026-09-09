@@ -1,0 +1,6 @@
+# actionlint 1.7.3 predates the GitHub-hosted ubuntu-slim runner.
+# Its custom-label list also supports known hosted labels absent from that
+# pinned version. This does not change where GitHub schedules the jobs.
+self-hosted-runner:
+  labels:
+    - ubuntu-slim
