@@ -33,3 +33,9 @@ fixture identities; do not splice prior favorable results into this comparison.
 
 Keep draft until those gates pass. No general import-speed, Apple/phone,
 exhaustive persisted-database parity or release-readiness claim is made here.
+
+## Source and validation references
+
+[Original bounded-import comparison and limitations](https://github.com/ManabiIO/manabitan/pull/24).
+[Accepted inflater integration](https://github.com/ManabiIO/manabitan/pull/22).
+[Exact accepted-base source qualification](https://github.com/ManabiIO/manabitan/actions/runs/34395763103).
