@@ -1,0 +1,67 @@
+name: Audit publish lint fixes
+on:
+  push:
+    branches: [audit/source-export-20260909]
+    paths: [.github/workflows/audit-publish-lint-fixes-20260909.yml]
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 6acd1d3ea7804ac97108b37ed36a086f029ee401
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - name: Apply only verified formatting corrections
+        shell: python
+        run: |
+          from pathlib import Path
+          for name in ['dev/bin/run-playwright.js', 'ext/js/extension/environment.js', 'playwright.config.js']:
+              p = Path(name)
+              data = p.read_bytes()
+              assert not data.endswith(b'\n'), name
+              p.write_bytes(data + b'\n')
+          p = Path('types/test/performance-dictionary-lock.d.ts')
+          data = p.read_text()
+          old = '/** Shape of the immutable import benchmark fixture manifest.'
+          assert data.count(old) == 1
+          p.write_text(data.replace(old, '/**\n * Shape of the immutable import benchmark fixture manifest.'))
+      - name: Install identical locked dependencies and build libraries
+        run: |
+          npm ci
+          npm run build:libs
+      - name: Verify changed-file lint, JSON registry and strict types
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          git diff --check
+          npx eslint dev/bin/run-playwright.js ext/js/extension/environment.js playwright.config.js types/test/performance-dictionary-lock.d.ts 2>&1 | tee "$RUNNER_TEMP/evidence/focused-lint.log"
+          npm run test:json 2>&1 | tee "$RUNNER_TEMP/evidence/json.log"
+          for project in main dev test bench; do
+            npm run "test:ts:$project" > "$RUNNER_TEMP/evidence/types-$project.log" 2>&1
+          done
+      - name: Publish source-only commit to an audit ref
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 6acd1d3ea7804ac97108b37ed36a086f029ee401
+          git config user.name 'Alex Ehlke'
+          git config user.email 'alex.ehlke@gmail.com'
+          git add dev/bin/run-playwright.js ext/js/extension/environment.js playwright.config.js types/test/performance-dictionary-lock.d.ts
+          test "$(git diff --cached --name-only | wc -l)" -eq 4
+          git diff --cached > "$RUNNER_TEMP/evidence/source.patch"
+          git commit -m 'Fix rollup file endings and fixture type documentation lint'
+          git show -s --format='%H %T %P' HEAD | tee "$RUNNER_TEMP/evidence/source-identity.txt"
+          git push origin HEAD:refs/heads/audit/reviewed-rollup-lint-source-20260909
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audit-rollup-lint-source
+          path: ${{ runner.temp }}/evidence
+          retention-days: 30
+          if-no-files-found: error
