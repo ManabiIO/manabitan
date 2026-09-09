@@ -1,0 +1,36 @@
+name: Export accepted import sources
+on:
+  push:
+    branches: [verify/import-source-recovery-20260909-evening]
+    paths: [.github/workflows/import-source-recovery.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Export immutable sources and Git identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/export"
+          for sha in da8f7436d34e510441d30692c8d698806b70e13f 03478be25506176610b2133be658ee697d9bb3f1; do
+            git archive "$sha" | gzip > "$RUNNER_TEMP/export/$sha.tar.gz"
+            git cat-file commit "$sha" > "$RUNNER_TEMP/export/$sha.commit"
+            git ls-tree -rz "$sha" > "$RUNNER_TEMP/export/$sha.manifest"
+            git rev-parse "$sha^{tree}" > "$RUNNER_TEMP/export/$sha.tree"
+          done
+          git diff da8f7436d34e510441d30692c8d698806b70e13f 03478be25506176610b2133be658ee697d9bb3f1 --binary > "$RUNNER_TEMP/export/bounded.patch"
+          cd "$RUNNER_TEMP/export"
+          sha256sum ./* > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: accepted-import-source-20260909
+          path: ${{ runner.temp }}/export/
+          retention-days: 14
+          if-no-files-found: error
