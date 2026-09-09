@@ -1,0 +1,139 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 836cb10..ca63dcf 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -377,14 +377,17 @@ static int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, u
+     if (start >= len || src[start] != '"') { return 0; }
+     uint32_t i = start + 1u;
+     while (i < len) {
+-        while (i + 8u <= len) {
++        while (len - i >= 8u) {
+             uint64_t word;
+             __builtin_memcpy(&word, src + i, sizeof(word));
+-            if (
+-                has_zero_byte64(word ^ UINT64_C(0x2222222222222222)) != 0u ||
+-                has_zero_byte64(word ^ UINT64_C(0x5c5c5c5c5c5c5c5c)) != 0u ||
+-                has_control_byte64(word) != 0u
+-            ) {
++            const uint64_t special =
++                has_zero_byte64(word ^ UINT64_C(0x2222222222222222)) |
++                has_zero_byte64(word ^ UINT64_C(0x5c5c5c5c5c5c5c5c)) |
++                has_control_byte64(word);
++            if (special != 0u) {
++                // Borrow propagation can mark later bytes, but the first marked
++                // byte is exact. Do not re-scan its ordinary prefix byte by byte.
++                i += (uint32_t)__builtin_ctzll(special) >> 3u;
+                 break;
+             }
+             i += 8u;
+diff --git a/test/term-bank-swar-prefix.test.js b/test/term-bank-swar-prefix.test.js
+new file mode 100644
+index 0000000..17db0f0
+--- /dev/null
++++ b/test/term-bank-swar-prefix.test.js
+@@ -0,0 +1,105 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++
++import {readFile} from 'node:fs/promises';
++import {beforeAll, describe, expect, test} from 'vitest';
++
++/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, parse_term_bank_with_media_hints: (...args: number[]) => number}} ParserExports */
++/** @type {ParserExports} */
++let wasm;
++const encoder = new TextEncoder();
++const decoder = new TextDecoder();
++
++beforeAll(async () => {
++    const module = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)));
++    wasm = /** @type {ParserExports} */ (/** @type {unknown} */ ((await WebAssembly.instantiate(module)).exports));
++});
++
++/**
++ * @param {Uint8Array} bytes
++ * @returns {{count: number, spans: Uint32Array}}
++ */
++function parse(bytes) {
++    wasm.wasm_reset_heap();
++    const input = wasm.wasm_alloc(bytes.length + 32);
++    const output = wasm.wasm_alloc(68);
++    const heap = new Uint8Array(wasm.memory.buffer);
++    // Bytes after the logical end must not complete a truncated string.
++    heap.fill(0x22, input, input + bytes.length + 32);
++    heap.set(bytes, input);
++    const count = wasm.parse_term_bank_with_media_hints(input, bytes.length, output, 1);
++    return {count, spans: Uint32Array.from(new Uint32Array(wasm.memory.buffer, output, 17))};
++}
++
++/**
++ * @param {Uint8Array} bytes
++ * @param {Uint32Array} spans
++ * @param {number} field
++ * @returns {unknown}
++ */
++function value(bytes, spans, field) {
++    return JSON.parse(decoder.decode(bytes.subarray(spans[field], spans[field] + spans[field + 1])));
++}
++
++describe('SWAR first-special-byte string scanning', () => {
++    test.each(Array.from({length: 8}, (_, i) => i))('keeps the first special byte exact at lane %i', (lane) => {
++        // The byte after a quote, backslash or control may also be marked by
++        // subtraction borrowing. The earliest marked lane must still be exact.
++        const values = ['#', ']', ' ', '\\]', '\\#', '"#', '\u001f ', '\u0000\u0001', 'éÿ日本🙂', '################', ']]]]]]]]'];
++        for (const length of [0, 1, 6, 7, 8, 9, 14, 15, 16, 17, 63, 64, 65]) {
++            for (const suffix of values) {
++                const expression = 'x'.repeat(length) + suffix;
++                const row = [expression, suffix, '', '', -3, [expression, {type: 'text', text: suffix}], 7, ''];
++                const bytes = encoder.encode(' '.repeat(lane) + JSON.stringify([row]));
++                const result = parse(bytes);
++                expect(result.count).toBe(1);
++                expect(value(bytes, result.spans, 0)).toBe(expression);
++                expect(value(bytes, result.spans, 2)).toBe(suffix);
++                expect(value(bytes, result.spans, 9)).toEqual(row[5]);
++            }
++        }
++    });
++
++    test('does not let a later quote hide any earlier unescaped control byte', () => {
++        for (let prefix = 0; prefix < 32; ++prefix) {
++            for (let control = 0; control < 32; ++control) {
++                const source = `[["${'x'.repeat(prefix)}${String.fromCharCode(control)} #]","","","",0,[],1,""]]`;
++                expect(parse(encoder.encode(source)).count).toBeLessThan(0);
++            }
++        }
++    });
++
++    test('rejects every logical truncation despite valid-looking adjacent memory', () => {
++        for (let prefix = 0; prefix < 24; ++prefix) {
++            const source = encoder.encode(`[["${'x'.repeat(prefix)}\\u65e5\\uD83D\\uDE42\\\\\\"#]","","","",0,["tail"],1,""]]`);
++            expect(parse(source).count).toBe(1);
++            for (let length = 0; length < source.length; ++length) {
++                expect(parse(source.subarray(0, length)).count).toBeLessThan(0);
++            }
++        }
++    });
++
++    test('matches independent JSON decoding for deterministic uneven strings and nested glossaries', () => {
++        let state = 0x2e9a3d41;
++        const next = () => {
++            state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
++            return state;
++        };
++        const alphabet = ['#', ']', ' ', 'a', '\\', '"', '\n', '\t', '\u0000', '\u001f', '日', 'é', '🙂'];
++        for (let iteration = 0; iteration < 2048; ++iteration) {
++            const count = next() % 96;
++            let expression = '';
++            for (let i = 0; i < count; ++i) { expression += alphabet[next() % alphabet.length]; }
++            const reading = expression.slice(0, next() % (expression.length + 1));
++            const row = [expression, reading, '', '', -1, [expression, {tag: 'span', content: [reading, '#]']}], 123, ''];
++            const bytes = encoder.encode(' '.repeat(next() % 16) + JSON.stringify([row]));
++            const result = parse(bytes);
++            expect(result.count).toBe(1);
++            expect(value(bytes, result.spans, 0)).toBe(expression);
++            expect(value(bytes, result.spans, 2)).toBe(reading);
++            expect(value(bytes, result.spans, 9)).toEqual(row[5]);
++        }
++    });
++});
