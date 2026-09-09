@@ -1,0 +1,75 @@
+name: Bounded import follow-up verification
+
+on:
+  push:
+    branches: [perf-import-bounded-followup-20260909]
+    paths:
+      - .github/workflows/bounded-followup-verify.yml
+      - ext/js/dictionary/term-bank-source-pipeline.js
+      - test/term-bank-source-followup.test.js
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bounded-followup-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Package identified tracked source for offline review
+        shell: python
+        run: |
+          import hashlib, json, os, pathlib, subprocess, tarfile
+          root = pathlib.Path.cwd()
+          out = pathlib.Path(os.environ['RUNNER_TEMP']) / 'bounded-followup'
+          out.mkdir()
+          paths = subprocess.check_output(['git', 'ls-files', '-z']).split(b'\0')
+          manifest = {}
+          excluded = {'.ttf', '.otf', '.woff', '.woff2', '.eot', '.ttc'}
+          with tarfile.open(out / 'source.tar.gz', 'w:gz') as archive:
+              for raw in paths:
+                  if not raw:
+                      continue
+                  path = pathlib.Path(os.fsdecode(raw))
+                  if path.is_file() and not path.is_symlink() and path.suffix.lower() not in excluded:
+                      manifest[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+                      archive.add(path, arcname=str(path), recursive=False)
+          data = {
+              'commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+              'tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
+              'files': manifest,
+          }
+          (out / 'source-manifest.json').write_text(json.dumps(data, indent=2))
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bounded-followup-source-${{ github.sha }}
+          path: ${{ runner.temp }}/bounded-followup
+          retention-days: 14
+          if-no-files-found: error
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Source ownership and bounded planner contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx vitest run test/dictionary-import-ownership.test.js test/term-bank-bounded-compressed-plan.test.js test/term-bank-source-followup.test.js 2>&1 | tee "$RUNNER_TEMP/bounded-followup/contracts.log"
+      - name: Ensure tracked sources stayed unchanged
+        run: git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-followup-contracts-${{ github.sha }}
+          path: ${{ runner.temp }}/bounded-followup/*.log
+          retention-days: 14
+          if-no-files-found: warn
