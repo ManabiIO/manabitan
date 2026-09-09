@@ -1,0 +1,87 @@
+name: Prepare reviewed performance rollup
+on:
+  push:
+    branches: [audit/source-export-20260909]
+    paths: [.github/workflows/audit-reviewed-rollup-20260909.yml]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+      - name: Reconstruct the reviewed source changes
+        run: |
+          set -euo pipefail
+          git checkout --detach 394d8eb799dd1eb5e194cee11472a4beab915080
+          git checkout 5c295fd17bed1aca2a5beae5963046574bcb2f36 -- ext/js/dictionary/wasm/term-bank-parser.c
+          python3 - <<'PY'
+          from pathlib import Path
+          def once(text, old, new):
+              assert text.count(old) == 1, old
+              return text.replace(old, new, 1)
+          p = Path('test/data/json.json')
+          p.write_text(once(p.read_text(), '        {\n            "path": "dev/data/manifest-variants.json",', '        {\n            "path": "test/perf/dictionaries.lock.json",\n            "typeFile": "types/test/performance-dictionary-lock.d.ts",\n            "type": "PerformanceDictionaryLock"\n        },\n        {\n            "path": "dev/data/manifest-variants.json",'))
+          license = Path('types/test/json.d.ts').read_text().split('import type')[0]
+          Path('types/test/performance-dictionary-lock.d.ts').write_text(license + '''/** Shape of the immutable import benchmark fixture manifest.
+           * Semantic hash, size, title, revision and row-count checks remain in the
+           * performance fixture loader and its regression tests.
+           */
+          export type PerformanceDictionaryLock = {
+              schemaVersion: 1;
+              dictionaries: Record<'jmdict' | 'jmnedict' | 'jitendex', PerformanceDictionaryFixture>;
+          };
+
+          export type PerformanceDictionaryFixture = {
+              label: string;
+              cacheFile: string;
+              release: string;
+              url: string;
+              sha256: string;
+              sizeBytes: number;
+              expectedTitle: string;
+              revision: string;
+              termRows: number;
+          };
+          ''')
+          p = Path('.github/workflows/ci.yml')
+          p.write_text(once(p.read_text(), '    strategy:\n      matrix:\n        include:', '    strategy:\n      fail-fast: false\n      matrix:\n        include:'))
+          PY
+          git add .github/workflows/ci.yml ext/js/dictionary/wasm/term-bank-parser.c test/data/json.json types/test/performance-dictionary-lock.d.ts
+          git diff --cached --check
+          git write-tree
+          test "$(git write-tree)" = f365ea2948005d166acc98ccf10983f92b140d3e
+          test "$(git hash-object ext/js/dictionary/wasm/term-bank-parser.c)" = 836cb10f5aa52177bd82d6fbccb44dd5f3811e2b
+      - name: Build and check JSON registry and retained parser contracts
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build:libs
+          npm run test:json 2>&1 | tee "$RUNNER_TEMP/rollup-json.log"
+          npx vitest run test/term-bank-parser-string-scan.test.js 2>&1 | tee "$RUNNER_TEMP/rollup-parser-contracts.log"
+      - name: Publish source-only commit on a new branch
+        run: |
+          set -euo pipefail
+          test "$(git write-tree)" = f365ea2948005d166acc98ccf10983f92b140d3e
+          git diff --exit-code -- ext/js/dictionary/wasm/term-bank-parser.c test/data/json.json types/test/performance-dictionary-lock.d.ts .github/workflows/ci.yml
+          git config user.name 'Alex Ehlke'
+          git config user.email 'alex.ehlke@gmail.com'
+          sha=$(git commit-tree f365ea2948005d166acc98ccf10983f92b140d3e -p 394d8eb799dd1eb5e194cee11472a4beab915080 -m 'Exclude unaccepted parser experiment and restore complete JSON and CI coverage')
+          git push origin "$sha:refs/heads/fix/reviewed-rollup-20260909"
+          printf '%s\n' "$sha" > "$RUNNER_TEMP/rollup-source-sha.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reviewed-rollup-preparation
+          path: |
+            ${{ runner.temp }}/rollup-*.log
+            ${{ runner.temp }}/rollup-source-sha.txt
+          retention-days: 30
