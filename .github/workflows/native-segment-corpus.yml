@@ -1,0 +1,51 @@
+name: Native segmented lookup corpus differential
+on:
+  push:
+    branches: [verify/import-storage-pass-20260909-2250]
+    paths:
+      - .github/workflows/native-segment-corpus.yml
+      - dev/perf/native-segment-corpus.mjs
+permissions:
+  contents: read
+jobs:
+  corpus:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - name: Build exact committed source controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence" "$RUNNER_TEMP/arms"
+          git worktree add --detach "$RUNNER_TEMP/arms/A" 03478be25506176610b2133be658ee697d9bb3f1
+          git worktree add --detach "$RUNNER_TEMP/arms/B" 85a04fa724ea11f895f8c735087fd02d72b1a203
+          test "$(git -C "$RUNNER_TEMP/arms/B" rev-parse 'HEAD^{tree}')" = 23c968f9fc18b3c533d0e7565b3ca9d66bed77aa
+          for arm in A B; do
+            cp -a node_modules "$RUNNER_TEMP/arms/$arm/node_modules"
+            (cd "$RUNNER_TEMP/arms/$arm" && node dev/bin/build-libs.js) > "$RUNNER_TEMP/evidence/build-$arm.log" 2>&1
+            git -C "$RUNNER_TEMP/arms/$arm" rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/evidence/source-$arm.txt"
+          done
+          (cd "$RUNNER_TEMP/arms/A" && node dev/perf/prepare-dictionaries.js) > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          cp dev/perf/native-segment-corpus.mjs "$RUNNER_TEMP/evidence/oracle.mjs"
+      - name: Complete dictionary-bank byte and mapping differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/native-segment-corpus.mjs "$RUNNER_TEMP/arms/A" "$RUNNER_TEMP/arms/B" "$RUNNER_TEMP/evidence/corpus.json" 2>&1 | tee "$RUNNER_TEMP/evidence/corpus.log"
+          for arm in A B; do test -z "$(git -C "$RUNNER_TEMP/arms/$arm" status --porcelain)"; done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-segments-corpus
+          path: ${{ runner.temp }}/evidence/
+          if-no-files-found: error
+          retention-days: 14
