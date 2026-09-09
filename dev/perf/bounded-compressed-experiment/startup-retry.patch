@@ -44,7 +44,7 @@
 +            # or file dispatch. Never retry an import, correctness failure, or
 +            # slow measured observation. Every failed attempt is retained.
 +            startup_only = (
-+                failed.get('status') == 'failed' and
++                failed.get('status') == 'failure' and
 +                failed.get('phaseCount') == 0 and failed.get('phases') == [] and
 +                failed.get('benchmark', {}).get('validation') is None and
 +                isinstance(reason, str) and
