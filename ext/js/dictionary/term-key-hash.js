@@ -107,3 +107,51 @@ function readUint32(bytes, offset) {
         (bytes[offset + 3] << 24)
     ) >>> 0;
 }
+
+/**
+ * The same seeded XXH32 as hashTermKeyBytes, with bulk little-endian word reads
+ * for large persisted index sections. This is not a new hash or storage format.
+ * @param {Uint8Array} bytes
+ * @returns {number}
+ */
+export function hashTermKeyBytesBulk(bytes) {
+    // Lookup-index sections are large, unlike the keys on the query hot path.
+    // Keep that path allocation-free; this one amortizes a DataView over a section.
+    const start = 0;
+    const end = bytes.byteLength;
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let offset = start;
+    const length = end - start;
+    let hash;
+    if (length >= 16) {
+        const limit = end - 16;
+        let v1 = (HASH_SEED + PRIME1 + PRIME2) >>> 0;
+        let v2 = (HASH_SEED + PRIME2) >>> 0;
+        let v3 = HASH_SEED;
+        let v4 = (HASH_SEED - PRIME1) >>> 0;
+        do {
+            v1 = round(v1, view.getUint32(offset, true)); offset += 4;
+            v2 = round(v2, view.getUint32(offset, true)); offset += 4;
+            v3 = round(v3, view.getUint32(offset, true)); offset += 4;
+            v4 = round(v4, view.getUint32(offset, true)); offset += 4;
+        } while (offset <= limit);
+        hash = (rotateLeft(v1, 1) + rotateLeft(v2, 7) + rotateLeft(v3, 12) + rotateLeft(v4, 18)) >>> 0;
+    } else {
+        hash = (HASH_SEED + PRIME5) >>> 0;
+    }
+    hash = (hash + length) >>> 0;
+    while (offset + 4 <= end) {
+        hash = Math.imul(rotateLeft((hash + Math.imul(view.getUint32(offset, true), PRIME3)) >>> 0, 17), PRIME4) >>> 0;
+        offset += 4;
+    }
+    while (offset < end) {
+        hash = Math.imul(rotateLeft((hash + Math.imul(bytes[offset], PRIME5)) >>> 0, 11), PRIME1) >>> 0;
+        ++offset;
+    }
+    hash ^= hash >>> 15;
+    hash = Math.imul(hash, PRIME2) >>> 0;
+    hash ^= hash >>> 13;
+    hash = Math.imul(hash, PRIME3) >>> 0;
+    hash ^= hash >>> 16;
+    return hash >>> 0;
+}

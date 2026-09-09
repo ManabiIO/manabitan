@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {hashTermKeyBytesBulk} from './term-key-hash.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -405,7 +406,7 @@ function getContentOffsetDelta(offset, base) {
  * @returns {number}
  */
 function hashLookupIndexBytes(bytes) {
-    return hashTermLookupKeyBytes(bytes);
+    return hashTermKeyBytesBulk(bytes);
 }
 
 /**
