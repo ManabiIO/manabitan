@@ -102,8 +102,11 @@ jobs:
           git worktree add --detach "$arms/baseline" b8d68458cde8788b5d5301ceaf36beae7a1363f9
           git worktree add --detach "$arms/candidate" ff9cbf2e848a86d6bbfd281179a6d753349e52f4
           for arm in baseline candidate; do
-            ln -s "$GITHUB_WORKSPACE/node_modules" "$arms/$arm/node_modules"
-            (cd "$arms/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+            # The repository ignores node_modules/ directories, not symlinks.
+            # Install the same lockfile normally; keep the strict clean-tree gate.
+            (cd "$arms/$arm" && npm ci && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+            git -C "$arms/$arm" status --porcelain > "$evidence/status-$arm.txt"
+            test ! -s "$evidence/status-$arm.txt"
           done
           for file in term-bank-parser.wasm zstd.wasm zip.js z-worker.js; do
             cmp "$arms/baseline/ext/lib/$file" "$arms/candidate/ext/lib/$file"
@@ -127,7 +130,7 @@ jobs:
             --candidate "$RUNNER_TEMP/arms/candidate" \
             --dictionary "$DICTIONARY" --pairs 6 --policy low \
             --output "$RUNNER_TEMP/evidence/paired" "${extra[@]}" \
-            | tee "$RUNNER_TEMP/evidence/driver.log"
+            2>&1 | tee "$RUNNER_TEMP/evidence/driver.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
