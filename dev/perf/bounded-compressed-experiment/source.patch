@@ -1,0 +1,87 @@
+diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictionary-importer.js
+index 24ee144c..bce79cb0 100644
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -1727,9 +1727,12 @@ export class DictionaryImporter {
+                 } else if (!this._disableTermBankWasmFastPath) {
+                     try {
+                         const termFileEntry = /** @type {import('@zip.js/zip.js').Entry} */ (termFile);
++                        const compressedRunPlan = importWideSourceRunEnabled ?
++                            (termFileIndex === 0 ? compressedImportRunPlan : termBankSourcePipeline.createCompressedImportRunPlan(termFileIndex)) :
++                            null
+                         const importRunPlan = importWideSourceRunEnabled ?
+-                            (termFileIndex === 0 ? compressedImportRunPlan ?? uncompressedImportRunPlan : null) ?? termBankSourcePipeline.createImportRunPlan(termFileIndex) :
+-                            null;
++                            compressedRunPlan ?? (termFileIndex === 0 ? uncompressedImportRunPlan : null) ?? termBankSourcePipeline.createImportRunPlan(termFileIndex) :
++                            null
+                         const usedImportWideSourceRun = importRunPlan !== null;
+                         let sourceTermFileBatch = importRunPlan?.files ?? (termBankSourcePipeline.canPrefetch(termFile) ? termBankSourcePipeline.getBatch(termFileIndex) : []);
+                         let tSourceArchiveReadStart = Date.now();
+@@ -1738,7 +1741,7 @@ export class DictionaryImporter {
+                             {
+                                 loaders: importRunPlan.loaders,
+                                 estimatedByteLengths: importRunPlan.estimatedByteLengths,
+-                                compressed: importRunPlan === compressedImportRunPlan,
++                                compressed: importRunPlan === compressedRunPlan,
+                             };
+                         sourceArchiveReadMs += Math.max(0, Date.now() - tSourceArchiveReadStart);
+                         if (preloadedTermFileBytes === null) {
+diff --git a/ext/js/dictionary/term-bank-source-pipeline.js b/ext/js/dictionary/term-bank-source-pipeline.js
+index cfe6bef5..2f76de3a 100644
+--- a/ext/js/dictionary/term-bank-source-pipeline.js
++++ b/ext/js/dictionary/term-bank-source-pipeline.js
+@@ -381,20 +381,32 @@ export class TermBankSourcePipeline {
+     }
+ 
+     /**
+-     * Builds an import-wide plan over raw ZIP payloads only when every source
+-     * has complete central-directory metadata required for exact validation.
++     * Builds a lazy raw-payload plan with complete validation metadata. On
++     * low-memory devices, limit it to the existing source-batch byte budget;
++     * larger devices retain the import-wide plan. The parser's independent
++     * source-size and worker-availability guards still apply.
+      * @param {number} startIndex
+      * @returns {{files: TermBankSourceFile[], loaders: Array<() => Promise<CompressedTermBankSource>>, estimatedByteLengths: number[]}|null}
+      */
+     createCompressedImportRunPlan(startIndex) {
+-        if (!this._enabled || this._lowMemory || this._compressedReadPool === null) { return null; }
+-        const files = this._termFiles.slice(startIndex);
++        if (!this._enabled || this._compressedReadPool === null) { return null }
++        const batch = this._lowMemory ? this.getBatchPlan(startIndex) : null
++        // Ordinary batching admits an oversized first file to make progress.
++        // That exception must never bypass the compressed parser's budget.
++        if (batch !== null && (
++            batch.unknownSizeCount > 0 || batch.estimatedBytes <= 0 ||
++            batch.estimatedBytes > this._batchMaxBytes
++        )) { return null }
++        const files = batch?.files ?? this._termFiles.slice(startIndex)
+         if (files.length < 4) { return null; }
+         /** @type {Array<{compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number}>} */
+         const metadata = [];
++        let compressedBytes = 0
+         for (const file of files) {
+             const value = this._getCompressedSourceMetadata(file);
+             if (value === null) { return null; }
++            compressedBytes += value.compressedSize
++            if (this._lowMemory && compressedBytes > this._batchMaxBytes) { return null }
+             metadata.push(value);
+         }
+         const estimatedByteLengths = metadata.map(({uncompressedSize}) => uncompressedSize);
+diff --git a/test/dictionary-import-ownership.test.js b/test/dictionary-import-ownership.test.js
+index 5e5b58bf..12bf7ead 100644
+--- a/test/dictionary-import-ownership.test.js
++++ b/test/dictionary-import-ownership.test.js
+@@ -358,9 +358,10 @@ describe('TermBankSourcePipeline', () => {
+             deviceMemory: 4,
+         });
+ 
+-        expect(pipeline.createImportRunPlan(0)).toBeNull();
+-        expect(pipeline.createCompressedImportRunPlan(0)).toBeNull();
+-        expect(pipeline.getBatch(0)).toEqual(files.slice(0, 16));
++        expect(pipeline.createImportRunPlan(0)).toBeNull()
++        expect(pipeline.createCompressedImportRunPlan(0)?.files).toEqual(files.slice(0, 16))
++        expect(pipeline.createCompressedImportRunPlan(16)?.files).toEqual(files.slice(16, 32))
++        expect(pipeline.getBatch(0)).toEqual(files.slice(0, 16))
+         await pipeline.dispose();
+     });
+ 
