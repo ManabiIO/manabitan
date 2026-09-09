@@ -67,14 +67,14 @@ jobs:
           npm run test:unit -- --maxWorkers=2 --minWorkers=1 > "$RUNNER_TEMP/evidence/units.log" 2>&1
           npm run test:unit:options > "$RUNNER_TEMP/evidence/options.log" 2>&1
           npm run test:json > "$RUNNER_TEMP/evidence/json.log" 2>&1
-          npm run build -- --dry-run > "$RUNNER_TEMP/evidence/build.log" 2>&1
+          npm run build -- --dryRun > "$RUNNER_TEMP/evidence/build.log" 2>&1
           test -z "$(git status --porcelain)"
       - name: Publish qualified source without audit ancestry
         shell: bash
         run: |
           set -euo pipefail
           cd "$RUNNER_TEMP/candidate"
-          test "$(git rev-parse HEAD^{tree})" = 29b2706fcf618ae7541bc0e97bfd1299dcfc0521
+          test "$(git rev-parse 'HEAD^{tree}')" = 29b2706fcf618ae7541bc0e97bfd1299dcfc0521
           test "$(git rev-parse HEAD^)" = c8090090924634014b791139d3b22d95d2ebc1ea
           git push origin HEAD:refs/heads/audit/lint-qualified-source-20260909
           git show -s --format='%H %T'
