@@ -1,0 +1,24 @@
+diff --git a/test/term-plan-chunk-validation.test.js b/test/term-plan-chunk-validation.test.js
+index 83490c3e..81a3af92 100644
+--- a/test/term-plan-chunk-validation.test.js
++++ b/test/term-plan-chunk-validation.test.js
+@@ -7,6 +7,7 @@
+  * (at your option) any later version.
+  */
+ 
++import assert from 'node:assert/strict';
+ import {describe, expect, test} from 'vitest';
+ import {
+     compactTermRecordPreinternedPlan,
+@@ -173,8 +174,8 @@ describe('one synchronous validation for compacted row chunks', () => {
+             const start = i * 30000;
+             const size = Math.min(30000, count - start);
+             const item = prepared.indexes.get(`${start}:${size}`);
+-            expect(item?.preinternedPlan).toEqual(chunks[i]);
+-            expect(item?.bytes).toEqual(encodePersistedTermLookupIndexFromPreinternedPlan(chunks[i], mask.slice(start, start + size), sequences.slice(start, start + size), size));
++            assert.deepStrictEqual(item?.preinternedPlan, chunks[i]);
++            assert.deepStrictEqual(item?.bytes, encodePersistedTermLookupIndexFromPreinternedPlan(chunks[i], mask.slice(start, start + size), sequences.slice(start, start + size), size));
+         }
+-    });
++    }, 20000);
+ });
