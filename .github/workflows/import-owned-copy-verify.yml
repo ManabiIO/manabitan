@@ -1,0 +1,63 @@
+name: Verify aligned owned import copies
+on:
+  push:
+    branches: [verify/import-allocation-workspace-20260909]
+    paths:
+      - .github/workflows/import-owned-copy-verify.yml
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - name: Reconstruct only the reviewed source and tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          cp .github/owned-copy-source.patch "$RUNNER_TEMP/evidence/source.patch"
+          git switch --detach ff9cbf2e848a86d6bbfd281179a6d753349e52f4
+          git apply --check "$RUNNER_TEMP/evidence/source.patch"
+          git apply "$RUNNER_TEMP/evidence/source.patch"
+          git add ext/js/core/copy-stable-byte-view.js ext/js/dictionary/dictionary-database.js test/copy-stable-byte-view.test.js test/dictionary-database-content-dedup.test.js
+          git write-tree | tee "$RUNNER_TEMP/evidence/tree.txt"
+          test "$(git write-tree)" = de590b82fe22487b4f95f90bb8ea4195b1f390ab
+          git -c user.name='Manabitan optimization worker' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Optimize stable shared source copies without growing cache allocations'
+          git rev-parse HEAD > "$RUNNER_TEMP/evidence/commit.txt"
+      - run: npm ci
+      - name: Build libraries and run complete contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/evidence"
+          node --version > "$out/node.txt"
+          clang --version > "$out/compiler.txt"
+          node dev/bin/build-libs.js > "$out/build-libs.log" 2>&1
+          node node_modules/vitest/vitest.mjs run > "$out/unit.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$out/options.log" 2>&1
+          npm run test:ts > "$out/types.log" 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/core/copy-stable-byte-view.js test/copy-stable-byte-view.test.js > "$out/focused-lint.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$out/build.log" 2>&1
+          test -z "$(git status --porcelain)"
+      - name: Publish source only to a new review branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin HEAD:refs/heads/perf-import-aligned-owned-copy-20260909
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-copy-source-verification
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
