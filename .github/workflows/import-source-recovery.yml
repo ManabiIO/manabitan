@@ -1,0 +1,33 @@
+name: Import source recovery
+on:
+  push:
+    branches: [verify/import-source-recovery-20260909-2140]
+    paths: [.github/workflows/import-source-recovery.yml]
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Export immutable product source history
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/export"
+          git branch export-accepted da8f7436d34e510441d30692c8d698806b70e13f
+          git branch export-bounded 03478be25506176610b2133be658ee697d9bb3f1
+          git bundle create "$RUNNER_TEMP/export/source.bundle" export-accepted export-bounded
+          git rev-parse export-accepted export-accepted^{tree} export-bounded export-bounded^{tree} > "$RUNNER_TEMP/export/identities.txt"
+          sha256sum "$RUNNER_TEMP/export/source.bundle" > "$RUNNER_TEMP/export/SHA256SUMS"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: accepted-import-source-history
+          path: ${{ runner.temp }}/export/
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
