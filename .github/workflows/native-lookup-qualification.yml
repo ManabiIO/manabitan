@@ -1,0 +1,169 @@
+name: Native lookup source and import qualification
+on:
+  push:
+    branches: [verify/native-lookup-segments-20260909]
+    paths:
+      - .github/workflows/native-lookup-qualification.yml
+      - dev/perf/native-source-config.json
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      source: ${{ steps.publish.outputs.source }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: python3 dev/perf/qualify-native-source.py
+      - name: Publish qualified product-only commit
+        id: publish
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          config="$GITHUB_WORKSPACE/dev/perf/native-source-config.json"
+          branch="$(jq -r .branch "$config")"
+          tree="$(jq -r .tree "$config")"
+          message="$(jq -r .message "$config")"
+          cd "$RUNNER_TEMP/product"
+          test "$(cat "$RUNNER_TEMP/evidence/qualified-tree.txt")" = "$tree"
+          git switch -c "$branch"
+          git config user.name OpenAI
+          git config user.email agent@openai.com
+          git -c core.hooksPath=/dev/null commit -m "$message"
+          test "$(git rev-parse HEAD^{tree})" = "$tree"
+          test -z "$(git status --porcelain)"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$branch"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/evidence/source.txt"
+          echo "source=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-lookup-source
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
+  comparison:
+    needs: source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmnedict, jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Build immutable arms and pin the comparison identity
+        shell: bash
+        env:
+          SOURCE: ${{ needs.source.outputs.source }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          config=dev/perf/native-source-config.json
+          git worktree add --detach "$RUNNER_TEMP/A" "$(jq -r .base "$config")"
+          git worktree add --detach "$RUNNER_TEMP/B" "$SOURCE"
+          for arm in A B; do
+            cp -al node_modules "$RUNNER_TEMP/$arm/node_modules"
+            (cd "$RUNNER_TEMP/$arm" && node dev/bin/build.js --target chrome-dev) > "$RUNNER_TEMP/evidence/build-$arm.log" 2>&1
+            git -C "$RUNNER_TEMP/$arm" rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/evidence/source-$arm.txt"
+            test -z "$(git -C "$RUNNER_TEMP/$arm" status --porcelain)"
+          done
+          (cd "$RUNNER_TEMP/A" && node dev/perf/prepare-dictionaries.js) > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          ln -s "$RUNNER_TEMP/A/builds/e2e-dictionary-cache" "$RUNNER_TEMP/B/builds/e2e-dictionary-cache"
+          git show 37da84b091b8c7e5b2c91d0778f087d60ce2f42a:dev/perf/definition-span-verify/paired.py > "$RUNNER_TEMP/evidence/paired.py"
+          python3 - <<'PY'
+          import os, json
+          from pathlib import Path
+          config = json.loads(Path('dev/perf/native-source-config.json').read_text())
+          path = Path(os.environ['RUNNER_TEMP']) / 'evidence/paired.py'
+          text = path.read_text()
+          old_tree = 'e604fea040cffee4e557d0c3797632b17328036f'
+          old_files = "assert changed == ['js/dictionary/term-content-block-store.js'], changed"
+          assert text.count(old_tree) == 1 and text.count(old_files) == 1
+          text = text.replace(old_tree, config['tree'])
+          text = text.replace(old_files, f"assert sorted(changed) == {sorted(config['payloads'])!r}, changed")
+          path.write_text(text)
+          PY
+          sha256sum "$RUNNER_TEMP/evidence/paired.py" > "$RUNNER_TEMP/evidence/driver.sha256"
+          clang --version > "$RUNNER_TEMP/evidence/compiler.txt"
+          node --version > "$RUNNER_TEMP/evidence/node.txt"
+          lscpu > "$RUNNER_TEMP/evidence/cpu.txt"
+          free -b > "$RUNNER_TEMP/evidence/memory.txt"
+      - name: Fixed twelve pairs, same-binary controls and excluded warmups
+        shell: bash
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          python3 "$RUNNER_TEMP/evidence/paired.py" --a "$RUNNER_TEMP/A" --b "$RUNNER_TEMP/B" --out "$RUNNER_TEMP/evidence/paired" --dictionaries "$DICTIONARY" --pairs 12 --controls 2>&1 | tee "$RUNNER_TEMP/evidence/driver.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-lookup-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
+  integration:
+    needs: source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.source.outputs.source }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Strict complete Chromium integration
+        shell: bash
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: ${{ runner.temp }}/evidence/integration.html
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/evidence/source.txt"
+          node dev/bin/build.js --target chrome-dev > "$RUNNER_TEMP/evidence/build.log" 2>&1
+          node dev/perf/prepare-dictionaries.js > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/integration.log" 2>&1
+          test -z "$(git status --porcelain)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-lookup-integration
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
