@@ -1,11 +1,7 @@
 name: Preserve tested paired-hash SIMD source
 
 on:
-  push:
-    branches: [perf-hash-stripes-verify-20260908]
-    paths:
-      - .github/workflows/preserve-hash-stripes-source.yml
-      - dev/perf/hash-stripes-final.test.txt
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -69,7 +65,7 @@ jobs:
           git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'Use every SIMD lane for exact paired XXH32 content hashes'
           git push origin HEAD:refs/heads/perf-import-hash-stripes-20260908
           git rev-parse HEAD > "$RUNNER_TEMP/evidence/source-sha.txt"
-          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/evidence/source-tree.txt"
+          git rev-parse 'HEAD^{tree}' > "$RUNNER_TEMP/evidence/source-tree.txt"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
