@@ -1,0 +1,165 @@
+name: Native segmented lookup qualification
+on:
+  push:
+    branches: [verify/import-storage-pass-20260909-2250]
+    paths:
+      - .github/workflows/native-segment-qualification.yml
+      - dev/perf/native-segments-confirm.py
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    outputs:
+      source: ${{ steps.publish.outputs.source }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Reconstruct and commit only the exact product source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          base64 -d dev/perf/native-segments.patch.b64 | gzip -d > "$RUNNER_TEMP/evidence/source.patch"
+          echo "e1103bfa5711e267d38cc203ca42e73d6b6c588a63d75e6d1ac6e6bc1c0b6c2a  $RUNNER_TEMP/evidence/source.patch" | sha256sum -c -
+          git worktree add --detach "$RUNNER_TEMP/product" 03478be25506176610b2133be658ee697d9bb3f1
+          cd "$RUNNER_TEMP/product"
+          git apply --check "$RUNNER_TEMP/evidence/source.patch"
+          git apply "$RUNNER_TEMP/evidence/source.patch"
+          git add ext/js/dictionary/term-bank-wasm-parser.js test/native-segmented-lookup.test.js
+          test "$(git write-tree)" = 23c968f9fc18b3c533d0e7565b3ca9d66bed77aa
+          git -c user.name='Alex Ehlke' -c user.email='alex.ehlke@gmail.com' -c core.hooksPath=/dev/null commit -m 'perf(import): prepare large fused lookup plans with existing segmented native encoder'
+          cp -a "$GITHUB_WORKSPACE/node_modules" node_modules
+          git rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/evidence/source.txt"
+          clang --version > "$RUNNER_TEMP/evidence/compiler.txt"
+      - name: Full source qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/product"
+          evidence="$RUNNER_TEMP/evidence"
+          node dev/bin/build-libs.js > "$evidence/libs.log" 2>&1
+          node node_modules/vitest/vitest.mjs run > "$evidence/unit.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$evidence/options.log" 2>&1
+          npm run test:ts > "$evidence/types.log" 2>&1
+          node node_modules/eslint/bin/eslint.js . --ignore-pattern '**/*.json' > "$evidence/lint.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$evidence/dry-build.log" 2>&1
+          node dev/bin/build.js --target chrome-dev > "$evidence/package.log" 2>&1
+          node dev/perf/prepare-dictionaries.js > "$evidence/fixtures.log" 2>&1
+          test -z "$(git status --porcelain)"
+      - name: Strict full Chromium integration
+        shell: bash
+        env:
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: ${{ runner.temp }}/evidence/integration.html
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/product"
+          node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/integration.log" 2>&1
+          test -z "$(git status --porcelain)"
+      - name: Publish isolated checked source branch without opening or merging a PR
+        id: publish
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/product"
+          test "$(git rev-parse 'HEAD^{tree}')" = 23c968f9fc18b3c533d0e7565b3ca9d66bed77aa
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/perf/native-segmented-lookup-20260909
+          echo "source=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-segments-qualification
+          path: ${{ runner.temp }}/evidence/
+          if-no-files-found: error
+          retention-days: 14
+  compare:
+    needs: qualify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmnedict, jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Build fixed committed controls and record native browser policy
+        shell: bash
+        env:
+          CANDIDATE: ${{ needs.qualify.outputs.source }}
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/evidence"
+          mkdir -p "$evidence" "$RUNNER_TEMP/arms"
+          git worktree add --detach "$RUNNER_TEMP/arms/A" 03478be25506176610b2133be658ee697d9bb3f1
+          git worktree add --detach "$RUNNER_TEMP/arms/B" "$CANDIDATE"
+          for arm in A B; do
+            cp -a node_modules "$RUNNER_TEMP/arms/$arm/node_modules"
+            (cd "$RUNNER_TEMP/arms/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+            test -z "$(git -C "$RUNNER_TEMP/arms/$arm" status --porcelain)"
+          done
+          (cd "$RUNNER_TEMP/arms/A" && node dev/perf/prepare-dictionaries.js) > "$evidence/fixtures.log" 2>&1
+          cp -a "$RUNNER_TEMP/arms/A/builds/e2e-dictionary-cache" "$RUNNER_TEMP/arms/B/builds/"
+          node --input-type=module <<'JS' > "$evidence/native-policy.json"
+          import {createServer} from 'node:http';
+          import {chromium} from 'playwright';
+          import os from 'node:os';
+          const server=createServer((req,res)=>res.end('<title>policy</title>'));
+          await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+          const browser=await chromium.launch({headless:true,executablePath:chromium.executablePath()});
+          try {
+            const page=await browser.newPage();
+            await page.goto(`http://127.0.0.1:${server.address().port}`);
+            const info=await page.evaluate(async()=>{
+              const url=URL.createObjectURL(new Blob(['postMessage({memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency})'],{type:'text/javascript'}));
+              const worker=new Worker(url);
+              const value=await new Promise((resolve,reject)=>{worker.onmessage=e=>resolve(e.data);worker.onerror=reject;});
+              worker.terminate();URL.revokeObjectURL(url);
+              return {page:{memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency},worker:value};
+            });
+            console.log(JSON.stringify({browser:browser.version(),node:process.version,cpu:os.cpus()[0].model,...info},null,2));
+          } finally {await browser.close();server.close();}
+          JS
+          clang --version > "$evidence/compiler.txt"
+          cp dev/perf/native-segments-confirm.py "$evidence/driver.py"
+      - name: Six fixed pairs and interleaved A/A and B/B controls, no retries
+        shell: bash
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          python3 dev/perf/native-segments-confirm.py --baseline "$RUNNER_TEMP/arms/A" --candidate "$RUNNER_TEMP/arms/B" --dictionary "$DICTIONARY" --pairs 6 --reverse --output "$RUNNER_TEMP/evidence/paired" 2>&1 | tee "$RUNNER_TEMP/evidence/driver.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-segments-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/evidence/
+          if-no-files-found: error
+          retention-days: 14
