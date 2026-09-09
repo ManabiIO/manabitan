@@ -1,0 +1,87 @@
+name: Verify local-state composite parser
+
+on:
+  push:
+    branches: [perf-composite-state-verify-20260908]
+    paths:
+      - .github/workflows/composite-state-verification.yml
+      - dev/perf/composite-experiment/**
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Prepare exact source arms
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/arms" "$RUNNER_TEMP/evidence"
+          for arm in baseline candidate; do
+            git worktree add --detach "$RUNNER_TEMP/arms/$arm" 394d8eb799dd1eb5e194cee11472a4beab915080
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/arms/$arm/node_modules"
+          done
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          source = Path(os.environ['RUNNER_TEMP']) / 'arms/candidate/ext/js/dictionary/wasm/term-bank-parser.c'
+          text = source.read_text()
+          start = text.index('static int parse_composite_span_impl(')
+          end = text.index('\nstatic int parse_composite_span(', start)
+          replacement = Path('dev/perf/composite-experiment/composite.c.txt').read_text()
+          source.write_text(text[:start] + replacement + text[end:])
+          PY
+          cp dev/perf/composite-experiment/term-bank-composite-state.test.js "$RUNNER_TEMP/arms/candidate/test/"
+          git -C "$RUNNER_TEMP/arms/candidate" add ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-composite-state.test.js
+          test "$(git -C "$RUNNER_TEMP/arms/candidate" write-tree)" = 7861e3696323cef9dd0f26c1ab798ea8b1c52fca
+          for arm in baseline candidate; do
+            (cd "$RUNNER_TEMP/arms/$arm" && node dev/bin/build.js --target chrome-dev) > "$RUNNER_TEMP/evidence/build-$arm.log" 2>&1
+            git -C "$RUNNER_TEMP/arms/$arm" diff HEAD --binary > "$RUNNER_TEMP/evidence/source-$arm.patch"
+          done
+          (cd "$RUNNER_TEMP/arms/baseline" && node dev/perf/prepare-dictionaries.js) > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          ln -s "$RUNNER_TEMP/arms/baseline/builds/e2e-dictionary-cache" "$RUNNER_TEMP/arms/candidate/builds/e2e-dictionary-cache"
+          cp dev/perf/composite-experiment/run-paired.py "$RUNNER_TEMP/evidence/"
+          clang --version > "$RUNNER_TEMP/evidence/compiler.txt"
+          lscpu > "$RUNNER_TEMP/evidence/cpu.txt"
+      - name: Full unit, options and type checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/candidate"
+          node node_modules/vitest/vitest.mjs run > "$RUNNER_TEMP/evidence/unit.log" 2>&1
+          npm run test:ts > "$RUNNER_TEMP/evidence/types.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$RUNNER_TEMP/evidence/options.log" 2>&1
+      - name: Eight paired full imports per dictionary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/composite-experiment/run-paired.py \
+            --baseline "$RUNNER_TEMP/arms/baseline" --candidate "$RUNNER_TEMP/arms/candidate" \
+            --pairs 8 --warmups 1 --output "$RUNNER_TEMP/evidence/paired" \
+            --label 'PR20 vs local-state composite parser, fixed eight pairs' | tee "$RUNNER_TEMP/evidence/driver.log"
+      - name: Strict full Chromium E2E
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/candidate"
+          MANABITAN_E2E_STRICT_RUNTIME=1 MANABITAN_CHROMIUM_HEADLESS=1 MANABITAN_E2E_SKIP_BUILD=1 MANABITAN_CHROMIUM_E2E_REPORT="$RUNNER_TEMP/evidence/full-chromium.html" node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/evidence/full-chromium.log" 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: composite-state-verification
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
