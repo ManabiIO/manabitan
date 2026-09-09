@@ -1,0 +1,77 @@
+name: Native segmented lookup fresh-runner confirmation
+on:
+  push:
+    branches: [verify/import-storage-pass-20260909-2250]
+    paths: [.github/workflows/native-segment-repeat.yml]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmnedict, jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Build fixed controls and record native policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/evidence"
+          mkdir -p "$evidence" "$RUNNER_TEMP/arms"
+          git worktree add --detach "$RUNNER_TEMP/arms/A" 03478be25506176610b2133be658ee697d9bb3f1
+          git worktree add --detach "$RUNNER_TEMP/arms/B" 85a04fa724ea11f895f8c735087fd02d72b1a203
+          for arm in A B; do
+            cp -a node_modules "$RUNNER_TEMP/arms/$arm/node_modules"
+            (cd "$RUNNER_TEMP/arms/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+            test -z "$(git -C "$RUNNER_TEMP/arms/$arm" status --porcelain)"
+          done
+          (cd "$RUNNER_TEMP/arms/A" && node dev/perf/prepare-dictionaries.js) > "$evidence/fixtures.log" 2>&1
+          cp -a "$RUNNER_TEMP/arms/A/builds/e2e-dictionary-cache" "$RUNNER_TEMP/arms/B/builds/"
+          node --input-type=module <<'JS' > "$evidence/native-policy.json"
+          import {createServer} from 'node:http';
+          import {chromium} from 'playwright';
+          import os from 'node:os';
+          const server=createServer((req,res)=>res.end('<title>policy</title>'));
+          await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+          const browser=await chromium.launch({headless:true,executablePath:chromium.executablePath()});
+          try {
+            const page=await browser.newPage();
+            await page.goto(`http://127.0.0.1:${server.address().port}`);
+            const info=await page.evaluate(async()=>{
+              const url=URL.createObjectURL(new Blob(['postMessage({memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency})'],{type:'text/javascript'}));
+              const worker=new Worker(url);
+              const value=await new Promise((resolve,reject)=>{worker.onmessage=e=>resolve(e.data);worker.onerror=reject;});
+              worker.terminate();URL.revokeObjectURL(url);
+              return {page:{memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency},worker:value};
+            });
+            console.log(JSON.stringify({browser:browser.version(),node:process.version,cpu:os.cpus()[0].model,...info},null,2));
+          } finally {await browser.close();server.close();}
+          JS
+          clang --version > "$evidence/compiler.txt"
+          cp dev/perf/native-segments-confirm.py "$evidence/driver.py"
+      - name: Six pairs, interleaved same-binary controls, no retries
+        shell: bash
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          python3 dev/perf/native-segments-confirm.py --baseline "$RUNNER_TEMP/arms/A" --candidate "$RUNNER_TEMP/arms/B" --dictionary "$DICTIONARY" --pairs 6 --output "$RUNNER_TEMP/evidence/paired" 2>&1 | tee "$RUNNER_TEMP/evidence/driver.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-segments-repeat-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/evidence/
+          if-no-files-found: error
+          retention-days: 14
