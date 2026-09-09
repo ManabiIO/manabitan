@@ -1,0 +1,79 @@
+name: Definition packing 24-pair confirmation
+on:
+  push:
+    branches: [verify/definition-span-confirmation-20260909]
+    paths: [.github/workflows/definition-span-confirmation.yml]
+permissions:
+  contents: read
+jobs:
+  confirmation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Build the immutable two arms and record the actual browser policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/evidence"
+          mkdir -p "$evidence"
+          node --input-type=module <<'NODE' > "$evidence/native-memory.json"
+          import {createServer} from 'node:http';
+          import {chromium} from 'playwright';
+          const server = createServer((req, res) => res.end('<!doctype html><title>memory</title>'));
+          await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+          const browser = await chromium.launch({headless: true, channel: 'chromium'});
+          try {
+            const page = await browser.newPage();
+            await page.goto(`http://127.0.0.1:${server.address().port}`);
+            const policy = await page.evaluate(async () => {
+              const url = URL.createObjectURL(new Blob(['postMessage({deviceMemory: navigator.deviceMemory, hardwareConcurrency: navigator.hardwareConcurrency})'], {type: 'text/javascript'}));
+              const worker = new Worker(url);
+              try {
+                const result = await new Promise((resolve, reject) => { worker.onmessage = e => resolve(e.data); worker.onerror = reject; });
+                return {page: {deviceMemory: navigator.deviceMemory, hardwareConcurrency: navigator.hardwareConcurrency}, worker: result};
+              } finally { worker.terminate(); URL.revokeObjectURL(url); }
+            });
+            console.log(JSON.stringify({browser: browser.version(), ...policy}, null, 2));
+            if (policy.page.deviceMemory !== policy.worker.deviceMemory || !(policy.worker.deviceMemory > 4)) {
+              throw new Error('Native browser policy is not the planned higher-memory route');
+            }
+          } finally { await browser.close(); server.close(); }
+          NODE
+          git worktree add --detach "$RUNNER_TEMP/A" 03478be25506176610b2133be658ee697d9bb3f1
+          git worktree add --detach "$RUNNER_TEMP/B" 0e4b1c1f2919fcce6fb1c4fa42733e26950877e6
+          for arm in A B; do
+            cp -al node_modules "$RUNNER_TEMP/$arm/node_modules"
+            (cd "$RUNNER_TEMP/$arm" && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+            git -C "$RUNNER_TEMP/$arm" rev-parse HEAD HEAD^{tree} > "$evidence/source-$arm.txt"
+            test -z "$(git -C "$RUNNER_TEMP/$arm" status --porcelain)"
+          done
+          (cd "$RUNNER_TEMP/A" && node dev/perf/prepare-dictionaries.js) > "$evidence/fixtures.log" 2>&1
+          ln -s "$RUNNER_TEMP/A/builds/e2e-dictionary-cache" "$RUNNER_TEMP/B/builds/e2e-dictionary-cache"
+          cp dev/perf/definition-span-verify/paired.py "$evidence/paired.py"
+          git diff 03478be25506176610b2133be658ee697d9bb3f1 0e4b1c1f2919fcce6fb1c4fa42733e26950877e6 --binary > "$evidence/source.patch"
+          clang --version > "$evidence/compiler.txt"
+          node --version > "$evidence/node.txt"
+          lscpu > "$evidence/cpu.txt"
+          free -b > "$evidence/memory.txt"
+      - name: Complete 24 adjacent AB/BA pairs, controls and excluded warmups without retries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/definition-span-verify/paired.py --a "$RUNNER_TEMP/A" --b "$RUNNER_TEMP/B" --out "$RUNNER_TEMP/evidence/paired" --dictionaries jmnedict --pairs 24 --controls 2>&1 | tee "$RUNNER_TEMP/evidence/driver.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: definition-span-24pair-jmnedict
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
