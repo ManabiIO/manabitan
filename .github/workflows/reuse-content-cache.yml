@@ -1,0 +1,96 @@
+name: Reuse-guided content cache verification
+on:
+  push:
+    branches: [verify/reuse-content-cache-20260910]
+    paths:
+      - .github/workflows/reuse-content-cache.yml
+      - dev/perf/reuse-content-cache/**
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [correctness, jmdict, jmnedict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - run: npm ci
+      - name: Reconstruct exact source-only arms and fixed acceptance driver
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence" "$RUNNER_TEMP/arms"
+          echo '08ba704b6f82a2a679250dfa237abad60ec918b186aed976fd7a3acb5f68f403  dev/perf/reuse-content-cache/source.patch' | sha256sum -c -
+          cp dev/perf/reuse-content-cache/source.patch "$RUNNER_TEMP/evidence/source.patch"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          text = Path('dev/perf/stable-word-copy/paired.py').read_text()
+          for old, new in [
+              ('8385544b3e978ea4c3140d78a27c1e31118392f4', 'e1356918eb67845d3338206d9d425f77547127ec'),
+              ("{'js/core/copy-stable-bytes.js'}", 'set()'),
+              (", 'dedupRecentSourceCacheBytes'", ''),
+          ]:
+              assert text.count(old) == 1, old
+              text = text.replace(old, new)
+          # Cache-prefill byte counts intentionally differ in this candidate.
+          # Final contents, all dedup totals, errors and full source accounting remain exact gates.
+          Path(os.environ['RUNNER_TEMP'], 'evidence', 'paired.py').write_text(text)
+          PY
+          for arm in A B; do
+            git worktree add --detach "$RUNNER_TEMP/arms/$arm" d5dd9cb0072059b326f333ef425018ce1227a756
+          done
+          git -C "$RUNNER_TEMP/arms/B" apply --index "$RUNNER_TEMP/evidence/source.patch"
+          test "$(git -C "$RUNNER_TEMP/arms/B" write-tree)" = e1356918eb67845d3338206d9d425f77547127ec
+          git -C "$RUNNER_TEMP/arms/B" -c core.hooksPath=/dev/null -c user.name='Manabitan verification' -c user.email='verification@users.noreply.github.com' commit -m 'perf(import): avoid refreshing a low-reuse content prefetch cache'
+          git -C "$RUNNER_TEMP/arms/B" rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/evidence/source.txt"
+          git -C "$RUNNER_TEMP/arms/B" cat-file commit HEAD > "$RUNNER_TEMP/evidence/commit.txt"
+          for arm in A B; do
+            cp -al "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/arms/$arm/node_modules"
+            (cd "$RUNNER_TEMP/arms/$arm" && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$RUNNER_TEMP/evidence/build-$arm.log" 2>&1
+            test -z "$(git -C "$RUNNER_TEMP/arms/$arm" status --porcelain)"
+          done
+      - name: Full existing correctness checks
+        if: matrix.lane == 'correctness'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/arms/B"
+          node node_modules/vitest/vitest.mjs run > "$RUNNER_TEMP/evidence/unit.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$RUNNER_TEMP/evidence/options.log" 2>&1
+          npm run test:ts > "$RUNNER_TEMP/evidence/types.log" 2>&1
+          npm run test:js > "$RUNNER_TEMP/evidence/lint.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$RUNNER_TEMP/evidence/dry-build.log" 2>&1
+          test -z "$(git status --porcelain)"
+      - name: Complete six-pair whole-import plan with same-binary controls
+        if: matrix.lane != 'correctness'
+        shell: bash
+        env:
+          DICTIONARY: ${{ matrix.lane }}
+        run: |
+          set -euo pipefail
+          node node_modules/playwright/cli.js install --with-deps chromium
+          (cd "$RUNNER_TEMP/arms/A" && node dev/perf/prepare-dictionaries.js) > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          ln -s "$RUNNER_TEMP/arms/A/builds/e2e-dictionary-cache" "$RUNNER_TEMP/arms/B/builds/e2e-dictionary-cache"
+          node --version > "$RUNNER_TEMP/evidence/node.txt"
+          clang --version > "$RUNNER_TEMP/evidence/compiler.txt"
+          lscpu > "$RUNNER_TEMP/evidence/cpu.txt"
+          free -b > "$RUNNER_TEMP/evidence/memory.txt"
+          python3 "$RUNNER_TEMP/evidence/paired.py" --baseline "$RUNNER_TEMP/arms/A" --candidate "$RUNNER_TEMP/arms/B" --dictionary "$DICTIONARY" --pairs 6 --output "$RUNNER_TEMP/evidence/paired" 2>&1 | tee "$RUNNER_TEMP/evidence/driver.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reuse-cache-${{ matrix.lane }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
