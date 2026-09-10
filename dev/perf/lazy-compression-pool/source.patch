@@ -1,0 +1,40 @@
+diff --git a/ext/js/dictionary/zstd-term-content.js b/ext/js/dictionary/zstd-term-content.js
+index cc7eb0b..942c510 100644
+--- a/ext/js/dictionary/zstd-term-content.js
++++ b/ext/js/dictionary/zstd-term-content.js
+@@ -394,8 +394,8 @@ export async function initializeTermContentZstd() {
+         dctx = nextDctx;
+         jmdictDict = loadedJmdictDict;
+         isInitialized = true;
+-        // Prewarm workers while archive/index preparation continues.
+-        void initializeCompressionPool();
++        // Parallel callers initialize their pool on demand. Read-only and
++        // single-block users must not create unused compression workers.
+     })();
+ 
+     try {
+diff --git a/test/zstd-term-content-initialization.test.js b/test/zstd-term-content-initialization.test.js
+index b4402be..47c60a4 100644
+--- a/test/zstd-term-content-initialization.test.js
++++ b/test/zstd-term-content-initialization.test.js
+@@ -39,6 +39,20 @@ describe('term content zstd initialization', () => {
+         vi.unstubAllGlobals();
+     });
+ 
++    test('initializes local codec contexts once without starting unused workers', async () => {
++        const worker = vi.fn(() => { throw new Error('Unexpected worker initialization'); });
++        vi.stubGlobal('Worker', worker);
++        zstd.createCCtx.mockReturnValue(11);
++        zstd.createDCtx.mockReturnValue(22);
++        const {initializeTermContentZstd} = await import('../ext/js/dictionary/zstd-term-content.js');
++        await Promise.all([initializeTermContentZstd(), initializeTermContentZstd()]);
++        await initializeTermContentZstd();
++        expect(zstd.init).toHaveBeenCalledOnce();
++        expect(zstd.createCCtx).toHaveBeenCalledOnce();
++        expect(zstd.createDCtx).toHaveBeenCalledOnce();
++        expect(worker).not.toHaveBeenCalled();
++    });
++
+     test('does not allocate native contexts before dictionary loading succeeds', async () => {
+         vi.stubGlobal('fetch', vi.fn(async () => new Response(null, {status: 503})));
+         const {initializeTermContentZstd} = await import('../ext/js/dictionary/zstd-term-content.js');
