@@ -1,8 +1,62 @@
 diff --git a/test/term-content-pack-runs.test.js b/test/term-content-pack-runs.test.js
-index 72901d14..a7024368 100644
 --- a/test/term-content-pack-runs.test.js
 +++ b/test/term-content-pack-runs.test.js
-@@ -66,7 +66,12 @@ async function checkAgainstEntries(source, offsets, lengths, targetBytes) {
+@@ -12,19 +12,33 @@
+ import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
+ import {compressWrappedTermContentZstdBatch} from '../ext/js/dictionary/zstd-term-content.js';
+ 
++// Like a real codec, the fixture has nonempty framing even for empty input.
++const codec = vi.hoisted(() => ({
++    /**
++     * @param {Uint8Array} bytes
++     * @returns {Uint8Array}
++     */
++    encode(bytes) {
++        const result = new Uint8Array(bytes.length + 1);
++        result.set(bytes, 1);
++        return result;
++    },
++}));
++
+ vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
+-    compressTermContentZstd: (/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes),
++    compressTermContentZstd: codec.encode,
+     compressWrappedTermContentZstdBatch: vi.fn(async (/** @type {Uint8Array[]} */ chunks) => ({
+-        chunks: chunks.map((bytes) => Uint8Array.from(bytes)), envelopeMs: 0, wrapped: false,
++        chunks: chunks.map((bytes) => codec.encode(bytes)), envelopeMs: 0, wrapped: false,
+     })),
+     compressWrappedTermContentZstdSpansBatch: vi.fn(),
+     beginCompressWrappedTermContentZstdSpansBatch: vi.fn(),
+-    decompressTermContentZstd: (/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes),
++    decompressTermContentZstd: (/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes.subarray(1)),
+ }));
+ 
+ /**
+  * @param {number} targetBytes
+  * @param {number} [referenceBytes]
++ * @returns {{content: TermContentOpfsStore, blocks: TermContentBlockStore}}
+  */
+ function createStore(targetBytes, referenceBytes = 60) {
+     const content = new TermContentOpfsStore();
+@@ -36,6 +50,8 @@
+ 
+ /**
+  * @param {TermContentOpfsStore} store
++ * @returns {Promise<Uint8Array|null>}
++ * @throws {Error} If the test store does not expose its physical length.
+  */
+ async function persistedBytes(store) {
+     const length = store.getDebugState().totalLength;
+@@ -50,6 +66,8 @@
+  * @param {number[]} offsets
+  * @param {number[]} lengths
+  * @param {number} targetBytes
++ * @returns {Promise<void>}
++ * @throws {Error} If forced block storage is unavailable.
+  */
+ async function checkAgainstEntries(source, offsets, lengths, targetBytes) {
+     // Own the oracle bytes independently and never use the candidate's gather.
+@@ -66,7 +84,12 @@
      expect(await persistedBytes(actual.content)).toEqual(await persistedBytes(expected.content));
      expect(source).toEqual(before);
      for (let i = 0; i < entries.length; ++i) {
@@ -16,3 +70,21 @@ index 72901d14..a7024368 100644
      }
  }
  
+@@ -127,7 +150,7 @@
+         const gate = new Promise((resolve) => { resume = () => resolve(void 0); });
+         vi.mocked(compressWrappedTermContentZstdBatch).mockImplementationOnce(async (chunks) => {
+             await gate;
+-            return {chunks: chunks.map((bytes) => Uint8Array.from(bytes)), envelopeMs: 0, wrapped: false};
++            return {chunks: chunks.map((bytes) => codec.encode(bytes)), envelopeMs: 0, wrapped: false};
+         });
+         const {blocks} = createStore(128);
+         const operation = blocks.tryAppendSpans(source, new Uint32Array([3, 7, 11]), new Uint32Array([4, 4, 4]), null, true);
+@@ -146,7 +169,7 @@
+         const source = Uint8Array.from({length: 64}, (_, i) => i + 1);
+         // First call is the independent per-entry oracle; the second is the candidate.
+         vi.mocked(compressWrappedTermContentZstdBatch)
+-            .mockImplementationOnce(async (chunks) => ({chunks: chunks.map((bytes) => Uint8Array.from(bytes)), envelopeMs: 0, wrapped: false}))
++            .mockImplementationOnce(async (chunks) => ({chunks: chunks.map((bytes) => codec.encode(bytes)), envelopeMs: 0, wrapped: false}))
+             .mockImplementationOnce(async (chunks) => {
+                 for (const chunk of chunks) { structuredClone(chunk.buffer, {transfer: [chunk.buffer]}); }
+                 throw new Error('injected transfer failure');
