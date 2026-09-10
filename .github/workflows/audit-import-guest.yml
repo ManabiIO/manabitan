@@ -1,0 +1,151 @@
+name: Complete native-policy 4-GiB guest qualification
+on:
+  push:
+    branches: [audit/remaining-import-qualification-20260910]
+    paths: [.github/workflows/audit-import-guest.yml]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - name: Boot isolated 4-GiB guest without application overrides
+        shell: bash
+        run: |
+          set -euo pipefail
+          V="$RUNNER_TEMP/vm"
+          E="$RUNNER_TEMP/evidence"
+          mkdir -p "$V" "$E"
+          test -c /dev/kvm
+          sudo apt-get update 2>&1 | tee "$E/host-install.log"
+          sudo apt-get install -y qemu-system-x86 qemu-utils cloud-image-utils acl 2>&1 | tee -a "$E/host-install.log"
+          sudo setfacl -m "u:$(id -un):rw" /dev/kvm
+          cd "$V"
+          curl -fL --retry 2 https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img -o base.img
+          curl -fL https://cloud-images.ubuntu.com/noble/current/SHA256SUMS -o SHA256SUMS
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          expected = [line.split()[0] for line in Path('SHA256SUMS').read_text().splitlines() if line.split()[-1].lstrip('*') == 'noble-server-cloudimg-amd64.img']
+          assert len(expected) == 1
+          actual = hashlib.sha256(Path('base.img').read_bytes()).hexdigest()
+          assert actual == expected[0]
+          Path('../evidence/guest-image.sha256').write_text(actual + '  noble-server-cloudimg-amd64.img\n')
+          PY
+          qemu-img create -f qcow2 -F qcow2 -b "$V/base.img" guest.img 24G
+          ssh-keygen -q -t ed25519 -N '' -f "$V/key"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          config = {'users': [{'name': 'bench', 'shell': '/bin/bash', 'sudo': 'ALL=(ALL) NOPASSWD:ALL', 'lock_passwd': True, 'ssh_authorized_keys': [Path('key.pub').read_text().strip()]}], 'ssh_pwauth': False, 'disable_root': True}
+          Path('user-data').write_text('#cloud-config\n' + json.dumps(config))
+          Path('meta-data').write_text('instance-id: import-qualification\nlocal-hostname: import-qualification\n')
+          PY
+          cloud-localds seed.img user-data meta-data
+          qemu-system-x86_64 -machine q35,accel=kvm -cpu host -smp 2 -m 4096 -display none -monitor none -serial "file:$E/guest-console.log" -daemonize -pidfile "$V/pid" -netdev user,id=net0,hostfwd=tcp:127.0.0.1:2222-:22 -device virtio-net-pci,netdev=net0 -drive "if=virtio,format=qcow2,file=$V/guest.img" -drive "if=virtio,format=raw,file=$V/seed.img"
+          sshargs=(-i "$V/key" -p 2222 -o "UserKnownHostsFile=$V/known_hosts" -o StrictHostKeyChecking=accept-new -o ConnectTimeout=3 -o BatchMode=yes)
+          ready=0
+          for attempt in $(seq 1 120); do
+            if ssh "${sshargs[@]}" bench@127.0.0.1 true; then ready=1; break; fi
+            sleep 3
+          done
+          test "$ready" = 1
+          ssh "${sshargs[@]}" bench@127.0.0.1 'sudo cloud-init status --wait'
+          qemu-system-x86_64 --version > "$E/qemu.txt"
+          printf 'KVM; -cpu host; -smp 2; -m 4096; no swap or navigator overrides\n' > "$E/guest-configuration.txt"
+          lscpu > "$E/host-cpu.txt"
+      - name: Build and run all six pairs in the same guest
+        shell: bash
+        run: |
+          set -euo pipefail
+          V="$RUNNER_TEMP/vm"
+          E="$RUNNER_TEMP/evidence"
+          sshargs=(-i "$V/key" -p 2222 -o "UserKnownHostsFile=$V/known_hosts" -o StrictHostKeyChecking=yes -o ConnectTimeout=5 -o BatchMode=yes)
+          ssh "${sshargs[@]}" bench@127.0.0.1 "bash -s -- '$DICTIONARY'" <<'GUEST' 2>&1 | tee "$E/guest-driver.log"
+          set -euo pipefail
+          dictionary="$1"
+          cd "$HOME"
+          mkdir -p evidence
+          E="$HOME/evidence"
+          sudo apt-get update > "$E/guest-install.log" 2>&1
+          sudo apt-get install -y git curl ca-certificates xz-utils unzip python3 clang lld time >> "$E/guest-install.log" 2>&1
+          sudo swapoff -a
+          curl -fL https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz -o node.tar.xz
+          curl -fL https://nodejs.org/dist/v24.20.0/SHASUMS256.txt -o node-SHASUMS256.txt
+          expected=$(awk '$2 == "node-v24.20.0-linux-x64.tar.xz" {print $1}' node-SHASUMS256.txt)
+          test "${#expected}" = 64
+          printf '%s  node.tar.xz\n' "$expected" | sha256sum -c -
+          printf '%s  node-v24.20.0-linux-x64.tar.xz\n' "$expected" > "$E/node-binary.sha256"
+          tar -xf node.tar.xz
+          sudo ln -s "$HOME/node-v24.20.0-linux-x64/bin/node" /usr/local/bin/node
+          export PATH="$HOME/node-v24.20.0-linux-x64/bin:$PATH"
+          BASE=da8f7436d34e510441d30692c8d698806b70e13f
+          SOURCE=d5dd9cb0072059b326f333ef425018ce1227a756
+          DRIVER=520ffe794153a473356596c354de4f026d53109b
+          git init source
+          git -C source remote add origin https://github.com/ManabiIO/manabitan.git
+          git -C source fetch --depth 1 origin "$BASE" "$SOURCE" "$DRIVER"
+          git -C source worktree add --detach "$HOME/A" "$BASE"
+          git -C source worktree add --detach "$HOME/B" "$SOURCE"
+          git -C source show "$DRIVER:dev/perf/multibatch-verify/paired.py.gz" | gzip -dc > "$E/paired.py"
+          git -C source show "$DRIVER:dev/perf/multibatch-verify/policy.mjs.gz" | gzip -dc > "$E/policy.mjs"
+          echo "662d8535571fa5d66bde4797f6e042a95c81974de9f74d2ffcbe6ab938fda617  $E/paired.py" | sha256sum -c -
+          echo "7239b3590ac24b9dec91bf14e7172941181763443dc776b80c41514794c13c52  $E/policy.mjs" | sha256sum -c -
+          cp "$E/paired.py" "$E/original-paired.py"
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path.home() / 'evidence/paired.py'
+          s = p.read_text()
+          old = "CANDIDATE_TREE = '4035249c23197b72d8be9d4cca7ebd6476771ef1'"
+          assert s.count(old) == 1
+          p.write_text(s.replace(old, "CANDIDATE_TREE = '1dadf454221027e6789733815c01cb6877f24218'"))
+          PY
+          for arm in A B; do
+            (cd "$HOME/$arm" && npm ci && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$E/build-$arm.log" 2>&1
+            test -z "$(git -C "$HOME/$arm" status --porcelain)"
+          done
+          (cd "$HOME/A" && node node_modules/playwright/cli.js install --with-deps chromium && node dev/perf/prepare-dictionaries.js) > "$E/browser-fixtures.log" 2>&1
+          cp -a "$HOME/A/builds/e2e-dictionary-cache" "$HOME/B/builds/"
+          node "$E/policy.mjs" "$HOME/A" "$E/native-policy.json"
+          node --version > "$E/node.txt"
+          clang --version > "$E/clang.txt"
+          uname -a > "$E/kernel.txt"
+          lscpu > "$E/cpu.txt"
+          cat /proc/meminfo > "$E/memory.txt"
+          cat /proc/swaps > "$E/swaps.txt"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads((Path.home() / 'evidence/native-policy.json').read_text())
+          assert p['page']['deviceMemory'] == p['worker']['deviceMemory'] == 4, p
+          assert p['page']['hardwareConcurrency'] == p['worker']['hardwareConcurrency'] == 2, p
+          PY
+          python3 "$E/paired.py" --baseline "$HOME/A" --candidate "$HOME/B" --policy "$E/native-policy.json" --output "$E/paired" --pairs 6 --dictionaries "$dictionary" --tier low --reverse 2>&1 | tee "$E/driver.log"
+          GUEST
+      - name: Collect evidence and stop this guest
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          V="$RUNNER_TEMP/vm"
+          E="$RUNNER_TEMP/evidence"
+          mkdir -p "$E/guest"
+          if test -f "$V/key"; then
+            ssh -i "$V/key" -p 2222 -o "UserKnownHostsFile=$V/known_hosts" -o StrictHostKeyChecking=accept-new -o ConnectTimeout=5 -o BatchMode=yes bench@127.0.0.1 'tar -C "$HOME/evidence" -czf - .' | tar -C "$E/guest" -xzf - || true
+          fi
+          if test -f "$V/pid"; then kill "$(cat "$V/pid")" || true; fi
+          rm -f "$V/key" "$V/key.pub" "$V/seed.img" "$V/user-data"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: complete-guest-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/evidence
+          if-no-files-found: error
+          retention-days: 30
