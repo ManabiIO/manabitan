@@ -1,0 +1,205 @@
+/*
+ * Copyright (C) 2026 Manabitan Authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ */
+
+import {beforeEach, describe, expect, test, vi} from 'vitest';
+import {TermContentBlockStore} from '../ext/js/dictionary/term-content-block-store.js';
+import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
+import {compressWrappedTermContentZstdBatch} from '../ext/js/dictionary/zstd-term-content.js';
+
+vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
+    compressTermContentZstd: (/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes),
+    compressWrappedTermContentZstdBatch: vi.fn(async (/** @type {Uint8Array[]} */ chunks) => ({
+        chunks: chunks.map((bytes) => Uint8Array.from(bytes)), envelopeMs: 0, wrapped: false,
+    })),
+    compressWrappedTermContentZstdSpansBatch: vi.fn(),
+    beginCompressWrappedTermContentZstdSpansBatch: vi.fn(),
+    decompressTermContentZstd: (/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes),
+}));
+
+/**
+ * @param {number} targetBytes
+ * @param {number} [referenceBytes]
+ */
+function createStore(targetBytes, referenceBytes = 60) {
+    const content = new TermContentOpfsStore();
+    const blocks = new TermContentBlockStore(content, {
+        blockTargetBytes: targetBytes, referencePackTargetBytes: referenceBytes, minInputBytes: 0,
+    });
+    return {content, blocks};
+}
+
+/**
+ * @param {TermContentOpfsStore} store
+ */
+async function persistedBytes(store) {
+    const length = store.getDebugState().totalLength;
+    if (typeof length !== 'number') { throw new Error('Missing physical storage length'); }
+    return await store.readSlice(0, length);
+}
+
+/**
+ * Compare the complete persisted stream, including checksums and references,
+ * with the unchanged per-entry packing path, not just sampled logical reads.
+ * @param {Uint8Array} source
+ * @param {number[]} offsets
+ * @param {number[]} lengths
+ * @param {number} targetBytes
+ */
+async function checkAgainstEntries(source, offsets, lengths, targetBytes) {
+    // Own the oracle bytes independently and never use the candidate's gather.
+    const entries = offsets.map((offset, i) => Uint8Array.from({length: lengths[i]}, (_, j) => source[offset + j]));
+    const before = Uint8Array.from(source);
+    const expected = createStore(targetBytes);
+    const actual = createStore(targetBytes);
+    const a = await expected.blocks.tryAppend(entries, null, true);
+    const b = await actual.blocks.tryAppendSpans(source, Uint32Array.from(offsets), Uint32Array.from(lengths), null, true);
+    if (a === null || b === null) { throw new Error('Expected forced block storage'); }
+    for (const key of /** @type {const} */ (['contentOffsets', 'contentLengths', 'contentDictName', 'compressedBytes', 'uncompressedBytes'])) {
+        expect(b[key]).toEqual(a[key]);
+    }
+    expect(await persistedBytes(actual.content)).toEqual(await persistedBytes(expected.content));
+    expect(source).toEqual(before);
+    for (let i = 0; i < entries.length; ++i) {
+        expect(await actual.blocks.read(b.contentOffsets[i], b.contentLengths[i], b.contentDictName)).toEqual(entries[i]);
+    }
+}
+
+describe('content-span packing copy runs', () => {
+    beforeEach(() => { vi.clearAllMocks(); });
+
+    test.each([false, true])('matches all reference bytes for ordered, overlapping and empty spans (shared=%s)', async (shared) => {
+        const backing = shared ? new SharedArrayBuffer(130) : new ArrayBuffer(130);
+        const source = new Uint8Array(backing, 3, 124);
+        for (let i = 0; i < source.length; ++i) { source[i] = (i * 17 + 3) & 255; }
+        /** @type {Array<[number[], number[]]>} */
+        const cases = [
+            [[0, 4, 8], [4, 4, 4]],
+            [[3, 7, 11], [4, 4, 4]],
+            [[3, 8, 20], [4, 4, 4]],
+            [[20, 3, 8], [4, 4, 4]],
+            [[3, 3, 5, 3], [4, 4, 4, 4]],
+            [[124, 3, 0, 7, 90, 11, 124], [0, 4, 0, 4, 0, 1, 0]],
+            [[0, 124, 50], [0, 0, 0]],
+            [[0, 124, 30], [124, 0, 1]],
+        ];
+        for (const [offsets, lengths] of cases) {
+            for (const target of [1, 4, 8, 9, 124]) {
+                await checkAgainstEntries(source, offsets, lengths, target);
+            }
+        }
+    });
+
+    test('reduces 4096 contiguous entry views to one without changing references', async () => {
+        const source = new Uint8Array(4096 * 4);
+        source.fill(31);
+        const offsets = Uint32Array.from({length: 4096}, (_, i) => i * 4);
+        const lengths = new Uint32Array(4096).fill(4);
+        const views = vi.spyOn(source, 'subarray');
+        const {blocks} = createStore(source.length);
+        const result = await blocks.tryAppendSpans(source, offsets, lengths, null, true);
+        expect(views).toHaveBeenCalledOnce();
+        expect(views).toHaveBeenCalledWith(0, source.length);
+        if (result === null) { throw new Error('Expected forced block storage'); }
+        expect(result.contentLengths).toEqual(lengths);
+        expect(result.contentOffsets.length).toBe(4096);
+        expect(vi.mocked(compressWrappedTermContentZstdBatch).mock.calls[0][0][0].buffer).not.toBe(source.buffer);
+    });
+
+    test('flushes runs at gaps and output block boundaries, not zero-length entries', async () => {
+        const source = new Uint8Array(40);
+        const views = vi.spyOn(source, 'subarray');
+        const {blocks} = createStore(8);
+        await blocks.tryAppendSpans(source, new Uint32Array([3, 40, 7, 11, 20, 24]), new Uint32Array([4, 0, 4, 4, 4, 1]), null, true);
+        expect(views.mock.calls).toEqual([[3, 11], [11, 15], [20, 24], [24, 25]]);
+    });
+
+    test.each([false, true])('owns bytes before deferred compression completes (shared=%s)', async (shared) => {
+        const source = new Uint8Array(shared ? new SharedArrayBuffer(128) : new ArrayBuffer(128));
+        for (let i = 0; i < source.length; ++i) { source[i] = i; }
+        const snapshot = Uint8Array.from(source);
+        let resume = () => {};
+        const gate = new Promise((resolve) => { resume = () => resolve(void 0); });
+        vi.mocked(compressWrappedTermContentZstdBatch).mockImplementationOnce(async (chunks) => {
+            await gate;
+            return {chunks: chunks.map((bytes) => Uint8Array.from(bytes)), envelopeMs: 0, wrapped: false};
+        });
+        const {blocks} = createStore(128);
+        const operation = blocks.tryAppendSpans(source, new Uint32Array([3, 7, 11]), new Uint32Array([4, 4, 4]), null, true);
+        expect(compressWrappedTermContentZstdBatch).toHaveBeenCalledOnce();
+        source.fill(255);
+        if (!shared) { structuredClone(source.buffer, {transfer: [source.buffer]}); }
+        resume();
+        const result = await operation;
+        if (result === null) { throw new Error('Expected forced block storage'); }
+        for (let i = 0; i < 3; ++i) {
+            expect(await blocks.read(result.contentOffsets[i], result.contentLengths[i], result.contentDictName)).toEqual(snapshot.slice(3 + 4 * i, 7 + 4 * i));
+        }
+    });
+
+    test('repacks identical bytes and references after a worker detaches packed slabs and fails', async () => {
+        const source = Uint8Array.from({length: 64}, (_, i) => i + 1);
+        // First call is the independent per-entry oracle; the second is the candidate.
+        vi.mocked(compressWrappedTermContentZstdBatch)
+            .mockImplementationOnce(async (chunks) => ({chunks: chunks.map((bytes) => Uint8Array.from(bytes)), envelopeMs: 0, wrapped: false}))
+            .mockImplementationOnce(async (chunks) => {
+                for (const chunk of chunks) { structuredClone(chunk.buffer, {transfer: [chunk.buffer]}); }
+                throw new Error('injected transfer failure');
+            });
+        await checkAgainstEntries(source, [3, 7, 60, 11, 8, 25], [4, 4, 0, 4, 3, 1], 8);
+    });
+
+    test('keeps borrowed shared WASM bytes independent across memory growth and source reuse', async () => {
+        const memory = new WebAssembly.Memory({initial: 1, maximum: 2, shared: true});
+        const source = new Uint8Array(memory.buffer, 3, 8192);
+        source.fill(27);
+        const {blocks} = createStore(8192);
+        const operation = blocks.tryAppendSpans(source, new Uint32Array([0, 4096]), new Uint32Array([4096, 4096]), null, true);
+        memory.grow(1);
+        new Uint8Array(memory.buffer).fill(81);
+        const result = await operation;
+        if (result === null) { throw new Error('Expected forced block storage'); }
+        expect(await blocks.read(result.contentOffsets[0], 4096, result.contentDictName)).toEqual(new Uint8Array(4096).fill(27));
+        expect(await blocks.read(result.contentOffsets[1], 4096, result.contentDictName)).toEqual(new Uint8Array(4096).fill(27));
+    });
+
+    test('validates every span before packing or writing, including empty out-of-range spans', async () => {
+        const source = new Uint8Array(12);
+        const views = vi.spyOn(source, 'subarray');
+        const {blocks, content} = createStore(16);
+        /** @type {Array<[number[], number[]]>} */
+        const cases = [[[0, 4], [4]], [[0, 13], [4, 0]], [[0, 10], [4, 3]], [[0, 0xffffffff], [4, 1]]];
+        for (const [offsets, lengths] of cases) {
+            await expect(blocks.tryAppendSpans(source, Uint32Array.from(offsets), Uint32Array.from(lengths), null, true)).rejects.toThrow();
+        }
+        expect(views).not.toHaveBeenCalled();
+        expect(compressWrappedTermContentZstdBatch).not.toHaveBeenCalled();
+        expect(content.getDebugState().totalLength).toBe(0);
+    });
+
+    test('matches the unchanged per-entry writer on 256 deterministic uneven plans', async () => {
+        let state = 0x931af76;
+        /** @returns {number} */
+        const random = () => { state = (Math.imul(state, 1664525) + 1013904223) >>> 0; return state; };
+        for (let trial = 0; trial < 256; ++trial) {
+            const source = new Uint8Array(trial % 2 ? new SharedArrayBuffer(521) : new ArrayBuffer(521), trial % 5, 512);
+            for (let i = 0; i < source.length; ++i) { source[i] = random() & 255; }
+            const offsets = [];
+            const lengths = [];
+            let end = 0;
+            for (let i = 0; i < 24; ++i) {
+                const offset = random() % 3 ? end : random() % 513;
+                const length = random() % Math.min(33, 513 - offset);
+                offsets.push(offset);
+                lengths.push(length);
+                end = offset + length;
+            }
+            await checkAgainstEntries(source, offsets, lengths, 1 + random() % 128);
+        }
+    });
+});
