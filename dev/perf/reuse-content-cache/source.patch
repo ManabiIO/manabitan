@@ -1,0 +1,46 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 9d041ed..6fb8681 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -7467,6 +7467,11 @@ this._readTermContentSignature(
+                         contentDedupPlan,
+                         contentUniqueIndexList: chunk.contentUniqueIndexList,
+                         stagedContentMetadata,
++                        // Keep an initial working set; refresh it when this wave
++                        // reused at least one persisted item per 128 new items.
++                        // Sparse reuse still follows the byte-exact storage path.
++                        cacheRecentSources: this._recentTermContentSourceBatches.size === 0 ||
++                            persistedHitCount * 128 >= pendingContentCount,
+                         importMetrics,
+                         metadataValidated: persistenceResult[VALIDATED_TERM_CONTENT_METADATA] === true,
+                         useResolvedContentReferences,
+@@ -8471,7 +8476,7 @@ null :
+ 
+     /**
+      * Publishes persisted offsets to rows and to the in-memory dedup index.
+-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
++     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean, cacheRecentSources?: boolean}} state
+      * @returns {string|(string|null)[]}
+      * @throws {Error} If dedup projections or persisted metadata are invalid.
+      */
+@@ -8494,6 +8499,7 @@ null :
+             importMetrics = null,
+             metadataValidated = false,
+             useResolvedContentReferences = false,
++            cacheRecentSources = true,
+         } = state;
+         let {resolvedContentDictNames} = state;
+         /**
+@@ -8630,10 +8636,10 @@ null :
+             );
+         }
+         const recentSourceCacheStart = importMetrics === null ? 0 : safePerformance.now();
+-        const recentSourceCacheBytes = this._cacheRecentPublishedTermContentSources(
++        const recentSourceCacheBytes = cacheRecentSources ? this._cacheRecentPublishedTermContentSources(
+             stagedContentMetadata,
+             pendingContentSpans,
+-        );
++        ) : 0;
+         if (importMetrics !== null) {
+             importMetrics.dedupRecentSourceCacheMs += safePerformance.now() - recentSourceCacheStart;
+             importMetrics.dedupRecentSourceCacheBytes += recentSourceCacheBytes;
