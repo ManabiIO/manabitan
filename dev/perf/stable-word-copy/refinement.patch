@@ -1,0 +1,109 @@
+diff --git a/ext/js/core/copy-stable-bytes.js b/ext/js/core/copy-stable-bytes.js
+index 7171b61..9a2219b 100644
+--- a/ext/js/core/copy-stable-bytes.js
++++ b/ext/js/core/copy-stable-bytes.js
+@@ -17,9 +17,10 @@
+ 
+ /**
+  * Copies bytes whose caller guarantees are stable until this function returns.
+- * Integer loads avoid per-byte shared-memory copy overhead for large borrowed
+- * parser slabs. This is not an atomic snapshot of a concurrently written slab.
+- * The result always owns an exact-sized, unshared buffer, as with Uint8Array.slice.
++ * Shared sources are loaded as aligned integer words; any alignment correction
++ * moves only private output bytes. No source padding or scratch slab is needed.
++ * This is not an atomic snapshot of a concurrently written source.
++ * The result owns an exact-sized unshared buffer, as with Uint8Array.slice.
+  * @param {Uint8Array} source
+  * @returns {Uint8Array}
+  */
+@@ -32,25 +33,31 @@ export function copyStableBytes(source) {
+         return source.slice();
+     }
+     const result = new Uint8Array(length);
+-    const input = new DataView(source.buffer, source.byteOffset, length);
+-    const output = new DataView(result.buffer);
+-    let offset = 0;
+-    const blockEnd = length - length % 32;
+-    for (; offset < blockEnd; offset += 32) {
+-        output.setUint32(offset, input.getUint32(offset, true), true);
+-        output.setUint32(offset + 4, input.getUint32(offset + 4, true), true);
+-        output.setUint32(offset + 8, input.getUint32(offset + 8, true), true);
+-        output.setUint32(offset + 12, input.getUint32(offset + 12, true), true);
+-        output.setUint32(offset + 16, input.getUint32(offset + 16, true), true);
+-        output.setUint32(offset + 20, input.getUint32(offset + 20, true), true);
+-        output.setUint32(offset + 24, input.getUint32(offset + 24, true), true);
+-        output.setUint32(offset + 28, input.getUint32(offset + 28, true), true);
++    const prefix = (4 - (source.byteOffset & 3)) & 3;
++    const wordCount = Math.floor((length - prefix) / 4);
++    const input = new Uint32Array(source.buffer, source.byteOffset + prefix, wordCount);
++    const output = new Uint32Array(result.buffer, 0, wordCount);
++    let index = 0;
++    const blockEnd = wordCount - wordCount % 8;
++    for (; index < blockEnd; index += 8) {
++        output[index] = input[index];
++        output[index + 1] = input[index + 1];
++        output[index + 2] = input[index + 2];
++        output[index + 3] = input[index + 3];
++        output[index + 4] = input[index + 4];
++        output[index + 5] = input[index + 5];
++        output[index + 6] = input[index + 6];
++        output[index + 7] = input[index + 7];
+     }
+-    const wordEnd = length - length % 4;
+-    for (; offset < wordEnd; offset += 4) {
+-        output.setUint32(offset, input.getUint32(offset, true), true);
++    for (; index < wordCount; ++index) {
++        output[index] = input[index];
+     }
+-    for (; offset < length; ++offset) {
++    const copiedBytes = wordCount * 4;
++    if (prefix !== 0) {
++        result.copyWithin(prefix, 0, copiedBytes);
++        for (let offset = 0; offset < prefix; ++offset) { result[offset] = source[offset]; }
++    }
++    for (let offset = prefix + copiedBytes; offset < length; ++offset) {
+         result[offset] = source[offset];
+     }
+     return result;
+diff --git a/test/copy-stable-bytes.test.js b/test/copy-stable-bytes.test.js
+index d7f80d7..c35d564 100644
+--- a/test/copy-stable-bytes.test.js
++++ b/test/copy-stable-bytes.test.js
+@@ -15,6 +15,8 @@
+  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  */
+ 
++import {Buffer} from 'node:buffer';
++
+ import {afterEach, describe, expect, test, vi} from 'vitest';
+ import {copyStableBytes} from '../ext/js/core/copy-stable-bytes.js';
+ 
+@@ -33,16 +35,16 @@ describe('stable shared-byte copies', () => {
+                 for (let i = 0; i < length; ++i) { source[i] = (i * 131 + Math.floor(i / 256)) & 255; }
+                 const expected = source.slice();
+                 const result = copyStableBytes(source);
+-                expect(result).toEqual(expected);
++                expect(Buffer.compare(result, expected)).toBe(0);
+                 expect(result.buffer).toBeInstanceOf(ArrayBuffer);
+                 expect(result.buffer).not.toBe(backing);
+                 expect(result.byteOffset).toBe(0);
+                 expect(result.buffer.byteLength).toBe(length);
+-                expect(source).toEqual(expected);
++                expect(Buffer.compare(source, expected)).toBe(0);
+                 expect(whole[source.byteOffset - 1]).toBe(165);
+                 expect(whole[source.byteOffset + length]).toBe(165);
+                 source.fill(0);
+-                expect(result).toEqual(expected);
++                expect(Buffer.compare(result, expected)).toBe(0);
+                 result.fill(255);
+                 expect(source.every((byte) => byte === 0)).toBe(true);
+             }
+@@ -65,7 +67,7 @@ describe('stable shared-byte copies', () => {
+         const result = copyStableBytes(source);
+         memory.grow(1);
+         new Uint8Array(memory.buffer).fill(0);
+-        expect(result).toEqual(expected);
++        expect(Buffer.compare(result, expected)).toBe(0);
+     });
+ 
+     test('keeps the ordinary fallback when SharedArrayBuffer is unavailable', () => {
