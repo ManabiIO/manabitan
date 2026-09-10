@@ -1,0 +1,79 @@
+name: Multi-batch exact-source browser qualification
+on:
+  push:
+    branches: [verify/multibatch-browsers-20260909]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+    env:
+      BROWSER: ${{ matrix.browser }}
+      MANABITAN_E2E_SKIP_BUILD: '1'
+      MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+      MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_E2E_PHASE_PROFILING: '0'
+      MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+      MANABITAN_E2E_PROCESS_SAMPLING: '0'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 34839d51d9b2cda28806b4a3908cda88847de87d
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '24.20.0'
+      - name: Build and install the browser used by the existing E2E suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          test "$(git rev-parse HEAD^{tree})" = 4035249c23197b72d8be9d4cca7ebd6476771ef1
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/evidence/source.txt"
+          node --version > "$RUNNER_TEMP/evidence/node.txt"
+          node dev/perf/prepare-dictionaries.js > "$RUNNER_TEMP/evidence/fixtures.log" 2>&1
+          if [ "$BROWSER" = chromium ]; then
+            node dev/bin/build.js --target chrome-dev > "$RUNNER_TEMP/evidence/build.log" 2>&1
+            node node_modules/playwright/cli.js install --with-deps chromium > "$RUNNER_TEMP/evidence/browser-install.log" 2>&1
+          else
+            node dev/bin/build.js --target firefox-dev > "$RUNNER_TEMP/evidence/build.log" 2>&1
+            npm install --no-save --package-lock=false selenium-webdriver@4.38.0 > "$RUNNER_TEMP/evidence/driver-install.log" 2>&1
+            curl -fsSL 'https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US' -o "$RUNNER_TEMP/firefox.tar"
+            mkdir -p "$RUNNER_TEMP/firefox"
+            tar -xf "$RUNNER_TEMP/firefox.tar" -C "$RUNNER_TEMP/firefox"
+            echo "MANABITAN_FIREFOX_BINARY=$RUNNER_TEMP/firefox/firefox/firefox" >> "$GITHUB_ENV"
+            "$RUNNER_TEMP/firefox/firefox/firefox" --version > "$RUNNER_TEMP/evidence/browser-version.txt"
+          fi
+      - name: Run complete strict extension integration
+        shell: bash
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_FIREFOX_HEADLESS: '0'
+          MANABITAN_FIREFOX_XPI: ${{ github.workspace }}/builds/manabitan-firefox-dev.zip
+          MANABITAN_CHROMIUM_E2E_REPORT: ${{ runner.temp }}/evidence/report.html
+          MANABITAN_FIREFOX_E2E_REPORT: ${{ runner.temp }}/evidence/report.html
+        run: |
+          set -euo pipefail
+          xvfb-run -a node "test/$BROWSER/extension-two-dictionary-import.e2e.js" > "$RUNNER_TEMP/evidence/integration.log" 2>&1
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const r = JSON.parse(readFileSync(`${process.env.RUNNER_TEMP}/evidence/report.json`, 'utf8'));
+          if (r.status !== 'success' || r.skippedVerification === true || !Array.isArray(r.phases) || r.phases.length === 0) {
+            throw new Error(`Incomplete integration: ${r.status} ${r.skipReason || ''}`);
+          }
+          console.log(JSON.stringify({status: r.status, skipped: r.skippedVerification, phases: r.phases.length, runtime: r.runtimeDiagnostics}, null, 2));
+          NODE
+          test -z "$(git status --porcelain)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: multibatch-browser-${{ matrix.browser }}
+          path: ${{ runner.temp }}/evidence/
+          if-no-files-found: error
+          retention-days: 14
