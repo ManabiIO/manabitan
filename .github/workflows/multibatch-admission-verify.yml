@@ -1,0 +1,132 @@
+name: Qualify bounded multi-batch admission
+on:
+  push:
+    branches: [verify/multibatch-admission-20260909]
+    paths:
+      - .github/workflows/multibatch-admission-verify.yml
+      - dev/perf/multibatch-verify/**
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - name: Reconstruct and identify normal source-only child
+        shell: bash
+        env:
+          GIT_AUTHOR_DATE: '1789000302 +0000'
+          GIT_COMMITTER_DATE: '1789000302 +0000'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          gzip -dc dev/perf/multibatch-verify/source.patch.gz > "$RUNNER_TEMP/evidence/source.patch"
+          echo "a387dca7d2d3a252c2e65db7617911e623fc62b2f00c83f344d4822f2f5c203a  $RUNNER_TEMP/evidence/source.patch" | sha256sum -c -
+          git worktree add --detach "$RUNNER_TEMP/source" 03478be25506176610b2133be658ee697d9bb3f1
+          cd "$RUNNER_TEMP/source"
+          git apply "$RUNNER_TEMP/evidence/source.patch"
+          git add ext/js/dictionary/term-bank-source-pipeline.js test/term-bank-bounded-compressed.test.js test/term-bank-bounded-compressed-plan.test.js test/term-bank-multibatch-admission.test.js
+          test "$(git write-tree)" = 4035249c23197b72d8be9d4cca7ebd6476771ef1
+          git -c user.name=OpenAI -c user.email=noreply@openai.com -c core.hooksPath=/dev/null commit -m 'Limit bounded compressed transport to multi-batch imports'
+          test "$(git rev-parse HEAD)" = 392235fda55f3a5ce68e99283f327754e58e0371
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/evidence/source.txt"
+      - name: Complete units, options, types, lint and builds
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/source"
+          npm ci > "$RUNNER_TEMP/evidence/install.log" 2>&1
+          node dev/bin/build-libs.js > "$RUNNER_TEMP/evidence/build-libs.log" 2>&1
+          npm run test:ts > "$RUNNER_TEMP/evidence/types.log" 2>&1
+          npm run test:js > "$RUNNER_TEMP/evidence/lint.log" 2>&1
+          node node_modules/vitest/vitest.mjs run > "$RUNNER_TEMP/evidence/unit.log" 2>&1
+          node node_modules/vitest/vitest.mjs run --config test/data/vitest.options.config.json > "$RUNNER_TEMP/evidence/options.log" 2>&1
+          node dev/bin/build.js --dryRun --all > "$RUNNER_TEMP/evidence/dry-build.log" 2>&1
+          test -z "$(git status --porcelain)"
+      - name: Publish qualified source branch without changing existing PRs
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/source"
+          branch=perf/import-multibatch-admission-20260909
+          existing="$(git ls-remote --heads origin "$branch" | cut -f1)"
+          if [ -n "$existing" ]; then
+            test "$existing" = 392235fda55f3a5ce68e99283f327754e58e0371
+          else
+            git push origin "HEAD:refs/heads/$branch"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: multibatch-source
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
+  comparison:
+    needs: source
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmnedict, jmdict, jitendex]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - name: Build frozen source arms and native browser runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/evidence"
+          mkdir -p "$evidence"
+          if ! command -v clang >/dev/null || ! command -v wasm-ld >/dev/null; then
+            sudo apt-get update > "$evidence/compiler-install.log" 2>&1
+            sudo apt-get install -y clang lld >> "$evidence/compiler-install.log" 2>&1
+          fi
+          gzip -dc dev/perf/multibatch-verify/paired.py.gz > "$evidence/paired.py"
+          gzip -dc dev/perf/multibatch-verify/policy.mjs.gz > "$evidence/policy.mjs"
+          echo "662d8535571fa5d66bde4797f6e042a95c81974de9f74d2ffcbe6ab938fda617  $evidence/paired.py" | sha256sum -c -
+          echo "7239b3590ac24b9dec91bf14e7172941181763443dc776b80c41514794c13c52  $evidence/policy.mjs" | sha256sum -c -
+          git worktree add --detach "$RUNNER_TEMP/A" da8f7436d34e510441d30692c8d698806b70e13f
+          git worktree add --detach "$RUNNER_TEMP/B" 392235fda55f3a5ce68e99283f327754e58e0371
+          for arm in A B; do
+            (cd "$RUNNER_TEMP/$arm" && npm ci && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$evidence/build-$arm.log" 2>&1
+            test -z "$(git -C "$RUNNER_TEMP/$arm" status --porcelain)"
+          done
+          (cd "$RUNNER_TEMP/A" && node node_modules/playwright/cli.js install --with-deps chromium && node dev/perf/prepare-dictionaries.js) > "$evidence/browser-fixtures.log" 2>&1
+          cp -a "$RUNNER_TEMP/A/builds/e2e-dictionary-cache" "$RUNNER_TEMP/B/builds/"
+          node "$evidence/policy.mjs" "$RUNNER_TEMP/A" "$evidence/native-policy.json"
+          node --version > "$evidence/node.txt"
+          clang --version > "$evidence/clang.txt"
+          lscpu > "$evidence/cpu.txt"
+          free -b > "$evidence/memory.txt"
+      - name: Four fixed pairs, excluded warmup and same-binary controls, no retries
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/evidence"
+          python3 "$evidence/paired.py" --baseline "$RUNNER_TEMP/A" --candidate "$RUNNER_TEMP/B" --policy "$evidence/native-policy.json" --output "$evidence/paired" --pairs 4 --dictionaries "$DICTIONARY" --tier low --reverse > "$evidence/driver.log" 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: multibatch-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 14
+          if-no-files-found: error
