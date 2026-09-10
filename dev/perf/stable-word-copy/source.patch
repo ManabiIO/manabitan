@@ -1,0 +1,202 @@
+diff --git a/ext/js/core/copy-stable-bytes.js b/ext/js/core/copy-stable-bytes.js
+new file mode 100644
+index 0000000..7171b61
+--- /dev/null
++++ b/ext/js/core/copy-stable-bytes.js
+@@ -0,0 +1,57 @@
++/*
++ * Copyright (C) 2023-2026  Yomitan Authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++
++/**
++ * Copies bytes whose caller guarantees are stable until this function returns.
++ * Integer loads avoid per-byte shared-memory copy overhead for large borrowed
++ * parser slabs. This is not an atomic snapshot of a concurrently written slab.
++ * The result always owns an exact-sized, unshared buffer, as with Uint8Array.slice.
++ * @param {Uint8Array} source
++ * @returns {Uint8Array}
++ */
++export function copyStableBytes(source) {
++    const length = source.byteLength;
++    if (
++        length < 1024 || typeof SharedArrayBuffer === 'undefined' ||
++        !(source.buffer instanceof SharedArrayBuffer)
++    ) {
++        return source.slice();
++    }
++    const result = new Uint8Array(length);
++    const input = new DataView(source.buffer, source.byteOffset, length);
++    const output = new DataView(result.buffer);
++    let offset = 0;
++    const blockEnd = length - length % 32;
++    for (; offset < blockEnd; offset += 32) {
++        output.setUint32(offset, input.getUint32(offset, true), true);
++        output.setUint32(offset + 4, input.getUint32(offset + 4, true), true);
++        output.setUint32(offset + 8, input.getUint32(offset + 8, true), true);
++        output.setUint32(offset + 12, input.getUint32(offset + 12, true), true);
++        output.setUint32(offset + 16, input.getUint32(offset + 16, true), true);
++        output.setUint32(offset + 20, input.getUint32(offset + 20, true), true);
++        output.setUint32(offset + 24, input.getUint32(offset + 24, true), true);
++        output.setUint32(offset + 28, input.getUint32(offset + 28, true), true);
++    }
++    const wordEnd = length - length % 4;
++    for (; offset < wordEnd; offset += 4) {
++        output.setUint32(offset, input.getUint32(offset, true), true);
++    }
++    for (; offset < length; ++offset) {
++        result[offset] = source[offset];
++    }
++    return result;
++}
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 9d041ed..f405b7a 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -21,6 +21,7 @@
+ 
+ import {initWasm, Resvg} from '../../lib/resvg-wasm.js';
+ import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
++import {copyStableBytes} from '../core/copy-stable-bytes.js';
+ import {isDevDiagnosticsBuild, reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
+ import {ExtensionError} from '../core/extension-error.js';
+ import {parseJson} from '../core/json.js';
+@@ -5824,7 +5825,7 @@ null;
+             this._nextRecentTermContentSourceBatchId = 1;
+         }
+         const batchId = this._nextRecentTermContentSourceBatchId++;
+-        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
++        const owned = copyStableBytes(spans.buffer.subarray(minimumOffset, maximumEnd));
+         this._recentTermContentSourceBatches.set(batchId, owned);
+         this._recentTermContentSourceBatchBytes += owned.byteLength;
+         for (let i = 0; i < staged.indexes.length; ++i) {
+diff --git a/test/copy-stable-bytes.test.js b/test/copy-stable-bytes.test.js
+new file mode 100644
+index 0000000..d7f80d7
+--- /dev/null
++++ b/test/copy-stable-bytes.test.js
+@@ -0,0 +1,84 @@
++/*
++ * Copyright (C) 2023-2026  Yomitan Authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++
++import {afterEach, describe, expect, test, vi} from 'vitest';
++import {copyStableBytes} from '../ext/js/core/copy-stable-bytes.js';
++
++const LENGTHS = [0, 1, 3, 4, 7, 15, 31, 32, 33, 1023, 1024, 1025, 1055, 1056, 65535, 65536, 65537, 4 * 1024 * 1024 + 3];
++
++describe('stable shared-byte copies', () => {
++    afterEach(() => { vi.unstubAllGlobals(); });
++
++    test.each(LENGTHS)('preserves every byte, boundary and ownership at length %i', (length) => {
++        for (const shared of [false, true]) {
++            for (let alignment = 0; alignment < 8; ++alignment) {
++                const backing = shared ? new SharedArrayBuffer(length + 32) : new ArrayBuffer(length + 32);
++                const whole = new Uint8Array(backing);
++                whole.fill(165);
++                const source = new Uint8Array(backing, 8 + alignment, length);
++                for (let i = 0; i < length; ++i) { source[i] = (i * 131 + Math.floor(i / 256)) & 255; }
++                const expected = source.slice();
++                const result = copyStableBytes(source);
++                expect(result).toEqual(expected);
++                expect(result.buffer).toBeInstanceOf(ArrayBuffer);
++                expect(result.buffer).not.toBe(backing);
++                expect(result.byteOffset).toBe(0);
++                expect(result.buffer.byteLength).toBe(length);
++                expect(source).toEqual(expected);
++                expect(whole[source.byteOffset - 1]).toBe(165);
++                expect(whole[source.byteOffset + length]).toBe(165);
++                source.fill(0);
++                expect(result).toEqual(expected);
++                result.fill(255);
++                expect(source.every((byte) => byte === 0)).toBe(true);
++            }
++        }
++    });
++
++    test('preserves integer bit patterns that would be NaNs if treated as floats', () => {
++        const source = new Uint8Array(new SharedArrayBuffer(4099), 3, 4096);
++        const view = new DataView(source.buffer, source.byteOffset, source.byteLength);
++        const patterns = [0xffffffff, 0x7f800001, 0x7ff00000, 0x7ff00001, 0xfff80001, 0x80000000, 0x00000001, 0x00000000];
++        for (let i = 0; i < source.byteLength; i += 4) { view.setUint32(i, patterns[(i / 4) % patterns.length], true); }
++        expect(copyStableBytes(source)).toEqual(source.slice());
++    });
++
++    test('owns bytes from a shared WASM view before reuse and memory growth', () => {
++        const memory = new WebAssembly.Memory({initial: 1, maximum: 2, shared: true});
++        const source = new Uint8Array(memory.buffer, 5, 4099);
++        for (let i = 0; i < source.length; ++i) { source[i] = i & 255; }
++        const expected = source.slice();
++        const result = copyStableBytes(source);
++        memory.grow(1);
++        new Uint8Array(memory.buffer).fill(0);
++        expect(result).toEqual(expected);
++    });
++
++    test('keeps the ordinary fallback when SharedArrayBuffer is unavailable', () => {
++        const source = new Uint8Array(4097).fill(127);
++        vi.stubGlobal('SharedArrayBuffer', void 0);
++        const result = copyStableBytes(source);
++        expect(result).toEqual(source);
++        expect(result.buffer).not.toBe(source.buffer);
++    });
++
++    test('keeps native detached ordinary-buffer errors', () => {
++        const source = new Uint8Array(4097);
++        structuredClone(source.buffer, {transfer: [source.buffer]});
++        expect(() => copyStableBytes(source)).toThrow(TypeError);
++    });
++});
+diff --git a/test/dictionary-database-content-dedup.test.js b/test/dictionary-database-content-dedup.test.js
+index d242a27..e043eab 100644
+--- a/test/dictionary-database-content-dedup.test.js
++++ b/test/dictionary-database-content-dedup.test.js
+@@ -331,6 +331,23 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
+         expect(result.recentSourceHitCount).toBe(1);
+     });
+ 
++    test('retains an exact unshared cache range after a large borrowed slab is reused', () => {
++        const database = new DictionaryDatabase();
++        const slab = new Uint8Array(new SharedArrayBuffer(8199), 3, 8196);
++        for (let i = 0; i < slab.length; ++i) { slab[i] = (i * 131) & 255; }
++        const expected = slab.slice(5, 8193);
++        const published = publishSlabMeta(database, slab, 5, expected.length, 10, 20);
++        const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database);
++        slab.fill(0);
++        const retained = findRecent(published.meta);
++        expect(retained).toBeDefined();
++        expect(retained.buffer).toEqual(expected);
++        expect(retained.buffer.buffer).toBeInstanceOf(ArrayBuffer);
++        expect(retained.buffer.buffer.byteLength).toBe(expected.length);
++        expect(retained.offset).toBe(0);
++        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(expected.length);
++    });
++
+     test('removes recent source mappings on rollback and cache reset', () => {
+         const database = new DictionaryDatabase();
+         const source = new Uint8Array([1, 2, 3, 4]);
