@@ -84,7 +84,8 @@ describe('bounded compressed source plans', () => {
     })
 
     test('rejects a compressed allocation budget overflow even with tiny decoded sizes', async () => {
-        const files = filesFor(4, 1024)
+        const files = filesFor(5, 1024)
+        files[4].uncompressedSize = 64 * mib
         for (const file of files) { file.compressedSize = 17 * mib }
         const {pipeline, readCompressed} = createPipeline(files)
         try {
@@ -133,7 +134,7 @@ describe('bounded compressed source plans', () => {
     })
 
     test('releases old reads before reopening the next bounded plan', async () => {
-        const files = filesFor(4)
+        const files = filesFor(5, 16 * mib)
         const {pipeline, readCompressed} = createPipeline(files)
         try {
             const first = pipeline.createCompressedImportRunPlan(0)
@@ -152,7 +153,7 @@ describe('bounded compressed source plans', () => {
     })
 
     test('still cancels and joins every outstanding raw payload read', async () => {
-        const files = filesFor(4)
+        const files = filesFor(5, 16 * mib)
         let aborted = 0
         const pipeline = new TermBankSourcePipeline({
             termFiles: files,

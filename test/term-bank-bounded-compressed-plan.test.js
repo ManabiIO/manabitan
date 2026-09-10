@@ -85,10 +85,10 @@ describe('bounded compressed term-bank plans', () => {
     })
 
     test('also bounds compressed input when it is larger than the claimed output', async () => {
-        const files = filesFor([2, 2, 2, 2])
+        const files = filesFor([2, 2, 2, 2, 64 * MiB])
         for (const file of files) { file.compressedSize = 16 * MiB }
         const {pipeline, readCompressed} = setup(files)
-        expect(pipeline.createCompressedImportRunPlan(0)?.files).toEqual(files)
+        expect(pipeline.createCompressedImportRunPlan(0)?.files).toEqual(files.slice(0, 4))
         files[0].compressedSize += 1
         expect(pipeline.createCompressedImportRunPlan(0)).toBeNull()
         expect(readCompressed).not.toHaveBeenCalled()

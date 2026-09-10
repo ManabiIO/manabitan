@@ -382,13 +382,17 @@ export class TermBankSourcePipeline {
 
     /**
      * Builds a lazy raw-ZIP plan with complete validation metadata. On a
-     * low-memory device, admit only the current bounded batch, never the
-     * entire import. The parser's independent source-size guard still applies.
+     * low-memory device, preserve ordinary single-batch imports and admit only
+     * the current batch of multi-batch imports. The parser's independent source-size guard still applies.
      * @param {number} startIndex
      * @returns {{files: TermBankSourceFile[], loaders: Array<() => Promise<CompressedTermBankSource>>, estimatedByteLengths: number[]}|null}
      */
     createCompressedImportRunPlan(startIndex) {
         if (!this._enabled || this._compressedReadPool === null) { return null; }
+        // Keep the established transport when the archive needs only one
+        // ordinary batch. Inspect the whole import even after a fallback;
+        // small final batches of genuinely multi-batch imports remain eligible.
+        if (this._lowMemory && this.getBatchPlan(0).files.length === this._termFiles.length) { return null; }
         const boundedBatch = this._lowMemory ? this.getBatchPlan(startIndex) : null;
         if (boundedBatch !== null && (
             boundedBatch.unknownSizeCount !== 0 ||
