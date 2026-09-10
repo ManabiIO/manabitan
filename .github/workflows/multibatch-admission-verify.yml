@@ -29,7 +29,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/evidence"
           gzip -dc dev/perf/multibatch-verify/source.patch.gz > "$RUNNER_TEMP/evidence/source.patch"
-          echo "a387dca7d2d3a252c2e65db7617911e623fc62b2f00c83f344d4822f2f5c203a  $RUNNER_TEMP/evidence/source.patch" | sha256sum -c -
+          echo "a387825c153d3e133ff6226378b1da5ee4e29a3f81f6ee224dce6a8ecf687364  $RUNNER_TEMP/evidence/source.patch" | sha256sum -c -
           git worktree add --detach "$RUNNER_TEMP/source" 03478be25506176610b2133be658ee697d9bb3f1
           cd "$RUNNER_TEMP/source"
           git apply "$RUNNER_TEMP/evidence/source.patch"
