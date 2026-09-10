@@ -1,0 +1,18 @@
+diff --git a/test/term-content-pack-runs.test.js b/test/term-content-pack-runs.test.js
+index 72901d14..a7024368 100644
+--- a/test/term-content-pack-runs.test.js
++++ b/test/term-content-pack-runs.test.js
+@@ -66,7 +66,12 @@ async function checkAgainstEntries(source, offsets, lengths, targetBytes) {
+     expect(await persistedBytes(actual.content)).toEqual(await persistedBytes(expected.content));
+     expect(source).toEqual(before);
+     for (let i = 0; i < entries.length; ++i) {
+-        expect(await actual.blocks.read(b.contentOffsets[i], b.contentLengths[i], b.contentDictName)).toEqual(entries[i]);
++        const actualRead = await actual.blocks.read(b.contentOffsets[i], b.contentLengths[i], b.contentDictName);
++        const expectedRead = await expected.blocks.read(a.contentOffsets[i], a.contentLengths[i], a.contentDictName);
++        expect(actualRead).toEqual(expectedRead);
++        // The existing compact-reference reader rejects zero-length entries.
++        // Preserve that contract while checking every nonempty payload directly.
++        if (entries[i].length > 0) { expect(actualRead).toEqual(entries[i]); }
+     }
+ }
+ 

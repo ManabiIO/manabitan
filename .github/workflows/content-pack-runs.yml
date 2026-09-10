@@ -32,8 +32,9 @@ jobs:
           cd "$RUNNER_TEMP/source"
           git apply "$GITHUB_WORKSPACE/dev/perf/pack-runs/runtime.patch"
           cp "$GITHUB_WORKSPACE/dev/perf/pack-runs/regressions.txt" test/term-content-pack-runs.test.js
+          git apply "$GITHUB_WORKSPACE/dev/perf/pack-runs/oracle-fix.patch"
           git add ext/js/dictionary/term-content-block-store.js test/term-content-pack-runs.test.js
-          test "$(git write-tree)" = 938a65e6349e8e737d54a1bb90c88acae134e330
+          test "$(git write-tree)" = c5cfc03e6c2467846d48e20b11c5ef4ab432f34c
           git -c user.name='OpenAI' -c user.email='noreply@openai.com' -c core.hooksPath=/dev/null commit -m 'perf(import): coalesce adjacent definition-content packing copies'
           git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/evidence/source.txt"
           git diff HEAD^ HEAD --binary > "$RUNNER_TEMP/evidence/source-and-tests.patch"
