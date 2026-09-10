@@ -1,0 +1,100 @@
+diff --git a/dev/bin/build.js b/dev/bin/build.js
+index d19d646..0de8b9c 100644
+--- a/dev/bin/build.js
++++ b/dev/bin/build.js
+@@ -27,6 +27,7 @@ import {parseArgs} from 'util';
+ import {buildLibs} from '../build-libs.js';
+ import {ManifestUtil} from '../manifest-util.js';
+ import {getAllFiles} from '../util.js';
++import {stageBundledExtension} from '../worker-bundles.js';
+ 
+ const dirname = path.dirname(fileURLToPath(import.meta.url));
+ 
+@@ -278,7 +279,12 @@ export async function main() {
+             manifestUtil.getVariants().filter(({buildable}) => buildable !== false).map(({name}) => name) :
+             targets)
+         ));
+-        await build(buildDir, extDir, manifestUtil, variantNames, manifestPath, dryRun, dryRunBuildZip, yomitanVersion);
++        const staged = await stageBundledExtension(extDir);
++        try {
++            await build(buildDir, staged.directory, manifestUtil, variantNames, path.join(staged.directory, 'manifest.json'), dryRun, dryRunBuildZip, yomitanVersion);
++        } finally {
++            staged.dispose();
++        }
+     } finally {
+         // Restore manifest
+         const manifestName = /** @type {?string} */ ((!args.default && typeof args.manifest !== 'undefined') ? args.manifest : null);
+diff --git a/dev/worker-bundles.js b/dev/worker-bundles.js
+new file mode 100644
+index 0000000..a5fb3c8
+--- /dev/null
++++ b/dev/worker-bundles.js
+@@ -0,0 +1,68 @@
++/*
++ * Copyright (C) 2023-2026  Yomitan Authors
++ * Copyright (C) 2020-2022  Yomichan Authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++
++import {build} from 'esbuild';
++import fs from 'node:fs';
++import os from 'node:os';
++import path from 'node:path';
++
++const PARSER_WORKER = 'js/dictionary/term-bank-wasm-parser-worker.js';
++
++/**
++ * Creates a packaging-only extension snapshot. Worker source modules stay
++ * readable and unchanged in the checkout; the packaged worker keeps its URL.
++ * @param {string} extensionDirectory
++ * @returns {Promise<{directory: string, dispose: () => void}>}
++ */
++export async function stageBundledExtension(extensionDirectory) {
++    const sourceDirectory = path.resolve(extensionDirectory);
++    const bundled = await build({
++        absWorkingDir: sourceDirectory,
++        entryPoints: [PARSER_WORKER],
++        bundle: true,
++        format: 'esm',
++        platform: 'browser',
++        target: 'es2022',
++        write: false,
++        metafile: true,
++        legalComments: 'inline',
++    });
++    // A relative URL must retain its original base after inlining. Fail the
++    // build if a future dependency with import.meta moves across directories.
++    for (const file of Object.keys(bundled.metafile.inputs)) {
++        if (
++            path.dirname(file) !== path.dirname(PARSER_WORKER) &&
++            fs.readFileSync(path.join(sourceDirectory, file), 'utf8').includes('import.meta')
++        ) {
++            throw new Error(`Worker dependency has a different import.meta URL base: ${file}`);
++        }
++    }
++    if (bundled.outputFiles.length !== 1) {
++        throw new Error('Expected one self-contained parser worker bundle');
++    }
++    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'manabitan-package-'));
++    const dispose = () => { fs.rmSync(directory, {recursive: true, force: true}); };
++    try {
++        fs.cpSync(sourceDirectory, directory, {recursive: true});
++        fs.writeFileSync(path.join(directory, PARSER_WORKER), bundled.outputFiles[0].contents);
++        return {directory, dispose};
++    } catch (error) {
++        dispose();
++        throw error;
++    }
++}
