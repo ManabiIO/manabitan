@@ -359,7 +359,8 @@ describe('TermBankSourcePipeline', () => {
         });
 
         expect(pipeline.createImportRunPlan(0)).toBeNull();
-        expect(pipeline.createCompressedImportRunPlan(0)).toBeNull();
+        expect(pipeline.createCompressedImportRunPlan(0)?.files).toEqual(files.slice(0, 16));
+        expect(pipeline.createCompressedImportRunPlan(16)?.files).toEqual(files.slice(16, 32));
         expect(pipeline.getBatch(0)).toEqual(files.slice(0, 16));
         await pipeline.dispose();
     });
