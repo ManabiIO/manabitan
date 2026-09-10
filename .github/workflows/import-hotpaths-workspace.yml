@@ -1,0 +1,32 @@
+name: Import hotpaths source workspace
+on:
+  push:
+    branches: [verify/import-hotpaths-workspace-20260910]
+    paths: [.github/workflows/import-hotpaths-workspace.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: d5dd9cb0072059b326f333ef425018ce1227a756
+          persist-credentials: false
+      - name: Export exact source and Git identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/source"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/source/identity.txt"
+          git archive HEAD | gzip > "$RUNNER_TEMP/source/source.tar.gz"
+          git ls-tree -r HEAD > "$RUNNER_TEMP/source/tree.txt"
+          git cat-file commit HEAD > "$RUNNER_TEMP/source/commit.txt"
+          sha256sum package-lock.json > "$RUNNER_TEMP/source/package-lock.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-hotpaths-source
+          path: ${{ runner.temp }}/source/
+          retention-days: 7
+          if-no-files-found: error
