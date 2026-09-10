@@ -1,0 +1,73 @@
+name: Diagnose import teardown
+on:
+  push:
+    branches: [audit/remaining-import-qualification-20260910]
+    paths: [.github/workflows/audit-import-teardown.yml]
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    env:
+      SOURCE: d5dd9cb0072059b326f333ef425018ce1227a756
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - name: Build unchanged product and prepare diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          E="$RUNNER_TEMP/diagnostic"
+          mkdir -p "$E"
+          if ! command -v clang >/dev/null || ! command -v wasm-ld >/dev/null; then
+            sudo apt-get update > "$E/install.log" 2>&1
+            sudo apt-get install -y clang lld >> "$E/install.log" 2>&1
+          fi
+          (npm ci && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$E/build.log" 2>&1
+          (node node_modules/playwright/cli.js install --with-deps chromium && node dev/perf/prepare-dictionaries.js) > "$E/browser-fixtures.log" 2>&1
+          test "$(git rev-parse HEAD)" = "$SOURCE"
+          test -z "$(git status --porcelain)"
+          git rev-parse HEAD 'HEAD^{tree}' > "$E/identity.txt"
+          sha256sum builds/manabitan-chrome-dev.zip > "$E/package-before.sha256"
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          s = p.read_text()
+          old = 'async function withCleanupTimeout(label, cleanup, timeoutMs = 10000) {\n    let timeoutId = null;'
+          new = old + '\n    const auditStarted = performance.now();\n    console.log(`[audit-cleanup] start ${label} ${Date.now()}`);'
+          assert s.count(old) == 1
+          s = s.replace(old, new)
+          old = 'if (timeoutId !== null) {\n            clearTimeout(timeoutId);\n        }\n    }\n}'
+          new = 'if (timeoutId !== null) {\n            clearTimeout(timeoutId);\n        }\n        console.log(`[audit-cleanup] end ${label} elapsed=${performance.now() - auditStarted} resources=${JSON.stringify(process.getActiveResourcesInfo())}`);\n    }\n}'
+          assert s.count(old) == 1
+          s = s.replace(old, new)
+          old = 'await main();'
+          assert s.count(old) == 1
+          s = s.replace(old, old + '\nconsole.log(`[audit-cleanup] main returned ${Date.now()} resources=${JSON.stringify(process.getActiveResourcesInfo())}`);\nprocess.once("beforeExit", () => console.log(`[audit-cleanup] beforeExit ${Date.now()}`));')
+          p.write_text(s)
+          PY
+          git diff --binary > "$E/diagnostic-only.patch"
+      - name: One diagnostic import; not performance acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          E="$RUNNER_TEMP/diagnostic"
+          date -u +%FT%TZ > "$E/start.txt"
+          /usr/bin/time -v node dev/perf/import-benchmark.js jmdict --runs 1 --no-build --output "$E/import" 2>&1 | tee "$E/driver.log"
+          date -u +%FT%TZ > "$E/end.txt"
+          sha256sum -c "$E/package-before.sha256"
+          test "$(git diff --name-only)" = test/chromium/extension-two-dictionary-import.e2e.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: teardown-diagnostic
+          path: ${{ runner.temp }}/diagnostic
+          if-no-files-found: error
+          retention-days: 30
