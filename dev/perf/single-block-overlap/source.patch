@@ -1,0 +1,239 @@
+diff --git a/ext/js/dictionary/zstd-term-content.js b/ext/js/dictionary/zstd-term-content.js
+index cc7eb0b..493ddac 100644
+--- a/ext/js/dictionary/zstd-term-content.js
++++ b/ext/js/dictionary/zstd-term-content.js
+@@ -527,7 +527,14 @@ export function beginCompressWrappedTermContentZstdSpansBatch(
+     blockLengths,
+     dictName,
+ ) {
+-    if (blockLengths.length === 1) {
++    // A substantial single shared block can overlap metadata/record work just
++    // like a multi-block batch. Tiny or non-shared inputs keep the local path.
++    const offloadSingleBlock = (
++        blockLengths.length === 1 && blockLengths[0] >= 512 * 1024 &&
++        typeof Worker !== 'undefined' && typeof SharedArrayBuffer === 'function' &&
++        source.buffer instanceof SharedArrayBuffer
++    );
++    if (blockLengths.length === 1 && !offloadSingleBlock) {
+         const completion = Promise.resolve().then(() => {
+             const result = compressWrappedTermContentZstdSpans(
+                 source,
+diff --git a/test/zstd-single-block-overlap.test.js b/test/zstd-single-block-overlap.test.js
+new file mode 100644
+index 0000000..cb453ab
+--- /dev/null
++++ b/test/zstd-single-block-overlap.test.js
+@@ -0,0 +1,213 @@
++/*
++ * Copyright (C) 2026 Manabitan Authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ */
++
++import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
++
++const wasm = vi.hoisted(() => ({
++    init: vi.fn(async () => {}),
++    createCCtx: vi.fn(() => 11),
++    createDCtx: vi.fn(() => 22),
++    freeCCtx: vi.fn(),
++    freeDCtx: vi.fn(),
++    prepareSpanCompression: vi.fn(() => ({})),
++    finishPreparedSpanCompression: vi.fn(() => new Uint8Array([31, 32])),
++}));
++vi.mock('../ext/lib/zstd-wasm.js', () => ({
++    ...wasm,
++    compress: vi.fn(),
++    compressUsingDict: vi.fn(),
++    compressUsingDictWithPrefix: vi.fn(),
++    decompress: vi.fn(),
++    decompressUsingDict: vi.fn(),
++}));
++
++class ControlledCompressionWorker {
++    /** @type {ControlledCompressionWorker[]} */
++    static workers = [];
++    /** @type {'none'|'before'|'after'} */
++    static failure = 'none';
++
++    constructor() {
++        /** @type {Map<string, Set<(event: unknown) => void>>} */
++        this.listeners = new Map();
++        /** @type {Array<{message: Record<string, unknown>, transfer: Transferable[]}>} */
++        this.calls = [];
++        /** @type {Array<() => void>} */
++        this.finishers = [];
++        ControlledCompressionWorker.workers.push(this);
++        queueMicrotask(() => { this.emit('message', {data: {type: 'ready'}}); });
++    }
++
++    /**
++     * @param {string} type
++     * @param {(event: unknown) => void} listener
++     */
++    addEventListener(type, listener) {
++        this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
++    }
++
++    /**
++     * @param {string} type
++     * @param {(event: unknown) => void} listener
++     */
++    removeEventListener(type, listener) { this.listeners.get(type)?.delete(listener); }
++
++    /**
++     * @param {Record<string, unknown>} message
++     * @param {Transferable[]} [transfer]
++     */
++    postMessage(message, transfer = []) {
++        const delivered = structuredClone(message, {transfer});
++        this.calls.push({message: delivered, transfer});
++        const source = /** @type {Uint8Array} */ (delivered.source);
++        const firstOffset = /** @type {Uint32Array} */ (delivered.sourceOffsets)[0];
++        const bytes = Uint8Array.of(source[firstOffset], source[firstOffset + 1]);
++        queueMicrotask(() => {
++            if (ControlledCompressionWorker.failure === 'before') {
++                this.emit('message', {data: {id: message.id, error: 'before source acknowledgement'}});
++                return;
++            }
++            this.emit('message', {data: {id: message.id, type: 'source-consumed'}});
++            if (ControlledCompressionWorker.failure === 'after') {
++                this.emit('message', {data: {id: message.id, error: 'after source acknowledgement'}});
++                return;
++            }
++            this.finishers.push(() => {
++                this.emit('message', {data: {id: message.id, compressed: bytes.buffer, envelopeMs: 2}});
++            });
++        });
++    }
++
++    /**
++     * @param {string} type
++     * @param {unknown} event
++     */
++    emit(type, event) {
++        for (const listener of this.listeners.get(type) ?? []) { listener(event); }
++    }
++
++    terminate() {}
++}
++
++/** @returns {Promise<typeof import('../ext/js/dictionary/zstd-term-content.js')>} */
++async function initialize() {
++    const api = await import('../ext/js/dictionary/zstd-term-content.js');
++    await api.initializeTermContentZstd();
++    return api;
++}
++
++/**
++ * @param {typeof import('../ext/js/dictionary/zstd-term-content.js')} api
++ * @param {Uint8Array} source
++ * @returns {ReturnType<typeof import('../ext/js/dictionary/zstd-term-content.js').beginCompressWrappedTermContentZstdSpansBatch>}
++ */
++function begin(api, source) {
++    return api.beginCompressWrappedTermContentZstdSpansBatch(
++        source,
++        Uint32Array.of(0),
++        Uint32Array.of(source.length),
++        Uint32Array.of(0, 1),
++        Uint32Array.of(source.length),
++        'jmdict',
++    );
++}
++
++describe('single substantial shared-block compression overlap', () => {
++    beforeEach(() => {
++        vi.resetModules();
++        vi.clearAllMocks();
++        ControlledCompressionWorker.workers = [];
++        ControlledCompressionWorker.failure = 'none';
++        vi.stubGlobal('Worker', ControlledCompressionWorker);
++        vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([1, 2, 3]))));
++    });
++
++    afterEach(() => { vi.unstubAllGlobals(); });
++
++    test.each([512 * 1024, 512 * 1024 + 1, 4 * 1024 * 1024])('overlaps a %i-byte block without changing ownership or compression options', async (length) => {
++        const api = await initialize();
++        const source = new Uint8Array(new SharedArrayBuffer(length + 8), 3, length).fill(157);
++        const operation = begin(api, source);
++        let completed = false;
++        void operation.completion.then(() => { completed = true; });
++        await operation.sourceConsumed;
++        expect(completed).toBe(false);
++        expect(wasm.prepareSpanCompression).not.toHaveBeenCalled();
++        expect(wasm.finishPreparedSpanCompression).not.toHaveBeenCalled();
++        expect(ControlledCompressionWorker.workers).toHaveLength(4);
++        const calls = ControlledCompressionWorker.workers.flatMap((worker) => worker.calls);
++        expect(calls).toHaveLength(1);
++        expect(calls[0].message.contentBytes).toBe(length);
++        expect(calls[0].message.dictName).toBe('jmdict');
++        expect(calls[0].message.wrap).toBe(true);
++        expect(calls[0].transfer).toHaveLength(2);
++        expect(source.byteLength).toBe(length);
++        source.fill(0);
++        for (const worker of ControlledCompressionWorker.workers) {
++            for (const finish of worker.finishers) { finish(); }
++        }
++        const result = await operation.completion;
++        expect(result.chunks).toEqual([Uint8Array.of(157, 157)]);
++        expect(result.envelopeMs).toBe(2);
++        expect(result.wrapped).toBe(true);
++    });
++
++    test.each([0, 1, 512 * 1024 - 1])('keeps a %i-byte single block synchronous', async (length) => {
++        const api = await initialize();
++        const operation = begin(api, new Uint8Array(new SharedArrayBuffer(length)));
++        await operation.completion;
++        await operation.sourceConsumed;
++        expect(wasm.prepareSpanCompression).toHaveBeenCalledOnce();
++        expect(wasm.finishPreparedSpanCompression).toHaveBeenCalledOnce();
++        expect(ControlledCompressionWorker.workers.flatMap((worker) => worker.calls)).toHaveLength(0);
++    });
++
++    test('keeps large ordinary sources on the existing local path', async () => {
++        const api = await initialize();
++        await begin(api, new Uint8Array(1024 * 1024)).completion;
++        expect(wasm.prepareSpanCompression).toHaveBeenCalledOnce();
++        expect(ControlledCompressionWorker.workers.flatMap((worker) => worker.calls)).toHaveLength(0);
++    });
++
++    test('keeps the local path when Worker is unavailable', async () => {
++        vi.stubGlobal('Worker', void 0);
++        const api = await initialize();
++        await begin(api, new Uint8Array(new SharedArrayBuffer(1024 * 1024))).completion;
++        expect(wasm.prepareSpanCompression).toHaveBeenCalledOnce();
++    });
++
++    test.each(['before', 'after'])('preserves the source fence for a %s-ack worker failure', async (failure) => {
++        ControlledCompressionWorker.failure = /** @type {'before'|'after'} */ (failure);
++        const api = await initialize();
++        const source = new Uint8Array(new SharedArrayBuffer(1024 * 1024)).fill(7);
++        const operation = begin(api, source);
++        const results = await Promise.allSettled([operation.sourceConsumed, operation.completion]);
++        expect(results[0].status).toBe(failure === 'before' ? 'rejected' : 'fulfilled');
++        expect(results[1].status).toBe('rejected');
++        expect(source.byteLength).toBe(1024 * 1024);
++        expect(source.every((byte) => byte === 7)).toBe(true);
++        expect(wasm.prepareSpanCompression).not.toHaveBeenCalled();
++    });
++
++    test('rejects malformed large single-block partitions without dispatch', async () => {
++        const api = await initialize();
++        const source = new Uint8Array(new SharedArrayBuffer(1024 * 1024));
++        const operation = api.beginCompressWrappedTermContentZstdSpansBatch(
++            source,
++            Uint32Array.of(0),
++            Uint32Array.of(source.length),
++            Uint32Array.of(1, 1),
++            Uint32Array.of(source.length),
++            'jmdict',
++        );
++        const results = await Promise.allSettled([operation.sourceConsumed, operation.completion]);
++        expect(results.map(({status}) => status)).toEqual(['rejected', 'rejected']);
++        expect(ControlledCompressionWorker.workers.flatMap((worker) => worker.calls)).toHaveLength(0);
++    });
++});
