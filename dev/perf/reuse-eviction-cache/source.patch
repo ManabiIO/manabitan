@@ -1,0 +1,63 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 9d041ed..1627b13 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -5783,9 +5783,10 @@ null;
+      * duplicates without reading recently written OPFS blocks.
+      * @param {{indexes: Int32Array, active: boolean}|null} staged
+      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
++     * @param {boolean} [allowEviction]
+      * @returns {number} Number of owned source bytes retained.
+      */
+-    _cacheRecentPublishedTermContentSources(staged, spans) {
++    _cacheRecentPublishedTermContentSources(staged, spans, allowEviction = true) {
+         if (staged === null || spans === null || staged.indexes.length === 0) { return 0; }
+         if (
+             !(spans.buffer instanceof Uint8Array) ||
+@@ -5808,6 +5809,10 @@ null;
+         if (!Number.isFinite(minimumOffset) || maximumEnd <= minimumOffset) { return 0; }
+         const byteLength = maximumEnd - minimumOffset;
+         if (byteLength > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES) { return 0; }
++        if (
++            !allowEviction &&
++            this._recentTermContentSourceBatchBytes + byteLength > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES
++        ) { return 0; }
+         while (
+             this._recentTermContentSourceBatchBytes + byteLength > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES &&
+             this._recentTermContentSourceBatches.size > 0
+@@ -7467,6 +7472,10 @@ this._readTermContentSignature(
+                         contentDedupPlan,
+                         contentUniqueIndexList: chunk.contentUniqueIndexList,
+                         stagedContentMetadata,
++                        // Fill the initial working set as before. Refresh a full
++                        // cache only when recent persisted reuse justifies copying
++                        // another source slab; exact storage comparison remains.
++                        allowRecentSourceCacheEviction: persistedHitCount * 128 >= pendingContentCount,
+                         importMetrics,
+                         metadataValidated: persistenceResult[VALIDATED_TERM_CONTENT_METADATA] === true,
+                         useResolvedContentReferences,
+@@ -8471,7 +8480,7 @@ null :
+ 
+     /**
+      * Publishes persisted offsets to rows and to the in-memory dedup index.
+-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
++     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean, allowRecentSourceCacheEviction?: boolean}} state
+      * @returns {string|(string|null)[]}
+      * @throws {Error} If dedup projections or persisted metadata are invalid.
+      */
+@@ -8494,6 +8503,7 @@ null :
+             importMetrics = null,
+             metadataValidated = false,
+             useResolvedContentReferences = false,
++            allowRecentSourceCacheEviction = true,
+         } = state;
+         let {resolvedContentDictNames} = state;
+         /**
+@@ -8633,6 +8643,7 @@ null :
+         const recentSourceCacheBytes = this._cacheRecentPublishedTermContentSources(
+             stagedContentMetadata,
+             pendingContentSpans,
++            allowRecentSourceCacheEviction,
+         );
+         if (importMetrics !== null) {
+             importMetrics.dedupRecentSourceCacheMs += safePerformance.now() - recentSourceCacheStart;
