@@ -1,0 +1,77 @@
+name: Complete high-memory import qualification
+on:
+  push:
+    branches: [audit/remaining-import-qualification-20260910]
+    paths: [.github/workflows/audit-import-high-memory.yml]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      SOURCE: d5dd9cb0072059b326f333ef425018ce1227a756
+      SOURCE_TREE: 1dadf454221027e6789733815c01cb6877f24218
+      BASE: da8f7436d34e510441d30692c8d698806b70e13f
+      DRIVER_SOURCE: 520ffe794153a473356596c354de4f026d53109b
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: npm
+      - name: Prepare frozen arms and unchanged verification protocol
+        shell: bash
+        run: |
+          set -euo pipefail
+          E="$RUNNER_TEMP/evidence"
+          mkdir -p "$E"
+          git show "$DRIVER_SOURCE:dev/perf/multibatch-verify/paired.py.gz" | gzip -dc > "$E/paired.py"
+          git show "$DRIVER_SOURCE:dev/perf/multibatch-verify/policy.mjs.gz" | gzip -dc > "$E/policy.mjs"
+          echo "662d8535571fa5d66bde4797f6e042a95c81974de9f74d2ffcbe6ab938fda617  $E/paired.py" | sha256sum -c -
+          echo "7239b3590ac24b9dec91bf14e7172941181763443dc776b80c41514794c13c52  $E/policy.mjs" | sha256sum -c -
+          cp "$E/paired.py" "$E/original-paired.py"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p = Path(os.environ['RUNNER_TEMP']) / 'evidence/paired.py'
+          s = p.read_text()
+          old = "CANDIDATE_TREE = '4035249c23197b72d8be9d4cca7ebd6476771ef1'"
+          assert s.count(old) == 1
+          p.write_text(s.replace(old, "CANDIDATE_TREE = '" + os.environ['SOURCE_TREE'] + "'"))
+          PY
+          git worktree add --detach "$RUNNER_TEMP/A" "$BASE"
+          git worktree add --detach "$RUNNER_TEMP/B" "$SOURCE"
+          test "$(git -C "$RUNNER_TEMP/B" rev-parse 'HEAD^{tree}')" = "$SOURCE_TREE"
+          for arm in A B; do
+            (cd "$RUNNER_TEMP/$arm" && npm ci && node dev/bin/build-libs.js && node dev/bin/build.js --target chrome-dev) > "$E/build-$arm.log" 2>&1
+            test -z "$(git -C "$RUNNER_TEMP/$arm" status --porcelain)"
+          done
+          (cd "$RUNNER_TEMP/A" && node node_modules/playwright/cli.js install --with-deps chromium && node dev/perf/prepare-dictionaries.js) > "$E/browser-fixtures.log" 2>&1
+          cp -a "$RUNNER_TEMP/A/builds/e2e-dictionary-cache" "$RUNNER_TEMP/B/builds/"
+          node "$E/policy.mjs" "$RUNNER_TEMP/A" "$E/native-policy.json"
+          node --version > "$E/node.txt"
+          clang --version > "$E/clang.txt"
+          lscpu > "$E/cpu.txt"
+          free -b > "$E/memory.txt"
+      - name: Six fixed pairs and both same-binary controls without retries
+        shell: bash
+        run: |
+          set -euo pipefail
+          E="$RUNNER_TEMP/evidence"
+          python3 "$E/paired.py" --baseline "$RUNNER_TEMP/A" --candidate "$RUNNER_TEMP/B" --policy "$E/native-policy.json" --output "$E/paired" --pairs 6 --dictionaries "$DICTIONARY" --tier high --reverse 2>&1 | tee "$E/driver.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: complete-high-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/evidence
+          if-no-files-found: error
+          retention-days: 30
