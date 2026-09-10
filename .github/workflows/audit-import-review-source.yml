@@ -1,0 +1,58 @@
+name: Pinned import review source
+on:
+  push:
+    branches: [audit/remaining-import-qualification-20260910]
+    paths: [.github/workflows/audit-import-review-source.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      SOURCE: d5dd9cb0072059b326f333ef425018ce1227a756
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE }}
+          persist-credentials: false
+      - name: Export identified text source only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE"
+          test -z "$(git status --porcelain)"
+          mkdir -p "$RUNNER_TEMP/review"
+          git rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/review/identity.txt"
+          git ls-tree -r HEAD > "$RUNNER_TEMP/review/full-tree.txt"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess, zipfile
+          out = pathlib.Path(os.environ['RUNNER_TEMP']) / 'review'
+          suffixes = {'.js', '.mjs', '.cjs', '.ts', '.json', '.py', '.md', '.yml', '.yaml', '.c', '.cpp', '.h', '.hpp', '.toml', '.html', '.css', '.sh'}
+          entries = []
+          rows = subprocess.check_output(['git', 'ls-tree', '-r', '-z', 'HEAD']).split(b'\0')
+          with zipfile.ZipFile(out / 'text-source.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+              for row in rows:
+                  if not row:
+                      continue
+                  metadata, encoded = row.split(b'\t', 1)
+                  mode, kind, blob = metadata.decode().split()
+                  path = pathlib.Path(os.fsdecode(encoded))
+                  if kind != 'blob' or mode not in ('100644', '100755') or path.suffix not in suffixes:
+                      continue
+                  data = path.read_bytes()
+                  data.decode('utf-8')
+                  actual = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+                  if actual != blob:
+                      raise RuntimeError(str(path))
+                  archive.writestr(str(path), data)
+                  entries.append({'path': str(path), 'mode': mode, 'blob': blob})
+          (out / 'included.json').write_text(json.dumps(entries, indent=2) + '\n')
+          PY
+          test -z "$(git status --porcelain)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pinned-import-review-source
+          path: ${{ runner.temp }}/review
+          if-no-files-found: error
+          retention-days: 30
