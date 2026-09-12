@@ -15,8 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import type * as Dictionary from './dictionary';
+
 export type termEntriesInput = {
-    term: string;
+    term: string | string[];
+};
+
+export type termEntriesResponse = {
+    dictionaryEntries: Dictionary.TermDictionaryEntry[];
+    originalTextLength: number;
+    index: number;
 };
 
 export type kanjiEntriesInput = {
@@ -34,6 +42,10 @@ export type ankiFieldsInput = {
 export type tokenizeInput = {
     text: string | string[];
     scanLength: number;
+};
+
+export type ankiCardFormatsInput = {
+    profileIndex?: number;
 };
 
 export type remoteVersionResponse = {

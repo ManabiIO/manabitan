@@ -586,6 +586,10 @@ export class OptionsUtil {
             this._updateVersion72,
             this._updateVersion73,
             this._updateVersion74,
+            this._updateVersion75,
+            this._updateVersion76,
+            this._updateVersion77,
+            this._updateVersion78,
         ];
         /* eslint-enable @typescript-eslint/unbound-method */
         if (typeof targetVersion === 'number' && targetVersion < result.length) {
@@ -1849,6 +1853,32 @@ export class OptionsUtil {
             consentState = (hasEnabledAudioProfile ? 'accepted' : 'declined');
         }
         options.global.dataTransmissionConsentState = consentState;
+    }
+
+    /**
+     *  - Split rank-based and occurrence-based frequency field templates.
+     *  @type {import('options-util').UpdateFunction}
+     */
+    async _updateVersion76(options) {
+        await this._applyAnkiFieldTemplatesPatch(options, '/data/templates/anki-field-templates-upgrade-v76.handlebars');
+    }
+
+    /**
+     * - Added general.popupFullWidthPosition.
+     * @type {import('options-util').UpdateFunction}
+     */
+    async _updateVersion77(options) {
+        for (const profile of options.profiles) {
+            profile.options.general.popupFullWidthPosition = 'bottom';
+        }
+    }
+
+    /**
+     *  - Add {url-plain} handlebar
+     *  @type {import('options-util').UpdateFunction}
+     */
+    async _updateVersion78(options) {
+        await this._applyAnkiFieldTemplatesPatch(options, '/data/templates/anki-field-templates-upgrade-v78.handlebars');
     }
 
     /**

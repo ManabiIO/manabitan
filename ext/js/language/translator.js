@@ -76,6 +76,10 @@ export class Translator {
         this._textProcessors = new Map();
         /** @type {import('translation-internal').ReadingNormalizerMap} */
         this._readingNormalizers = new Map();
+        /** @type {?Map<string, (import('dictionary-importer').Summary['frequencyMode'])>} */
+        this._dictionaryFrequencyModeMap = null;
+        /** @type {?Promise<Map<string, (import('dictionary-importer').Summary['frequencyMode'])>>} */
+        this._dictionaryFrequencyModeMapPromise = null;
     }
 
     /**
@@ -96,6 +100,8 @@ export class Translator {
      */
     clearDatabaseCaches() {
         this._tagCache.clear();
+        this._dictionaryFrequencyModeMap = null;
+        this._dictionaryFrequencyModeMapPromise = null;
     }
 
     /**
@@ -107,7 +113,7 @@ export class Translator {
      */
     async findTerms(mode, text, options) {
         safePerformance.mark('translator:findTerms:start');
-        const {enabledDictionaryMap, excludeDictionaryDefinitions, sortFrequencyDictionary, sortFrequencyDictionaryOrder, language, primaryReading} = options;
+        const {enabledDictionaryMap, excludeDictionaryDefinitions, sortFrequencyDictionary, sortFrequencyDictionaryOrder, language, primaryReading, useAllFrequencyDictionaries} = options;
         const tagAggregator = new TranslatorTagAggregator();
         let {dictionaryEntries, originalTextLength} = await this._findTermsInternal(text, options, tagAggregator, primaryReading);
 
@@ -127,7 +133,7 @@ export class Translator {
             this._removeExcludedDefinitions(dictionaryEntries, excludeDictionaryDefinitions);
         }
 
-        if (mode !== 'simple') {
+        if (mode !== 'simple' || useAllFrequencyDictionaries) {
             await this._addTermMeta(dictionaryEntries, enabledDictionaryMap, tagAggregator);
             await this._expandTagGroupsAndGroup(tagAggregator.getTagExpansionTargets());
         } else {
@@ -224,6 +230,7 @@ export class Translator {
 
         const termList = termReadingList.map(({term}) => term);
         const metas = await this._database.findTermMetaBulk(termList, dictionarySet);
+        const dictionaryFrequencyModeMap = await this._getDictionaryFrequencyModeMap();
 
         /** @type {import('translator').TermFrequencySimple[]} */
         const results = [];
@@ -245,6 +252,7 @@ export class Translator {
                 frequency: frequencyValue,
                 displayValue,
                 displayValueParsed,
+                frequencyMode: dictionaryFrequencyModeMap.get(dictionary),
             });
         }
         return results;
@@ -303,23 +311,26 @@ export class Translator {
                         continue;
                     }
 
-                    const existingTransformedLength = existingEntry.headwords[0].sources[0].transformedText.length;
+                    const existingTransformedText = existingEntry.headwords[0].sources[0].transformedText;
+                    const existingTransformedLength = existingTransformedText.length;
                     if (transformedText.length < existingTransformedLength) {
                         continue;
                     }
                     if (transformedText.length > existingTransformedLength) {
-                        dictionaryEntries[existingIndex] = this._createTermDictionaryEntryFromDatabaseEntry(
-                            databaseEntry,
-                            originalText,
-                            transformedText,
-                            deinflectedText,
-                            textProcessorRuleChainCandidates,
-                            inflectionRuleChainCandidates,
-                            true,
-                            enabledDictionaryMap,
-                            tagAggregator,
-                            primaryReading,
-                        );
+                        if (originalText !== existingTransformedText) {
+                            dictionaryEntries[existingIndex] = this._createTermDictionaryEntryFromDatabaseEntry(
+                                databaseEntry,
+                                originalText,
+                                transformedText,
+                                deinflectedText,
+                                textProcessorRuleChainCandidates,
+                                inflectionRuleChainCandidates,
+                                true,
+                                enabledDictionaryMap,
+                                tagAggregator,
+                                primaryReading,
+                            );
+                        }
                     } else {
                         this._mergeInflectionRuleChains(existingEntry, inflectionRuleChainCandidates);
                         this._mergeTextProcessorRuleChains(existingEntry, textProcessorRuleChainCandidates);
@@ -991,7 +1002,9 @@ export class Translator {
                 --i;
                 --ii;
             } else {
-                indexRemap.set(oldIndex, indexRemap.size);
+                const newIndex = indexRemap.size;
+                indexRemap.set(oldIndex, newIndex);
+                headwords[i].headwordIndex = newIndex;
             }
             ++oldIndex;
         }
@@ -1256,6 +1269,8 @@ export class Translator {
      * @param {TranslatorTagAggregator} tagAggregator
      */
     async _addTermMeta(dictionaryEntries, enabledDictionaryMap, tagAggregator) {
+        const dictionaryFrequencyModeMap = await this._getDictionaryFrequencyModeMap();
+
         /** @type {Map<string, Map<string, {headwordIndex: number, pronunciations: import('dictionary').TermPronunciation[], frequencies: import('dictionary').TermFrequency[]}[]>>} */
         const headwordMap = new Map();
         /** @type {string[]} */
@@ -1294,6 +1309,7 @@ export class Translator {
                             const hasReading = (data !== null && typeof data === 'object' && typeof data.reading === 'string');
                             if (hasReading && data.reading !== reading) { continue; }
                             const frequency = hasReading ? data.frequency : /** @type {import('dictionary-data').GenericFrequencyData} */ (data);
+                            const frequencyMode = dictionaryFrequencyModeMap.get(dictionary);
                             for (const {frequencies, headwordIndex} of targets) {
                                 const {frequency: frequencyValue, displayValue, displayValueParsed} = this._getFrequencyInfo(frequency);
                                 frequencies.push(this._createTermFrequency(
@@ -1306,6 +1322,7 @@ export class Translator {
                                     frequencyValue,
                                     displayValue,
                                     displayValueParsed,
+                                    frequencyMode,
                                 ));
                             }
                         }
@@ -1387,6 +1404,7 @@ export class Translator {
         }
 
         const metas = await this._database.findKanjiMetaBulk(kanjiList, enabledDictionaryMap);
+        const dictionaryFrequencyModeMap = await this._getDictionaryFrequencyModeMap();
         for (const {character, mode, data, dictionary, index} of metas) {
             const {index: dictionaryIndex} = this._getDictionaryOrder(dictionary, enabledDictionaryMap);
             const dictionaryAlias = this._getDictionaryAlias(dictionary, enabledDictionaryMap);
@@ -1394,6 +1412,7 @@ export class Translator {
                 case 'freq':
                     {
                         const {frequencies} = dictionaryEntries[index];
+                        const frequencyMode = dictionaryFrequencyModeMap.get(dictionary);
                         const {frequency, displayValue, displayValueParsed} = this._getFrequencyInfo(data);
                         frequencies.push(this._createKanjiFrequency(
                             frequencies.length,
@@ -1404,6 +1423,7 @@ export class Translator {
                             frequency,
                             displayValue,
                             displayValueParsed,
+                            frequencyMode,
                         ));
                     }
                     break;
@@ -1648,10 +1668,11 @@ export class Translator {
      * @param {number} frequency
      * @param {?string} displayValue
      * @param {boolean} displayValueParsed
+     * @param {import('dictionary-data').FrequencyMode|undefined} frequencyMode
      * @returns {import('dictionary').KanjiFrequency}
      */
-    _createKanjiFrequency(index, dictionary, dictionaryIndex, dictionaryAlias, character, frequency, displayValue, displayValueParsed) {
-        return {index, dictionary, dictionaryIndex, dictionaryAlias, character, frequency, displayValue, displayValueParsed};
+    _createKanjiFrequency(index, dictionary, dictionaryIndex, dictionaryAlias, character, frequency, displayValue, displayValueParsed, frequencyMode) {
+        return {index, dictionary, dictionaryIndex, dictionaryAlias, character, frequency, displayValue, displayValueParsed, frequencyMode: frequencyMode ?? null};
     }
 
     /**
@@ -1729,7 +1750,7 @@ export class Translator {
      * @returns {import('dictionary').TermHeadword}
      */
     _createTermHeadword(index, term, reading, sources, tags, wordClasses) {
-        return {index, term, reading, sources, tags, wordClasses};
+        return {index, headwordIndex: index, term, reading, sources, tags, wordClasses};
     }
 
     /**
@@ -1786,10 +1807,40 @@ export class Translator {
      * @param {number} frequency
      * @param {?string} displayValue
      * @param {boolean} displayValueParsed
+     * @param {import('dictionary-importer').Summary['frequencyMode']} frequencyMode
      * @returns {import('dictionary').TermFrequency}
      */
-    _createTermFrequency(index, headwordIndex, dictionary, dictionaryIndex, dictionaryAlias, hasReading, frequency, displayValue, displayValueParsed) {
-        return {index, headwordIndex, dictionary, dictionaryIndex, dictionaryAlias, hasReading, frequency, displayValue, displayValueParsed};
+    _createTermFrequency(index, headwordIndex, dictionary, dictionaryIndex, dictionaryAlias, hasReading, frequency, displayValue, displayValueParsed, frequencyMode) {
+        return {index, headwordIndex, dictionary, frequencyMode: frequencyMode ?? null, dictionaryIndex, dictionaryAlias, hasReading, frequency, displayValue, displayValueParsed};
+    }
+
+    /**
+     * @returns {Promise<Map<string, (import('dictionary-importer').Summary['frequencyMode'])>>}
+     */
+    async _getDictionaryFrequencyModeMap() {
+        if (this._dictionaryFrequencyModeMap !== null) { return this._dictionaryFrequencyModeMap; }
+        if (this._dictionaryFrequencyModeMapPromise !== null) { return await this._dictionaryFrequencyModeMapPromise; }
+
+        const promise = (async () => {
+            const dictionaryInfoList = await this._database.getDictionaryInfo();
+            /** @type {Map<string, (import('dictionary-importer').Summary['frequencyMode'])>} */
+            const map = new Map();
+            for (const info of dictionaryInfoList) { map.set(info.title, info.frequencyMode); }
+            return map;
+        })();
+        this._dictionaryFrequencyModeMapPromise = promise;
+        try {
+            const map = await promise;
+            // An import/update may invalidate this request before its read completes.
+            if (this._dictionaryFrequencyModeMapPromise === promise) {
+                this._dictionaryFrequencyModeMap = map;
+            }
+            return map;
+        } finally {
+            if (this._dictionaryFrequencyModeMapPromise === promise) {
+                this._dictionaryFrequencyModeMapPromise = null;
+            }
+        }
     }
 
     /**
@@ -2003,6 +2054,7 @@ export class Translator {
         for (let i = 0; i < headwordsArray.length; i++) {
             headwordIndexMap.set(headwordsArray[i].index, i);
             headwordsArray[i].index = i;
+            headwordsArray[i].headwordIndex = i;
         }
 
         // Remap definition headword indices

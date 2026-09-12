@@ -57,4 +57,4 @@ export type CanAddResult = {
 
 export type CanAddResults = CanAddResult[];
 
-export type Mode = 'existingOrNewTab' | 'newTab' | 'popup';
+export type Mode = 'existingOrNewTab' | 'existingOrCurrentTab' | 'newTab' | 'popup';

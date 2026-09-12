@@ -27,17 +27,17 @@ jobs:
         id: inputs
         shell: bash
         run: |
-          args="--exclude-path node_modules --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst'"
+          args="--exclude-path node_modules --root-dir '${{ github.workspace }}/ext' --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst'"
           if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
             mapfile -t files < <(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- '*.md' '*.html' '*.rst')
             if (( ${#files[@]} > 0 )); then
-              printf -v args '%s' "--exclude-path node_modules --verbose --no-progress"
+              printf -v args '%s' "--exclude-path node_modules --root-dir '${{ github.workspace }}/ext' --verbose --no-progress"
               printf -v file_args ' %q' "${files[@]}"
               args+="${file_args}"
             fi
           fi
           printf 'args=%s\n' "${args}" >> "${GITHUB_OUTPUT}"
-      - uses: lycheeverse/lychee-action@v2.6.1
+      - uses: lycheeverse/lychee-action@v2.8.0
         with:
           fail: true
           jobSummary: false

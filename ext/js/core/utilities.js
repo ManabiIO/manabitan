@@ -320,3 +320,51 @@ export function addScopeToCssLegacy(css, scopeSelector) {
         return addScopeToCss(css, scopeSelector);
     }
 }
+
+/**
+ * @param {'SHA-256'|'SHA-384'|'SHA-512'} algorithm
+ * @param {ArrayBuffer} arrayBuffer
+ * @returns {Promise<string>}
+ */
+export async function arrayBufferDigest(algorithm, arrayBuffer) {
+    const hash = new Uint8Array(await crypto.subtle.digest(algorithm, new Uint8Array(arrayBuffer)));
+    let digest = '';
+    for (const byte of hash) {
+        digest += byte.toString(16).padStart(2, '0');
+    }
+    return digest;
+}
+
+/**
+ * @param {'SHA-1'|'SHA-256'|'SHA-384'|'SHA-512'} algorithm
+ * @param {ArrayBuffer} arrayBuffer
+ * @returns {Promise<string>}
+ */
+export async function unsafeArrayBufferDigest(algorithm, arrayBuffer) {
+    // @ts-expect-error - Allow SHA-1 here
+    return arrayBufferDigest(algorithm, arrayBuffer);
+}
+
+/**
+ * @param {string} urlString
+ * @returns {boolean}
+ */
+export function isLocalhostUrl(urlString) {
+    try {
+        const url = new URL(urlString);
+        switch (url.hostname.toLowerCase()) {
+            case 'localhost':
+            case '127.0.0.1':
+            case '[::1]':
+                switch (url.protocol.toLowerCase()) {
+                    case 'http:':
+                    case 'https:':
+                        return true;
+                }
+                break;
+        }
+    } catch (e) {
+        // NOP
+    }
+    return false;
+}

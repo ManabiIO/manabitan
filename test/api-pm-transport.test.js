@@ -446,11 +446,11 @@ describe('API PM transport reliability', () => {
             sendMessage: vi.fn((_message, callback) => {
                 callbackCount += 1;
                 if (callbackCount === 1) {
-                    globalThis.chrome.runtime.lastError = {message: 'Could not establish connection. Receiving end does not exist.'};
+                    Reflect.set(globalThis.chrome.runtime, 'lastError', {message: 'Could not establish connection. Receiving end does not exist.'});
                     callback();
                     return;
                 }
-                globalThis.chrome.runtime.lastError = undefined;
+                Reflect.set(globalThis.chrome.runtime, 'lastError', undefined);
                 callback({result: []});
             }),
             getLastError: vi.fn(() => {
@@ -483,7 +483,7 @@ describe('API PM transport reliability', () => {
         });
         const webExtension = {
             sendMessage: vi.fn((_message, callback) => {
-                globalThis.chrome.runtime.lastError = {message: 'Could not establish connection. Receiving end does not exist.'};
+                Reflect.set(globalThis.chrome.runtime, 'lastError', {message: 'Could not establish connection. Receiving end does not exist.'});
                 callback();
             }),
             getLastError: vi.fn(() => {

@@ -111,6 +111,7 @@ function createScanner(termsFindImpl, sourceQueue) {
         isTextLookupWorthy: async () => false,
     }));
     const scanner = new TextScanner({
+        browser: 'chrome',
         api,
         node: window,
         getSearchContext,

@@ -93,7 +93,7 @@ jobs:
           echo "MANABITAN_FIREFOX_BINARY=$HOME/firefox-devedition/firefox/firefox" >> "$GITHUB_ENV"
 
       - name: Restore Firefox E2E dictionary cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: builds/e2e-dictionary-cache
           key: firefox-e2e-dictionaries-${{ runner.os }}-v1
@@ -161,7 +161,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Restore Chromium E2E dictionary cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: builds/e2e-dictionary-cache
           key: chromium-e2e-dictionaries-${{ runner.os }}-v1
@@ -287,7 +287,7 @@ jobs:
         run: npx playwright install --with-deps msedge
 
       - name: Restore Edge E2E dictionary cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: builds/e2e-dictionary-cache
           key: edge-e2e-dictionaries-${{ runner.os }}-v1

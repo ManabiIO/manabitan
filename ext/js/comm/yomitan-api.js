@@ -26,7 +26,7 @@ import {log} from '../core/log.js';
 import {toError} from '../core/to-error.js';
 import {createFuriganaHtml, createFuriganaPlain} from '../data/anki-note-builder.js';
 import {getDynamicTemplates} from '../data/anki-template-util.js';
-import {generateAnkiNoteMediaFileName} from '../data/anki-util.js';
+import {mediaFileNameHashOrTimestamp} from '../data/anki-util.js';
 import {getLanguageSummaries} from '../language/languages.js';
 import {AudioDownloader} from '../media/audio-downloader.js';
 import {getFileExtensionFromAudioMediaType, getFileExtensionFromImageMediaType} from '../media/media-util.js';
@@ -166,15 +166,28 @@ export class YomitanApi {
                         /** @type {import('yomitan-api.js').termEntriesInput} */
                         // @ts-expect-error - Allow this to error
                         const {term} = parsedBody;
-                        const invokeParams = {
-                            text: term,
-                            details: {},
-                            optionsContext: {index: optionsFull.profileCurrent},
-                        };
-                        result = await this._invoke(
-                            'termsFind',
-                            invokeParams,
-                        );
+                        if (typeof term === 'string') {
+                            const invokeParams = {
+                                text: term,
+                                details: {},
+                                optionsContext: {index: optionsFull.profileCurrent},
+                            };
+                            result = {...await this._invoke('termsFind', invokeParams), index: 0};
+                        } else if (Array.isArray(term)) {
+                            result = await Promise.all(term.map(async (text, index) => {
+                                const invokeParams = {
+                                    text,
+                                    details: {},
+                                    optionsContext: {index: optionsFull.profileCurrent},
+                                };
+                                return {
+                                    ...(await this._invoke('termsFind', invokeParams)),
+                                    index,
+                                };
+                            }));
+                        } else {
+                            throw new Error('Invalid input for termEntries, expected "term" to be a string or a string array but got ' + typeof term);
+                        }
                         break;
                     }
                     case 'kanjiEntries': {
@@ -252,8 +265,21 @@ export class YomitanApi {
                             scanLength: scanLength,
                             useInternalParser: parser !== 'mecab',
                             useMecabParser: parser === 'mecab',
+                            useAllFrequencyDictionaries: true,
                         };
                         result = await this._invoke('parseText', invokeParams);
+                        break;
+                    }
+                    case 'ankiCardFormats': {
+                        /** @type {import('yomitan-api.js').ankiCardFormatsInput} */
+                        const {profileIndex} = parsedBody;
+                        const resolvedProfileIndex = typeof profileIndex === 'number' ? profileIndex : optionsFull.profileCurrent;
+                        const profile = optionsFull.profiles[resolvedProfileIndex];
+                        if (typeof profile === 'undefined') {
+                            throw new Error('Invalid input for ankiCardFormats, expected "profileIndex" to be a valid profile index but got ' + profileIndex);
+                        }
+                        const profileOptions = profile.options;
+                        result = profileOptions.anki.cardFormats;
                         break;
                     }
                     default:
@@ -321,7 +347,7 @@ export class YomitanApi {
             for (const mediaFileData of mediaFilesData) {
                 if (media.some((x) => x.dictionary === mediaFileData.dictionary && x.path === mediaFileData.path)) { continue; }
                 const timestamp = Date.now();
-                const ankiFilename = generateAnkiNoteMediaFileName(`yomitan_dictionary_media_${mediaCount}`, getFileExtensionFromImageMediaType(mediaFileData.mediaType) ?? '', timestamp);
+                const ankiFilename = await mediaFileNameHashOrTimestamp('yomitan_dictionary_media', mediaFileData.content, getFileExtensionFromImageMediaType(mediaFileData.mediaType) ?? '', mediaCount, timestamp);
                 media.push({
                     dictionary: mediaFileData.dictionary,
                     path: mediaFileData.path,
@@ -357,7 +383,7 @@ export class YomitanApi {
                 const mediaType = audioData.contentType ?? '';
                 let extension = mediaType !== null ? getFileExtensionFromAudioMediaType(mediaType) : null;
                 if (extension === null) { extension = '.mp3'; }
-                const ankiFilename = generateAnkiNoteMediaFileName('yomitan_audio', extension, timestamp);
+                const ankiFilename = await mediaFileNameHashOrTimestamp('yomitan_audio', audioData.data, extension, null, timestamp);
                 audioDatas.push({
                     term: headword.term,
                     reading: headword.reading,
@@ -417,7 +443,7 @@ export class YomitanApi {
 
             commonDatas.push({
                 dictionaryEntry: dictionaryEntry,
-                resultOutputMode: 'group',
+                resultOutputMode: options.general.resultOutputMode,
                 cardFormat: {
                     type: 'term',
                     name: '',
@@ -426,8 +452,8 @@ export class YomitanApi {
                     fields: {},
                     icon: 'big-circle',
                 },
-                glossaryLayoutMode: 'default',
-                compactTags: false,
+                glossaryLayoutMode: options.general.glossaryLayoutMode,
+                compactTags: options.general.compactTags,
                 context: {
                     url: '',
                     documentTitle: '',

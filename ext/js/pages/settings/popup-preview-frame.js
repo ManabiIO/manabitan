@@ -115,6 +115,7 @@ export class PopupPreviewFrame {
             allowRootFramePopupProxy: false,
             childrenSupported: false,
             hotkeyHandler: this._hotkeyHandler,
+            browser: null,
         });
         this._frontend.setOptionsContextOverride(this._optionsContext);
         await this._frontend.prepare();

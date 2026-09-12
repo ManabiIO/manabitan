@@ -67,6 +67,8 @@ export type ParseTextSegment = {
         term: string;
         reading: string;
         sources: Dictionary.TermSource[];
+        frequencies: Dictionary.TermFrequency[];
+        pronunciations: Dictionary.TermPronunciation[];
     }[][];
 };
 
@@ -153,6 +155,7 @@ type ApiSurface = {
             scanLength: number;
             useInternalParser: boolean;
             useMecabParser: boolean;
+            useAllFrequencyDictionaries?: boolean;
         };
         return: ParseTextResultItem[];
     };
@@ -483,6 +486,12 @@ type ApiSurface = {
     forceSync: {
         params: void;
         return: void;
+    };
+    fetchLocalAudioData: {
+        params: {
+            url: string;
+        };
+        return: {data: string, contentType: string} | null;
     };
 };
 

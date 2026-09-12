@@ -110,7 +110,7 @@ export type Summary = {
     attribution?: string;
     sourceLanguage?: string;
     targetLanguage?: string;
-    frequencyMode?: 'occurrence-based' | 'rank-based';
+    frequencyMode?: DictionaryData.FrequencyMode;
     importSuccess?: boolean;
     storageHealth?: DictionaryStorageHealth;
     storageHealthReason?: string | null;

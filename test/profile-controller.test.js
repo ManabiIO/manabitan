@@ -103,6 +103,7 @@ describe('ProfileController profile conditions modal', () => {
         expect(cleanup).toHaveBeenCalledOnce();
         expect(prepare).toHaveBeenCalledWith(0);
         expect(Reflect.get(controller, '_updateProfileSelectOptions')).toHaveBeenCalledOnce();
-        expect(Reflect.get(controller, 'setDefaultProfile')).toHaveBeenCalledWith(1);
+        expect(Reflect.get(controller, 'setDefaultProfile')).not.toHaveBeenCalled();
+        expect(Reflect.get(controller, '_profileActiveSelect').value).toBe('1');
     });
 });

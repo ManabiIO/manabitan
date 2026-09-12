@@ -185,10 +185,11 @@ export class API {
      * @param {import('api').ApiParam<'parseText', 'scanLength'>} scanLength
      * @param {import('api').ApiParam<'parseText', 'useInternalParser'>} useInternalParser
      * @param {import('api').ApiParam<'parseText', 'useMecabParser'>} useMecabParser
+     * @param {import('api').ApiParam<'parseText', 'useAllFrequencyDictionaries'>} useAllFrequencyDictionaries
      * @returns {Promise<import('api').ApiReturn<'parseText'>>}
      */
-    parseText(text, optionsContext, scanLength, useInternalParser, useMecabParser) {
-        return this._invoke('parseText', {text, optionsContext, scanLength, useInternalParser, useMecabParser});
+    parseText(text, optionsContext, scanLength, useInternalParser, useMecabParser, useAllFrequencyDictionaries) {
+        return this._invoke('parseText', {text, optionsContext, scanLength, useInternalParser, useMecabParser, useAllFrequencyDictionaries});
     }
 
     /**
@@ -807,6 +808,14 @@ export class API {
      */
     forceSync() {
         return this._invoke('forceSync', void 0);
+    }
+
+    /**
+     * @param {string} url
+     * @returns {Promise<{data: string, contentType: string}|null>}
+     */
+    fetchLocalAudioData(url) {
+        return this._invoke('fetchLocalAudioData', {url});
     }
 
     // Utilities

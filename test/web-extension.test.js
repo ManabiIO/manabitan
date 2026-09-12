@@ -62,7 +62,7 @@ describe('WebExtension', () => {
     test('sendMessagePromise does not mark a live extension unloaded when a recipient disconnects', async () => {
         const webExtension = new WebExtension();
         globalThis.chrome.runtime.sendMessage = /** @type {typeof globalThis.chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(/** @type {(message: unknown, callback: (response?: unknown) => void) => void} */ ((_message, callback) => {
-            globalThis.chrome.runtime.lastError = {message: 'Could not establish connection. Receiving end does not exist.'};
+            Reflect.set(globalThis.chrome.runtime, 'lastError', {message: 'Could not establish connection. Receiving end does not exist.'});
             callback();
         }))));
 
@@ -76,8 +76,8 @@ describe('WebExtension', () => {
     ])('sendMessagePromise marks extension unloaded when its context is gone: %s', async (message) => {
         const webExtension = new WebExtension();
         globalThis.chrome.runtime.sendMessage = /** @type {typeof globalThis.chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(/** @type {(message: unknown, callback: (response?: unknown) => void) => void} */ ((_message, callback) => {
-            globalThis.chrome.runtime.id = '';
-            globalThis.chrome.runtime.lastError = {message};
+            Reflect.set(globalThis.chrome.runtime, 'id', '');
+            Reflect.set(globalThis.chrome.runtime, 'lastError', {message});
             callback();
         }))));
 
@@ -88,7 +88,7 @@ describe('WebExtension', () => {
     test('sendMessagePromise marks an explicitly invalidated extension context unloaded', async () => {
         const webExtension = new WebExtension();
         globalThis.chrome.runtime.sendMessage = /** @type {typeof globalThis.chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(/** @type {(message: unknown, callback: (response?: unknown) => void) => void} */ ((_message, callback) => {
-            globalThis.chrome.runtime.lastError = {message: 'Extension context invalidated.'};
+            Reflect.set(globalThis.chrome.runtime, 'lastError', {message: 'Extension context invalidated.'});
             callback();
         }))));
 
