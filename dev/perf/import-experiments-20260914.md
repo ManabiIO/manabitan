@@ -2,9 +2,9 @@
 
 ## Objective and status
 
-Four **default-off runtime flags are implemented**, not proposed placeholders. Qualify them against the selected `develop` head before enabling anything. Prioritize full import completion time, then lookup latency. Memory and stored dictionary size are non-regression gates, not resources to trade freely for throughput.
+Six **default-off runtime flags are implemented**, not proposed placeholders. Four are from the first structural round and two are from the radical follow-up in this document. Qualify them against the selected `develop` head before enabling anything. Prioritize full import completion time, then lookup latency. Memory, package size, and stored dictionary size are non-regression gates; do not buy throughput with large retained buffers or a larger persisted representation.
 
-The implementation is based on `ManabiIO/manabitan` commit `8bd9c56d419d4493c0602b58c2070b2b336840c0`, tree `6ab2fc9ac92a6c6c15c1625eb5838a5c2f634df4`. This includes the reliability changes after the previous `3a125475...` review. The complete local baseline tree was reconstructed and matched against every remote Git blob. Local reconstructed commit IDs are aliases, not the remote commit ID.
+The radical follow-up is based on `ManabiIO/manabitan` commit `443f4c51c04219f932f14c42d3d1e254f5620712`, tree `82c6c3dbdb8a01b82d9e835774ab864ffc743d1b`. This includes the newer supervised dictionary-import response handling from PR #38 and all four first-round import flags. Treat that commit as the source A/B parent for this round unless `develop` advances before qualification; if it advances, rebase the candidate and rerun source-overhead controls rather than mixing revisions.
 
 Read `git log` and record the exact candidate revision before testing. Do not mix results from intervening development changes. This handoff replaces the earlier implementation-proposal document. Historical prototype measurements are not measurements of this implementation.
 
@@ -16,8 +16,10 @@ Read `git log` and record the exact candidate revision before testing. Do not mi
 | `experimentalNativeEscapedKeys`      | Decodes exceptional JSON expression/reading keys in the unused interner tail, then interns their decoded UTF-8 bytes without restarting the group.                                                      | No separate key scratch allocation. Invalid raw UTF-8, key-length limits, or exhausted interner capacity retain the established fallback. Requires a fused group.                            |
 | `experimentalValidatedGlossaryReuse` | Reuses a successful prior row's glossary validation and hints only after full byte equality, bounded to the current bank. Carries that equality witness to later content deduplication.                 | The existing four-row window is unchanged. Samples only reject candidates. Unique/common-prefix inputs remain negative controls; do not enable broadly on repeat-heavy wins.                 |
 | `experimentalFusedSingleBank`        | Removes the existing multi-source-only restriction on fused parse/intern/encode/dedup for otherwise eligible single-bank groups.                                                                        | This is the additional structural experiment from the second review. It changes neither group sizes nor worker counts. Measure its larger native reservation versus avoided JavaScript work. |
+| `experimentalGlobalExactContentReuse` | Builds a fused-parser group-wide exact-content table before canonical encoding. It hashes raw glossary/rules/tags once, verifies every candidate by complete byte equality, and reuses the earlier canonical content metadata instead of encoding a distant duplicate again. | Unlike the four-row recent window, this can catch distant duplicates. It allocates a native hash table and one raw hash per row only while enabled. Unique-heavy input pays the pre-hash cost, so real dictionary hit rate is decisive. |
+| `experimentalFastGlossaryNormalization` | Specializes canonical normalization for top-level glossary arrays made only from scalars/strings and exact `{type:"text", text:...}` objects. General/nested structured content rolls the output cursor back and uses the complete recursive normalizer. | No persistent-format change and no extra long-lived buffer. The fast-path success and fallback counts must both be measured because nested Jitendex-style structured content can make the probe overhead net-negative. |
 
-All four default to `false`. Only the boolean `true` enables a flag. They are ephemeral `ImportDetails` fields, **not new persisted settings or UI controls**. Snapshot them before import work, propagate them through the existing source pipeline and actual worker request, and reset them for subsequent imports/worker requests. Native flags are per-call bits, not mutable C globals. Single-bank admission is decided in JavaScript.
+All six default to `false`. Only the boolean `true` enables a flag. They are ephemeral `ImportDetails` fields, **not new persisted settings or UI controls**. Snapshot them before import work, propagate them through the existing source pipeline and actual worker request, and reset them for subsequent imports/worker requests. Native flags are per-call bits, not mutable C globals. Single-bank admission is decided in JavaScript.
 
 Do not assert that a requested flag executed merely because it appears in a report. For example, native escaped-key handling does no work when the corpus has no escapes, and a single-bank group without fusion cannot exercise the native glossary experiment. Use the execution counters below.
 
@@ -58,31 +60,34 @@ discardedFusedRows
 bankSpanCount
 escapedKeyDecodeCount
 validatedGlossaryReuseCount
+globalExactContentReuseCount
+fastGlossaryNormalizationCount
+fastGlossaryNormalizationFallbackCount
 fusedSingleBankGroups
 maxWasmHeapBytes
 ```
 
 Failed fused work is included in the final allocation/copy/parse totals rather than being silently replaced by the recursive fallback's profile. This does not make overlapping phase totals additive end-to-end time.
 
-Each `term-file-fast-path:*` diagnostic includes `parserExperiments`, `parserFusedAttempts`, `parserFusedFallbacks`, `parserDiscardedFusedMs`, `parserDiscardedFusedRows`, `parserBankSpanCount`, `parserEscapedKeyDecodeCount`, `parserValidatedGlossaryReuseCount`, `parserFusedSingleBankGroups` and `parserMaxWasmHeapBytes`.
+Each `term-file-fast-path:*` diagnostic includes `parserExperiments`, `parserFusedAttempts`, `parserFusedFallbacks`, `parserDiscardedFusedMs`, `parserDiscardedFusedRows`, `parserBankSpanCount`, `parserEscapedKeyDecodeCount`, `parserValidatedGlossaryReuseCount`, `parserGlobalExactContentReuseCount`, `parserFastGlossaryNormalizationCount`, `parserFastGlossaryNormalizationFallbackCount`, `parserFusedSingleBankGroups` and `parserMaxWasmHeapBytes`.
 
 The overall summary exposes corresponding `fastPathParser*` fields plus requested/effective snapshots. **Those summary fields refer to the last fast-path profile, not automatically every batch in the import.** For import-wide accounting, aggregate the disjoint per-file/group reports once; do not count both those reports and their aggregate profile. Worker aggregation sums work counts and takes the maximum individual heap size. That maximum is **not** total resident memory across concurrent workers.
 
-Use counters to prove activation, fallback and meaningful opportunity size. A zero-escape dictionary cannot establish an escaped-key speedup. A request which fell back to an unrelated importer is not a successful experiment measurement.
+Use counters to prove activation, fallback and meaningful opportunity size. A zero-escape dictionary cannot establish an escaped-key speedup. A dictionary with zero `globalExactContentReuseCount` cannot establish a benefit for group-wide exact reuse, and fast-normalization results are meaningless unless both success and fallback opportunity are reported. A request which fell back to an unrelated importer is not a successful experiment measurement.
 
 ## Local validation and evidence boundaries
 
-The focused suite has **64 new tests** and **463 passing tests including the existing parser, scanner and composite-state suites**. It covers all 16 flag combinations across ordinary and compressed source routes, multi-chunk content offsets, growth, all-empty banks, metadata-capacity fallback, exhausted interner space, early/late escaped keys, CRC/size/truncation/trailing bytes, malformed cross-bank input, same-length glossary mutation, hint propagation and differing tags/rules.
+The radical candidate's focused parser suites pass **514 tests**. The three added follow-up regressions cover distant group-wide reuse, same-shaped unique content rejection, fast normalization byte equivalence, and fallback on general structured content. The focused matrix exercises **all 64 combinations of the six flags** across both preloaded and ordinary parser input on a mixed structured/media fixture, while adjacent tests cover growth, ownership, malformed bank boundaries, escaped keys, glossary witnesses, worker propagation and persisted lookup-sidecar equality.
+
+The complete local unit suite on the current radical candidate passes **6,382 tests in 169 files with 46 existing skips**. All four TypeScript projects pass, the 27-test options suite passes, changed-JavaScript ESLint passes, and all-target dry builds complete. Re-run all of these on the exact published candidate; local results are not a substitute for remote source qualification.
 
 An actual `worker_threads` bridge runs the production browser-worker module. It tests enabled/default/enabled/default requests, owned key retention, equivalent literal/escaped reading aliases, and byte-identical persisted lookup sidecars. This is real worker-module execution and structured cloning on Node, **not browser extension/OPFS execution**.
 
 One test compares 4,096 deterministic mixed UTF-16 keys against the independent JSON.parse/TextEncoder oracle. A separate retained ASan+UBSan harness tests the exact exceptional-key C helper with 4,485 valid/invalid/capacity cases and leak detection. That sanitizer claim covers the extracted decoder helpers, not the entire browser/WASM pipeline.
 
-A full intermediate-source local unit run reported 6,318 passed, six failed, 46 skipped, plus one unhandled error. The same six failures and unhandled error reproduce in the untouched baseline's two affected offscreen suites. The failures concern changed import/lookup queuing expectations and missing `chrome.runtime.getURL` in an offscreen mock, outside this patch. Do not turn this into an all-green claim; final-source execution and remote qualification records supersede this intermediate run.
+The first-round native exceptional-key sanitizer evidence remains useful for that flag, but the two radical flags are ordinary WASM parser changes and require the same complete browser/import qualification as the rest. Do not infer full-browser sanitizer coverage from the focused native helper run.
 
-The separate options suite passes 27 tests; all-target dry builds pass. Read the delivered logs for final-source type/lint/unit results rather than inferring them from older runs.
-
-The evidence archive contains a reproducible synthetic component runner, complete raw observations, source/WASM/runner fingerprints, and the native sanitizer harness. Its timed boundary is resident prepared fixtures through optional inflate+CRC, column parsing and completed lookup-sidecar preparation. Fallback JavaScript lookup preparation is included so both arms perform equal work. Fixture creation, compression for fixture preparation, and validation digests are outside timing. One full excluded warmup occurs in each fresh child process.
+The exploratory component runners used for both rounds time resident prepared fixtures through parser-side work, not the complete browser import. Keep that boundary explicit. Full import decisions must come from the locked browser file-input-to-post-UI-completion harness.
 
 **This is not a whole-import benchmark:** no worker IPC, global persisted deduplication, Zstd output compression, OPFS, browser UI or cross-device measurement is included. Its after-parser memory sample and lifetime maxRSS include different boundaries and must not be relabeled whole-import peak memory. Keep same-binary controls and all unfavorable observations.
 
@@ -110,6 +115,35 @@ The initial all-off single-bank comparison raised an overhead concern. The final
 The final enabled native-key cells use 640 KiB more WASM high-water space than their fallback controls, while their median after-parser RSS samples are lower. Single-bank fusion uses 1,920 KiB more WASM high-water space; its after-parser RSS samples are also lower. These samples do **not** establish lower whole-import peak memory. All-off and span/reuse pairs have identical observed WASM high-water sizes in this fixture set. Encoded unique-content byte counts and complete logical-content/lookup-sidecar digests match within every completed pair.
 
 **Hold glossary reuse for broad activation:** all eight common-prefix pairs are slower. Keep the other experiments default-off until real-dictionary end-to-end and memory/lookup qualification completes. Component percentages must not be quoted as browser import gains.
+
+## Radical follow-up: implemented flags and screening
+
+This follow-up deliberately targets eliminated work rather than parameter tuning. It adds two default-off native experiments. Neither changes worker counts, source budgets, compression level, cache capacities or persistent formats.
+
+### `experimentalGlobalExactContentReuse`
+
+The fused parser previously had a four-row raw-content window before canonical encoding, then canonical dedup after encoding. The new experiment adds a separate group-wide raw-content table so a distant exact duplicate can inherit the already-encoded canonical offset/hash/unique index. The pre-table hash covers complete raw glossary, rules, definition tags and term tags; a hash match is never sufficient by itself. Full byte equality remains the authorization boundary.
+
+Exploratory resident-parser screening on 12,000-row synthetic groups showed roughly **6–11% lower component elapsed time** on a repeat-heavy corpus with 749 distant exact hits, but roughly **5–6% slower** on all-unique content. That adverse unique-input result is a first-class gate, not noise to hide. The experiment must remain off unless JMdict/JMnedict/Jitendex import-wide hit rates make the real end-to-end result positive without memory regression.
+
+When enabled, the native parser allocates an additional open-address table at the same scale as the canonical content table plus one `uint32` raw hash per initial row capacity. Synthetic runs did not grow the observed WASM high-water page count because the allocation fit existing page slack, but that does **not** prove zero process-memory cost. Measure concurrent-worker peak RSS and WASM pages explicitly.
+
+### `experimentalFastGlossaryNormalization`
+
+The canonical token-binary encoder normally reparses a normalized glossary recursively. The experiment first tries a bounded specialized normalizer for the common top-level shape consisting only of scalar/string elements and exact two-field text objects. It emits the exact canonical bytes directly. If it sees nested arrays, a non-text object, extra object keys or any uncertain shape, it restores the output cursor and invokes the existing recursive normalizer.
+
+Exploratory screening on an eligible 8,000-row text-object corpus was roughly **15–17% faster** in parser-side elapsed time with every row taking the specialized path. A 5,000-row nested structured-content fallback corpus was roughly **4–6% slower**. Therefore measure both `fastGlossaryNormalizationCount` and `fastGlossaryNormalizationFallbackCount`; Jitendex may contain enough general structured content to erase the favorable text-object result. Do not add a dictionary-name exception or tune a threshold around the benchmark.
+
+The fast normalizer allocates no new persistent/native table. Its primary costs are extra probe parsing on fallback and approximately 2 KiB of additional parser WASM code together with the other radical native changes. In the local development build, `term-bank-parser.wasm` changed from **40,115 bytes to 42,246 bytes** and the full `chrome-dev` ZIP changed from **16,929,176 bytes to 16,930,426 bytes** (+1,250 compressed bytes). Re-measure package output on the final candidate; persisted dictionary bytes must remain equivalent.
+
+### Rejected/held radical candidates
+
+Do **not** reintroduce these into the same qualification stack merely to increase the number of experiments:
+
+- **Incremental/inline canonical XXH32:** rejected. Hashing every emitted fragment while canonical bytes were being written was about **18% slower** on short and normalized definitions and approximately flat/slower on long definitions. The existing contiguous post-encode XXH32 pass is more efficient than many tiny streaming updates. The code is removed from the candidate.
+- **Sample-only group-wide raw fingerprint:** rejected during implementation. Constant-work fingerprints created collision/probe pathologies on same-shaped unique content; only the complete raw hash variant remains. Full byte equality still gates reuse.
+- **Prepared Zstd `CDict`: held, not implemented in this round.** A native boundary microbenchmark suggested about an 11% compression-call improvement, but exposing/preparing CDicts changes the common generated Zstd WASM module and package surface even with the runtime flag off. Treat it as a separate future experiment only if an isolated module or measured package-size/memory story makes the trade acceptable.
+- **Streaming DEFLATE directly into later parser ownership:** do not resurrect without a fresh profile. Earlier attempts to fuse ownership/streaming moved work and memory rather than proving an import-wide win.
 
 ## Benchmark execution
 
@@ -176,6 +210,10 @@ for dictionary in jmdict jmnedict jitendex; do
     --flags '{"experimentalValidatedGlossaryReuse":true}' --label glossary-reuse
   node dev/perf/import-ab.js "$dictionary" --pairs 12 \
     --flags '{"experimentalFusedSingleBank":true}' --label fused-single-bank
+  node dev/perf/import-ab.js "$dictionary" --pairs 12 \
+    --flags '{"experimentalGlobalExactContentReuse":true}' --label global-exact-content-reuse
+  node dev/perf/import-ab.js "$dictionary" --pairs 12 \
+    --flags '{"experimentalFastGlossaryNormalization":true}' --label fast-glossary-normalization
 done
 ```
 
@@ -185,7 +223,7 @@ Report per-pair ratios, median paired change, total time across equal work, unce
 
 ### Interaction matrix and workloads
 
-Only after individual experiments survive, measure spans+keys, keys+single, spans+single, and the all-enabled combination. Reuse must also survive unique and common-prefix negative controls in those combinations. A faster bundle must not conceal a regressing individual flag.
+Only after individual experiments survive, measure spans+keys, keys+single, spans+single, spans+fast-normalization, single+global-exact-reuse, and the all-enabled combination. Validated glossary reuse must still survive unique/common-prefix negative controls; global exact reuse must survive an all-unique negative control; fast normalization must survive a nested structured-content fallback control. A faster bundle must not conceal a regressing individual flag.
 
 Cover real native constrained hosts and higher/unknown-memory routing; single/multibatch imports; compressed and ordinary input; many tiny banks; large banks; duplicate-heavy and unique content; text normalization and media; early/late escaped keys; malformed input; canceled/failed imports; updates and reimports. Observe actual page AND worker capability values. Device-memory emulation is not a substitute for physical memory pressure.
 
@@ -201,16 +239,18 @@ After reopening the extension/database, measure cold/warm exact, deinflected and
 
 ## Second-pass analysis and decisions
 
-The new single-bank flag targets eliminated passes and boundary work, not larger reservations as a tuning strategy. Keep it independent so its saved parse/encode/intern work and native memory costs can be attributed separately.
+The radical round adds group-wide pre-encode exact-content reuse and specialized glossary normalization because both remove whole classes of repeated parser work. It deliberately rejects inline hashing and holds CDict preparation rather than accumulating complexity that does not win at the relevant boundary.
+
+The single-bank flag targets eliminated passes and boundary work, not larger reservations as a tuning strategy. Keep it independent so its saved parse/encode/intern work and native memory costs can be attributed separately.
 
 Native escaped-key decoding was further refined to use the interner tail, removing both the separate scratch allocation and the copy into the interner for newly decoded keys. The equality-witness path removes a second glossary comparison only when an exact earlier comparison already established it. Neither refinement changes persisted formats or expands a cache.
 
-Do not introduce shared parser/Zstd memory, another scheduler, dictionary-name exceptions, larger caches, weaker equality checks, skipped archive validation or a new persisted representation in this round. Zstd dictionary/context reuse and parser-to-compressor ownership are possible future profile targets, but existing context reuse must be audited first; changing ownership or compression output without evidence is not an additional accepted optimization.
+Do not introduce shared parser/Zstd memory, another scheduler, dictionary-name exceptions, larger caches, weaker equality checks, skipped archive validation or a new persisted representation in this round. CDict preparation remains a separate held experiment because it changes the common Zstd module. Parser-to-compressor ownership is also future work only after profiling shows copying/ownership remains on the critical path.
 
 Preserve accepted miniz, local composite state and multibatch routing. Do not revive rejected SIMD hashing/scanning, ZIP splitting, aligned-copy/gather or old-stack packing variants. PR #19's withdrawn UI timings remain withdrawn. No Reader native importer, vendor pin or release branch is part of this work.
 
 ## Completion criteria
 
-Return the exact selected revisions, per-flag activation evidence, complete raw comparisons, separate memory/profile results, full correctness status and an **accept / hold / reject** decision for each flag. Require a material full-import benefit or removal of a real severe exception-path cliff with negligible ordinary-path cost. Treat all-off source overhead, memory, storage and lookup regressions as blockers even when enabled component timings improve.
+Start source A/B from parent `443f4c51c04219f932f14c42d3d1e254f5620712` unless a newer rebased parent is explicitly recorded. Return the exact selected revisions, per-flag activation evidence, complete raw comparisons, separate memory/profile results, full correctness status and an **accept / hold / reject** decision for each flag. Require a material full-import benefit or removal of a real severe exception-path cliff with negligible ordinary-path cost. Treat all-off source overhead, memory, storage and lookup regressions as blockers even when enabled component timings improve.
 
 Keep all defaults off until qualification is complete. The code is a runnable experiment platform, not release approval or a general speedup claim.

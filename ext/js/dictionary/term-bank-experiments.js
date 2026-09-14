@@ -29,6 +29,8 @@ export function snapshotTermBankExperiments(options = {}) {
         experimentalNativeEscapedKeys: options.experimentalNativeEscapedKeys === true,
         experimentalValidatedGlossaryReuse: options.experimentalValidatedGlossaryReuse === true,
         experimentalFusedSingleBank: options.experimentalFusedSingleBank === true,
+        experimentalGlobalExactContentReuse: options.experimentalGlobalExactContentReuse === true,
+        experimentalFastGlossaryNormalization: options.experimentalFastGlossaryNormalization === true,
     })
 }
 
@@ -41,5 +43,7 @@ export function snapshotTermBankExperiments(options = {}) {
 export function getTermBankExperimentMask(options) {
     return (options.experimentalTermBankSpans === true ? 1 : 0) |
     (options.experimentalNativeEscapedKeys === true ? 2 : 0) |
-    (options.experimentalValidatedGlossaryReuse === true ? 4 : 0)
+    (options.experimentalValidatedGlossaryReuse === true ? 4 : 0) |
+    (options.experimentalGlobalExactContentReuse === true ? 8 : 0) |
+    (options.experimentalFastGlossaryNormalization === true ? 16 : 0)
 }

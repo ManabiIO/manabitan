@@ -24,6 +24,8 @@
 #define EXPERIMENT_BANK_SPANS 1u
 #define EXPERIMENT_NATIVE_ESCAPED_KEYS 2u
 #define EXPERIMENT_VALIDATED_GLOSSARY_REUSE 4u
+#define EXPERIMENT_GLOBAL_EXACT_CONTENT_REUSE 8u
+#define EXPERIMENT_FAST_GLOSSARY_NORMALIZATION 16u
 #define MAX_INTERNED_KEY_BYTES 0xfffeu
 #ifndef RECENT_CONTENT_DEDUP_WINDOW
 #define RECENT_CONTENT_DEDUP_WINDOW 4u
@@ -1188,6 +1190,116 @@ static int glossary_object_try_extract_text_value(
     return 1;
 }
 
+static int glossary_text_object_try_extract_fast(
+    const uint8_t* src,
+    uint32_t src_len,
+    uint32_t start,
+    uint32_t limit,
+    uint32_t* out_end,
+    uint32_t* out_text_start,
+    uint32_t* out_text_length
+) {
+    static const uint8_t KEY_TYPE[] = "\"type\"";
+    static const uint8_t KEY_TEXT[] = "\"text\"";
+    static const uint8_t VALUE_TEXT[] = "\"text\"";
+    if (start >= limit || src[start] != '{') { return 0; }
+    uint32_t i = skip_ws(src, src_len, start + 1u);
+    int has_type_text = 0;
+    int has_text_value = 0;
+    uint32_t text_start = 0u;
+    uint32_t text_length = 0u;
+    uint32_t field_count = 0u;
+    while (i < limit) {
+        i = skip_ws(src, src_len, i);
+        if (i >= limit) { return 0; }
+        if (src[i] == '}') {
+            if (field_count != 2u || !has_type_text || !has_text_value) { return 0; }
+            *out_end = i + 1u;
+            *out_text_start = text_start;
+            *out_text_length = text_length;
+            return 1;
+        }
+        if (field_count >= 2u || src[i] != '"') { return 0; }
+        uint32_t key_end = 0u;
+        if (!parse_string_span(src, src_len, i, &key_end)) { return 0; }
+        const uint32_t key_start = i;
+        const uint32_t key_length = key_end - key_start;
+        const int is_type = token_equals_literal(src, key_start, key_length, KEY_TYPE, sizeof(KEY_TYPE) - 1u);
+        const int is_text = token_equals_literal(src, key_start, key_length, KEY_TEXT, sizeof(KEY_TEXT) - 1u);
+        if (!is_type && !is_text) { return 0; }
+        i = skip_ws(src, src_len, key_end);
+        if (i >= limit || src[i] != ':') { return 0; }
+        i = skip_ws(src, src_len, i + 1u);
+        uint32_t value_end = 0u;
+        if (!parse_value_span(src, src_len, i, &value_end) || value_end > limit) { return 0; }
+        if (is_type) {
+            if (!token_equals_literal(src, i, value_end - i, VALUE_TEXT, sizeof(VALUE_TEXT) - 1u)) { return 0; }
+            has_type_text = 1;
+        } else {
+            if (i >= value_end || src[i] != '"') { return 0; }
+            has_text_value = 1;
+            text_start = i;
+            text_length = value_end - i;
+        }
+        ++field_count;
+        i = skip_ws(src, src_len, value_end);
+        if (i < limit && src[i] == ',') { ++i; }
+    }
+    return 0;
+}
+
+/*
+ * Fast path for the overwhelmingly common normalized glossary shape: a
+ * top-level array containing scalar/string values and schema-valid
+ * {"type":"text","text":...} objects. Any nested/general structured content
+ * falls back to the complete recursive normalizer. Partial output is rolled
+ * back, so this is byte-identical or a no-op.
+ */
+static int write_fast_top_level_glossary(
+    const uint8_t* src,
+    uint32_t src_len,
+    uint32_t value_start,
+    uint32_t value_end,
+    uint8_t* out,
+    uint32_t out_capacity,
+    uint32_t* cursor
+) {
+    if (value_start >= value_end || src[value_start] != '[') { return 0; }
+    const uint32_t original_cursor = *cursor;
+    if (!write_byte_and_hash(out, out_capacity, cursor, '[', 0, 0)) { goto fail; }
+    uint32_t i = value_start + 1u;
+    int first = 1;
+    while (i < value_end) {
+        i = skip_ws(src, src_len, i);
+        if (i >= value_end) { goto fail; }
+        if (src[i] == ']') {
+            if (!write_byte_and_hash(out, out_capacity, cursor, ']', 0, 0)) { goto fail; }
+            return 1;
+        }
+        uint32_t element_end = 0u;
+        uint32_t text_start = 0u;
+        uint32_t text_length = 0u;
+        const int text_object = src[i] == '{' && glossary_text_object_try_extract_fast(
+            src, src_len, i, value_end, &element_end, &text_start, &text_length
+        );
+        if (src[i] == '{' && !text_object) { goto fail; }
+        if (src[i] == '[') { goto fail; }
+        if (!text_object && (!parse_value_span(src, src_len, i, &element_end) || element_end > value_end)) { goto fail; }
+        if (!first && !write_byte_and_hash(out, out_capacity, cursor, ',', 0, 0)) { goto fail; }
+        if (text_object) {
+            if (!write_bytes_and_hash(out, out_capacity, cursor, src + text_start, text_length, 0, 0)) { goto fail; }
+        } else if (!write_bytes_and_hash(out, out_capacity, cursor, src + i, element_end - i, 0, 0)) {
+            goto fail;
+        }
+        first = 0;
+        i = skip_ws(src, src_len, element_end);
+        if (i < value_end && src[i] == ',') { ++i; }
+    }
+fail:
+    *cursor = original_cursor;
+    return 0;
+}
+
 static int write_normalized_glossary_value_and_hash(
     const uint8_t* src,
     uint32_t src_len,
@@ -1330,7 +1442,9 @@ static int encode_term_content_token_binary_row(
     uint32_t out_capacity,
     uint32_t* cursor,
     uint32_t* out_h1,
-    uint32_t* out_h2
+    uint32_t* out_h2,
+    uint32_t experiment_mask,
+    uint32_t* experiment_stats
 ) {
     static const uint8_t MAGIC[] = "MBR6";
     static const uint8_t EMPTY_QUOTED[] = "\"\"";
@@ -1368,7 +1482,23 @@ static int encode_term_content_token_binary_row(
                 0
             )) { return 0; }
     } else if (row->glossary_length > 0u) {
-        if (!write_normalized_glossary_value_and_hash(
+        int normalized = 0;
+        if ((experiment_mask & EXPERIMENT_FAST_GLOSSARY_NORMALIZATION) != 0u) {
+            normalized = write_fast_top_level_glossary(
+                src,
+                row->glossary_start + row->glossary_length,
+                row->glossary_start,
+                row->glossary_start + row->glossary_length,
+                out,
+                out_capacity,
+                cursor
+            );
+            if (experiment_stats != 0) {
+                if (normalized) { ++experiment_stats[3]; }
+                else { ++experiment_stats[4]; }
+            }
+        }
+        if (!normalized && !write_normalized_glossary_value_and_hash(
             src,
             row->glossary_start + row->glossary_length,
             row->glossary_start,
@@ -1561,7 +1691,7 @@ int32_t encode_term_content_token_binary(
         const uint32_t start = cursor;
         uint32_t h1 = 0u;
         uint32_t h2 = 0u;
-        while (!encode_term_content_token_binary_row(src, &rows[i], out, out_capacity, &cursor, &h1, &h2)) {
+        while (!encode_term_content_token_binary_row(src, &rows[i], out, out_capacity, &cursor, &h1, &h2, 0u, 0)) {
             cursor = start;
             if (!grow_content_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         }
@@ -1686,6 +1816,18 @@ static uint32_t raw_term_content_quick_signature(
     signature ^= middle * 0x165667b1u;
     signature = (signature << 11u) | (signature >> 21u);
     return signature ^ last;
+}
+
+static uint32_t raw_term_content_hash(
+    const uint8_t* src,
+    const TermRowMeta* row
+) {
+    uint32_t hash = hash_content_xxh32(src + row->glossary_start, row->glossary_length, FNV1A_OFFSET);
+    hash ^= rotl32(hash_content_xxh32(src + row->rules_start, row->rules_length, MIX_OFFSET), 5u);
+    hash ^= rotl32(hash_content_xxh32(src + row->definition_tags_start, row->definition_tags_length, 0x85ebca6bu), 11u);
+    hash ^= rotl32(hash_content_xxh32(src + row->term_tags_start, row->term_tags_length, 0xc2b2ae35u), 17u);
+    hash ^= hash >> 16u;
+    return hash == 0u ? 1u : hash;
 }
 
 static int json_string_token_has_escape(
@@ -2278,7 +2420,9 @@ int32_t encode_term_content_token_binary_dedup(
             out_capacity,
             &cursor,
             &hash1,
-            &hash2
+            &hash2,
+            0u,
+            0
         )) {
             cursor = start;
             if (!grow_content_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
@@ -2369,7 +2513,10 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t experiment_mask,
     uint32_t bank_spans_ptr,
     uint32_t bank_count,
-    uint32_t experiment_stats_ptr
+    uint32_t experiment_stats_ptr,
+    uint32_t raw_content_hash_table_ptr,
+    uint32_t raw_content_hash_table_size,
+    uint32_t raw_content_hashes_ptr
 ) {
     if (
         json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
@@ -2387,13 +2534,23 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     }
     if (((bank_spans_ptr == 0u) != (bank_count == 0u)) ||
         (bank_count != 0u && (experiment_mask & EXPERIMENT_BANK_SPANS) == 0u)) { return -1; }
+    if ((experiment_mask & EXPERIMENT_GLOBAL_EXACT_CONTENT_REUSE) != 0u && (
+        raw_content_hash_table_ptr == 0u ||
+        raw_content_hashes_ptr == 0u ||
+        raw_content_hash_table_size == 0u ||
+        (raw_content_hash_table_size & (raw_content_hash_table_size - 1u)) != 0u
+    )) { return -1; }
     uint32_t* experiment_stats = (uint32_t*)(uintptr_t)experiment_stats_ptr;
-    if (experiment_stats != 0) { experiment_stats[0] = 0u; experiment_stats[1] = 0u; }
+    if (experiment_stats != 0) {
+        for (uint32_t i = 0u; i < 5u; ++i) { experiment_stats[i] = 0u; }
+    }
     const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
     TermRowMeta* rows = (TermRowMeta*)(uintptr_t)metas_ptr;
     uint8_t* out = (uint8_t*)(uintptr_t)out_ptr;
     uint32_t* row_meta = (uint32_t*)(uintptr_t)row_meta_ptr;
     uint32_t* hash_table = (uint32_t*)(uintptr_t)hash_table_ptr;
+    uint32_t* raw_content_hash_table = (uint32_t*)(uintptr_t)raw_content_hash_table_ptr;
+    uint32_t* raw_content_hashes = (uint32_t*)(uintptr_t)raw_content_hashes_ptr;
     uint32_t* unique_indexes = (uint32_t*)(uintptr_t)unique_indexes_ptr;
     uint32_t* unique_signatures = (uint32_t*)(uintptr_t)unique_signatures_ptr;
     uint8_t* strings = (uint8_t*)(uintptr_t)strings_ptr;
@@ -2416,6 +2573,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t recent_content_signatures[RECENT_CONTENT_DEDUP_WINDOW];
 #endif
     const uint32_t table_mask = hash_table_size - 1u;
+    const uint32_t raw_content_table_mask = raw_content_hash_table_size > 0u ? raw_content_hash_table_size - 1u : 0u;
     const uint32_t string_table_mask = string_hash_table_size - 1u;
     last_parse_capacity = metas_capacity;
     last_content_capacity = out_capacity;
@@ -2540,23 +2698,47 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
 
         const uint32_t row_offset = row_count * 4u;
         uint32_t recent_match = 0xffffffffu;
-#if RECENT_CONTENT_DEDUP_WINDOW > 0
-        const uint32_t raw_content_signature = raw_term_content_quick_signature(src, parsed_row);
-        const uint32_t recent_start = row_count > RECENT_CONTENT_DEDUP_WINDOW ?
-            row_count - RECENT_CONTENT_DEDUP_WINDOW :
-            0u;
-        for (uint32_t candidate = row_count; candidate > recent_start;) {
-            --candidate;
-            if (
-                recent_content_signatures[candidate % RECENT_CONTENT_DEDUP_WINDOW] == raw_content_signature &&
-                raw_term_content_tokens_equal(src, parsed_row, &rows[candidate], candidate == glossary_witness)
-            ) {
-                recent_match = candidate;
-                break;
+        if ((experiment_mask & EXPERIMENT_GLOBAL_EXACT_CONTENT_REUSE) != 0u) {
+            const uint32_t raw_hash = raw_term_content_hash(src, parsed_row);
+            raw_content_hashes[row_count] = raw_hash;
+            uint32_t raw_slot = raw_hash & raw_content_table_mask;
+            for (uint32_t probes = 0u; probes < raw_content_hash_table_size; ++probes) {
+                const uint32_t stored = raw_content_hash_table[raw_slot];
+                if (stored == 0u) {
+                    raw_content_hash_table[raw_slot] = row_count + 1u;
+                    break;
+                }
+                const uint32_t candidate = stored - 1u;
+                if (candidate >= row_count) { return -3; }
+                if (
+                    raw_content_hashes[candidate] == raw_hash &&
+                    raw_term_content_tokens_equal(src, parsed_row, &rows[candidate], candidate == glossary_witness)
+                ) {
+                    recent_match = candidate;
+                    if (experiment_stats != 0) { ++experiment_stats[2]; }
+                    break;
+                }
+                raw_slot = (raw_slot + 1u) & raw_content_table_mask;
             }
-        }
-        recent_content_signatures[row_count % RECENT_CONTENT_DEDUP_WINDOW] = raw_content_signature;
+        } else {
+#if RECENT_CONTENT_DEDUP_WINDOW > 0
+            const uint32_t raw_content_signature = raw_term_content_quick_signature(src, parsed_row);
+            const uint32_t recent_start = row_count > RECENT_CONTENT_DEDUP_WINDOW ?
+                row_count - RECENT_CONTENT_DEDUP_WINDOW :
+                0u;
+            for (uint32_t candidate = row_count; candidate > recent_start;) {
+                --candidate;
+                if (
+                    recent_content_signatures[candidate % RECENT_CONTENT_DEDUP_WINDOW] == raw_content_signature &&
+                    raw_term_content_tokens_equal(src, parsed_row, &rows[candidate], candidate == glossary_witness)
+                ) {
+                    recent_match = candidate;
+                    break;
+                }
+            }
+            recent_content_signatures[row_count % RECENT_CONTENT_DEDUP_WINDOW] = raw_content_signature;
 #endif
+        }
         if (recent_match != 0xffffffffu) {
             const uint32_t canonical_offset = recent_match * 4u;
             row_meta[row_offset] = row_meta[canonical_offset];
@@ -2576,7 +2758,9 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 out_capacity,
                 &cursor,
                 &hash1,
-                &hash2
+                &hash2,
+                experiment_mask,
+                experiment_stats
             )) {
                 cursor = start;
                 if (!grow_content_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }

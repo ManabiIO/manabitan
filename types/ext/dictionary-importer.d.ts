@@ -56,6 +56,8 @@ export type ImportExperiments = {
     experimentalNativeEscapedKeys?: boolean;
     experimentalValidatedGlossaryReuse?: boolean;
     experimentalFusedSingleBank?: boolean;
+    experimentalGlobalExactContentReuse?: boolean;
+    experimentalFastGlossaryNormalization?: boolean;
 };
 
 export type ImportDetails = ImportExperiments & {

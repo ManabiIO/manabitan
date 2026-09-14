@@ -38,6 +38,8 @@ const flagNames = /** @type {Array<keyof Experiments>} */ ([
     'experimentalNativeEscapedKeys',
     'experimentalValidatedGlossaryReuse',
     'experimentalFusedSingleBank',
+    'experimentalGlobalExactContentReuse',
+    'experimentalFastGlossaryNormalization',
 ])
 /**
  * @param {number} mask
@@ -169,7 +171,7 @@ describe('default-off term-bank experiments', () => {
         expect(snap).toEqual(flags(1))
         expect(Object.isFrozen(snap)).toBe(true)
         expect(snapshotTermBankExperiments()).toEqual(flags(0))
-        expect(getTermBankExperimentMask(flags(15))).toBe(7)
+        expect(getTermBankExperimentMask(flags(63))).toBe(31)
         expect(snapshotTermBankExperiments(/** @type {Experiments} */ (/** @type {unknown} */ ({experimentalTermBankSpans: 'true'})))).toEqual(flags(0))
     })
 
@@ -181,7 +183,7 @@ describe('default-off term-bank experiments', () => {
         '[]',
         JSON.stringify([row('text', [{type: 'text', text: '  a\n b  '}]), row('猫', glossary)]),
     ]
-    test.each(Array.from({length: 16}, (_, i) => i))('all flag combinations preserve row content/hash/key order: %i', async (mask) => {
+    test.each(Array.from({length: 64}, (_, i) => i))('all flag combinations preserve row content/hash/key order: %i', async (mask) => {
         const baseline = await parse(banks)
         for (const preload of [false, true]) {
             const result = await parse(banks, flags(mask), preload)
@@ -215,6 +217,40 @@ describe('default-off term-bank experiments', () => {
         expect(again.profile.experiments).toEqual(flags(0))
         expect(again.profile.fusedParseAttempts).toBe(0)
         expect(again.rows).toEqual(baseline.rows)
+    })
+
+
+    test('group-wide exact content reuse skips encoding for distant repeats', async () => {
+        const repeatedGlossary = [{type: 'text', text: '  repeated text  '}, 'tail']
+        const rows = [row('first', repeatedGlossary)]
+        for (let i = 0; i < 12; ++i) { rows.push(row(`unique-${i}`, [`definition-${i}`])) }
+        rows.push(row('last', repeatedGlossary))
+        const sources = [JSON.stringify(rows), '[]']
+        const baseline = await parse(sources)
+        const result = await parse(sources, {experimentalGlobalExactContentReuse: true})
+        expect(result.rows).toEqual(baseline.rows)
+        expect(result.profile.globalExactContentReuseCount).toBe(1)
+        expect(result.profile.recentContentDedupHitCount).toBeGreaterThanOrEqual(1)
+    })
+
+    test('group-wide exact content reuse does not reuse same-shaped unique content', async () => {
+        const rows = Array.from({length: 64}, (_, i) => row(`key-${i}`, [`${String(i).padStart(4, '0')}-${'x'.repeat(80)}-${i}`]))
+        const sources = [JSON.stringify(rows.slice(0, 32)), JSON.stringify(rows.slice(32))]
+        const baseline = await parse(sources)
+        const result = await parse(sources, {experimentalGlobalExactContentReuse: true})
+        expect(result.rows).toEqual(baseline.rows)
+        expect(result.profile.globalExactContentReuseCount).toBe(0)
+    })
+
+    test('fast glossary normalization preserves bytes and falls back on general structured content', async () => {
+        const fastGlossary = [{type: 'text', text: '  alpha\n beta  '}, 'literal', 7, true, null]
+        const nestedGlossary = [{type: 'structured-content', content: [{tag: 'span', content: [{type: 'text', text: 'nested'}]}]}]
+        const sources = [JSON.stringify([row('fast', fastGlossary), row('nested', nestedGlossary)]), '[]']
+        const baseline = await parse(sources)
+        const result = await parse(sources, {experimentalFastGlossaryNormalization: true})
+        expect(result.rows).toEqual(baseline.rows)
+        expect(result.profile.fastGlossaryNormalizationCount).toBeGreaterThan(0)
+        expect(result.profile.fastGlossaryNormalizationFallbackCount).toBeGreaterThan(0)
     })
 
     test('all-empty span groups have no rows', async () => {

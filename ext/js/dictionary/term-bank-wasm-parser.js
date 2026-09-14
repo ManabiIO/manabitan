@@ -58,7 +58,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
 /** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
-/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number}} TermBankExperimentProfile */
+/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number}} TermBankExperimentProfile */
 /** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
@@ -578,6 +578,12 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         let contentHashTableSize = 1;
         while (contentHashTableSize < initialMetaCapacity * 2) { contentHashTableSize *= 2; }
         const contentHashTablePtr = wasm.wasm_alloc(contentHashTableSize * 4);
+        const rawContentHashTablePtr = experiments.experimentalGlobalExactContentReuse ?
+            wasm.wasm_alloc(contentHashTableSize * 4) :
+            0;
+        const rawContentHashesPtr = experiments.experimentalGlobalExactContentReuse ?
+            wasm.wasm_alloc(initialMetaCapacity * 4) :
+            0;
         const contentUniqueIndexesPtr = wasm.wasm_alloc(initialMetaCapacity * 4);
         const contentUniqueCountPtr = wasm.wasm_alloc(4);
         const contentUniqueSignaturesPtr = wasm.wasm_alloc(initialMetaCapacity * CONTENT_SIGNATURE_U32_FIELDS * 4);
@@ -606,11 +612,12 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         // Content remains the final bump allocation so native growth can extend
         // it in place. Escaped keys use unused interner storage, not new scratch.
         const experimentMask = getTermBankExperimentMask(experiments);
-        const experimentStatsPtr = experimentMask !== 0 ? allocateWasmBuffer(wasm, 8, 'experiment stats') : 0;
+        const experimentStatsPtr = experimentMask !== 0 ? allocateWasmBuffer(wasm, 20, 'experiment stats') : 0;
         const contentOutPtr = wasm.wasm_alloc(contentOutCapacity);
         allocationMs += Math.max(0, Date.now() - tStart);
         if (
             outPtr === 0 || contentMetaPtr === 0 || contentHashTablePtr === 0 ||
+            (experiments.experimentalGlobalExactContentReuse && (rawContentHashTablePtr === 0 || rawContentHashesPtr === 0)) ||
             contentUniqueIndexesPtr === 0 || contentUniqueCountPtr === 0 || contentUniqueSignaturesPtr === 0 ||
             rowCountPtr === 0 || stringsPtr === 0 || stringLengthsPtr === 0 ||
             stringOffsetsPtr === 0 || stringHashesPtr === 0 || expressionIndexesPtr === 0 ||
@@ -621,6 +628,9 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             throw new TermBankWasmResourceError('Failed to allocate fused term-bank parser buffers');
         }
         new Uint32Array(wasm.memory.buffer, contentHashTablePtr, contentHashTableSize).fill(0);
+        if (rawContentHashTablePtr !== 0) {
+            new Uint32Array(wasm.memory.buffer, rawContentHashTablePtr, contentHashTableSize).fill(0);
+        }
         new Uint32Array(wasm.memory.buffer, stringHashTablePtr, stringHashTableSize).fill(0);
         new Uint32Array(wasm.memory.buffer, contentUniqueCountPtr, 1)[0] = 0;
         new Uint32Array(wasm.memory.buffer, rowCountPtr, 1)[0] = 0;
@@ -662,13 +672,19 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             bankSpansPtr,
             bankSpanCount,
             experimentStatsPtr,
+            rawContentHashTablePtr,
+            rawContentHashTablePtr === 0 ? 0 : contentHashTableSize,
+            rawContentHashesPtr,
         );
         parseBankMs += Math.max(0, Date.now() - tStart);
         const experimentStats = experimentStatsPtr === 0 ?
-[0, 0] :
-            new Uint32Array(wasm.memory.buffer, experimentStatsPtr, 2);
+            [0, 0, 0, 0, 0] :
+            new Uint32Array(wasm.memory.buffer, experimentStatsPtr, 5);
         const escapedKeyDecodeCount = experimentStats[0];
         const validatedGlossaryReuseCount = experimentStats[1];
+        const globalExactContentReuseCount = experimentStats[2];
+        const fastGlossaryNormalizationCount = experimentStats[3];
+        const fastGlossaryNormalizationFallbackCount = experimentStats[4];
         if (encodedContentBytes === -4 || encodedContentBytes === -5) {
             // Own bytes and span metadata before the recursive heap reset. The
             // fallback parses each bank independently too; it never lazy-joins
@@ -703,6 +719,9 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
             fallback.discardedFusedRows = discardedFusedRows;
             fallback.escapedKeyDecodeCount = escapedKeyDecodeCount;
             fallback.validatedGlossaryReuseCount = validatedGlossaryReuseCount;
+            fallback.globalExactContentReuseCount = globalExactContentReuseCount;
+            fallback.fastGlossaryNormalizationCount = fastGlossaryNormalizationCount;
+            fallback.fastGlossaryNormalizationFallbackCount = fastGlossaryNormalizationFallbackCount;
             fallback.bankSpanCount = bankSpanCount;
             return fallback;
         }
@@ -752,6 +771,9 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
             fusedParseAttempts: 1,
             escapedKeyDecodeCount,
             validatedGlossaryReuseCount,
+            globalExactContentReuseCount,
+            fastGlossaryNormalizationCount,
+            fastGlossaryNormalizationFallbackCount,
             fusedSingleBankGroups: (preloadedSource?.sourceCount ?? sourceArrays.length) === 1 ? 1 : 0,
             fusedStringPlan: {
                 stringLengths: new Uint16Array(wasm.memory.buffer, stringLengthsPtr, stringUniqueCount),
@@ -1884,6 +1906,9 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         bankSpanCount: parsed.bankSpanCount ?? 0,
         escapedKeyDecodeCount: parsed.escapedKeyDecodeCount ?? 0,
         validatedGlossaryReuseCount: parsed.validatedGlossaryReuseCount ?? 0,
+        globalExactContentReuseCount: parsed.globalExactContentReuseCount ?? 0,
+        fastGlossaryNormalizationCount: parsed.fastGlossaryNormalizationCount ?? 0,
+        fastGlossaryNormalizationFallbackCount: parsed.fastGlossaryNormalizationFallbackCount ?? 0,
         fusedSingleBankGroups: parsed.fusedSingleBankGroups ?? 0,
         maxWasmHeapBytes: parsed.wasm?.memory.buffer.byteLength ?? 0,
         bufferSetupMs,
@@ -3275,6 +3300,9 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         bankSpanCount: sum('bankSpanCount'),
         escapedKeyDecodeCount: sum('escapedKeyDecodeCount'),
         validatedGlossaryReuseCount: sum('validatedGlossaryReuseCount'),
+        globalExactContentReuseCount: sum('globalExactContentReuseCount'),
+        fastGlossaryNormalizationCount: sum('fastGlossaryNormalizationCount'),
+        fastGlossaryNormalizationFallbackCount: sum('fastGlossaryNormalizationFallbackCount'),
         fusedSingleBankGroups: sum('fusedSingleBankGroups'),
         maxWasmHeapBytes: Math.max(0, ...profiles.map((profile) => profile.maxWasmHeapBytes ?? 0)),
         bufferSetupMs: sum('bufferSetupMs'),
