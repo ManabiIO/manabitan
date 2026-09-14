@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/qualify-develop-runtime-lifecycle-final.yml
       - dev/qualify-develop-runtime-lifecycle.py
+      - dev/reconcile-develop-offscreen-bridge-fixtures.py
 
 permissions:
   contents: write
@@ -31,7 +32,7 @@ jobs:
       - run: npm ci
       - run: npm run build:libs
 
-      - name: Confirm untouched develop baseline and its two stale unit expectations
+      - name: Confirm exact untouched develop baseline failures
         shell: bash
         run: |
           mkdir -p /tmp/develop-lifecycle-final
@@ -49,11 +50,18 @@ jobs:
           import {readFileSync} from 'node:fs'
           const report = JSON.parse(readFileSync('/tmp/develop-lifecycle-final/baseline-unit.json', 'utf8'))
           const failed = report.testResults.flatMap((suite) => suite.assertionResults).filter((test) => test.status === 'failed')
-          assert.equal(failed.length, 2)
-          assert.deepEqual(failed.map((test) => test.title).sort(), [
+          const actual = failed.map((test) => test.title).sort()
+          const expected = [
               'fans out adjacent lookups after an import instead of serializing them',
               'queues lookups behind import while processing cancellation outside the mutation queue',
-          ])
+              'recreates a missing offscreen document after the control port dies',
+              'rotates a silently disconnected lookup port after the acceptance deadline',
+              'rotates a stale control port and retries a request without transferables',
+              'waits for an acknowledged request on an asynchronously registered control port',
+          ].sort()
+          assert.equal(failed.length, 6)
+          assert.deepEqual(actual, expected)
+          console.log('Confirmed exact six-failure untouched develop baseline.')
           JS
 
       - name: Add lifecycle regressions and confirm red state
@@ -81,8 +89,11 @@ jobs:
           }
           JS
 
-      - name: Apply narrowed fixes and import-busy test reconciliation
-        run: python dev/qualify-develop-runtime-lifecycle.py apply-fixes
+      - name: Apply narrowed fixes and reconcile stale expectations
+        shell: bash
+        run: |
+          python dev/qualify-develop-runtime-lifecycle.py apply-fixes
+          python dev/reconcile-develop-offscreen-bridge-fixtures.py
 
       - name: Require clean lint and all type projects
         shell: bash
@@ -91,6 +102,7 @@ jobs:
             ext/js/background/backend.js \
             ext/js/background/offscreen-proxy.js \
             test/runtime-lifecycle-develop.test.js \
+            test/offscreen-proxy-bridge.test.js \
             test/offscreen-dictionary-worker-import.test.js
           npm run test:ts:main
           npm run test:ts:dev
@@ -135,10 +147,12 @@ jobs:
             ext/js/background/backend.js \
             ext/js/background/offscreen-proxy.js \
             test/runtime-lifecycle-develop.test.js \
+            test/offscreen-proxy-bridge.test.js \
             test/offscreen-dictionary-worker-import.test.js
           git rm \
             .github/workflows/qualify-develop-runtime-lifecycle-final.yml \
-            dev/qualify-develop-runtime-lifecycle.py
+            dev/qualify-develop-runtime-lifecycle.py \
+            dev/reconcile-develop-offscreen-bridge-fixtures.py
           git diff --cached --stat > /tmp/develop-lifecycle-final/commit-stat.txt
           git commit -m 'Close develop runtime lifecycle races and align import-busy coverage'
           git rev-parse HEAD > /tmp/develop-lifecycle-final/verified-commit.txt
