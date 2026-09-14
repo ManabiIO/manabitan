@@ -1,0 +1,39 @@
+name: Radical import optimization workspace
+on:
+  push:
+    branches: [verify/radical-import-flags-20260914]
+    paths: [.github/workflows/radical-import-workspace.yml]
+permissions:
+  contents: read
+jobs:
+  workspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 443f4c51c04219f932f14c42d3d1e254f5620712
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Export exact workspace
+        run: |
+          mkdir -p "$RUNNER_TEMP/source" "$RUNNER_TEMP/runtime"
+          git archive HEAD | gzip > "$RUNNER_TEMP/source/source.tar.gz"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/source/source-identity.txt"
+          tar -czf "$RUNNER_TEMP/runtime/dependencies.tar.gz" node_modules ext/lib dev/lib/zstd-simd-module.js
+          cp "$(command -v node)" "$RUNNER_TEMP/runtime/node"
+          sha256sum "$RUNNER_TEMP/source/"* "$RUNNER_TEMP/runtime/"* > "$RUNNER_TEMP/runtime/SHA256SUMS"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: radical-import-source
+          path: ${{ runner.temp }}/source
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: radical-import-runtime
+          path: ${{ runner.temp }}/runtime
+          retention-days: 7
