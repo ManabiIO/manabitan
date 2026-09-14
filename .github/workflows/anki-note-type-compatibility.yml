@@ -8,6 +8,7 @@ on:
       - 'ext/js/pages/settings/anki-controller.js'
       - 'dev/anki-note-type-*'
       - 'dev/tests/*anki*'
+      - 'test/anki-note-type-field-util.test.js'
       - 'test/data/anki-note-types/**'
       - '.github/workflows/anki-note-type-compatibility.yml'
   workflow_dispatch:
@@ -22,6 +23,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Test offline field contracts and negative controls
+        run: node --test dev/tests/anki-note-type-compatibility.js
+      - name: Install archive reader
+        run: python -m pip install zstandard==0.25.0
+      - name: Test APKG reader and integrity checks
+        run: python -m unittest discover -s dev/tests -p 'test_anki*.py' -v
+      - name: Install repository test dependencies
+        run: npm ci
+      - name: Run existing mapper unit tests
+        run: npx vitest run test/anki-note-type-field-util.test.js
+      - name: Lint mapper and compatibility tools
+        run: npx eslint ext/js/data/anki-note-type-field-util.js dev/anki-note-type-compatibility.js dev/tests/anki-note-type-compatibility.js
+
   compatibility:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -50,7 +77,7 @@ jobs:
         if: ${{ !cancelled() }}
         env:
           MODE: ${{ matrix.mode }}
-        run: node dev/anki-note-type-compatibility.mjs "anki-report-$MODE.json"
+        run: node dev/anki-note-type-compatibility.js "anki-report-$MODE.json"
       - name: Retain schemas and provenance, not decks or media
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
