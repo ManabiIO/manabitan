@@ -27,7 +27,7 @@ function deferred() {
     /** @type {(reason?: unknown) => void} */
     let reject = () => {};
     const promise = new Promise((resolve2, reject2) => {
-        resolve = resolve2;
+        resolve = () => { resolve2(); };
         reject = reject2;
     });
     return {promise, resolve, reject};
@@ -147,10 +147,11 @@ describe('runtime reliability regressions', () => {
         Reflect.set(handler, '_queuedImportRequestCount', 1);
 
         try {
-            Reflect.get(handler, '_onMessage').call(handler, /** @type {MessageEvent} */ ({
+            const event = /** @type {MessageEvent} */ (/** @type {unknown} */ ({
                 data: {id: 99, action: 'findTermsStructuredOffscreen', params: {}},
                 ports: [],
             }));
+            Reflect.get(handler, '_onMessage').call(handler, event);
             await flushMicrotasks();
 
             expect(postMessage).toHaveBeenCalledOnce();
