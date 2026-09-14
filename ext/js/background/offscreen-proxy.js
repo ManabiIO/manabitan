@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
@@ -76,15 +77,23 @@ export class OffscreenProxy {
      * @see https://developer.chrome.com/docs/extensions/reference/offscreen/
      */
     async prepare() {
-        if (await this._hasOffscreenDocument()) {
-            await this._ensureOffscreenPort();
-            return;
-        }
-        if (this._creatingOffscreen) {
+        await this._ensureOffscreenPort();
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _ensureOffscreenDocument() {
+        if (this._creatingOffscreen !== null) {
             await this._creatingOffscreen;
             return;
         }
-        this._creatingOffscreen = (async () => {
+        // Share the existence probe too: a delayed negative probe must not recreate
+        // a document which another caller has just finished creating.
+        const creatingPromise = (async () => {
+            if (await this._hasOffscreenDocument()) { return; }
+            const port = this._currentOffscreenPort;
+            if (port) { this._clearCurrentOffscreenPort(port); }
             await chrome.offscreen.createDocument({
                 url: 'offscreen.html',
                 reasons: [
@@ -92,12 +101,14 @@ export class OffscreenProxy {
                 ],
                 justification: 'Access to the clipboard',
             });
-            await this._ensureOffscreenPort();
         })();
+        this._creatingOffscreen = creatingPromise;
         try {
-            await this._creatingOffscreen;
+            await creatingPromise;
         } finally {
-            this._creatingOffscreen = null;
+            if (this._creatingOffscreen === creatingPromise) {
+                this._creatingOffscreen = null;
+            }
         }
     }
 
@@ -114,26 +125,37 @@ export class OffscreenProxy {
      * @returns {Promise<void>}
      */
     async _ensureOffscreenPort() {
-        if (this._currentOffscreenPort !== null) {
-            return;
-        }
         if (this._registeringOffscreenPort !== null) {
             await this._registeringOffscreenPort;
             return;
         }
-        this._registeringOffscreenPort = (async () => {
-            await this.sendMessagePromise({action: 'createAndRegisterPortOffscreen'});
-            await Promise.race([
-                this._offscreenPortReadyPromise,
-                new Promise((resolve, reject) => {
-                    setTimeout(() => reject(new Error('Timed out waiting for offscreen control port registration')), 5000);
-                }),
-            ]);
+        const registeringPromise = (async () => {
+            // A closed document can leave a non-null port which silently drops sends.
+            await this._ensureOffscreenDocument();
+            if (this._currentOffscreenPort !== null) { return; }
+            // Bootstrap directly; never re-enter a public lifecycle-recovering send.
+            const response = await this._webExtension.sendMessagePromise({action: 'createAndRegisterPortOffscreen'});
+            this._getMessageResponseResult(/** @type {import('core').Response<void>} */ (response));
+            /** @type {ReturnType<typeof setTimeout>|undefined} */
+            let timeout;
+            try {
+                await Promise.race([
+                    this._offscreenPortReadyPromise,
+                    new Promise((resolve, reject) => {
+                        timeout = setTimeout(() => reject(new Error('Timed out waiting for offscreen control port registration')), 5000);
+                    }),
+                ]);
+            } finally {
+                clearTimeout(timeout);
+            }
         })();
+        this._registeringOffscreenPort = registeringPromise;
         try {
-            await this._registeringOffscreenPort;
+            await registeringPromise;
         } finally {
-            this._registeringOffscreenPort = null;
+            if (this._registeringOffscreenPort === registeringPromise) {
+                this._registeringOffscreenPort = null;
+            }
         }
     }
 
@@ -183,6 +205,7 @@ export class OffscreenProxy {
      * @returns {Promise<import('offscreen').ApiReturn<TMessageType>>}
      */
     async sendMessagePromise(message) {
+        await this._ensureOffscreenDocument();
         const response = await this._webExtension.sendMessagePromise(message);
         return this._getMessageResponseResult(/** @type {import('core').Response<import('offscreen').ApiReturn<TMessageType>>} */ (response));
     }
@@ -352,9 +375,23 @@ export class DictionaryRuntimeWorkerProxy {
      */
     _onMessage(event) {
         const id = typeof event.data?.id === 'number' ? event.data.id : null;
-        if (id === null) { return; }
+        if (id === null) {
+            reportDiagnostics('offscreen-proxy-unmatched-response', {
+                reason: 'missing-id',
+                id: null,
+                hasError: typeof event.data?.error !== 'undefined',
+            });
+            return;
+        }
         const handler = this._responseHandlers.get(id);
-        if (typeof handler === 'undefined') { return; }
+        if (typeof handler === 'undefined') {
+            reportDiagnostics('offscreen-proxy-unmatched-response', {
+                reason: 'unknown-id',
+                id,
+                hasError: typeof event.data?.error !== 'undefined',
+            });
+            return;
+        }
         this._responseHandlers.delete(id);
         if (typeof event.data?.error !== 'undefined') {
             handler.reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (event.data.error)));

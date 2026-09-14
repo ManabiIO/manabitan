@@ -30,6 +30,7 @@ import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
+import {toError} from '../core/to-error.js';
 import {clone, deferPromise, promiseTimeout} from '../core/utilities.js';
 import {generateAnkiNoteMediaFileName, INVALID_NOTE_ID, isNoteDataValid} from '../data/anki-util.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
@@ -154,6 +155,8 @@ export class Backend {
         this._prepareError = false;
         /** @type {?Promise<void>} */
         this._preparePromise = null;
+        /** @type {boolean} */
+        this._prepareInternalSyncComplete = false;
         /** @type {import('core').DeferredPromiseDetails<void>} */
         const {promise, resolve, reject} = deferPromise();
         /** @type {Promise<void>} */
@@ -282,19 +285,30 @@ export class Backend {
      */
     prepare() {
         if (this._preparePromise === null) {
+            if (this._prepareError) {
+                const deferred = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+                this._prepareCompletePromise = deferred.promise;
+                this._prepareCompleteResolve = deferred.resolve;
+                this._prepareCompleteReject = deferred.reject;
+                this._prepareError = false;
+            }
             const promise = this._prepareInternal();
-            promise.then(
+            this._preparePromise = promise;
+            void promise.then(
                 () => {
                     this._isPrepared = true;
                     this._prepareCompleteResolve();
+                    this._updateBadge();
                 },
                 (error) => {
+                    if (this._preparePromise === promise) {
+                        this._preparePromise = null;
+                    }
                     this._prepareError = true;
                     this._prepareCompleteReject(error);
+                    this._updateBadge();
                 },
             );
-            void promise.finally(() => this._updateBadge());
-            this._preparePromise = promise;
         }
         return this._prepareCompletePromise;
     }
@@ -559,9 +573,10 @@ export class Backend {
             }
         };
         try {
-            {
+            if (!this._prepareInternalSyncComplete) {
                 const startedAt = safePerformance.now();
                 this._prepareInternalSync();
+                this._prepareInternalSyncComplete = true;
                 recordPhase('_prepareInternalSync', startedAt);
             }
 
@@ -1797,14 +1812,25 @@ export class Backend {
      * @returns {Promise<void>}
      */
     async _runDictionaryMutation(task) {
-        await this._awaitDictionaryMutationSettled();
-        this._dictionaryMutationPromise = (async () => {
+        const previousPromise = this._dictionaryMutationPromise;
+        // Publish the tail before any caller-provided task can re-enter this queue.
+        const mutationPromise = Promise.resolve().then(async () => {
+            if (previousPromise !== null) {
+                try {
+                    await previousPromise;
+                } catch (_) {
+                    // A prior failed mutation must not poison later queued mutations.
+                }
+            }
             await task();
-        })();
+        });
+        this._dictionaryMutationPromise = mutationPromise;
         try {
-            await this._dictionaryMutationPromise;
+            await mutationPromise;
         } finally {
-            this._dictionaryMutationPromise = null;
+            if (this._dictionaryMutationPromise === mutationPromise) {
+                this._dictionaryMutationPromise = null;
+            }
         }
     }
 
@@ -2294,7 +2320,12 @@ export class Backend {
         if (this._searchPopupTabCreatePromise === null) {
             const promise = this._getOrCreateSearchPopup();
             this._searchPopupTabCreatePromise = promise;
-            void promise.then(() => { this._searchPopupTabCreatePromise = null; });
+            const clearPromise = () => {
+                if (this._searchPopupTabCreatePromise === promise) {
+                    this._searchPopupTabCreatePromise = null;
+                }
+            };
+            void promise.then(clearPromise, clearPromise);
         }
         return this._searchPopupTabCreatePromise;
     }

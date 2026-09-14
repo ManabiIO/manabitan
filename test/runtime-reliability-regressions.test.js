@@ -1,0 +1,160 @@
+/*
+ * Copyright (C) 2026 Manabitan authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ */
+
+import {afterEach, describe, expect, test, vi} from 'vitest';
+
+vi.mock('../ext/js/core/diagnostics-reporter.js', () => ({
+    isDevDiagnosticsBuild: false,
+    reportDiagnostics: vi.fn(),
+    reportDiagnosticsLazy: vi.fn(),
+}));
+
+const {Backend} = await import('../ext/js/background/backend.js');
+const {OffscreenProxy} = await import('../ext/js/background/offscreen-proxy.js');
+
+/**
+ * @returns {{promise: Promise<void>, resolve: () => void, reject: (reason?: unknown) => void}}
+ */
+function deferred() {
+    /** @type {() => void} */
+    let resolve = () => {};
+    /** @type {(reason?: unknown) => void} */
+    let reject = () => {};
+    const promise = /** @type {Promise<void>} */ (new Promise((resolve2, reject2) => {
+        resolve = () => { resolve2(void 0); };
+        reject = reject2;
+    }));
+    return {promise, resolve, reject};
+}
+
+async function flushMicrotasks() {
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+}
+
+describe('main runtime reliability regressions', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals();
+        vi.restoreAllMocks();
+    });
+
+    test('dictionary mutation admission is atomic and preserves serialization', async () => {
+        const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+        Reflect.set(backend, '_dictionaryMutationPromise', null);
+        const firstGate = deferred();
+        const secondGate = deferred();
+        const thirdGate = deferred();
+        /** @type {string[]} */
+        const starts = [];
+
+        const first = Backend.prototype._runDictionaryMutation.call(backend, async () => {
+            starts.push('first');
+            await firstGate.promise;
+        });
+        await flushMicrotasks();
+
+        const second = Backend.prototype._runDictionaryMutation.call(backend, async () => {
+            starts.push('second');
+            await secondGate.promise;
+        });
+        const third = Backend.prototype._runDictionaryMutation.call(backend, async () => {
+            starts.push('third');
+            await thirdGate.promise;
+        });
+        await flushMicrotasks();
+        expect(starts).toEqual(['first']);
+
+        firstGate.resolve();
+        await flushMicrotasks();
+        expect(starts).toEqual(['first', 'second']);
+
+        secondGate.resolve();
+        await flushMicrotasks();
+        expect(starts).toEqual(['first', 'second', 'third']);
+
+        thirdGate.resolve();
+        await Promise.all([first, second, third]);
+        expect(Reflect.get(backend, '_dictionaryMutationPromise')).toBe(null);
+    });
+
+    test('failed search-popup creation does not poison later attempts', async () => {
+        const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+        Reflect.set(backend, '_searchPopupTabCreatePromise', null);
+        const create = vi.fn()
+            .mockRejectedValueOnce(new Error('transient window failure'))
+            .mockResolvedValueOnce({tab: {id: 7}, created: true});
+        Reflect.set(backend, '_getOrCreateSearchPopup', create);
+
+        await expect(Backend.prototype._getOrCreateSearchPopupWrapper.call(backend)).rejects.toThrow('transient window failure');
+        await expect(Backend.prototype._getOrCreateSearchPopupWrapper.call(backend)).resolves.toEqual({tab: {id: 7}, created: true});
+        expect(create).toHaveBeenCalledTimes(2);
+    });
+
+    test('backend prepare can retry after a transient initialization failure', async () => {
+        const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+        const initialReady = deferred();
+        Reflect.set(backend, '_preparePromise', null);
+        Reflect.set(backend, '_prepareError', false);
+        Reflect.set(backend, '_isPrepared', false);
+        Reflect.set(backend, '_prepareCompletePromise', initialReady.promise);
+        Reflect.set(backend, '_prepareCompleteResolve', initialReady.resolve);
+        Reflect.set(backend, '_prepareCompleteReject', initialReady.reject);
+        Reflect.set(backend, '_updateBadge', vi.fn());
+        const prepareInternal = vi.fn()
+            .mockRejectedValueOnce(new Error('transient startup failure'))
+            .mockResolvedValueOnce(void 0);
+        Reflect.set(backend, '_prepareInternal', prepareInternal);
+
+        await expect(Backend.prototype.prepare.call(backend)).rejects.toThrow('transient startup failure');
+        await expect(Backend.prototype.prepare.call(backend)).resolves.toBeUndefined();
+        expect(prepareInternal).toHaveBeenCalledTimes(2);
+        expect(Reflect.get(backend, '_isPrepared')).toBe(true);
+    });
+
+    test('ordinary offscreen messages ensure the document exists before sending', async () => {
+        vi.stubGlobal('chrome', {runtime: {lastError: void 0}});
+        const proxy = /** @type {OffscreenProxy} */ (Object.create(OffscreenProxy.prototype));
+        const ensureOffscreenDocument = vi.fn().mockResolvedValue(void 0);
+        const sendMessagePromise = vi.fn().mockResolvedValue({result: 'ok'});
+        Reflect.set(proxy, '_ensureOffscreenDocument', ensureOffscreenDocument);
+        Reflect.set(proxy, '_webExtension', {sendMessagePromise});
+
+        await expect(OffscreenProxy.prototype.sendMessagePromise.call(proxy, {
+            action: 'getDictionaryInfoOffscreen',
+            params: void 0,
+        })).resolves.toBe('ok');
+        expect(ensureOffscreenDocument).toHaveBeenCalledOnce();
+        expect(sendMessagePromise).toHaveBeenCalledOnce();
+    });
+
+    test('concurrent offscreen recovery creates only one document', async () => {
+        const createGate = deferred();
+        const createDocument = vi.fn(async () => {
+            await createGate.promise;
+        });
+        vi.stubGlobal('chrome', {
+            offscreen: {createDocument},
+        });
+        const proxy = /** @type {OffscreenProxy} */ (Object.create(OffscreenProxy.prototype));
+        Reflect.set(proxy, '_creatingOffscreen', null);
+        Reflect.set(proxy, '_hasOffscreenDocument', vi.fn().mockResolvedValue(false));
+
+        const method = /** @type {() => Promise<void>} */ (Reflect.get(proxy, '_ensureOffscreenDocument').bind(proxy));
+        const first = method();
+        await flushMicrotasks();
+        const second = method();
+        await flushMicrotasks();
+        expect(createDocument).toHaveBeenCalledOnce();
+
+        createGate.resolve();
+        await Promise.all([first, second]);
+        expect(Reflect.get(proxy, '_creatingOffscreen')).toBe(null);
+    });
+});

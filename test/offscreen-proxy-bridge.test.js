@@ -25,11 +25,16 @@ describe('OffscreenProxy bridge reliability', () => {
 
     beforeEach(() => {
         originalChrome = globalThis.chrome;
-        globalThis.chrome = /** @type {typeof globalThis.chrome} */ ({
+        globalThis.chrome = /** @type {typeof globalThis.chrome} */ (/** @type {unknown} */ ({
             runtime: {
                 lastError: undefined,
+                getURL: vi.fn(() => 'chrome-extension://test/offscreen.html'),
+                getContexts: vi.fn().mockResolvedValue([{}]),
             },
-        });
+            offscreen: {
+                createDocument: vi.fn().mockResolvedValue(void 0),
+            },
+        }));
     });
 
     afterEach(() => {
@@ -101,5 +106,33 @@ describe('OffscreenProxy bridge reliability', () => {
         expect(stalePort.postMessage).toHaveBeenCalledTimes(1);
         expect(stalePort.close).toHaveBeenCalledTimes(1);
         expect(freshPort.postMessage).toHaveBeenCalledTimes(1);
+    });
+
+    test('control-port bootstrap does not re-enter the public recovering send path', async () => {
+        const port = {
+            postMessage: vi.fn(),
+            close: vi.fn(),
+            onmessageerror: null,
+        };
+        /** @type {InstanceType<typeof OffscreenProxy>|null} */
+        let proxy = null;
+        const webExtension = {
+            sendMessagePromise: vi.fn(async (message) => {
+                if (message?.action === 'createAndRegisterPortOffscreen' && proxy !== null) {
+                    queueMicrotask(() => {
+                        void proxy?.registerOffscreenPort(/** @type {MessagePort} */ (/** @type {unknown} */ (port)));
+                    });
+                }
+                return {result: null};
+            }),
+        };
+        proxy = new OffscreenProxy(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ (webExtension)));
+        const publicSend = vi.spyOn(proxy, 'sendMessagePromise');
+
+        await proxy.sendMessageViaPort({action: 'connectToDatabaseWorker'}, []);
+
+        expect(publicSend).not.toHaveBeenCalled();
+        expect(webExtension.sendMessagePromise).toHaveBeenCalledOnce();
+        expect(port.postMessage).toHaveBeenCalledOnce();
     });
 });
