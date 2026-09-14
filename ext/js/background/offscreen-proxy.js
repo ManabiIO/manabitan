@@ -216,6 +216,7 @@ export class OffscreenProxy {
      * @returns {Promise<import('offscreen').ApiReturn<TMessageType>>}
      */
     async sendMessagePromise(message) {
+        await this._ensureOffscreenDocument();
         const response = await this._webExtension.sendMessagePromise(message);
         return this._getMessageResponseResult(/** @type {import('core').Response<import('offscreen').ApiReturn<TMessageType>>} */ (response));
     }
