@@ -4,7 +4,7 @@
 
 [Install Manabitan](https://manabi.io/manabitan/getting-started/) · [Documentation](https://manabi.io/manabitan/) · [Releases](https://github.com/ManabiIO/manabitan/releases) · [Manabi Discord](https://discord.gg/gvxzS93C3w)
 
-Manabitan is a Yomitan fork that keeps the same basic reading/mining workflow while replacing the dictionary storage and query engines, dramatically reducing installed dictionary size, and adding quality-of-life improvements around dictionary management and Anki setup.
+Manabitan is a Yomitan fork that keeps the familiar reading/mining workflow while replacing the dictionary storage and query engines, dramatically reducing installed dictionary size, and improving dictionary management and Anki setup.
 
 **[Why use Manabitan instead of Yomitan?](https://manabi.io/manabitan/why-manabitan/)** · **[Roadmap](#roadmap)** · **[Why is it a fork?](https://manabi.io/manabitan/about-manabitan/)**
 
@@ -30,7 +30,7 @@ The amount saved varies with the dictionaries and build; there is no universal p
 
 For dictionaries that provide a usable web update source, Manabitan can check for updates automatically. Current controls include hourly, daily, weekly, and monthly schedules plus bulk update actions.
 
-That is useful because manual dictionary updates are easy to neglect, and they are especially annoying when an update makes the extension unavailable while it runs. The storage rewrite makes routine background updates practical instead of something you have to plan around.
+Manual dictionary updates are easy to neglect, especially when they interrupt reading. Faster imports plus a storage design that keeps installed dictionaries available make routine updates much easier to live with.
 
 ### Better dictionary management
 
@@ -52,17 +52,21 @@ Other note types retain best-effort mapping based on familiar field names and al
 
 Built-in popup themes and frequency-based recall blur add options around the existing workflow. MeCab, custom audio/Forvo, AnkiConnect, custom templates, CSS, and other upstream/community integrations remain useful where their integration requirements are satisfied.
 
-The goal is not to make a different product for the sake of being different. It is to keep what works in Yomitan and improve the parts that cost time, space, or setup effort.
+The goal is not to build a different product for the sake of being different. It is to keep what works in Yomitan and improve the parts that cost time, space, or setup effort.
 
 ## Roadmap
 
-Nothing is set in stone. These are general directions, not a fixed feature list or a delivery schedule.
+Nothing is set in stone. These are general directions, not a fixed feature list or delivery schedule.
 
-We intend to **continue maintaining Manabitan and porting upstream Yomitan changes**, adapting and testing them for our different internals. We will keep refining onboarding to help new users enter the Yomitan/Manabitan ecosystem, while preserving the flexibility experienced users rely on.
+We intend to **keep maintaining Manabitan and bringing upstream Yomitan changes into it**, adapting and testing them for our different internals. We will keep refining onboarding so new users can enter the Yomitan/Manabitan ecosystem with less friction, while preserving the flexibility experienced users rely on.
 
 We will continue making **imports and lookups faster, using less memory, and reducing installed storage requirements**. We are also developing a **robust benchmark suite comparing imports, lookups, and storage across tools compatible with Yomitan dictionaries**. We plan to make the suite public with reproducible workloads and clearly stated versions and test conditions. That publication is work in progress, not a finished comparison being announced here.
 
-We have **no current plans for dramatic changes to Yomitan's general functionality, design, or familiar behaviors**. Manabitan intends to stay true to Yomitan's vision for how this tool works: improve the internals and the setup experience without making people relearn the tool.
+We also intend to make **Manabitan's AnkiConnect integration substantially faster and more capable**. That includes reducing avoidable waiting and overhead in the operations around configuring and creating notes. We also intend to work on **AnkiConnect itself** so the bridge can become faster and support more capable workflows instead of forcing every improvement into Manabitan. The exact shape of that work is not set yet. More to come.
+
+The current automatic note-type field mapping described above is already in Manabitan. Broader AnkiConnect performance and capability improvements are roadmap work, not a claim about the current release.
+
+We have **no current plans for dramatic changes to Yomitan's general functionality, design, or familiar behaviors**. Manabitan intends to stay true to Yomitan's vision for how this tool works: improve the internals, efficiency, onboarding, and integrations without making people relearn the tool.
 
 Read the [full roadmap](https://manabi.io/manabitan/why-manabitan/#roadmap) for these directions alongside the user-facing benefits.
 
