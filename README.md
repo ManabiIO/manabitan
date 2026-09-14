@@ -4,25 +4,55 @@
 
 [Install Manabitan](https://manabi.io/manabitan/getting-started/) · [Documentation](https://manabi.io/manabitan/) · [Releases](https://github.com/ManabiIO/manabitan/releases) · [Manabi Discord](https://discord.gg/gvxzS93C3w)
 
-Manabitan is a Yomitan fork with rewritten dictionary storage and query engines, built for faster imports, background updates, and quicker lookups. Yomitan's primary maintainers have supported releasing this work as a separate fork, offered guidance, and reviewed our release preparations. We maintain and release Manabitan independently, so we can prove the new internals without making Yomitan's existing users take on a major data migration.
+Manabitan is a Yomitan fork that keeps the same basic reading/mining workflow while replacing the dictionary storage and query engines and adding quality-of-life improvements around dictionary management and Anki setup.
 
-[Why Manabitan exists](https://manabi.io/manabitan/about-manabitan/) explains the engineering tradeoffs, upstream relationship, and migration responsibility.
+**[Why use Manabitan instead of Yomitan?](https://manabi.io/manabitan/why-manabitan/)** · **[Why is it a fork?](https://manabi.io/manabitan/about-manabitan/)**
 
-## Less waiting, the same reason to use a dictionary extension
+Yomitan's primary maintainers have supported releasing this work as a separate fork, offered guidance, and reviewed our release preparations. Manabitan is maintained and released independently.
 
-Look up a word where you're reading, choose the dictionaries you need, hear available pronunciation audio, and make an Anki note. Manabitan keeps that workflow while changing the internals that make imports and queries expensive.
+## Why use Manabitan instead of Yomitan?
 
-The work includes optimized dictionary imports and lookups, MDX support, dictionary metadata editing, built-in themes, frequency-based recall blur, bulk recommended-dictionary installation, and Anki note-type setup. See the [dictionary guide](https://manabi.io/manabitan/dictionaries/), [advanced features](https://manabi.io/manabitan/advanced/), and [Anki guide](https://manabi.io/manabitan/anki/) for the details and build-specific limits.
+The short version: **less waiting, less dictionary maintenance, and less Anki setup without replacing the workflow that makes Yomitan useful.**
 
-Installed dictionaries can remain available while new data is imported. A first-time install must still finish before that dictionary can be used. For dictionaries with a usable web update source, scheduled updates can reduce the need to start updates manually. Device suspension, network access, and source availability can delay them.
+### Faster imports and lookups
 
-Speed matters during onboarding and with large dictionaries, especially on slower devices and e-readers. It matters during reading too: waiting for a definition interrupts the flow. Reduced CPU and storage work should help power consumption, but we have not established a measured battery-life improvement. Performance comparisons need the build, dictionaries, device, and test conditions; a badge or a single chart is not a universal guarantee.
+Manabitan rewrites dictionary storage and much of the query path. Dictionary imports and normal lookups are heavily optimized, with the biggest practical difference on large collections, older hardware, and e-ink devices.
 
-## Why a separate fork?
+Installed dictionaries can remain available while new data is prepared. A first-time install still has to finish before that dictionary can be used. Performance varies by build, browser, dictionary collection, and device; we benchmark it, but a single chart is not a universal speed ratio or battery-life guarantee.
 
-The storage and query changes work together. Splitting the transition into upstream pull requests is substantial implementation and review work, and intermediate steps may add complexity before delivering a useful improvement. Contributors have tried bringing foundational pieces upstream, but there has not been enough sustained capacity to complete the whole transition that way.
+### Automatic and scheduled dictionary updates
 
-A separate installation also avoids putting Yomitan's existing users through a major data migration before we are ready to take responsibility for it. That may be worth revisiting later. For now, we can build and test the architecture together and release it to people who choose it. Useful independent improvements can still go back upstream under the existing licenses.
+For dictionaries that provide a usable web update source, Manabitan can check for updates automatically. Current controls include hourly, daily, weekly, and monthly schedules plus bulk update actions.
+
+That is useful because manual dictionary updates are easy to neglect, and they are especially annoying when an update makes the extension unavailable while it runs. The storage rewrite makes routine background updates practical instead of something you have to plan around.
+
+### Better dictionary management
+
+Manabitan also adds MDX support, bulk recommended-dictionary installation, supported metadata editing, and bulk update controls. It continues to support the Yomitan dictionary ecosystem rather than replacing it with a proprietary format.
+
+### Automatic Anki field mapping
+
+If **Kiku**, **Lapis**, **Senren / Senren 洗練**, or **Crop Theft Vocab** already exists in Anki, selecting that note type in Manabitan automatically fills the expected Manabitan/Yomitan field markers instead of making you wire every field by hand.
+
+The presets cover the fields those note types actually use: expressions/readings, audio, definitions, sentence/cloze context, pitch, frequency, source information, and related fields. Kiku/Lapis/Senren can also pick an available dictionary-specific `single-glossary-*` marker for the primary-definition field.
+
+Other note types get best-effort mapping based on familiar field names and aliases such as `Word`, `Term`, `Phrase`, `Definition`, `Meaning`, `Sound`, `Audio`, sentence, pitch, and frequency fields. For unrecognized models, an existing same-named mapping is preserved when possible.
+
+**This does not install the note type into Anki.** Install/import the note type in Anki first, select it in Manabitan, then review the generated field mapping before normal mining. See the [Anki guide](https://manabi.io/manabitan/anki/#automatic-field-mapping) and [mapping implementation](ext/js/data/anki-note-type-field-util.js).
+
+### Reading quality of life
+
+Built-in popup themes and frequency-based recall blur add options around the existing workflow. MeCab, custom audio/Forvo, AnkiConnect, custom templates, CSS, and other upstream/community integrations remain useful where their integration requirements are satisfied.
+
+The goal is not to make a different product for the sake of being different. It is to keep what works in Yomitan and improve the parts that cost time or setup effort.
+
+## Why is Manabitan a separate fork?
+
+The storage and query changes work together. Splitting the transition into upstream pull requests is substantial implementation and review work, and intermediate steps can add complexity before delivering much immediate value on their own. Contributors have tried bringing foundational pieces upstream, but there has not been enough sustained capacity to carry the entire transition through that process.
+
+A separate installation also avoids putting Yomitan's existing users through a major data migration before we are ready to take responsibility for it. That may be worth revisiting later. For now, Manabitan lets us build and prove the architecture with people who deliberately choose it, while useful independent improvements can still flow back upstream under the existing licenses.
+
+The longer version is in [Why Manabitan is a fork](https://manabi.io/manabitan/about-manabitan/).
 
 ## Installation and migration
 
