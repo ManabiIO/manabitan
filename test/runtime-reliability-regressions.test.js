@@ -157,4 +157,27 @@ describe('runtime reliability regressions', () => {
         expect(postMessage).toHaveBeenCalledOnce();
         expect(postMessage.mock.calls[0][0]).toMatchObject({id: 99, error: expect.any(Object)});
     });
+
+    test('lookup is rejected while an import is actively running after queue admission', async () => {
+        const postMessage = vi.fn();
+        vi.stubGlobal('self', {
+            addEventListener: vi.fn(),
+            postMessage,
+        });
+        const {OffscreenDictionaryWorkerHandler} = await import('../ext/js/background/offscreen-dictionary-worker.js');
+        const handler = new OffscreenDictionaryWorkerHandler();
+        const queueGate = deferred();
+        Reflect.set(handler, '_requestQueue', queueGate.promise);
+        Reflect.set(handler, '_activeImportAbortController', new AbortController());
+
+        const event = /** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: {id: 100, action: 'findTermsStructuredOffscreen', params: {}},
+            ports: [],
+        }));
+        Reflect.get(handler, '_onMessage').call(handler, event);
+        await flushMicrotasks();
+
+        expect(postMessage).toHaveBeenCalledOnce();
+        expect(postMessage.mock.calls[0][0]).toMatchObject({id: 100, error: expect.any(Object)});
+    });
 });
