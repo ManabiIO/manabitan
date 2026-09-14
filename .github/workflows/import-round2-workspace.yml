@@ -1,0 +1,38 @@
+name: Import round two workspace
+on:
+  push:
+    branches: [verify/import-radical-round2-20260914]
+    paths: [.github/workflows/import-round2-workspace.yml]
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 443f4c51c04219f932f14c42d3d1e254f5620712
+          persist-credentials: false
+      - name: Export source
+        run: |
+          mkdir -p "$RUNNER_TEMP/source"
+          git archive HEAD | gzip > "$RUNNER_TEMP/source/source.tar.gz"
+          git ls-tree -r HEAD > "$RUNNER_TEMP/source/git-tree.txt"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/source/identity.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-round2-source
+          path: ${{ runner.temp }}/source
+          retention-days: 7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - name: Verify immutable fixtures
+        run: node dev/perf/prepare-dictionaries.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-round2-locked-fixtures
+          path: builds/e2e-dictionary-cache/*.zip
+          compression-level: 0
+          retention-days: 7
