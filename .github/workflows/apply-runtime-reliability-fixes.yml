@@ -1,3 +1,4 @@
+# One-shot workflow; deletes itself after applying and validating the fixes.
 name: Apply runtime reliability fixes
 
 on:
