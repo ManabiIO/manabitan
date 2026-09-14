@@ -1,0 +1,61 @@
+name: Anki note type compatibility
+
+on:
+  pull_request:
+    paths:
+      - 'ext/js/data/anki-note-type-field-util.js'
+      - 'ext/js/data/anki-template-util.js'
+      - 'ext/js/pages/settings/anki-controller.js'
+      - 'dev/anki-note-type-*'
+      - 'dev/tests/*anki*'
+      - 'test/data/anki-note-types/**'
+      - '.github/workflows/anki-note-type-compatibility.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '23 9 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: anki-note-types-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [pinned, latest]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Install archive reader
+        run: python -m pip install zstandard==0.25.0
+      - name: Download actual upstream packages and extract fields
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          MODE: ${{ matrix.mode }}
+        run: python dev/anki-note-type-upstream.py --mode "$MODE" --output "anki-report-$MODE.json"
+      - name: Check every field against the production mapper
+        if: ${{ !cancelled() }}
+        env:
+          MODE: ${{ matrix.mode }}
+        run: node dev/anki-note-type-compatibility.mjs "anki-report-$MODE.json"
+      - name: Retain schemas and provenance, not decks or media
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: anki-note-types-${{ matrix.mode }}
+          path: anki-report-${{ matrix.mode }}.json
+          if-no-files-found: error
+          retention-days: 30
