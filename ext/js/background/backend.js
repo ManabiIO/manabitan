@@ -1746,7 +1746,8 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      */
     async _runDictionaryMutation(task) {
         const previousPromise = this._dictionaryMutationPromise;
-        const mutationPromise = (async () => {
+        // Publish the tail before caller code can synchronously re-enter this queue.
+        const mutationPromise = Promise.resolve().then(async () => {
             if (previousPromise !== null) {
                 try {
                     await previousPromise;
@@ -1755,7 +1756,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                 }
             }
             await task();
-        })();
+        });
         this._dictionaryMutationPromise = mutationPromise;
         try {
             await mutationPromise;
