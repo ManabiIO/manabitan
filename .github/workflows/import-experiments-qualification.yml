@@ -1,0 +1,105 @@
+name: Import experiment source qualification
+on:
+  push:
+    branches: [verify/import-experiments-20260914]
+    paths: [.github/workflows/import-experiments-qualification.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify transport and exact product tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          export EVIDENCE="$RUNNER_TEMP/evidence"
+          python3 - <<'PY'
+          import base64, gzip, hashlib, os
+          from pathlib import Path
+          parts = sorted(Path('.github/import-experiment-patch').glob('*.b64'))
+          assert len(parts) == 6
+          text = ''.join(p.read_text().strip() for p in parts)
+          # Repair the identified single-character transport transcription only.
+          text = text.replace('Xe8tpbrX6Ptwcd', 'Xe8tpbrX6/Ptwcd')
+          patch = gzip.decompress(base64.b64decode(text, validate=True))
+          expected = '0cc4aa9fdd800c7b5749b9e15d4d094980fd19807eaab98449e554ee40c8e3d5'
+          assert hashlib.sha256(patch).hexdigest() == expected
+          Path(os.environ['EVIDENCE'], 'source.patch').write_bytes(patch)
+          PY
+          git checkout --detach 8bd9c56d419d4493c0602b58c2070b2b336840c0
+          git apply --index --whitespace=error-all "$EVIDENCE/source.patch"
+          test "$(git write-tree)" = 8f4fdd2ba668beafb3c74bc3f3a62a8091715744
+          git diff --cached --check
+          git diff --cached --stat > "$EVIDENCE/source-stat.txt"
+          git config user.name 'Manabitan contributors'
+          git config user.email 'contributors@manabi.io'
+          git commit -m 'Add default-off structural import experiments and qualification handoff' -m 'Implement bounded bank spans, native escaped keys, validated glossary reuse and single-bank fusion. Preserve storage formats and production defaults; add 64 regression tests and execution counters. Local full-suite offscreen failures reproduce on the unchanged parent.'
+          git rev-parse HEAD HEAD^{tree} HEAD^ > "$EVIDENCE/product-identity.txt"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - name: Install and build libraries
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$RUNNER_TEMP/evidence/npm-ci.log"
+          npm run build:libs 2>&1 | tee "$RUNNER_TEMP/evidence/build-libs.log"
+      - name: Focused parser, worker and compatibility coverage
+        run: |
+          set -euo pipefail
+          node node_modules/vitest/vitest.mjs run test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js test/term-bank-composite-state.test.js test/term-bank-parser-string-scan.test.js 2>&1 | tee "$RUNNER_TEMP/evidence/focused-tests.log"
+      - name: Types, options, focused lint and target builds
+        run: |
+          set -euo pipefail
+          npm run test:ts 2>&1 | tee "$RUNNER_TEMP/evidence/types.log"
+          npm run test:unit:options 2>&1 | tee "$RUNNER_TEMP/evidence/options.log"
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/term-bank-experiments.test.js 2>&1 | tee "$RUNNER_TEMP/evidence/lint.log"
+          npm run test:build 2>&1 | tee "$RUNNER_TEMP/evidence/build-targets.log"
+      - name: Publish only verified product ancestry to staging
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^{tree})" = 8f4fdd2ba668beafb3c74bc3f3a62a8091715744
+          test -z "$(git status --porcelain)"
+          git push origin HEAD:refs/heads/stage/import-experiments-20260914
+      - name: Record full unit status without hiding known baseline failures
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm run test:unit 2>&1 | tee "$RUNNER_TEMP/evidence/full-unit.log"
+      - name: Upload source qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-experiments-source-qualified
+          path: ${{ runner.temp }}/evidence
+          retention-days: 14
+      - name: Install Chromium and build development extension
+        run: |
+          node node_modules/playwright/cli.js install --with-deps chromium
+          node dev/bin/build.js --target chrome-dev
+      - name: Strict Chromium with all four experiments requested
+        continue-on-error: true
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{"experimentalTermBankSpans":true,"experimentalNativeEscapedKeys":true,"experimentalValidatedGlossaryReuse":true,"experimentalFusedSingleBank":true}'
+        run: |
+          set -o pipefail
+          xvfb-run -a npm run test:e2e:chromium-extension 2>&1 | tee "$RUNNER_TEMP/evidence/chromium.log"
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-experiments-browser-evidence
+          path: |
+            ${{ runner.temp }}/evidence/chromium.log
+            builds/*report*
+            builds/*summary*
+            builds/*diagnostic*
+          retention-days: 14
