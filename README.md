@@ -76,6 +76,14 @@ The storage and query changes work together. Splitting the transition into upstr
 
 A separate installation also avoids putting Yomitan's existing users through a major data migration before we are ready to take responsibility for it. That may be worth revisiting later. For now, Manabitan lets us build and prove the architecture with people who deliberately choose it, while useful independent improvements can still flow back upstream under the existing licenses.
 
+### Why the name Manabitan?
+
+A separately maintained fork this substantial needs its own name. A distinct name avoids confusing Manabitan with an official Yomitan release, makes maintenance and support responsibility clear, and respects Yomitan's name, branding, authorship, copyright, and licensing.
+
+The **Manabi** name also follows the naming scheme I use for my projects. I'm the developer behind **Manabi Reader** and **Manabi Flashcards**, so Manabitan fits into the same project family.
+
+The new name is not a move away from open source. **Manabitan will remain free and open source**, and I hope to release more open-source tools under the Manabi name—including original projects, not only forks—soon.
+
 The longer version is in [Why Manabitan is a fork](https://manabi.io/manabitan/about-manabitan/).
 
 ## Installation and migration
