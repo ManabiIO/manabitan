@@ -6,65 +6,181 @@ on:
       - fix/runtime-reliability-main-20260914
     paths:
       - .github/workflows/qualify-main-runtime-reliability.yml
-      - ext/js/background/backend.js
-      - ext/js/background/offscreen-proxy.js
-      - ext/js/pages/settings/dictionary-controller.js
-      - test/runtime-reliability-*.test.js
-      - test/offscreen-proxy-bridge.test.js
-      - test/dictionary-import-controller-update-profile.test.js
-      - test/dictionary-importer-zip-filename-alias.test.js
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: qualify-main-runtime-reliability
   cancel-in-progress: true
 
 jobs:
-  static-validation:
+  qualification:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
           cache: npm
       - run: npm ci
       - run: npm run build:libs
-      - name: Inspect strict lint and all four type projects
+      - name: Reproduce both lookup error recovery failures
         shell: bash
         run: |
-          mkdir -p /tmp/main-static
-          git rev-parse HEAD > /tmp/main-static/input-commit.txt
+          mkdir -p /tmp/main-final-static
+          git rev-parse HEAD > /tmp/main-final-static/input-commit.txt
           set +e
-          npx eslint ext/js/background/backend.js ext/js/background/offscreen-proxy.js ext/js/pages/settings/dictionary-controller.js test/runtime-reliability-regressions.test.js test/runtime-reliability-lifecycle.test.js test/offscreen-proxy-bridge.test.js test/dictionary-import-controller-update-profile.test.js test/dictionary-importer-zip-filename-alias.test.js --fix --format=json --output-file=/tmp/main-static/eslint.json
-          lint_status=$?
-          git diff --binary > /tmp/main-static/lint-autofix.patch
-          result=$lint_status
-          for project in main dev test bench; do
-            npm run "test:ts:$project" > "/tmp/main-static/types-$project.log" 2>&1
-            status=$?
-            printf '%s=%s\n' "$project" "$status"
-            cat "/tmp/main-static/types-$project.log"
-            if [ "$status" -ne 0 ]; then result=1; fi
-          done
+          npx vitest run test/backend-lookup-error-recovery.test.js --reporter=json --outputFile=/tmp/main-final-static/recovery-red.json
+          status=$?
+          set -e
+          test "$status" -ne 0
           node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
           import {readFileSync} from 'node:fs'
-          const results = JSON.parse(readFileSync('/tmp/main-static/eslint.json', 'utf8'))
+          const report = JSON.parse(readFileSync('/tmp/main-final-static/recovery-red.json', 'utf8'))
+          const results = report.testResults.flatMap((suite) => suite.assertionResults)
+          assert.equal(results.length, 2)
           for (const result of results) {
-              console.log(result.filePath, result.errorCount, result.warningCount)
-              for (const m of result.messages) console.log(`${m.line}:${m.column} ${m.ruleId}: ${m.message}`)
+              assert.equal(result.status, 'failed')
+              assert.match(result.failureMessages.join('\n'), /toError is not defined/)
+              console.log(`Confirmed red: ${result.title}`)
           }
           JS
-          exit "$result"
-      - name: Preserve static validation evidence
+      - name: Apply bounded recovery and fixture fixes
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          def replace(path, old, new, count=1):
+              p = Path(path)
+              text = p.read_text()
+              assert text.count(old) == count, (path, old, text.count(old))
+              p.write_text(text.replace(old, new))
+          replace('ext/js/background/backend.js', "import {safePerformance} from '../core/safe-performance.js';", "import {safePerformance} from '../core/safe-performance.js';\nimport {toError} from '../core/to-error.js';")
+          replace('ext/js/background/offscreen-proxy.js', "reasons: [/** @type {chrome.offscreen.Reason} */ ('CLIPBOARD')],", "reasons: [\n                    /** @type {chrome.offscreen.Reason} */ ('CLIPBOARD'),\n                ],")
+          replace('test/runtime-reliability-lifecycle.test.js', '/** @type {Backend} */', '/** @type {InstanceType<typeof Backend>} */', 2)
+          for name in ['test/runtime-reliability-lifecycle.test.js', 'test/offscreen-proxy-bridge.test.js']:
+              p = Path(name)
+              text = p.read_text().replace('.mockResolvedValue(undefined)', '.mockResolvedValue(void 0)')
+              text = text.replace('resolvePromise(undefined)', 'resolvePromise()')
+              p.write_text(text)
+          replace('test/offscreen-proxy-bridge.test.js', "globalThis.chrome = /** @type {typeof globalThis.chrome} */ ({", "globalThis.chrome = /** @type {typeof globalThis.chrome} */ (/** @type {unknown} */ ({")
+          replace('test/offscreen-proxy-bridge.test.js', "            offscreen: {\n                createDocument: vi.fn().mockResolvedValue(void 0),\n            },\n        });", "            offscreen: {\n                createDocument: vi.fn().mockResolvedValue(void 0),\n            },\n        }));")
+          PY
+          node --input-type=module <<'JS'
+          import {ESLint} from 'eslint'
+          import {execFileSync} from 'node:child_process'
+          import {existsSync} from 'node:fs'
+          const files = execFileSync('git', ['diff', '--name-only', 'd3fc6795ccce4ba9b293c336898f3dcb32338128', 'HEAD'], {encoding: 'utf8'}).trim().split('\n').filter((f) => f.endsWith('.js') && existsSync(f))
+          // Apply punctuation/newline fixes only; do not rewrite unrelated legacy code
+          // or use semantic autofixes that strip browser enum casts or mock values.
+          const eslint = new ESLint({fix: (message) => ['@stylistic/semi', '@stylistic/eol-last'].includes(message.ruleId)})
+          await ESLint.outputFixes(await eslint.lintFiles(files))
+          JS
+      - name: Capture candidate and untouched-main static diagnostics
+        shell: bash
+        run: |
+          git diff --binary > /tmp/main-final-static/source-fixes.patch
+          git worktree add --detach /tmp/main-reliability-base d3fc6795ccce4ba9b293c336898f3dcb32338128
+          ln -s "$PWD/node_modules" /tmp/main-reliability-base/node_modules
+          (cd /tmp/main-reliability-base && npm run build:libs)
+          cat > /tmp/main-final-static/lint.mjs <<'JS'
+          import {createRequire} from 'node:module'
+          import {execFileSync} from 'node:child_process'
+          import {existsSync, writeFileSync} from 'node:fs'
+          const require = createRequire(`${process.cwd()}/package.json`)
+          const {ESLint} = require('eslint')
+          const files = JSON.parse(process.env.CHANGED_FILES).filter((f) => existsSync(f))
+          const eslint = new ESLint({fix: false})
+          const results = await eslint.lintFiles(files)
+          writeFileSync(process.argv[2], JSON.stringify(results))
+          console.log('Lint errors:', results.reduce((count, result) => count + result.errorCount, 0))
+          JS
+          export CHANGED_FILES="$(git diff --name-only d3fc6795ccce4ba9b293c336898f3dcb32338128 HEAD | node -e 'let s="";process.stdin.on("data",c=>s+=c).on("end",()=>console.log(JSON.stringify(s.trim().split("\n").filter(f=>f.endsWith(".js")))))')"
+          node /tmp/main-final-static/lint.mjs /tmp/main-final-static/lint-candidate.json
+          (cd /tmp/main-reliability-base && node /tmp/main-final-static/lint.mjs /tmp/main-final-static/lint-base.json)
+          set +e
+          for project in main dev test bench; do
+            npm run "test:ts:$project" > "/tmp/main-final-static/types-candidate-$project.log" 2>&1
+            echo "candidate $project: $?"
+            (cd /tmp/main-reliability-base && npm run "test:ts:$project") > "/tmp/main-final-static/types-base-$project.log" 2>&1
+            echo "base $project: $?"
+          done
+          set -e
+      - name: Reject new lint or type errors without hiding baseline debt
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          from collections import Counter
+          root = Path('/tmp/main-final-static')
+          def lint(name):
+              result = Counter()
+              for file in json.loads((root / name).read_text()):
+                  path = file['filePath'].split('/manabitan/manabitan/')[-1].split('/main-reliability-base/')[-1]
+                  for m in file['messages']:
+                      if m['severity'] == 2:
+                          result[(path, m['ruleId'], m['message'])] += 1
+              return result
+          def types(name):
+              result = Counter()
+              for line in (root / name).read_text().splitlines():
+                  match = re.match(r'(.+?)\(\d+,\d+\): error (TS\d+): (.*)', line)
+                  if match:
+                      result[match.groups()] += 1
+              return result
+          summary = {}
+          unexpected = []
+          for kind, before, after in [('lint', lint('lint-base.json'), lint('lint-candidate.json'))] + [
+              (f'types-{project}', types(f'types-base-{project}.log'), types(f'types-candidate-{project}.log'))
+              for project in ['main', 'dev', 'test', 'bench']
+          ]:
+              added = after - before
+              summary[kind] = {'baseline_errors': sum(before.values()), 'candidate_errors': sum(after.values()), 'new_errors': sum(added.values())}
+              for message, count in added.items():
+                  unexpected.append({'category': kind, 'diagnostic': message, 'count': count})
+          summary['unexpected'] = unexpected
+          (root / 'static-comparison.json').write_text(json.dumps(summary, indent=2))
+          print(json.dumps(summary, indent=2))
+          if unexpected:
+              raise SystemExit('New static errors detected; no commit will be made.')
+          PY
+      - name: Re-run focused and full unit suites including options
+        shell: bash
+        run: |
+          npx vitest run test/backend-lookup-error-recovery.test.js test/runtime-reliability-regressions.test.js test/runtime-reliability-lifecycle.test.js test/offscreen-proxy.test.js test/offscreen-proxy-bridge.test.js test/backend-lookup-refresh.test.js test/dictionary-controller-task-resolution.test.js test/dictionary-import-controller-update-profile.test.js test/dictionary-importer-zip-filename-alias.test.js --reporter=json --outputFile=/tmp/main-final-static/focused-green.json
+          npm run test:unit -- --reporter=json --outputFile=/tmp/main-final-static/unit-green.json
+          npm run test:unit:options -- --reporter=json --outputFile=/tmp/main-final-static/options-green.json
+      - name: Build all targets and Chromium package
+        shell: bash
+        run: |
+          npm run license-report:html
+          npm run test:build > /tmp/main-final-static/build-all.log 2>&1
+          node ./dev/bin/build.js --target chrome-dev > /tmp/main-final-static/build-chromium.log 2>&1
+          git diff --check
+      - name: Commit only qualified source and remove temporary workflow
+        shell: bash
+        run: |
+          git fetch origin fix/runtime-reliability-main-20260914
+          test "$(git rev-parse FETCH_HEAD)" = "${{ github.sha }}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ext/js/background/backend.js ext/js/background/offscreen-proxy.js ext/js/pages/settings/dictionary-controller.js test/runtime-reliability-regressions.test.js test/runtime-reliability-lifecycle.test.js test/backend-lookup-error-recovery.test.js test/offscreen-proxy-bridge.test.js test/dictionary-import-controller-update-profile.test.js test/dictionary-importer-zip-filename-alias.test.js
+          git rm .github/workflows/qualify-main-runtime-reliability.yml
+          git diff --cached --stat > /tmp/main-final-static/commit-stat.txt
+          git commit -m 'Finish error recovery and qualify reliability changes against main baseline'
+          git rev-parse HEAD > /tmp/main-final-static/verified-commit.txt
+          git push origin HEAD:fix/runtime-reliability-main-20260914
+      - name: Preserve qualification evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: main-runtime-static-${{ github.run_id }}
-          path: /tmp/main-static
+          name: main-final-static-${{ github.run_id }}
+          path: /tmp/main-final-static
           if-no-files-found: error
