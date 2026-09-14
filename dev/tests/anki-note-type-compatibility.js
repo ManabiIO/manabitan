@@ -144,3 +144,4 @@ void test('a failed download, missing model or duplicate model is not a compatib
 void test('missing and duplicate report entries fail', () => {
     assert.throws(() => checkReport({results: snapshot.results.slice(1)}));
     assert.throws(() => checkReport({results: [snapshot.results[0], ...snapshot.results.slice(0, 3)]}));
+});
