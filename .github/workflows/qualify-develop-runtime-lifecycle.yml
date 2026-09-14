@@ -17,7 +17,7 @@ concurrency:
 jobs:
   qualification:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v6
         with:
@@ -29,182 +29,467 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build:libs
-      - name: Capture unchanged develop diagnostics
+
+      - name: Verify untouched develop and record its two stale unit expectations
         shell: bash
         run: |
           mkdir -p /tmp/develop-lifecycle
           git rev-parse HEAD > /tmp/develop-lifecycle/input-commit.txt
           test "$(git hash-object ext/js/background/backend.js)" = 5867b976053287fa250d6cf006dc9a5641eed29e
           test "$(git hash-object ext/js/background/offscreen-proxy.js)" = 2ebdd4770e79e58642fde5da17ebbb7b9a43efe4
-          cat > /tmp/develop-lifecycle/lint.mjs <<'JS'
-          import {createRequire} from 'node:module'
-          import {existsSync, writeFileSync} from 'node:fs'
-          const require = createRequire(`${process.cwd()}/package.json`)
-          const {ESLint} = require('eslint')
-          const files = ['ext/js/background/backend.js', 'ext/js/background/offscreen-proxy.js', 'test/runtime-reliability-lifecycle.test.js'].filter((file) => existsSync(file))
-          const eslint = new ESLint({fix: process.argv[3] === 'fix' ? (message) => ['@stylistic/semi', '@stylistic/eol-last'].includes(message.ruleId) : false})
-          const results = await eslint.lintFiles(files)
-          if (process.argv[3] === 'fix') await ESLint.outputFixes(results)
-          writeFileSync(process.argv[2], JSON.stringify(results))
-          JS
-          node /tmp/develop-lifecycle/lint.mjs /tmp/develop-lifecycle/lint-before.json
+          test "$(git hash-object test/offscreen-dictionary-worker-import.test.js)" = 9b5c564cd2bb0e1a2e776e706a33a7dd659ed995
           set +e
-          for project in main dev test bench; do
-            npm run "test:ts:$project" > "/tmp/develop-lifecycle/types-before-$project.log" 2>&1
-            echo "baseline $project: $?"
-          done
-          set -e
-      - name: Add lifecycle regressions with the develop reply protocol
-        shell: bash
-        run: |
-          git fetch origin fix/runtime-reliability-main-20260914
-          python - <<'PY'
-          from pathlib import Path
-          import subprocess
-          snapshot = '49313436297bd3d3c566fb34a40e61d147c606ea'
-          path = Path('test/runtime-reliability-lifecycle.test.js')
-          assert not path.exists()
-          text = subprocess.check_output(['git', 'show', f'{snapshot}:{path}'], text=True)
-          text = text.replace('/** @type {Backend} */', '/** @type {InstanceType<typeof Backend>} */')
-          text = text.replace('.mockResolvedValue(undefined)', '.mockResolvedValue(void 0)').replace('resolvePromise(undefined)', 'resolvePromise()')
-          start = text.index('function createPort() {')
-          end = text.index('\n}\n', start) + len('\n}\n')
-          replacement = '''function createPort() {
-              /** @param {{id?: number}} message */
-              const postMessage = (message) => {
-                  const {id} = message
-                  if (typeof id === 'number') {
-                      queueMicrotask(() => {
-                          port.onmessage?.call(port, new MessageEvent('message', {data: {id, result: void 0}}))
-                      })
-                  }
-              }
-              const port = /** @type {MessagePort} */ (/** @type {unknown} */ ({
-                  postMessage: vi.fn(postMessage),
-                  close: vi.fn(),
-                  onmessage: null,
-                  onmessageerror: null,
-              }))
-              return port
-          }
-          '''
-          path.write_text(text[:start] + replacement + text[end:])
-          PY
-          set +e
-          npx vitest run test/runtime-reliability-lifecycle.test.js --reporter=json --outputFile=/tmp/develop-lifecycle/red.json
+          npm run test:unit -- --reporter=json --outputFile=/tmp/develop-lifecycle/baseline-unit.json
           status=$?
           set -e
           test "$status" -ne 0
           node --input-type=module <<'JS'
           import assert from 'node:assert/strict'
           import {readFileSync} from 'node:fs'
-          const report = JSON.parse(readFileSync('/tmp/develop-lifecycle/red.json', 'utf8'))
+          const report = JSON.parse(readFileSync('/tmp/develop-lifecycle/baseline-unit.json', 'utf8'))
+          const failed = report.testResults.flatMap((suite) => suite.assertionResults).filter((test) => test.status === 'failed')
+          assert.equal(failed.length, 2)
+          const titles = failed.map((test) => test.title).sort()
+          assert.deepEqual(titles, [
+              'fans out adjacent lookups after an import instead of serializing them',
+              'queues lookups behind import while processing cancellation outside the mutation queue',
+          ])
+          console.log('Untouched develop has exactly the two known stale import-busy expectations.')
+          JS
+
+      - name: Add develop-specific lifecycle regressions and prove they are red
+        shell: bash
+        run: |
+          cat > test/runtime-lifecycle-develop.test.js <<'JS'
+          /*
+           * Copyright (C) 2026 Manabitan authors
+           *
+           * This program is free software: you can redistribute it and/or modify
+           * it under the terms of the GNU General Public License as published by
+           * the Free Software Foundation, either version 3 of the License, or
+           * (at your option) any later version.
+           */
+
+          import {afterEach, describe, expect, test, vi} from 'vitest';
+
+          vi.mock('../ext/js/core/diagnostics-reporter.js', () => ({
+              isDevDiagnosticsBuild: false,
+              reportDiagnostics: vi.fn(),
+              reportDiagnosticsLazy: vi.fn(),
+          }));
+
+          const {Backend} = await import('../ext/js/background/backend.js');
+          const {OffscreenProxy} = await import('../ext/js/background/offscreen-proxy.js');
+
+          function deferred() {
+              /** @type {() => void} */
+              let resolve = () => {};
+              const promise = /** @type {Promise<void>} */ (new Promise((resolvePromise) => {
+                  resolve = resolvePromise;
+              }));
+              return {promise, resolve};
+          }
+
+          function createPort() {
+              return /** @type {MessagePort} */ (/** @type {unknown} */ ({
+                  postMessage: vi.fn(),
+                  close: vi.fn(),
+                  onmessage: null,
+                  onmessageerror: null,
+              }));
+          }
+
+          afterEach(() => {
+              vi.useRealTimers();
+              vi.unstubAllGlobals();
+              vi.restoreAllMocks();
+          });
+
+          describe('develop runtime lifecycle regressions', () => {
+              test('publishes the mutation tail before a task can synchronously re-enter', async () => {
+                  const backend = /** @type {InstanceType<typeof Backend>} */ (Object.create(Backend.prototype));
+                  Reflect.set(backend, '_dictionaryMutationPromise', null);
+                  const gate = deferred();
+                  const started = deferred();
+                  /** @type {string[]} */
+                  const events = [];
+                  /** @type {Promise<void>|undefined} */
+                  let nested;
+                  const first = backend._runDictionaryMutation(async () => {
+                      events.push('first-start');
+                      nested = backend._runDictionaryMutation(async () => { events.push('nested'); });
+                      started.resolve();
+                      await gate.promise;
+                      events.push('first-end');
+                  });
+                  try {
+                      await started.promise;
+                      expect(events).toEqual(['first-start']);
+                  } finally {
+                      gate.resolve();
+                      await first;
+                      await nested;
+                  }
+                  expect(events).toEqual(['first-start', 'first-end', 'nested']);
+              });
+
+              test('coalesces the offscreen existence probe and creation', async () => {
+                  const probeGate = deferred();
+                  const createDocument = vi.fn().mockResolvedValue(void 0);
+                  const getContexts = vi.fn(async () => {
+                      await probeGate.promise;
+                      return [];
+                  });
+                  vi.stubGlobal('chrome', {
+                      runtime: {
+                          lastError: void 0,
+                          getURL: () => 'chrome-extension://test/offscreen.html',
+                          getContexts,
+                      },
+                      offscreen: {createDocument},
+                  });
+                  const proxy = new OffscreenProxy(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({sendMessagePromise: vi.fn()})));
+                  const first = Reflect.get(proxy, '_ensureOffscreenDocument').call(proxy);
+                  const second = Reflect.get(proxy, '_ensureOffscreenDocument').call(proxy);
+                  expect(getContexts).toHaveBeenCalledOnce();
+                  probeGate.resolve();
+                  await Promise.all([first, second]);
+                  expect(createDocument).toHaveBeenCalledOnce();
+              });
+
+              test('ordinary offscreen recovery closes the port owned by a vanished document', async () => {
+                  const oldPort = createPort();
+                  const createDocument = vi.fn().mockResolvedValue(void 0);
+                  vi.stubGlobal('chrome', {
+                      runtime: {
+                          lastError: void 0,
+                          getURL: () => 'chrome-extension://test/offscreen.html',
+                          getContexts: vi.fn().mockResolvedValue([]),
+                      },
+                      offscreen: {createDocument},
+                  });
+                  const webExtension = {sendMessagePromise: vi.fn().mockResolvedValue({result: null})};
+                  const proxy = new OffscreenProxy(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ (webExtension)));
+                  await proxy.registerOffscreenPort(oldPort);
+                  await proxy.sendMessagePromise({action: 'getDictionaryInfoOffscreen'});
+                  expect(createDocument).toHaveBeenCalledOnce();
+                  expect(oldPort.close).toHaveBeenCalledOnce();
+                  expect(Reflect.get(proxy, '_currentOffscreenPort')).toBeNull();
+              });
+
+              test('successful control-port bootstrap clears its registration deadline', async () => {
+                  vi.useFakeTimers();
+                  const port = createPort();
+                  vi.stubGlobal('chrome', {
+                      runtime: {
+                          lastError: void 0,
+                          getURL: () => 'chrome-extension://test/offscreen.html',
+                          getContexts: vi.fn().mockResolvedValue([{}]),
+                      },
+                      offscreen: {createDocument: vi.fn().mockResolvedValue(void 0)},
+                  });
+                  /** @type {InstanceType<typeof OffscreenProxy>|null} */
+                  let proxy = null;
+                  const webExtension = {
+                      sendMessagePromise: vi.fn(async () => {
+                          queueMicrotask(() => { void proxy?.registerOffscreenPort(port); });
+                          return {result: null};
+                      }),
+                  };
+                  proxy = new OffscreenProxy(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ (webExtension)));
+                  await Reflect.get(proxy, '_ensureOffscreenPort').call(proxy);
+                  expect(vi.getTimerCount()).toBe(0);
+              });
+          });
+          JS
+          set +e
+          npx vitest run test/runtime-lifecycle-develop.test.js --reporter=json --outputFile=/tmp/develop-lifecycle/lifecycle-red.json
+          status=$?
+          set -e
+          test "$status" -ne 0
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import {readFileSync} from 'node:fs'
+          const report = JSON.parse(readFileSync('/tmp/develop-lifecycle/lifecycle-red.json', 'utf8'))
           const results = report.testResults.flatMap((suite) => suite.assertionResults)
           for (const title of [
-              'publishes the mutation queue before invoking a synchronously reentrant task',
-              'shares document existence checking as well as creation across concurrent recovery',
-              'invalidates the old control port when an ordinary message recreates the document',
-              'rebuilds a silently stale transfer port after the offscreen document disappears',
-              'clears the registration deadline after successful bootstrap',
+              'publishes the mutation tail before a task can synchronously re-enter',
+              'coalesces the offscreen existence probe and creation',
+              'ordinary offscreen recovery closes the port owned by a vanished document',
+              'successful control-port bootstrap clears its registration deadline',
           ]) {
               assert.equal(results.find((result) => result.title === title)?.status, 'failed', title)
               console.log(`Confirmed red: ${title}`)
           }
           JS
-      - name: Apply only the four reviewed lifecycle method bodies
+
+      - name: Apply the narrowed lifecycle fixes and reconcile stale import-busy tests
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
-          import subprocess
-          snapshot = '49313436297bd3d3c566fb34a40e61d147c606ea'
-          def bounds(text, class_name, method):
+
+          def replace_method(path, class_name, method_name, replacement):
+              p = Path(path)
+              text = p.read_text()
               class_start = text.index(f'export class {class_name} {{')
-              start = text.index(f'    async {method}(', class_start)
+              start = text.index(f'    async {method_name}(', class_start)
               end = text.index('\n    }\n', start) + len('\n    }\n')
-              return start, end
-          for filename, class_name, methods in [
-              ('ext/js/background/backend.js', 'Backend', ['_runDictionaryMutation']),
-              ('ext/js/background/offscreen-proxy.js', 'OffscreenProxy', ['prepare', '_ensureOffscreenDocument', '_ensureOffscreenPort']),
-          ]:
-              path = Path(filename)
-              original = path.read_text()
-              source = subprocess.check_output(['git', 'show', f'{snapshot}:{filename}'], text=True)
-              for method in methods:
-                  source_start, source_end = bounds(source, class_name, method)
-                  start, end = bounds(original, class_name, method)
-                  original = original[:start] + source[source_start:source_end] + original[end:]
-              original = original.replace("reasons: [/** @type {chrome.offscreen.Reason} */ ('CLIPBOARD')],", "reasons: [\n                    /** @type {chrome.offscreen.Reason} */ ('CLIPBOARD'),\n                ],")
-              path.write_text(original)
+              p.write_text(text[:start] + replacement + text[end:])
+
+          replace_method('ext/js/background/backend.js', 'Backend', '_runDictionaryMutation', '''    async _runDictionaryMutation(task) {
+              const previousPromise = this._dictionaryMutationPromise;
+              // Publish the tail before caller code can synchronously re-enter this queue.
+              const mutationPromise = Promise.resolve().then(async () => {
+                  if (previousPromise !== null) {
+                      try {
+                          await previousPromise;
+                      } catch (_) {
+                          // A prior failed mutation must not poison later queued mutations.
+                      }
+                  }
+                  await task();
+              });
+              this._dictionaryMutationPromise = mutationPromise;
+              try {
+                  await mutationPromise;
+              } finally {
+                  if (this._dictionaryMutationPromise === mutationPromise) {
+                      this._dictionaryMutationPromise = null;
+                  }
+              }
+          }
+          ''')
+
+          replace_method('ext/js/background/offscreen-proxy.js', 'OffscreenProxy', '_ensureOffscreenDocument', '''    async _ensureOffscreenDocument() {
+              if (this._creatingOffscreen !== null) {
+                  await this._creatingOffscreen;
+                  return;
+              }
+              // Coalesce the existence probe as well as creation so two delayed
+              // negative probes cannot race into duplicate createDocument calls.
+              const creatingPromise = (async () => {
+                  if (await this._hasOffscreenDocument()) { return; }
+                  const port = this._currentOffscreenPort;
+                  if (port !== null) { this._clearCurrentOffscreenPort(port); }
+                  await chrome.offscreen.createDocument({
+                      url: 'offscreen.html',
+                      reasons: [
+                          /** @type {chrome.offscreen.Reason} */ ('CLIPBOARD'),
+                      ],
+                      justification: 'Access to the clipboard',
+                  });
+              })();
+              this._creatingOffscreen = creatingPromise;
+              try {
+                  await creatingPromise;
+              } finally {
+                  if (this._creatingOffscreen === creatingPromise) {
+                      this._creatingOffscreen = null;
+                  }
+              }
+          }
+          ''')
+
+          replace_method('ext/js/background/offscreen-proxy.js', 'OffscreenProxy', '_ensureOffscreenPort', '''    async _ensureOffscreenPort() {
+              // Develop's acknowledged control protocol can detect a silently stale
+              // port itself; avoid a getContexts preflight on every healthy request.
+              if (this._currentOffscreenPort !== null) { return; }
+              if (this._registeringOffscreenPort !== null) {
+                  await this._registeringOffscreenPort;
+                  return;
+              }
+              const registeringPromise = (async () => {
+                  await this._ensureOffscreenDocument();
+                  if (this._currentOffscreenPort !== null) { return; }
+                  const response = await this._webExtension.sendMessagePromise({action: 'createAndRegisterPortOffscreen'});
+                  this._getMessageResponseResult(/** @type {import('core').Response<void>} */ (response));
+                  /** @type {ReturnType<typeof setTimeout>|undefined} */
+                  let timeout;
+                  try {
+                      await Promise.race([
+                          this._offscreenPortReadyPromise,
+                          new Promise((resolve, reject) => {
+                              timeout = setTimeout(() => reject(new Error('Timed out waiting for offscreen control port registration')), 5000);
+                          }),
+                      ]);
+                  } finally {
+                      clearTimeout(timeout);
+                  }
+              })();
+              this._registeringOffscreenPort = registeringPromise;
+              try {
+                  await registeringPromise;
+              } finally {
+                  if (this._registeringOffscreenPort === registeringPromise) {
+                      this._registeringOffscreenPort = null;
+                  }
+              }
+          }
+          ''')
+
+          path = Path('test/offscreen-dictionary-worker-import.test.js')
+          text = path.read_text()
+          first_start = text.index("    test('queues lookups behind import while processing cancellation outside the mutation queue'")
+          second_start = text.index("    test('fans out adjacent lookups after an import instead of serializing them'", first_start)
+          third_start = text.index("    test('drains an active lookup before starting an import mutation'", second_start)
+          first = '''    test('rejects lookups while import is active and recovers after cancellation', async () => {
+              importControl.waitForCancellation = true;
+              /** @type {Map<string, (event: MessageEvent) => void>} */
+              const listeners = new Map();
+              const workerPostMessage = vi.fn();
+              vi.stubGlobal('self', {
+                  addEventListener: vi.fn((type, listener) => { listeners.set(type, listener); }),
+                  postMessage: workerPostMessage,
+              });
+              await import('../ext/js/background/offscreen-dictionary-worker.js');
+              const onMessage = listeners.get('message');
+              const responsePort = {postMessage: vi.fn(), close: vi.fn()};
+              onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+                  data: {id: 1, action: 'importDictionaryOffscreen', params: {archiveContent: new Blob(['dictionary']), details: {}}},
+                  ports: [responsePort],
+              })));
+              await vi.waitFor(() => expect(importControl.started).toBe(true));
+
+              onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+                  data: {
+                      id: 2,
+                      action: 'findTermsOffscreen',
+                      params: {mode: 'group', text: '日本', options: {enabledDictionaryMap: [], excludeDictionaryDefinitions: null, textReplacements: []}},
+                  },
+                  ports: [],
+              })));
+              await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({
+                  id: 2,
+                  error: expect.objectContaining({message: 'Cannot execute findTermsOffscreen: dictionary import is in progress'}),
+              })));
+
+              onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+                  data: {id: 3, action: 'cancelDictionaryImportOffscreen', params: {}},
+                  ports: [],
+              })));
+              await vi.waitFor(() => expect(responsePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'error'})));
+              await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith({id: 1, result: undefined}));
+
+              onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+                  data: {
+                      id: 4,
+                      action: 'findTermsOffscreen',
+                      params: {mode: 'group', text: '日本', options: {enabledDictionaryMap: [], excludeDictionaryDefinitions: null, textReplacements: []}},
+                  },
+                  ports: [],
+              })));
+              await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith({
+                  id: 4,
+                  result: {dictionaryEntries: [], originalTextLength: 0},
+              }));
+              expect(responsePort.close).toHaveBeenCalledOnce();
+          });
+
+'''
+          second = '''    test('rejects adjacent lookups during import and fans them out after import completes', async () => {
+              importControl.waitForCancellation = true;
+              importControl.waitForLookupRelease = true;
+              /** @type {Map<string, (event: MessageEvent) => void>} */
+              const listeners = new Map();
+              const workerPostMessage = vi.fn();
+              vi.stubGlobal('self', {
+                  addEventListener: vi.fn((type, listener) => { listeners.set(type, listener); }),
+                  postMessage: workerPostMessage,
+              });
+              await import('../ext/js/background/offscreen-dictionary-worker.js');
+              const onMessage = listeners.get('message');
+              const responsePort = {postMessage: vi.fn(), close: vi.fn()};
+              onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+                  data: {id: 1, action: 'importDictionaryOffscreen', params: {archiveContent: new Blob(['dictionary']), details: {}}},
+                  ports: [responsePort],
+              })));
+              await vi.waitFor(() => expect(importControl.started).toBe(true));
+              const lookupParams = {
+                  mode: 'group',
+                  text: '日本',
+                  options: {enabledDictionaryMap: [], excludeDictionaryDefinitions: null, textReplacements: []},
+              };
+              for (const id of [2, 3]) {
+                  onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+                      data: {id, action: 'findTermsOffscreen', params: lookupParams},
+                      ports: [],
+                  })));
+              }
+              await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({id: 2, error: expect.any(Object)})));
+              await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({id: 3, error: expect.any(Object)})));
+              expect(importControl.lookupStartedCount).toBe(0);
+
+              onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+                  data: {id: 4, action: 'cancelDictionaryImportOffscreen', params: {}},
+                  ports: [],
+              })));
+              await vi.waitFor(() => expect(responsePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'error'})));
+              await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith({id: 1, result: undefined}));
+
+              for (const id of [5, 6]) {
+                  onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+                      data: {id, action: 'findTermsOffscreen', params: lookupParams},
+                      ports: [],
+                  })));
+              }
+              await vi.waitFor(() => expect(importControl.lookupStartedCount).toBe(2));
+              expect(workerPostMessage).not.toHaveBeenCalledWith(expect.objectContaining({id: 5}));
+              expect(workerPostMessage).not.toHaveBeenCalledWith(expect.objectContaining({id: 6}));
+              importControl.releaseLookup?.();
+              await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({id: 5, result: expect.any(Object)})));
+              await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({id: 6, result: expect.any(Object)})));
+          });
+
+'''
+          path.write_text(text[:first_start] + first + second + text[third_start:])
           PY
-          node /tmp/develop-lifecycle/lint.mjs /tmp/develop-lifecycle/lint-autofix.json fix
-          # Typed ESLint programs may be stale during an autofix loop. Qualify the
-          # actual written files using a fresh, non-fixing parser process.
-          node /tmp/develop-lifecycle/lint.mjs /tmp/develop-lifecycle/lint-after.json
-          git diff --binary > /tmp/develop-lifecycle/source-fixes.patch
-          set +e
-          for project in main dev test bench; do
-            npm run "test:ts:$project" > "/tmp/develop-lifecycle/types-after-$project.log" 2>&1
-            echo "candidate $project: $?"
-          done
-          set -e
-      - name: Require no new static errors
+
+      - name: Require clean static analysis on all changed code
         shell: bash
         run: |
-          python - <<'PY'
-          import json, re
-          from pathlib import Path
-          from collections import Counter
-          root = Path('/tmp/develop-lifecycle')
-          def lint(name):
-              return Counter((file['filePath'], message['ruleId'], message['message'])
-                  for file in json.loads((root / name).read_text())
-                  for message in file['messages'] if message['severity'] == 2)
-          def types(name):
-              result = Counter()
-              for line in (root / name).read_text().splitlines():
-                  match = re.match(r'(.+?)\(\d+,\d+\): error (TS\d+): (.*)', line)
-                  if match:
-                      result[match.groups()] += 1
-              return result
-          summary = {}
-          unexpected = []
-          for name, before, after in [('lint', lint('lint-before.json'), lint('lint-after.json'))] + [
-              (f'types-{project}', types(f'types-before-{project}.log'), types(f'types-after-{project}.log'))
-              for project in ['main', 'dev', 'test', 'bench']
-          ]:
-              added = after - before
-              summary[name] = {'baseline_errors': sum(before.values()), 'candidate_errors': sum(after.values()), 'new_errors': sum(added.values())}
-              unexpected.extend({'category': name, 'diagnostic': key, 'count': count} for key, count in added.items())
-          summary['unexpected'] = unexpected
-          (root / 'static-comparison.json').write_text(json.dumps(summary, indent=2))
-          print(json.dumps(summary, indent=2))
-          if unexpected:
-              raise SystemExit('New static errors detected; no commit will be made.')
-          PY
-      - name: Run lifecycle and full regression suites
+          npx eslint ext/js/background/backend.js ext/js/background/offscreen-proxy.js test/runtime-lifecycle-develop.test.js test/offscreen-dictionary-worker-import.test.js
+          npm run test:ts:main
+          npm run test:ts:dev
+          npm run test:ts:test
+          npm run test:ts:bench
+          git diff --check
+
+      - name: Run focused regressions, full units, options, and builds
         shell: bash
         run: |
-          npx vitest run test/runtime-reliability-lifecycle.test.js --reporter=json --outputFile=/tmp/develop-lifecycle/focused-green.json
+          npx vitest run \
+            test/runtime-lifecycle-develop.test.js \
+            test/offscreen-proxy-bridge.test.js \
+            test/offscreen-dictionary-worker-import.test.js \
+            test/dictionary-worker-client.test.js \
+            test/offscreen-worker-recovery.test.js \
+            test/backend-lookup-refresh.test.js \
+            --reporter=json --outputFile=/tmp/develop-lifecycle/focused-green.json
           npm run test:unit -- --reporter=json --outputFile=/tmp/develop-lifecycle/unit-green.json
           npm run test:unit:options -- --reporter=json --outputFile=/tmp/develop-lifecycle/options-green.json
           npm run license-report:html
           npm run test:build > /tmp/develop-lifecycle/build-all.log 2>&1
           node ./dev/bin/build.js --target chrome-dev > /tmp/develop-lifecycle/build-chromium.log 2>&1
-          git diff --check
-      - name: Commit qualified lifecycle changes and remove temporary workflow
+
+      - name: Commit qualified changes and remove the temporary workflow
         shell: bash
         run: |
           git fetch origin fix/runtime-lifecycle-develop-20260914
           test "$(git rev-parse FETCH_HEAD)" = "${{ github.sha }}"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ext/js/background/backend.js ext/js/background/offscreen-proxy.js test/runtime-reliability-lifecycle.test.js
+          git add \
+            ext/js/background/backend.js \
+            ext/js/background/offscreen-proxy.js \
+            test/runtime-lifecycle-develop.test.js \
+            test/offscreen-dictionary-worker-import.test.js
           git rm .github/workflows/qualify-develop-runtime-lifecycle.yml
           git diff --cached --stat > /tmp/develop-lifecycle/commit-stat.txt
-          git commit -m 'Close runtime lifecycle races on develop without changing the control protocol'
+          git commit -m 'Close develop runtime lifecycle races and align import-busy coverage'
           git rev-parse HEAD > /tmp/develop-lifecycle/verified-commit.txt
           git push origin HEAD:fix/runtime-lifecycle-develop-20260914
+
       - name: Preserve qualification evidence
         if: always()
         uses: actions/upload-artifact@v4
