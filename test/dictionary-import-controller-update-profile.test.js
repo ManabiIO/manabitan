@@ -95,16 +95,16 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         Reflect.set(controller, '_showErrors', showErrors);
         Reflect.set(controller, '_recordImportDebugSnapshot', vi.fn());
         Reflect.set(controller, '_tryImportDictionaryOffscreen', vi.fn().mockResolvedValue({
-                result: {title: 'Jitendex staged [update-staging token123]', sourceTitle: 'Jitendex.org [2026-02-05]'},
-                errors: [],
-                debug: {importerDebug: {phaseTimings: []}},
+            result: {title: 'Jitendex staged [update-staging token123]', sourceTitle: 'Jitendex.org [2026-02-05]'},
+            errors: [],
+            debug: {importerDebug: {phaseTimings: []}},
         }));
 
         const result = await importDictionaryFromZip.call(
             controller,
             new File([new Uint8Array([1, 2, 3])], 'Jitendex staged [update-staging token123].zip', {type: 'application/zip'}),
             {
-                'profile-1': {
+                'profile-1': [{
                     index: 0,
                     alias: 'Jitendex',
                     name: 'Jitendex.org [2025-01-01]',
@@ -113,7 +113,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
                     definitionsCollapsible: 'not-collapsible',
                     partsOfSpeechFilter: false,
                     useDeinflections: true,
-                },
+                }],
             },
             /** @type {import('dictionary-importer').ImportDetails} */ (/** @type {unknown} */ ({
                 replacementDictionaryTitle: 'Jitendex.org [2025-01-01]',
