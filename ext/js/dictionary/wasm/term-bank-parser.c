@@ -481,26 +481,20 @@ static int parse_composite_span_impl(
     uint32_t* normalization_hint,
     uint32_t* text_normalization_hint
 ) {
-    if (start >= len) { return 0; }
-    const uint8_t open = src[start];
-    uint8_t close = 0;
-    if (open == '[') { close = ']'; }
-    else if (open == '{') { close = '}'; }
-    else { return 0; }
+    enum {
+        ARRAY_FIRST, ARRAY_AFTER_VALUE, ARRAY_VALUE,
+        OBJECT_FIRST, OBJECT_COLON, OBJECT_VALUE, OBJECT_AFTER_VALUE, OBJECT_KEY
+    };
+    if (start >= len || (src[start] != '[' && src[start] != '{')) { return 0; }
 
-    uint8_t expected_closers[MAX_JSON_NESTING];
-    /*
-     * Array states: 0 = first value or end, 1 = comma or end,
-     * 2 = value after comma. Object states: 0 = first key or end,
-     * 1 = colon, 2 = value, 3 = comma or end, 4 = key after comma.
-     */
-    uint8_t states[MAX_JSON_NESTING];
-    expected_closers[0] = close;
-    states[0] = 0u;
+    // The active frame stays in a local. Only suspended parents need stack
+    // storage; the state also encodes the matching container type.
+    uint8_t parents[MAX_JSON_NESTING];
     uint32_t depth = 1u;
+    uint8_t state = src[start] == '[' ? ARRAY_FIRST : OBJECT_FIRST;
     uint32_t i = start + 1u;
     while (i < len) {
-        uint8_t c = src[i];
+        const uint8_t c = src[i];
         if (is_ws(c)) {
             if (normalization_hint != 0 && *normalization_hint == 0u) {
                 *normalization_hint = 1u;
@@ -508,91 +502,76 @@ static int parse_composite_span_impl(
             ++i;
             continue;
         }
-
-        const uint8_t expected_closer = expected_closers[depth - 1u];
-        uint8_t* const state = &states[depth - 1u];
         if (c == '"') {
             if (media_hint != 0 && *media_hint == 0u && is_media_marker_at(src, len, i)) {
                 *media_hint = 1u;
             }
-            uint32_t s_end = 0;
+            uint32_t s_end = 0u;
             if (!parse_string_span(src, len, i, &s_end)) { return 0; }
-            if (expected_closer == '}') {
-                if (*state == 0u || *state == 4u) {
-                    if (
-                        (
-                            (normalization_hint != 0 && *normalization_hint == 0u) ||
-                            (text_normalization_hint != 0 && *text_normalization_hint == 0u)
-                        ) &&
-                        type_text_pair_at(src, len, i, s_end)
-                    ) {
-                        if (normalization_hint != 0) { *normalization_hint = 1u; }
-                        if (text_normalization_hint != 0) { *text_normalization_hint = 1u; }
-                    }
-                    *state = 1u;
-                } else if (*state == 2u) {
-                    *state = 3u;
-                } else {
-                    return 0;
+            if (state == OBJECT_FIRST || state == OBJECT_KEY) {
+                if (
+                    (
+                        (normalization_hint != 0 && *normalization_hint == 0u) ||
+                        (text_normalization_hint != 0 && *text_normalization_hint == 0u)
+                    ) &&
+                    type_text_pair_at(src, len, i, s_end)
+                ) {
+                    if (normalization_hint != 0) { *normalization_hint = 1u; }
+                    if (text_normalization_hint != 0) { *text_normalization_hint = 1u; }
                 }
+                state = OBJECT_COLON;
+            } else if (state == OBJECT_VALUE) {
+                state = OBJECT_AFTER_VALUE;
+            } else if (state == ARRAY_FIRST || state == ARRAY_VALUE) {
+                state = ARRAY_AFTER_VALUE;
             } else {
-                if (*state != 0u && *state != 2u) { return 0; }
-                *state = 1u;
+                return 0;
             }
             i = s_end;
             continue;
         }
-        if (c == '[' || c == '{') {
-            if (
-                (expected_closer == ']' && *state != 0u && *state != 2u) ||
-                (expected_closer == '}' && *state != 2u)
-            ) { return 0; }
-            *state = expected_closer == ']' ? 1u : 3u;
-            if (depth >= MAX_JSON_NESTING) { return 0; }
-            expected_closers[depth] = c == '[' ? ']' : '}';
-            states[depth] = 0u;
-            ++depth;
-            ++i;
-            continue;
-        }
         if (c == ']' || c == '}') {
-            if (c != expected_closer) { return 0; }
-            if (
-                (expected_closer == ']' && *state != 0u && *state != 1u) ||
-                (expected_closer == '}' && *state != 0u && *state != 3u)
-            ) { return 0; }
-            --depth;
+            if (c == ']') {
+                if (state != ARRAY_FIRST && state != ARRAY_AFTER_VALUE) { return 0; }
+            } else {
+                if (state != OBJECT_FIRST && state != OBJECT_AFTER_VALUE) { return 0; }
+            }
             ++i;
-            if (depth == 0u) {
+            if (--depth == 0u) {
                 *out_end = i;
                 return 1;
             }
+            state = parents[depth - 1u];
             continue;
         }
         if (c == ',') {
-            if (expected_closer == ']') {
-                if (*state != 1u) { return 0; }
-                *state = 2u;
-            } else {
-                if (*state != 3u) { return 0; }
-                *state = 4u;
-            }
+            if (state == ARRAY_AFTER_VALUE) { state = ARRAY_VALUE; }
+            else if (state == OBJECT_AFTER_VALUE) { state = OBJECT_KEY; }
+            else { return 0; }
             ++i;
             continue;
         }
         if (c == ':') {
-            if (expected_closer != '}' || *state != 1u) { return 0; }
-            *state = 2u;
+            if (state != OBJECT_COLON) { return 0; }
+            state = OBJECT_VALUE;
             ++i;
             continue;
         }
-        if (
-            (expected_closer == ']' && *state != 0u && *state != 2u) ||
-            (expected_closer == '}' && *state != 2u)
-        ) { return 0; }
+        uint8_t next_state;
+        if (state == ARRAY_FIRST || state == ARRAY_VALUE) { next_state = ARRAY_AFTER_VALUE; }
+        else if (state == OBJECT_VALUE) { next_state = OBJECT_AFTER_VALUE; }
+        else { return 0; }
+        if (c == '[' || c == '{') {
+            if (depth >= MAX_JSON_NESTING) { return 0; }
+            parents[depth - 1u] = next_state;
+            ++depth;
+            state = c == '[' ? ARRAY_FIRST : OBJECT_FIRST;
+            ++i;
+            continue;
+        }
         uint32_t scalar_end = 0u;
         if (!parse_scalar_span(src, len, i, &scalar_end)) { return 0; }
-        *state = expected_closer == ']' ? 1u : 3u;
+        state = next_state;
         i = scalar_end;
     }
     return 0;
