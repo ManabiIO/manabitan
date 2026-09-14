@@ -6,12 +6,10 @@ Manabitan maps existing Anki models; it does not install community note types. T
 
 On September 14, 2026, the compatibility workflow downloaded all four actual APKGs, verified their integrity, and extracted their complete model schemas. Kiku's package also includes an unrelated Basic model; the checker deliberately selects the known model rather than assuming the first model is the right one.
 
-| Source | Reviewed revision | Model fields | Authoritative field documentation |
-| --- | --- | --- | --- |
-| [Kiku](https://github.com/youyoumu/kiku/releases/tag/v2.1.0) | v2.1.0 | 24 | [Installation](https://kiku.youyoumu.my.id/installation.html) |
-| [Lapis](https://github.com/donkuri/lapis/releases/tag/1.7.0) | 1.7.0 | 22 | [Publisher's setup guide](https://github.com/donkuri/lapis#how-to-use-lapis) |
-| [Senren](https://github.com/BrenoAqua/Senren/releases/tag/v5.1.0) | v5.1.0 | 22 | [Yomitan setup](https://brenoaqua.github.io/Senren/yomitan/) |
-| [Crop Theft Vocab](https://github.com/Kuuuube/crop-theft/tree/88865e6209251b1baaaca7219be0dd6073e74cb8) | 88865e6209251b1baaaca7219be0dd6073e74cb8 | 9 | [Field setup](https://github.com/Kuuuube/crop-theft#field-setup) |
+- [Kiku v2.1.0](https://github.com/youyoumu/kiku/releases/tag/v2.1.0): 24 fields. See the publisher's [installation guide](https://kiku.youyoumu.my.id/installation.html).
+- [Lapis 1.7.0](https://github.com/donkuri/lapis/releases/tag/1.7.0): 22 fields. See the [publisher's setup guide](https://github.com/donkuri/lapis#how-to-use-lapis).
+- [Senren v5.1.0](https://github.com/BrenoAqua/Senren/releases/tag/v5.1.0): 22 fields. See the [Yomitan setup guide](https://brenoaqua.github.io/Senren/yomitan/).
+- [Crop Theft Vocab at revision `88865e6209251b1baaaca7219be0dd6073e74cb8`](https://github.com/Kuuuube/crop-theft/tree/88865e6209251b1baaaca7219be0dd6073e74cb8): 9 fields. See its [field setup](https://github.com/Kuuuube/crop-theft#field-setup).
 
 The first three revisions were the latest published stable releases at the check. Crop Theft publishes an APKG in its repository and has no numbered GitHub release; its latest mode resolves the current default branch to a commit before fetching the file.
 
@@ -27,7 +25,7 @@ The actual Senren 5.1 package contains `hint`, which is absent from the upstream
 
 The mapper also now defines own data properties for output fields. An Anki field named `__proto__` must survive enumeration and JSON serialization rather than invoking the inherited prototype setter. Regression tests also cover `constructor` and `hasOwnProperty`.
 
-The [post-fix run](https://github.com/ManabiIO/manabitan/actions/runs/34880737480) passed both actual-package modes for all four types, 17 offline Node tests, 14 Python reader tests, and the original 7 mapper tests. Its lint step stopped while loading the repository configuration because generated template libraries were missing; the workflow subsequently added the normal `build:libs` prerequisite. Consult the current PR run for the latest overall workflow status rather than treating the historical run as fully green.
+The [post-fix run](https://github.com/ManabiIO/manabitan/actions/runs/34880737480) passed both actual-package modes for all four types, 17 offline Node tests, 14 Python reader tests, and the original 7 mapper tests. Its lint step stopped while loading the repository configuration because generated template libraries were missing; the workflow subsequently added the normal `build:libs` prerequisite. The later focused run `34882170383` passed pinned and latest package checks, all 17 Node tests, all 14 Python tests, the original 7 mapper tests, and focused lint.
 
 ## Running the checks
 
