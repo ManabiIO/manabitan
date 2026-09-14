@@ -1,0 +1,134 @@
+[
+  {
+    "id": "kiku",
+    "modelNames": ["Kiku"],
+    "documentation": "https://kiku.youyoumu.my.id/installation.html",
+    "source": {
+      "kind": "release",
+      "repository": "youyoumu/kiku",
+      "revision": "v2.1.0",
+      "asset": "Kiku_v2.1.0.apkg",
+      "sha256": "e6a3f1d37ee530e07c02ea7f6d64d98f5702e9691c2ccc512ea288b372cef045"
+    },
+    "expected": {
+      "Expression": "{expression}",
+      "ExpressionFurigana": "{furigana-plain}",
+      "ExpressionReading": "{reading}",
+      "ExpressionAudio": "{audio}",
+      "SelectionText": "{popup-selection-text}",
+      "MainDefinition": "{single-glossary-primary}",
+      "DefinitionPicture": "",
+      "Sentence": "{cloze-prefix}<b>{cloze-body}</b>{cloze-suffix}",
+      "SentenceFurigana": "{sentence-furigana-plain}",
+      "SentenceAudio": "",
+      "Picture": "",
+      "Glossary": "{glossary}",
+      "Hint": "",
+      "IsWordAndSentenceCard": "",
+      "IsClickCard": "",
+      "IsSentenceCard": "",
+      "IsAudioCard": "",
+      "PitchPosition": "{pitch-accent-positions}",
+      "PitchCategories": "{pitch-accent-categories}",
+      "Frequency": "{frequencies}",
+      "FreqSort": "{frequency-harmonic-rank}",
+      "MiscInfo": "{document-title}",
+      "RelatedExpression": "",
+      "SentenceTranslation": ""
+    }
+  },
+  {
+    "id": "lapis",
+    "modelNames": ["Lapis"],
+    "documentation": "https://github.com/donkuri/lapis#how-to-use-lapis",
+    "source": {
+      "kind": "release",
+      "repository": "donkuri/lapis",
+      "revision": "1.7.0",
+      "asset": "Lapis.apkg",
+      "sha256": "85984f8c6f1263e2882c364bbbfdee4bce9e1e03f053a0a5b0ccc6cd90de0088"
+    },
+    "expected": {
+      "Expression": "{expression}",
+      "ExpressionFurigana": "{furigana-plain}",
+      "ExpressionReading": "{reading}",
+      "ExpressionAudio": "{audio}",
+      "SelectionText": "{popup-selection-text}",
+      "MainDefinition": "{single-glossary-primary}",
+      "DefinitionPicture": "",
+      "Sentence": "{cloze-prefix}<b>{cloze-body}</b>{cloze-suffix}",
+      "SentenceFurigana": "",
+      "SentenceAudio": "",
+      "Picture": "",
+      "Glossary": "{glossary}",
+      "Hint": "",
+      "IsWordAndSentenceCard": "",
+      "IsClickCard": "",
+      "IsSentenceCard": "",
+      "IsAudioCard": "",
+      "PitchPosition": "{pitch-accent-positions}",
+      "PitchCategories": "{pitch-accent-categories}",
+      "Frequency": "{frequencies}",
+      "FreqSort": "{frequency-harmonic-rank}",
+      "MiscInfo": "{document-title}"
+    }
+  },
+  {
+    "id": "senren",
+    "modelNames": ["Senren", "Senren・洗練", "Senren 洗練"],
+    "documentation": "https://brenoaqua.github.io/Senren/yomitan/",
+    "source": {
+      "kind": "release",
+      "repository": "BrenoAqua/Senren",
+      "revision": "v5.1.0",
+      "asset": "Senren.v5.1.0.apkg",
+      "sha256": "319367e09af9dfd698c3e1a953d404151222d6680ecf6b6acc5d68499578e659"
+    },
+    "expected": {
+      "word": "{expression}",
+      "reading": "{reading}",
+      "sentence": "<span class=\"group\">{cloze-prefix}<span class=\"highlight\">{cloze-body}</span>{cloze-suffix}</span>",
+      "sentenceFurigana": "<span class=\"group\">{sentence-furigana}</span>",
+      "sentenceTranslation": "",
+      "sentenceCard": "",
+      "audioCard": "",
+      "notes": "",
+      "selectionText": "{popup-selection-text}",
+      "definition": "{single-glossary-primary}",
+      "wordAudio": "{audio}",
+      "sentenceAudio": "",
+      "picture": "",
+      "glossary": "{glossary}",
+      "pitchAccents": "{pitch-accents}",
+      "pitchPositions": "{pitch-accent-positions}",
+      "pitchCategories": "{pitch-accent-categories}",
+      "frequencies": "{frequencies}",
+      "freqSort": "{frequency-harmonic-rank}",
+      "miscInfo": "{document-title}",
+      "dictionaryPreference": ""
+    }
+  },
+  {
+    "id": "crop-theft-vocab",
+    "modelNames": ["Crop Theft Vocab"],
+    "documentation": "https://github.com/Kuuuube/crop-theft#field-setup",
+    "source": {
+      "kind": "repository",
+      "repository": "Kuuuube/crop-theft",
+      "revision": "88865e6209251b1baaaca7219be0dd6073e74cb8",
+      "path": "crop_theft_vocab/Crop Theft Vocab.apkg",
+      "gitBlobSha": "0a2da238876182c9c272637a245b301d61bd944f"
+    },
+    "expected": {
+      "Word": "{expression}",
+      "Reading": "{reading}",
+      "PitchPattern": "{pitch-accents}",
+      "Audio": "{audio}",
+      "Definition": "{glossary-brief}",
+      "Example Sentence": "{sentence}",
+      "Example Target": "{search-query}",
+      "Frequency": "{frequency-harmonic-rank}",
+      "Notes": ""
+    }
+  }
+]
