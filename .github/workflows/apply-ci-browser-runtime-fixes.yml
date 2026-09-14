@@ -139,10 +139,17 @@ jobs:
         run: |
           node --check test/firefox/extension-two-dictionary-import.e2e.js
           git diff --check
-          test "$(grep -c 'workerRuntimeContext?.hasCreateSyncAccessHandle === true' .github/workflows/ci.yml)" -eq 4
-          test "$(grep -c 'workerRuntimeContext?.hasStorageGetDirectory === true' .github/workflows/ci.yml)" -eq 4
-          test "$(grep -c 'getAllWindowHandles' test/firefox/extension-two-dictionary-import.e2e.js)" -eq 0
-          test "$(grep -c 'moz-extension://\${firefoxDevExtensionUuid}' test/firefox/extension-two-dictionary-import.e2e.js)" -ge 1
+          python - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/ci.yml').read_text()
+          firefox = Path('test/firefox/extension-two-dictionary-import.e2e.js').read_text()
+          assert workflow.count('workerRuntimeContext?.hasCreateSyncAccessHandle === true') == 4
+          assert workflow.count('workerRuntimeContext?.hasStorageGetDirectory === true') == 4
+          assert 'getAllWindowHandles' not in firefox
+          assert 'moz-extension://${firefoxDevExtensionUuid}' in firefox
+          print('Confirmed worker-context OPFS predicates and deterministic Firefox extension UUID path.')
+          PY
 
       - name: Commit only qualified CI/harness changes and self-clean
         shell: bash
