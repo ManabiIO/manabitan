@@ -290,6 +290,7 @@ export class Offscreen {
         return await this._invokeDictionaryWorker('findTermsBulkOffscreen', {termList, dictionaryNames, matchType});
     }
 
+    /** @type {import('offscreen').ApiHandler<'debugDictionaryStorageStateOffscreen'>} */
     async _debugDictionaryStorageStateHandler() {
         return await this._invokeDictionaryWorker('debugDictionaryStorageStateOffscreen', {});
     }
@@ -384,11 +385,60 @@ export class Offscreen {
         if (ports.length === 0) {
             throw new Error('Offscreen import response port missing');
         }
+        const responsePort = ports[0];
+        const workerChannel = new MessageChannel();
+        let settled = false;
+        const closePorts = () => {
+            try { workerChannel.port1.close(); } catch (_) { /* NOP */ }
+            try { workerChannel.port2.close(); } catch (_) { /* NOP */ }
+            try { responsePort.close(); } catch (_) { /* NOP */ }
+        };
+        /**
+         * @param {unknown} message
+         * @param {boolean} terminal
+         */
+        const postResponse = (message, terminal) => {
+            if (settled) { return; }
+            try {
+                responsePort.postMessage(message);
+            } catch (_) {
+                settled = true;
+                closePorts();
+                return;
+            }
+            if (terminal) {
+                settled = true;
+                closePorts();
+            }
+        };
+        workerChannel.port1.onmessage = (event) => {
+            /** @type {unknown} */
+            const message = event.data;
+            /** @type {unknown} */
+            let type = null;
+            if (
+                typeof message === 'object' &&
+                message !== null &&
+                !Array.isArray(message)
+            ) {
+                type = Reflect.get(message, 'type');
+            }
+            postResponse(message, type === 'complete' || type === 'error');
+        };
+        workerChannel.port1.onmessageerror = () => {
+            postResponse({
+                type: 'error',
+                error: ExtensionError.serialize(new Error('Dictionary worker import response channel failed')),
+            }, true);
+        };
         try {
-            await this._invokeDictionaryWorker('importDictionaryOffscreen', {archiveContent, details}, [ports[0]]);
+            await this._invokeDictionaryWorker(
+                'importDictionaryOffscreen',
+                {archiveContent, details},
+                [workerChannel.port2],
+            );
         } catch (error) {
-            ports[0].postMessage({type: 'error', error: ExtensionError.serialize(error)});
-            ports[0].close();
+            postResponse({type: 'error', error: ExtensionError.serialize(error)}, true);
         }
     }
 
