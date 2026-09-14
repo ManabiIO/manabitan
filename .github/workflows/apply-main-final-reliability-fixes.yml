@@ -12,13 +12,18 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: main-final-reliability-qualification
+  cancel-in-progress: true
+
 jobs:
   red-green:
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: fix/runtime-reliability-main-20260914
+          ref: ${{ github.sha }}
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -26,53 +31,89 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build:libs
-      - name: Confirm new product regressions are red before source fixes
+      - name: Confirm named behavioral regressions fail before source fixes
         shell: bash
         run: |
           set +e
-          npx vitest run test/offscreen-proxy-bridge.test.js test/dictionary-controller-task-resolution.test.js 2>&1 | tee /tmp/main-final-red.log
+          npx vitest run test/runtime-reliability-lifecycle.test.js test/offscreen-proxy-bridge.test.js --reporter=default --reporter=json --outputFile=/tmp/main-final-red.json 2>&1 | tee /tmp/main-final-red.log
           status=${PIPESTATUS[0]}
           set -e
-          if [ "$status" -eq 0 ]; then
-            echo 'Expected product regression tests to fail before source fixes.'
-            exit 1
-          fi
-          grep -q 'offscreen-proxy-bridge.test.js' /tmp/main-final-red.log
-          grep -q 'dictionary-controller-task-resolution.test.js' /tmp/main-final-red.log
-      - name: Apply source fixes
+          test "$status" -ne 0
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import {readFileSync} from 'node:fs'
+          const report = JSON.parse(readFileSync('/tmp/main-final-red.json', 'utf8'))
+          const results = report.testResults.flatMap((suite) => suite.assertionResults)
+          for (const title of [
+              'publishes the mutation queue before invoking a synchronously reentrant task',
+              'shares document existence checking as well as creation across concurrent recovery',
+              'invalidates the old control port when an ordinary message recreates the document',
+              'rebuilds a silently stale transfer port after the offscreen document disappears',
+              'clears the registration deadline after successful bootstrap',
+              'control-port bootstrap does not re-enter the public recovering send path',
+          ]) {
+              const result = results.find((test) => test.title === title)
+              assert.equal(result?.status, 'failed', `Missing expected behavioral failure: ${title}`)
+              console.log(`Confirmed red: ${title}`)
+          }
+          JS
+      - name: Apply source and fixture fixes
         run: python dev/apply-main-final-reliability-fixes.py
       - name: Confirm targeted regression and adjacent suites are green
-        run: >-
-          npx vitest run
-          test/runtime-reliability-regressions.test.js
-          test/offscreen-proxy.test.js
-          test/offscreen-proxy-bridge.test.js
-          test/backend-lookup-refresh.test.js
-          test/dictionary-controller-task-resolution.test.js
-          test/dictionary-import-controller-update-profile.test.js
-          test/dictionary-importer-zip-filename-alias.test.js
-      - name: Run full unit suite
-        run: npm run test:unit
-      - name: Syntax-check changed runtime sources
-        run: >-
-          node --check ext/js/background/backend.js &&
-          node --check ext/js/background/offscreen-proxy.js &&
-          node --check ext/js/pages/settings/dictionary-controller.js
-      - name: Build Chromium development extension
-        run: node ./dev/bin/build.js --target chrome-dev
-      - name: Commit fixes and remove one-shot files
+        shell: bash
         run: |
-          rm .github/workflows/apply-main-final-reliability-fixes.yml
-          rm dev/apply-main-final-reliability-fixes.py
+          set -o pipefail
+          npx vitest run \
+            test/runtime-reliability-regressions.test.js \
+            test/runtime-reliability-lifecycle.test.js \
+            test/offscreen-proxy.test.js \
+            test/offscreen-proxy-bridge.test.js \
+            test/backend-lookup-refresh.test.js \
+            test/dictionary-controller-task-resolution.test.js \
+            test/dictionary-import-controller-update-profile.test.js \
+            test/dictionary-importer-zip-filename-alias.test.js \
+            --reporter=default --reporter=json --outputFile=/tmp/main-final-green.json 2>&1 | tee /tmp/main-final-green.log
+      - name: Run full unit suite
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:unit -- --reporter=default --reporter=json --outputFile=/tmp/main-final-unit.json 2>&1 | tee /tmp/main-final-unit.log
+      - name: Syntax-check changed runtime sources
+        run: |
+          node --check ext/js/background/backend.js
+          node --check ext/js/background/offscreen-proxy.js
+          node --check ext/js/pages/settings/dictionary-controller.js
+          node --check test/runtime-reliability-lifecycle.test.js
+          git diff --check
+      - name: Build Chromium development extension
+        shell: bash
+        run: |
+          set -o pipefail
+          node ./dev/bin/build.js --target chrome-dev 2>&1 | tee /tmp/main-final-build.log
+      - name: Commit verified fixes and remove one-shot files
+        shell: bash
+        run: |
+          git fetch origin fix/runtime-reliability-main-20260914
+          test "$(git rev-parse FETCH_HEAD)" = "${{ github.sha }}"
+          rm .github/workflows/apply-main-final-reliability-fixes.yml dev/apply-main-final-reliability-fixes.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add \
+            ext/js/background/backend.js \
             ext/js/background/offscreen-proxy.js \
             ext/js/pages/settings/dictionary-controller.js \
-            test/offscreen-proxy-bridge.test.js \
+            test/runtime-reliability-lifecycle.test.js \
             test/dictionary-import-controller-update-profile.test.js \
-            test/dictionary-importer-zip-filename-alias.test.js \
             .github/workflows/apply-main-final-reliability-fixes.yml \
             dev/apply-main-final-reliability-fixes.py
-          git commit -m 'Finish main runtime reliability qualification'
+          git commit -m 'Finish main runtime reliability and lifecycle qualification'
+          git rev-parse HEAD | tee /tmp/main-final-verified-commit.txt
+          git diff '${{ github.sha }}' HEAD --stat | tee /tmp/main-final-diff-stat.txt
           git push origin HEAD:fix/runtime-reliability-main-20260914
+      - name: Preserve all qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-final-reliability-${{ github.run_id }}
+          path: /tmp/main-final-*
+          if-no-files-found: warn
