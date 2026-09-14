@@ -66,16 +66,81 @@ jobs:
           console.log('Confirmed old CI predicate rejects a runtime that actually opened opfs-sahpool in the worker.');
           NODE
 
+      - name: Capture inherited Firefox harness diagnostics before patch
+        shell: bash
+        run: |
+          mkdir -p /tmp/browser-ci-fix
+          set +e
+          npx eslint test/firefox/extension-two-dictionary-import.e2e.js --format=json --output-file=/tmp/browser-ci-fix/eslint-before.json
+          echo "eslint-before=$?" > /tmp/browser-ci-fix/status-before.txt
+          npm run test:ts:test > /tmp/browser-ci-fix/types-before.log 2>&1
+          echo "types-before=$?" >> /tmp/browser-ci-fix/status-before.txt
+          set -e
+
       - name: Apply CI and Firefox harness fixes
         run: python dev/apply-ci-browser-runtime-fixes.py
 
-      - name: Validate patched workflow and Firefox harness statically
+      - name: Reject new Firefox lint or type diagnostics while preserving baseline debt
         shell: bash
         run: |
-          npx eslint test/firefox/extension-two-dictionary-import.e2e.js
-          npm run test:ts:test
+          set +e
+          npx eslint test/firefox/extension-two-dictionary-import.e2e.js --format=json --output-file=/tmp/browser-ci-fix/eslint-after.json
+          echo "eslint-after=$?" > /tmp/browser-ci-fix/status-after.txt
+          npm run test:ts:test > /tmp/browser-ci-fix/types-after.log 2>&1
+          echo "types-after=$?" >> /tmp/browser-ci-fix/status-after.txt
+          set -e
+          python - <<'PY'
+          import json
+          import re
+          from collections import Counter
+          from pathlib import Path
+
+          root = Path('/tmp/browser-ci-fix')
+
+          def lint_errors(name):
+              counter = Counter()
+              for result in json.loads((root / name).read_text()):
+                  for message in result.get('messages', []):
+                      if message.get('severity') == 2:
+                          counter[(message.get('ruleId'), message.get('message'))] += 1
+              return counter
+
+          def type_errors(name):
+              counter = Counter()
+              pattern = re.compile(r'test/firefox/extension-two-dictionary-import\.e2e\.js\(\d+,\d+\): error (TS\d+): (.*)')
+              for line in (root / name).read_text().splitlines():
+                  match = pattern.search(line)
+                  if match:
+                      counter[match.groups()] += 1
+              return counter
+
+          lint_before = lint_errors('eslint-before.json')
+          lint_after = lint_errors('eslint-after.json')
+          types_before = type_errors('types-before.log')
+          types_after = type_errors('types-after.log')
+          new_lint = lint_after - lint_before
+          new_types = types_after - types_before
+          summary = {
+              'lint_before': sum(lint_before.values()),
+              'lint_after': sum(lint_after.values()),
+              'new_lint': [{'diagnostic': key, 'count': count} for key, count in new_lint.items()],
+              'types_before': sum(types_before.values()),
+              'types_after': sum(types_after.values()),
+              'new_types': [{'diagnostic': key, 'count': count} for key, count in new_types.items()],
+          }
+          (root / 'diagnostic-comparison.json').write_text(json.dumps(summary, indent=2))
+          print(json.dumps(summary, indent=2))
+          if new_lint or new_types:
+              raise SystemExit('Browser CI patch introduced new Firefox-file static diagnostics.')
+          PY
+
+      - name: Validate patched source predicates and deterministic UUID path
+        shell: bash
+        run: |
+          node --check test/firefox/extension-two-dictionary-import.e2e.js
           git diff --check
           test "$(grep -c 'workerRuntimeContext?.hasCreateSyncAccessHandle === true' .github/workflows/ci.yml)" -eq 4
+          test "$(grep -c 'workerRuntimeContext?.hasStorageGetDirectory === true' .github/workflows/ci.yml)" -eq 4
           test "$(grep -c 'getAllWindowHandles' test/firefox/extension-two-dictionary-import.e2e.js)" -eq 0
           test "$(grep -c 'moz-extension://\${firefoxDevExtensionUuid}' test/firefox/extension-two-dictionary-import.e2e.js)" -ge 1
 
@@ -88,9 +153,9 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add .github/workflows/ci.yml test/firefox/extension-two-dictionary-import.e2e.js
           git rm .github/workflows/apply-ci-browser-runtime-fixes.yml dev/apply-ci-browser-runtime-fixes.py
-          git diff --cached --stat > /tmp/browser-ci-fix-stat.txt
+          git diff --cached --stat > /tmp/browser-ci-fix/commit-stat.txt
           git commit -m 'Fix browser E2E runtime capability detection and Firefox UUID discovery'
-          git rev-parse HEAD > /tmp/browser-ci-fix-verified-commit.txt
+          git rev-parse HEAD > /tmp/browser-ci-fix/verified-commit.txt
           git push origin HEAD:fix/ci-browser-runtime-diagnostics-20260914
 
       - name: Preserve qualification evidence
@@ -98,5 +163,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: browser-ci-fix-${{ github.run_id }}
-          path: /tmp/browser-ci-fix-*
+          path: /tmp/browser-ci-fix
           if-no-files-found: warn
