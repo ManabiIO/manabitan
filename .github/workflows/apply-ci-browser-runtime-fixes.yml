@@ -146,9 +146,9 @@ jobs:
           firefox = Path('test/firefox/extension-two-dictionary-import.e2e.js').read_text()
           assert workflow.count('workerRuntimeContext?.hasCreateSyncAccessHandle === true') == 4
           assert workflow.count('workerRuntimeContext?.hasStorageGetDirectory === true') == 4
-          assert 'getAllWindowHandles' not in firefox
+          assert 'const handlesUnknown = /** @type {unknown} */ (await driver.getAllWindowHandles());' not in firefox
           assert 'moz-extension://${firefoxDevExtensionUuid}' in firefox
-          print('Confirmed worker-context OPFS predicates and deterministic Firefox extension UUID path.')
+          print('Confirmed worker-context OPFS predicates and deterministic Firefox startup UUID path.')
           PY
 
       - name: Commit only qualified CI/harness changes and self-clean
