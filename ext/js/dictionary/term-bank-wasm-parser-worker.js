@@ -24,9 +24,10 @@ import {
     setTermBankWasmModule,
 } from './term-bank-wasm-parser.js';
 import {safePerformance} from '../core/safe-performance.js';
+import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {prepareTermLookupIndexesFromPreinternedPlan} from './term-lookup-index-preparation.js';
 
-/** @typedef {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean}} ParserOptions */
+/** @typedef {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean}} ParserOptions */
 /** @typedef {{compressionMethod: unknown, compressedSize: unknown, uncompressedSize: unknown, signature: unknown, filename?: unknown}} CompressedSourceMetadata */
 /** @typedef {{type: 'initialize', module: unknown}} InitializeRequest */
 /** @typedef {{type: 'parse', id: unknown, sourceBuffers: unknown, sourceMetadata?: unknown, sourceSentEpochMs?: unknown, version: unknown, chunkSize?: unknown, options?: unknown}} ParseRequest */
@@ -94,6 +95,7 @@ async function parse(data) {
         const options = /** @type {ParserOptions} */ (
             typeof rawOptions === 'object' && rawOptions !== null ? rawOptions : {}
         );
+        const experiments = snapshotTermBankExperiments(options);
         const sourceBytes = sourceBuffers.map((buffer) => new Uint8Array(buffer));
         let preloadedSource;
         if (typeof data.sourceMetadata !== 'undefined') {
@@ -111,7 +113,7 @@ async function parse(data) {
                     signature: /** @type {number} */ (metadata.signature),
                     filename: typeof metadata.filename === 'string' ? metadata.filename : void 0,
                 };
-            }));
+            }), experiments);
         }
         /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */
         let resultChunk = null;
@@ -139,7 +141,7 @@ async function parse(data) {
                 resultCopyMs = Math.max(0, safePerformance.now() - tResultCopyStart);
             },
             chunkSize,
-            {...options, maxPendingChunks: 1, singleChunk: true, preloadedSource},
+            {...options, ...experiments, maxPendingChunks: 1, singleChunk: true, preloadedSource},
         );
         if (resultChunk === null) {
             throw new Error('Parallel term-bank parser did not emit a chunk');

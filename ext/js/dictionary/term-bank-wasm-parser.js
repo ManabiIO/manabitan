@@ -19,6 +19,7 @@ import {parseJson} from '../core/json.js';
 import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
+import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -54,10 +55,11 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
-/** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
+/** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
 /** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
-/** @typedef {{wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan}} ParsedTermBankWasmBuffers */
+/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number}} TermBankExperimentProfile */
+/** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
 /** @type {WebAssembly.Module|null} */
@@ -67,7 +69,7 @@ let suppliedWasmModule = null;
 const textDecoder = new TextDecoder();
 /** @type {TextEncoder} */
 const textEncoder = new TextEncoder();
-/** @type {{bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number}|null} */
+/** @type {(TermBankExperimentProfile & {bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number})|null} */
 let lastTermBankWasmParseProfile = null;
 /** @type {string|null} */
 let lastParallelParserSkipReason = null;
@@ -158,12 +160,15 @@ async function getWasm() {
 }
 
 /**
- * Inflates complete raw ZIP payloads into one parser-owned JSON array. The
- * returned allocation stays valid only until the next parser WASM operation.
+ * Inflates complete raw ZIP payloads into parser-owned storage, joined by
+ * default or kept as independent banks by the span experiment. The allocation
+ * stays valid only until the next parser WASM operation.
  * @param {CompressedTermBankSource[]} sources
+ * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {Promise<PreloadedTermBankSource>}
  */
-export async function inflateCompressedTermBankSourcesWasm(sources) {
+export async function inflateCompressedTermBankSourcesWasm(sources, options = {}) {
+    const experiments = snapshotTermBankExperiments(options);
     if (!Array.isArray(sources) || sources.length === 0) {
         throw new TypeError('Compressed term-bank sources are empty');
     }
@@ -199,6 +204,9 @@ export async function inflateCompressedTermBankSourcesWasm(sources) {
     const uncompressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'uncompressed term-bank length');
     const compressionMethodsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'term-bank compression method');
     const signaturesPtr = allocateWasmBuffer(wasm, sources.length * 4, 'term-bank CRC');
+    const bankSpansPtr = experiments.experimentalTermBankSpans ?
+        allocateWasmBuffer(wasm, sources.length * 8, 'term-bank spans') :
+0;
     const outputCapacity = uncompressedBytes + 2;
     const outputPtr = allocateWasmBuffer(wasm, outputCapacity, 'inflated term-bank output');
     const heap = new Uint8Array(wasm.memory.buffer);
@@ -230,6 +238,7 @@ export async function inflateCompressedTermBankSourcesWasm(sources) {
         sources.length,
         outputPtr,
         outputCapacity,
+        bankSpansPtr,
     );
     const inflateMs = Math.max(0, safePerformance.now() - startedAt);
     if (jsonLength < 0) {
@@ -251,6 +260,8 @@ export async function inflateCompressedTermBankSourcesWasm(sources) {
         jsonPtr: outputPtr,
         jsonLength,
         sourceCount: sources.length,
+        bankSpansPtr,
+        bankSpanCount: bankSpansPtr === 0 ? 0 : sources.length,
         inflateMs,
         compressedBytes,
         uncompressedBytes,
@@ -435,15 +446,28 @@ function tokenBytesEqual(source, startA, lengthA, startB, lengthB) {
  * @param {boolean} deduplicateContent
  * @param {boolean} [allowFusedParse]
  * @param {PreloadedTermBankSource|null} [preloadedSource]
+ * @param {import('dictionary-importer').ImportExperiments} [experiments]
  * @returns {Promise<ParsedTermBankWasmBuffers>}
  * @throws {Error}
  */
-async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null) {
+async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}) {
+    const useBankSpans = experiments.experimentalTermBankSpans === true;
+    if (!useBankSpans && (preloadedSource?.bankSpanCount ?? 0) > 0) {
+        throw new Error('Preloaded bank spans require the span experiment');
+    }
     const sourceArrays = Array.isArray(contentBytes) ? contentBytes : [contentBytes];
     /** @type {Array<{bytes: Uint8Array, start: number, end: number}>} */
     const sourceSpans = [];
-    let jsonLength = preloadedSource?.jsonLength ?? (sourceArrays.length > 1 ? 2 : 0);
+    let jsonLength = preloadedSource?.jsonLength ?? (!useBankSpans && sourceArrays.length > 1 ? 2 : 0);
     for (const bytes of preloadedSource === null ? sourceArrays : []) {
+        if (useBankSpans) {
+            if (sourceArrays.length > 1 && getJsonArrayContentSpan(bytes) === null) {
+                throw new Error('Expected a JSON array in term-bank source fragment');
+            }
+            sourceSpans.push({bytes, start: 0, end: bytes.byteLength});
+            jsonLength += bytes.byteLength;
+            continue;
+        }
         if (sourceArrays.length === 1) {
             sourceSpans.push({bytes, start: 0, end: bytes.byteLength});
             jsonLength = bytes.byteLength;
@@ -456,7 +480,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             jsonLength += span.end - span.start;
         }
     }
-    if (preloadedSource === null && sourceArrays.length > 1) { jsonLength += Math.max(0, sourceSpans.length - 1); }
+    if (!useBankSpans && preloadedSource === null && sourceArrays.length > 1) { jsonLength += Math.max(0, sourceSpans.length - 1); }
     if (!Number.isSafeInteger(jsonLength) || jsonLength > MAX_WASM32_BUFFER_BYTES) {
         throw new TermBankWasmResourceError('Term-bank source exceeds the 32-bit WASM parser limit');
     }
@@ -498,6 +522,10 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
     let encodeContentMs = 0;
     let tStart = Date.now();
     const jsonPtr = preloadedSource?.jsonPtr ?? wasm.wasm_alloc(jsonLength);
+    const bankSpanCount = preloadedSource?.bankSpanCount ?? (useBankSpans ? sourceArrays.length : 0);
+    const bankSpansPtr = preloadedSource?.bankSpansPtr ?? (
+        bankSpanCount > 0 ? allocateWasmBuffer(wasm, bankSpanCount * 8, 'term-bank spans') : 0
+    );
     if (preloadedSource === null) {
         allocationMs += Math.max(0, Date.now() - tStart);
         if (jsonPtr === 0) {
@@ -505,7 +533,17 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         }
         tStart = Date.now();
         const inputHeap = new Uint8Array(wasm.memory.buffer);
-        if (sourceArrays.length === 1) {
+        if (bankSpanCount > 0) {
+            const spans = new Uint32Array(wasm.memory.buffer, bankSpansPtr, bankSpanCount * 2);
+            let offset = 0;
+            for (let i = 0; i < sourceArrays.length; ++i) {
+                const bytes = sourceArrays[i];
+                spans[i * 2] = offset;
+                spans[i * 2 + 1] = bytes.byteLength;
+                inputHeap.set(bytes, jsonPtr + offset);
+                offset += bytes.byteLength;
+            }
+        } else if (sourceArrays.length === 1) {
             inputHeap.set(sourceArrays[0], jsonPtr);
         } else {
             let cursor = jsonPtr;
@@ -527,7 +565,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
     );
     const useFusedParse = (
         allowFusedParse &&
-        (preloadedSource?.sourceCount ?? sourceArrays.length) > 1 &&
+        ((preloadedSource?.sourceCount ?? sourceArrays.length) > 1 || experiments.experimentalFusedSingleBank === true) &&
         includeContentMetadata &&
         computeContentHashes &&
         emitTokenBinaryContent &&
@@ -565,6 +603,10 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             0x7fffffff,
             Math.max(1024 * 1024, initialMetaCapacity * Math.max(192, normalizedInitialContentBytesPerRow)),
         );
+        // Content remains the final bump allocation so native growth can extend
+        // it in place. Escaped keys use unused interner storage, not new scratch.
+        const experimentMask = getTermBankExperimentMask(experiments);
+        const experimentStatsPtr = experimentMask !== 0 ? allocateWasmBuffer(wasm, 8, 'experiment stats') : 0;
         const contentOutPtr = wasm.wasm_alloc(contentOutCapacity);
         allocationMs += Math.max(0, Date.now() - tStart);
         if (
@@ -616,13 +658,31 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             sequencesPtr,
             recentContentHitsPtr,
             mediaHintFastScan ? 1 : 0,
+            experimentMask,
+            bankSpansPtr,
+            bankSpanCount,
+            experimentStatsPtr,
         );
         parseBankMs += Math.max(0, Date.now() - tStart);
+        const experimentStats = experimentStatsPtr === 0 ?
+[0, 0] :
+            new Uint32Array(wasm.memory.buffer, experimentStatsPtr, 2);
+        const escapedKeyDecodeCount = experimentStats[0];
+        const validatedGlossaryReuseCount = experimentStats[1];
         if (encodedContentBytes === -4 || encodedContentBytes === -5) {
-            const fallbackContentBytes = preloadedSource === null ?
-                contentBytes :
-                Uint8Array.from(new Uint8Array(wasm.memory.buffer, jsonPtr, jsonLength));
-            return await parseTermBankWasmBuffers(
+            // Own bytes and span metadata before the recursive heap reset. The
+            // fallback parses each bank independently too; it never lazy-joins
+            // potentially malformed banks after an early fused rejection.
+            let fallbackContentBytes = contentBytes;
+            if (preloadedSource !== null) {
+                const owned = Uint8Array.from(new Uint8Array(wasm.memory.buffer, jsonPtr, jsonLength));
+                const spans = new Uint32Array(wasm.memory.buffer, bankSpansPtr, bankSpanCount * 2);
+                fallbackContentBytes = bankSpanCount === 0 ?
+owned :
+Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans[i * 2] + spans[i * 2 + 1]));
+            }
+            const discardedFusedRows = new Uint32Array(wasm.memory.buffer, rowCountPtr, 1)[0];
+            const fallback = await parseTermBankWasmBuffers(
                 fallbackContentBytes,
                 includeContentMetadata,
                 initialContentBytesPerRow,
@@ -631,7 +691,20 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
                 emitTokenBinaryContent,
                 deduplicateContent,
                 false,
+                null,
+                experiments,
             );
+            fallback.allocationMs += allocationMs;
+            fallback.copyJsonMs += copyJsonMs;
+            fallback.parseBankMs += parseBankMs;
+            fallback.fusedParseAttempts = 1;
+            fallback.fusedParseFallbacks = 1;
+            fallback.discardedFusedParseMs = parseBankMs;
+            fallback.discardedFusedRows = discardedFusedRows;
+            fallback.escapedKeyDecodeCount = escapedKeyDecodeCount;
+            fallback.validatedGlossaryReuseCount = validatedGlossaryReuseCount;
+            fallback.bankSpanCount = bankSpanCount;
+            return fallback;
         }
         if (encodedContentBytes < 0) {
             if (encodedContentBytes === -2) {
@@ -648,6 +721,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         const heap = new Uint8Array(wasm.memory.buffer);
         return {
             wasm,
+            bankSpanCount,
             jsonPtr,
             jsonLength,
             metasPtr: outPtr,
@@ -675,6 +749,10 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             parseBankMs,
             encodeContentMs,
             recentContentDedupHitCount,
+            fusedParseAttempts: 1,
+            escapedKeyDecodeCount,
+            validatedGlossaryReuseCount,
+            fusedSingleBankGroups: (preloadedSource?.sourceCount ?? sourceArrays.length) === 1 ? 1 : 0,
             fusedStringPlan: {
                 stringLengths: new Uint16Array(wasm.memory.buffer, stringLengthsPtr, stringUniqueCount),
                 stringOffsets: new Uint32Array(wasm.memory.buffer, stringOffsetsPtr, stringUniqueCount),
@@ -696,8 +774,8 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
     }
     tStart = Date.now();
     const rowCount = mediaHintFastScan ?
-        wasm.parse_term_bank_with_media_hints(jsonPtr, jsonLength, outPtr, initialMetaCapacity) :
-        wasm.parse_term_bank(jsonPtr, jsonLength, outPtr, initialMetaCapacity);
+        wasm.parse_term_bank_with_media_hints(jsonPtr, jsonLength, outPtr, initialMetaCapacity, bankSpansPtr, bankSpanCount) :
+        wasm.parse_term_bank(jsonPtr, jsonLength, outPtr, initialMetaCapacity, bankSpansPtr, bankSpanCount);
     parseBankMs += Math.max(0, Date.now() - tStart);
     if (rowCount < 0) {
         if (rowCount === -2) {
@@ -716,6 +794,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         const source = heap.subarray(jsonPtr, jsonPtr + jsonLength);
         return {
             wasm,
+            bankSpanCount,
             jsonPtr,
             jsonLength,
             metasPtr: outPtr,
@@ -833,6 +912,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         new Uint32Array(wasm.memory.buffer, contentUniqueIndexesPtr, rowCount);
     return {
         wasm,
+        bankSpanCount,
         jsonPtr,
         jsonLength,
         metasPtr: outPtr,
@@ -1421,10 +1501,11 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
  * @param {number} version
  * @param {(chunk: {rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
- * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean, preloadedSource?: PreloadedTermBankSource}} [options]
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean, preloadedSource?: PreloadedTermBankSource}} [options]
  * @returns {Promise<void>}
  */
 export async function parseTermBankWithWasmColumnChunks(contentBytes, version, onChunk, chunkSize = DEFAULT_ROW_CHUNK_SIZE, options = {}) {
+    const experiments = snapshotTermBankExperiments(options);
     const initialContentBytesPerRow = Number.isFinite(options.initialContentBytesPerRow) ? /** @type {number} */ (options.initialContentBytesPerRow) : 48;
     const mediaHintFastScan = options.mediaHintFastScan === true;
     const computeContentHashes = options.computeContentHashes !== false;
@@ -1445,6 +1526,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         emitContentSlab && computeContentHashes,
         true,
         options.preloadedSource ?? null,
+        experiments,
     );
     const bufferSetupMs = Math.max(0, Date.now() - tBufferSetupStart);
     const {contentOutPtr, contentUniqueCount, rowCount, metaCapacity, contentCapacity} = parsed;
@@ -1675,7 +1757,12 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
             } else {
                 const expressionIndex = expressionIndexes[i];
                 const readingIndex = readingIndexes[i];
-                const readingEqualsExpression = readingIndex === expressionIndex;
+                // Escaped and literal tokens can intern to the same UTF-8 key
+                // without being the same raw reading token. Preserve the fused
+                // parser's flag, matching the established JavaScript fallback.
+                const readingEqualsExpression = fusedStringPlan === null ?
+                    readingIndex === expressionIndex :
+                    readingEqualsExpressionList[i] === 1;
                 readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
                 if (emitTermByteLists) {
                     const expressionOffset = nativeStringPlan.stringOffsets[expressionIndex];
@@ -1789,6 +1876,16 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
     }
     await Promise.all(pendingDispatches);
     lastTermBankWasmParseProfile = {
+        experiments,
+        fusedParseAttempts: parsed.fusedParseAttempts ?? 0,
+        fusedParseFallbacks: parsed.fusedParseFallbacks ?? 0,
+        discardedFusedParseMs: parsed.discardedFusedParseMs ?? 0,
+        discardedFusedRows: parsed.discardedFusedRows ?? 0,
+        bankSpanCount: parsed.bankSpanCount ?? 0,
+        escapedKeyDecodeCount: parsed.escapedKeyDecodeCount ?? 0,
+        validatedGlossaryReuseCount: parsed.validatedGlossaryReuseCount ?? 0,
+        fusedSingleBankGroups: parsed.fusedSingleBankGroups ?? 0,
+        maxWasmHeapBytes: parsed.wasm?.memory.buffer.byteLength ?? 0,
         bufferSetupMs,
         allocationMs: parsed.allocationMs,
         nativeStringPlanAllocationMs,
@@ -2015,7 +2112,7 @@ class ParallelTermBankPipelineRun {
         /** @type {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */
         this._onChunk = onChunk;
         /** @type {Record<string, unknown>} */
-        this._options = options;
+        this._options = {...options, ...snapshotTermBankExperiments(options)};
         /** @type {() => boolean} */
         this._shouldCancel = shouldCancel;
         /** @type {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean) => Promise<void>}} */
@@ -2314,7 +2411,7 @@ export async function disposeParallelTermBankParser() {
  * @param {Uint8Array[]} contentBytes
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -2334,7 +2431,7 @@ export async function parseTermBankWithWasmColumnChunksParallel(contentBytes, ve
  * @param {number[]} estimatedByteLengths
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -2358,7 +2455,7 @@ export async function parseTermBankWithWasmColumnChunksParallelDeferred(contentB
  * @param {number[]} estimatedByteLengths
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -2383,7 +2480,7 @@ export async function parseTermBankWithWasmColumnChunksParallelLazy(contentByteL
  * @param {number[]} estimatedByteLengths
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -2404,7 +2501,7 @@ export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(so
  * @param {ParallelTermBankSource[]} sources
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} options
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} options
  * @param {() => boolean} shouldCancel
  * @param {boolean} [lazy=false]
  * @returns {Promise<boolean>}
@@ -2905,7 +3002,7 @@ function createParallelParserError(value) {
  * @param {Uint8Array[]} contentBytes
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {{initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
  * @returns {Promise<boolean>}
  */
 export async function parseTermBankWithWasmColumnChunksOverlapped(contentBytes, version, onChunk, options = {}) {
@@ -3170,6 +3267,16 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         return result;
     };
     return {
+        experiments: profiles[0]?.experiments ?? snapshotTermBankExperiments(),
+        fusedParseAttempts: sum('fusedParseAttempts'),
+        fusedParseFallbacks: sum('fusedParseFallbacks'),
+        discardedFusedParseMs: sum('discardedFusedParseMs'),
+        discardedFusedRows: sum('discardedFusedRows'),
+        bankSpanCount: sum('bankSpanCount'),
+        escapedKeyDecodeCount: sum('escapedKeyDecodeCount'),
+        validatedGlossaryReuseCount: sum('validatedGlossaryReuseCount'),
+        fusedSingleBankGroups: sum('fusedSingleBankGroups'),
+        maxWasmHeapBytes: Math.max(0, ...profiles.map((profile) => profile.maxWasmHeapBytes ?? 0)),
         bufferSetupMs: sum('bufferSetupMs'),
         allocationMs: sum('allocationMs'),
         nativeStringPlanAllocationMs: sum('nativeStringPlanAllocationMs'),

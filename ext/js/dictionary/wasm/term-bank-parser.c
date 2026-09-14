@@ -21,6 +21,10 @@
 #define FNV1A_OFFSET 0x811c9dc5u
 #define MIX_OFFSET 0x9e3779b9u
 #define MAX_JSON_NESTING 256u
+#define EXPERIMENT_BANK_SPANS 1u
+#define EXPERIMENT_NATIVE_ESCAPED_KEYS 2u
+#define EXPERIMENT_VALIDATED_GLOSSARY_REUSE 4u
+#define MAX_INTERNED_KEY_BYTES 0xfffeu
 #ifndef RECENT_CONTENT_DEDUP_WINDOW
 #define RECENT_CONTENT_DEDUP_WINDOW 4u
 #endif
@@ -124,7 +128,8 @@ int32_t inflate_and_join_term_banks(
     uint32_t signatures_ptr,
     uint32_t source_count,
     uint32_t output_ptr,
-    uint32_t output_capacity
+    uint32_t output_capacity,
+    uint32_t bank_spans_ptr
 ) {
     if (source_count == 0u || output_capacity < 2u) {
         return -1;
@@ -136,9 +141,10 @@ int32_t inflate_and_join_term_banks(
     const uint32_t* compression_methods = (const uint32_t*)(uintptr_t)compression_methods_ptr;
     const uint32_t* signatures = (const uint32_t*)(uintptr_t)signatures_ptr;
     uint8_t* output = (uint8_t*)(uintptr_t)output_ptr;
-    uint32_t cursor = 1u;
+    uint32_t* bank_spans = (uint32_t*)(uintptr_t)bank_spans_ptr;
+    uint32_t cursor = bank_spans_ptr == 0u ? 1u : 0u;
     uint32_t nonempty_sources = 0u;
-    output[0] = '[';
+    if (bank_spans_ptr == 0u) { output[0] = '['; }
 
     for (uint32_t i = 0u; i < source_count; ++i) {
         const uint32_t input_offset = input_offsets[i];
@@ -194,6 +200,14 @@ int32_t inflate_and_join_term_banks(
         if (end - start < 2u || inflated[start] != '[' || inflated[end - 1u] != ']') {
             return -5;
         }
+        if (bank_spans_ptr != 0u) {
+            /* Preserve the CRC-verified bank, including its array wrapper.
+             * The parser bounds every token to this bank's logical end. */
+            bank_spans[i * 2u] = cursor;
+            bank_spans[i * 2u + 1u] = uncompressed_length;
+            cursor += uncompressed_length;
+            continue;
+        }
         ++start;
         --end;
         while (start < end && is_json_whitespace(inflated[start])) { ++start; }
@@ -211,6 +225,7 @@ int32_t inflate_and_join_term_banks(
         cursor += content_length;
         ++nonempty_sources;
     }
+    if (bank_spans_ptr != 0u) { return (int32_t)cursor; }
     if (cursor >= output_capacity) {
         return -1;
     }
@@ -720,13 +735,96 @@ static void clear_term_row_meta(TermRowMeta* meta) {
     meta->glossary_requires_text_normalization = 0u;
 }
 
+/* A span is [offset, length] in one immutable arena. All row metadata retains
+ * arena-relative offsets, so interning/deduplication survives bank transitions.
+ * The same cursor is used by the non-fused fallback: an early capacity/escaped
+ * key fallback must not accidentally turn malformed separate banks into valid
+ * concatenated JSON. */
+typedef struct {
+    const uint8_t* src;
+    const uint32_t* spans;
+    uint32_t length;
+    uint32_t count;
+    uint32_t next_bank;
+    uint32_t end;
+    uint32_t position;
+} TermBankCursor;
+
+static int next_term_bank(TermBankCursor* cursor) {
+    while (cursor->next_bank < cursor->count) {
+        const uint32_t bank = cursor->next_bank++;
+        const uint32_t start = cursor->spans != 0 ? cursor->spans[bank * 2u] : 0u;
+        const uint32_t length = cursor->spans != 0 ? cursor->spans[bank * 2u + 1u] : cursor->length;
+        if (start < cursor->end || start > cursor->length || length > cursor->length - start) { return -1; }
+        cursor->end = start + length;
+        uint32_t i = skip_ws(cursor->src, cursor->end, start);
+        if (i >= cursor->end || cursor->src[i] != '[') { return -1; }
+        i = skip_ws(cursor->src, cursor->end, i + 1u);
+        if (i >= cursor->end) { return -1; }
+        if (cursor->src[i] != ']') {
+            cursor->position = i;
+            return 1;
+        }
+        if (skip_ws(cursor->src, cursor->end, i + 1u) != cursor->end) { return -1; }
+    }
+    return 0;
+}
+
+static int next_term_row(TermBankCursor* cursor, uint32_t row_end) {
+    uint32_t i = skip_ws(cursor->src, cursor->end, row_end);
+    if (i >= cursor->end) { return -1; }
+    if (cursor->src[i] == ']') {
+        if (skip_ws(cursor->src, cursor->end, i + 1u) != cursor->end) { return -1; }
+        return next_term_bank(cursor);
+    }
+    if (cursor->src[i] != ',') { return -1; }
+    i = skip_ws(cursor->src, cursor->end, i + 1u);
+    if (i >= cursor->end || cursor->src[i] == ']') { return -1; }
+    cursor->position = i;
+    return 1;
+}
+
+static int content_bytes_equal_between(const uint8_t*, uint32_t, const uint8_t*, uint32_t, uint32_t);
+
+/* Samples only reject candidates. Only full equality with a successful earlier
+ * row of THIS parse grants grammar/hint reuse. Nothing survives heap reset.
+ * A witness also lets content dedup avoid comparing this same glossary twice. */
+static int reuse_validated_glossary(
+    const uint8_t* src, uint32_t end, uint32_t start,
+    const TermRowMeta* rows, uint32_t row_count,
+    TermRowMeta* meta, uint32_t* value_end, uint32_t* witness
+) {
+    if (start >= end || (src[start] != '[' && src[start] != '{')) { return 0; }
+    const uint32_t first = row_count > RECENT_CONTENT_DEDUP_WINDOW ? row_count - RECENT_CONTENT_DEDUP_WINDOW : 0u;
+    for (uint32_t k = row_count; k > first;) {
+        const TermRowMeta* prior = &rows[--k];
+        const uint32_t n = prior->glossary_length;
+        const uint32_t p = prior->glossary_start;
+        if (n == 0u || n > end - start || src[start] != src[p]) { continue; }
+        const uint32_t sample = n < 8u ? n : 8u;
+        if (!content_bytes_equal_between(src, start + n - sample, src, p + n - sample, sample) ||
+            !content_bytes_equal_between(src, start + (n - sample) / 2u, src, p + (n - sample) / 2u, sample) ||
+            !content_bytes_equal_between(src, start, src, p, n)) { continue; }
+        meta->glossary_may_contain_media = prior->glossary_may_contain_media;
+        meta->glossary_requires_normalization = prior->glossary_requires_normalization;
+        meta->glossary_requires_text_normalization = prior->glossary_requires_text_normalization;
+        *value_end = start + n;
+        *witness = k;
+        return 1;
+    }
+    return 0;
+}
+
 static int parse_row_single_pass(
     const uint8_t* src,
     uint32_t len,
     uint32_t row_start,
     TermRowMeta* out_meta,
     int media_hints,
-    uint32_t* out_next
+    uint32_t* out_next,
+    const TermRowMeta* prior_rows,
+    uint32_t prior_count,
+    uint32_t* glossary_witness
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
     clear_term_row_meta(out_meta);
@@ -745,7 +843,11 @@ static int parse_row_single_pass(
             if (!scan_scalar_span(src, len, i, &value_end)) { return 0; }
         } else if (field_index == 5u) {
             uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
-            if (!parse_value_span_with_glossary_hints(
+            if (
+                !(glossary_witness != 0 && reuse_validated_glossary(
+                    src, len, i, prior_rows, prior_count, out_meta, &value_end, glossary_witness
+                )) &&
+                !parse_value_span_with_glossary_hints(
                     src,
                     len,
                     i,
@@ -1294,7 +1396,9 @@ static int encode_term_content_token_binary_row(
     return 1;
 }
 
-static int32_t parse_term_bank_impl(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity, int media_hints) {
+/* Keep the ordinary contiguous fallback on its established tight loop. Span
+ * traversal is selected once per call, not charged per row when disabled. */
+static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity, int media_hints) {
     if (json_ptr == 0u || json_len == 0u || out_ptr == 0u || out_capacity == 0u) {
         return -1;
     }
@@ -1318,7 +1422,7 @@ static int32_t parse_term_bank_impl(uint32_t json_ptr, uint32_t json_len, uint32
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0)) {
             return -1;
         }
         ++row_count;
@@ -1335,14 +1439,44 @@ static int32_t parse_term_bank_impl(uint32_t json_ptr, uint32_t json_len, uint32
     return -1;
 }
 
-__attribute__((visibility("default")))
-int32_t parse_term_bank(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity) {
-    return parse_term_bank_impl(json_ptr, json_len, out_ptr, out_capacity, 0);
+
+static int32_t parse_term_bank_impl(
+    uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity,
+    int media_hints, uint32_t bank_spans_ptr, uint32_t bank_count
+) {
+    if (bank_spans_ptr == 0u) {
+        if (bank_count != 0u) { return -1; }
+        return parse_contiguous_term_bank(json_ptr, json_len, out_ptr, out_capacity, media_hints);
+    }
+    if (json_ptr == 0u || json_len == 0u || out_ptr == 0u || out_capacity == 0u ||
+        ((bank_spans_ptr == 0u) != (bank_count == 0u))) { return -1; }
+    const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
+    TermRowMeta* rows = (TermRowMeta*)(uintptr_t)out_ptr;
+    last_parse_capacity = out_capacity;
+    TermBankCursor source = {src, (const uint32_t*)(uintptr_t)bank_spans_ptr,
+        json_len, bank_count == 0u ? 1u : bank_count, 0u, 0u, 0u};
+    int status = next_term_bank(&source);
+    uint32_t row_count = 0u;
+    while (status > 0) {
+        if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
+        uint32_t row_end = 0u;
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0)) {
+            return -1;
+        }
+        ++row_count;
+        status = next_term_row(&source, row_end);
+    }
+    return status < 0 ? -1 : (int32_t)row_count;
 }
 
 __attribute__((visibility("default")))
-int32_t parse_term_bank_with_media_hints(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity) {
-    return parse_term_bank_impl(json_ptr, json_len, out_ptr, out_capacity, 1);
+int32_t parse_term_bank(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity, uint32_t bank_spans_ptr, uint32_t bank_count) {
+    return parse_term_bank_impl(json_ptr, json_len, out_ptr, out_capacity, 0, bank_spans_ptr, bank_count);
+}
+
+__attribute__((visibility("default")))
+int32_t parse_term_bank_with_media_hints(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity, uint32_t bank_spans_ptr, uint32_t bank_count) {
+    return parse_term_bank_impl(json_ptr, json_len, out_ptr, out_capacity, 1, bank_spans_ptr, bank_count);
 }
 
 __attribute__((visibility("default")))
@@ -1490,17 +1624,18 @@ static int content_bytes_equal_between(
 static int raw_term_content_tokens_equal(
     const uint8_t* src,
     const TermRowMeta* first,
-    const TermRowMeta* second
+    const TermRowMeta* second,
+    int glossary_equal
 ) {
     return (
         first->glossary_length == second->glossary_length &&
-        content_bytes_equal_between(
+        (glossary_equal || content_bytes_equal_between(
             src,
             first->glossary_start,
             src,
             second->glossary_start,
             first->glossary_length
-        ) &&
+        )) &&
         first->rules_length == second->rules_length &&
         content_bytes_equal_between(
             src,
@@ -1566,6 +1701,95 @@ static int json_string_token_has_escape(
         if (src[i] == '\\') { return 1; }
     }
     return 0;
+}
+
+
+static uint32_t key_hex4(const uint8_t* p) {
+    uint32_t value = 0u;
+    for (uint32_t j = 0u; j < 4u; ++j) {
+        const uint8_t c = p[j];
+        uint32_t digit;
+        if (c >= '0' && c <= '9') { digit = c - '0'; }
+        else if (c >= 'a' && c <= 'f') { digit = c - 'a' + 10u; }
+        else if (c >= 'A' && c <= 'F') { digit = c - 'A' + 10u; }
+        else { return 0xffffffffu; }
+        value = (value << 4u) | digit;
+    }
+    return value;
+}
+
+/* Decode only an exceptional JSON key, never every key in a source group.
+ * Unpaired escaped UTF-16 surrogates become U+FFFD, as TextEncoder does after
+ * JSON.parse. Invalid raw UTF-8 deliberately uses the old replacement-decoder
+ * fallback. Decode into the unused interner tail: no extra scratch allocation
+ * or copy is needed. A duplicate leaves this tail available for the next key. */
+static int32_t decode_escaped_key(const uint8_t* token, uint32_t length, uint8_t* output, uint32_t capacity) {
+    if (capacity > MAX_INTERNED_KEY_BYTES) { capacity = MAX_INTERNED_KEY_BYTES; }
+    if (length < 2u || token[0] != '"' || token[length - 1u] != '"') { return -1; }
+    const uint32_t end = length - 1u;
+    uint32_t cursor = 0u;
+    for (uint32_t i = 1u; i < end;) {
+        uint32_t c = token[i++];
+        if (c != '\\') {
+            if (c < 0x20u || c == '"') { return -1; }
+            uint32_t width = 1u;
+            if (c >= 0x80u) {
+                if (c >= 0xc2u && c <= 0xdfu) { width = 2u; }
+                else if (c >= 0xe0u && c <= 0xefu) { width = 3u; }
+                else if (c >= 0xf0u && c <= 0xf4u) { width = 4u; }
+                else { return -1; }
+                if (width - 1u > end - i) { return -1; }
+                const uint8_t second = token[i];
+                if ((c == 0xe0u && second < 0xa0u) || (c == 0xedu && second > 0x9fu) ||
+                    (c == 0xf0u && second < 0x90u) || (c == 0xf4u && second > 0x8fu)) { return -1; }
+                for (uint32_t j = 0u; j < width - 1u; ++j) {
+                    if ((token[i + j] & 0xc0u) != 0x80u) { return -1; }
+                }
+            }
+            if (width > capacity - cursor) { return -1; }
+            output[cursor++] = (uint8_t)c;
+            for (uint32_t j = 1u; j < width; ++j) { output[cursor++] = token[i++]; }
+            continue;
+        }
+        if (i >= end) { return -1; }
+        c = token[i++];
+        switch (c) {
+            case '"': case '\\': case '/': break;
+            case 'b': c = 8u; break;
+            case 'f': c = 12u; break;
+            case 'n': c = 10u; break;
+            case 'r': c = 13u; break;
+            case 't': c = 9u; break;
+            case 'u': {
+                if (end - i < 4u) { return -1; }
+                c = key_hex4(token + i);
+                if (c == 0xffffffffu) { return -1; }
+                i += 4u;
+                if (c >= 0xd800u && c <= 0xdbffu) {
+                    uint32_t low = 0u;
+                    if (end - i >= 6u && token[i] == '\\' && token[i + 1u] == 'u') {
+                        low = key_hex4(token + i + 2u);
+                    }
+                    if (low >= 0xdc00u && low <= 0xdfffu) {
+                        c = 0x10000u + ((c - 0xd800u) << 10u) + low - 0xdc00u;
+                        i += 6u;
+                    } else { c = 0xfffdu; }
+                } else if (c >= 0xdc00u && c <= 0xdfffu) { c = 0xfffdu; }
+                break;
+            }
+            default: return -1;
+        }
+        const uint32_t width = c < 0x80u ? 1u : (c < 0x800u ? 2u : (c < 0x10000u ? 3u : 4u));
+        if (width > capacity - cursor) { return -1; }
+        if (width == 1u) { output[cursor++] = (uint8_t)c; }
+        else {
+            output[cursor++] = (uint8_t)((width == 2u ? 0xc0u : (width == 3u ? 0xe0u : 0xf0u)) | (c >> (6u * (width - 1u))));
+            for (uint32_t j = width - 1u; j > 0u; --j) {
+                output[cursor++] = (uint8_t)(0x80u | ((c >> (6u * (j - 1u))) & 0x3fu));
+            }
+        }
+    }
+    return (int32_t)cursor;
 }
 
 static uint32_t mix_string_hash(uint32_t hash, uint32_t length) {
@@ -2141,7 +2365,11 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t scores_ptr,
     uint32_t sequences_ptr,
     uint32_t recent_content_hits_ptr,
-    uint32_t media_hints
+    uint32_t media_hints,
+    uint32_t experiment_mask,
+    uint32_t bank_spans_ptr,
+    uint32_t bank_count,
+    uint32_t experiment_stats_ptr
 ) {
     if (
         json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
@@ -2157,6 +2385,10 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     ) {
         return -1;
     }
+    if (((bank_spans_ptr == 0u) != (bank_count == 0u)) ||
+        (bank_count != 0u && (experiment_mask & EXPERIMENT_BANK_SPANS) == 0u)) { return -1; }
+    uint32_t* experiment_stats = (uint32_t*)(uintptr_t)experiment_stats_ptr;
+    if (experiment_stats != 0) { experiment_stats[0] = 0u; experiment_stats[1] = 0u; }
     const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
     TermRowMeta* rows = (TermRowMeta*)(uintptr_t)metas_ptr;
     uint8_t* out = (uint8_t*)(uintptr_t)out_ptr;
@@ -2188,26 +2420,21 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     last_parse_capacity = metas_capacity;
     last_content_capacity = out_capacity;
 
-    uint32_t i = skip_ws(src, json_len, 0u);
-    if (i >= json_len || src[i] != '[') { return -1; }
-    i = skip_ws(src, json_len, i + 1u);
-    if (i < json_len && src[i] == ']') {
-        i = skip_ws(src, json_len, i + 1u);
-        if (i != json_len) { return -1; }
-        *(uint32_t*)(uintptr_t)unique_count_ptr = 0u;
-        *(uint32_t*)(uintptr_t)row_count_ptr = 0u;
-        *(uint32_t*)(uintptr_t)string_unique_count_ptr = 0u;
-        *(uint32_t*)(uintptr_t)string_bytes_count_ptr = 0u;
-        *(uint32_t*)(uintptr_t)recent_content_hits_ptr = 0u;
-        return 0;
-    }
-
-    while (i < json_len) {
-        if (row_count >= metas_capacity) { return -4; }
+    TermBankCursor source = {src, (const uint32_t*)(uintptr_t)bank_spans_ptr,
+        json_len, bank_count == 0u ? 1u : bank_count, 0u, 0u, 0u};
+    int status = next_term_bank(&source);
+    while (status > 0) {
+        if (row_count >= metas_capacity) {
+            *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
+            return -4;
+        }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints != 0u, &row_end)) {
+        uint32_t glossary_witness = 0xffffffffu;
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
+                rows, row_count, (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u ? &glossary_witness : 0)) {
             return -1;
         }
+        if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
 
         const TermRowMeta* parsed_row = &rows[row_count];
         const uint32_t token_starts[2] = {
@@ -2244,11 +2471,22 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
             const uint32_t token_start = token_starts[field];
             const uint32_t token_length = token_lengths[field];
-            if (json_string_token_has_escape(src, token_start, token_length)) { return -5; }
-            const uint32_t value_start = token_start + 1u;
-            const uint32_t value_length = token_length - 2u;
-            if (value_length >= 0xffffu) { return -5; }
-            const uint32_t string_hash = hash_content_xxh32(src + value_start, value_length, FNV1A_OFFSET);
+            const uint8_t* value_source = src;
+            uint32_t value_start = token_start + 1u;
+            uint32_t value_length = token_length - 2u;
+            if (json_string_token_has_escape(src, token_start, token_length)) {
+                if ((experiment_mask & EXPERIMENT_NATIVE_ESCAPED_KEYS) == 0u) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
+                const int32_t decoded_length = decode_escaped_key(
+                    src + token_start, token_length, strings + strings_cursor, strings_capacity - strings_cursor
+                );
+                if (decoded_length < 0) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
+                value_source = strings;
+                value_start = strings_cursor;
+                value_length = (uint32_t)decoded_length;
+                if (experiment_stats != 0) { ++experiment_stats[0]; }
+            }
+            if (value_length >= 0xffffu) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
+            const uint32_t string_hash = hash_content_xxh32(value_source + value_start, value_length, FNV1A_OFFSET);
             uint32_t string_slot = mix_string_hash(string_hash, value_length) & string_table_mask;
             uint32_t matched_index = 0xffffffffu;
             for (uint32_t probes = 0u; probes < string_hash_table_size; ++probes) {
@@ -2262,7 +2500,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                     content_bytes_equal_between(
                         strings,
                         string_offsets[candidate],
-                        src,
+                        value_source,
                         value_start,
                         value_length
                     )
@@ -2281,9 +2519,11 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 string_hash_table[string_slot] != 0u ||
                 strings_cursor + value_length > strings_capacity
             ) {
-                return -5;
+                *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5;
             }
-            __builtin_memcpy(strings + strings_cursor, src + value_start, value_length);
+            if (value_source != strings) {
+                __builtin_memcpy(strings + strings_cursor, value_source + value_start, value_length);
+            }
             string_lengths[string_unique_count] = (uint16_t)value_length;
             string_offsets[string_unique_count] = strings_cursor;
             string_hashes[string_unique_count] = string_hash;
@@ -2309,7 +2549,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             --candidate;
             if (
                 recent_content_signatures[candidate % RECENT_CONTENT_DEDUP_WINDOW] == raw_content_signature &&
-                raw_term_content_tokens_equal(src, parsed_row, &rows[candidate])
+                raw_term_content_tokens_equal(src, parsed_row, &rows[candidate], candidate == glossary_witness)
             ) {
                 recent_match = candidate;
                 break;
@@ -2389,21 +2629,13 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         }
 
         ++row_count;
-        i = skip_ws(src, json_len, row_end);
-        if (i >= json_len) { return -1; }
-        if (src[i] == ']') {
-            i = skip_ws(src, json_len, i + 1u);
-            if (i != json_len) { return -1; }
-            *(uint32_t*)(uintptr_t)unique_count_ptr = unique_count;
-            *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
-            *(uint32_t*)(uintptr_t)string_unique_count_ptr = string_unique_count;
-            *(uint32_t*)(uintptr_t)string_bytes_count_ptr = strings_cursor;
-            *(uint32_t*)(uintptr_t)recent_content_hits_ptr = recent_content_hits;
-            return (int32_t)cursor;
-        }
-        if (src[i] != ',') { return -1; }
-        i = skip_ws(src, json_len, i + 1u);
-        if (i >= json_len || src[i] == ']') { return -1; }
+        status = next_term_row(&source, row_end);
     }
-    return -1;
+    if (status < 0) { return -1; }
+    *(uint32_t*)(uintptr_t)unique_count_ptr = unique_count;
+    *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
+    *(uint32_t*)(uintptr_t)string_unique_count_ptr = string_unique_count;
+    *(uint32_t*)(uintptr_t)string_bytes_count_ptr = strings_cursor;
+    *(uint32_t*)(uintptr_t)recent_content_hits_ptr = recent_content_hits;
+    return (int32_t)cursor;
 }

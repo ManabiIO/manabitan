@@ -50,7 +50,15 @@ export type ImportPhaseTiming = {
     details?: Record<string, unknown>;
 };
 
-export type ImportDetails = {
+/** Experimental parser paths; absent and non-true runtime values remain off. */
+export type ImportExperiments = {
+    experimentalTermBankSpans?: boolean;
+    experimentalNativeEscapedKeys?: boolean;
+    experimentalValidatedGlossaryReuse?: boolean;
+    experimentalFusedSingleBank?: boolean;
+};
+
+export type ImportDetails = ImportExperiments & {
     prefixWildcardsSupported?: boolean;
     yomitanVersion?: string;
     existingDatabaseContentBase64?: string;

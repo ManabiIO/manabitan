@@ -66,6 +66,7 @@ import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} fr
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
 import {DictionaryImportSession} from './dictionary-import-session.js';
 import {RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
+import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 
 const BlobReader = /** @type {typeof import('@zip.js/zip.js').BlobReader} */ (/** @type {unknown} */ (BlobReader0));
 const BlobWriter = /** @type {typeof import('@zip.js/zip.js').BlobWriter} */ (/** @type {unknown} */ (BlobWriter0));
@@ -526,6 +527,8 @@ export class DictionaryImporter {
         this._reverseStringCache = new Map();
         /** @type {boolean} */
         this._fastPrefixReverse = true;
+        /** @type {ReturnType<typeof snapshotTermBankExperiments>} */
+        this._termBankExperiments = snapshotTermBankExperiments();
     }
 
     /**
@@ -564,6 +567,7 @@ export class DictionaryImporter {
      */
     async _importDictionary(dictionaryDatabase, archiveContent, details, archiveOwnership) {
         this._ignoreCancellation = false;
+        this._termBankExperiments = snapshotTermBankExperiments(details);
         if (!dictionaryDatabase) {
             throw new Error('Invalid database');
         }
@@ -642,7 +646,7 @@ export class DictionaryImporter {
             kanjiMetaReadMs: 0,
             tagReadMs: 0,
         };
-        /** @type {{parserProfile?: Record<string, string|number|boolean|null>|null, materializationMs?: number, chunkSinkMs?: number, chunkCount?: number, totalRows?: number}|null} */
+        /** @type {{parserProfile?: (ReturnType<typeof consumeLastTermBankWasmParseProfile> & {parallelSkipReason?: string|null})|null, materializationMs?: number, chunkSinkMs?: number, chunkCount?: number, totalRows?: number}|null} */
         let lastFastTermBankReadProfile = null;
         /** @type {{readBytesMs?: number, decodeRowsMs?: number, reverseRowsMs?: number, metadataRebaseMs?: number, chunkSinkMs?: number, chunkCount?: number, totalRows?: number, rowChunkSize?: number, readingEqualsExpressionCount?: number, sequencePresentCount?: number, zeroScoreCount?: number, nonZeroScoreCount?: number, sharedGlossaryRowCount?: number, contentLengthExtendedCount?: number, avgContentLength?: number, avgExpressionLength?: number, avgReadingLength?: number}|null} */
         let lastArtifactTermBankReadProfile = null;
@@ -1821,6 +1825,7 @@ export class DictionaryImporter {
                         step4TimingBreakdown.termParseMs += Math.max(0, totalFastReadMs - streamChunkWorkMs);
                     }
                     if (lastFastTermBankReadProfile !== null) {
+                        /** @type {Partial<NonNullable<ReturnType<typeof consumeLastTermBankWasmParseProfile>>> & {parallelSkipReason?: string|null}} */
                         const parserProfile = lastFastTermBankReadProfile.parserProfile ?? {};
                         recordPhaseTiming(`term-file-fast-path:${streamedTermFileLabel}`, tFastParseStart, {
                             batchedFileCount: Math.max(1, Math.round(streamedProgressAllowance / termFileProgressAllowance)),
@@ -1838,6 +1843,16 @@ export class DictionaryImporter {
                             sourceFirstBatchFileCount: zipWorkerPolicy.firstBatchFileCount,
                             sourceFirstBatchEstimatedBytes: zipWorkerPolicy.firstBatchEstimatedBytes,
                             sourceFirstBatchSizeKnown: zipWorkerPolicy.firstBatchSizeKnown,
+                            parserExperiments: parserProfile.experiments ?? null,
+                            parserFusedAttempts: parserProfile.fusedParseAttempts ?? 0,
+                            parserFusedFallbacks: parserProfile.fusedParseFallbacks ?? 0,
+                            parserDiscardedFusedMs: parserProfile.discardedFusedParseMs ?? 0,
+                            parserDiscardedFusedRows: parserProfile.discardedFusedRows ?? 0,
+                            parserBankSpanCount: parserProfile.bankSpanCount ?? 0,
+                            parserEscapedKeyDecodeCount: parserProfile.escapedKeyDecodeCount ?? 0,
+                            parserValidatedGlossaryReuseCount: parserProfile.validatedGlossaryReuseCount ?? 0,
+                            parserFusedSingleBankGroups: parserProfile.fusedSingleBankGroups ?? 0,
+                            parserMaxWasmHeapBytes: parserProfile.maxWasmHeapBytes ?? 0,
                             parserBufferSetupMs: parserProfile.bufferSetupMs ?? null,
                             parserAllocationMs: parserProfile.allocationMs ?? null,
                             parserCopyJsonMs: parserProfile.copyJsonMs ?? null,
@@ -2075,6 +2090,17 @@ export class DictionaryImporter {
                 step4OtherMs: Math.max(0, importDataBanksElapsedMs - step4AccountedMs),
                 fastPathChunkCount: lastFastTermBankReadProfile?.chunkCount ?? null,
                 fastPathChunkSinkMs: lastFastTermBankReadProfile?.chunkSinkMs ?? null,
+                fastPathParserExperiments: this._termBankExperiments,
+                fastPathParserEffectiveExperiments: fastPathProfile?.experiments ?? null,
+                fastPathParserFusedAttempts: fastPathProfile?.fusedParseAttempts ?? 0,
+                fastPathParserFusedFallbacks: fastPathProfile?.fusedParseFallbacks ?? 0,
+                fastPathParserDiscardedFusedMs: fastPathProfile?.discardedFusedParseMs ?? 0,
+                fastPathParserDiscardedFusedRows: fastPathProfile?.discardedFusedRows ?? 0,
+                fastPathParserBankSpanCount: fastPathProfile?.bankSpanCount ?? 0,
+                fastPathParserEscapedKeyDecodeCount: fastPathProfile?.escapedKeyDecodeCount ?? 0,
+                fastPathParserValidatedGlossaryReuseCount: fastPathProfile?.validatedGlossaryReuseCount ?? 0,
+                fastPathParserFusedSingleBankGroups: fastPathProfile?.fusedSingleBankGroups ?? 0,
+                fastPathParserMaxWasmHeapBytes: fastPathProfile?.maxWasmHeapBytes ?? 0,
                 fastPathParserBufferSetupMs: fastPathProfile?.bufferSetupMs ?? null,
                 fastPathParserAllocationMs: fastPathProfile?.allocationMs ?? null,
                 fastPathParserCopyJsonMs: fastPathProfile?.copyJsonMs ?? null,
@@ -3970,6 +3996,7 @@ export class DictionaryImporter {
                 importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
             };
             const parserOptions = {
+                ...this._termBankExperiments,
                 copyContentBytes: this._wasmPassThroughTermContent && !streamToChunkHandler,
                 includeContentMetadata,
                 initialContentBytesPerRow: wasmInitialContentBytesPerRow,
