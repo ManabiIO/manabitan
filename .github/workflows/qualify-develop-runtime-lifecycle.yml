@@ -137,7 +137,10 @@ jobs:
               original = original.replace("reasons: [/** @type {chrome.offscreen.Reason} */ ('CLIPBOARD')],", "reasons: [\n                    /** @type {chrome.offscreen.Reason} */ ('CLIPBOARD'),\n                ],")
               path.write_text(original)
           PY
-          node /tmp/develop-lifecycle/lint.mjs /tmp/develop-lifecycle/lint-after.json fix
+          node /tmp/develop-lifecycle/lint.mjs /tmp/develop-lifecycle/lint-autofix.json fix
+          # Typed ESLint programs may be stale during an autofix loop. Qualify the
+          # actual written files using a fresh, non-fixing parser process.
+          node /tmp/develop-lifecycle/lint.mjs /tmp/develop-lifecycle/lint-after.json
           git diff --binary > /tmp/develop-lifecycle/source-fixes.patch
           set +e
           for project in main dev test bench; do
