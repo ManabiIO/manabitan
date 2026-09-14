@@ -18,21 +18,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          base64 -d .github/radical-import-patch/01.b64 | gzip -dc > "$RUNNER_TEMP/source.patch"
-          echo 'add4135cb390e8a22558b5e4acd67978366e0205129f91a7c97cffe03fcf3f5c  '"$RUNNER_TEMP/source.patch" | sha256sum -c -
+          cat .github/radical-import-patch-final/*.b64 | tr -d '\n' | base64 -d | gzip -dc > "$RUNNER_TEMP/source.patch"
+          echo 'cabbb2dff25aad491f6be290dfd39aafda0020dd66c2cee0750391fa00af60bd  '"$RUNNER_TEMP/source.patch" | sha256sum -c -
           git checkout --detach 443f4c51c04219f932f14c42d3d1e254f5620712
           git apply --index --whitespace=error-all "$RUNNER_TEMP/source.patch"
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('dev/perf/import-experiments-20260914.md')
-          text = p.read_text()
-          old = 'roughly **7–11% lower component elapsed time**'
-          new = 'roughly **6–11% lower component elapsed time**'
-          if old not in text:
-              raise SystemExit('expected handoff wording not found')
-          p.write_text(text.replace(old, new, 1))
-          PY
-          git add dev/perf/import-experiments-20260914.md
           test "$(git write-tree)" = 29d3f1eb4649fa96cfab6751d327f7ae34bd906b
           git diff --cached --check
           git config user.name 'Manabitan contributors'
@@ -70,7 +59,7 @@ jobs:
         run: |
           test "$(git rev-parse HEAD^{tree})" = 29d3f1eb4649fa96cfab6751d327f7ae34bd906b
           test -z "$(git status --porcelain)"
-          git push --force-with-lease origin HEAD:refs/heads/stage/radical-import-flags-20260914
+          git push origin HEAD:refs/heads/stage/radical-import-flags-20260914
       - name: Install Chromium and build extension
         run: |
           node node_modules/playwright/cli.js install --with-deps chromium
