@@ -77,13 +77,14 @@ describe('Offscreen import supervision', () => {
             [caller.port2],
         );
         await vi.waitFor(() => expect(transferredPort).not.toBeNull());
-        transferredPort?.postMessage({type: 'progress', progress: {step: 2}});
+        const workerPort = /** @type {MessagePort} */ (/** @type {unknown} */ (transferredPort));
+        workerPort.postMessage({type: 'progress', progress: {step: 2}});
         expect(await progressPromise).toEqual({type: 'progress', progress: {step: 2}});
 
         const completePromise = nextMessage(caller.port1);
-        transferredPort?.postMessage({type: 'complete', result: {title: 'Test'}});
+        workerPort.postMessage({type: 'complete', result: {title: 'Test'}});
         expect(await completePromise).toEqual({type: 'complete', result: {title: 'Test'}});
         caller.port1.close();
-        transferredPort?.close();
+        workerPort.close();
     });
 });
