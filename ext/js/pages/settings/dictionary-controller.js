@@ -1481,11 +1481,11 @@ export class DictionaryController {
      * @param {string|undefined} downloadUrl
      */
     async _updateDictionary(dictionaryTitle, downloadUrl) {
-        if (this._checkingIntegrity || this._checkingUpdates) { return }
+        if (this._checkingIntegrity || this._checkingUpdates) { return; }
 
-        const dictionaryInfo = await this._getDictionaryInfoForTask(dictionaryTitle)
-        dictionaryTitle = dictionaryInfo.title
-        downloadUrl = downloadUrl ?? dictionaryInfo.downloadUrl
+        const dictionaryInfo = await this._getDictionaryInfoForTask(dictionaryTitle);
+        dictionaryTitle = dictionaryInfo.title;
+        downloadUrl = downloadUrl ?? dictionaryInfo.downloadUrl;
         if (typeof downloadUrl !== 'string') { throw new Error('Attempted to update dictionary without download URL'); }
 
         const options = await this._settingsController.getOptionsFull();
@@ -1529,26 +1529,26 @@ export class DictionaryController {
      * @returns {Promise<import('dictionary-importer').Summary>}
      */
     async _getDictionaryInfoForTask(dictionaryTitle) {
-        const dictionaries = this._dictionaries ?? await this._settingsController.getDictionaryInfo()
-        const exactMatch = dictionaries.find((entry) => entry.title === dictionaryTitle)
-        if (typeof exactMatch !== 'undefined') { return exactMatch }
+        const dictionaries = this._dictionaries ?? await this._settingsController.getDictionaryInfo();
+        const exactMatch = dictionaries.find((entry) => entry.title === dictionaryTitle);
+        if (typeof exactMatch !== 'undefined') { return exactMatch; }
 
-        const normalizedTaskTitle = this._getDictionaryTaskMatchTitle(dictionaryTitle)
-        if (normalizedTaskTitle.length === 0) { throw new Error('Dictionary update task title is empty') }
+        const normalizedTaskTitle = this._getDictionaryTaskMatchTitle(dictionaryTitle);
+        if (normalizedTaskTitle.length === 0) { throw new Error('Dictionary update task title is empty'); }
         const matches = dictionaries.filter((entry) => {
-            const normalizedInstalledTitle = this._getDictionaryTaskMatchTitle(entry.title)
+            const normalizedInstalledTitle = this._getDictionaryTaskMatchTitle(entry.title);
             return (
                 normalizedInstalledTitle === normalizedTaskTitle ||
                 normalizedInstalledTitle.startsWith(`${normalizedTaskTitle} `) ||
                 normalizedInstalledTitle.startsWith(`${normalizedTaskTitle}.`) ||
                 normalizedInstalledTitle.startsWith(`${normalizedTaskTitle}[`)
-            )
-        })
-        if (matches.length === 1) { return matches[0] }
+            );
+        });
+        if (matches.length === 1) { return matches[0]; }
         if (matches.length > 1) {
-            throw new Error(`Dictionary update task title is ambiguous: ${dictionaryTitle}`)
+            throw new Error(`Dictionary update task title is ambiguous: ${dictionaryTitle}`);
         }
-        throw new Error(`Dictionary not found: ${dictionaryTitle}`)
+        throw new Error(`Dictionary not found: ${dictionaryTitle}`);
     }
 
     /**
@@ -1560,7 +1560,7 @@ export class DictionaryController {
             .replace(TRANSIENT_UPDATE_TITLE_PATTERN, '')
             .replace(/\s+/g, ' ')
             .trim()
-            .toLowerCase()
+            .toLowerCase();
     }
 
     /**

@@ -46,7 +46,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
 
     test('skips profile dictionary rewrites for profiles without carried-over update settings', async () => {
         const controller = createControllerForInternalTests();
-        Reflect.set(controller, '_activeImportRunGeneration', 1)
+        Reflect.set(controller, '_activeImportRunGeneration', 1);
         const replaceDictionaryTitle = vi.fn().mockResolvedValue(void 0);
         const triggerDatabaseUpdated = vi.fn().mockResolvedValue(void 0);
         const setAllSettings = vi.fn().mockResolvedValue(void 0);
@@ -127,7 +127,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
             vi.fn(),
         );
 
-        expect(result.errors).toEqual([])
+        expect(result.errors).toEqual([]);
         expect(result.importedTitle).toBe('Jitendex.org [2026-02-05]');
         expect(replaceDictionaryTitle).toHaveBeenCalledTimes(1);
         expect(triggerDatabaseUpdated).toHaveBeenCalledTimes(1);

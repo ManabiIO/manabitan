@@ -77,7 +77,7 @@ export class OffscreenProxy {
      * @see https://developer.chrome.com/docs/extensions/reference/offscreen/
      */
     async prepare() {
-        await this._ensureOffscreenPort()
+        await this._ensureOffscreenPort();
     }
 
     /**
@@ -85,27 +85,29 @@ export class OffscreenProxy {
      */
     async _ensureOffscreenDocument() {
         if (this._creatingOffscreen !== null) {
-            await this._creatingOffscreen
-            return
+            await this._creatingOffscreen;
+            return;
         }
         // Share the existence probe too: a delayed negative probe must not recreate
         // a document which another caller has just finished creating.
         const creatingPromise = (async () => {
-            if (await this._hasOffscreenDocument()) { return }
-            const port = this._currentOffscreenPort
-            if (port) { this._clearCurrentOffscreenPort(port) }
+            if (await this._hasOffscreenDocument()) { return; }
+            const port = this._currentOffscreenPort;
+            if (port) { this._clearCurrentOffscreenPort(port); }
             await chrome.offscreen.createDocument({
                 url: 'offscreen.html',
-                reasons: [/** @type {chrome.offscreen.Reason} */ ('CLIPBOARD')],
+                reasons: [
+                    /** @type {chrome.offscreen.Reason} */ ('CLIPBOARD'),
+                ],
                 justification: 'Access to the clipboard',
-            })
-        })()
-        this._creatingOffscreen = creatingPromise
+            });
+        })();
+        this._creatingOffscreen = creatingPromise;
         try {
-            await creatingPromise
+            await creatingPromise;
         } finally {
             if (this._creatingOffscreen === creatingPromise) {
-                this._creatingOffscreen = null
+                this._creatingOffscreen = null;
             }
         }
     }
@@ -124,35 +126,35 @@ export class OffscreenProxy {
      */
     async _ensureOffscreenPort() {
         if (this._registeringOffscreenPort !== null) {
-            await this._registeringOffscreenPort
-            return
+            await this._registeringOffscreenPort;
+            return;
         }
         const registeringPromise = (async () => {
             // A closed document can leave a non-null port which silently drops sends.
-            await this._ensureOffscreenDocument()
-            if (this._currentOffscreenPort !== null) { return }
+            await this._ensureOffscreenDocument();
+            if (this._currentOffscreenPort !== null) { return; }
             // Bootstrap directly; never re-enter a public lifecycle-recovering send.
-            const response = await this._webExtension.sendMessagePromise({action: 'createAndRegisterPortOffscreen'})
-            this._getMessageResponseResult(/** @type {import('core').Response<void>} */ (response))
+            const response = await this._webExtension.sendMessagePromise({action: 'createAndRegisterPortOffscreen'});
+            this._getMessageResponseResult(/** @type {import('core').Response<void>} */ (response));
             /** @type {ReturnType<typeof setTimeout>|undefined} */
-            let timeout
+            let timeout;
             try {
                 await Promise.race([
                     this._offscreenPortReadyPromise,
                     new Promise((resolve, reject) => {
-                        timeout = setTimeout(() => reject(new Error('Timed out waiting for offscreen control port registration')), 5000)
+                        timeout = setTimeout(() => reject(new Error('Timed out waiting for offscreen control port registration')), 5000);
                     }),
-                ])
+                ]);
             } finally {
-                clearTimeout(timeout)
+                clearTimeout(timeout);
             }
-        })()
-        this._registeringOffscreenPort = registeringPromise
+        })();
+        this._registeringOffscreenPort = registeringPromise;
         try {
-            await registeringPromise
+            await registeringPromise;
         } finally {
             if (this._registeringOffscreenPort === registeringPromise) {
-                this._registeringOffscreenPort = null
+                this._registeringOffscreenPort = null;
             }
         }
     }

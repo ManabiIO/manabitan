@@ -25,16 +25,16 @@ describe('OffscreenProxy bridge reliability', () => {
 
     beforeEach(() => {
         originalChrome = globalThis.chrome;
-        globalThis.chrome = /** @type {typeof globalThis.chrome} */ ({
+        globalThis.chrome = /** @type {typeof globalThis.chrome} */ (/** @type {unknown} */ ({
             runtime: {
                 lastError: undefined,
                 getURL: vi.fn(() => 'chrome-extension://test/offscreen.html'),
                 getContexts: vi.fn().mockResolvedValue([{}]),
             },
             offscreen: {
-                createDocument: vi.fn().mockResolvedValue(undefined),
+                createDocument: vi.fn().mockResolvedValue(void 0),
             },
-        });
+        }));
     });
 
     afterEach(() => {

@@ -30,6 +30,7 @@ import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
+import {toError} from '../core/to-error.js';
 import {clone, deferPromise, promiseTimeout} from '../core/utilities.js';
 import {generateAnkiNoteMediaFileName, INVALID_NOTE_ID, isNoteDataValid} from '../data/anki-util.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
@@ -1811,24 +1812,24 @@ export class Backend {
      * @returns {Promise<void>}
      */
     async _runDictionaryMutation(task) {
-        const previousPromise = this._dictionaryMutationPromise
+        const previousPromise = this._dictionaryMutationPromise;
         // Publish the tail before any caller-provided task can re-enter this queue.
         const mutationPromise = Promise.resolve().then(async () => {
             if (previousPromise !== null) {
                 try {
-                    await previousPromise
+                    await previousPromise;
                 } catch (_) {
                     // A prior failed mutation must not poison later queued mutations.
                 }
             }
-            await task()
-        })
-        this._dictionaryMutationPromise = mutationPromise
+            await task();
+        });
+        this._dictionaryMutationPromise = mutationPromise;
         try {
-            await mutationPromise
+            await mutationPromise;
         } finally {
             if (this._dictionaryMutationPromise === mutationPromise) {
-                this._dictionaryMutationPromise = null
+                this._dictionaryMutationPromise = null;
             }
         }
     }
