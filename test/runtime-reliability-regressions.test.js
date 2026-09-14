@@ -119,6 +119,7 @@ describe('runtime reliability regressions', () => {
     });
 
     test('ordinary offscreen messages ensure the document exists before sending', async () => {
+        vi.stubGlobal('chrome', {runtime: {lastError: void 0}});
         const proxy = /** @type {OffscreenProxy} */ (Object.create(OffscreenProxy.prototype));
         const ensureOffscreenDocument = vi.fn().mockResolvedValue(void 0);
         const sendMessagePromise = vi.fn().mockResolvedValue({result: 'ok'});
@@ -146,18 +147,14 @@ describe('runtime reliability regressions', () => {
         Reflect.set(handler, '_queuedExclusiveRequestCount', 1);
         Reflect.set(handler, '_queuedImportRequestCount', 1);
 
-        try {
-            const event = /** @type {MessageEvent} */ (/** @type {unknown} */ ({
-                data: {id: 99, action: 'findTermsStructuredOffscreen', params: {}},
-                ports: [],
-            }));
-            Reflect.get(handler, '_onMessage').call(handler, event);
-            await flushMicrotasks();
+        const event = /** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: {id: 99, action: 'findTermsStructuredOffscreen', params: {}},
+            ports: [],
+        }));
+        Reflect.get(handler, '_onMessage').call(handler, event);
+        await flushMicrotasks();
 
-            expect(postMessage).toHaveBeenCalledOnce();
-            expect(postMessage.mock.calls[0][0]).toMatchObject({id: 99, error: expect.any(Object)});
-        } finally {
-            importGate.resolve();
-        }
+        expect(postMessage).toHaveBeenCalledOnce();
+        expect(postMessage.mock.calls[0][0]).toMatchObject({id: 99, error: expect.any(Object)});
     });
 });
