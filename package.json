@@ -1,7 +1,7 @@
 {
     "name": "yomitan",
     "version": "0.0.0",
-    "description": "Japanese pop-up dictionary extension for Chrome and Firefox.",
+    "description": "Popup dictionary browser extension for language learning, based on Yomitan.",
     "directories": {
         "test": "test"
     },
@@ -35,6 +35,7 @@
         "test:html": "npx html-validate \"ext/**/*.html\" \"test/**/*.html\" \"dev/**/*.html\"",
         "test:md": "prettier . --check",
         "test:md:write": "prettier . --write",
+        "test:ts": "npm run test:ts:main && npm run test:ts:dev && npm run test:ts:test && npm run test:ts:bench",
         "test:ts:main": "npx tsc --noEmit --project jsconfig.json",
         "test:ts:dev": "npx tsc --noEmit --project dev/jsconfig.json",
         "test:ts:test": "npx tsc --noEmit --project test/jsconfig.typecheck.json",
@@ -69,7 +70,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/yomidevs/yomitan.git"
+        "url": "git+https://github.com/ManabiIO/manabitan.git"
     },
     "license": "GPL-3.0-or-later",
     "licenses": [
@@ -79,9 +80,9 @@
         }
     ],
     "bugs": {
-        "url": "https://github.com/yomidevs/yomitan/issues"
+        "url": "https://manabi.io/manabitan/support/"
     },
-    "homepage": "https://github.com/yomidevs/yomitan/",
+    "homepage": "https://manabi.io/manabitan/",
     "webExt": {
         "sourceDir": "ext"
     },
