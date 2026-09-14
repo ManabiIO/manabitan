@@ -50,10 +50,10 @@ replace_once(
     '''    prepare() {
         if (this._preparePromise === null) {
             if (this._prepareError) {
-                const {promise: completePromise, resolve, reject} = deferPromise();
-                this._prepareCompletePromise = completePromise;
-                this._prepareCompleteResolve = resolve;
-                this._prepareCompleteReject = reject;
+                const deferred = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+                this._prepareCompletePromise = deferred.promise;
+                this._prepareCompleteResolve = deferred.resolve;
+                this._prepareCompleteReject = deferred.reject;
                 this._prepareError = false;
             }
             const promise = this._prepareInternal();
