@@ -16,12 +16,16 @@ vi.mock('../ext/js/core/diagnostics-reporter.js', () => ({
 }));
 
 const {Backend} = await import('../ext/js/background/backend.js');
-const {OffscreenDictionaryWorkerHandler} = await import('../ext/js/background/offscreen-dictionary-worker.js');
 const {OffscreenProxy} = await import('../ext/js/background/offscreen-proxy.js');
 
+/**
+ * @returns {{promise: Promise<void>, resolve: () => void, reject: (reason?: unknown) => void}}
+ */
 function deferred() {
-    let resolve;
-    let reject;
+    /** @type {() => void} */
+    let resolve = () => {};
+    /** @type {(reason?: unknown) => void} */
+    let reject = () => {};
     const promise = new Promise((resolve2, reject2) => {
         resolve = resolve2;
         reject = reject2;
@@ -47,6 +51,7 @@ describe('runtime reliability regressions', () => {
         const firstGate = deferred();
         const secondGate = deferred();
         const thirdGate = deferred();
+        /** @type {string[]} */
         const starts = [];
 
         const first = Backend.prototype._runDictionaryMutation.call(backend, async () => {
@@ -120,28 +125,38 @@ describe('runtime reliability regressions', () => {
         Reflect.set(proxy, '_ensureOffscreenDocument', ensureOffscreenDocument);
         Reflect.set(proxy, '_webExtension', {sendMessagePromise});
 
-        await expect(OffscreenProxy.prototype.sendMessagePromise.call(proxy, {action: 'getDictionaryInfoOffscreen'})).resolves.toBe('ok');
+        await expect(OffscreenProxy.prototype.sendMessagePromise.call(proxy, {
+            action: 'getDictionaryInfoOffscreen',
+            params: void 0,
+        })).resolves.toBe('ok');
         expect(ensureOffscreenDocument).toHaveBeenCalledOnce();
         expect(sendMessagePromise).toHaveBeenCalledOnce();
     });
 
     test('lookup queued behind an import is rejected promptly instead of waiting for the worker timeout', async () => {
         const postMessage = vi.fn();
-        vi.stubGlobal('self', {postMessage});
+        vi.stubGlobal('self', {
+            addEventListener: vi.fn(),
+            postMessage,
+        });
+        const {OffscreenDictionaryWorkerHandler} = await import('../ext/js/background/offscreen-dictionary-worker.js');
         const handler = new OffscreenDictionaryWorkerHandler();
         const importGate = deferred();
         Reflect.set(handler, '_requestQueue', importGate.promise);
         Reflect.set(handler, '_queuedExclusiveRequestCount', 1);
         Reflect.set(handler, '_queuedImportRequestCount', 1);
 
-        Reflect.get(handler, '_onMessage').call(handler, {
-            data: {id: 99, action: 'findTermsStructuredOffscreen', params: {}},
-            ports: [],
-        });
-        await flushMicrotasks();
+        try {
+            Reflect.get(handler, '_onMessage').call(handler, /** @type {MessageEvent} */ ({
+                data: {id: 99, action: 'findTermsStructuredOffscreen', params: {}},
+                ports: [],
+            }));
+            await flushMicrotasks();
 
-        expect(postMessage).toHaveBeenCalledOnce();
-        expect(postMessage.mock.calls[0][0]).toMatchObject({id: 99, error: expect.any(Object)});
-        importGate.resolve();
+            expect(postMessage).toHaveBeenCalledOnce();
+            expect(postMessage.mock.calls[0][0]).toMatchObject({id: 99, error: expect.any(Object)});
+        } finally {
+            importGate.resolve();
+        }
     });
 });
