@@ -133,4 +133,28 @@ describe('main runtime reliability regressions', () => {
         expect(ensureOffscreenDocument).toHaveBeenCalledOnce();
         expect(sendMessagePromise).toHaveBeenCalledOnce();
     });
+
+    test('concurrent offscreen recovery creates only one document', async () => {
+        const createGate = deferred();
+        const createDocument = vi.fn(async () => {
+            await createGate.promise;
+        });
+        vi.stubGlobal('chrome', {
+            offscreen: {createDocument},
+        });
+        const proxy = /** @type {OffscreenProxy} */ (Object.create(OffscreenProxy.prototype));
+        Reflect.set(proxy, '_creatingOffscreen', null);
+        Reflect.set(proxy, '_hasOffscreenDocument', vi.fn().mockResolvedValue(false));
+
+        const method = /** @type {() => Promise<void>} */ (Reflect.get(proxy, '_ensureOffscreenDocument').bind(proxy));
+        const first = method();
+        await flushMicrotasks();
+        const second = method();
+        await flushMicrotasks();
+        expect(createDocument).toHaveBeenCalledOnce();
+
+        createGate.resolve();
+        await Promise.all([first, second]);
+        expect(Reflect.get(proxy, '_creatingOffscreen')).toBe(null);
+    });
 });
