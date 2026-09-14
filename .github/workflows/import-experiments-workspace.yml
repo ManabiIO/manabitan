@@ -1,0 +1,43 @@
+name: Import experiment workspace
+on:
+  push:
+    branches: [verify/import-experiments-20260914]
+    paths: [.github/workflows/import-experiments-workspace.yml]
+permissions:
+  contents: read
+jobs:
+  workspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 8bd9c56d419d4493c0602b58c2070b2b336840c0
+          persist-credentials: false
+      - name: Export exact source
+        run: |
+          mkdir -p "$RUNNER_TEMP/export"
+          git archive HEAD | gzip > "$RUNNER_TEMP/export/source.tar.gz"
+          git ls-tree -r HEAD > "$RUNNER_TEMP/export/git-tree.txt"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/export/source-identity.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-experiments-source
+          path: ${{ runner.temp }}/export
+          retention-days: 7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Export local test prerequisites
+        run: |
+          mkdir -p "$RUNNER_TEMP/runtime"
+          tar -czf "$RUNNER_TEMP/runtime/dependencies.tar.gz" node_modules ext/lib dev/lib/zstd-simd-module.js
+          cp "$(command -v node)" "$RUNNER_TEMP/runtime/node"
+          sha256sum "$RUNNER_TEMP/runtime/"* > "$RUNNER_TEMP/runtime/SHA256SUMS"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-experiments-dependencies
+          path: ${{ runner.temp }}/runtime
+          retention-days: 7
