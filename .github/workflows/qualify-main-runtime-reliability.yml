@@ -1,0 +1,70 @@
+name: Qualify main runtime reliability
+
+on:
+  push:
+    branches:
+      - fix/runtime-reliability-main-20260914
+    paths:
+      - .github/workflows/qualify-main-runtime-reliability.yml
+      - ext/js/background/backend.js
+      - ext/js/background/offscreen-proxy.js
+      - ext/js/pages/settings/dictionary-controller.js
+      - test/runtime-reliability-*.test.js
+      - test/offscreen-proxy-bridge.test.js
+      - test/dictionary-import-controller-update-profile.test.js
+      - test/dictionary-importer-zip-filename-alias.test.js
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qualify-main-runtime-reliability
+  cancel-in-progress: true
+
+jobs:
+  static-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Inspect strict lint and all four type projects
+        shell: bash
+        run: |
+          mkdir -p /tmp/main-static
+          git rev-parse HEAD > /tmp/main-static/input-commit.txt
+          set +e
+          npx eslint ext/js/background/backend.js ext/js/background/offscreen-proxy.js ext/js/pages/settings/dictionary-controller.js test/runtime-reliability-regressions.test.js test/runtime-reliability-lifecycle.test.js test/offscreen-proxy-bridge.test.js test/dictionary-import-controller-update-profile.test.js test/dictionary-importer-zip-filename-alias.test.js --fix --format=json --output-file=/tmp/main-static/eslint.json
+          lint_status=$?
+          git diff --binary > /tmp/main-static/lint-autofix.patch
+          result=$lint_status
+          for project in main dev test bench; do
+            npm run "test:ts:$project" > "/tmp/main-static/types-$project.log" 2>&1
+            status=$?
+            printf '%s=%s\n' "$project" "$status"
+            cat "/tmp/main-static/types-$project.log"
+            if [ "$status" -ne 0 ]; then result=1; fi
+          done
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs'
+          const results = JSON.parse(readFileSync('/tmp/main-static/eslint.json', 'utf8'))
+          for (const result of results) {
+              console.log(result.filePath, result.errorCount, result.warningCount)
+              for (const m of result.messages) console.log(`${m.line}:${m.column} ${m.ruleId}: ${m.message}`)
+          }
+          JS
+          exit "$result"
+      - name: Preserve static validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-runtime-static-${{ github.run_id }}
+          path: /tmp/main-static
+          if-no-files-found: error
