@@ -20,10 +20,10 @@ function deferred() {
     let resolve = () => {}
     /** @type {(error: Error) => void} */
     let reject = () => {}
-    const promise = new Promise((resolvePromise, rejectPromise) => {
+    const promise = /** @type {Promise<void>} */ (new Promise((resolvePromise, rejectPromise) => {
         resolve = () => { resolvePromise(undefined) }
         reject = rejectPromise
-    })
+    }))
     return {promise, resolve, reject}
 }
 

@@ -1811,23 +1811,24 @@ export class Backend {
      * @returns {Promise<void>}
      */
     async _runDictionaryMutation(task) {
-        const previousPromise = this._dictionaryMutationPromise;
-        const mutationPromise = (async () => {
+        const previousPromise = this._dictionaryMutationPromise
+        // Publish the tail before any caller-provided task can re-enter this queue.
+        const mutationPromise = Promise.resolve().then(async () => {
             if (previousPromise !== null) {
                 try {
-                    await previousPromise;
+                    await previousPromise
                 } catch (_) {
                     // A prior failed mutation must not poison later queued mutations.
                 }
             }
-            await task();
-        })();
-        this._dictionaryMutationPromise = mutationPromise;
+            await task()
+        })
+        this._dictionaryMutationPromise = mutationPromise
         try {
-            await mutationPromise;
+            await mutationPromise
         } finally {
             if (this._dictionaryMutationPromise === mutationPromise) {
-                this._dictionaryMutationPromise = null;
+                this._dictionaryMutationPromise = null
             }
         }
     }

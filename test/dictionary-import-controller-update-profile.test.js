@@ -38,7 +38,7 @@ function getDictionaryImportControllerMethod(name) {
 }
 
 describe('DictionaryImportController staged update profile rewrites', () => {
-    const importDictionaryFromZip = /** @type {(this: DictionaryImportController, file: File, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importDetails: import('dictionary-importer').ImportDetails, useImportSession: boolean, finalizeImportSession: boolean, onProgress: import('dictionary-worker').ImportProgressCallback) => Promise<{errors: Error[], importedTitle: string|null}>} */ (getDictionaryImportControllerMethod('_importDictionaryFromZip'));
+    const importDictionaryFromZip = /** @type {(this: DictionaryImportController, file: File, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importDetails: import('dictionary-importer').ImportDetails, useImportSession: boolean, finalizeImportSession: boolean, importRunGeneration: number, onProgress: import('dictionary-worker').ImportProgressCallback) => Promise<{errors: Error[], importedTitle: string|null}>} */ (getDictionaryImportControllerMethod('_importDictionaryFromZip'));
 
     afterEach(() => {
         vi.restoreAllMocks();
@@ -46,6 +46,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
 
     test('skips profile dictionary rewrites for profiles without carried-over update settings', async () => {
         const controller = createControllerForInternalTests();
+        Reflect.set(controller, '_activeImportRunGeneration', 1)
         const replaceDictionaryTitle = vi.fn().mockResolvedValue(void 0);
         const triggerDatabaseUpdated = vi.fn().mockResolvedValue(void 0);
         const setAllSettings = vi.fn().mockResolvedValue(void 0);
@@ -122,10 +123,11 @@ describe('DictionaryImportController staged update profile rewrites', () => {
             })),
             false,
             false,
+            1,
             vi.fn(),
         );
 
-        expect(result.errors).toHaveLength(0);
+        expect(result.errors).toEqual([])
         expect(result.importedTitle).toBe('Jitendex.org [2026-02-05]');
         expect(replaceDictionaryTitle).toHaveBeenCalledTimes(1);
         expect(triggerDatabaseUpdated).toHaveBeenCalledTimes(1);
