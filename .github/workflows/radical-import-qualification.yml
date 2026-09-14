@@ -1,0 +1,84 @@
+name: Radical import optimization qualification
+on:
+  workflow_dispatch:
+  push:
+    branches: [verify/radical-import-flags-20260914]
+    paths: [.github/workflows/radical-import-qualification.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reconstruct exact candidate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d .github/radical-import-patch/01.b64 | gzip -dc > "$RUNNER_TEMP/source.patch"
+          echo 'add4135cb390e8a22558b5e4acd67978366e0205129f91a7c97cffe03fcf3f5c  '"$RUNNER_TEMP/source.patch" | sha256sum -c -
+          git checkout --detach 443f4c51c04219f932f14c42d3d1e254f5620712
+          git apply --index --whitespace=error-all "$RUNNER_TEMP/source.patch"
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('dev/perf/import-experiments-20260914.md')
+          text = p.read_text()
+          old = 'roughly **7–11% lower component elapsed time**'
+          new = 'roughly **6–11% lower component elapsed time**'
+          if old not in text:
+              raise SystemExit('expected handoff wording not found')
+          p.write_text(text.replace(old, new, 1))
+          PY
+          git add dev/perf/import-experiments-20260914.md
+          test "$(git write-tree)" = 29d3f1eb4649fa96cfab6751d327f7ae34bd906b
+          git diff --cached --check
+          git config user.name 'Manabitan contributors'
+          git config user.email 'contributors@manabi.io'
+          git commit -m 'Add radical default-off import parser experiments' -m 'Add group-wide exact content reuse and fast glossary normalization flags, diagnostics, 64-combination regression coverage and an updated benchmark handoff. Preserve production defaults and persistent formats.'
+          test "$(git rev-parse HEAD^)" = 443f4c51c04219f932f14c42d3d1e254f5620712
+          test "$(git rev-parse HEAD^{tree})" = 29d3f1eb4649fa96cfab6751d327f7ae34bd906b
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - name: Install and build libraries
+        run: |
+          npm ci
+          npm run build:libs
+      - name: Focused parser and experiment matrix
+        run: |
+          node node_modules/vitest/vitest.mjs run \
+            test/term-bank-experiments.test.js \
+            test/term-bank-wasm-parser.test.js \
+            test/term-bank-composite-state.test.js \
+            test/term-bank-parser-string-scan.test.js
+      - name: Static qualification
+        run: |
+          npm run test:ts
+          npm run test:unit:options
+          node node_modules/eslint/bin/eslint.js \
+            ext/js/dictionary/dictionary-importer.js \
+            ext/js/dictionary/term-bank-experiments.js \
+            ext/js/dictionary/term-bank-wasm-parser.js \
+            test/term-bank-experiments.test.js
+          node dev/bin/build.js --dryRun --all
+      - name: Full unit suite
+        run: npm run test:unit
+      - name: Verify source identity and publish staging commit
+        run: |
+          test "$(git rev-parse HEAD^{tree})" = 29d3f1eb4649fa96cfab6751d327f7ae34bd906b
+          test -z "$(git status --porcelain)"
+          git push --force-with-lease origin HEAD:refs/heads/stage/radical-import-flags-20260914
+      - name: Install Chromium and build extension
+        run: |
+          node node_modules/playwright/cli.js install --with-deps chromium
+          node dev/bin/build.js --target chrome-dev
+      - name: Strict Chromium with all six experiments requested
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{"experimentalTermBankSpans":true,"experimentalNativeEscapedKeys":true,"experimentalValidatedGlossaryReuse":true,"experimentalFusedSingleBank":true,"experimentalGlobalExactContentReuse":true,"experimentalFastGlossaryNormalization":true}'
+        run: xvfb-run -a npm run test:e2e:chromium-extension
