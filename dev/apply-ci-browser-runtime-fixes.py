@@ -56,7 +56,19 @@ new_summary = '''          const openStorageDiagnostics = runtime && typeof runt
 replace_exact(ci, old_summary, new_summary, expected_count=2)
 
 firefox = 'test/firefox/extension-two-dictionary-import.e2e.js'
-old_firefox = '''async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
+old_jsdoc = '''/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @returns {Promise<string>}
+ * @throws {Error}
+ */
+'''
+new_jsdoc = '''/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} _driver
+ * @param {string} [installedAddonId]
+ * @returns {Promise<string>}
+ */
+'''
+old_firefox = r'''async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
     const normalizedAddonId = String(installedAddonId || '').trim();
     const expectedBaseUrl = normalizedAddonId.length > 0 ? `moz-extension://${normalizedAddonId}` : '';
     const deadline = Date.now() + 30_000;
@@ -86,7 +98,7 @@ old_firefox = '''async function waitForExtensionBaseUrl(driver, installedAddonId
     fail('Failed to discover moz-extension base URL from open tabs.');
 }
 '''
-new_firefox = '''function waitForExtensionBaseUrl(_driver, installedAddonId = '') {
+new_firefox = '''async function waitForExtensionBaseUrl(_driver, installedAddonId = '') {
     const normalizedAddonId = String(installedAddonId || '').trim();
     if (
         normalizedAddonId.length > 0 &&
@@ -99,7 +111,17 @@ new_firefox = '''function waitForExtensionBaseUrl(_driver, installedAddonId = ''
     // through extensions.webextensions.uuids. Enumerating windows immediately
     // after install can issue an unsupported WebDriver command while Firefox is
     // still in privileged scope, so use the deterministic UUID we configured.
-    return Promise.resolve(`moz-extension://${firefoxDevExtensionUuid}`);
+    return `moz-extension://${firefoxDevExtensionUuid}`;
 }
 '''
-replace_exact(firefox, old_firefox, new_firefox)
+
+file_text = Path(firefox).read_text()
+function_offset = file_text.index("async function waitForExtensionBaseUrl(driver, installedAddonId = '')")
+jsdoc_offset = file_text.rfind('/**', 0, function_offset)
+jsdoc_end = file_text.index(' */\n', jsdoc_offset) + len(' */\n')
+if file_text[jsdoc_offset:jsdoc_end] != old_jsdoc:
+    raise SystemExit('Firefox waitForExtensionBaseUrl JSDoc did not match expected baseline')
+file_text = file_text[:jsdoc_offset] + new_jsdoc + file_text[jsdoc_end:]
+if file_text.count(old_firefox) != 1:
+    raise SystemExit(f'Firefox waitForExtensionBaseUrl body expected once, got {file_text.count(old_firefox)}')
+Path(firefox).write_text(file_text.replace(old_firefox, new_firefox, 1))
