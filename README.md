@@ -60,6 +60,8 @@ Nothing is set in stone. These are general directions, not a fixed feature list 
 
 We intend to **keep maintaining Manabitan and bringing upstream Yomitan changes into it**, adapting and testing them for our different internals. We will keep refining onboarding so new users can enter the Yomitan/Manabitan ecosystem with less friction, while preserving the flexibility experienced users rely on.
 
+We want to make it easier to move an existing setup from Yomitan to Manabitan—and back again—with less manual work carrying over settings, profiles, and dictionaries. Trying Manabitan should not make it hard to return to Yomitan.
+
 We will continue making **imports and lookups faster, using less memory, and reducing installed storage requirements**. We are also developing a **robust benchmark suite comparing imports, lookups, and storage across tools compatible with Yomitan dictionaries**. We plan to make the suite public with reproducible workloads and clearly stated versions and test conditions. That publication is work in progress, not a finished comparison being announced here.
 
 We also intend to make **Manabitan's AnkiConnect integration substantially faster and more capable**. That includes reducing avoidable waiting and overhead in the operations around configuring and creating notes. We also intend to work on **AnkiConnect itself** so the bridge can become faster and support more capable workflows instead of forcing every improvement into Manabitan. The exact shape of that work is not set yet. More to come.
