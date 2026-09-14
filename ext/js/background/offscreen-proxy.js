@@ -107,12 +107,16 @@ export class OffscreenProxy {
      * @returns {Promise<void>}
      */
     async _ensureOffscreenDocument() {
-        if (await this._hasOffscreenDocument()) { return; }
-        if (this._creatingOffscreen) {
+        if (this._creatingOffscreen !== null) {
             await this._creatingOffscreen;
             return;
         }
-        this._creatingOffscreen = (async () => {
+        // Coalesce the existence probe as well as creation so two delayed
+        // negative probes cannot race into duplicate createDocument calls.
+        const creatingPromise = (async () => {
+            if (await this._hasOffscreenDocument()) { return; }
+            const port = this._currentOffscreenPort;
+            if (port !== null) { this._clearCurrentOffscreenPort(port); }
             await chrome.offscreen.createDocument({
                 url: 'offscreen.html',
                 reasons: [
@@ -121,10 +125,13 @@ export class OffscreenProxy {
                 justification: 'Access to the clipboard',
             });
         })();
+        this._creatingOffscreen = creatingPromise;
         try {
-            await this._creatingOffscreen;
+            await creatingPromise;
         } finally {
-            this._creatingOffscreen = null;
+            if (this._creatingOffscreen === creatingPromise) {
+                this._creatingOffscreen = null;
+            }
         }
     }
 
@@ -141,26 +148,38 @@ export class OffscreenProxy {
      * @returns {Promise<void>}
      */
     async _ensureOffscreenPort() {
-        if (this._currentOffscreenPort !== null) {
-            return;
-        }
+        // Develop's acknowledged control protocol detects a silently stale port
+        // itself, so avoid a getContexts preflight on every healthy request.
+        if (this._currentOffscreenPort !== null) { return; }
         if (this._registeringOffscreenPort !== null) {
             await this._registeringOffscreenPort;
             return;
         }
-        this._registeringOffscreenPort = (async () => {
-            await this.sendMessagePromise({action: 'createAndRegisterPortOffscreen'});
-            await Promise.race([
-                this._offscreenPortReadyPromise,
-                new Promise((resolve, reject) => {
-                    setTimeout(() => reject(new Error('Timed out waiting for offscreen control port registration')), 5000);
-                }),
-            ]);
+        const registeringPromise = (async () => {
+            await this._ensureOffscreenDocument();
+            if (this._currentOffscreenPort !== null) { return; }
+            const response = await this._webExtension.sendMessagePromise({action: 'createAndRegisterPortOffscreen'});
+            this._getMessageResponseResult(/** @type {import('core').Response<void>} */ (response));
+            /** @type {ReturnType<typeof setTimeout>|undefined} */
+            let timeout;
+            try {
+                await Promise.race([
+                    this._offscreenPortReadyPromise,
+                    new Promise((resolve, reject) => {
+                        timeout = setTimeout(() => reject(new Error('Timed out waiting for offscreen control port registration')), 5000);
+                    }),
+                ]);
+            } finally {
+                clearTimeout(timeout);
+            }
         })();
+        this._registeringOffscreenPort = registeringPromise;
         try {
-            await this._registeringOffscreenPort;
+            await registeringPromise;
         } finally {
-            this._registeringOffscreenPort = null;
+            if (this._registeringOffscreenPort === registeringPromise) {
+                this._registeringOffscreenPort = null;
+            }
         }
     }
 
