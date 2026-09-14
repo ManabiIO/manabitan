@@ -78,7 +78,7 @@ A separate installation also avoids putting Yomitan's existing users through a m
 
 ### Why the name Manabitan?
 
-A separately maintained fork this substantial needs its own name. A distinct name avoids confusing Manabitan with an official Yomitan release, makes maintenance and support responsibility clear, and respects Yomitan's name, branding, authorship, copyright, and licensing.
+A separately maintained fork this substantial needs its own name. A distinct name avoids confusing Manabitan with an official Yomitan release, makes maintenance and support responsibility clear, and preserves a clear boundary between the upstream project's identity and this fork's while retaining the required authorship, copyright, licensing, and attribution.
 
 The **Manabi** name also follows the naming scheme I use for my projects. I'm the developer behind **Manabi Reader** and **Manabi Flashcards**, so Manabitan fits into the same project family.
 
