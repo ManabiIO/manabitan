@@ -1,5 +1,6 @@
 name: Radical import optimization workspace
 on:
+  workflow_dispatch:
   push:
     branches: [verify/radical-import-flags-20260914]
     paths: [.github/workflows/radical-import-workspace.yml]
