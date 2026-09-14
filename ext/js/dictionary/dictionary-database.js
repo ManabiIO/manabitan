@@ -92,6 +92,8 @@ const TERM_CONTENT_META_SLOT_PENDING = 2;
 const TERM_CONTENT_META_PREALLOC_MAX_ENTRIES = 1024 * 1024;
 const TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE = 4096;
 const TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES = 48 * 1024 * 1024;
+const TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES = 512;
+const TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT = 64;
 const BULK_IMPORT_STATE_IDLE = 'idle';
 const BULK_IMPORT_STATE_ACTIVE = 'active';
 const BULK_IMPORT_STATE_FINALIZING = 'finalizing';
@@ -5794,8 +5796,31 @@ null;
         ) {
             return 0;
         }
+        const averageSampleCount = Math.min(
+            staged.indexes.length,
+            TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT,
+        );
+        let sampledPublishedCount = 0;
+        let sampledContentBytes = 0;
+        for (let i = 0; i < averageSampleCount; ++i) {
+            const sourceIndex = averageSampleCount === 1 ?
+                0 :
+                Math.floor(i * (staged.indexes.length - 1) / (averageSampleCount - 1));
+            const index = staged.indexes[sourceIndex];
+            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+            ++sampledPublishedCount;
+            sampledContentBytes += spans.lengths[sourceIndex];
+        }
+        if (
+            sampledPublishedCount >= Math.min(16, averageSampleCount) &&
+            sampledContentBytes > sampledPublishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES
+        ) {
+            return 0;
+        }
         let minimumOffset = Infinity;
         let maximumEnd = 0;
+        let publishedCount = 0;
+        let publishedContentBytes = 0;
         for (let i = 0; i < staged.indexes.length; ++i) {
             const index = staged.indexes[i];
             if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
@@ -5804,8 +5829,13 @@ null;
             if (offset > spans.buffer.byteLength || length > spans.buffer.byteLength - offset) { return 0; }
             minimumOffset = Math.min(minimumOffset, offset);
             maximumEnd = Math.max(maximumEnd, offset + length);
+            ++publishedCount;
+            publishedContentBytes += length;
         }
         if (!Number.isFinite(minimumOffset) || maximumEnd <= minimumOffset) { return 0; }
+        if (publishedContentBytes > publishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES) {
+            return 0;
+        }
         const byteLength = maximumEnd - minimumOffset;
         if (byteLength > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES) { return 0; }
         while (

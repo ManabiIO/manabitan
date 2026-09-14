@@ -364,6 +364,16 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0);
     });
 
+    test('does not retain batches dominated by large definitions', () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array(513);
+
+        const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
+
+        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0);
+        expect(Reflect.get(database, '_findRecentTermContentSource').call(database, meta)).toBeUndefined();
+    });
+
     test('fails fast when metadata insertion is attempted without reserved capacity', () => {
         const database = new DictionaryDatabase();
         const contentBytes = Uint8Array.of(1);
