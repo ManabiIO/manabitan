@@ -18,7 +18,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .github/radical-import-patch-final/*.b64 | tr -d '\n' | base64 -d | gzip -dc > "$RUNNER_TEMP/source.patch"
+          cat \
+            .github/radical-import-patch-final/01.b64 \
+            .github/radical-import-patch-final/02.b64 \
+            .github/radical-import-patch-final/03a.b64 \
+            .github/radical-import-patch-final/03b.b64 \
+            .github/radical-import-patch-final/04.b64 \
+            .github/radical-import-patch-final/05.b64 \
+            .github/radical-import-patch-final/06.b64 \
+            | tr -d '\n' | base64 -d | gzip -dc > "$RUNNER_TEMP/source.patch"
           echo 'cabbb2dff25aad491f6be290dfd39aafda0020dd66c2cee0750391fa00af60bd  '"$RUNNER_TEMP/source.patch" | sha256sum -c -
           git checkout --detach 443f4c51c04219f932f14c42d3d1e254f5620712
           git apply --index --whitespace=error-all "$RUNNER_TEMP/source.patch"
