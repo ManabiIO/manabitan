@@ -1,49 +1,35 @@
-# Privacy Policy for Yomitan
+# Privacy policy for Manabitan
 
-Yomitan data is stored locally on your device. Yomitan does not sell or externally collect any user data.
+Manabitan is a separately maintained fork of Yomitan. It stores dictionaries and settings locally in the browser's extension storage; normal dictionary lookup uses installed data. Local storage is not a backup, and removing an extension or browser profile can remove that data.
 
-Some features require sending data to third party services. These features and what data is sent are detailed below.
+## Dictionary downloads and updates
 
-## Audio Sources (enabled by default)
+Installing dictionaries contacts their configured publishers or download hosts. Enabled automatic updates can make update checks and downloads without a new click for each request. Those destinations receive the requested URL and normal network metadata, including an IP address. A custom URL can contain account-specific information. Dictionaries without a usable update source are not automatically updated merely because they can be imported.
 
-Required to play pronunciation audio for terms.
+## Audio
 
-Audio playback may send the **term, reading, and/or language** for any dictionary entry term where the `Play Audio` speaker button is pressed. Personally identifying information is never sent.
+Audio lookup can send a term, reading, and language to configured sources. These can include JapanesePod101/LanguagePod101, Jisho, Lingua Libre or Wiktionary through Wikimedia services, and user-configured custom sources. Autoplay can trigger requests without pressing the speaker for each entry. Availability and handling by a third-party source are governed by that service.
 
-The following audio sources are provided by default (availability may vary based on the selected language):
+Browser text-to-speech depends on the browser, operating system, and selected voice. A voice may use an external provider; this policy does not promise that every voice is processed locally.
 
-- JPod101: Audio sourced specifically from the Japanese variant of LanguagePod101 https://www.japanesepod101.com/.
+## Anki
 
-- LanguagePod101: Audio sourced from any language available on https://languagepod101.com/.
+When enabled, Manabitan communicates with the configured AnkiConnect endpoint. Depending on the configured fields and actions, data can include dictionary entries, sentence text, the current page URL/title, screenshots, clipboard contents, and settings needed to create or check notes. Only enable fields and actions you intend to use.
 
-- Jisho: Audio sourced from https://jisho.org.
+The usual endpoint is local. A user-configured remote endpoint changes where that information goes. Anki's own collection synchronization is a separate service and is not controlled by the extension's local connection setting.
 
-- Lingua Libre: Audio from https://lingualibre.org content sourced through the [Wikimedia Commons API](https://commons.wikimedia.org/w/api.php).
+## External API and native helpers
 
-- Wiktionary: Audio from https://www.wiktionary.org/ content sourced through the [Wikimedia Commons API](https://commons.wikimedia.org/w/api.php).
+The optional external API allows other applications to request data when enabled. Optional native messaging, including MeCab integration, can send text to a separately installed helper. Enable these only for integrations you intend to use. The behavior of that helper or downstream application is separate from Manabitan.
 
-Custom audio sources may be configured manually by users to access any URL. A dictionary entry's **term, reading, and/or language** may be configured to be sent to the chosen source.
+## Clipboard, diagnostics, and backups
 
-## Anki (disabled by default)
+Clipboard permissions support explicitly enabled search, copying, or note-field features. Settings and diagnostic exports may contain URLs, dictionary names, custom templates, error text, and local paths. Review and redact exports before sharing them; do not post credentials, private page content, or proprietary dictionary data in a public report.
 
-[Anki](https://apps.ankiweb.net/) connectivity is provided through [AnkiConnect](https://ankiweb.net/shared/info/2055492159).
+Keep backups somewhere you control. Settings exports, original dictionary packages, and whole-database backups are not interchangeable. See the [backup guide](https://manabi.io/manabitan/dictionaries/#backups-and-settings).
 
-Anki actions may be triggered when a user performs a Yomitan search or interacts with an Anki feature within Yomitan.
+## Permissions and documentation website
 
-Yomitan may send **limited information about the current webpage, information contained in Yomitan dictionary entries, and/or relevant user settings**.
+See [Privacy and permissions](https://manabi.io/manabitan/privacy/) for the purpose of the browser permissions, including storage, scheduled alarms, website access, Chromium offscreen documents, and optional integrations. The exact permissions are defined by the distributed browser package.
 
-**Enabling Anki connectivity does not enable sending any webpage information unless explicitly configured to do so.** Only the minimum amount of data is sent and only what is specifically configured by the user.
-
-Webpage information that may be sent is limited to: the term being scanned, the sentence containing the scanned term, the webpage URL, the webpage title, and/or a screenshot of the page.
-
-## Yomitan API (disabled by default)
-
-Yomitan provides an option to expose data to other applications through an API.
-
-Local applications may request data from Yomitan through the Yomitan API for external use. The Yomitan API is not accessible by other devices.
-
-## Mecab (disabled by default)
-
-[Mecab](https://taku910.github.io/mecab/) connectivity is available for text parsing. Yomitan may send **search query text** to Mecab for parsing. Personally identifying information is never sent.
-
-Mecab does not distribute any data; all data stays on your device.
+The Manabitan documentation website is separate from the extension. Its server and any configured delivery proxy receive normal website requests. Following a third-party link or visiting a community, store, or service is subject to that destination's practices.

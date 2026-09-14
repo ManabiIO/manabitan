@@ -4,9 +4,7 @@
         "name": "Manabitan Popup Dictionary",
         "version": "$YOMITAN_VERSION",
         "description": "Popup dictionary for language learning",
-        "author": {
-            "email": "themoeway@googlegroups.com"
-        },
+        "author": "Manabitan contributors",
         "icons": {
             "16": "images/icon16.png",
             "19": "images/icon19.png",
@@ -118,7 +116,8 @@
         "content_security_policy": {
             "extension_pages": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; img-src blob: 'self'; style-src 'self' 'unsafe-inline'; media-src *; connect-src *",
             "sandbox": "sandbox allow-scripts; default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'unsafe-inline'"
-        }
+        },
+        "homepage_url": "https://manabi.io/manabitan/"
     },
     "defaultVariant": "base",
     "variants": [
@@ -199,7 +198,7 @@
                     "path": [
                         "author"
                     ],
-                    "value": "Yomidevs"
+                    "value": "Manabitan contributors"
                 },
                 {
                     "action": "delete",
@@ -362,7 +361,7 @@
                     "path": [
                         "author"
                     ],
-                    "value": "Yomidevs"
+                    "value": "Manabitan contributors"
                 },
                 {
                     "action": "remove",

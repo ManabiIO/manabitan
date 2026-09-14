@@ -2,264 +2,125 @@
 
 # Manabitan
 
-[Download for Chrome, Firefox, Edge](https://github.com/ManabiIO/manabitan/releases/latest)
-[Firefox Dev Builds](https://github.com/ManabiIO/manabitan/releases/latest)
+[Install Manabitan](https://manabi.io/manabitan/getting-started/) · [Documentation](https://manabi.io/manabitan/) · [Releases](https://github.com/ManabiIO/manabitan/releases) · [Manabi Discord](https://discord.gg/gvxzS93C3w)
 
-[![CI](https://img.shields.io/github/actions/workflow/status/ManabiIO/manabitan/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/ManabiIO/manabitan/actions/workflows/ci.yml)
-[![GitHub Downloads](https://img.shields.io/github/downloads/ManabiIO/manabitan/total?style=for-the-badge&label=Downloads)](https://github.com/ManabiIO/manabitan/releases)
-[![Test Coverage](https://img.shields.io/badge/test%20coverage-100%25-brightgreen?style=for-the-badge)](https://github.com/ManabiIO/manabitan/blob/main/docs/development/npm-scripts.md#testcoverage)
-[![Manabi Discord](https://dcbadge.limes.pink/api/server/gvxzS93C3w?style=for-the-badge)](https://discord.gg/gvxzS93C3w)
-[![Discord](https://dcbadge.limes.pink/api/server/YkQrXW6TXF?style=for-the-badge)](https://discord.gg/YkQrXW6TXF)
+Manabitan is a Yomitan fork that keeps the familiar reading/mining workflow while replacing the dictionary storage and query engines, dramatically reducing installed dictionary size, and improving dictionary management and Anki setup.
 
-# Differences from Yomitan
+**[Why use Manabitan instead of Yomitan?](https://manabi.io/manabitan/why-manabitan/)** · **[Roadmap](#roadmap)** · **[Why is it a fork?](https://manabi.io/manabitan/about-manabitan/)**
 
-## Speed
+Yomitan's primary maintainers have supported releasing this work as a separate fork, offered guidance, and reviewed our release preparations. Manabitan is maintained and released independently.
 
-![manabitan_vs_yomitan_chart](https://github.com/user-attachments/assets/1351b902-c918-43a6-b4ac-c64c333fa68d)
+## Why use Manabitan instead of Yomitan?
 
-## Features
+**Less waiting, less disk space, less dictionary maintenance, and less Anki setup—without replacing the workflow that makes Yomitan useful.**
 
-- MDX dictionary support (now supports 20,000 more dicts than Yomitan)
-- Auto-updating dictionaries, never manually update a dictionary again.
-- Schedule when a specific dictionary updates (hourly, daily, weekly, monthly) ((Imports are so fast you won't even notice it's updating))
-- Blur when word is under a certain frequency to force you to recall it.
-- Edit dictionary metadata (name etc) after importing.
-- Install all reccomended dicts with one button
-- Update all dicts with one button
-- Custom themes built in. Glass, Autumn, Tokyo, Dark etc
+### Faster imports and lookups
 
-## Nerdy
+Manabitan rewrites dictionary storage and much of the query path. Dictionary imports and normal lookups are heavily optimized, with the biggest practical difference on large collections, older hardware, and e-ink devices.
 
-- 100% test coverage with extensive end to end tests
-- Significantly less RAM usage
-- Auto import Kiku/Lapis/Senren/Crop-Theft Anki Note types.
-- No scan length. Before you had to say "only scan 10 characters", now you don't have to do that. We will show you the longest possible word in the dict (plus a few more characters for grammar etc)
+Installed dictionaries can remain available while new data is prepared. A first-time install still has to finish before that dictionary can be used. Performance varies by build, browser, dictionary collection, and device; we benchmark it, but a single chart is not a universal speed ratio or battery-life guarantee.
 
-We have benchmarks for these 3 things:
+### Dramatically smaller installed dictionaries
 
-1. Importing dictionaries
-2. Looking up words
-3. Adding to Anki
+Imported dictionaries take up dramatically less disk space than in Yomitan. This is the installed dictionary footprint, not simply a smaller ZIP download. Large collections become more practical, particularly on devices with limited storage.
 
-We regularly benchmark these 3 things and if if it becomes slower than normal we will work to fix it.
+The amount saved varies with the dictionaries and build; there is no universal percentage. Imports and updates can still require temporary working space. The public benchmark suite in our [roadmap](#roadmap) is intended to make storage, import, and lookup comparisons reproducible across compatible tools.
 
-If a new feature or bug makes one of these 3 things slower, we will exterminate it ruthlessly to ensure we are the best dictionary app on the market.
+### Automatic and scheduled dictionary updates
 
-Manabitan is a dictionary app that lets you mine to Anki. If this is not fast, then what is the point of this software?
+For dictionaries that provide a usable web update source, Manabitan can check for updates automatically. Current controls include hourly, daily, weekly, and monthly schedules plus bulk update actions.
 
-## Why not contribute to Yomitan directly?
+Manual dictionary updates are easy to neglect, especially when they interrupt reading. Faster imports plus a storage design that keeps installed dictionaries available make routine updates much easier to live with.
 
-A lot of this stuff is experimental and may break.
+### Better dictionary management
 
-When you use this software you are aware it may break.
+Manabitan also adds MDX support, bulk recommended-dictionary installation, supported metadata editing, and bulk update controls. It continues to support the Yomitan dictionary ecosystem rather than replacing it with a proprietary format.
 
-Some of these features are so big and drastic Yomitan will never merge that code, such as changing the entire database structure.
+### Automatic Anki field mapping
 
-I am also [actively](https://github.com/yomidevs/yomitan/issues?q=is%3Apr%20author%3Abee-san) pushing PRs to Yomitan to improve it based on this work.
+If **Kiku**, **Lapis**, **Senren / Senren 洗練**, or **Crop Theft Vocab** already exists in Anki, selecting that note type in Manabitan automatically fills its expected field markers instead of making you wire every field by hand.
 
-Using this fork and telling me what works and doesn't will allow me to contribute back to Yomitan easier.
+The presets cover the expressions/readings, audio, definitions, sentence context, pitch, frequency, and source fields appropriate to each type. Kiku, Lapis, and Senren can also pick an available dictionary-specific `single-glossary-*` marker for the primary definition.
 
-# Visit [yomitan.wiki](https://yomitan.wiki) to learn more!
+The mappings are checked against publisher documentation and actual downloadable packages. The September 14, 2026 review covered **Kiku 2.1.0 (24 fields), Lapis 1.7.0 (22), Senren 5.1.0 (22), and Crop Theft Vocab at revision 88865e6 (9)**. Kiku now gets plain sentence furigana while Lapis deliberately leaves that field blank; Senren retains its grouping/highlight markup. Automated tests use captured schemas, checksum-pinned packages, and the latest upstream packages to flag field drift. See the [compatibility review and test commands](docs/development/anki-note-type-compatibility.md).
 
-> Documentation currently lives on the legacy Yomitan wiki. Manabitan is feature-compatible, so the Yomitan wiki guides still apply.
+Other note types retain best-effort mapping based on familiar field names and aliases such as `Word`, `Term`, `Phrase`, `Definition`, `Meaning`, `Sound`, `Audio`, sentence, pitch, and frequency fields. For unrecognized models, existing same-named mapping values can be reused; newly generated mappings initialize overwrite modes to `coalesce`.
 
-:wave: **Manabitan is a fast Yomitan.** It forks Yomitan to provide the same functionality with much faster imports and lookups. It also deduplicates and compresses Yomitan entries to reduce storage use.
+**This does not install the note type into Anki or migrate existing notes.** Install/import the note type in Anki first, select it in Manabitan, then review the mapping before normal mining. Presets include intentionally blank fields and leave unrecognized extra fields blank. Existing saved mappings are not silently rewritten. See the [Anki guide](https://manabi.io/manabitan/anki/#automatic-field-mapping) for older-version and customization guidance and the [mapping implementation](ext/js/data/anki-note-type-field-util.js).
 
-## Why the name change Manabitan?
+### Reading quality of life
 
-Manabitan changes core Yomitan database technology to deliver major performance gains. Because of that, merging this directly upstream and migrating every existing Yomitan setup at once would be risky. This project prioritizes shipping and stabilizing the new technology first, then addressing broad migration paths. It is built by the developer of [Manabi Reader](https://reader.manabi.io/), who previously pioneered similar Yomitan performance optimizations now prototyped for the upcoming Manabi Reader update.
+Built-in popup themes and frequency-based recall blur add options around the existing workflow. MeCab, custom audio/Forvo, AnkiConnect, custom templates, CSS, and other upstream/community integrations remain useful where their integration requirements are satisfied.
 
-📢 **New contributors [welcome](#contributing)!**
-
-📢 **Interested in adding a new language to Manabitan? See [here](./docs/development/language-features.md) for thorough documentation!**
-
-## Features
-
-Manabitan turns your web browser into a tool for building language literacy by helping you **read** texts that would otherwise be too difficult to tackle in [a variety of supported languages](https://yomitan.wiki/supported-languages/).
-
-Manabitan provides powerful features not available in other browser-based dictionaries:
-
-- 💬 Interactive popup definition window for displaying search results.
-- 🔊 Built-in native pronunciation audio with the ability to add your own [custom audio sources](https://yomitan.wiki/advanced/#default-audio-sources).
-- ✍️ Kanji stroke order diagrams are just a click away.
-- 📝 [Automatic flashcard creation](https://yomitan.wiki/anki/) for the [Anki](https://apps.ankiweb.net/) flashcard program via the [AnkiConnect](https://foosoft.net/projects/anki-connect) plugin.
-- 🔍 Custom search page for easily executing custom search queries.
-- 📖 Support for multiple dictionary formats including [EPWING](https://ja.wikipedia.org/wiki/EPWING) via the [Yomitan Import](https://github.com/yomidevs/yomitan-import) tool.
-- ✨ Clean, modern code makes it easy for developers to [contribute](#contributing) new features and languages.
-
-[![Term definitions](docs/images/ss-terms-thumb.png)](docs/images/ss-terms.png)
-[![Kanji information](docs/images/ss-kanji-thumb.png)](docs/images/ss-kanji.png)
-[![Dictionary options](docs/images/ss-dictionaries-thumb.png)](docs/images/ss-dictionaries.png)
-[![Anki options](docs/images/ss-anki-thumb.png)](docs/images/ss-anki.png)
-
-## Documentation/How To
-
-**Please visit the [Yomitan Wiki](https://yomitan.wiki) for the most up-to-date usage documentation (legacy docs, feature-compatible with Manabitan).**
-
-### Developer Documentation
-
-- Dictionaries
-  - 🛠️ [Making Manabitan Dictionaries](./docs/making-yomitan-dictionaries.md)
-- Anki Integration
-  - 🔧 [Anki handlebar templates](./docs/templates.md)
-- Advanced Features
-- Troubleshooting
-  - 🕷️ [Known browser bugs](./docs/browser-bugs.md)
-
-## Installation
-
-Install from the latest GitHub release page:
-
-### [Download for Chrome, Firefox, Edge](https://github.com/ManabiIO/manabitan/releases/latest)
+The goal is not to build a different product for the sake of being different. It is to keep what works in Yomitan and improve the parts that cost time, space, or setup effort.
 
 ## Roadmap
 
-### Priority (unsorted)
+Nothing is set in stone. These are general directions, not a fixed feature list or delivery schedule.
 
-- [ ] Auto-update
-- [ ] Ereader performance
-- [ ] Improve onboarding for easier default installation
-- [ ] Change Manabitan import/export to a smaller, optimized format, and provide separate Yomitan import/export paths
+We intend to **keep maintaining Manabitan and bringing upstream Yomitan changes into it**, adapting and testing them for our different internals. We will keep refining onboarding so new users can enter the Yomitan/Manabitan ecosystem with less friction, while preserving the flexibility experienced users rely on.
 
-### Backlog
+We want to make it easier to move an existing setup from Yomitan to Manabitan—and back again—with less manual work carrying over settings, profiles, and dictionaries. Trying Manabitan should not make it hard to return to Yomitan.
 
-- [ ] Full-text search option per dictionary for searching glosses
-- [ ] Voice input for search
-- [ ] Default TTS
+We will continue making **imports and lookups faster, using less memory, and reducing installed storage requirements**. We are also developing a **robust benchmark suite comparing imports, lookups, and storage across tools compatible with Yomitan dictionaries**. We plan to make the suite public with reproducible workloads and clearly stated versions and test conditions. That publication is work in progress, not a finished comparison being announced here.
 
-### Optimization TODO
+We also intend to make **Manabitan's AnkiConnect integration substantially faster and more capable**. That includes reducing avoidable waiting and overhead in the operations around configuring and creating notes. We also intend to work on **AnkiConnect itself** so the bridge can become faster and support more capable workflows instead of forcing every improvement into Manabitan. The exact shape of that work is not set yet. More to come.
 
-- [ ] Import
-- [ ] Export
-- [ ] Yomitan import
-- [ ] Yomitan export
-- [ ] Deletion
-- [ ] Lookups
-- [ ] Move GitHub-hosted default dictionaries to CDNs
-- [ ] 64KB chunking of glossaries for compression
-- [ ] Add the ManabiDictionaries custom zstd dictionaries
+The current automatic note-type field mapping described above is already in Manabitan. Broader AnkiConnect performance and capability improvements are roadmap work, not a claim about the current release.
 
-## Contributing
+We have **no current plans for dramatic changes to Yomitan's general functionality, design, or familiar behaviors**. Manabitan intends to stay true to Yomitan's vision for how this tool works: improve the internals, efficiency, onboarding, and integrations without making people relearn the tool.
 
-🚀 **Dip your toes into contributing by looking at issues with the label [good first issue](https://github.com/ManabiIO/manabitan/issues?q=is%3Aissue+is%3Aopen+label%3A%22gоοd+fіrst+іssսe%22).**
+Read the [full roadmap](https://manabi.io/manabitan/why-manabitan/#roadmap) for these directions alongside the user-facing benefits.
 
-Since this is a distributed effort, we **highly welcome new contributors**! Feel free to browse the [issue tracker](https://github.com/ManabiIO/manabitan/issues), and read our [contributing guidelines](./CONTRIBUTING.md).
+## Why is Manabitan a separate fork?
 
-Here are some ways anyone can help:
+The storage and query changes work together. Splitting the transition into upstream pull requests is substantial implementation and review work, and intermediate steps can add complexity before delivering much immediate value on their own. Contributors have tried bringing foundational pieces upstream, but there has not been enough sustained capacity to carry the entire transition through that process.
 
-- Try using the Manabitan dev build. Not only do you get cutting edge features, but you can help uncover bugs and give feedback to developers early on.
-- Document any UI/UX friction in GitHub Issues. We're looking to make Manabitan more accessible to non-technical users.
-- All the issues in `area/bug` older than 2 months need help reproducing. If anything interests you, please try to reproduce it and report your results. We can't easily tell if these issues are one-off, have since been resolved, or are no longer relevant.
+A separate installation also avoids putting Yomitan's existing users through a major data migration before we are ready to take responsibility for it. That may be worth revisiting later. For now, Manabitan lets us build and prove the architecture with people who deliberately choose it, while useful independent improvements can still flow back upstream under the existing licenses.
 
-> The current active maintainers of Manabitan spend a lot of their time debugging and triaging issues. When someone files a bug report, we need to assess the frequency and severity of the bug. It is extremely helpful if we get multiple reports of people who experience a bug or people who can contribute additional detail to an existing bug report.
+### Why the name Manabitan?
 
-If you're looking to code, please let us know what you plan on working on before submitting a Pull Request. This gives the core maintainers an opportunity to provide feedback early on before you dive too deep. You can do this by opening a GitHub Issue with the proposal.
+A separately maintained fork this substantial needs its own name. A distinct name avoids confusing Manabitan with an official Yomitan release, makes maintenance and support responsibility clear, and preserves a clear boundary between the upstream project's identity and this fork's while retaining the required authorship, copyright, licensing, and attribution.
 
-Some contributions we always appreciate:
+The **Manabi** name also follows the naming scheme I use for my projects. I'm the developer behind **Manabi Reader** and **Manabi Flashcards**, so Manabitan fits into the same project family.
 
-- Well-written tests covering different functionalities. This includes [playwright tests](https://github.com/yomidevs/yomitan/tree/master/test/playwright), [benchmark tests](https://github.com/yomidevs/yomitan/tree/master/benches), and unit tests.
-- Increasing our type coverage.
-- More and better documentation!
+The new name is not a move away from open source. **Manabitan will remain free and open source**, and I hope to release more open-source tools under the Manabi name—including original projects, not only forks—soon.
 
-Information on how to setup and build the codebase can be found [here](./CONTRIBUTING.md#setup).
+The longer version is in [Why Manabitan is a fork](https://manabi.io/manabitan/about-manabitan/).
 
-If you want to add or improve support for a language, read the documentation on [language features](./docs/development/language-features.md).
+## Installation and migration
 
-Feel free to join us on the [Manabi Discord](https://discord.gg/gvxzS93C3w) or the [Yomitan Discord](https://discord.gg/YkQrXW6TXF).
+Read the [installation guide](https://manabi.io/manabitan/getting-started/) and the notes for the release you choose. Packages come from this repository's [Releases](https://github.com/ManabiIO/manabitan/releases); an upstream Yomitan store listing is not a Manabitan download. A browser-variant filename does not establish that a release is stable or that a Firefox ZIP is signed.
 
-## Building Manabitan
+Keep backups and follow [Moving from Yomitan](https://manabi.io/manabitan/yomitan-migration/) or [Moving from Yomichan](https://manabi.io/manabitan/yomichan-migration/). Individual dictionary packages, settings JSON, and whole-database backups are different formats. Do not assume SQLite collection backups are interchangeable with Yomitan's JSON exports, or that every storage layout can be restored across every build.
 
-1. Install [Node.js](https://nodejs.org/) and [npm](https://docs.npmjs.com/).
+## Development and contributing
 
-2. Run `npm ci` to set up the environment.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development environment and test commands. Discuss substantial proposals in the [Manabi Discord](https://discord.gg/gvxzS93C3w). While Issues are disabled, use that community for Manabitan-specific questions and reproducible reports rather than sending them to Yomitan's tracker.
 
-3. Run `npm run license-report:html` to generate any missing or changed license information.
+The [wiki repository](https://github.com/ManabiIO/manabitan-wiki) owns user documentation. Developer references include [dictionary formats](docs/making-yomitan-dictionaries.md), [Anki templates](docs/templates.md), [note-type compatibility](docs/development/anki-note-type-compatibility.md), [language features](docs/development/language-features.md), and [browser bugs](docs/browser-bugs.md). Real project names, compatibility identifiers, and upstream authorship are not renamed indiscriminately.
 
-4. Run `npm run build` for a plain testing build or `npm run-script build -- --all --version {version}` for a release build (replacing `{version}` with a version number).
+### Building from source
 
-5. The builds for each browser and release branch can be found in the `builds` directory.
+Use Node.js 22 or newer, then install the exact dependency lock:
 
-For more information, see [Contributing](./CONTRIBUTING.md#setup).
+```sh
+npm ci
+npm run build:source-release -- --version <version>
+```
 
-## Reproducible Source Build
+The source release command builds libraries, generates license information, and builds the browser variants. Output is written to `builds/`, including `manabitan-chrome.zip`, `manabitan-firefox.zip`, `manabitan-firefox-dev.zip`, and `manabitan-edge.zip`. A local build is not automatically store-signed.
 
-This section documents how to build an exact copy of the distributed extension packages from source.
+To reproduce a particular release, check out its exact tag or commit before installing dependencies. See [Contributing](CONTRIBUTING.md#setup) for additional setup requirements and the supported test environment. Run unit, static, build, and browser tests appropriate to the change; this README does not equate a configured test suite with release qualification.
 
-### Environment requirements
+### Release tagging
 
-- Operating system: Linux or macOS (CI uses Ubuntu).
-- Node.js: `>=22.0.0` (from `package.json` `engines.node`).
-- npm: bundled with your Node.js installation.
+Use `./tag.sh` from the repository root. The default release branch is `main`, and tags use the existing four-part CalVer format. Set `MANABITAN_RELEASE_BRANCH` only when intentionally releasing from another branch. Verify the actual packages, installation persistence, and update channel before announcing support.
 
-### Tool installation
+## Credits, licensing, and privacy
 
-1. Install Node.js 22+ from [nodejs.org](https://nodejs.org/).
-2. Verify tool versions:
-   - `node --version`
-   - `npm --version`
+Manabitan is based on [Yomitan](https://github.com/yomidevs/yomitan), which continues [Yomichan](https://github.com/FooSoft/yomichan) and its contributors' work. The project retains its GPL-3.0-or-later licensing and existing notices. Third-party components retain their respective licenses. See [LICENSE](LICENSE), generated extension license information, and the wiki's [Credits](https://manabi.io/manabitan/credits/).
 
-### Exact rebuild steps
+MDX import support includes work from [PyGlossary](https://github.com/ilius/pyglossary), licensed under GNU GPLv3. `fallback-bloop.mp3` is provided by [UNIVERSFIELD](https://pixabay.com/sound-effects/error-8-206492/) under the [Pixabay Content License](https://pixabay.com/service/license-summary/).
 
-1. Clone and checkout the exact source revision you want to reproduce:
-
-   ```bash
-   git clone https://github.com/ManabiIO/manabitan.git
-   cd manabitan
-   git checkout <tag-or-commit>
-   ```
-
-2. Install dependencies exactly as locked:
-
-   ```bash
-   npm ci
-   ```
-
-3. Run the full release source build script (all required technical steps):
-
-   ```bash
-   npm run build:source-release -- --version <version>
-   ```
-
-This executes:
-
-- `npm run build:libs`
-- `npm run license-report:html`
-- `npm run-script build -- --all --version <version>`
-
-### Build outputs
-
-The generated browser packages are written to the `builds/` directory, including:
-
-- `manabitan-chrome.zip`
-- `manabitan-firefox.zip`
-- `manabitan-firefox-dev.zip`
-- `manabitan-edge.zip`
-
-### Release Tagging
-
-- Tag releases with `./tag.sh` from the repository root.
-- By default, the script requires you to be on `main` and creates a CalVer-style 4-part tag (`YY.M.D.N`).
-- To tag from a different branch, set `MANABITAN_RELEASE_BRANCH=<branch>` when running the script.
-
-## Third-Party Libraries
-
-Manabitan uses several third-party libraries to function.
-
-<!-- The following table is generated using the command `npm run license-report:markdown`. -->
-
-| Name                | License type | Link                                                                   |
-| :------------------ | :----------- | :--------------------------------------------------------------------- |
-| @resvg/resvg-wasm   | MPL-2.0      | git+ssh://git@github.com/yisibl/resvg-js.git                           |
-| @zip.js/zip.js      | BSD-3-Clause | git+https://github.com/gildas-lormeau/zip.js.git                       |
-| dexie               | Apache-2.0   | git+https://github.com/dexie/Dexie.js.git                              |
-| dexie-export-import | Apache-2.0   | git+https://github.com/dexie/Dexie.js.git                              |
-| hangul-js           | MIT          | git://github.com/e-/Hangul.js.git                                      |
-| kanji-processor     | n/a          | https://registry.npmjs.org/kanji-processor/-/kanji-processor-1.0.2.tgz |
-| parse5              | MIT          | git://github.com/inikulin/parse5.git                                   |
-| yomitan-handlebars  | MIT          | n/a                                                                    |
-| linkedom            | ISC          | git+https://github.com/WebReflection/linkedom.git                      |
-
-## Attribution
-
-MDX import support uses [PyGlossary](https://github.com/ilius/pyglossary), licensed under the [GNU GPLv3](https://raw.githubusercontent.com/ilius/pyglossary/master/LICENSE).
-`fallback-bloop.mp3` is provided by [UNIVERSFIELD](https://pixabay.com/sound-effects/error-8-206492/) and licensed under the [Pixabay Content License](https://pixabay.com/service/license-summary/).
+Read the [privacy policy](PRIVACY-POLICY.md) and [permissions guide](https://manabi.io/manabitan/privacy/) before enabling optional network, clipboard, or external integrations.

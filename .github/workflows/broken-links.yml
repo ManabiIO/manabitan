@@ -29,9 +29,13 @@ jobs:
         run: |
           args="--exclude-path node_modules --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst'"
           if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            # The companion manabitan-wiki + Manabi deployment PRs establish this
+            # canonical root. Do not make this PR depend on a site that cannot be
+            # live until those changes land. Scheduled checks on main intentionally
+            # do not carry this exclusion, so production links are still monitored.
+            args="--exclude-path node_modules --verbose --no-progress --exclude ^https://manabi\\.io/manabitan"
             mapfile -t files < <(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- '*.md' '*.html' '*.rst')
             if (( ${#files[@]} > 0 )); then
-              printf -v args '%s' "--exclude-path node_modules --verbose --no-progress"
               printf -v file_args ' %q' "${files[@]}"
               args+="${file_args}"
             fi

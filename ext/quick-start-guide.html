@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Quick Start Guide</title>
+    <title>Manabitan Quick Start Guide</title>
     <link rel="icon" type="image/png" href="/images/icon16.png" sizes="16x16">
-    <link rel="icon" type="image/png" href="/images/icon19.png" sizes="19x19">
     <link rel="icon" type="image/png" href="/images/icon32.png" sizes="32x32">
-    <link rel="icon" type="image/png" href="/images/icon38.png" sizes="38x38">
-    <link rel="icon" type="image/png" href="/images/icon48.png" sizes="48x48">
     <link rel="icon" type="image/png" href="/images/icon64.png" sizes="64x64">
     <link rel="icon" type="image/png" href="/images/icon128.png" sizes="128x128">
     <link rel="stylesheet" type="text/css" href="/css/material.css">
@@ -16,142 +13,34 @@
     <script src="/js/pages/generic-page-main.js" type="module"></script>
 </head>
 <body hidden>
-
-<!-- Main content -->
 <div class="content-outer"><div class="content scrollbar">
 <div class="content-left"></div>
 <div class="content-center">
-
     <span tabindex="-1" id="content-scroll-focus"></span>
-
     <h1>Manabitan Quick Start Guide</h1>
-
-    <!-- Content -->
-    <h2>Quick Actions</h2>
-
-    <div class="settings-group">
-        <div class="settings-item">
-            <div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
-                Clicking the <img src="/images/yomitan-icon.svg" class="inline-icon" alt=""> <em>Manabitan</em> button in the browser bar will open the quick-actions popup.
-            </div></div></div>
-            <div id="action-popup-container">
-                <img id="action-popup" src="/images/browser-action-popup.webp" alt="browser-action-popup">
-                <div class="settings-item-children settings-item-children-group">
-                    <div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
-                        The <img src="/images/cog.svg" class="inline-icon" alt=""> <em>cog</em> button will open the <a href="/settings.html" target="_blank" rel="noopener">Settings</a> page.
-                    </div></div></div></div>
-                    <div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
-                        The <img src="/images/magnifying-glass.svg" class="inline-icon" alt=""> <em>magnifying glass</em> button will open the <a href="/search.html" target="_blank" rel="noopener">Search</a> page,
-                        enabling text and terms to be looked up using the installed dictionaries.
-                        This can even be used in offline mode!
-                    </div></div></div></div>
-                    <div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
-                        The <img src="/images/question-mark-circle.svg" class="inline-icon" alt=""> <em>question mark</em> button will open the <a href="/info.html" target="_blank" rel="noopener">Information</a> page,
-                        which has some helpful information and links about Manabitan.
-                    </div></div></div></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <h2>Installing Dictionaries</h2>
-
-    <div class="settings-group">
-        <div class="settings-item">
-            <div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
-                Manabitan requires one or more dictionaries to be installed in order to look up terms, kanji, and other information.
-
-                <br><br>
-
-                To get started, first select your desired language in the <a href="/settings.html#general" rel="noopener">Settings</a> page.
-                Then, click on <i>Get recommended dictionaries</i> under the <a href="/settings.html#dictionaries" rel="noopener">Dictionaries</a> section to find dictionaries for your language.
-                You can also visit <a href="https://yomitan.wiki/dictionaries/" target="_blank" rel="noopener noreferrer">Yomitan Wiki</a> to learn more about Manabitan dictionaries.
-                Once downloaded, dictionaries can be configured and managed from the same <a href="/settings.html#dictionaries" rel="noopener">Settings</a> page.
-
-                <br><br>
-
-                <img class="quick-start-img" src="/images/settings-dictionaries-popup.webp" alt="settings-dictionaries-popup">
-
-            </div></div></div>
-        </div>
-    </div>
-
-
-    <h2>Scanning Text</h2>
-
-    <div class="settings-group">
-        <div class="settings-item">
-            <div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
-                After dictionaries have been installed, webpage text can be scanned by moving the cursor while holding a modifier key.
-                The default key is <kbd>Shift</kbd>, which can be disabled or configured in the <a href="/settings.html#backup">Settings</a> page.
-            </div></div></div>
-
-            <img class="quick-start-img" src="/images/scanning-popup.webp" alt="scanning">
-
-            <div class="settings-item-children settings-item-children-group">
-                <div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
-                    Clicking the <img src="/images/play-audio.svg" class="inline-icon" alt=""> <em>speaker</em> button of an entry in the search results
-                    will play an audio clip of a term's pronunciation using an online dictionary, if available.
-                </div></div></div></div>
-                <div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
-                    Clicking on a kanji character in a term's definition will show additional information about that character.
-                    <span class="light">(Requires a kanji dictionary to be installed.)</span>
-                </div></div></div></div>
-            </div>
-        </div>
-    </div>
-
-    <h2>Migrating to Manabitan</h2>
-
-    <div class="settings-group">
-        <div class="settings-item">
-            <div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
-                You can also import an exported collection of dictionaries from the <a href="/settings.html#backup">Backup section of the Settings</a> page.
-
-                <br><br>
-
-                If you are migrating from Yomichan, you may be interested in importing your data into Manabitan.
-                Please follow instructions from <a href="https://yomitan.wiki/yomichan-migration/#migrating-from-yomichan" target="_blank" rel="noopener noreferrer">Yomitan Wiki</a> for that.
-
-                <br><br>
-
-                If you are using or planning to use custom templates for Anki note creation, note that <a href="https://yomitan.wiki/yomichan-migration/#custom-templates" target="_blank" rel="noopener noreferrer">some syntax has changed from Yomichan and Yomibaba.</a>
-                Please ensure that your custom templates are using the updated syntax.
-            </div></div></div>
-        </div>
-    </div>
-
-    <h2>Links</h2>
-
-    <div class="settings-group">
-        <a href="/welcome.html" rel="noopener" class="settings-item settings-item-button"><div class="settings-item-inner">
-            <div class="settings-item-left">
-                <div class="settings-item-label">Go to Welcome page</div>
-            </div>
-            <div class="settings-item-right open-panel-button-container">
-                <button type="button" class="icon-button"><span class="icon-button-inner"><span class="icon" data-icon="material-right-arrow"></span></span></button>
-            </div>
-        </div></a>
-        <a href="/info.html" rel="noopener" class="settings-item settings-item-button"><div class="settings-item-inner">
-            <div class="settings-item-left">
-                <div class="settings-item-label">Go to Info page</div>
-            </div>
-            <div class="settings-item-right open-panel-button-container">
-                <button type="button" class="icon-button"><span class="icon-button-inner"><span class="icon" data-icon="material-right-arrow"></span></span></button>
-            </div>
-        </div></a>
-        <a href="https://yomitan.wiki/" rel="noopener noreferrer" class="settings-item settings-item-button"><div class="settings-item-inner">
-            <div class="settings-item-left">
-                <div class="settings-item-label outer-link"><strong>New to Manabitan? Head to the Yomitan Wiki!</strong></div>
-            </div>
-            <div class="settings-item-right open-panel-button-container">
-                <button type="button" class="icon-button"><span class="icon-button-inner"><span class="icon" data-icon="material-right-arrow"></span></span></button>
-            </div>
-        </div></a>
-    </div>
-
+    <h2>Open settings and install dictionaries</h2>
+    <div class="settings-group"><div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
+        <p>Open the <img src="/images/icon16.png" class="inline-icon" alt="Manabitan"> toolbar popup, then <a href="/settings.html">Settings</a>. Choose your language and open <strong>Get recommended dictionaries&hellip;</strong> in the Dictionaries section. Start with a definition dictionary.</p>
+        <p>To import your own compatible dictionary package, open <strong>Configure installed and enabled dictionaries&hellip;</strong> and use <strong>Import</strong>. Enable it in the active profile after the import finishes. See the <a href="https://manabi.io/manabitan/dictionaries/" rel="noopener noreferrer">dictionary guide</a> for formats, schedules, and backups.</p>
+    </div></div></div></div></div>
+    <h2>Look up a word</h2>
+    <div class="settings-group"><div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
+        <p>On a normal webpage with selectable text, hold <kbd>Shift</kbd> and move the pointer over a word. Grant website permission and reload the page when necessary. Browser settings/store pages and image-only text can be unavailable to scanning.</p>
+        <p>The speaker plays available audio from your configured sources. The <a href="/search.html">search page</a> can look up text using installed dictionaries. See <a href="https://manabi.io/manabitan/advanced/" rel="noopener noreferrer">scanning and audio settings</a> for customization.</p>
+        <p>For PDFs, use the <a href="https://manabi.io/manabitan/manabitan-pdf-viewer/" rel="noopener noreferrer">Manabitan PDF Viewer</a>. It requires a selectable text layer; it does not add OCR.</p>
+    </div></div></div></div></div>
+    <h2>Connect Anki</h2>
+    <div class="settings-group"><div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
+        <p>Install AnkiConnect in Anki, keep Anki running, and enable Anki integration in Manabitan. Configure a deck, note type, and fields, then create one test note. Follow the <a href="https://manabi.io/manabitan/anki/" rel="noopener noreferrer">Anki guide</a> for note-type setup, duplicates, media, and custom templates.</p>
+    </div></div></div></div></div>
+    <h2>Moving from another extension</h2>
+    <div class="settings-group"><div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left"><div class="settings-item-label">
+        <p>Keep the old extension and its data while testing. Export settings and retain the original dictionary packages. Settings JSON, dictionary packages, and whole-database backups are different; a Yomitan JSON database is not a Manabitan SQLite backup.</p>
+        <p>Follow <a href="https://manabi.io/manabitan/yomitan-migration/" rel="noopener noreferrer">Moving from Yomitan</a> or <a href="https://manabi.io/manabitan/yomichan-migration/" rel="noopener noreferrer">Moving from Yomichan</a>. Disable the other extension's scanning to avoid duplicate popups without uninstalling it.</p>
+    </div></div></div></div></div>
+    <h2>More information</h2>
+    <p><a href="/welcome.html">Welcome page</a> &middot; <a href="/info.html">Version and diagnostics</a> &middot; <a href="https://manabi.io/manabitan/" rel="noopener noreferrer">Manabitan documentation</a> &middot; <a href="https://manabi.io/manabitan/support/" rel="noopener noreferrer">Support</a></p>
     <div class="footer-padding"></div>
-
 </div>
 <div class="content-right"></div>
 </div></div>

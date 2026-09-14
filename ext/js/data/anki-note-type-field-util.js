@@ -18,8 +18,8 @@
 import {getStandardFieldMarkers} from './anki-template-util.js';
 
 const knownAnkiNoteTypePresets = new Map([
-    ['kiku', 'kiku-lapis'],
-    ['lapis', 'kiku-lapis'],
+    ['kiku', 'kiku'],
+    ['lapis', 'lapis'],
     ['senren', 'senren'],
     ['senren 洗練', 'senren'],
     ['crop theft vocab', 'crop-theft-vocab'],
@@ -63,14 +63,21 @@ export function buildAnkiFieldsForModel({
     const fields = {};
     for (let i = 0, ii = fieldNames.length; i < ii; ++i) {
         const fieldName = fieldNames[i];
-        fields[fieldName] = {
-            value: (
-                preset !== null ?
-                getPresetFieldValue(preset, fieldName) :
-                getDefaultAnkiFieldValue(fieldName, i, dictionaryEntryType, oldFields)
-            ),
-            overwriteMode: 'coalesce',
-        };
+        // Anki permits arbitrary field names. Define an own data property even
+        // for __proto__, rather than invoking Object.prototype's setter.
+        Object.defineProperty(fields, fieldName, {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                value: (
+                    preset !== null ?
+                    getPresetFieldValue(preset, fieldName) :
+                    getDefaultAnkiFieldValue(fieldName, i, dictionaryEntryType, oldFields)
+                ),
+                overwriteMode: 'coalesce',
+            },
+        });
     }
     return fields;
 }
@@ -135,31 +142,17 @@ function getKnownAnkiNoteTypePreset(modelName, dictionaryEntryType, dynamicField
 
     const primaryDefinitionMarker = getPrimaryDefinitionMarker(dynamicFieldMarkers);
     switch (presetKey) {
-        case 'kiku-lapis':
+        case 'kiku':
+            // Kiku 2.1 transfers target-word emphasis from Sentence to its
+            // furigana field. Lapis still recommends leaving that field blank.
             return {
-                Expression: '{expression}',
-                ExpressionFurigana: '{furigana-plain}',
-                ExpressionReading: '{reading}',
-                ExpressionAudio: '{audio}',
-                SelectionText: '{popup-selection-text}',
-                MainDefinition: primaryDefinitionMarker,
-                DefinitionPicture: '',
-                Sentence: '{cloze-prefix}<b>{cloze-body}</b>{cloze-suffix}',
-                SentenceFurigana: '',
-                SentenceAudio: '',
-                Picture: '',
-                Glossary: '{glossary}',
-                Hint: '',
-                IsWordAndSentenceCard: '',
-                IsClickCard: '',
-                IsSentenceCard: '',
-                IsAudioCard: '',
-                PitchPosition: '{pitch-accent-positions}',
-                PitchCategories: '{pitch-accent-categories}',
-                Frequency: '{frequencies}',
-                FreqSort: '{frequency-harmonic-rank}',
-                MiscInfo: '{document-title}',
+                ...getLapisFieldPreset(primaryDefinitionMarker),
+                SentenceFurigana: '{sentence-furigana-plain}',
+                RelatedExpression: '',
+                SentenceTranslation: '',
             };
+        case 'lapis':
+            return getLapisFieldPreset(primaryDefinitionMarker);
         case 'senren':
             return {
                 word: '{expression}',
@@ -170,6 +163,7 @@ function getKnownAnkiNoteTypePreset(modelName, dictionaryEntryType, dynamicField
                 sentenceCard: '',
                 audioCard: '',
                 notes: '',
+                hint: '',
                 selectionText: '{popup-selection-text}',
                 definition: primaryDefinitionMarker,
                 wordAudio: '{audio}',
@@ -199,6 +193,37 @@ function getKnownAnkiNoteTypePreset(modelName, dictionaryEntryType, dynamicField
         default:
             return null;
     }
+}
+
+/**
+ * @param {string} primaryDefinitionMarker
+ * @returns {Record<string, string>}
+ */
+function getLapisFieldPreset(primaryDefinitionMarker) {
+    return {
+        Expression: '{expression}',
+        ExpressionFurigana: '{furigana-plain}',
+        ExpressionReading: '{reading}',
+        ExpressionAudio: '{audio}',
+        SelectionText: '{popup-selection-text}',
+        MainDefinition: primaryDefinitionMarker,
+        DefinitionPicture: '',
+        Sentence: '{cloze-prefix}<b>{cloze-body}</b>{cloze-suffix}',
+        SentenceFurigana: '',
+        SentenceAudio: '',
+        Picture: '',
+        Glossary: '{glossary}',
+        Hint: '',
+        IsWordAndSentenceCard: '',
+        IsClickCard: '',
+        IsSentenceCard: '',
+        IsAudioCard: '',
+        PitchPosition: '{pitch-accent-positions}',
+        PitchCategories: '{pitch-accent-categories}',
+        Frequency: '{frequencies}',
+        FreqSort: '{frequency-harmonic-rank}',
+        MiscInfo: '{document-title}',
+    };
 }
 
 /**
