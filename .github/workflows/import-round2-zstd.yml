@@ -1,0 +1,46 @@
+name: Import round two Zstd
+on:
+  push:
+    branches: [verify/import-radical-round2-20260914]
+    paths: [.github/workflows/import-round2-zstd.yml]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 443f4c51c04219f932f14c42d3d1e254f5620712
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 4.0.15
+      - name: Add explicit persistent dictionary exports and compile
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('dev/bin/build-zstd-wasm.js')
+          s=p.read_text()
+          old="    '_ZSTD_compress_usingDict',"
+          assert s.count(old)==1
+          s=s.replace(old,old+"\n    '_ZSTD_CCtx_reset',\n    '_ZSTD_CCtx_setParameter',\n    '_ZSTD_CCtx_loadDictionary',\n    '_ZSTD_compress2',")
+          p.write_text(s)
+          PY
+          node dev/bin/build-zstd-wasm.js --write
+          emcc --version > dev/data/zstd-round2-toolchain.txt
+          sha256sum dev/lib/zstd-simd-module.js dev/data/zstd-simd.wasm dev/bin/build-zstd-wasm.js > dev/data/zstd-round2-digests.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-round2-zstd-generated
+          path: |
+            dev/lib/zstd-simd-module.js
+            dev/data/zstd-simd.wasm
+            dev/bin/build-zstd-wasm.js
+            dev/data/zstd-round2-toolchain.txt
+            dev/data/zstd-round2-digests.txt
+          retention-days: 14
