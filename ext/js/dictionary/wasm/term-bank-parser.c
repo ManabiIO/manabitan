@@ -65,8 +65,16 @@ void* memcpy(void* dest, const void* source, unsigned long count) {
 
 int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length, uint8_t* output, uint32_t output_length);
 
-static uint32_t crc32_table[8][256];
+static uint32_t crc32_table[16][256];
 static uint32_t crc32_table_initialized = 0u;
+
+static uint32_t crc32_read_u32_le(const uint8_t* data) {
+    return
+        (uint32_t)data[0] |
+        ((uint32_t)data[1] << 8u) |
+        ((uint32_t)data[2] << 16u) |
+        ((uint32_t)data[3] << 24u);
+}
 
 static uint32_t crc32_bytes(const uint8_t* data, uint32_t length) {
     if (crc32_table_initialized == 0u) {
@@ -77,7 +85,7 @@ static uint32_t crc32_bytes(const uint8_t* data, uint32_t length) {
             }
             crc32_table[0][i] = value;
         }
-        for (uint32_t slice = 1u; slice < 8u; ++slice) {
+        for (uint32_t slice = 1u; slice < 16u; ++slice) {
             for (uint32_t i = 0u; i < 256u; ++i) {
                 const uint32_t value = crc32_table[slice - 1u][i];
                 crc32_table[slice][i] = (value >> 8u) ^ crc32_table[0][value & 0xffu];
@@ -88,28 +96,30 @@ static uint32_t crc32_bytes(const uint8_t* data, uint32_t length) {
 
     uint32_t crc = 0xffffffffu;
     uint32_t offset = 0u;
-    while (length - offset >= 8u) {
-        const uint32_t first =
-            (uint32_t)data[offset] |
-            ((uint32_t)data[offset + 1u] << 8u) |
-            ((uint32_t)data[offset + 2u] << 16u) |
-            ((uint32_t)data[offset + 3u] << 24u);
-        const uint32_t second =
-            (uint32_t)data[offset + 4u] |
-            ((uint32_t)data[offset + 5u] << 8u) |
-            ((uint32_t)data[offset + 6u] << 16u) |
-            ((uint32_t)data[offset + 7u] << 24u);
+    while (length - offset >= 16u) {
+        const uint32_t first = crc32_read_u32_le(data + offset);
+        const uint32_t second = crc32_read_u32_le(data + offset + 4u);
+        const uint32_t third = crc32_read_u32_le(data + offset + 8u);
+        const uint32_t fourth = crc32_read_u32_le(data + offset + 12u);
         crc ^= first;
         crc =
-            crc32_table[7][crc & 0xffu] ^
-            crc32_table[6][(crc >> 8u) & 0xffu] ^
-            crc32_table[5][(crc >> 16u) & 0xffu] ^
-            crc32_table[4][crc >> 24u] ^
-            crc32_table[3][second & 0xffu] ^
-            crc32_table[2][(second >> 8u) & 0xffu] ^
-            crc32_table[1][(second >> 16u) & 0xffu] ^
-            crc32_table[0][second >> 24u];
-        offset += 8u;
+            crc32_table[15][crc & 0xffu] ^
+            crc32_table[14][(crc >> 8u) & 0xffu] ^
+            crc32_table[13][(crc >> 16u) & 0xffu] ^
+            crc32_table[12][crc >> 24u] ^
+            crc32_table[11][second & 0xffu] ^
+            crc32_table[10][(second >> 8u) & 0xffu] ^
+            crc32_table[9][(second >> 16u) & 0xffu] ^
+            crc32_table[8][second >> 24u] ^
+            crc32_table[7][third & 0xffu] ^
+            crc32_table[6][(third >> 8u) & 0xffu] ^
+            crc32_table[5][(third >> 16u) & 0xffu] ^
+            crc32_table[4][third >> 24u] ^
+            crc32_table[3][fourth & 0xffu] ^
+            crc32_table[2][(fourth >> 8u) & 0xffu] ^
+            crc32_table[1][(fourth >> 16u) & 0xffu] ^
+            crc32_table[0][fourth >> 24u];
+        offset += 16u;
     }
     while (offset < length) {
         crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset++]) & 0xffu];

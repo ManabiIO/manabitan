@@ -61,7 +61,57 @@ function readSpan(result, offset) {
     return JSON.parse(decoder.decode(result.bytes.subarray(start, start + result.spans[offset + 1])))
 }
 
+/**
+ * @param {ReturnType<typeof parse>} result
+ * @returns {unknown[]}
+ */
+function readRow(result) {
+    return [
+        readSpan(result, 0),
+        readSpan(result, 2),
+        readSpan(result, 4),
+        readSpan(result, 6),
+        result.spans[8] | 0,
+        readSpan(result, 9),
+        result.spans[11] | 0,
+        readSpan(result, 12),
+    ]
+}
+
+/**
+ * Uses the platform JSON parser as an independent acceptance and row-value
+ * oracle for the public WASM parser.
+ * @param {string} source
+ */
+function expectMatchesJson(source) {
+    let expected
+    try {
+        expected = JSON.parse(source)
+    } catch {
+        expected = null
+    }
+    const result = parse(source)
+    if (expected === null) {
+        expect(result.count).toBeLessThan(0)
+        return
+    }
+    expect(result.count).toBe(expected.length)
+    expect(result.count).toBe(1)
+    expect(readRow(result)).toEqual(expected[0])
+}
+
+/**
+ * @param {string} expressionToken
+ * @param {number} alignment
+ * @returns {string}
+ */
+function createRowSource(expressionToken, alignment) {
+    return `${' '.repeat(alignment)}[[${expressionToken},"reading","noun","rule",-42,[${expressionToken}],99,"common"]]`
+}
+
 const alignments = Array.from({length: 64}, (_, index) => index)
+const differentialAlignments = Array.from({length: 16}, (_, index) => index)
+const specialPositions = Array.from({length: 16}, (_, index) => index)
 
 describe('term-bank string scanning', () => {
     test.each(alignments)('preserves string spans at byte alignment %i', (padding) => {
@@ -113,18 +163,114 @@ describe('term-bank string scanning', () => {
             expect(parse(`${prefix}${escape}","","","",0,[],1,""]]`).count).toBeLessThan(0)
         }
     })
+
+    test('differentially handles quotes, escapes, Unicode runs, and every 16-byte position/alignment', () => {
+        const escapes = ['\\"', '\\\\', '\\/', '\\b', '\\f', '\\n', '\\r', '\\t', '\\u65e5']
+        const unicodeRuns = ['é'.repeat(19), '日本語'.repeat(11), '🙂'.repeat(13), 'é日🙂'.repeat(9)]
+        for (const alignment of differentialAlignments) {
+            for (const position of specialPositions) {
+                const prefix = 'a'.repeat(position)
+                expectMatchesJson(createRowSource(`"${prefix}"`, alignment))
+                expectMatchesJson(createRowSource(`"${prefix}${escapes[(alignment + position) % escapes.length]}tail"`, alignment))
+                expectMatchesJson(createRowSource(`"${prefix}${unicodeRuns[(alignment + position) % unicodeRuns.length]}tail"`, alignment))
+            }
+        }
+    })
+
+    test('differentially rejects every raw control byte at every 16-byte position/alignment', () => {
+        for (const alignment of differentialAlignments) {
+            for (const position of specialPositions) {
+                const prefix = 'a'.repeat(position)
+                for (let control = 0; control < 0x20; ++control) {
+                    expectMatchesJson(createRowSource(`"${prefix}${String.fromCharCode(control)}tail"`, alignment))
+                }
+            }
+        }
+    })
+
+    test('differentially rejects malformed escapes and bounded end-of-buffer tails', () => {
+        const malformedEscapes = ['\\q', '\\U0001', '\\u', '\\u0', '\\u00', '\\u000', '\\u00xz', '\\u-001', '\\u 000', '\\]']
+        for (const alignment of differentialAlignments) {
+            for (const position of specialPositions) {
+                const prefix = 'a'.repeat(position)
+                const malformedEscape = malformedEscapes[(alignment + position) % malformedEscapes.length]
+                expectMatchesJson(createRowSource(`"${prefix}${malformedEscape}tail"`, alignment))
+                for (let tailLength = 0; tailLength < 8; ++tailLength) {
+                    expectMatchesJson(`${' '.repeat(alignment)}[["${prefix}${'z'.repeat(tailLength)}`)
+                }
+            }
+        }
+    })
+
+    test('stops at the real first special when byte-mask borrows mark later bytes', () => {
+        for (const alignment of differentialAlignments) {
+            for (const position of specialPositions) {
+                const prefix = 'a'.repeat(position)
+                expectMatchesJson(`${' '.repeat(alignment)}[["${prefix}"#`)
+                expectMatchesJson(createRowSource(`"${prefix}\\]tail"`, alignment))
+                expectMatchesJson(createRowSource(`"${prefix}${String.fromCharCode(0x1f)} tail"`, alignment))
+            }
+        }
+    })
 })
 
 /**
- * @param {string[]} sources
- * @param {number} method
- * @returns {string}
+ * @typedef {{source: string, method: 0|8}} JoinSource
  */
-function inflateAndJoin(sources, method) {
-    const buffers = sources.map((source) => encoder.encode(source))
-    const payloads = buffers.map((bytes) => (method === 8 ? deflateRawSync(bytes) : bytes))
+
+/**
+ * Reproduces the original compact join byte-for-byte without parsing JSON.
+ * @param {string[]} sources
+ * @returns {Uint8Array}
+ */
+function referenceJoin(sources) {
+    const whitespace = new Set([0x20, 0x09, 0x0a, 0x0d])
+    const contents = sources.map((source) => {
+        const bytes = encoder.encode(source)
+        let start = 0
+        let end = bytes.length
+        while (start < end && whitespace.has(bytes[start])) { ++start }
+        while (end > start && whitespace.has(bytes[end - 1])) { --end }
+        expect(bytes[start]).toBe(0x5b)
+        expect(bytes[end - 1]).toBe(0x5d)
+        ++start
+        --end
+        while (start < end && whitespace.has(bytes[start])) { ++start }
+        while (end > start && whitespace.has(bytes[end - 1])) { --end }
+        return bytes.subarray(start, end)
+    }).filter((bytes) => bytes.length > 0)
+    const length = contents.reduce((sum, bytes) => sum + bytes.length, 2 + Math.max(0, contents.length - 1))
+    const result = new Uint8Array(length)
+    let cursor = 0
+    result[cursor++] = 0x5b
+    for (let i = 0; i < contents.length; ++i) {
+        if (i > 0) { result[cursor++] = 0x2c }
+        result.set(contents[i], cursor)
+        cursor += contents[i].length
+    }
+    result[cursor] = 0x5d
+    return result
+}
+
+/**
+ * @param {JoinSource[]} sources
+ * @param {{capacity?: number, corruptCrcAt?: number, trailingDeflateAt?: number, truncateAt?: number}} [options]
+ * @returns {{status: number, output: Uint8Array}}
+ */
+function inflateAndJoin(sources, options = {}) {
+    const buffers = sources.map(({source}) => encoder.encode(source))
+    const payloads = buffers.map((bytes, index) => {
+        const payload = sources[index].method === 8 ? deflateRawSync(bytes) : bytes
+        if (options.trailingDeflateAt === index) {
+            return Buffer.concat([payload, Buffer.from([0xa5])])
+        }
+        if (options.truncateAt === index) {
+            return payload.subarray(0, -1)
+        }
+        return payload
+    })
     const inputLength = payloads.reduce((sum, bytes) => sum + bytes.length, 0)
-    const capacity = buffers.reduce((sum, bytes) => sum + bytes.length, 2)
+    const capacity = options.capacity ?? buffers.reduce((sum, bytes) => sum + bytes.length, 2)
     wasm.wasm_reset_heap()
     const input = wasm.wasm_alloc(inputLength)
     const offsets = wasm.wasm_alloc(sources.length * 4)
@@ -132,7 +278,8 @@ function inflateAndJoin(sources, method) {
     const uncompressedLengths = wasm.wasm_alloc(sources.length * 4)
     const methods = wasm.wasm_alloc(sources.length * 4)
     const checksums = wasm.wasm_alloc(sources.length * 4)
-    const output = wasm.wasm_alloc(capacity)
+    const outputBlock = wasm.wasm_alloc(capacity + 64)
+    const output = outputBlock + 32
     const heap = new Uint8Array(wasm.memory.buffer)
     const words = new Uint32Array(wasm.memory.buffer)
     let cursor = 0
@@ -141,10 +288,11 @@ function inflateAndJoin(sources, method) {
         words[offsets / 4 + i] = cursor
         words[compressedLengths / 4 + i] = payloads[i].length
         words[uncompressedLengths / 4 + i] = buffers[i].length
-        words[methods / 4 + i] = method
-        words[checksums / 4 + i] = crc32(buffers[i])
+        words[methods / 4 + i] = sources[i].method
+        words[checksums / 4 + i] = crc32(buffers[i]) ^ (options.corruptCrcAt === i ? 1 : 0)
         cursor += payloads[i].length
     }
+    heap.fill(0xa5, outputBlock, output + capacity + 32)
     const length = wasm.inflate_and_join_term_banks(
         input,
         inputLength,
@@ -157,21 +305,77 @@ function inflateAndJoin(sources, method) {
         output,
         capacity,
     )
-    expect(length).toBeGreaterThanOrEqual(2)
-    return decoder.decode(new Uint8Array(wasm.memory.buffer, output, length))
+    expect([...heap.subarray(outputBlock, output)]).toEqual(new Array(32).fill(0xa5))
+    expect([...heap.subarray(output + capacity, output + capacity + 32)]).toEqual(new Array(32).fill(0xa5))
+    return {status: length, output: heap.slice(output, output + Math.max(0, length))}
 }
 
-describe('overlapping term-bank join', () => {
+describe('term-bank join integrity', () => {
     test.each([0, 8])('preserves bytes and source order for compression method %i', (method) => {
         for (const padding of alignments) {
             const value = JSON.stringify(['x'.repeat(padding), '日本語', '\\"'])
             const whitespace = ' '.repeat(padding)
             const sources = ['[]', `${whitespace}[ ${value} ]\n`, '[ ]', `[${value}]`, '[]']
-            expect(inflateAndJoin(sources, method)).toBe(`[${value},${value}]`)
+            const result = inflateAndJoin(sources.map((source) => ({source, method: /** @type {0|8} */ (method)})))
+            expect(result.status).toBe(referenceJoin(sources).length)
+            expect(result.output).toEqual(referenceJoin(sources))
         }
     })
 
     test.each([0, 8])('handles all-empty arrays for compression method %i', (method) => {
-        expect(inflateAndJoin(['[]', ' \n[ \t ]\r', '[]'], method)).toBe('[]')
+        const sources = ['[]', ' \n[ \t ]\r', '[]']
+        const result = inflateAndJoin(sources.map((source) => ({source, method: /** @type {0|8} */ (method)})))
+        expect(result.output).toEqual(referenceJoin(sources))
+    })
+
+    test.each([0, 8])('preserves join copies at overlap boundaries using method %i', (method) => {
+        /** @type {Array<{distance: number, wrap: (content: string) => string}>} */
+        const wrappers = [
+            {distance: 0, wrap: (content) => `[${content}]`},
+            {distance: 1, wrap: (content) => `[ ${content}\t]`},
+            {distance: 2, wrap: (content) => `\r[\n${content}\t ]`},
+        ]
+        for (const contentLength of [16, 32, 64]) {
+            const content = JSON.stringify('x'.repeat(contentLength - 2))
+            expect(encoder.encode(content)).toHaveLength(contentLength)
+            for (const {distance, wrap} of wrappers) {
+                const sources = ['["prefix"]', wrap(content)]
+                expect(encoder.encode(sources[1]).indexOf(encoder.encode(content)[0]) - 1).toBe(distance)
+                const result = inflateAndJoin(sources.map((source) => ({source, method: /** @type {0|8} */ (method)})))
+                expect(result.output).toEqual(referenceJoin(sources))
+            }
+        }
+    })
+
+    test('matches the reference for mixed STORE/DEFLATE banks and arbitrary array values', () => {
+        const hugeValue = 'plain-bank-value'.repeat(65536)
+        const sources = [
+            {source: ' \n[]\t', method: /** @type {const} */ (0)},
+            {source: '[1,{"nested":[true,false,null,{"text":"日本語"}]},"first"]', method: /** @type {const} */ (0)},
+            {source: '[ ]', method: /** @type {const} */ (8)},
+            {source: `\r\n["${hugeValue}"] \t`, method: /** @type {const} */ (0)},
+            {source: '[{"last":3},[4,5]]', method: /** @type {const} */ (8)},
+            {source: '[]', method: /** @type {const} */ (0)},
+        ]
+        const result = inflateAndJoin(sources)
+        const expected = referenceJoin(sources.map(({source}) => source))
+        expect(result.status).toBe(expected.length)
+        expect(result.output).toEqual(expected)
+    })
+
+    test('preserves the conservative capacity boundary', () => {
+        const sources = [{source: '["value"]', method: /** @type {const} */ (0)}]
+        const admittedCapacity = encoder.encode(sources[0].source).length + 1
+        const result = inflateAndJoin(sources, {capacity: admittedCapacity})
+        expect(result.output).toEqual(referenceJoin(sources.map(({source}) => source)))
+        expect(inflateAndJoin(sources, {capacity: admittedCapacity - 1}).status).toBe(-1)
+    })
+
+    test('rejects CRC failure, trailing DEFLATE bytes, truncation, and non-array input', () => {
+        const deflated = [{source: '[{"valid":true}]', method: /** @type {const} */ (8)}]
+        expect(inflateAndJoin(deflated, {corruptCrcAt: 0}).status).toBe(-4)
+        expect(inflateAndJoin(deflated, {trailingDeflateAt: 0}).status).toBe(-6)
+        expect(inflateAndJoin(deflated, {truncateAt: 0}).status).toBe(-2)
+        expect(inflateAndJoin([{source: '{"not":"array"}', method: 0}]).status).toBe(-5)
     })
 })
