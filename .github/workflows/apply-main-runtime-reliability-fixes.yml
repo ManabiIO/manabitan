@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/apply-main-runtime-reliability-fixes.yml
       - dev/apply-main-runtime-reliability-fixes.py
+      - dev/apply-main-offscreen-diagnostics-fix.py
 
 permissions:
   contents: write
@@ -39,8 +40,21 @@ jobs:
           grep -q 'failed search-popup creation does not poison later attempts' /tmp/runtime-reliability-red.log
           grep -q 'backend prepare can retry after a transient initialization failure' /tmp/runtime-reliability-red.log
           grep -q 'ordinary offscreen messages ensure the document exists before sending' /tmp/runtime-reliability-red.log
+      - name: Confirm existing unmatched-response test is red
+        run: |
+          set +e
+          npx vitest run test/offscreen-proxy.test.js 2>&1 | tee /tmp/offscreen-proxy-red.log
+          status=${PIPESTATUS[0]}
+          set -e
+          if [ "$status" -eq 0 ]; then
+            echo 'Offscreen proxy suite unexpectedly passed before diagnostics fix.'
+            exit 1
+          fi
+          grep -q 'emits unmatched-response diagnostics for unknown reply ids' /tmp/offscreen-proxy-red.log
       - name: Apply reliability fixes
-        run: python dev/apply-main-runtime-reliability-fixes.py
+        run: |
+          python dev/apply-main-runtime-reliability-fixes.py
+          python dev/apply-main-offscreen-diagnostics-fix.py
       - name: Confirm regression tests pass after fixes
         run: npx vitest run test/runtime-reliability-regressions.test.js
       - name: Run focused existing runtime tests
@@ -53,8 +67,9 @@ jobs:
         run: |
           rm .github/workflows/apply-main-runtime-reliability-fixes.yml
           rm dev/apply-main-runtime-reliability-fixes.py
+          rm dev/apply-main-offscreen-diagnostics-fix.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ext/js/background/backend.js ext/js/background/offscreen-proxy.js test/runtime-reliability-regressions.test.js .github/workflows/apply-main-runtime-reliability-fixes.yml dev/apply-main-runtime-reliability-fixes.py
+          git add ext/js/background/backend.js ext/js/background/offscreen-proxy.js test/runtime-reliability-regressions.test.js .github/workflows/apply-main-runtime-reliability-fixes.yml dev/apply-main-runtime-reliability-fixes.py dev/apply-main-offscreen-diagnostics-fix.py
           git commit -m 'Fix main runtime reliability recovery paths'
           git push origin HEAD:fix/runtime-reliability-main-20260914
