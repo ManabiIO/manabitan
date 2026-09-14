@@ -1,0 +1,102 @@
+name: Apply browser CI runtime diagnostic fixes
+
+on:
+  push:
+    branches:
+      - fix/ci-browser-runtime-diagnostics-20260914
+    paths:
+      - .github/workflows/apply-ci-browser-runtime-fixes.yml
+      - dev/apply-ci-browser-runtime-fixes.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-ci-browser-runtime-fixes
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+
+      - name: Reproduce Chromium readiness false negative from recorded worker diagnostics
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const assert = require('node:assert/strict');
+          const runtime = {
+            hasStorageGetDirectory: true,
+            hasCreateSyncAccessHandle: false,
+            hasOpfsSahpoolVfs: true,
+            openStorageMode: 'opfs-sahpool',
+            openStorageDiagnostics: {
+              runtimeContext: {
+                hasStorageGetDirectory: true,
+                hasCreateSyncAccessHandle: true,
+              },
+            },
+          };
+          const oldReady = (
+            runtime.hasStorageGetDirectory === true &&
+            runtime.hasCreateSyncAccessHandle === true &&
+            runtime.hasOpfsSahpoolVfs === true &&
+            runtime.openStorageMode === 'opfs-sahpool'
+          );
+          const worker = runtime.openStorageDiagnostics.runtimeContext;
+          const expectedReady = (
+            (runtime.hasStorageGetDirectory === true || worker.hasStorageGetDirectory === true) &&
+            (runtime.hasCreateSyncAccessHandle === true || worker.hasCreateSyncAccessHandle === true) &&
+            runtime.hasOpfsSahpoolVfs === true &&
+            runtime.openStorageMode === 'opfs-sahpool'
+          );
+          assert.equal(oldReady, false);
+          assert.equal(expectedReady, true);
+          console.log('Confirmed old CI predicate rejects a runtime that actually opened opfs-sahpool in the worker.');
+          NODE
+
+      - name: Apply CI and Firefox harness fixes
+        run: python dev/apply-ci-browser-runtime-fixes.py
+
+      - name: Validate patched workflow and Firefox harness statically
+        shell: bash
+        run: |
+          npx eslint test/firefox/extension-two-dictionary-import.e2e.js
+          npm run test:ts:test
+          git diff --check
+          test "$(grep -c 'workerRuntimeContext?.hasCreateSyncAccessHandle === true' .github/workflows/ci.yml)" -eq 4
+          test "$(grep -c 'getAllWindowHandles' test/firefox/extension-two-dictionary-import.e2e.js)" -eq 0
+          test "$(grep -c 'moz-extension://\${firefoxDevExtensionUuid}' test/firefox/extension-two-dictionary-import.e2e.js)" -ge 1
+
+      - name: Commit only qualified CI/harness changes and self-clean
+        shell: bash
+        run: |
+          git fetch origin fix/ci-browser-runtime-diagnostics-20260914
+          test "$(git rev-parse FETCH_HEAD)" = "${{ github.sha }}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/ci.yml test/firefox/extension-two-dictionary-import.e2e.js
+          git rm .github/workflows/apply-ci-browser-runtime-fixes.yml dev/apply-ci-browser-runtime-fixes.py
+          git diff --cached --stat > /tmp/browser-ci-fix-stat.txt
+          git commit -m 'Fix browser E2E runtime capability detection and Firefox UUID discovery'
+          git rev-parse HEAD > /tmp/browser-ci-fix-verified-commit.txt
+          git push origin HEAD:fix/ci-browser-runtime-diagnostics-20260914
+
+      - name: Preserve qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-ci-fix-${{ github.run_id }}
+          path: /tmp/browser-ci-fix-*
+          if-no-files-found: warn
