@@ -64,6 +64,7 @@ jobs:
           replace('ext/js/background/backend.js', "import {safePerformance} from '../core/safe-performance.js';", "import {safePerformance} from '../core/safe-performance.js';\nimport {toError} from '../core/to-error.js';")
           replace('ext/js/background/offscreen-proxy.js', "reasons: [/** @type {chrome.offscreen.Reason} */ ('CLIPBOARD')],", "reasons: [\n                    /** @type {chrome.offscreen.Reason} */ ('CLIPBOARD'),\n                ],")
           replace('test/runtime-reliability-lifecycle.test.js', '/** @type {Backend} */', '/** @type {InstanceType<typeof Backend>} */', 2)
+          replace('test/backend-lookup-error-recovery.test.js', "            text: '暗記', details: {}, optionsContext: {depth: 0, url: 'https://example.test/'},\n        })", "            text: '暗記', details: {}, optionsContext: {depth: 0, url: 'https://example.test/'},\n        }, {})", 2)
           for name in ['test/runtime-reliability-lifecycle.test.js', 'test/offscreen-proxy-bridge.test.js']:
               p = Path(name)
               text = p.read_text().replace('.mockResolvedValue(undefined)', '.mockResolvedValue(void 0)')
@@ -91,7 +92,6 @@ jobs:
           (cd /tmp/main-reliability-base && npm run build:libs)
           cat > /tmp/main-final-static/lint.mjs <<'JS'
           import {createRequire} from 'node:module'
-          import {execFileSync} from 'node:child_process'
           import {existsSync, writeFileSync} from 'node:fs'
           const require = createRequire(`${process.cwd()}/package.json`)
           const {ESLint} = require('eslint')
@@ -116,22 +116,26 @@ jobs:
         shell: bash
         run: |
           python - <<'PY'
-          import json, re
+          import json, os, re
           from pathlib import Path
           from collections import Counter
           root = Path('/tmp/main-final-static')
+          def normalize(value):
+              for prefix in [os.environ['GITHUB_WORKSPACE'], '/tmp/main-reliability-base']:
+                  value = value.replace(prefix + '/', '<repo>/')
+              return value
           def lint(name):
               result = Counter()
               for file in json.loads((root / name).read_text()):
-                  path = file['filePath'].split('/manabitan/manabitan/')[-1].split('/main-reliability-base/')[-1]
+                  path = normalize(file['filePath'])
                   for m in file['messages']:
                       if m['severity'] == 2:
-                          result[(path, m['ruleId'], m['message'])] += 1
+                          result[(path, m['ruleId'], normalize(m['message']))] += 1
               return result
           def types(name):
               result = Counter()
               for line in (root / name).read_text().splitlines():
-                  match = re.match(r'(.+?)\(\d+,\d+\): error (TS\d+): (.*)', line)
+                  match = re.match(r'(.+?)\(\d+,\d+\): error (TS\d+): (.*)', normalize(line))
                   if match:
                       result[match.groups()] += 1
               return result
