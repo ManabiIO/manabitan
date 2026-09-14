@@ -1,0 +1,114 @@
+name: Qualify import failure supervision develop
+
+on:
+  push:
+    branches:
+      - fix/import-failure-supervision-develop-20260914
+    paths:
+      - .github/workflows/qualify-import-failure-supervision-develop.yml
+      - dev/apply-import-failure-supervision-develop.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: qualify-import-failure-supervision-develop
+  cancel-in-progress: true
+
+jobs:
+  qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+
+      - name: Confirm worker-transfer failure is red and normal relay control is green
+        shell: bash
+        run: |
+          mkdir -p /tmp/import-supervision-develop
+          set +e
+          npx vitest run test/offscreen-import-supervision.test.js --reporter=json --outputFile=/tmp/import-supervision-develop/red.json
+          status=$?
+          set -e
+          test "$status" -ne 0
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import {readFileSync} from 'node:fs'
+          const report = JSON.parse(readFileSync('/tmp/import-supervision-develop/red.json', 'utf8'))
+          const results = report.testResults.flatMap((suite) => suite.assertionResults)
+          const failure = results.find((test) => test.title === 'reports a worker failure after worker-side response-port ownership transfer')
+          const control = results.find((test) => test.title === 'forwards worker progress and completion through the supervised response channel')
+          assert.equal(failure?.status, 'failed')
+          assert.match(failure.failureMessages.join('\n'), /timeout/)
+          assert.equal(control?.status, 'passed')
+          console.log('Confirmed RED worker-failure path and GREEN normal transfer control.')
+          JS
+
+      - name: Apply offscreen-owned import relay
+        run: python dev/apply-import-failure-supervision-develop.py
+
+      - name: Confirm exact regression and adjacent runtime suites are green
+        run: >-
+          npx vitest run
+          test/offscreen-import-supervision.test.js
+          test/offscreen-proxy-bridge.test.js
+          test/offscreen-dictionary-worker-import.test.js
+          test/dictionary-worker-client.test.js
+          test/offscreen-worker-recovery.test.js
+          test/backend-lookup-refresh.test.js
+          --reporter=json
+          --outputFile=/tmp/import-supervision-develop/focused-green.json
+
+      - name: Require clean lint and all TypeScript projects
+        run: |
+          npx eslint ext/js/background/offscreen.js test/offscreen-import-supervision.test.js
+          npm run test:ts:main
+          npm run test:ts:dev
+          npm run test:ts:test
+          npm run test:ts:bench
+          git diff --check
+
+      - name: Run full unit and options suites
+        run: |
+          npm run test:unit -- --reporter=json --outputFile=/tmp/import-supervision-develop/unit-green.json
+          npm run test:unit:options -- --reporter=json --outputFile=/tmp/import-supervision-develop/options-green.json
+
+      - name: Build all targets and Chromium development package
+        run: |
+          npm run license-report:html
+          npm run test:build > /tmp/import-supervision-develop/build-all.log 2>&1
+          node ./dev/bin/build.js --target chrome-dev > /tmp/import-supervision-develop/build-chromium.log 2>&1
+          git diff --check
+
+      - name: Commit only qualified source and regression test
+        shell: bash
+        run: |
+          git fetch origin fix/import-failure-supervision-develop-20260914
+          test "$(git rev-parse FETCH_HEAD)" = "${{ github.sha }}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ext/js/background/offscreen.js test/offscreen-import-supervision.test.js
+          git rm \
+            .github/workflows/qualify-import-failure-supervision-develop.yml \
+            dev/apply-import-failure-supervision-develop.py
+          git diff --cached --stat > /tmp/import-supervision-develop/commit-stat.txt
+          git commit -m 'Supervise develop dictionary import responses across worker failure'
+          git rev-parse HEAD > /tmp/import-supervision-develop/verified-commit.txt
+          git push origin HEAD:fix/import-failure-supervision-develop-20260914
+
+      - name: Preserve qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-supervision-develop-${{ github.run_id }}
+          path: /tmp/import-supervision-develop
+          if-no-files-found: warn
