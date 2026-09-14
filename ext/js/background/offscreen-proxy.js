@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
@@ -76,11 +77,16 @@ export class OffscreenProxy {
      * @see https://developer.chrome.com/docs/extensions/reference/offscreen/
      */
     async prepare() {
-        if (await this._hasOffscreenDocument()) {
-            await this._ensureOffscreenPort();
-            return;
-        }
-        if (this._creatingOffscreen) {
+        await this._ensureOffscreenDocument();
+        await this._ensureOffscreenPort();
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async _ensureOffscreenDocument() {
+        if (await this._hasOffscreenDocument()) { return; }
+        if (this._creatingOffscreen !== null) {
             await this._creatingOffscreen;
             return;
         }
@@ -92,7 +98,6 @@ export class OffscreenProxy {
                 ],
                 justification: 'Access to the clipboard',
             });
-            await this._ensureOffscreenPort();
         })();
         try {
             await this._creatingOffscreen;
@@ -183,6 +188,7 @@ export class OffscreenProxy {
      * @returns {Promise<import('offscreen').ApiReturn<TMessageType>>}
      */
     async sendMessagePromise(message) {
+        await this._ensureOffscreenDocument();
         const response = await this._webExtension.sendMessagePromise(message);
         return this._getMessageResponseResult(/** @type {import('core').Response<import('offscreen').ApiReturn<TMessageType>>} */ (response));
     }
@@ -352,9 +358,23 @@ export class DictionaryRuntimeWorkerProxy {
      */
     _onMessage(event) {
         const id = typeof event.data?.id === 'number' ? event.data.id : null;
-        if (id === null) { return; }
+        if (id === null) {
+            reportDiagnostics('offscreen-proxy-unmatched-response', {
+                reason: 'missing-id',
+                id: null,
+                hasError: typeof event.data?.error !== 'undefined',
+            });
+            return;
+        }
         const handler = this._responseHandlers.get(id);
-        if (typeof handler === 'undefined') { return; }
+        if (typeof handler === 'undefined') {
+            reportDiagnostics('offscreen-proxy-unmatched-response', {
+                reason: 'unknown-id',
+                id,
+                hasError: typeof event.data?.error !== 'undefined',
+            });
+            return;
+        }
         this._responseHandlers.delete(id);
         if (typeof event.data?.error !== 'undefined') {
             handler.reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (event.data.error)));
