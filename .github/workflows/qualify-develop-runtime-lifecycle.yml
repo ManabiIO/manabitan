@@ -1,0 +1,211 @@
+name: Qualify develop runtime lifecycle
+
+on:
+  push:
+    branches:
+      - fix/runtime-lifecycle-develop-20260914
+    paths:
+      - .github/workflows/qualify-develop-runtime-lifecycle.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: qualify-develop-runtime-lifecycle
+  cancel-in-progress: true
+
+jobs:
+  qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Capture unchanged develop diagnostics
+        shell: bash
+        run: |
+          mkdir -p /tmp/develop-lifecycle
+          git rev-parse HEAD > /tmp/develop-lifecycle/input-commit.txt
+          test "$(git hash-object ext/js/background/backend.js)" = 5867b976053287fa250d6cf006dc9a5641eed29e
+          test "$(git hash-object ext/js/background/offscreen-proxy.js)" = 2ebdd4770e79e58642fde5da17ebbb7b9a43efe4
+          cat > /tmp/develop-lifecycle/lint.mjs <<'JS'
+          import {createRequire} from 'node:module'
+          import {existsSync, writeFileSync} from 'node:fs'
+          const require = createRequire(`${process.cwd()}/package.json`)
+          const {ESLint} = require('eslint')
+          const files = ['ext/js/background/backend.js', 'ext/js/background/offscreen-proxy.js', 'test/runtime-reliability-lifecycle.test.js'].filter((file) => existsSync(file))
+          const eslint = new ESLint({fix: process.argv[3] === 'fix' ? (message) => ['@stylistic/semi', '@stylistic/eol-last'].includes(message.ruleId) : false})
+          const results = await eslint.lintFiles(files)
+          if (process.argv[3] === 'fix') await ESLint.outputFixes(results)
+          writeFileSync(process.argv[2], JSON.stringify(results))
+          JS
+          node /tmp/develop-lifecycle/lint.mjs /tmp/develop-lifecycle/lint-before.json
+          set +e
+          for project in main dev test bench; do
+            npm run "test:ts:$project" > "/tmp/develop-lifecycle/types-before-$project.log" 2>&1
+            echo "baseline $project: $?"
+          done
+          set -e
+      - name: Add lifecycle regressions with the develop reply protocol
+        shell: bash
+        run: |
+          git fetch origin fix/runtime-reliability-main-20260914
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+          snapshot = '49313436297bd3d3c566fb34a40e61d147c606ea'
+          path = Path('test/runtime-reliability-lifecycle.test.js')
+          assert not path.exists()
+          text = subprocess.check_output(['git', 'show', f'{snapshot}:{path}'], text=True)
+          text = text.replace('/** @type {Backend} */', '/** @type {InstanceType<typeof Backend>} */')
+          text = text.replace('.mockResolvedValue(undefined)', '.mockResolvedValue(void 0)').replace('resolvePromise(undefined)', 'resolvePromise()')
+          start = text.index('function createPort() {')
+          end = text.index('\n}\n', start) + len('\n}\n')
+          replacement = '''function createPort() {
+              /** @param {{id?: number}} message */
+              const postMessage = (message) => {
+                  const {id} = message
+                  if (typeof id === 'number') {
+                      queueMicrotask(() => {
+                          port.onmessage?.call(port, new MessageEvent('message', {data: {id, result: void 0}}))
+                      })
+                  }
+              }
+              const port = /** @type {MessagePort} */ (/** @type {unknown} */ ({
+                  postMessage: vi.fn(postMessage),
+                  close: vi.fn(),
+                  onmessage: null,
+                  onmessageerror: null,
+              }))
+              return port
+          }
+          '''
+          path.write_text(text[:start] + replacement + text[end:])
+          PY
+          set +e
+          npx vitest run test/runtime-reliability-lifecycle.test.js --reporter=json --outputFile=/tmp/develop-lifecycle/red.json
+          status=$?
+          set -e
+          test "$status" -ne 0
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import {readFileSync} from 'node:fs'
+          const report = JSON.parse(readFileSync('/tmp/develop-lifecycle/red.json', 'utf8'))
+          const results = report.testResults.flatMap((suite) => suite.assertionResults)
+          for (const title of [
+              'publishes the mutation queue before invoking a synchronously reentrant task',
+              'shares document existence checking as well as creation across concurrent recovery',
+              'invalidates the old control port when an ordinary message recreates the document',
+              'rebuilds a silently stale transfer port after the offscreen document disappears',
+              'clears the registration deadline after successful bootstrap',
+          ]) {
+              assert.equal(results.find((result) => result.title === title)?.status, 'failed', title)
+              console.log(`Confirmed red: ${title}`)
+          }
+          JS
+      - name: Apply only the four reviewed lifecycle method bodies
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+          snapshot = '49313436297bd3d3c566fb34a40e61d147c606ea'
+          def bounds(text, class_name, method):
+              class_start = text.index(f'export class {class_name} {{')
+              start = text.index(f'    async {method}(', class_start)
+              end = text.index('\n    }\n', start) + len('\n    }\n')
+              return start, end
+          for filename, class_name, methods in [
+              ('ext/js/background/backend.js', 'Backend', ['_runDictionaryMutation']),
+              ('ext/js/background/offscreen-proxy.js', 'OffscreenProxy', ['prepare', '_ensureOffscreenDocument', '_ensureOffscreenPort']),
+          ]:
+              path = Path(filename)
+              original = path.read_text()
+              source = subprocess.check_output(['git', 'show', f'{snapshot}:{filename}'], text=True)
+              for method in methods:
+                  source_start, source_end = bounds(source, class_name, method)
+                  start, end = bounds(original, class_name, method)
+                  original = original[:start] + source[source_start:source_end] + original[end:]
+              original = original.replace("reasons: [/** @type {chrome.offscreen.Reason} */ ('CLIPBOARD')],", "reasons: [\n                    /** @type {chrome.offscreen.Reason} */ ('CLIPBOARD'),\n                ],")
+              path.write_text(original)
+          PY
+          node /tmp/develop-lifecycle/lint.mjs /tmp/develop-lifecycle/lint-after.json fix
+          git diff --binary > /tmp/develop-lifecycle/source-fixes.patch
+          set +e
+          for project in main dev test bench; do
+            npm run "test:ts:$project" > "/tmp/develop-lifecycle/types-after-$project.log" 2>&1
+            echo "candidate $project: $?"
+          done
+          set -e
+      - name: Require no new static errors
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          from collections import Counter
+          root = Path('/tmp/develop-lifecycle')
+          def lint(name):
+              return Counter((file['filePath'], message['ruleId'], message['message'])
+                  for file in json.loads((root / name).read_text())
+                  for message in file['messages'] if message['severity'] == 2)
+          def types(name):
+              result = Counter()
+              for line in (root / name).read_text().splitlines():
+                  match = re.match(r'(.+?)\(\d+,\d+\): error (TS\d+): (.*)', line)
+                  if match:
+                      result[match.groups()] += 1
+              return result
+          summary = {}
+          unexpected = []
+          for name, before, after in [('lint', lint('lint-before.json'), lint('lint-after.json'))] + [
+              (f'types-{project}', types(f'types-before-{project}.log'), types(f'types-after-{project}.log'))
+              for project in ['main', 'dev', 'test', 'bench']
+          ]:
+              added = after - before
+              summary[name] = {'baseline_errors': sum(before.values()), 'candidate_errors': sum(after.values()), 'new_errors': sum(added.values())}
+              unexpected.extend({'category': name, 'diagnostic': key, 'count': count} for key, count in added.items())
+          summary['unexpected'] = unexpected
+          (root / 'static-comparison.json').write_text(json.dumps(summary, indent=2))
+          print(json.dumps(summary, indent=2))
+          if unexpected:
+              raise SystemExit('New static errors detected; no commit will be made.')
+          PY
+      - name: Run lifecycle and full regression suites
+        shell: bash
+        run: |
+          npx vitest run test/runtime-reliability-lifecycle.test.js --reporter=json --outputFile=/tmp/develop-lifecycle/focused-green.json
+          npm run test:unit -- --reporter=json --outputFile=/tmp/develop-lifecycle/unit-green.json
+          npm run test:unit:options -- --reporter=json --outputFile=/tmp/develop-lifecycle/options-green.json
+          npm run license-report:html
+          npm run test:build > /tmp/develop-lifecycle/build-all.log 2>&1
+          node ./dev/bin/build.js --target chrome-dev > /tmp/develop-lifecycle/build-chromium.log 2>&1
+          git diff --check
+      - name: Commit qualified lifecycle changes and remove temporary workflow
+        shell: bash
+        run: |
+          git fetch origin fix/runtime-lifecycle-develop-20260914
+          test "$(git rev-parse FETCH_HEAD)" = "${{ github.sha }}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ext/js/background/backend.js ext/js/background/offscreen-proxy.js test/runtime-reliability-lifecycle.test.js
+          git rm .github/workflows/qualify-develop-runtime-lifecycle.yml
+          git diff --cached --stat > /tmp/develop-lifecycle/commit-stat.txt
+          git commit -m 'Close runtime lifecycle races on develop without changing the control protocol'
+          git rev-parse HEAD > /tmp/develop-lifecycle/verified-commit.txt
+          git push origin HEAD:fix/runtime-lifecycle-develop-20260914
+      - name: Preserve qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: develop-lifecycle-${{ github.run_id }}
+          path: /tmp/develop-lifecycle
+          if-no-files-found: error
