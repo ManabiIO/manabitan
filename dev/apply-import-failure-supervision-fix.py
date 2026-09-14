@@ -85,9 +85,7 @@ old_debug = '''    async _debugDictionaryStorageStateHandler() {
         return await this._invokeDictionaryWorker('debugDictionaryStorageStateOffscreen', {});
     }
 '''
-new_debug = '''    /**
-     * @returns {Promise<unknown>}
-     */
+new_debug = '''    /** @type {import('offscreen').ApiHandler<'debugDictionaryStorageStateOffscreen'>} */
     async _debugDictionaryStorageStateHandler() {
         return await this._invokeDictionaryWorker('debugDictionaryStorageStateOffscreen', {});
     }
