@@ -26,10 +26,10 @@ function deferred() {
     let resolve = () => {};
     /** @type {(reason?: unknown) => void} */
     let reject = () => {};
-    const promise = new Promise((resolve2, reject2) => {
-        resolve = () => { resolve2(); };
+    const promise = /** @type {Promise<void>} */ (new Promise((resolve2, reject2) => {
+        resolve = () => { resolve2(void 0); };
         reject = reject2;
-    });
+    }));
     return {promise, resolve, reject};
 }
 
