@@ -47,7 +47,11 @@ replace_async_method(backend, '_runDictionaryMutation', '''    async _runDiction
 ''')
 
 offscreen = 'ext/js/background/offscreen-proxy.js'
-replace_async_method(offscreen, 'prepare', '''    async prepare() {
+replace_once(offscreen, '''    async prepare() {
+        await this._ensureOffscreenDocument();
+        await this._ensureOffscreenPort();
+    }
+''', '''    async prepare() {
         await this._ensureOffscreenPort()
     }
 ''')
