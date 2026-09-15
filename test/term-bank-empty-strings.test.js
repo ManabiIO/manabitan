@@ -58,9 +58,7 @@ function parse(banks, alignment = 0, physicalEnd = false) {
         spans[i * 2 + 1] = part.length
         offset += part.length
     }
-    const count = wasm.parse_term_bank_with_media_hints(
-        input, bytes.length, output, 1, banks.length > 1 ? spanPointer : 0, banks.length > 1 ? banks.length : 0,
-    )
+    const count = wasm.parse_term_bank_with_media_hints(input, bytes.length, output, 1, banks.length > 1 ? spanPointer : 0, banks.length > 1 ? banks.length : 0)
     expect([...heap.subarray(guarded, output)]).toEqual(new Array(16).fill(0xa5))
     expect([...heap.subarray(output + 68, output + 68 + 16)]).toEqual(new Array(16).fill(0xa5))
     return {count, metadata: [...new Uint32Array(wasm.memory.buffer, output, 17)], bytes}
@@ -90,7 +88,7 @@ const fields = [0, 2, 4, 6, 9, 12]
 describe('empty string parser boundaries', () => {
     test.each(Array.from({length: 16}, (_, i) => i))('preserves all empty/nonempty field combinations at alignment %i', (alignment) => {
         for (let mask = 0; mask < 64; ++mask) {
-            const values = Array.from({length: 6}, (_, i) => (mask & (1 << i)) === 0 ? '' : '日🙂"\\')
+            const values = Array.from({length: 6}, (_, i) => ((mask & (1 << i)) === 0 ? '' : '日🙂"\\'))
             const row = [values[0], values[1], values[2], values[3], 0, [values[4]], -1, values[5]]
             const source = `${' '.repeat(alignment)}${JSON.stringify([row])}`
             const result = parse([source], alignment)
