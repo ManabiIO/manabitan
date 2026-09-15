@@ -1,0 +1,20 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 5b57eb7..b4f28ae 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -1839,7 +1839,14 @@ static int json_string_token_has_escape(
+         return 1;
+     }
+     const uint32_t end = start + length - 1u;
+-    for (uint32_t i = start + 1u; i < end; ++i) {
++    uint32_t i = start + 1u;
++    while (end - i >= 8u) {
++        uint64_t word;
++        __builtin_memcpy(&word, src + i, sizeof(word));
++        if (has_zero_byte64(word ^ UINT64_C(0x5c5c5c5c5c5c5c5c)) != 0u) { return 1; }
++        i += 8u;
++    }
++    for (; i < end; ++i) {
+         if (src[i] == '\\') { return 1; }
+     }
+     return 0;

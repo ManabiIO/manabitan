@@ -1,0 +1,34 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 5b57eb7..666f643 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -1759,13 +1759,6 @@ static int raw_term_content_tokens_equal(
+ ) {
+     return (
+         first->glossary_length == second->glossary_length &&
+-        (glossary_equal || content_bytes_equal_between(
+-            src,
+-            first->glossary_start,
+-            src,
+-            second->glossary_start,
+-            first->glossary_length
+-        )) &&
+         first->rules_length == second->rules_length &&
+         content_bytes_equal_between(
+             src,
+@@ -1789,7 +1782,14 @@ static int raw_term_content_tokens_equal(
+             src,
+             second->term_tags_start,
+             first->term_tags_length
+-        )
++        ) &&
++        (glossary_equal || content_bytes_equal_between(
++            src,
++            first->glossary_start,
++            src,
++            second->glossary_start,
++            first->glossary_length
++        ))
+     );
+ }
+ 

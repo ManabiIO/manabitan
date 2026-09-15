@@ -1,0 +1,38 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 5b57eb7..2c0abf0 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -16,6 +16,7 @@
+  */
+ 
+ #include <stdint.h>
++#include <wasm_simd128.h>
+ 
+ #define WASM_PAGE_SIZE 65536u
+ #define FNV1A_OFFSET 0x811c9dc5u
+@@ -1711,6 +1712,12 @@ static int content_bytes_equal(
+     uint32_t length
+ ) {
+     uint32_t i = 0u;
++    while (length - i >= 16u) {
++        const v128_t first = wasm_v128_load(bytes + first_offset + i);
++        const v128_t second = wasm_v128_load(bytes + second_offset + i);
++        if (wasm_v128_any_true(wasm_v128_xor(first, second))) { return 0; }
++        i += 16u;
++    }
+     while (i + 8u <= length) {
+         uint64_t first;
+         uint64_t second;
+@@ -1734,6 +1741,12 @@ static int content_bytes_equal_between(
+     uint32_t length
+ ) {
+     uint32_t i = 0u;
++    while (length - i >= 16u) {
++        const v128_t first = wasm_v128_load(first_bytes + first_offset + i);
++        const v128_t second = wasm_v128_load(second_bytes + second_offset + i);
++        if (wasm_v128_any_true(wasm_v128_xor(first, second))) { return 0; }
++        i += 16u;
++    }
+     while (i + 8u <= length) {
+         uint64_t first;
+         uint64_t second;

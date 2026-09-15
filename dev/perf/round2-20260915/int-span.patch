@@ -1,0 +1,68 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 5b57eb7..62d6360 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -707,6 +707,44 @@ static int parse_int32_token(
+     return 1;
+ }
+ 
++static int parse_int32_span(
++    const uint8_t* src,
++    uint32_t len,
++    uint32_t start,
++    int32_t null_value,
++    int32_t* out_value,
++    uint32_t* out_end
++) {
++    if (start >= len) { return 0; }
++    uint32_t i = start;
++    int32_t result;
++    if (len - i >= 4u && is_null_token(src, i, 4u)) {
++        i += 4u;
++        result = null_value;
++    } else {
++        const int negative = src[i] == '-';
++        if (negative) { ++i; }
++        if (i >= len || src[i] < '0' || src[i] > '9') { return 0; }
++        const int leading_zero = src[i] == '0';
++        const uint32_t digits_start = i;
++        uint32_t value = 0u;
++        while (i < len && src[i] >= '0' && src[i] <= '9') {
++            const uint32_t digit = (uint32_t)(src[i] - '0');
++            if (value > 214748364u ||
++                (value == 214748364u && digit > (negative ? 8u : 7u))) { return 0; }
++            value = value * 10u + digit;
++            ++i;
++        }
++        if (leading_zero && i - digits_start != 1u) { return 0; }
++        result = negative ? (int32_t)(0u - value) : (int32_t)value;
++    }
++    /* Do not accept a valid prefix of a malformed or non-integer token. */
++    if (i < len && src[i] != ',' && src[i] != ']' && src[i] != '}' && !is_ws(src[i])) { return 0; }
++    *out_value = result;
++    *out_end = i;
++    return 1;
++}
++
+ static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index, uint32_t start, uint32_t end) {
+     uint32_t length = end > start ? (end - start) : 0u;
+     switch (field_index) {
+@@ -842,7 +880,8 @@ static int parse_row_single_pass(
+         }
+         uint32_t value_end = 0u;
+         if (field_index == 4u || field_index == 6u) {
+-            if (!scan_scalar_span(src, len, i, &value_end)) { return 0; }
++            int32_t* value = field_index == 4u ? &out_meta->score : &out_meta->sequence;
++            if (!parse_int32_span(src, len, i, field_index == 4u ? 0 : -1, value, &value_end)) { return 0; }
+         } else if (field_index == 5u) {
+             uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
+             if (
+@@ -861,7 +900,7 @@ static int parse_row_single_pass(
+         } else if (!parse_value_span(src, len, i, &value_end)) {
+             return 0;
+         }
+-        if (field_index < 8u) {
++        if (field_index < 8u && field_index != 4u && field_index != 6u) {
+             if (!set_field(src, out_meta, field_index, i, value_end)) { return 0; }
+         }
+         ++field_index;
