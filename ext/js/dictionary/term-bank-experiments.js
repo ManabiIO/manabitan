@@ -31,6 +31,8 @@ export function snapshotTermBankExperiments(options = {}) {
         experimentalFusedSingleBank: options.experimentalFusedSingleBank === true,
         experimentalGlobalExactContentReuse: options.experimentalGlobalExactContentReuse === true,
         experimentalFastGlossaryNormalization: options.experimentalFastGlossaryNormalization === true,
+        experimentalKnownGlossaryKeys: options.experimentalKnownGlossaryKeys === true,
+        experimentalSchemaRowParser: options.experimentalSchemaRowParser === true,
     })
 }
 
@@ -45,5 +47,7 @@ export function getTermBankExperimentMask(options) {
     (options.experimentalNativeEscapedKeys === true ? 2 : 0) |
     (options.experimentalValidatedGlossaryReuse === true ? 4 : 0) |
     (options.experimentalGlobalExactContentReuse === true ? 8 : 0) |
-    (options.experimentalFastGlossaryNormalization === true ? 16 : 0)
+    (options.experimentalFastGlossaryNormalization === true ? 16 : 0) |
+    (options.experimentalKnownGlossaryKeys === true ? 32 : 0) |
+    (options.experimentalSchemaRowParser === true ? 64 : 0)
 }

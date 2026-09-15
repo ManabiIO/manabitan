@@ -40,6 +40,8 @@ const flagNames = /** @type {Array<keyof Experiments>} */ ([
     'experimentalFusedSingleBank',
     'experimentalGlobalExactContentReuse',
     'experimentalFastGlossaryNormalization',
+    'experimentalKnownGlossaryKeys',
+    'experimentalSchemaRowParser',
 ])
 /**
  * @param {number} mask
@@ -171,7 +173,7 @@ describe('default-off term-bank experiments', () => {
         expect(snap).toEqual(flags(1))
         expect(Object.isFrozen(snap)).toBe(true)
         expect(snapshotTermBankExperiments()).toEqual(flags(0))
-        expect(getTermBankExperimentMask(flags(63))).toBe(31)
+        expect(getTermBankExperimentMask(flags(255))).toBe(127)
         expect(snapshotTermBankExperiments(/** @type {Experiments} */ (/** @type {unknown} */ ({experimentalTermBankSpans: 'true'})))).toEqual(flags(0))
     })
 
@@ -183,7 +185,7 @@ describe('default-off term-bank experiments', () => {
         '[]',
         JSON.stringify([row('text', [{type: 'text', text: '  a\n b  '}]), row('猫', glossary)]),
     ]
-    test.each(Array.from({length: 64}, (_, i) => i))('all flag combinations preserve row content/hash/key order: %i', async (mask) => {
+    test.each(Array.from({length: 256}, (_, i) => i))('all flag combinations preserve row content/hash/key order: %i', async (mask) => {
         const baseline = await parse(banks)
         for (const preload of [false, true]) {
             const result = await parse(banks, flags(mask), preload)
@@ -504,13 +506,13 @@ describe('actual parser worker flag propagation', () => {
             expect((await requestWorker(worker, null)).type).toBe('loaded')
             const module = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))
             expect((await requestWorker(worker, {type: 'initialize', module})).type).toBe('ready')
-            const source = `[${[escapedBank(String.raw`"\u65e5本"`).slice(1, -1), JSON.stringify(row('猫')), JSON.stringify(row('犬')), String.raw`["日","\u65e5","","",0,[],1,""]`].join(',')}]`
+            const source = `[${[escapedBank(String.raw`"\u65e5本"`).slice(1, -1), JSON.stringify(row('猫', [{type: 'structured-content', content: {tag: 'span', content: '日本語'}}])), JSON.stringify(row('犬')), String.raw`["日","\u65e5","","",0,[],1,""]`].join(',')}]`
             const oracle = await parse([source])
             let previousOwnedKeys
             let previousOwnedKeysCopy
             /** @type {Map<string, Uint8Array>|undefined} */
             let priorIndexes
-            for (const mask of [15, 0, 15, 0]) {
+            for (const mask of [255, 0, 255, 0]) {
                 const payload = compressed(source, 8)
                 const sourceBuffer = preload ? payload.bytes.buffer : encoder.encode(source).buffer
                 const reply = await requestWorker(worker, {type: 'parse',
@@ -529,9 +531,11 @@ describe('actual parser worker flag propagation', () => {
                 if (!chunk) { throw new Error('Missing worker chunk') }
                 expect(snapshotChunk(chunk)).toEqual(oracle.rows)
                 expect(reply.profile?.experiments).toEqual(flags(mask))
-                expect(reply.profile?.bankSpanCount).toBe(mask === 15 ? 1 : 0)
-                expect(reply.profile?.fusedSingleBankGroups).toBe(mask === 15 ? 1 : 0)
+                expect(reply.profile?.bankSpanCount).toBe(mask === 255 ? 1 : 0)
+                expect(reply.profile?.fusedSingleBankGroups).toBe(mask === 255 ? 1 : 0)
                 expect(reply.profile?.fusedParseFallbacks).toBe(0)
+                expect(reply.profile?.schemaRowParseCount).toBe(mask === 255 ? 4 : 0)
+                expect(reply.profile?.knownGlossaryKeyCount ?? 0).toBe(mask === 255 ? 4 : 0)
                 if (previousOwnedKeys) { expect(previousOwnedKeys).toEqual(previousOwnedKeysCopy) }
                 previousOwnedKeys = chunk.termRecordPreinternedPlan.stringsBuffer
                 previousOwnedKeysCopy = Uint8Array.from(previousOwnedKeys)
@@ -541,5 +545,131 @@ describe('actual parser worker flag propagation', () => {
                 priorIndexes = indexes
             }
         } finally { await worker.terminate() }
+    })
+})
+
+
+describe('known glossary property keys', () => {
+    const known = ['content', 'class', 'tag', 'type', 'text', 'title', 'data', 'style', 'path', 'href']
+    test.each(known)('requires exact complete literal key: %s', async (key) => {
+        for (const spelling of [JSON.stringify(key),
+            JSON.stringify(key + 'x'),
+            JSON.stringify('x' + key),
+            `"\\u${key.charCodeAt(0).toString(16).padStart(4, '0')}${key.slice(1)}"`]) {
+            const source = `[["語","","","",0,[{${spelling}:"ordinary","unfamiliar":"${key}"}],1,""]]`
+            const base = await parse([source, '[]'])
+            const enabled = await parse([source, '[]'], {experimentalKnownGlossaryKeys: true})
+            expect(enabled.rows).toEqual(base.rows)
+            expect(enabled.profile.knownGlossaryKeyCount).toBe(spelling === JSON.stringify(key) ? 1 : 0)
+        }
+    })
+    test('values cannot authorize a key match and media/text hints survive', async () => {
+        const source = JSON.stringify([
+            row('a', [{type: 'text', text: 'text payload'}]),
+            row('b', [{type: 'image', path: 'image.png'}]),
+            row('c', [{type: 'structured-content', content: [{tag: 'a', href: '#term', content: ['content', 'type', 'path']}]}]),
+        ], null, 1)
+        const base = await parse([source, '[]'])
+        for (const preload of [false, true]) {
+            const enabled = await parse([source, '[]'], {...flags(255), experimentalValidatedGlossaryReuse: false}, preload)
+            expect(enabled.rows).toEqual(base.rows)
+            expect(enabled.profile.knownGlossaryKeyCount).toBeGreaterThan(0)
+            expect(enabled.rows.some((r) => r.media.length > 0)).toBe(true)
+        }
+    })
+    test('truncated keys and missing grammar remain rejected at independent bank ends', async () => {
+        for (const key of known) {
+            const token = JSON.stringify(key)
+            for (let n = 1; n < token.length; ++n) {
+                const malformed = `[["a","","","",0,[{${token.slice(0, n)}],1,""]]`
+                await expect(parse([malformed, '[]'], flags(255), true)).rejects.toThrow()
+                await expect(parse([malformed, '[]'])).rejects.toThrow()
+            }
+        }
+        for (const glossary of ['{"content" "value"}', '{"content":1,}', '{"content":1 "class":2}', '["content":"x"]']) {
+            const malformed = `[["a","","","",0,${glossary},1,""]]`
+            await expect(parse([malformed, '[]'], flags(255))).rejects.toThrow()
+            await expect(parse([malformed, '[]'])).rejects.toThrow()
+        }
+    })
+})
+
+describe('fixed-schema row parser', () => {
+    test.each(['-2147483648', '-2147483647', '-1', '-0', '0', '1', '2147483647', 'null'])('matches established int32 conversion for %s', async (value) => {
+        const source = `[["a","",null,null, ${value} ,[{"content":"x"}], ${value} ,null]]`
+        const base = await parse([source, '[]'])
+        const enabled = await parse([source, '[]'], flags(255), true)
+        expect(enabled.rows).toEqual(base.rows)
+        expect(enabled.profile.schemaRowParseCount).toBe(1)
+        expect(enabled.profile.schemaRowFallbackCount).toBe(0)
+    })
+    test.each(['2147483648',
+        '-2147483649',
+        '9999999999999999999999',
+        '-99999999999999999999',
+        '00',
+        '-00',
+        '01',
+        '+1',
+        '-',
+        '1.0',
+        '1e0',
+        '1e99',
+        'true',
+        'nullx',
+        'NaN'])('preserves invalid or unsupported scalar outcome: %s', async (value) => {
+        for (const field of [4, 6]) {
+            const parts = ['"a"', '""', '""', '""', '0', '[{"content":"x"}]', '1', '""']
+            parts[field] = value
+            const source = `[[${parts.join(',')}]]`
+            const oracle = await parse([source, '[]']).then((r) => r.rows, () => null)
+            if (oracle === null) {
+                await expect(parse([source, '[]'], flags(255), true)).rejects.toThrow()
+            } else {
+                const enabled = await parse([source, '[]'], flags(255), true)
+                expect(enabled.rows).toEqual(oracle)
+            }
+        }
+    })
+    test('late shape mismatch retries original row without leaking a glossary witness', async () => {
+        const shared = [{type: 'structured-content', content: {tag: 'span', content: 'same glossary'}}]
+        const rows = [row('first', shared), [...row('second', shared), {ignored: true}], row('third', shared)]
+        const source = JSON.stringify(rows)
+        const base = await parse([source, '[]'])
+        const enabled = await parse([source, '[]'], flags(255), true)
+        expect(enabled.rows).toEqual(base.rows)
+        expect(enabled.profile.schemaRowParseCount).toBe(2)
+        expect(enabled.profile.schemaRowFallbackCount).toBe(1)
+        expect(enabled.profile.fusedParseFallbacks).toBe(0)
+    })
+    test('retains short legacy-row defaults rather than rejecting the optimization miss', async () => {
+        const source = JSON.stringify([row('six fields').slice(0, 6), row('seven fields').slice(0, 7), row('eight fields')])
+        const base = await parse([source, '[]'])
+        const enabled = await parse([source, '[]'], flags(255), true)
+        expect(enabled.rows).toEqual(base.rows)
+        expect(enabled.profile.schemaRowFallbackCount).toBe(2)
+        expect(enabled.profile.schemaRowParseCount).toBe(1)
+    })
+    test('randomized fields and whitespace match the general parser', async () => {
+        let seed = 0x19876543
+        const next = () => {
+            seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0
+            return seed
+        }
+        const values = Array.from({length: 1024}, (_, i) => [
+            `word${i}`,
+i % 3 ? '' : `read${i}`,
+i % 5 ? 'noun' : null,
+i % 7 ? '' : null,
+next() | 0,
+i % 2 ? ['日本語', 'quoted"word', '\\'] : [{content: 'a', tag: 'span'}],
+next() | 0,
+i % 9 ? '' : null,
+        ])
+        const source = JSON.stringify(values, null, '\t')
+        const base = await parse([source, '[]'])
+        const enabled = await parse([source, '[]'], flags(255), true)
+        expect(enabled.rows).toEqual(base.rows)
+        expect(enabled.profile.schemaRowParseCount).toBe(values.length)
     })
 })

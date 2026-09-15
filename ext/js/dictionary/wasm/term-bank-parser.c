@@ -26,6 +26,8 @@
 #define EXPERIMENT_VALIDATED_GLOSSARY_REUSE 4u
 #define EXPERIMENT_GLOBAL_EXACT_CONTENT_REUSE 8u
 #define EXPERIMENT_FAST_GLOSSARY_NORMALIZATION 16u
+#define EXPERIMENT_KNOWN_GLOSSARY_KEYS 32u
+#define EXPERIMENT_SCHEMA_ROW_PARSER 64u
 #define MAX_INTERNED_KEY_BYTES 0xfffeu
 #ifndef RECENT_CONTENT_DEDUP_WINDOW
 #define RECENT_CONTENT_DEDUP_WINDOW 4u
@@ -489,14 +491,64 @@ static int scan_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, ui
 
 static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end);
 
-static int parse_composite_span_impl(
+static inline int literal_key_equals(const uint8_t* a, const char* b, uint32_t length) {
+    if (length >= 8u) {
+        uint64_t lhs, rhs;
+        __builtin_memcpy(&lhs, a, 8u);
+        __builtin_memcpy(&rhs, b, 8u);
+        if (lhs != rhs) { return 0; }
+        a += 8u; b += 8u; length -= 8u;
+    } else if (length >= 4u) {
+        uint32_t lhs, rhs;
+        __builtin_memcpy(&lhs, a, 4u);
+        __builtin_memcpy(&rhs, b, 4u);
+        if (lhs != rhs) { return 0; }
+        a += 4u; b += 4u; length -= 4u;
+    }
+    for (uint32_t i = 0u; i < length; ++i) {
+        if (a[i] != (uint8_t)b[i]) { return 0; }
+    }
+    return 1;
+}
+
+/* Match complete literal keys, including their closing quote. Unknown and
+ * escaped keys retain the general validated string scanner. No dictionary
+ * identity, inferred schema, hash equality or cache authorizes a match. */
+static inline uint32_t known_glossary_key_length(const uint8_t* src, uint32_t len, uint32_t start) {
+    if (start >= len || len - start < 5u) { return 0u; }
+    const uint8_t* p = src + start;
+    const uint32_t remaining = len - start;
+#define KEY_IS(value) (remaining >= sizeof(value) - 1u && literal_key_equals(p, value, sizeof(value) - 1u))
+    switch (p[1]) {
+        case 'c':
+            if (KEY_IS("\"content\"")) { return 9u; }
+            if (KEY_IS("\"class\"")) { return 7u; }
+            break;
+        case 't':
+            if (KEY_IS("\"tag\"")) { return 5u; }
+            if (KEY_IS("\"type\"")) { return 6u; }
+            if (KEY_IS("\"text\"")) { return 6u; }
+            if (KEY_IS("\"title\"")) { return 7u; }
+            break;
+        case 'd': if (KEY_IS("\"data\"")) { return 6u; } break;
+        case 's': if (KEY_IS("\"style\"")) { return 7u; } break;
+        case 'p': if (KEY_IS("\"path\"")) { return 6u; } break;
+        case 'h': if (KEY_IS("\"href\"")) { return 6u; } break;
+    }
+#undef KEY_IS
+    return 0u;
+}
+
+static __attribute__((always_inline)) inline int parse_composite_span_core(
     const uint8_t* src,
     uint32_t len,
     uint32_t start,
     uint32_t* out_end,
     uint32_t* media_hint,
     uint32_t* normalization_hint,
-    uint32_t* text_normalization_hint
+    uint32_t* text_normalization_hint,
+    uint32_t experiment_mask,
+    uint32_t* experiment_stats
 ) {
     enum {
         ARRAY_FIRST, ARRAY_AFTER_VALUE, ARRAY_VALUE,
@@ -524,7 +576,14 @@ static int parse_composite_span_impl(
                 *media_hint = 1u;
             }
             uint32_t s_end = 0u;
-            if (!parse_string_span(src, len, i, &s_end)) { return 0; }
+            const uint32_t known_length =
+                (experiment_mask & EXPERIMENT_KNOWN_GLOSSARY_KEYS) != 0u &&
+                (state == OBJECT_FIRST || state == OBJECT_KEY) ?
+                    known_glossary_key_length(src, len, i) : 0u;
+            if (known_length != 0u) {
+                s_end = i + known_length;
+                if (experiment_stats != 0) { ++experiment_stats[5]; }
+            } else if (!parse_string_span(src, len, i, &s_end)) { return 0; }
             if (state == OBJECT_FIRST || state == OBJECT_KEY) {
                 if (
                     (
@@ -592,6 +651,25 @@ static int parse_composite_span_impl(
         i = scalar_end;
     }
     return 0;
+}
+
+/* Keep the default specialization free of experimental per-token branches.
+ * Both entrypoints compile from the same grammar implementation. */
+static int parse_composite_span_impl(
+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end,
+    uint32_t* media_hint, uint32_t* normalization_hint, uint32_t* text_normalization_hint
+) {
+    return parse_composite_span_core(src, len, start, out_end,
+        media_hint, normalization_hint, text_normalization_hint, 0u, 0);
+}
+
+static int parse_composite_span_experimental(
+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end,
+    uint32_t* media_hint, uint32_t* normalization_hint, uint32_t* text_normalization_hint,
+    uint32_t experiment_mask, uint32_t* experiment_stats
+) {
+    return parse_composite_span_core(src, len, start, out_end,
+        media_hint, normalization_hint, text_normalization_hint, experiment_mask, experiment_stats);
 }
 
 static int parse_composite_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
@@ -663,11 +741,17 @@ static int parse_value_span_with_glossary_hints(
     uint32_t* out_end,
     uint32_t* media_hint,
     uint32_t* normalization_hint,
-    uint32_t* text_normalization_hint
+    uint32_t* text_normalization_hint,
+    uint32_t experiment_mask,
+    uint32_t* experiment_stats
 ) {
     if (start >= len) { return 0; }
     uint8_t c = src[start];
     if (c == '[' || c == '{') {
+        if ((experiment_mask & EXPERIMENT_KNOWN_GLOSSARY_KEYS) != 0u) {
+            return parse_composite_span_experimental(src, len, start, out_end,
+                media_hint, normalization_hint, text_normalization_hint, experiment_mask, experiment_stats);
+        }
         return parse_composite_span_impl(src, len, start, out_end, media_hint, normalization_hint, text_normalization_hint);
     }
     return parse_value_span(src, len, start, out_end);
@@ -826,7 +910,9 @@ static int parse_row_single_pass(
     uint32_t* out_next,
     const TermRowMeta* prior_rows,
     uint32_t prior_count,
-    uint32_t* glossary_witness
+    uint32_t* glossary_witness,
+    uint32_t experiment_mask,
+    uint32_t* experiment_stats
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
     clear_term_row_meta(out_meta);
@@ -856,7 +942,9 @@ static int parse_row_single_pass(
                     &value_end,
                     media_hint,
                     &out_meta->glossary_requires_normalization,
-                    &out_meta->glossary_requires_text_normalization
+                    &out_meta->glossary_requires_text_normalization,
+                    experiment_mask,
+                    experiment_stats
                 )) { return 0; }
         } else if (!parse_value_span(src, len, i, &value_end)) {
             return 0;
@@ -876,6 +964,96 @@ static int parse_row_single_pass(
         if (i >= len || src[i] == ']') { return 0; }
     }
     return 0;
+}
+
+/* Fixed-schema rows avoid generic field dispatch and the separate scalar scan
+ * before int32 conversion. A nonmatching row is retried by the original parser
+ * before any keys or content are published. Every field is still validated. */
+static inline int row_string_field(const uint8_t* src, uint32_t len, uint32_t* cursor,
+    uint32_t* start, uint32_t* length, int nullable) {
+    const uint32_t i = skip_ws(src, len, *cursor);
+    uint32_t end;
+    if (nullable && i <= len && len - i >= 4u && is_null_token(src, i, 4u)) {
+        end = i + 4u;
+    } else if (!parse_string_span(src, len, i, &end)) { return 0; }
+    *start = i;
+    *length = end - i;
+    *cursor = end;
+    return 1;
+}
+
+static inline int row_separator(const uint8_t* src, uint32_t len, uint32_t* cursor, uint8_t expected) {
+    const uint32_t i = skip_ws(src, len, *cursor);
+    if (i >= len || src[i] != expected) { return 0; }
+    *cursor = i + 1u;
+    return 1;
+}
+
+static inline int row_int32_field(const uint8_t* src, uint32_t len, uint32_t* cursor,
+    int32_t null_value, int32_t* result) {
+    uint32_t i = skip_ws(src, len, *cursor);
+    if (i >= len) { return 0; }
+    if (len - i >= 4u && is_null_token(src, i, 4u)) {
+        *cursor = i + 4u;
+        *result = null_value;
+        return 1;
+    }
+    const int negative = src[i] == '-';
+    if (negative) { ++i; }
+    if (i >= len || src[i] < '0' || src[i] > '9') { return 0; }
+    const int leading_zero = src[i] == '0';
+    uint32_t value = (uint32_t)(src[i++] - '0');
+    const uint32_t limit = negative ? 0x80000000u : 0x7fffffffu;
+    while (i < len && src[i] >= '0' && src[i] <= '9') {
+        const uint32_t digit = src[i++] - '0';
+        if (leading_zero || value > (limit - digit) / 10u) { return 0; }
+        value = value * 10u + digit;
+    }
+    *result = negative ? (int32_t)(0u - value) : (int32_t)value;
+    *cursor = i;
+    return 1;
+}
+
+static int parse_row_fixed_schema(
+    const uint8_t* src, uint32_t len, uint32_t row_start, TermRowMeta* meta,
+    int media_hints, uint32_t* out_next, const TermRowMeta* prior_rows,
+    uint32_t prior_count, uint32_t* glossary_witness,
+    uint32_t experiment_mask, uint32_t* experiment_stats
+) {
+    if (row_start >= len || src[row_start] != '[') { return 0; }
+    uint32_t i = row_start + 1u;
+    // No whole-row clear: all seventeen fields are assigned on success.
+    if (!row_string_field(src, len, &i, &meta->expression_start, &meta->expression_length, 0) ||
+        !row_separator(src, len, &i, ',') ||
+        !row_string_field(src, len, &i, &meta->reading_start, &meta->reading_length, 0) ||
+        !row_separator(src, len, &i, ',') ||
+        !row_string_field(src, len, &i, &meta->definition_tags_start, &meta->definition_tags_length, 1) ||
+        !row_separator(src, len, &i, ',') ||
+        !row_string_field(src, len, &i, &meta->rules_start, &meta->rules_length, 1) ||
+        !row_separator(src, len, &i, ',') ||
+        !row_int32_field(src, len, &i, 0, &meta->score) ||
+        !row_separator(src, len, &i, ',')) { return 0; }
+    i = skip_ws(src, len, i);
+    meta->glossary_start = i;
+    meta->glossary_may_contain_media = 0u;
+    meta->glossary_requires_normalization = 0u;
+    meta->glossary_requires_text_normalization = 0u;
+    uint32_t glossary_end = 0u;
+    if (!(glossary_witness != 0 && reuse_validated_glossary(
+        src, len, i, prior_rows, prior_count, meta, &glossary_end, glossary_witness
+    )) && !parse_value_span_with_glossary_hints(src, len, i, &glossary_end,
+        media_hints ? &meta->glossary_may_contain_media : 0,
+        &meta->glossary_requires_normalization, &meta->glossary_requires_text_normalization,
+        experiment_mask, experiment_stats)) { return 0; }
+    meta->glossary_length = glossary_end - i;
+    i = glossary_end;
+    if (!row_separator(src, len, &i, ',') ||
+        !row_int32_field(src, len, &i, -1, &meta->sequence) ||
+        !row_separator(src, len, &i, ',') ||
+        !row_string_field(src, len, &i, &meta->term_tags_start, &meta->term_tags_length, 1) ||
+        !row_separator(src, len, &i, ']')) { return 0; }
+    *out_next = i;
+    return 1;
 }
 
 static int is_null_token(const uint8_t* src, uint32_t start, uint32_t length) {
@@ -1552,7 +1730,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, 
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, 0)) {
             return -1;
         }
         ++row_count;
@@ -1590,7 +1768,7 @@ static int32_t parse_term_bank_impl(
     while (status > 0) {
         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0)) {
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, 0)) {
             return -1;
         }
         ++row_count;
@@ -2542,7 +2720,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     )) { return -1; }
     uint32_t* experiment_stats = (uint32_t*)(uintptr_t)experiment_stats_ptr;
     if (experiment_stats != 0) {
-        for (uint32_t i = 0u; i < 5u; ++i) { experiment_stats[i] = 0u; }
+        for (uint32_t i = 0u; i < 8u; ++i) { experiment_stats[i] = 0u; }
     }
     const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
     TermRowMeta* rows = (TermRowMeta*)(uintptr_t)metas_ptr;
@@ -2588,9 +2766,21 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         }
         uint32_t row_end = 0u;
         uint32_t glossary_witness = 0xffffffffu;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u ? &glossary_witness : 0)) {
-            return -1;
+        const int schema_enabled = (experiment_mask & EXPERIMENT_SCHEMA_ROW_PARSER) != 0u;
+        const int parsed_schema = schema_enabled && parse_row_fixed_schema(
+            src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
+            rows, row_count, (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u ? &glossary_witness : 0,
+            experiment_mask, experiment_stats);
+        if (parsed_schema) {
+            if (experiment_stats != 0) { ++experiment_stats[6]; }
+        } else {
+            if (schema_enabled && experiment_stats != 0) { ++experiment_stats[7]; }
+            // A speculative row may have found a glossary witness before a
+            // later field failed. Reset it before the general parser retries.
+            glossary_witness = 0xffffffffu;
+            if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
+                    rows, row_count, (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u ? &glossary_witness : 0,
+                    experiment_mask, experiment_stats)) { return -1; }
         }
         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
 

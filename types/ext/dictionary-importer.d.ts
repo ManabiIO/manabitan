@@ -58,6 +58,8 @@ export type ImportExperiments = {
     experimentalFusedSingleBank?: boolean;
     experimentalGlobalExactContentReuse?: boolean;
     experimentalFastGlossaryNormalization?: boolean;
+    experimentalKnownGlossaryKeys?: boolean;
+    experimentalSchemaRowParser?: boolean;
 };
 
 export type ImportDetails = ImportExperiments & {
