@@ -1,0 +1,78 @@
+name: Import opportunity qualification
+on:
+  push:
+    branches: [verify/import-opportunities-20260914]
+    paths: [.github/workflows/import-opportunity-qualification.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reconstruct exact source
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, gzip, hashlib, os
+          from pathlib import Path
+          parts = sorted(Path('.github/import-opportunity-patch').glob('*.b64'))
+          assert len(parts) == 8
+          text = ''.join(p.read_text().strip() for p in parts)
+          for old,new in [('GVlTG/Zf2wy','GVlTG/Zf1wy'),('TibJJrw','TibJrw'),('ZbTeJJg','ZbTeJg'),('TFfWHG1+XeOn','TFfWHG1+On')]:
+              text = text.replace(old,new)
+          patch = gzip.decompress(base64.b64decode(text, validate=True))
+          assert hashlib.sha256(patch).hexdigest() == 'c7ecae3fe7d5233d891c9436dd67c363094f3d4b338174f3e3aa4818afac4751'
+          Path(os.environ['RUNNER_TEMP'],'source.patch').write_bytes(patch)
+          PY
+          git checkout --detach 385857d029cb32160f05f4923e08712e34cc327b
+          git apply --index --whitespace=error-all "$RUNNER_TEMP/source.patch"
+          test "$(git write-tree)" = ac88087f8a4c3ec8175f17226fbb854d16f9f019
+          git diff --cached --check
+          git -c user.name='Manabitan contributors' -c user.email=contributors@manabi.io commit -m 'Add default-off known-key and schema-row import experiments'
+          git rev-parse HEAD HEAD^{tree} HEAD^ > "$RUNNER_TEMP/source-identity.txt"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - run: npm ci && npm run build:libs
+      - name: Unit and static qualification
+        run: |
+          set -euo pipefail
+          npm run test:ts
+          npm run test:unit
+          npm run test:unit:options
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-experiments.test.js dev/perf/parser-opportunities.js
+          npm run test:build
+      - name: Publish verified source-only staging commit
+        run: |
+          test "$(git rev-parse HEAD^{tree})" = ac88087f8a4c3ec8175f17226fbb854d16f9f019
+          test -z "$(git status --porcelain)"
+          git push origin HEAD:refs/heads/stage/import-opportunities-20260914
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Chromium functional coverage
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{"experimentalTermBankSpans":true,"experimentalNativeEscapedKeys":true,"experimentalValidatedGlossaryReuse":true,"experimentalFusedSingleBank":true,"experimentalGlobalExactContentReuse":true,"experimentalFastGlossaryNormalization":true,"experimentalKnownGlossaryKeys":true,"experimentalSchemaRowParser":true}'
+        run: xvfb-run -a npm run test:e2e:chromium-extension
+      - name: End-to-end screening with individual flags
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+        run: |
+          xvfb-run -a node dev/perf/import-ab.js jitendex --pairs 4 --flags '{"experimentalKnownGlossaryKeys":true}' --label known-keys
+          xvfb-run -a node dev/perf/import-ab.js jmnedict --pairs 4 --flags '{"experimentalSchemaRowParser":true}' --label schema-rows
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: import-opportunity-qualification
+          path: |
+            ${{ runner.temp }}/source-identity.txt
+            builds/*report*.json
+            builds/*ab*/*.json
+          retention-days: 14
