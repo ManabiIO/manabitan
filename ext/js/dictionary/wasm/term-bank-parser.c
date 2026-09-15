@@ -221,8 +221,10 @@ int32_t inflate_and_join_term_banks(
         if (nonempty_sources > 0u) {
             output[cursor++] = ',';
         }
-        for (uint32_t j = 0u; j < content_length; ++j) {
-            output[cursor + j] = inflated[start + j];
+        /* The interiors can overlap while shifting left. Later compact banks
+         * are already in place after the comma replaces their opening bracket. */
+        if (output + cursor != inflated + start) {
+            __builtin_memmove(output + cursor, inflated + start, content_length);
         }
         cursor += content_length;
         ++nonempty_sources;
