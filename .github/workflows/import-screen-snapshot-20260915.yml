@@ -1,0 +1,39 @@
+name: Import review pinned workspace 20260915
+on:
+  push:
+    branches: [verify/import-screen-20260915]
+    paths: [.github/workflows/import-screen-snapshot-20260915.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 30ffb604e0a87f0aa252bd4331bc54668062b1e1
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Fetch checksum-pinned dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/perf-dictionaries')"
+      - name: Prepare transferable workspace without credentials or Git metadata
+        run: |
+          mkdir -p /tmp/import-review-export
+          git archive HEAD | tar -x -C /tmp/import-review-export
+          cp -a node_modules /tmp/import-review-export/
+          mkdir -p /tmp/import-review-export/builds
+          cp -a builds/perf-dictionaries /tmp/import-review-export/builds/
+          printf '%s\n' '30ffb604e0a87f0aa252bd4331bc54668062b1e1' > /tmp/import-review-export/SOURCE_COMMIT
+          tar -czf /tmp/manabitan-import-review-20260915.tgz -C /tmp/import-review-export .
+          sha256sum /tmp/manabitan-import-review-20260915.tgz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-review-workspace-20260915
+          path: /tmp/manabitan-import-review-20260915.tgz
+          retention-days: 7
+          compression-level: 0
