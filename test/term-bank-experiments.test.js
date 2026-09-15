@@ -46,7 +46,7 @@ const flagNames = /** @type {Array<keyof Experiments>} */ ([
  * @returns {Experiments}
  */
 function flags(mask) {
-    return Object.fromEntries(flagNames.map((key, i) => [key, (mask & (1 << i)) !== 0]))
+    return snapshotTermBankExperiments(Object.fromEntries(flagNames.map((key, i) => [key, (mask & (1 << i)) !== 0])))
 }
 
 /**

@@ -340,6 +340,57 @@ export function compactTermRecordPreinternedPlan(plan, start, count, remapScratc
         throw new RangeError('Invalid preinterned plan reading-equality range');
     }
     const sourceStringOffsets = getValidatedStringOffsets(plan);
+    return compactValidatedTermRecordPlan(plan, start, count, remapScratch, readingEqualsExpressionList, sourceStringOffsets);
+}
+
+/**
+ * Validates one immutable source arena once, then compacts every bounded run
+ * synchronously. No validation token survives a call or crosses an await.
+ * @param {PreinternedTermRecordPlan} plan
+ * @param {number} count
+ * @param {number} runRowLimit
+ * @param {Uint32Array} remapScratch
+ * @param {boolean[]|Uint8Array} readingEqualsExpressionList
+ * @returns {PreinternedTermRecordPlan[]}
+ * @throws {TypeError|RangeError|Error} If the source, range, or scratch is invalid.
+ */
+export function compactTermRecordPreinternedPlanRuns(plan, count, runRowLimit, remapScratch, readingEqualsExpressionList) {
+    validatePlanRowRange(plan, 0, count);
+    if (!Number.isSafeInteger(runRowLimit) || runRowLimit <= 0) {
+        throw new RangeError('Invalid preinterned plan run size');
+    }
+    if (!(remapScratch instanceof Uint32Array) || remapScratch.length < plan.stringLengths.length) {
+        throw new RangeError('Invalid preinterned plan compaction scratch');
+    }
+    if (readingEqualsExpressionList.length < count) {
+        throw new RangeError('Invalid preinterned plan reading-equality range');
+    }
+    const sourceStringOffsets = getValidatedStringOffsets(plan);
+    const runs = [];
+    for (let start = 0; start < count; start += runRowLimit) {
+        runs.push(compactValidatedTermRecordPlan(
+            plan,
+            start,
+            Math.min(runRowLimit, count - start),
+            remapScratch,
+            readingEqualsExpressionList,
+            sourceStringOffsets,
+        ));
+    }
+    return runs;
+}
+
+/**
+ * @param {PreinternedTermRecordPlan} plan
+ * @param {number} start
+ * @param {number} count
+ * @param {Uint32Array} remapScratch
+ * @param {boolean[]|Uint8Array|undefined} readingEqualsExpressionList
+ * @param {Uint32Array} sourceStringOffsets
+ * @returns {PreinternedTermRecordPlan}
+ * @throws {RangeError|Error} If a row reference or scratch entry is invalid.
+ */
+function compactValidatedTermRecordPlan(plan, start, count, remapScratch, readingEqualsExpressionList, sourceStringOffsets) {
     const referencedOldIndexes = [];
     const expressionIndexes = new Uint32Array(count);
     const readingIndexes = new Uint32Array(count);

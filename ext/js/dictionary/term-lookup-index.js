@@ -69,6 +69,7 @@ const HASH_SLOT_TARGET_LOAD = 4;
  * @param {boolean[]|Uint8Array} readingEqualsExpressionList
  * @param {(number|undefined)[]|Int32Array} sequenceList
  * @param {number} rowCount
+ * @param {boolean} [directArena=false]
  * @returns {Uint8Array}
  * @throws {Error} If the preinterned plan is malformed.
  */
@@ -77,6 +78,7 @@ export function encodePersistedTermLookupIndexFromPreinternedPlan(
     readingEqualsExpressionList,
     sequenceList,
     rowCount,
+    directArena = false,
 ) {
     return encodePersistedTermLookupIndexFromPreinternedPlanInternal(
         plan,
@@ -84,6 +86,7 @@ export function encodePersistedTermLookupIndexFromPreinternedPlan(
         sequenceList,
         rowCount,
         null,
+        directArena === true,
     );
 }
 
@@ -95,6 +98,7 @@ export function encodePersistedTermLookupIndexFromPreinternedPlan(
  * @param {(number|undefined)[]|Int32Array} sequenceList
  * @param {number} rowCount
  * @param {number} readingPostingCount
+ * @param {boolean} [directArena=false]
  * @returns {Uint8Array}
  * @throws {Error} If the validated count or preinterned plan is malformed.
  */
@@ -104,6 +108,7 @@ export function encodePersistedTermLookupIndexFromValidatedPreinternedPlan(
     sequenceList,
     rowCount,
     readingPostingCount,
+    directArena = false,
 ) {
     if (
         !Number.isSafeInteger(readingPostingCount) ||
@@ -118,6 +123,7 @@ export function encodePersistedTermLookupIndexFromValidatedPreinternedPlan(
         sequenceList,
         rowCount,
         readingPostingCount,
+        directArena === true,
     );
 }
 
@@ -127,6 +133,7 @@ export function encodePersistedTermLookupIndexFromValidatedPreinternedPlan(
  * @param {(number|undefined)[]|Int32Array} sequenceList
  * @param {number} rowCount
  * @param {number|null} validatedReadingPostingCount
+ * @param {boolean} directArena
  * @returns {Uint8Array}
  * @throws {Error} If the preinterned plan is malformed.
  */
@@ -136,6 +143,7 @@ function encodePersistedTermLookupIndexFromPreinternedPlanInternal(
     sequenceList,
     rowCount,
     validatedReadingPostingCount,
+    directArena,
 ) {
     const {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes} = plan;
     if (!Number.isSafeInteger(rowCount) || rowCount >= U16_NULL) {
@@ -209,7 +217,7 @@ function encodePersistedTermLookupIndexFromPreinternedPlanInternal(
         sequenceValues,
         readingPostingCount,
         keyHashes: stringHashes,
-    });
+    }, directArena);
 }
 
 /**
@@ -289,10 +297,11 @@ export function encodePersistedTermLookupIndex(rows) {
 
 /**
  * @param {{keyBytes: Uint8Array, keyOffsets: Uint32Array, keyCount?: number, expressionKeys: Uint32Array, readingKeys: Uint32Array, readingEqualsExpressionList?: boolean[]|Uint8Array, sequenceValues: Int32Array, readingPostingCount: number, keyHashes?: Uint32Array}} plan
+ * @param {boolean} [directArena=false]
  * @returns {Uint8Array}
  * @throws {RangeError} If one chunk cannot represent all interned keys.
  */
-function encodeIndexPlan(plan) {
+function encodeIndexPlan(plan, directArena = false) {
     const {keyBytes, keyOffsets, expressionKeys, readingKeys, readingEqualsExpressionList, sequenceValues, readingPostingCount, keyHashes} = plan;
     const rowCount = expressionKeys.length;
     const keyCount = typeof plan.keyCount === 'number' ? plan.keyCount : keyOffsets.length - 1;
@@ -329,12 +338,23 @@ function encodeIndexPlan(plan) {
     const alignedKeyBytesLength = align4(keyBytes.byteLength);
     const baseU16Count = keyCount + (rowCount * 3);
     const baseU16BytesLength = align4(baseU16Count * 2);
-    const base = new Uint8Array(
-        BASE_HEADER_BYTES +
-        alignedKeyBytesLength +
-        baseU16BytesLength +
-        (sequenceKeyCount * 4),
-    );
+    const baseByteLength = BASE_HEADER_BYTES + alignedKeyBytesLength + baseU16BytesLength + (sequenceKeyCount * 4);
+    const derivedU16Count =
+        keySlotCount +
+        keyCount +
+        (keyCount + 1) +
+        rowCount +
+        (keyCount + 1) +
+        readingPostingCount +
+        sequenceSlotCount +
+        sequenceKeyCount +
+        (sequenceKeyCount + 1) +
+        sequencePostingCount;
+    const derivedByteLength = DERIVED_HEADER_BYTES + align4(derivedU16Count * 2);
+    // Build both persisted sections in their final owning container. Neither
+    // section escapes before validation finishes; the wire format is unchanged.
+    const directOutput = directArena ? new Uint8Array(CONTAINER_HEADER_BYTES + baseByteLength + derivedByteLength) : null;
+    const base = directOutput === null ? new Uint8Array(baseByteLength) : directOutput.subarray(CONTAINER_HEADER_BYTES, CONTAINER_HEADER_BYTES + baseByteLength);
     const baseHeader = new Uint32Array(base.buffer, base.byteOffset, BASE_HEADER_U32_COUNT);
     baseHeader[0] = rowCount;
     baseHeader[1] = keyCount;
@@ -392,18 +412,7 @@ function encodeIndexPlan(plan) {
         persistedSequenceRowKeys[row] = sequencePlan.keyByRow[row];
     }
 
-    const derivedU16Count =
-        keySlotCount +
-        keyCount +
-        (keyCount + 1) +
-        rowCount +
-        (keyCount + 1) +
-        readingPostingCount +
-        sequenceSlotCount +
-        sequenceKeyCount +
-        (sequenceKeyCount + 1) +
-        sequencePostingCount;
-    const derived = new Uint8Array(DERIVED_HEADER_BYTES + align4(derivedU16Count * 2));
+    const derived = directOutput === null ? new Uint8Array(derivedByteLength) : directOutput.subarray(CONTAINER_HEADER_BYTES + baseByteLength);
     const derivedHeader = new Uint32Array(derived.buffer, derived.byteOffset, DERIVED_HEADER_U32_COUNT);
     derivedHeader[0] = rowCount;
     derivedHeader[1] = keyCount;
@@ -465,14 +474,16 @@ function encodeIndexPlan(plan) {
         sequencePostingRows,
         persistedSequenceRowKeys,
     );
-    const output = new Uint8Array(CONTAINER_HEADER_BYTES + base.byteLength + derived.byteLength);
+    const output = directOutput ?? new Uint8Array(CONTAINER_HEADER_BYTES + base.byteLength + derived.byteLength);
     const containerHeader = new Uint32Array(output.buffer, output.byteOffset, CONTAINER_HEADER_U32_COUNT);
     containerHeader[0] = CONTAINER_MAGIC;
     containerHeader[1] = COMPACT_INDEX_FORMAT_VERSION;
     containerHeader[2] = base.byteLength;
     containerHeader[3] = derived.byteLength;
-    output.set(base, CONTAINER_HEADER_BYTES);
-    output.set(derived, CONTAINER_HEADER_BYTES + base.byteLength);
+    if (directOutput === null) {
+        output.set(base, CONTAINER_HEADER_BYTES);
+        output.set(derived, CONTAINER_HEADER_BYTES + base.byteLength);
+    }
     return output;
 }
 

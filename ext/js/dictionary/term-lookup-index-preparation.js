@@ -22,6 +22,7 @@ import {
 } from './term-lookup-index.js';
 import {
     compactTermRecordPreinternedPlan,
+    compactTermRecordPreinternedPlanRuns,
     hasCompleteTermRecordPreinternedPlan,
 } from './term-record-preinterned-plan.js';
 
@@ -39,9 +40,10 @@ const MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS = 0xffff - 1;
  * owner as a fallback.
  * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} chunk
  * @param {Uint32Array|null} [remapScratch=null]
- * @returns {{indexes: Map<string, PreparedTermLookupIndex>, compactMs: number, indexEncodeMs: number, totalMs: number}|null}
+ * @param {import('dictionary-importer').ImportExperiments} [experiments={}]
+ * @returns {{indexes: Map<string, PreparedTermLookupIndex>, compactMs: number, indexEncodeMs: number, totalMs: number, directArenaSegments: number, directArenaCopiedBytesAvoided: number, compactionSourceValidationPasses: number}|null}
  */
-export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch = null) {
+export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch = null, experiments = {}) {
     const count = chunk.rowCount;
     const preinternedPlan = chunk.termRecordPreinternedPlan ?? null;
     if (count <= 0 || !hasCompleteTermRecordPreinternedPlan(preinternedPlan, count)) {
@@ -67,6 +69,13 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
     );
     const reuseWholePlan = validatedReadingPostingCount !== null;
     const runRowLimit = reuseWholePlan ? count : MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS;
+    const runsStartedAt = safePerformance.now();
+    const compactRuns = !reuseWholePlan && experiments.experimentalSinglePassLookupCompaction === true ?
+        compactTermRecordPreinternedPlanRuns(preinternedPlan, count, runRowLimit, scratch, chunk.readingEqualsExpressionList) :
+        null;
+    if (compactRuns !== null) { compactMs += safePerformance.now() - runsStartedAt; }
+    const directArena = experiments.experimentalDirectLookupArena === true;
+    let directArenaCopiedBytesAvoided = 0;
     /** @type {Map<string, PreparedTermLookupIndex>} */
     const indexes = new Map();
     for (let runStart = 0; runStart < count; runStart += runRowLimit) {
@@ -75,6 +84,8 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
         const compactStartedAt = safePerformance.now();
         const runPlan = reuseWholePlan ?
             preinternedPlan :
+            (compactRuns !== null ?
+                compactRuns[runStart / runRowLimit] :
             /** @type {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (
                 compactTermRecordPreinternedPlan(
                     preinternedPlan,
@@ -83,7 +94,7 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
                     scratch,
                     chunk.readingEqualsExpressionList,
                 )
-            );
+            ));
         compactMs += safePerformance.now() - compactStartedAt;
         const readingEqualsExpressionList = isWholeChunk ?
             chunk.readingEqualsExpressionList :
@@ -99,21 +110,27 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
                 sequenceList,
                 runCount,
                 /** @type {number} */ (validatedReadingPostingCount),
+                directArena,
             ) :
             encodePersistedTermLookupIndexFromPreinternedPlan(
                 runPlan,
                 readingEqualsExpressionList,
                 sequenceList,
                 runCount,
+                directArena,
             );
         indexEncodeMs += safePerformance.now() - encodeStartedAt;
         indexes.set(`${runStart}:${runCount}`, {bytes, preinternedPlan: runPlan});
+        if (directArena) { directArenaCopiedBytesAvoided += bytes.byteLength - 16; }
     }
     return {
         indexes,
         compactMs,
         indexEncodeMs,
         totalMs: safePerformance.now() - startedAt,
+        directArenaSegments: directArena ? indexes.size : 0,
+        directArenaCopiedBytesAvoided,
+        compactionSourceValidationPasses: reuseWholePlan ? 0 : (compactRuns !== null ? 1 : indexes.size),
     };
 }
 

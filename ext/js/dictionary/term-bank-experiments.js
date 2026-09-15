@@ -25,6 +25,10 @@
  */
 export function snapshotTermBankExperiments(options = {}) {
     return Object.freeze({
+        experimentalLookupScratchReuse: options.experimentalLookupScratchReuse === true,
+        experimentalNativeSegmentedLookup: options.experimentalNativeSegmentedLookup === true,
+        experimentalDirectLookupArena: options.experimentalDirectLookupArena === true,
+        experimentalSinglePassLookupCompaction: options.experimentalSinglePassLookupCompaction === true,
         experimentalTermBankSpans: options.experimentalTermBankSpans === true,
         experimentalNativeEscapedKeys: options.experimentalNativeEscapedKeys === true,
         experimentalValidatedGlossaryReuse: options.experimentalValidatedGlossaryReuse === true,
@@ -35,8 +39,8 @@ export function snapshotTermBankExperiments(options = {}) {
 }
 
 /**
- * Must match EXPERIMENT_* in wasm/term-bank-parser.c. Single-bank admission is
- * handled in JavaScript and deliberately consumes no native option bit.
+ * Must match EXPERIMENT_* in wasm/term-bank-parser.c. Single-bank admission and
+ * lookup construction are selected in JavaScript and consume no native bit.
  * @param {import('dictionary-importer').ImportExperiments} options
  * @returns {number}
  */

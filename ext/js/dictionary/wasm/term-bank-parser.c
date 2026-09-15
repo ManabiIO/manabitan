@@ -2823,3 +2823,71 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     *(uint32_t*)(uintptr_t)recent_content_hits_ptr = recent_content_hits;
     return (int32_t)cursor;
 }
+
+/* Segment compaction consumes only parser-owned columns. Each call revalidates
+ * the source arena and row references; the next call resets dirty remap scratch.
+ * The caller reuses ONE segment arena rather than retaining per-run WASM slabs. */
+__attribute__((visibility("default")))
+int32_t compact_term_lookup_keys(
+    uint32_t strings_ptr, uint32_t strings_length,
+    uint32_t lengths_ptr, uint32_t offsets_ptr, uint32_t hashes_ptr, uint32_t key_count,
+    uint32_t expressions_ptr, uint32_t readings_ptr, uint32_t equals_ptr, uint32_t row_count,
+    uint32_t remap_ptr, uint32_t out_lengths_ptr, uint32_t out_offsets_ptr,
+    uint32_t out_hashes_ptr, uint32_t out_expressions_ptr, uint32_t out_readings_ptr,
+    uint32_t out_strings_ptr, uint32_t out_strings_capacity, uint32_t out_key_capacity,
+    uint32_t info_ptr
+) {
+    if (row_count == 0u || row_count >= 0xffffu || key_count == 0u ||
+        out_key_capacity >= 0xffffu || strings_ptr == 0u || lengths_ptr == 0u ||
+        offsets_ptr == 0u || hashes_ptr == 0u || expressions_ptr == 0u || readings_ptr == 0u ||
+        equals_ptr == 0u || remap_ptr == 0u || info_ptr == 0u ||
+        out_lengths_ptr == 0u || out_offsets_ptr == 0u || out_hashes_ptr == 0u ||
+        out_expressions_ptr == 0u || out_readings_ptr == 0u || out_strings_ptr == 0u ||
+        key_count > UINT32_MAX / sizeof(uint32_t)) { return -1; }
+    const uint8_t* strings = (const uint8_t*)(uintptr_t)strings_ptr;
+    const uint16_t* lengths = (const uint16_t*)(uintptr_t)lengths_ptr;
+    const uint32_t* offsets = (const uint32_t*)(uintptr_t)offsets_ptr;
+    const uint32_t* hashes = (const uint32_t*)(uintptr_t)hashes_ptr;
+    const uint32_t* expressions = (const uint32_t*)(uintptr_t)expressions_ptr;
+    const uint32_t* readings = (const uint32_t*)(uintptr_t)readings_ptr;
+    const uint8_t* equals = (const uint8_t*)(uintptr_t)equals_ptr;
+    uint32_t* remap = (uint32_t*)(uintptr_t)remap_ptr;
+    uint16_t* out_lengths = (uint16_t*)(uintptr_t)out_lengths_ptr;
+    uint32_t* out_offsets = (uint32_t*)(uintptr_t)out_offsets_ptr;
+    uint32_t* out_hashes = (uint32_t*)(uintptr_t)out_hashes_ptr;
+    uint32_t* out_expressions = (uint32_t*)(uintptr_t)out_expressions_ptr;
+    uint32_t* out_readings = (uint32_t*)(uintptr_t)out_readings_ptr;
+    uint8_t* out_strings = (uint8_t*)(uintptr_t)out_strings_ptr;
+    uint32_t* info = (uint32_t*)(uintptr_t)info_ptr;
+    uint32_t expected = 0u;
+    for (uint32_t key = 0u; key < key_count; ++key) {
+        if (offsets[key] != expected || expected > strings_length || lengths[key] > strings_length - expected) { return -2; }
+        expected += lengths[key];
+    }
+    if (expected != strings_length) { return -2; }
+    memset(remap, 0, key_count * sizeof(uint32_t));
+    uint32_t count = 0u, cursor = 0u;
+    for (uint32_t row = 0u; row < row_count; ++row) {
+        if (equals[row] > 1u) { return -3; }
+        const uint32_t keys[2] = {expressions[row], equals[row] ? expressions[row] : readings[row]};
+        for (uint32_t field = 0u; field < 2u; ++field) {
+            const uint32_t key = keys[field];
+            if (key >= key_count || lengths[key] == 0u) { return -3; }
+            uint32_t mapped = remap[key];
+            if (mapped == 0u) {
+                if (count >= out_key_capacity || lengths[key] > out_strings_capacity - cursor) { return -4; }
+                out_lengths[count] = lengths[key];
+                out_offsets[count] = cursor;
+                out_hashes[count] = hashes[key];
+                __builtin_memcpy(out_strings + cursor, strings + offsets[key], lengths[key]);
+                cursor += lengths[key];
+                mapped = ++count;
+                remap[key] = mapped;
+            }
+            if (field == 0u) { out_expressions[row] = mapped - 1u; }
+            else { out_readings[row] = mapped - 1u; }
+        }
+    }
+    info[0] = cursor;
+    return (int32_t)count;
+}

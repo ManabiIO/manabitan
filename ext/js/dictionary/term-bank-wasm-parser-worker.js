@@ -161,14 +161,17 @@ async function parse(data) {
             }
         }
         if (options.prepareLookupIndexes === true && !(stableResultChunk.preparedLookupIndexes instanceof Map)) {
-            const prepared = prepareTermLookupIndexesFromPreinternedPlan(stableResultChunk);
+            const prepared = prepareTermLookupIndexesFromPreinternedPlan(stableResultChunk, null, experiments);
             if (prepared !== null) {
                 stableResultChunk.preparedLookupIndexes = prepared.indexes;
                 stableResultChunk.preparedLookupIndexEncodeMs = prepared.totalMs;
                 if (profile !== null) {
-                    profile.lookupIndexPrepareMs = prepared.totalMs;
+                    profile.lookupIndexPrepareMs = (profile.lookupIndexPrepareMs ?? 0) + prepared.totalMs;
                     profile.lookupIndexCompactMs = prepared.compactMs;
-                    profile.lookupIndexEncodeMs = prepared.indexEncodeMs;
+                    profile.lookupIndexEncodeMs = (profile.lookupIndexEncodeMs ?? 0) + prepared.indexEncodeMs;
+                    profile.directLookupArenaSegments = prepared.directArenaSegments;
+                    profile.directLookupArenaCopiedBytesAvoided = prepared.directArenaCopiedBytesAvoided;
+                    profile.lookupCompactionSourceValidationPasses = prepared.compactionSourceValidationPasses;
                 }
             }
         }
