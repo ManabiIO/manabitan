@@ -1,0 +1,101 @@
+name: Empty-string import exact-source qualification
+on:
+  push:
+    branches: [verify/import-round2-20260915]
+    paths: [.github/workflows/import-round2-qualify-20260915.yml]
+permissions:
+  contents: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 30ffb604e0a87f0aa252bd4331bc54668062b1e1
+      - name: Pin reviewed boundary tests and source patch
+        run: |
+          git fetch --depth=1 origin 846628e960dc8990b37c9e287c522dee76bad0be
+          git show FETCH_HEAD:test/term-bank-empty-strings.test.js > test/term-bank-empty-strings.test.js
+          git show FETCH_HEAD:dev/perf/round2-20260915/empty-strings.patch > "$RUNNER_TEMP/empty-strings.patch"
+          test "$(git hash-object test/term-bank-empty-strings.test.js)" = ad1e76ee47cb9480c14eb612150e5651c55125af
+          mkdir -p builds/round2-qualification
+          git switch -c perf/empty-string-import-20260915
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - name: Build baseline and run new tests against the unchanged implementation
+        run: |
+          npm run build:libs > builds/round2-qualification/parent-build.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/term-bank-empty-strings.test.js 2>&1 | tee builds/round2-qualification/parent-tests.log
+      - name: Apply the independently benchmarked source
+        run: |
+          git apply --check "$RUNNER_TEMP/empty-strings.patch"
+          git apply "$RUNNER_TEMP/empty-strings.patch"
+          test "$(sha256sum ext/js/dictionary/wasm/term-bank-parser.c | cut -d ' ' -f 1)" = e3ba0849015956aa97f668795457863b8277dd6936921166ec633e363bcfb970
+          npm run build:libs 2>&1 | tee builds/round2-qualification/candidate-build.log
+          node --version > builds/round2-qualification/node.txt
+          clang --version > builds/round2-qualification/compiler.txt
+      - name: Focused parser and boundary suites
+        id: focused
+        continue-on-error: true
+        run: node node_modules/vitest/vitest.mjs run test/term-bank-empty-strings.test.js test/term-bank-wasm-parser.test.js test/term-bank-experiments.test.js test/term-bank-composite-state.test.js test/lookup-construction-experiments.test.js test/term-bank-parser-string-scan.test.js 2>&1 | tee builds/round2-qualification/focused.log
+      - name: Full unit suite
+        id: unit
+        continue-on-error: true
+        run: npm run test:unit 2>&1 | tee builds/round2-qualification/unit.log
+      - name: Options suite
+        id: options
+        continue-on-error: true
+        run: npm run test:unit:options 2>&1 | tee builds/round2-qualification/options.log
+      - name: Strict typecheck projects
+        id: types
+        continue-on-error: true
+        run: npm run test:ts 2>&1 | tee builds/round2-qualification/types.log
+      - name: New test ESLint without rewriting
+        id: lint
+        continue-on-error: true
+        run: node node_modules/eslint/bin/eslint.js test/term-bank-empty-strings.test.js 2>&1 | tee builds/round2-qualification/lint.log
+      - name: All build plans and actual Chrome and Firefox development packages
+        id: build
+        continue-on-error: true
+        run: |
+          npm run test:build 2>&1 | tee builds/round2-qualification/build-plans.log
+          node dev/bin/build.js --target chrome-dev 2>&1 | tee builds/round2-qualification/chrome-build.log
+          node dev/bin/build.js --target firefox-dev 2>&1 | tee builds/round2-qualification/firefox-build.log
+      - name: Publish the tested source only when every check passed
+        if: steps.focused.outcome == 'success' && steps.unit.outcome == 'success' && steps.options.outcome == 'success' && steps.types.outcome == 'success' && steps.lint.outcome == 'success' && steps.build.outcome == 'success'
+        run: |
+          git diff --check
+          test "$(git hash-object test/term-bank-empty-strings.test.js)" = ad1e76ee47cb9480c14eb612150e5651c55125af
+          git add ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-empty-strings.test.js
+          git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'perf: recognize empty JSON strings before the general word scanner'
+          test -z "$(git status --porcelain)"
+          git push origin HEAD:refs/heads/perf/empty-string-import-20260915
+          git rev-parse HEAD 'HEAD^{tree}' > builds/round2-qualification/published.txt
+      - name: Record outcomes and require every check
+        if: always()
+        env:
+          FOCUSED: ${{ steps.focused.outcome }}
+          UNIT: ${{ steps.unit.outcome }}
+          OPTIONS: ${{ steps.options.outcome }}
+          TYPES: ${{ steps.types.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+        run: |
+          mkdir -p builds/round2-qualification
+          printf '%s\n' "focused=$FOCUSED unit=$UNIT options=$OPTIONS types=$TYPES lint=$LINT build=$BUILD" > builds/round2-qualification/outcomes.txt
+          cp test/term-bank-empty-strings.test.js builds/round2-qualification/
+          git diff 30ffb604e0a87f0aa252bd4331bc54668062b1e1 -- ext/js/dictionary/wasm/term-bank-parser.c > builds/round2-qualification/native.patch
+          test "$FOCUSED/$UNIT/$OPTIONS/$TYPES/$LINT/$BUILD" = 'success/success/success/success/success/success'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: round2-empty-string-qualification
+          path: builds/round2-qualification
+          retention-days: 30
