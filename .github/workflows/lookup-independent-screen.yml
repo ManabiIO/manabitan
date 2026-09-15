@@ -1,0 +1,68 @@
+name: Independent lookup experiment screen
+on:
+  push:
+    branches: [verify/lookup-construction-experiments-20260915]
+    paths: [.github/workflows/lookup-independent-screen.yml]
+permissions:
+  contents: read
+jobs:
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 30ffb604e0a87f0aa252bd4331bc54668062b1e1
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - name: Prepare both immutable sources before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          test "$(git rev-parse HEAD^{tree})" = c069f4ca92d8e6902a1a182281a06b2579610c05
+          npm ci
+          npm run build:libs
+          node dev/perf/prepare-dictionaries.js
+          git worktree add --detach "$RUNNER_TEMP/parent" 385857d029cb32160f05f4923e08712e34cc327b
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/parent/node_modules"
+          (cd "$RUNNER_TEMP/parent" && node dev/bin/build-libs.js)
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/evidence/candidate.txt"
+          git -C "$RUNNER_TEMP/parent" rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/evidence/parent.txt"
+          uname -a > "$RUNNER_TEMP/evidence/host.txt"
+          lscpu >> "$RUNNER_TEMP/evidence/host.txt"
+          node --version >> "$RUNNER_TEMP/evidence/host.txt"
+          clang --version >> "$RUNNER_TEMP/evidence/host.txt"
+      - name: Sequential fixed reverse-order controls and four experiments
+        shell: bash
+        run: |
+          set -euo pipefail
+          E="$RUNNER_TEMP/evidence"
+          run_screen() {
+            local label="$1"
+            local dictionary="$2"
+            local flags="$3"
+            shift 3
+            node dev/perf/import-lookup-screen.js "$dictionary" --pairs 8 --initial-order BA --flags "$flags" --out "$E/$label.json" "$@" 2>&1 | tee "$E/$label.log"
+          }
+          run_screen aa-before jmnedict '{}'
+          run_screen source-all-off jmnedict '{}' --baseline-root "$RUNNER_TEMP/parent"
+          run_screen native-reused jmnedict '{"experimentalNativeSegmentedLookup":true,"experimentalLookupScratchReuse":true}'
+          run_screen native-only jmnedict '{"experimentalNativeSegmentedLookup":true}'
+          run_screen direct-arena jmnedict '{"experimentalDirectLookupArena":true}'
+          run_screen single-compaction jmnedict '{"experimentalSinglePassLookupCompaction":true}'
+          run_screen native-reused-jmdict jmdict '{"experimentalNativeSegmentedLookup":true,"experimentalLookupScratchReuse":true}'
+          run_screen reused-jitendex jitendex '{"experimentalLookupScratchReuse":true}'
+          run_screen aa-after jmnedict '{}'
+          test -z "$(git status --porcelain)"
+          test -z "$(git -C "$RUNNER_TEMP/parent" status --porcelain)"
+      - name: Preserve independent observations and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lookup-independent-screen
+          path: ${{ runner.temp }}/evidence
+          retention-days: 14
