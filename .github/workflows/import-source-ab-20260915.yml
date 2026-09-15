@@ -1,0 +1,53 @@
+name: Native import source AB 20260915
+on:
+  push:
+    branches: [verify/import-screen-20260915]
+    paths:
+      - .github/workflows/import-source-ab-20260915.yml
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        candidate: [join-bulk, key-reuse, lookup-init, crc-unroll]
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 30ffb604e0a87f0aa252bd4331bc54668062b1e1
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Fetch the reviewed screening driver
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh api "repos/$REPOSITORY/contents/dev/perf/review-native-source-screen-20260915.py?ref=f113d0dbbbb0d5be78d9ac0178a260d94def64e4" --jq .content | base64 --decode > "$RUNNER_TEMP/native-screen.py"
+          python3 -m py_compile "$RUNNER_TEMP/native-screen.py"
+      - run: npm ci
+      - name: Install the lockfile-pinned browser
+        run: npx playwright install --with-deps chromium
+      - name: Fetch checksum-pinned dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Build the exact baseline
+        run: node dev/bin/build.js --target chrome-dev
+      - name: Fixed source-revision comparisons
+        env:
+          CANDIDATE: ${{ matrix.candidate }}
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: python3 "$RUNNER_TEMP/native-screen.py"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: source-import-screen-${{ matrix.candidate }}-${{ matrix.dictionary }}
+          path: builds/source-screen
+          retention-days: 30
