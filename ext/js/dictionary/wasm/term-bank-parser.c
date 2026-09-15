@@ -54,14 +54,8 @@ void* memcpy(void* dest, const void* source, unsigned long count) {
     return dest;
 }
 
-#define MINIZ_NO_MALLOC
-#define MINIZ_NO_STDIO
-#define MINIZ_NO_TIME
-#define MINIZ_NO_ARCHIVE_APIS
-#define MINIZ_NO_DEFLATE_APIS
-#define MINIZ_LITTLE_ENDIAN 1
-#define MINIZ_USE_UNALIGNED_LOADS_AND_STORES 1
-#include "vendor/miniz/miniz_tinfl.c"
+int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length,
+                          uint8_t* output, uint32_t output_length);
 
 static uint32_t crc32_table[8][256];
 static uint32_t crc32_table_initialized = 0u;
@@ -166,28 +160,10 @@ int32_t inflate_and_join_term_banks(
             }
             memcpy(inflated, input + input_offset, uncompressed_length);
         } else if (compression_methods[i] == 8u) {
-            tinfl_decompressor decompressor;
-            tinfl_init(&decompressor);
-            size_t consumed = compressed_length;
-            size_t produced = uncompressed_length;
-            const tinfl_status status = tinfl_decompress(
-                &decompressor,
-                input + input_offset,
-                &consumed,
-                inflated,
-                inflated,
-                &produced,
-                TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF
+            const int32_t status = term_bank_inflate(
+                input + input_offset, compressed_length, inflated, uncompressed_length
             );
-            if (status != TINFL_STATUS_DONE) {
-                return -2;
-            }
-            if (produced != uncompressed_length) {
-                return -3;
-            }
-            if (consumed != compressed_length) {
-                return -6;
-            }
+            if (status != 0) { return status; }
         } else {
             return -1;
         }
