@@ -1,0 +1,31 @@
+name: Import review pinned Chromium 20260915
+on:
+  push:
+    branches: [verify/import-screen-20260915]
+    paths: [.github/workflows/import-screen-browser-20260915.yml]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 30ffb604e0a87f0aa252bd4331bc54668062b1e1
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: |
+          tar -czf /tmp/import-review-chromium-20260915.tgz -C "$HOME/.cache/ms-playwright" chromium-1243
+          sha256sum /tmp/import-review-chromium-20260915.tgz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-review-chromium-20260915
+          path: /tmp/import-review-chromium-20260915.tgz
+          retention-days: 7
+          compression-level: 0
