@@ -1,0 +1,55 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index a9bf0c6..adca124 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -5390,19 +5390,11 @@ null;
+         if (a.byteLength !== b.byteLength) { return false; }
+         let i = 0;
+         const length = a.byteLength;
+-        const unrolledLength = length & ~7;
+-        for (; i < unrolledLength; i += 8) {
+-            if (
+-                a[i] !== b[i] ||
+-                a[i + 1] !== b[i + 1] ||
+-                a[i + 2] !== b[i + 2] ||
+-                a[i + 3] !== b[i + 3] ||
+-                a[i + 4] !== b[i + 4] ||
+-                a[i + 5] !== b[i + 5] ||
+-                a[i + 6] !== b[i + 6] ||
+-                a[i + 7] !== b[i + 7]
+-            ) {
+-                return false;
++        if (length >= 4) {
++            const aView = new DataView(a.buffer, a.byteOffset, length);
++            const bView = new DataView(b.buffer, b.byteOffset, length);
++            for (; i + 4 <= length; i += 4) {
++                if (aView.getUint32(i) !== bView.getUint32(i)) { return false; }
+             }
+         }
+         for (; i < length; ++i) {
+@@ -5421,20 +5413,11 @@ null;
+     _termContentBytesEqualSpan(a, buffer, offset, length) {
+         if (a.byteLength !== length) { return false; }
+         let i = 0;
+-        const unrolledLength = length & ~7;
+-        for (; i < unrolledLength; i += 8) {
+-            const j = offset + i;
+-            if (
+-                a[i] !== buffer[j] ||
+-                a[i + 1] !== buffer[j + 1] ||
+-                a[i + 2] !== buffer[j + 2] ||
+-                a[i + 3] !== buffer[j + 3] ||
+-                a[i + 4] !== buffer[j + 4] ||
+-                a[i + 5] !== buffer[j + 5] ||
+-                a[i + 6] !== buffer[j + 6] ||
+-                a[i + 7] !== buffer[j + 7]
+-            ) {
+-                return false;
++        if (length >= 4 && Number.isSafeInteger(offset) && offset >= 0 && offset <= buffer.byteLength - length) {
++            const aView = new DataView(a.buffer, a.byteOffset, length);
++            const bView = new DataView(buffer.buffer, buffer.byteOffset + offset, length);
++            for (; i + 4 <= length; i += 4) {
++                if (aView.getUint32(i) !== bView.getUint32(i)) { return false; }
+             }
+         }
+         for (; i < length; ++i) {
