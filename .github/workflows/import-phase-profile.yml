@@ -1,0 +1,39 @@
+name: Import phase profile
+on:
+  push:
+    branches: [verify/import-opportunities-20260914]
+    paths: [.github/workflows/import-phase-profile.yml]
+permissions:
+  contents: read
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 385857d029cb32160f05f4923e08712e34cc327b
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - run: npm ci
+      - run: npm run build:libs
+      - run: node dev/perf/prepare-dictionaries.js
+      - run: node node_modules/playwright/cli.js install --with-deps chromium
+      - run: node dev/bin/build.js --target chrome-dev
+      - name: Profile strict real imports
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{}'
+        run: xvfb-run -a npm run test:e2e:chromium-extension
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: baseline-import-phase-profile
+          path: |
+            builds/chromium-e2e-import-report.json
+            builds/chromium-e2e-import-report.html
+          retention-days: 7
