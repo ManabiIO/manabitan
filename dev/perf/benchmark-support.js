@@ -21,7 +21,7 @@ import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {parseJson} from '../../ext/js/core/json.js';
-import {snapshotTermBankExperiments} from '../../ext/js/dictionary/term-bank-experiments.js';
+import {resolveTermBankImportExperiments} from '../../ext/js/dictionary/term-bank-experiments.js';
 
 /**
  * @param {string} value
@@ -89,7 +89,7 @@ export function optionalMetric(value) {
  */
 function validateExperimentReceipts(debug, importFlags) {
     const flags = asRecord(importFlags) ?? {};
-    const expected = snapshotTermBankExperiments(/** @type {import('dictionary-importer').ImportExperiments} */ (flags));
+    const expected = resolveTermBankImportExperiments(/** @type {import('dictionary-importer').ImportExperiments} */ (flags));
     let receiptRequired = false;
     for (const key of Object.keys(flags)) {
         if (!key.startsWith('experimental')) { continue; }

@@ -66,7 +66,7 @@ import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} fr
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
 import {DictionaryImportSession} from './dictionary-import-session.js';
 import {RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
-import {snapshotTermBankExperiments} from './term-bank-experiments.js';
+import {resolveTermBankImportExperiments, snapshotTermBankExperiments} from './term-bank-experiments.js';
 
 const BlobReader = /** @type {typeof import('@zip.js/zip.js').BlobReader} */ (/** @type {unknown} */ (BlobReader0));
 const BlobWriter = /** @type {typeof import('@zip.js/zip.js').BlobWriter} */ (/** @type {unknown} */ (BlobWriter0));
@@ -567,7 +567,7 @@ export class DictionaryImporter {
      */
     async _importDictionary(dictionaryDatabase, archiveContent, details, archiveOwnership) {
         this._ignoreCancellation = false;
-        this._termBankExperiments = snapshotTermBankExperiments(details);
+        this._termBankExperiments = resolveTermBankImportExperiments(details);
         if (!dictionaryDatabase) {
             throw new Error('Invalid database');
         }
