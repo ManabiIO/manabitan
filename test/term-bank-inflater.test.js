@@ -54,7 +54,7 @@ function decode(compressed, expected, options = {}) {
     heap.set(compressed, input)
     heap.fill(0xa5, guarded, output + size + 16)
     new Uint32Array(wasm.memory.buffer, meta, 5).set([0, compressed.length, size, 8, options.signature ?? crc32(expected)])
-    const status = wasm.inflate_and_join_term_banks(input, compressed.length, meta, meta + 4, meta + 8, meta + 12, meta + 16, 1, output, size, spans, 1)
+    const status = wasm.inflate_and_join_term_banks(input, compressed.length, meta, meta + 4, meta + 8, meta + 12, meta + 16, 1, output, size, spans)
     expect([...heap.subarray(guarded, output)]).toEqual(new Array(16).fill(0xa5))
     expect([...heap.subarray(output + size, output + size + 16)]).toEqual(new Array(16).fill(0xa5))
     if (status >= 0) { expect([...new Uint32Array(wasm.memory.buffer, spans, 2)]).toEqual([0, expected.length]) }
