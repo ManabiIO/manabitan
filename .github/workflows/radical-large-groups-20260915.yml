@@ -1,0 +1,151 @@
+name: Oversized native lookup qualification and source AB
+on:
+  push:
+    branches: [verify/import-radical-20260915]
+    paths: [.github/workflows/radical-large-groups-20260915.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    outputs:
+      source_sha: ${{ steps.publish.outputs.source_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 104ed1dcc350424ac131d905f30b5bc34100faeb
+      - name: Apply the exact narrow proposal on the qualified receipt baseline
+        run: |
+          cp dev/perf/radical-20260915/narrow-native-policy.py "$RUNNER_TEMP/narrow.py"
+          cp dev/perf/radical-20260915/native-pipeline-policy.patch "$RUNNER_TEMP/policy.patch"
+          git fetch --depth=1 origin 00e0a9d6bbde666ece3e56140384bf00bc47431d
+          git checkout --detach 00e0a9d6bbde666ece3e56140384bf00bc47431d
+          python3 "$RUNNER_TEMP/narrow.py" "$RUNNER_TEMP/policy.patch"
+          mkdir -p builds/large-qualification
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Focused tests and full unit/options suites
+        run: |
+          node node_modules/vitest/vitest.mjs run test/term-bank-import-policy.test.js test/perf-import-experiment-evidence.test.js test/perf-benchmark-support.test.js test/dictionary-import-controller-update-profile.test.js test/term-bank-wasm-parser.test.js test/term-bank-experiments.test.js test/term-bank-composite-state.test.js test/lookup-construction-experiments.test.js test/term-bank-parser-string-scan.test.js 2>&1 | tee builds/large-qualification/focused.log
+          npm run test:unit 2>&1 | tee builds/large-qualification/unit.log
+          npm run test:unit:options 2>&1 | tee builds/large-qualification/options.log
+      - name: Strict types, changed-file lint and build plans
+        run: |
+          npm run test:ts 2>&1 | tee builds/large-qualification/types.log
+          node node_modules/eslint/bin/eslint.js dev/perf/benchmark-support.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/term-bank-wasm-parser.js ext/js/pages/settings/dictionary-import-controller.js test/perf-import-experiment-evidence.test.js test/term-bank-import-policy.test.js test/lookup-construction-experiments.test.js 2>&1 | tee builds/large-qualification/lint.log
+          npm run test:build 2>&1 | tee builds/large-qualification/build-plans.log
+          node dev/bin/build.js --target firefox-dev 2>&1 | tee builds/large-qualification/firefox-build.log
+      - run: npx playwright install --with-deps chromium
+      - name: Pinned complete dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Full strict Chromium behavior with the proposed defaults
+        env:
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{}'
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_E2E_REPORT: ./builds/large-qualification/chromium.html
+        run: |
+          npm run test:e2e:chromium-extension 2>&1 | tee builds/large-qualification/chromium.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('builds/large-qualification/chromium.json').read_text())
+          assert data['status']=='success' and data['skippedVerification'] is False
+          receipts=[]
+          def inspect(value):
+              if isinstance(value,dict):
+                  for key,item in value.items():
+                      if key in ('parserExperiments','fastPathParserEffectiveExperiments'):
+                          assert len(item)==10
+                          assert all(type(flag) is bool and flag==(name=='experimentalNativeSegmentedLookup') for name,flag in item.items()),item
+                          receipts.append(item)
+                      else: inspect(item)
+              elif isinstance(value,list):
+                  for item in value: inspect(item)
+          inspect(data)
+          assert receipts
+          Path('builds/large-qualification/receipt-audit.json').write_text(json.dumps({'matchingReceipts':len(receipts),'phases':len(data['phases'])},indent=2))
+          PY
+      - name: Publish only the qualified eight-file proposal
+        id: publish
+        run: |
+          git diff --check
+          test "$(git write-tree)" = 2330e712e57fd0e0da641f347fd683165b24bd51
+          git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'perf: prepare oversized lookup groups natively using retired parser workspace'
+          test -z "$(git status --porcelain)"
+          git push origin HEAD:refs/heads/perf/native-large-group-import-20260915
+          echo "source_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          git rev-parse HEAD 'HEAD^{tree}' > builds/large-qualification/published.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-large-group-qualification
+          path: builds/large-qualification
+          retention-days: 30
+  compare:
+    needs: qualify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [large-defaults, large-disabled]
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 104ed1dcc350424ac131d905f30b5bc34100faeb
+          persist-credentials: false
+      - name: Prepare exact source comparisons and complete fixed plans
+        run: |
+          cp -a dev/perf/radical-20260915 "$RUNNER_TEMP/radical-review"
+          git fetch --depth=1 origin 00e0a9d6bbde666ece3e56140384bf00bc47431d
+          git checkout --detach 00e0a9d6bbde666ece3e56140384bf00bc47431d
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path(os.environ['RUNNER_TEMP'])/'radical-review/source-ab.py'
+          s=p.read_text().replace('30ffb604e0a87f0aa252bd4331bc54668062b1e1','00e0a9d6bbde666ece3e56140384bf00bc47431d').replace('c069f4ca92d8e6902a1a182281a06b2579610c05','1c2b75e21de1c06527b8e107bfdeb47944cde29f')
+          s=s.replace('flags_by_variant = {',"flags_by_variant = {\n    'large-defaults': {},\n    'large-disabled': {'experimentalNativeSegmentedLookup': False},")
+          old="if variant.startswith('libdeflate'):\n    run(['python3', str(Path(__file__).parent / 'install-libdeflate.py')], cwd=candidate)"
+          new="if variant.startswith('large-'):\n    run(['python3',str(Path(__file__).parent/'narrow-native-policy.py'),str(Path(__file__).parent/'native-pipeline-policy.patch')],cwd=candidate)"
+          assert s.count(old)==1
+          s=s.replace(old,new)
+          old="(output / 'candidate.patch').write_text"
+          s=s.replace(old,"assert run(['git','rev-parse','HEAD^{tree}'],cwd=candidate)=='2330e712e57fd0e0da641f347fd683165b24bd51'\n"+old)
+          p.write_text(s)
+          PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Pinned complete dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - run: node dev/bin/build.js --target chrome-dev
+      - name: Full source-revision comparisons with same-binary controls
+        env:
+          CANDIDATE: ${{ matrix.mode }}
+          DICTIONARY: ${{ matrix.dictionary }}
+          PAIRS: ${{ matrix.mode == 'large-defaults' && '12' || '6' }}
+          INITIAL_ORDER: BA
+        run: python3 "$RUNNER_TEMP/radical-review/source-ab.py"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-large-source-${{ matrix.mode }}-${{ matrix.dictionary }}
+          path: builds/radical-screen
+          retention-days: 30
