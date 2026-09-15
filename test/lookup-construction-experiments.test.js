@@ -26,6 +26,7 @@ import {
 import {prepareTermLookupIndexesFromPreinternedPlan, hasCompletePreparedTermLookupIndexes} from '../ext/js/dictionary/term-lookup-index-preparation.js'
 import {compactTermRecordPreinternedPlanRuns} from '../ext/js/dictionary/term-record-preinterned-plan.js'
 import {createRetiredLookupScratchAllocator} from '../ext/js/dictionary/term-lookup-scratch.js'
+import * as lookupScratch from '../ext/js/dictionary/term-lookup-scratch.js'
 import {hashTermKeyBytes} from '../ext/js/dictionary/term-key-hash.js'
 import {snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js'
 
@@ -146,6 +147,54 @@ describe('lookup construction experiments', () => {
         expect(() => createRetiredLookupScratchAllocator([{pointer: 8, byteLength: 33}], 40)).toThrow(RangeError)
         expect(() => createRetiredLookupScratchAllocator([{pointer: 9, byteLength: 8}], 40)).toThrow(RangeError)
     })
+    test('segmentation alone keeps small native groups on their established allocation path', async () => {
+        const banks = makeBanks(20001)
+        const baseline = await parse(banks)
+        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true})
+        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(0)
+        expect(candidate.profile?.nativeLookupScratchReuseGroups).toBe(0)
+        expect(candidate.profile?.nativeLookupScratchReusedBytes).toBe(0)
+        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
+    })
+
+    test('oversized native lookup automatically uses retired workspace without the small-group experiment', async () => {
+        const banks = makeBanks(70001)
+        const baseline = await parse(banks)
+        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true})
+        expect(candidate.profile?.experiments?.experimentalLookupScratchReuse).toBe(false)
+        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(3)
+        expect(candidate.profile?.nativeLookupScratchReuseGroups).toBe(1)
+        expect(candidate.profile?.nativeLookupScratchReusedBytes).toBeGreaterThan(0)
+        expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe(0)
+        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
+    })
+
+    test('oversized native lookup abandons partially planned retired space on exhaustion', async () => {
+        const banks = makeBanks(70001)
+        const baseline = await parse(banks)
+        const original = createRetiredLookupScratchAllocator
+        let allocations = 0
+        const mock = vi.spyOn(lookupScratch, 'createRetiredLookupScratchAllocator').mockImplementation((regions, memoryBytes) => {
+            const allocator = original(regions, memoryBytes)
+            return {
+                // Use real retired addresses, then inject a late capacity miss.
+                // Address planning must not write anything before all allocations fit.
+                allocate(size) { return ++allocations > 2 ? null : allocator.allocate(size) },
+                usedBytes() { return allocator.usedBytes() },
+            }
+        })
+        try {
+            const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true})
+            expect(allocations).toBeGreaterThan(2)
+            expect(candidate.profile?.nativeSegmentedLookupFallbacks).toBe(1)
+            expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe(1)
+            expect(candidate.profile?.nativeLookupScratchReusedBytes).toBe(0)
+            expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
+        } finally {
+            mock.mockRestore()
+        }
+    })
+
     test('scratch reuse works independently for a small native index and preserves media payloads', async () => {
         const banks = makeBanks(20001)
         const rows = JSON.parse(new TextDecoder().decode(banks[0]))

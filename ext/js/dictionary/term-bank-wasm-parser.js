@@ -747,7 +747,10 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
             jsonPtr,
             jsonLength,
             metasPtr: outPtr,
-            retiredLookupScratch: experiments.experimentalLookupScratchReuse ?
+            // Segmented lookup reuses only dead parser workspace. Small native groups
+            // retain their established allocator unless explicitly experimented on.
+            retiredLookupScratch: (experiments.experimentalLookupScratchReuse ||
+            (experiments.experimentalNativeSegmentedLookup && (rowCount >= 0xffff || stringUniqueCount >= 0xffff))) ?
 [
     {pointer: outPtr, byteLength: initialMetaCapacity * META_U32_FIELDS * 4},
     {pointer: stringHashTablePtr, byteLength: stringHashTableSize * 4},
@@ -1734,7 +1737,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         );
         // Address planning is read-only. Native writes happen after ALL row
         // metadata/media decoding, and only for a single complete fused chunk.
-        const retiredScratch = experiments.experimentalLookupScratchReuse && fusedPlanLayout !== null &&
+        const retiredScratch = (experiments.experimentalLookupScratchReuse || segmentedLookup) && fusedPlanLayout !== null &&
         normalizedChunkSize >= rowCount && parsed.retiredLookupScratch ?
             createRetiredLookupScratchAllocator(parsed.retiredLookupScratch, parsed.wasm.memory.buffer.byteLength) :
 null;

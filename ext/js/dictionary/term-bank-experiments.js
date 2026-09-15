@@ -39,6 +39,21 @@ export function snapshotTermBankExperiments(options = {}) {
 }
 
 /**
+ * Default import policy, resolved once at the import boundary. Low-level parser
+ * calls and worker snapshots remain explicit/default-off; only the import
+ * owner selects native segmentation for oversized groups. Explicit overrides retain
+ * the existing strict-boolean semantics and can disable any individual path.
+ * @param {import('dictionary-importer').ImportExperiments} [options]
+ * @returns {ReturnType<typeof snapshotTermBankExperiments>}
+ */
+export function resolveTermBankImportExperiments(options = {}) {
+    return snapshotTermBankExperiments({
+        experimentalNativeSegmentedLookup: true,
+        ...options,
+    })
+}
+
+/**
  * Must match EXPERIMENT_* in wasm/term-bank-parser.c. Single-bank admission and
  * lookup construction are selected in JavaScript and consume no native bit.
  * @param {import('dictionary-importer').ImportExperiments} options

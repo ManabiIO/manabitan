@@ -19,7 +19,7 @@
 
 import {afterEach, describe, expect, test} from 'vitest'
 import {DictionaryImportController} from '../ext/js/pages/settings/dictionary-import-controller.js'
-import {snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js'
+import {resolveTermBankImportExperiments, snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js'
 import {extractImportResult} from '../dev/perf/benchmark-support.js'
 import {loadDictionaryFixtures} from '../dev/perf/dictionary-fixtures.js'
 
@@ -79,7 +79,7 @@ describe('import experiment controls and worker receipts', () => {
         const flags = {[key]: true}
         Reflect.set(globalThis, 'manabitanImportPerformanceFlags', flags)
         const result = readControls().termBankExperiments
-        expect(result).toEqual(snapshotTermBankExperiments(flags))
+        expect(result).toEqual(resolveTermBankImportExperiments(flags))
         expect(Object.isFrozen(result)).toBe(true)
         flags[key] = false
         expect(result[key]).toBe(true)
@@ -90,9 +90,9 @@ describe('import experiment controls and worker receipts', () => {
         }
     })
 
-    test.each([undefined, null, [], 'true', 1])('invalid global controls remain default-off: %j', (value) => {
+    test.each([undefined, null, [], 'true', 1])('invalid global controls use the default import policy: %j', (value) => {
         Reflect.set(globalThis, 'manabitanImportPerformanceFlags', value)
-        expect(readControls().termBankExperiments).toEqual(snapshotTermBankExperiments())
+        expect(readControls().termBankExperiments).toEqual(resolveTermBankImportExperiments())
     })
 
     test.each(keys)('rejects requested %s when parser receipts say false', (key) => {
@@ -128,8 +128,8 @@ describe('import experiment controls and worker receipts', () => {
         const flags = {experimentalNativeSegmentedLookup: true, experimentalLookupScratchReuse: true}
         data.benchmark.importFlags = flags
         const phases = [
-            {details: {parserExperiments: snapshotTermBankExperiments(flags)}},
-            {details: {fastPathParserEffectiveExperiments: snapshotTermBankExperiments(flags)}},
+            {details: {parserExperiments: resolveTermBankImportExperiments(flags)}},
+            {details: {fastPathParserEffectiveExperiments: resolveTermBankImportExperiments(flags)}},
         ]
         data.phases[0].data.importDebug.importerPhaseTimings = phases
         expect(extractImportResult(data, 'jmdict', fixture, false, flags).totalImportMs).toBe(123.5)
