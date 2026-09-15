@@ -1,0 +1,138 @@
+name: Verified import experiment controls and pipeline screen
+on:
+  push:
+    branches: [verify/import-radical-20260915]
+    paths: [.github/workflows/radical-pipeline-controls-20260915.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    outputs:
+      source_sha: ${{ steps.publish.outputs.source_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e94c19cdb2a44db71682af9cdc2b38eb52c6d27d
+      - name: Preserve exact tests and patch; check out the parent
+        run: |
+          cp dev/perf/radical-20260915/experiment-controls.patch "$RUNNER_TEMP/controls.patch"
+          cp test/perf-import-experiment-evidence.test.js "$RUNNER_TEMP/controls.test.js"
+          git fetch --depth=1 origin 30ffb604e0a87f0aa252bd4331bc54668062b1e1
+          git checkout --detach 30ffb604e0a87f0aa252bd4331bc54668062b1e1
+          cp "$RUNNER_TEMP/controls.test.js" test/perf-import-experiment-evidence.test.js
+          mkdir -p builds/controls-qualification
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Require the 27 regressions to fail before the fix
+        run: |
+          set +e
+          node node_modules/vitest/vitest.mjs run test/perf-import-experiment-evidence.test.js --reporter=json --outputFile=builds/controls-qualification/red.json > builds/controls-qualification/red.log 2>&1
+          status=$?
+          set -e
+          test "$status" = 1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('builds/controls-qualification/red.json').read_text())
+          assert data['numFailedTests'] == 27 and data['numTotalTests'] == 27, data
+          PY
+      - name: Apply the exact locally reviewed fix
+        run: |
+          git apply --check "$RUNNER_TEMP/controls.patch"
+          git apply "$RUNNER_TEMP/controls.patch"
+          echo '485985e783ac8adf5bce820ef40df9f8b8aee0018fc6fb447cce176463059bcf  dev/perf/benchmark-support.js' | sha256sum --check
+          echo 'd07599abf2ee98b91fbcb083660023181cc5f89a5458d4a47328cbd1c7b399d9  ext/js/pages/settings/dictionary-import-controller.js' | sha256sum --check
+          echo '5afe64ebc3ec1d275ab0c17d49ed3ec02994545c7ff12378e59d3a5c9833d1b3  test/perf-import-experiment-evidence.test.js' | sha256sum --check
+      - name: Focused and complete unit suites
+        run: |
+          node node_modules/vitest/vitest.mjs run test/perf-import-experiment-evidence.test.js test/perf-benchmark-support.test.js test/dictionary-import-controller-update-profile.test.js 2>&1 | tee builds/controls-qualification/focused.log
+          npm run test:unit 2>&1 | tee builds/controls-qualification/unit.log
+          npm run test:unit:options 2>&1 | tee builds/controls-qualification/options.log
+      - name: Types, changed-file lint and build qualification
+        run: |
+          npm run test:ts 2>&1 | tee builds/controls-qualification/types.log
+          node node_modules/eslint/bin/eslint.js dev/perf/benchmark-support.js ext/js/pages/settings/dictionary-import-controller.js test/perf-import-experiment-evidence.test.js 2>&1 | tee builds/controls-qualification/lint.log
+          npm run test:build 2>&1 | tee builds/controls-qualification/build-plans.log
+          node dev/bin/build.js --target chrome-dev 2>&1 | tee builds/controls-qualification/chrome-build.log
+      - name: Publish only the three-file correctness fix
+        id: publish
+        run: |
+          git diff --check
+          git add dev/perf/benchmark-support.js ext/js/pages/settings/dictionary-import-controller.js test/perf-import-experiment-evidence.test.js
+          git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'fix: forward import experiment controls and reject mismatched worker receipts'
+          test -z "$(git status --porcelain)"
+          git push origin HEAD:refs/heads/fix/import-experiment-receipts-20260915
+          echo "source_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          git rev-parse HEAD 'HEAD^{tree}' > builds/controls-qualification/published.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: import-experiment-receipts-qualification
+          path: builds/controls-qualification
+          retention-days: 30
+  compare:
+    needs: qualify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [lookup-native, fused-pipeline]
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.qualify.outputs.source_sha }}
+          persist-credentials: false
+      - name: Fetch immutable driver and pin the corrected controls on both arms
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/radical-review"
+          for file in source-ab.py install-libdeflate.py; do
+            gh api "repos/ManabiIO/manabitan/contents/dev/perf/radical-20260915/$file?ref=e2e49757be70d11cce74a9e0b865936c2343dbe2" --jq .content | base64 --decode > "$RUNNER_TEMP/radical-review/$file"
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          import os,subprocess
+          p=Path(os.environ['RUNNER_TEMP'])/'radical-review/source-ab.py'
+          s=p.read_text()
+          sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          tree=subprocess.check_output(['git','rev-parse','HEAD^{tree}'],text=True).strip()
+          s=s.replace('30ffb604e0a87f0aa252bd4331bc54668062b1e1',sha).replace('c069f4ca92d8e6902a1a182281a06b2579610c05',tree)
+          p.write_text(s)
+          PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify pinned complete dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Build the identical binary for both arms
+        run: node dev/bin/build.js --target chrome-dev
+      - name: Six AB pairs with actual worker receipts and three AA controls
+        env:
+          CANDIDATE: ${{ matrix.candidate }}
+          DICTIONARY: ${{ matrix.dictionary }}
+          PAIRS: '6'
+          INITIAL_ORDER: AB
+        run: python3 "$RUNNER_TEMP/radical-review/source-ab.py"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: actual-pipeline-screen-${{ matrix.candidate }}-${{ matrix.dictionary }}
+          path: builds/radical-screen
+          retention-days: 30
