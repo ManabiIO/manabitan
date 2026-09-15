@@ -1,0 +1,24 @@
+name: Radical import dependency source
+on:
+  push:
+    branches: [verify/import-radical-20260915]
+    paths: [.github/workflows/radical-source-20260915.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Download and verify official source
+        run: |
+          curl --fail --location --retry 2 --output libdeflate-1.26.tar.gz https://github.com/ebiggers/libdeflate/releases/download/v1.26/libdeflate-1.26.tar.gz
+          echo '125856d4656e0feab660f94842f835923410c9281fedbcee64598c918da42b5a  libdeflate-1.26.tar.gz' | sha256sum --check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libdeflate-source-1.26
+          path: libdeflate-1.26.tar.gz
+          retention-days: 7
