@@ -4,9 +4,11 @@ on:
     branches: [verify/import-screen-20260915]
     paths:
       - .github/workflows/import-join-qualify-20260915.yml
-      - test/term-bank-join-boundaries.test.js
 permissions:
-  contents: write
+  contents: read
+defaults:
+  run:
+    shell: bash
 jobs:
   qualify:
     runs-on: ubuntu-24.04
@@ -14,50 +16,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 30ffb604e0a87f0aa252bd4331bc54668062b1e1
-          fetch-depth: 1
+          ref: e456fba18b7383ebbade745f2b41bfe2d8a3733f
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      - name: Apply only the measured native change and boundary tests
-        env:
-          REVIEW_SHA: ${{ github.sha }}
+      - name: Pin source identity
         run: |
-          test "$(git rev-parse HEAD)" = 30ffb604e0a87f0aa252bd4331bc54668062b1e1
-          git fetch --depth=1 origin "$REVIEW_SHA"
-          git show FETCH_HEAD:test/term-bank-join-boundaries.test.js > /tmp/join-boundaries.js
-          git switch -c perf/native-bank-join-20260915
-          cp /tmp/join-boundaries.js test/term-bank-join-boundaries.test.js
-          python3 - <<'PY'
-          from pathlib import Path
-          import hashlib
-          p = Path('ext/js/dictionary/wasm/term-bank-parser.c')
-          s = p.read_text()
-          old = '''        for (uint32_t j = 0u; j < content_length; ++j) {
-                      output[cursor + j] = inflated[start + j];
-                  }'''
-          new = '''        /* The interiors can overlap while shifting left. Later compact banks
-                   * are already in place after the comma replaces their opening bracket. */
-                  if (output + cursor != inflated + start) {
-                      __builtin_memmove(output + cursor, inflated + start, content_length);
-                  }'''
-          assert s.count(old) == 1
-          s = s.replace(old, new)
-          assert hashlib.sha256(s.encode()).hexdigest() == '9be72ee642106131ca57be11dc3131463bea4da1176548735ea2607d622f7920'
-          p.write_text(s)
-          PY
           mkdir -p builds/join-qualification
-          git diff --stat
+          git rev-parse HEAD 'HEAD^{tree}' | tee builds/join-qualification/source.txt
+          test "$(sha256sum ext/js/dictionary/wasm/term-bank-parser.c | cut -d ' ' -f 1)" = 9be72ee642106131ca57be11dc3131463bea4da1176548735ea2607d622f7920
+          clang --version | tee builds/join-qualification/compiler.txt
       - run: npm ci
       - name: Build native assets
-        run: |
-          clang --version | tee builds/join-qualification/compiler.txt
-          npm run build:libs 2>&1 | tee builds/join-qualification/build.log
-      - name: Check new test style
+        run: npm run build:libs 2>&1 | tee builds/join-qualification/build.log
+      - name: Check new test style without modifying it
         id: lint
         continue-on-error: true
-        run: npx eslint test/term-bank-join-boundaries.test.js --fix 2>&1 | tee builds/join-qualification/lint.log
+        run: npx eslint test/term-bank-join-boundaries.test.js 2>&1 | tee builds/join-qualification/lint.log
       - name: Focused native and boundary tests
         id: focused
         continue-on-error: true
@@ -74,18 +51,19 @@ jobs:
         id: types
         continue-on-error: true
         run: npm run test:ts 2>&1 | tee builds/join-qualification/types.log
-      - name: All build targets
-        id: build
+      - name: All target build plans
+        id: buildplans
         continue-on-error: true
-        run: npm run test:build 2>&1 | tee builds/join-qualification/build-targets.log
-      - name: Publish only the qualified candidate branch
-        if: steps.lint.outcome == 'success' && steps.focused.outcome == 'success' && steps.unit.outcome == 'success' && steps.options.outcome == 'success' && steps.types.outcome == 'success' && steps.build.outcome == 'success'
-        run: |
-          git add ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-join-boundaries.test.js
-          git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'perf: eliminate redundant native term-bank join copies'
-          git push origin HEAD:refs/heads/perf/native-bank-join-20260915
-          git rev-parse HEAD 'HEAD^{tree}' | tee builds/join-qualification/published.txt
-      - name: Capture exact tested patch and outcomes
+        run: npm run test:build 2>&1 | tee builds/join-qualification/build-plans.log
+      - name: Actual Chrome development build
+        id: chrome
+        continue-on-error: true
+        run: node dev/bin/build.js --target chrome-dev 2>&1 | tee builds/join-qualification/chrome-build.log
+      - name: Actual Firefox development build
+        id: firefox
+        continue-on-error: true
+        run: node dev/bin/build.js --target firefox-dev 2>&1 | tee builds/join-qualification/firefox-build.log
+      - name: Record exact outcomes and assert unchanged source
         if: always()
         env:
           LINT: ${{ steps.lint.outcome }}
@@ -93,15 +71,19 @@ jobs:
           UNIT: ${{ steps.unit.outcome }}
           OPTIONS: ${{ steps.options.outcome }}
           TYPES: ${{ steps.types.outcome }}
-          BUILD: ${{ steps.build.outcome }}
+          BUILDPLANS: ${{ steps.buildplans.outcome }}
+          CHROME: ${{ steps.chrome.outcome }}
+          FIREFOX: ${{ steps.firefox.outcome }}
         run: |
           mkdir -p builds/join-qualification
-          printf '%s\n' "lint=$LINT focused=$FOCUSED unit=$UNIT options=$OPTIONS types=$TYPES build=$BUILD" > builds/join-qualification/outcomes.txt
-          git diff 30ffb604e0a87f0aa252bd4331bc54668062b1e1 -- ext/js/dictionary/wasm/term-bank-parser.c > builds/join-qualification/native.patch
+          printf '%s\n' "lint=$LINT focused=$FOCUSED unit=$UNIT options=$OPTIONS types=$TYPES buildplans=$BUILDPLANS chrome=$CHROME firefox=$FIREFOX" > builds/join-qualification/outcomes.txt
           cp test/term-bank-join-boundaries.test.js builds/join-qualification/
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+          test "$LINT/$FOCUSED/$UNIT/$OPTIONS/$TYPES/$BUILDPLANS/$CHROME/$FIREFOX" = 'success/success/success/success/success/success/success/success'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: native-join-qualification-20260915
+          name: native-join-qualification-corrected-20260915
           path: builds/join-qualification
           retention-days: 30
