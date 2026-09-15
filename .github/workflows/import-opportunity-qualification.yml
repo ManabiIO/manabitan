@@ -13,26 +13,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Reconstruct exact source
+      - name: Reconstruct routing repair on qualified parser source
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import base64, gzip, hashlib, os
-          from pathlib import Path
-          parts = sorted(Path('.github/import-opportunity-patch').glob('*.b64'))
-          assert len(parts) == 8
-          text = ''.join(p.read_text().strip() for p in parts)
-          for old,new in [('GVlTG/Zf2wy','GVlTG/Zf1wy'),('TibJJrw','TibJrw'),('ZbTeJJg','ZbTeJg'),('TFfWHG1+XeOn','TFfWHG1+On')]:
-              text = text.replace(old,new)
-          patch = gzip.decompress(base64.b64decode(text, validate=True))
-          assert hashlib.sha256(patch).hexdigest() == 'c7ecae3fe7d5233d891c9436dd67c363094f3d4b338174f3e3aa4818afac4751'
-          Path(os.environ['RUNNER_TEMP'],'source.patch').write_bytes(patch)
-          PY
-          git checkout --detach 385857d029cb32160f05f4923e08712e34cc327b
-          git apply --index --whitespace=error-all "$RUNNER_TEMP/source.patch"
-          test "$(git write-tree)" = ac88087f8a4c3ec8175f17226fbb854d16f9f019
+          gzip -dc .github/import-opportunity-routing.patch.gz > "$RUNNER_TEMP/routing.patch"
+          echo 'bec31797793fb89d89307876a290d32bf05ef40c1578bf5a372d4479b86721d3  '"$RUNNER_TEMP/routing.patch" | sha256sum -c -
+          git checkout --detach 662aeebd6b5ebc2aac83e0270b8bee686ac1ee4a
+          git apply --index --whitespace=error-all "$RUNNER_TEMP/routing.patch"
+          test "$(git write-tree)" = b5f7b420afe60c02cba305b384a4a6b32716700a
           git diff --cached --check
-          git -c user.name='Manabitan contributors' -c user.email=contributors@manabi.io commit -m 'Add default-off known-key and schema-row import experiments'
+          git -c user.name='Manabitan contributors' -c user.email=contributors@manabi.io commit -m 'Preserve import experiment flags through settings and reject inactive benchmark arms'
           git rev-parse HEAD HEAD^{tree} HEAD^ > "$RUNNER_TEMP/source-identity.txt"
       - uses: actions/setup-node@v4
         with:
@@ -44,15 +34,15 @@ jobs:
           npm run test:ts
           npm run test:unit
           npm run test:unit:options
-          node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-experiments.test.js dev/perf/parser-opportunities.js
+          node node_modules/eslint/bin/eslint.js ext/js/pages/settings/dictionary-import-controller.js dev/perf/benchmark-support.js test/import-experiment-routing.test.js test/perf-benchmark-support.test.js test/chromium/extension-two-dictionary-import.e2e.js
           npm run test:build
       - name: Publish verified source-only staging commit
         run: |
-          test "$(git rev-parse HEAD^{tree})" = ac88087f8a4c3ec8175f17226fbb854d16f9f019
+          test "$(git rev-parse HEAD^{tree})" = b5f7b420afe60c02cba305b384a4a6b32716700a
           test -z "$(git status --porcelain)"
-          git push origin HEAD:refs/heads/stage/import-opportunities-20260914
+          git push origin HEAD:refs/heads/stage/import-opportunities-routed-20260914
       - run: node node_modules/playwright/cli.js install --with-deps chromium
-      - name: Chromium functional coverage
+      - name: Chromium functional coverage with effective-option validation
         env:
           MANABITAN_CHROMIUM_HEADLESS: '1'
           MANABITAN_E2E_STRICT_RUNTIME: '1'
@@ -60,11 +50,12 @@ jobs:
           MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
           MANABITAN_E2E_IMPORT_FLAGS_JSON: '{"experimentalTermBankSpans":true,"experimentalNativeEscapedKeys":true,"experimentalValidatedGlossaryReuse":true,"experimentalFusedSingleBank":true,"experimentalGlobalExactContentReuse":true,"experimentalFastGlossaryNormalization":true,"experimentalKnownGlossaryKeys":true,"experimentalSchemaRowParser":true}'
         run: xvfb-run -a npm run test:e2e:chromium-extension
-      - name: End-to-end screening with individual flags
+      - name: Verified end-to-end screening and same-binary control
         env:
           MANABITAN_CHROMIUM_HEADLESS: '1'
           MANABITAN_E2E_STRICT_RUNTIME: '1'
         run: |
+          xvfb-run -a node dev/perf/import-ab.js jitendex --pairs 4 --flags '{}' --label same-binary-aa
           xvfb-run -a node dev/perf/import-ab.js jitendex --pairs 4 --flags '{"experimentalKnownGlossaryKeys":true}' --label known-keys
           xvfb-run -a node dev/perf/import-ab.js jmnedict --pairs 4 --flags '{"experimentalSchemaRowParser":true}' --label schema-rows
       - uses: actions/upload-artifact@v4
