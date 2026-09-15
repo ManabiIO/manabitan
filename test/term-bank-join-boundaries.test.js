@@ -39,10 +39,12 @@ beforeAll(async () => {
  */
 function source(text, method) {
     const bytes = encoder.encode(text)
-    return {bytes: method === 8 ? new Uint8Array(deflateRawSync(bytes)) : bytes,
+    return {
+        bytes: method === 8 ? new Uint8Array(deflateRawSync(bytes)) : bytes,
         decodedBytes: bytes.length,
         method,
-        signature: crc32(bytes)}
+        signature: crc32(bytes),
+    }
 }
 
 /**
@@ -87,13 +89,15 @@ function join(sources, spans = false, capacityOverride) {
         sources.length,
         output,
         capacity,
-spans ? spanPointer : 0,
+        spans ? spanPointer : 0,
     )
     expect(heap.subarray(guarded, output)).toEqual(new Uint8Array(16).fill(0xa5))
     expect(heap.subarray(output + capacity, output + capacity + 16)).toEqual(new Uint8Array(16).fill(0xa5))
-    return {length,
+    return {
+        length,
         bytes: heap.slice(output, output + Math.max(0, length)),
-        spans: [...new Uint32Array(wasm.memory.buffer, spanPointer, sources.length * 2)]}
+        spans: [...new Uint32Array(wasm.memory.buffer, spanPointer, sources.length * 2)],
+    }
 }
 
 /**
@@ -111,13 +115,15 @@ const widths = [0, 1, 2, 3, 7, 8, 15, 16, 17, 31, 32, 33, 63, 64, 65, 4095, 4096
 describe('native join byte and ownership boundaries', () => {
     test.each(widths)('preserves self-copy and overlapping shifts at interior width %i', (width) => {
         const value = JSON.stringify(['日🙂', 'x'.repeat(width), '\\"'])
-        const texts = ['[]',
+        const texts = [
+            '[]',
             `[${value}]`,
             '[ ]',
             `[${value}]`,
             ` \n[ \t${value}\r ]\n`,
             `[${value}]`,
-            '[]']
+            '[]',
+        ]
         const result = join(texts.map((text, i) => source(text, i % 2 === 0 ? 8 : 0)))
         expect(result.length).toBe(encoder.encode(expectedJoin(texts)).length)
         expect(decoder.decode(result.bytes)).toBe(expectedJoin(texts))
@@ -161,7 +167,7 @@ describe('native join byte and ownership boundaries', () => {
             expect(result.spans.slice(i * 2, i * 2 + 2)).toEqual([offset, length])
             offset += length
         }
-        expect(ordinary.bytes).toEqual(saved)
+        expect([...ordinary.bytes]).toEqual(saved)
     })
 
     test.each([0, 8])('validates an in-place later bank before skipping its copy, method %i', (method) => {
