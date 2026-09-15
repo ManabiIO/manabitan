@@ -1,0 +1,38 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 5b57eb7..9589367 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -276,6 +276,12 @@ static uint32_t read_content_signature(
+     uint32_t length,
+     uint32_t offset
+ ) {
++    if (offset <= length && length - offset >= 4u) {
++        return (uint32_t)bytes[offset] |
++            ((uint32_t)bytes[offset + 1u] << 8u) |
++            ((uint32_t)bytes[offset + 2u] << 16u) |
++            ((uint32_t)bytes[offset + 3u] << 24u);
++    }
+     uint32_t result = 0u;
+     for (uint32_t i = 0u; i < 4u && offset + i < length; ++i) {
+         result |= (uint32_t)bytes[offset + i] << (i * 8u);
+@@ -1801,11 +1807,15 @@ static uint32_t raw_term_content_quick_signature(
+     uint32_t first = 0u;
+     uint32_t middle = 0u;
+     uint32_t last = 0u;
+-    if (length > 0u) {
+-        const uint32_t sample_length = length < 4u ? length : 4u;
+-        __builtin_memcpy(&first, src + row->glossary_start, sample_length);
+-        __builtin_memcpy(&middle, src + row->glossary_start + ((length - sample_length) / 2u), sample_length);
+-        __builtin_memcpy(&last, src + row->glossary_start + length - sample_length, sample_length);
++    if (length >= 4u) {
++        const uint8_t* glossary = src + row->glossary_start;
++        first = read_u32_le(glossary);
++        middle = read_u32_le(glossary + (length - 4u) / 2u);
++        last = read_u32_le(glossary + length - 4u);
++    } else if (length > 0u) {
++        first = read_content_signature(src + row->glossary_start, length, 0u);
++        middle = first;
++        last = first;
+     }
+     uint32_t signature = length * 0x9e3779b1u;
+     signature ^= row->rules_length * 0x85ebca6bu;
