@@ -1,0 +1,113 @@
+diff --git a/dev/perf/benchmark-support.js b/dev/perf/benchmark-support.js
+index 625b4a3..58769e3 100644
+--- a/dev/perf/benchmark-support.js
++++ b/dev/perf/benchmark-support.js
+@@ -21,6 +21,7 @@ import {createHash} from 'node:crypto';
+ import {readFile} from 'node:fs/promises';
+ import path from 'node:path';
+ import {parseJson} from '../../ext/js/core/json.js';
++import {snapshotTermBankExperiments} from '../../ext/js/dictionary/term-bank-experiments.js';
+ 
+ /**
+  * @param {string} value
+@@ -78,6 +79,39 @@ export function optionalMetric(value) {
+     return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
+ }
+ 
++/**
++ * Requested flags in a report header are not proof that the worker received
++ * them. Check every available worker/effective receipt, not a top-level echo.
++ * Activation counters still need separate interpretation for eligibility.
++ * @param {Record<string, unknown>} debug
++ * @param {unknown} importFlags
++ * @throws {Error}
++ */
++function validateExperimentReceipts(debug, importFlags) {
++    const flags = asRecord(importFlags) ?? {};
++    const expected = snapshotTermBankExperiments(/** @type {import('dictionary-importer').ImportExperiments} */ (flags));
++    let receiptRequired = false;
++    for (const key of Object.keys(flags)) {
++        if (!key.startsWith('experimental')) { continue; }
++        if (!Object.hasOwn(expected, key)) { throw new Error(`Unknown import experiment: ${key}`); }
++        receiptRequired = true;
++    }
++    let receipts = 0;
++    const phases = Array.isArray(debug.importerPhaseTimings) ? debug.importerPhaseTimings : [];
++    for (const phase of phases) {
++        const details = asRecord(asRecord(phase)?.details);
++        if (details === null) { continue; }
++        for (const key of ['parserExperiments', 'fastPathParserEffectiveExperiments']) {
++            if (!Object.hasOwn(details, key)) { continue; }
++            ++receipts;
++            if (!isDeepStrictEqual(details[key], expected)) {
++                throw new Error(`Import experiment receipt mismatch: ${key}`);
++            }
++        }
++    }
++    if (receiptRequired && receipts === 0) { throw new Error('Missing import experiment worker receipts'); }
++}
++
+ /**
+  * @param {unknown} value
+  * @param {string} dictionaryId
+@@ -131,6 +165,7 @@ export function extractImportResult(value, dictionaryId, fixture, traceEnabled,
+     if (debug?.hasResult !== true || debug.resultTitle !== fixture.expectedTitle || debug.errorCount !== 0 || debug.addSettingsErrorCount !== 0 || debug.usesFallbackStorage !== false) {
+         throw new Error(`Import completion did not confirm an error-free ${fixture.expectedTitle}`);
+     }
++    validateExperimentReceipts(debug, importFlags);
+     const validation = asRecord(benchmark.validation);
+     if (validation?.title !== fixture.expectedTitle || validation.revision !== fixture.revision ||
+     validation.termRows !== fixture.termRows || validation.contentReadable !== true ||
+diff --git a/ext/js/pages/settings/dictionary-import-controller.js b/ext/js/pages/settings/dictionary-import-controller.js
+index f9eb41d..bc8ae60 100644
+--- a/ext/js/pages/settings/dictionary-import-controller.js
++++ b/ext/js/pages/settings/dictionary-import-controller.js
+@@ -26,6 +26,7 @@ import {promiseTimeout} from '../../core/utilities.js';
+ import {getKebabCase} from '../../data/anki-template-util.js';
+ import {querySelectorNotNull} from '../../dom/query-selector.js';
+ import {Mdx} from '../../comm/mdx.js';
++import {snapshotTermBankExperiments} from '../../dictionary/term-bank-experiments.js';
+ import {DictionaryController} from './dictionary-controller.js';
+ 
+ const OPFS_REQUIRED_USER_MESSAGE = 'Manabitan requires OPFS storage support.';
+@@ -2257,6 +2258,7 @@ export class DictionaryImportController {
+                 artifactFixedPackMinTotalRows,
+                 wasmPreallocateChunkRows,
+                 termContentBlockTargetBytes,
++                termBankExperiments,
+             } = this._getImportPerformanceFlags();
+             const importDetails = {
+                 prefixWildcardsSupported: optionsFull.global.database.prefixWildcardsSupported,
+@@ -2273,6 +2275,7 @@ export class DictionaryImportController {
+                 artifactFixedPackMinTotalRows,
+                 wasmPreallocateChunkRows,
+                 termContentBlockTargetBytes,
++                ...termBankExperiments,
+                 ...(importDetailsOverrides && typeof importDetailsOverrides === 'object' && !Array.isArray(importDetailsOverrides) ? importDetailsOverrides : {}),
+             };
+ 
+@@ -2503,7 +2506,7 @@ export class DictionaryImportController {
+     }
+ 
+     /**
+-     * @returns {{skipImageMetadata: boolean, skipMediaImport: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, zipUseWebWorkers: boolean|null, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean, termContentBlockTargetBytes: number|null}}
++     * @returns {{skipImageMetadata: boolean, skipMediaImport: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, zipUseWebWorkers: boolean|null, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean, termContentBlockTargetBytes: number|null, termBankExperiments: ReturnType<typeof snapshotTermBankExperiments>}}
+      */
+     _getImportPerformanceFlags() {
+         const flags = /** @type {unknown} */ (Reflect.get(globalThis, 'manabitanImportPerformanceFlags'));
+@@ -2522,6 +2525,7 @@ export class DictionaryImportController {
+                 artifactFixedPackMinTotalRows: null,
+                 wasmPreallocateChunkRows: true,
+                 termContentBlockTargetBytes: null,
++                termBankExperiments: snapshotTermBankExperiments(),
+             };
+         }
+         const flagsRecord = /** @type {Record<string, unknown>} */ (flags);
+@@ -2535,6 +2539,7 @@ export class DictionaryImportController {
+             termContentStorageModeRaw :
+             'raw-bytes';
+         return {
++            termBankExperiments: snapshotTermBankExperiments(/** @type {import('dictionary-importer').ImportExperiments} */ (flagsRecord)),
+             skipImageMetadata: flagsRecord.skipImageMetadata !== false,
+             skipMediaImport: flagsRecord.skipMediaImport === true,
+             mediaResolutionConcurrency: Math.max(1, Math.min(32, mediaResolutionConcurrency)),
