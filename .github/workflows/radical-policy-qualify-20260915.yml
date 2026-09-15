@@ -1,0 +1,163 @@
+name: Native import policy qualification and source comparisons
+on:
+  push:
+    branches: [verify/import-radical-20260915]
+    paths: [.github/workflows/radical-policy-qualify-20260915.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    outputs:
+      source_sha: ${{ steps.publish.outputs.source_sha }}
+      source_tree: ${{ steps.publish.outputs.source_tree }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 8d1d47047c2c15fb5a7a4073a96129a2460ce16e
+      - name: Apply only the exact proposed import policy
+        run: |
+          cp dev/perf/radical-20260915/native-pipeline-policy.patch "$RUNNER_TEMP/policy.patch"
+          echo "8266b0ca7541a0209276325a734daae25172c4a9b6b83320ff9fdc829ed50397  $RUNNER_TEMP/policy.patch" | sha256sum --check
+          git fetch --depth=1 origin 00e0a9d6bbde666ece3e56140384bf00bc47431d
+          git checkout --detach 00e0a9d6bbde666ece3e56140384bf00bc47431d
+          git apply --check "$RUNNER_TEMP/policy.patch"
+          git apply "$RUNNER_TEMP/policy.patch"
+          mkdir -p builds/policy-qualification
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Focused policy, receipt, parser and lookup tests
+        run: node node_modules/vitest/vitest.mjs run test/term-bank-import-policy.test.js test/perf-import-experiment-evidence.test.js test/perf-benchmark-support.test.js test/dictionary-import-controller-update-profile.test.js test/term-bank-wasm-parser.test.js test/term-bank-experiments.test.js test/term-bank-composite-state.test.js test/lookup-construction-experiments.test.js test/term-bank-parser-string-scan.test.js 2>&1 | tee builds/policy-qualification/focused.log
+      - name: Full unit and options suites
+        run: |
+          npm run test:unit 2>&1 | tee builds/policy-qualification/unit.log
+          npm run test:unit:options 2>&1 | tee builds/policy-qualification/options.log
+      - name: Strict types, changed-file lint, build plans and Firefox package
+        run: |
+          npm run test:ts 2>&1 | tee builds/policy-qualification/types.log
+          node node_modules/eslint/bin/eslint.js dev/perf/benchmark-support.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-experiments.js ext/js/pages/settings/dictionary-import-controller.js test/perf-import-experiment-evidence.test.js test/term-bank-import-policy.test.js 2>&1 | tee builds/policy-qualification/lint.log
+          npm run test:build 2>&1 | tee builds/policy-qualification/build-plans.log
+          node dev/bin/build.js --target firefox-dev 2>&1 | tee builds/policy-qualification/firefox-build.log
+      - run: npx playwright install --with-deps chromium
+      - name: Verify pinned complete dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Full strict Chromium suite using normal proposed defaults
+        env:
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{}'
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_E2E_REPORT: ./builds/policy-qualification/chromium.html
+        run: |
+          npm run test:e2e:chromium-extension 2>&1 | tee builds/policy-qualification/chromium.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('builds/policy-qualification/chromium.json').read_text())
+          assert data['status']=='success' and data['skippedVerification'] is False
+          enabled={'experimentalLookupScratchReuse','experimentalNativeSegmentedLookup','experimentalTermBankSpans','experimentalGlobalExactContentReuse'}
+          found=0
+          def inspect(value):
+              global found
+              if isinstance(value,dict):
+                  for key,item in value.items():
+                      if key in ('parserExperiments','fastPathParserEffectiveExperiments'):
+                          assert all(type(flag) is bool and flag==(name in enabled) for name,flag in item.items()),item
+                          assert len(item)==10
+                          found+=1
+                      else: inspect(item)
+              elif isinstance(value,list):
+                  for item in value: inspect(item)
+          inspect(data)
+          assert found>0
+          Path('builds/policy-qualification/receipt-audit.json').write_text(json.dumps({'matchingWorkerReceipts':found,'enabled':sorted(enabled),'phases':len(data['phases'])},indent=2))
+          PY
+      - name: Publish only the qualified six-file policy proposal
+        id: publish
+        run: |
+          git diff --check
+          git add dev/perf/benchmark-support.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-experiments.js ext/js/pages/settings/dictionary-import-controller.js test/perf-import-experiment-evidence.test.js test/term-bank-import-policy.test.js
+          git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'perf: select bounded native lookup, scratch reuse, bank spans and exact-content reuse for imports'
+          test -z "$(git status --porcelain)"
+          git push origin HEAD:refs/heads/perf/native-import-policy-20260915
+          echo "source_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "source_tree=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_OUTPUT"
+          git rev-parse HEAD 'HEAD^{tree}' > builds/policy-qualification/published.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-import-policy-qualification
+          path: builds/policy-qualification
+          retention-days: 30
+  compare:
+    needs: qualify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [policy-defaults, policy-disabled]
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 00e0a9d6bbde666ece3e56140384bf00bc47431d
+          persist-credentials: false
+      - name: Freeze exact source comparison inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_TREE: ${{ needs.qualify.outputs.source_tree }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/radical-review"
+          for file in source-ab.py install-libdeflate.py; do
+            gh api "repos/ManabiIO/manabitan/contents/dev/perf/radical-20260915/$file?ref=e2e49757be70d11cce74a9e0b865936c2343dbe2" --jq .content | base64 --decode > "$RUNNER_TEMP/radical-review/$file"
+          done
+          gh api 'repos/ManabiIO/manabitan/contents/dev/perf/radical-20260915/native-pipeline-policy.patch?ref=8d1d47047c2c15fb5a7a4073a96129a2460ce16e' --jq .content | base64 --decode > "$RUNNER_TEMP/radical-review/policy.patch"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path(os.environ['RUNNER_TEMP'])/'radical-review/source-ab.py'
+          s=p.read_text().replace('30ffb604e0a87f0aa252bd4331bc54668062b1e1','00e0a9d6bbde666ece3e56140384bf00bc47431d').replace('c069f4ca92d8e6902a1a182281a06b2579610c05','1c2b75e21de1c06527b8e107bfdeb47944cde29f')
+          s=s.replace('flags_by_variant = {',"flags_by_variant = {\n    'policy-defaults': {},\n    'policy-disabled': {name: False for name in ['experimentalLookupScratchReuse','experimentalNativeSegmentedLookup','experimentalTermBankSpans','experimentalGlobalExactContentReuse']},")
+          old="if variant.startswith('libdeflate'):\n    run(['python3', str(Path(__file__).parent / 'install-libdeflate.py')], cwd=candidate)"
+          new="if variant.startswith('policy-'):\n    run(['git','apply',str(Path(__file__).parent/'policy.patch')],cwd=candidate)\n    run(['git','add','.'],cwd=candidate)"
+          assert s.count(old)==1
+          s=s.replace(old,new)
+          old="(output / 'candidate.patch').write_text"
+          s=s.replace(old,"assert run(['git','rev-parse','HEAD^{tree}'],cwd=candidate)==os.environ['EXPECTED_TREE']\n"+old)
+          p.write_text(s)
+          PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify pinned complete dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - run: node dev/bin/build.js --target chrome-dev
+      - name: Six actual source pairs and three interleaved AA controls
+        env:
+          CANDIDATE: ${{ matrix.candidate }}
+          DICTIONARY: ${{ matrix.dictionary }}
+          EXPECTED_TREE: ${{ needs.qualify.outputs.source_tree }}
+          PAIRS: '6'
+          INITIAL_ORDER: AB
+        run: python3 "$RUNNER_TEMP/radical-review/source-ab.py"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-policy-source-${{ matrix.candidate }}-${{ matrix.dictionary }}
+          path: builds/radical-screen
+          retention-days: 30
