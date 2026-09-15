@@ -1,123 +1,74 @@
-name: Full-buffer DEFLATE exact-source qualification
+name: Full-buffer DEFLATE final read-only qualification
 on:
   push:
     branches: [verify/import-radical-20260915]
     paths: [.github/workflows/radical-libdeflate-qualify-20260915.yml]
 permissions:
-  contents: write
+  contents: read
 defaults:
   run:
     shell: bash
 jobs:
   qualify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        candidate: [libdeflate, libdeflate64]
-    env:
-      CANDIDATE: ${{ matrix.candidate }}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 9ed3012045a46468defe0d5c2621995945fe2c1c
-      - name: Preserve reviewed inputs and check out baseline
-        run: |
-          mkdir -p "$RUNNER_TEMP/decoder-review"
-          cp dev/perf/radical-20260915/install-libdeflate.py dev/perf/radical-20260915/libdeflate-README.md test/term-bank-inflater.test.js test/native/term-bank-inflater-sanitizer.c "$RUNNER_TEMP/decoder-review/"
-          git fetch --depth=1 origin 30ffb604e0a87f0aa252bd4331bc54668062b1e1
-          git checkout --detach 30ffb604e0a87f0aa252bd4331bc54668062b1e1
-          cp "$RUNNER_TEMP/decoder-review/term-bank-inflater.test.js" test/
-          test "$(sha256sum test/term-bank-inflater.test.js | cut -d ' ' -f 1)" = e5d273cf80e54a2205268cfaded7bffd6e27700206009ec43f969da3401de376
-          mkdir -p builds/decoder-qualification
+          ref: 726c5b7444a1b3c131c90de356f8261ac2fe65a2
+          persist-credentials: false
+          fetch-depth: 2
       - uses: actions/setup-node@v4
         with:
           node-version: '24.20.0'
           cache: npm
       - run: npm ci
-      - name: New conformance suite against unchanged miniz baseline
+      - name: Build the original baseline at the same path
         run: |
-          npm run build:libs > builds/decoder-qualification/parent-build.log 2>&1
-          node node_modules/vitest/vitest.mjs run test/term-bank-inflater.test.js 2>&1 | tee builds/decoder-qualification/parent-conformance.log
-      - name: Install the exact benchmarked candidate and provenance
+          mkdir -p builds/decoder-final
+          git checkout --detach 30ffb604e0a87f0aa252bd4331bc54668062b1e1
+          node dev/bin/build.js --target chrome-dev > builds/decoder-final/parent-build.log 2>&1
+          cp builds/manabitan-chrome-dev.zip "$RUNNER_TEMP/parent.zip"
+          cp ext/lib/term-bank-parser.wasm "$RUNNER_TEMP/parent.wasm"
+      - name: Build the exact published candidate at the same path
         run: |
-          python3 "$RUNNER_TEMP/decoder-review/install-libdeflate.py"
-          cp "$RUNNER_TEMP/decoder-review/libdeflate-README.md" ext/js/dictionary/wasm/vendor/libdeflate/README.md
-          if [ "$CANDIDATE" = libdeflate64 ]; then
-            printf '\n## Local wasm32 specialization\n\nIn `common_defs.h`, `machine_word_t` is `u64` on wasm32, instead of upstream `size_t`. Other targets retain upstream behavior. No pointer or size ABI changes. This is the only upstream source modification; it requires separate measurement and qualification.\n' >> ext/js/dictionary/wasm/vendor/libdeflate/README.md
-          else
-            printf '\nAll seven upstream files are byte-identical to the verified v1.26 archive.\n' >> ext/js/dictionary/wasm/vendor/libdeflate/README.md
-          fi
-          mkdir -p test/native
-          cp "$RUNNER_TEMP/decoder-review/term-bank-inflater-sanitizer.c" test/native/
-          npm run build:libs 2>&1 | tee builds/decoder-qualification/candidate-build.log
-          node --version > builds/decoder-qualification/node.txt
-          clang --version > builds/decoder-qualification/compiler.txt
-          git diff --stat > builds/decoder-qualification/diff-stat.txt
-      - name: Native portable decoder address and undefined behavior sanitizers
-        id: sanitizers
-        continue-on-error: true
+          git checkout --detach 726c5b7444a1b3c131c90de356f8261ac2fe65a2
+          node dev/bin/build.js --target chrome-dev > builds/decoder-final/candidate-build.log 2>&1
+          python3 - <<'PY'
+          from pathlib import Path
+          import os,json,hashlib,zipfile
+          root=Path.cwd();parent=Path(os.environ['RUNNER_TEMP'])/'parent.zip';candidate=root/'builds/manabitan-chrome-dev.zip'
+          with zipfile.ZipFile(parent) as a,zipfile.ZipFile(candidate) as b:
+              added=sorted(set(b.namelist())-set(a.namelist()))
+              removed=sorted(set(a.namelist())-set(b.namelist()))
+              changed=sorted(n for n in set(a.namelist())&set(b.namelist()) if a.read(n)!=b.read(n))
+              assert removed==[]
+              assert changed==['js/dictionary/wasm/term-bank-parser.c','lib/term-bank-parser.wasm'],changed
+              assert all(n=='js/dictionary/wasm/term-bank-inflate.c' or n.startswith('js/dictionary/wasm/vendor/libdeflate/') for n in added),added
+          wasm=root/'ext/lib/term-bank-parser.wasm';oldwasm=Path(os.environ['RUNNER_TEMP'])/'parent.wasm'
+          result={'parentBytes':parent.stat().st_size,'candidateBytes':candidate.stat().st_size,'deltaBytes':candidate.stat().st_size-parent.stat().st_size,'parentWasmBytes':oldwasm.stat().st_size,'candidateWasmBytes':wasm.stat().st_size,'wasmDeltaBytes':wasm.stat().st_size-oldwasm.stat().st_size,'candidateWasmSha256':hashlib.sha256(wasm.read_bytes()).hexdigest(),'addedMembers':added,'changedMembers':changed,'removedMembers':removed,'sameBuildPath':True}
+          Path('builds/decoder-final/package-comparison.json').write_text(json.dumps(result,indent=2))
+          print(json.dumps(result,indent=2))
+          PY
+      - name: Exact-head tests and static checks
+        run: |
+          npm run test:unit 2>&1 | tee builds/decoder-final/unit.log
+          npm run test:unit:options 2>&1 | tee builds/decoder-final/options.log
+          npm run test:ts 2>&1 | tee builds/decoder-final/types.log
+          node node_modules/eslint/bin/eslint.js dev/build-libs.js test/term-bank-inflater.test.js 2>&1 | tee builds/decoder-final/lint.log
+          node node_modules/prettier/bin/prettier.cjs --check ext/js/dictionary/wasm/vendor/libdeflate/README.md 2>&1 | tee builds/decoder-final/docs.log
+      - name: Recheck native portable decoder sanitizers
         run: |
           clang -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -ffunction-sections -fdata-sections -I. test/native/term-bank-inflater-sanitizer.c -Wl,--gc-sections -lz -o "$RUNNER_TEMP/inflater-test"
-          ASAN_OPTIONS=detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 "$RUNNER_TEMP/inflater-test" 2>&1 | tee builds/decoder-qualification/sanitizers.log
-      - name: Focused parser and inflater suites
-        id: focused
-        continue-on-error: true
-        run: node node_modules/vitest/vitest.mjs run test/term-bank-inflater.test.js test/term-bank-wasm-parser.test.js test/term-bank-experiments.test.js test/term-bank-composite-state.test.js test/lookup-construction-experiments.test.js test/term-bank-parser-string-scan.test.js 2>&1 | tee builds/decoder-qualification/focused.log
-      - name: Full unit suite
-        id: unit
-        continue-on-error: true
-        run: npm run test:unit 2>&1 | tee builds/decoder-qualification/unit.log
-      - name: Options suite
-        id: options
-        continue-on-error: true
-        run: npm run test:unit:options 2>&1 | tee builds/decoder-qualification/options.log
-      - name: Four strict typecheck projects
-        id: types
-        continue-on-error: true
-        run: npm run test:ts 2>&1 | tee builds/decoder-qualification/types.log
-      - name: Changed JavaScript and documentation checks without rewriting
-        id: lint
-        continue-on-error: true
-        run: |
-          node node_modules/eslint/bin/eslint.js dev/build-libs.js test/term-bank-inflater.test.js 2>&1 | tee builds/decoder-qualification/lint.log
-          node node_modules/prettier/bin/prettier.cjs --check ext/js/dictionary/wasm/vendor/libdeflate/README.md 2>&1 | tee builds/decoder-qualification/docs.log
-      - name: All build plans and actual Chrome and Firefox packages
-        id: build
-        continue-on-error: true
-        run: |
-          npm run test:build 2>&1 | tee builds/decoder-qualification/build-plans.log
-          node dev/bin/build.js --target chrome-dev 2>&1 | tee builds/decoder-qualification/chrome-build.log
-          node dev/bin/build.js --target firefox-dev 2>&1 | tee builds/decoder-qualification/firefox-build.log
-      - name: Publish isolated source branch only after all qualification checks
-        if: steps.sanitizers.outcome == 'success' && steps.focused.outcome == 'success' && steps.unit.outcome == 'success' && steps.options.outcome == 'success' && steps.types.outcome == 'success' && steps.lint.outcome == 'success' && steps.build.outcome == 'success'
+          ASAN_OPTIONS=detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 "$RUNNER_TEMP/inflater-test" 2>&1 | tee builds/decoder-final/sanitizers.log
+      - name: Assert unchanged source and record identity
         run: |
           git diff --check
-          git add dev/build-libs.js ext/js/dictionary/wasm test/term-bank-inflater.test.js test/native/term-bank-inflater-sanitizer.c
-          git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m "perf: replace streaming inflater with bounded $CANDIDATE DEFLATE backend"
           test -z "$(git status --porcelain)"
-          git push origin "HEAD:refs/heads/perf/$CANDIDATE-import-20260915"
-          git rev-parse HEAD 'HEAD^{tree}' > builds/decoder-qualification/published.txt
-      - name: Record exact outcomes and require all checks
-        if: always()
-        env:
-          SANITIZERS: ${{ steps.sanitizers.outcome }}
-          FOCUSED: ${{ steps.focused.outcome }}
-          UNIT: ${{ steps.unit.outcome }}
-          OPTIONS: ${{ steps.options.outcome }}
-          TYPES: ${{ steps.types.outcome }}
-          LINT: ${{ steps.lint.outcome }}
-          BUILD: ${{ steps.build.outcome }}
-        run: |
-          mkdir -p builds/decoder-qualification
-          printf '%s\n' "sanitizers=$SANITIZERS focused=$FOCUSED unit=$UNIT options=$OPTIONS types=$TYPES lint=$LINT build=$BUILD" > builds/decoder-qualification/outcomes.txt
-          git diff 30ffb604e0a87f0aa252bd4331bc54668062b1e1 -- dev/build-libs.js ext/js/dictionary/wasm > builds/decoder-qualification/source.patch
-          cp test/term-bank-inflater.test.js test/native/term-bank-inflater-sanitizer.c builds/decoder-qualification/
-          test "$SANITIZERS/$FOCUSED/$UNIT/$OPTIONS/$TYPES/$LINT/$BUILD" = 'success/success/success/success/success/success/success'
+          git rev-parse HEAD 'HEAD^{tree}' > builds/decoder-final/source.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: radical-qualification-${{ matrix.candidate }}
-          path: builds/decoder-qualification
+          name: libdeflate-final-readonly-qualification
+          path: builds/decoder-final
           retention-days: 30
