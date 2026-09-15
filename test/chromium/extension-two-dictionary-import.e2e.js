@@ -30,6 +30,7 @@ import {access, copyFile, mkdir, mkdtemp, readFile, rm, writeFile} from 'node:fs
 import {chromium} from '@playwright/test';
 import {ensurePinnedDictionaryCache} from '../../dev/perf/dictionary-fixtures.js';
 import {getHostEnvironment} from '../../dev/perf/host-environment.js';
+import {validateImportExperimentActivation} from '../../dev/perf/benchmark-support.js';
 import {parseJson} from '../../ext/js/core/json.js';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
@@ -3183,9 +3184,17 @@ async function main() {
             if (browserChannel !== null) {
                 launchOptions.channel = browserChannel;
             }
-            return await chromium.launchPersistentContext(userDataDir, {
+            const launched = await chromium.launchPersistentContext(userDataDir, {
                 ...launchOptions,
             });
+            // Debug options live only on each settings page. Reapply them after
+            // reload/restart so functional scenarios do not silently become controls.
+            await launched.addInitScript((flags) => {
+                if (location.protocol === 'chrome-extension:' && flags !== null) {
+                    globalThis.manabitanImportPerformanceFlags = {...flags};
+                }
+            }, e2eImportFlags);
+            return launched;
         };
         /**
          * @param {import('@playwright/test').Page} targetPage
@@ -3664,6 +3673,7 @@ async function main() {
             const importStepTimingHistory = await getImportStepTimingHistory(page);
             const importStepTimingSummary = summarizeImportStepTimingHistory(importStepTimingHistory);
             const importStep4Breakdown = summarizeImportStep4Breakdown(importDebugHistory);
+            const experimentActivation = validateImportExperimentActivation(importDebug, e2eImportFlags);
             await addReportPhase(
                 report,
                 page,
@@ -3678,6 +3688,7 @@ async function main() {
                     dictionary: importLabel,
                     browserTiming,
                     importDebug,
+                    experimentActivation,
                     importDebugHistory,
                     stepTimingSummary: importStepTimingSummary,
                     step4Breakdown: importStep4Breakdown,

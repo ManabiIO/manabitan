@@ -21,6 +21,7 @@ import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {parseJson} from '../../ext/js/core/json.js';
+import {snapshotTermBankExperiments} from '../../ext/js/dictionary/term-bank-experiments.js';
 
 /**
  * @param {string} value
@@ -79,6 +80,58 @@ export function optionalMetric(value) {
 }
 
 /**
+ * Check effective worker options, not the harness's requested-options echo.
+ * Zero work is recorded as zero opportunity; it does not prove activation.
+ * @param {unknown} importDebug
+ * @param {unknown} flags
+ * @returns {{groups: number, counters: Record<string, number>}}
+ * @throws {Error} If options disappeared, leaked, or their work evidence is missing.
+ */
+export function validateImportExperimentActivation(importDebug, flags) {
+    const expected = snapshotTermBankExperiments(/** @type {import('dictionary-importer').ImportExperiments} */ (asRecord(flags) ?? {}));
+    for (const [name, value] of Object.entries(asRecord(flags) ?? {})) {
+        if (name.startsWith('experimental') && (!Object.hasOwn(expected, name) || typeof value !== 'boolean')) {
+            throw new Error(`Invalid parser experiment option: ${name}`);
+        }
+    }
+    const debug = asRecord(importDebug);
+    const phases = Array.isArray(debug?.importerPhaseTimings) ? debug.importerPhaseTimings.map(asRecord) : [];
+    const groups = phases.filter((phase) => typeof phase?.phase === 'string' && phase.phase.startsWith('term-file-fast-path:'));
+    if (groups.length === 0 && Object.values(expected).some(Boolean)) {
+        throw new Error('Missing effective parser experiments in import report');
+    }
+    /** @type {Record<string, string>} */
+    const workMetrics = {
+        experimentalTermBankSpans: 'parserBankSpanCount',
+        experimentalNativeEscapedKeys: 'parserEscapedKeyDecodeCount',
+        experimentalValidatedGlossaryReuse: 'parserValidatedGlossaryReuseCount',
+        experimentalFusedSingleBank: 'parserFusedSingleBankGroups',
+        experimentalGlobalExactContentReuse: 'parserGlobalExactContentReuseCount',
+        experimentalFastGlossaryNormalization: 'parserFastGlossaryNormalizationCount',
+        experimentalKnownGlossaryKeys: 'parserKnownGlossaryKeyCount',
+        experimentalSchemaRowParser: 'parserSchemaRowParseCount',
+    };
+    /** @type {Record<string, number>} */
+    const counters = {};
+    for (const group of groups) {
+        const details = asRecord(group?.details);
+        const effective = asRecord(details?.parserExperiments);
+        if (effective === null) { throw new Error('Missing effective parser experiments in group'); }
+        for (const [name, enabled] of Object.entries(expected)) {
+            if (effective[name] !== enabled && !(enabled === false && typeof effective[name] === 'undefined')) {
+                throw new Error(`Mismatched effective parser experiments: ${name}`);
+            }
+            if (!enabled) { continue; }
+            const metric = workMetrics[name];
+            const count = optionalMetric(details?.[metric]);
+            if (count === null || !Number.isSafeInteger(count)) { throw new Error(`Missing or invalid experiment counter: ${metric}`); }
+            counters[metric] = (counters[metric] ?? 0) + count;
+        }
+    }
+    return {groups: groups.length, counters};
+}
+
+/**
  * @param {unknown} value
  * @param {string} dictionaryId
  * @param {import('./dictionary-fixtures.js').DictionaryFixture} fixture
@@ -131,6 +184,7 @@ export function extractImportResult(value, dictionaryId, fixture, traceEnabled, 
     if (debug?.hasResult !== true || debug.resultTitle !== fixture.expectedTitle || debug.errorCount !== 0 || debug.addSettingsErrorCount !== 0 || debug.usesFallbackStorage !== false) {
         throw new Error(`Import completion did not confirm an error-free ${fixture.expectedTitle}`);
     }
+    validateImportExperimentActivation(debug, importFlags);
     const validation = asRecord(benchmark.validation);
     if (validation?.title !== fixture.expectedTitle || validation.revision !== fixture.revision ||
     validation.termRows !== fixture.termRows || validation.contentReadable !== true ||

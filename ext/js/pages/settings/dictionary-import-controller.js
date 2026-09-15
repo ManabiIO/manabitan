@@ -27,6 +27,7 @@ import {getKebabCase} from '../../data/anki-template-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {Mdx} from '../../comm/mdx.js';
 import {DictionaryController} from './dictionary-controller.js';
+import {snapshotTermBankExperiments} from '../../dictionary/term-bank-experiments.js';
 
 const OPFS_REQUIRED_USER_MESSAGE = 'Manabitan requires OPFS storage support.';
 const MDX_CONVERSION_PROGRESS_TOTAL = 1000;
@@ -2235,6 +2236,7 @@ export class DictionaryImportController {
         });
         let importModeEnabled = false;
         const importStartTime = safePerformance.now();
+        const performanceFlags = this._getImportPerformanceFlags();
         try {
             this._setModifying(true);
             this._hideErrors();
@@ -2257,8 +2259,9 @@ export class DictionaryImportController {
                 artifactFixedPackMinTotalRows,
                 wasmPreallocateChunkRows,
                 termContentBlockTargetBytes,
-            } = this._getImportPerformanceFlags();
+            } = performanceFlags;
             const importDetails = {
+                ...snapshotTermBankExperiments(performanceFlags),
                 prefixWildcardsSupported: optionsFull.global.database.prefixWildcardsSupported,
                 yomitanVersion: chrome.runtime.getManifest().version,
                 skipImageMetadata,
@@ -2503,12 +2506,13 @@ export class DictionaryImportController {
     }
 
     /**
-     * @returns {{skipImageMetadata: boolean, skipMediaImport: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, zipUseWebWorkers: boolean|null, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean, termContentBlockTargetBytes: number|null}}
+     * @returns {{skipImageMetadata: boolean, skipMediaImport: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, zipUseWebWorkers: boolean|null, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean, termContentBlockTargetBytes: number|null} & Required<import('dictionary-importer').ImportExperiments>}
      */
     _getImportPerformanceFlags() {
         const flags = /** @type {unknown} */ (Reflect.get(globalThis, 'manabitanImportPerformanceFlags'));
         if (typeof flags !== 'object' || flags === null || Array.isArray(flags)) {
             return {
+                ...snapshotTermBankExperiments(),
                 skipImageMetadata: true,
                 skipMediaImport: false,
                 mediaResolutionConcurrency: 16,
@@ -2535,6 +2539,7 @@ export class DictionaryImportController {
             termContentStorageModeRaw :
             'raw-bytes';
         return {
+            ...snapshotTermBankExperiments(/** @type {import('dictionary-importer').ImportExperiments} */ (flagsRecord)),
             skipImageMetadata: flagsRecord.skipImageMetadata !== false,
             skipMediaImport: flagsRecord.skipMediaImport === true,
             mediaResolutionConcurrency: Math.max(1, Math.min(32, mediaResolutionConcurrency)),

@@ -23,6 +23,7 @@ import path from 'node:path';
 import {promisify} from 'node:util';
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {createBenchmarkEnvironment, extractImportResult, median, metricDelta, optionalMetric, parsePositiveInteger, percentDelta, roundMetric} from '../dev/perf/benchmark-support.js';
+import {snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js';
 import {ensureFixtureFile, loadDictionaryFixtures} from '../dev/perf/dictionary-fixtures.js';
 
 const fixtures = await loadDictionaryFixtures();
@@ -285,5 +286,59 @@ describe('atomic pinned fixture installation', () => {
         await Promise.all([ensureFixtureFile(sampleFixture, filePath), ensureFixtureFile(sampleFixture, filePath)]);
         expect(await readFile(filePath)).toEqual(bytes);
         expect(await readdir(dir)).toEqual(['fixture.zip']);
+    });
+});
+
+
+describe('effective parser experiment evidence', () => {
+    function reportWithFlags() {
+        const report = validReport();
+        const flags = {experimentalKnownGlossaryKeys: true};
+        report.benchmark.importFlags = flags;
+        report.phases[0].data.importDebug.importerPhaseTimings = [{
+            phase: 'term-file-fast-path:term_bank_1.json',
+            details: {parserExperiments: snapshotTermBankExperiments(flags), parserKnownGlossaryKeyCount: 100},
+        }];
+        return report;
+    }
+    test('rejects a report that records requested flags but dropped them in the importer', () => {
+        const report = reportWithFlags();
+        report.phases[0].data.importDebug.importerPhaseTimings[0].details.parserExperiments = snapshotTermBankExperiments();
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, report.benchmark.importFlags)).toThrow('effective parser experiments');
+    });
+    test('rejects missing effective reports for requested parser experiments', () => {
+        const report = reportWithFlags();
+        delete report.phases[0].data.importDebug.importerPhaseTimings;
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, report.benchmark.importFlags)).toThrow('effective parser experiments');
+    });
+    test('rejects a lost flag in an earlier group even if the last group matches', () => {
+        const report = reportWithFlags();
+        report.phases[0].data.importDebug.importerPhaseTimings.unshift({phase: 'term-file-fast-path:first', details: {parserExperiments: snapshotTermBankExperiments()}});
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, report.benchmark.importFlags)).toThrow('effective parser experiments');
+    });
+    test('rejects a missing work counter instead of interpreting it as zero', () => {
+        const report = reportWithFlags();
+        delete report.phases[0].data.importDebug.importerPhaseTimings[0].details.parserKnownGlossaryKeyCount;
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, report.benchmark.importFlags)).toThrow('experiment counter');
+    });
+    test('allows an explicit zero-opportunity count without claiming activation', () => {
+        const report = reportWithFlags();
+        report.phases[0].data.importDebug.importerPhaseTimings[0].details.parserKnownGlossaryKeyCount = 0;
+        expect(extractImportResult(report, 'jmdict', fixture, false, report.benchmark.importFlags).totalImportMs).toBe(123.5);
+    });
+    test('allows omitted disabled flags in an older-source control', () => {
+        const report = reportWithFlags();
+        report.phases[0].data.importDebug.importerPhaseTimings[0].details.parserExperiments = {experimentalKnownGlossaryKeys: true};
+        expect(extractImportResult(report, 'jmdict', fixture, false, report.benchmark.importFlags).totalImportMs).toBe(123.5);
+    });
+    test.each([{experimentalKnownGlossaryKeys: 'true'}, {experimentalMisspelledFlag: true}])('rejects invalid experiment options %j', (flags) => {
+        const report = reportWithFlags();
+        report.benchmark.importFlags = flags;
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, flags)).toThrow('Invalid parser experiment option');
+    });
+    test('rejects unintended active experiments in a baseline run', () => {
+        const report = reportWithFlags();
+        report.benchmark.importFlags = null;
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('effective parser experiments');
     });
 });
