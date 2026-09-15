@@ -84,7 +84,7 @@ jobs:
           git add ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-join-boundaries.test.js
           git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'perf: eliminate redundant native term-bank join copies'
           git push origin HEAD:refs/heads/perf/native-bank-join-20260915
-          git rev-parse HEAD HEAD^{tree} | tee builds/join-qualification/published.txt
+          git rev-parse HEAD 'HEAD^{tree}' | tee builds/join-qualification/published.txt
       - name: Capture exact tested patch and outcomes
         if: always()
         env:
