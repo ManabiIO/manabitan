@@ -1,0 +1,113 @@
+name: Lookup experiment qualification
+on:
+  push:
+    branches: [verify/lookup-construction-experiments-20260915]
+    paths: [.github/workflows/lookup-experiments-qualification.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reconstruct and verify exact candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          cp -r .github/lookup-patch "$RUNNER_TEMP/evidence/transport"
+          export EVIDENCE="$RUNNER_TEMP/evidence"
+          python3 - <<'PY'
+          import base64, gzip, hashlib, os
+          from pathlib import Path
+          expected = {
+              '01.b64': '1b408c2da56e730cd85a495cb860f8202b98988eacc03179084bfbf71433678b',
+              '02.b64': '1e16c45d7c2890b7cf36f3380d4aef9439a263a17996ac142cd2c72b4fc6f096',
+              '03.b64': '4f539d4ed73e0ab1b60ef3041aa3e8f85f04204dbed5f7da5ac9fb8a1b91ddb7',
+              '04.b64': 'ddc1e25f10ce9c440ffeef68b6ec31a6185594a186bf9c0f6b5816afe8bf0264',
+              '05.b64': 'cb1b830cf0ea1b06095e13e32e1256ef2832af94d3b08ae6a786dcb7181f1f47',
+              '06.b64': '442f938e07164e5388eb55e6f9af5a53059e3b5cb2305ca0aadfe3f676d8e68b',
+              '07.b64': 'e1a186d3e1dde553e228b2260036c044c6b193efbb9887c44764b544b306ac94',
+          }
+          fixes = {
+              '02.b64': [('INGpUldwHpTTTEQHB0B', 'INGpUldwHpTTEQHB0B')],
+              '03.b64': [('352D+Pans3Pbo4Yv', '352D+Pans3P0Pbo4Yv')],
+          }
+          parts = []
+          for name, sha in expected.items():
+              text = ''.join(Path('.github/lookup-patch', name).read_text().split())
+              for old, new in fixes.get(name, []):
+                  assert text.count(old) == 1, (name, 'transport fixup not unique')
+                  text = text.replace(old, new)
+              actual = hashlib.sha256(text.encode()).hexdigest()
+              print(name, len(text), actual, flush=True)
+              assert actual == sha, (name, 'transport SHA mismatch')
+              parts.append(text)
+          patch = gzip.decompress(base64.b64decode(''.join(parts), validate=True))
+          assert hashlib.sha256(patch).hexdigest() == 'd06f5fd8eca5556e6294493ef8ae94c8652c580f2bcc4cb643c8619210da6ac9'
+          Path(os.environ['EVIDENCE'], 'source.patch').write_bytes(patch)
+          PY
+          git checkout --detach 385857d029cb32160f05f4923e08712e34cc327b
+          git apply --index --whitespace=error-all "$EVIDENCE/source.patch"
+          test "$(git write-tree)" = c069f4ca92d8e6902a1a182281a06b2579610c05
+          git diff --cached --check
+          git config user.name 'Manabitan contributors'
+          git config user.email 'contributors@manabi.io'
+          git commit -m 'Add default-off lookup construction and retired-scratch experiments' -m 'Implement native segmented lookup, retired parser workspace reuse, direct v7 arena encoding and synchronous single-validation compaction. Preserve persistent bytes and production defaults; add regression tests and a reproducible pinned-corpus screen. Consolidate qualification instructions into one Markdown.'
+          git rev-parse HEAD HEAD^{tree} HEAD^ > "$EVIDENCE/source-identity.txt"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - name: Libraries and exact-source functional qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          E="$RUNNER_TEMP/evidence"
+          npm ci 2>&1 | tee "$E/install.log"
+          npm run build:libs 2>&1 | tee "$E/libraries.log"
+          npm run test:ts 2>&1 | tee "$E/types.log"
+          node node_modules/eslint/bin/eslint.js dev/build-libs.js dev/perf/import-lookup-screen.js ext/js/dictionary/{term-bank-experiments,term-bank-wasm-parser,term-bank-wasm-parser-worker,dictionary-importer,term-lookup-index-preparation,term-lookup-index,term-lookup-scratch,term-record-preinterned-plan}.js test/{lookup-construction-experiments,term-bank-experiments}.test.js 2>&1 | tee "$E/lint.log"
+          npm run test:unit 2>&1 | tee "$E/unit.log"
+          npm run test:unit:options 2>&1 | tee "$E/options.log"
+          npm run test:build 2>&1 | tee "$E/build.log"
+          test -z "$(git status --porcelain)"
+          test "$(git rev-parse HEAD^{tree})" = c069f4ca92d8e6902a1a182281a06b2579610c05
+          git push origin HEAD:refs/heads/stage/lookup-construction-experiments-20260915
+      - name: Prepare pinned browser fixtures
+        run: |
+          node node_modules/playwright/cli.js install --with-deps chromium
+          node dev/perf/prepare-dictionaries.js
+          node dev/bin/build.js --target chrome-dev
+      - name: Strict Chromium functionality with all ten flags requested
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{"experimentalTermBankSpans":true,"experimentalNativeEscapedKeys":true,"experimentalValidatedGlossaryReuse":true,"experimentalFusedSingleBank":true,"experimentalGlobalExactContentReuse":true,"experimentalFastGlossaryNormalization":true,"experimentalNativeSegmentedLookup":true,"experimentalLookupScratchReuse":true,"experimentalDirectLookupArena":true,"experimentalSinglePassLookupCompaction":true}'
+        run: |
+          set -o pipefail
+          xvfb-run -a npm run test:e2e:chromium-extension 2>&1 | tee "$RUNNER_TEMP/evidence/chromium-functional.log"
+          cp builds/chromium-e2e-import-report.json "$RUNNER_TEMP/evidence/functional-report.json"
+      - name: Fixed browser screening, controls and native reused scratch
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+        run: |
+          set -euo pipefail
+          unset MANABITAN_E2E_IMPORT_FLAGS_JSON
+          xvfb-run -a node dev/perf/import-ab.js jmnedict --pairs 8 --flags '{}' --label lookup-aa 2>&1 | tee "$RUNNER_TEMP/evidence/browser-aa.log"
+          xvfb-run -a node dev/perf/import-ab.js jmnedict --pairs 8 --flags '{"experimentalNativeSegmentedLookup":true,"experimentalLookupScratchReuse":true}' --label native-reused 2>&1 | tee "$RUNNER_TEMP/evidence/browser-native-reused.log"
+      - name: Preserve evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lookup-experiments-evidence
+          path: |
+            ${{ runner.temp }}/evidence
+            builds/*report*.json
+            builds/*benchmark*.json
+            builds/*ab*.json
+          retention-days: 14
