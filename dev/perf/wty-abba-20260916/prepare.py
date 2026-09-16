@@ -43,8 +43,23 @@ def replace(p, old, new):
     assert s.count(old) == 1, (str(p), old[:100], s.count(old))
     p.write_text(s.replace(old, new))
 
+# Benchmark-only fixture/harness support. None of these alter importer work.
 replace('dev/perf/dictionary-fixtures.js', '        fixtures,\n', '        fixtures,\n        dictionaryPaths: paths,\n')
 replace('dev/perf/dictionary-fixtures.js', 'fixtures: Record<string, DictionaryFixture>}>}', 'fixtures: Record<string, DictionaryFixture>, dictionaryPaths: Record<string, string>}>}')
 replace('test/chromium/extension-two-dictionary-import.e2e.js', "new Set(['jmdict', 'jmnedict', 'jitendex'])", "new Set(['jmdict', 'jmnedict', 'jitendex', 'wty-en-en'])")
 replace('test/chromium/extension-two-dictionary-import.e2e.js', "            jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},", "            jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},\n            ...Object.fromEntries(Object.entries(cachedDictionaries.fixtures ?? {}).map(([id, spec]) => [id, {label: spec.label, filePath: cachedDictionaries.dictionaryPaths[id]}])),")
+
+# Common correctness prerequisite for this workload. It is applied before the
+# one shared package build, so baseline and every feature-flag arm execute the
+# exact same repair. Chromium rejects TextDecoder inputs backed by shared WASM
+# memory; copy only the rare strings that actually require JS decoding.
+replace(
+    'ext/js/dictionary/term-bank-wasm-parser.js',
+    'const textDecoder = new TextDecoder();\n',
+    "const textDecoder = new TextDecoder();\n\n/**\n * @param {Uint8Array} bytes\n * @returns {string}\n */\nfunction decodeTextBytes(bytes) {\n    const shared = typeof SharedArrayBuffer !== 'undefined' && bytes.buffer instanceof SharedArrayBuffer;\n    return textDecoder.decode(shared ? Uint8Array.from(bytes) : bytes);\n}\n",
+)
+replace('ext/js/dictionary/term-bank-wasm-parser.js', '        return textDecoder.decode(valueBytes);', '        return decodeTextBytes(valueBytes);')
+replace('ext/js/dictionary/term-bank-wasm-parser.js', '    const quoted = textDecoder.decode(source.subarray(start, start + length));', '    const quoted = decodeTextBytes(source.subarray(start, start + length));')
+replace('ext/js/dictionary/term-bank-wasm-parser.js', "    return textDecoder.decode(source.subarray(start, start + length));", "    return decodeTextBytes(source.subarray(start, start + length));")
+
 print(json.dumps({'fixture': fixture, 'stats': {k: v for k, v in stats.items() if k not in ('sampleRows', 'otherFiles')}}, indent=2))
