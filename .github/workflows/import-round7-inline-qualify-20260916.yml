@@ -1,0 +1,130 @@
+name: String inlining exact-source qualification
+on:
+  push:
+    branches: [verify/import-round7-20260916]
+    paths: [.github/workflows/import-round7-inline-qualify-20260916.yml]
+permissions:
+  contents: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: b4094a423c20bb0ed424d944238f922c1b36559c
+      - name: Retrieve immutable test and isolated source change
+        run: |
+          git fetch --depth=1 origin 95c07e98f757510b2270499ad91aad6348d74c14
+          git show FETCH_HEAD:test/term-bank-adjacent-delimiters.test.js > test/term-bank-adjacent-delimiters.test.js
+          git show FETCH_HEAD:dev/perf/round7-20260916/apply-inline.py > "$RUNNER_TEMP/apply-inline.py"
+          test "$(git hash-object test/term-bank-adjacent-delimiters.test.js)" = 10c0786d5408a62902a84e7fddb58067c4c46185
+          mkdir -p builds/round7-qualification
+          git switch -c verify/qualified-inline-string-20260916
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - name: Check the new grammar cases against the unchanged parent
+        run: |
+          npm run build:libs > builds/round7-qualification/parent-build.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/term-bank-adjacent-delimiters.test.js 2>&1 | tee builds/round7-qualification/parent-tests.log
+      - name: Apply and build the measured source
+        run: |
+          python3 "$RUNNER_TEMP/apply-inline.py" inline-string | tee builds/round7-qualification/source-change.json
+          test "$(sha256sum ext/js/dictionary/wasm/term-bank-parser.c | cut -d ' ' -f 1)" = e234fc1413b1560a5aac129f71ffddf5db196572ca1fe173e30eb46fcb1efcf3
+          clang --version > builds/round7-qualification/compiler.txt
+          node --version > builds/round7-qualification/node.txt
+          npm run build:libs 2>&1 | tee builds/round7-qualification/candidate-build.log
+          test "$(sha256sum ext/lib/term-bank-parser.wasm | cut -d ' ' -f 1)" = 8815ce7d99b8d3f95ebce3dfb1e0a3e6678ea609e041971f2bc5ef173875c2fc
+      - name: Focused parser, bank, lookup and new caller tests
+        id: focused
+        continue-on-error: true
+        run: node node_modules/vitest/vitest.mjs run test/term-bank-adjacent-delimiters.test.js test/term-bank-wasm-parser.test.js test/term-bank-parser-string-scan.test.js test/term-bank-composite-state.test.js test/term-bank-experiments.test.js test/lookup-construction-experiments.test.js test/term-bank-join-boundaries.test.js 2>&1 | tee builds/round7-qualification/focused.log
+      - name: Full unit suite
+        id: unit
+        continue-on-error: true
+        run: npm run test:unit 2>&1 | tee builds/round7-qualification/unit.log
+      - name: Options suite
+        id: options
+        continue-on-error: true
+        run: npm run test:unit:options 2>&1 | tee builds/round7-qualification/options.log
+      - name: All strict JavaScript typecheck projects
+        id: types
+        continue-on-error: true
+        run: npm run test:ts 2>&1 | tee builds/round7-qualification/types.log
+      - name: New-test lint without rewriting
+        id: lint
+        continue-on-error: true
+        run: node node_modules/eslint/bin/eslint.js test/term-bank-adjacent-delimiters.test.js 2>&1 | tee builds/round7-qualification/lint.log
+      - name: All build plans and actual Chrome and Firefox packages
+        id: build
+        continue-on-error: true
+        run: |
+          npm run test:build 2>&1 | tee builds/round7-qualification/build-plans.log
+          node dev/bin/build.js --target chrome-dev 2>&1 | tee builds/round7-qualification/chrome-build.log
+          node dev/bin/build.js --target firefox-dev 2>&1 | tee builds/round7-qualification/firefox-build.log
+      - name: Install pinned browser and full fixtures
+        run: |
+          npx playwright install --with-deps chromium
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Full strict Chromium lifecycle qualification
+        id: browser
+        continue-on-error: true
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/round7-qualification/browser.html
+        run: |
+          npm run test:e2e:chromium-extension 2>&1 | tee builds/round7-qualification/browser.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('builds/round7-qualification/browser.json').read_text())
+          assert report['status'] == 'success' and report['skippedVerification'] is False
+          assert len(report['phases']) >= 80
+          PY
+      - name: Publish only qualified source to a verification ref, not an optimization PR
+        if: steps.focused.outcome == 'success' && steps.unit.outcome == 'success' && steps.options.outcome == 'success' && steps.types.outcome == 'success' && steps.lint.outcome == 'success' && steps.build.outcome == 'success' && steps.browser.outcome == 'success'
+        run: |
+          git diff --check
+          test "$(git hash-object test/term-bank-adjacent-delimiters.test.js)" = 10c0786d5408a62902a84e7fddb58067c4c46185
+          test "$(sha256sum ext/js/dictionary/wasm/term-bank-parser.c | cut -d ' ' -f 1)" = e234fc1413b1560a5aac129f71ffddf5db196572ca1fe173e30eb46fcb1efcf3
+          git add ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-adjacent-delimiters.test.js
+          git -c core.hooksPath=/dev/null -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'perf: inline the native string scanner into its parser callers'
+          test -z "$(git status --porcelain)"
+          git push origin HEAD:refs/heads/verify/qualified-inline-string-20260916
+          git rev-parse HEAD 'HEAD^{tree}' > builds/round7-qualification/qualified.txt
+      - name: Record outcomes and fail closed
+        if: always()
+        env:
+          FOCUSED: ${{ steps.focused.outcome }}
+          UNIT: ${{ steps.unit.outcome }}
+          OPTIONS: ${{ steps.options.outcome }}
+          TYPES: ${{ steps.types.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+          BROWSER: ${{ steps.browser.outcome }}
+        run: |
+          mkdir -p builds/round7-qualification
+          printf '%s\n' "focused=$FOCUSED unit=$UNIT options=$OPTIONS types=$TYPES lint=$LINT build=$BUILD browser=$BROWSER" > builds/round7-qualification/outcomes.txt
+          cp test/term-bank-adjacent-delimiters.test.js builds/round7-qualification/
+          git diff b4094a423c20bb0ed424d944238f922c1b36559c -- ext/js/dictionary/wasm/term-bank-parser.c > builds/round7-qualification/native.patch
+          printf '%s\n' 'Correctness qualification alone is not permission to promote a performance claim. No production or release ref is changed.' > builds/round7-qualification/disposition.txt
+          test "$FOCUSED/$UNIT/$OPTIONS/$TYPES/$LINT/$BUILD/$BROWSER" = 'success/success/success/success/success/success/success'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: round7-inline-string-qualification
+          path: builds/round7-qualification
+          retention-days: 30
