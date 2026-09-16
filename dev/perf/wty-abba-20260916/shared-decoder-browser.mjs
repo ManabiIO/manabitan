@@ -33,7 +33,7 @@ const server = createServer((request, response) => {
 })
 await new Promise((resolve, reject) => {
     server.once('error', reject)
-    server.listen(0, '127.0.0.1', () => { resolve(undefined) })
+    server.listen(0, '127.0.0.1', resolve)
 })
 const address = server.address()
 assert(address && typeof address === 'object')
@@ -42,13 +42,18 @@ try {
     const page = await browser.newPage()
     await page.goto(`http://127.0.0.1:${address.port}`)
     const result = await page.evaluate(async () => {
-        /** @param {unknown} value @param {string} message @returns {asserts value} */
+        /**
+         * @param {unknown} value
+         * @param {string} message
+         * @returns {asserts value}
+         */
         function check(value, message) {
             if (!value) { throw new Error(message) }
         }
         check(globalThis.crossOriginIsolated, 'Test must execute with shared memory enabled')
-        const modulePath = '/ext/js/dictionary/term-bank-wasm-parser.js'
-        const parser = /** @type {typeof import('../../ext/js/dictionary/term-bank-wasm-parser.js')} */ (await import(modulePath))
+        const parser = /** @type {typeof import('../../ext/js/dictionary/term-bank-wasm-parser.js')} */ (
+            await import('/ext/js/dictionary/term-bank-wasm-parser.js') // eslint-disable-line no-unsanitized/method
+        )
         const compiled = await WebAssembly.compile(await (await fetch('/ext/lib/term-bank-parser.wasm')).arrayBuffer())
         const instance = await WebAssembly.instantiate(compiled)
         check(/** @type {WebAssembly.Memory} */ (instance.exports.memory).buffer instanceof SharedArrayBuffer, 'Production parser must use shared WASM memory')
@@ -88,8 +93,11 @@ try {
             }
         }
         let invalidRejected = false
-        try { await parser.parseTermBankWithWasm(encoder.encode('[["bad"'), 3) }
-        catch { invalidRejected = true }
+        try {
+            await parser.parseTermBankWithWasm(encoder.encode('[["bad"'), 3)
+        } catch {
+            invalidRejected = true
+        }
         check(invalidRejected, 'Malformed JSON must remain rejected')
         const recovered = await parser.parseTermBankWithWasm(encoder.encode(JSON.stringify(fixtures)), 3)
         check(recovered.length === fixtures.length, 'Valid parse did not recover after failure')
@@ -102,5 +110,13 @@ try {
     console.log(JSON.stringify({browser: browser.version(), expectedFailure: expectFailure, ...result}))
 } finally {
     await browser.close()
-    await new Promise((resolve, reject) => { server.close((error) => { if (error) { reject(error) } else { resolve(undefined) } }) })
+    await new Promise((resolve, reject) => {
+        server.close((error) => {
+            if (error) {
+                reject(error)
+                return
+            }
+            resolve()
+        })
+    })
 }
