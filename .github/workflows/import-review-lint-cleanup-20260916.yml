@@ -1,0 +1,117 @@
+name: Isolated composite-test lint cleanup
+on:
+  push:
+    branches: [verify/import-pipeline-research-20260916]
+    paths: [.github/workflows/import-review-lint-cleanup-20260916.yml]
+permissions:
+  contents: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - name: Reproduce exactly the existing lint failure and preserve parent
+        run: |
+          mkdir -p builds/composite-cleanup
+          cp test/term-bank-composite-state.test.js builds/composite-cleanup/parent.js
+          set +e
+          node node_modules/eslint/bin/eslint.js test/term-bank-composite-state.test.js -f json > builds/composite-cleanup/red-lint.json 2> builds/composite-cleanup/red-lint-stderr.log
+          status=$?
+          set -e
+          test "$status" -eq 1
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path('test/term-bank-composite-state.test.js')
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='9384dca84f8e29bc0cc728c19d50bc946191ce25a6ce48566c75480dc99edd17'
+          issues=json.loads(Path('builds/composite-cleanup/red-lint.json').read_text())
+          assert len(issues)==1 and issues[0]['errorCount']==38
+          PY
+      - name: Apply only deterministic formatting and JSDoc corrections
+        run: |
+          set +e
+          node node_modules/eslint/bin/eslint.js test/term-bank-composite-state.test.js --fix > builds/composite-cleanup/autofix.log 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 1
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('test/term-bank-composite-state.test.js')
+          s=p.read_text()
+          old='/** @param {number} depth */'
+          assert s.count(old)==1
+          s=s.replace(old,'/**\n * @param {number} depth\n * @returns {string}\n */')
+          s=s.replace(chr(92)*3+chr(34),chr(92)*2+chr(34))
+          old='                try { JSON.parse(glossary) } catch { accepted = false }'
+          assert s.count(old)==1
+          s=s.replace(old,'                try {\n                    JSON.parse(glossary)\n                } catch {\n                    accepted = false\n                }')
+          p.write_text(s)
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='7407a8e78b49705a636bbd259275d595bb75ad706b72056bd9dff552902b6838'
+          PY
+      - name: Verify complete AST equivalence except the explicit typed-array conversion style
+        run: |
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs'
+          import assert from 'node:assert/strict'
+          import * as espree from 'espree'
+          const ast = path => {
+              const tree=espree.parse(fs.readFileSync(path,'utf8'),{ecmaVersion:'latest',sourceType:'module'})
+              return JSON.stringify(tree,(key,value)=>{
+                  if(key==='start'||key==='end'||key==='raw') return undefined
+                  if(value?.type==='CallExpression'&&value.callee?.type==='MemberExpression'&&value.callee.object?.name==='Array'&&value.callee.property?.name==='from'&&value.arguments.length===1) {
+                      return {type:'ArrayExpression',elements:[{type:'SpreadElement',argument:value.arguments[0]}]}
+                  }
+                  return value
+              })
+          }
+          assert.equal(ast('builds/composite-cleanup/parent.js'),ast('test/term-bank-composite-state.test.js'))
+          fs.writeFileSync('builds/composite-cleanup/ast-check.txt','AST identical after explicit Array.from-to-spread normalization; every test literal and assertion preserved\n')
+          JS
+      - name: Full lint, tests, types and build plans
+        run: |
+          npm run build:libs > builds/composite-cleanup/build-libs.log 2>&1
+          npm run test:js 2>&1 | tee builds/composite-cleanup/full-lint.log
+          node node_modules/vitest/vitest.mjs run test/term-bank-composite-state.test.js 2>&1 | tee builds/composite-cleanup/focused.log
+          npm run test:unit 2>&1 | tee builds/composite-cleanup/unit.log
+          npm run test:unit:options 2>&1 | tee builds/composite-cleanup/options.log
+          npm run test:ts 2>&1 | tee builds/composite-cleanup/types.log
+          npm run test:build 2>&1 | tee builds/composite-cleanup/build-plans.log
+      - name: Publish only the cleaned test file on its own branch
+        run: |
+          git diff --check
+          printf '%s\n' '7407a8e78b49705a636bbd259275d595bb75ad706b72056bd9dff552902b6838  test/term-bank-composite-state.test.js' | sha256sum -c -
+          git add test/term-bank-composite-state.test.js
+          python3 - <<'PY'
+          import subprocess
+          assert subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines()==['test/term-bank-composite-state.test.js']
+          PY
+          git -c core.hooksPath=/dev/null -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'test: restore clean lint for composite parser state coverage'
+          test -z "$(git status --porcelain)"
+          branch='fix/composite-test-lint-20260916'
+          test -z "$(git ls-remote --heads origin "$branch")"
+          git push origin "HEAD:refs/heads/$branch"
+          git rev-parse HEAD 'HEAD^{tree}' > builds/composite-cleanup/qualified.txt
+      - name: Preserve failure and success evidence
+        if: always()
+        run: |
+          mkdir -p builds/composite-cleanup
+          git diff c0a1b7ee6fa1383a0a422361d2a8b7f826499fff -- test/term-bank-composite-state.test.js > builds/composite-cleanup/test.patch
+          cp test/term-bank-composite-state.test.js builds/composite-cleanup/candidate.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: composite-test-lint-cleanup-qualification
+          path: builds/composite-cleanup
+          retention-days: 30
