@@ -1,0 +1,80 @@
+name: Independent bounded match expansion confirmation
+on:
+  push:
+    branches: [verify/import-crc-lifetime-20260916]
+    paths: [.github/workflows/import-match-confirm-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 6476bbb73bf7316e92b816593e70b4181df75213
+          persist-credentials: false
+      - name: Pin exact candidate and original source-comparison driver
+        run: |
+          mkdir -p "$RUNNER_TEMP/match-confirm"
+          cp dev/perf/crc-lifetime-20260916/apply-overlap.py "$RUNNER_TEMP/match-confirm/apply.py"
+          git fetch --depth=1 origin 23524cf48cb08482ebd271406fe48da773bb516c
+          git show FETCH_HEAD:dev/perf/round6-20260916/screen.py > "$RUNNER_TEMP/match-confirm/screen.py"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'match-confirm/screen.py'
+          s=p.read_text()
+          for old,new in {
+              'b4094a423c20bb0ed424d944238f922c1b36559c':'c0a1b7ee6fa1383a0a422361d2a8b7f826499fff',
+              '604c5c2b64b8d217e87895dbd981aa3a30579bcb':'a48da18d4244b00661d0c6518b2ce77b9f2f9b55',
+              "('word-jump', 'simd-jump', 'inflight-bounds')":"('match-expand',)",
+              'round6':'match-confirm',
+              'round-six':'match-confirm',
+          }.items():
+              assert old in s, old
+              s=s.replace(old,new)
+          needle="logrun(['node', 'node_modules/vitest/vitest.mjs', 'run', *tests], 'focused.log', candidate)"
+          s=s.replace(needle,"assert all((candidate / name).is_file() for name in tests), tests\n"+needle)
+          needle='identities = {arm: identity(directory) for arm, directory in roots.items()}'
+          s=s.replace(needle,needle+"\n(output / 'sizes.json').write_text(json.dumps({arm: {'wasmBytes': (directory / 'ext/lib/term-bank-parser.wasm').stat().st_size, 'packageBytes': (directory / package).stat().st_size} for arm, directory in roots.items()}, indent=2))")
+          p.write_text(s)
+          PY
+          python3 -m py_compile "$RUNNER_TEMP/match-confirm/"*.py
+          git fetch --depth=1 origin c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
+          git checkout --detach c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify complete locked fixtures
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Twelve reversed-order pairs with six interleaved A/A controls
+        env:
+          CANDIDATE: match-expand
+          DICTIONARY: ${{ matrix.dictionary }}
+          PAIRS: '12'
+          INITIAL_ORDER: AB
+        run: |
+          mkdir -p builds/match-confirm
+          python3 "$RUNNER_TEMP/match-confirm/screen.py" 2>&1 | tee builds/match-confirm/driver.log
+      - name: Preserve exact executed inputs
+        if: always()
+        run: |
+          mkdir -p builds/match-confirm/executed-inputs
+          cp "$RUNNER_TEMP/match-confirm/"*.py builds/match-confirm/executed-inputs/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: match-confirm-${{ matrix.dictionary }}
+          path: builds/match-confirm
+          retention-days: 30
