@@ -1,0 +1,76 @@
+name: Exact-layout parser arena comparison
+on:
+  push:
+    branches: [verify/import-round8-20260916]
+    paths: [.github/workflows/import-round8-arena-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 47f10695e197271a5c71f41f5857d281b53322f7
+          persist-credentials: false
+      - name: Prepare exact input and same-path source comparison
+        run: |
+          mkdir -p "$RUNNER_TEMP/round8-review"
+          cp dev/perf/round8-20260916/apply-arena.py "$RUNNER_TEMP/round8-review/apply.py"
+          git fetch --depth=1 origin ef53e3bb8d7acaa645dba562cc818c4b35fe94bb
+          git show FETCH_HEAD:dev/perf/round6-20260916/screen.py > "$RUNNER_TEMP/round8-review/screen.py"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p = Path(os.environ['RUNNER_TEMP']) / 'round8-review/screen.py'
+          s = p.read_text()
+          old = "assert variant in ('word-jump', 'simd-jump', 'inflight-bounds')"
+          assert s.count(old) == 1
+          s = s.replace(old, "assert variant == 'arena'")
+          old = "if variant != 'inflight-bounds':\n    allowed.add('lib/term-bank-parser.wasm')"
+          assert s.count(old) == 1
+          s = s.replace(old, "# The native parser is byte-identical; only the JS allocator changes.")
+          s = s.replace('round6', 'round8').replace('round-six', 'round-eight')
+          marker = "identities = {arm: identity(directory) for arm, directory in roots.items()}"
+          s = s.replace(marker, marker + "\nassert identities['A']['parserWasm'] == identities['B']['parserWasm']\n(output / 'sizes.json').write_text(json.dumps({arm: {'wasmBytes': (directory / 'ext/lib/term-bank-parser.wasm').stat().st_size, 'packageBytes': (directory / package).stat().st_size} for arm, directory in roots.items()}, indent=2))")
+          p.write_text(s)
+          PY
+          python3 -m py_compile "$RUNNER_TEMP/round8-review/"*.py
+          git fetch --depth=1 origin b4094a423c20bb0ed424d944238f922c1b36559c
+          git checkout --detach b4094a423c20bb0ed424d944238f922c1b36559c
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify complete locked fixtures
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Real parser tests, full-corpus equality and six pairs with AA controls
+        env:
+          CANDIDATE: arena
+          DICTIONARY: ${{ matrix.dictionary }}
+          PAIRS: '6'
+          INITIAL_ORDER: AB
+        run: |
+          mkdir -p builds/round8
+          python3 "$RUNNER_TEMP/round8-review/screen.py" 2>&1 | tee builds/round8/driver.log
+      - name: Preserve exact inputs on all outcomes
+        if: always()
+        run: |
+          mkdir -p builds/round8/driver-inputs
+          cp "$RUNNER_TEMP/round8-review/"*.py builds/round8/driver-inputs/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: round8-arena-${{ matrix.dictionary }}
+          path: builds/round8
+          retention-days: 30
