@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: d960d29b1c63341cc73e550dbb72b47057d6c8e9
+          ref: c0ea21e67ae5ea72b3f4c37d44bea4c82d11044f
       - name: Preserve exact inputs and select production parent
         run: |
           cp -R dev/perf/deep-import-20260916 "$RUNNER_TEMP/media-final-inputs"
@@ -57,7 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: d960d29b1c63341cc73e550dbb72b47057d6c8e9
+          ref: c0ea21e67ae5ea72b3f4c37d44bea4c82d11044f
           persist-credentials: false
       - name: Preserve final source recipe and derive fixed comparison plan
         run: |
