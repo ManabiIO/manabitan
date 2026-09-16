@@ -1,0 +1,89 @@
+
+describe('WTY dense-bank and exact-hash experiments', () => {
+    test('new switches are strictly default-off and do not mutate supplied options', () => {
+        for (const name of ['experimentalRangeZipReads', 'experimentalSimdContentHash', 'experimentalLargerFusedCapacity']) {
+            const off = snapshotTermBankExperiments()
+            expect(Reflect.get(off, name)).toBe(false)
+            for (const value of [false, undefined, null, 1, 'true']) {
+                expect(snapshotTermBankExperiments({[name]: value})).toEqual(off)
+            }
+            const input = {[name]: true}
+            const on = snapshotTermBankExperiments(input)
+            input[name] = false
+            expect(Reflect.get(on, name)).toBe(true)
+            expect(Object.isFrozen(on)).toBe(true)
+        }
+        expect(getTermBankExperimentMask({experimentalSimdContentHash: true})).toBe(32)
+        expect(getTermBankExperimentMask({experimentalLargerFusedCapacity: true, experimentalRangeZipReads: true})).toBe(0)
+    })
+
+    test.each([false, true])('SIMD preserves every content byte and both XXH32 values: preload=%s', async (preload) => {
+        const sources = [JSON.stringify(Array.from({length: 1100}, (_, i) => row(`hash-${i}`, [String(i) + '語😀x'.repeat(i % 521)]))), '[]']
+        const baseline = await parse(sources, {}, preload)
+        const candidate = await parse(sources, {experimentalSimdContentHash: true}, preload)
+        expect(candidate.rows).toEqual(baseline.rows)
+        expect(baseline.profile.simdContentHashCount).toBe(0)
+        expect(candidate.profile.simdContentHashCount).toBeGreaterThan(0)
+        expect(candidate.profile.fusedParseFallbacks).toBe(0)
+        expect((await parse(sources, {}, preload)).rows).toEqual(baseline.rows)
+    })
+
+    test.each([false, true])('capacity avoids discarded dense-bank work without changing keys, content or order: preload=%s', async (preload) => {
+        const source = JSON.stringify(Array.from({length: 25000}, (_, i) => row(`dense-${i}`, [`definition-${i % 47}`])))
+        const sources = [source, '[]']
+        const baseline = await parse(sources, {}, preload)
+        const candidate = await parse(sources, {experimentalLargerFusedCapacity: true}, preload)
+        expect(baseline.profile.fusedParseFallbacks).toBe(1)
+        expect(baseline.profile.discardedFusedRows).toBeGreaterThan(0)
+        expect(candidate.profile.fusedParseAttempts).toBe(1)
+        expect(candidate.profile.fusedParseFallbacks).toBe(0)
+        expect(candidate.profile.discardedFusedRows).toBe(0)
+        expect(candidate.rows).toEqual(baseline.rows)
+    }, 30000)
+
+    test('capacity alone does not enable fusion or enlarge a non-fused single bank', async () => {
+        const source = JSON.stringify(Array.from({length: 11000}, (_, i) => row(`ordinary-${i}`)))
+        const baseline = await parse([source])
+        const candidate = await parse([source], {experimentalLargerFusedCapacity: true})
+        expect(candidate.rows).toEqual(baseline.rows)
+        expect(candidate.profile.fusedParseAttempts).toBe(0)
+        expect(candidate.profile.metaCapacity).toBe(baseline.profile.metaCapacity)
+    })
+
+    test('single-bank fusion plus larger capacity preserves ordinary production output', async () => {
+        const source = JSON.stringify(Array.from({length: 25000}, (_, i) => row(`single-${i}`, [`meaning ${i}`])))
+        const baseline = await parse([source])
+        const candidate = await parse([source], {experimentalLargerFusedCapacity: true, experimentalFusedSingleBank: true})
+        expect(candidate.rows).toEqual(baseline.rows)
+        expect(candidate.profile.fusedParseAttempts).toBe(1)
+        expect(candidate.profile.fusedParseFallbacks).toBe(0)
+    }, 30000)
+
+    test('capacity overflow still falls back without truncating or duplicating rows', async () => {
+        const source = JSON.stringify(Array.from({length: 66000}, (_, i) => row(`overflow-${i}`)))
+        const baseline = await parse([source, '[]'])
+        const candidate = await parse([source, '[]'], {experimentalLargerFusedCapacity: true})
+        expect(candidate.rows).toHaveLength(66000)
+        expect(candidate.rows).toEqual(baseline.rows)
+        expect(candidate.profile.fusedParseFallbacks).toBe(1)
+    }, 30000)
+
+    test('dense malformed input remains rejected with the larger reservation', async () => {
+        const valid = JSON.stringify(Array.from({length: 21000}, (_, i) => row(`invalid-${i}`)))
+        const invalid = `${valid.slice(0, -1)},["unterminated"`
+        await expect(parse([invalid, '[]'])).rejects.toThrow()
+        await expect(parse([invalid, '[]'], {experimentalLargerFusedCapacity: true})).rejects.toThrow()
+        expect((await parse([JSON.stringify([row('recovered')]), '[]'], {experimentalLargerFusedCapacity: true})).rows).toHaveLength(1)
+    }, 30000)
+
+    test('SIMD and larger-capacity flags preserve escaped keys and structured glossary combinations', async () => {
+        const source = JSON.stringify(Array.from({length: 90}, (_, i) => row(`escaped"${i}`, [{type: 'structured-content', content: {tag: 'span', content: `word ${i} ` + 'α'.repeat(i * 3)}}])))
+        const baseline = await parse([source, '[]'])
+        for (const preload of [false, true]) {
+            const result = await parse([source, '[]'], {experimentalLargerFusedCapacity: true, experimentalSimdContentHash: true, experimentalNativeEscapedKeys: true, experimentalTermBankSpans: true}, preload)
+            expect(result.rows).toEqual(baseline.rows)
+            expect(result.profile.simdContentHashCount).toBeGreaterThan(0)
+            expect(result.profile.fusedParseFallbacks).toBe(0)
+        }
+    })
+})
