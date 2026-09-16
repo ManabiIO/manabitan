@@ -1,0 +1,76 @@
+name: Active import flags independent replication 20260916
+on:
+  push:
+    branches: [verify/import-active-flags-20260916]
+    paths: [.github/workflows/import-active-flags-replication-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - candidate: lean-fused
+            dictionary: jmdict
+          - candidate: lean-fused
+            dictionary: jitendex
+          - candidate: lookup-native
+            dictionary: jmdict
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 00e0a9d6bbde666ece3e56140384bf00bc47431d
+          persist-credentials: false
+      - name: Prepare immutable corrected-control driver
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/active-review"
+          gh api "repos/ManabiIO/manabitan/contents/dev/perf/radical-20260915/source-ab.py?ref=e2e49757be70d11cce74a9e0b865936c2343dbe2" --jq .content | base64 --decode > "$RUNNER_TEMP/active-review/source-ab.py"
+          gh api "repos/ManabiIO/manabitan/contents/dev/perf/radical-20260915/install-libdeflate.py?ref=e2e49757be70d11cce74a9e0b865936c2343dbe2" --jq .content | base64 --decode > "$RUNNER_TEMP/active-review/install-libdeflate.py"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path(os.environ['RUNNER_TEMP'])/'active-review/source-ab.py'; s=p.read_text()
+          s=s.replace('30ffb604e0a87f0aa252bd4331bc54668062b1e1','00e0a9d6bbde666ece3e56140384bf00bc47431d')
+          s=s.replace('c069f4ca92d8e6902a1a182281a06b2579610c05','1c2b75e21de1c06527b8e107bfdeb47944cde29f')
+          marker="    'lookup-native': {'experimentalNativeSegmentedLookup': True, 'experimentalLookupScratchReuse': True},\n"
+          assert marker in s
+          s=s.replace(marker,marker+"    'lean-fused': {'experimentalTermBankSpans': True, 'experimentalGlobalExactContentReuse': True, 'experimentalNativeSegmentedLookup': True, 'experimentalLookupScratchReuse': True},\n")
+          p.write_text(s)
+          PY
+          python3 -m py_compile "$RUNNER_TEMP/active-review/source-ab.py"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Verify pinned complete dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - run: node dev/bin/build.js --target chrome-dev
+      - name: Twelve reversed-order pairs with six A/A controls
+        env:
+          CANDIDATE: ${{ matrix.candidate }}
+          DICTIONARY: ${{ matrix.dictionary }}
+          PAIRS: '12'
+          INITIAL_ORDER: BA
+        run: python3 "$RUNNER_TEMP/active-review/source-ab.py"
+      - name: Preserve executed driver
+        if: always()
+        run: |
+          mkdir -p builds/radical-screen
+          cp "$RUNNER_TEMP/active-review/source-ab.py" builds/radical-screen/executed-driver.py || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: active-replication-${{ matrix.candidate }}-${{ matrix.dictionary }}
+          path: builds/radical-screen
+          retention-days: 30
