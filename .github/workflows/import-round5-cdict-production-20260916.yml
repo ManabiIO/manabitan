@@ -35,7 +35,7 @@ jobs:
           s = s[:start] + "    control_kind = 'unchanged production source and native codec; independent twelve-pair confirmation'\n" + s[end:]
           old = "    'cdict': {'lib/zstd-wasm.js', 'lib/zstd-wasm.js.map'},"
           assert s.count(old) == 1
-          s = s.replace(old, "    'cdict': {'lib/zstd-wasm.js', 'lib/zstd-wasm.js.map', 'lib/zstd.wasm'},")
+          s = s.replace(old, "    'cdict': {'lib/zstd-wasm.js', 'lib/zstd-wasm.js.map', 'lib/zstd.wasm', 'lib/zstd-simd-module.js', 'lib/zstd-simd-module.js.map'},")
           old = "assert identities['A']['zstdWasm'] == identities['B']['zstdWasm']"
           assert s.count(old) == 1
           s = s.replace(old, "assert identities['A']['commit'] == BASE\nassert identities['A']['zstdWasm'] == 'ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc'\nassert identities['B']['zstdWasm'] == '26e457ed3abbf9ab33bbf81f2351bae61c9ca8f71a57ef451b125cd3ed5024ff'")
