@@ -10,7 +10,7 @@ BASE = 'c0a1b7ee6fa1383a0a422361d2a8b7f826499fff'
 SOURCE = 'ext/js/dictionary/dictionary-importer.js'
 TEST = 'test/dictionary-importer-media-prefetch.test.js'
 HASHES = {
-    SOURCE: '4a8a50151166fa317dc18723992e0bcf423455aa3f0fea2b2cc5de8d08f9a1e2',
+    SOURCE: '86194729b52d5817f77601d32702d8a53fae635ddd62346024b3c42081b3b7f4',
     TEST: '9dbf7611ea5727be4c932d78f39d350484872ff40f1ac294eb6a8d42860c1814',
 }
 root = Path.cwd()
@@ -66,12 +66,27 @@ logged(['node', 'test/chromium/extension-two-dictionary-import.e2e.js'], 'chromi
 result = json.loads(report.read_text())
 assert result['status'] == 'success' and result['skippedVerification'] is False
 verify_source()
-receipt = {'base': BASE, 'head': head, 'tree': tree, 'hashes': HASHES, 'status': 'qualified', 'chromium': {'status': result['status'], 'skippedVerification': result['skippedVerification']}, 'branch': 'perf/bounded-media-prefetch-20260916'}
+receipt = {'base': BASE, 'testedHead': head, 'head': head, 'tree': tree, 'hashes': HASHES, 'status': 'qualified', 'chromium': {'status': result['status'], 'skippedVerification': result['skippedVerification']}, 'branch': 'perf/bounded-media-prefetch-20260916'}
 (out / 'qualification.json').write_text(json.dumps(receipt, indent=2))
-run(['git', 'bundle', 'create', str(out / 'candidate.bundle'), f'{BASE}..HEAD'])
-# Only create this new isolated product branch. Never merge or rewrite a ref.
+# Advance only this isolated branch, and only from the known earlier candidate.
+# A new parent is allowed only with the identical already-qualified full tree.
 branch = receipt['branch']
-assert run(['git', 'ls-remote', '--heads', 'origin', branch]) == '', 'Publication branch already exists; inspect before changing it'
+remote = run(['git', 'ls-remote', '--heads', 'origin', branch])
+if remote:
+    parent = remote.split()[0]
+    run(['git', 'fetch', '--depth=2', 'origin', parent])
+    assert set(run(['git', 'diff', '--name-only', BASE, parent]).splitlines()) == {SOURCE, TEST}
+    prior_source = subprocess.check_output(['git', 'show', f'{parent}:{SOURCE}'])
+    prior_test = subprocess.check_output(['git', 'show', f'{parent}:{TEST}'])
+    assert hashlib.sha256(prior_source).hexdigest() == '4a8a50151166fa317dc18723992e0bcf423455aa3f0fea2b2cc5de8d08f9a1e2'
+    assert hashlib.sha256(prior_test).hexdigest() == HASHES[TEST]
+    head = run(['git', '-c', 'user.name=Manabitan contributors', '-c', 'user.email=contributors@manabi.io', 'commit-tree', tree, '-p', parent, '-m', 'fix: retain media cleanup when cancellation provider throws'])
+    run(['git', 'update-ref', 'HEAD', head])
+    assert run(['git', 'rev-parse', 'HEAD^{tree}']) == tree
+    verify_source()
+    receipt['head'] = head
+    receipt['publicationParent'] = parent
+run(['git', 'bundle', 'create', str(out / 'candidate.bundle'), f'{BASE}..HEAD'])
 run(['git', 'push', 'origin', f'HEAD:refs/heads/{branch}'])
 receipt['published'] = True
 (out / 'publication.json').write_text(json.dumps(receipt, indent=2))
