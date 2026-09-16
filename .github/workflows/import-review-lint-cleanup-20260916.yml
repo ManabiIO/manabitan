@@ -21,9 +21,12 @@ jobs:
           node-version: '24.20.0'
           cache: npm
       - run: npm ci
-      - name: Reproduce exactly the existing lint failure and preserve parent
+      - name: Build generated modules required by the existing lint configuration
         run: |
           mkdir -p builds/composite-cleanup
+          npm run build:libs > builds/composite-cleanup/build-libs.log 2>&1
+      - name: Reproduce exactly the existing lint failure and preserve parent
+        run: |
           cp test/term-bank-composite-state.test.js builds/composite-cleanup/parent.js
           set +e
           node node_modules/eslint/bin/eslint.js test/term-bank-composite-state.test.js -f json > builds/composite-cleanup/red-lint.json 2> builds/composite-cleanup/red-lint-stderr.log
@@ -81,7 +84,6 @@ jobs:
           JS
       - name: Full lint, tests, types and build plans
         run: |
-          npm run build:libs > builds/composite-cleanup/build-libs.log 2>&1
           npm run test:js 2>&1 | tee builds/composite-cleanup/full-lint.log
           node node_modules/vitest/vitest.mjs run test/term-bank-composite-state.test.js 2>&1 | tee builds/composite-cleanup/focused.log
           npm run test:unit 2>&1 | tee builds/composite-cleanup/unit.log
