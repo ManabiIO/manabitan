@@ -1,0 +1,39 @@
+name: WTY import preflight
+on:
+  push:
+    branches: [verify/wty-import-abba-20260916]
+    paths: [.github/workflows/wty-preflight-20260916.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
+          persist-credentials: false
+      - name: Preserve exact baseline source and inspect public fixture metadata
+        shell: bash
+        run: |
+          mkdir -p /tmp/wty-preflight
+          git archive --format=tar.gz HEAD > /tmp/wty-preflight/source.tar.gz
+          python3 - <<'PY'
+          import json, urllib.request
+          from pathlib import Path
+          url='https://huggingface.co/api/datasets/daxida/wty-release'
+          req=urllib.request.Request(url,headers={'User-Agent':'Manabitan-wty-import-benchmark'})
+          with urllib.request.urlopen(req,timeout=90) as r:
+              data=json.load(r)
+          matches=[s for s in data.get('siblings',[]) if s['rfilename'].endswith('wty-en-en.zip')]
+          result={'sha':data['sha'],'candidates':matches}
+          Path('/tmp/wty-preflight/fixture-candidates.json').write_text(json.dumps(result,indent=2)+'\n')
+          print(json.dumps(result,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wty-preflight
+          path: /tmp/wty-preflight
+          retention-days: 14
