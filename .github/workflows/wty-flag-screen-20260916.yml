@@ -56,8 +56,18 @@ jobs:
         with:
           path: builds/e2e-dictionary-cache
           key: wty-en-en-21b1b22-c0a1b7ee-v1
-      - name: Pin WTY and apply common prerequisite
-        run: python3 dev/perf/wty-abba-20260916/prepare.py
+      - name: Pin WTY, apply common prerequisite and raise validation buffer
+        shell: bash
+        run: |
+          python3 dev/perf/wty-abba-20260916/prepare.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          s = p.read_text()
+          old = "const {stdout} = await execFileAsync('unzip', ['-p', zipPath, banks[bankIndex]], {maxBuffer: 32 * 1024 * 1024});"
+          assert s.count(old) == 1
+          p.write_text(s.replace(old, old.replace('32 * 1024', '128 * 1024')))
+          PY
       - run: npm ci
       - name: Build one package for both A and B arms
         run: |
