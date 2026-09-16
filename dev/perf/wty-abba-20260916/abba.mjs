@@ -23,6 +23,11 @@ const candidates = {
     combined: {experimentalLargerFusedCapacity: true, experimentalFusedSingleBank: true, experimentalNativeEscapedKeys: true, experimentalSimdContentHash: true},
     native: {experimentalNativeEscapedKeys: true},
     spans: {experimentalTermBankSpans: true},
+    validatedGlossary: {experimentalValidatedGlossaryReuse: true},
+    globalContent: {experimentalGlobalExactContentReuse: true},
+    lookupScratch: {experimentalLookupScratchReuse: true},
+    segmentedLookup: {experimentalNativeSegmentedLookup: true},
+    fastGlossary: {experimentalFastGlossaryNormalization: true},
 }
 const selected = (process.argv[2] ?? 'control,range,simd,capacity,capacitySingle').split(',')
 const blocks = Number(process.argv[3] ?? 2)
