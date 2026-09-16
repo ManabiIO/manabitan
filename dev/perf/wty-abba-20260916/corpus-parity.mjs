@@ -1,21 +1,22 @@
 import assert from 'node:assert/strict'
 import {readFile, writeFile, mkdir} from 'node:fs/promises'
 import {createHash} from 'node:crypto'
+import {execFile} from 'node:child_process'
+import {promisify} from 'node:util'
 import path from 'node:path'
-import {ZipReader, Uint8ArrayReader, Uint8ArrayWriter, configure} from '@zip.js/zip.js'
 import {parseTermBankWithWasmColumnChunks, setTermBankWasmModule, consumeLastTermBankWasmParseProfile} from '../../ext/js/dictionary/term-bank-wasm-parser.js'
 
+const execFileAsync = promisify(execFile)
 const flags = JSON.parse(process.argv[2] ?? '{"experimentalLargerFusedCapacity":true,"experimentalFusedSingleBank":true}')
 const output = process.argv[3] ?? 'builds/wty-parity'
 await mkdir(output, {recursive: true})
 const fixture = JSON.parse(await readFile('test/perf/dictionaries.lock.json', 'utf8')).dictionaries['wty-en-en']
-const archive = await readFile(path.join('builds/e2e-dictionary-cache', fixture.cacheFile))
+const archivePath = path.join('builds/e2e-dictionary-cache', fixture.cacheFile)
+const archive = await readFile(archivePath)
 assert.equal(archive.length, fixture.sizeBytes)
 assert.equal(createHash('sha256').update(archive).digest('hex'), fixture.sha256)
 const wasm = await readFile('ext/lib/term-bank-parser.wasm')
 setTermBankWasmModule(await WebAssembly.compile(wasm))
-configure({useWebWorkers: false})
-const reader = new ZipReader(new Uint8ArrayReader(archive))
 const report = {fixture, flags, wasmSha256: createHash('sha256').update(wasm).digest('hex'), rows: 0, banks: [], status: 'running'}
 async function save() { await writeFile(path.join(output, 'parity.json'), JSON.stringify(report, null, 2) + '\n') }
 async function digestBank(bytes, options) {
@@ -53,18 +54,21 @@ async function digestBank(bytes, options) {
     return {rows, sha256: digest.digest('hex'), profile: consumeLastTermBankWasmParseProfile()}
 }
 try {
-    const entries = (await reader.getEntries()).filter(entry => /^term_bank_\d+\.json$/.test(entry.filename)).sort((a, b) => Number(a.filename.match(/\d+/)[0]) - Number(b.filename.match(/\d+/)[0]))
-    for (const entry of entries) {
-        assert(entry.uncompressedSize < 200 * 1024 * 1024)
-        const bytes = await entry.getData(new Uint8ArrayWriter(), {checkSignature: true})
+    const {stdout: listing} = await execFileAsync('unzip', ['-Z1', archivePath], {encoding: 'utf8', maxBuffer: 4 * 1024 * 1024})
+    const entries = listing.split(/\r?\n/).filter(name => /^term_bank_\d+\.json$/.test(name)).sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]))
+    assert.equal(entries.length, 67)
+    for (const filename of entries) {
+        const {stdout} = await execFileAsync('unzip', ['-p', archivePath, filename], {encoding: 'buffer', maxBuffer: 256 * 1024 * 1024})
+        const bytes = new Uint8Array(stdout.buffer, stdout.byteOffset, stdout.byteLength)
+        assert(bytes.byteLength < 200 * 1024 * 1024)
         const baseline = await digestBank(bytes, {})
         const candidate = await digestBank(bytes, flags)
-        assert.equal(candidate.rows, baseline.rows, entry.filename)
-        assert.equal(candidate.sha256, baseline.sha256, entry.filename)
+        assert.equal(candidate.rows, baseline.rows, filename)
+        assert.equal(candidate.sha256, baseline.sha256, filename)
         report.rows += baseline.rows
-        report.banks.push({filename: entry.filename, size: bytes.length, baseline, candidate})
+        report.banks.push({filename, size: bytes.length, baseline, candidate})
         await save()
-        console.log(`${entry.filename}: ${baseline.rows} rows, exact key/content/hash equality`)
+        console.log(`${filename}: ${baseline.rows} rows, exact key/content/hash equality`)
     }
     assert.equal(report.rows, fixture.termRows)
     report.status = 'success'
@@ -74,5 +78,4 @@ try {
     throw error
 } finally {
     await save()
-    await reader.close()
 }
