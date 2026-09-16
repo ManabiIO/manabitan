@@ -23,6 +23,7 @@ out = root / 'builds/parser-concurrency-screen'
 out.mkdir(parents=True, exist_ok=True)
 package = root / 'builds/manabitan-chrome-dev.zip'
 source = root / 'ext/js/dictionary/term-bank-wasm-parser.js'
+worker_test = root / 'test/term-bank-wasm-parser.test.js'
 
 
 def run(args):
@@ -49,17 +50,33 @@ for old, new in [
     assert s.count(old) == 1
     s = s.replace(old, new)
 source.write_text(s)
+# The policy tests intentionally pin the established default worker count. A
+# source candidate that changes that policy must update the three affected
+# expected values; all other parser tests remain unchanged.
+t = worker_test.read_text()
+for descriptor in [
+    '{hardwareConcurrency: 12, deviceMemory: 4}',
+    '{hardwareConcurrency: 4, deviceMemory: 8}',
+    '{}',
+]:
+    old = f'[{descriptor}, 2]'
+    new = f'[{descriptor}, {workers}]'
+    assert t.count(old) == 1
+    t = t.replace(old, new)
+worker_test.write_text(t)
 subprocess.run(['git', 'diff', '--check'], cwd=root, check=True)
-subprocess.run(['node', 'node_modules/vitest/vitest.mjs', 'run', 'test/term-bank-wasm-parser.test.js', 'test/term-bank-experiments.test.js', 'test/term-bank-composite-state.test.js', 'test/lookup-construction-experiments.test.js'], cwd=root, check=True, stdout=open(out/'focused.log','w'), stderr=subprocess.STDOUT, timeout=240)
-subprocess.run(['git', 'add', str(source.relative_to(root))], cwd=root, check=True)
+with open(out/'focused.log','w') as log:
+    subprocess.run(['node', 'node_modules/vitest/vitest.mjs', 'run', 'test/term-bank-wasm-parser.test.js', 'test/term-bank-experiments.test.js', 'test/term-bank-composite-state.test.js', 'test/lookup-construction-experiments.test.js'], cwd=root, check=True, stdout=log, stderr=subprocess.STDOUT, timeout=240)
+subprocess.run(['git', 'add', str(source.relative_to(root)), str(worker_test.relative_to(root))], cwd=root, check=True)
 subprocess.run(['git', '-c', 'core.hooksPath=/dev/null', '-c', 'user.name=Manabitan contributors', '-c', 'user.email=contributors@manabi.io', 'commit', '-m', f'Isolated parser concurrency candidate: {variant}'], cwd=root, check=True, stdout=subprocess.DEVNULL)
 candidate = run(['git', 'rev-parse', 'HEAD'])
 candidate_tree = run(['git', 'rev-parse', 'HEAD^{tree}'])
-subprocess.run(['node', 'dev/bin/build.js', '--target', 'chrome-dev'], cwd=root, check=True, stdout=open(out/'candidate-build.log','w'), stderr=subprocess.STDOUT, timeout=240)
+with open(out/'candidate-build.log','w') as log:
+    subprocess.run(['node', 'dev/bin/build.js', '--target', 'chrome-dev'], cwd=root, check=True, stdout=log, stderr=subprocess.STDOUT, timeout=240)
 candidate_package = Path(os.environ['RUNNER_TEMP']) / 'parser-candidate.zip'
 shutil.copy2(package, candidate_package)
 candidate_package_hash = sha(candidate_package)
-(out/'candidate.patch').write_text(run(['git', 'diff', BASE, candidate, '--', str(source.relative_to(root))]) + '\n')
+(out/'candidate.patch').write_text(run(['git', 'diff', BASE, candidate, '--', str(source.relative_to(root)), str(worker_test.relative_to(root))]) + '\n')
 identities = {
     'A': {'commit': BASE, 'tree': TREE, 'package': base_package_hash},
     'B': {'commit': candidate, 'tree': candidate_tree, 'package': candidate_package_hash},
