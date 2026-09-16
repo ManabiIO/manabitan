@@ -1,0 +1,79 @@
+name: Allocation PRs integration with updated develop
+on:
+  push:
+    branches: [verify/import-round4-20260915]
+    paths: [.github/workflows/import-round4-integration-20260915.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: b4094a423c20bb0ed424d944238f922c1b36559c
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Compose the two exact PR heads without publishing any ref
+        run: |
+          git fetch origin 7bebff928f324c473db567488c0c752f8c700dc0 51ec5f7eba758fb2dcd8ecc53a4915c9b49e7deb
+          git -c user.name='Qualification only' -c user.email='qualification@manabi.io' merge --no-edit --no-ff 7bebff928f324c473db567488c0c752f8c700dc0
+          git -c user.name='Qualification only' -c user.email='qualification@manabi.io' merge --no-edit --no-ff 51ec5f7eba758fb2dcd8ecc53a4915c9b49e7deb
+          mkdir -p builds/round4-integration
+          git rev-parse HEAD 'HEAD^{tree}' > builds/round4-integration/composition.txt
+          git diff b4094a423c20bb0ed424d944238f922c1b36559c --stat > builds/round4-integration/diff-stat.txt
+          test "$(sha256sum ext/js/dictionary/term-record-opfs-store.js | cut -d ' ' -f 1)" = bdb1db17a0fb1bf5bbad1360e5400527b9870240e51a0587d15e6694884286cd
+          test "$(sha256sum ext/js/dictionary/term-record-preinterned-plan.js | cut -d ' ' -f 1)" = a6f19c1f090f24ff51cc06da444ec3060da731fc8826bf60353f7df0fb927a1f
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs > builds/round4-integration/build-libs.log 2>&1
+      - name: Complete unit and options suites with both PRs and updated base
+        run: |
+          npm run test:unit 2>&1 | tee builds/round4-integration/unit.log
+          npm run test:unit:options 2>&1 | tee builds/round4-integration/options.log
+      - name: Strict typecheck projects and changed-source lint
+        run: |
+          npm run test:ts 2>&1 | tee builds/round4-integration/types.log
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-record-opfs-store.js ext/js/dictionary/term-record-preinterned-plan.js test/term-record-direct-fields.test.js test/term-record-string-runs.test.js 2>&1 | tee builds/round4-integration/lint.log
+      - name: Actual browser packages and pinned fixture setup
+        run: |
+          node dev/bin/build.js --target chrome-dev 2>&1 | tee builds/round4-integration/chrome-build.log
+          node dev/bin/build.js --target firefox-dev 2>&1 | tee builds/round4-integration/firefox-build.log
+          npx playwright install --with-deps chromium
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Full strict Chromium integration
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/round4-integration/browser.html
+        run: |
+          npm run test:e2e:chromium-extension 2>&1 | tee builds/round4-integration/browser.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path('builds/round4-integration/browser.json').read_text())
+          assert r['status'] == 'success' and r['skippedVerification'] is False
+          assert len(r['phases']) >= 80
+          PY
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+          printf '%s\n' 'Complete integration passed; no refs pushed or PRs merged.' > builds/round4-integration/complete.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: round4-updated-develop-integration
+          path: builds/round4-integration
+          retention-days: 30
