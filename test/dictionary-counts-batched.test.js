@@ -110,10 +110,11 @@ describe('batched dictionary side-table counts', () => {
         const rows = vi.spyOn(connection, 'selectObjects')
         await database.getDictionaryCounts(names, true)
         expect(rows).toHaveBeenCalledTimes(16)
-        const queries = rows.mock.calls.filter(([sql]) => sql.includes('FILTER'))
+        const queries = rows.mock.calls.filter(([sql]) => typeof sql === 'string' && sql.includes('FILTER'))
         expect(queries).toHaveLength(15)
-        expect(queries.filter(([sql]) => sql.includes(' AS total'))).toHaveLength(5)
+        expect(queries.filter(([sql]) => typeof sql === 'string' && sql.includes(' AS total'))).toHaveLength(5)
         for (const [sql, bindings] of queries) {
+            if (typeof sql !== 'string') { throw new TypeError('Expected SQL text') }
             expect(sql).not.toContain('quoted')
             expect(Array.isArray(bindings)).toBe(true)
             expect(/** @type {unknown[]} */ (bindings)).toHaveLength(sql.match(/\?\d+/g)?.length ?? 0)
