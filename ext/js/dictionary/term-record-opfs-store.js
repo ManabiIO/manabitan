@@ -2776,6 +2776,22 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Returns only already-resident records without building lookup indexes,
+     * decoding strings, or loading additional persistent rows.
+     * @param {string} dictionaryName
+     * @returns {number[]}
+     */
+    getResidentIdsForDictionary(dictionaryName) {
+        const ids = [];
+        // Empty names do not participate in stale-membership tracking.
+        const records = dictionaryName.length === 0 ? this._recordsById.values() : this._iterateRecordsForDictionary(dictionaryName);
+        for (const record of records) {
+            if (record.dictionary === dictionaryName) { ids.push(record.id); }
+        }
+        return ids;
+    }
+
+    /**
      * @param {TermRecord} record
      * @returns {boolean} Whether the record must be added to its dictionary indexes.
      */
