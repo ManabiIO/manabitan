@@ -1,0 +1,82 @@
+name: String inlining combined-backend qualification
+on:
+  push:
+    branches: [verify/import-round7-20260916]
+    paths: [.github/workflows/import-round7-inline-integration-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 78837c89c3d251fcedebc8ecaf14a4c2c2c1f6cb
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Compose pinned first-special, libdeflate and inlining changes locally
+        run: |
+          git fetch origin 726c5b7444a1b3c131c90de356f8261ac2fe65a2 95c07e98f757510b2270499ad91aad6348d74c14
+          git -c user.name='Qualification only' -c user.email='qualification@manabi.io' cherry-pick 726c5b7444a1b3c131c90de356f8261ac2fe65a2
+          git show 95c07e98f757510b2270499ad91aad6348d74c14:test/term-bank-adjacent-delimiters.test.js > test/term-bank-adjacent-delimiters.test.js
+          git show 95c07e98f757510b2270499ad91aad6348d74c14:dev/perf/round7-20260916/apply-inline.py > "$RUNNER_TEMP/apply-inline.py"
+          mkdir -p builds/round7-integration
+          python3 "$RUNNER_TEMP/apply-inline.py" inline-string > builds/round7-integration/source.json
+          test "$(git hash-object test/term-bank-adjacent-delimiters.test.js)" = 10c0786d5408a62902a84e7fddb58067c4c46185
+          git add ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-adjacent-delimiters.test.js
+          git -c core.hooksPath=/dev/null -c user.name='Qualification only' -c user.email='qualification@manabi.io' commit -m 'Local-only composition: inlining with first-special scanner and libdeflate'
+          git rev-parse HEAD 'HEAD^{tree}' > builds/round7-integration/identity.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - name: Native build and complete unit and options tests
+        run: |
+          npm run build:libs 2>&1 | tee builds/round7-integration/native.log
+          sha256sum ext/lib/term-bank-parser.wasm > builds/round7-integration/wasm.txt
+          npm run test:unit 2>&1 | tee builds/round7-integration/unit.log
+          npm run test:unit:options 2>&1 | tee builds/round7-integration/options.log
+      - name: All strict typechecks and new-test lint
+        run: |
+          npm run test:ts 2>&1 | tee builds/round7-integration/types.log
+          node node_modules/eslint/bin/eslint.js test/term-bank-adjacent-delimiters.test.js 2>&1 | tee builds/round7-integration/lint.log
+      - name: Actual Chrome and Firefox packages and pinned browser fixtures
+        run: |
+          node dev/bin/build.js --target chrome-dev 2>&1 | tee builds/round7-integration/chrome-build.log
+          node dev/bin/build.js --target firefox-dev 2>&1 | tee builds/round7-integration/firefox-build.log
+          npx playwright install --with-deps chromium
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Full strict Chromium lifecycle with all three changes
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/round7-integration/browser.html
+        run: |
+          npm run test:e2e:chromium-extension 2>&1 | tee builds/round7-integration/browser.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('builds/round7-integration/browser.json').read_text())
+          assert report['status'] == 'success' and report['skippedVerification'] is False
+          assert len(report['phases']) >= 80
+          PY
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+          printf '%s\n' 'Combined functional qualification passed. No refs pushed, PRs merged, or timing claims added.' > builds/round7-integration/complete.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: round7-inline-combined-qualification
+          path: builds/round7-integration
+          retention-days: 30
