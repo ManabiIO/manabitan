@@ -1545,8 +1545,8 @@ export class DictionaryImporter {
                             }
                             if (prefetchRequirements.length > 0) {
                                 mediaPrefetch = mediaPrefetch.then(async () => {
-                                    if (!acceptMediaPrefetch || importSession.failed || this._isCancelled()) { return; }
                                     try {
+                                        if (!acceptMediaPrefetch || importSession.failed || this._isCancelled()) { return; }
                                         const result = await this._resolveAsyncRequirements(prefetchRequirements, fileMap);
                                         prefetchedNoMetadataMedia.push(...result.media);
                                     } catch (error) {
