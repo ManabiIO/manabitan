@@ -8,6 +8,9 @@ CACHE = ROOT / 'builds/e2e-dictionary-cache'
 CACHE.mkdir(parents=True, exist_ok=True)
 REV = '21b1b22cd655d7936d62b127e6404fbb8a88c7c3'
 URL = f'https://huggingface.co/datasets/daxida/wty-release/resolve/{REV}/latest/dict/en/en/wty-en-en.zip'
+EXPECTED_SHA256 = 'b9603db16dee82afd811386302ccd78bab591a6513b0d3194d937dc9110dd4a5'
+EXPECTED_SIZE = 106918350
+EXPECTED_ROWS = 1643040
 archive = CACHE / 'wty-en-en.zip'
 if not archive.exists():
     req = urllib.request.Request(URL, headers={'User-Agent': 'Manabitan-wty-benchmark'})
@@ -16,20 +19,32 @@ if not archive.exists():
             output.write(chunk)
     archive.with_suffix('.tmp').replace(archive)
 sha = hashlib.file_digest(archive.open('rb'), 'sha256').hexdigest()
+assert sha == EXPECTED_SHA256, sha
+assert archive.stat().st_size == EXPECTED_SIZE, archive.stat().st_size
 with zipfile.ZipFile(archive) as z:
     index = json.loads(z.read('index.json'))
     banks = sorted((i for i in z.infolist() if re.fullmatch(r'term_bank_\d+\.json', i.filename)), key=lambda i: int(re.search(r'\d+', i.filename).group()))
-    assert banks
-    rows = 0
-    sample = None
-    for info in banks:
-        entries = json.loads(z.read(info))
-        rows += len(entries)
-        if sample is None:
-            sample = entries[:5]
-            (OUT / 'term_bank_1.json').write_bytes(z.read(info))
-    stats = {'index': index, 'termBanks': len(banks), 'termRows': rows, 'inflatedTermBytes': sum(i.file_size for i in banks), 'compressedTermBytes': sum(i.compress_size for i in banks), 'otherFiles': [{'name': i.filename, 'size': i.file_size} for i in z.infolist() if i not in banks][:50], 'sampleRows': sample}
-fixture = {'label': index['title'], 'cacheFile': 'wty-en-en.zip', 'release': REV, 'url': URL, 'sha256': sha, 'sizeBytes': archive.stat().st_size, 'expectedTitle': index['title'], 'revision': index['revision'], 'termRows': rows}
+    assert len(banks) == 67
+    stats = {
+        'index': index,
+        'termBanks': len(banks),
+        'termRows': EXPECTED_ROWS,
+        'inflatedTermBytes': sum(i.file_size for i in banks),
+        'compressedTermBytes': sum(i.compress_size for i in banks),
+    }
+fixture = {
+    'label': index['title'],
+    'cacheFile': 'wty-en-en.zip',
+    'release': REV,
+    'url': URL,
+    'sha256': sha,
+    'sizeBytes': EXPECTED_SIZE,
+    'expectedTitle': index['title'],
+    'revision': index['revision'],
+    'termRows': EXPECTED_ROWS,
+}
+assert fixture['expectedTitle'] == 'wty-en-en'
+assert fixture['revision'] == '2026.08.29'
 (OUT / 'fixture.json').write_text(json.dumps(fixture, indent=2) + '\n')
 (OUT / 'archive-profile.json').write_text(json.dumps(stats, indent=2) + '\n')
 lock = ROOT / 'test/perf/dictionaries.lock.json'
@@ -62,4 +77,4 @@ replace('ext/js/dictionary/term-bank-wasm-parser.js', '        return textDecode
 replace('ext/js/dictionary/term-bank-wasm-parser.js', '    const quoted = textDecoder.decode(source.subarray(start, start + length));', '    const quoted = decodeTextBytes(source.subarray(start, start + length));')
 replace('ext/js/dictionary/term-bank-wasm-parser.js', "    return textDecoder.decode(source.subarray(start, start + length));", "    return decodeTextBytes(source.subarray(start, start + length));")
 
-print(json.dumps({'fixture': fixture, 'stats': {k: v for k, v in stats.items() if k not in ('sampleRows', 'otherFiles')}}, indent=2))
+print(json.dumps({'fixture': fixture, 'stats': stats}, indent=2))
