@@ -1,4 +1,4 @@
-# Rerun after lint/type-clean browser regression.
+# Rerun after lint/type convergence in the browser regression.
 name: Publish WTY shared-WASM decoder fix
 on:
   push:
