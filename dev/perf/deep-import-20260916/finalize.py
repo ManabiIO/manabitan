@@ -16,13 +16,14 @@ changes = [
     ("const size = typeof file === 'undefined' ? void 0 : Reflect.get(file, 'uncompressedSize');", "const size = /** @type {unknown} */ (typeof file === 'undefined' ? void 0 : Reflect.get(file, 'uncompressedSize'));", 1),
     ('throw mediaPrefetchFailure;', 'throw toError(mediaPrefetchFailure);', 2),
     ('        let mediaPrefetch = Promise.resolve();', '        // Overlap only referenced, metadata-free media with term processing.\n        // The final join keeps the archive alive until every started read settles.\n        let mediaPrefetch = Promise.resolve();', 1),
+    ('                                mediaPrefetch = mediaPrefetch.then(async () => {\n                                    if (!acceptMediaPrefetch || importSession.failed || this._isCancelled()) { return; }\n                                    try {', '                                mediaPrefetch = mediaPrefetch.then(async () => {\n                                    try {\n                                        if (!acceptMediaPrefetch || importSession.failed || this._isCancelled()) { return; }', 1),
 ]
 for old, new, count in changes:
     assert text.count(old) == count, old
     text = text.replace(old, new)
 source.write_text(text)
 source_hash = hashlib.sha256(source.read_bytes()).hexdigest()
-assert source_hash == '4a8a50151166fa317dc18723992e0bcf423455aa3f0fea2b2cc5de8d08f9a1e2'
+assert source_hash == '86194729b52d5817f77601d32702d8a53fae635ddd62346024b3c42081b3b7f4'
 test = Path('test/dictionary-importer-media-prefetch.test.js')
 shutil.copyfile(inputs / 'media-prefetch-test.txt', test)
 assert hashlib.sha256(test.read_bytes()).hexdigest() == '9dbf7611ea5727be4c932d78f39d350484872ff40f1ac294eb6a8d42860c1814'
