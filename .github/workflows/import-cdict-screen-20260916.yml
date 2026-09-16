@@ -19,12 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: c6bf1c6522e14847ae083250b9f645720cb13d6d
+          ref: ba0bc1bf4695b034968f5fde592fb7b79e5392e5
           persist-credentials: false
-      - name: Preserve immutable candidate and driver then pin production baseline
+      - name: Preserve candidate and checked real-WASM test
         run: |
           mkdir -p "$RUNNER_TEMP/cdict-inputs"
           cp dev/perf/cdict-20260916/{apply,screen}.py "$RUNNER_TEMP/cdict-inputs/"
+          cp dev/perf/cdict-20260916/real-cdict-test.js "$RUNNER_TEMP/cdict-inputs/test.js"
           python3 - <<'PY'
           import os
           from pathlib import Path
@@ -37,10 +38,15 @@ jobs:
               "text=term.read_text()",
               "assert text.count('ReturnType<typeof prepareSpanCompression>') == 2",
               "term.write_text(text.replace('ReturnType<typeof prepareSpanCompression>', 'ReturnType<typeof prepareSpanCompressionUsingCDict>'))",
+              "shutil.copy(inputs/'test.js',candidate/'test/zstd-cdict.test.js')",
               "zstd_build(candidate,True,'candidate-zstd-build.log')",
           ])
           assert s.count(old) == 1
-          p.write_text(s.replace(old, new))
+          s = s.replace(old, new)
+          old = "'test/zstd-wasm.test.js','test/term-content-block-store.test.js'"
+          assert s.count(old) == 1
+          s = s.replace(old, "'test/zstd-wasm.test.js','test/term-content-block-store.test.js','test/zstd-cdict.test.js'")
+          p.write_text(s)
           PY
           python3 -m py_compile "$RUNNER_TEMP/cdict-inputs/"*.py
           git fetch --depth=1 origin c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
@@ -68,7 +74,7 @@ jobs:
         if: always()
         run: |
           mkdir -p builds/cdict-review/executed-inputs
-          cp "$RUNNER_TEMP/cdict-inputs/"*.py builds/cdict-review/executed-inputs/
+          cp "$RUNNER_TEMP/cdict-inputs/"*.* builds/cdict-review/executed-inputs/
           if test -f "$RUNNER_TEMP/cdict-candidate/dev/data/zstd-simd.wasm"; then
             tar -czf builds/cdict-review/candidate-assets.tar.gz -C "$RUNNER_TEMP/cdict-candidate" dev/lib/zstd-wasm.js dev/lib/zstd-simd-module.js dev/lib/zstd-simd-module.d.ts dev/data/zstd-simd.wasm ext/js/dictionary/zstd-term-content.js
           fi
