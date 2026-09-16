@@ -25,6 +25,22 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/cdict-inputs"
           cp dev/perf/cdict-20260916/{apply,screen}.py "$RUNNER_TEMP/cdict-inputs/"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'cdict-inputs/screen.py'
+          s=p.read_text()
+          old="change=json.loads(run(['python3',str(inputs/'apply.py'),variant],candidate))\nzstd_build(candidate,True,'candidate-zstd-build.log')"
+          new="""change=json.loads(run(['python3',str(inputs/'apply.py'),variant],candidate))
+term=candidate/'ext/js/dictionary/zstd-term-content.js'
+text=term.read_text()
+assert text.count('ReturnType<typeof prepareSpanCompression>') == 2
+term.write_text(text.replace('ReturnType<typeof prepareSpanCompression>', 'ReturnType<typeof prepareSpanCompressionUsingCDict>'))
+zstd_build(candidate,True,'candidate-zstd-build.log')"""
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new))
+          PY
+          python3 -m py_compile "$RUNNER_TEMP/cdict-inputs/"*.py
           git fetch --depth=1 origin c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
           git checkout --detach c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
       - uses: actions/setup-node@v4
