@@ -25,6 +25,7 @@ jobs:
         run: |
           cp dev/perf/zstd-worker-batch-20260916.patch "$RUNNER_TEMP/candidate.patch"
           test "$(sha256sum "$RUNNER_TEMP/candidate.patch" | cut -d ' ' -f 1)" = 3dd4433c31c29cabb3047e0f0db0950afc8b3c9c72c943013849120b3a36b232
+          git fetch --depth=1 origin 30ffb604e0a87f0aa252bd4331bc54668062b1e1
           git checkout --detach 30ffb604e0a87f0aa252bd4331bc54668062b1e1
           test "$(git rev-parse 'HEAD^{tree}')" = c069f4ca92d8e6902a1a182281a06b2579610c05
       - uses: actions/setup-node@v4
