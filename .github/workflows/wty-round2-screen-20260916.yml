@@ -1,0 +1,81 @@
+name: WTY round two parser screen
+on:
+  push:
+    branches: [verify/wty-import-abba-20260916]
+    paths: [.github/workflows/wty-round2-screen-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  screen:
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - id: keys
+            flags: '{"experimentalShortGlossaryKeys":true}'
+          - id: media
+            flags: '{"experimentalExactMediaHints":true}'
+          - id: projection
+            flags: '{"experimentalMediaOnlyProjection":true}'
+          - id: keys-projection
+            flags: '{"experimentalShortGlossaryKeys":true,"experimentalMediaOnlyProjection":true}'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - uses: actions/cache/restore@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-en-en-21b1b22-c0a1b7ee-v1
+      - name: Pin workload and prepare identical off/on package sources
+        run: |
+          mkdir -p builds/wty-round2
+          python3 dev/perf/wty-abba-20260916/prepare.py
+          python3 dev/perf/wty-round2/apply.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          s=p.read_text()
+          old="const {stdout} = await execFileAsync('unzip', ['-p', zipPath, banks[bankIndex]], {maxBuffer: 32 * 1024 * 1024});"
+          assert s.count(old)==1
+          p.write_text(s.replace(old,old.replace('32 * 1024','128 * 1024')))
+          PY
+          git diff --check
+          git diff > builds/wty-round2/source.patch
+      - run: npm ci
+      - name: Build and install Chromium
+        run: |
+          npm run build:libs > builds/wty-round2/libs.log 2>&1
+          node dev/bin/build.js --target chrome-dev > builds/wty-round2/package.log 2>&1
+          npx playwright install --with-deps chromium
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Real complete imports, fixed plan, no retries
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          WTY_FLAGS: ${{ matrix.flags }}
+          WTY_BLOCKS: '2'
+        run: node dev/perf/wty-round2/run.mjs 2>&1 | tee builds/wty-round2/run.log
+      - name: Preserve exact sources and executable
+        if: always()
+        run: |
+          mkdir -p builds/wty-round2/sources
+          cp ext/js/dictionary/wasm/term-bank-parser.c ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-experiments.js builds/wty-round2/sources/
+          if test -f ext/lib/term-bank-parser.wasm; then cp ext/lib/term-bank-parser.wasm builds/wty-round2/sources/; fi
+          cp -r dev/perf/wty-round2 builds/wty-round2/recipes
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wty-round2-${{ matrix.id }}
+          path: builds/wty-round2
+          retention-days: 30
