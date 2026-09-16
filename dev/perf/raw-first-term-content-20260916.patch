@@ -1,28 +1,16 @@
 diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
-index a9bf0c6..e1577a4 100644
+index a9bf0c6..6b64210 100644
 --- a/ext/js/dictionary/dictionary-database.js
 +++ b/ext/js/dictionary/dictionary-database.js
-@@ -8382,6 +8382,10 @@ export class DictionaryDatabase {
-      * @returns {{storage: Promise<{pendingOffsets: Float64Array, pendingLengths: Uint32Array, pendingResolvedDictNames: string}>, completion: Promise<{packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}
+@@ -8383,6 +8383,7 @@ export class DictionaryDatabase {
       */
      _tryBeginPersistArtifactTermContent(dictionary, pendingContentSpans) {
-+        // Experiment: persist raw packed content directly during import. This
-+        // measures the upper bound available from moving block compression out
-+        // of the synchronous import completion path.
-+        return null;
-+        /* c8 ignore start -- benchmark-only experiment */
          if (
++            true ||
              !this._termContentZstdInitialized ||
              pendingContentSpans === null ||
-@@ -8414,6 +8418,7 @@ export class DictionaryDatabase {
-         void storage.catch(() => {});
-         void completion.catch(() => {});
-         return {storage, completion, initialSelection: operation.initialSelection};
-+        /* c8 ignore stop */
-     }
- 
-     /**
-@@ -8430,7 +8435,7 @@ export class DictionaryDatabase {
+             this._termContentBlockImportSession === null
+@@ -8430,7 +8431,7 @@ export class DictionaryDatabase {
          const blockSession = this._termContentBlockImportSession ?? this._termContentBlockStore.beginImportSession();
          let blockStorage = null;
          try {
