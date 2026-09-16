@@ -1,0 +1,56 @@
+name: WTY complete-corpus parity
+on:
+  push:
+    branches: [verify/wty-import-abba-20260916]
+    paths: [.github/workflows/wty-corpus-parity-20260916.yml]
+permissions:
+  contents: read
+jobs:
+  parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [capacity-single, combined]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - uses: actions/cache/restore@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-en-en-21b1b22-c0a1b7ee-v1
+      - name: Build exact candidates and pinned corpus
+        run: |
+          mkdir -p builds/wty-parity
+          cp -R dev/perf/wty-abba-20260916 "$RUNNER_TEMP/wty-assets"
+          python3 "$RUNNER_TEMP/wty-assets/prepare.py"
+          printf '%s\n' 'b9603db16dee82afd811386302ccd78bab591a6513b0d3194d937dc9110dd4a5  builds/e2e-dictionary-cache/wty-en-en.zip' | sha256sum -c -
+          python3 "$RUNNER_TEMP/wty-assets/apply-decoder-fix.py"
+          python3 "$RUNNER_TEMP/wty-assets/apply-candidates.py" range simd capacity
+          cp "$RUNNER_TEMP/wty-assets/corpus-parity.mjs" test/chromium/wty-corpus-parity.mjs
+          rm -rf dev/perf/wty-abba-20260916
+          npm ci
+          npm run build:libs > builds/wty-parity/build.log 2>&1
+      - name: Compare complete canonical row streams against flags-off
+        env:
+          VARIANT: ${{ matrix.variant }}
+        shell: bash
+        run: |
+          set -o pipefail
+          FLAGS='{"experimentalLargerFusedCapacity":true,"experimentalFusedSingleBank":true}'
+          if [ "$VARIANT" = combined ]; then
+            FLAGS='{"experimentalLargerFusedCapacity":true,"experimentalFusedSingleBank":true,"experimentalNativeEscapedKeys":true,"experimentalSimdContentHash":true}'
+          fi
+          node test/chromium/wty-corpus-parity.mjs "$FLAGS" builds/wty-parity 2>&1 | tee builds/wty-parity/parity.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wty-corpus-parity-${{ matrix.variant }}
+          path: builds/wty-parity
+          retention-days: 30
