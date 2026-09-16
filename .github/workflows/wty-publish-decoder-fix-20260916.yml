@@ -65,7 +65,7 @@ jobs:
           PY
           git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'fix: decode shared parser tokens through owned bytes'
           git push origin HEAD:refs/heads/fix/wty-shared-wasm-textdecoder-20260916
-          git rev-parse HEAD HEAD^{tree} > builds/wty-decoder-publish/published.txt
+          git rev-parse HEAD 'HEAD^{tree}' > builds/wty-decoder-publish/published.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
