@@ -1,0 +1,173 @@
+name: Compaction and direct-field exact-source qualification
+on:
+  push:
+    branches: [verify/import-round4-20260915]
+    paths: [.github/workflows/import-round4-qualify-20260915.yml]
+permissions:
+  contents: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - candidate: record-direct
+            source: term-record-opfs-store.js
+            source_hash: bdb1db17a0fb1bf5bbad1360e5400527b9870240e51a0587d15e6694884286cd
+            test: term-record-direct-fields.test.js
+            test_blob: c97d77dac154c4d3c24ee2ba6cbc7d9374e09121
+            red_failures: 1
+            branch: perf/direct-record-fields-20260915
+          - candidate: string-runs
+            source: term-record-preinterned-plan.js
+            source_hash: a6f19c1f090f24ff51cc06da444ec3060da731fc8826bf60353f7df0fb927a1f
+            test: term-record-string-runs.test.js
+            test_blob: a8be564a87aea168051b8801759f7134ed099b59
+            red_failures: 2
+            branch: perf/coalesced-string-compaction-20260915
+    env:
+      CANDIDATE: ${{ matrix.candidate }}
+      SOURCE: ${{ matrix.source }}
+      SOURCE_HASH: ${{ matrix.source_hash }}
+      TEST: ${{ matrix.test }}
+      TEST_BLOB: ${{ matrix.test_blob }}
+      RED_FAILURES: ${{ matrix.red_failures }}
+      PRODUCT_BRANCH: ${{ matrix.branch }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 30ffb604e0a87f0aa252bd4331bc54668062b1e1
+      - name: Retrieve exact reviewed test and patch
+        run: |
+          git fetch --depth=1 origin 3b61983b36c9db9949d661d0de36fff3a1f39a32
+          git show "FETCH_HEAD:test/$TEST" > "test/$TEST"
+          git show "FETCH_HEAD:dev/perf/round4-20260915/$CANDIDATE.patch" > "$RUNNER_TEMP/candidate.patch"
+          test "$(git hash-object "test/$TEST")" = "$TEST_BLOB"
+          mkdir -p builds/round4-qualification
+          cp "$RUNNER_TEMP/candidate.patch" builds/round4-qualification/
+          git switch -c "$PRODUCT_BRANCH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - name: Reproduce only the new optimization assertions on the unchanged parent
+        run: |
+          npm run build:libs > builds/round4-qualification/parent-build.log 2>&1
+          set +e
+          node node_modules/vitest/vitest.mjs run "test/$TEST" --reporter=json --outputFile=builds/round4-qualification/red.json > builds/round4-qualification/red.log 2>&1
+          status=$?
+          set -e
+          test "$status" = 1
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          r = json.loads(Path('builds/round4-qualification/red.json').read_text())
+          failed = [a for f in r['testResults'] for a in f['assertionResults'] if a['status'] == 'failed']
+          assert len(failed) == int(os.environ['RED_FAILURES']), failed
+          expected = {
+              'record-direct': ['allocates only the score-key scratch column before final output'],
+              'string-runs': ['copies 1,024 adjacent first-seen keys through one source view',
+                  'flushes exactly at source gaps without changing first-seen key order'],
+          }[os.environ['CANDIDATE']]
+          assert sorted(a['title'] for a in failed) == sorted(expected), failed
+          assert r['numPendingTests'] == 0 and r['numFailedTests'] == len(expected), r
+          PY
+      - name: Apply exact source revision and rebuild
+        run: |
+          git apply --check "$RUNNER_TEMP/candidate.patch"
+          git apply "$RUNNER_TEMP/candidate.patch"
+          test "$(sha256sum "ext/js/dictionary/$SOURCE" | cut -d ' ' -f 1)" = "$SOURCE_HASH"
+          npm run build:libs 2>&1 | tee builds/round4-qualification/candidate-build.log
+          node --version > builds/round4-qualification/node.txt
+          clang --version > builds/round4-qualification/compiler.txt
+      - name: New regressions and adjacent import/storage/lookup tests
+        id: focused
+        continue-on-error: true
+        run: node node_modules/vitest/vitest.mjs run "test/$TEST" test/dictionary-database-content-dedup.test.js test/term-record-opfs-store.test.js test/term-content-block-store.test.js test/term-lookup-index.test.js test/term-lookup-index-preparation.test.js test/lookup-construction-experiments.test.js 2>&1 | tee builds/round4-qualification/focused.log
+      - name: Complete unit suite
+        id: unit
+        continue-on-error: true
+        run: npm run test:unit 2>&1 | tee builds/round4-qualification/unit.log
+      - name: Options suite
+        id: options
+        continue-on-error: true
+        run: npm run test:unit:options 2>&1 | tee builds/round4-qualification/options.log
+      - name: All strict JavaScript typecheck projects
+        id: types
+        continue-on-error: true
+        run: npm run test:ts 2>&1 | tee builds/round4-qualification/types.log
+      - name: Changed-file ESLint without rewriting
+        id: lint
+        continue-on-error: true
+        run: node node_modules/eslint/bin/eslint.js "ext/js/dictionary/$SOURCE" "test/$TEST" 2>&1 | tee builds/round4-qualification/lint.log
+      - name: Build plans and actual Chrome and Firefox packages
+        id: build
+        continue-on-error: true
+        run: |
+          npm run test:build 2>&1 | tee builds/round4-qualification/build-plans.log
+          node dev/bin/build.js --target chrome-dev 2>&1 | tee builds/round4-qualification/chrome-build.log
+          node dev/bin/build.js --target firefox-dev 2>&1 | tee builds/round4-qualification/firefox-build.log
+      - name: Install pinned Chromium and complete dictionary fixtures
+        run: |
+          npx playwright install --with-deps chromium
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Full strict Chromium import and persistence qualification
+        id: browser
+        continue-on-error: true
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/round4-qualification/full-browser.html
+        run: |
+          npm run test:e2e:chromium-extension 2>&1 | tee builds/round4-qualification/browser.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path('builds/round4-qualification/full-browser.json').read_text())
+          assert r['status'] == 'success' and r['skippedVerification'] is False
+          assert len(r['phases']) >= 80
+          PY
+      - name: Publish only tested source and regression file
+        if: steps.focused.outcome == 'success' && steps.unit.outcome == 'success' && steps.options.outcome == 'success' && steps.types.outcome == 'success' && steps.lint.outcome == 'success' && steps.build.outcome == 'success' && steps.browser.outcome == 'success'
+        run: |
+          git diff --check
+          test "$(git hash-object "test/$TEST")" = "$TEST_BLOB"
+          test "$(sha256sum "ext/js/dictionary/$SOURCE" | cut -d ' ' -f 1)" = "$SOURCE_HASH"
+          git add "ext/js/dictionary/$SOURCE" "test/$TEST"
+          git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m "perf: reduce import allocation with $CANDIDATE"
+          test -z "$(git status --porcelain)"
+          git push origin "HEAD:refs/heads/$PRODUCT_BRANCH"
+          git rev-parse HEAD 'HEAD^{tree}' > builds/round4-qualification/published.txt
+      - name: Record outcomes and fail closed
+        if: always()
+        env:
+          FOCUSED: ${{ steps.focused.outcome }}
+          UNIT: ${{ steps.unit.outcome }}
+          OPTIONS: ${{ steps.options.outcome }}
+          TYPES: ${{ steps.types.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+          BROWSER: ${{ steps.browser.outcome }}
+        run: |
+          mkdir -p builds/round4-qualification
+          printf '%s\n' "focused=$FOCUSED unit=$UNIT options=$OPTIONS types=$TYPES lint=$LINT build=$BUILD browser=$BROWSER" > builds/round4-qualification/outcomes.txt
+          cp "test/$TEST" builds/round4-qualification/
+          test "$FOCUSED/$UNIT/$OPTIONS/$TYPES/$LINT/$BUILD/$BROWSER" = 'success/success/success/success/success/success/success'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: round4-qualification-${{ matrix.candidate }}
+          path: builds/round4-qualification
+          retention-days: 30
