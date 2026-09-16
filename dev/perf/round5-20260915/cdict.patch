@@ -1,0 +1,90 @@
+--- a/dev/lib/zstd-wasm.js
++++ b/dev/lib/zstd-wasm.js
+@@ -25,6 +25,37 @@
+ let initialization = null;
+ /** @type {Map<number, {source: number, sourceCapacity: number, destination: number, destinationCapacity: number, dictionary: number, dictionaryCapacity: number}>} */
+ const contextBuffers = new Map();
++/** @type {Map<number, {pointer: number, bytes: Uint8Array, level: number}>} */
++const preparedDictionaries = new Map();
++
++/**
++ * One owned prepared dictionary per compression context. Exact bytes and level
++ * are checked on every use, including mutation of a caller-owned dictionary.
++ * The dictionary copy is taken before native allocation can grow WASM memory.
++ * @param {number} context
++ * @param {number} source
++ * @param {number} length
++ * @param {number} level
++ * @returns {number}
++ * @throws {Error} If dictionary preparation fails.
++ */
++function getPreparedDictionary(context, source, length, level) {
++    const module = getModule();
++    const previous = preparedDictionaries.get(context);
++    if (previous && previous.level === level && previous.bytes.length === length) {
++        let equal = true;
++        for (let i = 0; i < length; ++i) {
++            if (previous.bytes[i] !== module.HEAPU8[source + i]) { equal = false; break; }
++        }
++        if (equal) { return previous.pointer; }
++    }
++    const bytes = module.HEAPU8.slice(source, source + length);
++    const pointer = module._ZSTD_createCDict(source, length, level);
++    if (pointer === 0) { throw new Error('Failed to prepare Zstd compression dictionary'); }
++    preparedDictionaries.set(context, {pointer, bytes, level});
++    if (previous) { module._ZSTD_freeCDict(previous.pointer); }
++    return pointer;
++}
+ const TERM_CONTENT_BLOCK_ENVELOPE_BYTES = 12;
+ 
+ /**
+@@ -133,8 +164,12 @@
+  * @returns {number}
+  */
+ export function freeCCtx(context) {
++    const module = getModule();
++    const result = module._ZSTD_freeCCtx(context);
++    const dictionary = preparedDictionaries.get(context);
++    if (dictionary) { module._ZSTD_freeCDict(dictionary.pointer); preparedDictionaries.delete(context); }
+     releaseContextBuffers(context);
+-    return getModule()._ZSTD_freeCCtx(context);
++    return result;
+ }
+ 
+ /**
+@@ -216,15 +251,13 @@
+     if (prefixBytes > 0) {
+         module.HEAPU8.fill(0, buffers.destination, buffers.destination + prefixBytes);
+     }
+-    const size = module._ZSTD_compress_usingDict(
++    const size = module._ZSTD_compress_usingCDict(
+         context,
+         buffers.destination + prefixBytes,
+         buffers.destinationCapacity - prefixBytes,
+         buffers.source,
+         content.byteLength,
+-        buffers.dictionary,
+-        dictionary.byteLength,
+-        level,
++        getPreparedDictionary(context, buffers.dictionary, dictionary.byteLength, level),
+     );
+     checkResult(size);
+     if (writeBlockEnvelope && module._manabitan_write_block_envelope(buffers.destination, prefixBytes + size) !== 1) {
+@@ -370,15 +403,13 @@
+     if (contextBuffers.get(context) !== buffers) {
+         throw new Error('Prepared Zstd span buffers are no longer active');
+     }
+-    const size = module._ZSTD_compress_usingDict(
++    const size = module._ZSTD_compress_usingCDict(
+         context,
+         buffers.destination + prefixBytes,
+         buffers.destinationCapacity - prefixBytes,
+         buffers.source,
+         contentBytes,
+-        buffers.dictionary,
+-        dictionaryBytes,
+-        level,
++        getPreparedDictionary(context, buffers.dictionary, dictionaryBytes, level),
+     );
+     checkResult(size);
+     if (writeBlockEnvelope && module._manabitan_write_block_envelope(buffers.destination, prefixBytes + size) !== 1) {

@@ -1,0 +1,36 @@
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -3018,7 +3018,12 @@
+             }
+ 
+             // Load file content without staging through Blob.
+-            const bytes = await this._getData(file, new Uint8ArrayWriter());
++            const decodedSize = Reflect.get(file, 'uncompressedSize');
++            const compressedSize = Reflect.get(file, 'compressedSize');
++            const boundedMedia = Number.isSafeInteger(decodedSize) && decodedSize >= 0 && decodedSize <= 256 * 1024 &&
++                Number.isSafeInteger(compressedSize) && compressedSize >= 0 && compressedSize <= 256 * 1024;
++            const bytes = await this._getData(file, new Uint8ArrayWriter(), void 0,
++                boundedMedia ? {useWebWorkers: false} : void 0);
+             let content = (
+                 bytes.byteOffset === 0 &&
+                 bytes.byteLength === bytes.buffer.byteLength
+@@ -4973,9 +4978,10 @@
+      * @param {ImportFileEntry} entry
+      * @param {import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter} writer
+      * @param {AbortSignal} [signal]
++     * @param {{useWebWorkers?: boolean, transferStreams?: boolean}} [zipOptions]
+      * @returns {Promise<T>}
+      */
+-    async _getData(entry, writer, signal) {
++    async _getData(entry, writer, signal, zipOptions) {
+         signal?.throwIfAborted();
+         const entryBytes = /** @type {unknown} */ (Reflect.get(entry, 'bytes'));
+         const bytes = entryBytes instanceof Uint8Array ? entryBytes : void 0;
+@@ -4998,6 +5004,7 @@
+         const getData = /** @type {(writer: import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter, options?: import('@zip.js/zip.js').EntryGetDataOptions) => Promise<T>} */ (entryGetData);
+         return await getData.call(entry, writer, {
+             useWebWorkers: this._zipUseWebWorkers,
++            ...zipOptions,
+             ...(typeof signal === 'undefined' ? {} : {signal}),
+         });
+     }

@@ -1,0 +1,24 @@
+--- a/dev/bin/build-zstd-wasm.js
++++ b/dev/bin/build-zstd-wasm.js
+@@ -31,6 +31,9 @@
+     '_ZSTD_createCCtx',
+     '_ZSTD_freeCCtx',
+     '_ZSTD_compress_usingDict',
++    '_ZSTD_createCDict',
++    '_ZSTD_freeCDict',
++    '_ZSTD_compress_usingCDict',
+     '_ZSTD_compress',
+     '_ZSTD_createDCtx',
+     '_ZSTD_freeDCtx',
+--- a/dev/lib/zstd-simd-module.d.ts
++++ b/dev/lib/zstd-simd-module.d.ts
+@@ -27,6 +27,9 @@
+     _ZSTD_freeCCtx(context: number): number;
+     _ZSTD_freeDCtx(context: number): number;
+     _ZSTD_compressBound(size: number): number;
++    _ZSTD_createCDict(dictionary: number, dictionarySize: number, level: number): number;
++    _ZSTD_freeCDict(dictionary: number): number;
++    _ZSTD_compress_usingCDict(context: number, destination: number, capacity: number, source: number, size: number, dictionary: number): number;
+     _ZSTD_compress(destination: number, capacity: number, source: number, size: number, level: number): number;
+     _ZSTD_compress_usingDict(context: number, destination: number, capacity: number, source: number, size: number, dictionary: number, dictionarySize: number, level: number): number;
+     _ZSTD_decompress(destination: number, capacity: number, source: number, size: number): number;
