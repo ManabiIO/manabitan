@@ -1,0 +1,70 @@
+name: JSON delimiter transition import comparisons
+on:
+  push:
+    branches: [verify/import-round7-20260916]
+    paths: [.github/workflows/import-round7-delimiters-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [key-colon, string-delimiters]
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c82dcc08a3eea1e4d1c3382a529b4dee1a908d8e
+          persist-credentials: false
+      - name: Preserve exact candidate and fixed-plan same-path harness
+        run: |
+          mkdir -p "$RUNNER_TEMP/round7-review"
+          cp dev/perf/round7-20260916/apply-delimiters.py "$RUNNER_TEMP/round7-review/apply.py"
+          git fetch --depth=1 origin 23524cf48cb08482ebd271406fe48da773bb516c
+          git show FETCH_HEAD:dev/perf/round6-20260916/screen.py > "$RUNNER_TEMP/round7-review/screen.py"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p = Path(os.environ['RUNNER_TEMP']) / 'round7-review/screen.py'
+          s = p.read_text().replace("('word-jump', 'simd-jump', 'inflight-bounds')", "('key-colon', 'string-delimiters')")
+          s = s.replace('round6', 'round7').replace('round-six', 'round-seven')
+          s = s.replace("'inflight-bounds'", "'not-applicable'")
+          p.write_text(s)
+          PY
+          python3 -m py_compile "$RUNNER_TEMP/round7-review/"*.py
+          git fetch --depth=1 origin b4094a423c20bb0ed424d944238f922c1b36559c
+          git checkout --detach b4094a423c20bb0ed424d944238f922c1b36559c
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify full locked dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Focused tests, corpus equality and six alternating pairs
+        env:
+          CANDIDATE: ${{ matrix.candidate }}
+          DICTIONARY: ${{ matrix.dictionary }}
+          PAIRS: '6'
+          INITIAL_ORDER: AB
+        run: |
+          mkdir -p builds/round7
+          python3 "$RUNNER_TEMP/round7-review/screen.py" 2>&1 | tee builds/round7/driver.log
+      - name: Preserve exact driver even on failure
+        if: always()
+        run: |
+          mkdir -p builds/round7/driver-inputs
+          cp "$RUNNER_TEMP/round7-review/"*.py builds/round7/driver-inputs/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: round7-${{ matrix.candidate }}-${{ matrix.dictionary }}
+          path: builds/round7
+          retention-days: 30
