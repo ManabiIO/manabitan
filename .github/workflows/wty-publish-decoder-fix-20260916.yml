@@ -1,3 +1,4 @@
+# Rerun after lint-clean browser regression.
 name: Publish WTY shared-WASM decoder fix
 on:
   push:
