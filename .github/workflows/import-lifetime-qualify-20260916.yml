@@ -1,0 +1,134 @@
+name: Prepared compression lifetime RED GREEN qualification
+on:
+  push:
+    branches: [verify/import-crc-lifetime-20260916]
+    paths: [.github/workflows/import-lifetime-qualify-20260916.yml]
+permissions:
+  contents: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
+      - name: Load immutable recipe and regression tests
+        run: |
+          mkdir -p builds/lifetime-qualification "$RUNNER_TEMP/lifetime-inputs"
+          git fetch --depth=1 origin 6efa183a0f9c0f9b7e125cc8db9e6d9dadb96cdf
+          git show FETCH_HEAD:dev/perf/crc-lifetime-20260916/apply.py > "$RUNNER_TEMP/lifetime-inputs/apply.py"
+          git show FETCH_HEAD:dev/perf/crc-lifetime-20260916/tests/zstd-prepared-lifetime.test.js > test/zstd-prepared-lifetime.test.js
+          printf '%s\n' '76a9730e11b2162143655ab7b5bb95d703a499b0d330a370c1011bb13b7f1210  test/zstd-prepared-lifetime.test.js' | sha256sum -c -
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - name: Reproduce exact stale-handle failures against unchanged production code
+        run: |
+          npm run build:libs > builds/lifetime-qualification/parent-build.log 2>&1
+          set +e
+          node node_modules/vitest/vitest.mjs run test/zstd-prepared-lifetime.test.js --reporter=json --outputFile=builds/lifetime-qualification/red.json > builds/lifetime-qualification/red.log 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('builds/lifetime-qualification/red.json').read_text())
+          assert r['numTotalTests']==13 and r['numFailedTests']==10 and r['numPassedTests']==3
+          assertions=r['testResults'][0]['assertionResults']
+          failed=[t for t in assertions if t['status']=='failed']
+          assert len(failed)==10
+          assert all(any('to throw an error' in message for message in t['failureMessages']) for t in failed), failed
+          PY
+      - name: Apply exact lifetime fix and build libraries
+        run: |
+          python3 "$RUNNER_TEMP/lifetime-inputs/apply.py" lifetime | tee builds/lifetime-qualification/source-change.json
+          printf '%s\n' '87b9a365a746d5a24edee51f89fea3cf82a244d636cee233e771c9549ca19909  dev/lib/zstd-wasm.js' | sha256sum -c -
+          npm run build:libs > builds/lifetime-qualification/candidate-build.log 2>&1
+          sha256sum dev/lib/zstd-wasm.js test/zstd-prepared-lifetime.test.js ext/lib/zstd-wasm.js ext/lib/term-bank-parser.wasm test/perf/dictionaries.lock.json > builds/lifetime-qualification/qualified-inputs.sha256
+      - name: Focused regressions and complete unit qualification
+        run: |
+          node node_modules/vitest/vitest.mjs run test/zstd-prepared-lifetime.test.js test/zstd-wasm.test.js test/zstd-term-content-pool.test.js test/zstd-term-content-initialization.test.js test/dictionary-database-content-dedup.test.js test/term-content-block-store.test.js --reporter=json --outputFile=builds/lifetime-qualification/green.json > builds/lifetime-qualification/green.log 2>&1
+          npm run test:unit 2>&1 | tee builds/lifetime-qualification/unit.log
+          npm run test:unit:options 2>&1 | tee builds/lifetime-qualification/options.log
+          npm run test:ts 2>&1 | tee builds/lifetime-qualification/types.log
+          node node_modules/eslint/bin/eslint.js dev/lib/zstd-wasm.js test/zstd-prepared-lifetime.test.js > builds/lifetime-qualification/changed-lint.log 2>&1
+      - name: All build plans and actual browser packages
+        run: |
+          npm run test:build 2>&1 | tee builds/lifetime-qualification/build-plans.log
+          node dev/bin/build.js --target chrome-dev > builds/lifetime-qualification/chrome-build.log 2>&1
+          node dev/bin/build.js --target firefox-dev > builds/lifetime-qualification/firefox-build.log 2>&1
+      - name: Check inherited repository lint debt without suppressing new failures
+        run: |
+          set +e
+          node node_modules/eslint/bin/eslint.js . --ignore-pattern '**/*.json' -f json > builds/lifetime-qualification/lint.json 2> builds/lifetime-qualification/lint-stderr.log
+          status=$?
+          set -e
+          test "$status" -eq 1
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path('test/term-bank-composite-state.test.js')
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='9384dca84f8e29bc0cc728c19d50bc946191ce25a6ce48566c75480dc99edd17'
+          issues=[r for r in json.loads(Path('builds/lifetime-qualification/lint.json').read_text()) if r['errorCount'] or r['warningCount']]
+          assert len(issues)==1 and issues[0]['filePath'].endswith('/test/term-bank-composite-state.test.js')
+          assert issues[0]['errorCount']==38 and issues[0]['warningCount']==0
+          PY
+      - name: Install browser and full checksum-pinned fixtures
+        run: |
+          npx playwright install --with-deps chromium
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Full strict Chromium import and recovery lifecycle
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{}'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/lifetime-qualification/browser.html
+        run: |
+          npm run test:e2e:chromium-extension 2>&1 | tee builds/lifetime-qualification/browser.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('builds/lifetime-qualification/browser.json').read_text())
+          assert r['status']=='success' and r['skippedVerification'] is False and len(r['phases'])>=80
+          PY
+      - name: Publish only qualified fix and tests on a new correctness branch
+        run: |
+          git diff --check
+          sha256sum -c builds/lifetime-qualification/qualified-inputs.sha256
+          git add dev/lib/zstd-wasm.js test/zstd-prepared-lifetime.test.js
+          python3 - <<'PY'
+          import subprocess
+          assert subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines()==['dev/lib/zstd-wasm.js','test/zstd-prepared-lifetime.test.js']
+          PY
+          git -c core.hooksPath=/dev/null -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'fix: bind prepared compression to its active buffer operation'
+          test -z "$(git status --porcelain)"
+          branch='fix/zstd-prepared-lifetime-20260916'
+          test -z "$(git ls-remote --heads origin "$branch")"
+          git push origin "HEAD:refs/heads/$branch"
+          git rev-parse HEAD 'HEAD^{tree}' > builds/lifetime-qualification/qualified.txt
+      - name: Preserve failure and success evidence
+        if: always()
+        run: |
+          mkdir -p builds/lifetime-qualification
+          git diff c0a1b7ee6fa1383a0a422361d2a8b7f826499fff -- dev/lib/zstd-wasm.js test/zstd-prepared-lifetime.test.js > builds/lifetime-qualification/source.patch
+          cp test/zstd-prepared-lifetime.test.js builds/lifetime-qualification/
+          cp "$RUNNER_TEMP/lifetime-inputs/apply.py" builds/lifetime-qualification/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prepared-lifetime-exact-qualification
+          path: builds/lifetime-qualification
+          retention-days: 30
