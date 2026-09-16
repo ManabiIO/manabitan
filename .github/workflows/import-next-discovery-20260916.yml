@@ -1,0 +1,23 @@
+name: Inspect next import candidates
+on:
+  push:
+    branches: [verify/import-crc-lifetime-20260916]
+    paths: [.github/workflows/import-next-discovery-20260916.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
+      - run: |
+          mkdir -p builds/next-discovery
+          rg -n -C 8 'beginCompressWrappedTermContentZstdSpansBatch|compressWrappedSpans\(' ext/js > builds/next-discovery/callsites.txt || true
+          rg -n -C 5 'sourceOffsets|sourceLengths|SharedArrayBuffer' ext/js/dictionary/term-content-block-store.js ext/js/dictionary/dictionary-database.js > builds/next-discovery/span-sources.txt || true
+          { command -v emcc || true; emcc --version 2>/dev/null || true; } > builds/next-discovery/emcc.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: next-import-discovery
+          path: builds/next-discovery
