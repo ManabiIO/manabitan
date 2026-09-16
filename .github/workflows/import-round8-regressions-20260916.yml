@@ -1,0 +1,74 @@
+name: Round eight parser boundary regression matrix
+on:
+  push:
+    branches: [verify/import-round8-20260916]
+    paths: [.github/workflows/import-round8-regressions-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e01a9611de961455d1a01568ac56dd99ab45b9c5
+          persist-credentials: false
+      - name: Preserve immutable regression and candidate inputs
+        run: |
+          cp -a dev/perf/round8-20260916 "$RUNNER_TEMP/round8-inputs"
+          cp test/term-bank-control-flow.test.js "$RUNNER_TEMP/control-flow.test.js"
+          git fetch --depth=1 origin b4094a423c20bb0ed424d944238f922c1b36559c
+          git checkout --detach b4094a423c20bb0ed424d944238f922c1b36559c
+          cp "$RUNNER_TEMP/control-flow.test.js" test/term-bank-control-flow.test.js
+          test "$(git hash-object test/term-bank-control-flow.test.js)" = 9a58d0df10d91f0d23217380ea8e640a38585ddf
+          mkdir -p builds/round8-regressions
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - name: New-test lint and all strict typecheck projects
+        run: |
+          npm run build:libs > builds/round8-regressions/baseline-build.log 2>&1
+          node node_modules/eslint/bin/eslint.js test/term-bank-control-flow.test.js 2>&1 | tee builds/round8-regressions/lint.log
+          npm run test:ts 2>&1 | tee builds/round8-regressions/types.log
+      - name: Test parent and all seven exact native candidate sources
+        run: |
+          for candidate in parent row-cursor row-unrolled state-tables scalar-once string-prefix local-hints composite-switch; do
+            git checkout b4094a423c20bb0ed424d944238f922c1b36559c -- ext/js/dictionary/wasm/term-bank-parser.c
+            case "$candidate" in
+              parent) ;;
+              row-cursor|row-unrolled|state-tables|scalar-once)
+                python3 "$RUNNER_TEMP/round8-inputs/apply.py" "$candidate" > "builds/round8-regressions/$candidate-source.json" ;;
+              *) python3 "$RUNNER_TEMP/round8-inputs/apply-more.py" "$candidate" > "builds/round8-regressions/$candidate-source.json" ;;
+            esac
+            npm run build:libs > "builds/round8-regressions/$candidate-build.log" 2>&1
+            node node_modules/vitest/vitest.mjs run test/term-bank-control-flow.test.js --reporter=json --outputFile="builds/round8-regressions/$candidate.json" 2>&1 | tee "builds/round8-regressions/$candidate.log"
+          done
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('builds/round8-regressions')
+          candidates = ['parent', 'row-cursor', 'row-unrolled', 'state-tables', 'scalar-once', 'string-prefix', 'local-hints', 'composite-switch']
+          for candidate in candidates:
+              r = json.loads((root / (candidate + '.json')).read_text())
+              assert r['success'] is True and r['numPassedTests'] == 24 and r['numFailedTests'] == 0 and r['numPendingTests'] == 0, candidate
+          (root / 'complete.json').write_text(json.dumps({'distinctTests': 24, 'compositions': candidates, 'status': 'success'}))
+          PY
+          test "$(git hash-object test/term-bank-control-flow.test.js)" = 9a58d0df10d91f0d23217380ea8e640a38585ddf
+      - name: Preserve exact test and inputs
+        if: always()
+        run: |
+          mkdir -p builds/round8-regressions/inputs
+          cp test/term-bank-control-flow.test.js builds/round8-regressions/
+          cp "$RUNNER_TEMP/round8-inputs/"*.py builds/round8-regressions/inputs/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: round8-parser-regressions
+          path: builds/round8-regressions
+          retention-days: 30
