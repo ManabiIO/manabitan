@@ -399,11 +399,14 @@ static int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, u
         while (i + 8u <= len) {
             uint64_t word;
             __builtin_memcpy(&word, src + i, sizeof(word));
-            if (
-                has_zero_byte64(word ^ UINT64_C(0x2222222222222222)) != 0u ||
-                has_zero_byte64(word ^ UINT64_C(0x5c5c5c5c5c5c5c5c)) != 0u ||
-                has_control_byte64(word) != 0u
-            ) {
+            const uint64_t special =
+                has_zero_byte64(word ^ UINT64_C(0x2222222222222222)) |
+                has_zero_byte64(word ^ UINT64_C(0x5c5c5c5c5c5c5c5c)) |
+                has_control_byte64(word);
+            if (special != 0u) {
+                // On little-endian WASM the first marked byte is exact, even
+                // when subtraction borrows mark a later byte spuriously.
+                i += (uint32_t)__builtin_ctzll(special) / 8u;
                 break;
             }
             i += 8u;
