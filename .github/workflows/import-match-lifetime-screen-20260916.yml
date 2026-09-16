@@ -1,0 +1,92 @@
+name: DEFLATE match and lifetime source comparisons
+on:
+  push:
+    branches: [verify/import-crc-lifetime-20260916]
+    paths: [.github/workflows/import-match-lifetime-screen-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [match-fill, match-expand, lifetime]
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 6476bbb73bf7316e92b816593e70b4181df75213
+          persist-credentials: false
+      - name: Preserve immutable generators and source-identity benchmark plan
+        run: |
+          mkdir -p "$RUNNER_TEMP/match-review"
+          cp dev/perf/crc-lifetime-20260916/apply.py "$RUNNER_TEMP/match-review/apply-first.py"
+          cp dev/perf/crc-lifetime-20260916/apply-overlap.py "$RUNNER_TEMP/match-review/apply-overlap.py"
+          git fetch --depth=1 origin 23524cf48cb08482ebd271406fe48da773bb516c
+          git show FETCH_HEAD:dev/perf/round6-20260916/screen.py > "$RUNNER_TEMP/match-review/screen.py"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          inputs=Path(os.environ['RUNNER_TEMP'])/'match-review'
+          (inputs/'apply.py').write_text("from pathlib import Path\nimport subprocess,sys\nname='apply-first.py' if sys.argv[1]=='lifetime' else 'apply-overlap.py'\nsubprocess.run(['python3',str(Path(__file__).with_name(name)),sys.argv[1]],check=True)\n")
+          p=inputs/'screen.py'
+          s=p.read_text()
+          replacements={
+              'b4094a423c20bb0ed424d944238f922c1b36559c':'c0a1b7ee6fa1383a0a422361d2a8b7f826499fff',
+              '604c5c2b64b8d217e87895dbd981aa3a30579bcb':'a48da18d4244b00661d0c6518b2ce77b9f2f9b55',
+              "('word-jump', 'simd-jump', 'inflight-bounds')":"('match-fill', 'match-expand', 'lifetime')",
+              'round6':'match-review',
+              'round-six':'match-review',
+              "variant != 'inflight-bounds'":"variant != 'lifetime'",
+              "variant == 'inflight-bounds'":"variant == 'lifetime'",
+              "['test/dictionary-database-content-dedup.test.js', 'test/term-content-block-store.test.js']":"['test/zstd-wasm.test.js', 'test/zstd-term-content-pool.test.js', 'test/zstd-term-content-initialization.test.js']",
+          }
+          for old,new in replacements.items():
+              assert old in s, old
+              s=s.replace(old,new)
+          start=s.index("allowed = {source.relative_to('ext').as_posix()}")
+          end=s.index('with zipfile.ZipFile',start)
+          s=s[:start]+"allowed = {'lib/zstd-wasm.js', 'lib/zstd-wasm.js.map'} if variant == 'lifetime' else {source.relative_to('ext').as_posix(), 'lib/term-bank-parser.wasm'}\n"+s[end:]
+          needle="logrun(['node', 'node_modules/vitest/vitest.mjs', 'run', *tests], 'focused.log', candidate)"
+          assert needle in s
+          s=s.replace(needle,"assert all((candidate / name).is_file() for name in tests), tests\n"+needle)
+          needle='identities = {arm: identity(directory) for arm, directory in roots.items()}'
+          s=s.replace(needle,needle+"\n(output / 'sizes.json').write_text(json.dumps({arm: {'wasmBytes': (directory / 'ext/lib/term-bank-parser.wasm').stat().st_size, 'packageBytes': (directory / package).stat().st_size} for arm, directory in roots.items()}, indent=2))")
+          p.write_text(s)
+          PY
+          python3 -m py_compile "$RUNNER_TEMP/match-review/"*.py
+          git fetch --depth=1 origin c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
+          git checkout --detach c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify complete fixture bytes
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Fixed alternating pairs with excluded warmups and interleaved A/A controls
+        env:
+          CANDIDATE: ${{ matrix.candidate }}
+          DICTIONARY: ${{ matrix.dictionary }}
+          PAIRS: ${{ matrix.candidate == 'lifetime' && '12' || '6' }}
+          INITIAL_ORDER: BA
+        run: |
+          mkdir -p builds/match-review
+          python3 "$RUNNER_TEMP/match-review/screen.py" 2>&1 | tee builds/match-review/driver.log
+      - name: Preserve all exact executed inputs
+        if: always()
+        run: |
+          mkdir -p builds/match-review/executed-inputs
+          cp "$RUNNER_TEMP/match-review/"*.py builds/match-review/executed-inputs/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: match-review-${{ matrix.candidate }}-${{ matrix.dictionary }}
+          path: builds/match-review
+          retention-days: 30
