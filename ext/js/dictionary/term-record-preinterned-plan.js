@@ -449,11 +449,24 @@ function compactValidatedTermRecordPlan(plan, start, count, remapScratch, readin
     }
     const stringsBuffer = new Uint8Array(stringsByteLength);
     let cursor = 0;
+    let runStart = -1;
+    let runEnd = 0;
     for (const oldIndex of referencedOldIndexes) {
         const oldOffset = sourceStringOffsets[oldIndex];
         const length = plan.stringLengths[oldIndex];
-        stringsBuffer.set(plan.stringsBuffer.subarray(oldOffset, oldOffset + length), cursor);
-        cursor += length;
+        if (runStart < 0) {
+            runStart = oldOffset;
+        } else if (oldOffset !== runEnd) {
+            stringsBuffer.set(plan.stringsBuffer.subarray(runStart, runEnd), cursor);
+            cursor += runEnd - runStart;
+            runStart = oldOffset;
+        }
+        runEnd = oldOffset + length;
+    }
+    if (runStart >= 0) {
+        // Adjacent source spans already have the required first-seen ordering.
+        // Copy their union once without allocating one view for every key.
+        stringsBuffer.set(plan.stringsBuffer.subarray(runStart, runEnd), cursor);
     }
     return {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes};
 }
