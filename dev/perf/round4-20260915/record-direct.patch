@@ -1,0 +1,50 @@
+diff --git a/ext/js/dictionary/term-record-opfs-store.js b/ext/js/dictionary/term-record-opfs-store.js
+index d15bcc6..b80e551 100644
+--- a/ext/js/dictionary/term-record-opfs-store.js
++++ b/ext/js/dictionary/term-record-opfs-store.js
+@@ -4575,8 +4575,6 @@ export class TermRecordOpfsStore {
+      */
+     _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
+         const count = chunk.rowCount;
+-        const offsets = new Uint32Array(count);
+-        const lengths = new Uint16Array(count);
+         const scoreKeys = new Uint16Array(count);
+         /** @type {number[]} */
+         const scores = [];
+@@ -4584,14 +4582,11 @@ export class TermRecordOpfsStore {
+         const scoreIndexes = new Map();
+         let compact = true;
+         for (let i = 0; i < count; ++i) {
+-            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+             const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+             if (contentLength >= U16_NULL) {
+                 compact = false;
+                 break;
+             }
+-            offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
+-            lengths[i] = contentLength < 0 ? U16_NULL : contentLength;
+             const score = chunk.scoreList[i] ?? 0;
+             let scoreIndex = scoreIndexes.get(score);
+             if (typeof scoreIndex !== 'number') {
+@@ -4635,11 +4630,19 @@ export class TermRecordOpfsStore {
+         let cursor = COMPACT_RECORD_FIELDS_HEADER_BYTES;
+         new Int32Array(output.buffer, cursor, scores.length).set(scores);
+         cursor += scores.length * 4;
+-        new Uint32Array(output.buffer, cursor, count).set(offsets);
++        const offsets = new Uint32Array(output.buffer, cursor, count);
+         cursor += count * 4;
+-        new Uint16Array(output.buffer, cursor, count).set(lengths);
++        const lengths = new Uint16Array(output.buffer, cursor, count);
+         cursor += count * 2;
+         new Uint16Array(output.buffer, cursor, count).set(scoreKeys);
++        // Materialize offset and length columns directly in the final owning
++        // buffer after the format decision; do not stage or copy those columns.
++        for (let i = 0; i < count; ++i) {
++            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
++            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
++            offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
++            lengths[i] = contentLength < 0 ? U16_NULL : contentLength;
++        }
+         return output;
+     }
+ 

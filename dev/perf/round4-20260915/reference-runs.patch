@@ -1,0 +1,34 @@
+diff --git a/ext/js/dictionary/term-content-block-store.js b/ext/js/dictionary/term-content-block-store.js
+index 48cd7d7..7ffa2bb 100644
+--- a/ext/js/dictionary/term-content-block-store.js
++++ b/ext/js/dictionary/term-content-block-store.js
+@@ -1244,18 +1244,22 @@ function createTermContentReferenceSlabs(
+  */
+ function createTermContentReferenceOffsets(entryCount, slabOffsets, entriesPerSlab) {
+     const contentOffsets = new Float64Array(entryCount);
+-    for (let i = 0; i < entryCount; ++i) {
+-        const slabIndex = Math.floor(i / entriesPerSlab);
++    for (let start = 0, slabIndex = 0; start < entryCount; start += entriesPerSlab, ++slabIndex) {
+         const slabOffset = slabOffsets[slabIndex];
+         if (!Number.isSafeInteger(slabOffset) || slabOffset < 0) {
+             throw new RangeError(`Invalid term content reference slab offset: ${slabOffset}`);
+         }
+-        const contentOffset = slabOffset +
+-        (i % entriesPerSlab) * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+-        if (!Number.isSafeInteger(contentOffset)) {
+-            throw new RangeError(`Term content reference offset exceeds the safe integer range: ${contentOffset}`);
++        const end = Math.min(entryCount, start + entriesPerSlab);
++        const lastOffset = slabOffset + (end - start - 1) * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
++        if (!Number.isSafeInteger(lastOffset)) {
++            throw new RangeError(`Term content reference offset exceeds the safe integer range: ${lastOffset}`);
++        }
++        // A nonnegative, integer-stride run is bounded by its first and last
++        // offsets. Validate the run once, then avoid per-row division/modulo.
++        let offset = slabOffset;
++        for (let i = start; i < end; ++i, offset += RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES) {
++            contentOffsets[i] = offset;
+         }
+-        contentOffsets[i] = contentOffset;
+     }
+     return contentOffsets;
+ }

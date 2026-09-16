@@ -1,0 +1,55 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index a9bf0c6..7da7dcc 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -7941,11 +7941,15 @@ null :
+             /** @type {Array<PendingContentDescriptor & {existingMeta: TermContentMeta}>} */
+             const exactCandidates = [];
+             /**
+-             * @param {PendingContentDescriptor} descriptor
++             * @param {number} uniqueIndex
++             * @param {number} rowIndex
++             * @param {number} contentOffset
++             * @param {number} contentLength
++             * @param {number} hash1
++             * @param {number} hash2
+              * @throws {RangeError} If an offset exceeds the persisted Uint32 representation.
+              */
+-            const appendPendingContent = (descriptor) => {
+-                const {uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2} = descriptor;
++            const appendPendingContent = (uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2) => {
+                 if (contentOffset > 0xffffffff) {
+                     throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
+                 }
+@@ -7999,7 +8003,8 @@ null :
+                     if (exactFallback) { ++exactFallbackCount; }
+                     if (recentSourceHit === true) { ++recentSourceHitCount; }
+                     if (typeof existingMeta === 'undefined') {
+-                        appendPendingContent(descriptor);
++                        const {uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2} = descriptor;
++                        appendPendingContent(uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2);
+                         continue;
+                     }
+                     const {uniqueIndex} = descriptor;
+@@ -8039,7 +8044,7 @@ null :
+                     ) {
+                         throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
+                     }
+-                    const descriptor = {uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2};
++
+                     const existingIndex = persistedLookupRequired ?
+                         this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
+                         -1;
+@@ -8047,10 +8052,10 @@ null :
+                         void 0 :
+                         this._readTermEntryContentMetaHashPairIndex(existingIndex);
+                     if (typeof existingMeta === 'undefined') {
+-                        appendPendingContent(descriptor);
++                        appendPendingContent(uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2);
+                         continue;
+                     }
+-                    exactCandidates.push({...descriptor, existingMeta});
++                    exactCandidates.push({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2, existingMeta});
+                     if (exactCandidates.length >= TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE) {
+                         await resolveExactCandidates();
+                     }
