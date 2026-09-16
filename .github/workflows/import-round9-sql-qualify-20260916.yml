@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 882a8045a9ca672d66d1536452ce5efe56a0eabc
+          ref: 0fec19b86bdfcf6d848cb456af68943162dd1517
       - name: Preserve exact reviewed inputs and select current production baseline
         run: |
           mkdir -p "$RUNNER_TEMP/round9-review"
@@ -27,7 +27,7 @@ jobs:
           git switch -c fix/sql-constraints-and-counts-20260916
           cp "$RUNNER_TEMP/round9-review/"*.test.js test/
           test "$(git hash-object test/dictionary-terms-vtab.test.js)" = bb6b7cbce7344bc4b40e46b42b199df61ca97ba8
-          test "$(git hash-object test/dictionary-counts-batched.test.js)" = f19cf23cb7a02c9ee592f9f16839c43a71b59eba
+          test "$(git hash-object test/dictionary-counts-batched.test.js)" = 4c62d7c207bc4dce1c0f3c60ae4adb2be73a65b4
           mkdir -p builds/round9-qualification
       - uses: actions/setup-node@v4
         with:
@@ -120,7 +120,7 @@ jobs:
           test "$(sha256sum ext/js/dictionary/dictionary-database.js | cut -d ' ' -f 1)" = bb4cf5bfa66f7a33a6535335533a8f8b75f10e1a37287717dd79808bb06e41c0
           test "$(sha256sum ext/js/dictionary/term-record-opfs-store.js | cut -d ' ' -f 1)" = 789c302d3bb5a40637090f59185b0ec868a5bcf3b34655988d4849fe280b68f8
           test "$(git hash-object test/dictionary-terms-vtab.test.js)" = bb6b7cbce7344bc4b40e46b42b199df61ca97ba8
-          test "$(git hash-object test/dictionary-counts-batched.test.js)" = f19cf23cb7a02c9ee592f9f16839c43a71b59eba
+          test "$(git hash-object test/dictionary-counts-batched.test.js)" = 4c62d7c207bc4dce1c0f3c60ae4adb2be73a65b4
           git add ext/js/dictionary/dictionary-database.js ext/js/dictionary/term-record-opfs-store.js test/dictionary-terms-vtab.test.js test/dictionary-counts-batched.test.js
           git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'fix: make SQL filters order independent and reduce dictionary count scans'
           test -z "$(git status --porcelain)"
@@ -144,6 +144,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: round9-sql-qualification
+          name: round9-sql-qualification-corrected
           path: builds/round9-qualification
           retention-days: 30
