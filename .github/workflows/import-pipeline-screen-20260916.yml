@@ -1,0 +1,87 @@
+name: Shared-span and dedup full-import screens
+on:
+  push:
+    branches: [verify/import-pipeline-research-20260916]
+    paths: [.github/workflows/import-pipeline-screen-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [gather32, gather64, cache64, scalar-pending]
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 272f975e20776f57208f0f85836ac17a96b8e897
+          persist-credentials: false
+      - name: Pin source and derive fixed-plan driver
+        run: |
+          mkdir -p "$RUNNER_TEMP/pipeline-review"
+          cp dev/perf/pipeline-research-20260916/apply.py "$RUNNER_TEMP/pipeline-review/apply.py"
+          git fetch --depth=1 origin 23524cf48cb08482ebd271406fe48da773bb516c
+          git show FETCH_HEAD:dev/perf/round6-20260916/screen.py > "$RUNNER_TEMP/pipeline-review/screen.py"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p = Path(os.environ['RUNNER_TEMP']) / 'pipeline-review/screen.py'
+          s = p.read_text()
+          replacements = {
+              'b4094a423c20bb0ed424d944238f922c1b36559c': 'c0a1b7ee6fa1383a0a422361d2a8b7f826499fff',
+              '604c5c2b64b8d217e87895dbd981aa3a30579bcb': 'a48da18d4244b00661d0c6518b2ce77b9f2f9b55',
+              "('word-jump', 'simd-jump', 'inflight-bounds')": "('gather32', 'gather64', 'cache64', 'scalar-pending')",
+              'round6': 'pipeline-review',
+              'round-six': 'pipeline-review',
+          }
+          for old, new in replacements.items():
+              assert old in s, old
+              s = s.replace(old, new)
+          start = s.index("allowed = {source.relative_to('ext').as_posix()}")
+          end = s.index('with zipfile.ZipFile', start)
+          s = s[:start] + "allowed = {'lib/zstd-wasm.js', 'lib/zstd-wasm.js.map'} if variant.startswith('gather') else {source.relative_to('ext').as_posix()}\n" + s[end:]
+          start = s.index("tests = ['test/dictionary-database-content-dedup.test.js'")
+          end = s.index("roots = {'A': root, 'B': candidate}", start)
+          s = s[:start] + "tests = ['test/zstd-wasm.test.js'] if variant.startswith('gather') else ['test/dictionary-database-content-dedup.test.js', 'test/term-content-block-store.test.js']\nlogrun(['node', 'node_modules/vitest/vitest.mjs', 'run', *tests], 'focused.log', candidate)\n" + s[end:]
+          old = 'identities = {arm: identity(directory) for arm, directory in roots.items()}'
+          assert s.count(old) == 1
+          s = s.replace(old, old + "\n(output / 'sizes.json').write_text(json.dumps({arm: {'wasmBytes': (directory / 'ext/lib/term-bank-parser.wasm').stat().st_size, 'packageBytes': (directory / package).stat().st_size} for arm, directory in roots.items()}, indent=2))")
+          p.write_text(s)
+          PY
+          python3 -m py_compile "$RUNNER_TEMP/pipeline-review/"*.py
+          git fetch --depth=1 origin c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
+          git checkout --detach c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify complete checksum-pinned dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Six alternating browser pairs, excluded warmups and interleaved A/A controls
+        env:
+          CANDIDATE: ${{ matrix.candidate }}
+          DICTIONARY: ${{ matrix.dictionary }}
+          PAIRS: '6'
+          INITIAL_ORDER: AB
+        run: |
+          mkdir -p builds/pipeline-review
+          python3 "$RUNNER_TEMP/pipeline-review/screen.py" 2>&1 | tee builds/pipeline-review/driver.log
+      - name: Retain exact driver inputs on success or failure
+        if: always()
+        run: |
+          mkdir -p builds/pipeline-review/executed-inputs
+          cp "$RUNNER_TEMP/pipeline-review/"*.py builds/pipeline-review/executed-inputs/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pipeline-screen-${{ matrix.candidate }}-${{ matrix.dictionary }}
+          path: builds/pipeline-review
+          retention-days: 30
