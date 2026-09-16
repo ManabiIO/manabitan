@@ -2,7 +2,9 @@ name: Raw-first term content import screen 20260916
 on:
   push:
     branches: [verify/raw-first-term-content-20260916]
-    paths: [.github/workflows/raw-first-term-content-screen-20260916.yml]
+    paths:
+      - .github/workflows/raw-first-term-content-screen-20260916.yml
+      - dev/perf/raw-first-term-content-20260916.patch
 permissions:
   contents: read
 defaults:
