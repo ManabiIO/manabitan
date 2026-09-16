@@ -45,14 +45,14 @@ try {
         /**
          * @param {unknown} value
          * @param {string} message
-         * @returns {asserts value}
+         * @returns {void}
          */
         function check(value, message) {
             if (!value) { throw new Error(message) }
         }
         check(globalThis.crossOriginIsolated, 'Test must execute with shared memory enabled')
         const parser = /** @type {typeof import('../../ext/js/dictionary/term-bank-wasm-parser.js')} */ (
-            await import('/ext/js/dictionary/term-bank-wasm-parser.js') // eslint-disable-line no-unsanitized/method
+            await import('/ext/js/dictionary/term-bank-wasm-parser.js')
         )
         const compiled = await WebAssembly.compile(await (await fetch('/ext/lib/term-bank-parser.wasm')).arrayBuffer())
         const instance = await WebAssembly.instantiate(compiled)
