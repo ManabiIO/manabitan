@@ -31,10 +31,10 @@ const server = createServer((request, response) => {
         response.end(await readFile(filePath))
     })().catch(() => { response.writeHead(500).end() })
 })
-await new Promise((resolve, reject) => {
+await /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
     server.once('error', reject)
-    server.listen(0, '127.0.0.1', () => resolve(undefined))
-})
+    server.listen(0, '127.0.0.1', () => resolve())
+}))
 const address = server.address()
 assert(address && typeof address === 'object')
 const browser = await chromium.launch({headless: true, args: ['--no-sandbox']})
@@ -53,6 +53,7 @@ try {
         check(globalThis.crossOriginIsolated, 'Test must execute with shared memory enabled')
         const parserModuleUrl = '/ext/js/dictionary/term-bank-wasm-parser.js'
         const parser = /** @type {typeof import('../../ext/js/dictionary/term-bank-wasm-parser.js')} */ (
+            // eslint-disable-next-line no-unsanitized/method
             await import(parserModuleUrl)
         )
         const compiled = await WebAssembly.compile(await (await fetch('/ext/lib/term-bank-parser.wasm')).arrayBuffer())
@@ -111,13 +112,13 @@ try {
     console.log(JSON.stringify({browser: browser.version(), expectedFailure: expectFailure, ...result}))
 } finally {
     await browser.close()
-    await new Promise((resolve, reject) => {
+    await /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
         server.close((error) => {
             if (error) {
                 reject(error)
                 return
             }
-            resolve(undefined)
+            resolve()
         })
-    })
+    }))
 }
