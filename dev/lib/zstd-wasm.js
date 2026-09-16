@@ -23,7 +23,7 @@ import createZstdModule from './zstd-simd-module.js';
 let moduleInstance = null;
 /** @type {Promise<void>|null} */
 let initialization = null;
-/** @type {Map<number, {source: number, sourceCapacity: number, destination: number, destinationCapacity: number, dictionary: number, dictionaryCapacity: number}>} */
+/** @type {Map<number, {source: number, sourceCapacity: number, destination: number, destinationCapacity: number, dictionary: number, dictionaryCapacity: number, prepared: object|null}>} */
 const contextBuffers = new Map();
 const TERM_CONTENT_BLOCK_ENVELOPE_BYTES = 12;
 
@@ -74,16 +74,19 @@ function checkResult(code) {
  * @param {number} sourceSize
  * @param {number} destinationSize
  * @param {number} dictionarySize
- * @returns {{source: number, sourceCapacity: number, destination: number, destinationCapacity: number, dictionary: number, dictionaryCapacity: number}}
+ * @returns {{source: number, sourceCapacity: number, destination: number, destinationCapacity: number, dictionary: number, dictionaryCapacity: number, prepared: object|null}}
  * @throws {Error} If a required buffer cannot be allocated.
  */
 function ensureContextBuffers(context, sourceSize, destinationSize, dictionarySize) {
     const module = getModule();
     let buffers = contextBuffers.get(context);
     if (typeof buffers === 'undefined') {
-        buffers = {source: 0, sourceCapacity: 0, destination: 0, destinationCapacity: 0, dictionary: 0, dictionaryCapacity: 0};
+        buffers = {source: 0, sourceCapacity: 0, destination: 0, destinationCapacity: 0, dictionary: 0, dictionaryCapacity: 0, prepared: null};
         contextBuffers.set(context, buffers);
     }
+    // Invalidate the previous operation before any copy, free or allocation.
+    // The retained buffer object itself is reused, even when its pointers change.
+    buffers.prepared = null;
     if (buffers.sourceCapacity < sourceSize) {
         if (buffers.source !== 0) { module._free(buffers.source); }
         buffers.source = 0;
@@ -115,6 +118,7 @@ function ensureContextBuffers(context, sourceSize, destinationSize, dictionarySi
 function releaseContextBuffers(context) {
     const buffers = contextBuffers.get(context);
     if (typeof buffers === 'undefined') { return; }
+    buffers.prepared = null;
     const module = getModule();
     if (buffers.source !== 0) { module._free(buffers.source); }
     if (buffers.destination !== 0) { module._free(buffers.destination); }
@@ -356,7 +360,9 @@ export function prepareSpanCompression(
     if (prefixBytes > 0) {
         module.HEAPU8.fill(0, buffers.destination, buffers.destination + prefixBytes);
     }
-    return {context, buffers, contentBytes, dictionaryBytes: dictionary.byteLength, prefixBytes, level, writeBlockEnvelope};
+    const prepared = {context, buffers, contentBytes, dictionaryBytes: dictionary.byteLength, prefixBytes, level, writeBlockEnvelope};
+    buffers.prepared = prepared;
+    return prepared;
 }
 
 /**
@@ -367,9 +373,11 @@ export function prepareSpanCompression(
 export function finishPreparedSpanCompression(prepared) {
     const {context, buffers, contentBytes, dictionaryBytes, prefixBytes, level, writeBlockEnvelope} = prepared;
     const module = getModule();
-    if (contextBuffers.get(context) !== buffers) {
+    if (contextBuffers.get(context) !== buffers || buffers.prepared !== prepared) {
         throw new Error('Prepared Zstd span buffers are no longer active');
     }
+    // A failed compression or envelope write must not leave a reusable handle.
+    buffers.prepared = null;
     const size = module._ZSTD_compress_usingDict(
         context,
         buffers.destination + prefixBytes,
