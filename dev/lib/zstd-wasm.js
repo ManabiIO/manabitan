@@ -276,6 +276,47 @@ export function compressSpansUsingDictWithPrefix(
 }
 
 /**
+ * Copies a validated, stable shared span into independently owned private bytes.
+ * The caller must keep the source immutable until this synchronous copy returns.
+ * This is not a concurrent shared-memory snapshot operation.
+ * @param {Uint8Array} source
+ * @param {number} sourceOffset
+ * @param {Uint8Array} destination
+ * @param {number} destinationOffset
+ * @param {number} length
+ */
+function copyStableSharedBytes(source, sourceOffset, destination, destinationOffset, length) {
+    if (
+        length < 1024 ||
+        typeof SharedArrayBuffer === 'undefined' ||
+        !(source.buffer instanceof SharedArrayBuffer) ||
+        destination.buffer instanceof SharedArrayBuffer
+    ) {
+        destination.set(source.subarray(sourceOffset, sourceOffset + length), destinationOffset);
+        return;
+    }
+    // Align both views independently. Every word remains inside its logical span;
+    // only private destination bytes move when the two alignment offsets differ.
+    const sourcePrefix = (8 - ((source.byteOffset + sourceOffset) % 8)) % 8;
+    const destinationPrefix = (8 - ((destination.byteOffset + destinationOffset) % 8)) % 8;
+    const wordCount = Math.floor((length - Math.max(sourcePrefix, destinationPrefix)) / 8);
+    const wordBytes = wordCount * 8;
+    new BigUint64Array(destination.buffer, destination.byteOffset + destinationOffset + destinationPrefix, wordCount).set(
+        new BigUint64Array(source.buffer, source.byteOffset + sourceOffset + sourcePrefix, wordCount),
+    );
+    if (sourcePrefix !== destinationPrefix) {
+        destination.copyWithin(
+            destinationOffset + sourcePrefix,
+            destinationOffset + destinationPrefix,
+            destinationOffset + destinationPrefix + wordBytes,
+        );
+    }
+    destination.set(source.subarray(sourceOffset, sourceOffset + sourcePrefix), destinationOffset);
+    const tail = sourcePrefix + wordBytes;
+    destination.set(source.subarray(sourceOffset + tail, sourceOffset + length), destinationOffset + tail);
+}
+
+/**
  * Gathers source spans into retained WASM memory without starting compression.
  * Once this returns, callers may safely release or reuse the source bytes.
  * @param {number} context
@@ -343,10 +384,7 @@ export function prepareSpanCompression(
             ++runSpanCount;
             ++i;
         } while (i < sourceOffsets.length);
-        module.HEAPU8.set(
-            source.subarray(runOffset, runOffset + runLength),
-            buffers.source + outputOffset,
-        );
+        copyStableSharedBytes(source, runOffset, module.HEAPU8, buffers.source + outputOffset, runLength);
         outputOffset += runLength;
     }
     if (outputOffset !== contentBytes) {
