@@ -1,0 +1,47 @@
+name: Import round six baseline profiles
+on:
+  push:
+    branches: [verify/import-round6-20260916]
+    paths: [.github/workflows/import-round6-profile-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: b4094a423c20bb0ed424d944238f922c1b36559c
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - run: node dev/bin/build.js --target chrome-dev
+      - name: Non-authoritative profiled imports
+        run: |
+          mkdir -p builds/round6-profile
+          node dev/perf/import-benchmark.js jmdict --runs 1 --no-build --flags '{}' --trace --output builds/round6-profile/jmdict
+          node dev/perf/import-benchmark.js jitendex --runs 1 --no-build --flags '{}' --trace --output builds/round6-profile/jitendex
+      - name: Export exact source and built assets without credentials
+        if: always()
+        run: |
+          mkdir -p builds/round6-profile
+          git archive HEAD | gzip > builds/round6-profile/source.tar.gz
+          tar -czf builds/round6-profile/generated.tar.gz ext/lib builds/manabitan-chrome-dev.zip
+          git rev-parse HEAD 'HEAD^{tree}' > builds/round6-profile/source.txt
+          node --version > builds/round6-profile/node.txt
+          clang --version > builds/round6-profile/compiler.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: round6-baseline-profile
+          path: builds/round6-profile
+          retention-days: 30
