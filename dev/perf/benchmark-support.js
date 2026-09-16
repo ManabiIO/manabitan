@@ -21,6 +21,7 @@ import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {parseJson} from '../../ext/js/core/json.js';
+import {snapshotTermBankExperiments} from '../../ext/js/dictionary/term-bank-experiments.js';
 
 /**
  * @param {string} value
@@ -79,6 +80,39 @@ export function optionalMetric(value) {
 }
 
 /**
+ * Requested flags in a report header are not proof that the worker received
+ * them. Check every available worker/effective receipt, not a top-level echo.
+ * Activation counters still need separate interpretation for eligibility.
+ * @param {Record<string, unknown>} debug
+ * @param {unknown} importFlags
+ * @throws {Error}
+ */
+function validateExperimentReceipts(debug, importFlags) {
+    const flags = asRecord(importFlags) ?? {};
+    const expected = snapshotTermBankExperiments(/** @type {import('dictionary-importer').ImportExperiments} */ (flags));
+    let receiptRequired = false;
+    for (const key of Object.keys(flags)) {
+        if (!key.startsWith('experimental')) { continue; }
+        if (!Object.hasOwn(expected, key)) { throw new Error(`Unknown import experiment: ${key}`); }
+        receiptRequired = true;
+    }
+    let receipts = 0;
+    const phases = Array.isArray(debug.importerPhaseTimings) ? debug.importerPhaseTimings : [];
+    for (const phase of phases) {
+        const details = asRecord(asRecord(phase)?.details);
+        if (details === null) { continue; }
+        for (const key of ['parserExperiments', 'fastPathParserEffectiveExperiments']) {
+            if (!Object.hasOwn(details, key)) { continue; }
+            ++receipts;
+            if (!isDeepStrictEqual(details[key], expected)) {
+                throw new Error(`Import experiment receipt mismatch: ${key}`);
+            }
+        }
+    }
+    if (receiptRequired && receipts === 0) { throw new Error('Missing import experiment worker receipts'); }
+}
+
+/**
  * @param {unknown} value
  * @param {string} dictionaryId
  * @param {import('./dictionary-fixtures.js').DictionaryFixture} fixture
@@ -131,6 +165,7 @@ export function extractImportResult(value, dictionaryId, fixture, traceEnabled, 
     if (debug?.hasResult !== true || debug.resultTitle !== fixture.expectedTitle || debug.errorCount !== 0 || debug.addSettingsErrorCount !== 0 || debug.usesFallbackStorage !== false) {
         throw new Error(`Import completion did not confirm an error-free ${fixture.expectedTitle}`);
     }
+    validateExperimentReceipts(debug, importFlags);
     const validation = asRecord(benchmark.validation);
     if (validation?.title !== fixture.expectedTitle || validation.revision !== fixture.revision ||
     validation.termRows !== fixture.termRows || validation.contentReadable !== true ||
