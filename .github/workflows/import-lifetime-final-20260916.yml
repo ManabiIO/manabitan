@@ -1,0 +1,137 @@
+name: Final prepared compression lifetime qualification
+on:
+  push:
+    branches: [verify/import-crc-lifetime-20260916]
+    paths: [.github/workflows/import-lifetime-final-20260916.yml]
+permissions:
+  contents: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
+      - name: Load immutable source and tests, correcting only the test type annotation
+        run: |
+          mkdir -p builds/lifetime-final "$RUNNER_TEMP/lifetime-inputs"
+          git fetch --depth=1 origin 6efa183a0f9c0f9b7e125cc8db9e6d9dadb96cdf
+          git show FETCH_HEAD:dev/perf/crc-lifetime-20260916/apply.py > "$RUNNER_TEMP/lifetime-inputs/apply.py"
+          git show FETCH_HEAD:dev/perf/crc-lifetime-20260916/tests/zstd-prepared-lifetime.test.js > test/zstd-prepared-lifetime.test.js
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          p=Path('test/zstd-prepared-lifetime.test.js')
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='76a9730e11b2162143655ab7b5bb95d703a499b0d330a370c1011bb13b7f1210'
+          s=p.read_text()
+          old='@returns {ReturnType<typeof api.prepareSpanCompression>}'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,"@returns {ReturnType<typeof import('../dev/lib/zstd-wasm.js').prepareSpanCompression>}"))
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='bba66332063fc9f66788957cba0d2e39b59604a6a4973dc4ba5e547c08113fe6'
+          PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - name: Failure-first verification against unchanged parent
+        run: |
+          npm run build:libs > builds/lifetime-final/parent-build.log 2>&1
+          set +e
+          node node_modules/vitest/vitest.mjs run test/zstd-prepared-lifetime.test.js --reporter=json --outputFile=builds/lifetime-final/red.json > builds/lifetime-final/red.log 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('builds/lifetime-final/red.json').read_text())
+          assert r['numTotalTests']==13 and r['numFailedTests']==10 and r['numPassedTests']==3
+          failed=[t for t in r['testResults'][0]['assertionResults'] if t['status']=='failed']
+          assert len(failed)==10 and all(any('to throw an error' in m for m in t['failureMessages']) for t in failed)
+          PY
+      - name: Exact candidate, focused tests, full suites, types and builds
+        run: |
+          python3 "$RUNNER_TEMP/lifetime-inputs/apply.py" lifetime | tee builds/lifetime-final/source-change.json
+          printf '%s\n' '87b9a365a746d5a24edee51f89fea3cf82a244d636cee233e771c9549ca19909  dev/lib/zstd-wasm.js' | sha256sum -c -
+          npm run build:libs > builds/lifetime-final/candidate-build.log 2>&1
+          sha256sum dev/lib/zstd-wasm.js test/zstd-prepared-lifetime.test.js ext/lib/zstd-wasm.js ext/lib/term-bank-parser.wasm test/perf/dictionaries.lock.json > builds/lifetime-final/qualified-inputs.sha256
+          node node_modules/vitest/vitest.mjs run test/zstd-prepared-lifetime.test.js test/zstd-wasm.test.js test/zstd-term-content-pool.test.js test/zstd-term-content-initialization.test.js test/dictionary-database-content-dedup.test.js test/term-content-block-store.test.js --reporter=json --outputFile=builds/lifetime-final/green.json > builds/lifetime-final/green.log 2>&1
+          npm run test:unit 2>&1 | tee builds/lifetime-final/unit.log
+          npm run test:unit:options 2>&1 | tee builds/lifetime-final/options.log
+          npm run test:ts 2>&1 | tee builds/lifetime-final/types.log
+          node node_modules/eslint/bin/eslint.js dev/lib/zstd-wasm.js test/zstd-prepared-lifetime.test.js > builds/lifetime-final/changed-lint.log 2>&1
+          npm run test:build 2>&1 | tee builds/lifetime-final/build-plans.log
+          node dev/bin/build.js --target chrome-dev > builds/lifetime-final/chrome-build.log 2>&1
+          node dev/bin/build.js --target firefox-dev > builds/lifetime-final/firefox-build.log 2>&1
+      - name: Reject new full-repository lint errors while retaining inherited diagnostics
+        run: |
+          set +e
+          node node_modules/eslint/bin/eslint.js . --ignore-pattern '**/*.json' -f json > builds/lifetime-final/lint.json 2> builds/lifetime-final/lint-stderr.log
+          status=$?
+          set -e
+          test "$status" -eq 1
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          assert hashlib.sha256(Path('test/term-bank-composite-state.test.js').read_bytes()).hexdigest()=='9384dca84f8e29bc0cc728c19d50bc946191ce25a6ce48566c75480dc99edd17'
+          issues=[r for r in json.loads(Path('builds/lifetime-final/lint.json').read_text()) if r['errorCount'] or r['warningCount']]
+          assert len(issues)==1 and issues[0]['filePath'].endswith('/test/term-bank-composite-state.test.js')
+          assert issues[0]['errorCount']==38 and issues[0]['warningCount']==0
+          PY
+      - name: Install browser and complete checksum-pinned dictionaries
+        run: |
+          npx playwright install --with-deps chromium
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Full strict Chromium lifecycle
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{}'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/lifetime-final/browser.html
+        run: |
+          npm run test:e2e:chromium-extension 2>&1 | tee builds/lifetime-final/browser.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('builds/lifetime-final/browser.json').read_text())
+          assert r['status']=='success' and r['skippedVerification'] is False and len(r['phases'])>=80
+          PY
+      - name: Publish only the two qualified files on a new branch
+        run: |
+          git diff --check
+          sha256sum -c builds/lifetime-final/qualified-inputs.sha256
+          git add dev/lib/zstd-wasm.js test/zstd-prepared-lifetime.test.js
+          python3 - <<'PY'
+          import subprocess
+          assert subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines()==['dev/lib/zstd-wasm.js','test/zstd-prepared-lifetime.test.js']
+          PY
+          git -c core.hooksPath=/dev/null -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'fix: bind prepared compression to its active buffer operation'
+          test -z "$(git status --porcelain)"
+          branch='fix/zstd-prepared-lifetime-20260916'
+          test -z "$(git ls-remote --heads origin "$branch")"
+          git push origin "HEAD:refs/heads/$branch"
+          git rev-parse HEAD 'HEAD^{tree}' > builds/lifetime-final/qualified.txt
+      - name: Retain executed source and evidence
+        if: always()
+        run: |
+          mkdir -p builds/lifetime-final
+          git diff c0a1b7ee6fa1383a0a422361d2a8b7f826499fff -- dev/lib/zstd-wasm.js test/zstd-prepared-lifetime.test.js > builds/lifetime-final/source.patch
+          cp test/zstd-prepared-lifetime.test.js dev/lib/zstd-wasm.js builds/lifetime-final/
+          cp "$RUNNER_TEMP/lifetime-inputs/apply.py" builds/lifetime-final/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prepared-lifetime-final-qualification
+          path: builds/lifetime-final
+          retention-days: 30
