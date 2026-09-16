@@ -8,7 +8,7 @@ permissions:
 jobs:
   profile:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,10 +21,10 @@ jobs:
         with:
           path: builds/e2e-dictionary-cache
           key: wty-en-en-21b1b22-c0a1b7ee-v1
-      - name: Pin and inspect full workload
+      - name: Pin workload and apply common benchmark prerequisite
         run: python3 dev/perf/wty-abba-20260916/prepare.py
       - run: npm ci
-      - name: Build unchanged production code
+      - name: Build one package used by both runs
         run: |
           npm run build:libs
           node dev/bin/build.js --target chrome-dev
@@ -36,7 +36,6 @@ jobs:
           MANABITAN_E2E_STRICT_RUNTIME: '1'
           MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
           MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
-          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{}'
           MANABITAN_E2E_SKIP_BUILD: '1'
           MANABITAN_E2E_IMPORT_BENCH_QUICK: '1'
           MANABITAN_E2E_IMPORT_BENCH_DICTIONARY: wty-en-en
@@ -44,8 +43,8 @@ jobs:
           MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
           MANABITAN_E2E_PROCESS_SAMPLING: '0'
         run: |
-          MANABITAN_CHROMIUM_E2E_REPORT=builds/wty-profile/baseline.html node test/chromium/extension-two-dictionary-import.e2e.js > builds/wty-profile/baseline.log 2>&1
-          MANABITAN_CHROMIUM_E2E_REPORT=builds/wty-profile/profile.html MANABITAN_E2E_IMPORT_TRACE_PATH=builds/wty-profile/trace.json node test/chromium/extension-two-dictionary-import.e2e.js > builds/wty-profile/profile.log 2>&1
+          MANABITAN_E2E_IMPORT_FLAGS_JSON='{}' MANABITAN_CHROMIUM_E2E_REPORT=builds/wty-profile/baseline.html node test/chromium/extension-two-dictionary-import.e2e.js > builds/wty-profile/baseline.log 2>&1
+          MANABITAN_E2E_IMPORT_FLAGS_JSON='{"debugImportLogging":true}' MANABITAN_CHROMIUM_E2E_REPORT=builds/wty-profile/profile.html node test/chromium/extension-two-dictionary-import.e2e.js > builds/wty-profile/profile.log 2>&1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
