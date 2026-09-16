@@ -1,0 +1,26 @@
+name: Inspect Zstd build and dictionary reuse boundary
+on:
+  push:
+    branches: [verify/import-crc-lifetime-20260916]
+    paths: [.github/workflows/import-zstd-discovery-20260916.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c0a1b7ee6fa1383a0a422361d2a8b7f826499fff
+          persist-credentials: false
+      - name: Locate exports, build flags and importer callsites
+        run: |
+          mkdir -p builds/zstd-discovery
+          rg -n --hidden --glob '!node_modules/**' --glob '!builds/**' 'ZSTD_(compress_usingDict|createCCtx|EXPORTED|createCDict|compress_usingCDict)|EXPORTED_FUNCTIONS|zstd-simd|prepareSpanCompression|CONTENT_COMPRESSION_LEVEL|COMPRESSION_WORKER_COUNT' . > builds/zstd-discovery/rg.txt || true
+          find dev ext -maxdepth 4 -type f \( -name '*zstd*' -o -name '*build-lib*' \) -print | sort > builds/zstd-discovery/files.txt
+          git rev-parse HEAD HEAD^{tree} > builds/zstd-discovery/identity.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zstd-build-discovery
+          path: builds/zstd-discovery
+          retention-days: 7
