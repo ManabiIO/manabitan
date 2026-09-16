@@ -392,7 +392,7 @@ static int is_hex_digit(uint8_t value) {
         (value >= 'A' && value <= 'F');
 }
 
-static int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+static __attribute__((always_inline)) inline int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
     if (start >= len || src[start] != '"') { return 0; }
     uint32_t i = start + 1u;
     while (i < len) {
