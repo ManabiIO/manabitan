@@ -1,0 +1,210 @@
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -4099,6 +4099,36 @@
+          */
+         const getTermCount = (dictionaryName) => summaryTermCountByDictionary.get(dictionaryName) ?? this._getDirectDictionaryRecordCount(dictionaryName);
+ 
++        // Keep indexed/single-name lookups on their existing path. Otherwise
++        // count several requested titles per scan without GROUP BY's temporary
++        // sort. Bind names and bound query width independently of import batches.
++        /** @type {Map<string, Map<string, number>>} */
++        const batchedCounts = new Map();
++        /** @type {Map<string, number>} */
++        const batchedTotals = new Map();
++        const uniqueNames = [...new Set(dictionaryNames)];
++        if (!this._enableSqliteSecondaryIndexes && uniqueNames.length > 1) {
++            const namesPerQuery = 32;
++            for (let start = 0; start < uniqueNames.length; start += namesPerQuery) {
++                const names = uniqueNames.slice(start, start + namesPerQuery);
++                const includeTotal = getTotal && start === 0;
++                const columns = names.map((_, i) => `COUNT(*) FILTER (WHERE dictionary = ?${i + 1}) AS c${i}`);
++                if (includeTotal) { columns.push('COUNT(*) AS total'); }
++                for (const table of tables) {
++                    const row = db.selectObjects(`SELECT ${columns.join(', ')} FROM ${table}`, names)[0];
++                    let byDictionary = batchedCounts.get(table);
++                    if (typeof byDictionary === 'undefined') {
++                        byDictionary = new Map();
++                        batchedCounts.set(table, byDictionary);
++                    }
++                    for (const [i, name] of names.entries()) {
++                        byDictionary.set(name, this._asNumber(row?.[`c${i}`], 0));
++                    }
++                    if (includeTotal) { batchedTotals.set(table, this._asNumber(row?.total, 0)); }
++                }
++            }
++        }
++
+         /** @type {import('dictionary-database').DictionaryCountGroup[]} */
+         const counts = [];
+ 
+@@ -4108,7 +4138,7 @@
+                 terms: installedDictionaryNames.reduce((sum, dictionaryName) => sum + getTermCount(dictionaryName), 0),
+             };
+             for (const table of tables) {
+-                total[table] = this._asNumber(db.selectValue(`SELECT COUNT(*) FROM ${table}`), 0);
++                total[table] = batchedTotals.get(table) ?? this._asNumber(db.selectValue(`SELECT COUNT(*) FROM ${table}`), 0);
+             }
+             counts.push(total);
+         }
+@@ -4118,10 +4148,13 @@
+             const countGroup = {terms: 0};
+             countGroup.terms = getTermCount(dictionaryName);
+             for (const table of tables) {
+-                countGroup[table] = this._asNumber(
+-                    db.selectValue(`SELECT COUNT(*) FROM ${table} WHERE dictionary = $dictionary`, {$dictionary: dictionaryName}),
+-                    0,
+-                );
++                const batched = batchedCounts.get(table);
++                countGroup[table] = typeof batched === 'undefined' ?
++                    this._asNumber(
++                        db.selectValue(`SELECT COUNT(*) FROM ${table} WHERE dictionary = $dictionary`, {$dictionary: dictionaryName}),
++                        0,
++                    ) :
++                    (batched.get(dictionaryName) ?? 0);
+             }
+             counts.push(countGroup);
+         }
+@@ -9820,8 +9853,6 @@
+         const termsVtabIdxRowIdEq = 1 << 4;
+         const termRecordStore = this._termRecordStore;
+         const termsVtabCursorState = this._termsVtabCursorState;
+-        const asNumber = this._asNumber.bind(this);
+-        const asString = this._asString.bind(this);
+         const getTermRecordStorageName = this._getTermRecordStorageName.bind(this);
+         const getDictionaryNameForTermRecordStorage = this._getDictionaryNameForTermRecordStorage.bind(this);
+         const eqOp = typeof capi.SQLITE_INDEX_CONSTRAINT_EQ === 'number' ? capi.SQLITE_INDEX_CONSTRAINT_EQ : 2;
+@@ -9867,39 +9898,32 @@
+                     const idxInfo = vtab.xIndexInfo(toPtr(pIdxInfo));
+                     let argvIndex = 1;
+                     let idxNum = 0;
+-                    for (let i = 0; i < idxInfo.$nConstraint; ++i) {
+-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+-                        const constraint = idxInfo.nthConstraint(i);
+-                        if (!constraint || constraint.$usable === 0 || constraint.$op !== eqOp) { continue; }
+-                        const column = toPtr(constraint.$iColumn);
+-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+-                        const usage = idxInfo.nthConstraintUsage(i);
+-                        if (!usage) { continue; }
+-                        switch (column) {
+-                            case -1:
+-                                idxNum |= termsVtabIdxRowIdEq;
+-                                break;
+-                            case 0:
+-                                idxNum |= termsVtabIdxDictionaryEq;
+-                                break;
+-                            case 1:
+-                                idxNum |= termsVtabIdxExpressionEq;
+-                                break;
+-                            case 2:
+-                                idxNum |= termsVtabIdxReadingEq;
+-                                break;
+-                            case 14:
+-                                idxNum |= termsVtabIdxSequenceEq;
+-                                break;
+-                            default:
+-                                continue;
++                    // xFilter consumes one value per bit in this exact order,
++                    // not in SQLite's query-dependent constraint order.
++                    const columns = [-1, 0, 1, 2, 14];
++                    const bits = [termsVtabIdxRowIdEq, termsVtabIdxDictionaryEq, termsVtabIdxExpressionEq, termsVtabIdxReadingEq, termsVtabIdxSequenceEq];
++                    for (let slot = 0; slot < columns.length; ++slot) {
++                        for (let i = 0; i < idxInfo.$nConstraint; ++i) {
++                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
++                            const constraint = idxInfo.nthConstraint(i);
++                            if (!constraint || constraint.$usable === 0 || constraint.$op !== eqOp || constraint.$iColumn !== columns[slot]) { continue; }
++                            // Exact JS string/index comparisons implement BINARY only.
++                            if (slot >= 1 && slot <= 3 && capi.sqlite3_vtab_collation(idxInfo, i) !== 'BINARY') { continue; }
++                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
++                            const usage = idxInfo.nthConstraintUsage(i);
++                            if (!usage) { continue; }
++                            usage.$argvIndex = argvIndex++;
++                            // SQLite remains authoritative for affinity, duplicate
++                            // predicates and SQL NULL semantics. Never omit them.
++                            usage.$omit = 0;
++                            idxNum |= bits[slot];
++                            break;
+                         }
+-                        usage.$argvIndex = argvIndex++;
+-                        usage.$omit = 1;
+                     }
+                     idxInfo.$idxNum = idxNum;
+-                    idxInfo.$estimatedRows = idxNum === 0 ? Math.max(1, termRecordStore.size) : 32;
+-                    idxInfo.$estimatedCost = idxNum === 0 ? Math.max(1, termRecordStore.size) : 32;
++                    const rowIdLookup = (idxNum & termsVtabIdxRowIdEq) !== 0;
++                    idxInfo.$estimatedRows = rowIdLookup ? 1 : Math.max(1, termRecordStore.size);
++                    idxInfo.$estimatedCost = rowIdLookup ? 1 : Math.max(1, termRecordStore.size);
+                     return 0;
+                 },
+                 xDisconnect(pVtab) {
+@@ -9926,22 +9950,33 @@
+                     const state = termsVtabCursorState.get(cursorPtr);
+                     if (typeof state === 'undefined') { return 0; }
+                     const args = capi.sqlite3_values_to_js(toPtr(argc), toPtr(argv));
++                    state.ids = [];
++                    state.index = 0;
++                    // Equality against NULL cannot be true, even for nullable columns.
++                    if (args.includes(null)) { return 0; }
+                     let argIndex = 0;
+-                    let rowId = null;
+-                    let dictionary = null;
+-                    let expression = null;
+-                    let reading = null;
+-                    let sequence = null;
+                     const idxBits = toPtr(idxNum);
+-                    if ((idxBits & termsVtabIdxRowIdEq) !== 0) { rowId = asNumber(args[argIndex++], -1); }
+-                    if ((idxBits & termsVtabIdxDictionaryEq) !== 0) {
+-                        dictionary = getTermRecordStorageName(asString(args[argIndex++]));
++                    const rowId = (idxBits & termsVtabIdxRowIdEq) !== 0 ? args[argIndex++] : null;
++                    const dictionaryValue = (idxBits & termsVtabIdxDictionaryEq) !== 0 ? args[argIndex++] : null;
++                    const expressionValue = (idxBits & termsVtabIdxExpressionEq) !== 0 ? args[argIndex++] : null;
++                    const readingValue = (idxBits & termsVtabIdxReadingEq) !== 0 ? args[argIndex++] : null;
++                    const sequenceValue = (idxBits & termsVtabIdxSequenceEq) !== 0 ? args[argIndex++] : null;
++                    // Restrict only values whose JS comparison agrees with SQLite.
++                    // Other storage classes/coercions are left to SQLite's recheck.
++                    const dictionary = typeof dictionaryValue === 'string' ? getTermRecordStorageName(dictionaryValue) : null;
++                    const expression = typeof expressionValue === 'string' ? expressionValue : null;
++                    const reading = typeof readingValue === 'string' ? readingValue : null;
++                    const sequence = typeof sequenceValue === 'number' && Number.isSafeInteger(sequenceValue) ? sequenceValue : null;
++                    let baseIds;
++                    if (typeof rowId === 'number') {
++                        baseIds = Number.isSafeInteger(rowId) && rowId > 0 ? [rowId] : [];
++                    } else if (dictionary !== null) {
++                        // The virtual table projects resident records. Do not use
++                        // lookup postings that omit aliases or hydrate lazy rows.
++                        baseIds = termRecordStore.getResidentIdsForDictionary(dictionary);
++                    } else {
++                        baseIds = termRecordStore.getAllIds();
+                     }
+-                    if ((idxBits & termsVtabIdxExpressionEq) !== 0) { expression = asString(args[argIndex++]); }
+-                    if ((idxBits & termsVtabIdxReadingEq) !== 0) { reading = asString(args[argIndex++]); }
+-                    if ((idxBits & termsVtabIdxSequenceEq) !== 0) { sequence = asNumber(args[argIndex++], -1); }
+-
+-                    const baseIds = (typeof rowId === 'number' && rowId > 0) ? [rowId] : termRecordStore.getAllIds();
+                     const ids = [];
+                     for (const id of baseIds) {
+                         if (id <= 0) { continue; }
+--- a/ext/js/dictionary/term-record-opfs-store.js
++++ b/ext/js/dictionary/term-record-opfs-store.js
+@@ -2773,6 +2773,22 @@
+      */
+     getAllIds() {
+         return [...this._recordsById.keys()].sort((a, b) => a - b);
++    }
++
++    /**
++     * Returns only already-resident records without building lookup indexes,
++     * decoding strings, or loading additional persistent rows.
++     * @param {string} dictionaryName
++     * @returns {number[]}
++     */
++    getResidentIdsForDictionary(dictionaryName) {
++        const ids = [];
++        // Empty names do not participate in stale-membership tracking.
++        const records = dictionaryName.length === 0 ? this._recordsById.values() : this._iterateRecordsForDictionary(dictionaryName);
++        for (const record of records) {
++            if (record.dictionary === dictionaryName) { ids.push(record.id); }
++        }
++        return ids;
+     }
+ 
+     /**
