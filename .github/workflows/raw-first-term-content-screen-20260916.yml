@@ -1,0 +1,100 @@
+name: Raw-first term content import screen 20260916
+on:
+  push:
+    branches: [verify/raw-first-term-content-20260916]
+    paths: [.github/workflows/raw-first-term-content-screen-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Preserve experiment and pin exact baseline
+        run: |
+          cp dev/perf/raw-first-term-content-20260916.patch "$RUNNER_TEMP/candidate.patch"
+          git fetch --depth=1 origin 30ffb604e0a87f0aa252bd4331bc54668062b1e1
+          git checkout --detach 30ffb604e0a87f0aa252bd4331bc54668062b1e1
+          test "$(git rev-parse 'HEAD^{tree}')" = c069f4ca92d8e6902a1a182281a06b2579610c05
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Fetch checksum-pinned dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Build exact baseline package
+        run: |
+          node dev/bin/build.js --target chrome-dev
+          cp builds/manabitan-chrome-dev.zip "$RUNNER_TEMP/base.zip"
+          sha256sum "$RUNNER_TEMP/base.zip" > "$RUNNER_TEMP/base-package.sha256"
+      - name: Build and sanity-check raw-first candidate
+        run: |
+          git apply --check "$RUNNER_TEMP/candidate.patch"
+          git apply "$RUNNER_TEMP/candidate.patch"
+          git diff --check
+          node node_modules/vitest/vitest.mjs run test/dictionary-database-content-dedup.test.js test/term-content-opfs-store.test.js test/term-content-block-store.test.js
+          git add ext/js/dictionary/dictionary-database.js
+          git -c core.hooksPath=/dev/null -c user.name='Manabitan contributors' -c user.email=contributors@manabi.io commit -m 'experiment: persist raw term content during import'
+          git rev-parse HEAD 'HEAD^{tree}' | tee "$RUNNER_TEMP/candidate-source.txt"
+          test -z "$(git status --porcelain)"
+          node dev/bin/build.js --target chrome-dev
+          cp builds/manabitan-chrome-dev.zip "$RUNNER_TEMP/candidate.zip"
+          sha256sum "$RUNNER_TEMP/candidate.zip" > "$RUNNER_TEMP/candidate-package.sha256"
+      - name: Fixed six-pair browser source comparison
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, shutil, subprocess, time
+          root=pathlib.Path.cwd(); tmp=pathlib.Path(os.environ['RUNNER_TEMP']); dictionary=os.environ['DICTIONARY']
+          baseline='30ffb604e0a87f0aa252bd4331bc54668062b1e1'; candidate=(tmp/'candidate-source.txt').read_text().splitlines()[0].strip()
+          out=root/'builds/raw-first-screen'; out.mkdir(parents=True,exist_ok=True)
+          ids={'A':{'commit':baseline,'package':subprocess.check_output(['sha256sum',str(tmp/'base.zip')],text=True).split()[0]},'B':{'commit':candidate,'package':subprocess.check_output(['sha256sum',str(tmp/'candidate.zip')],text=True).split()[0]}}
+          plan=[{'kind':'warmup','pair':0,'arm':'A','binary':'A'},{'kind':'warmup','pair':0,'arm':'B','binary':'B'}]
+          for pair in range(1,7):
+              order='AB' if pair%2 else 'BA'; plan += [{'kind':'measured','pair':pair,'arm':a,'binary':a} for a in order]
+              if pair%2==0:
+                  aa='AB' if pair!=4 else 'BA'; plan += [{'kind':'aa','pair':pair//2,'arm':a,'binary':'A'} for a in aa]
+          (out/'plan.json').write_text(json.dumps({'baseline':baseline,'candidate':candidate,'dictionary':dictionary,'identities':ids,'plan':plan,'noRetries':True,'noOutlierRemoval':True,'purpose':'Upper-bound experiment: durable raw content now, no synchronous block compression'},indent=2))
+          obs=[]
+          for ordinal,item in enumerate(plan,1):
+              commit=ids[item['binary']]['commit']; subprocess.run(['git','checkout','--detach',commit],check=True,stdout=subprocess.DEVNULL)
+              if subprocess.check_output(['git','status','--porcelain'],text=True).strip(): raise RuntimeError('dirty source')
+              shutil.copy2(tmp/('base.zip' if item['binary']=='A' else 'candidate.zip'),root/'builds/manabitan-chrome-dev.zip')
+              dest=out/f"{ordinal:02d}-{item['kind']}-{item['pair']}-{item['arm']}"; started=time.monotonic()
+              with open(str(dest)+'.log','w') as log:
+                  subprocess.run(['node','dev/perf/import-benchmark.js',dictionary,'--runs','1','--no-build','--flags','{}','--output',str(dest)],check=True,stdout=log,stderr=subprocess.STDOUT,timeout=240)
+              summary=json.loads((dest/'summary.json').read_text()); report=json.loads((dest/'run-1.json').read_text())
+              if report.get('status')!='success' or report.get('skippedVerification') is not False: raise RuntimeError(f'invalid report {ordinal}: {report.get("failureReason")}')
+              run=summary['runs'][0]; debug=run.get('importDebug') or {}
+              row={**item,'ordinal':ordinal,'ms':run['totalImportMs'],'workerMs':run['workerImportMs'],'validation':run['validation'],'browser':summary['browserVersion'],'sourceCommit':summary['source']['gitSha'],'package':summary['source']['sha256']['builds/manabitan-chrome-dev.zip'],'wallSeconds':time.monotonic()-started,'importDebug':debug}
+              if row['sourceCommit']!=commit or row['package']!=ids[item['binary']]['package']: raise RuntimeError(f'identity mismatch {ordinal}')
+              obs.append(row); (out/'observations.json').write_text(json.dumps(obs,indent=2)); print(json.dumps({'ordinal':ordinal,'kind':item['kind'],'pair':item['pair'],'arm':item['arm'],'ms':row['ms']}),flush=True)
+          (out/'complete.json').write_text(json.dumps({'completed':len(obs),'planned':len(plan)},indent=2))
+          PY
+      - name: Preserve exact evidence
+        if: always()
+        run: |
+          mkdir -p builds/raw-first-screen
+          cp "$RUNNER_TEMP/candidate.patch" builds/raw-first-screen/candidate.patch || true
+          cp "$RUNNER_TEMP/candidate-source.txt" builds/raw-first-screen/candidate-source.txt || true
+          cp "$RUNNER_TEMP/base-package.sha256" builds/raw-first-screen/base-package.sha256 || true
+          cp "$RUNNER_TEMP/candidate-package.sha256" builds/raw-first-screen/candidate-package.sha256 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: raw-first-term-content-${{ matrix.dictionary }}
+          path: builds/raw-first-screen
+          retention-days: 30
