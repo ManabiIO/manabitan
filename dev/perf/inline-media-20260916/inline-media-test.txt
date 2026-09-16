@@ -1,0 +1,64 @@
+/*
+ * Copyright (C) 2026 Manabitan authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ */
+
+import {describe, expect, test, vi} from 'vitest';
+import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+
+const SMALL_MEDIA_MAX_BYTES = 256 * 1024;
+
+describe('DictionaryImporter small media ZIP reads', () => {
+    test.each([
+        ['PNG below threshold', 'image.png', SMALL_MEDIA_MAX_BYTES - 1, false],
+        ['PNG at threshold', 'image.png', SMALL_MEDIA_MAX_BYTES, false],
+        ['JPEG below threshold', 'image.jpeg', 4096, false],
+        ['WebP below threshold', 'image.webp', 4096, false],
+        ['image above threshold', 'image.png', SMALL_MEDIA_MAX_BYTES + 1, true],
+        ['image with unknown size', 'image.png', void 0, true],
+        ['image with fractional size', 'image.png', 4096.5, true],
+        ['non-image below threshold', 'audio.mp3', 4096, true],
+    ])('%s selects the expected ZIP worker policy', async (name, filename, uncompressedSize, expectedUseWebWorkers) => {
+        void name;
+        const getData = vi.fn(async () => new Uint8Array([1, 2, 3]));
+        const entry = {filename, getData, ...(typeof uncompressedSize === 'undefined' ? {} : {uncompressedSize})};
+        const importer = new DictionaryImporter(/** @type {import('core').SafeAny} */ ({}));
+        const writer = /** @type {import('core').SafeAny} */ ({});
+
+        await importer._getData(/** @type {import('core').SafeAny} */ (entry), writer);
+
+        expect(getData).toHaveBeenCalledTimes(1);
+        expect(getData.mock.calls[0][1]).toMatchObject({useWebWorkers: expectedUseWebWorkers});
+    });
+
+    test('respects an already-disabled ZIP worker policy', async () => {
+        const getData = vi.fn(async () => new Uint8Array([1]));
+        const importer = new DictionaryImporter(/** @type {import('core').SafeAny} */ ({}));
+        importer._zipUseWebWorkers = false;
+
+        await importer._getData(
+            /** @type {import('core').SafeAny} */ ({filename: 'large.png', uncompressedSize: SMALL_MEDIA_MAX_BYTES + 1, getData}),
+            /** @type {import('core').SafeAny} */ ({}),
+        );
+
+        expect(getData.mock.calls[0][1]).toMatchObject({useWebWorkers: false});
+    });
+
+    test('forwards the abort signal while disabling workers for small images', async () => {
+        const controller = new AbortController();
+        const getData = vi.fn(async () => new Uint8Array([1]));
+        const importer = new DictionaryImporter(/** @type {import('core').SafeAny} */ ({}));
+
+        await importer._getData(
+            /** @type {import('core').SafeAny} */ ({filename: 'small.png', uncompressedSize: 1024, getData}),
+            /** @type {import('core').SafeAny} */ ({}),
+            controller.signal,
+        );
+
+        expect(getData.mock.calls[0][1]).toMatchObject({useWebWorkers: false, signal: controller.signal});
+    });
+});
