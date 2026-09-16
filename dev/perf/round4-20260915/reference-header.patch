@@ -1,0 +1,55 @@
+diff --git a/ext/js/dictionary/term-content-block-store.js b/ext/js/dictionary/term-content-block-store.js
+index 48cd7d7..6e40b1e 100644
+--- a/ext/js/dictionary/term-content-block-store.js
++++ b/ext/js/dictionary/term-content-block-store.js
+@@ -1213,6 +1213,11 @@ function createTermContentReferenceSlabs(
+ ) {
+     const slabCount = Math.ceil(sourceLengths.length / entriesPerSlab);
+     const referenceSlabs = new Array(slabCount);
++    let previousBlockIndex = -1;
++    let blockOffsetLow = 0;
++    let blockOffsetHigh = 0;
++    let compressedLength = 0;
++    let uncompressedLength = 0;
+     for (let slabIndex = 0; slabIndex < slabCount; ++slabIndex) {
+         const startIndex = slabIndex * entriesPerSlab;
+         const entryCount = Math.min(entriesPerSlab, sourceLengths.length - startIndex);
+@@ -1221,14 +1226,30 @@ function createTermContentReferenceSlabs(
+         for (let localIndex = 0; localIndex < entryCount; ++localIndex) {
+             const contentIndex = startIndex + localIndex;
+             const blockIndex = packed.sourceChunkIndices[contentIndex];
+-            writeRawTermContentCompactBlockReference(
+-                view,
+-                localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES,
+-                blockOffsets[blockIndex],
+-                blockLengths[blockIndex],
+-                packedChunkLengths[blockIndex],
+-                packed.sourceChunkLocalOffsets[contentIndex],
+-            );
++            const offset = localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
++            const entryOffset = packed.sourceChunkLocalOffsets[contentIndex];
++            if (blockIndex !== previousBlockIndex) {
++                // The ordinary writer validates the shared block tuple. Its
++                // encoded header can be reused for this synchronous block run.
++                writeRawTermContentCompactBlockReference(
++                    view, offset, blockOffsets[blockIndex], blockLengths[blockIndex],
++                    packedChunkLengths[blockIndex], entryOffset,
++                );
++                blockOffsetLow = view.getUint32(offset, true);
++                blockOffsetHigh = view.getUint32(offset + 4, true);
++                compressedLength = view.getUint32(offset + 8, true);
++                uncompressedLength = view.getUint32(offset + 12, true);
++                previousBlockIndex = blockIndex;
++            } else {
++                if (!Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= 0x100000000) {
++                    throw new RangeError('Invalid compact term-content block reference');
++                }
++                view.setUint32(offset, blockOffsetLow, true);
++                view.setUint32(offset + 4, blockOffsetHigh, true);
++                view.setUint32(offset + 8, compressedLength, true);
++                view.setUint32(offset + 12, uncompressedLength, true);
++                view.setUint32(offset + 16, entryOffset, true);
++            }
+         }
+         referenceSlabs[slabIndex] = slab;
+     }
