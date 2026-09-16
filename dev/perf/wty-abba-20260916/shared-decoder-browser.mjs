@@ -33,7 +33,7 @@ const server = createServer((request, response) => {
 })
 await new Promise((resolve, reject) => {
     server.once('error', reject)
-    server.listen(0, '127.0.0.1', resolve)
+    server.listen(0, '127.0.0.1', () => resolve(undefined))
 })
 const address = server.address()
 assert(address && typeof address === 'object')
@@ -51,8 +51,9 @@ try {
             if (!value) { throw new Error(message) }
         }
         check(globalThis.crossOriginIsolated, 'Test must execute with shared memory enabled')
+        const parserModuleUrl = '/ext/js/dictionary/term-bank-wasm-parser.js'
         const parser = /** @type {typeof import('../../ext/js/dictionary/term-bank-wasm-parser.js')} */ (
-            await import('/ext/js/dictionary/term-bank-wasm-parser.js')
+            await import(parserModuleUrl)
         )
         const compiled = await WebAssembly.compile(await (await fetch('/ext/lib/term-bank-parser.wasm')).arrayBuffer())
         const instance = await WebAssembly.instantiate(compiled)
@@ -116,7 +117,7 @@ try {
                 reject(error)
                 return
             }
-            resolve()
+            resolve(undefined)
         })
     })
 }
