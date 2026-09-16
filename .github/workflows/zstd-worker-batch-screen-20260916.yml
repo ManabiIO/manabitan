@@ -1,0 +1,126 @@
+name: Zstd worker batch import screen 20260916
+on:
+  push:
+    branches: [verify/zstd-worker-batch-20260916]
+    paths: [.github/workflows/zstd-worker-batch-screen-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Pin candidate patch and return to exact baseline
+        run: |
+          cp dev/perf/zstd-worker-batch-20260916.patch "$RUNNER_TEMP/candidate.patch"
+          test "$(sha256sum "$RUNNER_TEMP/candidate.patch" | cut -d ' ' -f 1)" = 3dd4433c31c29cabb3047e0f0db0950afc8b3c9c72c943013849120b3a36b232
+          git checkout --detach 30ffb604e0a87f0aa252bd4331bc54668062b1e1
+          test "$(git rev-parse 'HEAD^{tree}')" = c069f4ca92d8e6902a1a182281a06b2579610c05
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Fetch checksum-pinned dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Build exact baseline
+        run: |
+          node dev/bin/build.js --target chrome-dev
+          cp builds/manabitan-chrome-dev.zip "$RUNNER_TEMP/base.zip"
+          sha256sum "$RUNNER_TEMP/base.zip" | tee "$RUNNER_TEMP/base-package.sha256"
+      - name: Build and qualify isolated candidate
+        run: |
+          git apply --check "$RUNNER_TEMP/candidate.patch"
+          git apply "$RUNNER_TEMP/candidate.patch"
+          git diff --check
+          node node_modules/vitest/vitest.mjs run test/zstd-term-content-pool.test.js test/term-content-block-store.test.js test/zstd-wasm.test.js test/zstd-term-content-initialization.test.js
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/zstd-term-content.js ext/js/dictionary/zstd-term-content-compression-worker.js test/zstd-term-content-pool.test.js
+          npm run test:ts
+          git add ext/js/dictionary/zstd-term-content.js ext/js/dictionary/zstd-term-content-compression-worker.js test/zstd-term-content-pool.test.js
+          git -c core.hooksPath=/dev/null -c user.name='Manabitan contributors' -c user.email=contributors@manabi.io commit -m 'perf: batch term-content compression worker messages'
+          git rev-parse HEAD 'HEAD^{tree}' | tee "$RUNNER_TEMP/candidate-source.txt"
+          test -z "$(git status --porcelain)"
+          node dev/bin/build.js --target chrome-dev
+          cp builds/manabitan-chrome-dev.zip "$RUNNER_TEMP/candidate.zip"
+          sha256sum "$RUNNER_TEMP/candidate.zip" | tee "$RUNNER_TEMP/candidate-package.sha256"
+      - name: Fixed six-pair browser source comparison
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, shutil, subprocess, time
+          root = pathlib.Path.cwd()
+          tmp = pathlib.Path(os.environ['RUNNER_TEMP'])
+          baseline = '30ffb604e0a87f0aa252bd4331bc54668062b1e1'
+          candidate = (tmp / 'candidate-source.txt').read_text().splitlines()[0].strip()
+          dictionary = os.environ['DICTIONARY']
+          out = root / 'builds' / 'zstd-worker-batch-screen'
+          out.mkdir(parents=True, exist_ok=True)
+          identities = {
+              'A': {'commit': baseline, 'package': subprocess.check_output(['sha256sum', str(tmp / 'base.zip')], text=True).split()[0]},
+              'B': {'commit': candidate, 'package': subprocess.check_output(['sha256sum', str(tmp / 'candidate.zip')], text=True).split()[0]},
+          }
+          plan = [
+              {'kind': 'warmup', 'pair': 0, 'arm': 'A', 'binary': 'A'},
+              {'kind': 'warmup', 'pair': 0, 'arm': 'B', 'binary': 'B'},
+          ]
+          for pair in range(1, 7):
+              order = 'AB' if pair % 2 else 'BA'
+              plan.extend({'kind': 'measured', 'pair': pair, 'arm': arm, 'binary': arm} for arm in order)
+              if pair % 2 == 0:
+                  aa_order = 'AB' if pair != 4 else 'BA'
+                  plan.extend({'kind': 'aa', 'pair': pair // 2, 'arm': arm, 'binary': 'A'} for arm in aa_order)
+          (out / 'plan.json').write_text(json.dumps({'baseline': baseline, 'candidate': candidate, 'dictionary': dictionary, 'identities': identities, 'plan': plan, 'noRetries': True, 'noOutlierRemoval': True}, indent=2))
+          observations = []
+          for ordinal, item in enumerate(plan, 1):
+              commit = identities[item['binary']]['commit']
+              subprocess.run(['git', 'checkout', '--detach', commit], check=True, stdout=subprocess.DEVNULL)
+              status = subprocess.check_output(['git', 'status', '--porcelain'], text=True).strip()
+              if status:
+                  raise RuntimeError(f'dirty source before observation {ordinal}: {status}')
+              shutil.copy2(tmp / ('base.zip' if item['binary'] == 'A' else 'candidate.zip'), root / 'builds/manabitan-chrome-dev.zip')
+              destination = out / f"{ordinal:02d}-{item['kind']}-{item['pair']}-{item['arm']}"
+              started = time.monotonic()
+              with open(str(destination) + '.log', 'w') as log:
+                  subprocess.run(['node', 'dev/perf/import-benchmark.js', dictionary, '--runs', '1', '--no-build', '--flags', '{}', '--output', str(destination)], check=True, stdout=log, stderr=subprocess.STDOUT, timeout=240)
+              summary = json.loads((destination / 'summary.json').read_text())
+              report = json.loads((destination / 'run-1.json').read_text())
+              if report.get('status') != 'success' or report.get('skippedVerification') is not False:
+                  raise RuntimeError(f'invalid report {ordinal}: {report.get("status")} {report.get("failureReason")}')
+              run = summary['runs'][0]
+              observations.append({**item, 'ordinal': ordinal, 'ms': run['totalImportMs'], 'workerMs': run['workerImportMs'], 'validation': run['validation'], 'browser': summary['browserVersion'], 'wallSeconds': time.monotonic() - started, 'sourceCommit': summary['source']['gitSha'], 'package': summary['source']['sha256']['builds/manabitan-chrome-dev.zip']})
+              if observations[-1]['sourceCommit'] != commit or observations[-1]['package'] != identities[item['binary']]['package']:
+                  raise RuntimeError(f'identity mismatch observation {ordinal}')
+              (out / 'observations.json').write_text(json.dumps(observations, indent=2))
+              print(json.dumps(observations[-1]), flush=True)
+          (out / 'complete.json').write_text(json.dumps({'completed': len(observations), 'planned': len(plan)}, indent=2))
+          PY
+      - name: Preserve exact candidate and toolchain evidence
+        if: always()
+        run: |
+          mkdir -p builds/zstd-worker-batch-screen
+          cp "$RUNNER_TEMP/candidate.patch" builds/zstd-worker-batch-screen/candidate.patch
+          cp "$RUNNER_TEMP/candidate-source.txt" builds/zstd-worker-batch-screen/candidate-source.txt || true
+          cp "$RUNNER_TEMP/base-package.sha256" builds/zstd-worker-batch-screen/base-package.sha256 || true
+          cp "$RUNNER_TEMP/candidate-package.sha256" builds/zstd-worker-batch-screen/candidate-package.sha256 || true
+          node --version > builds/zstd-worker-batch-screen/node.txt
+          chromium_version=$(find "$HOME/.cache/ms-playwright" -type f -path '*/chrome-linux64/chrome' -print -quit 2>/dev/null || true)
+          if [ -n "$chromium_version" ]; then "$chromium_version" --version > builds/zstd-worker-batch-screen/chromium.txt || true; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zstd-worker-batch-${{ matrix.dictionary }}
+          path: builds/zstd-worker-batch-screen
+          retention-days: 30
