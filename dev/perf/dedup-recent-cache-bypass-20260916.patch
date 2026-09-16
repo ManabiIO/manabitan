@@ -1,0 +1,19 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index a9bf0c6..d8bce6f 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -8660,10 +8660,10 @@ export class DictionaryDatabase {
+             );
+         }
+         const recentSourceCacheStart = importMetrics === null ? 0 : safePerformance.now();
+-        const recentSourceCacheBytes = this._cacheRecentPublishedTermContentSources(
+-            stagedContentMetadata,
+-            pendingContentSpans,
+-        );
++        // Exact candidates remain resolvable through the in-flight source map
++        // and persisted block store. Avoid retaining another owned copy of the
++        // just-published parser source during import.
++        const recentSourceCacheBytes = 0;
+         if (importMetrics !== null) {
+             importMetrics.dedupRecentSourceCacheMs += safePerformance.now() - recentSourceCacheStart;
+             importMetrics.dedupRecentSourceCacheBytes += recentSourceCacheBytes;
