@@ -1,0 +1,261 @@
+--- /dev/null
++++ b/ext/js/dictionary/wasm/media-inflate.c
+@@ -0,0 +1,99 @@
++/* Copyright (C) 2026 Manabitan authors; SPDX-License-Identifier: GPL-3.0-or-later */
++#include <stdint.h>
++#include <stddef.h>
++#define MEDIA_CAPACITY (256u * 1024u)
++static uint8_t media_input[MEDIA_CAPACITY];
++static uint8_t media_output[MEDIA_CAPACITY];
++void* memset(void* dest, int value, size_t count) {
++    uint8_t* bytes = dest;
++    for (size_t i = 0; i < count; ++i) { bytes[i] = (uint8_t)value; }
++    return dest;
++}
++void* memcpy(void* dest, const void* source, size_t count) {
++    uint8_t* output = dest; const uint8_t* input = source;
++    for (size_t i = 0; i < count; ++i) { output[i] = input[i]; }
++    return dest;
++}
++#define MINIZ_NO_MALLOC
++#define MINIZ_NO_STDIO
++#define MINIZ_NO_TIME
++#define MINIZ_NO_ARCHIVE_APIS
++#define MINIZ_NO_DEFLATE_APIS
++#define MINIZ_LITTLE_ENDIAN 1
++#define MINIZ_USE_UNALIGNED_LOADS_AND_STORES 1
++#include "vendor/miniz/miniz_tinfl.c"
++static uint32_t crc32_table[8][256];
++static uint32_t crc32_table_initialized = 0u;
++
++static uint32_t crc32_bytes(const uint8_t* data, uint32_t length) {
++    if (crc32_table_initialized == 0u) {
++        for (uint32_t i = 0u; i < 256u; ++i) {
++            uint32_t value = i;
++            for (uint32_t bit = 0u; bit < 8u; ++bit) {
++                value = (value >> 1u) ^ ((value & 1u) != 0u ? 0xedb88320u : 0u);
++            }
++            crc32_table[0][i] = value;
++        }
++        for (uint32_t slice = 1u; slice < 8u; ++slice) {
++            for (uint32_t i = 0u; i < 256u; ++i) {
++                const uint32_t value = crc32_table[slice - 1u][i];
++                crc32_table[slice][i] = (value >> 8u) ^ crc32_table[0][value & 0xffu];
++            }
++        }
++        crc32_table_initialized = 1u;
++    }
++
++    uint32_t crc = 0xffffffffu;
++    uint32_t offset = 0u;
++    while (length - offset >= 8u) {
++        const uint32_t first =
++            (uint32_t)data[offset] |
++            ((uint32_t)data[offset + 1u] << 8u) |
++            ((uint32_t)data[offset + 2u] << 16u) |
++            ((uint32_t)data[offset + 3u] << 24u);
++        const uint32_t second =
++            (uint32_t)data[offset + 4u] |
++            ((uint32_t)data[offset + 5u] << 8u) |
++            ((uint32_t)data[offset + 6u] << 16u) |
++            ((uint32_t)data[offset + 7u] << 24u);
++        crc ^= first;
++        crc =
++            crc32_table[7][crc & 0xffu] ^
++            crc32_table[6][(crc >> 8u) & 0xffu] ^
++            crc32_table[5][(crc >> 16u) & 0xffu] ^
++            crc32_table[4][crc >> 24u] ^
++            crc32_table[3][second & 0xffu] ^
++            crc32_table[2][(second >> 8u) & 0xffu] ^
++            crc32_table[1][(second >> 16u) & 0xffu] ^
++            crc32_table[0][second >> 24u];
++        offset += 8u;
++    }
++    while (offset < length) {
++        crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset++]) & 0xffu];
++    }
++    return ~crc;
++}
++
++
++uint32_t media_input_pointer(void) { return (uint32_t)(uintptr_t)media_input; }
++uint32_t media_output_pointer(void) { return (uint32_t)(uintptr_t)media_output; }
++/* Exact synchronous bounded-buffer decode. The caller owns this instance and
++ * copies the verified result before yielding; no source buffer escapes. */
++int32_t inflate_media(uint32_t compressed, uint32_t decoded, uint32_t method, uint32_t signature) {
++    if (compressed > MEDIA_CAPACITY || decoded > MEDIA_CAPACITY) { return -1; }
++    if (method == 0u) {
++        if (compressed != decoded) { return -3; }
++        memcpy(media_output, media_input, decoded);
++    } else if (method == 8u) {
++        tinfl_decompressor decoder;
++        tinfl_init(&decoder);
++        size_t consumed = compressed, produced = decoded;
++        const tinfl_status status = tinfl_decompress(&decoder, media_input, &consumed,
++            media_output, media_output, &produced, TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF);
++        if (status != TINFL_STATUS_DONE) { return -2; }
++        if (produced != decoded) { return -3; }
++        if (consumed != compressed) { return -6; }
++    } else { return -1; }
++    if (crc32_bytes(media_output, decoded) != signature) { return -4; }
++    return (int32_t)decoded;
++}
+--- /dev/null
++++ b/ext/js/dictionary/media-inflater.js
+@@ -0,0 +1,32 @@
++/* Copyright (C) 2026 Manabitan authors; SPDX-License-Identifier: GPL-3.0-or-later */
++
++/** @typedef {{memory: WebAssembly.Memory, media_input_pointer(): number, media_output_pointer(): number, inflate_media(size: number, decoded: number, method: number, signature: number): number}} MediaExports */
++/** @typedef {{decode(bytes: Uint8Array, decoded: number, method: number, signature: number): Uint8Array}} MediaInflater */
++export const MEDIA_INFLATE_MAX_BYTES = 256 * 1024;
++
++/**
++ * A separate capped module avoids borrowing a parser arena across async work.
++ * Resource/load errors are handled by the importer's existing ZIP fallback.
++ * @returns {Promise<MediaInflater>}
++ */
++export async function createMediaInflater() {
++    const response = await fetch(new URL('../../lib/media-inflate.wasm', import.meta.url));
++    if (!response.ok) { throw new Error('Unable to load bounded media inflater'); }
++    const {instance} = await WebAssembly.instantiate(await response.arrayBuffer());
++    const wasm = /** @type {MediaExports} */ (/** @type {unknown} */ (instance.exports));
++    const input = wasm.media_input_pointer();
++    const output = wasm.media_output_pointer();
++    return {
++        decode(bytes, decoded, method, signature) {
++            if (bytes.byteLength > MEDIA_INFLATE_MAX_BYTES || !Number.isSafeInteger(decoded) || decoded < 0 || decoded > MEDIA_INFLATE_MAX_BYTES ||
++                (method !== 0 && method !== 8) || !Number.isSafeInteger(signature) || signature < 0 || signature > 0xffffffff) {
++                throw new RangeError('Invalid bounded media inflate metadata');
++            }
++            const heap = new Uint8Array(wasm.memory.buffer);
++            heap.set(bytes, input);
++            const size = wasm.inflate_media(bytes.byteLength, decoded, method, signature);
++            if (size < 0) { throw new Error(`Invalid ZIP media payload (${size})`); }
++            return heap.slice(output, output + size);
++        },
++    };
++}
+--- a/dev/build-libs.js
++++ b/dev/build-libs.js
+@@ -206,7 +206,16 @@
+         {
+             sourcePath: path.join(extDir, 'js', 'dictionary', 'wasm', 'term-bank-parser.c'),
+             outputPath: path.join(out, 'term-bank-parser.wasm'),
++            shared: true,
++            maxMemory: 4294967296,
+             exports: ['wasm_reset_heap', 'wasm_alloc', 'wasm_get_last_parse_capacity', 'wasm_get_last_content_capacity', 'inflate_and_join_term_banks', 'parse_term_bank', 'parse_term_bank_with_media_hints', 'parse_and_encode_term_bank_token_binary_dedup', 'build_term_string_plan', 'encode_term_lookup_index', 'compact_term_lookup_keys', 'encode_term_content', 'encode_term_content_no_hash', 'encode_term_content_token_binary', 'encode_term_content_token_binary_dedup'],
++        },
++        {
++            sourcePath: path.join(extDir, 'js', 'dictionary', 'wasm', 'media-inflate.c'),
++            outputPath: path.join(out, 'media-inflate.wasm'),
++            shared: false,
++            maxMemory: 1048576,
++            exports: ['media_input_pointer', 'media_output_pointer', 'inflate_media'],
+         },
+     ];
+ 
+@@ -221,8 +230,8 @@
+             '-msimd128',
+             '-nostdlib',
+             '-Wl,--no-entry',
+-            '-Wl,--shared-memory',
+-            '-Wl,--max-memory=4294967296',
++            ...(target.shared ? ['-Wl,--shared-memory'] : []),
++            `-Wl,--max-memory=${target.maxMemory}`,
+         ];
+         for (const exportName of target.exports) {
+             args.push(`-Wl,--export=${exportName}`);
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -67,6 +67,7 @@
+ import {DictionaryImportSession} from './dictionary-import-session.js';
+ import {RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
+ import {snapshotTermBankExperiments} from './term-bank-experiments.js';
++import {createMediaInflater, MEDIA_INFLATE_MAX_BYTES} from './media-inflater.js';
+ 
+ const BlobReader = /** @type {typeof import('@zip.js/zip.js').BlobReader} */ (/** @type {unknown} */ (BlobReader0));
+ const BlobWriter = /** @type {typeof import('@zip.js/zip.js').BlobWriter} */ (/** @type {unknown} */ (BlobWriter0));
+@@ -529,6 +530,12 @@
+         this._fastPrefixReverse = true;
+         /** @type {ReturnType<typeof snapshotTermBankExperiments>} */
+         this._termBankExperiments = snapshotTermBankExperiments();
++        /** @type {RawZipPayloadReader|null} */
++        this._mediaZipPayloadReader = null;
++        /** @type {Promise<import('./media-inflater.js').MediaInflater|null>|null} */
++        this._mediaInflater = null;
++        this._nativeMediaFiles = 0;
++
+     }
+ 
+     /**
+@@ -554,6 +561,9 @@
+                 );
+             }
+             throw error;
++        } finally {
++            this._mediaZipPayloadReader = null;
++            this._mediaInflater = null;
+         }
+     }
+ 
+@@ -1081,6 +1091,8 @@
+         const rawZipPayloadReader = RawZipPayloadReader.supportsArchive(archiveContent) ?
+             new RawZipPayloadReader(archiveContent) :
+             null;
++        this._mediaZipPayloadReader = rawZipPayloadReader;
++        this._nativeMediaFiles = 0;
+         const termBankSourcePipeline = new TermBankSourcePipeline({
+             termFiles: activeTermFiles,
+             enabled: !this._disableTermBankWasmFastPath && !useTermArtifactFiles && !usePackedTermArtifact,
+@@ -2085,6 +2097,7 @@
+                 step4TermSerializationMs: Math.max(0, step4TimingBreakdown.termSerializationMs),
+                 step4BulkAddTermsMs: Math.max(0, step4TimingBreakdown.bulkAddTermsMs),
+                 step4BulkAddTagsMetaMs: Math.max(0, step4TimingBreakdown.bulkAddTagsMetaMs),
++                nativeMediaFiles: this._nativeMediaFiles,
+                 step4MediaResolveMs: Math.max(0, step4TimingBreakdown.mediaResolveMs),
+                 step4MediaWriteMs: Math.max(0, step4TimingBreakdown.mediaWriteMs),
+                 step4TermFileNonParseWriteMs: Math.max(0, step4TimingBreakdown.termFileNonParseWriteMs),
+@@ -3018,7 +3031,7 @@
+             }
+ 
+             // Load file content without staging through Blob.
+-            const bytes = await this._getData(file, new Uint8ArrayWriter());
++            const bytes = await this._getNativeMediaBytes(file) ?? await this._getData(file, new Uint8ArrayWriter());
+             let content = (
+                 bytes.byteOffset === 0 &&
+                 bytes.byteLength === bytes.buffer.byteLength
+@@ -3062,6 +3075,34 @@
+         } finally {
+             this._pendingImageMediaByPath.delete(path);
+         }
++    }
++
++    /**
++     * A bounded optional fast path, using the same validated raw ZIP reader as
++     * source banks. Corrupt payloads reject; only module load failure falls back.
++     * @param {ImportFileEntry} file
++     * @returns {Promise<Uint8Array|null>}
++     */
++    async _getNativeMediaBytes(file) {
++        const reader = this._mediaZipPayloadReader;
++        if (reader === null) { return null; }
++        const decoded = /** @type {unknown} */ (Reflect.get(file, 'uncompressedSize'));
++        const compressed = /** @type {unknown} */ (Reflect.get(file, 'compressedSize'));
++        const method = /** @type {unknown} */ (Reflect.get(file, 'compressionMethod'));
++        const signature = /** @type {unknown} */ (Reflect.get(file, 'signature'));
++        if (typeof decoded !== 'number' || !Number.isSafeInteger(decoded) || decoded < 0 || decoded > MEDIA_INFLATE_MAX_BYTES ||
++            typeof compressed !== 'number' || !Number.isSafeInteger(compressed) || compressed < 0 || compressed > MEDIA_INFLATE_MAX_BYTES ||
++            (method !== 0 && method !== 8) || typeof signature !== 'number' || !Number.isSafeInteger(signature) || signature < 0 || signature > 0xffffffff ||
++            Reflect.get(file, 'encrypted') === true) { return null; }
++        this._mediaInflater ??= createMediaInflater().catch(() => null);
++        const inflater = await this._mediaInflater;
++        if (inflater === null) { return null; }
++        this._throwIfCancelled();
++        const bytes = await reader.read(file, new AbortController().signal);
++        this._throwIfCancelled();
++        const result = inflater.decode(bytes, decoded, method, signature);
++        ++this._nativeMediaFiles;
++        return result;
+     }
+ 
+     /**
