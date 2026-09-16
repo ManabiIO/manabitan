@@ -1,0 +1,60 @@
+name: WTY correctness qualification
+on:
+  push:
+    branches: [verify/wty-import-abba-20260916]
+    paths: [.github/workflows/wty-correctness-20260916.yml]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: |
+          mkdir -p builds/wty-qualification
+          cp -R dev/perf/wty-abba-20260916 "$RUNNER_TEMP/wty-assets"
+          cp "$RUNNER_TEMP/wty-assets/shared-decoder-browser.mjs" test/chromium/term-bank-shared-decoder.e2e.js
+          rm -rf dev/perf/wty-abba-20260916
+          npm ci
+          npm run build:libs > builds/wty-qualification/baseline-build.log 2>&1
+          npx playwright install --with-deps chromium
+      - name: Reproduce actual browser shared-memory decoding failure on untouched parent
+        run: node test/chromium/term-bank-shared-decoder.e2e.js --expect-failure | tee builds/wty-qualification/decoder-red.log
+      - name: Apply common correction and independent candidates
+        run: |
+          python3 "$RUNNER_TEMP/wty-assets/apply-decoder-fix.py"
+          python3 "$RUNNER_TEMP/wty-assets/apply-candidates.py" range simd capacity
+          cat "$RUNNER_TEMP/wty-assets/parser-tests.txt" >> test/term-bank-experiments.test.js
+          npm run build:libs > builds/wty-qualification/candidate-build.log 2>&1
+      - name: Real browser decoder green, then exact-output and fallback tests
+        shell: bash
+        run: |
+          set -o pipefail
+          node test/chromium/term-bank-shared-decoder.e2e.js 2>&1 | tee builds/wty-qualification/decoder-green.log
+          node node_modules/vitest/vitest.mjs run test/term-bank-experiments.test.js test/dictionary-import-ownership.test.js 2>&1 | tee builds/wty-qualification/focused.log
+          npm run test:ts 2>&1 | tee builds/wty-qualification/types.log
+      - name: Changed-file lint without auto-rewriting
+        shell: bash
+        run: |
+          set -o pipefail
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-source-pipeline.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/dictionary-importer.js test/term-bank-experiments.test.js test/chromium/term-bank-shared-decoder.e2e.js 2>&1 | tee builds/wty-qualification/lint.log
+      - name: Retain exact source and failure evidence
+        if: always()
+        run: |
+          mkdir -p builds/wty-qualification
+          git diff -- ext types test/term-bank-experiments.test.js > builds/wty-qualification/source.patch
+          cp test/chromium/term-bank-shared-decoder.e2e.js builds/wty-qualification/
+          tar -czf builds/wty-qualification/source.tar.gz ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-source-pipeline.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/wasm/term-bank-parser.c types/ext/dictionary-importer.d.ts test/term-bank-experiments.test.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wty-candidate-qualification
+          path: builds/wty-qualification
+          retention-days: 30
