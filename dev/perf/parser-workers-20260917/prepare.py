@@ -56,27 +56,34 @@ import {afterEach, describe, expect, test} from 'vitest'
 import {getParallelTermBankParserWorkerCount} from '../ext/js/dictionary/term-bank-wasm-parser.js'
 import {snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js'
 
+/** @typedef {import('dictionary-importer').ImportExperiments} Experiments */
 const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+const names = /** @type {Array<keyof Experiments>} */ (['experimentalParserWorkers3', 'experimentalParserWorkers4'])
 
+/**
+ * @param {number} hardwareConcurrency
+ * @param {number|undefined} deviceMemory
+ */
 function setNavigator(hardwareConcurrency, deviceMemory) {
     Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {hardwareConcurrency, deviceMemory}})
 }
 
 afterEach(() => {
     if (originalNavigator === undefined) {
-        delete globalThis.navigator
+        Reflect.deleteProperty(globalThis, 'navigator')
     } else {
         Object.defineProperty(globalThis, 'navigator', originalNavigator)
     }
 })
 
 describe('bounded parser worker experiments', () => {
-    test.each(['experimentalParserWorkers3', 'experimentalParserWorkers4'])('%s is literal-true and default-off', (key) => {
+    test.each(names)('%s is literal-true and default-off', (key) => {
         expect(snapshotTermBankExperiments()[key]).toBe(false)
         for (const value of [false, 0, 1, null, undefined, 'true', {}]) {
-            expect(snapshotTermBankExperiments({[key]: value})[key]).toBe(false)
+            const options = /** @type {Experiments} */ (/** @type {unknown} */ ({[key]: value}))
+            expect(snapshotTermBankExperiments(options)[key]).toBe(false)
         }
-        expect(snapshotTermBankExperiments({[key]: true})[key]).toBe(true)
+        expect(snapshotTermBankExperiments(/** @type {Experiments} */ ({[key]: true}))[key]).toBe(true)
     })
 
     test('four-core devices select only the requested count', () => {
