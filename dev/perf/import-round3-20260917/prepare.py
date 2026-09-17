@@ -51,7 +51,7 @@ new = '''        const explicitTermContentBlockTargetBytes = Number.isFinite(det
             Math.max(64 * 1024, Math.min(16 * 1024 * 1024, Math.trunc(/** @type {number} */ (details.termContentBlockTargetBytes)))) :
             null;
         const termContentBlockTargetBytes = explicitTermContentBlockTargetBytes ??
-            getExperimentalTermContentBlockTargetBytes(this._termBankExperiments);'''
+        getExperimentalTermContentBlockTargetBytes(this._termBankExperiments);'''
 replace('ext/js/dictionary/dictionary-importer.js', old, new)
 
 (ROOT / 'test/term-content-block-experiments.test.js').write_text('''/*
