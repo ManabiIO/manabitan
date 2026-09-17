@@ -1,0 +1,141 @@
+name: WTY isolated-candidate confirmation
+on:
+  push:
+    branches: [verify/wty-next-20260917]
+    paths: [.github/workflows/wty-next-confirm-20260917.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  confirm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: keys
+            modes: keys
+            flags: '{"experimentalKnownObjectKeys":true}'
+          - id: skip
+            modes: skip
+            flags: '{"experimentalSkipFusedParse":true}'
+          - id: retain
+            modes: retain
+            flags: '{"experimentalRetainedFusedFallback":true}'
+          - id: keysRetain
+            modes: keys retain
+            flags: '{"experimentalKnownObjectKeys":true,"experimentalRetainedFusedFallback":true}'
+    env:
+      CANDIDATE_ID: ${{ matrix.id }}
+      CANDIDATE_MODES: ${{ matrix.modes }}
+      CANDIDATE_FLAGS: ${{ matrix.flags }}
+      WTY_OUTPUT: builds/wty-confirm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: f8f868903c4733f6017d479f65b9600a583bedb2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - name: Retrieve immutable recipes and isolate only this candidate
+        run: |
+          mkdir -p "$RUNNER_TEMP/wty-tools" builds/wty-confirm
+          git fetch --depth=1 origin 5510075f183b1be74d614eadb92d9dee75be4f79
+          for file in known-keys.patch.gz.b64 prepare-candidates.py select-candidate.py abba.mjs corpus-parity.mjs; do
+            git show "FETCH_HEAD:dev/perf/wty-next-20260917/$file" > "$RUNNER_TEMP/wty-tools/$file"
+          done
+          read -r -a modes <<< "$CANDIDATE_MODES"
+          python3 "$RUNNER_TEMP/wty-tools/select-candidate.py" "${modes[@]}"
+          git diff --check
+      - run: npm ci
+      - name: Qualify exact final source before timing
+        run: |
+          npm run build:libs > builds/wty-confirm/libs.log 2>&1
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs'
+          import assert from 'node:assert/strict'
+          import {spawnSync} from 'node:child_process'
+          import * as espree from 'espree'
+          const files=['ext/js/dictionary/term-bank-wasm-parser.js','test/term-bank-experiments.test.js']
+          const ast=p=>JSON.stringify(espree.parse(fs.readFileSync(p,'utf8'),{ecmaVersion:'latest',sourceType:'module'}),(key,value)=>key==='start'||key==='end'?undefined:value)
+          const before=files.map(ast)
+          assert.equal(spawnSync(process.execPath,['node_modules/eslint/bin/eslint.js','--fix',...files],{stdio:'inherit'}).status,0)
+          assert.deepEqual(files.map(ast),before)
+          fs.writeFileSync('builds/wty-confirm/format-ast-equality.txt','Complete syntax tree unchanged by formatting\n')
+          JS
+          npm run build:libs > builds/wty-confirm/formatted-libs.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/term-bank-experiments.test.js test/term-bank-composite-state.test.js > builds/wty-confirm/focused.log 2>&1
+          npm run test:unit > builds/wty-confirm/unit.log 2>&1
+          npm run test:unit:options > builds/wty-confirm/options.log 2>&1
+          npm run test:ts > builds/wty-confirm/types.log 2>&1
+          npm run test:build > builds/wty-confirm/build-plans.log 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-experiments.test.js > builds/wty-confirm/changed-lint.log 2>&1
+          sha256sum ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/wasm/term-bank-parser.c types/ext/dictionary-importer.d.ts test/term-bank-experiments.test.js ext/lib/term-bank-parser.wasm > builds/wty-confirm/qualified-inputs.sha256
+      - uses: actions/cache@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-next-fixtures-b9603db-v1
+      - name: Prepare common complete-dictionary harness and actual browser packages
+        run: |
+          git fetch --depth=1 origin 9c843c8a0e06190948ae0d52c29094a45a2555f1
+          git show FETCH_HEAD:dev/perf/wty-abba-20260916/prepare.py > "$RUNNER_TEMP/wty-prepare-original.py"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path(os.environ['RUNNER_TEMP'])
+          (p/'wty-prepare.py').write_text((p/'wty-prepare-original.py').read_text().split('# Common correctness prerequisite')[0])
+          PY
+          python3 "$RUNNER_TEMP/wty-prepare.py" > builds/wty-confirm/fixture.log
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+          node dev/bin/build.js --target chrome-dev > builds/wty-confirm/chrome-build.log 2>&1
+          node dev/bin/build.js --target firefox-dev > builds/wty-confirm/firefox-build.log 2>&1
+          npx playwright install --with-deps chromium
+          sha256sum -c builds/wty-confirm/qualified-inputs.sha256
+      - name: Independent six-block ABBA and same-binary controls
+        run: node "$RUNNER_TEMP/wty-tools/abba.mjs" "control,$CANDIDATE_ID" 6 | tee builds/wty-confirm/abba.log
+      - name: Full WTY row/content/hash/hint parity through compressed grouped source
+        run: |
+          node "$RUNNER_TEMP/wty-tools/corpus-parity.mjs" "$CANDIDATE_FLAGS" builds/wty-corpus > builds/wty-confirm/corpus.log 2>&1
+          cp builds/wty-corpus/parity.json builds/wty-confirm/corpus-parity.json
+      - name: Full strict Chromium lifecycle on the qualified candidate
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: ${{ matrix.flags }}
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/wty-confirm/lifecycle.html
+        run: |
+          node test/chromium/extension-two-dictionary-import.e2e.js > builds/wty-confirm/lifecycle.log 2>&1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('builds/wty-confirm/lifecycle.json').read_text())
+          assert report['status']=='success' and report['skippedVerification'] is False and len(report['phases'])>=80
+          PY
+          sha256sum -c builds/wty-confirm/qualified-inputs.sha256
+          echo QUALIFIED > builds/wty-confirm/qualification-complete.txt
+      - name: Retain every observation and exact source without publishing unproven candidates
+        if: always()
+        run: |
+          mkdir -p builds/wty-confirm/source
+          cp ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/wasm/term-bank-parser.c types/ext/dictionary-importer.d.ts test/term-bank-experiments.test.js ext/lib/term-bank-parser.wasm builds/wty-confirm/source/ 2>/dev/null || true
+          cp "$RUNNER_TEMP/wty-tools/abba.mjs" "$RUNNER_TEMP/wty-tools/corpus-parity.mjs" builds/wty-confirm/source/ 2>/dev/null || true
+          cp builds/wty-corpus/parity.json builds/wty-confirm/corpus-parity.json 2>/dev/null || true
+          git diff -- ext/js types/ext test/term-bank-experiments.test.js > builds/wty-confirm/candidate.patch
+          git rev-parse HEAD > builds/wty-confirm/base.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wty-isolated-${{ matrix.id }}
+          path: builds/wty-confirm
+          retention-days: 30
