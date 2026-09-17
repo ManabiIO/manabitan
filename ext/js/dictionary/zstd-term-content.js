@@ -366,8 +366,8 @@ export async function initializeTermContentZstd() {
         return;
     }
     initializePromise = (async () => {
-        await init('/lib/zstd.wasm');
-        const response = await fetch('/lib/zstd-dicts/jmdict.zdict');
+        await init(new URL('../../lib/zstd.wasm', import.meta.url).href);
+        const response = await fetch(new URL('../../lib/zstd-dicts/jmdict.zdict', import.meta.url));
         if (!response.ok) {
             throw new Error(`Failed to load zstd dictionary: ${response.status}`);
         }

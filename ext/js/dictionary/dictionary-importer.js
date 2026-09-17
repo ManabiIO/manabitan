@@ -726,8 +726,8 @@ export class DictionaryImporter {
 
         configure({
             workerScripts: {
-                deflate: ['../../lib/z-worker.js'],
-                inflate: ['../../lib/z-worker.js'],
+                deflate: [new URL('../../lib/z-worker.js', import.meta.url).href],
+                inflate: [new URL('../../lib/z-worker.js', import.meta.url).href],
             },
             maxWorkers: zipMaxWorkers,
             useWebWorkers: this._zipUseWebWorkers,
