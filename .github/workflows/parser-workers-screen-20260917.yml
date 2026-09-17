@@ -58,7 +58,26 @@ jobs:
           Path('builds/parser-worker-screen/inherited-lint-note.txt').write_text('Current develop e6f85c1 already has one unused decodeUtf8 helper after #52; candidate lint disables only no-unused-vars for this already-existing helper.\n')
           PY
           node node_modules/vitest/vitest.mjs run test/term-bank-parser-worker-policy.test.js test/term-bank-experiments.test.js test/term-bank-composite-state.test.js > builds/parser-worker-screen/focused.log 2>&1
-          npm run test:ts > builds/parser-worker-screen/types.log 2>&1
+          npm run test:ts:main > builds/parser-worker-screen/types-main.log 2>&1
+          npm run test:ts:dev > builds/parser-worker-screen/types-dev.log 2>&1
+          set +e
+          npm run test:ts:test > builds/parser-worker-screen/types-test.log 2>&1
+          test_status=$?
+          set -e
+          test "$test_status" -ne 0
+          python3 - <<'PY'
+          from pathlib import Path
+          text=Path('builds/parser-worker-screen/types-test.log').read_text()
+          errors=[line for line in text.splitlines() if 'error TS' in line]
+          expected=[
+              "test/dictionary-importer-shared-buffer.test.js(22,20): error TS7006: Parameter 'bytes' implicitly has an 'any' type.",
+              "test/dictionary-importer-shared-buffer.test.js(39,45): error TS2502: 'row' is referenced directly or indirectly in its own type annotation.",
+          ]
+          assert errors == expected, (errors, expected)
+          assert 'term-bank-parser-worker-policy.test.js' not in text
+          Path('builds/parser-worker-screen/inherited-type-note.txt').write_text('Candidate test typecheck has exactly the two known current-develop diagnostics and no parser-worker-policy diagnostics.\n')
+          PY
+          npm run test:ts:bench > builds/parser-worker-screen/types-bench.log 2>&1
           git diff --name-only | xargs sha256sum > builds/parser-worker-screen/qualified-source.sha256
           sha256sum ext/lib/term-bank-parser.wasm ext/lib/zstd-wasm.js >> builds/parser-worker-screen/qualified-source.sha256
       - uses: actions/cache@v4
