@@ -1,0 +1,25 @@
+name: Shared import baseline source
+on:
+  push:
+    branches: [verify/import-shared-more-20260917]
+    paths: [.github/workflows/import-more-source-20260917.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 6896f54d13be0ba17fcf9345a9b6f29a04f88860
+          persist-credentials: false
+      - run: |
+          mkdir -p /tmp/import-more-source
+          git archive --format=tar.gz HEAD > /tmp/import-more-source/baseline.tar.gz
+          git rev-parse HEAD HEAD^{tree} > /tmp/import-more-source/identity.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-more-baseline-source
+          path: /tmp/import-more-source
+          retention-days: 30
