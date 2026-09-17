@@ -1,0 +1,73 @@
+name: Publish generic span compression draft
+on:
+  push:
+    branches: [verify/import-transport-compression-20260917]
+    paths:
+      - .github/workflows/publish-generic-span-compression-20260917.yml
+permissions:
+  contents: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 8cd1a7e41ac172a015a0e9b8b8b94f522d41b424
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - name: Apply exact isolated patch
+        env:
+          RECIPE_SHA: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = 8cd1a7e41ac172a015a0e9b8b8b94f522d41b424
+          git fetch --depth=1 origin "$RECIPE_SHA"
+          git show FETCH_HEAD:dev/perf/import-transport-20260917/generic-span-compression.patch.gz.b64 > "$RUNNER_TEMP/generic.b64"
+          base64 -d "$RUNNER_TEMP/generic.b64" | gzip -dc > "$RUNNER_TEMP/generic.patch"
+          echo "24bf026d65f8fae144a96acfa0973f69747782e9038c6ee6f50d8070107217bc  $RUNNER_TEMP/generic.patch" | sha256sum -c -
+          git apply --check "$RUNNER_TEMP/generic.patch"
+          git apply "$RUNNER_TEMP/generic.patch"
+          git diff --check
+          python3 - <<'PY'
+          import subprocess
+          expected = {
+              'ext/js/dictionary/dictionary-database.js',
+              'ext/js/dictionary/dictionary-importer.js',
+              'ext/js/dictionary/term-bank-experiments.js',
+              'ext/js/dictionary/term-content-block-store.js',
+              'ext/js/dictionary/zstd-term-content-compression-worker.js',
+              'ext/js/dictionary/zstd-term-content.js',
+              'test/term-bank-experiments.test.js',
+              'test/term-content-block-store.test.js',
+              'test/zstd-term-content-pool.test.js',
+              'types/ext/dictionary-importer.d.ts',
+          }
+          actual = set(subprocess.check_output(['git','diff','--name-only'], text=True).splitlines())
+          assert actual == expected, (actual - expected, expected - actual)
+          PY
+      - run: npm ci
+      - name: Focused qualification before publication
+        run: |
+          node node_modules/eslint/bin/eslint.js             ext/js/dictionary/dictionary-database.js             ext/js/dictionary/dictionary-importer.js             ext/js/dictionary/term-bank-experiments.js             ext/js/dictionary/term-content-block-store.js             ext/js/dictionary/zstd-term-content-compression-worker.js             ext/js/dictionary/zstd-term-content.js             test/term-bank-experiments.test.js             test/term-content-block-store.test.js             test/zstd-term-content-pool.test.js
+          node node_modules/vitest/vitest.mjs run             test/zstd-wasm.test.js             test/zstd-term-content-pool.test.js             test/term-content-block-store.test.js             test/term-bank-experiments.test.js
+          npm run test:ts:main
+          npm run test:ts:dev
+          npm run test:ts:bench
+          npm run test:build
+          git diff --check
+      - name: Commit exact product and regression changes
+        run: |
+          git config user.name "Manabitan contributors"
+          git config user.email "contributors@manabi.io"
+          git add             ext/js/dictionary/dictionary-database.js             ext/js/dictionary/dictionary-importer.js             ext/js/dictionary/term-bank-experiments.js             ext/js/dictionary/term-content-block-store.js             ext/js/dictionary/zstd-term-content-compression-worker.js             ext/js/dictionary/zstd-term-content.js             test/term-bank-experiments.test.js             test/term-content-block-store.test.js             test/zstd-term-content-pool.test.js             types/ext/dictionary-importer.d.ts
+          git diff --cached --check
+          git commit -s -m "perf: add opt-in generic span compression"
+          git push origin HEAD:refs/heads/perf/generic-span-compression-20260917
+          git rev-parse HEAD HEAD^{tree}
