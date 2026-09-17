@@ -36,6 +36,7 @@ jobs:
       - run: npm ci
       - name: Freeze exact source and run the complete qualification suite
         run: |
+          npm run build:libs > builds/crc-qualification/lint-dependencies.log 2>&1
           node --input-type=module - <<'JS'
           import fs from 'node:fs'
           import assert from 'node:assert/strict'
