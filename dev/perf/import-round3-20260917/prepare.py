@@ -8,6 +8,38 @@ def replace(path, old, new):
     assert text.count(old) == 1, (path, old[:100], text.count(old))
     p.write_text(text.replace(old, new))
 
+# Common correctness repair, not a performance candidate. Current develop's
+# shared-memory decoder helper dereferences optional TextDecoder input and can
+# crash Jitendex after partial import. Apply the exact repair to every arm.
+replace(
+    'ext/js/dictionary/dictionary-importer.js',
+    ''' * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+function decodeUtf8Bytes(decoder, bytes) {
+    const buffer = bytes.buffer;
+    return (
+        typeof SharedArrayBuffer === 'function' &&
+        buffer instanceof SharedArrayBuffer
+    ) ?
+        decoder.decode(Uint8Array.from(bytes)) :
+        decoder.decode(bytes);
+}''',
+    ''' * @param {Uint8Array|undefined} bytes
+ * @returns {string}
+ */
+function decodeUtf8Bytes(decoder, bytes) {
+    const buffer = bytes?.buffer;
+    return (
+        typeof SharedArrayBuffer === 'function' &&
+        bytes instanceof Uint8Array &&
+        buffer instanceof SharedArrayBuffer
+    ) ?
+        decoder.decode(Uint8Array.from(bytes)) :
+        decoder.decode(bytes);
+}''',
+)
+
 flags = ['experimentalContentBlocks2MiB', 'experimentalContentBlocks8MiB']
 replace(
     'ext/js/dictionary/term-bank-experiments.js',
@@ -94,4 +126,4 @@ describe('term-content block-size experiments', () => {
     })
 })
 ''')
-print('Staged default-off 2 MiB / 8 MiB content-block experiments; existing lookup flags unchanged')
+print('Applied common optional-decoder repair to all arms; staged default-off 2 MiB / 8 MiB block experiments')
