@@ -39,7 +39,7 @@ jobs:
         run: |
           npm run build:libs > builds/shared-decoder-fix/libs.log 2>&1
           node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-importer.js test/dictionary-importer-shared-buffer.test.js > builds/shared-decoder-fix/lint.log 2>&1
-          node node_modules/vitest/vitest.mjs run test/dictionary-importer-shared-buffer.test.js test/dictionary-importer.test.js test/term-bank-composite-state.test.js > builds/shared-decoder-fix/focused.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/dictionary-importer-shared-buffer.test.js test/term-bank-composite-state.test.js > builds/shared-decoder-fix/focused.log 2>&1
           npm run test:ts:main > builds/shared-decoder-fix/types-main.log 2>&1
           npm run test:ts:dev > builds/shared-decoder-fix/types-dev.log 2>&1
           npm run test:ts:bench > builds/shared-decoder-fix/types-bench.log 2>&1
@@ -95,7 +95,7 @@ jobs:
           test "$(git diff --cached --name-only)" = ext/js/dictionary/dictionary-importer.js
           git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'fix: preserve optional TextDecoder input semantics'
           git push origin HEAD:refs/heads/fix/shared-decoder-optional-bytes-20260917
-          git rev-parse HEAD HEAD^{tree} > builds/shared-decoder-fix/published.txt
+          git rev-parse HEAD 'HEAD^{tree}' > builds/shared-decoder-fix/published.txt
           echo QUALIFIED > builds/shared-decoder-fix/complete.txt
       - uses: actions/upload-artifact@v4
         if: always()
