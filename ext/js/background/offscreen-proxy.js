@@ -90,6 +90,8 @@ export class OffscreenProxy {
         this._resolveOffscreenPortReady = null;
         /** @type {number} */
         this._offscreenControlRequestId = 0;
+        /** @type {number} */
+        this._activeStreamedImportCount = 0;
         /** @type {Map<number, {port: MessagePort, accept: (() => void)|null, resolve: (value: unknown) => void, reject: (reason?: unknown) => void}>} */
         this._offscreenControlResponseHandlers = new Map();
         this._resetOffscreenPortReadyPromise();
@@ -235,6 +237,10 @@ export class OffscreenProxy {
      * @returns {Promise<import('offscreen').ApiReturn<TMessageType>>}
      */
     async sendMessagePromise(message) {
+        if (message.action === 'cancelDictionaryImportOffscreen' && this._activeStreamedImportCount === 0) {
+            reportDiagnostics('dictionary-import-cancel-skipped', {reason: 'no-active-streamed-import'});
+            return /** @type {import('offscreen').ApiReturn<TMessageType>} */ (void 0);
+        }
         await this._ensureOffscreenDocument();
         const response = await this._webExtension.sendMessagePromise(message);
         return this._getMessageResponseResult(/** @type {import('core').Response<import('offscreen').ApiReturn<TMessageType>>} */ (response));
@@ -287,41 +293,51 @@ export class OffscreenProxy {
      * @returns {Promise<import('offscreen').McApiReturn<TMessageType>>}
      */
     async sendMessageViaPort(message, transfers) {
-        const attemptCount = transfers.length === 0 ? 2 : 1;
-        for (let attempt = 0; attempt < attemptCount; ++attempt) {
-            /** @type {MessagePort|null} */
-            let port = null;
-            try {
+        const isStreamedImport = getDictionaryRuntimeActionPolicy(message.action).concurrency === 'streamed-import';
+        if (isStreamedImport) {
+            this._activeStreamedImportCount += 1;
+        }
+        try {
+            const attemptCount = transfers.length === 0 ? 2 : 1;
+            for (let attempt = 0; attempt < attemptCount; ++attempt) {
+                /** @type {MessagePort|null} */
+                let port = null;
                 try {
-                    await this._ensureOffscreenPort();
-                } catch (initialError) {
-                    reportDiagnostics('offscreen-control-runtime-recovery', {
-                        action: message.action,
-                        attempt: attempt + 1,
-                        reason: initialError instanceof Error ? initialError.message : String(initialError),
-                    });
-                    await this.prepare();
+                    try {
+                        await this._ensureOffscreenPort();
+                    } catch (initialError) {
+                        reportDiagnostics('offscreen-control-runtime-recovery', {
+                            action: message.action,
+                            attempt: attempt + 1,
+                            reason: initialError instanceof Error ? initialError.message : String(initialError),
+                        });
+                        await this.prepare();
+                    }
+                    port = this._currentOffscreenPort;
+                    if (port === null) {
+                        throw new OffscreenControlTransportError('Offscreen control port is unavailable');
+                    }
+                    return /** @type {import('offscreen').McApiReturn<TMessageType>} */ (
+                        await this._sendOffscreenControlMessage(port, /** @type {import('offscreen').McApiMessageAny} */ (message), transfers)
+                    );
+                } catch (error) {
+                    const transportError = error instanceof OffscreenControlTransportError ?
+                        error :
+                        (port === null ? new OffscreenControlTransportError('Failed to establish offscreen control transport', {cause: error}) : null);
+                    if (transportError === null) {
+                        throw error;
+                    }
+                    if (port !== null) {
+                        this._clearCurrentOffscreenPort(port);
+                    }
+                    if (attempt + 1 >= attemptCount) {
+                        throw transportError;
+                    }
                 }
-                port = this._currentOffscreenPort;
-                if (port === null) {
-                    throw new OffscreenControlTransportError('Offscreen control port is unavailable');
-                }
-                return /** @type {import('offscreen').McApiReturn<TMessageType>} */ (
-                    await this._sendOffscreenControlMessage(port, /** @type {import('offscreen').McApiMessageAny} */ (message), transfers)
-                );
-            } catch (error) {
-                const transportError = error instanceof OffscreenControlTransportError ?
-                    error :
-                    (port === null ? new OffscreenControlTransportError('Failed to establish offscreen control transport', {cause: error}) : null);
-                if (transportError === null) {
-                    throw error;
-                }
-                if (port !== null) {
-                    this._clearCurrentOffscreenPort(port);
-                }
-                if (attempt + 1 >= attemptCount) {
-                    throw transportError;
-                }
+            }
+        } finally {
+            if (isStreamedImport) {
+                this._activeStreamedImportCount = Math.max(0, this._activeStreamedImportCount - 1);
             }
         }
     }
