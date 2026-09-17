@@ -363,6 +363,7 @@ type ApiSurface = {
     setDictionaryImportMode: {
         params: {
             active: boolean;
+            cancelActiveImport?: boolean;
         };
         return: void;
     };
