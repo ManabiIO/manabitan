@@ -1,0 +1,173 @@
+/*
+ * Copyright (C) 2026 Manabitan authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+/* eslint @stylistic/semi: ["error", "never"] */
+
+import {readFile} from 'node:fs/promises'
+import {createHash} from 'node:crypto'
+import {afterAll, beforeAll, describe, expect, test, vi} from 'vitest'
+import {snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js'
+import {consumeLastTermBankWasmParseProfile, parseTermBankWithWasmColumnChunks} from '../ext/js/dictionary/term-bank-wasm-parser.js'
+
+/** @typedef {Parameters<typeof parseTermBankWithWasmColumnChunks>[4]} Options */
+/** @typedef {Parameters<Parameters<typeof parseTermBankWithWasmColumnChunks>[2]>[0]} Chunk */
+const encoder = new TextEncoder()
+const originalFetch = globalThis.fetch
+const skip = {experimentalSkipFusedProbe: true}
+
+/**
+ * Copy every logical output column while its borrowed memory is valid.
+ * @param {Chunk} chunk
+ * @returns {string[]}
+ */
+function snapshot(chunk) {
+    const plan = chunk.termRecordPreinternedPlan
+    const offsets = plan.stringOffsets ?? new Uint32Array(plan.stringLengths.length)
+    if (!(plan.stringOffsets instanceof Uint32Array)) {
+        for (let i = 1; i < offsets.length; ++i) { offsets[i] = offsets[i - 1] + plan.stringLengths[i - 1] }
+    }
+    /** @param {number} index @returns {number[]} */
+    const key = (index) => [...plan.stringsBuffer.subarray(offsets[index], offsets[index] + plan.stringLengths[index])]
+    const rows = []
+    for (let i = 0; i < chunk.rowCount; ++i) {
+        const meta = chunk.contentMetaList
+        const slab = chunk.contentBytesBuffer
+        const offset = meta ? meta[i * 4] + (chunk.contentBytesBaseOffset ?? 0) : 0
+        const bytes = slab && meta ? slab.subarray(offset, offset + meta[i * 4 + 1]) : chunk.contentBytesList[i]
+        const hashes = meta ? [meta[i * 4 + 2], meta[i * 4 + 3]] : [chunk.contentHash1List[i], chunk.contentHash2List[i]]
+        rows.push(JSON.stringify({
+            expression: key(plan.expressionIndexes[i]),
+            reading: key(plan.readingIndexes[i]),
+            same: chunk.readingEqualsExpressionList[i],
+            score: chunk.scoreList[i],
+            sequence: chunk.sequenceList[i],
+            length: bytes.length,
+            content: createHash('sha256').update(bytes).digest('hex'),
+            hashes,
+            expressionBytes: chunk.expressionBytesList[i] ? [...chunk.expressionBytesList[i]] : null,
+            readingBytes: chunk.readingBytesList[i] ? [...chunk.readingBytesList[i]] : null,
+            media: chunk.mediaRows.filter((item) => item.index === i).map(({row}) => ({
+                expression: row.expression,
+                reading: row.reading,
+                glossary: row.glossaryJson,
+                bytes: [...row.termEntryContentBytes],
+            })),
+        }))
+    }
+    return rows
+}
+
+/**
+ * @param {string[]} banks
+ * @param {Options} [options]
+ * @returns {Promise<{rows: string[], profile: NonNullable<ReturnType<typeof consumeLastTermBankWasmParseProfile>>}>}
+ */
+async function parse(banks, options = {}) {
+    /** @type {string[]} */
+    const rows = []
+    await parseTermBankWithWasmColumnChunks(banks.map((bank) => encoder.encode(bank)), 3, async (chunk) => {
+        rows.push(...snapshot(chunk))
+        await Promise.resolve()
+    }, 17, {emitContentSlab: true, emitTokenBinaryContent: true, emitTermByteLists: false, mediaHintFastScan: true, ...options})
+    const profile = consumeLastTermBankWasmParseProfile()
+    if (profile === null) { throw new Error('Missing parser profile') }
+    return {rows, profile}
+}
+
+/** @param {string} expression @param {unknown[]} [glossary] @returns {unknown[]} */
+function row(expression, glossary = ['definition']) { return [expression, '', 'noun', '', -3, glossary, 7, 'common'] }
+const plainBanks = [JSON.stringify([row('one'), row('two')]), JSON.stringify([row('three'), row('one')])]
+
+beforeAll(() => {
+    vi.stubGlobal('fetch', async (/** @type {RequestInfo|URL} */ input) => {
+        const url = input instanceof URL ? input : new URL(String(input))
+        return url.protocol === 'file:' ? new Response(await readFile(url)) : await originalFetch(input)
+    })
+})
+afterAll(() => { vi.unstubAllGlobals() })
+
+describe('skip speculative fused parser experiment', () => {
+    test('is default-off and requires an exact true without retaining caller state', () => {
+        const input = {experimentalSkipFusedProbe: true}
+        const options = snapshotTermBankExperiments(input)
+        input.experimentalSkipFusedProbe = false
+        expect(options.experimentalSkipFusedProbe).toBe(true)
+        expect(Object.isFrozen(options)).toBe(true)
+        expect(snapshotTermBankExperiments().experimentalSkipFusedProbe).toBe(false)
+        expect(snapshotTermBankExperiments(/** @type {import('dictionary-importer').ImportExperiments} */ (/** @type {unknown} */ ({experimentalSkipFusedProbe: 1}))).experimentalSkipFusedProbe).toBe(false)
+    })
+    test('bypasses an eligible successful fused parse without changing any row', async () => {
+        const a = await parse(plainBanks)
+        const b = await parse(plainBanks, skip)
+        expect(a.profile.fusedParseAttempts).toBe(1)
+        expect(a.profile.fusedParseFallbacks).toBe(0)
+        expect(b.profile.fusedParseAttempts).toBe(0)
+        expect(b.profile.discardedFusedRows).toBe(0)
+        expect(b.rows).toEqual(a.rows)
+    })
+    test('does not leak the bypass setting into the next import', async () => {
+        const a = await parse(plainBanks)
+        await parse(plainBanks, skip)
+        const again = await parse(plainBanks)
+        expect(again.rows).toEqual(a.rows)
+        expect(again.profile.fusedParseAttempts).toBe(1)
+    })
+    test('avoids capacity-failure work while retaining all 24000 rows and hashes', async () => {
+        const bank = JSON.stringify(Array.from({length: 12000}, (_, i) => row(`key-${i % 31}`)))
+        const a = await parse([bank, bank], {singleChunk: true})
+        const b = await parse([bank, bank], {...skip, singleChunk: true})
+        expect(a.profile.fusedParseFallbacks).toBe(1)
+        expect(a.profile.discardedFusedRows).toBeGreaterThan(0)
+        expect(b.profile.fusedParseAttempts).toBe(0)
+        expect(b.profile.discardedFusedRows).toBe(0)
+        expect(b.rows.length).toBe(24000)
+        expect(b.rows).toEqual(a.rows)
+    })
+    test.each([
+        {emitTermByteLists: true},
+        {emitContentSlab: false},
+        {mediaHintFastScan: false},
+        {prepareLookupIndexes: true},
+        {useNativeStringPlan: false},
+        {singleChunk: true},
+        {experimentalTermBankSpans: true},
+        {experimentalNativeEscapedKeys: true},
+    ])('retains output under alternative supported options %j', async (options) => {
+        const a = await parse(plainBanks, options)
+        const b = await parse(plainBanks, {...options, ...skip})
+        expect(b.rows).toEqual(a.rows)
+        expect(b.profile.fusedParseAttempts).toBe(0)
+    })
+    test('preserves escaped keys, distinct readings, Unicode and media projection', async () => {
+        const rows = [row('café', [{type: 'structured-content', content: {tag: 'img', path: 'photo.png'}}]),
+            ['字', 'じ', 'n', '', 12, ['image', 'img', '😺'], 42, ''],
+            ['a', 'a', '', '', 0, ['x'], -1, ''],
+            ['same', '', '', '', 0, ['x'], -1, '']]
+        const banks = [JSON.stringify(rows), '[["\\u0061","a","","",0,["x"],-1,""]]']
+        const a = await parse(banks)
+        const b = await parse(banks, skip)
+        expect(b.rows).toEqual(a.rows)
+        expect(b.profile.fusedParseAttempts).toBe(0)
+    })
+    test.each(['[["x","","","",0,[{"tag":}],0,""]]', '[["x","","","",0,["x"],0,""]', '[,]', '[["x","","","",0,["x",],0,""]]'])('still rejects malformed JSON and recovers: %s', async (bad) => {
+        await expect(parse([bad, plainBanks[0]])).rejects.toThrow()
+        await expect(parse([bad, plainBanks[0]], skip)).rejects.toThrow()
+        expect((await parse(plainBanks, skip)).rows).toEqual((await parse(plainBanks)).rows)
+    })
+    test('retains empty-bank behavior', async () => {
+        expect((await parse(['[]', '[]'], skip)).rows).toEqual([])
+    })
+})
