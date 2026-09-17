@@ -28,6 +28,15 @@ jobs:
           git fetch --depth=1 origin "$RECIPE_SHA"
           git show FETCH_HEAD:dev/perf/import-more-20260917/test-metadata-growth.js > test/term-bank-metadata-growth.test.js
           git show FETCH_HEAD:dev/perf/import-more-20260917/fix-metadata.py > "$RUNNER_TEMP/fix-metadata.py"
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('test/term-bank-metadata-growth.test.js');s=p.read_text()
+          old='/** @param {Uint8Array} bytes @returns {string} */'
+          assert s.count(old)==1
+          s=s.replace(old,'/**\n * @param {Uint8Array} bytes\n * @returns {string}\n */')
+          old='}, {hints:';assert s.count(old)==2
+          p.write_text(s.replace(old,'},\n    {hints:'))
+          PY
       - run: npm ci
       - name: Reproduce all twelve odd-capacity failures on untouched native source
         run: |

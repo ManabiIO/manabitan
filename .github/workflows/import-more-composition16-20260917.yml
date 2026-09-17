@@ -1,0 +1,84 @@
+name: Isolated grouping and libdeflate composition
+on:
+  push:
+    branches: [verify/import-shared-more-20260917]
+    paths: [.github/workflows/import-more-composition16-20260917.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, wty-en-en]
+    env:
+      MORE_DICTIONARY: ${{ matrix.dictionary }}
+      MORE_OUTPUT: builds/group-composition
+      RECIPE_SHA: ${{ github.sha }}
+      FIXTURE_RECIPE_SHA: 9c843c8a0e06190948ae0d52c29094a45a2555f1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 6896f54d13be0ba17fcf9345a9b6f29a04f88860
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - name: Use identical isolated g16 code with libdeflate held on in both arms
+        run: |
+          mkdir -p "$RUNNER_TEMP/group-tools" builds/group-composition
+          git fetch --depth=1 origin "$RECIPE_SHA"
+          for file in prepare.py isolate16.py term-bank-group-policy.js test-group-policy.js abba.mjs composition-driver.py; do
+            git show "FETCH_HEAD:dev/perf/import-more-20260917/$file" > "$RUNNER_TEMP/group-tools/$file"
+          done
+          python3 "$RUNNER_TEMP/group-tools/isolate16.py"
+          python3 "$RUNNER_TEMP/group-tools/composition-driver.py" "$RUNNER_TEMP/group-tools/abba.mjs" "$RUNNER_TEMP/group-tools/composition.mjs"
+          git add -N ext/js/dictionary/term-bank-group-policy.js test/term-bank-group-policy.test.js
+          git diff --check
+      - run: npm ci
+      - name: Build unchanged native code and check isolated policy
+        run: |
+          npm run build:libs > builds/group-composition/libs.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/term-bank-group-policy.test.js test/term-bank-wasm-parser.test.js > builds/group-composition/focused.log 2>&1
+      - uses: actions/cache@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-next-fixtures-b9603db-v1
+      - name: Identical complete-fixture harness and actual extension
+        run: |
+          git fetch --depth=1 origin "$FIXTURE_RECIPE_SHA"
+          git show FETCH_HEAD:dev/perf/wty-abba-20260916/prepare.py > "$RUNNER_TEMP/fixture-original.py"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path(os.environ['RUNNER_TEMP'])
+          (p/'fixture.py').write_text((p/'fixture-original.py').read_text().split('# Common correctness prerequisite')[0])
+          h=Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          text=h.read_text(); assert text.count('maxBuffer: 32 * 1024 * 1024')==2
+          h.write_text(text.replace('maxBuffer: 32 * 1024 * 1024','maxBuffer: 256 * 1024 * 1024'))
+          PY
+          python3 "$RUNNER_TEMP/fixture.py" > builds/group-composition/fixture.log
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+          node dev/bin/build.js --target chrome-dev > builds/group-composition/chrome-build.log 2>&1
+          npx playwright install --with-deps chromium
+      - name: Prespecified four-block composition ABBA and same-binary controls
+        run: node "$RUNNER_TEMP/group-tools/composition.mjs" control,g16 4 | tee builds/group-composition/abba.log
+      - name: Preserve all observations and exact source
+        if: always()
+        run: |
+          mkdir -p builds/group-composition/source
+          git diff -- ext/js types/ext test/term-bank-group-policy.test.js > builds/group-composition/candidate.patch
+          cp "$RUNNER_TEMP/group-tools/composition.mjs" "$RUNNER_TEMP/group-tools/composition-driver.py" builds/group-composition/source/
+          sha256sum ext/js/dictionary/term-bank-group-policy.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/term-bank-wasm-parser.js types/ext/dictionary-importer.d.ts test/term-bank-group-policy.test.js ext/lib/term-bank-parser.wasm > builds/group-composition/qualified.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: group-composition-${{ matrix.dictionary }}
+          path: builds/group-composition
+          retention-days: 30
