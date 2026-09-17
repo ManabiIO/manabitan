@@ -1109,6 +1109,16 @@ export class DictionaryImporter {
         importSession.setSourcePipeline(termBankSourcePipeline);
         archiveOwnership.transfer(archiveReader);
         let initialSourcePrefetch = {fileCount: 0, estimatedBytes: 0};
+        // Overlap only referenced, metadata-free media with term processing.
+        // The final join keeps the archive alive until every started read settles.
+        let mediaPrefetch = Promise.resolve();
+        let acceptMediaPrefetch = true;
+        /** @type {Error|null} */
+        let mediaPrefetchFailure = null;
+        /** @type {import('dictionary-database').MediaDataArrayBufferContent[]} */
+        const prefetchedNoMetadataMedia = [];
+        let mediaPrefetchRemainingBytes = 4 * 1024 * 1024;
+        let mediaPrefetchRemainingEntries = 256;
 
         try {
             // Start the bounded first read before transaction and media setup so
@@ -1463,6 +1473,7 @@ export class DictionaryImporter {
                  * @returns {Promise<Record<string, number>>}
                  */
             const processTermChunk = async (termFile, termChunk, requirements, streamedProgress = null, streamedProgressStartIndex = 0, streamedProgressAllowance = termFileProgressAllowance) => {
+                if (mediaPrefetchFailure !== null) { throw toError(mediaPrefetchFailure); }
                 const trackProgress = streamedProgress === null;
                 /** @type {DirectTermChunk|null} */
                 const directArtifactChunk = Array.isArray(termChunk) ? null : termChunk;
@@ -1516,7 +1527,33 @@ export class DictionaryImporter {
                             for (const requirement of notAddedRequirements) {
                                 this._assignRequirementNoMetadata(requirement);
                             }
-                            deferredNoMetadataMediaRequirements.push(...notAddedRequirements);
+                            /** @type {import('dictionary-importer').ImportRequirement[]} */
+                            const prefetchRequirements = [];
+                            for (const requirement of notAddedRequirements) {
+                                const file = requirement.type === 'structured-content-media-link' ? void 0 : fileMap.get(requirement.source.path);
+                                const size = /** @type {unknown} */ (typeof file === 'undefined' ? void 0 : Reflect.get(file, 'uncompressedSize'));
+                                if (
+                                    typeof size !== 'number' || !Number.isSafeInteger(size) || size < 0 ||
+                                    size > mediaPrefetchRemainingBytes || mediaPrefetchRemainingEntries === 0
+                                ) {
+                                    deferredNoMetadataMediaRequirements.push(requirement);
+                                    continue;
+                                }
+                                mediaPrefetchRemainingBytes -= size;
+                                --mediaPrefetchRemainingEntries;
+                                prefetchRequirements.push(requirement);
+                            }
+                            if (prefetchRequirements.length > 0) {
+                                mediaPrefetch = mediaPrefetch.then(async () => {
+                                    try {
+                                        if (!acceptMediaPrefetch || importSession.failed || this._isCancelled()) { return; }
+                                        const result = await this._resolveAsyncRequirements(prefetchRequirements, fileMap);
+                                        prefetchedNoMetadataMedia.push(...result.media);
+                                    } catch (error) {
+                                        mediaPrefetchFailure = importSession.recordFailure(error);
+                                    }
+                                });
+                            }
                         } else {
                             ({media} = await this._resolveAsyncRequirements(notAddedRequirements, fileMap));
                         }
@@ -1963,9 +2000,13 @@ export class DictionaryImporter {
 
             await dictionaryDatabase.queuePendingTermContentImportWrites();
 
-            if (deferredNoMetadataMediaRequirements.length > 0) {
+            if (deferredNoMetadataMediaRequirements.length > 0 || mediaPrefetchRemainingEntries < 256) {
                 const tMediaResolveStart = Date.now();
+                await mediaPrefetch;
+                if (mediaPrefetchFailure !== null) { throw toError(mediaPrefetchFailure); }
                 const {media} = await this._resolveAsyncRequirements(deferredNoMetadataMediaRequirements, fileMap);
+                media.unshift(...prefetchedNoMetadataMedia);
+                prefetchedNoMetadataMedia.length = 0;
                 const tMediaResolved = Date.now();
                 step4TimingBreakdown.mediaResolveMs += Math.max(0, tMediaResolved - tMediaResolveStart);
                 const tMediaWriteStart = Date.now();
@@ -2207,6 +2248,9 @@ export class DictionaryImporter {
                 ok: false,
             });
         } finally {
+            acceptMediaPrefetch = false;
+            await mediaPrefetch;
+            prefetchedNoMetadataMedia.length = 0;
             eventLoopYielder.close();
             if (!importSession.failed && this._isCancelled()) {
                 importSession.recordFailure(new Error('Dictionary import was cancelled'));
