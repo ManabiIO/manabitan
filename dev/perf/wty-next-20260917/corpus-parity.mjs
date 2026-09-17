@@ -24,7 +24,7 @@ with archive.open('rb') as raw, zipfile.ZipFile(archive) as z:
     for info in banks:
         raw.seek(info.header_offset)
         header=raw.read(30)
-        assert header[:4]==b'PK\x03\x04'
+        assert len(header)==30 and header[:4]==bytes([80,75,3,4])
         name_length,extra_length=struct.unpack_from('<HH',header,26)
         raw.seek(name_length+extra_length,1)
         payload=raw.read(info.compress_size)
@@ -53,6 +53,12 @@ async function parse(sources,experiments){
         const offsets=plan.stringOffsets??new Uint32Array(plan.stringLengths.length)
         if(!plan.stringOffsets) for(let i=1;i<offsets.length;i++) offsets[i]=offsets[i-1]+plan.stringLengths[i-1]
         const key=index=>plan.stringsBuffer.subarray(offsets[index],offsets[index]+plan.stringLengths[index])
+        const mediaByRow=new Map()
+        for(const media of chunk.mediaRows){
+            assert.ok(media.index>=0 && media.index<chunk.rowCount)
+            const entries=mediaByRow.get(media.index)??[]
+            entries.push(media);mediaByRow.set(media.index,entries)
+        }
         for(let i=0;i<chunk.rowCount;i++){
             const expression=key(plan.expressionIndexes[i]),reading=key(plan.readingIndexes[i])
             let content=chunk.contentBytesList[i],h1=chunk.contentHash1List[i],h2=chunk.contentHash2List[i]
@@ -65,7 +71,7 @@ async function parse(sources,experiments){
             values.forEach((v,j)=>header.writeUInt32LE(v>>>0,j*4))
             digest.update(header).update(expression).update(reading).update(content)
             contentBytes+=content.length
-            const media=chunk.mediaRows.filter(m=>m.index===i)
+            const media=mediaByRow.get(i)??[]
             length.writeUInt32LE(media.length);digest.update(length)
             for(const {row} of media){addText(row.expression);addText(row.reading);addText(row.glossaryJson);addText(sha(row.termEntryContentBytes));mediaRows++}
         }
