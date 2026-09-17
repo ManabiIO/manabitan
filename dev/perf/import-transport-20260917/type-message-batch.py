@@ -28,3 +28,4 @@ edit(p,'/** @param {Record<string, unknown>} message @returns {Record<string, un
      */''')
 edit(p,'/** @type {Record<string, unknown>[]} */ (message.jobs) : [message];','/** @type {Record<string, unknown>[]} */ (message.jobs) :\n            [message];')
 print('Explicit unknown packet boundaries, diagnostic accessor and JSDoc formatting; unchanged compression algorithms')
+# benchmark rerun marker: corrected typed packet source is now fully qualified
