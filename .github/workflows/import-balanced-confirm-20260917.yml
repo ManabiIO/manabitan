@@ -1,0 +1,130 @@
+name: Isolated balanced compression qualification
+on:
+  push:
+    branches: [verify/import-transport-compression-20260917]
+    paths: [.github/workflows/import-balanced-confirm-20260917.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  confirm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, wty-en-en]
+    env:
+      THREE_DICTIONARY: ${{ matrix.dictionary }}
+      THREE_OUTPUT: builds/balanced-confirm
+      CHECK_OUT: builds/balanced-confirm/check.json
+      WORKER_CHECK_OUT: builds/balanced-confirm/worker-check.json
+      RECIPE_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 8cd1a7e41ac172a015a0e9b8b8b94f522d41b424
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - name: Isolate one default-off policy on the repaired baseline
+        run: |
+          mkdir -p builds/balanced-confirm "$RUNNER_TEMP/balanced-tools"
+          git fetch --depth=1 origin "$RECIPE_SHA"
+          for file in candidates.patch.gz.b64 select-balanced.py abba.mjs balanced-check.mjs balanced-worker-check.mjs compare-test-types.py; do
+            git show "FETCH_HEAD:dev/perf/import-transport-20260917/$file" > "$RUNNER_TEMP/balanced-tools/$file"
+          done
+          git show FETCH_HEAD:.github/workflows/import-compression-screen2-20260917.yml > "$RUNNER_TEMP/balanced-tools/screen.yml"
+          python3 "$RUNNER_TEMP/balanced-tools/select-balanced.py"
+          python3 - <<'PY'
+          import os,yaml
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'balanced-tools'
+          steps=yaml.safe_load((p/'screen.yml').read_text())['jobs']['screen']['steps']
+          script=next(s['run'] for s in steps if s.get('name')=='Immutable full fixtures and actual Chrome package')
+          (p/'fixtures.sh').write_text(script.replace('builds/compression-screen','builds/balanced-confirm'))
+          PY
+      - run: npm ci
+      - name: Qualify exact final source before timing
+        run: |
+          npm run build:libs > builds/balanced-confirm/libs.log 2>&1
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs'
+          import assert from 'node:assert/strict'
+          import {spawnSync} from 'node:child_process'
+          import * as espree from 'espree'
+          const files=['ext/js/dictionary/dictionary-database.js','ext/js/dictionary/dictionary-importer.js','ext/js/dictionary/term-bank-experiments.js','ext/js/dictionary/term-content-block-store.js','ext/js/dictionary/zstd-term-content.js','ext/js/dictionary/zstd-term-content-compression-worker.js','test/term-bank-experiments.test.js','test/term-content-block-store.test.js','test/zstd-term-content-pool.test.js']
+          const ast=p=>JSON.stringify(espree.parse(fs.readFileSync(p,'utf8'),{ecmaVersion:'latest',sourceType:'module'}),(key,value)=>key==='start'||key==='end'?undefined:value)
+          const before=files.map(ast)
+          const result=spawnSync(process.execPath,['node_modules/eslint/bin/eslint.js','--fix',...files],{encoding:'utf8'})
+          fs.writeFileSync('builds/balanced-confirm/changed-lint.log',result.stdout+result.stderr)
+          assert.equal(result.status,0)
+          assert.deepEqual(files.map(ast),before)
+          fs.writeFileSync('builds/balanced-confirm/format-equality.txt','Entire syntax tree unchanged\n')
+          JS
+          node "$RUNNER_TEMP/balanced-tools/balanced-check.mjs" > builds/balanced-confirm/check.log 2>&1
+          node "$RUNNER_TEMP/balanced-tools/balanced-worker-check.mjs" > builds/balanced-confirm/worker-check.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/zstd-wasm.test.js test/zstd-term-content-pool.test.js test/term-content-block-store.test.js test/term-bank-experiments.test.js test/dictionary-importer-media-keys.test.js > builds/balanced-confirm/focused.log 2>&1
+          npm run test:unit > builds/balanced-confirm/unit.log 2>&1
+          npm run test:unit:options > builds/balanced-confirm/options.log 2>&1
+          npm run test:ts:main > builds/balanced-confirm/types-main.log 2>&1
+          npm run test:ts:dev > builds/balanced-confirm/types-dev.log 2>&1
+          npm run test:ts:bench > builds/balanced-confirm/types-bench.log 2>&1
+          python3 "$RUNNER_TEMP/balanced-tools/compare-test-types.py" > builds/balanced-confirm/type-parity.log 2>&1
+          npm run test:build > builds/balanced-confirm/build-plans.log 2>&1
+          git diff --name-only | xargs sha256sum > builds/balanced-confirm/qualified-source.sha256
+          sha256sum ext/lib/term-bank-parser.wasm ext/lib/zstd-wasm.js >> builds/balanced-confirm/qualified-source.sha256
+      - uses: actions/cache@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-next-fixtures-b9603db-v1
+      - name: Actual browser packages and full pinned fixtures
+        run: |
+          bash -e -o pipefail "$RUNNER_TEMP/balanced-tools/fixtures.sh"
+          node dev/bin/build.js --target firefox-dev > builds/balanced-confirm/firefox-build.log 2>&1
+          sha256sum -c builds/balanced-confirm/qualified-source.sha256
+      - name: Fixed six-block same-build ABBA with interleaved controls
+        run: node "$RUNNER_TEMP/balanced-tools/balanced-abba.mjs" control,balanced 6 | tee builds/balanced-confirm/abba.log
+      - name: Strict Chromium import and recovery lifecycle
+        if: matrix.dictionary == 'jmdict'
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{"experimentalBalancedCompression":true}'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/balanced-confirm/lifecycle.html
+        run: |
+          node test/chromium/extension-two-dictionary-import.e2e.js > builds/balanced-confirm/lifecycle.log 2>&1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('builds/balanced-confirm/lifecycle.json').read_text())
+          assert r['status']=='success' and r['skippedVerification'] is False and len(r['phases'])>=80
+          PY
+      - name: Verify measured code remained immutable
+        run: |
+          sha256sum -c builds/balanced-confirm/qualified-source.sha256
+          echo QUALIFIED > builds/balanced-confirm/complete.txt
+      - name: Retain every observation and exact isolated implementation
+        if: always()
+        run: |
+          mkdir -p builds/balanced-confirm/source
+          git diff -- ext/js types/ext test/term-bank-experiments.test.js test/term-content-block-store.test.js test/zstd-term-content-pool.test.js > builds/balanced-confirm/product.patch
+          cp "$RUNNER_TEMP/balanced-tools/"*.mjs "$RUNNER_TEMP/balanced-tools/"*.py builds/balanced-confirm/source/
+          tar -czf builds/balanced-confirm/source.tar.gz ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/term-content-block-store.js ext/js/dictionary/zstd-term-content.js ext/js/dictionary/zstd-term-content-compression-worker.js types/ext/dictionary-importer.d.ts test/term-bank-experiments.test.js test/term-content-block-store.test.js test/zstd-term-content-pool.test.js ext/lib/term-bank-parser.wasm ext/lib/zstd-wasm.js test/chromium/extension-two-dictionary-import.e2e.js test/perf/dictionaries.lock.json
+          git rev-parse HEAD > builds/balanced-confirm/base.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: balanced-confirm-${{ matrix.dictionary }}
+          path: builds/balanced-confirm
+          retention-days: 30
