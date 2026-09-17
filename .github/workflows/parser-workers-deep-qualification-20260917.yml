@@ -1,0 +1,127 @@
+name: Deep qualify exact three-worker parser source
+on:
+  push:
+    branches: [verify/import-transport-compression-20260917]
+    paths: [.github/workflows/parser-workers-deep-qualification-20260917.yml]
+permissions:
+  contents: read
+  actions: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e6f85c1fb8fec871eef76363ac0ba3c59aff78f7
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 35285156823
+          name: parser-worker-qualification
+          path: ${{ runner.temp }}/qualified
+      - name: Apply only the exact qualified product/test patch
+        run: |
+          mkdir -p builds/parser-worker-deep
+          test "$(cat "$RUNNER_TEMP/qualified/candidate.txt")" = w3
+          test "$(cat "$RUNNER_TEMP/qualified/complete.txt")" = QUALIFIED
+          git apply --check "$RUNNER_TEMP/qualified/product.patch"
+          git apply "$RUNNER_TEMP/qualified/product.patch"
+          npm ci
+          npm run build:libs > builds/parser-worker-deep/libs.log 2>&1
+          sha256sum -c "$RUNNER_TEMP/qualified/source.sha256"
+      - uses: actions/cache@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-next-fixtures-b9603db-v1
+      - name: Prepare pinned WTY fixture and strict Chromium harness
+        run: |
+          git fetch --depth=1 origin 9c843c8a0e06190948ae0d52c29094a45a2555f1
+          git show FETCH_HEAD:dev/perf/wty-abba-20260916/prepare.py > "$RUNNER_TEMP/fixture-original.py"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path(os.environ['RUNNER_TEMP'])
+          (p/'fixture.py').write_text((p/'fixture-original.py').read_text().split('# Common correctness prerequisite')[0])
+          h=Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          s=h.read_text(); assert s.count('maxBuffer: 32 * 1024 * 1024') == 2
+          h.write_text(s.replace('maxBuffer: 32 * 1024 * 1024','maxBuffer: 256 * 1024 * 1024'))
+          PY
+          python3 "$RUNNER_TEMP/fixture.py" > builds/parser-worker-deep/fixture.log
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+          node dev/bin/build.js --target chrome-dev > builds/parser-worker-deep/chrome-build.log 2>&1
+          npx playwright install --with-deps chromium
+          sha256sum -c "$RUNNER_TEMP/qualified/source.sha256"
+      - name: Compare every WTY parser row in both source layouts
+        run: |
+          git fetch --depth=1 origin 4eb5685f5d9b9cf93acdfa5b7d7a85c8cf377392
+          git show FETCH_HEAD:dev/perf/import-more-20260917/corpus.mjs > "$RUNNER_TEMP/group-corpus.mjs"
+          python3 - <<'PY'
+          from pathlib import Path
+          src=Path(__import__('os').environ['RUNNER_TEMP'])/'group-corpus.mjs'
+          s=src.read_text()
+          old="const sizes = (process.argv[4] ?? '16,32,48').split(',').map(Number)\nassert.ok(sizes.length && sizes.every(n => [16, 32, 48].includes(n)))"
+          new="const sizes = [3]\nassert.deepEqual(sizes, [3])"
+          assert s.count(old)==1; s=s.replace(old,new)
+          old="const flags = {[`experimentalParserGroups${size}MiB`]: true}"
+          new="const flags = {experimentalParserWorkers3: true}"
+          assert s.count(old)==1; s=s.replace(old,new)
+          old="assert.notEqual(candidate.profile.parallelGroupCount, baseline.profile.parallelGroupCount, 'Grouping experiment must change actual group boundaries')"
+          new="assert.equal(baseline.profile.parallelWorkerCount, 2); assert.equal(candidate.profile.parallelWorkerCount, 3)"
+          assert s.count(old)==1; s=s.replace(old,new)
+          src.write_text(s)
+          PY
+          node "$RUNNER_TEMP/group-corpus.mjs" wty-en-en builds/parser-worker-corpus 3 > builds/parser-worker-deep/corpus.log 2>&1
+          cp builds/parser-worker-corpus/parity.json builds/parser-worker-deep/corpus-parity.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('builds/parser-worker-deep/corpus-parity.json')
+          r=json.loads(p.read_text())
+          assert r['status']=='success' and len(r['results'])==2
+          for result in r['results']:
+              assert result['baseline']['rows']==1643040 and result['candidate']['rows']==1643040
+              assert result['baseline']['sha256']==result['candidate']['sha256']
+              assert result['baseline']['contentBytes']==result['candidate']['contentBytes']
+              assert result['baseline']['mediaRows']==result['candidate']['mediaRows']
+              assert result['baseline']['profile']['parallelWorkerCount']==2
+              assert result['candidate']['profile']['parallelWorkerCount']==3
+          PY
+      - name: Run strict Chromium lifecycle with the selected flag
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{"experimentalParserWorkers3":true}'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/parser-worker-deep/lifecycle.html
+        run: |
+          node test/chromium/extension-two-dictionary-import.e2e.js > builds/parser-worker-deep/lifecycle.log 2>&1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('builds/parser-worker-deep/lifecycle.json').read_text())
+          assert r['status']=='success' and r['skippedVerification'] is False
+          assert len(r['phases']) >= 80
+          Path('builds/parser-worker-deep/lifecycle-count.txt').write_text(str(len(r['phases']))+'\n')
+          PY
+          sha256sum -c "$RUNNER_TEMP/qualified/source.sha256"
+          echo DEEP_QUALIFIED > builds/parser-worker-deep/complete.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parser-worker-deep-qualification
+          path: builds/parser-worker-deep
+          retention-days: 30
