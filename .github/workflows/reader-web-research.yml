@@ -30,7 +30,16 @@ jobs:
         run: |
           npm ci
           npm run build:libs
-      - name: Reproduce the resource failures before fixing them
+      - name: Repair only the two rejected test-style declarations in the research generator
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('recipe/dev/reader-web-research/prepare-assets.py')
+          s = p.read_text().replace('vi.fn(function ()', 'vi.fn(function createWorker()')
+          s = s.replace('/** @param {string} name @param {(event: MessageEvent) => void} listener */', '/**\n             * @param {string} name\n             * @param {(event: MessageEvent) => void} listener\n             */')
+          p.write_text(s)
+          PY
+      - name: Reproduce resource failures before fixing them
         working-directory: work
         shell: bash
         run: |
@@ -52,7 +61,7 @@ jobs:
           npm run test:ts:main > ../evidence/assets-types.log 2>&1
           npm run test:build > ../evidence/assets-build-plans.log 2>&1
           npm run build -- --target chrome-dev > ../evidence/assets-chrome-build.log 2>&1
-      - name: Publish only the qualified source and tests to a clean feature branch
+      - name: Publish only qualified source and tests to a clean feature branch
         working-directory: work
         shell: bash
         run: |
@@ -67,69 +76,6 @@ jobs:
         if: always()
         with:
           name: reader-web-portable-assets-qualification
-          path: evidence/
-          retention-days: 14
-          if-no-files-found: error
-  reader-upgrade-trial:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          repository: ttu-ttu/ebook-reader
-          ref: 301aef4957c3cb22162276b11f4a47b35533faae
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - run: npm install --global pnpm@12.3.4
-      - name: Trial a coherent current toolchain, with no upstream writes
-        shell: bash
-        run: |
-          mkdir -p evidence
-          python3 - <<'PY'
-          from pathlib import Path
-          import json
-          for name in ('package.json', 'apps/web/package.json'):
-              path = Path(name)
-              package = json.loads(path.read_text())
-              package['devDependencies']['svelte'] = '5.57.0'
-              if name.startswith('apps/'):
-                  package['devDependencies']['vite'] = '8.3.0'
-                  package['devDependencies']['@sveltejs/vite-plugin-svelte'] = '7.3.0'
-                  package['dependencies']['@zip.js/zip.js'] = '2.15.0'
-                  package['dependencies']['dompurify'] = '3.4.15'
-              path.write_text(json.dumps(package, indent=2) + '\n')
-          p = Path('apps/web/tsconfig.json'); data = json.loads(p.read_text()); data['compilerOptions']['moduleResolution'] = 'bundler'; p.write_text(json.dumps(data, indent=2) + '\n')
-          p = Path('apps/web/vite.config.js'); s = p.read_text(); s = s.replace("  },\n  experimental: {\n    prebundleSvelteLibraries: true\n  }", '  }'); p.write_text(s)
-          Path('pnpm-lock.yaml').unlink()
-          PY
-          python3 - <<'PY'
-          import json, pathlib, subprocess
-          out = pathlib.Path('evidence'); receipts = {}
-          commands = {
-              'install': ['pnpm', 'install', '--no-frozen-lockfile', '--ignore-scripts'],
-              'audit': ['pnpm', 'audit', '--json'],
-              'sync': ['pnpm', '--dir', 'apps/web', 'exec', 'svelte-kit', 'sync'],
-              'types': ['pnpm', '--dir', 'apps/web', 'exec', 'svelte-check', '--tsconfig', './tsconfig.json'],
-              'build': ['pnpm', 'build'],
-              'lint': ['pnpm', 'exec', 'eslint', '.'],
-          }
-          for name, command in commands.items():
-              try:
-                  result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=420)
-                  (out / (name + '.log')).write_text(result.stdout)
-                  receipts[name] = {'command': command, 'exitCode': result.returncode}
-              except subprocess.TimeoutExpired as error:
-                  (out / (name + '.log')).write_text(str(error.stdout)); receipts[name] = {'command': command, 'timeout': True}
-              (out / 'results.json').write_text(json.dumps(receipts, indent=2) + '\n')
-          result = subprocess.run(['git', 'diff', '--binary'], stdout=subprocess.PIPE, text=True, check=True)
-          (out / 'reader-upgrade-trial.patch').write_text(result.stdout)
-          PY
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: reader-upgrade-trial
           path: evidence/
           retention-days: 14
           if-no-files-found: error
