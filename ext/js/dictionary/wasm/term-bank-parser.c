@@ -58,7 +58,6 @@ int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length,
                           uint8_t* output, uint32_t output_length);
 
 int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length, uint8_t* output, uint32_t output_length);
-
 static uint32_t crc32_table[16][256];
 static uint32_t crc32_table_initialized = 0u;
 

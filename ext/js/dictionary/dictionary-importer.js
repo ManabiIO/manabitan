@@ -139,6 +139,24 @@ const UTF8_TEXT_DECODER = new TextDecoder('utf-8', {fatal: true});
 Object.freeze(EMPTY_TERM_GLOSSARY);
 
 /**
+ * Chromium rejects SharedArrayBuffer-backed views passed to TextDecoder.
+ * Parser WASM memory may be shared, so copy only shared-backed views while
+ * preserving the zero-copy path for normal archive and worker buffers.
+ * @param {TextDecoder} decoder
+ * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+function decodeUtf8Bytes(decoder, bytes) {
+    const buffer = bytes.buffer;
+    return (
+        typeof SharedArrayBuffer === 'function' &&
+        buffer instanceof SharedArrayBuffer
+    ) ?
+        decoder.decode(Uint8Array.from(bytes)) :
+        decoder.decode(bytes);
+}
+
+/**
  * @template T
  * @param {number} length
  * @returns {T[]}
@@ -2724,12 +2742,12 @@ export class DictionaryImporter {
             let path;
             if (hasEscape) {
                 try {
-                    path = /** @type {string} */ (parseJson(`"${this._textDecoder.decode(tokenBytes)}"`));
+                    path = /** @type {string} */ (parseJson(`"${decodeUtf8Bytes(this._textDecoder, tokenBytes)}"`));
                 } catch (_) {
                     return null;
                 }
             } else {
-                path = this._textDecoder.decode(tokenBytes);
+                path = decodeUtf8Bytes(this._textDecoder, tokenBytes);
             }
             if (getImageMediaTypeFromFileName(path) !== null) {
                 paths.push(path);
@@ -3856,10 +3874,10 @@ export class DictionaryImporter {
                     const {mediaRows, ...columnPayload} = columnChunk;
                     if (requirementsForChunk !== null) {
                         for (const {index, row} of mediaRows) {
-                            const expression = row.expression.length > 0 ? row.expression : this._textDecoder.decode(columnChunk.expressionBytesList[index]);
+                            const expression = row.expression.length > 0 ? row.expression : decodeUtf8Bytes(this._textDecoder, columnChunk.expressionBytesList[index]);
                             let reading = expression;
                             if (columnChunk.readingEqualsExpressionList[index] !== 1) {
-                                reading = row.reading.length > 0 ? row.reading : this._textDecoder.decode(columnChunk.readingBytesList[index]);
+                                reading = row.reading.length > 0 ? row.reading : decodeUtf8Bytes(this._textDecoder, columnChunk.readingBytesList[index]);
                             }
                             /** @type {import('dictionary-database').DatabaseTermEntry} */
                             const entry = {
@@ -4787,7 +4805,7 @@ null;
             return termEntryContentBytes;
         }
         try {
-            const parsedValue = /** @type {unknown} */ (parseJson(this._textDecoder.decode(termEntryContentBytes)));
+            const parsedValue = /** @type {unknown} */ (parseJson(decodeUtf8Bytes(this._textDecoder, termEntryContentBytes)));
             const value = /** @type {{rules?: unknown, definitionTags?: unknown, termTags?: unknown, glossary?: unknown}|import('dictionary-data').TermGlossary[]} */ (parsedValue);
             const rules = (!Array.isArray(value) && typeof value.rules === 'string') ? value.rules : '';
             const definitionTags = (!Array.isArray(value) && typeof value.definitionTags === 'string') ? value.definitionTags : '';
@@ -4830,7 +4848,7 @@ null;
             return {contentBytes, contentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME};
         }
         try {
-            const parsedValue = /** @type {unknown} */ (parseJson(this._textDecoder.decode(contentBytes)));
+            const parsedValue = /** @type {unknown} */ (parseJson(decodeUtf8Bytes(this._textDecoder, contentBytes)));
             const value = /** @type {{rules?: unknown, definitionTags?: unknown, termTags?: unknown, glossary?: unknown}|import('dictionary-data').TermGlossary[]} */ (parsedValue);
             const rules = (!Array.isArray(value) && typeof value.rules === 'string') ? value.rules : '';
             const definitionTags = (!Array.isArray(value) && typeof value.definitionTags === 'string') ? value.definitionTags : '';
@@ -4888,7 +4906,7 @@ null;
             return row.glossaryJson;
         }
         if (row.glossaryJsonBytes instanceof Uint8Array) {
-            const glossaryJson = this._textDecoder.decode(row.glossaryJsonBytes);
+            const glossaryJson = decodeUtf8Bytes(this._textDecoder, row.glossaryJsonBytes);
             row.glossaryJson = glossaryJson;
             return glossaryJson;
         }
@@ -4976,7 +4994,7 @@ null;
                     glossary: this._parseGlossaryJsonFromFastRow(tokenContent.glossaryJson, fileName),
                 };
             }
-            const parsedValue = /** @type {unknown} */ (parseJson(this._textDecoder.decode(termEntryContentBytes)));
+            const parsedValue = /** @type {unknown} */ (parseJson(decodeUtf8Bytes(this._textDecoder, termEntryContentBytes)));
             const value = /** @type {{rules?: unknown, definitionTags?: unknown, termTags?: unknown, glossary?: unknown}|import('dictionary-data').TermGlossary[]} */ (parsedValue);
             const rules = (!Array.isArray(value) && typeof value.rules === 'string') ? value.rules : '';
             const definitionTags = (!Array.isArray(value) && typeof value.definitionTags === 'string') ? value.definitionTags : '';
@@ -5028,7 +5046,7 @@ null;
                 return /** @type {T} */ (bytes);
             }
             if (writer instanceof TextWriter) {
-                return /** @type {T} */ (new TextDecoder().decode(bytes));
+                return /** @type {T} */ (decodeUtf8Bytes(new TextDecoder(), bytes));
             }
             if (writer instanceof BlobWriter) {
                 return /** @type {T} */ (new Blob([bytes]));
