@@ -1,0 +1,458 @@
+name: Temporary import tail patch
+
+on:
+  push:
+    branches:
+      - perf/import-tail-completion-20260916
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: perf/import-tail-completion-20260916
+          fetch-depth: 0
+
+      - name: Apply asserted source patches
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          def replace_once(path, old, new, label):
+              text = path.read_text()
+              count = text.count(old)
+              assert count == 1, f'{label}: expected one exact match, found {count}'
+              path.write_text(text.replace(old, new, 1))
+
+          def regex_once(path, pattern, replacement, label):
+              text = path.read_text()
+              text2, count = re.subn(pattern, replacement, text, count=1, flags=re.S)
+              assert count == 1, f'{label}: expected one regex match, found {count}'
+              path.write_text(text2)
+
+          backend = Path('ext/js/background/backend.js')
+          replace_once(
+              backend,
+              """    /** @type {import('api').ApiHandler<'setDictionaryImportMode'>} */
+    async _onApiSetDictionaryImportMode({active}) {
+        await this._setDictionaryImportMode(active);
+    }
+""",
+              """    /** @type {import('api').ApiHandler<'setDictionaryImportMode'>} */
+    async _onApiSetDictionaryImportMode({active, cancelActiveImport = true}) {
+        await this._setDictionaryImportMode(active, cancelActiveImport);
+    }
+""",
+              'backend handler',
+          )
+          replace_once(
+              backend,
+              """    /**
+     * @param {boolean} active
+     * @returns {Promise<void>}
+     */
+    async _setDictionaryImportMode(active) {
+""",
+              """    /**
+     * @param {boolean} active
+     * @param {boolean} [cancelActiveImport]
+     * @returns {Promise<void>}
+     */
+    async _setDictionaryImportMode(active, cancelActiveImport = true) {
+""",
+              'backend mode signature',
+          )
+          replace_once(
+              backend,
+              """            this._dictionaryImportModeActive = false;
+            try {
+                if (this._offscreen !== null) {
+                    await this._offscreen.sendMessagePromise({action: 'cancelDictionaryImportOffscreen'});
+                } else if (this._localDictionaryRuntime !== null) {
+                    await this._localDictionaryRuntime.sendMessagePromise({action: 'cancelDictionaryImportOffscreen'});
+                }
+            } catch (error) {
+                reportDiagnostics('dictionary-import-cancel-failed', {error: toError(error).message});
+            }
+            await this._ensureDictionaryDatabaseReady();
+            reportDiagnostics('dictionary-import-mode-changed', {active: false});
+""",
+              """            this._dictionaryImportModeActive = false;
+            if (cancelActiveImport) {
+                try {
+                    if (this._offscreen !== null) {
+                        await this._offscreen.sendMessagePromise({action: 'cancelDictionaryImportOffscreen'});
+                    } else if (this._localDictionaryRuntime !== null) {
+                        await this._localDictionaryRuntime.sendMessagePromise({action: 'cancelDictionaryImportOffscreen'});
+                    }
+                } catch (error) {
+                    reportDiagnostics('dictionary-import-cancel-failed', {error: toError(error).message});
+                }
+            }
+            await this._ensureDictionaryDatabaseReady();
+            reportDiagnostics('dictionary-import-mode-changed', {active: false, cancelActiveImport});
+""",
+              'backend conditional cancel',
+          )
+
+          importer = Path('ext/js/pages/settings/dictionary-import-controller.js')
+          replace_once(
+              importer,
+              """            prevention.end();
+            if (this._isImportRunCurrent(importRunGeneration)) {
+                for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = true; }
+                if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, false); }
+                this._setModifying(false);
+                if (importModeEnabled) {
+                    try {
+                        await this._settingsController.application.api.setDictionaryImportMode(false);
+                    } catch (error) {
+                        const importModeExitError = toError(error);
+                        errors.push(importModeExitError);
+                        reportDiagnostics('dictionary-import-session-import-mode-exit-failed', {
+                            message: importModeExitError.message,
+                            importRunGeneration,
+                        });
+                    }
+                }
+                this._showErrors(errors);
+                this._triggerStorageChanged();
+""",
+              """            prevention.end();
+            if (this._isImportRunCurrent(importRunGeneration)) {
+                if (importModeEnabled) {
+                    try {
+                        await this._settingsController.application.api.setDictionaryImportMode(false, false);
+                    } catch (error) {
+                        const importModeExitError = toError(error);
+                        errors.push(importModeExitError);
+                        reportDiagnostics('dictionary-import-session-import-mode-exit-failed', {
+                            message: importModeExitError.message,
+                            importRunGeneration,
+                        });
+                    }
+                }
+                for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = true; }
+                if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, false); }
+                this._setModifying(false);
+                this._showErrors(errors);
+                this._triggerStorageChanged();
+""",
+              'import clean completion ordering',
+          )
+          replace_once(
+              importer,
+              """        const addSettingsStartTime = safePerformance.now();
+        const errors2 = shouldAddDictionarySettings ? await this._addDictionarySettings(result, profilesDictionarySettings) : [];
+        const addSettingsEndTime = safePerformance.now();
+""",
+              """        const addSettingsStartTime = safePerformance.now();
+        const addSettingsResult = shouldAddDictionarySettings ?
+            await this._addDictionarySettings(result, profilesDictionarySettings) :
+            {errors: [], activeProfileEnabled: null};
+        const errors2 = addSettingsResult.errors;
+        const addSettingsEndTime = safePerformance.now();
+""",
+              'settings proof result',
+          )
+          replace_once(
+              importer,
+              """            const verifyImportedDictionaryVisibleStartTime = safePerformance.now();
+            await this._verifyImportedDictionaryVisible(
+                result.title || sourceDictionaryTitle || dictionaryTitle,
+                shouldAddDictionarySettings && profilesDictionarySettings === null,
+            );
+            const verifyImportedDictionaryVisibleEndTime = safePerformance.now();
+""",
+              """            const verifyImportedDictionaryVisibleStartTime = safePerformance.now();
+            this._verifyImportedDictionaryVisible(
+                result.title || sourceDictionaryTitle || dictionaryTitle,
+                shouldAddDictionarySettings && profilesDictionarySettings === null,
+                addSettingsResult,
+            );
+            const verifyImportedDictionaryVisibleEndTime = safePerformance.now();
+""",
+              'visibility proof call',
+          )
+          replace_once(
+              importer,
+              """        /** @type {Array<{context: DeferredDictionaryFinalization, importedTitle: string}>} */
+        const successfulFinalizations = [];
+""",
+              '',
+              'deferred verification state',
+          )
+          replace_once(
+              importer,
+              """                    importedTitles.push(result.importedTitle);
+                    successfulFinalizations.push({context, importedTitle: result.importedTitle});
+""",
+              """                    importedTitles.push(result.importedTitle);
+""",
+              'deferred verification push',
+          )
+          regex_once(
+              importer,
+              r"\n        for \(const \{context, importedTitle\} of successfulFinalizations\) \{.*?\n        \}\n        return \{errors, importedTitles\};",
+              "\n        return {errors, importedTitles};",
+              'deferred duplicate verification loop',
+          )
+          replace_once(
+              importer,
+              """    /**
+     * @param {import('dictionary-importer').Summary} summary
+     * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
+     * @returns {Promise<Error[]>}
+     */
+    async _addDictionarySettings(summary, profilesDictionarySettings) {
+""",
+              """    /**
+     * @param {import('dictionary-importer').Summary} summary
+     * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
+     * @returns {Promise<{errors: Error[], activeProfileEnabled: boolean|null}>}
+     */
+    async _addDictionarySettings(summary, profilesDictionarySettings) {
+""",
+              'add settings return type',
+          )
+          replace_once(
+              importer,
+              """        if (!optionsFull) { return [new Error('Failed to automatically set dictionary settings. A page refresh and manual enabling of the dictionary may be required.')]; }
+
+        const profileIndex = this._settingsController.profileIndex;
+""",
+              """        if (!optionsFull) {
+            return {
+                errors: [new Error('Failed to automatically set dictionary settings. A page refresh and manual enabling of the dictionary may be required.')],
+                activeProfileEnabled: null,
+            };
+        }
+
+        const profileIndex = this._settingsController.profileIndex;
+        /** @type {boolean|null} */
+        let activeProfileEnabled = null;
+""",
+              'add settings failure proof',
+          )
+          replace_once(
+              importer,
+              """            const profileDictionarySettings = profilesDictionarySettings?.[profileId];
+            if (!Array.isArray(profileDictionarySettings) || profileDictionarySettings.length === 0) {
+""",
+              """            const profileDictionarySettings = profilesDictionarySettings?.[profileId];
+            if (i === profileIndex) {
+                activeProfileEnabled = !Array.isArray(profileDictionarySettings) || profileDictionarySettings.length === 0 ?
+                    enabled :
+                    profileDictionarySettings.some((setting) => setting.enabled === true);
+            }
+            if (!Array.isArray(profileDictionarySettings) || profileDictionarySettings.length === 0) {
+""",
+              'active profile settings proof',
+          )
+          replace_once(
+              importer,
+              """        }
+        return await this._modifyGlobalSettings(targets);
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @returns {Promise<void>}
+     */
+    async _removeDictionarySettingsByName(dictionaryTitle) {
+""",
+              """        }
+        const errors = await this._modifyGlobalSettings(targets);
+        return {
+            errors,
+            activeProfileEnabled: errors.length === 0 ? activeProfileEnabled : null,
+        };
+    }
+
+    /**
+     * @param {string} dictionaryTitle
+     * @returns {Promise<void>}
+     */
+    async _removeDictionarySettingsByName(dictionaryTitle) {
+""",
+              'add settings proof return',
+          )
+          regex_once(
+              importer,
+              r"    /\*\*\n     \* @param \{string\} dictionaryTitle\n     \* @param \{boolean\} requireEnabledForActiveProfile\n     \* @returns \{Promise<void>\}\n     \*/\n    async _verifyImportedDictionaryVisible\(dictionaryTitle, requireEnabledForActiveProfile\) \{.*?\n    \}\n\n(?=    /\*\*\n     \* @param \{string\} dictionaryTitle\n     \* @param \{Array<)",
+              """    /**
+     * @param {string} dictionaryTitle
+     * @param {boolean} requireEnabledForActiveProfile
+     * @param {{activeProfileEnabled: boolean|null}} settingsProof
+     * @returns {void}
+     */
+    _verifyImportedDictionaryVisible(dictionaryTitle, requireEnabledForActiveProfile, settingsProof) {
+        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle.trim() : '';
+        if (normalizedTitle.length === 0) {
+            throw new Error('Cannot verify imported dictionary visibility without a title');
+        }
+        const activeProfileEnabled = !requireEnabledForActiveProfile || settingsProof.activeProfileEnabled === true;
+        if (!activeProfileEnabled) {
+            reportDiagnostics('dictionary-import-active-profile-disabled', {
+                dictionaryTitle: normalizedTitle,
+                activeProfileIndex: this._settingsController.profileIndex,
+            });
+            throw new Error(`Imported dictionary ${normalizedTitle} was not enabled for the active profile`);
+        }
+        reportDiagnostics('dictionary-import-visibility-verified', {
+            dictionaryTitle: normalizedTitle,
+            requireEnabledForActiveProfile,
+            activeProfileEnabled,
+            backendLookupVerificationSkipped: true,
+            source: 'settings-write-proof',
+        });
+    }
+
+""",
+              'visibility proof method',
+          )
+
+          controller = Path('ext/js/pages/settings/dictionary-controller.js')
+          replace_once(
+              controller,
+              """     * @param {boolean} newDictionariesEnabled
+     */
+    static async ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled) {
+""",
+              """     * @param {boolean} newDictionariesEnabled
+     * @returns {Promise<boolean>}
+     */
+    static async ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled) {
+""",
+              'ensure settings return type',
+          )
+          replace_once(
+              controller,
+              """        if (modifyGlobalSettings && targets.length > 0) {
+            await settingsController.modifyGlobalSettings(targets);
+        }
+    }
+""",
+              """        if (modifyGlobalSettings && targets.length > 0) {
+            await settingsController.modifyGlobalSettings(targets);
+            return true;
+        }
+        return false;
+    }
+""",
+              'ensure settings changed result',
+          )
+          replace_once(
+              controller,
+              """    /**
+     * @param {import('application').EventArgument<'databaseUpdated'>|undefined} [_details]
+     */
+    async _onDatabaseUpdated(_details = void 0) {
+        /** @type {?import('core').TokenObject} */
+        const token = {};
+        this._databaseStateToken = token;
+        this._dictionaries = null;
+        try {
+            const dictionaries = await this._settingsController.getDictionaryInfo();
+            if (this._databaseStateToken !== token) { return; }
+            this._dictionaries = dictionaries;
+
+            await this._updateEntries(null);
+            if (this._databaseStateToken !== token) { return; }
+
+            if (this._onDictionariesUpdate) {
+                this._onDictionariesUpdate();
+            }
+        } catch (error) {
+            if (this._databaseStateToken === token) {
+                this._dictionaries = null;
+            }
+            log.error(error);
+        }
+    }
+""",
+              """    /**
+     * @param {import('application').EventArgument<'databaseUpdated'>|undefined} [details]
+     */
+    async _onDatabaseUpdated(details = void 0) {
+        /** @type {?import('core').TokenObject} */
+        const token = {};
+        this._databaseStateToken = token;
+        this._dictionaries = null;
+        try {
+            const dictionaries = await this._settingsController.getDictionaryInfo();
+            if (this._databaseStateToken !== token) { return; }
+            this._dictionaries = dictionaries;
+
+            const renderBeforeReconcile = details?.cause === 'import';
+            await this._updateEntries(token, !renderBeforeReconcile);
+            if (this._databaseStateToken !== token) { return; }
+
+            if (this._onDictionariesUpdate) {
+                this._onDictionariesUpdate();
+            }
+            if (renderBeforeReconcile) {
+                requestAnimationFrame(() => {
+                    void this._reconcileDictionarySettingsAfterImport(token, dictionaries);
+                });
+            }
+        } catch (error) {
+            if (this._databaseStateToken === token) {
+                this._dictionaries = null;
+            }
+            log.error(error);
+        }
+    }
+
+    /**
+     * @param {import('core').TokenObject} token
+     * @param {import('dictionary-importer').Summary[]} dictionaries
+     * @returns {Promise<void>}
+     */
+    async _reconcileDictionarySettingsAfterImport(token, dictionaries) {
+        try {
+            const settingsChanged = await DictionaryController.ensureDictionarySettings(
+                this._settingsController,
+                dictionaries,
+                void 0,
+                true,
+                false,
+            );
+            if (!settingsChanged || this._databaseStateToken !== token) { return; }
+            const options = await this._settingsController.getOptions();
+            if (this._databaseStateToken !== token) { return; }
+            this._updateCurrentEntries(options);
+        } catch (error) {
+            log.error(error);
+        }
+    }
+""",
+              'render before reconciliation',
+          )
+          PY
+
+      - name: Validate patch shape
+        shell: bash
+        run: |
+          git diff --check
+          node --check ext/js/background/backend.js
+          node --check ext/js/pages/settings/dictionary-import-controller.js
+          node --check ext/js/pages/settings/dictionary-controller.js
+          npx eslint ext/js/background/backend.js ext/js/pages/settings/dictionary-import-controller.js ext/js/pages/settings/dictionary-controller.js ext/js/comm/api.js
+
+      - name: Commit patched source
+        shell: bash
+        run: |
+          rm .github/workflows/tmp-import-tail-patch.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'perf(dictionary): reduce post-import completion tail'
+          git push origin HEAD:perf/import-tail-completion-20260916
