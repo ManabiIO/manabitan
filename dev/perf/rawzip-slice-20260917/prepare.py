@@ -56,6 +56,10 @@ import {describe, expect, test} from 'vitest'
 import {RawZipPayloadReader} from '../ext/js/dictionary/term-bank-source-pipeline.js'
 import {snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js'
 
+/**
+ * @param {Uint8Array} payload
+ * @returns {{archive: Uint8Array, file: {filename: string, offset: number, compressedSize: number, compressionMethod: number, rawFilename: Uint8Array}}}
+ */
 function makeArchive(payload) {
     const filename = new TextEncoder().encode('term_bank_1.json')
     const archive = new Uint8Array(30 + filename.length + payload.length + 7)
