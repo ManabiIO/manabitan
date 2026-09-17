@@ -8,6 +8,37 @@ def replace(path, old, new):
     assert text.count(old) == 1, (path, old[:120], text.count(old))
     p.write_text(text.replace(old, new))
 
+# Common correctness repair, applied identically to flags-off and candidate
+# arms. It is not part of the source-copy performance claim.
+replace(
+    'ext/js/dictionary/dictionary-importer.js',
+    ''' * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+function decodeUtf8Bytes(decoder, bytes) {
+    const buffer = bytes.buffer;
+    return (
+        typeof SharedArrayBuffer === 'function' &&
+        buffer instanceof SharedArrayBuffer
+    ) ?
+        decoder.decode(Uint8Array.from(bytes)) :
+        decoder.decode(bytes);
+}''',
+    ''' * @param {Uint8Array|undefined} bytes
+ * @returns {string}
+ */
+function decodeUtf8Bytes(decoder, bytes) {
+    const buffer = bytes?.buffer;
+    return (
+        typeof SharedArrayBuffer === 'function' &&
+        bytes instanceof Uint8Array &&
+        buffer instanceof SharedArrayBuffer
+    ) ?
+        decoder.decode(Uint8Array.from(bytes)) :
+        decoder.decode(bytes);
+}''',
+)
+
 flag = 'experimentalRawZipSliceCopy'
 replace(
     'ext/js/dictionary/term-bank-experiments.js',
@@ -119,4 +150,4 @@ describe('raw ZIP native slice experiment', () => {
     })
 })
 ''')
-print('Staged default-off raw ZIP slice-copy candidate; fallback remains Uint8Array.from')
+print('Applied common optional-decoder repair to all arms; staged default-off raw ZIP slice-copy candidate')
