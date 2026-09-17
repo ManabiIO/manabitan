@@ -27,8 +27,8 @@ jobs:
           from pathlib import Path
           p=Path('ext/js/dictionary/dictionary-importer.js')
           s=p.read_text()
-          old=''' * @param {Uint8Array} bytes\n * @returns {string}\n */\nfunction decodeUtf8Bytes(decoder, bytes) {\n    const buffer = bytes.buffer;'''
-          new=''' * @param {Uint8Array|undefined} bytes\n * @returns {string}\n */\nfunction decodeUtf8Bytes(decoder, bytes) {\n    const buffer = bytes?.buffer;'''
+          old=''' * @param {Uint8Array} bytes\n * @returns {string}\n */\nfunction decodeUtf8Bytes(decoder, bytes) {\n    const buffer = bytes.buffer;\n    return (\n        typeof SharedArrayBuffer === 'function' &&\n        buffer instanceof SharedArrayBuffer\n    ) ?\n        decoder.decode(Uint8Array.from(bytes)) :\n        decoder.decode(bytes);\n}'''
+          new=''' * @param {Uint8Array|undefined} bytes\n * @returns {string}\n */\nfunction decodeUtf8Bytes(decoder, bytes) {\n    const buffer = bytes?.buffer;\n    return (\n        typeof SharedArrayBuffer === 'function' &&\n        bytes instanceof Uint8Array &&\n        buffer instanceof SharedArrayBuffer\n    ) ?\n        decoder.decode(Uint8Array.from(bytes)) :\n        decoder.decode(bytes);\n}'''
           assert s.count(old)==1
           p.write_text(s.replace(old,new))
           PY
