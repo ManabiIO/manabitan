@@ -1,0 +1,112 @@
+name: Publish qualified WTY fused bypass
+on:
+  push:
+    branches: [verify/wty-next-20260917]
+    paths: [.github/workflows/wty-publish-bypass-20260917.yml]
+permissions:
+  contents: write
+  actions: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 8191f6c6997d7afc5d54e647e93af6def48dfa98
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          name: wty-isolated-skip
+          run-id: 35168122189
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/wty-qualified
+      - name: Check exact audited evidence and unchanged baseline tree
+        run: |
+          mkdir -p builds/wty-publish
+          test "$(git rev-parse 'HEAD^{tree}')" = b15cac57d7b35a51a5a33a2a1906d9bed8e3dfdf
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os
+          q=Path(os.environ['RUNNER_TEMP'])/'wty-qualified'
+          hashes={'candidate.patch':'480f5cb4c28a4b82f85fd9527a6b79fee8218f6f5b2027cbc349d0a5a2b048ff','summary.json':'dec8b8d891474bba7ae74f3f3f88914422aa4a2359e48530c51f4a52d1a9ae36','qualified-inputs.sha256':'9e259d7ca779e83af499b20e68be18f9cc62554147dfbc964933b6f834acb307'}
+          for name,digest in hashes.items():
+              assert hashlib.sha256((q/name).read_bytes()).hexdigest()==digest,name
+          assert (q/'qualification-complete.txt').read_text().strip()=='QUALIFIED'
+          s=json.loads((q/'summary.json').read_text())
+          assert s['status']=='success' and len(s['plan'])==len(s['observations'])==52 and s['blocks']==6
+          assert s['results']['skip']['pairsFaster']==11 and s['results']['skip']['pairedMedianPercent'] < -2.5
+          for row in s['observations']:
+              report=q/row['report']
+              assert hashlib.sha256(report.read_bytes()).hexdigest()==row['reportSha256']
+              data=json.loads(report.read_text())
+              assert data['status']=='success' and data['skippedVerification'] is False
+              assert data['benchmark']['validation']['termRows']==1643040 and data['benchmark']['validation']['probeCount']==12
+          assert json.loads((q/'corpus-parity.json').read_text())['status']=='success'
+          life=json.loads((q/'lifecycle.json').read_text())
+          assert life['status']=='success' and life['skippedVerification'] is False and len(life['phases'])==83
+          Path('builds/wty-publish/evidence-gate.json').write_text(json.dumps(hashes,indent=2)+'\n')
+          PY
+      - run: npm ci
+      - name: Reproduce missing bypass behavior on the unchanged baseline
+        run: |
+          npm run build:libs > builds/wty-publish/parent-build.log 2>&1
+          cp "$RUNNER_TEMP/wty-qualified/source/term-bank-experiments.test.js" test/term-bank-experiments.test.js
+          set +e
+          node node_modules/vitest/vitest.mjs run test/term-bank-experiments.test.js -t 'bypasses fused work without changing rows' --reporter=json --outputFile=builds/wty-publish/red.json > builds/wty-publish/red.log 2>&1
+          result=$?
+          set -e
+          test "$result" -eq 1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('builds/wty-publish/red.json').read_text())
+          failed=[a for test in report['testResults'] for a in test['assertionResults'] if a['status']=='failed']
+          assert len(failed)==2 and report['numFailedTests']==2
+          assert all('bypasses fused work without changing rows' in a['fullName'] and any('expected 1 to be +0' in m or 'expected 1 to be 0' in m for m in a['failureMessages']) for a in failed)
+          PY
+          git restore test/term-bank-experiments.test.js
+          test -z "$(git status --porcelain)"
+      - name: Apply only the audited product patch and recheck exact source
+        run: |
+          git apply --check "$RUNNER_TEMP/wty-qualified/candidate.patch"
+          git apply "$RUNNER_TEMP/wty-qualified/candidate.patch"
+          npm run build:libs > builds/wty-publish/candidate-build.log 2>&1
+          sha256sum -c "$RUNNER_TEMP/wty-qualified/qualified-inputs.sha256"
+          node node_modules/vitest/vitest.mjs run test/term-bank-experiments.test.js test/term-bank-composite-state.test.js > builds/wty-publish/focused.log 2>&1
+          npm run test:unit > builds/wty-publish/unit.log 2>&1
+          npm run test:unit:options > builds/wty-publish/options.log 2>&1
+          npm run test:ts > builds/wty-publish/types.log 2>&1
+          npm run test:build > builds/wty-publish/build-plans.log 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-experiments.test.js > builds/wty-publish/changed-lint.log 2>&1
+          node dev/bin/build.js --target chrome-dev > builds/wty-publish/chrome-build.log 2>&1
+          node dev/bin/build.js --target firefox-dev > builds/wty-publish/firefox-build.log 2>&1
+          sha256sum -c "$RUNNER_TEMP/wty-qualified/qualified-inputs.sha256"
+      - name: Publish only a new feature-flag branch, never develop or main
+        run: |
+          git diff --check
+          python3 - <<'PY'
+          import subprocess
+          expected=['ext/js/dictionary/term-bank-experiments.js','ext/js/dictionary/term-bank-wasm-parser.js','test/term-bank-experiments.test.js','types/ext/dictionary-importer.d.ts']
+          assert subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()==expected
+          subprocess.run(['git','add','--',*expected],check=True)
+          assert subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines()==expected
+          PY
+          git -c core.hooksPath=/dev/null -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'perf: add opt-in fused parser bypass for WTY imports'
+          test -z "$(git status --porcelain)"
+          git push origin HEAD:refs/heads/perf/wty-fused-bypass-20260917
+          git rev-parse HEAD 'HEAD^{tree}' > builds/wty-publish/published.txt
+          cp "$RUNNER_TEMP/wty-qualified/qualified-inputs.sha256" builds/wty-publish/
+          git diff HEAD^ HEAD > builds/wty-publish/published.patch
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wty-bypass-publication
+          path: builds/wty-publish
+          retention-days: 30
