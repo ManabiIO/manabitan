@@ -32,6 +32,20 @@ jobs:
       - name: Build native modules and qualify runtime and tests
         run: |
           npm run build:libs > builds/wty-next-screen/libs.log 2>&1
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs'
+          import assert from 'node:assert/strict'
+          import {spawnSync} from 'node:child_process'
+          import * as espree from 'espree'
+          const files=['ext/js/dictionary/term-bank-wasm-parser.js','test/term-bank-experiments.test.js']
+          const ast=p=>JSON.stringify(espree.parse(fs.readFileSync(p,'utf8'),{ecmaVersion:'latest',sourceType:'module'}),(key,value)=>key==='start'||key==='end'?undefined:value)
+          const before=files.map(ast)
+          const result=spawnSync(process.execPath,['node_modules/eslint/bin/eslint.js','--fix',...files],{stdio:'inherit'})
+          assert.equal(result.status,0)
+          assert.deepEqual(files.map(ast),before,'Formatting correction must preserve the complete syntax tree')
+          fs.writeFileSync('builds/wty-next-screen/format-ast-equality.txt','Complete AST equality verified before qualification\n')
+          JS
+          npm run build:libs > builds/wty-next-screen/formatted-libs.log 2>&1
           node node_modules/vitest/vitest.mjs run test/term-bank-experiments.test.js test/term-bank-composite-state.test.js > builds/wty-next-screen/focused.log 2>&1
           npm run test:unit > builds/wty-next-screen/unit.log 2>&1
           npm run test:unit:options > builds/wty-next-screen/options.log 2>&1
