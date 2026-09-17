@@ -1,0 +1,105 @@
+name: Qualify optional shared-decoder input fix
+on:
+  push:
+    branches: [verify/import-shared-round3-20260917]
+    paths: [.github/workflows/shared-decoder-optional-fix-20260917.yml]
+permissions:
+  contents: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2f407e86fae0d3e39f506e6b1ce30886697698ea
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - name: Apply the minimal semantic-preservation fix
+        run: |
+          mkdir -p builds/shared-decoder-fix
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('ext/js/dictionary/dictionary-importer.js')
+          s=p.read_text()
+          old=''' * @param {Uint8Array} bytes\n * @returns {string}\n */\nfunction decodeUtf8Bytes(decoder, bytes) {\n    const buffer = bytes.buffer;'''
+          new=''' * @param {Uint8Array|undefined} bytes\n * @returns {string}\n */\nfunction decodeUtf8Bytes(decoder, bytes) {\n    const buffer = bytes?.buffer;'''
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new))
+          PY
+          git diff --check
+          git diff -- ext/js/dictionary/dictionary-importer.js > builds/shared-decoder-fix/fix.patch
+      - run: npm ci
+      - name: Focused correctness and unchanged type diagnostics
+        run: |
+          npm run build:libs > builds/shared-decoder-fix/libs.log 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-importer.js test/dictionary-importer-shared-buffer.test.js > builds/shared-decoder-fix/lint.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/dictionary-importer-shared-buffer.test.js test/dictionary-importer.test.js test/term-bank-composite-state.test.js > builds/shared-decoder-fix/focused.log 2>&1
+          npm run test:ts:main > builds/shared-decoder-fix/types-main.log 2>&1
+          npm run test:ts:dev > builds/shared-decoder-fix/types-dev.log 2>&1
+          npm run test:ts:bench > builds/shared-decoder-fix/types-bench.log 2>&1
+          set +e
+          npm run test:ts:test > builds/shared-decoder-fix/types-test.log 2>&1
+          status=$?
+          set -e
+          test "$status" -ne 0
+          git diff --exit-code 2f407e86fae0d3e39f506e6b1ce30886697698ea -- test/dictionary-importer-shared-buffer.test.js
+          python3 - <<'PY'
+          from pathlib import Path
+          errors=[line for line in Path('builds/shared-decoder-fix/types-test.log').read_text().splitlines() if 'error TS' in line]
+          assert len(errors)==2, errors
+          assert any('dictionary-importer-shared-buffer.test.js(22,20): error TS7006' in x for x in errors)
+          assert any('dictionary-importer-shared-buffer.test.js(39,45): error TS2502' in x for x in errors)
+          PY
+      - uses: actions/cache@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: shared-decoder-jitendex-8364e69e-v1
+      - name: Build exact browser package and pinned Jitendex fixture
+        run: |
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+          node dev/bin/build.js --target chrome-dev > builds/shared-decoder-fix/chrome-build.log 2>&1
+          npx playwright install --with-deps chromium
+      - name: Re-run the exact Jitendex path that failed on current develop
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{}'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_IMPORT_BENCH_QUICK: '1'
+          MANABITAN_E2E_IMPORT_BENCH_DICTIONARY: jitendex
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/shared-decoder-fix/jitendex.html
+        run: |
+          node test/chromium/extension-two-dictionary-import.e2e.js > builds/shared-decoder-fix/jitendex.log 2>&1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('builds/shared-decoder-fix/jitendex.json').read_text())
+          assert r['status']=='success' and r['skippedVerification'] is False
+          b=r['benchmark']; assert b['dictionary']=='jitendex'
+          v=b['validation']; assert v['termRows']==435448 and v['probeCount']==12 and v['contentReadable'] is True
+          PY
+      - name: Publish source-only fix branch after qualification
+        run: |
+          git add ext/js/dictionary/dictionary-importer.js
+          test "$(git diff --cached --name-only)" = ext/js/dictionary/dictionary-importer.js
+          git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'fix: preserve optional TextDecoder input semantics'
+          git push origin HEAD:refs/heads/fix/shared-decoder-optional-bytes-20260917
+          git rev-parse HEAD HEAD^{tree} > builds/shared-decoder-fix/published.txt
+          echo QUALIFIED > builds/shared-decoder-fix/complete.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shared-decoder-optional-fix
+          path: builds/shared-decoder-fix
+          retention-days: 30
