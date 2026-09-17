@@ -1,0 +1,107 @@
+name: Compression screen after common media repair
+on:
+  push:
+    branches: [verify/import-transport-compression-20260917]
+    paths: [.github/workflows/import-compression-media-screen-20260917.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, wty-en-en]
+    env:
+      THREE_DICTIONARY: ${{ matrix.dictionary }}
+      THREE_OUTPUT: builds/compression-screen
+      CHECK_OUT: builds/compression-screen/check.json
+      WORKER_CHECK_OUT: builds/compression-screen/worker-check.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - name: Retrieve identical preparation and validation commands
+        run: |
+          mkdir -p builds/compression-screen
+          python3 - <<'PY'
+          import os,subprocess,yaml
+          from pathlib import Path
+          original=subprocess.check_output(['git','show','d896ff89aa8bf3854bb4ec8fb77287589641d100:.github/workflows/import-compression-screen2-20260917.yml'],text=True)
+          steps=yaml.safe_load(original)['jobs']['screen']['steps']
+          names={
+              'Apply exact candidates and restore unchanged decompression signature':'prepare',
+              'Actual codec, focused suites, types and syntax-preserving formatting':'qualify',
+              'Immutable full fixtures and actual Chrome package':'fixture',
+              'Retain exact source and every result or failure':'retain',
+          }
+          for step in steps:
+              if step.get('name') in names:
+                  Path(os.environ['RUNNER_TEMP'],names[step['name']]+'.sh').write_text(step['run'])
+          PY
+      - run: npm ci
+      - name: RED on the untouched integrated importer
+        run: |
+          npm run build:libs > builds/compression-screen/parent-libs.log 2>&1
+          cp dev/perf/import-transport-20260917/test-media-keys.js test/dictionary-importer-media-keys.test.js
+          set +e
+          node node_modules/vitest/vitest.mjs run test/dictionary-importer-media-keys.test.js --reporter=json --outputFile=builds/compression-screen/media-red.json > builds/compression-screen/media-red.log 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('builds/compression-screen/media-red.json').read_text())
+          assert r['numTotalTests']==6 and r['numFailedTests']==5
+          failures=[a for t in r['testResults'] for a in t['assertionResults'] if a['status']=='failed']
+          assert len(failures)==5 and all('buffer' in '\n'.join(f['failureMessages']) for f in failures)
+          PY
+      - name: GREEN with a two-line media-key repair shared by both arms
+        run: |
+          python3 dev/perf/import-transport-20260917/fix-media.py
+          node node_modules/vitest/vitest.mjs run test/dictionary-importer-media-keys.test.js > builds/compression-screen/media-green.log 2>&1
+          git diff -- ext/js/dictionary/dictionary-importer.js > builds/compression-screen/common-media-fix.patch
+          git restore --source=HEAD -- ext/js/dictionary/dictionary-importer.js
+      - name: Apply independent default-off compression candidates
+        run: |
+          bash -e -o pipefail "$RUNNER_TEMP/prepare.sh"
+          python3 dev/perf/import-transport-20260917/fix-media.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('dev/perf/import-transport-20260917/abba.mjs')
+          s=p.read_text().replace("base:'2f407e86fae0d3e39f506e6b1ce30886697698ea',","base:'2f407e86fae0d3e39f506e6b1ce30886697698ea',commonRepair:'native media-row key bytes are used when redundant byte columns are omitted; identical in both arms',")
+          p.write_text(s)
+          PY
+      - name: Requalify exact source, source ownership and worker transfers
+        run: |
+          bash -e -o pipefail "$RUNNER_TEMP/qualify.sh"
+          node node_modules/vitest/vitest.mjs run test/dictionary-importer-media-keys.test.js > builds/compression-screen/media-candidate-green.log 2>&1
+      - uses: actions/cache@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-next-fixtures-b9603db-v1
+      - name: Full immutable fixtures and browser package
+        run: bash -e -o pipefail "$RUNNER_TEMP/fixture.sh"
+      - name: New fixed ABBA cohort; no observations from the broken baseline pooled
+        run: node dev/perf/import-transport-20260917/abba.mjs control,fast2,workers2,generic,both 2 | tee builds/compression-screen/abba.log
+      - name: Retain exact code and all passing or failing observations
+        if: always()
+        run: |
+          bash -e -o pipefail "$RUNNER_TEMP/retain.sh"
+          cp test/dictionary-importer-media-keys.test.js builds/compression-screen/source/ 2>/dev/null || true
+          cp dev/perf/import-transport-20260917/fix-media.py builds/compression-screen/source/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compression-media-screen-${{ matrix.dictionary }}
+          path: builds/compression-screen
+          retention-days: 30
