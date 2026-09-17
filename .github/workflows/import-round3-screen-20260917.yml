@@ -1,0 +1,86 @@
+name: Shared import round 3 screen
+on:
+  push:
+    branches: [verify/import-shared-round3-20260917]
+    paths: [.github/workflows/import-round3-screen-20260917.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, wty-en-en]
+    env:
+      ROUND3_DICTIONARY: ${{ matrix.dictionary }}
+      ROUND3_OUTPUT: builds/round3
+      RECIPE_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2f407e86fae0d3e39f506e6b1ce30886697698ea
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - name: Apply only the default-off block-size experiments
+        run: |
+          mkdir -p "$RUNNER_TEMP/round3" builds/round3
+          git fetch --depth=1 origin "$RECIPE_SHA"
+          git show "FETCH_HEAD:dev/perf/import-round3-20260917/prepare.py" > "$RUNNER_TEMP/round3/prepare.py"
+          git show "FETCH_HEAD:dev/perf/import-round3-20260917/abba.mjs" > "$RUNNER_TEMP/round3/abba.mjs"
+          python3 "$RUNNER_TEMP/round3/prepare.py"
+          git add -N test/term-content-block-experiments.test.js
+          git diff --check
+          git diff -- ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-experiments.js types/ext/dictionary-importer.d.ts test/term-content-block-experiments.test.js > builds/round3/candidate.patch
+      - run: npm ci
+      - name: Qualify candidate source before timing
+        run: |
+          npm run build:libs > builds/round3/libs.log 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-experiments.js test/term-content-block-experiments.test.js > builds/round3/lint.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/term-content-block-experiments.test.js test/term-bank-experiments.test.js test/term-content-block-store.test.js test/dictionary-database-content-dedup.test.js > builds/round3/focused.log 2>&1
+          npm run test:ts > builds/round3/types.log 2>&1
+      - uses: actions/cache@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-next-fixtures-b9603db-v1
+      - name: Prepare immutable fixtures and same browser package for all arms
+        run: |
+          git fetch --depth=1 origin 9c843c8a0e06190948ae0d52c29094a45a2555f1
+          git show FETCH_HEAD:dev/perf/wty-abba-20260916/prepare.py > "$RUNNER_TEMP/fixture-original.py"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path(os.environ['RUNNER_TEMP'])
+          (p/'fixture.py').write_text((p/'fixture-original.py').read_text().split('# Common correctness prerequisite')[0])
+          h=Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          text=h.read_text()
+          assert text.count('maxBuffer: 32 * 1024 * 1024')==2
+          h.write_text(text.replace('maxBuffer: 32 * 1024 * 1024','maxBuffer: 256 * 1024 * 1024'))
+          PY
+          python3 "$RUNNER_TEMP/fixture.py" > builds/round3/fixture.log
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+          node dev/bin/build.js --target chrome-dev > builds/round3/chrome-build.log 2>&1
+          npx playwright install --with-deps chromium
+      - name: Fixed two-block ABBA discovery with same-binary controls
+        run: node "$RUNNER_TEMP/round3/abba.mjs" control,block2,block8,scratch,segmented,direct,single,lookupCombo 2 | tee builds/round3/abba.log
+      - name: Retain all raw observations and exact source
+        if: always()
+        run: |
+          mkdir -p builds/round3/source
+          cp "$RUNNER_TEMP/round3/abba.mjs" "$RUNNER_TEMP/round3/prepare.py" builds/round3/source/ 2>/dev/null || true
+          git diff -- ext/js types/ext test/term-content-block-experiments.test.js > builds/round3/final.patch
+          tar -czf builds/round3/source.tar.gz ext/js/dictionary/dictionary-importer.js ext/js/dictionary/dictionary-database.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-content-block-store.js types/ext/dictionary-importer.d.ts test/term-content-block-experiments.test.js ext/lib/term-bank-parser.wasm test/chromium/extension-two-dictionary-import.e2e.js test/perf/dictionaries.lock.json
+          git rev-parse HEAD > builds/round3/base.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: round3-${{ matrix.dictionary }}
+          path: builds/round3
+          retention-days: 30
