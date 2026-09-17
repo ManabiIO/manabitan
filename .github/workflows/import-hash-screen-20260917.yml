@@ -28,7 +28,7 @@ jobs:
           git show FETCH_HEAD:dev/perf/import-round3-20260917/hash-bench.mjs > "$RUNNER_TEMP/hash-bench.mjs"
           sed "s#../../../ext/js/dictionary/term-entry-content-hash.js#${GITHUB_WORKSPACE}/ext/js/dictionary/term-entry-content-hash.js#" "$RUNNER_TEMP/hash-bench.mjs" > builds/hash-screen/hash-bench.mjs
           node builds/hash-screen/hash-bench.mjs > builds/hash-screen/result.json
-          git rev-parse HEAD HEAD^{tree} > builds/hash-screen/base.txt
+          git rev-parse HEAD 'HEAD^{tree}' > builds/hash-screen/base.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
