@@ -25,6 +25,7 @@
  */
 export function snapshotTermBankExperiments(options = {}) {
     return Object.freeze({
+        experimentalSkipFusedProbe: options.experimentalSkipFusedProbe === true,
         experimentalLookupScratchReuse: options.experimentalLookupScratchReuse === true,
         experimentalNativeSegmentedLookup: options.experimentalNativeSegmentedLookup === true,
         experimentalDirectLookupArena: options.experimentalDirectLookupArena === true,

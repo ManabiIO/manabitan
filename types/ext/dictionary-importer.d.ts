@@ -52,6 +52,8 @@ export type ImportPhaseTiming = {
 
 /** Experimental parser paths; absent and non-true runtime values remain off. */
 export type ImportExperiments = {
+    /** Bypass speculative fused parsing; retain the established general parser. */
+    experimentalSkipFusedProbe?: boolean;
     experimentalLookupScratchReuse?: boolean;
     experimentalNativeSegmentedLookup?: boolean;
     experimentalDirectLookupArena?: boolean;
