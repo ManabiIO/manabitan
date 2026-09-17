@@ -1,0 +1,155 @@
+name: WTY skip probe independent qualification
+on:
+  push:
+    branches: [verify/wty-import-abba-20260916]
+    paths: [.github/workflows/wty-skip-confirm-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  confirm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - uses: actions/cache/restore@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-en-en-21b1b22-c0a1b7ee-v1
+      - name: Same package, only candidate flag differs
+        run: |
+          mkdir -p builds/wty-confirm
+          python3 dev/perf/wty-abba-20260916/prepare.py
+          python3 dev/perf/wty-round2/apply-skip.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          s=p.read_text()
+          old="const {stdout} = await execFileAsync('unzip', ['-p', zipPath, banks[bankIndex]], {maxBuffer: 32 * 1024 * 1024});"
+          assert s.count(old)==1
+          p.write_text(s.replace(old,old.replace('32 * 1024','128 * 1024')))
+          PY
+          git diff > builds/wty-confirm/source.patch
+      - run: npm ci
+      - name: Build and install
+        run: |
+          npm run build:libs > builds/wty-confirm/libs.log 2>&1
+          node dev/bin/build.js --target chrome-dev > builds/wty-confirm/build.log 2>&1
+          npx playwright install --with-deps chromium
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Twelve adjacent pairs, reversed starting order, six A/A pairs
+        env:
+          WTY_FLAGS: '{"experimentalSkipFusedProbe":true}'
+          WTY_BLOCKS: '6'
+          WTY_REVERSE: '1'
+          WTY_OUTPUT: builds/wty-confirm
+        run: node dev/perf/wty-round2/run.mjs 2>&1 | tee builds/wty-confirm/run.log
+      - name: Audit activation and predeclared publication gate
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('builds/wty-confirm/summary.json').read_text())
+          assert s['status']=='success' and len(s['observations'])==38
+          for r in s['observations']:
+              p=r['aggregate']
+              on=r['flags'].get('experimentalSkipFusedProbe') is True
+              assert p['fastPathParserFusedAttempts']==(0 if on else 12)
+              assert p['fastPathParserFusedFallbacks']==(0 if on else 12)
+              assert p['fastPathParserDiscardedFusedRows']==(0 if on else 226900)
+          r=s['results']
+          gate=r['pairedMedianPercent'] < -1 and r['equalWorkPercent'] < -1 and r['fasterPairs'] >= 10 and -r['pairedMedianPercent'] > r['controlAbsoluteMedian']
+          Path('builds/wty-confirm/gate.json').write_text(json.dumps({'confirmedWinner':gate,'rule':'median < -1%, equal-work < -1%, at least 10/12 faster, effect larger than median absolute A/A variation','results':r},indent=2)+'\n')
+          print(json.dumps({'confirmedWinner':gate,'results':r},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wty-skip-confirmation
+          path: builds/wty-confirm
+          retention-days: 30
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - uses: actions/cache/restore@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-en-en-21b1b22-c0a1b7ee-v1
+      - name: Stage exact product based on PR 50, not verification ancestry
+        run: |
+          mkdir -p "$RUNNER_TEMP/wty-tools" builds/wty-qualification
+          cp dev/perf/wty-round2/apply-skip.py dev/perf/wty-round2/skip-tests.txt dev/perf/wty-abba-20260916/prepare.py dev/perf/wty-abba-20260916/corpus-parity.mjs "$RUNNER_TEMP/wty-tools/"
+          git fetch --depth=1 origin f8f868903c4733f6017d479f65b9600a583bedb2
+          git checkout --detach FETCH_HEAD
+          python3 "$RUNNER_TEMP/wty-tools/apply-skip.py"
+          cp "$RUNNER_TEMP/wty-tools/skip-tests.txt" test/term-bank-skip-fused-probe.test.js
+      - run: npm ci
+      - name: Build then check exact regression source
+        run: |
+          npm run build:libs > builds/wty-qualification/libs.log 2>&1
+          node node_modules/eslint/bin/eslint.js --fix test/term-bank-skip-fused-probe.test.js > builds/wty-qualification/test-format.log 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-experiments.js test/term-bank-skip-fused-probe.test.js > builds/wty-qualification/changed-lint.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/term-bank-skip-fused-probe.test.js test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js 2>&1 | tee builds/wty-qualification/focused.log
+          npm run test:unit 2>&1 | tee builds/wty-qualification/unit.log
+          npm run test:unit:options 2>&1 | tee builds/wty-qualification/options.log
+          npm run test:ts 2>&1 | tee builds/wty-qualification/types.log
+          npm run test:build 2>&1 | tee builds/wty-qualification/build-plans.log
+          node dev/bin/build.js --target chrome-dev > builds/wty-qualification/chrome.log 2>&1
+          node dev/bin/build.js --target firefox-dev > builds/wty-qualification/firefox.log 2>&1
+      - name: Preserve product-only patch and exact hashes before harness changes
+        run: |
+          git add ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-experiments.js types/ext/dictionary-importer.d.ts test/term-bank-skip-fused-probe.test.js
+          git diff --cached --check
+          git diff --cached --binary > builds/wty-qualification/product.patch
+          sha256sum ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-experiments.js types/ext/dictionary-importer.d.ts test/term-bank-skip-fused-probe.test.js ext/lib/term-bank-parser.wasm > builds/wty-qualification/product.sha256
+          cp test/term-bank-skip-fused-probe.test.js builds/wty-qualification/
+      - name: Full WTY row/content/hash parity using real parser and pinned archive
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          tools=Path(os.environ['RUNNER_TEMP'])/'wty-tools'
+          p=tools/'prepare.py'
+          s=p.read_text().split('# Common correctness prerequisite')[0]
+          p.write_text(s)
+          PY
+          python3 "$RUNNER_TEMP/wty-tools/prepare.py"
+          cp "$RUNNER_TEMP/wty-tools/corpus-parity.mjs" test/perf/wty-qualification-parity.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('test/perf/wty-qualification-parity.mjs')
+          s=p.read_text()
+          s=s.replace('parseTermBankWithWasmColumnChunks([bytes],','parseTermBankWithWasmColumnChunks([bytes, new Uint8Array([91,93])],')
+          s=s.replace('emitContentSlab: true,','emitContentSlab: true, emitTermByteLists: false,')
+          s=s.replace('assert.equal(candidate.rows, baseline.rows, filename)', "assert.equal(baseline.profile.fusedParseAttempts, 1, filename)\n        assert.equal(candidate.profile.fusedParseAttempts, 0, filename)\n        assert.equal(candidate.rows, baseline.rows, filename)")
+          p.write_text(s)
+          PY
+          node test/perf/wty-qualification-parity.mjs '{"experimentalSkipFusedProbe":true}' builds/wty-qualification/parity 2>&1 | tee builds/wty-qualification/parity.log
+      - name: Retain qualification inputs and product source
+        if: always()
+        run: |
+          mkdir -p builds/wty-qualification
+          cp test/term-bank-skip-fused-probe.test.js builds/wty-qualification/
+          git diff --cached --binary > builds/wty-qualification/staged.patch
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wty-skip-qualification
+          path: builds/wty-qualification
+          retention-days: 30
