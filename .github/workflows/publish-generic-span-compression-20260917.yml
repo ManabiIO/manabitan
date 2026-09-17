@@ -55,6 +55,7 @@ jobs:
       - run: npm ci
       - name: Focused qualification before publication
         run: |
+          npm run build:libs > /tmp/generic-build-libs.log 2>&1
           node node_modules/eslint/bin/eslint.js             ext/js/dictionary/dictionary-database.js             ext/js/dictionary/dictionary-importer.js             ext/js/dictionary/term-bank-experiments.js             ext/js/dictionary/term-content-block-store.js             ext/js/dictionary/zstd-term-content-compression-worker.js             ext/js/dictionary/zstd-term-content.js             test/term-bank-experiments.test.js             test/term-content-block-store.test.js             test/zstd-term-content-pool.test.js
           node node_modules/vitest/vitest.mjs run             test/zstd-wasm.test.js             test/zstd-term-content-pool.test.js             test/term-content-block-store.test.js             test/term-bank-experiments.test.js
           npm run test:ts:main
