@@ -8,7 +8,69 @@ concurrency:
   group: reader-web-research-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  reader-baseline:
+  portable-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: recipe
+          persist-credentials: false
+      - uses: actions/checkout@v6
+        with:
+          ref: e6f85c1fb8fec871eef76363ac0ba3c59aff78f7
+          path: work
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install and build pinned baseline libraries
+        working-directory: work
+        run: |
+          npm ci
+          npm run build:libs
+      - name: Reproduce the resource failures before fixing them
+        working-directory: work
+        shell: bash
+        run: |
+          mkdir -p ../evidence
+          python3 ../recipe/dev/reader-web-research/prepare-assets.py . --tests-only
+          set +e
+          npx vitest run test/web-asset-paths.test.js > ../evidence/assets-red.log 2>&1
+          status=$?
+          set -e
+          echo "$status" > ../evidence/assets-red-exit.txt
+          test "$status" -ne 0
+      - name: Apply and qualify the production correction
+        working-directory: work
+        shell: bash
+        run: |
+          python3 ../recipe/dev/reader-web-research/prepare-assets.py .
+          npx eslint --fix ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/dictionary-worker.js ext/js/dictionary/zstd-term-content.js ext/js/display/display-generator.js test/mdx-client.test.js test/web-asset-paths.test.js > ../evidence/assets-lint.log 2>&1
+          npx vitest run test/web-asset-paths.test.js test/mdx-client.test.js > ../evidence/assets-green.log 2>&1
+          npm run test:ts:main > ../evidence/assets-types.log 2>&1
+          npm run test:build > ../evidence/assets-build-plans.log 2>&1
+          npm run build -- --target chrome-dev > ../evidence/assets-chrome-build.log 2>&1
+      - name: Publish only the qualified source and tests to a clean feature branch
+        working-directory: work
+        shell: bash
+        run: |
+          git config user.name 'Manabi contributors'
+          git config user.email 'contributors@manabi.io'
+          git add ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/dictionary-worker.js ext/js/dictionary/zstd-term-content.js ext/js/display/display-generator.js test/mdx-client.test.js test/web-asset-paths.test.js
+          git -c core.hooksPath=/dev/null commit -m 'fix: resolve shared dictionary assets relative to their modules'
+          git push origin HEAD:refs/heads/feat/reader-web-portable-assets-20260917
+          git rev-parse HEAD > ../evidence/published-head.txt
+          git diff e6f85c1fb8fec871eef76363ac0ba3c59aff78f7 HEAD > ../evidence/portable-assets.patch
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reader-web-portable-assets-qualification
+          path: evidence/
+          retention-days: 14
+          if-no-files-found: error
+  reader-upgrade-trial:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -16,56 +78,58 @@ jobs:
         with:
           repository: ttu-ttu/ebook-reader
           ref: 301aef4957c3cb22162276b11f4a47b35533faae
-          path: reader
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Install exact upstream package manager
-        run: npm install --global pnpm@12.3.4
-      - name: Audit and qualify baseline without rewriting its lockfile
-        working-directory: reader
+      - run: npm install --global pnpm@12.3.4
+      - name: Trial a coherent current toolchain, with no upstream writes
         shell: bash
         run: |
-          mkdir -p ../evidence
-          node --version > ../evidence/node.txt
-          pnpm --version > ../evidence/pnpm.txt
-          git rev-parse HEAD > ../evidence/reader-head.txt
+          mkdir -p evidence
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          for name in ('package.json', 'apps/web/package.json'):
+              path = Path(name)
+              package = json.loads(path.read_text())
+              package['devDependencies']['svelte'] = '5.57.0'
+              if name.startswith('apps/'):
+                  package['devDependencies']['vite'] = '8.3.0'
+                  package['devDependencies']['@sveltejs/vite-plugin-svelte'] = '7.3.0'
+                  package['dependencies']['@zip.js/zip.js'] = '2.15.0'
+                  package['dependencies']['dompurify'] = '3.4.15'
+              path.write_text(json.dumps(package, indent=2) + '\n')
+          p = Path('apps/web/tsconfig.json'); data = json.loads(p.read_text()); data['compilerOptions']['moduleResolution'] = 'bundler'; p.write_text(json.dumps(data, indent=2) + '\n')
+          p = Path('apps/web/vite.config.js'); s = p.read_text(); s = s.replace("  },\n  experimental: {\n    prebundleSvelteLibraries: true\n  }", '  }'); p.write_text(s)
+          Path('pnpm-lock.yaml').unlink()
+          PY
           python3 - <<'PY'
           import json, pathlib, subprocess
-          out = pathlib.Path('../evidence')
+          out = pathlib.Path('evidence'); receipts = {}
           commands = {
-              'install': ['pnpm', 'install', '--frozen-lockfile', '--ignore-scripts'],
+              'install': ['pnpm', 'install', '--no-frozen-lockfile', '--ignore-scripts'],
               'audit': ['pnpm', 'audit', '--json'],
               'sync': ['pnpm', '--dir', 'apps/web', 'exec', 'svelte-kit', 'sync'],
               'types': ['pnpm', '--dir', 'apps/web', 'exec', 'svelte-check', '--tsconfig', './tsconfig.json'],
               'build': ['pnpm', 'build'],
               'lint': ['pnpm', 'exec', 'eslint', '.'],
           }
-          receipts = {}
           for name, command in commands.items():
               try:
                   result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=420)
                   (out / (name + '.log')).write_text(result.stdout)
                   receipts[name] = {'command': command, 'exitCode': result.returncode}
               except subprocess.TimeoutExpired as error:
-                  (out / (name + '.log')).write_text(str(error.stdout))
-                  receipts[name] = {'command': command, 'timeout': True}
+                  (out / (name + '.log')).write_text(str(error.stdout)); receipts[name] = {'command': command, 'timeout': True}
               (out / 'results.json').write_text(json.dumps(receipts, indent=2) + '\n')
-          subprocess.run(['git', 'diff', '--exit-code'], check=True)
+          result = subprocess.run(['git', 'diff', '--binary'], stdout=subprocess.PIPE, text=True, check=True)
+          (out / 'reader-upgrade-trial.patch').write_text(result.stdout)
           PY
-      - name: Record current compatible package and advisory inputs
-        if: always()
-        shell: bash
-        run: |
-          mkdir -p evidence
-          for p in dompurify svelte vite @sveltejs/kit @sveltejs/vite-plugin-svelte @zip.js/zip.js ua-parser-js; do
-            npm view "$p" version engines peerDependencies license --json >> evidence/registry.jsonl
-          done
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: reader-baseline-qualification
+          name: reader-upgrade-trial
           path: evidence/
           retention-days: 14
           if-no-files-found: error
