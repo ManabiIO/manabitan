@@ -37,6 +37,15 @@ jobs:
           git fetch --depth=1 origin "$RECIPE_SHA"
           git show "FETCH_HEAD:dev/perf/zstd-worker-limit-20260917/prepare.py" > "$RUNNER_TEMP/zstd-workers/prepare.py"
           git show "FETCH_HEAD:dev/perf/zstd-worker-limit-20260917/abba.mjs" > "$RUNNER_TEMP/zstd-workers/abba.mjs"
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path(__import__('os').environ['RUNNER_TEMP'])/'zstd-workers/prepare.py'
+          s=p.read_text()
+          old="""needle = '''    /**\n     * @param {number} workerIndex\n     * @param {Record<string, unknown>} message'''\nassert s.count(needle) == 1\ns = s.replace(needle, '''    /**\n     * @param {number|null} workerLimit\n     * @returns {number}\n     */\n    _resolveWorkerCount(workerLimit) {\n        return Number.isSafeInteger(workerLimit) ?\n            Math.max(1, Math.min(this._workers.length, /** @type {number} */ (workerLimit))) :\n            this._workers.length;\n    }\n\n''' + needle)"""
+          new="""needle = '''    /**\n     * @param {number} workerIndex\n     * @param {Record<string, unknown>} message\n     * @param {Transferable[]} transfer\n     * @returns {Promise<{bytes: Uint8Array, envelopeMs: number}>}\n     */\n    _dispatch(workerIndex, message, transfer) {'''\nassert s.count(needle) == 1\ns = s.replace(needle, '''    /**\n     * @param {number|null} workerLimit\n     * @returns {number}\n     */\n    _resolveWorkerCount(workerLimit) {\n        return Number.isSafeInteger(workerLimit) ?\n            Math.max(1, Math.min(this._workers.length, /** @type {number} */ (workerLimit))) :\n            this._workers.length;\n    }\n\n''' + needle)"""
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new))
+          PY
           python3 "$RUNNER_TEMP/zstd-workers/prepare.py"
           git diff --check
           git diff -- ext/js types/ext test/zstd-term-content-pool.test.js > builds/zstd-workers/candidate.patch
@@ -91,7 +100,7 @@ jobs:
           mkdir -p builds/zstd-workers/source
           cp "$RUNNER_TEMP/zstd-workers/abba.mjs" "$RUNNER_TEMP/zstd-workers/prepare.py" builds/zstd-workers/source/ 2>/dev/null || true
           git diff -- ext/js types/ext test/zstd-term-content-pool.test.js > builds/zstd-workers/final.patch
-          tar -czf builds/zstd-workers/source.tar.gz ext/js/dictionary/dictionary-importer.js ext/js/dictionary/dictionary-database.js ext/js/dictionary/term-content-block-store.js ext/js/dictionary/zstd-term-content.js ext/js/dictionary/term-bank-experiments.js types/ext/dictionary-importer.d.ts test/zstd-term-content-pool.test.js ext/lib/term-bank-parser.wasm test/chromium/extension-two-dictionary-import.e2e.js test/perf/dictionaries.lock.json
+          tar -czf builds/zstd-workers/source.tar.gz ext/js/dictionary/dictionary-importer.js ext/js/dictionary/dictionary-database.js ext/js/dictionary/term-content-block-store.js ext/js/dictionary/zstd-term-content.js ext/js/dictionary/term-bank-experiments.js types/ext/dictionary-importer.d.ts test/zstd-term-content-pool.test.js ext/lib/term-bank-parser.wasm test/chromium/extension-two-dictionary-import.e2e.js test/perf/dictionaries.lock.json 2>/dev/null || true
           git rev-parse HEAD 'HEAD^{tree}' > builds/zstd-workers/base.txt
       - uses: actions/upload-artifact@v4
         if: always()
