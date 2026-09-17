@@ -1,0 +1,125 @@
+name: Publish confirmed three-worker parser candidate
+on:
+  push:
+    branches: [verify/import-transport-compression-20260917]
+    paths:
+      - dev/perf/parser-worker-confirm-20260917/publish-trigger.txt
+permissions:
+  contents: write
+  actions: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e6f85c1fb8fec871eef76363ac0ba3c59aff78f7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 35285156823
+          pattern: parser-worker-*
+          path: ${{ runner.temp }}/confirmation
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 35285903227
+          name: parser-worker-deep-qualification
+          path: ${{ runner.temp }}/deep
+      - name: Audit immutable confirmation and correctness evidence
+        run: |
+          mkdir -p builds/parser-worker-publication
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'confirmation'
+          q=root/'parser-worker-qualification'
+          assert (q/'complete.txt').read_text().strip()=='QUALIFIED'
+          assert (q/'candidate.txt').read_text().strip()=='w3'
+          patch=q/'product.patch'
+          patch_hash=hashlib.sha256(patch.read_bytes()).hexdigest()
+          rows={'jmdict':526942,'jitendex':435448,'wty-en-en':1643040}
+          audit={'status':'success','patchSha256':patch_hash,'dictionaries':{}}
+          for dictionary,row_count in rows.items():
+              p=root/f'parser-worker-confirm-{dictionary}'
+              assert (p/'complete.txt').read_text().strip()=='CONFIRMED'
+              assert hashlib.sha256((p/'product.patch').read_bytes()).hexdigest()==patch_hash
+              s=json.loads((p/'summary.json').read_text())
+              assert s['status']=='success' and s['blocks']==6 and len(s['observations'])==52
+              assert s['base']=='e6f85c1fb8fec871eef76363ac0ba3c59aff78f7'
+              assert s['fixture']['termRows']==row_count
+              r=s['results']['w3']; c=s['results']['control']
+              assert r['pairedMedianPercent'] < 0 and r['equalWorkPercent'] < 0
+              assert r['pairsFaster'] >= 10
+              assert len(r['blockPercentages'])==6 and all(x < 0 for x in r['blockPercentages'])
+              for o in s['observations']:
+                  assert o['validation']['termRows']==row_count and o['validation']['contentReadable'] is True and o['validation']['probeCount']==12
+                  assert o['parser']['parserParallelWorkerCount']==(3 if o['variant']=='w3' and o['arm']=='B' else 2)
+              audit['dictionaries'][dictionary]={'winner':r,'control':c}
+          deep=Path(os.environ['RUNNER_TEMP'])/'deep'
+          assert (deep/'complete.txt').read_text().strip()=='DEEP_QUALIFIED'
+          assert int((deep/'lifecycle-count.txt').read_text()) >= 80
+          parity=json.loads((deep/'corpus-parity.json').read_text())
+          assert parity['status']=='success' and len(parity['results'])==2
+          for item in parity['results']:
+              assert item['baseline']['rows']==1643040 and item['candidate']['rows']==1643040
+              for key in ['sha256','contentBytes','mediaRows']:
+                  assert item['baseline'][key]==item['candidate'][key]
+              assert item['baseline']['profile']['parallelWorkerCount']==2
+              assert item['candidate']['profile']['parallelWorkerCount']==3
+          Path('builds/parser-worker-publication/audit.json').write_text(json.dumps(audit,indent=2)+'\n')
+          Path('builds/parser-worker-publication/product.patch').write_bytes(patch.read_bytes())
+          PY
+          test "$(git ls-remote origin refs/heads/develop | cut -f1)" = e6f85c1fb8fec871eef76363ac0ba3c59aff78f7
+          test -z "$(git ls-remote origin refs/heads/perf/parser-workers-three-20260917)"
+      - run: npm ci
+      - name: Apply exact qualified patch and recheck product tree
+        run: |
+          git apply --check builds/parser-worker-publication/product.patch
+          git apply builds/parser-worker-publication/product.patch
+          git add -N test/term-bank-parser-worker-policy.test.js
+          git diff --check
+          python3 - <<'PY'
+          import subprocess
+          expected={
+            'ext/js/dictionary/dictionary-importer.js',
+            'ext/js/dictionary/term-bank-experiments.js',
+            'ext/js/dictionary/term-bank-wasm-parser.js',
+            'test/term-bank-parser-worker-policy.test.js',
+            'types/ext/dictionary-importer.d.ts',
+          }
+          actual=set(subprocess.check_output(['git','diff','--name-only'],text=True).splitlines())
+          assert actual==expected,(actual-expected,expected-actual)
+          PY
+          npm run build:libs > builds/parser-worker-publication/libs.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/term-bank-parser-worker-policy.test.js test/term-bank-experiments.test.js test/term-bank-composite-state.test.js > builds/parser-worker-publication/focused.log 2>&1
+          npm run test:ts:main > builds/parser-worker-publication/types-main.log 2>&1
+          npm run test:ts:dev > builds/parser-worker-publication/types-dev.log 2>&1
+          npm run test:ts:bench > builds/parser-worker-publication/types-bench.log 2>&1
+          node dev/bin/build.js --target chrome-dev > builds/parser-worker-publication/chrome-build.log 2>&1
+          node dev/bin/build.js --target firefox-dev > builds/parser-worker-publication/firefox-build.log 2>&1
+          sha256sum ext/lib/term-bank-parser.wasm ext/lib/zstd-wasm.js > builds/parser-worker-publication/runtime-wasm.sha256
+      - name: Push only the exact product/test branch
+        run: |
+          test "$(git ls-remote origin refs/heads/develop | cut -f1)" = e6f85c1fb8fec871eef76363ac0ba3c59aff78f7
+          git checkout -b perf/parser-workers-three-20260917
+          git add ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-parser-worker-policy.test.js types/ext/dictionary-importer.d.ts
+          git diff --cached --check
+          git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'perf: add opt-in third parser worker for mid-core imports'
+          git push origin HEAD:refs/heads/perf/parser-workers-three-20260917
+          git rev-parse HEAD 'HEAD^{tree}' > builds/parser-worker-publication/published.txt
+          echo PUBLISHED > builds/parser-worker-publication/complete.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parser-worker-publication
+          path: builds/parser-worker-publication
+          retention-days: 30
