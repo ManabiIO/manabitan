@@ -20,6 +20,7 @@ jobs:
       MORE_DICTIONARY: ${{ matrix.dictionary }}
       MORE_OUTPUT: builds/more-screen
       RECIPE_SHA: ${{ github.sha }}
+      FIXTURE_RECIPE_SHA: 9c843c8a0e06190948ae0d52c29094a45a2555f1
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,7 +54,7 @@ jobs:
           key: wty-next-fixtures-b9603db-v1
       - name: Prepare full immutable fixtures and the same harness for both arms
         run: |
-          git fetch --depth=1 origin 9c843c8a0e06190948e0d52c29094a45a2555f1
+          git fetch --depth=1 origin "$FIXTURE_RECIPE_SHA"
           git show FETCH_HEAD:dev/perf/wty-abba-20260916/prepare.py > "$RUNNER_TEMP/fixture-original.py"
           python3 - <<'PY'
           from pathlib import Path
