@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {
     compress,
     createCCtx,
@@ -51,6 +52,7 @@ const COMPRESSION_WORKER_COUNT = 4;
 const COMPRESSION_WORKER_READY_TIMEOUT_MS = 30_000;
 const COMPRESSION_JOB_TIMEOUT_MS = 60_000;
 const JMDICT_COMPRESSION_LEVEL = -1;
+const EMPTY_COMPRESSION_DICTIONARY = new Uint8Array(0);
 
 /**
  * @param {unknown} value
@@ -102,10 +104,11 @@ export class TermContentCompressionPool {
     /**
      * @param {Uint8Array[]} contents
      * @param {string|null} dictName
+     * @param {import('dictionary-importer').ImportExperiments} [options]
      * @returns {Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: true}>}
      */
-    async compressWrapped(contents, dictName) {
-        const {chunks, envelopeMs} = await this._compress(contents, dictName, true);
+    async compressWrapped(contents, dictName, options = {}) {
+        const {chunks, envelopeMs} = await this._compress(contents, dictName, true, options);
         return {
             chunks,
             envelopeMs,
@@ -120,9 +123,10 @@ export class TermContentCompressionPool {
      * @param {Uint32Array} blockStartIndexes
      * @param {Uint32Array} blockLengths
      * @param {string|null} dictName
+     * @param {import('dictionary-importer').ImportExperiments} [options]
      * @returns {Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: true}>}
      */
-    async compressWrappedSpans(source, sourceOffsets, sourceLengths, blockStartIndexes, blockLengths, dictName) {
+    async compressWrappedSpans(source, sourceOffsets, sourceLengths, blockStartIndexes, blockLengths, dictName, options = {}) {
         return await this.beginCompressWrappedSpans(
             source,
             sourceOffsets,
@@ -130,6 +134,7 @@ export class TermContentCompressionPool {
             blockStartIndexes,
             blockLengths,
             dictName,
+            options,
         ).completion;
     }
 
@@ -140,10 +145,11 @@ export class TermContentCompressionPool {
      * @param {Uint32Array} blockStartIndexes
      * @param {Uint32Array} blockLengths
      * @param {string|null} dictName
+     * @param {import('dictionary-importer').ImportExperiments} [options]
      * @returns {{sourceConsumed: Promise<void>, completion: Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: true}>}}
      * @throws {Error} If the pool or block plan is invalid.
      */
-    beginCompressWrappedSpans(source, sourceOffsets, sourceLengths, blockStartIndexes, blockLengths, dictName) {
+    beginCompressWrappedSpans(source, sourceOffsets, sourceLengths, blockStartIndexes, blockLengths, dictName, options = {}) {
         if (this._failed) { throw new Error('Term content compression pool is unavailable'); }
         const blockCount = blockLengths.length;
         if (
@@ -162,6 +168,7 @@ export class TermContentCompressionPool {
                 throw new RangeError('Term content compression block span is invalid');
             }
         }
+        const compressionExperiments = snapshotTermBankExperiments(options);
         const envelopeMsByWorker = new Float64Array(this._workers.length);
         const jobs = Array.from(blockLengths, (contentBytes, blockIndex) => {
             const workerIndex = blockIndex % this._workers.length;
@@ -178,6 +185,7 @@ export class TermContentCompressionPool {
                     contentBytes,
                     dictName,
                     wrap: true,
+                    compressionExperiments,
                 },
                 [blockOffsets.buffer, blockSourceLengths.buffer],
             );
@@ -199,9 +207,10 @@ export class TermContentCompressionPool {
      * @param {Uint8Array[]} contents
      * @param {string|null} dictName
      * @param {boolean} wrap
+     * @param {import('dictionary-importer').ImportExperiments} [options]
      * @returns {Promise<{chunks: Uint8Array[], envelopeMs: number}>}
      */
-    async _compress(contents, dictName, wrap) {
+    async _compress(contents, dictName, wrap, options = {}) {
         if (this._failed) { throw new Error('Term content compression pool is unavailable'); }
         if (contents.length === 0) { return {chunks: [], envelopeMs: 0}; }
         const seenBuffers = new Set();
@@ -214,6 +223,7 @@ export class TermContentCompressionPool {
                 seenBuffers.add(buffer);
             }
         }
+        const compressionExperiments = snapshotTermBankExperiments(options);
         const envelopeMsByWorker = new Float64Array(this._workers.length);
         const chunks = await Promise.all(contents.map(async (content, index) => {
             const workerIndex = index % this._workers.length;
@@ -230,7 +240,7 @@ export class TermContentCompressionPool {
             }
             const result = await this._dispatch(
                 workerIndex,
-                {content, dictName, wrap},
+                {content, dictName, wrap, compressionExperiments},
                 transfer,
             );
             envelopeMsByWorker[workerIndex] += result.envelopeMs;
@@ -439,13 +449,15 @@ export async function compressTermContentZstdBatch(contents, dictName) {
  * Compresses and integrity-wraps blocks before they cross the worker boundary.
  * @param {Uint8Array[]} contents
  * @param {string|null} dictName
+ * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: boolean}>}
  */
-export async function compressWrappedTermContentZstdBatch(contents, dictName) {
+export async function compressWrappedTermContentZstdBatch(contents, dictName, options = {}) {
+    options = snapshotTermBankExperiments(options);
     if (contents.length < 2) {
         let envelopeMs = 0;
         const chunks = contents.map((content) => {
-            const result = compressWrappedTermContentZstd(content, dictName);
+            const result = compressWrappedTermContentZstd(content, dictName, options);
             envelopeMs += result.envelopeMs;
             return result.bytes;
         });
@@ -454,7 +466,7 @@ export async function compressWrappedTermContentZstdBatch(contents, dictName) {
     try {
         const pool = await initializeCompressionPool();
         if (pool !== null && !pool.failed) {
-            return await pool.compressWrapped(contents, dictName);
+            return await pool.compressWrapped(contents, dictName, options);
         }
     } catch (error) {
         const hasDetachedInput = contents.some((content) => content.byteLength === 0);
@@ -476,7 +488,7 @@ export async function compressWrappedTermContentZstdBatch(contents, dictName) {
     }
     let envelopeMs = 0;
     const chunks = contents.map((content) => {
-        const result = compressWrappedTermContentZstd(content, dictName);
+        const result = compressWrappedTermContentZstd(content, dictName, options);
         envelopeMs += result.envelopeMs;
         return result.bytes;
     });
@@ -490,6 +502,7 @@ export async function compressWrappedTermContentZstdBatch(contents, dictName) {
  * @param {Uint32Array} blockStartIndexes
  * @param {Uint32Array} blockLengths
  * @param {string|null} dictName
+ * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: true}>}
  */
 export async function compressWrappedTermContentZstdSpansBatch(
@@ -499,6 +512,7 @@ export async function compressWrappedTermContentZstdSpansBatch(
     blockStartIndexes,
     blockLengths,
     dictName,
+    options = {},
 ) {
     return await beginCompressWrappedTermContentZstdSpansBatch(
         source,
@@ -507,6 +521,7 @@ export async function compressWrappedTermContentZstdSpansBatch(
         blockStartIndexes,
         blockLengths,
         dictName,
+        options,
     ).completion;
 }
 
@@ -517,6 +532,7 @@ export async function compressWrappedTermContentZstdSpansBatch(
  * @param {Uint32Array} blockStartIndexes
  * @param {Uint32Array} blockLengths
  * @param {string|null} dictName
+ * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {{sourceConsumed: Promise<void>, completion: Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: true}>}}
  */
 export function beginCompressWrappedTermContentZstdSpansBatch(
@@ -526,7 +542,9 @@ export function beginCompressWrappedTermContentZstdSpansBatch(
     blockStartIndexes,
     blockLengths,
     dictName,
+    options = {},
 ) {
+    options = snapshotTermBankExperiments(options);
     if (blockLengths.length === 1) {
         const completion = Promise.resolve().then(() => {
             const result = compressWrappedTermContentZstdSpans(
@@ -535,6 +553,7 @@ export function beginCompressWrappedTermContentZstdSpansBatch(
                 sourceLengths,
                 blockLengths[0],
                 dictName,
+                options,
             );
             return {chunks: [result.bytes], envelopeMs: result.envelopeMs, wrapped: /** @type {true} */ (true)};
         });
@@ -552,6 +571,7 @@ export function beginCompressWrappedTermContentZstdSpansBatch(
             blockStartIndexes,
             blockLengths,
             dictName,
+            options,
         );
     })();
     const sourceConsumed = operation.then(({sourceConsumed: value}) => value);
@@ -673,10 +693,11 @@ export function compressTermContentZstd(content, dictName) {
 /**
  * @param {Uint8Array} content
  * @param {string|null} dictName
+ * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {{bytes: Uint8Array, envelopeMs: number}}
  * @throws {Error} If Zstd is unavailable or compression fails.
  */
-export function compressWrappedTermContentZstd(content, dictName) {
+export function compressWrappedTermContentZstd(content, dictName, options = {}) {
     if (!isInitialized || cctx === null) {
         throw new Error('Term content zstd not initialized');
     }
@@ -687,6 +708,17 @@ export function compressWrappedTermContentZstd(content, dictName) {
             jmdictDict,
             TERM_CONTENT_BLOCK_ENVELOPE_BYTES,
             JMDICT_COMPRESSION_LEVEL,
+            true,
+        ));
+        return {bytes: output, envelopeMs: 0};
+    }
+    if (options.experimentalGenericSpanCompression === true) {
+        const output = requireCompressedBytes(compressUsingDictWithPrefix(
+            cctx,
+            content,
+            EMPTY_COMPRESSION_DICTIONARY,
+            TERM_CONTENT_BLOCK_ENVELOPE_BYTES,
+            1,
             true,
         ));
         return {bytes: output, envelopeMs: 0};
@@ -703,12 +735,13 @@ export function compressWrappedTermContentZstd(content, dictName) {
  * @param {Uint32Array} sourceLengths
  * @param {number} contentBytes
  * @param {string|null} dictName
+ * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {{bytes: Uint8Array, envelopeMs: number}}
  * @throws {Error} If the dictionary is unavailable or compression fails.
  */
-export function compressWrappedTermContentZstdSpans(source, sourceOffsets, sourceLengths, contentBytes, dictName) {
+export function compressWrappedTermContentZstdSpans(source, sourceOffsets, sourceLengths, contentBytes, dictName, options = {}) {
     return finishWrappedTermContentZstdSpans(
-        prepareWrappedTermContentZstdSpans(source, sourceOffsets, sourceLengths, contentBytes, dictName),
+        prepareWrappedTermContentZstdSpans(source, sourceOffsets, sourceLengths, contentBytes, dictName, options),
     );
 }
 
@@ -720,11 +753,12 @@ export function compressWrappedTermContentZstdSpans(source, sourceOffsets, sourc
  * @param {Uint32Array} sourceLengths
  * @param {number} contentBytes
  * @param {string|null} dictName
+ * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {ReturnType<typeof prepareSpanCompression>}
  * @throws {Error} If the dictionary is unavailable or a span is invalid.
  */
-export function prepareWrappedTermContentZstdSpans(source, sourceOffsets, sourceLengths, contentBytes, dictName) {
-    if (!isInitialized || cctx === null || dictName !== 'jmdict' || jmdictDict === null) {
+export function prepareWrappedTermContentZstdSpans(source, sourceOffsets, sourceLengths, contentBytes, dictName, options = {}) {
+    if (!isInitialized || cctx === null || jmdictDict === null || (dictName !== 'jmdict' && options.experimentalGenericSpanCompression !== true)) {
         throw new Error('Term content zstd dictionary is unavailable');
     }
     return prepareSpanCompression(
@@ -733,9 +767,9 @@ export function prepareWrappedTermContentZstdSpans(source, sourceOffsets, source
         sourceOffsets,
         sourceLengths,
         contentBytes,
-        jmdictDict,
+        dictName === 'jmdict' ? jmdictDict : EMPTY_COMPRESSION_DICTIONARY,
         TERM_CONTENT_BLOCK_ENVELOPE_BYTES,
-        JMDICT_COMPRESSION_LEVEL,
+        dictName === 'jmdict' ? JMDICT_COMPRESSION_LEVEL : 1,
         true,
     );
 }
