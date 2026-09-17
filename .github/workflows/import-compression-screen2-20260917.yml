@@ -20,6 +20,7 @@ jobs:
       THREE_DICTIONARY: ${{ matrix.dictionary }}
       THREE_OUTPUT: builds/compression-screen
       CHECK_OUT: builds/compression-screen/check.json
+      WORKER_CHECK_OUT: builds/compression-screen/worker-check.json
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,8 +63,12 @@ jobs:
           fs.writeFileSync('builds/compression-screen/format-equality.txt','Entire syntax tree unchanged\n')
           JS
           node dev/perf/import-transport-20260917/check.mjs > builds/compression-screen/check.log 2>&1
+          node dev/perf/import-transport-20260917/worker-check.mjs > builds/compression-screen/worker-check.log 2>&1
           node node_modules/vitest/vitest.mjs run test/zstd-wasm.test.js test/zstd-term-content-pool.test.js test/term-content-block-store.test.js test/term-bank-experiments.test.js test/dictionary-importer.test.js > builds/compression-screen/focused.log 2>&1
-          npm run test:ts > builds/compression-screen/types.log 2>&1
+          npm run test:ts:main > builds/compression-screen/types-main.log 2>&1
+          npm run test:ts:dev > builds/compression-screen/types-dev.log 2>&1
+          npm run test:ts:bench > builds/compression-screen/types-bench.log 2>&1
+          python3 dev/perf/import-transport-20260917/compare-test-types.py > builds/compression-screen/test-types-parity.log 2>&1
       - uses: actions/cache@v4
         with:
           path: builds/e2e-dictionary-cache
@@ -92,7 +97,7 @@ jobs:
         run: |
           mkdir -p builds/compression-screen/source
           git diff -- ext/js types/ext test/term-bank-experiments.test.js test/term-content-block-store.test.js test/zstd-term-content-pool.test.js > builds/compression-screen/candidate.patch
-          cp dev/perf/import-transport-20260917/abba.mjs dev/perf/import-transport-20260917/check.mjs builds/compression-screen/source/
+          cp dev/perf/import-transport-20260917/abba.mjs dev/perf/import-transport-20260917/check.mjs dev/perf/import-transport-20260917/worker-check.mjs dev/perf/import-transport-20260917/compare-test-types.py builds/compression-screen/source/
           tar -czf builds/compression-screen/source.tar.gz ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/term-content-block-store.js ext/js/dictionary/zstd-term-content.js ext/js/dictionary/zstd-term-content-compression-worker.js types/ext/dictionary-importer.d.ts test/term-bank-experiments.test.js test/term-content-block-store.test.js test/zstd-term-content-pool.test.js ext/lib/term-bank-parser.wasm ext/lib/zstd-wasm.js test/chromium/extension-two-dictionary-import.e2e.js test/perf/dictionaries.lock.json 2>/dev/null || true
           git rev-parse HEAD > builds/compression-screen/research-head.txt
       - uses: actions/upload-artifact@v4
