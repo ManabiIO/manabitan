@@ -33,10 +33,11 @@ jobs:
         run: |
           mkdir -p builds/compression-screen
           python3 - <<'PY'
-          import os,subprocess,yaml
+          import os,yaml,hashlib
           from pathlib import Path
-          original=subprocess.check_output(['git','show','d896ff89aa8bf3854bb4ec8fb77287589641d100:.github/workflows/import-compression-screen2-20260917.yml'],text=True)
-          steps=yaml.safe_load(original)['jobs']['screen']['steps']
+          raw=Path('.github/workflows/import-compression-screen2-20260917.yml').read_bytes()
+          assert hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()=='fc545d2f29f3874cff5204399c43faaf398f2d7c'
+          steps=yaml.safe_load(raw)['jobs']['screen']['steps']
           names={
               'Apply exact candidates and restore unchanged decompression signature':'prepare',
               'Actual codec, focused suites, types and syntax-preserving formatting':'qualify',
