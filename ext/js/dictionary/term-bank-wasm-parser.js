@@ -580,6 +580,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
     );
     const useFusedParse = (
         allowFusedParse &&
+        experiments.experimentalSkipFusedParse !== true &&
         ((preloadedSource?.sourceCount ?? sourceArrays.length) > 1 || experiments.experimentalFusedSingleBank === true) &&
         includeContentMetadata &&
         computeContentHashes &&

@@ -573,3 +573,29 @@ describe('full-buffer inflation experiment', () => {
         expect((await parse(sources, flags, true)).rows).toEqual((await parse(sources, {experimentalTermBankSpans}, true)).rows)
     })
 })
+
+describe('explicit fused parser bypass', () => {
+    test('defaults off and requires literal true', () => {
+        expect(snapshotTermBankExperiments().experimentalSkipFusedParse).toBe(false)
+        for (const value of [false, 0, 1, null, undefined, 'true', {}]) {
+            const options = /** @type {Experiments} */ (/** @type {unknown} */ ({experimentalSkipFusedParse: value}))
+            expect(snapshotTermBankExperiments(options).experimentalSkipFusedParse).toBe(false)
+        }
+        expect(snapshotTermBankExperiments({experimentalSkipFusedParse: true}).experimentalSkipFusedParse).toBe(true)
+    })
+    test.each([false, true])('bypasses fused work without changing rows, preload=%s', async (preload) => {
+        for (const experimentalTermBankSpans of [false, true]) {
+            const sources = [JSON.stringify([row('first'), row('second')]), JSON.stringify([row('last')])]
+            const baseline = await parse(sources, {experimentalTermBankSpans}, preload)
+            expect(baseline.profile.fusedParseAttempts).toBe(1)
+            const candidate = await parse(sources, {experimentalSkipFusedParse: true, experimentalTermBankSpans}, preload)
+            expect(candidate.profile.fusedParseAttempts).toBe(0)
+            expect(candidate.rows).toEqual(baseline.rows)
+        }
+    })
+    test.each([false, true])('still rejects invalid source and recovers, spans=%s', async (experimentalTermBankSpans) => {
+        await expect(parse([JSON.stringify([row('first')]), '[[],,]'], {experimentalSkipFusedParse: true, experimentalTermBankSpans}, true)).rejects.toThrow()
+        const sources = [JSON.stringify([row('safe')]), JSON.stringify([row('after failure')])]
+        expect((await parse(sources, {experimentalSkipFusedParse: true, experimentalTermBankSpans}, true)).rows).toEqual((await parse(sources, {experimentalTermBankSpans}, true)).rows)
+    })
+})
