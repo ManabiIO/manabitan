@@ -31,10 +31,12 @@ jobs:
           for file in prepare.py make-driver.py confirm-trigger.txt; do
             git show "FETCH_HEAD:dev/perf/parser-workers-20260917/$file" > "$RUNNER_TEMP/worker-tools/$file"
           done
+          git show "FETCH_HEAD:dev/perf/parser-worker-confirm-20260917/isolate.py" > "$RUNNER_TEMP/worker-tools/isolate.py"
           candidate=$(tr -d '[:space:]' < "$RUNNER_TEMP/worker-tools/confirm-trigger.txt")
           case "$candidate" in w3|w4) ;; *) echo "invalid candidate: $candidate" >&2; exit 1;; esac
           printf '%s\n' "$candidate" > builds/parser-worker-qualification/candidate.txt
           python3 "$RUNNER_TEMP/worker-tools/prepare.py"
+          python3 "$RUNNER_TEMP/worker-tools/isolate.py" "$candidate"
           git add -N test/term-bank-parser-worker-policy.test.js
           git diff --check
       - run: npm ci
@@ -110,11 +112,13 @@ jobs:
           for file in prepare.py make-driver.py confirm-trigger.txt; do
             git show "FETCH_HEAD:dev/perf/parser-workers-20260917/$file" > "$RUNNER_TEMP/worker-tools/$file"
           done
+          git show "FETCH_HEAD:dev/perf/parser-worker-confirm-20260917/isolate.py" > "$RUNNER_TEMP/worker-tools/isolate.py"
           git show "FETCH_HEAD:dev/perf/import-transport-20260917/abba.mjs" > "$RUNNER_TEMP/worker-tools/base-abba.mjs"
           candidate=$(tr -d '[:space:]' < "$RUNNER_TEMP/worker-tools/confirm-trigger.txt")
           case "$candidate" in w3|w4) ;; *) exit 1;; esac
           printf '%s\n' "$candidate" > builds/parser-worker-confirm/candidate.txt
           python3 "$RUNNER_TEMP/worker-tools/prepare.py"
+          python3 "$RUNNER_TEMP/worker-tools/isolate.py" "$candidate"
           python3 "$RUNNER_TEMP/worker-tools/make-driver.py" "$RUNNER_TEMP/worker-tools/base-abba.mjs" "$RUNNER_TEMP/worker-tools/worker-abba.mjs"
           git add -N test/term-bank-parser-worker-policy.test.js
           git diff --check
