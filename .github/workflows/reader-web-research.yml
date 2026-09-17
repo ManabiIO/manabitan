@@ -8,47 +8,64 @@ concurrency:
   group: reader-web-research-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  source-inventory:
+  reader-baseline:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: e6f85c1fb8fec871eef76363ac0ba3c59aff78f7
-          path: manabitan
-          persist-credentials: false
       - uses: actions/checkout@v6
         with:
           repository: ttu-ttu/ebook-reader
           ref: 301aef4957c3cb22162276b11f4a47b35533faae
           path: reader
           persist-credentials: false
-      - name: Record exact source inputs (no credentials or font binaries)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install exact upstream package manager
+        run: npm install --global pnpm@12.3.4
+      - name: Audit and qualify baseline without rewriting its lockfile
+        working-directory: reader
+        shell: bash
+        run: |
+          mkdir -p ../evidence
+          node --version > ../evidence/node.txt
+          pnpm --version > ../evidence/pnpm.txt
+          git rev-parse HEAD > ../evidence/reader-head.txt
+          python3 - <<'PY'
+          import json, pathlib, subprocess
+          out = pathlib.Path('../evidence')
+          commands = {
+              'install': ['pnpm', 'install', '--frozen-lockfile', '--ignore-scripts'],
+              'audit': ['pnpm', 'audit', '--json'],
+              'sync': ['pnpm', '--dir', 'apps/web', 'exec', 'svelte-kit', 'sync'],
+              'types': ['pnpm', '--dir', 'apps/web', 'exec', 'svelte-check', '--tsconfig', './tsconfig.json'],
+              'build': ['pnpm', 'build'],
+              'lint': ['pnpm', 'exec', 'eslint', '.'],
+          }
+          receipts = {}
+          for name, command in commands.items():
+              try:
+                  result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=420)
+                  (out / (name + '.log')).write_text(result.stdout)
+                  receipts[name] = {'command': command, 'exitCode': result.returncode}
+              except subprocess.TimeoutExpired as error:
+                  (out / (name + '.log')).write_text(str(error.stdout))
+                  receipts[name] = {'command': command, 'timeout': True}
+              (out / 'results.json').write_text(json.dumps(receipts, indent=2) + '\n')
+          subprocess.run(['git', 'diff', '--exit-code'], check=True)
+          PY
+      - name: Record current compatible package and advisory inputs
+        if: always()
         shell: bash
         run: |
           mkdir -p evidence
-          python3 - <<'PY'
-          import hashlib, json, pathlib, subprocess, tarfile
-          evidence = pathlib.Path('evidence')
-          receipts = {}
-          for name in ('manabitan', 'reader'):
-              root = pathlib.Path(name)
-              sha = subprocess.check_output(['git', '-C', name, 'rev-parse', 'HEAD'], text=True).strip()
-              paths = subprocess.check_output(['git', '-C', name, 'ls-files', '-z']).decode().split('\0')
-              archive = evidence / (name + '-source.tar.gz')
-              with tarfile.open(archive, 'w:gz') as tar:
-                  for item in paths:
-                      if not item or pathlib.Path(item).suffix.lower() in {'.woff', '.woff2', '.ttf', '.otf', '.eot'}:
-                          continue
-                      path = root / item
-                      if path.is_file() and not path.is_symlink():
-                          tar.add(path, arcname=item, recursive=False)
-              receipts[name] = {'commit': sha, 'archiveSha256': hashlib.sha256(archive.read_bytes()).hexdigest(), 'fontBinariesOmitted': True}
-          (evidence / 'receipts.json').write_text(json.dumps(receipts, indent=2) + '\n')
-          PY
+          for p in dompurify svelte vite @sveltejs/kit @sveltejs/vite-plugin-svelte @zip.js/zip.js ua-parser-js; do
+            npm view "$p" version engines peerDependencies license --json >> evidence/registry.jsonl
+          done
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: reader-web-source-inventory
+          name: reader-baseline-qualification
           path: evidence/
-          retention-days: 7
+          retention-days: 14
           if-no-files-found: error
