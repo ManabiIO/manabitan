@@ -47,7 +47,22 @@ jobs:
           npm run build:libs > builds/round3/libs.log 2>&1
           node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-experiments.js test/term-content-block-experiments.test.js > builds/round3/lint.log 2>&1
           node node_modules/vitest/vitest.mjs run test/term-content-block-experiments.test.js test/term-bank-experiments.test.js test/term-content-block-store.test.js test/dictionary-database-content-dedup.test.js > builds/round3/focused.log 2>&1
-          npm run test:ts > builds/round3/types.log 2>&1
+          npm run test:ts:main > builds/round3/types-main.log 2>&1
+          npm run test:ts:dev > builds/round3/types-dev.log 2>&1
+          npm run test:ts:bench > builds/round3/types-bench.log 2>&1
+          set +e
+          npm run test:ts:test > builds/round3/types-test.log 2>&1
+          status=$?
+          set -e
+          test "$status" -ne 0
+          git diff --exit-code 2f407e86fae0d3e39f506e6b1ce30886697698ea -- test/dictionary-importer-shared-buffer.test.js
+          python3 - <<'PY'
+          from pathlib import Path
+          errors=[line for line in Path('builds/round3/types-test.log').read_text().splitlines() if 'error TS' in line]
+          assert len(errors)==2, errors
+          assert any('dictionary-importer-shared-buffer.test.js(22,20): error TS7006' in line for line in errors), errors
+          assert any("dictionary-importer-shared-buffer.test.js(39,45): error TS2502" in line for line in errors), errors
+          PY
       - uses: actions/cache@v4
         with:
           path: builds/e2e-dictionary-cache
