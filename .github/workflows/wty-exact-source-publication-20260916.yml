@@ -1,0 +1,142 @@
+name: WTY exact source replication and gated publication
+on:
+  push:
+    branches: [verify/wty-import-abba-20260916]
+    paths: [.github/workflows/wty-exact-source-publication-20260916.yml]
+permissions:
+  contents: write
+  actions: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - uses: actions/cache/restore@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-en-en-21b1b22-c0a1b7ee-v1
+      - uses: actions/download-artifact@v4
+        with:
+          name: wty-skip-final-qualification
+          run-id: 35165290411
+          github-token: ${{ github.token }}
+          path: builds/qualified-product
+      - uses: actions/download-artifact@v4
+        with:
+          name: wty-skip-confirmation
+          run-id: 35165090377
+          github-token: ${{ github.token }}
+          path: builds/prior-confirmation
+      - name: Apply only the exact qualified four-file product patch
+        run: |
+          mkdir -p "$RUNNER_TEMP/wty-final-tools" builds/wty-exact
+          cp dev/perf/wty-round2/run.mjs dev/perf/wty-round2/audit-final.py dev/perf/wty-abba-20260916/prepare.py "$RUNNER_TEMP/wty-final-tools/"
+          printf '%s\n' '7b84cde45284ef728dfa7f3c5133be8c35ac543c2020069fcd2c25be18ec70fb  builds/qualified-product/product.patch' '161167d70aea0d9fcfa5309938ac8145fe6559b531e57e4fc2dbef152f82411f  builds/qualified-product/product.sha256' '38f47c30b7135c589cda5316c0f4223488a0247e8c022b60b602054b211435ac  builds/qualified-product/COMPLETE' | sha256sum -c -
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          assert json.loads(Path('builds/prior-confirmation/gate.json').read_text())['confirmedWinner'] is True
+          s=json.loads(Path('builds/prior-confirmation/summary.json').read_text())
+          assert s['status']=='success' and len(s['observations'])==38
+          q=json.loads(Path('builds/qualified-product/parity/parity.json').read_text())
+          assert q['status']=='success' and q['rows']==1643040 and len(q['banks'])==67
+          assert all(b['baseline']['sha256']==b['candidate']['sha256'] and b['baseline']['profile']['fusedParseAttempts']==1 and b['candidate']['profile']['fusedParseAttempts']==0 for b in q['banks'])
+          r=json.loads(Path('builds/qualified-product/lifecycle.json').read_text())
+          assert r['status']=='success' and r['skippedVerification'] is False and len(r['phases'])==84
+          PY
+          git fetch --depth=1 origin f8f868903c4733f6017d479f65b9600a583bedb2
+          git checkout --detach FETCH_HEAD
+          git apply --index builds/qualified-product/product.patch
+          git diff --cached --check
+          python3 - <<'PY'
+          import subprocess
+          paths=subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines()
+          assert paths==['ext/js/dictionary/term-bank-experiments.js','ext/js/dictionary/term-bank-wasm-parser.js','test/term-bank-skip-fused-probe.test.js','types/ext/dictionary-importer.d.ts'],paths
+          PY
+          cp builds/qualified-product/product.patch builds/qualified-product/product.sha256 builds/wty-exact/
+      - name: Prepare pinned fixture and benchmark-only harness
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          tools=Path(os.environ['RUNNER_TEMP'])/'wty-final-tools'
+          p=tools/'prepare.py'
+          p.write_text(p.read_text().split('# Common correctness prerequisite')[0])
+          PY
+          python3 "$RUNNER_TEMP/wty-final-tools/prepare.py"
+          cp "$RUNNER_TEMP/wty-final-tools/run.mjs" dev/perf/wty-exact-replication.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('dev/perf/wty-exact-replication.mjs')
+          s=p.read_text()
+          old="from '../benchmark-support.js'"
+          assert s.count(old)==1
+          s=s.replace(old,"from './benchmark-support.js'")
+          s=s.replace("c0a1b7ee6fa1383a0a422361d2a8b7f826499fff plus the PR #50 shared token decoder fix", "f8f868903c4733f6017d479f65b9600a583bedb2 exact PR #50; candidate flag off/on")
+          p.write_text(s)
+          p=Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          s=p.read_text()
+          old="const {stdout} = await execFileAsync('unzip', ['-p', zipPath, banks[bankIndex]], {maxBuffer: 32 * 1024 * 1024});"
+          assert s.count(old)==1
+          p.write_text(s.replace(old,old.replace('32 * 1024','128 * 1024')))
+          PY
+      - run: npm ci
+      - name: Rebuild without rewriting product source; verify exact qualified hashes
+        run: |
+          npm run build:libs > builds/wty-exact/libs.log 2>&1
+          sha256sum -c builds/qualified-product/product.sha256
+          node dev/bin/build.js --target chrome-dev > builds/wty-exact/build.log 2>&1
+          npx playwright install --with-deps chromium
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Final exact-source twelve-pair BAAB replication with six A/A controls
+        env:
+          WTY_FLAGS: '{"experimentalSkipFusedProbe":true}'
+          WTY_BLOCKS: '6'
+          WTY_REVERSE: '1'
+          WTY_OUTPUT: builds/wty-exact
+        run: node dev/perf/wty-exact-replication.mjs 2>&1 | tee builds/wty-exact/run.log
+      - name: Recompute all raw observations and enforce unchanged publication gate
+        run: |
+          python3 "$RUNNER_TEMP/wty-final-tools/audit-final.py" builds/wty-exact
+          sha256sum -c builds/qualified-product/product.sha256
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          s=json.loads(Path('builds/wty-exact/summary.json').read_text())
+          for line in Path('builds/qualified-product/product.sha256').read_text().splitlines():
+              sha,path=line.split(maxsplit=1)
+              if path in s['inputs']: assert s['inputs'][path]==sha,(path,s['inputs'][path],sha)
+          PY
+      - name: Publish only the qualified product tree to a new non-force branch
+        run: |
+          git diff --cached --binary > builds/wty-exact/staged.patch
+          cmp builds/wty-exact/staged.patch builds/qualified-product/product.patch
+          git restore --worktree dev/perf/dictionary-fixtures.js test/chromium/extension-two-dictionary-import.e2e.js test/perf/dictionaries.lock.json
+          cp dev/perf/wty-exact-replication.mjs builds/wty-exact/driver.mjs
+          cp "$RUNNER_TEMP/wty-final-tools/audit-final.py" builds/wty-exact/audit-final.py
+          rm dev/perf/wty-exact-replication.mjs
+          git -c core.hooksPath=/dev/null -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'perf: allow bypassing discarded fused parser probes during import'
+          test -z "$(git status --porcelain)"
+          git push origin HEAD:refs/heads/perf/wty-skip-fused-probe-20260916
+          git rev-parse HEAD 'HEAD^{tree}' > builds/wty-exact/published.txt
+          git log -1 --format=fuller > builds/wty-exact/published-commit.txt
+      - name: Preserve raw results and source even on failure
+        if: always()
+        run: |
+          mkdir -p builds/wty-exact
+          cp "$RUNNER_TEMP/wty-final-tools/audit-final.py" builds/wty-exact/ || true
+          if test -f dev/perf/wty-exact-replication.mjs; then cp dev/perf/wty-exact-replication.mjs builds/wty-exact/driver.mjs; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wty-exact-source-replication
+          path: builds/wty-exact
+          retention-days: 30
