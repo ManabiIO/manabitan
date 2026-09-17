@@ -1,0 +1,83 @@
+name: Metadata arena alignment correction
+on:
+  push:
+    branches: [verify/import-shared-more-20260917]
+    paths: [.github/workflows/import-metadata-fix-20260917.yml]
+permissions:
+  contents: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      RECIPE_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 6896f54d13be0ba17fcf9345a9b6f29a04f88860
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - name: Retrieve only the regression and exact correction
+        run: |
+          mkdir -p builds/metadata-fix
+          git fetch --depth=1 origin "$RECIPE_SHA"
+          git show FETCH_HEAD:dev/perf/import-more-20260917/test-metadata-growth.js > test/term-bank-metadata-growth.test.js
+          git show FETCH_HEAD:dev/perf/import-more-20260917/fix-metadata.py > "$RUNNER_TEMP/fix-metadata.py"
+      - run: npm ci
+      - name: Reproduce all twelve odd-capacity failures on untouched native source
+        run: |
+          npm run build:libs > builds/metadata-fix/parent-libs.log 2>&1
+          cp ext/lib/term-bank-parser.wasm builds/metadata-fix/parent.wasm
+          set +e
+          node node_modules/vitest/vitest.mjs run test/term-bank-metadata-growth.test.js -t 'grows through odd row capacities' --reporter=json --outputFile=builds/metadata-fix/red.json > builds/metadata-fix/red.log 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('builds/metadata-fix/red.json').read_text())
+          assert r['numFailedTests']==12
+          failures=[a for t in r['testResults'] for a in t['assertionResults'] if a['status']=='failed']
+          assert all('grows through odd row capacities' in a['fullName'] for a in failures)
+          assert all('expected -2 to be' in '\n'.join(a['failureMessages']) for a in failures)
+          PY
+      - name: Correct aligned allocation arithmetic and run all qualification gates
+        run: |
+          python3 "$RUNNER_TEMP/fix-metadata.py"
+          npm run build:libs > builds/metadata-fix/libs.log 2>&1
+          node node_modules/eslint/bin/eslint.js test/term-bank-metadata-growth.test.js > builds/metadata-fix/lint.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/term-bank-metadata-growth.test.js test/term-bank-wasm-parser.test.js test/term-bank-experiments.test.js test/term-bank-inflater.test.js > builds/metadata-fix/focused.log 2>&1
+          npm run test:unit > builds/metadata-fix/unit.log 2>&1
+          npm run test:unit:options > builds/metadata-fix/options.log 2>&1
+          npm run test:ts > builds/metadata-fix/types.log 2>&1
+          npm run test:build > builds/metadata-fix/build-plans.log 2>&1
+          node dev/bin/build.js --target chrome-dev > builds/metadata-fix/chrome-build.log 2>&1
+          node dev/bin/build.js --target firefox-dev > builds/metadata-fix/firefox-build.log 2>&1
+          git diff --check
+      - name: Publish only the two-file correctness branch, never a production ref
+        run: |
+          git add ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-metadata-growth.test.js
+          test "$(git diff --cached --name-only | wc -l)" -eq 2
+          git -c user.name='Manabitan contributors' -c user.email='contributors@manabi.io' commit -m 'fix: align metadata slab capacity when growing the parser arena'
+          git push origin HEAD:refs/heads/fix/term-metadata-aligned-growth-20260917
+          git rev-parse HEAD 'HEAD^{tree}' > builds/metadata-fix/published.txt
+          echo QUALIFIED > builds/metadata-fix/complete.txt
+      - name: Retain failure-first evidence and exact source
+        if: always()
+        run: |
+          mkdir -p builds/metadata-fix/source
+          git diff 6896f54d13be0ba17fcf9345a9b6f29a04f88860 -- ext/js/dictionary/wasm/term-bank-parser.c > builds/metadata-fix/native.patch
+          cp ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-metadata-growth.test.js ext/lib/term-bank-parser.wasm builds/metadata-fix/source/ 2>/dev/null || true
+          sha256sum ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-metadata-growth.test.js ext/lib/term-bank-parser.wasm > builds/metadata-fix/qualified.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: metadata-alignment-fix
+          path: builds/metadata-fix
+          retention-days: 30
