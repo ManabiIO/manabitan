@@ -1,0 +1,60 @@
+name: WTY skip-fused-probe screen
+on:
+  push:
+    branches: [verify/wty-import-abba-20260916]
+    paths: [.github/workflows/wty-skip-probe-screen-20260916.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - uses: actions/cache/restore@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-en-en-21b1b22-c0a1b7ee-v1
+      - name: Prepare one repaired baseline with only the new flag
+        run: |
+          mkdir -p builds/wty-skip-screen
+          python3 dev/perf/wty-abba-20260916/prepare.py
+          python3 dev/perf/wty-round2/apply-skip.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          s=p.read_text()
+          old="const {stdout} = await execFileAsync('unzip', ['-p', zipPath, banks[bankIndex]], {maxBuffer: 32 * 1024 * 1024});"
+          assert s.count(old)==1
+          p.write_text(s.replace(old,old.replace('32 * 1024','128 * 1024')))
+          PY
+          git diff --check
+          git diff > builds/wty-skip-screen/source.patch
+      - run: npm ci
+      - name: Build exact source and browser
+        run: |
+          npm run build:libs > builds/wty-skip-screen/libs.log 2>&1
+          node dev/bin/build.js --target chrome-dev > builds/wty-skip-screen/build.log 2>&1
+          npx playwright install --with-deps chromium
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+      - name: Four adjacent pairs plus same-binary controls
+        env:
+          WTY_FLAGS: '{"experimentalSkipFusedProbe":true}'
+          WTY_BLOCKS: '2'
+          WTY_OUTPUT: builds/wty-skip-screen
+        run: node dev/perf/wty-round2/run.mjs 2>&1 | tee builds/wty-skip-screen/run.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wty-skip-probe-screen
+          path: builds/wty-skip-screen
+          retention-days: 30
