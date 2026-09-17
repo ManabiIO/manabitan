@@ -543,3 +543,33 @@ describe('actual parser worker flag propagation', () => {
         } finally { await worker.terminate() }
     })
 })
+
+
+describe('full-buffer inflation experiment', () => {
+    test.each(['experimentalLibdeflate'])('defaults off and requires literal true: %s', (key) => {
+        const name = /** @type {keyof Experiments} */ (key)
+        expect(snapshotTermBankExperiments()[name]).toBe(false)
+        for (const value of [false, 0, 1, null, undefined, 'true', {}]) {
+            const options = /** @type {Experiments} */ (/** @type {unknown} */ ({[name]: value}))
+            expect(snapshotTermBankExperiments(options)[name]).toBe(false)
+        }
+        expect(snapshotTermBankExperiments({[name]: true})[name]).toBe(true)
+    })
+    test.each([false, true])('preserves exact keys, content, hints and hashes with spans=%s', async (experimentalTermBankSpans) => {
+        const sources = [JSON.stringify([row('日本語', [{type: 'structured-content', content: {tag: 'div', content: 'long'.repeat(4096)}}])]), JSON.stringify([row('tail'), row('duplicate')])]
+        const baseline = await parse(sources, {experimentalTermBankSpans}, true)
+        for (const enabled of [false, true, true, false]) {
+            const candidate = await parse(sources, {experimentalLibdeflate: enabled, experimentalTermBankSpans}, true)
+            expect(candidate.rows).toEqual(baseline.rows)
+        }
+    })
+    test.each([false, true])('rejects corrupt compressed sources and recovers, spans=%s', async (experimentalTermBankSpans) => {
+        const source = compressed(JSON.stringify([row('validated')]), 8)
+        const flags = {experimentalLibdeflate: true, experimentalTermBankSpans}
+        await expect(inflateCompressedTermBankSourcesWasm([{...source, signature: (source.signature ^ 1) >>> 0}], flags)).rejects.toThrow()
+        await expect(inflateCompressedTermBankSourcesWasm([{...source, bytes: source.bytes.subarray(0, -1), compressedSize: source.compressedSize - 1}], flags)).rejects.toThrow()
+        await expect(inflateCompressedTermBankSourcesWasm([{...source, uncompressedSize: source.uncompressedSize - 1}], flags)).rejects.toThrow()
+        const sources = [JSON.stringify([row('after failure')]), JSON.stringify([row('second bank')])]
+        expect((await parse(sources, flags, true)).rows).toEqual((await parse(sources, {experimentalTermBankSpans}, true)).rows)
+    })
+})

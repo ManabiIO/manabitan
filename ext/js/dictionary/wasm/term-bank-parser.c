@@ -54,8 +54,16 @@ void* memcpy(void* dest, const void* source, unsigned long count) {
     return dest;
 }
 
-int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length,
-                          uint8_t* output, uint32_t output_length);
+#define MINIZ_NO_MALLOC
+#define MINIZ_NO_STDIO
+#define MINIZ_NO_TIME
+#define MINIZ_NO_ARCHIVE_APIS
+#define MINIZ_NO_DEFLATE_APIS
+#define MINIZ_LITTLE_ENDIAN 1
+#define MINIZ_USE_UNALIGNED_LOADS_AND_STORES 1
+#include "vendor/miniz/miniz_tinfl.c"
+
+int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length, uint8_t* output, uint32_t output_length);
 
 static uint32_t crc32_table[8][256];
 static uint32_t crc32_table_initialized = 0u;
@@ -125,7 +133,8 @@ int32_t inflate_and_join_term_banks(
     uint32_t source_count,
     uint32_t output_ptr,
     uint32_t output_capacity,
-    uint32_t bank_spans_ptr
+    uint32_t bank_spans_ptr,
+    uint32_t use_libdeflate
 ) {
     if (source_count == 0u || output_capacity < 2u) {
         return -1;
@@ -159,11 +168,32 @@ int32_t inflate_and_join_term_banks(
                 return -3;
             }
             memcpy(inflated, input + input_offset, uncompressed_length);
-        } else if (compression_methods[i] == 8u) {
-            const int32_t status = term_bank_inflate(
-                input + input_offset, compressed_length, inflated, uncompressed_length
-            );
+        } else if (compression_methods[i] == 8u && use_libdeflate == 1u) {
+            const int32_t status = term_bank_inflate(input + input_offset, compressed_length, inflated, uncompressed_length);
             if (status != 0) { return status; }
+        } else if (compression_methods[i] == 8u) {
+            tinfl_decompressor decompressor;
+            tinfl_init(&decompressor);
+            size_t consumed = compressed_length;
+            size_t produced = uncompressed_length;
+            const tinfl_status status = tinfl_decompress(
+                &decompressor,
+                input + input_offset,
+                &consumed,
+                inflated,
+                inflated,
+                &produced,
+                TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF
+            );
+            if (status != TINFL_STATUS_DONE) {
+                return -2;
+            }
+            if (produced != uncompressed_length) {
+                return -3;
+            }
+            if (consumed != compressed_length) {
+                return -6;
+            }
         } else {
             return -1;
         }
@@ -197,8 +227,10 @@ int32_t inflate_and_join_term_banks(
         if (nonempty_sources > 0u) {
             output[cursor++] = ',';
         }
-        for (uint32_t j = 0u; j < content_length; ++j) {
-            output[cursor + j] = inflated[start + j];
+        /* The interiors can overlap while shifting left. Later compact banks
+         * are already in place after the comma replaces their opening bracket. */
+        if (output + cursor != inflated + start) {
+            __builtin_memmove(output + cursor, inflated + start, content_length);
         }
         cursor += content_length;
         ++nonempty_sources;
@@ -366,18 +398,21 @@ static int is_hex_digit(uint8_t value) {
         (value >= 'A' && value <= 'F');
 }
 
-static int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+static __attribute__((always_inline)) inline int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
     if (start >= len || src[start] != '"') { return 0; }
     uint32_t i = start + 1u;
     while (i < len) {
         while (i + 8u <= len) {
             uint64_t word;
             __builtin_memcpy(&word, src + i, sizeof(word));
-            if (
-                has_zero_byte64(word ^ UINT64_C(0x2222222222222222)) != 0u ||
-                has_zero_byte64(word ^ UINT64_C(0x5c5c5c5c5c5c5c5c)) != 0u ||
-                has_control_byte64(word) != 0u
-            ) {
+            const uint64_t special =
+                has_zero_byte64(word ^ UINT64_C(0x2222222222222222)) |
+                has_zero_byte64(word ^ UINT64_C(0x5c5c5c5c5c5c5c5c)) |
+                has_control_byte64(word);
+            if (special != 0u) {
+                // On little-endian WASM the first marked byte is exact, even
+                // when subtraction borrows mark a later byte spuriously.
+                i += (uint32_t)__builtin_ctzll(special) / 8u;
                 break;
             }
             i += 8u;

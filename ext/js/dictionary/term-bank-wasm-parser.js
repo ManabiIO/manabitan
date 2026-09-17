@@ -242,6 +242,7 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
         outputPtr,
         outputCapacity,
         bankSpansPtr,
+        experiments.experimentalLibdeflate ? 1 : 0,
     );
     const inflateMs = Math.max(0, safePerformance.now() - startedAt);
     if (jsonLength < 0) {
@@ -346,6 +347,17 @@ function isJsonWhitespace(value) {
 }
 
 /**
+ * TextDecoder does not accept SharedArrayBuffer-backed views in browsers.
+ * Parser memory stays stable during these synchronous projections. Copy only
+ * the requested token, never the entire shared heap or source bank.
+ * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+function decodeParserText(bytes) {
+    return textDecoder.decode(bytes.buffer instanceof ArrayBuffer ? bytes : Uint8Array.from(bytes));
+}
+
+/**
  * @param {Uint8Array} source
  * @param {number} start
  * @param {number} length
@@ -362,9 +374,9 @@ function decodeJsonStringToken(source, start, length) {
     const valueEnd = start + length - 1;
     const valueBytes = source.subarray(valueStart, valueEnd);
     if (!valueBytes.includes(U8_BACKSLASH)) {
-        return textDecoder.decode(valueBytes);
+        return decodeParserText(valueBytes);
     }
-    const quoted = textDecoder.decode(source.subarray(start, start + length));
+    const quoted = decodeParserText(source.subarray(start, start + length));
     return /** @type {string} */ (parseJson(quoted));
 }
 
@@ -418,7 +430,7 @@ function isEmptyJsonStringToken(source, start, length) {
  */
 function decodeRawToken(source, start, length) {
     if (length <= 0) { return ''; }
-    return textDecoder.decode(source.subarray(start, start + length));
+    return decodeParserText(source.subarray(start, start + length));
 }
 
 /**
