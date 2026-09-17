@@ -1,0 +1,54 @@
+name: Reader web qualification research
+on:
+  push:
+    branches: [research/reader-web-qualification-20260917]
+permissions:
+  contents: read
+concurrency:
+  group: reader-web-research-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: e6f85c1fb8fec871eef76363ac0ba3c59aff78f7
+          path: manabitan
+          persist-credentials: false
+      - uses: actions/checkout@v6
+        with:
+          repository: ttu-ttu/ebook-reader
+          ref: 301aef4957c3cb22162276b11f4a47b35533faae
+          path: reader
+          persist-credentials: false
+      - name: Record exact source inputs (no credentials or font binaries)
+        shell: bash
+        run: |
+          mkdir -p evidence
+          python3 - <<'PY'
+          import hashlib, json, pathlib, subprocess, tarfile
+          evidence = pathlib.Path('evidence')
+          receipts = {}
+          for name in ('manabitan', 'reader'):
+              root = pathlib.Path(name)
+              sha = subprocess.check_output(['git', '-C', name, 'rev-parse', 'HEAD'], text=True).strip()
+              paths = subprocess.check_output(['git', '-C', name, 'ls-files', '-z']).decode().split('\0')
+              archive = evidence / (name + '-source.tar.gz')
+              with tarfile.open(archive, 'w:gz') as tar:
+                  for item in paths:
+                      if not item or pathlib.Path(item).suffix.lower() in {'.woff', '.woff2', '.ttf', '.otf', '.eot'}:
+                          continue
+                      path = root / item
+                      if path.is_file() and not path.is_symlink():
+                          tar.add(path, arcname=item, recursive=False)
+              receipts[name] = {'commit': sha, 'archiveSha256': hashlib.sha256(archive.read_bytes()).hexdigest(), 'fontBinariesOmitted': True}
+          (evidence / 'receipts.json').write_text(json.dumps(receipts, indent=2) + '\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reader-web-source-inventory
+          path: evidence/
+          retention-days: 7
+          if-no-files-found: error
