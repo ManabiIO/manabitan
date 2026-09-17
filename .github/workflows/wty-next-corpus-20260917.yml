@@ -1,0 +1,66 @@
+name: WTY complete grouped-source parity
+on:
+  push:
+    branches: [verify/wty-next-20260917]
+    paths: [.github/workflows/wty-next-corpus-20260917.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  corpus:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - name: Prepare and build the exact candidate family
+        run: |
+          mkdir -p builds/wty-corpus-evidence
+          git fetch --depth=1 origin f8f868903c4733f6017d479f65b9600a583bedb2
+          git show FETCH_HEAD:ext/js/dictionary/term-bank-wasm-parser.js > ext/js/dictionary/term-bank-wasm-parser.js
+          python3 dev/perf/wty-next-20260917/prepare-candidates.py
+          npm run build:libs
+          node node_modules/eslint/bin/eslint.js --fix ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-experiments.test.js
+          npm run build:libs
+          sha256sum ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/wasm/term-bank-parser.c ext/lib/term-bank-parser.wasm > builds/wty-corpus-evidence/sources.sha256
+      - uses: actions/cache@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-next-fixtures-b9603db-v1
+      - name: Check the complete pinned archive
+        run: |
+          git fetch --depth=1 origin 9c843c8a0e06190948ae0d52c29094a45a2555f1
+          git show FETCH_HEAD:dev/perf/wty-abba-20260916/prepare.py > "$RUNNER_TEMP/wty-prepare-original.py"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path(os.environ['RUNNER_TEMP'])
+          (p/'wty-prepare.py').write_text((p/'wty-prepare-original.py').read_text().split('# Common correctness prerequisite')[0])
+          PY
+          python3 "$RUNNER_TEMP/wty-prepare.py" > builds/wty-corpus-evidence/fixture.log
+      - name: Compare every row, hash, hint and content byte in both source layouts
+        run: |
+          node dev/perf/wty-next-20260917/corpus-parity.mjs '{"experimentalRetainedFusedFallback":true}' builds/wty-corpus-retain > builds/wty-corpus-evidence/retain.log 2>&1
+          node dev/perf/wty-next-20260917/corpus-parity.mjs '{"experimentalKnownObjectKeys":true,"experimentalRetainedFusedFallback":true}' builds/wty-corpus-combined > builds/wty-corpus-evidence/combined.log 2>&1
+      - name: Preserve only code and verification evidence, not dictionary payloads
+        if: always()
+        run: |
+          mkdir -p builds/wty-corpus-evidence
+          cp builds/wty-corpus-retain/parity.json builds/wty-corpus-evidence/retain-parity.json 2>/dev/null || true
+          cp builds/wty-corpus-combined/parity.json builds/wty-corpus-evidence/combined-parity.json 2>/dev/null || true
+          cp dev/perf/wty-next-20260917/corpus-parity.mjs builds/wty-corpus-evidence/
+          git diff -- ext/js types/ext test/term-bank-experiments.test.js > builds/wty-corpus-evidence/source.patch
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wty-next-corpus
+          path: builds/wty-corpus-evidence
+          retention-days: 30
