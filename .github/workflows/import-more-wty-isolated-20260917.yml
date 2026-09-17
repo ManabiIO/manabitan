@@ -1,0 +1,100 @@
+name: WTY independent parser group screens
+on:
+  push:
+    branches: [verify/import-shared-more-20260917]
+    paths: [.github/workflows/import-more-wty-isolated-20260917.yml]
+permissions:
+  contents: read
+  actions: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        size: [16, 48]
+    env:
+      MORE_DICTIONARY: wty-en-en
+      MORE_OUTPUT: builds/wty-group
+      GROUP_SIZE: ${{ matrix.size }}
+      FIXTURE_RECIPE_SHA: 9c843c8a0e06190948ae0d52c29094a45a2555f1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 6896f54d13be0ba17fcf9345a9b6f29a04f88860
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 35220497857
+          name: group-screen-wty-en-en
+          path: ${{ runner.temp }}/group-source
+      - name: Reuse identical runtime source without the failed 32 MiB candidate in this plan
+        run: |
+          mkdir -p builds/wty-group
+          git apply --check "$RUNNER_TEMP/group-source/candidate.patch"
+          git apply "$RUNNER_TEMP/group-source/candidate.patch"
+          git add -N ext/js/dictionary/term-bank-group-policy.js test/term-bank-group-policy.test.js
+          git diff --check
+      - run: npm ci
+      - name: Build and recheck policy tests
+        run: |
+          npm run build:libs > builds/wty-group/libs.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/term-bank-group-policy.test.js test/term-bank-wasm-parser.test.js > builds/wty-group/focused.log 2>&1
+      - uses: actions/cache@v4
+        with:
+          path: builds/e2e-dictionary-cache
+          key: wty-next-fixtures-b9603db-v1
+      - name: Restore the immutable complete-dictionary harness
+        run: |
+          git fetch --depth=1 origin "$FIXTURE_RECIPE_SHA"
+          git show FETCH_HEAD:dev/perf/wty-abba-20260916/prepare.py > "$RUNNER_TEMP/fixture-original.py"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path(os.environ['RUNNER_TEMP'])
+          (p/'fixture.py').write_text((p/'fixture-original.py').read_text().split('# Common correctness prerequisite')[0])
+          h=Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          text=h.read_text(); assert text.count('maxBuffer: 32 * 1024 * 1024')==2
+          h.write_text(text.replace('maxBuffer: 32 * 1024 * 1024','maxBuffer: 256 * 1024 * 1024'))
+          PY
+          python3 "$RUNNER_TEMP/fixture.py" > builds/wty-group/fixture.log
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+          node dev/bin/build.js --target chrome-dev > builds/wty-group/chrome-build.log 2>&1
+          npx playwright install --with-deps chromium
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'group-source'
+          s=json.loads((p/'summary.json').read_text())
+          for name,digest in s['identities'].items():
+              if name=='builds/manabitan-chrome-dev.zip':continue
+              assert hashlib.sha256(Path(name).read_bytes()).hexdigest()==digest,name
+          PY
+      - name: New fixed-plan ABBA cohort with the original checks
+        run: node "$RUNNER_TEMP/group-source/source/abba.mjs" "control,g$GROUP_SIZE" 2 | tee builds/wty-group/abba.log
+      - name: Compare every ordered row and borrowed-content lifetime
+        run: |
+          node "$RUNNER_TEMP/group-source/source/corpus.mjs" wty-en-en builds/wty-group-corpus "$GROUP_SIZE" > builds/wty-group/corpus.log 2>&1
+          cp builds/wty-group-corpus/parity.json builds/wty-group/corpus-parity.json
+      - name: Preserve every result or failed preflight without trimming or retrying
+        if: always()
+        run: |
+          mkdir -p builds/wty-group/source
+          cp "$RUNNER_TEMP/group-source/source/abba.mjs" "$RUNNER_TEMP/group-source/source/corpus.mjs" builds/wty-group/source/
+          cp "$RUNNER_TEMP/group-source/candidate.patch" builds/wty-group/
+          cp builds/wty-group-corpus/parity.json builds/wty-group/corpus-parity.json 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wty-group-${{ matrix.size }}
+          path: builds/wty-group
+          retention-days: 30
