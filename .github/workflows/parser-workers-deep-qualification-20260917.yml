@@ -66,7 +66,8 @@ jobs:
           git show FETCH_HEAD:dev/perf/import-more-20260917/corpus.mjs > "$RUNNER_TEMP/group-corpus.mjs"
           python3 - <<'PY'
           from pathlib import Path
-          src=Path(__import__('os').environ['RUNNER_TEMP'])/'group-corpus.mjs'
+          import os
+          src=Path(os.environ['RUNNER_TEMP'])/'group-corpus.mjs'
           s=src.read_text()
           old="const sizes = (process.argv[4] ?? '16,32,48').split(',').map(Number)\nassert.ok(sizes.length && sizes.every(n => [16, 32, 48].includes(n)))"
           new="const sizes = [3]\nassert.deepEqual(sizes, [3])"
@@ -76,6 +77,12 @@ jobs:
           assert s.count(old)==1; s=s.replace(old,new)
           old="assert.notEqual(candidate.profile.parallelGroupCount, baseline.profile.parallelGroupCount, 'Grouping experiment must change actual group boundaries')"
           new="assert.equal(baseline.profile.parallelWorkerCount, 2); assert.equal(candidate.profile.parallelWorkerCount, 3)"
+          assert s.count(old)==1; s=s.replace(old,new)
+          old="        const baseline = await digest({}, spans)\n"
+          new="        const baseline = await digest({}, spans)\n        await parser.disposeParallelTermBankParser()\n"
+          assert s.count(old)==1; s=s.replace(old,new)
+          old="            const candidate = await digest(flags, spans)\n"
+          new="            const candidate = await digest(flags, spans)\n            await parser.disposeParallelTermBankParser()\n"
           assert s.count(old)==1; s=s.replace(old,new)
           src.write_text(s)
           PY
