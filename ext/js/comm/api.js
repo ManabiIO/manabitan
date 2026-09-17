@@ -433,10 +433,11 @@ export class API {
 
     /**
      * @param {import('api').ApiParam<'setDictionaryImportMode', 'active'>} active
+     * @param {import('api').ApiParam<'setDictionaryImportMode', 'cancelActiveImport'>} [cancelActiveImport=true]
      * @returns {Promise<import('api').ApiReturn<'setDictionaryImportMode'>>}
      */
-    setDictionaryImportMode(active) {
-        return this._invoke('setDictionaryImportMode', {active});
+    setDictionaryImportMode(active, cancelActiveImport = true) {
+        return this._invoke('setDictionaryImportMode', {active, cancelActiveImport});
     }
 
     /**
