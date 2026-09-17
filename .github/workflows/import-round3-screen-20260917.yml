@@ -2,7 +2,9 @@ name: Shared import round 3 screen
 on:
   push:
     branches: [verify/import-shared-round3-20260917]
-    paths: [.github/workflows/import-round3-screen-20260917.yml]
+    paths:
+      - .github/workflows/import-round3-screen-20260917.yml
+      - dev/perf/import-round3-20260917/**
 permissions:
   contents: read
 defaults:
