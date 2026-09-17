@@ -35,14 +35,20 @@ jobs:
           import base64,gzip,hashlib,subprocess
           from pathlib import Path
           text=Path('dev/perf/three-dictionary-20260917/candidates.patch.gz.b64').read_text()
-          # Correct a duplicated three-character transport fragment; exact decoded
-          # source checksum is mandatory and rejects every other alteration.
           text=text.replace('h2Obf6Hf6H+', 'h2Obf6H+')
           patch=gzip.decompress(base64.b64decode(text,validate=False))
           assert hashlib.sha256(patch).hexdigest()=='c2f362dbe7512af4723c73a499a8a6c0548c8d8ba98750abead38cd711ddba0f'
           Path('builds/three-screen/experiments.patch').write_bytes(patch)
           subprocess.run(['git','apply','--check','builds/three-screen/experiments.patch'],check=True)
           subprocess.run(['git','apply','builds/three-screen/experiments.patch'],check=True)
+          # The generated browser wrapper cannot fetch a filesystem path in Node.
+          # Supply the identical compiled Zstd bytes as a data URL, with no runtime
+          # source alteration or changed assertion.
+          p=Path('dev/perf/three-dictionary-20260917/check.mjs')
+          text=p.read_text()
+          old="await zstd.init(path.join(root, 'ext/lib/zstd.wasm'))"
+          assert text.count(old)==1
+          p.write_text(text.replace(old,"await zstd.init('data:application/wasm;base64,' + readFileSync('dev/data/zstd-simd.wasm').toString('base64'))"))
           PY
           git fetch --depth=1 origin 726c5b7444a1b3c131c90de356f8261ac2fe65a2
           git restore --source=FETCH_HEAD -- ext/js/dictionary/wasm/term-bank-inflate.c ext/js/dictionary/wasm/vendor/libdeflate
