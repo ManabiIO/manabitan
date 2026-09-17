@@ -242,6 +242,7 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
         outputPtr,
         outputCapacity,
         bankSpansPtr,
+        experiments.experimentalLibdeflate ? 1 : 0,
     );
     const inflateMs = Math.max(0, safePerformance.now() - startedAt);
     if (jsonLength < 0) {

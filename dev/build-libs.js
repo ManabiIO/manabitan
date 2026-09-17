@@ -227,7 +227,7 @@ async function buildDictionaryWasm(out) {
         for (const exportName of target.exports) {
             args.push(`-Wl,--export=${exportName}`);
         }
-        args.push('-Wl,--strip-all', '-o', target.outputPath, target.sourcePath);
+        args.push('-Wl,--strip-all', '-o', target.outputPath, target.sourcePath, path.join(extDir, 'js', 'dictionary', 'wasm', 'term-bank-inflate.c'));
         execFileSync(compiler.command, [...(compiler.args ?? []), ...args], {stdio: 'inherit'});
     }
 }

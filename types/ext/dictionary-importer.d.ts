@@ -52,6 +52,7 @@ export type ImportPhaseTiming = {
 
 /** Experimental parser paths; absent and non-true runtime values remain off. */
 export type ImportExperiments = {
+    experimentalLibdeflate?: boolean;
     experimentalLookupScratchReuse?: boolean;
     experimentalNativeSegmentedLookup?: boolean;
     experimentalDirectLookupArena?: boolean;

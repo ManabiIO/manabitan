@@ -63,6 +63,8 @@ void* memcpy(void* dest, const void* source, unsigned long count) {
 #define MINIZ_USE_UNALIGNED_LOADS_AND_STORES 1
 #include "vendor/miniz/miniz_tinfl.c"
 
+int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length, uint8_t* output, uint32_t output_length);
+
 static uint32_t crc32_table[8][256];
 static uint32_t crc32_table_initialized = 0u;
 
@@ -131,7 +133,8 @@ int32_t inflate_and_join_term_banks(
     uint32_t source_count,
     uint32_t output_ptr,
     uint32_t output_capacity,
-    uint32_t bank_spans_ptr
+    uint32_t bank_spans_ptr,
+    uint32_t use_libdeflate
 ) {
     if (source_count == 0u || output_capacity < 2u) {
         return -1;
@@ -165,6 +168,9 @@ int32_t inflate_and_join_term_banks(
                 return -3;
             }
             memcpy(inflated, input + input_offset, uncompressed_length);
+        } else if (compression_methods[i] == 8u && use_libdeflate == 1u) {
+            const int32_t status = term_bank_inflate(input + input_offset, compressed_length, inflated, uncompressed_length);
+            if (status != 0) { return status; }
         } else if (compression_methods[i] == 8u) {
             tinfl_decompressor decompressor;
             tinfl_init(&decompressor);
