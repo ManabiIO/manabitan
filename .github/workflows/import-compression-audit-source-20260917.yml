@@ -1,0 +1,33 @@
+name: Compression source audit
+on:
+  push:
+    branches: [verify/import-transport-compression-20260917]
+    paths: [.github/workflows/import-compression-audit-source-20260917.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: f00b61bb2d851024f4124f1d854502ba602b506d
+          persist-credentials: false
+      - name: Preserve exact recipes and completed run inventory
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/compression-audit
+          git archive --format=tar.gz HEAD dev/perf/import-transport-20260917 .github/workflows > /tmp/compression-audit/recipes.tar.gz
+          gh api 'repos/ManabiIO/manabitan/actions/runs?branch=verify%2Fimport-transport-compression-20260917&per_page=100' --jq '[.workflow_runs[] | {id,name,status,conclusion,head_sha,path}]' > /tmp/compression-audit/runs.json
+          gh api repos/ManabiIO/manabitan/branches/develop --jq '{sha:.commit.sha,tree:.commit.commit.tree.sha}' > /tmp/compression-audit/develop.json
+          git fetch --depth=1 origin 8cd1a7e41ac172a015a0e9b8b8b94f522d41b424
+          git archive --format=tar.gz FETCH_HEAD > /tmp/compression-audit/repaired-base.tar.gz
+          cat /tmp/compression-audit/runs.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compression-source-audit
+          path: /tmp/compression-audit
+          retention-days: 30
