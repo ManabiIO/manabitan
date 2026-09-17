@@ -3,7 +3,7 @@ on:
   push:
     branches: [verify/import-transport-compression-20260917]
     paths:
-      - dev/perf/parser-workers-20260917/confirm-trigger.txt
+      - dev/perf/parser-worker-confirm-20260917/trigger.txt
 permissions:
   contents: read
 defaults:
@@ -28,11 +28,12 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/worker-tools" builds/parser-worker-qualification
           git fetch --depth=1 origin "$RECIPE_SHA"
-          for file in prepare.py make-driver.py confirm-trigger.txt; do
+          for file in prepare.py make-driver.py; do
             git show "FETCH_HEAD:dev/perf/parser-workers-20260917/$file" > "$RUNNER_TEMP/worker-tools/$file"
           done
           git show "FETCH_HEAD:dev/perf/parser-worker-confirm-20260917/isolate.py" > "$RUNNER_TEMP/worker-tools/isolate.py"
-          candidate=$(tr -d '[:space:]' < "$RUNNER_TEMP/worker-tools/confirm-trigger.txt")
+          git show "FETCH_HEAD:dev/perf/parser-worker-confirm-20260917/trigger.txt" > "$RUNNER_TEMP/worker-tools/trigger.txt"
+          candidate=$(tr -d '[:space:]' < "$RUNNER_TEMP/worker-tools/trigger.txt")
           case "$candidate" in w3|w4) ;; *) echo "invalid candidate: $candidate" >&2; exit 1;; esac
           printf '%s\n' "$candidate" > builds/parser-worker-qualification/candidate.txt
           python3 "$RUNNER_TEMP/worker-tools/prepare.py"
@@ -109,12 +110,13 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/worker-tools" builds/parser-worker-confirm
           git fetch --depth=1 origin "$RECIPE_SHA"
-          for file in prepare.py make-driver.py confirm-trigger.txt; do
+          for file in prepare.py make-driver.py; do
             git show "FETCH_HEAD:dev/perf/parser-workers-20260917/$file" > "$RUNNER_TEMP/worker-tools/$file"
           done
           git show "FETCH_HEAD:dev/perf/parser-worker-confirm-20260917/isolate.py" > "$RUNNER_TEMP/worker-tools/isolate.py"
+          git show "FETCH_HEAD:dev/perf/parser-worker-confirm-20260917/trigger.txt" > "$RUNNER_TEMP/worker-tools/trigger.txt"
           git show "FETCH_HEAD:dev/perf/import-transport-20260917/abba.mjs" > "$RUNNER_TEMP/worker-tools/base-abba.mjs"
-          candidate=$(tr -d '[:space:]' < "$RUNNER_TEMP/worker-tools/confirm-trigger.txt")
+          candidate=$(tr -d '[:space:]' < "$RUNNER_TEMP/worker-tools/trigger.txt")
           case "$candidate" in w3|w4) ;; *) exit 1;; esac
           printf '%s\n' "$candidate" > builds/parser-worker-confirm/candidate.txt
           python3 "$RUNNER_TEMP/worker-tools/prepare.py"
