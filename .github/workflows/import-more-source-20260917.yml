@@ -17,7 +17,7 @@ jobs:
       - run: |
           mkdir -p /tmp/import-more-source
           git archive --format=tar.gz HEAD > /tmp/import-more-source/baseline.tar.gz
-          git rev-parse HEAD HEAD^{tree} > /tmp/import-more-source/identity.txt
+          git rev-parse HEAD 'HEAD^{tree}' > /tmp/import-more-source/identity.txt
       - uses: actions/upload-artifact@v4
         with:
           name: import-more-baseline-source
