@@ -42,10 +42,13 @@ function parseGlossary(glossary, hints = true) {
     const output = parser.wasm_alloc(17 * 4)
     new Uint8Array(parser.memory.buffer, input, bytes.length).set(bytes)
     const count = (hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank)(input, bytes.length, output, 1)
-    return {count, metadata: Array.from(new Uint32Array(parser.memory.buffer, output, 17))}
+    return {count, metadata: [...new Uint32Array(parser.memory.buffer, output, 17)]}
 }
 
-/** @param {number} depth */
+/**
+ * @param {number} depth
+ * @returns {string}
+ */
 function nested(depth) {
     let value = '0'
     for (let i = 0; i < depth; ++i) { value = i % 2 === 0 ? `[${value}]` : `{"k":${value}}` }
@@ -54,28 +57,62 @@ function nested(depth) {
 
 describe('composite parser state transitions', () => {
     test.each([
-        '[]', '{}', '[[]]', '[{}]', '{"k":[]}', '{"k":{}}',
+        '[]',
+        '{}',
+        '[[]]',
+        '[{}]',
+        '{"k":[]}',
+        '{"k":{}}',
         '[0,true,false,null,"",[],{}]',
         '{"a":0,"b":true,"c":null,"d":"","e":[],"f":{}}',
         '[{"a":[[],{},[1,2]],"b":{"c":false}},3,"last"]',
-        '["commas, colons: and brackets [{]} inside strings","\\\"\\\\\\n\\u1234"]',
+        '["commas, colons: and brackets [{]} inside strings","\\"\\\\\\n\\u1234"]',
         '[ -1, 1.25, 1e+3, -0.25e-2 ]',
-        nested(1), nested(2), nested(255), nested(256),
+        nested(1),
+        nested(2),
+        nested(255),
+        nested(256),
     ])('accepts complete container states: %s', (glossary) => {
         expect(parseGlossary(glossary).count).toBe(1)
         expect(parseGlossary(glossary, false).count).toBe(1)
     })
 
     test.each([
-        '[}', '{]', '[,]', '{,}', '[1,]', '{"k":0,}',
-        '[1 2]', '["a" "b"]', '[[]{}]', '[1:2]',
-        '{"k"}', '{"k",0}', '{"k":}', '{"k"::0}',
-        '{0:1}', '{true:1}', '{[]:1}', '{"a":1 "b":2}',
-        '{"a":{}[]}', '{"a":[],false}', '{"a":0,:1}',
-        '[[}]', '{"a":[}}', '[{"a":[]]}', '[{"a":0,}]',
-        '[truefalse]', '[+1]', '[01]', '[1.]', '[1e]',
-        '["\\q"]', '["\\u12zz"]', '["raw\ncontrol"]',
-        nested(257), nested(258),
+        '[}',
+        '{]',
+        '[,]',
+        '{,}',
+        '[1,]',
+        '{"k":0,}',
+        '[1 2]',
+        '["a" "b"]',
+        '[[]{}]',
+        '[1:2]',
+        '{"k"}',
+        '{"k",0}',
+        '{"k":}',
+        '{"k"::0}',
+        '{0:1}',
+        '{true:1}',
+        '{[]:1}',
+        '{"a":1 "b":2}',
+        '{"a":{}[]}',
+        '{"a":[],false}',
+        '{"a":0,:1}',
+        '[[}]',
+        '{"a":[}}',
+        '[{"a":[]]}',
+        '[{"a":0,}]',
+        '[truefalse]',
+        '[+1]',
+        '[01]',
+        '[1.]',
+        '[1e]',
+        '["\\q"]',
+        '["\\u12zz"]',
+        '["raw\ncontrol"]',
+        nested(257),
+        nested(258),
     ])('rejects malformed transitions or excessive depth: %s', (glossary) => {
         expect(parseGlossary(glossary).count).toBeLessThan(0)
         expect(parseGlossary(glossary, false).count).toBeLessThan(0)
@@ -109,7 +146,11 @@ describe('composite parser state transitions', () => {
             const mutations = [valid, valid.slice(0, offset), valid.slice(0, offset) + token + valid.slice(offset + 1)]
             for (const glossary of mutations) {
                 let accepted = true
-                try { JSON.parse(glossary) } catch { accepted = false }
+                try {
+                    JSON.parse(glossary)
+                } catch {
+                    accepted = false
+                }
                 expect(parseGlossary(glossary).count > 0).toBe(accepted)
             }
         }
