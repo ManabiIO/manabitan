@@ -2,7 +2,9 @@ name: Same-settings compression transport screen
 on:
   push:
     branches: [verify/import-transport-compression-20260917]
-    paths: [.github/workflows/import-message-batch-screen-20260917.yml]
+    paths:
+      - .github/workflows/import-message-batch-screen-20260917.yml
+      - dev/perf/import-transport-20260917/type-message-batch.py
 permissions:
   contents: read
 defaults:
