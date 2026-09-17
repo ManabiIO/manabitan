@@ -1657,7 +1657,7 @@ export class DictionaryImporter {
                 effectiveTermContentStorageMode === 'raw-bytes' &&
                 activeTermFiles.length >= 4
             ) {
-                void prewarmParallelTermBankParser();
+                void prewarmParallelTermBankParser(this._termBankExperiments);
             }
             let importWideSourceRunEnabled = true;
             for (let termFileIndex = 0; termFileIndex < activeTermFiles.length; ++termFileIndex) {

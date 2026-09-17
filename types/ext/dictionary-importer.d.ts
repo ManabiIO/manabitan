@@ -52,6 +52,7 @@ export type ImportPhaseTiming = {
 
 /** Experimental parser paths; absent and non-true runtime values remain off. */
 export type ImportExperiments = {
+    experimentalParserWorkers3?: boolean;
     experimentalLibdeflate?: boolean;
     experimentalSkipFusedParse?: boolean;
     experimentalLookupScratchReuse?: boolean;
