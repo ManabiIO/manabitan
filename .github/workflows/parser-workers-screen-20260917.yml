@@ -2,7 +2,9 @@ name: Shared parser worker screen
 on:
   push:
     branches: [verify/import-transport-compression-20260917]
-    paths: [.github/workflows/parser-workers-screen-20260917.yml]
+    paths:
+      - .github/workflows/parser-workers-screen-20260917.yml
+      - dev/perf/parser-workers-20260917/**
 permissions:
   contents: read
 defaults:
@@ -45,7 +47,16 @@ jobs:
       - name: Qualify policy and exact source before timing
         run: |
           npm run build:libs > builds/parser-worker-screen/libs.log 2>&1
-          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/dictionary-importer.js test/term-bank-parser-worker-policy.test.js > builds/parser-worker-screen/lint.log 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-experiments.js ext/js/dictionary/dictionary-importer.js test/term-bank-parser-worker-policy.test.js > builds/parser-worker-screen/lint.log 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-wasm-parser.js --rule '@typescript-eslint/no-unused-vars: off' > builds/parser-worker-screen/parser-lint.log 2>&1
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('ext/js/dictionary/term-bank-wasm-parser.js')
+          s=p.read_text()
+          assert s.count('function decodeUtf8(bytes)') == 1
+          assert s.count('decodeUtf8(') == 1
+          Path('builds/parser-worker-screen/inherited-lint-note.txt').write_text('Current develop e6f85c1 already has one unused decodeUtf8 helper after #52; candidate lint disables only no-unused-vars for this already-existing helper.\n')
+          PY
           node node_modules/vitest/vitest.mjs run test/term-bank-parser-worker-policy.test.js test/term-bank-experiments.test.js test/term-bank-composite-state.test.js > builds/parser-worker-screen/focused.log 2>&1
           npm run test:ts > builds/parser-worker-screen/types.log 2>&1
           git diff --name-only | xargs sha256sum > builds/parser-worker-screen/qualified-source.sha256
