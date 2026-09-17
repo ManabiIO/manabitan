@@ -34,11 +34,12 @@ jobs:
         run: |
           mkdir -p builds/packet-screen "$RUNNER_TEMP/packet-tools"
           git fetch --depth=1 origin "$RECIPE_SHA"
-          for file in candidates.patch.gz.b64 select-balanced.py abba.mjs prepare-message-batch.py finalize-message-batch.py test-message-batches.js packet-worker-check.mjs compare-test-types.py; do
+          for file in candidates.patch.gz.b64 select-balanced.py abba.mjs prepare-message-batch.py finalize-message-batch.py type-message-batch.py test-message-batches.js packet-worker-check.mjs compare-test-types.py; do
             git show "FETCH_HEAD:dev/perf/import-transport-20260917/$file" > "$RUNNER_TEMP/packet-tools/$file"
           done
           python3 "$RUNNER_TEMP/packet-tools/prepare-message-batch.py"
           python3 "$RUNNER_TEMP/packet-tools/finalize-message-batch.py"
+          python3 "$RUNNER_TEMP/packet-tools/type-message-batch.py"
           git diff --check
       - run: npm ci
       - name: Build and qualify exact source before timing
