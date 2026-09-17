@@ -3874,10 +3874,10 @@ export class DictionaryImporter {
                     const {mediaRows, ...columnPayload} = columnChunk;
                     if (requirementsForChunk !== null) {
                         for (const {index, row} of mediaRows) {
-                            const expression = row.expression.length > 0 ? row.expression : decodeUtf8Bytes(this._textDecoder, columnChunk.expressionBytesList[index]);
+                            const expression = row.expression.length > 0 ? row.expression : decodeUtf8Bytes(this._textDecoder, row.expressionBytes ?? columnChunk.expressionBytesList[index]);
                             let reading = expression;
                             if (columnChunk.readingEqualsExpressionList[index] !== 1) {
-                                reading = row.reading.length > 0 ? row.reading : decodeUtf8Bytes(this._textDecoder, columnChunk.readingBytesList[index]);
+                                reading = row.reading.length > 0 ? row.reading : decodeUtf8Bytes(this._textDecoder, row.readingBytes ?? columnChunk.readingBytesList[index]);
                             }
                             /** @type {import('dictionary-database').DatabaseTermEntry} */
                             const entry = {
