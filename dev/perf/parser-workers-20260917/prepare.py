@@ -13,7 +13,11 @@ for flag in ['experimentalParserWorkers3','experimentalParserWorkers4']:
     edit('types/ext/dictionary-importer.d.ts','export type ImportExperiments = {\n',f'export type ImportExperiments = {{\n    {flag}?: boolean;\n')
 
 p='ext/js/dictionary/term-bank-wasm-parser.js'
-edit(p,'    async prewarm() {\n        const disposalGeneration = this._disposalGeneration;\n        const workerCount = getParallelTermBankParserWorkerCount();', '''    async prewarm(options = {}) {
+edit(p,'    /** @returns {Promise<boolean>} */\n    async prewarm() {\n        const disposalGeneration = this._disposalGeneration;\n        const workerCount = getParallelTermBankParserWorkerCount();', '''    /**
+     * @param {import('dictionary-importer').ImportExperiments} [options]
+     * @returns {Promise<boolean>}
+     */
+    async prewarm(options = {}) {
         const disposalGeneration = this._disposalGeneration;
         const workerCount = getParallelTermBankParserWorkerCount(options);''')
 edit(p,' * @returns {Promise<boolean>}\n */\nexport async function prewarmParallelTermBankParser() {\n    if (!canUseParallelTermBankParser()) { return false; }\n    return await parallelTermBankParserPool.prewarm();', ''' * @param {import('dictionary-importer').ImportExperiments} [options]
@@ -22,7 +26,6 @@ edit(p,' * @returns {Promise<boolean>}\n */\nexport async function prewarmParall
 export async function prewarmParallelTermBankParser(options = {}) {
     if (!canUseParallelTermBankParser()) { return false; }
     return await parallelTermBankParserPool.prewarm(options);''')
-# Only the run itself uses experimental count; generic capability admission remains baseline-safe.
 edit(p,'    const workerCount = getParallelTermBankParserWorkerCount();\n    const pipelineGroupsPerWorker = getParallelSourcePipelineGroupsPerWorker(options);','    const workerCount = getParallelTermBankParserWorkerCount(options);\n    const pipelineGroupsPerWorker = getParallelSourcePipelineGroupsPerWorker(options);')
 edit(p,' * @returns {number}\n */\nexport function getParallelTermBankParserWorkerCount() {',''' * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {number}
@@ -52,38 +55,50 @@ edit('ext/js/dictionary/dictionary-importer.js','                void prewarmPar
 import {afterEach, describe, expect, test} from 'vitest'
 import {getParallelTermBankParserWorkerCount} from '../ext/js/dictionary/term-bank-wasm-parser.js'
 import {snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js'
+
 const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+
 function setNavigator(hardwareConcurrency, deviceMemory) {
     Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {hardwareConcurrency, deviceMemory}})
 }
+
 afterEach(() => {
-    if (originalNavigator === undefined) delete globalThis.navigator
-    else Object.defineProperty(globalThis, 'navigator', originalNavigator)
+    if (originalNavigator === undefined) {
+        delete globalThis.navigator
+    } else {
+        Object.defineProperty(globalThis, 'navigator', originalNavigator)
+    }
 })
+
 describe('bounded parser worker experiments', () => {
-    test.each(['experimentalParserWorkers3','experimentalParserWorkers4'])('%s is literal-true and default-off', key => {
+    test.each(['experimentalParserWorkers3', 'experimentalParserWorkers4'])('%s is literal-true and default-off', (key) => {
         expect(snapshotTermBankExperiments()[key]).toBe(false)
-        for (const value of [false,0,1,null,undefined,'true',{}]) expect(snapshotTermBankExperiments({[key]:value})[key]).toBe(false)
-        expect(snapshotTermBankExperiments({[key]:true})[key]).toBe(true)
+        for (const value of [false, 0, 1, null, undefined, 'true', {}]) {
+            expect(snapshotTermBankExperiments({[key]: value})[key]).toBe(false)
+        }
+        expect(snapshotTermBankExperiments({[key]: true})[key]).toBe(true)
     })
+
     test('four-core devices select only the requested count', () => {
         setNavigator(4, 8)
         expect(getParallelTermBankParserWorkerCount()).toBe(2)
-        expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers3:true})).toBe(3)
-        expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers4:true})).toBe(4)
-        expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers3:true,experimentalParserWorkers4:true})).toBe(2)
+        expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers3: true})).toBe(3)
+        expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers4: true})).toBe(4)
+        expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers3: true, experimentalParserWorkers4: true})).toBe(2)
     })
+
     test('does not weaken existing high-capability policy', () => {
         setNavigator(8, 8)
         expect(getParallelTermBankParserWorkerCount()).toBe(5)
-        expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers3:true})).toBe(5)
-        expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers4:true})).toBe(5)
+        expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers3: true})).toBe(5)
+        expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers4: true})).toBe(5)
     })
+
     test('constrained and undersized devices stay baseline', () => {
-        for (const [cpu,memory] of [[2,8],[4,4],[4,2]]) {
-            setNavigator(cpu,memory)
-            expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers3:true})).toBe(2)
-            expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers4:true})).toBe(2)
+        for (const [cpu, memory] of [[2, 8], [4, 4], [4, 2]]) {
+            setNavigator(cpu, memory)
+            expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers3: true})).toBe(2)
+            expect(getParallelTermBankParserWorkerCount({experimentalParserWorkers4: true})).toBe(2)
         }
     })
 })
