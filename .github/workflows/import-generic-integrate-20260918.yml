@@ -1,0 +1,85 @@
+name: Integrate qualified generic span source
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-generic-integrate-20260918.yml]
+permissions:
+  contents: write
+  actions: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  integrate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: perf/generic-span-compression-20260917
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 35388885914
+          name: generic-qualified-jmnedict
+          path: builds/generic-reference
+      - name: Preserve ancestry and resolve only qualified flag declarations
+        run: |
+          mkdir -p builds/generic-integration builds/generic-reference/source-tree
+          test "$(git rev-parse HEAD)" = 34e55a9965aa85240da0d13a550423d07e01839c
+          tar -xzf builds/generic-reference/source.tar.gz -C builds/generic-reference/source-tree
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git merge --no-commit --no-ff fb7241deb70950dc113089cd774c9489ede48f8a > builds/generic-integration/merge.log 2>&1 || {
+            python3 - <<'PY'
+          import subprocess
+          allowed={'ext/js/dictionary/term-bank-experiments.js','types/ext/dictionary-importer.d.ts'}
+          conflicts=set(subprocess.check_output(['git','diff','--name-only','--diff-filter=U'],text=True).splitlines())
+          assert conflicts and conflicts.issubset(allowed),conflicts
+          PY
+          }
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess,hashlib,json
+          root=Path('builds/generic-reference/source-tree')
+          for name in ['ext/js/dictionary/term-bank-experiments.js','types/ext/dictionary-importer.d.ts']:
+              Path(name).write_bytes((root/name).read_bytes())
+              subprocess.run(['git','add',name],check=True)
+          assert not subprocess.check_output(['git','diff','--name-only','--diff-filter=U'],text=True).strip()
+          product=[p for p in root.rglob('*') if p.is_file() and p.relative_to(root).parts[0] in {'ext','types'}]
+          for p in product:
+              name=str(p.relative_to(root));assert p.read_bytes()==Path(name).read_bytes(),name
+          json.dump({str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in product},open('builds/generic-integration/qualified-product-hashes.json','w'),indent=2)
+          PY
+          git diff --check
+          git diff --cached --check
+          git commit -m 'Merge qualified develop baseline into generic span compression'
+          git diff --stat fb7241deb70950dc113089cd774c9489ede48f8a HEAD > builds/generic-integration/product-stat.txt
+          git rev-parse HEAD > builds/generic-integration/PRODUCT_HEAD
+      - run: npm ci
+      - name: Validate exact merged source and real-codec tests
+        run: |
+          npm run build:libs > builds/generic-integration/libs.log 2>&1
+          npm run test:unit -- --no-file-parallelism > builds/generic-integration/unit.log 2>&1
+          npm run test:unit:options > builds/generic-integration/options.log 2>&1
+          npm run test:ts:main > builds/generic-integration/types-main.log 2>&1
+          npm run test:ts:dev > builds/generic-integration/types-dev.log 2>&1
+          npm run test:ts:bench > builds/generic-integration/types-bench.log 2>&1
+          npm run test:build > builds/generic-integration/build-plans.log 2>&1
+          git diff --name-only fb7241deb70950dc113089cd774c9489ede48f8a HEAD -- '*.js' | xargs node node_modules/eslint/bin/eslint.js > builds/generic-integration/lint.log 2>&1
+      - name: Fast-forward only the unchanged PR branch
+        run: |
+          test "$(git ls-remote origin refs/heads/perf/generic-span-compression-20260917 | cut -f1)" = 34e55a9965aa85240da0d13a550423d07e01839c
+          git push origin HEAD:refs/heads/perf/generic-span-compression-20260917
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: generic-merged-source-validation
+          path: builds/generic-integration
+          retention-days: 30
+          if-no-files-found: error
