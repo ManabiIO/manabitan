@@ -53,7 +53,7 @@ jobs:
                 for(const arm of ['baseline','variant']){
                   const file=path.join(dir,path.basename(pair[arm].reportJsonPath));const report=JSON.parse(readFileSync(file));
                   const flags=arm==='baseline'?summary.baselineImportFlags:result.importFlags;
-                  const actual=extractImportResult(report,summary.dictionary,summary.fixture,false,flags);
+                  const actual=extractImportResult(report,summary.dictionary,summary.fixture,false,Object.keys(flags).length===0?null:flags);
                   assert.equal(actual.totalImportMs,pair[arm].summary.totalImportMs);
                   assert.equal(actual.importDebug.openStorageDiagnostics.mode,'opfs-sahpool');
                   const phases=actual.importDebug.importerPhaseTimings;
