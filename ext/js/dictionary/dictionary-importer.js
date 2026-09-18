@@ -143,13 +143,14 @@ Object.freeze(EMPTY_TERM_GLOSSARY);
  * Parser WASM memory may be shared, so copy only shared-backed views while
  * preserving the zero-copy path for normal archive and worker buffers.
  * @param {TextDecoder} decoder
- * @param {Uint8Array} bytes
+ * @param {Uint8Array|undefined} bytes
  * @returns {string}
  */
 function decodeUtf8Bytes(decoder, bytes) {
-    const buffer = bytes.buffer;
+    const buffer = bytes?.buffer;
     return (
         typeof SharedArrayBuffer === 'function' &&
+        bytes instanceof Uint8Array &&
         buffer instanceof SharedArrayBuffer
     ) ?
         decoder.decode(Uint8Array.from(bytes)) :
@@ -1658,7 +1659,7 @@ export class DictionaryImporter {
                 effectiveTermContentStorageMode === 'raw-bytes' &&
                 activeTermFiles.length >= 4
             ) {
-                void prewarmParallelTermBankParser();
+                void prewarmParallelTermBankParser(this._termBankExperiments);
             }
             let importWideSourceRunEnabled = true;
             for (let termFileIndex = 0; termFileIndex < activeTermFiles.length; ++termFileIndex) {
