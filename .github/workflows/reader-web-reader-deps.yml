@@ -1,0 +1,49 @@
+name: Reader web baseline and security dependency
+on:
+  push:
+    branches: [research/reader-web-runtime-source-20260917]
+    paths: [.github/workflows/reader-web-reader-deps.yml]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ttu-ttu/ebook-reader
+          ref: 301aef4957c3cb22162276b11f4a47b35533faae
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.21.0
+      - name: Baseline and isolated sanitizer dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualification
+          npm install --global pnpm@12.3.4
+          pnpm install --frozen-lockfile > qualification/install.log 2>&1
+          pnpm --dir apps/web exec svelte-kit sync
+          set +e
+          pnpm --dir apps/web check > qualification/baseline-check.log 2>&1
+          echo "$?" > qualification/baseline-check.exit
+          pnpm build > qualification/baseline-build.log 2>&1
+          echo "$?" > qualification/baseline-build.exit
+          pnpm audit --json > qualification/baseline-audit.json 2>&1
+          echo "$?" > qualification/baseline-audit.exit
+          set -e
+          pnpm --dir apps/web add --save-exact dompurify@3.4.15 > qualification/sanitizer-install.log 2>&1
+          git diff --binary -- apps/web/package.json pnpm-lock.yaml > qualification/dompurify-dependency.patch
+          tar -czf qualification/reader-node-modules.tar.gz node_modules apps/web/node_modules
+          cp "$(command -v node)" qualification/node
+          sha256sum qualification/reader-node-modules.tar.gz qualification/node > qualification/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reader-web-baseline-and-deps
+          path: qualification/
+          retention-days: 3
+          compression-level: 0
+          if-no-files-found: error
