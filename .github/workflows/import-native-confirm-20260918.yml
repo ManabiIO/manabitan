@@ -46,16 +46,16 @@ jobs:
           FLAGS='{"experimentalNativeSegmentedLookup":true,"experimentalLookupScratchReuse":true}'
           node dev/perf/import-ab.js "$DICTIONARY" --pairs 1 --flags "$FLAGS" --label excluded-warmup
           mkdir -p builds/confirmation/warmup
-          mv builds/*iso*.json builds/*iso*.html builds/*summary*.json builds/confirmation/warmup/
+          mv builds/*iso*.json builds/*iso*.html builds/confirmation/warmup/
           node dev/perf/import-ab.js "$DICTIONARY" --pairs 3 --flags '{}' --label pre-AA
           mkdir -p builds/confirmation/pre-AA
-          mv builds/*iso*.json builds/*iso*.html builds/*summary*.json builds/confirmation/pre-AA/
+          mv builds/*iso*.json builds/*iso*.html builds/confirmation/pre-AA/
           node dev/perf/import-ab.js "$DICTIONARY" --pairs 12 --flags "$FLAGS" --label native-confirm
           mkdir -p builds/confirmation/measured
-          mv builds/*iso*.json builds/*iso*.html builds/*summary*.json builds/confirmation/measured/
+          mv builds/*iso*.json builds/*iso*.html builds/confirmation/measured/
           node dev/perf/import-ab.js "$DICTIONARY" --pairs 3 --flags '{}' --label post-AA
           mkdir -p builds/confirmation/post-AA
-          mv builds/*iso*.json builds/*iso*.html builds/*summary*.json builds/confirmation/post-AA/
+          mv builds/*iso*.json builds/*iso*.html builds/confirmation/post-AA/
           git diff > builds/confirmation/harness-only.patch
           git rev-parse HEAD > builds/confirmation/SOURCE_HEAD
           sha256sum ext/lib/term-bank-parser.wasm package-lock.json test/perf/dictionaries.lock.json > builds/confirmation/hashes.txt
@@ -63,6 +63,9 @@ jobs:
         if: always()
         with:
           name: native-confirm-${{ matrix.dictionary }}-${{ matrix.replication }}
-          path: builds/confirmation
+          path: |
+            builds/confirmation
+            builds/*iso*.json
+            builds/*iso*.html
           retention-days: 14
           if-no-files-found: error
