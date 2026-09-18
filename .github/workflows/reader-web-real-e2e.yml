@@ -1,0 +1,105 @@
+name: Reader web real-browser qualification
+on:
+  push:
+    branches: [research/reader-web-e2e-20260918]
+    paths: [.github/workflows/reader-web-real-e2e.yml]
+permissions:
+  contents: read
+concurrency:
+  group: reader-web-real-e2e
+  cancel-in-progress: true
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ttu-ttu/ebook-reader
+          ref: 301aef4957c3cb22162276b11f4a47b35533faae
+          path: reader-fixture
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.21.0
+      - name: Verify and apply pinned Reader runtime fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reader-web-results /tmp/reader-fixtures
+          python3 - <<'PY'
+          import base64, gzip, hashlib, pathlib
+          root = pathlib.Path('test/reader-web')
+          data = (root/'fixture-runtime.part1.b64').read_text().strip() + (root/'fixture-runtime.part2.b64').read_text().strip()
+          # Correct transport transcription only. The decoded source hash below
+          # is authoritative and fails closed on any other discrepancy.
+          for old,new in [('T+RZZTVKs','T+RZTVKs'),('PPux/eXPux/eXPw','PPux/eXPw'),('XR95y6WoefVm9PbNr70XR95y6+','XR95y6+'),('Lzz/6GP2','Lzz/6GP2')]:
+              data = data.replace(old,new)
+          patch = gzip.decompress(base64.b64decode(data, validate=True))
+          assert hashlib.sha256(patch).hexdigest() == 'b822ebbb904c1cb0051a4f5e5d177f081a7c6b5107e50a9b48b12f3e0961260e'
+          pathlib.Path('/tmp/reader-runtime.patch').write_bytes(patch)
+          PY
+          git -C reader-fixture apply /tmp/reader-runtime.patch
+          git rev-parse HEAD > reader-web-results/harness-head.txt
+          git -C reader-fixture rev-parse HEAD > reader-web-results/reader-upstream.txt
+          cp /tmp/reader-runtime.patch reader-web-results/reader-runtime.patch
+      - name: Install and build real applications
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci > reader-web-results/manabitan-install.log 2>&1
+          npm run build:libs > reader-web-results/manabitan-libs.log 2>&1
+          node dev/bin/build.js chrome-dev > reader-web-results/manabitan-build.log 2>&1
+          mkdir -p /tmp/manabitan-extension
+          unzip -q builds/yomitan-chrome-dev.zip -d /tmp/manabitan-extension
+          npm install --global pnpm@12.3.4
+          cd reader-fixture
+          pnpm install --frozen-lockfile > ../reader-web-results/reader-install.log 2>&1
+          pnpm --dir apps/web exec svelte-kit sync
+          pnpm build > ../reader-web-results/reader-build-a.log 2>&1
+          cp -a apps/web/build /tmp/reader-build-a
+          pnpm build > ../reader-web-results/reader-build-b.log 2>&1
+          cp -a apps/web/build /tmp/reader-build-b
+          cd ..
+          npx playwright install --with-deps chromium > reader-web-results/browser-install.log 2>&1
+      - name: Prepare full official JMdict fixture and synthetic Japanese books
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 test/reader-web/make-fixtures.py /tmp/reader-fixtures
+          curl --fail --location --retry 3 --max-time 180 https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-18/JMdict_english.zip -o /tmp/reader-fixtures/JMdict_english.zip
+          python3 - <<'PY'
+          import hashlib,json,pathlib,zipfile
+          p=pathlib.Path('/tmp/reader-fixtures/JMdict_english.zip')
+          raw=p.read_bytes()
+          digest=hashlib.sha256(raw).hexdigest()
+          assert len(raw)==15595643
+          assert digest=='b895d0fa41324d5bdd7bd0a943e73b46d25f849ddab6e0491e619bfc4e4e20d9'
+          with zipfile.ZipFile(p) as z:
+              index=json.loads(z.read('index.json'))
+              rows=sum(len(json.loads(z.read(n))) for n in z.namelist() if n.startswith('term_bank_') and n.endswith('.json'))
+          metadata={'repository':'yomidevs/jmdict-yomitan','release':'2026-09-18','asset':p.name,'bytes':len(raw),'sha256':digest,'termRows':rows,'index':index}
+          pathlib.Path('/tmp/reader-fixtures/jmdict.json').write_text(json.dumps(metadata,indent=2))
+          pathlib.Path('reader-web-results/jmdict.json').write_text(json.dumps(metadata,indent=2))
+          PY
+      - name: Run real-origin browser scenarios
+        env:
+          READER_BUILD: /tmp/reader-build-a
+          READER_BUILD_B: /tmp/reader-build-b
+          READER_FIXTURES: /tmp/reader-fixtures
+          MANABITAN_EXTENSION: /tmp/manabitan-extension
+          E2E_OUTPUT: reader-web-results
+        run: node test/reader-web/run.mjs 2>&1 | tee reader-web-results/browser-run.log
+      - name: Retain test sources without runtime fonts or dictionaries
+        if: always()
+        run: tar -czf reader-web-results/test-sources.tar.gz test/reader-web/run.mjs test/reader-web/make-fixtures.py .github/workflows/reader-web-real-e2e.yml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reader-web-real-chromium
+          path: reader-web-results/
+          retention-days: 7
+          if-no-files-found: error
