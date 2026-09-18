@@ -1,0 +1,62 @@
+name: Reader system typography qualification
+on:
+  push:
+    branches: [research/reader-web-typography-20260918]
+    paths: [.github/workflows/reader-web-typography.yml]
+permissions:
+  contents: read
+concurrency:
+  group: reader-web-system-typography
+  cancel-in-progress: true
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ttu-ttu/ebook-reader
+          ref: 301aef4957c3cb22162276b11f4a47b35533faae
+          path: reader-fixture
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.21.0
+      - name: Build and exercise static Reader with system typography
+        run: |
+          python3 test/reader-web/enable-completion-observer.py
+          python3 test/reader-web/prepare-candidate.py
+          python3 test/reader-web/prepare-popup-qualification.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('test/reader-web/qualify.sh');s=p.read_text()
+          old='python3 test/reader-web/nonzero-bookmark-assertions.py'
+          assert s.count(old)==1
+          s=s.replace(old,old+'\npython3 test/reader-web/closed-shadow-assertions.py\npython3 test/reader-web/visible-target-assertions.py\npython3 test/reader-web/prepare-typography.py')
+          p.write_text(s)
+          PY
+          bash test/reader-web/qualify.sh
+      - name: Retain executed source and runtime diff
+        if: always()
+        run: |
+          mkdir -p reader-web-results
+          git -C reader-fixture add -N -- apps/web
+          git -C reader-fixture diff --binary -- apps/web package.json pnpm-lock.yaml > reader-web-results/reader-composed-runtime.patch
+          tar -czf reader-web-results/test-sources.tar.gz test/reader-web/run.mjs test/reader-web/font-acceptance.mjs test/reader-web/make-fixtures.py .github/workflows/reader-web-typography.yml
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path('reader-fixture/apps/web/build')
+          assets=[{'path':str(p.relative_to(root)),'bytes':p.stat().st_size} for p in root.rglob('*') if p.is_file() and p.suffix.lower() in ['.woff','.woff2','.ttf','.otf']]
+          Path('reader-web-results/optional-font-assets.json').write_text(json.dumps({'assets':assets,'bytes':sum(a['bytes'] for a in assets)},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reader-system-typography-chromium
+          path: reader-web-results/
+          retention-days: 7
+          if-no-files-found: error
