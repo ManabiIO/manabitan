@@ -1,0 +1,149 @@
+name: Publish qualified bounded lookup winner
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-bounded-publish-20260918.yml]
+permissions:
+  contents: write
+  actions: read
+defaults:
+  run:
+    shell: bash
+    working-directory: source
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ManabiIO/manabitan
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          path: source
+      - uses: actions/checkout@v4
+        with:
+          ref: c513633fa3b952d0cc24eacddb9c564baebe7fa3
+          path: recipe
+          persist-credentials: false
+      - name: Require completed qualification and independent confirmation
+        run: |
+          set -euo pipefail
+          test "$(gh api repos/ManabiIO/manabitan/actions/jobs/105771116922 --jq .conclusion)" = success
+          gh run watch 35398573920 --exit-status --interval 10
+          test "$(gh api repos/ManabiIO/manabitan/actions/runs/35398134731 --jq .conclusion)" = success
+      - uses: actions/download-artifact@v4
+        with:
+          name: bounded-native-v2-qualification
+          run-id: 35397995354
+          github-token: ${{ github.token }}
+          path: receipts/qualify
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bounded-final-confirm-*
+          run-id: 35398573920
+          github-token: ${{ github.token }}
+          path: receipts/confirm
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bounded-memory-*
+          run-id: 35398134731
+          github-token: ${{ github.token }}
+          path: receipts/memory
+      - name: Audit every raw observation before considering publication
+        run: |
+          set -euo pipefail
+          mkdir -p builds/publication
+          for dictionary in jmdict jmnedict jitendex; do
+            python3 ../recipe/dev/perf/structural-20260918/audit-confirm.py "../receipts/confirm/bounded-final-confirm-$dictionary" "$dictionary" > "builds/publication/audit-$dictionary.json"
+          done
+          python3 - <<'PY'
+          import pathlib,json,hashlib,re
+          root=pathlib.Path('../receipts')
+          qualification=root/'qualify'
+          assert (qualification/'product-tree.txt').read_text().strip()=='ab09c415acac24f618e968141765abbfa4acc1f1'
+          assert hashlib.sha256((qualification/'qualified.patch').read_bytes()).hexdigest()=='f0113319e0a85daad783ae772ced86905a0555b3c9819911e459e220b65ea93c'
+          lifecycle=json.loads((qualification/'lifecycle.json').read_text())
+          assert lifecycle['status']=='success' and lifecycle['skippedVerification'] is False and lifecycle['phaseCount']==85
+          unit=re.sub(r'\x1b\[[0-9;]*m','',(qualification/'unit.log').read_text())
+          assert '6621 passed' in unit and '46 skipped' in unit
+          assert (qualification/'parent-test-types.log').read_bytes()==(qualification/'candidate-test-types.log').read_bytes()
+          for dictionary in ['jmdict','jmnedict','jitendex']:
+              audit=json.loads(pathlib.Path(f'builds/publication/audit-{dictionary}.json').read_text())
+              result=audit['results']['candidate']
+              assert len(result['pairChangesPct'])==12
+              if dictionary in ['jmdict','jmnedict']:
+                  assert result['medianPairedPct'] < -5 and result['fasterPairs'] >= 10, (dictionary,result)
+                  assert all(x < 0 for x in result['blockChangesPct']), (dictionary,result)
+                  assert audit['work']['B']['fallbacks']==[0]
+              else:
+                  assert result['medianPairedPct'] < 2 and result['equalWorkPct'] < 2, result
+              overhead=audit['results']['source-overhead']
+              assert overhead['medianPairedPct'] < 2 and overhead['equalWorkPct'] < 3, (dictionary,overhead)
+              memory=root/'memory'/f'bounded-memory-{dictionary}'
+              assert (memory/'VERIFIED').exists()
+              summary=json.loads((memory/'summary.json').read_text())
+              assert summary['authoritativeTiming'] is False and summary['peakSampledTreePssKiB']['medianPairedPct'] < 3
+              observations=json.loads((memory/'observations.json').read_text())
+              assert len(observations)==8 and [x['arm'] for x in observations]==list('ABBAABBA')
+              for item in observations:
+                  samples=json.loads((memory/f'{item["index"]:02d}-{item["arm"]}-samples.json').read_text())
+                  active=[x for x in samples if len(x['processes'])>=3]
+                  assert len(active)>=10
+                  for metric,result_key in [('pssKiB','peakSampledTreePssKiB'),('rssKiB','peakSampledTreeRssKiB')]:
+                      assert all(sum(p[metric] for p in x['processes'])==x[metric] for x in active)
+                      assert max(x[metric] for x in active)==item[result_key]
+              pathlib.Path(f'builds/publication/memory-{dictionary}.json').write_text(json.dumps(summary,indent=2))
+          PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - name: Reconstruct the isolated product tree and recheck source
+        run: |
+          set -euo pipefail
+          git apply ../receipts/qualify/qualified.patch
+          echo '1e3e02c3bccbbe0966a0c9ad73e21dbcfc9fdb9553d1a83ac93318561b7c1257  ext/js/dictionary/term-bank-wasm-parser.js' | sha256sum -c -
+          echo '2d4e44281b3e1f48728aa55782f3232c4105931255aa110a9953e76d66447ea1  test/lookup-construction-experiments.test.js' | sha256sum -c -
+          npm ci
+          npm run build:libs
+          cmp ext/lib/term-bank-parser.wasm ../receipts/qualify/parent.wasm
+          node node_modules/vitest/vitest.mjs run test/lookup-construction-experiments.test.js --maxWorkers=1 --minWorkers=1 > builds/publication/focused.log 2>&1
+          npm run test:ts:main > builds/publication/types-main.log 2>&1
+          git diff --check
+          git diff --binary > builds/publication/product.patch
+          cmp builds/publication/product.patch ../receipts/qualify/qualified.patch
+          python3 - <<'PY'
+          import subprocess
+          paths=subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()
+          assert sorted(paths)==['ext/js/dictionary/term-bank-wasm-parser.js','test/lookup-construction-experiments.test.js'],paths
+          PY
+          git add ext/js/dictionary/term-bank-wasm-parser.js test/lookup-construction-experiments.test.js
+          test "$(git write-tree)" = ab09c415acac24f618e968141765abbfa4acc1f1
+      - name: Publish only a new product branch, never develop or main
+        run: |
+          set -euo pipefail
+          branch=perf/bounded-native-lookup-20260918
+          test "$(git ls-remote origin refs/heads/develop | cut -f1)" = fb7241deb70950dc113089cd774c9489ede48f8a
+          test -z "$(git ls-remote origin "refs/heads/$branch")"
+          git switch -c "$branch"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          HUSKY=0 git commit -m 'perf: bound native segmented lookup to retired parser workspace'
+          git push origin "HEAD:refs/heads/$branch"
+          python3 - <<'PY'
+          import subprocess,json,pathlib
+          git=lambda *args:subprocess.check_output(['git',*args],text=True).strip()
+          result={'branch':git('branch','--show-current'),'head':git('rev-parse','HEAD'),'tree':git('rev-parse','HEAD^{tree}'),'parent':git('rev-parse','HEAD^'),'qualificationRun':35397995354,'confirmationRun':35398573920,'memoryRun':35398134731}
+          assert result['tree']=='ab09c415acac24f618e968141765abbfa4acc1f1' and result['parent']=='fb7241deb70950dc113089cd774c9489ede48f8a'
+          pathlib.Path('builds/publication/published.json').write_text(json.dumps(result,indent=2));print(json.dumps(result,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-native-publication
+          path: source/builds/publication
+          retention-days: 30
+          if-no-files-found: error
