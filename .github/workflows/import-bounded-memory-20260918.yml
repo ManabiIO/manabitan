@@ -1,0 +1,88 @@
+name: Bounded native lookup browser-tree memory
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-bounded-memory-20260918.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+    working-directory: source
+jobs:
+  memory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 5ae35c00ec4975273f66f3f56dfd68fda3b8e9bb
+          path: recipe
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci
+      - name: Build exact candidate
+        run: |
+          set -euo pipefail
+          git apply ../recipe/dev/perf/structural-20260918/bounded-native.patch
+          git apply ../recipe/dev/perf/structural-20260918/bounded-native-v2-overlay.patch
+          echo '1e3e02c3bccbbe0966a0c9ad73e21dbcfc9fdb9553d1a83ac93318561b7c1257  ext/js/dictionary/term-bank-wasm-parser.js' | sha256sum -c -
+          echo '2d4e44281b3e1f48728aa55782f3232c4105931255aa110a9953e76d66447ea1  test/lookup-construction-experiments.test.js' | sha256sum -c -
+          npm run build:libs
+          node dev/bin/build.js chrome-dev
+          npx playwright install --with-deps chromium
+          node dev/perf/prepare-dictionaries.js
+      - name: Two ABBA diagnostic memory blocks
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          python3 ../recipe/dev/perf/structural-20260918/memory.py
+          cp ../recipe/dev/perf/structural-20260918/memory.py builds/bounded-memory/driver.py
+          sha256sum ext/js/dictionary/term-bank-wasm-parser.js test/lookup-construction-experiments.test.js ext/lib/term-bank-parser.wasm builds/manabitan-chrome-dev.zip > builds/bounded-memory/identities.txt
+          python3 - <<'PY'
+          import json,pathlib,os
+          out=pathlib.Path('builds/bounded-memory')
+          fixture=json.loads(pathlib.Path('test/perf/dictionaries.lock.json').read_text())['dictionaries'][os.environ['DICTIONARY']]
+          observations=json.loads((out/'observations.json').read_text())
+          assert len(observations)==8
+          for row in observations:
+              d=json.loads((out/f'{row["index"]:02d}-{row["arm"]}.json').read_text())
+              assert d['status']=='success' and d['skippedVerification'] is False
+              b=d['benchmark']; v=b['validation']
+              assert b['authoritativeTiming'] is False and b['processSampling'] is True
+              assert b['dictionary']==os.environ['DICTIONARY'] and b['pinnedDictionaries'] and b['productionImportDefaults']
+              assert v['title']==fixture['expectedTitle'] and v['revision']==fixture['revision'] and v['termRows']==fixture['termRows']
+              assert v['contentReadable'] is True and v['probeCount']>=12
+              phases=[x for x in d['phases'] if x['name']==fixture['label']+': total import']; assert len(phases)==1
+              debug=phases[0]['data']['importDebug']
+              assert debug['errorCount']==0 and debug['usesFallbackStorage'] is False
+              receipts=[]
+              for p in debug['importerPhaseTimings']:
+                  for key,value in p.get('details',{}).items():
+                      if key in ['parserExperiments','fastPathParserExperiments','fastPathParserEffectiveExperiments']:
+                          receipts.append(value)
+                          assert all(v is (k=='experimentalNativeSegmentedLookup' and row['arm']=='B') for k,v in value.items())
+              assert receipts
+          (out/'VERIFIED').write_text('8 complete diagnostic memory imports; exact fixtures and worker receipts verified\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-memory-${{ matrix.dictionary }}
+          path: source/builds/bounded-memory
+          retention-days: 30
+          if-no-files-found: error
