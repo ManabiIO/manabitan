@@ -39,7 +39,10 @@ function makeSource() {
     const expected = Array.from(offsets, (offset, i) => source.slice(offset, offset + lengths[i]));
     const packed = new Uint8Array(lengths.reduce((sum, length) => sum + length, 0));
     let offset = 0;
-    for (const bytes of expected) { packed.set(bytes, offset); offset += bytes.length; }
+    for (const bytes of expected) {
+        packed.set(bytes, offset);
+        offset += bytes.length;
+    }
     return {source, offsets, lengths, expected, packed};
 }
 
@@ -94,8 +97,6 @@ describe('generic span compression with the real codec', () => {
 
     test('rejects out-of-range spans before producing a compressed frame', () => {
         const {source} = makeSource();
-        expect(() => prepareWrappedTermContentZstdSpans(
-            source, new Uint32Array([source.length - 1]), new Uint32Array([2]), 2, null, options,
-        )).toThrow();
+        expect(() => prepareWrappedTermContentZstdSpans(source, new Uint32Array([source.length - 1]), new Uint32Array([2]), 2, null, options)).toThrow();
     });
 });
