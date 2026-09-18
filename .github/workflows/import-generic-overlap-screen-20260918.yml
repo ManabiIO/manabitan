@@ -34,7 +34,7 @@ jobs:
           mkdir -p builds/generic-overlap/source "$RUNNER_TEMP/generic-tools"
           git fetch --depth=2 origin 6c75ae517f8a4d74a27e1b7d0f69c1dcdb01e243
           git show --format= --binary 6c75ae517f8a4d74a27e1b7d0f69c1dcdb01e243 > builds/generic-overlap/generic.patch
-          git apply builds/generic-overlap/generic.patch
+          git apply --exclude=ext/js/dictionary/term-bank-experiments.js --exclude=types/ext/dictionary-importer.d.ts builds/generic-overlap/generic.patch
           git fetch --depth=1 origin f00b61bb2d851024f4124f1d854502ba602b506d
           git show FETCH_HEAD:dev/perf/import-transport-20260917/abba.mjs > "$RUNNER_TEMP/generic-tools/abba-original.mjs"
           git fetch --depth=1 origin 9c843c8a0e06190948ae0d52c29094a45a2555f1
@@ -44,8 +44,8 @@ jobs:
           import os
           def replace(path, old, new):
               p=Path(path); s=p.read_text(); assert s.count(old)==1,(path,old); p.write_text(s.replace(old,new))
-          replace('ext/js/dictionary/term-bank-experiments.js','return Object.freeze({','return Object.freeze({\n        experimentalGenericSpanOverlap: options.experimentalGenericSpanOverlap === true,')
-          replace('types/ext/dictionary-importer.d.ts','experimentalGenericSpanCompression?: boolean;','experimentalGenericSpanCompression?: boolean;\n    experimentalGenericSpanOverlap?: boolean;')
+          replace('ext/js/dictionary/term-bank-experiments.js','return Object.freeze({','return Object.freeze({\n        experimentalGenericSpanCompression: options.experimentalGenericSpanCompression === true,\n        experimentalGenericSpanOverlap: options.experimentalGenericSpanOverlap === true,')
+          replace('types/ext/dictionary-importer.d.ts','experimentalLibdeflate?: boolean;','experimentalLibdeflate?: boolean;\n    experimentalGenericSpanCompression?: boolean;\n    experimentalGenericSpanOverlap?: boolean;')
           replace('ext/js/dictionary/term-content-block-store.js',"            compressionDictName !== 'jmdict' ||", "            (compressionDictName !== 'jmdict' && !(this._compressionExperiments.experimentalGenericSpanCompression && this._compressionExperiments.experimentalGenericSpanOverlap)) ||")
           p=Path('ext/js/dictionary/term-content-block-store.js');s=p.read_text();start=s.index('    _beginAppendSharedSpans(');before=s.rfind('     * @param {string} compressionDictName',0,start);assert before>=0;s=s[:before]+s[before:].replace('     * @param {string} compressionDictName','     * @param {string|null} compressionDictName',1);p.write_text(s)
           tools=Path(os.environ['RUNNER_TEMP'])/'generic-tools'
@@ -74,7 +74,7 @@ jobs:
       - name: Preserve exact candidate and driver
         if: always()
         run: |
-          cp "$RUNNER_TEMP/generic-tools/"*.mjs "$RUNNER_TEMP/generic-tools/"*.py builds/generic-overlap/source/
+          find "$RUNNER_TEMP/generic-tools" -maxdepth 1 -type f -exec cp '{}' builds/generic-overlap/source/ ';'
           git diff > builds/generic-overlap/source.patch
           git diff --name-only | xargs -r tar -czf builds/generic-overlap/source.tar.gz
       - uses: actions/upload-artifact@v4
