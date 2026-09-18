@@ -1,0 +1,220 @@
+diff --git a/apps/web/src/lib/components/book-card/book-card.svelte b/apps/web/src/lib/components/book-card/book-card.svelte
+index de30fff..522da1b 100644
+--- a/apps/web/src/lib/components/book-card/book-card.svelte
++++ b/apps/web/src/lib/components/book-card/book-card.svelte
+@@ -1,6 +1,7 @@
+ <script lang="ts">
+   import { faImage } from '@fortawesome/free-regular-svg-icons';
+   import { onDestroy } from 'svelte';
++  import { createLocalCoverUrl } from '$lib/functions/book-security/local-media';
+   import Fa from 'svelte-fa';
+ 
+   export let imagePath: string | Blob;
+@@ -20,44 +21,19 @@
+       URL.revokeObjectURL(objectUrl);
+       objectUrl = '';
+     }
+-    if (typeof value !== 'string') {
+-      objectUrl = URL.createObjectURL(
+-        value.type ? value : new Blob([value], { type: 'image/jpeg' })
+-      );
+-
+-      return objectUrl;
+-    }
+-
+-    return value;
++    const url = createLocalCoverUrl(value);
++    if (url.startsWith('blob:')) objectUrl = url;
++    return url;
+   }
+ 
+-  function mapImagePathFactory() {
+-    let prevValue: string | Blob | undefined;
+-    let prevResponse: string | undefined;
+-
+-    const isEqual = (newValue: string | Blob) => {
+-      if (!prevValue) return false;
+-      if (prevValue instanceof Blob && newValue instanceof Blob) {
+-        return prevValue.type === newValue.type && prevValue.size === newValue.size;
+-      }
+-      if (typeof prevValue !== 'object' || typeof newValue !== 'object') {
+-        return prevValue === newValue;
+-      }
+-      return false;
+-    };
+-
+-    return (value: string | Blob) => {
+-      if (isEqual(value)) return prevResponse as string;
+-
+-      prevValue = value;
+-      prevResponse = convertImagePath(value);
+-
+-      return prevResponse;
+-    };
++  let previousImage: string | Blob | undefined;
++  let coverUrl = '';
++  $: if (imagePath !== previousImage) {
++    previousImage = imagePath;
++    coverUrl = convertImagePath(imagePath);
++    imageLoading = true;
+   }
+ 
+-  const mapImagePath = mapImagePathFactory();
+-
+   let imgEl: HTMLImageElement | undefined;
+   let imageLoading = true;
+ 
+@@ -72,14 +48,14 @@
+         <Fa class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" icon={faImage} />
+       {/if}
+ 
+-      {#if imagePath}
++      {#if coverUrl}
+         <img
+           decoding="async"
+           loading="lazy"
+           referrerpolicy="no-referrer"
+           class="book-cover relative h-full w-full object-cover transition delay-150 duration-700 ease-out"
+           class:blur={!imageLoadComplete}
+-          src={mapImagePath(imagePath)}
++          src={coverUrl}
+           {alt}
+           bind:this={imgEl}
+           on:load={() => (imageLoading = false)}
+diff --git a/apps/web/src/lib/functions/book-security/local-media.ts b/apps/web/src/lib/functions/book-security/local-media.ts
+new file mode 100644
+index 0000000..cfa65b6
+--- /dev/null
++++ b/apps/web/src/lib/functions/book-security/local-media.ts
+@@ -0,0 +1,89 @@
++/**
++ * @license BSD-3-Clause
++ * Copyright (c) 2026, ッツ Reader Authors
++ * All rights reserved.
++ */
++
++const MAX_COVER_BYTES = 64 * 1024 * 1024;
++const IMAGE_MIMES = new Set([
++  'image/png',
++  'image/jpeg',
++  'image/gif',
++  'image/webp',
++  'image/bmp',
++  'image/avif',
++  'image/svg+xml'
++]);
++
++/** Covers bypass the book-body renderer. Never treat restored strings as URLs. */
++export function createLocalCoverUrl(
++  value: unknown,
++  createObjectURL: (blob: Blob) => string = (blob) => URL.createObjectURL(blob)
++): string {
++  if (value instanceof Blob) {
++    if (value.size === 0 || value.size > MAX_COVER_BYTES) return '';
++    const mime = (value.type || 'image/jpeg').toLowerCase();
++    if (!IMAGE_MIMES.has(mime)) return '';
++    // SVG is displayed in an image element, not injected into document HTML.
++    return createObjectURL(value.type ? value : new Blob([value], { type: mime }));
++  }
++  // Older libraries contain raster data URLs; retain those without accepting
++  // remote, relative, file, javascript, SVG data or stale persisted blob URLs.
++  if (typeof value !== 'string' || value.length > (MAX_COVER_BYTES * 4) / 3 + 128) return '';
++  if (!/^data:image\/(?:png|jpeg|gif|webp|bmp|avif);base64,[a-z0-9+/]*={0,2}$/i.test(value))
++    return '';
++  return value;
++}
++
++function cssString(value: string): string {
++  return (
++    '"' +
++    value.replace(
++      // eslint-disable-next-line no-control-regex
++      /["\\\x00-\x1f\x7f]/g,
++      (character) => `\\${character.charCodeAt(0).toString(16)} `
++    ) +
++    '"'
++  );
++}
++
++/** Local font metadata is untrusted even though the CSS element is app-owned. */
++export function buildLocalFontStyleSheet(fonts: unknown): string {
++  if (!Array.isArray(fonts)) return '';
++  const formats: Record<string, string> = {
++    woff: 'woff',
++    woff2: 'woff2',
++    ttf: 'truetype',
++    otf: 'opentype'
++  };
++  const rules: string[] = [];
++  for (const font of fonts.slice(0, 256)) {
++    if (!font || typeof font !== 'object') continue;
++    const { name, fileName, path } = font;
++    if (
++      typeof name !== 'string' ||
++      !name ||
++      name.length > 200 ||
++      typeof fileName !== 'string' ||
++      !fileName ||
++      fileName.length > 255 ||
++      // eslint-disable-next-line no-control-regex
++      /[\\/\x00-\x1f\x7f]/.test(fileName)
++    )
++      continue;
++    const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
++    const format = Object.hasOwn(formats, extension) ? formats[extension] : undefined;
++    let expectedPath: string;
++    try {
++      expectedPath = `/userfonts/${encodeURIComponent(fileName)}`;
++    } catch {
++      // Malformed UTF-16 in restored metadata must not prevent Reader startup.
++      continue;
++    }
++    if (!format || path !== expectedPath) continue;
++    rules.push(
++      `@font-face{font-family:${cssString(name)};font-style:normal;font-weight:400;font-display:swap;src:url(${cssString(expectedPath)}) format(${cssString(format)})}`
++    );
++  }
++  return rules.join('\n');
++}
+diff --git a/apps/web/src/routes/+layout.svelte b/apps/web/src/routes/+layout.svelte
+index d111290..76b9fc9 100644
+--- a/apps/web/src/routes/+layout.svelte
++++ b/apps/web/src/routes/+layout.svelte
+@@ -7,6 +7,7 @@
+   import { userFontsCacheName, type UserFont } from '$lib/data/fonts';
+   import { fontFamilyGroupOne$, isOnline$, userFonts$ } from '$lib/data/store';
+   import { dummyFn, isMobile, isMobile$ } from '$lib/functions/utils';
++  import { buildLocalFontStyleSheet } from '$lib/functions/book-security/local-media';
+   import { MetaTags } from 'svelte-meta-tags';
+   import '../app.scss';
+ 
+@@ -26,28 +27,7 @@
+   }
+ 
+   function addUserFonts(userFonts: UserFont[]) {
+-    let styleContent = '';
+-
+-    for (let index = 0, { length } = userFonts; index < length; index += 1) {
+-      const userFont = userFonts[index];
+-      const ext = userFont.fileName.split('.').pop() || '';
+-
+-      let format = '';
+-
+-      switch (ext) {
+-        case 'otf':
+-          format = 'opentype';
+-          break;
+-        case 'ttf':
+-          format = 'truetype';
+-          break;
+-        default:
+-          format = ext;
+-          break;
+-      }
+-
+-      styleContent += `@font-face{font-family: '${userFont.name}';font-style: normal;font-weight: 400;font-display: swap;src: local(''), url('${userFont.path}') format('${format}')}\n`;
+-    }
++    const styleContent = buildLocalFontStyleSheet(userFonts);
+ 
+     let styleElement = document.getElementById(userFontsCacheName);
+ 
