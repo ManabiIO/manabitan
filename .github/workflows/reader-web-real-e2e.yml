@@ -44,6 +44,8 @@ jobs:
           git rev-parse HEAD > reader-web-results/harness-head.txt
           git -C reader-fixture rev-parse HEAD > reader-web-results/reader-upstream.txt
           cp /tmp/reader-runtime.patch reader-web-results/reader-runtime.patch
+          python3 test/reader-web/prepare-harness.py
+          node --check test/reader-web/run.mjs
       - name: Install and build real applications
         shell: bash
         run: |
@@ -54,6 +56,22 @@ jobs:
           mkdir -p /tmp/manabitan-extension
           unzip -q builds/manabitan-chrome-dev.zip -d /tmp/manabitan-extension
           npm install --global pnpm@12.3.4
+          cp reader-fixture/pnpm-lock.yaml /tmp/reader-lock-before.yaml
+          cd reader-fixture
+          pnpm install --lockfile-only --no-frozen-lockfile > ../reader-web-results/reader-lock-reconcile.log 2>&1
+          cd ..
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import {parse} from 'yaml';
+          const before=parse(fs.readFileSync('/tmp/reader-lock-before.yaml','utf8'));
+          const after=parse(fs.readFileSync('reader-fixture/pnpm-lock.yaml','utf8'));
+          delete before.packageManagerDependencies;
+          delete after.packageManagerDependencies;
+          assert.deepEqual(after,before,'No application dependency resolution changes permitted');
+          JS
+          diff -u --label a/pnpm-lock.yaml --label b/pnpm-lock.yaml /tmp/reader-lock-before.yaml reader-fixture/pnpm-lock.yaml > reader-web-results/pnpm-tool-lock.patch || test "$?" -eq 1
+          cp reader-fixture/pnpm-lock.yaml reader-web-results/pnpm-lock.yaml
           cd reader-fixture
           pnpm install --frozen-lockfile > ../reader-web-results/reader-install.log 2>&1
           pnpm --dir apps/web exec svelte-kit sync
