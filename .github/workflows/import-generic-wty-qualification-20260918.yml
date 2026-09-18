@@ -1,0 +1,73 @@
+name: Complete isolated generic WTY qualification
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-generic-wty-qualification-20260918.yml]
+permissions:
+  contents: read
+  actions: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      THREE_DICTIONARY: wty-en-en
+      THREE_OUTPUT: builds/generic-wty-qualification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 35388885914
+          name: generic-qualified-jmnedict
+          path: builds/reference
+      - name: Restore byte-identical candidate and fixed schedule
+        run: |
+          mkdir -p builds/generic-wty-qualification
+          git apply builds/reference/source.patch
+          sha256sum builds/reference/source.patch > builds/generic-wty-qualification/SOURCE_PATCH_SHA256
+          git fetch --depth=1 origin 34e55a9965aa85240da0d13a550423d07e01839c
+          git show FETCH_HEAD:test/generic-span-codec-integration.test.js > test/generic-span-codec-integration.test.js
+          cat > builds/generic-wty-qualification/SETUP_NOTE <<'TXT'
+          The WTY job in 35388885914 stopped before any browser observation: an existing 20ms timing-based idle-worker unit test failed under file-level concurrency. The identical product patch passed all 6616 unit tests on the other three hosts. This run retains the failed setup artifact and does not replace any measured cohort. Unit test files are serialized here to avoid competing for the timing test's 20ms budget; no test is excluded or assertion weakened. The browser schedule remains six fixed ABBA blocks with interleaved controls. The newly added six real-codec tests are also included.
+          TXT
+      - run: npm ci
+      - name: Validate source and additional real-codec coverage
+        run: |
+          npm run build:libs > builds/generic-wty-qualification/libs.log 2>&1
+          npm run test:unit -- --no-file-parallelism > builds/generic-wty-qualification/unit.log 2>&1
+          npm run test:unit:options > builds/generic-wty-qualification/options.log 2>&1
+          npm run test:ts:main > builds/generic-wty-qualification/types-main.log 2>&1
+          npm run test:ts:dev > builds/generic-wty-qualification/types-dev.log 2>&1
+          npm run test:ts:bench > builds/generic-wty-qualification/types-bench.log 2>&1
+          npm run test:build > builds/generic-wty-qualification/build-plans.log 2>&1
+          node node_modules/eslint/bin/eslint.js test/generic-span-codec-integration.test.js > builds/generic-wty-qualification/integration-lint.log 2>&1
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+          node dev/bin/build.js --target chrome-dev > builds/generic-wty-qualification/build.log 2>&1
+          npx playwright install --with-deps chromium
+      - name: First measured WTY six-block qualification
+        run: node builds/reference/source/abba.mjs control,generic 6 | tee builds/generic-wty-qualification/abba.log
+      - name: Retain exact code, tests, schedule, and all observations
+        if: always()
+        run: |
+          cp builds/reference/source/abba.mjs builds/generic-wty-qualification/
+          cp test/generic-span-codec-integration.test.js builds/generic-wty-qualification/
+          git diff > builds/generic-wty-qualification/source.patch
+          git rev-parse HEAD > builds/generic-wty-qualification/SOURCE_HEAD
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: generic-qualified-wty-complete
+          path: builds/generic-wty-qualification
+          retention-days: 30
+          if-no-files-found: error
