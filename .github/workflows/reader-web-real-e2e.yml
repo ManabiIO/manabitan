@@ -35,7 +35,11 @@ jobs:
           p=Path('test/reader-web/qualify.sh');s=p.read_text()
           old='python3 test/reader-web/nonzero-bookmark-assertions.py'
           assert s.count(old)==1
-          p.write_text(s.replace(old,old+'\npython3 test/reader-web/closed-shadow-assertions.py'))
+          s=s.replace(old,old+'\npython3 test/reader-web/closed-shadow-assertions.py\npython3 test/reader-web/visible-target-assertions.py')
+          old='(cd reader-fixture && pnpm --dir apps/web exec svelte-kit sync)'
+          assert s.count(old)==1
+          s=s.replace(old,'audit_status=0\n(cd reader-fixture && pnpm audit --json) > reader-web-results/reader-current-audit.json 2>&1 || audit_status=$?\nprintf "%s\\n" "$audit_status" > reader-web-results/reader-current-audit.exit\n'+old)
+          p.write_text(s)
           PY
           bash test/reader-web/qualify.sh
       - name: Retain runnable test sources and complete runtime diff
