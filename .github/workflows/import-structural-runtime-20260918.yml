@@ -1,0 +1,42 @@
+name: Capture verified import dictionaries and runtime
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-structural-runtime-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Download locked fixtures and browser
+        run: |
+          set -euo pipefail
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('builds/e2e-dictionary-cache');"
+          npx playwright install chromium
+      - name: Package exact runtime and fixtures
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/import-runtime/node/bin
+          cp "$(which node)" /tmp/import-runtime/node/bin/node
+          cp -a "$HOME/.cache/ms-playwright" /tmp/import-runtime/ms-playwright
+          cp -a builds/e2e-dictionary-cache /tmp/import-runtime/dictionaries
+          cp test/perf/dictionaries.lock.json /tmp/import-runtime/dictionaries.lock.json
+          node --version > /tmp/import-runtime/node-version.txt
+          tar -czf /tmp/import-runtime-fixtures.tgz -C /tmp/import-runtime .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pinned-import-runtime-fixtures
+          path: /tmp/import-runtime-fixtures.tgz
+          retention-days: 7
+          if-no-files-found: error
