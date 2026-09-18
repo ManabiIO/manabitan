@@ -1,0 +1,45 @@
+name: Reader web pinned-source qualification
+on:
+  push:
+    branches: [research/reader-web-runtime-source-20260917]
+    paths: [.github/workflows/reader-web-runtime-source.yml]
+permissions:
+  contents: read
+concurrency:
+  group: reader-web-pinned-source
+  cancel-in-progress: true
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a5b2039b1622912134471f8af2a4d2b4990a795f
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.16.0
+      - name: Capture versioned source and dependency fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualification
+          git rev-parse HEAD > qualification/manabitan-source-sha.txt
+          git archive --format=tar.gz --output=qualification/manabitan-source.tar.gz HEAD
+          npm ci
+          tar -czf qualification/manabitan-node-modules.tar.gz node_modules
+          git clone --depth=1 https://github.com/ttu-ttu/ebook-reader.git /tmp/reader-upstream
+          cd /tmp/reader-upstream
+          test "$(git rev-parse HEAD)" = 301aef4957c3cb22162276b11f4a47b35533faae
+          git rev-parse HEAD > "$GITHUB_WORKSPACE/qualification/reader-source-sha.txt"
+          git archive --format=tar.gz --output="$GITHUB_WORKSPACE/qualification/reader-source.tar.gz" HEAD
+          cd "$GITHUB_WORKSPACE"
+          sha256sum qualification/*.tar.gz > qualification/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reader-web-pinned-source
+          path: qualification/
+          retention-days: 3
+          compression-level: 0
+          if-no-files-found: error
