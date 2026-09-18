@@ -1,0 +1,74 @@
+name: Complete private ownership screen
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-private-ownership-20260918.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+    working-directory: source
+jobs:
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict]
+    env:
+      CANDIDATE: owned-private
+      DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fbe9ae29413488d4a3a9cbac8d2463f25b54ff75
+          path: recipe
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Correct exact-line build selection and retain unchanged fixed-plan driver
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'JS'
+          import {readFileSync, writeFileSync} from 'node:fs';
+          import {parse} from 'yaml';
+          const recipe=parse(readFileSync('../recipe/.github/workflows/import-ownership-screen-20260918.yml','utf8'));
+          const steps=recipe.jobs.screen.steps;
+          let build=steps.find(x=>x.name==='Build isolated source arms at the same path').run;
+          const old="assert s.count(old)==1\n    p.write_text(s.replace(old,''))";
+          const replacement="lines=s.splitlines(keepends=True); assert lines.count(old)==1\n    p.write_text(''.join(line for line in lines if line != old))";
+          if (build.split(old).length!==2) throw new Error('Unexpected private-memory recipe');
+          build=build.replace(old,replacement);
+          writeFileSync('/tmp/private-build.sh',build);
+          writeFileSync('/tmp/private-screen.sh',steps.find(x=>x.name==='Fixed complete-import ABBA and same-binary controls').run);
+          JS
+          bash /tmp/private-build.sh
+          node --input-type=module - <<'JS'
+          import {readFileSync} from 'node:fs';
+          for(const [arm,shared] of [['A',true],['B',false]]) {
+            const {instance}=await WebAssembly.instantiate(readFileSync(`builds/ownership-screen/${arm}/parser.wasm`));
+            if((instance.exports.memory.buffer instanceof SharedArrayBuffer)!==shared) throw new Error(`Wrong memory type for ${arm}`);
+          }
+          JS
+          cp /tmp/private-build.sh builds/ownership-screen/build-recipe.sh
+          cp /tmp/private-screen.sh builds/ownership-screen/screen-recipe.sh
+          bash /tmp/private-screen.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: private-ownership-${{ matrix.dictionary }}
+          path: source/builds/ownership-screen
+          retention-days: 14
+          if-no-files-found: error
