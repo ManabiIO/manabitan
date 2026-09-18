@@ -34,9 +34,7 @@ jobs:
           import base64, gzip, hashlib, pathlib
           root = pathlib.Path('test/reader-web')
           data = (root/'fixture-runtime.part1.b64').read_text().strip() + (root/'fixture-runtime.part2.b64').read_text().strip()
-          # Correct transport transcription only. The decoded source hash below
-          # is authoritative and fails closed on any other discrepancy.
-          for old,new in [('T+RZZTVKs','T+RZTVKs'),('PPux/eXPux/eXPw','PPux/eXPw'),('XR95y6WoefVm9PbNr70XR95y6+','XR95y6+'),('Lzz/6GP2','Lzz/6GP2')]:
+          for old,new in [('T+RZZTVKs','T+RZTVKs'),('PPux/eXPux/eXPw','PPux/eXPw'),('XR95y6WoefVm9PbNr70XR95y6+','XR95y6+')]:
               data = data.replace(old,new)
           patch = gzip.decompress(base64.b64decode(data, validate=True))
           assert hashlib.sha256(patch).hexdigest() == 'b822ebbb904c1cb0051a4f5e5d177f081a7c6b5107e50a9b48b12f3e0961260e'
@@ -54,7 +52,7 @@ jobs:
           npm run build:libs > reader-web-results/manabitan-libs.log 2>&1
           node dev/bin/build.js chrome-dev > reader-web-results/manabitan-build.log 2>&1
           mkdir -p /tmp/manabitan-extension
-          unzip -q builds/yomitan-chrome-dev.zip -d /tmp/manabitan-extension
+          unzip -q builds/manabitan-chrome-dev.zip -d /tmp/manabitan-extension
           npm install --global pnpm@12.3.4
           cd reader-fixture
           pnpm install --frozen-lockfile > ../reader-web-results/reader-install.log 2>&1
