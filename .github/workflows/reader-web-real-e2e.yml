@@ -30,6 +30,13 @@ jobs:
           python3 test/reader-web/enable-completion-observer.py
           python3 test/reader-web/prepare-candidate.py
           python3 test/reader-web/prepare-popup-qualification.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('test/reader-web/qualify.sh');s=p.read_text()
+          old='python3 test/reader-web/nonzero-bookmark-assertions.py'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,old+'\npython3 test/reader-web/closed-shadow-assertions.py'))
+          PY
           bash test/reader-web/qualify.sh
       - name: Retain runnable test sources and complete runtime diff
         if: always()
