@@ -1,0 +1,40 @@
+name: Profile current complete dictionary imports
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-structural-profile-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Complete import with diagnostic trace
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          node dev/perf/import-benchmark.js "$DICTIONARY" --trace --flags '{}' --output builds/structural-profile
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: structural-profile-${{ matrix.dictionary }}
+          path: builds/structural-profile
+          retention-days: 14
+          if-no-files-found: error
