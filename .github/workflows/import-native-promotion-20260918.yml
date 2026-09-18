@@ -1,0 +1,189 @@
+name: Validate qualified native lookup defaults
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-native-promotion-20260918.yml]
+permissions:
+  contents: write
+  actions: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 35388506078
+          pattern: native-confirm-*
+          path: builds/native-reference
+      - name: Validate and retain every reference observation
+        run: |
+          mkdir -p builds/native-promotion "$RUNNER_TEMP/native-tools"
+          cat > "$RUNNER_TEMP/native-tools/evidence.mjs" <<'JS'
+          import assert from 'node:assert/strict';
+          import {readFileSync,readdirSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          import path from 'node:path';
+          import {pathToFileURL} from 'node:url';
+          const {extractImportResult}=await import(pathToFileURL(path.resolve('dev/perf/benchmark-support.js')));
+          const hash=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+          const output={schemaVersion:1,baseline:'fb7241deb70950dc113089cd774c9489ede48f8a',run:35388506078,cohorts:[]};
+          const roots=readdirSync('builds/native-reference');assert.equal(roots.length,6);
+          for(const name of roots.sort()){
+            const root=path.join('builds/native-reference',name,'confirmation');
+            const cohort={name,stages:{}};let signature=null;
+            for(const stage of ['warmup','pre-AA','measured','post-AA']){
+              const dir=path.join(root,stage),files=readdirSync(dir).filter(x=>x.includes('summary')&&x.endsWith('.json'));assert.equal(files.length,1);
+              const summary=JSON.parse(readFileSync(path.join(dir,files[0])));assert.equal(summary.schemaVersion,3);assert.equal(summary.source.gitSha,output.baseline);assert.equal(summary.authoritativeTiming,true);
+              const result=summary.results[0];assert.equal(result.status,'ok');assert.equal(result.runPairs.length,stage==='measured'?12:stage==='warmup'?1:3);
+              const rows=[];
+              for(const pair of result.runPairs){
+                const entry={iteration:pair.iteration,deltaPercent:pair.deltas.totalImportPercentDelta};
+                for(const arm of ['baseline','variant']){
+                  const file=path.join(dir,path.basename(pair[arm].reportJsonPath));const report=JSON.parse(readFileSync(file));
+                  const flags=arm==='baseline'?summary.baselineImportFlags:result.importFlags;
+                  const actual=extractImportResult(report,summary.dictionary,summary.fixture,false,flags);
+                  assert.equal(actual.totalImportMs,pair[arm].summary.totalImportMs);
+                  assert.equal(actual.importDebug.openStorageDiagnostics.mode,'opfs-sahpool');
+                  const phases=actual.importDebug.importerPhaseTimings;
+                  const parser=phases.find(p=>p.phase.startsWith('term-file-fast-path:')).details;
+                  const final=phases.find(p=>p.phase==='bulk-finalization').details;assert.equal(final.ok,true);
+                  const work={rows:parser.rows,content:final.termContentTotalWriteBytes,records:final.termRecordTotalWriteBytes,lookup:final.termRecordLookupIndexWriteBytes};
+                  if(signature===null)signature=work;assert.deepEqual(work,signature);
+                  entry[arm]={ms:actual.totalImportMs,validation:actual.validation,work,flags,segments:parser.parserNativeSegmentedLookupSegments,scratchGroups:parser.parserNativeLookupScratchReuseGroups,scratchMisses:parser.parserNativeLookupScratchReuseMisses,nativeFallbacks:parser.parserNativeSegmentedLookupFallbacks,reportSha256:hash(file)};
+                }
+                rows.push(entry);
+              }
+              cohort.stages[stage]={summarySha256:hash(path.join(dir,files[0])),source:summary.source,fixture:summary.fixture,medians:result.medians,pairs:rows};
+            }
+            output.cohorts.push(cohort);
+          }
+          writeFileSync('dev/perf/native-lookup-qualification-20260918.json',JSON.stringify(output,null,2)+'\n');
+          JS
+          node "$RUNNER_TEMP/native-tools/evidence.mjs"
+      - name: Prepare minimal qualified production policy and regression coverage
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('ext/js/dictionary/term-bank-experiments.js');s=p.read_text();s=s.replace(' * Default-off import experiments. Snapshot before asynchronous work, and copy\n * the effective values into each worker request; no toggle survives an import.',' * Per-import implementation switches. Qualified native lookup construction\n * defaults on; the other experiments remain default-off. Snapshot before\n * asynchronous work and copy effective values into each worker request.\n * Explicit false opts out for diagnostics; no toggle survives an import.')
+          for k in ['experimentalLookupScratchReuse','experimentalNativeSegmentedLookup']:
+              old=f'{k}: options.{k} === true,';assert s.count(old)==1;s=s.replace(old,f"{k}: typeof options.{k} === 'undefined' || options.{k} === true,")
+          p.write_text(s)
+          p=Path('test/lookup-construction-experiments.test.js');s=p.read_text();s=s.replace('async function parse(banks, flags = {}, preload = false) {','async function parse(banks, flags = {}, preload = false) {\n    // Keep the portable oracle explicit after production native promotion.\n    flags = {experimentalNativeSegmentedLookup: false, experimentalLookupScratchReuse: false, ...flags}')
+          s=s.replace("test('new flags require exact true and reset when omitted'","test('switches reject truthy values and reset to their qualified defaults'")
+          s=s.replace('expect(Reflect.get(snapshotTermBankExperiments(), key)).toBe(false)',"expect(Reflect.get(snapshotTermBankExperiments(), key)).toBe(key === 'experimentalLookupScratchReuse' || key === 'experimentalNativeSegmentedLookup')")
+          s=s.replace('for (const enabled of [true, false]) {','for (const enabled of [true, false, undefined, false, undefined]) {').replace('id: enabled ? 1 : 2,','id: enabled === false ? 2 : 1,').replace('toBe(enabled ? 3 : 0)','toBe(enabled === false ? 0 : 3)').replace('toBe(enabled ? 1 : 0)','toBe(enabled === false ? 0 : 1)');p.write_text(s)
+          p=Path('types/ext/dictionary-importer.d.ts');s=p.read_text();s=s.replace('    experimentalLookupScratchReuse?: boolean;','    /** Qualified production default: true. Explicit false retains the allocation oracle. */\n    experimentalLookupScratchReuse?: boolean;').replace('    experimentalNativeSegmentedLookup?: boolean;','    /** Qualified production default: true. Explicit false retains portable large-group lookup construction. */\n    experimentalNativeSegmentedLookup?: boolean;');p.write_text(s)
+          PY
+          cat > dev/perf/native-lookup-promotion-20260918.md <<'MD'
+          # Native lookup production qualification — 2026-09-18
+
+          Promote the existing native segmented lookup and retired-parser-workspace reuse paths. The structural win is eliminating JavaScript compaction/encoding of large lookup groups, not another parser-worker-count adjustment. All other experiments remain off. Explicit false still selects the old implementation independently for either switch; invalid non-boolean values remain disabled.
+
+          ## Independent complete-import evidence
+
+          Pinned baseline: `fb7241deb70950dc113089cd774c9489ede48f8a`. Run [35388506078](https://github.com/ManabiIO/manabitan/actions/runs/35388506078) used two independent hosts per dictionary, opposite initial order, one excluded warmup pair, three pre-control pairs, twelve measured adjacent alternating pairs, and three post-control pairs. Every observation and every control is retained in `native-lookup-qualification-20260918.json`; raw reports are in the run artifacts. No tails or unfavorable hosts were removed.
+
+          | Dictionary | Host AB paired median | Host BA paired median | Faster measured pairs |
+          | --- | ---: | ---: | ---: |
+          | JMdict | -11.34% | -12.21% | 24/24 |
+          | JMnedict | -11.56% | -11.92% | 24/24 |
+          | Jitendex | +1.01% | -0.47% | 12/24 |
+
+          Jitendex is not a demonstrated speedup. Its BA host had a noisy pre-control (-16.08%); that host and all its measurements remain included. Do not pool absolute times between hosts. JMdict/JMnedict controls are materially smaller than their measured effects.
+
+          Timing is the schema-3 browser monotonic file-input-change event through current-operation, post-UI import-complete. Reports verify full pinned title/revision/row counts, persisted content probes, non-fallback OPFS/SQLite storage, and matching effective flags. Content, record and lookup write bytes match across arms. JMdict uses 15 native segments and eight scratch-reuse groups. JMnedict retains the bounded existing workspace fallback: one group uses the portable path after a scratch-capacity miss, with 23 native segments and seven reuse groups. This is not reported as zero parser fallback. No storage fallback or import errors occurred.
+
+          ## Behavior and safety
+
+          The production native algorithms, uint16 segment limits, capacity checks, resource fallback and on-disk formats are unchanged. The only runtime changes are the two default values. The byte-for-byte portable lookup oracle is explicitly disabled in regression helpers so promotion cannot silently turn an A/B test into native-versus-native. A real worker alternates true, false and omitted options across five requests; complete index digests and path counters are checked after each request.
+
+          Research workflows, generic span compression, extra content-write overlap, three-worker parsing and unrelated experiments are not in this product patch. For future baseline comparisons, `{}` now means these qualified production defaults; use both switches explicitly false to compare against the pre-promotion route.
+          MD
+      - run: npm ci
+      - name: Validate production code and all unit tests
+        run: |
+          npm run build:libs > builds/native-promotion/libs.log 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-experiments.js test/lookup-construction-experiments.test.js > builds/native-promotion/lint.log 2>&1
+          npm run test:unit > builds/native-promotion/unit.log 2>&1
+          npm run test:unit:options > builds/native-promotion/options.log 2>&1
+          npm run test:ts:main > builds/native-promotion/types-main.log 2>&1
+          npm run test:ts:dev > builds/native-promotion/types-dev.log 2>&1
+          npm run test:ts:bench > builds/native-promotion/types-bench.log 2>&1
+          npm run test:build > builds/native-promotion/build-plans.log 2>&1
+          npx prettier dev/perf/native-lookup-promotion-20260918.md dev/perf/native-lookup-qualification-20260918.json --write
+          git diff --check
+      - name: Create isolated product commit without changing develop
+        run: |
+          git switch -c perf/native-lookup-defaults-20260918
+          git add ext/js/dictionary/term-bank-experiments.js test/lookup-construction-experiments.test.js types/ext/dictionary-importer.d.ts dev/perf/native-lookup-promotion-20260918.md dev/perf/native-lookup-qualification-20260918.json
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'perf: enable qualified native lookup construction and scratch reuse'
+          git rev-parse HEAD > builds/native-promotion/PRODUCT_HEAD
+          git show --stat HEAD > builds/native-promotion/product-stat.txt
+      - name: Prepare exact production-default comparison
+        run: |
+          git fetch --depth=1 origin f00b61bb2d851024f4124f1d854502ba602b506d
+          git show FETCH_HEAD:dev/perf/import-transport-20260917/abba.mjs > "$RUNNER_TEMP/native-tools/abba-original.mjs"
+          git fetch --depth=1 origin 9c843c8a0e06190948ae0d52c29094a45a2555f1
+          git show FETCH_HEAD:dev/perf/wty-abba-20260916/prepare.py > "$RUNNER_TEMP/native-tools/fixture-original.py"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os,subprocess
+          tools=Path(os.environ['RUNNER_TEMP'])/'native-tools';s=(tools/'abba-original.mjs').read_text();start=s.index('const variants=');end=s.index('\n',start);s=s[:start]+"const legacy={experimentalNativeSegmentedLookup:false,experimentalLookupScratchReuse:false}; const variants={control:legacy,production:{}}"+s[end:];assert s.count("flags:arm==='A'?{}:variants[id]")==2;s=s.replace("flags:arm==='A'?{}:variants[id]","flags:arm==='A'?legacy:variants[id]");s=s.replace("base:'2f407e86fae0d3e39f506e6b1ce30886697698ea'","base:"+repr(subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()));(tools/'abba.mjs').write_text(s);(tools/'fixture.py').write_text((tools/'fixture-original.py').read_text().split('# Common correctness prerequisite')[0]);p=Path('test/chromium/extension-two-dictionary-import.e2e.js');s=p.read_text();assert s.count('maxBuffer: 32 * 1024 * 1024')==2;p.write_text(s.replace('maxBuffer: 32 * 1024 * 1024','maxBuffer: 256 * 1024 * 1024'))
+          PY
+          python3 "$RUNNER_TEMP/native-tools/fixture.py" > builds/native-promotion/fixture.log
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('./builds/e2e-dictionary-cache')"
+          node dev/bin/build.js --target chrome-dev > builds/native-promotion/build.log 2>&1
+          npx playwright install --with-deps chromium
+      - name: Whole WTY import with default-on policy and retained A-A controls
+        env:
+          THREE_DICTIONARY: wty-en-en
+          THREE_OUTPUT: builds/native-promotion/wty
+        run: node "$RUNNER_TEMP/native-tools/abba.mjs" control,production 2 | tee builds/native-promotion/wty.log
+      - name: Production-default Chromium import and recovery lifecycle
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{}'
+          MANABITAN_E2E_IMPORT_BENCH_QUICK: '0'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/native-promotion/lifecycle.html
+        run: |
+          node test/chromium/extension-two-dictionary-import.e2e.js > builds/native-promotion/lifecycle.log 2>&1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('builds/native-promotion/lifecycle.json').read_text());assert r['status']=='success' and r['skippedVerification'] is False
+          PY
+      - name: Publish only the validated product branch
+        run: |
+          test -z "$(git ls-remote --heads origin refs/heads/perf/native-lookup-defaults-20260918)"
+          git push origin HEAD:refs/heads/perf/native-lookup-defaults-20260918
+      - name: Preserve validation and research-only changes
+        if: always()
+        run: |
+          git diff > builds/native-promotion/research-only.patch
+          find "$RUNNER_TEMP/native-tools" -maxdepth 1 -type f -exec cp '{}' builds/native-promotion/ ';'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-defaults-validation
+          path: builds/native-promotion
+          retention-days: 30
+          if-no-files-found: error
