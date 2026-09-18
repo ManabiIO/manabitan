@@ -1,0 +1,54 @@
+--- a/ext/js/dictionary/term-bank-wasm-parser.js
++++ b/ext/js/dictionary/term-bank-wasm-parser.js
+@@ -1163,7 +1163,7 @@
+             // Malformed internal metadata must not produce a smaller arena.
+             // The existing native validation will reject it before publication.
+             if (typeof expression !== 'number' || typeof reading !== 'number' ||
+-                expression >= stringLengths.length || reading >= stringLengths.length) {
++            expression >= stringLengths.length || reading >= stringLengths.length) {
+                 return sourceBytes;
+             }
+             bytes += stringLengths[expression];
+@@ -1765,7 +1765,9 @@
+     (rowCount >= 0xffff || fusedStringPlan.stringLengths.length >= 0xffff) &&
+     typeof parsed.wasm?.compact_term_lookup_keys === 'function';
+     if (segmentedLookup && fusedStringPlan !== null) {
+-        maxNativeChunkStringBytes = getNativeSegmentKeyBytesCapacity(fusedStringPlan, rowCount);
++        // Even an all-empty key table needs a valid scratch address. Capacity
++        // is not encoded length; existing index validation remains unchanged.
++        maxNativeChunkStringBytes = Math.max(1, getNativeSegmentKeyBytesCapacity(fusedStringPlan, rowCount));
+     }
+     /** @type {ReturnType<typeof createNativeLookupCompactionScratch>|null} */
+     let nativeCompactionScratch = null;
+--- a/test/lookup-construction-experiments.test.js
++++ b/test/lookup-construction-experiments.test.js
+@@ -290,6 +290,29 @@
+         const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true}, true)
+         expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(3)
+         expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
++    })
++    test.each([false, true])('empty key tables preserve the existing index rejection: explicit reuse=%s', async (explicitReuse) => {
++        const bank = encoder.encode(JSON.stringify(Array.from({length: 10000}, () => [
++            '',
++            '',
++            '',
++            '',
++            0,
++            ['meaning'],
++            0,
++            '',
++        ])))
++        const banks = [bank, bank, bank, bank, bank, bank, bank]
++        // Empty lookup keys are rejected by the existing index format. Do not
++        // replace that validation failure with an unrelated allocator error.
++        await expect(parse(banks)).rejects.toThrow('Invalid term lookup index key boundary')
++        await expect(parse(banks, {
++            experimentalNativeSegmentedLookup: true,
++            experimentalLookupScratchReuse: explicitReuse,
++        })).rejects.toThrow('Invalid term lookup index key boundary')
++        const recovered = await parse(makeBanks(70001), {experimentalNativeSegmentedLookup: true})
++        expect(recovered.profile?.nativeSegmentedLookupSegments).toBe(3)
++        expect(hasCompletePreparedTermLookupIndexes(recovered.indexes, 70001)).toBe(true)
+     })
+     test('native compactor rejects invalid source/rows/capacity and resets remap on retry', async () => {
+         const binary = await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))
