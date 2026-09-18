@@ -26,7 +26,9 @@ jobs:
         with:
           node-version: 24.21.0
       - name: Build and exercise real Reader and ManabiTan
-        run: bash test/reader-web/qualify.sh
+        run: |
+          python3 test/reader-web/enable-completion-observer.py
+          bash test/reader-web/qualify.sh
       - name: Retain runnable test sources
         if: always()
         run: |
