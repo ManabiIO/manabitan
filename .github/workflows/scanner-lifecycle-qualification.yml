@@ -35,8 +35,8 @@ jobs:
           set -o pipefail
           npx vitest run test/reader-scanner-lifecycle.test.js test/text-scanner.test.js test/dictionary-importer-shared-buffer.test.js test/web-asset-fetch.test.js test/web-asset-paths.test.js test/dictionary-worker-backend.test.js 2>&1 | tee evidence/unit.log
           npx eslint ext/js/language/text-scanner.js test/text-scanner.test.js test/reader-scanner-lifecycle.test.js test/dictionary-importer-shared-buffer.test.js 2>&1 | tee evidence/lint.log
-          npx tsc --noEmit --project tsconfig.json 2>&1 | tee evidence/types-main.log
-          npx tsc --noEmit --project test/tsconfig.json 2>&1 | tee evidence/types-test.log
+          npm run test:ts:main 2>&1 | tee evidence/types-main.log
+          npm run test:ts:test 2>&1 | tee evidence/types-test.log
       - name: Build real extension
         run: node dev/bin/build.js chrome-dev 2>&1 | tee evidence/build.log
       - uses: actions/upload-artifact@v4
