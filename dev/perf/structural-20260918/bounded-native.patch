@@ -1,0 +1,201 @@
+diff --git a/ext/js/dictionary/term-bank-wasm-parser.js b/ext/js/dictionary/term-bank-wasm-parser.js
+index ffb915f..1fdb061 100644
+--- a/ext/js/dictionary/term-bank-wasm-parser.js
++++ b/ext/js/dictionary/term-bank-wasm-parser.js
+@@ -777,7 +777,7 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
+             jsonPtr,
+             jsonLength,
+             metasPtr: outPtr,
+-            retiredLookupScratch: experiments.experimentalLookupScratchReuse ?
++            retiredLookupScratch: (experiments.experimentalLookupScratchReuse || experiments.experimentalNativeSegmentedLookup) ?
+ [
+     {pointer: outPtr, byteLength: initialMetaCapacity * META_U32_FIELDS * 4},
+     {pointer: stringHashTablePtr, byteLength: stringHashTableSize * 4},
+@@ -1140,6 +1140,41 @@ function getNativeLookupIndexCapacity(rowCount, keyCount, keyBytesLength) {
+     return 16 + 32 + align4(keyBytesLength) + baseU16Bytes + (rowCount * 4) + 32 + align4(derivedU16Count * 2);
+ }
+ 
++/**
++ * Bounds a reusable segment arena without allocating another key-remap table.
++ * Summing referenced key lengths can count a key more than once, but cannot
++ * undercount the compacted bytes. The whole source arena is an independent
++ * upper bound. Keep the native compactor's validation authoritative; this
++ * sizing pass neither caches validation nor changes segment boundaries.
++ * @param {FusedTermStringPlan} plan
++ * @param {number} rowCount
++ * @returns {number}
++ */
++function getNativeSegmentKeyBytesCapacity(plan, rowCount) {
++    const sourceBytes = plan.stringsBuffer.byteLength;
++    const {stringLengths, expressionIndexes, readingIndexes} = plan;
++    let maximum = 0;
++    for (let start = 0; start < rowCount; start += MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS) {
++        const end = Math.min(rowCount, start + MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS);
++        let bytes = 0;
++        for (let row = start; row < end; ++row) {
++            const expression = expressionIndexes[row];
++            const reading = readingIndexes[row];
++            // Malformed internal metadata must not produce a smaller arena.
++            // The existing native validation will reject it before publication.
++            if (typeof expression !== 'number' || typeof reading !== 'number' ||
++                expression >= stringLengths.length || reading >= stringLengths.length) {
++                return sourceBytes;
++            }
++            bytes += stringLengths[expression];
++            if (reading !== expression) { bytes += stringLengths[reading]; }
++            if (bytes >= sourceBytes) { return sourceBytes; }
++        }
++        maximum = Math.max(maximum, bytes);
++    }
++    return maximum;
++}
++
+ /**
+  * @param {Awaited<ReturnType<typeof getWasm>>} wasm
+  * @param {number} rowCapacity
+@@ -1729,6 +1764,9 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
+     fusedStringPlan !== null && normalizedChunkSize >= rowCount &&
+     (rowCount >= 0xffff || fusedStringPlan.stringLengths.length >= 0xffff) &&
+     typeof parsed.wasm?.compact_term_lookup_keys === 'function';
++    if (segmentedLookup && fusedStringPlan !== null) {
++        maxNativeChunkStringBytes = getNativeSegmentKeyBytesCapacity(fusedStringPlan, rowCount);
++    }
+     /** @type {ReturnType<typeof createNativeLookupCompactionScratch>|null} */
+     let nativeCompactionScratch = null;
+     let nativeLookupScratchReusedBytes = 0;
+@@ -1764,7 +1802,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
+         );
+         // Address planning is read-only. Native writes happen after ALL row
+         // metadata/media decoding, and only for a single complete fused chunk.
+-        const retiredScratch = experiments.experimentalLookupScratchReuse && fusedPlanLayout !== null &&
++        const retiredScratch = (segmentedLookup || experiments.experimentalLookupScratchReuse) && fusedPlanLayout !== null &&
+         normalizedChunkSize >= rowCount && parsed.retiredLookupScratch ?
+             createRetiredLookupScratchAllocator(parsed.retiredLookupScratch, parsed.wasm.memory.buffer.byteLength) :
+ null;
+@@ -1777,6 +1815,11 @@ null :
+     return pointer;
+ };
+         try {
++            // Large-group native lookup is worthwhile only with retired workspace.
++            // Never grow the parser heap just to replace the JavaScript fallback.
++            if (segmentedLookup && retiredScratch === null) {
++                throw new TermBankWasmResourceError('Retired parser workspace is unavailable');
++            }
+             nativeLookupIndexScratch = createNativeLookupIndexScratch(
+                 parsed.wasm,
+                 nativeLookupRowCapacity,
+diff --git a/test/lookup-construction-experiments.test.js b/test/lookup-construction-experiments.test.js
+index 4c86f1b..fe9fd2c 100644
+--- a/test/lookup-construction-experiments.test.js
++++ b/test/lookup-construction-experiments.test.js
+@@ -196,6 +196,101 @@ describe('lookup construction experiments', () => {
+         expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe(1)
+         expect(candidate.profile?.nativeLookupScratchReusedBytes).toBe(0)
+     })
++    test.each([65534, 65535, 65536])('native segmentation alone reuses retired scratch at the row boundary: %i', async (count) => {
++        const banks = makeBanks(count)
++        const baseline = await parse(banks)
++        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true}, true)
++        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(Math.ceil(count / 30000))
++        expect(candidate.profile?.nativeLookupScratchReuseGroups).toBe(1)
++        expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe(0)
++        expect(candidate.profile?.nativeLookupScratchReusedBytes).toBeGreaterThan(0)
++        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
++        expect(hasCompletePreparedTermLookupIndexes(candidate.indexes, count)).toBe(true)
++        await parse(makeBanks(24))
++        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
++    })
++    test('native segmentation alone falls back when retired scratch cannot hold long keys', async () => {
++        const banks = makeBanks(40001).map((bank) => {
++            const rows = JSON.parse(new TextDecoder().decode(bank))
++            for (const row of rows) {
++                row[0] = 'a'.repeat(20) + row[0]
++                row[1] = 'b'.repeat(20) + row[1]
++            }
++            return encoder.encode(JSON.stringify(rows))
++        })
++        const baseline = await parse(banks)
++        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true})
++        expect(candidate.profile?.fusedParseFallbacks).toBe(0)
++        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(0)
++        expect(candidate.profile?.nativeSegmentedLookupFallbacks).toBe(1)
++        expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe(1)
++        expect(candidate.profile?.nativeLookupScratchReusedBytes).toBe(0)
++        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
++        expect(hasCompletePreparedTermLookupIndexes(candidate.indexes, 40001)).toBe(true)
++        const recovered = await parse(makeBanks(70001), {experimentalNativeSegmentedLookup: true})
++        expect(recovered.profile?.nativeSegmentedLookupSegments).toBe(3)
++        expect(recovered.profile?.nativeLookupScratchReuseGroups).toBe(1)
++    })
++    test('segment-sized arenas keep a wide multi-segment group within retired workspace', async () => {
++        const banks = makeBanks(90001).map((bank) => {
++            const rows = JSON.parse(new TextDecoder().decode(bank))
++            for (const row of rows) {
++                row[0] = 'a'.repeat(20) + row[0]
++                row[1] = 'b'.repeat(20) + row[1]
++            }
++            return encoder.encode(JSON.stringify(rows))
++        })
++        const baseline = await parse(banks)
++        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true, experimentalLookupScratchReuse: true})
++        expect(candidate.profile?.fusedParseFallbacks).toBe(0)
++        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(4)
++        expect(candidate.profile?.nativeLookupScratchReuseGroups).toBe(1)
++        expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe(0)
++        expect(candidate.profile?.nativeLookupScratchReusedBytes).toBeGreaterThan(0)
++        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
++        await parse(makeBanks(24))
++        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
++    })
++    test.each([false, true])('segment bounds preserve repeated keys and reading aliases: %s', async (aliases) => {
++        const banks = makeBanks(70001).map((bank) => {
++            const rows = JSON.parse(new TextDecoder().decode(bank))
++            for (const row of rows) {
++                row[0] = '共通'
++                row[1] = aliases ? row[0] : ''
++            }
++            return encoder.encode(JSON.stringify(rows))
++        })
++        const baseline = await parse(banks)
++        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true})
++        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(3)
++        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
++    })
++    test('segment bounds include the final partial segment and long boundary keys', async () => {
++        const rows = Array.from({length: 60001}, (_, index) => [
++            index < 60000 ? '共通' : '長'.repeat(1000),
++            index === 30000 ? '読'.repeat(2000) : '',
++            '',
++            '',
++            0,
++            ['meaning'],
++            index,
++            '',
++        ])
++        // Unique earlier keys force native segmentation even below 65535 rows.
++        for (let index = 0; index < 40000; ++index) {
++            rows[index][0] = `単語${index}`
++            rows[index][1] = `よみ${index}`
++        }
++        rows[30000][1] = '読'.repeat(2000)
++        const banks = []
++        for (let start = 0; start < rows.length; start += 10000) {
++            banks.push(encoder.encode(JSON.stringify(rows.slice(start, start + 10000))))
++        }
++        const baseline = await parse(banks)
++        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true}, true)
++        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(3)
++        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
++    })
+     test('native compactor rejects invalid source/rows/capacity and resets remap on retry', async () => {
+         const binary = await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))
+         const {instance} = await WebAssembly.instantiate(binary)
+@@ -348,7 +443,7 @@ describe('lookup construction experiments', () => {
+                     version: 3,
+                     sourceBuffers: banks.map((bank) => bank.buffer),
+                     options: {experimentalNativeSegmentedLookup: enabled,
+-                        experimentalLookupScratchReuse: enabled,
++                        experimentalLookupScratchReuse: false,
+                         singleChunk: true,
+                         emitTermByteLists: false,
+                         computeContentHashes: true,
