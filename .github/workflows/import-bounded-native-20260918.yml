@@ -1,0 +1,195 @@
+name: Qualify bounded native lookup imports
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-bounded-native-20260918.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+    working-directory: source
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 5a2c6d0694913d3bb0370d0aff693db3e74249b1
+          path: recipe
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Reproduce parent diagnostics and new regression failures
+        run: |
+          set -euo pipefail
+          mkdir -p builds/bounded-qualification
+          cp ../recipe/dev/perf/structural-20260918/bounded-native.patch builds/bounded-qualification/candidate.patch
+          echo 'ecb3c177c66595a38b41041987d7a4e563a01ca6cb5935300958fbf7327590d3  builds/bounded-qualification/candidate.patch' | sha256sum -c -
+          cp ext/lib/term-bank-parser.wasm builds/bounded-qualification/parent.wasm
+          set +e
+          npm run test:ts:test > builds/bounded-qualification/parent-test-types.log 2>&1
+          echo "$?" > builds/bounded-qualification/parent-test-types.exit
+          set -e
+          git apply --include='test/lookup-construction-experiments.test.js' builds/bounded-qualification/candidate.patch
+          set +e
+          node node_modules/vitest/vitest.mjs run test/lookup-construction-experiments.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=builds/bounded-qualification/red.json > builds/bounded-qualification/red.log 2>&1
+          result=$?
+          set -e
+          test "$result" -ne 0
+          python3 - <<'PY'
+          import json,pathlib
+          data=json.loads(pathlib.Path('builds/bounded-qualification/red.json').read_text())
+          failures=[t['fullName'] for f in data['testResults'] for t in f['assertionResults'] if t['status']=='failed']
+          assert len(failures)==6,failures
+          assert all(any(s in name for s in ['native segmentation alone','segment-sized arenas','actual worker preserves native segment plans']) for name in failures),failures
+          print('Expected parent failures:',failures)
+          PY
+          git apply --include='ext/js/dictionary/term-bank-wasm-parser.js' builds/bounded-qualification/candidate.patch
+      - name: Exact-source tests, types and lint
+        run: |
+          set -euo pipefail
+          echo 'a4e8e465d7ab7bdf23004c68bf4df83c570051bb4f1bbf130b004b80e827c278  ext/js/dictionary/term-bank-wasm-parser.js' | sha256sum -c -
+          echo 'b210d4b292273c596c3286b787681520d469953a969b9690d80a9cdce339c0f8  test/lookup-construction-experiments.test.js' | sha256sum -c -
+          node node_modules/vitest/vitest.mjs run --no-file-parallelism --maxWorkers=1 --minWorkers=1 > builds/bounded-qualification/unit.log 2>&1
+          npm run test:unit:options > builds/bounded-qualification/options.log 2>&1
+          npm run test:ts:main > builds/bounded-qualification/types-main.log 2>&1
+          npm run test:ts:dev > builds/bounded-qualification/types-dev.log 2>&1
+          npm run test:ts:bench > builds/bounded-qualification/types-bench.log 2>&1
+          set +e
+          npm run test:ts:test > builds/bounded-qualification/candidate-test-types.log 2>&1
+          echo "$?" > builds/bounded-qualification/candidate-test-types.exit
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-wasm-parser.js test/lookup-construction-experiments.test.js --format=json > builds/bounded-qualification/lint.json
+          lint_status=$?
+          set -e
+          test "$lint_status" -eq 1
+          diff -u builds/bounded-qualification/parent-test-types.log builds/bounded-qualification/candidate-test-types.log
+          diff -u builds/bounded-qualification/parent-test-types.exit builds/bounded-qualification/candidate-test-types.exit
+          python3 - <<'PY'
+          import json,pathlib
+          data=json.loads(pathlib.Path('builds/bounded-qualification/lint.json').read_text())
+          messages=[(f['filePath'],m) for f in data for m in f['messages']]
+          assert len(messages)==1,messages
+          path,m=messages[0]
+          assert path.endswith('/ext/js/dictionary/term-bank-wasm-parser.js') and m['line']==82 and m['ruleId']=='@typescript-eslint/no-unused-vars' and "'decodeUtf8' is defined but never used" in m['message'],messages
+          PY
+          npm run test:build > builds/bounded-qualification/build-plans.log 2>&1
+          node dev/bin/build.js chrome-dev > builds/bounded-qualification/chrome-build.log 2>&1
+          node dev/bin/build.js firefox-dev > builds/bounded-qualification/firefox-build.log 2>&1
+          cmp ext/lib/term-bank-parser.wasm builds/bounded-qualification/parent.wasm
+          git diff --check
+      - run: npx playwright install --with-deps chromium
+      - name: Strict complete Chromium lifecycle
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{"experimentalNativeSegmentedLookup":true}'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/bounded-qualification/lifecycle.html
+        run: |
+          set -euo pipefail
+          node test/chromium/extension-two-dictionary-import.e2e.js > builds/bounded-qualification/lifecycle.log 2>&1
+          python3 - <<'PY'
+          import json,pathlib
+          d=json.loads(pathlib.Path('builds/bounded-qualification/lifecycle.json').read_text())
+          assert d['status']=='success' and d['skippedVerification'] is False
+          print('Strict lifecycle phases:',len(d['phases']))
+          PY
+          git diff --binary > builds/bounded-qualification/qualified.patch
+          cmp builds/bounded-qualification/qualified.patch builds/bounded-qualification/candidate.patch
+          git add ext/js/dictionary/term-bank-wasm-parser.js test/lookup-construction-experiments.test.js
+          git write-tree > builds/bounded-qualification/product-tree.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-native-qualification
+          path: source/builds/bounded-qualification
+          retention-days: 30
+          if-no-files-found: error
+  confirm:
+    needs: qualify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 5a2c6d0694913d3bb0370d0aff693db3e74249b1
+          path: recipe
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Build actual parent and exact candidate at one path
+        run: |
+          set -euo pipefail
+          mkdir -p builds/bounded-native/parent builds/bounded-native/candidate
+          cp ../recipe/dev/perf/structural-20260918/bounded-native.patch builds/bounded-native/candidate.patch
+          cp ../recipe/dev/perf/structural-20260918/confirm.py builds/bounded-native/driver.py
+          npm run build:libs
+          node dev/bin/build.js chrome-dev
+          cp builds/manabitan-chrome-dev.zip builds/bounded-native/parent/package.zip
+          cp ext/lib/term-bank-parser.wasm builds/bounded-native/parent/parser.wasm
+          cp ext/js/dictionary/term-bank-wasm-parser.js builds/bounded-native/parent/parser.js
+          git apply builds/bounded-native/candidate.patch
+          echo 'a4e8e465d7ab7bdf23004c68bf4df83c570051bb4f1bbf130b004b80e827c278  ext/js/dictionary/term-bank-wasm-parser.js' | sha256sum -c -
+          echo 'b210d4b292273c596c3286b787681520d469953a969b9690d80a9cdce339c0f8  test/lookup-construction-experiments.test.js' | sha256sum -c -
+          node dev/bin/build.js chrome-dev
+          cp builds/manabitan-chrome-dev.zip builds/bounded-native/candidate/package.zip
+          cp ext/lib/term-bank-parser.wasm builds/bounded-native/candidate/parser.wasm
+          cp ext/js/dictionary/term-bank-wasm-parser.js builds/bounded-native/candidate/parser.js
+          python3 - <<'PY'
+          import pathlib,zipfile,json
+          p=pathlib.Path('builds/bounded-native')
+          a=zipfile.ZipFile(p/'parent/package.zip'); b=zipfile.ZipFile(p/'candidate/package.zip')
+          assert a.namelist()==b.namelist()
+          changed=[n for n in a.namelist() if a.read(n)!=b.read(n)]
+          assert changed==['js/dictionary/term-bank-wasm-parser.js'],changed
+          (p/'package-comparison.json').write_text(json.dumps({'changedMembers':changed,'parentBytes':(p/'parent/package.zip').stat().st_size,'candidateBytes':(p/'candidate/package.zip').stat().st_size},indent=2))
+          PY
+      - name: Complete-corpus lookup and canonical-content parity
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          node dev/perf/import-lookup-screen.js "$DICTIONARY" --pairs 1 --flags '{"experimentalNativeSegmentedLookup":true}' --out builds/bounded-native/corpus.json > builds/bounded-native/corpus.log 2>&1
+      - name: Fixed independent ABBA confirmation, source cost and direct previous-path comparison
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          python3 builds/bounded-native/driver.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-native-confirm-${{ matrix.dictionary }}
+          path: source/builds/bounded-native
+          retention-days: 30
+          if-no-files-found: error
