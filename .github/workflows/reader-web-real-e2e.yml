@@ -29,6 +29,7 @@ jobs:
         run: |
           python3 test/reader-web/enable-completion-observer.py
           python3 test/reader-web/prepare-candidate.py
+          python3 test/reader-web/prepare-popup-qualification.py
           bash test/reader-web/qualify.sh
       - name: Retain runnable test sources and complete runtime diff
         if: always()
