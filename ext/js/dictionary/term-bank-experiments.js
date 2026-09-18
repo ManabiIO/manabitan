@@ -18,8 +18,10 @@
 /* eslint @stylistic/semi: ["error", "never"] */
 
 /**
- * Default-off import experiments. Snapshot before asynchronous work, and copy
- * the effective values into each worker request; no toggle survives an import.
+ * Per-import implementation switches. Qualified native lookup construction
+ * defaults on; the other experiments remain default-off. Snapshot before
+ * asynchronous work and copy effective values into each worker request.
+ * Explicit false opts out for diagnostics; no toggle survives an import.
  * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {Readonly<Required<import('dictionary-importer').ImportExperiments>>}
  */
@@ -28,8 +30,8 @@ export function snapshotTermBankExperiments(options = {}) {
         experimentalParserWorkers3: options.experimentalParserWorkers3 === true,
         experimentalLibdeflate: options.experimentalLibdeflate === true,
         experimentalSkipFusedParse: options.experimentalSkipFusedParse === true,
-        experimentalLookupScratchReuse: options.experimentalLookupScratchReuse === true,
-        experimentalNativeSegmentedLookup: options.experimentalNativeSegmentedLookup === true,
+        experimentalLookupScratchReuse: typeof options.experimentalLookupScratchReuse === 'undefined' || options.experimentalLookupScratchReuse === true,
+        experimentalNativeSegmentedLookup: typeof options.experimentalNativeSegmentedLookup === 'undefined' || options.experimentalNativeSegmentedLookup === true,
         experimentalDirectLookupArena: options.experimentalDirectLookupArena === true,
         experimentalSinglePassLookupCompaction: options.experimentalSinglePassLookupCompaction === true,
         experimentalTermBankSpans: options.experimentalTermBankSpans === true,

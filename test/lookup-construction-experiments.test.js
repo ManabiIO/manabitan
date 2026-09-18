@@ -101,6 +101,8 @@ function digestIndexes(indexes) {
  * @throws {Error} If the parser omits results.
  */
 async function parse(banks, flags = {}, preload = false) {
+    // Keep the portable oracle explicit after production native promotion.
+    flags = {experimentalNativeSegmentedLookup: false, experimentalLookupScratchReuse: false, ...flags}
     const preloadedSource = preload ?
         await inflateCompressedTermBankSourcesWasm(banks.map((bank, i) => {
             const compressionMethod = /** @type {0|8} */ (i % 2 === 0 ? 8 : 0)
@@ -307,12 +309,12 @@ describe('lookup construction experiments', () => {
         plan.expressionIndexes[45000] = key
         expect(compactTermRecordPreinternedPlanRuns(plan, 70001, 30000, scratch, baseline.chunk.readingEqualsExpressionList)).toHaveLength(3)
     })
-    test('new flags require exact true and reset when omitted', () => {
+    test('switches reject truthy values and reset to their qualified defaults', () => {
         const keys = ['experimentalLookupScratchReuse', 'experimentalDirectLookupArena', 'experimentalSinglePassLookupCompaction', 'experimentalNativeSegmentedLookup']
         for (const key of keys) {
             expect(Reflect.get(snapshotTermBankExperiments({[key]: true}), key)).toBe(true)
             expect(Reflect.get(snapshotTermBankExperiments({[key]: 1}), key)).toBe(false)
-            expect(Reflect.get(snapshotTermBankExperiments(), key)).toBe(false)
+            expect(Reflect.get(snapshotTermBankExperiments(), key)).toBe(key === 'experimentalLookupScratchReuse' || key === 'experimentalNativeSegmentedLookup')
         }
     })
     test('actual worker preserves native segment plans and resets the flag', async () => {
@@ -342,9 +344,9 @@ describe('lookup construction experiments', () => {
             expect((await request({type: 'initialize', module})).type).toBe('ready')
             const banks = makeBanks(70001)
             let prior = ''
-            for (const enabled of [true, false]) {
+            for (const enabled of [true, false, undefined, false, undefined]) {
                 const reply = await request({type: 'parse',
-                    id: enabled ? 1 : 2,
+                    id: enabled === false ? 2 : 1,
                     version: 3,
                     sourceBuffers: banks.map((bank) => bank.buffer),
                     options: {experimentalNativeSegmentedLookup: enabled,
@@ -356,8 +358,8 @@ describe('lookup construction experiments', () => {
                         emitTokenBinaryContent: true,
                         prepareLookupIndexes: true}})
                 expect(reply.type).toBe('result')
-                expect(reply.profile.nativeSegmentedLookupSegments ?? 0).toBe(enabled ? 3 : 0)
-                expect(reply.profile.nativeLookupScratchReuseGroups ?? 0).toBe(enabled ? 1 : 0)
+                expect(reply.profile.nativeSegmentedLookupSegments ?? 0).toBe(enabled === false ? 0 : 3)
+                expect(reply.profile.nativeLookupScratchReuseGroups ?? 0).toBe(enabled === false ? 0 : 1)
                 expect(hasCompletePreparedTermLookupIndexes(reply.chunk.preparedLookupIndexes, 70001)).toBe(true)
                 const current = digestIndexes(/** @type {NonNullable<Chunk['preparedLookupIndexes']>} */ (reply.chunk.preparedLookupIndexes))
                 if (prior) { expect(current).toBe(prior) }

@@ -55,7 +55,9 @@ export type ImportExperiments = {
     experimentalParserWorkers3?: boolean;
     experimentalLibdeflate?: boolean;
     experimentalSkipFusedParse?: boolean;
+    /** Qualified production default: true. Explicit false retains the allocation oracle. */
     experimentalLookupScratchReuse?: boolean;
+    /** Qualified production default: true. Explicit false retains portable large-group lookup construction. */
     experimentalNativeSegmentedLookup?: boolean;
     experimentalDirectLookupArena?: boolean;
     experimentalSinglePassLookupCompaction?: boolean;
