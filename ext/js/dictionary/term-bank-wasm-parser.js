@@ -2173,10 +2173,13 @@ class ParallelTermBankParserPool {
         this._disposalGeneration = 0;
     }
 
-    /** @returns {Promise<boolean>} */
-    async prewarm() {
+    /**
+     * @param {import('dictionary-importer').ImportExperiments} [options]
+     * @returns {Promise<boolean>}
+     */
+    async prewarm(options = {}) {
         const disposalGeneration = this._disposalGeneration;
-        const workerCount = getParallelTermBankParserWorkerCount();
+        const workerCount = getParallelTermBankParserWorkerCount(options);
         try {
             if (this._disposalRequested) {
                 const activeRun = this._activeRun;
@@ -2627,11 +2630,12 @@ const parallelTermBankParserPool = new ParallelTermBankParserPool();
 /**
  * Starts parser workers while source ZIP entries are still being inflated.
  * A failed prewarm is non-fatal; the caller can retain the in-worker parser.
+ * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {Promise<boolean>}
  */
-export async function prewarmParallelTermBankParser() {
+export async function prewarmParallelTermBankParser(options = {}) {
     if (!canUseParallelTermBankParser()) { return false; }
-    return await parallelTermBankParserPool.prewarm();
+    return await parallelTermBankParserPool.prewarm(options);
 }
 
 /** Releases parser heaps after import so lookup workloads do not retain them. */
@@ -2773,7 +2777,7 @@ async function parseTermBankWithWasmColumnChunksParallelSources(sources, version
         lastParallelParserSkipReason = 'source-size-budget';
         return false;
     }
-    const workerCount = getParallelTermBankParserWorkerCount();
+    const workerCount = getParallelTermBankParserWorkerCount(options);
     const pipelineGroupsPerWorker = getParallelSourcePipelineGroupsPerWorker(options);
     const requestedGroupCount = lazy ?
         Math.max(
@@ -2860,9 +2864,10 @@ function canUseParallelTermBankParser() {
  * Uses additional parser heaps only where the browser reports enough logical CPUs
  * and does not report a constrained memory tier. Missing device-memory hints
  * are normal in Firefox and do not disable the higher-throughput path.
+ * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {number}
  */
-export function getParallelTermBankParserWorkerCount() {
+export function getParallelTermBankParserWorkerCount(options = {}) {
     const rawHardwareConcurrency = /** @type {unknown} */ (
         typeof navigator === 'undefined' ? void 0 : Reflect.get(navigator, 'hardwareConcurrency')
     );
@@ -2879,9 +2884,14 @@ export function getParallelTermBankParserWorkerCount() {
         Number.isFinite(rawDeviceMemory) &&
         rawDeviceMemory <= LOW_MEMORY_DEVICE_GIB
     );
-    return hasEnoughCpus && !hasConstrainedMemory ?
+    const baseline = hasEnoughCpus && !hasConstrainedMemory ?
         HIGH_CAPABILITY_PARALLEL_SOURCE_WORKER_COUNT :
         DEFAULT_PARALLEL_SOURCE_WORKER_COUNT;
+    if (hasConstrainedMemory || typeof rawHardwareConcurrency !== 'number' || !Number.isFinite(rawHardwareConcurrency)) {
+        return baseline;
+    }
+    if (options.experimentalParserWorkers3 !== true || rawHardwareConcurrency < 4) { return baseline; }
+    return Math.max(baseline, 3);
 }
 
 /**
