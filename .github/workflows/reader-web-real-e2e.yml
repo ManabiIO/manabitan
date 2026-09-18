@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: reader-web-real-e2e
+  group: reader-web-real-e2e-candidate
   cancel-in-progress: true
 jobs:
   chromium:
@@ -28,11 +28,14 @@ jobs:
       - name: Build and exercise real Reader and ManabiTan
         run: |
           python3 test/reader-web/enable-completion-observer.py
+          python3 test/reader-web/prepare-candidate.py
           bash test/reader-web/qualify.sh
-      - name: Retain runnable test sources
+      - name: Retain runnable test sources and complete runtime diff
         if: always()
         run: |
           mkdir -p reader-web-results
+          git -C reader-fixture add -N -- apps/web
+          git -C reader-fixture diff --binary -- apps/web package.json pnpm-lock.yaml > reader-web-results/reader-composed-runtime.patch
           tar -czf reader-web-results/test-sources.tar.gz test/reader-web/run.mjs test/reader-web/make-fixtures.py test/reader-web/qualify.sh .github/workflows/reader-web-real-e2e.yml
       - uses: actions/upload-artifact@v4
         if: always()
