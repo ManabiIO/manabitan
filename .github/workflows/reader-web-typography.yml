@@ -35,7 +35,7 @@ jobs:
           p=Path('test/reader-web/qualify.sh');s=p.read_text()
           old='python3 test/reader-web/nonzero-bookmark-assertions.py'
           assert s.count(old)==1
-          s=s.replace(old,old+'\npython3 test/reader-web/closed-shadow-assertions.py\npython3 test/reader-web/visible-target-assertions.py\npython3 test/reader-web/prepare-typography.py\npython3 test/reader-web/qualify-font-reflow.py\npython3 test/reader-web/finish-typography.py')
+          s=s.replace(old,old+'\npython3 test/reader-web/closed-shadow-assertions.py\npython3 test/reader-web/visible-target-assertions.py\npython3 test/reader-web/prepare-typography.py\npython3 test/reader-web/qualify-font-reflow.py\npython3 test/reader-web/finish-typography.py\npython3 test/reader-web/assert-populated-shell.py')
           p.write_text(s)
           p=Path('test/reader-web/finish-typography.py');s=p.read_text()
           old="p.write_text(s)\nexpected={"
