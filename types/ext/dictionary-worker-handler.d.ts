@@ -80,3 +80,9 @@ export type GetImageDetailsResponseMessage = {
     action: 'getImageDetails.response';
     params: DictionaryWorkerMediaLoader.HandleMessageParams;
 };
+
+/** Host-owned operations. A web host must implement these using its one storage owner. */
+export type DictionaryWorkerBackend = {
+    deleteDictionaryByTitle(dictionaryTitle: string): Promise<void>;
+    getDictionaryCounts(dictionaryNames: string[], getTotal: boolean): Promise<import('./dictionary-database').DictionaryCounts>;
+};

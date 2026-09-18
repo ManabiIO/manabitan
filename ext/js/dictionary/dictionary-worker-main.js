@@ -17,12 +17,13 @@
  */
 
 import {log} from '../core/log.js';
+import {ExtensionDictionaryWorkerBackend} from '../comm/dictionary-worker-backend.js';
 import {DictionaryWorkerHandler} from './dictionary-worker-handler.js';
 
 /** Entry point. */
 function main() {
     try {
-        const dictionaryWorkerHandler = new DictionaryWorkerHandler();
+        const dictionaryWorkerHandler = new DictionaryWorkerHandler(new ExtensionDictionaryWorkerBackend(chrome.runtime));
         dictionaryWorkerHandler.prepare();
     } catch (e) {
         log.error(e);
