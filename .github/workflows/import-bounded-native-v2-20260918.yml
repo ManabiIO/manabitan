@@ -1,0 +1,76 @@
+name: Final bounded native lookup qualification
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-bounded-native-v2-20260918.yml]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+    working-directory: source
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 671732a91ac2801b1acf5d5c3675fb099fefc7d0
+          path: recipe
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci
+      - run: node ../recipe/dev/perf/structural-20260918/run-v2-recipe.mjs qualify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-native-v2-qualification
+          path: source/builds/bounded-qualification
+          retention-days: 30
+          if-no-files-found: error
+  confirm:
+    needs: qualify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 671732a91ac2801b1acf5d5c3675fb099fefc7d0
+          path: recipe
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci
+      - name: Exact isolated-source corpus and full-import comparisons
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: node ../recipe/dev/perf/structural-20260918/run-v2-recipe.mjs confirm
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-native-v2-confirm-${{ matrix.dictionary }}
+          path: source/builds/bounded-native
+          retention-days: 30
+          if-no-files-found: error
