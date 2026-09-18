@@ -1,0 +1,68 @@
+name: Confirm native lookup full imports
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-native-confirm-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  confirm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+        replication: [AB, BA]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Frozen schedule, excluded warmups, and controls
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          REPLICATION: ${{ matrix.replication }}
+        run: |
+          set -euo pipefail
+          mkdir -p builds/confirmation
+          if [ "$REPLICATION" = BA ]; then
+            python3 - <<'PY'
+          from pathlib import Path
+          p = Path('test/chromium/import-flags-ab-benchmark.js')
+          s = p.read_text()
+          old = 'const variantFirst = (iteration % 2) === 0;'
+          assert s.count(old) == 1
+          p.write_text(s.replace(old, 'const variantFirst = (iteration % 2) !== 0;'))
+          PY
+          fi
+          FLAGS='{"experimentalNativeSegmentedLookup":true,"experimentalLookupScratchReuse":true}'
+          node dev/perf/import-ab.js "$DICTIONARY" --pairs 1 --flags "$FLAGS" --label excluded-warmup
+          mkdir -p builds/confirmation/warmup
+          mv builds/*iso*.json builds/*iso*.html builds/*summary*.json builds/confirmation/warmup/
+          node dev/perf/import-ab.js "$DICTIONARY" --pairs 3 --flags '{}' --label pre-AA
+          mkdir -p builds/confirmation/pre-AA
+          mv builds/*iso*.json builds/*iso*.html builds/*summary*.json builds/confirmation/pre-AA/
+          node dev/perf/import-ab.js "$DICTIONARY" --pairs 12 --flags "$FLAGS" --label native-confirm
+          mkdir -p builds/confirmation/measured
+          mv builds/*iso*.json builds/*iso*.html builds/*summary*.json builds/confirmation/measured/
+          node dev/perf/import-ab.js "$DICTIONARY" --pairs 3 --flags '{}' --label post-AA
+          mkdir -p builds/confirmation/post-AA
+          mv builds/*iso*.json builds/*iso*.html builds/*summary*.json builds/confirmation/post-AA/
+          git diff > builds/confirmation/harness-only.patch
+          git rev-parse HEAD > builds/confirmation/SOURCE_HEAD
+          sha256sum ext/lib/term-bank-parser.wasm package-lock.json test/perf/dictionaries.lock.json > builds/confirmation/hashes.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-confirm-${{ matrix.dictionary }}-${{ matrix.replication }}
+          path: builds/confirmation
+          retention-days: 14
+          if-no-files-found: error
