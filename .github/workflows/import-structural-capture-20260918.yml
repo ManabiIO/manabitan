@@ -1,0 +1,41 @@
+name: Capture pinned import research inputs
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-structural-capture-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Capture source, generated libraries, and installed dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/import-capture/source
+          git archive HEAD | tar -x -C /tmp/import-capture/source
+          cp -a ext/lib /tmp/import-capture/source/ext/
+          cp -a node_modules /tmp/import-capture/source/
+          git rev-parse HEAD > /tmp/import-capture/SOURCE_HEAD
+          git ls-tree -r HEAD > /tmp/import-capture/SOURCE_TREE
+          node --version > /tmp/import-capture/NODE_VERSION
+          clang --version > /tmp/import-capture/CLANG_VERSION
+          tar -czf /tmp/import-source-and-dependencies.tgz -C /tmp/import-capture .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pinned-import-source-dependencies
+          path: /tmp/import-source-and-dependencies.tgz
+          retention-days: 7
+          if-no-files-found: error
