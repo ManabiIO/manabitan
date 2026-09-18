@@ -1,0 +1,50 @@
+name: Screen structural import candidates
+on:
+  push:
+    branches: [research/import-structural-20260918]
+    paths: [.github/workflows/import-structural-screen-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+        candidate: [native-lookup, validated-reuse]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fb7241deb70950dc113089cd774c9489ede48f8a
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Fixed three-pair exploratory screen
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          CANDIDATE: ${{ matrix.candidate }}
+        run: |
+          set -euo pipefail
+          if [ "$CANDIDATE" = native-lookup ]; then
+            FLAGS='{"experimentalNativeSegmentedLookup":true,"experimentalLookupScratchReuse":true}'
+          else
+            FLAGS='{"experimentalValidatedGlossaryReuse":true,"experimentalGlobalExactContentReuse":true}'
+          fi
+          node dev/perf/import-ab.js "$DICTIONARY" --pairs 3 --flags "$FLAGS" --label "structural-$CANDIDATE"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: structural-screen-${{ matrix.dictionary }}-${{ matrix.candidate }}
+          path: |
+            builds/*iso*.json
+            builds/*iso*.html
+            builds/*summary*.json
+          retention-days: 14
+          if-no-files-found: error
