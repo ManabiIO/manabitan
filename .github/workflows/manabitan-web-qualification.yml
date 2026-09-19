@@ -1,0 +1,36 @@
+name: ManabiTan web runtime qualification
+on:
+  push:
+    branches: [research/manabitan-web-runtime-20260918]
+    paths: ['.github/workflows/manabitan-web-qualification.yml', 'research/**', 'ext/web/**', 'web/**']
+permissions: {contents: read}
+concurrency:
+  group: manabitan-web-runtime-qualification
+  cancel-in-progress: true
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24.21.0'}
+      - name: Materialize the checksum-pinned runtime
+        run: |
+          mkdir -p evidence
+          python3 research/prepare-web.py
+          find ext/web web -type f | sort | tee evidence/source-files.txt
+          tar -czf evidence/web-source.tar.gz ext/web web types/ext/text-scanner.d.ts types/ext/structured-content.d.ts ext/js/language/text-scanner.js ext/js/display/structured-content-generator.js
+      - name: Build shared extension libraries
+        run: |
+          npm ci > evidence/install.log 2>&1
+          npm run build:libs > evidence/build-libs.log 2>&1
+      - name: Validate extension-facing contracts
+        run: |
+          set -o pipefail
+          npm run test:ts:main 2>&1 | tee evidence/types-main.log
+          npm run test:ts:test 2>&1 | tee evidence/types-test.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: manabitan-web-qualification, path: evidence, retention-days: 7}
