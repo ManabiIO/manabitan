@@ -54,6 +54,7 @@ export type ImportPhaseTiming = {
 export type ImportExperiments = {
     experimentalParserWorkers3?: boolean;
     experimentalLibdeflate?: boolean;
+    experimentalGenericSpanCompression?: boolean;
     experimentalSkipFusedParse?: boolean;
     experimentalLookupScratchReuse?: boolean;
     experimentalNativeSegmentedLookup?: boolean;

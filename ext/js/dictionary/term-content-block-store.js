@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {
@@ -215,6 +216,8 @@ export class TermContentBlockStore {
      * @param {{blockTargetBytes?: number, referencePackTargetBytes?: number, minInputBytes?: number, minSavingsRatio?: number, cacheMaxBytes?: number}} [options]
      */
     constructor(contentStore, options = {}) {
+        /** @type {ReturnType<typeof snapshotTermBankExperiments>} */
+        this._compressionExperiments = snapshotTermBankExperiments();
         /** @type {import('./term-content-opfs-store.js').TermContentOpfsStore} */
         this._contentStore = contentStore;
         /** @type {number} */
@@ -246,6 +249,13 @@ export class TermContentBlockStore {
     }
 
     /**
+     * @param {import('dictionary-importer').ImportExperiments} [options]
+     */
+    setCompressionExperiments(options = {}) {
+        this._compressionExperiments = snapshotTermBankExperiments(options);
+    }
+
+    /**
      * @param {number} value
      * @throws {RangeError} If the byte target cannot be represented safely.
      */
@@ -259,6 +269,7 @@ export class TermContentBlockStore {
     /** @returns {Record<string, unknown>} */
     getDiagnostics() {
         return {
+            compressionExperiments: this._compressionExperiments,
             cacheEntries: this._cache.size,
             cacheBytes: this._cache.bytes,
             cacheMaxBytes: this._cacheMaxBytes,
@@ -641,7 +652,7 @@ export class TermContentBlockStore {
         validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
         if (sourceOffsets.length === 0) { return null; }
         if (
-            compressionDictName === 'jmdict' &&
+            (compressionDictName === 'jmdict' || this._compressionExperiments.experimentalGenericSpanCompression === true) &&
             typeof SharedArrayBuffer === 'function' &&
             sourceBytes.buffer instanceof SharedArrayBuffer
         ) {
@@ -715,6 +726,7 @@ export class TermContentBlockStore {
      * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}}
      */
     _beginAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection) {
+        const compressionExperiments = this._compressionExperiments;
         const planStart = safePerformance.now();
         const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
         let packMs = safePerformance.now() - planStart;
@@ -741,6 +753,7 @@ export class TermContentBlockStore {
                     packed.blockStartIndexes,
                     packed.packedChunkLengths,
                     compressionDictName,
+                    compressionExperiments,
                 );
                 const consumed = operation.sourceConsumed.then(() => {
                     sourceWasConsumed = true;
@@ -870,11 +883,12 @@ export class TermContentBlockStore {
      * @param {Uint8Array} sourceBytes
      * @param {Uint32Array} sourceOffsets
      * @param {Uint32Array} sourceLengths
-     * @param {string} compressionDictName
+     * @param {string|null} compressionDictName
      * @param {boolean} force
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
     async _tryAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force) {
+        const compressionExperiments = this._compressionExperiments;
         let uncompressedBytes = 0;
         for (const length of sourceLengths) { uncompressedBytes += length; }
         if (!force && uncompressedBytes < this._minInputBytes) { return null; }
@@ -893,6 +907,7 @@ export class TermContentBlockStore {
                 packed.blockStartIndexes,
                 packed.packedChunkLengths,
                 compressionDictName,
+                compressionExperiments,
             );
             compressedChunks = result.chunks;
             envelopeMs = result.envelopeMs;
@@ -933,6 +948,7 @@ export class TermContentBlockStore {
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
     async _tryAppendPacked(pack, sourceLengths, compressionDictName, force) {
+        const compressionExperiments = this._compressionExperiments;
         let uncompressedBytes = 0;
         for (const length of sourceLengths) { uncompressedBytes += length; }
         if (!force && uncompressedBytes < this._minInputBytes) { return null; }
@@ -946,7 +962,7 @@ export class TermContentBlockStore {
         let envelopeMs = 0;
         phaseStart = safePerformance.now();
         try {
-            const result = await compressWrappedTermContentZstdBatch(packed.packedChunks, compressionDictName);
+            const result = await compressWrappedTermContentZstdBatch(packed.packedChunks, compressionDictName, compressionExperiments);
             compressedChunks = result.chunks;
             envelopeMs = result.envelopeMs;
             if (!result.wrapped) {

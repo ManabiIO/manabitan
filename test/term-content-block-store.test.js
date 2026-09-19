@@ -982,3 +982,16 @@ describe('TermContentBlockStore', () => {
         });
     });
 });
+
+
+describe('compression flag storage propagation', () => {
+    test('resets storage-side compression flags on the next import', () => {
+        const db = new DictionaryDatabase();
+        const options = {experimentalGenericSpanCompression: true};
+        db.setImportOptimizationFlags(options);
+        options.experimentalGenericSpanCompression = false;
+        expect(db._termContentBlockStore.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: true});
+        db.setImportOptimizationFlags();
+        expect(db._termContentBlockStore.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: false});
+    });
+});

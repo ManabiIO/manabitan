@@ -640,6 +640,7 @@ export class DictionaryImporter {
         this._utf8StringBytesCache.clear();
         this._reverseStringCache.clear();
         const importOptimizationFlags = {
+            ...snapshotTermBankExperiments(details),
             termContentStorageMode,
             expectedTermContentImportBytes: void 0,
             artifactFixedPackMinTotalRows,
@@ -1021,8 +1022,9 @@ export class DictionaryImporter {
             ) :
             null;
         const expectedTermRecordImportBytes = totalArtifactTermRows > 0 ? totalArtifactTermRows * 128 : null;
-        /** @type {{termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
+        /** @type {import('dictionary-importer').ImportExperiments & {termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
         const importOptimizationOptions = {
+            ...snapshotTermBankExperiments(details),
             termContentStorageMode: effectiveTermContentStorageMode,
             artifactFixedPackMinTotalRows,
             queueTermContentWrites: !isStagedDictionaryUpdate,

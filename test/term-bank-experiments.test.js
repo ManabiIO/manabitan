@@ -599,3 +599,16 @@ describe('explicit fused parser bypass', () => {
         expect((await parse(sources, {experimentalSkipFusedParse: true, experimentalTermBankSpans}, true)).rows).toEqual((await parse(sources, {experimentalTermBankSpans}, true)).rows)
     })
 })
+
+
+describe('compression experiment admission', () => {
+    test.each(['experimentalGenericSpanCompression'])('requires literal true: %s', (key) => {
+        const name = /** @type {keyof Experiments} */ (key)
+        expect(snapshotTermBankExperiments()[name]).toBe(false)
+        for (const value of [false, 0, 1, null, undefined, 'true', {}]) {
+            const options = /** @type {Experiments} */ (/** @type {unknown} */ ({[name]: value}))
+            expect(snapshotTermBankExperiments(options)[name]).toBe(false)
+        }
+        expect(snapshotTermBankExperiments({[name]: true})[name]).toBe(true)
+    })
+})

@@ -205,3 +205,24 @@ describe('TermContentCompressionPool', () => {
         pool.close();
     });
 });
+
+
+describe('per-operation generic span compression', () => {
+    test('snapshots packed and shared jobs without leaking into the next call', async () => {
+        const worker = new MockCompressionWorker((message) => ({compressed: Uint8Array.of(message.source ? 3 : 4).buffer, sourceConsumed: true}));
+        const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ ([worker])));
+        try {
+            for (const enabled of [false, true, true, false]) {
+                const options = {experimentalGenericSpanCompression: enabled};
+                const completion = pool.compressWrapped([Uint8Array.of(1, 2)], null, options);
+                options.experimentalGenericSpanCompression = !enabled;
+                await expect(completion).resolves.toMatchObject({wrapped: true});
+                expect(worker.calls.at(-1)?.message.compressionExperiments).toMatchObject({experimentalGenericSpanCompression: enabled});
+                const operation = pool.beginCompressWrappedSpans(new Uint8Array(new SharedArrayBuffer(64)), Uint32Array.of(1), Uint32Array.of(5), Uint32Array.of(0, 1), Uint32Array.of(5), 'jmdict', {experimentalGenericSpanCompression: enabled});
+                await operation.sourceConsumed;
+                await expect(operation.completion).resolves.toMatchObject({wrapped: true});
+                expect(worker.calls.at(-1)?.message.compressionExperiments).toMatchObject({experimentalGenericSpanCompression: enabled});
+            }
+        } finally { pool.close(); }
+    });
+});

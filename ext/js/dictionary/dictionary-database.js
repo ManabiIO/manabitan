@@ -1636,6 +1636,7 @@ export class DictionaryDatabase {
                     termRecordWriteCoalesceTargetBytes,
                     termRecordLookupIndexWriteCallCount,
                     termRecordLookupIndexWriteBytes,
+                    compressionExperiments: this._termContentBlockStore.getDiagnostics().compressionExperiments,
                     termRecordLookupIndexAwaitMs,
                     termRecordLookupIndexMaxQueuedBytes,
                     termsVirtualTableSyncMs,
@@ -1713,9 +1714,10 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows?: number|null, queueTermContentWrites?: boolean, termContentBlockTargetBytes?: number|null}} [options]
+     * @param {import('dictionary-importer').ImportExperiments & {termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows?: number|null, queueTermContentWrites?: boolean, termContentBlockTargetBytes?: number|null}} [options]
      */
     setImportOptimizationFlags(options = {}) {
+        this._termContentBlockStore.setCompressionExperiments(options);
         this._adaptiveTermBulkAddBatchSize = true;
         this._retryBeginImmediateTransaction = false;
         this._skipIntraBatchContentDedup = false;
