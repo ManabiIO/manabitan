@@ -46,7 +46,12 @@ export function resolveAssetUrl(path, packageRoot = new URL('../../', import.met
  * @returns {Promise<Response>}
  */
 async function fetchAsset(url) {
-    const response = await fetch(resolveAssetUrl(url), {
+    const packageUrl = resolveAssetUrl(url);
+    const runtime = typeof chrome === 'object' ? chrome.runtime : null;
+    const requestUrl = typeof runtime?.getURL === 'function' && !/^[a-z][a-z0-9+.-]*:/i.test(url) && !url.startsWith('//') ?
+        runtime.getURL(url) :
+        packageUrl;
+    const response = await fetch(requestUrl, {
         method: 'GET',
         mode: 'no-cors',
         cache: 'default',
