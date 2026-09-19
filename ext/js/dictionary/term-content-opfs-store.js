@@ -2014,6 +2014,12 @@ export class TermContentOpfsStore {
             const currentActiveSegment = this._getActiveSegmentState();
             if (currentActiveSegment !== null) {
                 currentActiveSegment.fileLength += chunkSize;
+                // The append cursor adds persisted and still-in-flight bytes.
+                // Once a queued write advances the persisted length, subtract
+                // exactly that progress before another append can observe it.
+                // Keeping the entire drain batch counted until completion would
+                // double-count completed groups and publish offsets past EOF.
+                this._inFlightWriteBytes = Math.max(0, this._inFlightWriteBytes - chunkSize);
                 this._length = Math.max(this._length, currentActiveSegment.startOffset + currentActiveSegment.fileLength);
             }
             blobOffset += chunkSize;
