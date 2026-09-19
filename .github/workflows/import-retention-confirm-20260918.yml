@@ -1,0 +1,56 @@
+name: Confirm consumed-result release
+on:
+  push:
+    branches: [research/import-owned-handoff-20260918]
+    paths: [.github/workflows/import-retention-confirm-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  confirm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex, wty-en-en]
+        lane: [timing, memory]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Prepare isolated release-only source
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          if [ "$DICTIONARY" = wty-en-en ]; then python dev/perf/owned-wty-setup-20260918.py; fi
+          python dev/perf/retention-setup-20260918.py
+      - name: Independent fixed cohort; never mix sampled and unsampled timings
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          LANE: ${{ matrix.lane }}
+          MANABITAN_CLANG: clang-18
+        run: |
+          set -euo pipefail
+          if [ "$LANE" = timing ]; then
+            python dev/perf/bounded-handoff-driver-20260918.py --dictionary "$DICTIONARY" --variants release-only --blocks 6 --out "$RUNNER_TEMP/retention-confirm"
+          else
+            python dev/perf/bounded-handoff-memory-20260918.py --dictionary "$DICTIONARY" --variants release-only --blocks 3 --out "$RUNNER_TEMP/retention-confirm"
+            echo 'DIAGNOSTIC ONLY: no authoritative speed estimates from sampled observations.' > "$RUNNER_TEMP/retention-confirm/NOT_AUTHORITATIVE_TIMING"
+          fi
+          cp dev/perf/retention-setup-20260918.py dev/perf/bounded-handoff-memory-20260918.py "$RUNNER_TEMP/retention-confirm/"
+          git diff -- test/perf/dictionaries.lock.json test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/retention-confirm/harness-only.patch"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: retention-confirm-${{ matrix.lane }}-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/retention-confirm
+          retention-days: 30
+          if-no-files-found: error
