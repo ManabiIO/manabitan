@@ -46,13 +46,20 @@ export function createReaderScanner(client: ManabiTanWebClient, container: HTMLE
     scanner.on('searchError', ({error}) => { if (active && error.name !== 'AbortError') callbacks.onError(error); });
     scanner.on('searchEmpty', () => { if (active) callbacks.onEmpty?.(); });
     scanner.prepare();
+    const start = () => { generation += 1; active = true; scanner.setEnabled(true); };
+    const stop = () => {
+        generation += 1; active = false; scanner.setEnabled(false);
+        scanner.clearSelection(); scanner.clearMousePosition();
+        for (const controller of requests) controller.abort();
+        requests.clear();
+    };
     return {
-        start() { generation += 1; active = true; scanner.setEnabled(true); },
-        stop() {
-            generation += 1; active = false; scanner.setEnabled(false);
-            for (const controller of requests) controller.abort();
-            requests.clear();
-        },
+        start,
+        stop,
+        // Closing a popup invalidates pending results and the retained text
+        // source, so a late lookup cannot reopen it and the same word can be
+        // scanned again. Dismissal never enables a previously stopped scanner.
+        dismiss() { const resume = active; stop(); if (resume) start(); },
         get generation() { return generation; }
     };
 }
