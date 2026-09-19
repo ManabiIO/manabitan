@@ -1,0 +1,124 @@
+name: Qualify exact bounded parser handoffs
+on:
+  push:
+    branches: [research/import-owned-handoff-20260918]
+    paths: [.github/workflows/import-bounded-qualification-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [release-only, owned-release]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Failure-first qualification with complete assertion output
+        env:
+          VARIANT: ${{ matrix.variant }}
+          MANABITAN_CLANG: clang-18
+        run: |
+          set -euo pipefail
+          mkdir -p qualification
+          python dev/perf/retention-setup-20260918.py
+          cp dev/perf/result-lifetime-20260918.test.txt test/term-bank-result-lifetime.test.js
+          npm run build:libs > qualification/baseline-libraries.log 2>&1
+          set +e
+          node node_modules/vitest/vitest.mjs run test/term-bank-result-lifetime.test.js --reporter=default --reporter=json --outputFile=qualification/red.json > qualification/red.log 2>&1
+          status=$?
+          npm run test:ts:test > qualification/baseline-test-types.log 2>&1
+          echo "$?" > qualification/baseline-test-types.status
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-wasm-parser.js --format=json > qualification/baseline-parser-lint.json
+          echo "$?" > qualification/baseline-parser-lint.status
+          set -e
+          test "$status" -ne 0
+          python - <<'PY'
+          import json, importlib.util, os, re
+          from pathlib import Path
+          report = json.loads(Path('qualification/red.json').read_text())
+          assert report['numFailedTests'] == 3 and report['numPassedTests'] == 0
+          output = re.sub(r'\x1b\[[0-9;]*m', '', Path('qualification/red.log').read_text())
+          assert 'to have a length of +0 but got 1' in output
+          spec = importlib.util.spec_from_file_location('candidate', 'dev/perf/bounded-handoff-driver-20260918.py')
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          module.configure(os.environ['VARIANT'])
+          if os.environ['VARIANT'] == 'owned-release':
+              module.adjust_tests()
+              Path('test/term-bank-private-ownership.test.js').write_bytes(Path('dev/perf/private-ownership-20260918.test.txt').read_bytes())
+          PY
+          npm run build:libs > qualification/libraries.log 2>&1
+          git diff -- dev/build-libs.js ext/js/dictionary/term-bank-wasm-parser-worker.js ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-wasm-parser.test.js > qualification/product.patch
+          cp test/term-bank-result-lifetime.test.js qualification/
+          sha256sum dev/build-libs.js ext/js/dictionary/term-bank-wasm-parser-worker.js ext/js/dictionary/term-bank-wasm-parser.js ext/lib/term-bank-parser.wasm test/term-bank-result-lifetime.test.js > qualification/source.sha256
+      - name: Complete unit, type, lint, options and package gates
+        run: |
+          set -euo pipefail
+          node node_modules/vitest/vitest.mjs run --no-file-parallelism > qualification/unit.log 2>&1
+          npm run test:unit:options > qualification/options.log 2>&1
+          npm run test:ts:main > qualification/main-types.log 2>&1
+          npm run test:ts:dev > qualification/dev-types.log 2>&1
+          npm run test:ts:bench > qualification/bench-types.log 2>&1
+          node node_modules/eslint/bin/eslint.js dev/build-libs.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/term-bank-wasm-parser.test.js test/term-bank-result-lifetime.test.js > qualification/lint.log 2>&1
+          if [ -f test/term-bank-private-ownership.test.js ]; then node node_modules/eslint/bin/eslint.js test/term-bank-private-ownership.test.js >> qualification/lint.log 2>&1; fi
+          set +e
+          npm run test:ts:test > qualification/candidate-test-types.log 2>&1
+          echo "$?" > qualification/candidate-test-types.status
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-wasm-parser.js --format=json > qualification/candidate-parser-lint.json
+          echo "$?" > qualification/candidate-parser-lint.status
+          set -e
+          cmp qualification/baseline-test-types.log qualification/candidate-test-types.log
+          cmp qualification/baseline-test-types.status qualification/candidate-test-types.status
+          cmp qualification/baseline-parser-lint.status qualification/candidate-parser-lint.status
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a = json.loads(Path('qualification/baseline-parser-lint.json').read_text())
+          b = json.loads(Path('qualification/candidate-parser-lint.json').read_text())
+          assert len(a) == len(b) == 1
+          assert a[0]['messages'] == b[0]['messages']
+          assert len(a[0]['messages']) == 1 and a[0]['messages'][0]['ruleId'] == 'unused-imports/no-unused-vars'
+          PY
+          npm run test:build > qualification/build-plans.log 2>&1
+          node dev/bin/build.js chrome-dev > qualification/chrome-build.log 2>&1
+          node dev/bin/build.js firefox-dev > qualification/firefox-build.log 2>&1
+          git diff --check
+      - run: npx playwright install --with-deps chromium
+      - name: Full strict Chromium lifecycle
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{}'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: qualification/lifecycle.html
+        run: |
+          set -euo pipefail
+          node test/chromium/extension-two-dictionary-import.e2e.js > qualification/lifecycle.log 2>&1
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('qualification/lifecycle.json').read_text())
+          assert report['status'] == 'success' and report['skippedVerification'] is False
+          PY
+          sha256sum --check qualification/source.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-exact-qualification-${{ matrix.variant }}
+          path: qualification
+          retention-days: 30
+          if-no-files-found: error
