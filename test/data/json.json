@@ -11,6 +11,7 @@
         {"path": ".claude/settings.local.json", "ignore": true},
         {"path": ".github/actionlint-matcher.json", "ignore": true},
         {"path": "dev/jsconfig.json", "ignore": true},
+        {"path": "web/tsconfig.json", "ignore": true},
         {"path": "ext/manifest.json", "ignore": true},
         {"path": "test/data/dictionaries/invalid-dictionary1/index.json", "ignore": true},
         {"path": "test/data/dictionaries/invalid-dictionary2/kanji_bank_1.json", "ignore": true},
@@ -30,6 +31,7 @@
         {"path": "test/data/vitest.json.config.json", "ignore": true},
         {"path": "benches/jsconfig.json", "ignore": true},
         {"path": "dev/data/chrome-manifest-schema.json", "ignore": true},
+        {"path": "dev/perf/native-lookup-qualification-20260918.json", "ignore": true},
 
         {
             "path": "test/perf/dictionaries.lock.json",

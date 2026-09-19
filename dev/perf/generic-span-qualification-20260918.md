@@ -10,12 +10,12 @@ The measured baseline is `fb7241deb70950dc113089cd774c9489ede48f8a`. The isolate
 
 Each dictionary used one fixed six-block same-build ABBA schedule: four excluded full warmup observations, twelve measured candidate pairs, and twelve interleaved A/A control pairs. All 208 observations across the four dictionaries were retained, including the slower WTY candidate observation. Fresh browser profiles and OPFS stores were used for each observation. No timing observations were retried, trimmed, or discarded.
 
-| Dictionary | Median paired change | Candidate pairs faster | A/A median paired change | Equal-work time change |
-| --- | ---: | ---: | ---: | ---: |
-| WTY English | -14.02% | 11/12 | +0.52% | -12.37% |
-| JMnedict | -3.34% | 11/12 | +2.02% | -3.53% |
-| JMdict | +0.34% | 5/12 | -0.90% | +0.10% |
-| Jitendex | +0.42% | 4/12 | +0.97% | +0.53% |
+| Dictionary  | Median paired change | Candidate pairs faster | A/A median paired change | Equal-work time change |
+| ----------- | -------------------: | ---------------------: | -----------------------: | ---------------------: |
+| WTY English |              -14.02% |                  11/12 |                   +0.52% |                -12.37% |
+| JMnedict    |               -3.34% |                  11/12 |                   +2.02% |                 -3.53% |
+| JMdict      |               +0.34% |                   5/12 |                   -0.90% |                 +0.10% |
+| Jitendex    |               +0.42% |                   4/12 |                   +0.97% |                 +0.53% |
 
 WTY arm medians were 4,474.35 ms off and 3,863.25 ms on. Every WTY ABBA block total improved: -12.52%, -17.14%, -9.77%, -3.19%, -17.05%, -14.40%. The one slower candidate pair (+6.96%) remains in the median and equal-work calculations. The JMnedict gain is modest; JMdict and Jitendex are effectively unchanged in this cohort. Do not pool absolute times between dictionary hosts or add this result to the separate native-lookup result.
 
