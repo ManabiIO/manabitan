@@ -1,0 +1,188 @@
+--- a/ext/web/worker.ts
++++ b/ext/web/worker.ts
+@@ -123,12 +123,12 @@
+                 mediaResolutionConcurrency: 2, zipMaxWorkers: 2, zipUseWebWorkers: false
+             });
+             translator.clearDatabaseCaches();
+-            if (!imported.result || imported.errors.length) {
++            if (!imported.result) {
+                 throw new WebRuntimeError('import_failed', imported.errors.map((e) => e.message).slice(0, 8).join('; ') || 'Dictionary import did not commit');
+             }
+             // Cancellation during commit is not a rollback. Report the committed
+             // result; the caller must not claim that this dictionary was removed.
+-            return {summary: imported.result, cancelledAfterCommit: !!current?.cancelled, status: await status()};
++            return {summary: imported.result, warnings: imported.errors.map((error) => error.message).slice(0, 8), cancelledAfterCommit: !!current?.cancelled, status: await status()};
+         }
+         case 'delete': {
+             const title = text(p.title);
+--- a/ext/web/render.ts
++++ b/ext/web/render.ts
+@@ -32,7 +32,7 @@
+         if (internal) {
+             const text = new URL(href).searchParams.get('query');
+             element.href = '#';
+-            element.addEventListener('click', (event) => { event.preventDefault(); if (text) this.lookup(text.slice(0, 256)); });
++            element.addEventListener('click', (event) => { event.preventDefault(); if (text && !this.disposed) this.lookup(text.slice(0, 256)); }, {signal: this.controller.signal});
+             return;
+         }
+         try {
+@@ -46,15 +46,22 @@
+         // bytes as a top-level same-origin document (especially SVG documents).
+     }
+ }
+-function bounded(value: unknown): boolean {
++function bounded(value: unknown, budget: {nodes: number; characters: number}): boolean {
+     const work: Array<[unknown, number]> = [[value, 0]];
+     let nodes = 0;
+     while (work.length) {
+         const [item, depth] = work.pop()!;
+-        if (++nodes > 8000 || depth > 32) return false;
+-        if (typeof item === 'string' && item.length > 100000) return false;
++        if (++nodes > 4000 || ++budget.nodes > 12000 || depth > 32) return false;
++        if (typeof item === 'string') {
++            budget.characters += item.length;
++            if (item.length > 100000 || budget.characters > 250000) return false;
++        }
+         if (item && typeof item === 'object') {
+-            for (const child of Object.values(item)) work.push([child, depth + 1]);
++            for (const key in item) {
++                if (!Object.hasOwn(item, key)) continue;
++                if (work.length + nodes >= 4000) return false;
++                work.push([(item as Record<string, unknown>)[key], depth + 1]);
++            }
+         }
+     }
+     return true;
+@@ -65,7 +72,7 @@
+     for (const node of container.querySelectorAll<HTMLElement>('[style]')) {
+         for (const property of Array.from(node.style)) {
+             const value = node.style.getPropertyValue(property);
+-            if (/url\s*\(|image-set\s*\(|var\s*\(|[\\<>@]/i.test(value)) node.style.removeProperty(property);
++            if (property === 'background-image' || property === 'list-style-image' || /url\s*\(|image-set\s*\(|var\s*\(|[\\<>@]/i.test(value)) node.style.removeProperty(property);
+         }
+     }
+ }
+@@ -74,6 +81,8 @@
+     const manager = new ReaderMedia(client, lookup);
+     const generator = new StructuredContentGenerator(manager, container.ownerDocument, window);
+     const fragment = document.createDocumentFragment();
++    const budget = {nodes: 0, characters: 0};
++    let truncated = result.dictionaryEntries.length > 30;
+     for (const entry of result.dictionaryEntries.slice(0, 30)) {
+         const article = document.createElement('article'); article.className = 'dictionary-entry';
+         const heading = document.createElement('h3'); heading.className = 'headword';
+@@ -94,8 +103,9 @@
+             article.append(label);
+             const list = document.createElement('ol');
+             for (const value of definition.entries.slice(0, 100)) {
++                if (budget.nodes > 12000 || budget.characters > 250000) { truncated = true; break; }
+                 const item = document.createElement('li');
+-                if (!bounded(value)) { item.textContent = 'Definition exceeds the display complexity limit.'; }
++                if (!bounded(value, budget)) { truncated = true; item.textContent = 'Definition exceeds the display complexity limit.'; }
+                 else if (typeof value === 'string') item.textContent = value;
+                 else if (value.type === 'structured-content') item.append(generator.createStructuredContent(value.content as Content, definition.dictionary));
+                 else if (value.type === 'image') item.append(generator.createDefinitionImage(value, definition.dictionary));
+@@ -107,6 +117,10 @@
+         fragment.append(article);
+     }
+     if (!result.dictionaryEntries.length) { const text = document.createElement('p'); text.textContent = 'No matching dictionary entries.'; fragment.append(text); }
++    if (truncated) {
++        const note = document.createElement('p'); note.textContent = 'Some definitions were omitted because this result exceeds the display complexity limit.';
++        fragment.append(note);
++    }
+     container.replaceChildren(fragment);
+     return () => manager.dispose();
+ }
+--- a/ext/web/client.ts
++++ b/ext/web/client.ts
+@@ -57,7 +57,12 @@
+                     reject(options.signal?.reason ?? new DOMException('Cancelled', 'AbortError'));
+                 }
+             };
+-            const cleanup = () => options.signal?.removeEventListener('abort', onAbort);
++            // A failed worker fetch or a stalled decoder must not leave a live
++            // storage owner and a permanently pending UI. Termination preserves
++            // the journal for the next open and fails every outstanding request.
++            const timeout = operation === 'import' ? 15 * 60_000 : operation === 'delete' ? 120_000 : operation === 'close' ? 60_000 : 30_000;
++            const timer = setTimeout(() => this.fail(new WebRuntimeError('worker_timeout', 'Dictionary operation timed out. Reopen to recover interrupted work.')), timeout);
++            const cleanup = () => { clearTimeout(timer); options.signal?.removeEventListener('abort', onAbort); };
+             this.pending.set(id, {resolve: (v) => resolve(v as T), reject, cleanup, progress: options.onProgress});
+             options.signal?.addEventListener('abort', onAbort, {once: true});
+             try { this.worker.postMessage({version: API_VERSION, id, operation, parameters}); }
+@@ -72,7 +77,7 @@
+     status(options?: CallOptions) { return this.call<Status>('status', {}, options); }
+     lookup(text: string, options?: CallOptions) { return this.call<LookupResult>('lookup', {text}, options); }
+     importDictionary(archive: Blob, options?: CallOptions) {
+-        return this.call<{summary: Summary; cancelledAfterCommit: boolean; status: Status}>('import', {archive}, options, true);
++        return this.call<{summary: Summary; warnings: string[]; cancelledAfterCommit: boolean; status: Status}>('import', {archive}, options, true);
+     }
+     deleteDictionary(title: string, options?: CallOptions) { return this.call<Status>('delete', {title}, options, true); }
+     setEnabled(title: string, enabled: boolean) { return this.call<Status>('enable', {title, enabled}); }
+--- a/ext/web/scanner.ts
++++ b/ext/web/scanner.ts
+@@ -8,6 +8,7 @@
+     onResult: (result: EventArgument<'searchSuccess'>) => void;
+     onError: (error: Error) => void;
+     onEmpty?: () => void;
++    includeSelector?: string;
+ }
+ /** Uses the real ManabiTan scanner with a narrow, environment-owned API port. */
+ export function createReaderScanner(client: ManabiTanWebClient, container: HTMLElement, callbacks: ScannerCallbacks) {
+@@ -29,6 +30,7 @@
+     }), textSourceGenerator: new TextSourceGenerator(), browser: null,
+     searchTerms: true, searchKanji: false, searchOnClick: false});
+     scanner.language = 'ja';
++    scanner.includeSelector = callbacks.includeSelector ?? null;
+     scanner.excludeSelector = 'rt, rp, button, input, textarea, select, [data-manabitan-web-popup]';
+     const options: InputOptions = {
+         searchTerms: true, searchKanji: false, scanOnTouchMove: false, scanOnTouchPress: false,
+--- a/web/build.mjs
++++ b/web/build.mjs
+@@ -10,6 +10,8 @@
+ await fs.rm(output, {recursive: true, force: true});
+ await fs.mkdir(output, {recursive: true});
+ for (const name of ['js', 'lib', 'data', 'fonts']) await fs.cp(path.join(root, 'ext', name), path.join(output, name), {recursive: true});
++await fs.mkdir(path.join(output, 'css'), {recursive: true});
++await fs.copyFile(path.join(root, 'ext/css/structured-content.css'), path.join(output, 'css/structured-content.css'));
+ for (const required of ['lib/sqlite/sqlite3.wasm', 'lib/resvg.wasm']) await fs.access(path.join(output, required));
+ const entryPoints = (await fs.readdir(path.join(root, 'ext/web'))).filter((p) => p.endsWith('.ts')).map((p) => path.join(root, 'ext/web', p));
+ await build({entryPoints, outdir: path.join(output, 'web'), platform: 'browser', format: 'esm', target: 'es2022', bundle: false});
+@@ -25,5 +27,5 @@
+ }
+ await walk(output);
+ await fs.writeFile(path.join(output, 'manifest.json'), JSON.stringify({package: 'manabitan-web', apiVersion: 1, revision,
+-    client: 'web/client.js', scanner: 'web/scanner.js', renderer: 'web/render.js', assets}, null, 2));
++    client: 'web/client.js', scanner: 'web/scanner.js', renderer: 'web/render.js', presets: 'web/presets.js', style: 'css/structured-content.css', assets}, null, 2));
+ console.log(`Built static ManabiTan web runtime: ${assets.length} assets, revision ${revision}`);
+--- a/ext/js/display/structured-content-generator.js
++++ b/ext/js/display/structured-content-generator.js
+@@ -207,7 +207,12 @@
+             } else if ('loadMediaUrl' in this._contentManager) {
+                 this._contentManager.loadMediaUrl(
+                     path, dictionary,
+-                    (url) => { this._setImageData(node, /** @type {HTMLImageElement} */ (image), imageBackground, url, false); },
++                    (url) => {
++                        this._setImageData(node, /** @type {HTMLImageElement} */ (image), imageBackground, url, false);
++                        // Web-hosted dictionary media is image-only. Opening an
++                        // imported SVG as a same-origin document can run scripts.
++                        node.removeAttribute('href');
++                    },
+                     () => { this._setImageData(node, /** @type {HTMLImageElement} */ (image), imageBackground, null, true); },
+                 );
+             }
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -2307,10 +2307,9 @@
+             dictionaryDatabase.setImportDebugLogging(false);
+         }
+ 
+-        if (!importSession.failed && this._isCancelled()) {
+-            importSession.recordFailure(new Error('Dictionary import was cancelled'));
+-        }
+-
++        // Cancellation is checked before finalization above. Once the atomic
++        // publication succeeds, report that committed result rather than a
++        // cancellation failure for a dictionary which is already persisted.
+         if (importSession.failed) {
+             await importSession.cleanupIncompleteSummary();
+             return {
