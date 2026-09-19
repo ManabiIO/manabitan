@@ -84,7 +84,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Verify original locked dictionaries
         run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('builds/e2e-dictionary-cache');"
-      - name: Fixed full-import cohorts with same-binary controls
+      - name: Independent fixed full-import cohorts with same-binary controls
         env:
           DICTIONARY: ${{ matrix.dictionary }}
         run: python dev/perf/zip-ranges-20260919.py --dictionary "$DICTIONARY" --blocks 6 --out "$RUNNER_TEMP/zip-ranges-evidence"
