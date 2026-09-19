@@ -15,7 +15,7 @@
          const size = archiveContent instanceof Blob ? archiveContent.size : archiveContent.byteLength;
 -        return Number.isSafeInteger(size) && size >= ZIP_LOCAL_FILE_HEADER_LENGTH && size <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES;
 +        return Number.isSafeInteger(size) && size >= ZIP_LOCAL_FILE_HEADER_LENGTH &&
-+            (archiveContent instanceof Blob || size <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES);
++        (archiveContent instanceof Blob || size <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES);
      }
  
      /**
