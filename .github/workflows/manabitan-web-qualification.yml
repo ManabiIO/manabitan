@@ -10,28 +10,35 @@ concurrency:
 jobs:
   qualify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
       - uses: actions/setup-node@v4
         with: {node-version: '24.21.0'}
-      - name: Materialize the checksum-pinned runtime
+      - name: Compose and retain exact source
         run: |
           mkdir -p evidence
           python3 research/prepare-web.py
-          tar -czf evidence/web-source.tar.gz ext/web web types/ext/text-scanner.d.ts types/ext/structured-content.d.ts ext/js/language/text-scanner.js ext/js/display/structured-content-generator.js
+          python3 research/refine-web.py
+          python3 - <<'PY'
+          import json,pathlib
+          files=[str(p) for root in ('ext/web','web') for p in pathlib.Path(root).rglob('*') if p.is_file()]
+          files+=['types/ext/text-scanner.d.ts','types/ext/structured-content.d.ts','ext/js/language/text-scanner.js','ext/js/display/structured-content-generator.js','ext/js/dictionary/dictionary-importer.js']
+          pathlib.Path('evidence/source.json').write_text(json.dumps([{'path':p,'content':pathlib.Path(p).read_text()} for p in sorted(files)]))
+          PY
       - name: Build shared libraries and web artifact
         run: |
           npm ci > evidence/install.log 2>&1
           npm run build:libs > evidence/build-libs.log 2>&1
           node web/build.mjs > evidence/build-web.log 2>&1
-      - name: Validate extension and web contracts
+      - name: Validate shared and web contracts
         run: |
           set -o pipefail
           npm run test:ts:main 2>&1 | tee evidence/types-main.log
           npm run test:ts:test 2>&1 | tee evidence/types-test.log
           npx tsc -p web/tsconfig.json 2>&1 | tee evidence/types-web.log
+          npx vitest run test/reader-scanner-lifecycle.test.js test/dictionary-importer-shared-buffer.test.js test/dictionary-import-session.test.js 2>&1 | tee evidence/unit.log
       - uses: actions/checkout@v4
         with:
           repository: ManabiIO/manabi-reader-web
@@ -39,17 +46,18 @@ jobs:
           path: reader-fixtures
           sparse-checkout: test/reader/e2e
           persist-credentials: false
-      - name: Prepare checksum-verified full JMdict and browser
+      - name: Prepare real dictionaries and browser
         run: |
           python3 reader-fixtures/test/reader/e2e/prepare-jmdict.py "$RUNNER_TEMP/dictionaries" > evidence/jmdict.json
           python3 web/make-fixtures.py "$RUNNER_TEMP/dictionaries"
+          python3 web/prepare-fixtures.py "$RUNNER_TEMP/dictionaries"
           npx playwright install --with-deps chromium > evidence/browser-install.log 2>&1
-      - name: No-extension OPFS and lookup acceptance
+      - name: No-extension OPFS, crash, rendering and default dictionary acceptance
         env: {DICTIONARY_FIXTURES: '${{ runner.temp }}/dictionaries'}
         run: |
           set -o pipefail
           node web/e2e.mjs 2>&1 | tee evidence/browser.log
-      - name: Retain browser results and reproducible fixture
+      - name: Retain browser evidence and dictionary fixtures
         if: always()
         run: |
           if test -d builds/web-evidence; then cp -a builds/web-evidence evidence/browser; fi
@@ -57,3 +65,32 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with: {name: manabitan-web-qualification, path: evidence, retention-days: 7}
+  record:
+    needs: qualify
+    runs-on: ubuntu-24.04
+    permissions: {contents: write}
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {name: manabitan-web-qualification}
+      - name: Record verified source blobs and tree without moving any branch
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          python3 - <<'PY'
+          import json,pathlib,hashlib,urllib.request,os
+          def post(endpoint,value):
+            r=urllib.request.Request('https://api.github.com/repos/ManabiIO/manabitan/git/'+endpoint,data=json.dumps(value).encode(),headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Content-Type':'application/json'},method='POST')
+            with urllib.request.urlopen(r,timeout=30) as response:return json.load(response)
+          shared={'types/ext/text-scanner.d.ts','types/ext/structured-content.d.ts','ext/js/language/text-scanner.js','ext/js/display/structured-content-generator.js','ext/js/dictionary/dictionary-importer.js'}
+          files=json.loads(pathlib.Path('source.json').read_text());assert len(files)<40
+          entries=[]
+          for e in files:
+            p=e['path'];assert '..' not in p.split('/') and (p.startswith(('ext/web/','web/')) or p in shared)
+            raw=e['content'].encode();assert len(raw)<1024*1024
+            sha=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+            assert post('blobs',{'content':e['content'],'encoding':'utf-8'})['sha']==sha
+            entries.append({'path':p,'mode':'100644','type':'blob','sha':sha})
+          tree=post('trees',{'base_tree':'b429d69a5e72d70de27ddf661343044f9a7de567','tree':entries})['sha']
+          pathlib.Path('tree.json').write_text(json.dumps({'tree':tree,'entries':entries}));print(tree)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: manabitan-web-tested-tree, path: tree.json, retention-days: 7}
