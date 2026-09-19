@@ -347,10 +347,25 @@ export function prepareSpanCompression(
             ++runSpanCount;
             ++i;
         } while (i < sourceOffsets.length);
-        module.HEAPU8.set(
-            source.subarray(runOffset, runOffset + runLength),
-            buffers.source + outputOffset,
-        );
+        const heap = module.HEAPU8;
+        const destinationOffset = buffers.source + outputOffset;
+        const prefix = (
+            runLength >= 1024 &&
+            typeof SharedArrayBuffer !== 'undefined' &&
+            source.buffer instanceof SharedArrayBuffer &&
+            !(heap.buffer instanceof SharedArrayBuffer)
+        ) ?
+            (heap.byteOffset + destinationOffset - source.byteOffset - runOffset) & 7 :
+            0;
+        if (prefix === 0) {
+            heap.set(source.subarray(runOffset, runOffset + runLength), destinationOffset);
+        } else {
+            // Keep the immutable source in bounds, align the shared bulk copy,
+            // then shift only private bytes. No padding or extra buffer is needed.
+            heap.set(source.subarray(runOffset + prefix, runOffset + runLength), destinationOffset);
+            heap.copyWithin(destinationOffset + prefix, destinationOffset, destinationOffset + runLength - prefix);
+            heap.set(source.subarray(runOffset, runOffset + prefix), destinationOffset);
+        }
         outputOffset += runLength;
     }
     if (outputOffset !== contentBytes) {
