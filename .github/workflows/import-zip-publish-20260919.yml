@@ -1,0 +1,160 @@
+name: Publish qualified bounded ZIP reader
+on:
+  push:
+    branches: [research/import-zip-ranges-20260919]
+    paths: [.github/workflows/import-zip-publish-20260919.yml]
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      MANABITAN_CLANG: clang-18
+      BASE: fb7241deb70950dc113089cd774c9489ede48f8a
+      PRODUCT: perf/bounded-large-zip-20260919
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require all exact-source runs to have completed successfully
+        run: |
+          set -euo pipefail
+          for id in 35456623885 35456938713 35456962991; do
+            test "$(gh api "repos/ManabiIO/manabitan/actions/runs/$id" --jq '.conclusion')" = success
+          done
+          test "$(gh api repos/ManabiIO/manabitan/actions/runs/35456623885 --jq '.head_sha')" = 1ef094ccff33a2f2331885861d0518a492549eee
+          test "$(git ls-remote origin refs/heads/develop | cut -f1)" = "$BASE"
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 35456623885
+          github-token: ${{ github.token }}
+          path: evidence/final
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 35456938713
+          github-token: ${{ github.token }}
+          path: evidence/memory
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 35456962991
+          github-token: ${{ github.token }}
+          path: evidence/lifecycle
+      - name: Recompute raw report and memory gates before publication
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,statistics
+          from pathlib import Path
+          def load(p): return json.loads(p.read_text())
+          def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          final='3f944585412c7c581486575841bc677a2bdc42500f6b1ba2bf86bfee20378bd1'
+          audited={}
+          for dictionary in ['jmdict','jmnedict','jitendex']:
+              root=Path('evidence/final')/('zip-ranges-'+dictionary)
+              identity=load(root/'identities.json')
+              assert identity['source']['candidate']==final
+              for arm in ['baseline','candidate']:
+                  assert sha(root/(arm+'.js'))==identity['source'][arm]
+                  assert sha(root/(arm+'.zip'))==identity['packages'][arm]['sha256']
+              audited[dictionary]={}
+              for layout in ['large','original']:
+                  plan=load(root/layout/'plan.json'); observations=load(root/layout/'observations.json')
+                  assert len(plan)==len(observations)==(50 if layout=='large' else 18)
+                  fixture=load(root/('derived-lock.json' if layout=='large' else 'original-lock.json'))['dictionaries'][dictionary]
+                  for spec,row in zip(plan,observations):
+                      assert all(row[k]==v for k,v in spec.items())
+                      p=root/row['report']; assert sha(p)==row['reportSha256']
+                      report=load(p); assert report['status']=='success' and report['skippedVerification'] is False
+                      bench=report['benchmark']; assert bench['productionImportDefaults'] and bench['authoritativeTiming']
+                      assert bench['importFlags']=={} and not any(bench[k] for k in ['traceEnabled','phaseProfiling','phaseScreenshots','processSampling'])
+                      v=bench['validation']; assert v['title']==fixture['expectedTitle'] and v['revision']==fixture['revision']
+                      assert v['termRows']==fixture['termRows'] and v['contentReadable'] and v['probeCount']==12
+                      phases=[p for p in report['phases'] if isinstance(p.get('data'),dict) and p['data'].get('kind')=='dictionary-import']
+                      assert len(phases)==1
+                      data=phases[0]['data']; t=data['browserTiming']
+                      assert t['errorCount']==0 and t['trigger']=='file-input-change' and t['sequence']>t['sequenceBefore']
+                      assert abs(t['completedAtMs']-t['startedAtMs']-row['ms'])<0.00001 and row['ms']>0
+                      d=data['importDebug']; assert d['hasResult'] and d['errorCount']==0 and d['addSettingsErrorCount']==0 and not d['usesFallbackStorage']
+                      assert d['openStorageDiagnostics']['mode']=='opfs-sahpool'
+                      fast=[p['details'] for p in d['importerPhaseTimings'] if p['phase'].startswith('term-file-fast-path:')]
+                      assert fast and sum(p['rows'] for p in fast)==fixture['termRows']
+                      assert all(len(p['parserExperiments'])==13 and all(v is False for v in p['parserExperiments'].values()) for p in fast)
+                      if layout=='large': assert (sum(p['parserSourceCompressedBytes'] for p in fast)>0)==(row['arm']=='candidate')
+                  rows=[r for r in observations if r['role']=='candidate']; pairs=[]; totals=[]
+                  for i in range(0,len(rows),4):
+                      a,b,c,d=[r['ms'] for r in rows[i:i+4]]
+                      pairs.extend([100*(b/a-1),100*(c/d-1)]); totals.append(100*((b+c)/(a+d)-1))
+                  result=load(root/layout/'result.json'); assert result['pairedPercent']==pairs and result['blockTotalsPercent']==totals
+                  assert result['medianPairedPercent']==statistics.median(pairs)
+                  if layout=='large': assert statistics.median(pairs)<-5 and all(x<0 for x in pairs+totals)
+                  else: assert statistics.median(pairs)<3
+                  audited[dictionary][layout]=result
+              memory=Path('evidence/memory')/('zip-range-memory-'+dictionary)
+              observations=load(memory/'large/observations.json'); assert len(observations)==18
+              values=[]
+              for row in observations:
+                  m=load(memory/'large'/f'{row["index"]:03}.memory.json')
+                  assert m['diagnosticOnly'] and len(m['samples'])>2
+                  assert all(sum(p['Pss'] for p in s['processes'])==s['pss'] for s in m['samples'])
+                  peak=max(s['pss'] for s in m['samples']); assert peak==m['peakPss']
+                  if row['role']=='candidate': values.append(peak)
+              pairs=[]
+              for i in range(0,len(values),4):
+                  a,b,c,d=values[i:i+4];pairs.extend([100*(b/a-1),100*(c/d-1)])
+              assert statistics.median(pairs)<5
+              audited[dictionary]['sampledMemoryPairedPercent']=pairs
+          for p in [Path('evidence/final/zip-ranges-qualification/lifecycle.json'),Path('evidence/lifecycle/zip-ranges-large-lifecycle/large-lifecycle.json')]:
+              r=load(p); assert r['status']=='success' and r['skippedVerification'] is False and r['phaseCount']>=83
+          Path('evidence/publication-audit.json').write_text(json.dumps(audited,indent=2))
+          PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Reconstruct and recheck only the qualified product changes
+        run: |
+          set -euo pipefail
+          cp dev/perf/zip-ranges-20260919.patch "$RUNNER_TEMP/candidate.patch"
+          cp test/raw-zip-range-reader.test.js "$RUNNER_TEMP/range.test.js"
+          git fetch --depth=1 origin "$BASE"
+          git checkout -b "$PRODUCT" "$BASE"
+          git apply "$RUNNER_TEMP/candidate.patch"
+          cp "$RUNNER_TEMP/range.test.js" test/raw-zip-range-reader.test.js
+          npm ci > "$RUNNER_TEMP/npm-ci.log" 2>&1
+          npm run build:libs > "$RUNNER_TEMP/libraries.log" 2>&1
+          node node_modules/vitest/vitest.mjs run test/raw-zip-range-reader.test.js test/dictionary-import-ownership.test.js > "$RUNNER_TEMP/focused.log" 2>&1
+          npm run test:ts:main > "$RUNNER_TEMP/main-types.log" 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-source-pipeline.js test/raw-zip-range-reader.test.js > "$RUNNER_TEMP/lint.log" 2>&1
+          echo '3f944585412c7c581486575841bc677a2bdc42500f6b1ba2bf86bfee20378bd1  ext/js/dictionary/term-bank-source-pipeline.js' | sha256sum --check
+          echo '065886f0b6998027464e1391dad09c44c1593e0375ffe0afd371503d31ed8961  test/raw-zip-range-reader.test.js' | sha256sum --check
+          git add ext/js/dictionary/term-bank-source-pipeline.js test/raw-zip-range-reader.test.js
+          git diff --cached --check
+          test "$(git diff --cached --name-only | wc -l)" -eq 2
+          git config user.name 'Manabitan automation'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -c core.hooksPath=/dev/null commit -s -m 'perf: preserve bounded native imports for large ZIP files'
+          git rev-parse HEAD HEAD^{tree} > evidence/published-identities.txt
+          git ls-tree HEAD ext/js/dictionary/term-bank-source-pipeline.js test/raw-zip-range-reader.test.js >> evidence/published-identities.txt
+          cp "$RUNNER_TEMP/focused.log" "$RUNNER_TEMP/main-types.log" "$RUNNER_TEMP/lint.log" evidence/
+      - name: Push only the new branch without force or default-branch changes
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin refs/heads/develop | cut -f1)" = "$BASE"
+          if git ls-remote --exit-code origin "refs/heads/$PRODUCT"; then
+            echo 'Refusing to overwrite an existing product branch'
+            exit 1
+          fi
+          git push origin "HEAD:refs/heads/$PRODUCT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-zip-publication
+          path: |
+            evidence/publication-audit.json
+            evidence/published-identities.txt
+            evidence/focused.log
+            evidence/main-types.log
+            evidence/lint.log
+          retention-days: 30
+          if-no-files-found: error
