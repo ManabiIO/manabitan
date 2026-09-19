@@ -50,7 +50,7 @@ export class TextScanner extends EventDispatcher {
         browser = null,
     }) {
         super();
-        /** @type {import('../comm/api.js').API} */
+        /** @type {import('text-scanner').ScannerApi} */
         this._api = api;
         /** @type {HTMLElement|Window} */
         this._node = node;

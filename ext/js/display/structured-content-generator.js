@@ -37,12 +37,12 @@ function getStructuredContentMediaPath(href) {
 
 export class StructuredContentGenerator {
     /**
-     * @param {import('./display-content-manager.js').DisplayContentManager|import('../templates/anki-template-renderer-content-manager.js').AnkiTemplateRendererContentManager} contentManager
+     * @param {import('./display-content-manager.js').DisplayContentManager|import('../templates/anki-template-renderer-content-manager.js').AnkiTemplateRendererContentManager|import('structured-content').UrlContentManager} contentManager
      * @param {Document} document
      * @param {Window} window
      */
     constructor(contentManager, document, window) {
-        /** @type {import('./display-content-manager.js').DisplayContentManager|import('../templates/anki-template-renderer-content-manager.js').AnkiTemplateRendererContentManager} */
+        /** @type {import('./display-content-manager.js').DisplayContentManager|import('../templates/anki-template-renderer-content-manager.js').AnkiTemplateRendererContentManager|import('structured-content').UrlContentManager} */
         this._contentManager = contentManager;
         /** @type {Document} */
         this._document = document;
@@ -203,6 +203,17 @@ export class StructuredContentGenerator {
                     () => {
                         this._setImageData(node, /** @type {HTMLImageElement} */ (image), imageBackground, null, true);
                     },
+                );
+            } else if ('loadMediaUrl' in this._contentManager) {
+                this._contentManager.loadMediaUrl(
+                    path, dictionary,
+                    (url) => {
+                        this._setImageData(node, /** @type {HTMLImageElement} */ (image), imageBackground, url, false);
+                        // Web-hosted dictionary media is image-only. Opening an
+                        // imported SVG as a same-origin document can run scripts.
+                        node.removeAttribute('href');
+                    },
+                    () => { this._setImageData(node, /** @type {HTMLImageElement} */ (image), imageBackground, null, true); },
                 );
             }
         }
@@ -535,7 +546,7 @@ export class StructuredContentGenerator {
         if (media) {
             const mediaPath = getStructuredContentMediaPath(href);
             node.href = '#';
-            if (this._contentManager instanceof DisplayContentManager) {
+            if (this._contentManager instanceof DisplayContentManager || 'loadMediaUrl' in this._contentManager) {
                 const contentManager = this._contentManager;
                 node.addEventListener('click', (e) => {
                     e.preventDefault();

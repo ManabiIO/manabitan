@@ -246,3 +246,10 @@ export type LinkElement = {
 export type Element = LineBreak | UnstyledElement | TableElement | StyledElement | ImageElement | LinkElement;
 
 export type Content = string | Element | Content[];
+
+/** A host-local URL media adapter for the shared structured dictionary renderer. */
+export interface UrlContentManager {
+    loadMediaUrl(path: string, dictionary: string, loaded: (url: string) => void, failed: () => void): void;
+    prepareLink(element: HTMLAnchorElement, href: string, internal: boolean): void;
+    openMediaInTab(path: string, dictionary: string, window: Window): Promise<void>;
+}
