@@ -1,0 +1,235 @@
+/*
+ * Copyright (C) 2026  Manabitan authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+import {createHash} from 'node:crypto';
+import {readFile} from 'node:fs/promises';
+import {Worker} from 'node:worker_threads';
+import {describe, expect, test} from 'vitest';
+
+/** @typedef {import('../ext/js/dictionary/term-bank-wasm-parser.js').TermBankColumnChunk} Chunk */
+/** @typedef {{type: string, chunk: Chunk, borrowsWorkerMemory?: boolean, profile: {maxWasmHeapBytes: number}, error?: {message: string}}} Reply */
+const binaryUrl = new URL('../ext/lib/term-bank-parser.wasm', import.meta.url);
+const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href;
+const encoder = new TextEncoder();
+
+/**
+ * Hash every field/view in the actual returned result, including nested plans.
+ * @param {unknown} value
+ * @returns {string}
+ */
+function digestResult(value) {
+    const hash = createHash('sha256');
+    /** @param {unknown} item */
+    const visit = (item) => {
+        if (ArrayBuffer.isView(item)) {
+            hash.update(item.constructor.name);
+            hash.update(new Uint8Array(item.buffer, item.byteOffset, item.byteLength));
+        } else if (item instanceof Map) {
+            for (const [key, entry] of item) {
+                visit(key);
+                visit(entry);
+            }
+        } else if (item !== null && typeof item === 'object') {
+            for (const [key, entry] of Object.entries(item)) {
+                visit(key);
+                visit(entry);
+            }
+        } else {
+            hash.update(`${typeof item}:${String(item)};`);
+        }
+    };
+    visit(value);
+    return hash.digest('hex');
+}
+
+/**
+ * Only the Node message transport is adapted; the real production worker and
+ * actual compiled parser execute unchanged, with real transfer/detachment.
+ * @param {boolean} sharedAvailable
+ * @returns {Promise<{worker: Worker, request: (message: unknown, transfer?: ArrayBuffer[]) => Promise<Reply>}>}
+ */
+async function createParser(sharedAvailable) {
+    const module = await WebAssembly.compile(await readFile(binaryUrl));
+    const adapter = `import {parentPort} from 'node:worker_threads';
+        ${sharedAvailable ? '' : 'globalThis.SharedArrayBuffer = undefined;'}
+        globalThis.self = {
+            addEventListener: (_, handler) => parentPort.on('message', data => handler({data})),
+            postMessage: (data, transfer) => parentPort.postMessage(data, transfer),
+        };
+        await import(${JSON.stringify(workerUrl)});
+        parentPort.postMessage({type: 'loaded'});`;
+    const worker = new Worker(new URL(`data:text/javascript,${encodeURIComponent(adapter)}`));
+    /**
+     * @param {unknown} message
+     * @param {ArrayBuffer[]} [transfer=[]]
+     * @returns {Promise<Reply>}
+     */
+    const request = (message, transfer = []) => new Promise((resolve, reject) => {
+        /** @param {Error} error */
+        const fail = (error) => {
+            cleanup();
+            reject(error);
+        };
+        /** @param {Reply} reply */
+        const receive = (reply) => {
+            cleanup();
+            resolve(reply);
+        };
+        /** @param {number} code */
+        const exit = (code) => { fail(new Error(`Parser exited before replying: ${code}`)); };
+        const timer = setTimeout(() => { fail(new Error('Parser ownership request timed out')); }, 15000);
+        const cleanup = () => {
+            clearTimeout(timer);
+            worker.off('error', fail);
+            worker.off('exit', exit);
+            worker.off('message', receive);
+        };
+        worker.once('error', fail);
+        worker.once('exit', exit);
+        worker.once('message', receive);
+        if (message !== null) { worker.postMessage(message, transfer); }
+    });
+    try {
+        expect((await request(null)).type).toBe('loaded');
+        expect((await request({type: 'initialize', module})).type).toBe('ready');
+        return {worker, request};
+    } catch (error) {
+        await worker.terminate();
+        throw error;
+    }
+}
+
+/**
+ * @param {string[]} banks
+ * @param {number} id
+ * @returns {{message: object, buffers: ArrayBuffer[]}}
+ */
+function parseRequest(banks, id) {
+    const buffers = banks.map((bank) => encoder.encode(bank).buffer);
+    return {
+        buffers,
+        message: {
+            type: 'parse',
+            id,
+            version: 3,
+            sourceBuffers: buffers,
+            options: {
+                singleChunk: true,
+                emitTermByteLists: false,
+                computeContentHashes: true,
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                prepareLookupIndexes: true,
+            },
+        },
+    };
+}
+
+/**
+ * @param {Chunk} chunk
+ * @returns {string[]}
+ */
+function expressions(chunk) {
+    const plan = chunk.termRecordPreinternedPlan;
+    let offset = 0;
+    const keys = [...plan.stringLengths].map((length) => {
+        const value = new TextDecoder().decode(Uint8Array.from(plan.stringsBuffer.subarray(offset, offset + length)));
+        offset += length;
+        return value;
+    });
+    return [...plan.expressionIndexes].map((index) => keys[index]);
+}
+
+const examples = [
+    '[ ["猫","ねこ","","",1,["cat"],7,""] ]',
+    '[["\\u732b","ねこ","","",-3,["escaped"],8,""]]',
+    '[["😀𠮷","","","",0,[{"type":"text","text":"unicode"}],9,""]]',
+    '[["画像","がぞう","","",2,[{"type":"image","path":"image.png"}],10,""]]',
+];
+
+describe('private parser output ownership', () => {
+    test('the shipped module has private memory and old views detach on growth', async () => {
+        const {instance} = await WebAssembly.instantiate(await readFile(binaryUrl));
+        const memory = /** @type {WebAssembly.Memory} */ (instance.exports.memory);
+        expect(memory.buffer instanceof ArrayBuffer).toBe(true);
+        const prior = memory.buffer;
+        const live = new Uint8Array(prior, 0, 4);
+        live.set([1, 2, 3, 4]);
+        const owned = Uint8Array.from(live);
+        memory.grow(1);
+        expect(prior.byteLength).toBe(0);
+        expect([...owned]).toStrictEqual([1, 2, 3, 4]);
+        expect([...new Uint8Array(memory.buffer, 0, 4)]).toStrictEqual([1, 2, 3, 4]);
+    });
+
+    test.each(examples.flatMap((bank) => [true, false].map((sharedAvailable) => ({bank, sharedAvailable}))))(
+        'owns output across parser reuse and growth: $bank, shared=$sharedAvailable',
+        async ({bank, sharedAvailable}) => {
+            const {worker, request} = await createParser(sharedAvailable);
+            try {
+                const source = parseRequest([bank, bank], 1);
+                const reply = await request(source.message, source.buffers);
+                expect(source.buffers.every((buffer) => buffer.byteLength === 0)).toBe(true);
+                expect(reply.type).toBe('result');
+                expect(reply.borrowsWorkerMemory).toBe(false);
+                expect(reply.chunk.rowCount).toBe(2);
+                const expected = JSON.parse(bank)[0][0];
+                expect(expressions(reply.chunk)).toStrictEqual([expected, expected]);
+                expect(reply.chunk.scoreList.buffer instanceof ArrayBuffer).toBe(true);
+                const snapshot = digestResult(reply.chunk);
+                // Elapsed encoding time may differ across requests; every data byte must match.
+                const contentSnapshot = digestResult({...reply.chunk, preparedLookupIndexEncodeMs: 0});
+                const larger = JSON.stringify(Array.from({length: 12000}, (_, index) => [
+                    `単語${index}`, '', '', '', index % 11, ['x'.repeat(512)], index, '',
+                ]));
+                const growth = parseRequest([larger, larger], 2);
+                const grown = await request(growth.message, growth.buffers);
+                expect(grown.type).toBe('result');
+                expect(grown.profile.maxWasmHeapBytes).toBeGreaterThan(reply.profile.maxWasmHeapBytes);
+                expect(grown.borrowsWorkerMemory).toBe(false);
+                expect(digestResult(reply.chunk)).toBe(snapshot);
+                const again = parseRequest([bank, bank], 3);
+                const repeated = await request(again.message, again.buffers);
+                expect(repeated.type).toBe('result');
+                expect(digestResult({...repeated.chunk, preparedLookupIndexEncodeMs: 0})).toBe(contentSnapshot);
+                expect(digestResult(reply.chunk)).toBe(snapshot);
+            } finally {
+                await worker.terminate();
+            }
+        },
+    );
+
+    test('failed parsing and receiver mutation do not poison later output', async () => {
+        const {worker, request} = await createParser(true);
+        try {
+            const source = parseRequest([examples[0], examples[0]], 1);
+            const reply = await request(source.message, source.buffers);
+            expect(reply.type).toBe('result');
+            expect(reply.borrowsWorkerMemory).toBe(false);
+            const snapshot = digestResult({...reply.chunk, preparedLookupIndexEncodeMs: 0});
+            reply.chunk.scoreList[0] = 99999;
+            const invalid = parseRequest(['[["truncated'], 2);
+            expect((await request(invalid.message, invalid.buffers)).type).toBe('parse-error');
+            const recovery = parseRequest([examples[0], examples[0]], 3);
+            const recovered = await request(recovery.message, recovery.buffers);
+            expect(recovered.type).toBe('result');
+            expect(digestResult({...recovered.chunk, preparedLookupIndexEncodeMs: 0})).toBe(snapshot);
+        } finally {
+            await worker.terminate();
+        }
+    });
+});
