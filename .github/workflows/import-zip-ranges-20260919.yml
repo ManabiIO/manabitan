@@ -1,0 +1,97 @@
+name: Bounded ZIP ranges qualification
+on:
+  push:
+    branches: [research/import-zip-ranges-20260919]
+    paths: [.github/workflows/import-zip-ranges-20260919.yml]
+permissions:
+  contents: read
+jobs:
+  qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      MANABITAN_CLANG: clang-18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Failure-first new range coverage, then complete qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualification
+          set +e
+          node node_modules/vitest/vitest.mjs run test/raw-zip-range-reader.test.js --reporter=json --outputFile=qualification/red.json > qualification/red.log 2>&1
+          status=$?
+          set -e
+          test "$status" -ne 0
+          git apply dev/perf/zip-ranges-20260919.patch
+          node node_modules/vitest/vitest.mjs run test/raw-zip-range-reader.test.js test/dictionary-import-ownership.test.js > qualification/focused.log 2>&1
+          node node_modules/vitest/vitest.mjs run --no-file-parallelism > qualification/unit.log 2>&1
+          npm run test:unit:options > qualification/options.log 2>&1
+          npm run test:ts:main > qualification/main-types.log 2>&1
+          npm run test:ts:dev > qualification/dev-types.log 2>&1
+          npm run test:ts:bench > qualification/bench-types.log 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-source-pipeline.js test/raw-zip-range-reader.test.js > qualification/lint.log 2>&1
+          npm run test:build > qualification/build-plans.log 2>&1
+          node dev/bin/build.js chrome-dev > qualification/chrome-build.log 2>&1
+          node dev/bin/build.js firefox-dev > qualification/firefox-build.log 2>&1
+          git diff --check
+          sha256sum ext/js/dictionary/term-bank-source-pipeline.js test/raw-zip-range-reader.test.js ext/lib/term-bank-parser.wasm > qualification/hashes.txt
+      - run: npx playwright install --with-deps chromium
+      - name: Real production-default Chromium lifecycle
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_CHROMIUM_E2E_REPORT: qualification/lifecycle.html
+        run: node test/chromium/extension-two-dictionary-import.e2e.js > qualification/lifecycle.log 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zip-ranges-qualification
+          path: qualification
+          retention-days: 30
+          if-no-files-found: error
+  full-import:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    env:
+      MANABITAN_CLANG: clang-18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Verify original locked dictionaries
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('builds/e2e-dictionary-cache');"
+      - name: Fixed full-import cohorts with same-binary controls
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: python dev/perf/zip-ranges-20260919.py --dictionary "$DICTIONARY" --blocks 6 --out "$RUNNER_TEMP/zip-ranges-evidence"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zip-ranges-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/zip-ranges-evidence
+          retention-days: 30
+          if-no-files-found: error
