@@ -34,12 +34,13 @@ self.addEventListener('message', (event) => {
 /** @param {MessageEvent} event */
 async function compressContent(event) {
     const rawData = /** @type {unknown} */ (event.data);
-    const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown}} */ (rawData);
+    const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown, compressionExperiments?: import('dictionary-importer').ImportExperiments}} */ (rawData);
     const id = typeof data?.id === 'number' ? data.id : -1;
     try {
         const {compressTermContentZstd, compressWrappedTermContentZstd, finishWrappedTermContentZstdSpans, prepareWrappedTermContentZstdSpans} = await modulePromise;
         await initialization;
         const dictName = typeof data.dictName === 'string' ? data.dictName : null;
+        const options = data.compressionExperiments ?? {};
         /** @type {{bytes: Uint8Array, envelopeMs: number}} */
         let result;
         if (
@@ -62,6 +63,7 @@ async function compressContent(event) {
                 data.sourceLengths,
                 data.contentBytes,
                 dictName,
+                options,
             );
             self.postMessage({type: 'source-consumed', id});
             result = finishWrappedTermContentZstdSpans(prepared);
@@ -70,7 +72,7 @@ async function compressContent(event) {
                 throw new TypeError('Compression worker input is not a Uint8Array');
             }
             result = data.wrap === true ?
-                compressWrappedTermContentZstd(data.content, dictName) :
+                compressWrappedTermContentZstd(data.content, dictName, options) :
                 {bytes: compressTermContentZstd(data.content, dictName), envelopeMs: 0};
         }
         const {bytes, envelopeMs} = result;

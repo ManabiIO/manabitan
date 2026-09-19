@@ -762,7 +762,7 @@ export class DictionaryDatabase {
                 // keep existing draw worker split behaviour.
                 const isWorker = self.constructor.name !== 'Window';
                 if (!isWorker && this._worker === null) {
-                    this._worker = new Worker('/js/dictionary/dictionary-database-worker-main.js', {type: 'module'});
+                    this._worker = new Worker(new URL('dictionary-database-worker-main.js', import.meta.url), {type: 'module'});
                     this._worker.addEventListener('error', (event) => {
                         log.log('Worker terminated with error:', event);
                     });
@@ -771,7 +771,7 @@ export class DictionaryDatabase {
                     });
                 } else if (isWorker && this._resvgFontBuffer === null) {
                     try {
-                        await initWasm(fetch('/lib/resvg.wasm'));
+                        await initWasm(fetch(new URL('../../lib/resvg.wasm', import.meta.url)));
                     } catch (error) {
                         const message = (error instanceof Error) ? error.message : String(error);
                         if (!/Already initialized/i.test(message)) {
@@ -779,7 +779,7 @@ export class DictionaryDatabase {
                         }
                     }
 
-                    const font = await fetch('/fonts/NotoSansJP-Regular.ttf');
+                    const font = await fetch(new URL('../../fonts/NotoSansJP-Regular.ttf', import.meta.url));
                     const fontData = await font.arrayBuffer();
                     this._resvgFontBuffer = new Uint8Array(fontData);
                 }
@@ -1636,6 +1636,7 @@ export class DictionaryDatabase {
                     termRecordWriteCoalesceTargetBytes,
                     termRecordLookupIndexWriteCallCount,
                     termRecordLookupIndexWriteBytes,
+                    compressionExperiments: this._termContentBlockStore.getDiagnostics().compressionExperiments,
                     termRecordLookupIndexAwaitMs,
                     termRecordLookupIndexMaxQueuedBytes,
                     termsVirtualTableSyncMs,
@@ -1713,9 +1714,10 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {{termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows?: number|null, queueTermContentWrites?: boolean, termContentBlockTargetBytes?: number|null}} [options]
+     * @param {import('dictionary-importer').ImportExperiments & {termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows?: number|null, queueTermContentWrites?: boolean, termContentBlockTargetBytes?: number|null}} [options]
      */
     setImportOptimizationFlags(options = {}) {
+        this._termContentBlockStore.setCompressionExperiments(options);
         this._adaptiveTermBulkAddBatchSize = true;
         this._retryBeginImmediateTransaction = false;
         this._skipIntraBatchContentDedup = false;

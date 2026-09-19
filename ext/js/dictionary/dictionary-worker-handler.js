@@ -26,7 +26,14 @@ import {convertMdxToArchive} from './mdx/mdx-converter.js';
 const MDX_IMPORT_VERSION = 1;
 
 export class DictionaryWorkerHandler {
-    constructor() {
+    /**
+     * The host supplies only the dictionary operations that require its owning
+     * storage environment. Import/validation remains in the shared core.
+     * @param {import('dictionary-worker-handler').DictionaryWorkerBackend|null} [backend]
+     */
+    constructor(backend = null) {
+        /** @type {import('dictionary-worker-handler').DictionaryWorkerBackend|null} */
+        this._backend = backend;
         /** @type {DictionaryWorkerMediaLoader} */
         this._mediaLoader = new DictionaryWorkerMediaLoader();
         /** @type {DictionaryDatabase|null} */
@@ -93,42 +100,14 @@ export class DictionaryWorkerHandler {
     }
 
     /**
-     * @template [T=unknown]
-     * @param {string} action
-     * @param {import('core').SerializableObject} params
-     * @returns {Promise<T>}
+     * @returns {import('dictionary-worker-handler').DictionaryWorkerBackend}
+     * @throws {Error} No dictionary backend was explicitly provided.
      */
-    async _invokeBackendApi(action, params) {
-        const runtime = /** @type {typeof chrome.runtime|undefined} */ (Reflect.get(chrome, 'runtime'));
-        if (typeof runtime?.sendMessage !== 'function') {
-            throw new Error(`Cannot invoke backend action ${action}: chrome.runtime.sendMessage unavailable`);
+    _requireBackend() {
+        if (this._backend === null) {
+            throw new Error('Dictionary worker backend is not configured for this runtime');
         }
-        return await new Promise((resolve, reject) => {
-            runtime.sendMessage({action, params}, (responseRaw) => {
-                const runtimeError = runtime.lastError;
-                if (typeof runtimeError !== 'undefined') {
-                    reject(new Error(runtimeError.message));
-                    return;
-                }
-                const response = /** @type {unknown} */ (responseRaw);
-                if (!(typeof response === 'object' && response !== null)) {
-                    reject(new Error(`Backend action ${action} returned invalid response`));
-                    return;
-                }
-                const responseRecord = /** @type {Record<string, unknown>} */ (response);
-                const error = /** @type {unknown} */ (Reflect.get(responseRecord, 'error'));
-                if (typeof error !== 'undefined' && error !== null) {
-                    if (typeof error === 'object' && !Array.isArray(error)) {
-                        reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error)));
-                        return;
-                    }
-                    reject(new Error(`Backend action ${action} returned invalid error payload`));
-                    return;
-                }
-                const result = Reflect.get(responseRecord, 'result');
-                resolve(/** @type {T} */ (result));
-            });
-        });
+        return this._backend;
     }
 
     /**
@@ -475,7 +454,7 @@ export class DictionaryWorkerHandler {
      */
     async _deleteDictionary({dictionaryTitle}, onProgress) {
         onProgress({processed: 0, count: 1, storeCount: 1, storesProcesed: 0});
-        await this._invokeBackendApi('deleteDictionaryByTitle', {dictionaryTitle});
+        await this._requireBackend().deleteDictionaryByTitle(dictionaryTitle);
         onProgress({processed: 1, count: 1, storeCount: 1, storesProcesed: 1});
     }
 
@@ -484,7 +463,7 @@ export class DictionaryWorkerHandler {
      * @returns {Promise<import('dictionary-database').DictionaryCounts>}
      */
     async _getDictionaryCounts({dictionaryNames, getTotal}) {
-        return await this._invokeBackendApi('getDictionaryCounts', {dictionaryNames, getTotal});
+        return await this._requireBackend().getDictionaryCounts(dictionaryNames, getTotal);
     }
 
     /**

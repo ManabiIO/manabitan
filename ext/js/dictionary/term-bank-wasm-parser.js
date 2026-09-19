@@ -72,22 +72,6 @@ const textDecoder = new TextDecoder();
 /** @type {TextEncoder} */
 const textEncoder = new TextEncoder();
 
-/**
- * Chromium rejects SharedArrayBuffer-backed views passed to TextDecoder.
- * WASM memory can be shared in a cross-origin-isolated context, so copy only
- * that exceptional input and keep ordinary decoding zero-copy.
- * @param {Uint8Array} bytes
- * @returns {string}
- */
-function decodeUtf8(bytes) {
-    const buffer = bytes.buffer;
-    return (
-        typeof SharedArrayBuffer === 'function' &&
-        buffer instanceof SharedArrayBuffer
-    ) ?
-        textDecoder.decode(Uint8Array.from(bytes)) :
-        textDecoder.decode(bytes);
-}
 /** @type {(TermBankExperimentProfile & {bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, nativeLookupScratchReusedBytes?: number, nativeLookupScratchReuseGroups?: number, nativeLookupScratchReuseMisses?: number, nativeSegmentedLookupSegments?: number, directLookupArenaSegments?: number, directLookupArenaCopiedBytesAvoided?: number, lookupCompactionSourceValidationPasses?: number, nativeSegmentedLookupFallbacks?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number})|null} */
 let lastTermBankWasmParseProfile = null;
 /** @type {string|null} */
@@ -777,7 +761,7 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
             jsonPtr,
             jsonLength,
             metasPtr: outPtr,
-            retiredLookupScratch: experiments.experimentalLookupScratchReuse ?
+            retiredLookupScratch: (experiments.experimentalLookupScratchReuse || experiments.experimentalNativeSegmentedLookup) ?
 [
     {pointer: outPtr, byteLength: initialMetaCapacity * META_U32_FIELDS * 4},
     {pointer: stringHashTablePtr, byteLength: stringHashTableSize * 4},
@@ -1138,6 +1122,41 @@ function getNativeLookupIndexCapacity(rowCount, keyCount, keyBytesLength) {
         sequenceSlotCount + rowCount +
         (rowCount + 1) + rowCount;
     return 16 + 32 + align4(keyBytesLength) + baseU16Bytes + (rowCount * 4) + 32 + align4(derivedU16Count * 2);
+}
+
+/**
+ * Bounds a reusable segment arena without allocating another key-remap table.
+ * Summing referenced key lengths can count a key more than once, but cannot
+ * undercount the compacted bytes. The whole source arena is an independent
+ * upper bound. Keep the native compactor's validation authoritative; this
+ * sizing pass neither caches validation nor changes segment boundaries.
+ * @param {FusedTermStringPlan} plan
+ * @param {number} rowCount
+ * @returns {number}
+ */
+function getNativeSegmentKeyBytesCapacity(plan, rowCount) {
+    const sourceBytes = plan.stringsBuffer.byteLength;
+    const {stringLengths, expressionIndexes, readingIndexes} = plan;
+    let maximum = 0;
+    for (let start = 0; start < rowCount; start += MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS) {
+        const end = Math.min(rowCount, start + MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS);
+        let bytes = 0;
+        for (let row = start; row < end; ++row) {
+            const expression = expressionIndexes[row];
+            const reading = readingIndexes[row];
+            // Malformed internal metadata must not produce a smaller arena.
+            // The existing native validation will reject it before publication.
+            if (typeof expression !== 'number' || typeof reading !== 'number' ||
+            expression >= stringLengths.length || reading >= stringLengths.length) {
+                return sourceBytes;
+            }
+            bytes += stringLengths[expression];
+            if (reading !== expression) { bytes += stringLengths[reading]; }
+            if (bytes >= sourceBytes) { return sourceBytes; }
+        }
+        maximum = Math.max(maximum, bytes);
+    }
+    return maximum;
 }
 
 /**
@@ -1729,6 +1748,11 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
     fusedStringPlan !== null && normalizedChunkSize >= rowCount &&
     (rowCount >= 0xffff || fusedStringPlan.stringLengths.length >= 0xffff) &&
     typeof parsed.wasm?.compact_term_lookup_keys === 'function';
+    if (segmentedLookup && fusedStringPlan !== null) {
+        // Even an all-empty key table needs a valid scratch address. Capacity
+        // is not encoded length; existing index validation remains unchanged.
+        maxNativeChunkStringBytes = Math.max(1, getNativeSegmentKeyBytesCapacity(fusedStringPlan, rowCount));
+    }
     /** @type {ReturnType<typeof createNativeLookupCompactionScratch>|null} */
     let nativeCompactionScratch = null;
     let nativeLookupScratchReusedBytes = 0;
@@ -1764,7 +1788,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         );
         // Address planning is read-only. Native writes happen after ALL row
         // metadata/media decoding, and only for a single complete fused chunk.
-        const retiredScratch = experiments.experimentalLookupScratchReuse && fusedPlanLayout !== null &&
+        const retiredScratch = (segmentedLookup || experiments.experimentalLookupScratchReuse) && fusedPlanLayout !== null &&
         normalizedChunkSize >= rowCount && parsed.retiredLookupScratch ?
             createRetiredLookupScratchAllocator(parsed.retiredLookupScratch, parsed.wasm.memory.buffer.byteLength) :
 null;
@@ -1777,6 +1801,11 @@ null :
     return pointer;
 };
         try {
+            // Large-group native lookup is worthwhile only with retired workspace.
+            // Never grow the parser heap just to replace the JavaScript fallback.
+            if (segmentedLookup && retiredScratch === null) {
+                throw new TermBankWasmResourceError('Retired parser workspace is unavailable');
+            }
             nativeLookupIndexScratch = createNativeLookupIndexScratch(
                 parsed.wasm,
                 nativeLookupRowCapacity,

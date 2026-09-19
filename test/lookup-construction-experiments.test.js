@@ -101,6 +101,8 @@ function digestIndexes(indexes) {
  * @throws {Error} If the parser omits results.
  */
 async function parse(banks, flags = {}, preload = false) {
+    // Keep the portable oracle explicit after production native promotion.
+    flags = {experimentalNativeSegmentedLookup: false, experimentalLookupScratchReuse: false, ...flags}
     const preloadedSource = preload ?
         await inflateCompressedTermBankSourcesWasm(banks.map((bank, i) => {
             const compressionMethod = /** @type {0|8} */ (i % 2 === 0 ? 8 : 0)
@@ -195,6 +197,124 @@ describe('lookup construction experiments', () => {
         expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
         expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe(1)
         expect(candidate.profile?.nativeLookupScratchReusedBytes).toBe(0)
+    })
+    test.each([65534, 65535, 65536])('native segmentation alone reuses retired scratch at the row boundary: %i', async (count) => {
+        const banks = makeBanks(count)
+        const baseline = await parse(banks)
+        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true}, true)
+        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(Math.ceil(count / 30000))
+        expect(candidate.profile?.nativeLookupScratchReuseGroups).toBe(1)
+        expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe(0)
+        expect(candidate.profile?.nativeLookupScratchReusedBytes).toBeGreaterThan(0)
+        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
+        expect(hasCompletePreparedTermLookupIndexes(candidate.indexes, count)).toBe(true)
+        await parse(makeBanks(24))
+        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
+    })
+    test('native segmentation alone falls back when retired scratch cannot hold long keys', async () => {
+        const banks = makeBanks(40001).map((bank) => {
+            const rows = JSON.parse(new TextDecoder().decode(bank))
+            for (const row of rows) {
+                row[0] = 'a'.repeat(20) + row[0]
+                row[1] = 'b'.repeat(20) + row[1]
+            }
+            return encoder.encode(JSON.stringify(rows))
+        })
+        const baseline = await parse(banks)
+        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true})
+        expect(candidate.profile?.fusedParseFallbacks).toBe(0)
+        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(0)
+        expect(candidate.profile?.nativeSegmentedLookupFallbacks).toBe(1)
+        expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe(1)
+        expect(candidate.profile?.nativeLookupScratchReusedBytes).toBe(0)
+        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
+        expect(hasCompletePreparedTermLookupIndexes(candidate.indexes, 40001)).toBe(true)
+        const recovered = await parse(makeBanks(70001), {experimentalNativeSegmentedLookup: true})
+        expect(recovered.profile?.nativeSegmentedLookupSegments).toBe(3)
+        expect(recovered.profile?.nativeLookupScratchReuseGroups).toBe(1)
+    })
+    test('segment-sized arenas keep a wide multi-segment group within retired workspace', async () => {
+        const banks = makeBanks(90001).map((bank) => {
+            const rows = JSON.parse(new TextDecoder().decode(bank))
+            for (const row of rows) {
+                row[0] = 'a'.repeat(20) + row[0]
+                row[1] = 'b'.repeat(20) + row[1]
+            }
+            return encoder.encode(JSON.stringify(rows))
+        })
+        const baseline = await parse(banks)
+        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true, experimentalLookupScratchReuse: true})
+        expect(candidate.profile?.fusedParseFallbacks).toBe(0)
+        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(4)
+        expect(candidate.profile?.nativeLookupScratchReuseGroups).toBe(1)
+        expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe(0)
+        expect(candidate.profile?.nativeLookupScratchReusedBytes).toBeGreaterThan(0)
+        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
+        await parse(makeBanks(24))
+        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
+    })
+    test.each([false, true])('segment bounds preserve repeated keys and reading aliases: %s', async (aliases) => {
+        const banks = makeBanks(70001).map((bank) => {
+            const rows = JSON.parse(new TextDecoder().decode(bank))
+            for (const row of rows) {
+                row[0] = '共通'
+                row[1] = aliases ? row[0] : ''
+            }
+            return encoder.encode(JSON.stringify(rows))
+        })
+        const baseline = await parse(banks)
+        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true})
+        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(3)
+        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
+    })
+    test('segment bounds include the final partial segment and long boundary keys', async () => {
+        const rows = Array.from({length: 60001}, (_, index) => [
+            index < 60000 ? '共通' : '長'.repeat(1000),
+            index === 30000 ? '読'.repeat(2000) : '',
+            '',
+            '',
+            0,
+            ['meaning'],
+            index,
+            '',
+        ])
+        // Unique earlier keys force native segmentation even below 65535 rows.
+        for (let index = 0; index < 40000; ++index) {
+            rows[index][0] = `単語${index}`
+            rows[index][1] = `よみ${index}`
+        }
+        rows[30000][1] = '読'.repeat(2000)
+        const banks = []
+        for (let start = 0; start < rows.length; start += 10000) {
+            banks.push(encoder.encode(JSON.stringify(rows.slice(start, start + 10000))))
+        }
+        const baseline = await parse(banks)
+        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true}, true)
+        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(3)
+        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
+    })
+    test.each([false, true])('empty key tables preserve the existing index rejection: explicit reuse=%s', async (explicitReuse) => {
+        const bank = encoder.encode(JSON.stringify(Array.from({length: 10000}, () => [
+            '',
+            '',
+            '',
+            '',
+            0,
+            ['meaning'],
+            0,
+            '',
+        ])))
+        const banks = [bank, bank, bank, bank, bank, bank, bank]
+        // Empty lookup keys are rejected by the existing index format. Do not
+        // replace that validation failure with an unrelated allocator error.
+        await expect(parse(banks)).rejects.toThrow('Invalid term lookup index key boundary')
+        await expect(parse(banks, {
+            experimentalNativeSegmentedLookup: true,
+            experimentalLookupScratchReuse: explicitReuse,
+        })).rejects.toThrow('Invalid term lookup index key boundary')
+        const recovered = await parse(makeBanks(70001), {experimentalNativeSegmentedLookup: true})
+        expect(recovered.profile?.nativeSegmentedLookupSegments).toBe(3)
+        expect(hasCompletePreparedTermLookupIndexes(recovered.indexes, 70001)).toBe(true)
     })
     test('native compactor rejects invalid source/rows/capacity and resets remap on retry', async () => {
         const binary = await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))
@@ -307,12 +427,12 @@ describe('lookup construction experiments', () => {
         plan.expressionIndexes[45000] = key
         expect(compactTermRecordPreinternedPlanRuns(plan, 70001, 30000, scratch, baseline.chunk.readingEqualsExpressionList)).toHaveLength(3)
     })
-    test('new flags require exact true and reset when omitted', () => {
+    test('switches reject truthy values and reset to their qualified defaults', () => {
         const keys = ['experimentalLookupScratchReuse', 'experimentalDirectLookupArena', 'experimentalSinglePassLookupCompaction', 'experimentalNativeSegmentedLookup']
         for (const key of keys) {
             expect(Reflect.get(snapshotTermBankExperiments({[key]: true}), key)).toBe(true)
             expect(Reflect.get(snapshotTermBankExperiments({[key]: 1}), key)).toBe(false)
-            expect(Reflect.get(snapshotTermBankExperiments(), key)).toBe(false)
+            expect(Reflect.get(snapshotTermBankExperiments(), key)).toBe(key === 'experimentalLookupScratchReuse' || key === 'experimentalNativeSegmentedLookup')
         }
     })
     test('actual worker preserves native segment plans and resets the flag', async () => {
@@ -342,13 +462,13 @@ describe('lookup construction experiments', () => {
             expect((await request({type: 'initialize', module})).type).toBe('ready')
             const banks = makeBanks(70001)
             let prior = ''
-            for (const enabled of [true, false]) {
+            for (const enabled of [true, false, undefined, false, undefined]) {
                 const reply = await request({type: 'parse',
-                    id: enabled ? 1 : 2,
+                    id: enabled === false ? 2 : 1,
                     version: 3,
                     sourceBuffers: banks.map((bank) => bank.buffer),
                     options: {experimentalNativeSegmentedLookup: enabled,
-                        experimentalLookupScratchReuse: enabled,
+                        experimentalLookupScratchReuse: false,
                         singleChunk: true,
                         emitTermByteLists: false,
                         computeContentHashes: true,
@@ -356,8 +476,8 @@ describe('lookup construction experiments', () => {
                         emitTokenBinaryContent: true,
                         prepareLookupIndexes: true}})
                 expect(reply.type).toBe('result')
-                expect(reply.profile.nativeSegmentedLookupSegments ?? 0).toBe(enabled ? 3 : 0)
-                expect(reply.profile.nativeLookupScratchReuseGroups ?? 0).toBe(enabled ? 1 : 0)
+                expect(reply.profile.nativeSegmentedLookupSegments ?? 0).toBe(enabled === false ? 0 : 3)
+                expect(reply.profile.nativeLookupScratchReuseGroups ?? 0).toBe(enabled === false ? 0 : 1)
                 expect(hasCompletePreparedTermLookupIndexes(reply.chunk.preparedLookupIndexes, 70001)).toBe(true)
                 const current = digestIndexes(/** @type {NonNullable<Chunk['preparedLookupIndexes']>} */ (reply.chunk.preparedLookupIndexes))
                 if (prior) { expect(current).toBe(prior) }

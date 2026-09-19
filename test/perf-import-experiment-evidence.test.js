@@ -90,7 +90,7 @@ describe('import experiment controls and worker receipts', () => {
         }
     })
 
-    test.each([undefined, null, [], 'true', 1])('invalid global controls remain default-off: %j', (value) => {
+    test.each([undefined, null, [], 'true', 1])('invalid global controls use the qualified defaults: %j', (value) => {
         Reflect.set(globalThis, 'manabitanImportPerformanceFlags', value)
         expect(readControls().termBankExperiments).toEqual(snapshotTermBankExperiments())
     })
@@ -100,7 +100,7 @@ describe('import experiment controls and worker receipts', () => {
         const flags = {[key]: true}
         data.benchmark.importFlags = flags
         data.phases[0].data.importDebug.importerPhaseTimings = [
-            {details: {parserExperiments: snapshotTermBankExperiments()}},
+            {details: {parserExperiments: snapshotTermBankExperiments({[key]: false})}},
         ]
         expect(() => extractImportResult(data, 'jmdict', fixture, false, flags)).toThrow('experiment')
     })
@@ -133,7 +133,7 @@ describe('import experiment controls and worker receipts', () => {
         ]
         data.phases[0].data.importDebug.importerPhaseTimings = phases
         expect(extractImportResult(data, 'jmdict', fixture, false, flags).totalImportMs).toBe(123.5)
-        phases.push({details: {parserExperiments: snapshotTermBankExperiments()}})
+        phases.push({details: {parserExperiments: snapshotTermBankExperiments({experimentalNativeSegmentedLookup: false, experimentalLookupScratchReuse: false})}})
         expect(() => extractImportResult(data, 'jmdict', fixture, false, flags)).toThrow('experiment')
     })
 })
