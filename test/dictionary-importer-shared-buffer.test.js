@@ -19,6 +19,10 @@ describe('DictionaryImporter shared-buffer decoding', () => {
         /** @type {ArrayBuffer|null} */
         let decodedBuffer = null;
         Reflect.set(importer, '_textDecoder', {
+            /**
+             * @param {Uint8Array<ArrayBuffer>} bytes
+             * @returns {string}
+             */
             decode(bytes) {
                 ++decodeCount;
                 decodedBuffer = bytes.buffer;
@@ -36,7 +40,7 @@ describe('DictionaryImporter shared-buffer decoding', () => {
             glossaryJson: '',
             glossaryJsonBytes: shared.subarray(4, 4 + encoded.byteLength),
         };
-        const getGlossaryJson = /** @type {(row: typeof row) => string} */ (
+        const getGlossaryJson = /** @type {(entry: typeof row) => string} */ (
             Reflect.get(importer, '_getFastRowGlossaryJson')
         ).bind(importer);
 

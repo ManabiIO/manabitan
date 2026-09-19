@@ -197,6 +197,8 @@ describe('TextScanner lookup robustness', () => {
     test('passive mousemove lookup flushes immediately after scan delay', async () => {
         vi.useFakeTimers();
         const scanner = /** @type {TextScanner} */ (/** @type {unknown} */ (Object.create(TextScanner.prototype)));
+        Reflect.set(scanner, '_enabledValue', true);
+        Reflect.set(scanner, '_pointerGeneration', 0);
         Reflect.set(scanner, '_delay', 40);
         Reflect.set(scanner, '_scanTimerPromise', null);
         Reflect.set(scanner, '_scanTimerPromiseResolve', null);

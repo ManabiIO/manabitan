@@ -1,0 +1,47 @@
+name: ManabiTan static web acceptance
+on:
+  pull_request:
+    paths: ['ext/web/**', 'web/**', 'ext/js/dictionary/**', 'ext/js/display/structured-content-generator.js', 'ext/js/language/text-scanner.js', 'types/ext/**', 'test/term-content-queued-cursor.test.js', '.github/workflows/manabitan-web.yml']
+  push:
+    branches: [feat/manabitan-web-runtime-20260918]
+permissions: {contents: read}
+concurrency:
+  group: manabitan-static-web-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24.21.0'}
+      - run: npm ci
+      - run: npm run build:libs
+      - run: node web/build.mjs
+      - run: npm run test:ts:main && npm run test:ts:test && npx tsc -p web/tsconfig.json
+      - run: npx vitest run test/reader-scanner-lifecycle.test.js test/dictionary-importer-shared-buffer.test.js test/term-content-opfs-store.test.js test/term-content-queued-cursor.test.js
+      - uses: actions/checkout@v4
+        with:
+          repository: ManabiIO/manabi-reader-web
+          ref: bca91f6fff6300d10ba47d046dfb1a20a7c97e5e
+          path: reader-fixtures
+          sparse-checkout: test/reader/e2e
+          persist-credentials: false
+      - name: Prepare independently verified real dictionary fixtures
+        run: |
+          python3 reader-fixtures/test/reader/e2e/prepare-jmdict.py "$RUNNER_TEMP/dictionaries"
+          python3 web/make-fixtures.py "$RUNNER_TEMP/dictionaries"
+          python3 web/prepare-fixtures.py "$RUNNER_TEMP/dictionaries"
+          npx playwright install --with-deps chromium
+      - name: Run real no-extension browser acceptance
+        env: {DICTIONARY_FIXTURES: '${{ runner.temp }}/dictionaries'}
+        run: node web/e2e.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: manabitan-static-web-results
+          path: builds/web-evidence/results.json
+          retention-days: 7
+          if-no-files-found: warn

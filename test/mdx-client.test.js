@@ -348,7 +348,7 @@ describe('DictionaryWorker MDX import integration', () => {
         });
 
         const [worker] = workerInstances;
-        expect(worker?.url).toBe('/js/dictionary/dictionary-worker-main.js');
+        expect(worker?.url).toEqual(new URL('../ext/js/dictionary/dictionary-worker-main.js', import.meta.url));
         expect(worker?.options).toStrictEqual({type: 'module'});
 
         const postMessageCalls = worker?.postMessage.mock.calls ?? [];

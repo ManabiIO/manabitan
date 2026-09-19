@@ -726,8 +726,8 @@ export class DictionaryImporter {
 
         configure({
             workerScripts: {
-                deflate: ['../../lib/z-worker.js'],
-                inflate: ['../../lib/z-worker.js'],
+                deflate: [new URL('../../lib/z-worker.js', import.meta.url).href],
+                inflate: [new URL('../../lib/z-worker.js', import.meta.url).href],
             },
             maxWorkers: zipMaxWorkers,
             useWebWorkers: this._zipUseWebWorkers,
@@ -2307,10 +2307,9 @@ export class DictionaryImporter {
             dictionaryDatabase.setImportDebugLogging(false);
         }
 
-        if (!importSession.failed && this._isCancelled()) {
-            importSession.recordFailure(new Error('Dictionary import was cancelled'));
-        }
-
+        // Cancellation is checked before finalization above. Once the atomic
+        // publication succeeds, report that committed result rather than a
+        // cancellation failure for a dictionary which is already persisted.
         if (importSession.failed) {
             await importSession.cleanupIncompleteSummary();
             return {

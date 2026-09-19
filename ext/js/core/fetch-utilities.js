@@ -18,11 +18,35 @@
 import {readResponseJson} from './json.js';
 
 /**
+ * Resolve package assets independently of the hosting page or extension API.
+ * Leading slashes retain their historic package-root meaning. Already-resolved
+ * URLs (e.g. display templates) must not be prefixed a second time.
+ * @param {string} path
+ * @param {URL} [packageRoot]
+ * @returns {URL}
+ * @throws {Error} The URL resolves outside this package.
+ */
+export function resolveAssetUrl(path, packageRoot = new URL('../../', import.meta.url)) {
+    const url = new URL(path.startsWith('/') && !path.startsWith('//') ? path.slice(1) : path, packageRoot);
+    // Extension URL origins are "null" in some URL implementations; compare
+    // protocol and host explicitly instead of treating equal origins as proof.
+    if (
+        url.protocol !== packageRoot.protocol ||
+        url.host !== packageRoot.host ||
+        url.username.length > 0 || url.password.length > 0 ||
+        !url.pathname.startsWith(packageRoot.pathname)
+    ) {
+        throw new Error(`Asset URL is outside the package: ${path}`);
+    }
+    return url;
+}
+
+/**
  * @param {string} url
  * @returns {Promise<Response>}
  */
 async function fetchAsset(url) {
-    const response = await fetch(chrome.runtime.getURL(url), {
+    const response = await fetch(resolveAssetUrl(url), {
         method: 'GET',
         mode: 'no-cors',
         cache: 'default',

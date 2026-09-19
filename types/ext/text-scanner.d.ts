@@ -152,8 +152,10 @@ export type GetSearchContextCallbackSync = () => SearchContext;
 
 export type GetSearchContextCallbackAsync = () => Promise<SearchContext>;
 
+export type ScannerApi = Pick<API, 'termsFind' | 'kanjiFind' | 'isTextLookupWorthy'>;
+
 export type ConstructorDetails = {
-    api: API;
+    api: ScannerApi;
     node: HTMLElement | Window;
     getSearchContext: GetSearchContextCallback;
     ignoreElements?: (() => Element[]) | null;

@@ -117,7 +117,7 @@ export class DictionaryWorker {
      */
     _invoke(action, params, transfer, onProgress, formatResult) {
         return new Promise((resolve, reject) => {
-            const worker = this._worker ?? new Worker('/js/dictionary/dictionary-worker-main.js', {type: 'module'});
+            const worker = this._worker ?? new Worker(new URL('dictionary-worker-main.js', import.meta.url), {type: 'module'});
             if (this._reuseWorker && this._worker === null) {
                 this._worker = worker;
             }
