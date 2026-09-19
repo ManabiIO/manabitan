@@ -1,0 +1,154 @@
+/*
+ * Copyright (C) 2026  Manabitan authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+import {readFile} from 'node:fs/promises';
+import {Worker as NodeWorker} from 'node:worker_threads';
+import {afterEach, describe, expect, test, vi} from 'vitest';
+import {
+    disposeParallelTermBankParser,
+    parseTermBankWithWasmColumnChunksParallel,
+} from '../ext/js/dictionary/term-bank-wasm-parser.js';
+
+/** @typedef {import('../ext/js/dictionary/term-bank-wasm-parser.js').TermBankColumnChunk} Chunk */
+/** @typedef {{chunk: Chunk|null, consume: (() => void)|null, sourceBytes: number}} Result */
+
+/** Adapts only the Node transport; all parsing and coordination are production code. */
+class BrowserWorker extends EventTarget {
+    /** @param {URL} url */
+    constructor(url) {
+        super();
+        const adapter = `import {parentPort} from 'node:worker_threads';
+            globalThis.self = {
+                addEventListener: (_, handler) => parentPort.on('message', data => handler({data})),
+                postMessage: (data, transfer) => parentPort.postMessage(data, transfer),
+            };
+            await import(${JSON.stringify(url.href)});`;
+        this.worker = new NodeWorker(new URL(`data:text/javascript,${encodeURIComponent(adapter)}`));
+        this.worker.on('message', (data) => this.dispatchEvent(new MessageEvent('message', {data})));
+        this.worker.on('error', (error) => {
+            const event = new Event('error');
+            Object.defineProperty(event, 'message', {value: error.message});
+            this.dispatchEvent(event);
+        });
+    }
+
+    /**
+     * @param {unknown} value
+     * @param {ArrayBuffer[]} transfer
+     */
+    postMessage(value, transfer = []) { this.worker.postMessage(value, transfer); }
+
+    /** @returns {void} */
+    terminate() { void this.worker.terminate(); }
+}
+
+afterEach(async () => {
+    await disposeParallelTermBankParser();
+    vi.unstubAllGlobals();
+});
+
+/**
+ * Observe only native Promise resolution values. No parser/result replacement,
+ * timers, forced GC or private-class exports are used. Keeping the wrappers in
+ * this observer makes the release assertion deterministic rather than a GC test.
+ * @returns {Result[]}
+ */
+function observeSlots() {
+    /** @type {Result[]} */
+    const results = [];
+    const nativePromise = Promise;
+    vi.stubGlobal('Promise', new Proxy(nativePromise, {
+        construct(Target, [executor]) {
+            return new Target((resolve, reject) => {
+                executor((/** @type {unknown} */ value) => {
+                    if (value !== null && typeof value === 'object' &&
+                    Object.hasOwn(value, 'chunk') && Object.hasOwn(value, 'consume') && Object.hasOwn(value, 'sourceBytes')) {
+                        results.push(/** @type {Result} */ (value));
+                    }
+                    resolve(value);
+                }, reject);
+            });
+        },
+    }));
+    return results;
+}
+
+/** @returns {Uint8Array[]} */
+function banks() {
+    return Array.from({length: 16}, (_, index) => new TextEncoder().encode(JSON.stringify([
+        [`単語${index}`, 'よみ', '', '', index, [`meaning-${index}`], index, ''],
+    ])));
+}
+
+/** @returns {Promise<void>} */
+async function prepare() {
+    const binary = await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url));
+    vi.stubGlobal('fetch', async () => new Response(binary));
+    vi.stubGlobal('Worker', BrowserWorker);
+    vi.stubGlobal('navigator', {hardwareConcurrency: 4, deviceMemory: 8});
+}
+
+describe('parallel parser consumed result lifetime', () => {
+    test.each(['success', 'sink-error', 'cancel'])('releases consumed slots before later work: %s', async (mode) => {
+        await prepare();
+        const slots = observeSlots();
+        /** @type {Chunk[]} */
+        const retained = [];
+        /** @type {number[][]} */
+        const scores = [];
+        let cancelled = false;
+        const operation = parseTermBankWithWasmColumnChunksParallel(banks(), 3, async (chunk, progress) => {
+            // Prior completed slots, including the initial result, must no longer
+            // own their chunks while this later sink is still active.
+            const consumed = slots.filter((result) => retained.includes(/** @type {Chunk} */ (result.chunk)));
+            expect(consumed).toHaveLength(0);
+            const current = slots.find((result) => result.chunk === chunk);
+            expect(current).toBeDefined();
+            retained.push(chunk);
+            scores.push([...chunk.scoreList]);
+            await Promise.resolve();
+            expect(current?.chunk).toBe(chunk); // Do not release before sink completion.
+            if (progress.chunkIndex === 3 && mode === 'sink-error') { throw new Error('deliberate sink error'); }
+            if (progress.chunkIndex === 3 && mode === 'cancel') { cancelled = true; }
+        }, {emitContentSlab: true, emitTermByteLists: false, singleChunk: true}, () => cancelled);
+        if (mode === 'success') {
+            await expect(operation).resolves.toBe(true);
+            expect(retained).toHaveLength(8);
+        } else {
+            await expect(operation).rejects.toThrow(mode === 'sink-error' ? 'deliberate sink error' : /cancel/i);
+            expect(retained).toHaveLength(3);
+        }
+        // Consumers that explicitly retain a chunk still own its metadata.
+        expect(retained.map((chunk) => [...chunk.scoreList])).toStrictEqual(scores);
+        for (const chunk of retained) {
+            expect(slots.some((result) => result.chunk === chunk)).toBe(false);
+            expect(chunk.releaseBorrowedContent).toBeUndefined();
+        }
+        expect(slots.filter((result) => result.chunk === null && result.sourceBytes > 0)).toHaveLength(retained.length);
+        expect(slots.filter((result) => result.chunk === null).every((result) => result.consume === null)).toBe(true);
+        await disposeParallelTermBankParser();
+        // Error/cancellation cannot poison the next pool generation.
+        let recovered = 0;
+        await expect(parseTermBankWithWasmColumnChunksParallel(
+            banks(),
+            3,
+            () => { ++recovered; },
+            {emitContentSlab: true, emitTermByteLists: false, singleChunk: true},
+        )).resolves.toBe(true);
+        expect(recovered).toBe(8);
+    });
+});
