@@ -1,0 +1,56 @@
+name: Screen consumption-bounded owned handoffs
+on:
+  push:
+    branches: [research/import-owned-handoff-20260918]
+    paths: [.github/workflows/import-consumed-handoff-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex, wty-en-en]
+        lane: [timing, memory]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Prepare exact bounded-ownership source recipe
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          if [ "$DICTIONARY" = wty-en-en ]; then python dev/perf/owned-wty-setup-20260918.py; fi
+          python dev/perf/consumed-handoff-setup-20260918.py
+      - name: Separate fixed timing or memory cohort
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          LANE: ${{ matrix.lane }}
+          MANABITAN_CLANG: clang-18
+        run: |
+          set -euo pipefail
+          if [ "$LANE" = timing ]; then
+            python dev/perf/consumed-handoff-driver-20260918.py --dictionary "$DICTIONARY" --blocks 2 --out "$RUNNER_TEMP/consumed-handoff"
+          else
+            python dev/perf/consumed-handoff-memory-20260918.py --dictionary "$DICTIONARY" --blocks 2 --out "$RUNNER_TEMP/consumed-handoff"
+            echo 'DIAGNOSTIC ONLY: external sampling invalidates nested timing labels; no speed estimate from this lane.' > "$RUNNER_TEMP/consumed-handoff/NOT_AUTHORITATIVE_TIMING"
+          fi
+          cp dev/perf/consumed-handoff-setup-20260918.py dev/perf/consumed-handoff-memory-20260918.py "$RUNNER_TEMP/consumed-handoff/"
+          git diff -- test/perf/dictionaries.lock.json test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/consumed-handoff/harness-only.patch"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: consumed-handoff-${{ matrix.lane }}-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/consumed-handoff
+          retention-days: 30
+          if-no-files-found: error
