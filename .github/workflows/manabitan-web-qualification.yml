@@ -2,7 +2,7 @@ name: ManabiTan web runtime qualification
 on:
   push:
     branches: [research/manabitan-web-runtime-20260918]
-    paths: ['.github/workflows/manabitan-web-qualification.yml', 'research/**', 'ext/web/**', 'web/**']
+    paths: ['.github/workflows/manabitan-web-qualification.yml', 'research/**', 'ext/web/**', 'web/**', 'test/term-content-queued-cursor.test.js']
 permissions: {contents: read}
 concurrency:
   group: manabitan-web-runtime-qualification
@@ -21,10 +21,11 @@ jobs:
           mkdir -p evidence
           python3 research/prepare-web.py
           python3 research/refine-web.py
+          python3 research/fix-queued-cursor.py
           python3 - <<'PY'
           import json,pathlib
           files=[str(p) for root in ('ext/web','web') for p in pathlib.Path(root).rglob('*') if p.is_file()]
-          files+=['types/ext/text-scanner.d.ts','types/ext/structured-content.d.ts','ext/js/language/text-scanner.js','ext/js/display/structured-content-generator.js','ext/js/dictionary/dictionary-importer.js']
+          files+=['types/ext/text-scanner.d.ts','types/ext/structured-content.d.ts','ext/js/language/text-scanner.js','ext/js/display/structured-content-generator.js','ext/js/dictionary/dictionary-importer.js','ext/js/dictionary/term-content-opfs-store.js','test/term-content-queued-cursor.test.js']
           pathlib.Path('evidence/source.json').write_text(json.dumps([{'path':p,'content':pathlib.Path(p).read_text()} for p in sorted(files)]))
           PY
       - name: Build shared libraries and web artifact
@@ -38,7 +39,8 @@ jobs:
           npm run test:ts:main 2>&1 | tee evidence/types-main.log
           npm run test:ts:test 2>&1 | tee evidence/types-test.log
           npx tsc -p web/tsconfig.json 2>&1 | tee evidence/types-web.log
-          npx vitest run test/reader-scanner-lifecycle.test.js test/dictionary-importer-shared-buffer.test.js test/dictionary-import-session.test.js 2>&1 | tee evidence/unit.log
+          npx eslint ext/js/dictionary/term-content-opfs-store.js test/term-content-queued-cursor.test.js 2>&1 | tee evidence/cursor-lint.log
+          npx vitest run test/reader-scanner-lifecycle.test.js test/dictionary-importer-shared-buffer.test.js test/term-content-opfs-store.test.js test/term-content-queued-cursor.test.js 2>&1 | tee evidence/unit.log
       - uses: actions/checkout@v4
         with:
           repository: ManabiIO/manabi-reader-web
@@ -80,7 +82,7 @@ jobs:
           def post(endpoint,value):
             r=urllib.request.Request('https://api.github.com/repos/ManabiIO/manabitan/git/'+endpoint,data=json.dumps(value).encode(),headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Content-Type':'application/json'},method='POST')
             with urllib.request.urlopen(r,timeout=30) as response:return json.load(response)
-          shared={'types/ext/text-scanner.d.ts','types/ext/structured-content.d.ts','ext/js/language/text-scanner.js','ext/js/display/structured-content-generator.js','ext/js/dictionary/dictionary-importer.js'}
+          shared={'types/ext/text-scanner.d.ts','types/ext/structured-content.d.ts','ext/js/language/text-scanner.js','ext/js/display/structured-content-generator.js','ext/js/dictionary/dictionary-importer.js','ext/js/dictionary/term-content-opfs-store.js','test/term-content-queued-cursor.test.js'}
           files=json.loads(pathlib.Path('source.json').read_text());assert len(files)<40
           entries=[]
           for e in files:
