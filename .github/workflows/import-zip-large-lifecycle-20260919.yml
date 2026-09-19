@@ -1,0 +1,103 @@
+name: Bounded large ZIP lifecycle
+on:
+  push:
+    branches: [research/import-zip-ranges-20260919]
+    paths: [.github/workflows/import-zip-large-lifecycle-20260919.yml]
+permissions:
+  contents: read
+jobs:
+  lifecycle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      MANABITAN_CLANG: clang-18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Compare exact parent and candidate test diagnostics
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          mv test/raw-zip-range-reader.test.js "$RUNNER_TEMP/range.test.js"
+          set +e
+          node node_modules/typescript/bin/tsc --noEmit --project test/jsconfig.typecheck.json > evidence/parent-types.log 2>&1
+          parent_status=$?
+          set -e
+          mv "$RUNNER_TEMP/range.test.js" test/raw-zip-range-reader.test.js
+          git apply dev/perf/zip-ranges-20260919.patch
+          set +e
+          node node_modules/typescript/bin/tsc --noEmit --project test/jsconfig.typecheck.json > evidence/candidate-types.log 2>&1
+          candidate_status=$?
+          set -e
+          test "$parent_status" -eq 2
+          test "$candidate_status" -eq "$parent_status"
+          cmp evidence/parent-types.log evidence/candidate-types.log
+          test "$(wc -l < evidence/parent-types.log)" -eq 2
+          grep -F 'test/dictionary-importer-shared-buffer.test.js(22,20): error TS7006:' evidence/parent-types.log
+          grep -F 'test/dictionary-importer-shared-buffer.test.js(39,45): error TS2502:' evidence/parent-types.log
+          sha256sum ext/js/dictionary/term-bank-source-pipeline.js test/raw-zip-range-reader.test.js ext/lib/term-bank-parser.wasm > evidence/hashes.txt
+          node dev/bin/build.js chrome-dev > evidence/build.log 2>&1
+      - run: npx playwright install --with-deps chromium
+      - name: Construct explicit cutoff fixtures with every original member preserved
+        run: |
+          set -euo pipefail
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('builds/e2e-dictionary-cache');"
+          python - <<'PY'
+          import hashlib,json,shutil,zipfile
+          from pathlib import Path
+          lock_path=Path('test/perf/dictionaries.lock.json')
+          lock=json.loads(lock_path.read_text())
+          Path('evidence/original-lock.json').write_bytes(lock_path.read_bytes())
+          padding=Path('builds/lifecycle-unused.bin')
+          with padding.open('wb') as f: f.truncate(129*1024*1024)
+          for fixture in lock['dictionaries'].values():
+              original=Path('builds/e2e-dictionary-cache')/fixture['cacheFile']
+              assert original.stat().st_size==fixture['sizeBytes']
+              assert hashlib.sha256(original.read_bytes()).hexdigest()==fixture['sha256']
+              target=original.with_name('large-lifecycle-'+original.name)
+              shutil.copyfile(original,target)
+              with zipfile.ZipFile(target,'a') as z:
+                  info=zipfile.ZipInfo('benchmark-unused.bin',date_time=(2026,9,19,0,0,0))
+                  info.compress_type=zipfile.ZIP_STORED
+                  with z.open(info,'w') as dest,padding.open('rb') as src: shutil.copyfileobj(src,dest,1024*1024)
+              with zipfile.ZipFile(original) as a,zipfile.ZipFile(target) as b:
+                  assert set(b.namelist())-set(a.namelist())=={'benchmark-unused.bin'}
+                  for name in a.namelist(): assert a.read(name)==b.read(name),name
+              fixture.update(cacheFile=target.name,sizeBytes=target.stat().st_size,sha256=hashlib.sha256(target.read_bytes()).hexdigest())
+          lock_path.write_text(json.dumps(lock,indent=4)+'\n')
+          Path('evidence/derived-lock.json').write_bytes(lock_path.read_bytes())
+          padding.unlink()
+          PY
+      - name: Strict complete Chromium lifecycle on large archives
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_CHROMIUM_E2E_REPORT: evidence/large-lifecycle.html
+        run: |
+          set -euo pipefail
+          node test/chromium/extension-two-dictionary-import.e2e.js > evidence/large-lifecycle.log 2>&1
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('evidence/large-lifecycle.json').read_text())
+          assert data['status']=='success' and data['skippedVerification'] is False
+          PY
+          sha256sum --check evidence/hashes.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zip-ranges-large-lifecycle
+          path: evidence
+          retention-days: 30
+          if-no-files-found: error
