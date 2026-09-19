@@ -1,0 +1,104 @@
+name: Qualify owned import memory and corpus
+on:
+  push:
+    branches: [research/import-owned-handoff-20260918]
+    paths: [.github/workflows/import-owned-memory-corpus-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  memory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex, wty-en-en]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Pinned fixture setup
+        if: matrix.dictionary == 'wty-en-en'
+        run: python dev/perf/owned-wty-setup-20260918.py
+      - name: Separate diagnostic ABBA memory comparisons
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          MANABITAN_CLANG: clang-18
+        run: |
+          set -euo pipefail
+          python dev/perf/owned-memory-20260918.py --dictionary "$DICTIONARY" --variants private-owned --blocks 2 --out "$RUNNER_TEMP/owned-memory"
+          cp dev/perf/owned-memory-20260918.py "$RUNNER_TEMP/owned-memory/"
+          echo 'DIAGNOSTIC ONLY: sampling perturbs timing; do not use this lane for speed estimates.' > "$RUNNER_TEMP/owned-memory/NOT_AUTHORITATIVE_TIMING"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-memory-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/owned-memory
+          retention-days: 30
+          if-no-files-found: error
+  corpus:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex, wty-en-en]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Pinned fixture setup
+        if: matrix.dictionary == 'wty-en-en'
+        run: python dev/perf/owned-wty-setup-20260918.py
+      - name: Verify archive identities
+        run: |
+          set -euo pipefail
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('builds/e2e-dictionary-cache');"
+      - name: Same-source full worker output and ownership comparison
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          MANABITAN_CLANG: clang-18
+        run: |
+          set -euo pipefail
+          mkdir -p corpus
+          python - <<'PY'
+          import importlib.util, json, os, subprocess
+          from pathlib import Path
+          spec = importlib.util.spec_from_file_location('candidate', 'dev/perf/owned-handoff-20260918.py')
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          dictionary = os.environ['DICTIONARY']
+          for mode in ['baseline', 'private-owned']:
+              module.configure(mode)
+              module.command(['node', 'dev/bin/build-libs.js'], Path('corpus') / (mode + '-build.log'))
+              module.command(['node', 'dev/perf/owned-corpus-20260918.mjs', dictionary, mode, 'corpus/' + mode + '.json'], Path('corpus') / (mode + '.log'), timeout=900)
+          a = json.loads(Path('corpus/baseline.json').read_text())
+          b = json.loads(Path('corpus/private-owned.json').read_text())
+          assert a['status'] == b['status'] == 'success'
+          assert a['groups'] == b['groups'], 'Full real-worker output differs'
+          assert a['rows'] == b['rows'] and a['archiveSha256'] == b['archiveSha256']
+          Path('corpus/PARITY.json').write_text(json.dumps({'status': 'success', 'rows': a['rows'], 'groups': len(a['groups']), 'baselineWasm': a['wasmSha256'], 'candidateWasm': b['wasmSha256']}, indent=2))
+          print(Path('corpus/PARITY.json').read_text())
+          PY
+          cp dev/perf/owned-corpus-20260918.mjs corpus/
+          git diff -- dev/build-libs.js ext/js/dictionary/term-bank-wasm-parser-worker.js > corpus/source.patch
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-corpus-${{ matrix.dictionary }}
+          path: corpus
+          retention-days: 30
+          if-no-files-found: error
