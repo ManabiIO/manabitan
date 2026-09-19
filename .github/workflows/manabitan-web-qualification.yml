@@ -10,7 +10,7 @@ concurrency:
 jobs:
   qualify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
@@ -20,17 +20,40 @@ jobs:
         run: |
           mkdir -p evidence
           python3 research/prepare-web.py
-          find ext/web web -type f | sort | tee evidence/source-files.txt
           tar -czf evidence/web-source.tar.gz ext/web web types/ext/text-scanner.d.ts types/ext/structured-content.d.ts ext/js/language/text-scanner.js ext/js/display/structured-content-generator.js
-      - name: Build shared extension libraries
+      - name: Build shared libraries and web artifact
         run: |
           npm ci > evidence/install.log 2>&1
           npm run build:libs > evidence/build-libs.log 2>&1
-      - name: Validate extension-facing contracts
+          node web/build.mjs > evidence/build-web.log 2>&1
+      - name: Validate extension and web contracts
         run: |
           set -o pipefail
           npm run test:ts:main 2>&1 | tee evidence/types-main.log
           npm run test:ts:test 2>&1 | tee evidence/types-test.log
+          npx tsc -p web/tsconfig.json 2>&1 | tee evidence/types-web.log
+      - uses: actions/checkout@v4
+        with:
+          repository: ManabiIO/manabi-reader-web
+          ref: bca91f6fff6300d10ba47d046dfb1a20a7c97e5e
+          path: reader-fixtures
+          sparse-checkout: test/reader/e2e
+          persist-credentials: false
+      - name: Prepare checksum-verified full JMdict and browser
+        run: |
+          python3 reader-fixtures/test/reader/e2e/prepare-jmdict.py "$RUNNER_TEMP/dictionaries" > evidence/jmdict.json
+          python3 web/make-fixtures.py "$RUNNER_TEMP/dictionaries"
+          npx playwright install --with-deps chromium > evidence/browser-install.log 2>&1
+      - name: No-extension OPFS and lookup acceptance
+        env: {DICTIONARY_FIXTURES: '${{ runner.temp }}/dictionaries'}
+        run: |
+          set -o pipefail
+          node web/e2e.mjs 2>&1 | tee evidence/browser.log
+      - name: Retain browser results and reproducible fixture
+        if: always()
+        run: |
+          if test -d builds/web-evidence; then cp -a builds/web-evidence evidence/browser; fi
+          if test -d "$RUNNER_TEMP/dictionaries"; then tar -czf evidence/dictionary-fixtures.tar.gz -C "$RUNNER_TEMP/dictionaries" .; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with: {name: manabitan-web-qualification, path: evidence, retention-days: 7}
