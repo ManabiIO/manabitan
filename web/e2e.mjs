@@ -70,6 +70,15 @@ try{
   await page.evaluate(()=>scan());const rect=await page.locator('#text').evaluate(el=>{const t=el.firstChild;const r=document.createRange();r.setStart(t,0);r.setEnd(t,1);const b=r.getBoundingClientRect();return{x:b.x+b.width/2,y:b.y+b.height/2};});
   await page.keyboard.down('Shift');try{await page.mouse.move(rect.x,rect.y);await expect(page.locator('#result .headword').first()).toContainText('猫');}finally{await page.keyboard.up('Shift');}
   assert.equal(await page.evaluate(()=>window.scanError),undefined);});
+ await check('popup dismissal permits rescanning the same word and never enables a stopped scanner',async()=>{
+  await page.evaluate(()=>{scanner.dismiss();window.disposeRender?.();document.querySelector('#result').replaceChildren();});
+  const rect=await page.locator('#text').evaluate(el=>{const r=document.createRange();r.setStart(el.firstChild,0);r.setEnd(el.firstChild,1);const b=r.getBoundingClientRect();return{x:b.x+b.width/2,y:b.y+b.height/2};});
+  await page.mouse.move(0,0);await page.keyboard.down('Shift');
+  try{await page.mouse.move(rect.x,rect.y);await expect(page.locator('#result .headword').first()).toContainText('猫');}finally{await page.keyboard.up('Shift');}
+  await page.evaluate(()=>{scanner.stop();scanner.dismiss();document.querySelector('#result').replaceChildren();});
+  await page.mouse.move(0,0);await page.keyboard.down('Shift');
+  try{await page.mouse.move(rect.x,rect.y);await page.waitForTimeout(150);assert.equal(await page.locator('#result .headword').count(),0);}finally{await page.keyboard.up('Shift');}
+ });
  await check('second independent tab cannot open the same SQLite pool',async()=>{
   const tab=await context.newPage();await tab.goto(origin);await tab.waitForFunction(()=>window.hostReady);
   const failure=await tab.evaluate(()=>runtime.open().then(()=>null,e=>e.code));assert.equal(failure,'storage_busy');
