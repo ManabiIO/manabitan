@@ -33,7 +33,7 @@ export class RawZipPayloadReader {
     /** @param {ArrayBuffer|Blob} archiveContent */
     constructor(archiveContent) {
         if (!RawZipPayloadReader.supportsArchive(archiveContent)) {
-            throw new RangeError('Raw ZIP archive exceeds the direct-read budget');
+            throw new RangeError('Raw ZIP archive size is invalid');
         }
         /** @type {ArrayBuffer|Blob} */
         this._archiveContent = archiveContent;
@@ -47,7 +47,8 @@ export class RawZipPayloadReader {
      */
     static supportsArchive(archiveContent) {
         const size = archiveContent instanceof Blob ? archiveContent.size : archiveContent.byteLength;
-        return Number.isSafeInteger(size) && size >= ZIP_LOCAL_FILE_HEADER_LENGTH && size <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES;
+        return Number.isSafeInteger(size) && size >= ZIP_LOCAL_FILE_HEADER_LENGTH &&
+        (archiveContent instanceof Blob || size <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES);
     }
 
     /**
@@ -57,47 +58,76 @@ export class RawZipPayloadReader {
      */
     async read(file, signal) {
         signal.throwIfAborted();
-        const archiveBytes = await this._getArchiveBytes();
-        signal.throwIfAborted();
+        const archiveSize = this._archiveContent instanceof Blob ? this._archiveContent.size : this._archiveContent.byteLength;
         const offset = /** @type {unknown} */ (Reflect.get(file, 'offset'));
         const compressedSize = /** @type {unknown} */ (Reflect.get(file, 'compressedSize'));
         const compressionMethod = /** @type {unknown} */ (Reflect.get(file, 'compressionMethod'));
         if (
             typeof offset !== 'number' || !Number.isSafeInteger(offset) || offset < 0 ||
             typeof compressedSize !== 'number' || !Number.isSafeInteger(compressedSize) || compressedSize < 0 ||
+            compressedSize > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES ||
             (compressionMethod !== 0 && compressionMethod !== 8) ||
-            offset > archiveBytes.byteLength - ZIP_LOCAL_FILE_HEADER_LENGTH
+            offset > archiveSize - ZIP_LOCAL_FILE_HEADER_LENGTH
         ) {
             throw new Error(`Raw ZIP metadata is invalid for '${file.filename}'`);
         }
+        // Keep the existing small-archive path. Large Files/Blobs read only
+        // validated entry ranges; an already-owned ArrayBuffer needs no copy.
+        const ranged = this._archiveContent instanceof Blob && archiveSize > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES;
+        const archiveBytes = ranged ?
+            await this._readBlobRange(offset, ZIP_LOCAL_FILE_HEADER_LENGTH, signal) :
+            await this._getArchiveBytes();
+        signal.throwIfAborted();
+        const headerOffset = ranged ? 0 : offset;
         const view = new DataView(archiveBytes.buffer, archiveBytes.byteOffset, archiveBytes.byteLength);
-        if (view.getUint32(offset, true) !== ZIP_LOCAL_FILE_HEADER_SIGNATURE) {
+        if (view.getUint32(headerOffset, true) !== ZIP_LOCAL_FILE_HEADER_SIGNATURE) {
             throw new Error(`Raw ZIP local header is invalid for '${file.filename}'`);
         }
-        const localFlags = view.getUint16(offset + 6, true);
-        const localCompressionMethod = view.getUint16(offset + 8, true);
+        const localFlags = view.getUint16(headerOffset + 6, true);
+        const localCompressionMethod = view.getUint16(headerOffset + 8, true);
         if ((localFlags & 0x1) !== 0 || localCompressionMethod !== compressionMethod) {
             throw new Error(`Raw ZIP local header disagrees with central metadata for '${file.filename}'`);
         }
-        const filenameLength = view.getUint16(offset + 26, true);
-        const extraFieldLength = view.getUint16(offset + 28, true);
+        const filenameLength = view.getUint16(headerOffset + 26, true);
+        const extraFieldLength = view.getUint16(headerOffset + 28, true);
+        const dataOffset = offset + ZIP_LOCAL_FILE_HEADER_LENGTH + filenameLength + extraFieldLength;
+        if (!Number.isSafeInteger(dataOffset) || dataOffset > archiveSize || compressedSize > archiveSize - dataOffset) {
+            throw new Error(`Raw ZIP payload is out of bounds for '${file.filename}'`);
+        }
         const rawFilename = /** @type {unknown} */ (Reflect.get(file, 'rawFilename'));
         if (rawFilename instanceof Uint8Array) {
             if (filenameLength !== rawFilename.byteLength) {
                 throw new Error(`Raw ZIP local filename disagrees with central metadata for '${file.filename}'`);
             }
             const localFilenameOffset = offset + ZIP_LOCAL_FILE_HEADER_LENGTH;
+            const localFilename = ranged ?
+                await this._readBlobRange(localFilenameOffset, filenameLength, signal) :
+                archiveBytes.subarray(localFilenameOffset, localFilenameOffset + filenameLength);
             for (let i = 0; i < filenameLength; ++i) {
-                if (archiveBytes[localFilenameOffset + i] !== rawFilename[i]) {
+                if (localFilename[i] !== rawFilename[i]) {
                     throw new Error(`Raw ZIP local filename disagrees with central metadata for '${file.filename}'`);
                 }
             }
         }
-        const dataOffset = offset + ZIP_LOCAL_FILE_HEADER_LENGTH + filenameLength + extraFieldLength;
-        if (dataOffset < offset || dataOffset > archiveBytes.byteLength || compressedSize > archiveBytes.byteLength - dataOffset) {
-            throw new Error(`Raw ZIP payload is out of bounds for '${file.filename}'`);
-        }
-        return Uint8Array.from(archiveBytes.subarray(dataOffset, dataOffset + compressedSize));
+        return ranged ?
+            await this._readBlobRange(dataOffset, compressedSize, signal) :
+            Uint8Array.from(archiveBytes.subarray(dataOffset, dataOffset + compressedSize));
+    }
+
+    /**
+     * Blob.arrayBuffer cannot be interrupted. Join its completion and check
+     * cancellation before exposing bytes or starting the next bounded read.
+     * @param {number} offset
+     * @param {number} length
+     * @param {AbortSignal} signal
+     * @returns {Promise<Uint8Array>}
+     */
+    async _readBlobRange(offset, length, signal) {
+        signal.throwIfAborted();
+        const bytes = new Uint8Array(await /** @type {Blob} */ (this._archiveContent).slice(offset, offset + length).arrayBuffer());
+        signal.throwIfAborted();
+        if (bytes.byteLength !== length) { throw new Error('Raw ZIP range read is incomplete'); }
+        return bytes;
     }
 
     /** @returns {Promise<Uint8Array>} */
@@ -406,9 +436,11 @@ export class TermBankSourcePipeline {
         for (const file of files) {
             const value = this._getCompressedSourceMetadata(file);
             if (value === null) { return null; }
-            // Bound compressed allocations independently of declared decoded
-            // sizes, including overlapping or adversarial ZIP entries.
-            if (this._lowMemory && value.compressedSize > this._batchMaxBytes - compressedBytes) { return null; }
+            // Preserve the old 128 MiB archive ceiling as a compressed-source
+            // budget, independently of decoded sizes or overlapping entries.
+            // Large media/unused entries need not disqualify small term banks.
+            const compressedBudget = this._lowMemory ? this._batchMaxBytes : RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES;
+            if (value.compressedSize > compressedBudget - compressedBytes) { return null; }
             compressedBytes += value.compressedSize;
             metadata.push(value);
         }
