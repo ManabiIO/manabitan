@@ -1,0 +1,133 @@
+name: Final consumed-result lifetime qualification
+on:
+  push:
+    branches: [research/import-owned-handoff-20260918]
+    paths: [.github/workflows/import-result-retention-final-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [release-only, owned-release]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Reproduce retention with full causes and preserve parent diagnostics
+        env:
+          MANABITAN_CLANG: clang-18
+        run: |
+          set -euo pipefail
+          mkdir -p builds/qualification
+          python dev/perf/retention-setup-20260918.py
+          cp dev/perf/result-lifetime-20260918.test.txt test/term-bank-result-lifetime.test.js
+          npm run build:libs > builds/qualification/parent-build.log 2>&1
+          set +e
+          node node_modules/vitest/vitest.mjs run test/term-bank-result-lifetime.test.js --reporter=default --reporter=json --outputFile=builds/qualification/red.json > builds/qualification/red.log 2>&1
+          echo "$?" > builds/qualification/red.status
+          npm run test:ts:test > builds/qualification/parent-types.log 2>&1
+          echo "$?" > builds/qualification/parent-types.status
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-wasm-parser.js --format=json > builds/qualification/parent-lint.json
+          echo "$?" > builds/qualification/parent-lint.status
+          set -e
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          p=Path('builds/qualification')
+          r=json.loads((p/'red.json').read_text())
+          assert (p/'red.status').read_text().strip()=='1'
+          assert r['numFailedTests']==3 and r['numPassedTests']==0
+          text=re.sub(r'\x1b\[[0-9;]*m','',(p/'red.log').read_text())
+          assert 'to have a length of +0 but got 1' in text
+          PY
+      - name: Apply isolated candidate, without adding research files to product source
+        env:
+          VARIANT: ${{ matrix.variant }}
+          MANABITAN_CLANG: clang-18
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import importlib.util,os
+          from pathlib import Path
+          s=importlib.util.spec_from_file_location('candidate','dev/perf/bounded-handoff-driver-20260918.py')
+          m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
+          m.configure(os.environ['VARIANT'])
+          if os.environ['VARIANT']=='owned-release':
+              m.adjust_tests()
+              Path('test/term-bank-private-ownership.test.js').write_bytes(Path('dev/perf/private-ownership-20260918.test.txt').read_bytes())
+          PY
+          npm run build:libs > builds/qualification/libraries.log 2>&1
+          git diff -- dev/build-libs.js ext/js/dictionary/term-bank-wasm-parser-worker.js ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-wasm-parser.test.js > builds/qualification/product.patch
+          sha256sum dev/build-libs.js ext/js/dictionary/term-bank-wasm-parser-worker.js ext/js/dictionary/term-bank-wasm-parser.js ext/lib/term-bank-parser.wasm test/term-bank-result-lifetime.test.js > builds/qualification/source.sha256
+      - name: Full functional, type, lint, options and package checks
+        run: |
+          set -euo pipefail
+          node node_modules/vitest/vitest.mjs run --no-file-parallelism > builds/qualification/unit.log 2>&1
+          npm run test:unit:options > builds/qualification/options.log 2>&1
+          npm run test:ts:main > builds/qualification/main-types.log 2>&1
+          npm run test:ts:dev > builds/qualification/dev-types.log 2>&1
+          npm run test:ts:bench > builds/qualification/bench-types.log 2>&1
+          node node_modules/eslint/bin/eslint.js dev/build-libs.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/term-bank-wasm-parser.test.js test/term-bank-result-lifetime.test.js > builds/qualification/lint.log 2>&1
+          if [ -f test/term-bank-private-ownership.test.js ]; then node node_modules/eslint/bin/eslint.js test/term-bank-private-ownership.test.js >> builds/qualification/lint.log 2>&1; fi
+          set +e
+          npm run test:ts:test > builds/qualification/candidate-types.log 2>&1
+          echo "$?" > builds/qualification/candidate-types.status
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-wasm-parser.js --format=json > builds/qualification/candidate-lint.json
+          echo "$?" > builds/qualification/candidate-lint.status
+          set -e
+          cmp builds/qualification/parent-types.log builds/qualification/candidate-types.log
+          cmp builds/qualification/parent-types.status builds/qualification/candidate-types.status
+          cmp builds/qualification/parent-lint.status builds/qualification/candidate-lint.status
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('builds/qualification')
+          a=json.loads((p/'parent-lint.json').read_text());b=json.loads((p/'candidate-lint.json').read_text())
+          assert len(a)==len(b)==1 and a[0]['messages']==b[0]['messages']
+          assert len(a[0]['messages'])==1 and a[0]['messages'][0]['message']=="'decodeUtf8' is defined but never used."
+          assert a[0]['messages'][0]['ruleId']=='@typescript-eslint/no-unused-vars'
+          PY
+          npm run test:build > builds/qualification/build-plans.log 2>&1
+          node dev/bin/build.js chrome-dev > builds/qualification/chrome-build.log 2>&1
+          node dev/bin/build.js firefox-dev > builds/qualification/firefox-build.log 2>&1
+          git diff --check
+      - run: npx playwright install --with-deps chromium
+      - name: Strict full Chromium lifecycle, never skip verification
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{}'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: builds/qualification/lifecycle.html
+        run: |
+          set -euo pipefail
+          node test/chromium/extension-two-dictionary-import.e2e.js > builds/qualification/lifecycle.log 2>&1
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('builds/qualification/lifecycle.json').read_text())
+          assert r['status']=='success' and r['skippedVerification'] is False
+          PY
+          sha256sum --check builds/qualification/source.sha256
+          cp test/term-bank-result-lifetime.test.js builds/qualification/result-lifetime.test.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: retention-final-${{ matrix.variant }}
+          path: builds/qualification
+          retention-days: 30
+          if-no-files-found: error
