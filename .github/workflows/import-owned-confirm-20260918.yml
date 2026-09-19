@@ -1,0 +1,152 @@
+name: Confirm private owned parser imports
+on:
+  push:
+    branches: [research/import-owned-handoff-20260918]
+    paths: [.github/workflows/import-owned-confirm-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  confirm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex, wty-en-en]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Admit the checksum-pinned full WTY fixture without dropping probes
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path('dev/perf/owned-handoff-20260918.py')
+          text = p.read_text()
+          old = "choices=['jmdict', 'jmnedict', 'jitendex']"
+          assert text.count(old) == 1
+          p.write_text(text.replace(old, "choices=['jmdict', 'jmnedict', 'jitendex', 'wty-en-en']"))
+          if os.environ['DICTIONARY'] == 'wty-en-en':
+              p = Path('test/perf/dictionaries.lock.json')
+              lock = json.loads(p.read_text())
+              lock['dictionaries']['wty-en-en'] = {
+                  'label': 'wty-en-en', 'cacheFile': 'wty-en-en.zip',
+                  'release': '21b1b22cd655d7936d62b127e6404fbb8a88c7c3',
+                  'url': 'https://huggingface.co/datasets/daxida/wty-release/resolve/21b1b22cd655d7936d62b127e6404fbb8a88c7c3/latest/dict/en/en/wty-en-en.zip',
+                  'sha256': 'b9603db16dee82afd811386302ccd78bab591a6513b0d3194d937dc9110dd4a5',
+                  'sizeBytes': 106918350, 'expectedTitle': 'wty-en-en',
+                  'revision': '2026.08.29', 'termRows': 1643040,
+              }
+              p.write_text(json.dumps(lock, indent=4) + '\n')
+              p = Path('test/chromium/extension-two-dictionary-import.e2e.js')
+              text = p.read_text()
+              old = "new Set(['jmdict', 'jmnedict', 'jitendex'])"
+              assert text.count(old) == 1
+              text = text.replace(old, "new Set(['jmdict', 'jmnedict', 'jitendex', 'wty-en-en'])")
+              old = 'maxBuffer: 32 * 1024 * 1024'
+              assert text.count(old) == 2
+              text = text.replace(old, 'maxBuffer: 256 * 1024 * 1024')
+              old = "            jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},"
+              assert text.count(old) == 1
+              text = text.replace(old, old + "\n            'wty-en-en': {label: 'wty-en-en', filePath: path.join(dictionaryCacheDir, 'wty-en-en.zip')},")
+              p.write_text(text)
+          PY
+      - name: Fixed independent twelve-pair source cohort
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          MANABITAN_CLANG: clang-18
+        run: |
+          set -euo pipefail
+          python dev/perf/owned-handoff-20260918.py --dictionary "$DICTIONARY" --variants private-owned --blocks 6 --out "$RUNNER_TEMP/owned-confirm"
+          git diff -- test/perf/dictionaries.lock.json test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/owned-confirm/harness-only.patch"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-confirm-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/owned-confirm
+          retention-days: 30
+          if-no-files-found: error
+  qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Prepare exact candidate and real-worker tests
+        run: |
+          set -euo pipefail
+          mkdir -p qualification
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+          spec = importlib.util.spec_from_file_location('candidate', 'dev/perf/owned-handoff-20260918.py')
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          module.configure('private-owned')
+          module.adjust_tests()
+          Path('test/term-bank-private-ownership.test.js').write_bytes(Path('dev/perf/private-ownership-20260918.test.txt').read_bytes())
+          PY
+          MANABITAN_CLANG=clang-18 npm run build:libs > qualification/libraries.log 2>&1
+          git diff -- dev/build-libs.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/term-bank-wasm-parser.test.js > qualification/product.patch
+          cp test/term-bank-private-ownership.test.js qualification/
+          sha256sum dev/build-libs.js ext/js/dictionary/term-bank-wasm-parser-worker.js ext/lib/term-bank-parser.wasm test/term-bank-private-ownership.test.js > qualification/identities.sha256
+      - name: Complete unit, type, lint, options and build qualification
+        run: |
+          set -euo pipefail
+          node node_modules/vitest/vitest.mjs run --no-file-parallelism > qualification/unit.log 2>&1
+          npm run test:unit:options > qualification/options.log 2>&1
+          npm run test:ts:main > qualification/main-types.log 2>&1
+          npm run test:ts:dev > qualification/dev-types.log 2>&1
+          npm run test:ts:bench > qualification/bench-types.log 2>&1
+          node node_modules/eslint/bin/eslint.js dev/build-libs.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/term-bank-wasm-parser.test.js test/term-bank-private-ownership.test.js > qualification/lint.log 2>&1
+          npm run test:build > qualification/build-plans.log 2>&1
+          node dev/bin/build.js chrome-dev > qualification/chrome-build.log 2>&1
+          node dev/bin/build.js firefox-dev > qualification/firefox-build.log 2>&1
+          git diff --check > qualification/diff-check.log
+      - run: npx playwright install --with-deps chromium
+      - name: Strict actual Chromium lifecycle
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_IMPORT_FLAGS_JSON: '{}'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: qualification/lifecycle.html
+        run: |
+          set -euo pipefail
+          node test/chromium/extension-two-dictionary-import.e2e.js > qualification/lifecycle.log 2>&1
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path('qualification/lifecycle.json').read_text())
+          assert r['status'] == 'success' and r['skippedVerification'] is False
+          PY
+          sha256sum --check qualification/identities.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-confirm-qualification
+          path: qualification
+          retention-days: 30
+          if-no-files-found: error
