@@ -1,0 +1,87 @@
+name: Screen structural parser ownership
+on:
+  push:
+    branches: [research/import-owned-handoff-20260918]
+    paths: [.github/workflows/import-owned-handoff-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [private-owned, private-shared]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Prepare isolated candidate and its buffer-ownership expectations
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          set -euo pipefail
+          mkdir -p qualification
+          python - <<'PY'
+          import importlib.util, os
+          spec = importlib.util.spec_from_file_location('candidate', 'dev/perf/owned-handoff-20260918.py')
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          module.configure(os.environ['VARIANT'])
+          module.adjust_tests()
+          PY
+          MANABITAN_CLANG=clang-18 npm run build:libs
+          git diff -- dev/build-libs.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/term-bank-wasm-parser.test.js > qualification/source.patch
+      - name: Full unit and options suites
+        run: |
+          set -euo pipefail
+          node node_modules/vitest/vitest.mjs run --no-file-parallelism > qualification/unit.log 2>&1
+          npm run test:unit:options > qualification/options.log 2>&1
+          npm run test:ts:main > qualification/main-types.log 2>&1
+          npm run test:ts:dev > qualification/dev-types.log 2>&1
+          npm run test:ts:bench > qualification/bench-types.log 2>&1
+          npm run test:build > qualification/build-plans.log 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-handoff-qualification-${{ matrix.variant }}
+          path: qualification
+          retention-days: 14
+          if-no-files-found: error
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Fixed complete-import source comparison
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          MANABITAN_CLANG: clang-18
+        run: |
+          set -euo pipefail
+          python dev/perf/owned-handoff-20260918.py --dictionary "$DICTIONARY" --blocks 2 --out "$RUNNER_TEMP/owned-handoff-evidence"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-handoff-screen-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/owned-handoff-evidence
+          retention-days: 14
+          if-no-files-found: error
