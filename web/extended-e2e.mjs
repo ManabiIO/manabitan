@@ -4,6 +4,18 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import {expect} from '@playwright/test';
 
+/**
+ *
+ * @param root0
+ * @param root0.context
+ * @param root0.page
+ * @param root0.origin
+ * @param root0.fixtures
+ * @param root0.check
+ * @param root0.importFile
+ * @param root0.dictionary
+ * @param root0.requests
+ */
 export async function runExtended({context, page, origin, fixtures, check, importFile, dictionary, requests}) {
     await check('recommendations reuse the existing ManabiTan Japanese catalog', async () => {
         const catalog = await page.evaluate(async () => (await import('/vendor/web/presets.js')).recommendedDictionaries());

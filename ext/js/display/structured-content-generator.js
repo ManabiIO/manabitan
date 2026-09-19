@@ -206,14 +206,17 @@ export class StructuredContentGenerator {
                 );
             } else if ('loadMediaUrl' in this._contentManager) {
                 this._contentManager.loadMediaUrl(
-                    path, dictionary,
+                    path,
+                    dictionary,
                     (url) => {
                         this._setImageData(node, /** @type {HTMLImageElement} */ (image), imageBackground, url, false);
                         // Web-hosted dictionary media is image-only. Opening an
                         // imported SVG as a same-origin document can run scripts.
                         node.removeAttribute('href');
                     },
-                    () => { this._setImageData(node, /** @type {HTMLImageElement} */ (image), imageBackground, null, true); },
+                    () => {
+                        this._setImageData(node, /** @type {HTMLImageElement} */ (image), imageBackground, null, true);
+                    },
                 );
             }
         }

@@ -145,6 +145,7 @@ export default [
                     './dev/jsconfig.json',
                     './test/jsconfig.json',
                     './benches/jsconfig.json',
+                    './web/tsconfig.json',
                 ],
             },
         },
@@ -959,6 +960,53 @@ export default [
                 ...Object.fromEntries(Object.entries(globals.browser).map(([key]) => [key, 'off'])),
                 ...globals.worker,
             },
+        },
+    },
+    {
+        // The static runtime is typed TypeScript and uses SPDX headers. Requiring
+        // JSDoc type duplication would weaken, rather than improve, its types.
+        files: [
+            'ext/web/**/*.ts',
+        ],
+
+        rules: {
+            'header/header': 'off',
+            'jsdoc/require-jsdoc': 'off',
+            'jsdoc/require-param-type': 'off',
+            'jsdoc/require-returns': 'off',
+            'jsdoc/require-throws': 'off',
+        },
+    },
+    {
+        // These Node qualification/build scripts intentionally contain browser
+        // callbacks serialized by Playwright. Model those page globals here.
+        files: [
+            'web/*.mjs',
+        ],
+
+        languageOptions: {
+            globals: {
+                ...globals.node,
+                createRuntime: 'readonly',
+                find: 'readonly',
+                openRuntime: 'readonly',
+                runtime: 'readonly',
+                scan: 'readonly',
+                scanner: 'readonly',
+            },
+        },
+
+        rules: {
+            'header/header': 'off',
+            'no-promise-executor-return': 'off',
+            'no-restricted-syntax': 'off',
+            'no-underscore-dangle': 'off',
+            'no-undefined': 'off',
+            'no-unsanitized/method': 'off',
+            '@stylistic/max-statements-per-line': 'off',
+            'jsdoc/require-jsdoc': 'off',
+            'jsdoc/require-param-type': 'off',
+            'jsdoc/require-returns': 'off',
         },
     },
     {
