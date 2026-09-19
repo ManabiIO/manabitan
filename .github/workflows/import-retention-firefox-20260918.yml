@@ -1,0 +1,76 @@
+name: Qualify parser lifetime changes in Firefox
+on:
+  push:
+    branches: [research/import-owned-handoff-20260918]
+    paths: [.github/workflows/import-retention-firefox-20260918.yml]
+permissions:
+  contents: read
+jobs:
+  firefox:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [release-only, owned-consumed]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Build exact source variant
+        env:
+          VARIANT: ${{ matrix.variant }}
+          MANABITAN_CLANG: clang-18
+        run: |
+          set -euo pipefail
+          mkdir -p builds/firefox-evidence
+          python dev/perf/consumed-handoff-setup-20260918.py
+          python - <<'PY'
+          import importlib.util, os
+          spec = importlib.util.spec_from_file_location('candidate', 'dev/perf/consumed-handoff-driver-20260918.py')
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          module.configure(os.environ['VARIANT'])
+          PY
+          npm run build:libs > builds/firefox-evidence/libraries.log 2>&1
+          node dev/bin/build.js firefox-dev > builds/firefox-evidence/package.log 2>&1
+          cp builds/manabitan-firefox-dev.zip builds/manabitan-firefox-dev.xpi
+          sha256sum ext/lib/term-bank-parser.wasm ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js builds/manabitan-firefox-dev.xpi > builds/firefox-evidence/source.sha256
+      - name: Official Firefox Developer Edition runtime
+        run: |
+          set -euo pipefail
+          curl -fL 'https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US' -o /tmp/firefox.tar
+          mkdir -p "$RUNNER_TEMP/firefox"
+          tar -xf /tmp/firefox.tar -C "$RUNNER_TEMP/firefox"
+          sha256sum /tmp/firefox.tar > builds/firefox-evidence/runtime.sha256
+          "$RUNNER_TEMP/firefox/firefox/firefox" --version > builds/firefox-evidence/version.txt
+          echo "MANABITAN_FIREFOX_BINARY=$RUNNER_TEMP/firefox/firefox/firefox" >> "$GITHUB_ENV"
+      - name: Actual strict extension lifecycle
+        env:
+          MANABITAN_FIREFOX_XPI: ${{ github.workspace }}/builds/manabitan-firefox-dev.xpi
+          MANABITAN_FIREFOX_HEADLESS: '0'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_FIREFOX_E2E_REPORT: builds/firefox-evidence/lifecycle.html
+        run: |
+          set -euo pipefail
+          xvfb-run -a node test/firefox/extension-two-dictionary-import.e2e.js > builds/firefox-evidence/lifecycle.log 2>&1
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path('builds/firefox-evidence/lifecycle.json').read_text())
+          assert r['status'] == 'success' and r['skippedVerification'] is False
+          PY
+          sha256sum --check builds/firefox-evidence/source.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: retention-firefox-${{ matrix.variant }}
+          path: builds/firefox-evidence
+          retention-days: 30
+          if-no-files-found: error
