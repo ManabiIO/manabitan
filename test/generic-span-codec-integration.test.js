@@ -21,8 +21,11 @@ beforeAll(async () => {
     // checksum implementation, block codec and memory-backed store all run.
     globalThis.fetch = async (input, init) => {
         const value = String(input);
-        if (!value.startsWith('/lib/')) { return await originalFetch(input, init); }
-        const bytes = await readFile(new URL(`../ext${value}`, import.meta.url));
+        const resource = value.startsWith('/lib/') ?
+            new URL(`../ext${value}`, import.meta.url) :
+            new URL(value);
+        if (resource.protocol !== 'file:') { return await originalFetch(input, init); }
+        const bytes = await readFile(resource);
         return new Response(bytes, {headers: {'Content-Type': 'application/wasm'}});
     };
     await initializeTermContentZstd();

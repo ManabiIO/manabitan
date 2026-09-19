@@ -72,22 +72,6 @@ const textDecoder = new TextDecoder();
 /** @type {TextEncoder} */
 const textEncoder = new TextEncoder();
 
-/**
- * Chromium rejects SharedArrayBuffer-backed views passed to TextDecoder.
- * WASM memory can be shared in a cross-origin-isolated context, so copy only
- * that exceptional input and keep ordinary decoding zero-copy.
- * @param {Uint8Array} bytes
- * @returns {string}
- */
-function decodeUtf8(bytes) {
-    const buffer = bytes.buffer;
-    return (
-        typeof SharedArrayBuffer === 'function' &&
-        buffer instanceof SharedArrayBuffer
-    ) ?
-        textDecoder.decode(Uint8Array.from(bytes)) :
-        textDecoder.decode(bytes);
-}
 /** @type {(TermBankExperimentProfile & {bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, nativeLookupScratchReusedBytes?: number, nativeLookupScratchReuseGroups?: number, nativeLookupScratchReuseMisses?: number, nativeSegmentedLookupSegments?: number, directLookupArenaSegments?: number, directLookupArenaCopiedBytesAvoided?: number, lookupCompactionSourceValidationPasses?: number, nativeSegmentedLookupFallbacks?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number})|null} */
 let lastTermBankWasmParseProfile = null;
 /** @type {string|null} */
