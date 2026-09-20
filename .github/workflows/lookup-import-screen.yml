@@ -1,0 +1,44 @@
+name: Screen sequence-table full imports
+
+on:
+  push:
+    branches: [research/lookup-continuation-20260920]
+    paths: [dev/perf/lookup-continuation/import-launch.txt]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Use pinned production source with isolated benchmark driver
+        run: |
+          cp dev/perf/lookup-continuation/import-screen.mjs "$RUNNER_TEMP/import-screen.mjs"
+          git switch --detach 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108
+
+      - uses: ./.github/actions/setup
+
+      - name: Install actual Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Native imports with A/A, ABBA, and BAAB ordering
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: node "$RUNNER_TEMP/import-screen.mjs" "$DICTIONARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sequence-import-${{ matrix.dictionary }}
+          path: builds/sequence-import-screen/
+          retention-days: 7
