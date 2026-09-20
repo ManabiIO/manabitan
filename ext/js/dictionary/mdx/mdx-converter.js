@@ -216,14 +216,15 @@ const NULL_CHARACTER = String.fromCodePoint(0);
 class EmbeddedAssetCollector {
     /**
      * @param {string} assetPrefix
+     * @param {{value: number}} counter
      */
-    constructor(assetPrefix) {
+    constructor(assetPrefix, counter) {
         /** @type {string} */
         this._assetPrefix = assetPrefix;
         /** @type {Map<string, Uint8Array>} */
         this._assets = new Map();
-        /** @type {number} */
-        this._counter = 0;
+        /** @type {{value: number}} */
+        this._counter = counter;
     }
 
     /**
@@ -243,7 +244,7 @@ class EmbeddedAssetCollector {
         const {mediaType, data} = decoded;
         const extension = EMBEDDED_ASSET_EXTENSION_MAP.get(mediaType.split(';', 1)[0].trim().toLowerCase()) ?? '.bin';
         const category = (mediaType.split('/', 1)[0] || 'asset').trim().toLowerCase();
-        const path = `${this._assetPrefix}embedded/${category}/${String(++this._counter).padStart(6, '0')}${extension}`;
+        const path = `${this._assetPrefix}embedded/${category}/${String(++this._counter.value).padStart(6, '0')}${extension}`;
         this._assets.set(path, data);
         return path;
     }
@@ -445,7 +446,7 @@ function normalizeRelativeAssetPath(path, sourceAssetPath = null) {
     }
     value = decodePercentEncodedPathSegments(value);
     value = value.replace(/^\/+/u, '');
-    if (sourceAssetPath !== null && (value.startsWith('./') || value.startsWith('../'))) {
+    if (sourceAssetPath !== null && !value.startsWith('/')) {
         const sourceParent = sourceAssetPath.replace(/\/[^/]*$/u, '');
         value = sourceParent.length > 0 ? `${sourceParent}/${value}` : value;
     }
@@ -609,8 +610,8 @@ function convertInlineStyle(styleText, assetPrefix, assetReferences) {
 function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetReferences}) {
     const value = href.trim();
     const lowered = value.toLowerCase();
-    if (lowered.startsWith('entry://')) { return createSearchHref(value.slice(8)); }
-    if (lowered.startsWith('bword://')) { return createSearchHref(value.slice(8)); }
+    if (lowered.startsWith('entry://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
+    if (lowered.startsWith('bword://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
     if (lowered.startsWith('d:') || lowered.startsWith('x:')) { return createSearchHref(value.slice(2)); }
     if (lowered.startsWith('sound://')) {
         const assetKey = normalizeReferencedAssetKey(value.slice(8), assetPrefix, null);
@@ -805,11 +806,11 @@ function appendStructuredContent(parent, content, details) {
 
 /**
  * @param {string} definition
- * @param {{enableAudio: boolean, assetPrefix: string}} options
+ * @param {{enableAudio: boolean, assetPrefix: string, embeddedAssetCounter: {value: number}}} options
  * @returns {{glossary: Record<string, unknown>, inlineStylesheets: Array<[string, string]>, embeddedAssets: Map<string, Uint8Array>, assetReferences: Set<string>}}
  */
 function convertDefinitionToStructuredContent(definition, options) {
-    const embeddedAssets = new EmbeddedAssetCollector(options.assetPrefix);
+    const embeddedAssets = new EmbeddedAssetCollector(options.assetPrefix, options.embeddedAssetCounter);
     /** @type {Set<string>} */
     const assetReferences = new Set();
     /** @type {Array<[string, string]>} */
@@ -865,6 +866,27 @@ function extractTitle(mdx, fileName, override) {
  */
 function extractDescription(mdx, override) {
     return override.trim().length > 0 ? override.trim() : trimNullSuffix(String(mdx.header.Description ?? ''));
+}
+
+/**
+ * @param {string} term
+ * @param {Map<string, string[]>} redirects
+ * @returns {string[]}
+ */
+function getRedirectExpressions(term, redirects) {
+    const expressions = [term];
+    const visited = new Set(expressions);
+    const pending = [term];
+    for (let index = 0; index < pending.length; ++index) {
+        const aliases = redirects.get(pending[index]) ?? [];
+        for (const alias of aliases) {
+            if (visited.has(alias)) { continue; }
+            visited.add(alias);
+            expressions.push(alias);
+            pending.push(alias);
+        }
+    }
+    return expressions;
 }
 
 /**
@@ -925,6 +947,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
 
         /** @type {Map<string, Uint8Array>} */
         const embeddedAssets = new Map();
+        const embeddedAssetCounter = {value: 0};
         const encoder = new TextEncoder();
         /** @type {Map<string, Uint8Array>} */
         const files = new Map();
@@ -1000,7 +1023,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
 
             let converted;
             try {
-                converted = convertDefinitionToStructuredContent(definition, {enableAudio, assetPrefix});
+                converted = convertDefinitionToStructuredContent(definition, {enableAudio, assetPrefix, embeddedAssetCounter});
             } catch (_error) {
                 skippedEntryErrorCount += 1;
                 if (typeof onProgress === 'function') {
@@ -1050,9 +1073,19 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         let encodedTermRowCount = 0;
         /** @type {unknown[][]} */
         let bank = [];
+        const resolvedRedirectExpressions = new Set();
+        const flushBank = () => {
+            if (bank.length === 0) { return; }
+            encodedTermRowCount += bank.length;
+            writeJson(`term_bank_${bankIndex}.json`, bank);
+            encodedTermBankCount += 1;
+            bank = [];
+            bankIndex += 1;
+        };
         for (const {term, glossary, sequence: entrySequence} of convertedEntries) {
-            const expressions = [...new Set([term, ...(redirects.get(term) ?? [])])];
+            const expressions = getRedirectExpressions(term, redirects);
             for (const expression of expressions) {
+                if (expression !== term) { resolvedRedirectExpressions.add(expression); }
                 bank.push([
                     expression,
                     '',
@@ -1063,26 +1096,21 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                     entrySequence,
                     '',
                 ]);
-            }
-            if (bank.length >= termBankSize) {
-                encodedTermRowCount += bank.length;
-                writeJson(`term_bank_${bankIndex}.json`, bank);
-                encodedTermBankCount += 1;
-                bank = [];
-                bankIndex += 1;
+                if (bank.length >= termBankSize) { flushBank(); }
             }
         }
 
-        if (bank.length > 0 || convertedEntries.length === 0) {
-            encodedTermRowCount += bank.length;
-            writeJson(`term_bank_${bankIndex}.json`, bank);
+        if (bank.length > 0) {
+            flushBank();
+        } else if (convertedEntries.length === 0) {
+            writeJson(`term_bank_${bankIndex}.json`, []);
             encodedTermBankCount += 1;
         }
         recordPhaseTiming('prepare-mdx:encode-banks', tEncodeBanksStart, {
             encodedTermBankCount,
             encodedTermRowCount,
             jsonEncodeMs,
-            unresolvedRedirectCount: Math.max(0, redirectCount - (encodedTermRowCount - convertedEntries.length)),
+            unresolvedRedirectCount: Math.max(0, redirectCount - resolvedRedirectExpressions.size),
         });
 
         const tMaterializeAssetsStart = Date.now();

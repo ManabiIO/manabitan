@@ -23,8 +23,10 @@ export class FileScanner {
      */
     readBuffer(offset, length) {
         const start = Number(offset);
-        const end = Math.min(this._buffer.byteLength, start + length);
-        return this._buffer.slice(start, end);
+        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(length) || start < 0 || length < 0 || start > this._buffer.byteLength || length > this._buffer.byteLength - start) {
+            throw new RangeError(`MDict read out of bounds: offset=${start}, length=${length}, size=${this._buffer.byteLength}`);
+        }
+        return this._buffer.slice(start, start + length);
     }
 
     /**

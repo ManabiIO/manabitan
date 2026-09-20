@@ -63,8 +63,8 @@ describe('MDict v2 binary records', () => {
             for (const recordBlockSize of [1, 7, 64]) {
                 test(`${compression}/${encoding}/${recordBlockSize}-byte blocks preserve whole records`, () => {
                     const entries = [
-                        {key: 'zebra', value: '<div>猫と犬 🐈 é\nsecond line</div>'},
                         {key: 'apple', value: '<p>an intentionally longer definition</p>'},
+                        {key: 'zebra', value: '<div>猫と犬 🐈 é\nsecond line</div>'},
                         {key: '猫', value: '<b>ねこ</b>'},
                     ];
                     const fixture = makeMdictFixture(entries, {compression, encoding, recordBlockSize, keysPerBlock: 1});

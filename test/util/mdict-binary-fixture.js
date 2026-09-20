@@ -97,12 +97,15 @@ export function makeMdictFixture(entries, options = {}) {
     !Number.isSafeInteger(keysPerBlock) || keysPerBlock < 1) {
         throw new RangeError('Fixture block sizes must be positive safe integers');
     }
+    // MDict key blocks are ordered by key. Keep the fixture writer independent
+    // from the parser while still emitting a valid dictionary for unsorted input.
+    const orderedEntries = [...entries].sort((a, b) => a.key.localeCompare(b.key));
     const v2 = Number.parseFloat(version) >= 2;
     const numWidth = v2 ? 8 : 4;
     const keyEncoding = mdd ? 'utf16le' : encoding;
     const keyUnit = keyEncoding === 'utf16le' ? 2 : 1;
     const terminator = Buffer.alloc(keyUnit);
-    const records = entries.map(({value}) => {
+    const records = orderedEntries.map(({value}) => {
         const bytes = typeof value === 'string' ? Buffer.from(value, mdd ? 'utf8' : encoding) : Buffer.from(value);
         return mdd ? bytes : Buffer.concat([bytes, Buffer.alloc(encoding === 'utf16le' ? 2 : 1)]);
     });
@@ -127,16 +130,16 @@ export function makeMdictFixture(entries, options = {}) {
     const packedKeys = [];
     /** @type {Buffer[]} */
     const keyInfo = [];
-    for (let index = 0; index < entries.length; index += keysPerBlock) {
-        const count = Math.min(keysPerBlock, entries.length - index);
+    for (let index = 0; index < orderedEntries.length; index += keysPerBlock) {
+        const count = Math.min(keysPerBlock, orderedEntries.length - index);
         const keyParts = [];
         for (let i = index; i < index + count; i += 1) {
-            keyParts.push(integer(offsets[i], numWidth), Buffer.from(entries[i].key, keyEncoding), terminator);
+            keyParts.push(integer(offsets[i], numWidth), Buffer.from(orderedEntries[i].key, keyEncoding), terminator);
         }
         const unpacked = Buffer.concat(keyParts);
         const packed = packBlock(unpacked, compression);
-        const first = Buffer.from(entries[index].key, keyEncoding);
-        const last = Buffer.from(entries[index + count - 1].key, keyEncoding);
+        const first = Buffer.from(orderedEntries[index].key, keyEncoding);
+        const last = Buffer.from(orderedEntries[index + count - 1].key, keyEncoding);
         keyInfo.push(
             integer(keyBlockEntryCounts[packedKeys.length] ?? count, numWidth),
             integer(first.length / keyUnit, v2 ? 2 : 1),
@@ -155,7 +158,7 @@ export function makeMdictFixture(entries, options = {}) {
     const keyBytes = Buffer.concat(packedKeys);
     const keyHeader = Buffer.concat([
         integer(packedKeys.length, numWidth),
-        integer(entries.length, numWidth),
+        integer(orderedEntries.length, numWidth),
         ...(v2 ? [integer(keyInfoBytes.length, numWidth)] : []),
         integer(packedKeyInfo.length, numWidth),
         integer(keyBytes.length, numWidth),
@@ -174,7 +177,7 @@ export function makeMdictFixture(entries, options = {}) {
         packedKeyInfo,
         keyBytes,
         integer(packedRecords.length, numWidth),
-        integer(entries.length, numWidth),
+        integer(orderedEntries.length, numWidth),
         integer(recordInfoBytes.length, numWidth),
         integer(packedRecordBytes.length, numWidth),
         recordInfoBytes,
