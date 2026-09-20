@@ -15,8 +15,12 @@ const encoder = new TextEncoder()
 const results = []
 const makeImporter = () => new DictionaryImporter({getImageDetails: async () => ({width: 1, height: 1})}, () => {})
 async function check(name, run) {
-    try { await run(); results.push({name, passed: true}) }
-    catch (error) { results.push({name, passed: false, error: error.stack}) }
+    try {
+        await run()
+        results.push({name, passed: true})
+    } catch (error) {
+        results.push({name, passed: false, error: error.stack})
+    }
 }
 const escapedMarker = '[{"type":"im\\u0061ge","path":"one.png"}]'
 const mixedPaths = '[{"type":"image","path":"one.png"},{"type":"image","pa\\u0074h":"two.png"}]'
