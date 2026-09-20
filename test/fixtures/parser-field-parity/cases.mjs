@@ -36,8 +36,7 @@ export function createCases(parser, lookup) {
     const add = (name, run) => { cases.push({name, run}) }
     const parseRows = async (input, options = {}) => {
         const result = []
-        await parser.parseTermBankWithWasmChunks(encoder.encode(input), 3, (rows) => { result.push(...rows) }, 1,
-            {copyContentBytes: true, ...options})
+        await parser.parseTermBankWithWasmChunks(encoder.encode(input), 3, (rows) => { result.push(...rows) }, 1, {copyContentBytes: true, ...options})
         return result
     }
     const project = async (input, options = {}) => {

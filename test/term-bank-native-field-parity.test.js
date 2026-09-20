@@ -6,7 +6,7 @@ import {test} from 'vitest'
 
 test('native parser preserves string identity and uint16 byte-length boundaries', () => {
     execFileSync(process.execPath, [
-        fileURLToPath(new URL('./fixtures/parser-field-parity/check.mjs', import.meta.url)),
+        fileURLToPath(new URL('fixtures/parser-field-parity/check.mjs', import.meta.url)),
         fileURLToPath(new URL('../', import.meta.url)),
     ], {stdio: 'pipe', timeout: 120000})
 }, 130000)
