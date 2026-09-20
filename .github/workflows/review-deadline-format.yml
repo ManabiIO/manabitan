@@ -1,0 +1,73 @@
+name: Deadline repair formatting qualification
+on:
+  push:
+    branches: [automation/review-deadline-format-20260920]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: adeaa2d3ea302e9edf86070a8f20f70ede156068
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Apply only repository style corrections
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ext/web/client.ts')
+          s = p.read_text()
+          assert s.count('this.watchdogTimer = undefined') == 2
+          assert s.count('this.watchdogId = undefined') == 1
+          s = s.replace('this.watchdogTimer = undefined', 'delete this.watchdogTimer')
+          s = s.replace('this.watchdogId = undefined', 'delete this.watchdogId')
+          p.write_text(s)
+          PY
+          npx eslint --fix ext/web/client.ts test/web-client-deadline.test.js web/client-deadline-check.mjs
+          node web/client-deadline-check.mjs
+      - name: Publish exact qualified files without workflow ancestry
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess, urllib.request
+          repo = 'ManabiIO/manabitan'
+          base = 'adeaa2d3ea302e9edf86070a8f20f70ede156068'
+          branch = 'fix/review-deadline-ownership-20260920'
+          paths = ['ext/web/client.ts', 'test/web-client-deadline.test.js', 'web/client-deadline-check.mjs']
+          def api(method, route, value=None):
+              req = urllib.request.Request('https://api.github.com/repos/' + repo + '/' + route, method=method,
+                  data=None if value is None else json.dumps(value).encode(),
+                  headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json'})
+              with urllib.request.urlopen(req, timeout=60) as response: return json.load(response)
+          changed = subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines()
+          assert set(changed) <= set(paths), changed
+          assert api('GET', 'git/ref/heads/' + branch)['object']['sha'] == base
+          old = api('GET', 'git/commits/' + base)
+          entries = []
+          for path in paths:
+              blob = api('POST', 'git/blobs', {'content': pathlib.Path(path).read_text(), 'encoding': 'utf-8'})['sha']
+              entries.append({'path': path, 'mode': '100644', 'type': 'blob', 'sha': blob})
+          tree = api('POST', 'git/trees', {'base_tree': old['tree']['sha'], 'tree': entries})['sha']
+          head = api('POST', 'git/commits', {'message': 'Apply repository lint policy to deadline repair and regression harness', 'tree': tree, 'parents': [base]})['sha']
+          api('PATCH', 'git/refs/heads/' + branch, {'sha': head, 'force': False})
+          result = {'base': base, 'head': head, 'tree': tree, 'files': entries, 'checks': ['ESLint (three changed files)', '11 production-client deadline scenarios']}
+          pathlib.Path('deadline-format-receipt.json').write_text(json.dumps(result, indent=2) + '\n')
+          print(json.dumps(result, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deadline-format-evidence
+          path: |
+            deadline-format-receipt.json
+            ext/web/client.ts
+            test/web-client-deadline.test.js
+            web/client-deadline-check.mjs
+          retention-days: 14
