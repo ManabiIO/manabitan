@@ -1,0 +1,46 @@
+name: Parser field native import qualification
+
+on:
+  push:
+    branches: ['review/parser-handoff-qualification-20260920']
+    paths: ['.github/workflows/parser-field-native-imports.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  imports:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Apply the isolated correctness-only patch
+        run: |
+          git apply --check dev/perf/parser-field-parity.patch
+          git apply dev/perf/parser-field-parity.patch
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Import the pinned real dictionary using native browser storage
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          node dev/perf/import-benchmark.js "$DICTIONARY" --runs 1 --output "builds/parser-native-import/$DICTIONARY"
+          sha256sum ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/wasm/term-bank-parser.c ext/lib/term-bank-parser.wasm > "builds/parser-native-import/$DICTIONARY/SHA256SUMS"
+          git rev-parse HEAD > "builds/parser-native-import/$DICTIONARY/research-head.txt"
+          git diff -- ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/wasm/term-bank-parser.c > "builds/parser-native-import/$DICTIONARY/correctness.patch"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parser-native-import-${{ matrix.dictionary }}
+          path: builds/parser-native-import/
+          if-no-files-found: error
+          retention-days: 14
