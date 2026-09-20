@@ -175,7 +175,7 @@ describe('zero-term dictionary lookup state', () => {
                 summaryJson: JSON.stringify({counts: {terms: {total: 0}}}),
             }]),
         };
-        vi.spyOn(database, '_requireDb').mockReturnValue(/** @type {ReturnType<DictionaryDatabase['_requireDb']>} */ (db));
+        vi.spyOn(database, '_requireDb').mockReturnValue(/** @type {ReturnType<DictionaryDatabase['_requireDb']>} */ (/** @type {unknown} */ (db)));
         const recordStore = /** @type {import('../ext/js/dictionary/term-record-opfs-store.js').TermRecordOpfsStore} */ (Reflect.get(database, '_termRecordStore'));
         const load = vi.spyOn(recordStore, 'ensureDictionariesLoaded').mockResolvedValue();
         const generation = Reflect.get(database, '_directTermIndexGeneration');
@@ -197,7 +197,7 @@ describe('zero-term dictionary lookup state', () => {
         const db = {
             selectObjects: vi.fn(() => [{title: 'Legacy', summaryJson: JSON.stringify({})}]),
         };
-        vi.spyOn(database, '_requireDb').mockReturnValue(/** @type {ReturnType<DictionaryDatabase['_requireDb']>} */ (db));
+        vi.spyOn(database, '_requireDb').mockReturnValue(/** @type {ReturnType<DictionaryDatabase['_requireDb']>} */ (/** @type {unknown} */ (db)));
         const recordStore = /** @type {import('../ext/js/dictionary/term-record-opfs-store.js').TermRecordOpfsStore} */ (Reflect.get(database, '_termRecordStore'));
         const load = vi.spyOn(recordStore, 'ensureDictionariesLoaded').mockResolvedValue();
         vi.spyOn(recordStore, 'isDictionaryAvailable').mockReturnValue(false);
