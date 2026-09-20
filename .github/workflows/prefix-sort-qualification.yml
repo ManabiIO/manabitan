@@ -1,0 +1,85 @@
+name: Qualify bounded prefix sorts
+
+on:
+  push:
+    branches: [research/lookup-continuation-20260920]
+    paths: [dev/perf/lookup-continuation/sort-launch.txt]
+
+permissions:
+  contents: write
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Construct tests-first composition on correctness PR
+        run: |
+          mkdir -p "$RUNNER_TEMP/prefix-sort"
+          cp dev/perf/lookup-continuation/{sort.test.js,apply-prefix.py} "$RUNNER_TEMP/prefix-sort/"
+          git switch --detach 04e26523ec7fa8584a268d4cf2033024a004207f
+          git switch -c "perf/bounded-prefix-sort-20260920-${GITHUB_RUN_ID}"
+          cp "$RUNNER_TEMP/prefix-sort/sort.test.js" test/term-lookup-sort.test.js
+          git config user.name 'Manabitan review automation'
+          git config user.email 'review-automation@users.noreply.github.com'
+          git add test/term-lookup-sort.test.js
+          git commit -m 'test: verify bounded-sort byte ordering and posting semantics'
+          mkdir -p builds/prefix-sort-qualification
+          git rev-parse HEAD > builds/prefix-sort-qualification/tests-commit.txt
+
+      - uses: ./.github/actions/setup
+
+      - name: Require semantic controls to pass before optimization
+        run: npx vitest run test/term-lookup-sort.test.js --reporter=json --outputFile=builds/prefix-sort-qualification/baseline-tests.json > builds/prefix-sort-qualification/baseline-tests.log 2>&1
+
+      - name: Apply separately benchmarked candidate
+        run: |
+          python3 "$RUNNER_TEMP/prefix-sort/apply-prefix.py"
+          git diff --check
+          npx vitest run test/term-lookup-sort.test.js --reporter=json --outputFile=builds/prefix-sort-qualification/candidate-tests.json > builds/prefix-sort-qualification/candidate-tests.log 2>&1
+
+      - name: Repository qualification
+        run: |
+          set +e
+          out=builds/prefix-sort-qualification
+          npx eslint ext/js/dictionary/term-lookup-index.js test/term-lookup-sort.test.js > "$out/lint.log" 2>&1
+          echo "lint=$?" >> "$out/gates.txt"
+          npm run test:ts > "$out/types.log" 2>&1
+          echo "types=$?" >> "$out/gates.txt"
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile="$out/full-unit.json" > "$out/full-unit.log" 2>&1
+          echo "unit=$?" >> "$out/gates.txt"
+          npm run test:unit:options > "$out/options.log" 2>&1
+          echo "options=$?" >> "$out/gates.txt"
+          npm run test:build > "$out/build.log" 2>&1
+          echo "build=$?" >> "$out/gates.txt"
+          set -e
+          cat "$out/gates.txt"
+          ! grep -E '=[1-9][0-9]*$' "$out/gates.txt"
+
+      - name: Publish only isolated qualified candidate branch
+        run: |
+          git add ext/js/dictionary/term-lookup-index.js
+          git commit -m 'perf: bound tiny radix partitions with prefix-aware insertion sort'
+          git rev-parse HEAD > builds/prefix-sort-qualification/fix-commit.txt
+          git branch --show-current > builds/prefix-sort-qualification/branch.txt
+          git diff 04e26523ec7fa8584a268d4cf2033024a004207f HEAD > builds/prefix-sort-qualification/exact.patch
+          git push origin "HEAD:refs/heads/$(git branch --show-current)"
+
+      - name: Retain all qualification evidence
+        if: always()
+        run: |
+          mkdir -p builds/prefix-sort-qualification
+          git diff > builds/prefix-sort-qualification/working.patch
+          git status --short > builds/prefix-sort-qualification/status.txt
+          sha256sum ext/js/dictionary/term-lookup-index.js > builds/prefix-sort-qualification/source-sha256.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prefix-sort-qualification
+          path: builds/prefix-sort-qualification/
+          retention-days: 7
