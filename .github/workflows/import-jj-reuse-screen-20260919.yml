@@ -1,0 +1,47 @@
+name: Original dictionary parser-work elimination screen
+on:
+  push:
+    branches: [research/import-jitendex-jmdict-20260919]
+    paths: [.github/workflows/import-jj-reuse-screen-20260919.yml]
+permissions:
+  contents: read
+jobs:
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jitendex, jmdict]
+        experiment: [experimentalValidatedGlossaryReuse, experimentalTermBankSpans]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 54ac62a39386459b7822fc644e5a1a6b1a619619
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: MANABITAN_CLANG=clang-18 npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Screen fixed original-dictionary pairs with bracketing controls
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          EXPERIMENT: ${{ matrix.experiment }}
+        run: |
+          set -euo pipefail
+          node dev/perf/import-ab.js "$DICTIONARY" --pairs 2 --flags '{}' --label before-control
+          flags=$(node -e 'console.log(JSON.stringify({[process.env.EXPERIMENT]:true}))')
+          node dev/perf/import-ab.js "$DICTIONARY" --pairs 4 --flags "$flags" --label candidate
+          node dev/perf/import-ab.js "$DICTIONARY" --pairs 2 --flags '{}' --label after-control
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jj-reuse-${{ matrix.dictionary }}-${{ matrix.experiment }}
+          path: |
+            builds/chromium-e2e-import-flags-*.json
+            builds/chromium-e2e-import-flags-*.html
+          retention-days: 21
+          if-no-files-found: error
