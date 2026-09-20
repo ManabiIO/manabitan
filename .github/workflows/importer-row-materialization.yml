@@ -1,0 +1,95 @@
+name: Importer row materialization qualification
+
+on:
+  push:
+    branches: [review/importer-row-materialization-20260920]
+    paths:
+      - '.github/workflows/importer-row-materialization.yml'
+      - 'dev/perf/importer-row-materialization.patch'
+      - 'test/fixtures/term-row-materialization/**'
+      - 'test/dictionary-importer-row-materialization.test.js'
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Reproduce baseline failures
+        shell: bash
+        run: |
+          mkdir -p builds/row-materialization
+          set +e
+          node test/fixtures/term-row-materialization/check.mjs builds/row-materialization/red.json > builds/row-materialization/red.log 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 1
+          node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('builds/row-materialization/red.json')); if(r.passed!==16 || r.failed!==30 || r.unhandled.length) process.exit(1)"
+      - name: Apply correctness patch
+        run: |
+          git apply --check dev/perf/importer-row-materialization.patch
+          git apply dev/perf/importer-row-materialization.patch
+          node test/fixtures/term-row-materialization/check.mjs builds/row-materialization/green.json > builds/row-materialization/green.log 2>&1
+      - name: Format fixtures and enforce lint
+        run: |
+          npx eslint --fix test/dictionary-importer-row-materialization.test.js test/fixtures/term-row-materialization/*.mjs
+          npx eslint ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-wasm-parser.js test/dictionary-importer-row-materialization.test.js test/fixtures/term-row-materialization/*.mjs
+          node test/fixtures/term-row-materialization/check.mjs builds/row-materialization/green-formatted.json > builds/row-materialization/green-formatted.log 2>&1
+      - name: Check all TypeScript projects
+        run: npm run test:ts
+      - name: Run full unit and options suites
+        run: |
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=builds/row-materialization/unit.json
+          npm run test:unit:options
+      - name: Dry-run all extension builds
+        run: npm run test:build
+      - name: Preserve exact qualified changes
+        run: |
+          git diff --check
+          git diff --binary -- ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-wasm-parser.js > builds/row-materialization/production.patch
+          tar -czf builds/row-materialization/tests.tar.gz test/fixtures/term-row-materialization test/dictionary-importer-row-materialization.test.js
+          sha256sum ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-wasm-parser.js ext/lib/term-bank-parser.wasm > builds/row-materialization/production.sha256
+          git rev-parse HEAD > builds/row-materialization/qualification-commit.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: importer-row-materialization-qualification
+          path: builds/row-materialization/
+          if-no-files-found: error
+          retention-days: 14
+
+  publish-review-branch:
+    needs: qualify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 72f60a71e584b104380a81a721ec70b91dcd28f4
+      - uses: actions/download-artifact@v4
+        with:
+          name: importer-row-materialization-qualification
+          path: /tmp/row-materialization
+      - name: Publish tests-first and fix commits on a new review branch only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c fix/importer-row-materialization-20260920
+          tar -xzf /tmp/row-materialization/tests.tar.gz
+          git add test/fixtures/term-row-materialization test/dictionary-importer-row-materialization.test.js
+          git -c core.hooksPath=/dev/null commit -m 'test: reproduce native row materialization and field decoding defects'
+          git apply --check /tmp/row-materialization/production.patch
+          git apply /tmp/row-materialization/production.patch
+          git add ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-wasm-parser.js
+          git -c core.hooksPath=/dev/null commit -m 'fix: preserve byte-backed row keys glossaries and media paths'
+          git push origin HEAD:refs/heads/fix/importer-row-materialization-20260920
