@@ -1,0 +1,43 @@
+name: MDict native binary regression
+
+on:
+  pull_request:
+    paths:
+      - 'ext/js/dictionary/mdx/**'
+      - 'test/mdict-binary-regressions.test.js'
+      - 'test/util/mdict-binary-fixture.js'
+      - '.github/workflows/mdict-native.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mdict-native-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  native-binary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Preserve exact parser and converter source for reproduction
+        run: |
+          mkdir -p builds/mdict-native
+          git rev-parse HEAD > builds/mdict-native/commit.txt
+          tar -czf builds/mdict-native/source.tar.gz ext/js/dictionary/mdx ext/js/data/array-buffer-util.js ext/lib/parse5.js ext/lib/zip.js test/mdict-binary-regressions.test.js test/util/mdict-binary-fixture.js package.json
+      - name: Exercise actual native parsers and converter
+        run: |
+          set -o pipefail
+          npx vitest run test/mdict-binary-regressions.test.js --reporter=verbose --reporter=json --outputFile.json=builds/mdict-native/results.json 2>&1 | tee builds/mdict-native/tests.log
+      - name: Retain reproducible source and test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mdict-native-${{ github.event.pull_request.number }}-${{ github.sha }}
+          path: builds/mdict-native/
+          if-no-files-found: error
+          retention-days: 14
