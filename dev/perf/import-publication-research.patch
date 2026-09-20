@@ -1,0 +1,62 @@
+diff --git a/ext/js/dictionary/dictionary-import-session.js b/ext/js/dictionary/dictionary-import-session.js
+--- a/ext/js/dictionary/dictionary-import-session.js
++++ b/ext/js/dictionary/dictionary-import-session.js
+@@ -185,12 +185,16 @@
+                 const details = await this._dictionaryDatabase.finishBulkImport(onCheckpoint, {
+                     summary,
+                     primaryKey: this._dictionarySummaryPrimaryKey,
++                    onPublished: () => {
++                        this._bulkState = 'committed';
++                        this._published = true;
++                    },
+                 });
+                 this._bulkState = 'committed';
+                 this._published = true;
+                 return details;
+             } catch (error) {
+-                this._bulkState = 'failed';
++                if (!this._published) { this._bulkState = 'failed'; }
+                 this.recordFailure(error);
+                 return null;
+             }
+diff --git a/ext/js/dictionary/dictionary-import-journal.js b/ext/js/dictionary/dictionary-import-journal.js
+--- a/ext/js/dictionary/dictionary-import-journal.js
++++ b/ext/js/dictionary/dictionary-import-journal.js
+@@ -58,6 +58,12 @@
+         if (!this._isRecord(record)) {
+             throw new Error('Invalid dictionary import journal record');
+         }
++        // Freeze the admitted checkpoint bytes before the first asynchronous
++        // boundary; callers may otherwise mutate a previously validated record.
++        const content = JSON.stringify(record);
++        if (!this._isRecord(parseJson(content))) {
++            throw new Error('Invalid serialized dictionary import journal record');
++        }
+         const root = await this._getRoot();
+         if (root === null) {
+             throw new Error('Dictionary import journal requires OPFS');
+@@ -65,7 +71,7 @@
+         const handle = await root.getFileHandle(FILE_NAME, {create: true});
+         const writable = await handle.createWritable();
+         try {
+-            await writable.write(JSON.stringify(record));
++            await writable.write(content);
+             await writable.close();
+         } catch (error) {
+             const writeError = error instanceof Error ? error : new Error(String(error));
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -1368 +1368 @@
+-     * @param {{summary: import('dictionary-importer').Summary, primaryKey: number}|null} [publication]
++     * @param {{summary: import('dictionary-importer').Summary, primaryKey: number, onPublished?: () => void}|null} [publication]
+@@ -1534,6 +1534,9 @@
+                     // deletion must not let close() roll the committed OPFS
+                     // data back in this process.
+                     this._bulkImportJournalRecord = null;
++                    // A post-commit cleanup error must not authorize the import
++                    // session to delete an already-published dictionary.
++                    publication?.onPublished?.();
+                     try {
+                         await this._importJournal.clear();
+                         this._deleteImportPublicationMarkerBestEffort(sessionId);

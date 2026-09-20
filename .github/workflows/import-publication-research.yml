@@ -1,25 +1,103 @@
-name: Import publication source qualification
+name: Import publication and journal qualification
 on:
   push:
     branches: [review/import-publication-journal-20260920-r8]
 permissions:
-  contents: read
+  contents: write
 jobs:
-  capture:
+  qualify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108
-      - name: Preserve exact repository source for qualified patch construction
-        run: |
-          git rev-parse HEAD > /tmp/repository-base.txt
-          git archive --format=tar HEAD | gzip > /tmp/manabitan-source.tar.gz
-      - uses: actions/upload-artifact@v4
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
         with:
-          name: import-publication-source
-          path: |
-            /tmp/repository-base.txt
-            /tmp/manabitan-source.tar.gz
+          node-version: '22'
+          cache: npm
+      - name: Prepare isolated tests-first tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/r8-payload /tmp/r8-evidence
+          git archive HEAD test/import-publication-journal.test.js test/fixtures/import-publication test/fixtures/import-journal-snapshot dev/perf/import-publication-research.patch dev/perf/import-publication-journal-20260920.md | tar -x -C /tmp/r8-payload
+          git switch --detach 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108
+          test "$(git hash-object ext/js/dictionary/dictionary-database.js)" = 6ad381878c288641d8a29ca09876d9c95a1b8df3
+          cp -R /tmp/r8-payload/test/. test/
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add test
+          git commit -m 'test: reproduce post-publication deletion and mutable journal checkpoints'
+          git rev-parse HEAD >/tmp/r8-evidence/tests-first-commit.txt
+      - name: Reproduce behavioral failures on actual repository source
+        shell: bash
+        run: |
+          set +e
+          node test/fixtures/import-publication/check.mjs . /tmp/r8-evidence/publication-red.json
+          pub=$?
+          node test/fixtures/import-journal-snapshot/check.mjs . /tmp/r8-evidence/journal-red.json terminal
+          journal=$?
+          set -e
+          test "$pub" = 1
+          test "$journal" = 1
+          node --input-type=module -e "import fs from 'node:fs';import assert from 'node:assert/strict';for(const [name,passed,failed] of [['publication',15,19],['journal',14,31]]){const r=JSON.parse(fs.readFileSync('/tmp/r8-evidence/'+name+'-red.json'));assert.equal(r.passed,passed);assert.equal(r.failed,failed)}"
+      - name: Apply correctness repairs and verify green
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply --unidiff-zero --check /tmp/r8-payload/dev/perf/import-publication-research.patch
+          git apply --unidiff-zero /tmp/r8-payload/dev/perf/import-publication-research.patch
+          cp /tmp/r8-payload/dev/perf/import-publication-journal-20260920.md dev/perf/
+          node test/fixtures/import-publication/check.mjs . /tmp/r8-evidence/publication-green.json
+          node test/fixtures/import-journal-snapshot/check.mjs . /tmp/r8-evidence/journal-green.json terminal
+          node test/fixtures/import-journal-snapshot/check.mjs . /tmp/r8-evidence/journal-injection-green.json injection-only
+      - name: Install and build library dependencies
+        run: |
+          npm ci
+          npm run build:libs
+      - name: Check source and focused regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx eslint ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-import-session.js ext/js/dictionary/dictionary-import-journal.js test/import-publication-journal.test.js test/fixtures/import-publication/check.mjs test/fixtures/import-journal-snapshot/check.mjs test/fixtures/import-journal-snapshot/node-opfs-adapter.mjs --fix
+          npx prettier dev/perf/import-publication-journal-20260920.md --write
+          npx vitest run test/import-publication-journal.test.js --maxWorkers=1 --minWorkers=1
+          npm run test:ts
+          git diff --check
+      - name: Full units options and dry build
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=/tmp/r8-evidence/full-unit.json
+          npm run test:unit:options
+          npm run test:build
+      - name: Commit and publish isolated correctness branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          node test/fixtures/import-publication/check.mjs . /tmp/r8-evidence/publication-final.json
+          node test/fixtures/import-journal-snapshot/check.mjs . /tmp/r8-evidence/journal-final.json terminal
+          git add ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-import-session.js ext/js/dictionary/dictionary-import-journal.js test/import-publication-journal.test.js test/fixtures/import-publication test/fixtures/import-journal-snapshot dev/perf/import-publication-journal-20260920.md
+          git commit -m 'fix: acknowledge committed imports and snapshot admitted recovery journals'
+          git rev-parse HEAD >/tmp/r8-evidence/fixed-commit.txt
+          git diff 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108 HEAD >/tmp/r8-evidence/qualified.patch
+          if git ls-remote --exit-code --heads origin fix/import-publication-journal-20260920-r8; then
+            echo 'Refusing to overwrite existing branch'; exit 1
+          fi
+          git push origin HEAD:refs/heads/fix/import-publication-journal-20260920-r8
+      - name: Preserve evidence and exact source even on failure
+        if: always()
+        shell: bash
+        run: |
+          git diff 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108 >/tmp/r8-evidence/working.patch
+          git status --short >/tmp/r8-evidence/git-status.txt
+          git log -3 --oneline >/tmp/r8-evidence/commits.txt
+          cp ext/js/dictionary/dictionary-database.js /tmp/r8-evidence/dictionary-database.js
+          tar -czf /tmp/r8-evidence/repository-source.tar.gz --exclude=.git --exclude=node_modules --exclude=builds --exclude=test-results --exclude=playwright/.cache .
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: import-publication-journal-qualification
+          path: /tmp/r8-evidence
           retention-days: 7
