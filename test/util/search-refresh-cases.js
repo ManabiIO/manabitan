@@ -116,7 +116,10 @@ function fixture(type = 'terms') {
     });
     display.on(
         'contentUpdateStart',
-        /** @param {import('display').EventArgument<'contentUpdateStart'>} details */
+        /**
+         * @param {import('display').EventArgument<'contentUpdateStart'>} details
+         * @returns {void}
+         */
         (details) => controller._onContentUpdateStart(details),
     );
 
