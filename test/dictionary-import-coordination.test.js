@@ -9,7 +9,8 @@ const execFileAsync = promisify(execFile)
 
 test('journal ordering and session callback ownership', async () => {
     const {stdout} = await execFileAsync(process.execPath, [
-        '--test', '--test-reporter=tap',
+        '--test',
+        '--test-reporter=tap',
         fileURLToPath(new URL('fixtures/import-coordination/reentry.mjs', import.meta.url)),
     ], {timeout: 30000, maxBuffer: 1024 * 1024})
     expect(stdout).toContain('# pass 17')
