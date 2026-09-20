@@ -1,0 +1,35 @@
+name: Search draft refresh regression
+
+on:
+  pull_request:
+    paths:
+      - 'ext/js/display/display.js'
+      - 'ext/js/display/search-display-controller.js'
+      - 'test/playwright/search-refresh.spec.js'
+      - 'test/util/search-refresh-cases.js'
+      - '.github/workflows/search-refresh.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - run: npm run build -- --target chrome-dev
+      - run: npx playwright install --with-deps chromium
+      - name: Exercise delayed dictionary refresh with real search UI
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+        run: xvfb-run -a node dev/bin/run-playwright.js test search-refresh.spec.js --project=chromium --workers=1 --retries=0 --reporter=line
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: search-refresh-failure
+          path: test-results/
+          retention-days: 14

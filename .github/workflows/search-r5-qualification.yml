@@ -1,0 +1,76 @@
+name: Qualify search draft repair R5
+
+on:
+  push:
+    branches: ['review/search-draft-r5-20260920']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: search-draft-r5-qualification
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    if: github.repository == 'ManabiIO/manabitan'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Stage isolated review inputs and pinned baseline
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/search-r5/payload" "$RUNNER_TEMP/search-r5/results"
+          cp --parents dev/review/search-r5/fix.patch test/util/search-refresh-cases.js test/search-refresh-input.test.js test/playwright/search-refresh.spec.js docs/development/search-refresh.md .github/workflows/search-refresh.yml "$RUNNER_TEMP/search-r5/payload/"
+          git checkout --detach c3bf83aaca965b07b4223c1e065663fefdbf1429
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          cp -r "$RUNNER_TEMP/search-r5/payload/test" .
+          cp -r "$RUNNER_TEMP/search-r5/payload/docs" .
+          cp "$RUNNER_TEMP/search-r5/payload/.github/workflows/search-refresh.yml" .github/workflows/
+          git add test/util/search-refresh-cases.js test/search-refresh-input.test.js test/playwright/search-refresh.spec.js docs/development/search-refresh.md .github/workflows/search-refresh.yml
+          git -c core.hooksPath=/dev/null commit -m 'test: reproduce search-draft replacement through real display methods'
+          git rev-parse HEAD > "$RUNNER_TEMP/search-r5/results/tests-head.txt"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Confirm unchanged assertions fail on the pinned baseline
+        run: |
+          set -euo pipefail
+          result=0
+          node --test --test-reporter=tap test/util/search-refresh-cases.js > "$RUNNER_TEMP/search-r5/results/red.tap" 2>&1 || result=$?
+          test "$result" -eq 1
+          grep -q '^# pass 5$' "$RUNNER_TEMP/search-r5/results/red.tap"
+          grep -q '^# fail 18$' "$RUNNER_TEMP/search-r5/results/red.tap"
+      - name: Apply and validate the exact reviewed production patch
+        run: |
+          set -euo pipefail
+          git apply --check "$RUNNER_TEMP/search-r5/payload/dev/review/search-r5/fix.patch"
+          git apply "$RUNNER_TEMP/search-r5/payload/dev/review/search-r5/fix.patch"
+          test "$(git hash-object ext/js/display/display.js)" = '0b018b87e5ef1ceee946465936b766c0f098a58a'
+          test "$(git hash-object ext/js/display/search-display-controller.js)" = 'a3a2617699587f3924801c6a4a89a3097e9652e7'
+          test "$(git hash-object types/ext/display.d.ts)" = '38f27ff5f7ab15d4e91e3d2d6b84111f3ebe4ab8'
+          node --test --test-reporter=tap test/util/search-refresh-cases.js | tee "$RUNNER_TEMP/search-r5/results/green.tap"
+          npx vitest run test/search-refresh-input.test.js test/search-display-controller.test.js test/display-lookup-refresh.test.js test/display-database-updated.test.js
+          npx eslint ext/js/display/display.js ext/js/display/search-display-controller.js test/util/search-refresh-cases.js test/search-refresh-input.test.js test/playwright/search-refresh.spec.js
+          npm run test:ts
+          npm run test:build
+      - name: Publish only the qualified source and tests to a new review branch
+        run: |
+          set -euo pipefail
+          git add ext/js/display/display.js ext/js/display/search-display-controller.js types/ext/display.d.ts
+          git -c core.hooksPath=/dev/null commit -m 'fix: preserve draft search input across automatic dictionary refreshes'
+          git rev-parse HEAD > "$RUNNER_TEMP/search-r5/results/fix-head.txt"
+          git diff c3bf83aaca965b07b4223c1e065663fefdbf1429 HEAD > "$RUNNER_TEMP/search-r5/results/combined.patch"
+          git ls-remote --heads origin refs/heads/fix/search-refresh-drafts-r5-20260920 > "$RUNNER_TEMP/search-r5/results/existing-branch.txt"
+          test ! -s "$RUNNER_TEMP/search-r5/results/existing-branch.txt"
+          git push origin HEAD:refs/heads/fix/search-refresh-drafts-r5-20260920
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: search-draft-r5-qualification
+          path: ${{ runner.temp }}/search-r5/
+          retention-days: 14

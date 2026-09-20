@@ -1,0 +1,115 @@
+diff --git a/ext/js/display/display.js b/ext/js/display/display.js
+index a4a4678..0b018b8 100644
+--- a/ext/js/display/display.js
++++ b/ext/js/display/display.js
+@@ -622,7 +622,7 @@ export class Display extends EventDispatcher {
+      */
+     searchLast(updateOptionsContext) {
+         const type = this._contentType;
+-        if (type === 'clear') { return; }
++        if (type === 'clear' || type === 'unloaded') { return; }
+         const query = this._query;
+         const {state} = this._history;
+         const hasState = typeof state === 'object' && state !== null;
+@@ -649,6 +649,7 @@ export class Display extends EventDispatcher {
+             state: newState,
+             content: {
+                 contentOrigin: this.getContentOrigin(),
++                preserveSearchInput: this._pageType === 'search' && !updateOptionsContext,
+             },
+         };
+         void this.setContent(details);
+@@ -1468,6 +1469,10 @@ export class Display extends EventDispatcher {
+         }
+ 
+         let {dictionaryEntries} = content;
++        // This is an instruction for this refresh, not later back/forward
++        // navigation to the same history entry. Consume it before any await.
++        const preserveSearchInput = content.preserveSearchInput === true;
++        delete content.preserveSearchInput;
+ 
+         let contentOriginValid = false;
+         const {contentOrigin} = content;
+@@ -1526,7 +1531,7 @@ export class Display extends EventDispatcher {
+         container.textContent = '';
+ 
+         safePerformance.mark('display:contentUpdate:start');
+-        this._triggerContentUpdateStart();
++        this._triggerContentUpdateStart(preserveSearchInput);
+ 
+         let i = 0;
+         for (const dictionaryEntry of dictionaryEntries) {
+@@ -2480,9 +2485,11 @@ export class Display extends EventDispatcher {
+         this.trigger('contentClear', {});
+     }
+ 
+-    /** */
+-    _triggerContentUpdateStart() {
+-        this.trigger('contentUpdateStart', {type: this._contentType, query: this._query});
++    /**
++     * @param {boolean} [preserveSearchInput]
++     */
++    _triggerContentUpdateStart(preserveSearchInput = false) {
++        this.trigger('contentUpdateStart', {type: this._contentType, query: this._query, preserveSearchInput});
+     }
+ 
+     /**
+diff --git a/ext/js/display/search-display-controller.js b/ext/js/display/search-display-controller.js
+index f1548d2..a3a2617 100644
+--- a/ext/js/display/search-display-controller.js
++++ b/ext/js/display/search-display-controller.js
+@@ -341,7 +341,7 @@ export class SearchDisplayController {
+     /**
+      * @param {import('display').EventArgument<'contentUpdateStart'>} details
+      */
+-    _onContentUpdateStart({type, query}) {
++    _onContentUpdateStart({type, query, preserveSearchInput = false}) {
+         this._contentUpdateSequence = this._searchRequestSequence;
+         this._contentUpdateQuery = typeof query === 'string' ? query : '';
+         updateSearchDebugState({
+@@ -362,13 +362,14 @@ export class SearchDisplayController {
+                     animate = (typeof content === 'object' && content !== null && content.animate === true);
+                     showBackButton = (typeof state === 'object' && state !== null && state.cause === 'queryParser');
+                     valid = (typeof query === 'string' && query.length > 0);
+-                    this._display.blurElement(this._queryInput);
++                    if (!preserveSearchInput) { this._display.blurElement(this._queryInput); }
+                 }
+                 break;
+             case 'clear':
+                 valid = false;
+                 animate = true;
+                 query = '';
++                preserveSearchInput = false;
+                 break;
+         }
+ 
+@@ -376,7 +377,7 @@ export class SearchDisplayController {
+ 
+         this._searchBackButton.hidden = !showBackButton;
+ 
+-        if (this._queryInput.value !== query) {
++        if (!preserveSearchInput && this._queryInput.value !== query) {
+             this._queryInput.value = query.trimEnd();
+             this._updateSearchHeight(true);
+         }
+diff --git a/types/ext/display.d.ts b/types/ext/display.d.ts
+index 6ea8c52..38f27ff 100644
+--- a/types/ext/display.d.ts
++++ b/types/ext/display.d.ts
+@@ -113,6 +113,8 @@ export type HistoryStateSentence = {
+  * The non-persistent content assigned to the navigation entry.
+  */
+ export type HistoryContent = {
++    /** Preserve the search draft/focus for this automatic refresh; consumed before lookup. */
++    preserveSearchInput?: boolean;
+     /** Whether or not any CSS animations should occur. */
+     animate?: boolean;
+     /** An array of dictionary entries to display as content. */
+@@ -151,6 +153,7 @@ export type Events = {
+     contentUpdateStart: {
+         type: PageType;
+         query: string;
++        preserveSearchInput?: boolean;
+     };
+     contentUpdateEntry: {
+         dictionaryEntry: Dictionary.DictionaryEntry;
