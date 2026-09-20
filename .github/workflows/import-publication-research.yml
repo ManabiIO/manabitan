@@ -16,15 +16,22 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      - name: Install and build library dependencies
+        run: |
+          npm ci
+          npm run build:libs
       - name: Prepare isolated tests-first tree
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/r8-payload /tmp/r8-evidence
-          git archive HEAD test/import-publication-journal.test.js test/fixtures/import-publication test/fixtures/import-journal-snapshot dev/perf/import-publication-research.patch dev/perf/import-publication-journal-20260920.md | tar -x -C /tmp/r8-payload
+          git archive HEAD test/import-publication-journal.test.js test/fixtures/import-publication test/fixtures/import-journal-snapshot dev/perf/import-publication-research.patch dev/perf/import-publication-research-format.py dev/perf/import-publication-journal-20260920.md | tar -x -C /tmp/r8-payload
           git switch --detach 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108
           test "$(git hash-object ext/js/dictionary/dictionary-database.js)" = 6ad381878c288641d8a29ca09876d9c95a1b8df3
           cp -R /tmp/r8-payload/test/. test/
+          python /tmp/r8-payload/dev/perf/import-publication-research-format.py
+          npx prettier test/fixtures/import-publication/check.mjs test/fixtures/import-journal-snapshot/check.mjs test/fixtures/import-journal-snapshot/node-opfs-adapter.mjs --write --no-semi --print-width 200
+          npx eslint test/import-publication-journal.test.js test/fixtures/import-publication/check.mjs test/fixtures/import-journal-snapshot/check.mjs test/fixtures/import-journal-snapshot/node-opfs-adapter.mjs --fix
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add test
@@ -49,20 +56,24 @@ jobs:
           git apply --unidiff-zero --check /tmp/r8-payload/dev/perf/import-publication-research.patch
           git apply --unidiff-zero /tmp/r8-payload/dev/perf/import-publication-research.patch
           cp /tmp/r8-payload/dev/perf/import-publication-journal-20260920.md dev/perf/
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('test/dictionary-import-ownership.test.js')
+          source = p.read_text()
+          old = '            primaryKey: 42,\n'
+          assert source.count(old) == 1
+          p.write_text(source.replace(old, old + '            onPublished: expect.any(Function),\n'))
+          PY
           node test/fixtures/import-publication/check.mjs . /tmp/r8-evidence/publication-green.json
           node test/fixtures/import-journal-snapshot/check.mjs . /tmp/r8-evidence/journal-green.json terminal
           node test/fixtures/import-journal-snapshot/check.mjs . /tmp/r8-evidence/journal-injection-green.json injection-only
-      - name: Install and build library dependencies
-        run: |
-          npm ci
-          npm run build:libs
       - name: Check source and focused regressions
         shell: bash
         run: |
           set -euo pipefail
-          npx eslint ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-import-session.js ext/js/dictionary/dictionary-import-journal.js test/import-publication-journal.test.js test/fixtures/import-publication/check.mjs test/fixtures/import-journal-snapshot/check.mjs test/fixtures/import-journal-snapshot/node-opfs-adapter.mjs --fix
+          npx eslint ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-import-session.js ext/js/dictionary/dictionary-import-journal.js test/dictionary-import-ownership.test.js test/import-publication-journal.test.js test/fixtures/import-publication/check.mjs test/fixtures/import-journal-snapshot/check.mjs test/fixtures/import-journal-snapshot/node-opfs-adapter.mjs --fix
           npx prettier dev/perf/import-publication-journal-20260920.md --write
-          npx vitest run test/import-publication-journal.test.js --maxWorkers=1 --minWorkers=1
+          npx vitest run test/import-publication-journal.test.js test/dictionary-import-ownership.test.js --maxWorkers=1 --minWorkers=1
           npm run test:ts
           git diff --check
       - name: Full units options and dry build
@@ -78,7 +89,7 @@ jobs:
           set -euo pipefail
           node test/fixtures/import-publication/check.mjs . /tmp/r8-evidence/publication-final.json
           node test/fixtures/import-journal-snapshot/check.mjs . /tmp/r8-evidence/journal-final.json terminal
-          git add ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-import-session.js ext/js/dictionary/dictionary-import-journal.js test/import-publication-journal.test.js test/fixtures/import-publication test/fixtures/import-journal-snapshot dev/perf/import-publication-journal-20260920.md
+          git add ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-import-session.js ext/js/dictionary/dictionary-import-journal.js test/dictionary-import-ownership.test.js test/import-publication-journal.test.js test/fixtures/import-publication test/fixtures/import-journal-snapshot dev/perf/import-publication-journal-20260920.md
           git commit -m 'fix: acknowledge committed imports and snapshot admitted recovery journals'
           git rev-parse HEAD >/tmp/r8-evidence/fixed-commit.txt
           git diff 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108 HEAD >/tmp/r8-evidence/qualified.patch
