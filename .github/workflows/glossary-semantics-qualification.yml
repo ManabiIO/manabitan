@@ -1,0 +1,114 @@
+name: Glossary semantics qualification
+
+on:
+  push:
+    branches: [review/glossary-semantics-20260920]
+    paths:
+      - '.github/workflows/glossary-semantics-qualification.yml'
+      - 'dev/perf/glossary-semantics-repair.py'
+      - 'test/fixtures/glossary-semantics/**'
+      - 'test/term-bank-glossary-semantics.test.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: glossary-semantics-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Reproduce original failures
+        shell: bash
+        run: |
+          mkdir -p builds/glossary-semantics
+          git rev-parse HEAD > builds/glossary-semantics/review-head.txt
+          cp ext/lib/term-bank-parser.wasm builds/glossary-semantics/baseline.wasm
+          set +e
+          node test/fixtures/glossary-semantics/check.mjs . builds/glossary-semantics/red-native.json > builds/glossary-semantics/red-native.log 2>&1
+          native_code=$?
+          node test/fixtures/glossary-semantics/importer.mjs . builds/glossary-semantics/red-importer.json > builds/glossary-semantics/red-importer.log 2>&1
+          importer_code=$?
+          set -e
+          test "$native_code" -eq 1
+          test "$importer_code" -eq 1
+          node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('builds/glossary-semantics/red-native.json')); if(r.passed!==42||r.failed!==279) process.exit(1)"
+          node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('builds/glossary-semantics/red-importer.json')); if(r.failed===0||r.results.length!==14) process.exit(1)"
+      - name: Apply isolated repairs and rebuild native module
+        shell: bash
+        run: |
+          python3 dev/perf/glossary-semantics-repair.py
+          echo 'bb183a1299b5474f9986c372f73f0e434b78a177c9738bfa6936a0b64bd7394c  ext/js/dictionary/wasm/term-bank-parser.c' | sha256sum --check
+          echo 'a4f6432ac5006c88784e72cfc92ccb17ed10dee522ba4c5a6328d840eb61d64c  ext/js/dictionary/dictionary-importer.js' | sha256sum --check
+          git diff --binary -- ext/js/dictionary/wasm/term-bank-parser.c ext/js/dictionary/dictionary-importer.js > builds/glossary-semantics/production.patch
+          npm run build:libs
+          node test/fixtures/glossary-semantics/check.mjs . builds/glossary-semantics/green-native.json > builds/glossary-semantics/green-native.log 2>&1
+          node test/fixtures/glossary-semantics/importer.mjs . builds/glossary-semantics/green-importer.json > builds/glossary-semantics/green-importer.log 2>&1
+      - name: Format fixture style and verify lint
+        run: |
+          npx eslint --fix test/term-bank-glossary-semantics.test.js test/fixtures/glossary-semantics/*.mjs
+          npx eslint ext/js/dictionary/dictionary-importer.js test/term-bank-glossary-semantics.test.js test/fixtures/glossary-semantics/*.mjs
+      - name: Check all TypeScript projects
+        run: npm run test:ts
+      - name: Run full unit and options suites
+        run: |
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=default --reporter=json --outputFile=builds/glossary-semantics/full-unit.json
+          npm run test:unit:options
+      - name: Dry-run all extension builds
+        run: npm run test:build
+      - name: Preserve source and receipts
+        if: always()
+        run: |
+          mkdir -p builds/glossary-semantics
+          sha256sum ext/js/dictionary/dictionary-importer.js ext/js/dictionary/wasm/term-bank-parser.c ext/lib/term-bank-parser.wasm > builds/glossary-semantics/hashes.txt
+          tar -czf builds/glossary-semantics/tests.tar.gz test/term-bank-glossary-semantics.test.js test/fixtures/glossary-semantics
+          tar -czf builds/glossary-semantics/source.tar.gz ext/js ext/lib dev/bin package.json
+          git diff --check
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: glossary-semantics-qualification
+          path: builds/glossary-semantics/
+          retention-days: 14
+          if-no-files-found: error
+
+  publish-review-branch:
+    needs: qualify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: c3bf83aaca965b07b4223c1e065663fefdbf1429
+      - uses: actions/download-artifact@v4
+        with:
+          name: glossary-semantics-qualification
+          path: /tmp/glossary-semantics
+      - name: Publish tests-first and fixes without merging
+        shell: bash
+        run: |
+          branch=fix/glossary-json-semantics-20260920
+          test -z "$(git ls-remote --heads origin "$branch")"
+          git switch -c "$branch"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          tar -xzf /tmp/glossary-semantics/tests.tar.gz
+          git add test/term-bank-glossary-semantics.test.js test/fixtures/glossary-semantics
+          git commit -m 'test: reproduce escaped glossary media and duplicate-property normalization'
+          git apply --check /tmp/glossary-semantics/production.patch
+          git apply /tmp/glossary-semantics/production.patch
+          git add ext/js/dictionary/wasm/term-bank-parser.c ext/js/dictionary/dictionary-importer.js
+          git commit -m 'fix: preserve decoded glossary identity and complete media requirements'
+          git push origin "HEAD:refs/heads/$branch"
