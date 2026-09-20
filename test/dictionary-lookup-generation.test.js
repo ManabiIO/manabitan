@@ -185,6 +185,11 @@ describe('zero-term dictionary lookup state', () => {
         expect(load).not.toHaveBeenCalled();
         expect(Reflect.get(database, '_directTermIndexLoadedDictionaryNames').has('Web Frequency')).toBe(true);
         expect(Reflect.get(database, '_directTermIndexGeneration')).toBe(generation);
+
+        db.selectObjects.mockClear();
+        await database._ensureDirectTermIndexesLoaded(['Web Frequency']);
+        expect(db.selectObjects).not.toHaveBeenCalled();
+        expect(load).not.toHaveBeenCalled();
     });
 
     test('retains fail-closed shard loading when summary term count is unavailable', async () => {
