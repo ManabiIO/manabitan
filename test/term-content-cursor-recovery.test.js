@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {expect, test} from 'vitest';
 
 test('term-content cursor, recovery, and direct-failure regressions', () => {
-    const script = fileURLToPath(new URL('fixtures/opfs-continuation/check.mjs', import.meta.url));
+    const script = fileURLToPath(new URL('fixtures/opfs-continuation/check.js', import.meta.url));
     expect(() => execFileSync(process.execPath, [script, process.cwd()], {
         timeout: 60000,
         encoding: 'utf8',
