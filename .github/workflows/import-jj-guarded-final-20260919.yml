@@ -1,0 +1,136 @@
+name: Guarded glossary exact-source qualification
+on:
+  push:
+    branches: [research/import-jitendex-jmdict-20260919]
+    paths: [.github/workflows/import-jj-guarded-final-20260919.yml]
+permissions:
+  contents: read
+jobs:
+  confirmation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jitendex, jmdict]
+        order: [AB, BA]
+    env:
+      MANABITAN_CLANG: clang-18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: python dev/perf/apply-guarded-glossary.py
+      - run: npm ci
+      - run: npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('builds/e2e-dictionary-cache');"
+      - name: Independent full-import confirmations on unchanged publisher archives
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          ORDER: ${{ matrix.order }}
+        run: python dev/perf/jj-glossary-confirm.py --dictionary "$DICTIONARY" --initial-order "$ORDER" --blocks 6 --out "$RUNNER_TEMP/guarded-confirm"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: guarded-confirm-${{ matrix.dictionary }}-${{ matrix.order }}
+          path: ${{ runner.temp }}/guarded-confirm
+          retention-days: 30
+          if-no-files-found: error
+  qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      MANABITAN_CLANG: clang-18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Reconstruct exact five-file candidate
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python dev/perf/apply-guarded-glossary.py > evidence/hashes.txt
+          git diff > evidence/product.patch
+      - run: npm ci
+      - run: npm run build:libs > evidence/build-libs.log 2>&1
+      - name: Complete unit, type, lint and build validation
+        run: |
+          set -euo pipefail
+          node node_modules/vitest/vitest.mjs run --no-file-parallelism > evidence/unit.log 2>&1
+          npm run test:unit:options > evidence/options.log 2>&1
+          npm run test:ts > evidence/types.log 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-experiments.js test/term-bank-experiments.test.js test/lookup-construction-experiments.test.js > evidence/lint.log 2>&1
+          npm run test:build > evidence/build-plans.log 2>&1
+          node dev/bin/build.js chrome-dev > evidence/chrome-build.log 2>&1
+          node dev/bin/build.js firefox-dev > evidence/firefox-build.log 2>&1
+          git diff --check
+          sha256sum ext/lib/term-bank-parser.wasm >> evidence/hashes.txt
+      - run: npx playwright install --with-deps chromium
+      - name: Strict complete original-dictionary lifecycle using actual new defaults
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_CHROMIUM_E2E_REPORT: evidence/lifecycle.html
+        run: node test/chromium/extension-two-dictionary-import.e2e.js > evidence/lifecycle.log 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: guarded-glossary-qualification
+          path: evidence
+          retention-days: 30
+          if-no-files-found: error
+  corpus-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jitendex, jmdict]
+    env:
+      MANABITAN_CLANG: clang-18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Build independent parent and candidate parser binaries
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin 54ac62a39386459b7822fc644e5a1a6b1a619619
+          git worktree add --detach "$RUNNER_TEMP/parent" 54ac62a39386459b7822fc644e5a1a6b1a619619
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/parent/node_modules"
+          (cd "$RUNNER_TEMP/parent" && npm run build:libs)
+          python dev/perf/apply-guarded-glossary.py
+          npm run build:libs
+      - run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('builds/e2e-dictionary-cache');"
+      - name: Compare every row and complete prepared index with actual parent source
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          node dev/perf/import-lookup-screen.js "$DICTIONARY" --pairs 2 --baseline-root "$RUNNER_TEMP/parent" --flags '{}' --out evidence/corpus-parity.json > evidence/corpus.log 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: guarded-glossary-parity-${{ matrix.dictionary }}
+          path: evidence
+          retention-days: 30
+          if-no-files-found: error
