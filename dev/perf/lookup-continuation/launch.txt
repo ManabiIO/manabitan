@@ -1,3 +1,4 @@
-Qualification attempt 1
+Qualification attempt 2
 Pinned production baseline: 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108
+Attempt 1 passed red/green, all four TypeScript projects, full units, options, and build; its new fixture failed lint. Corrected fixture formatting and scoped trusted-checkout dynamic-import annotations. No regression assertion or production change altered.
 The workflow publishes only a new isolated fix branch after all gates pass. It does not merge or update develop.
