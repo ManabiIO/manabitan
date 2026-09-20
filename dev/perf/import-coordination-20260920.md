@@ -29,7 +29,9 @@ npx vitest run test/dictionary-import-coordination.test.js
 Tests-only commit: `a7e99e66749ee6298ebcc7ff5a2765ccccc74dec`.
 At that source, the identical 17-case runner produces 5 passes and 12 behavioral
 failures. The fixed source produces 17 passes, zero failures, zero skips, and zero
-cancellations in Node 22.16.0 on Linux.
+cancellations in Node 22.16.0 on Linux. The subsequently lint-corrected fixture
+was also copied onto upstream and rerun: the same 5/12 versus 17/0 result holds.
+Assertions were not weakened.
 
 Production Git blobs verified against the locally executed source:
 
@@ -41,12 +43,29 @@ review was rerun: baseline 37 passes / 12 failures, repaired 49 passes / zero
 failures, with zero observed unhandled rejections. These are overlapping checks,
 not 66 independent defects or additional full-unit tests.
 
+## Executed repository qualification
+
+[Normal CI for e5225de](https://github.com/ManabiIO/manabitan/actions/runs/35535658259)
+passed the complete matrix, including unit/options suites, JavaScript lint, all
+four TypeScript projects, the build, and Chromium/Firefox extension CI lanes.
+The corresponding static-runtime acceptance lane is tracked separately on the
+PR. A complete local unit run on Node 22.16.0 passed 6,810 tests with 46 skips and
+zero failures. The wrapper counts as one unit test; do not add its 17 subprocess
+cases again to the unit total.
+
+The initial PR revision failed JavaScript lint on test-file formatting and its
+dynamic source selector. Those were repaired using static production imports
+and normal repository lint, without changing production algorithms. The first
+link-check attempt also failed because this note contained no links, not because
+of an invalid URL. This note now links its actual CI evidence instead of disabling
+that check. Require fresh normal checks after subsequent branch updates.
+
 ## Witnesses and boundaries
 
 An old empty-file read previously deleted a newer successfully written journal.
 Delayed clears and writes could similarly overtake one another. The fixture uses
 captured Blob snapshots and commit-on-close writable doubles at the filesystem
-boundary; it is not native OPFS qualification.
+boundary; it is not native OPFS fault injection.
 
 Reentrant source/parser disposers previously closed the archive before the
 original disposer completed. Other callbacks could duplicate database start,
@@ -57,11 +76,9 @@ The journal queue is instance-local. Cross-instance ownership remains the
 application coordinator's responsibility. A callback must not await the same
 operation that owns it; self-dependent callback cycles are not supported.
 
-## Merge gates
+## Remaining qualification
 
-Require green full repository unit/options/type/lint/build checks and the actual
-Chromium/Firefox extension and static-runtime acceptance lanes on the final PR
-head. At initial publication these CI results were not yet available. Native
+Keep the exact final head green in normal and static-runtime CI. Native
 quota/power-loss fault injection and complete application cancellation/recovery
-qualification remain outside the local evidence. No import speedup or release
-readiness is claimed.
+qualification remain outside the local evidence. No import speedup, merge, or
+release readiness is claimed.
