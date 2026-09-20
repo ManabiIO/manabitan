@@ -141,7 +141,8 @@ function fixture(type = 'terms') {
     };
 }
 
-for (const method of ['_refreshAfterOptionsUpdate', '_refreshAfterDictionaryDatabaseUpdate']) {
+const refreshMethods = /** @type {const} */ (['_refreshAfterOptionsUpdate', '_refreshAfterDictionaryDatabaseUpdate']);
+for (const method of refreshMethods) {
     test(`${method}: real searchLast leaves a clear page draft alone (baseline control)`, async () => {
         const f = fixture('clear');
         const refresh = f.controller[method]();
@@ -207,7 +208,9 @@ test('the preservation marker is consumed before lookup and does not suppress la
     const f = fixture();
     f.optionsGate.resolve();
     await f.controller._refreshAfterDictionaryDatabaseUpdate();
-    assert.equal(Object.hasOwn(f.display._history.content, 'preserveSearchInput'), false);
+    const historyContent = f.display._history.content;
+    assert.ok(historyContent);
+    assert.equal(Object.hasOwn(historyContent, 'preserveSearchInput'), false);
     f.input.value = 'draft';
     f.lookupGate.resolve([]);
     await f.rendered();
