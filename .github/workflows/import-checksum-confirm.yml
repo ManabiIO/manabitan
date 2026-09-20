@@ -1,0 +1,50 @@
+name: Import checksum confirmation
+
+on:
+  push:
+    branches: [research/import-session-continuation-20260920]
+    paths: [.github/workflows/import-checksum-confirm.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  full-import-confirmation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare identical correctness composition and isolated candidate
+        run: |
+          node dev/research/decode-session-patches.mjs
+          cp dev/research/checksum-import-confirm.mjs /tmp/session-review/confirm.mjs
+          git checkout --detach 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108
+          git apply --check /tmp/session-review/fix.patch
+          git apply /tmp/session-review/fix.patch
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Install native Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run alternating ABBA/BAAB and interleaved A/A blocks
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: node /tmp/session-review/confirm.mjs "$DICTIONARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checksum-confirmation-${{ matrix.dictionary }}
+          path: |
+            /tmp/session-review/confirmation-${{ matrix.dictionary }}/**/*.json
+            /tmp/session-review/confirmation-${{ matrix.dictionary }}/**/*.log
+            /tmp/session-review/*.patch
+            /tmp/session-review/*.sha256
+            /tmp/session-review/confirm.mjs
+          retention-days: 7
