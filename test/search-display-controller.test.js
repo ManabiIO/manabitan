@@ -169,13 +169,14 @@ describe('Keyboard Event Handling', () => {
     test('dictionary database updates refresh options and rerun the active display search', async () => {
         const updateOptionsSpy = vi.spyOn(display, 'updateOptions').mockResolvedValue(void 0);
         const searchLastSpy = vi.spyOn(display, 'searchLast').mockImplementation(() => {});
+        Reflect.set(display, '_contentType', 'terms');
         queryInput.value = '暗記';
 
-        await searchDisplayController._onDatabaseUpdated({type: 'dictionary', cause: 'import'});
+        await searchDisplayController._refreshAfterDictionaryDatabaseUpdate();
 
         expect(updateOptionsSpy).toHaveBeenCalledTimes(1);
         expect(searchLastSpy).toHaveBeenCalledTimes(1);
-        expect(searchLastSpy).toHaveBeenCalledWith(false);
+        expect(searchLastSpy).toHaveBeenCalledWith(false, true);
     });
 
     test('options updates rerun visible results even if the textbox has been cleared locally', async () => {
@@ -188,7 +189,7 @@ describe('Keyboard Event Handling', () => {
 
         expect(updateOptionsSpy).toHaveBeenCalledTimes(1);
         expect(searchLastSpy).toHaveBeenCalledTimes(1);
-        expect(searchLastSpy).toHaveBeenCalledWith(false);
+        expect(searchLastSpy).toHaveBeenCalledWith(false, true);
     });
 
     test('options updates do not invent a rerun when no search results are currently shown', async () => {
