@@ -1,0 +1,43 @@
+name: Import session research
+
+on:
+  push:
+    branches: [research/import-session-continuation-20260920]
+
+permissions:
+  contents: read
+
+jobs:
+  review-environment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Archive tracked source without repository credentials
+        run: |
+          mkdir -p /tmp/import-review-source
+          git rev-parse HEAD > /tmp/import-review-source/commit.txt
+          git archive --format=tar HEAD | gzip > /tmp/import-review-source/source.tar.gz
+          sha256sum /tmp/import-review-source/source.tar.gz > /tmp/import-review-source/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-review-source
+          path: /tmp/import-review-source
+          retention-days: 7
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Archive dependencies and generated libraries only
+        run: |
+          mkdir -p /tmp/import-review-runtime
+          node --version > /tmp/import-review-runtime/node.txt
+          npm --version > /tmp/import-review-runtime/npm.txt
+          tar -czf /tmp/import-review-runtime/runtime.tar.gz node_modules ext/lib
+          sha256sum /tmp/import-review-runtime/runtime.tar.gz > /tmp/import-review-runtime/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-review-runtime
+          path: /tmp/import-review-runtime
+          retention-days: 7
