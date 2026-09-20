@@ -1,0 +1,5 @@
+Bounded sorting qualification attempt 1
+Base: correctness PR #74 at 04e26523ec7fa8584a268d4cf2033024a004207f.
+The candidate was benchmarked separately in Node and Chromium before this product-branch construction. Existing persisted bytes and query results passed independent differential checks.
+Require all 16 new semantic tests to pass on both unchanged and optimized code, then full unit/options/type/build and targeted lint. Publish only a fresh isolated candidate branch; no merge or default-branch change.
+Real-corpus component measurements are a separate workflow, not assumed to pass here and not a full-extension latency claim.
