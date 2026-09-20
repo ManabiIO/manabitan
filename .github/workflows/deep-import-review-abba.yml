@@ -1,0 +1,85 @@
+name: Deep import review ABBA
+
+on:
+  push:
+    branches: [review/import-lookup-deep-20260920]
+    paths: [.github/workflows/deep-import-review-abba.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Build exact baseline and screened candidate, then measure fresh-profile imports
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json, shutil, subprocess
+          def run(args):
+              subprocess.run(args, check=True)
+          def sha(data):
+              return hashlib.sha256(data).hexdigest()
+          target = Path('ext/js/dictionary/term-entry-content-hash.js')
+          original = target.read_text()
+          assert sha(original.encode()) == '3a661e6875bf8dcb4c3b9f301e79506539b27d83cb069b3d5566e9bad9346620'
+          clone = original[original.index('function hashContentXxh32(bytes, seed) {'):]
+          clone = clone.replace('function hashContentXxh32(bytes, seed)', 'function hashViewXxh32(bytes, seed)').replace('bytes.length', 'bytes.byteLength').replace('readUint32Le(bytes, offset)', 'bytes.getUint32(offset, true)').replace('bytes[offset]', 'bytes.getUint8(offset)')
+          candidate = original.replace('    let h1 = hashContentXxh32(bytes, 0x811c9dc5);\n    const h2 = hashContentXxh32(bytes, 0x9e3779b9);', '    const view = bytes.length >= 64 ? new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength) : null\n    let h1 = view === null ? hashContentXxh32(bytes, 0x811c9dc5) : hashViewXxh32(view, 0x811c9dc5)\n    const h2 = view === null ? hashContentXxh32(bytes, 0x9e3779b9) : hashViewXxh32(view, 0x9e3779b9)') + '\n' + clone
+          assert sha(candidate.encode()) == '8d990f0f677501c196a535b12a1d721c8038e6b205e4df36927646887ea23e11'
+          output = Path('builds/deep-import-abba')
+          output.mkdir(parents=True, exist_ok=True)
+          variants = {'A': original, 'B': candidate}
+          metadata = {}
+          for variant, source in variants.items():
+              target.write_text(source)
+              run(['node', 'dev/bin/build.js', '--target', 'chrome-dev'])
+              archive = Path('/tmp') / ('deep-review-' + variant + '.zip')
+              shutil.copyfile('builds/manabitan-chrome-dev.zip', archive)
+              metadata[variant] = {'hashModuleSha256': sha(source.encode()), 'extensionZipSha256': sha(archive.read_bytes())}
+              (output / (variant + '-hash.js')).write_text(source)
+          (output / 'variants.json').write_text(json.dumps(metadata, indent=2))
+          records = []
+          counter = 0
+          def trial(dictionary, variant, kind, block, slot):
+              global counter
+              counter += 1
+              target.write_text(variants[variant])
+              shutil.copyfile('/tmp/deep-review-' + variant + '.zip', 'builds/manabitan-chrome-dev.zip')
+              destination = output / ('%03d-%s-%s-%s' % (counter, kind, dictionary, variant))
+              run(['node', 'dev/perf/import-benchmark.js', dictionary, '--runs', '1', '--no-build', '--output', str(destination)])
+              summary = json.loads((destination / 'summary.json').read_text())
+              records.append({'counter': counter, 'dictionary': dictionary, 'variant': variant, 'kind': kind, 'block': block, 'slot': slot, 'totalImportMs': summary['runs'][0]['totalImportMs'], 'workerImportMs': summary['runs'][0]['workerImportMs'], 'summary': str(destination / 'summary.json'), 'source': metadata[variant]})
+              (output / 'trials.json').write_text(json.dumps(records, indent=2))
+          for dictionary in ['jmdict', 'jitendex', 'jmnedict']:
+              for variant in ['A', 'B']:
+                  trial(dictionary, variant, 'warmup', -1, -1)
+          for block in range(3):
+              dictionaries = ['jmdict', 'jitendex', 'jmnedict']
+              dictionaries = dictionaries[block:] + dictionaries[:block]
+              for dictionary in dictionaries:
+                  for slot, variant in enumerate('ABBA'):
+                      trial(dictionary, variant, 'abba', block, slot)
+          for dictionary in ['jmnedict', 'jitendex', 'jmdict']:
+              for slot in range(4):
+                  trial(dictionary, 'A', 'aa', 0, slot)
+          target.write_text(original)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deep-import-review-abba
+          path: builds/deep-import-abba/
+          retention-days: 7
