@@ -9,13 +9,16 @@ import {createNodeOpfs} from './node-opfs-adapter.mjs'
 
 const root = path.resolve(process.argv[2] ?? new URL('../before', import.meta.url).pathname)
 const source = path.join(root, 'ext/js/dictionary/term-content-opfs-store.js')
-// eslint-disable-next-line no-unsanitized/method -- The test runner intentionally imports production source from the supplied checkout path.\nconst {TermContentOpfsStore} = await import(pathToFileURL(source).href)
+// eslint-disable-next-line no-unsanitized/method -- The test runner intentionally imports production source from the supplied checkout path.
+const {TermContentOpfsStore} = await import(pathToFileURL(source).href)
 const output = process.argv[3]
 const previousNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
 const tests = []
 const results = []
 const test = (name, body) => tests.push({name, body})
-const tick = () => new Promise((resolve) => {\n    setImmediate(resolve)\n})
+const tick = () => new Promise((resolve) => {
+    setImmediate(resolve)
+})
 const latch = () => {
     let resolve
     const promise = new Promise((done) => { resolve = done })
@@ -58,7 +61,9 @@ for (const unreadable of [0, 1, 2]) {
         for (let index = 0; index < 3; ++index) { await persist(env, fileName(index), [index + 1]) }
         const before = await snapshot(env)
         const failure = new DOMException('Transient storage read failure', 'NotReadableError')
-        env.hooks.beforeGetFile = (name) => {\n            if (name === fileName(unreadable)) { throw failure }\n        }
+        env.hooks.beforeGetFile = (name) => {
+            if (name === fileName(unreadable)) { throw failure }
+        }
         await assert.rejects(store.prepare(), (error) => error === failure)
         env.hooks.beforeGetFile = null
         assert.deepEqual(await snapshot(env), before)
@@ -121,7 +126,10 @@ test('failed close cannot make subsequent finalization report success', async (e
     const failure = new Error('Injected OPFS close failure')
     const writable = store._writable
     const abort = writable.abort.bind(writable)
-    writable.close = async () => {\n        await abort()\n        throw failure\n    }
+    writable.close = async () => {
+        await abort()
+        throw failure
+    }
     await assert.rejects(store.endImportSession(), (error) => error === failure)
     await assert.rejects(store.endImportSession(), (error) => error === failure)
     await assert.rejects(store.beginImportSession(), (error) => error === failure)
@@ -275,7 +283,9 @@ for (const queued of [false, true]) {
             // is held. The fixed producer must instead await the owner.
             await tick()
             await tick()
-        } finally {\n            release.resolve()\n        }
+        } finally {
+            release.resolve()
+        }
         assert.deepEqual(await reading, Uint8Array.of(3, 4, 5, 6))
         assert.deepEqual(await append, [{offset: 8, length: 2}])
         await store.flushImportWrites()
@@ -311,7 +321,10 @@ test('failed rollback cannot re-enable admission over unverified content', async
     await store.endImportSession()
     await persist(env, fileName(0), [1])
     let rollbackError
-    await assert.rejects(store.rollbackImportSession(checkpoint), (error) => {\n        rollbackError = error\n        return error instanceof Error && /roll back/.test(error.message)\n    })
+    await assert.rejects(store.rollbackImportSession(checkpoint), (error) => {
+        rollbackError = error
+        return error instanceof Error && /roll back/.test(error.message)
+    })
     const before = await snapshot(env)
     await assert.rejects(store.appendBatch([Uint8Array.of(90)]), (error) => error === rollbackError)
     await assert.rejects(store.beginImportSession(), (error) => error === rollbackError)
@@ -351,11 +364,19 @@ for (const {name, body} of tests) {
         env.hooks.beforeGetFile = null
         env.hooks.beforeCreateWritable = null
         env.hooks.afterCreateWritable = null
-        try {\n            await store.endImportSession()\n        } catch (_) {\n            // Cleanup is best-effort after the assertion result is recorded.\n        }
+        try {
+            await store.endImportSession()
+        } catch (_) {
+            // Cleanup is best-effort after the assertion result is recorded.
+        }
         await env.dispose()
     }
 }
-if (previousNavigator) {\n    Object.defineProperty(globalThis, 'navigator', previousNavigator)\n} else {\n    delete globalThis.navigator\n}
+if (previousNavigator) {
+    Object.defineProperty(globalThis, 'navigator', previousNavigator)
+} else {
+    delete globalThis.navigator
+}
 const report = {
     node: process.version,
     sourceSha256: createHash('sha256').update(await readFile(source)).digest('hex'),
