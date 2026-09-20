@@ -17,7 +17,7 @@
 
 import {expect, test} from './playwright-util.js';
 
-test('dictionary refresh preserves a draft typed while options are pending', async ({page, extensionId}) => {
+test('dictionary refresh preserves a draft typed while options are pending', async ({page, extensionId}, testInfo) => {
     await page.goto(`chrome-extension://${extensionId}/search.html?query=${encodeURIComponent('猫')}`);
     await expect(page.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
     await expect(page.locator('#search-textbox')).toHaveValue('猫');
@@ -27,7 +27,13 @@ test('dictionary refresh preserves a draft typed while options are pending', asy
         const {Display} = /** @type {typeof import('../../ext/js/display/display.js')} */ (await import(moduleUrl));
         const originalUpdate = Display.prototype.updateOptions;
         const originalComplete = Display.prototype._triggerContentUpdateComplete;
-        const state = {started: false, completions: 0, release: () => {}, restore: () => {}};
+        const state = {started: false, completions: 0, trace: /** @type {string[]} */ ([]), release: () => {}, restore: () => {}};
+        /** @param {FocusEvent} event */
+        const observeFocus = (event) => {
+            state.trace.push(`${event.type}: ${event.target instanceof Element ? event.target.id || event.target.tagName : 'unknown'}; active=${document.activeElement?.id}; stack=${new Error().stack}`);
+        };
+        document.addEventListener('focusin', observeFocus, true);
+        document.addEventListener('focusout', observeFocus, true);
         /** @type {Promise<void>} */
         const gate = new Promise((resolve) => { state.release = resolve; });
         Display.prototype.updateOptions = async function delayedOptions() {
@@ -44,6 +50,8 @@ test('dictionary refresh preserves a draft typed while options are pending', asy
         state.restore = () => {
             Display.prototype.updateOptions = originalUpdate;
             Display.prototype._triggerContentUpdateComplete = originalComplete;
+            document.removeEventListener('focusin', observeFocus, true);
+            document.removeEventListener('focusout', observeFocus, true);
         };
         Reflect.set(globalThis, '__searchRefreshTest', state);
         await new Promise((resolve, reject) => {
@@ -63,6 +71,7 @@ test('dictionary refresh preserves a draft typed while options are pending', asy
         const input = page.locator('#search-textbox');
         await input.fill('読め');
         await input.focus();
+        await expect(input).toBeFocused();
         await input.evaluate((node) => {
             const textarea = /** @type {HTMLTextAreaElement} */ (node);
             textarea.setSelectionRange(0, 2);
@@ -78,11 +87,14 @@ test('dictionary refresh preserves a draft typed while options are pending', asy
         await input.press('Enter');
         await expect(page).toHaveURL(/query=%E8%AA%AD%E3%82%81/u);
     } finally {
-        await page.evaluate(() => {
+        const trace = await page.evaluate(() => {
             const state = Reflect.get(globalThis, '__searchRefreshTest');
+            const result = {trace: state.trace, activeElement: document.activeElement?.outerHTML, debug: Reflect.get(globalThis, '__manabitanSearchDebug')};
             state.release();
             state.restore();
             Reflect.deleteProperty(globalThis, '__searchRefreshTest');
+            return result;
         });
+        await testInfo.attach('focus-trace', {body: JSON.stringify(trace, null, 2), contentType: 'application/json'});
     }
 });
