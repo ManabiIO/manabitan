@@ -113,6 +113,8 @@ export type HistoryStateSentence = {
  * The non-persistent content assigned to the navigation entry.
  */
 export type HistoryContent = {
+    /** One-shot automatic-refresh flag, consumed before rendering; not a navigation preference. */
+    preserveSearchInput?: boolean;
     /** Whether or not any CSS animations should occur. */
     animate?: boolean;
     /** An array of dictionary entries to display as content. */
@@ -151,6 +153,7 @@ export type Events = {
     contentUpdateStart: {
         type: PageType;
         query: string;
+        preserveSearchInput?: boolean;
     };
     contentUpdateEntry: {
         dictionaryEntry: Dictionary.DictionaryEntry;
