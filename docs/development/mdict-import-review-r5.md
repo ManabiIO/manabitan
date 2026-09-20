@@ -19,6 +19,7 @@ work, or enable any performance flag.
 - `ext/templates-modals.html`, `ext/mdict.html`, and `docs/mdict.md`: actual shipped
   import guidance and conversion notes. `ext/css/settings.css` keeps one import
   scroll region and wraps long dictionary filenames.
+
 The Search refresh issue discovered during R5 was fixed and merged independently
 as PR #85. This branch deliberately does not duplicate those display changes.
 
@@ -35,6 +36,6 @@ has doubles and does not certify OPFS publication.
 Keep full repository unit/type/JS/HTML/build checks, actual extension imports,
 Firefox-specific MDict behavior, browser restart and large-source qualification
 as merge gates. Offline modal checks and source-artifact native tests are not
-full extension acceptance. The new `mdict-import-feedback.spec.js` Playwright scenario is prepared but unrun.
-It verifies numeric-name resource precedence via stored PNG bytes, separate alias
+full extension acceptance. The new `mdict-import-feedback.spec.js` Playwright
+scenario is prepared but unrun. It verifies numeric-name resource precedence via stored PNG bytes, separate alias
 notes, and notice clearing on the next clean import.
