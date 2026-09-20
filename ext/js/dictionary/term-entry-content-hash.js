@@ -43,8 +43,10 @@ export function hashPairToHex(h1, h2) {
  * @returns {[number, number]}
  */
 export function hashTermEntryContentBytesPair(bytes) {
-    let h1 = hashContentXxh32(bytes, 0x811c9dc5);
-    const h2 = hashContentXxh32(bytes, 0x9e3779b9);
+    // Keep short values allocation-free; use native little-endian loads for larger payloads.
+    const view = bytes.length >= 64 ? new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength) : null;
+    let h1 = view === null ? hashContentXxh32(bytes, 0x811c9dc5) : hashViewXxh32(view, 0x811c9dc5);
+    const h2 = view === null ? hashContentXxh32(bytes, 0x9e3779b9) : hashViewXxh32(view, 0x9e3779b9);
     if ((h1 | h2) === 0) {
         h1 = 1;
     }
@@ -132,6 +134,57 @@ function hashContentXxh32(bytes, seed) {
     }
     while (offset < length) {
         h32 = (h32 + Math.imul(bytes[offset], 374761393)) >>> 0;
+        h32 = Math.imul(rotateLeft32(h32, 11), 2654435761) >>> 0;
+        ++offset;
+    }
+    h32 ^= h32 >>> 15;
+    h32 = Math.imul(h32, 2246822519) >>> 0;
+    h32 ^= h32 >>> 13;
+    h32 = Math.imul(h32, 3266489917) >>> 0;
+    h32 ^= h32 >>> 16;
+    return h32 >>> 0;
+}
+
+/**
+ * The specialized loop intentionally mirrors hashContentXxh32. A generic reader
+ * regressed short values in ABBA screening; persisted hashes must stay identical.
+ * @param {DataView} bytes
+ * @param {number} seed
+ * @returns {number}
+ */
+function hashViewXxh32(bytes, seed) {
+    let offset = 0;
+    const length = bytes.byteLength;
+    let h32;
+    if (length >= 16) {
+        const limit = length - 16;
+        let v1 = (seed + 2654435761 + 2246822519) >>> 0;
+        let v2 = (seed + 2246822519) >>> 0;
+        let v3 = seed >>> 0;
+        let v4 = (seed - 2654435761) >>> 0;
+        do {
+            v1 = xxh32Round(v1, bytes.getUint32(offset, true)); offset += 4;
+            v2 = xxh32Round(v2, bytes.getUint32(offset, true)); offset += 4;
+            v3 = xxh32Round(v3, bytes.getUint32(offset, true)); offset += 4;
+            v4 = xxh32Round(v4, bytes.getUint32(offset, true)); offset += 4;
+        } while (offset <= limit);
+        h32 = (
+            rotateLeft32(v1, 1) +
+            rotateLeft32(v2, 7) +
+            rotateLeft32(v3, 12) +
+            rotateLeft32(v4, 18)
+        ) >>> 0;
+    } else {
+        h32 = (seed + 374761393) >>> 0;
+    }
+    h32 = (h32 + length) >>> 0;
+    while ((offset + 4) <= length) {
+        h32 = (h32 + Math.imul(bytes.getUint32(offset, true), 3266489917)) >>> 0;
+        h32 = Math.imul(rotateLeft32(h32, 17), 668265263) >>> 0;
+        offset += 4;
+    }
+    while (offset < length) {
+        h32 = (h32 + Math.imul(bytes.getUint8(offset), 374761393)) >>> 0;
         h32 = Math.imul(rotateLeft32(h32, 11), 2654435761) >>> 0;
         ++offset;
     }
