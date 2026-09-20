@@ -1,0 +1,59 @@
+diff --git a/ext/js/dictionary/term-content-opfs-store.js b/ext/js/dictionary/term-content-opfs-store.js
+--- a/ext/js/dictionary/term-content-opfs-store.js
++++ b/ext/js/dictionary/term-content-opfs-store.js
+@@ -244,7 +244,7 @@
+      * @returns {Promise<void>}
+      */
+     async rollbackImportSession(checkpoint) {
+-        await this._runMutationExclusive(async () => {
++        const rollback = async () => {
+             if (
+                 typeof checkpoint !== 'object' ||
+                 checkpoint === null ||
+@@ -371,6 +371,15 @@
+             this._queuedWriteBytes = 0;
+             this._inFlightWriteBytes = 0;
+             this._invalidateReadState();
++        };
++        await this._runMutationExclusive(async () => {
++            try {
++                await rollback();
++            } catch (error) {
++                // Failed restoration cannot reopen admission over unverified bytes.
++                this._queuedWriteError ??= error instanceof Error ? error : new Error(String(error));
++                throw this._queuedWriteError;
++            }
+         });
+     }
+ 
+diff --git a/test/fixtures/opfs-continuation/check.mjs b/test/fixtures/opfs-continuation/check.mjs
+--- a/test/fixtures/opfs-continuation/check.mjs
++++ b/test/fixtures/opfs-continuation/check.mjs
+@@ -283,6 +283,27 @@
+     assert.deepEqual(await store.readSlice(0, 5), Uint8Array.of(1, 2, 3, 4, 5))
+ })
+ 
++test('failed rollback cannot re-enable admission over unverified content', async (env, store) => {
++    await seed(store)
++    const checkpoint = await store.createImportCheckpoint()
++    await store.beginImportSession()
++    await store.appendBatch([Uint8Array.of(5, 6)])
++    await store.endImportSession()
++    await persist(env, fileName(0), [1])
++    let rollbackError
++    await assert.rejects(store.rollbackImportSession(checkpoint), (error) => { rollbackError = error; return /roll back/.test(error.message) })
++    const before = await snapshot(env)
++    await assert.rejects(store.appendBatch([Uint8Array.of(90)]), (error) => error === rollbackError)
++    await assert.rejects(store.beginImportSession(), (error) => error === rollbackError)
++    await assert.rejects(store.endImportSession(), (error) => error === rollbackError)
++    assert.deepEqual(await snapshot(env), before)
++    await store.rollbackImportSession({segments: []})
++    await store.beginImportSession()
++    await store.appendBatch([Uint8Array.of(42)])
++    await store.endImportSession()
++    assert.deepEqual(await store.readSlice(0, 1), Uint8Array.of(42))
++})
++
+ for (const {name, body} of tests) {
+     console.error('START', name)
+     const env = await createNodeOpfs()
