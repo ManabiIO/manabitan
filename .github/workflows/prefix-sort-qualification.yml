@@ -81,5 +81,24 @@ jobs:
         if: always()
         with:
           name: prefix-sort-qualification
-          path: builds/prefix-sort-qualification/
+          path: |
+            builds/prefix-sort-qualification/
+            package.json
+            ext/js/dictionary/term-record-preinterned-plan.js
+            ext/js/dictionary/term-key-hash.js
+            ext/js/dictionary/term-record-opfs-store.js
+            ext/js/dictionary/term-lookup-index-preparation.js
+            ext/js/dictionary/term-lookup-index.js
+            ext/js/dictionary/raw-term-content.js
+            ext/js/core/to-error.js
+            ext/js/core/json.js
+            ext/js/core/extension-error.js
+            ext/js/core/event-dispatcher.js
+            ext/js/core/diagnostics-reporter.js
+            ext/js/core/log.js
+            ext/js/core/safe-performance.js
+            test/fixtures/opfs-continuation/node-opfs-adapter.mjs
+            test/fixtures/opfs-continuation/lookup-long-key.mjs
+            test/term-lookup-long-key.test.js
+            test/term-lookup-sort.test.js
           retention-days: 7
