@@ -1,0 +1,95 @@
+name: Short-key compaction full-import ABBA screen
+on:
+  push:
+    branches: [review/opfs-cursor-continuation-20260920]
+    paths: [.github/workflows/opfs-compaction-abba.yml]
+permissions:
+  contents: read
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Prepare fixed correctness composition and one isolated candidate
+        run: |
+          mkdir -p /tmp/compaction-abba
+          cp review/opfs-rollback-admission-followup.patch /tmp/compaction-abba/
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib
+          raw = gzip.decompress(base64.b64decode(Path('review/opfs-cursor-continuation.patch.gz.b64').read_text()))
+          assert hashlib.sha256(raw).hexdigest() == 'd6ff9f73ca2e67d30c4e13dc615957999213ad633a1731be34486cbbf8fbcbd5'
+          Path('/tmp/compaction-abba/correctness.patch').write_bytes(raw)
+          PY
+          git switch --detach 2438146bb22837963e7af7018ab702a70f5615b6
+          git apply --include='ext/*' /tmp/compaction-abba/correctness.patch
+          git apply --include='ext/*' /tmp/compaction-abba/opfs-rollback-admission-followup.patch
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ext
+          git commit -m 'benchmark baseline: identical OPFS correctness repairs in both arms'
+          git rev-parse HEAD > /tmp/compaction-abba/A.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ext/js/dictionary/term-record-preinterned-plan.js')
+          s = p.read_text()
+          old = '        stringsBuffer.set(plan.stringsBuffer.subarray(oldOffset, oldOffset + length), cursor);'
+          new = '''        if (length <= 32) {
+              for (let i = 0; i < length; ++i) {
+                  stringsBuffer[cursor + i] = plan.stringsBuffer[oldOffset + i];
+              }
+          } else {
+              stringsBuffer.set(plan.stringsBuffer.subarray(oldOffset, oldOffset + length), cursor);
+          }'''
+          assert s.count(old) == 1
+          p.write_text(s.replace(old, new))
+          PY
+          git add ext/js/dictionary/term-record-preinterned-plan.js
+          git commit -m 'benchmark candidate: avoid short-key compaction subarray views'
+          git rev-parse HEAD > /tmp/compaction-abba/B.txt
+          git diff "$(cat /tmp/compaction-abba/A.txt)" HEAD > /tmp/compaction-abba/candidate.patch
+          git diff 2438146bb22837963e7af7018ab702a70f5615b6 "$(cat /tmp/compaction-abba/A.txt)" > /tmp/compaction-abba/baseline.patch
+      - run: npm ci
+      - run: npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Fresh-profile A/A control and two ABBA blocks
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          python3 - <<'PY'
+          import subprocess, os, json, hashlib
+          from pathlib import Path
+          evidence = Path('/tmp/compaction-abba')
+          plan = [('AA', 0, 'A'), ('AA', 1, 'A')]
+          for block in range(2):
+              plan.extend([(f'ABBA-{block}', i, arm) for i, arm in enumerate('ABBA')])
+          records = []
+          for phase, ordinal, arm in plan:
+              commit = (evidence / f'{arm}.txt').read_text().strip()
+              subprocess.run(['git', 'switch', '--detach', commit], check=True)
+              output = evidence / f'{phase}-{ordinal}-{arm}'
+              source = Path('ext/js/dictionary/term-record-preinterned-plan.js')
+              source_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+              with (evidence / f'{phase}-{ordinal}-{arm}.log').open('w') as log:
+                  subprocess.run(['node', 'dev/perf/import-benchmark.js', os.environ['DICTIONARY'], '--runs', '1', '--output', str(output)], stdout=log, stderr=subprocess.STDOUT, check=True)
+              summary = json.loads((output / 'summary.json').read_text())
+              assert summary['authoritativeTiming'] and len(summary['runs']) == 1
+              records.append({'phase': phase, 'ordinal': ordinal, 'arm': arm, 'commit': commit, 'sourceSha256': source_hash, 'totalImportMs': summary['runs'][0]['totalImportMs'], 'workerImportMs': summary['runs'][0]['workerImportMs'], 'summary': str(output / 'summary.json')})
+              (evidence / 'samples.json').write_text(json.dumps({'dictionary': os.environ['DICTIONARY'], 'records': records}, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compaction-abba-${{ matrix.dictionary }}
+          path: /tmp/compaction-abba/
+          retention-days: 7
