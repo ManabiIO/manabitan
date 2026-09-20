@@ -72,7 +72,9 @@ afterEach(() => {
 /** @returns {{file: File, release: () => void}} */
 function delayedFile() {
     let release = () => {};
-    const pending = new Promise((resolve) => { release = () => resolve(new ArrayBuffer(1)); });
+    const pending = new Promise((resolve) => {
+        release = () => resolve(new ArrayBuffer(1));
+    });
     const file = new File(['x'], 'fixture.mdx');
     Object.defineProperty(file, 'arrayBuffer', {value: () => pending});
     return {file, release};
@@ -84,7 +86,11 @@ function delayedFile() {
  */
 function observe(promise) {
     const result = {state: 'pending', done: Promise.resolve()};
-    result.done = promise.then(() => { result.state = 'resolved'; }, (error) => { result.state = String(error.message); });
+    result.done = promise.then(() => {
+        result.state = 'resolved';
+    }, (error) => {
+        result.state = String(error.message);
+    });
     return result;
 }
 
@@ -116,7 +122,10 @@ test('disconnect during MDD upload does not read later assets', async () => {
     const {file, release} = delayedFile();
     let laterReads = 0;
     const later = new File(['z'], 'later.mdd');
-    Object.defineProperty(later, 'arrayBuffer', {value: async () => { laterReads += 1; return new ArrayBuffer(1); }});
+    Object.defineProperty(later, 'arrayBuffer', {value: async () => {
+        laterReads += 1;
+        return new ArrayBuffer(1);
+    }});
     const result = observe(mdx.convertDictionary({mdxFile: new File(['x'], 'fixture.mdx'), mddFiles: [file, later]}));
     try {
         await tick();
