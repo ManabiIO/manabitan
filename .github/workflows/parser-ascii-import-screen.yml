@@ -1,0 +1,77 @@
+name: Parser ASCII complete import screen
+
+on:
+  push:
+    branches: ['review/parser-handoff-qualification-20260920']
+    paths: ['.github/workflows/parser-ascii-import-screen.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Prepare both arms with identical correctness repairs
+        run: |
+          git apply --check dev/perf/parser-field-parity.patch
+          git apply dev/perf/parser-field-parity.patch
+          cp ext/js/dictionary/term-bank-wasm-parser.js /tmp/parser-baseline.js
+          git apply --check dev/perf/parser-ascii-experiment.patch
+          git apply dev/perf/parser-ascii-experiment.patch
+          cp ext/js/dictionary/term-bank-wasm-parser.js /tmp/parser-candidate.js
+          cp /tmp/parser-baseline.js ext/js/dictionary/term-bank-wasm-parser.js
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run one A/A pair followed by two ABBA blocks
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, shutil, subprocess
+          dictionary = os.environ['DICTIONARY']
+          output = pathlib.Path('builds/parser-ascii-screen') / dictionary
+          output.mkdir(parents=True, exist_ok=True)
+          samples = []
+          order = [('control', 'A'), ('control', 'A'), ('abba-1', 'A'), ('abba-1', 'B'), ('abba-1', 'B'), ('abba-1', 'A'), ('abba-2', 'A'), ('abba-2', 'B'), ('abba-2', 'B'), ('abba-2', 'A')]
+          for position, (group, arm) in enumerate(order):
+              source = pathlib.Path('/tmp/parser-baseline.js' if arm == 'A' else '/tmp/parser-candidate.js')
+              shutil.copyfile(source, 'ext/js/dictionary/term-bank-wasm-parser.js')
+              destination = output / f'{position:02}-{group}-{arm}'
+              entry = {'position': position, 'group': group, 'arm': arm, 'sourceSha256': hashlib.sha256(source.read_bytes()).hexdigest(), 'directory': str(destination)}
+              result = subprocess.run(['node', 'dev/perf/import-benchmark.js', dictionary, '--runs', '1', '--output', str(destination)])
+              entry['exitCode'] = result.returncode
+              samples.append(entry)
+              (output / 'samples.json').write_text(json.dumps(samples, indent=2) + '\n')
+              if result.returncode != 0:
+                  raise SystemExit(result.returncode)
+              summary = json.loads((destination / 'summary.json').read_text())
+              report = json.loads((destination / 'run-1.json').read_text())
+              run = summary['runs'][0]
+              validation = report['benchmark']['validation']
+              if report['status'] != 'success' or report['skippedVerification'] or run['importDebug']['errorCount'] != 0 or run['importDebug']['usesFallbackStorage'] or not validation['contentReadable']:
+                  raise RuntimeError('Import qualification failed')
+              entry.update({'totalImportMs': run['totalImportMs'], 'workerImportMs': run['workerImportMs'], 'browserVersion': summary['browserVersion'], 'validation': validation})
+              (output / 'samples.json').write_text(json.dumps(samples, indent=2) + '\n')
+          shutil.copyfile('/tmp/parser-baseline.js', output / 'parser-baseline.js')
+          shutil.copyfile('/tmp/parser-candidate.js', output / 'parser-candidate.js')
+          (output / 'research-head.txt').write_text(subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parser-ascii-import-${{ matrix.dictionary }}
+          path: builds/parser-ascii-screen/
+          retention-days: 14
+          if-no-files-found: error

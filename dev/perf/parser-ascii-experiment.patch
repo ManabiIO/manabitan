@@ -1,0 +1,19 @@
+--- a/ext/js/dictionary/term-bank-wasm-parser.js
++++ b/ext/js/dictionary/term-bank-wasm-parser.js
+@@ -356,6 +356,16 @@
+  * @returns {string}
+  */
+ function decodeParserText(bytes) {
++    if (bytes.length <= 32) {
++        let value = '';
++        let index = 0;
++        for (; index < bytes.length; ++index) {
++            const byte = bytes[index];
++            if (byte >= 0x80) { break; }
++            value += String.fromCharCode(byte);
++        }
++        if (index === bytes.length) { return value; }
++    }
+     return textDecoder.decode(bytes.buffer instanceof ArrayBuffer ? bytes : Uint8Array.from(bytes));
+ }
+ 
