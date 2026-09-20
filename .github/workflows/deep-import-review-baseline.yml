@@ -1,0 +1,36 @@
+name: Deep import review baseline
+
+on:
+  push:
+    branches: [review/import-lookup-deep-20260920]
+    paths: [.github/workflows/deep-import-review-baseline.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Real dictionary import baselines
+        run: |
+          mkdir -p builds/deep-import-review
+          node dev/perf/import-benchmark.js jmdict --runs 1 --output builds/deep-import-review/jmdict
+          node dev/perf/import-benchmark.js jitendex --runs 1 --no-build --output builds/deep-import-review/jitendex
+          node dev/perf/import-benchmark.js jmnedict --runs 1 --no-build --output builds/deep-import-review/jmnedict
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deep-import-review-baseline
+          path: builds/deep-import-review/
+          retention-days: 7
