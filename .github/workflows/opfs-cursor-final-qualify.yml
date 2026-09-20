@@ -1,0 +1,130 @@
+name: Final OPFS cursor qualification
+on:
+  push:
+    branches: [review/opfs-cursor-continuation-20260920]
+    paths: [.github/workflows/opfs-cursor-final-qualify.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Construct clean tests-only revision
+        run: |
+          mkdir -p /tmp/opfs-final
+          cp review/opfs-existing-test-integration.patch review/opfs-rollback-admission-followup.patch /tmp/opfs-final/
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib
+          raw = gzip.decompress(base64.b64decode(Path('review/opfs-cursor-continuation.patch.gz.b64').read_text()))
+          assert hashlib.sha256(raw).hexdigest() == 'd6ff9f73ca2e67d30c4e13dc615957999213ad633a1731be34486cbbf8fbcbd5'
+          Path('/tmp/opfs-final/continuation.patch').write_bytes(raw)
+          patch = Path('/tmp/opfs-final/opfs-rollback-admission-followup.patch').read_bytes()
+          assert hashlib.sha256(patch).hexdigest() == 'e48859bb139791fb2aa7c6ff2e015e8748d13cc3fbf06d32e1a593f8ab3125ae'
+          PY
+          git switch -c fix/opfs-cursor-recovery-complete-20260920 2438146bb22837963e7af7018ab702a70f5615b6
+          git apply --include='test/*' /tmp/opfs-final/continuation.patch
+          git apply --include='test/*' /tmp/opfs-final/opfs-rollback-admission-followup.patch
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add test
+          git commit -m 'test: reproduce OPFS cursor recovery and terminal rollback failures'
+          git rev-parse HEAD > /tmp/opfs-final/tests-commit.txt
+      - name: Exact RED verification
+        run: |
+          set +e
+          node test/fixtures/opfs-continuation/check.mjs "$PWD" /tmp/opfs-final/red.json > /tmp/opfs-final/red.log 2>&1
+          status=$?
+          set -e
+          test "$status" = 1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('/tmp/opfs-final/red.json').read_text())
+          assert data['failed'] == 24 and data['passed'] == 5, data
+          assert all('AssertionError' in item['error'] for item in data['results'] if not item['passed']), data
+          PY
+      - name: Apply final correctness composition
+        run: |
+          git apply --exclude='test/*' /tmp/opfs-final/continuation.patch
+          git apply --exclude='test/*' /tmp/opfs-final/opfs-rollback-admission-followup.patch
+          git apply /tmp/opfs-final/opfs-existing-test-integration.patch
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('dev/perf/opfs-cursor-recovery-20260920.md')
+          s = p.read_text().replace('28-case', '29-case').replace('23 assertion failures', '24 assertion failures').replace('28 passes', '29 passes').replace('the 28 cases', 'the 29 cases')
+          s += '\nFailed rollback also retains its error inside the mutation owner; admission remains closed until a later explicit rollback succeeds.\n'
+          p.write_text(s)
+          PY
+          node test/fixtures/opfs-continuation/check.mjs "$PWD" /tmp/opfs-final/green.json > /tmp/opfs-final/green.log 2>&1
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Focused storage suites
+        id: focused
+        continue-on-error: true
+        run: npx vitest run test/term-content-cursor-recovery.test.js test/term-content-opfs-store.test.js test/term-record-opfs-store.test.js test/term-content-block-store.test.js test/term-content-cache-invalidation.test.js test/term-write-rejection-ownership.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/opfs-final/focused.json > /tmp/opfs-final/focused.log 2>&1
+      - name: Changed JavaScript lint
+        id: lint
+        continue-on-error: true
+        run: npx eslint ext/js/dictionary/term-content-opfs-store.js test/term-content-cursor-recovery.test.js test/term-content-cache-invalidation.test.js test/term-content-opfs-store.test.js > /tmp/opfs-final/lint.log 2>&1
+      - name: All TypeScript projects
+        id: types
+        continue-on-error: true
+        run: npm run test:ts > /tmp/opfs-final/types.log 2>&1
+      - name: Full unit suite
+        id: units
+        continue-on-error: true
+        run: npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=/tmp/opfs-final/full-unit.json > /tmp/opfs-final/full-unit.log 2>&1
+      - name: Options suite
+        id: options
+        continue-on-error: true
+        run: npm run test:unit:options > /tmp/opfs-final/options.log 2>&1
+      - name: All-target dry build
+        id: build
+        continue-on-error: true
+        run: npm run test:build > /tmp/opfs-final/build.log 2>&1
+      - name: Enforce all source qualification gates
+        env:
+          FOCUSED: ${{ steps.focused.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          TYPES: ${{ steps.types.outcome }}
+          UNITS: ${{ steps.units.outcome }}
+          OPTIONS: ${{ steps.options.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+        run: |
+          python3 - <<'PY'
+          import os, json
+          from pathlib import Path
+          results = {key: os.environ[key] for key in ['FOCUSED', 'LINT', 'TYPES', 'UNITS', 'OPTIONS', 'BUILD']}
+          Path('/tmp/opfs-final/gates.json').write_text(json.dumps(results, indent=2))
+          assert all(value == 'success' for value in results.values()), results
+          PY
+      - run: npx playwright install --with-deps chromium
+      - name: Native Chromium imports
+        run: |
+          node dev/perf/import-benchmark.js jmdict --runs 1 --output /tmp/opfs-final/import-jmdict
+          node dev/perf/import-benchmark.js jitendex --runs 1 --no-build --output /tmp/opfs-final/import-jitendex
+          node dev/perf/import-benchmark.js jmnedict --runs 1 --no-build --output /tmp/opfs-final/import-jmnedict
+      - name: Publish clean tested source, not research machinery
+        run: |
+          git add ext/js/dictionary/term-content-opfs-store.js dev/perf/opfs-cursor-recovery-20260920.md test/term-content-cache-invalidation.test.js test/term-content-opfs-store.test.js
+          git commit -m 'fix: preserve append cursors and keep failed rollback admission closed'
+          git rev-parse HEAD > /tmp/opfs-final/fix-commit.txt
+          sha256sum ext/js/dictionary/term-content-opfs-store.js > /tmp/opfs-final/source-sha256.txt
+          git push origin HEAD:refs/heads/fix/opfs-cursor-recovery-complete-20260920
+      - name: Preserve exact diff
+        if: always()
+        run: git diff 2438146bb22837963e7af7018ab702a70f5615b6 > /tmp/opfs-final/exact-working.patch
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: opfs-cursor-final-qualification
+          path: /tmp/opfs-final/
+          retention-days: 7
