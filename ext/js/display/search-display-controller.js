@@ -347,6 +347,12 @@ export class SearchDisplayController {
      * @param {import('display').EventArgument<'contentUpdateStart'>} details
      */
     _onContentUpdateStart({type, query, preserveSearchInput = false}) {
+        // A fresh Search page can publish its initial clear state after the
+        // textarea is already interactive. Preserve text typed before the first
+        // submitted search; later clear/history events retain normal syncing.
+        if (type === 'clear' && this._searchRequestSequence === 0 && this._queryInput.value.length > 0) {
+            preserveSearchInput = true;
+        }
         this._contentUpdateSequence = this._searchRequestSequence;
         this._contentUpdateQuery = typeof query === 'string' ? query : '';
         updateSearchDebugState({
