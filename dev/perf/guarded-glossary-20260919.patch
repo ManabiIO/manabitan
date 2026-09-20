@@ -1,0 +1,326 @@
+diff --git a/ext/js/dictionary/term-bank-experiments.js b/ext/js/dictionary/term-bank-experiments.js
+index 56c1a94..adc645f 100644
+--- a/ext/js/dictionary/term-bank-experiments.js
++++ b/ext/js/dictionary/term-bank-experiments.js
+@@ -19,7 +19,7 @@
+ 
+ /**
+  * Per-import implementation switches. Qualified native lookup construction
+- * defaults on; the other experiments remain default-off. Snapshot before
++ * and guarded nested-glossary reuse default on; other experiments default off. Snapshot before
+  * asynchronous work and copy effective values into each worker request.
+  * Explicit false opts out for diagnostics; no toggle survives an import.
+  * @param {import('dictionary-importer').ImportExperiments} [options]
+@@ -37,7 +37,7 @@ export function snapshotTermBankExperiments(options = {}) {
+         experimentalSinglePassLookupCompaction: options.experimentalSinglePassLookupCompaction === true,
+         experimentalTermBankSpans: options.experimentalTermBankSpans === true,
+         experimentalNativeEscapedKeys: options.experimentalNativeEscapedKeys === true,
+-        experimentalValidatedGlossaryReuse: options.experimentalValidatedGlossaryReuse === true,
++        experimentalValidatedGlossaryReuse: typeof options.experimentalValidatedGlossaryReuse === 'undefined' || options.experimentalValidatedGlossaryReuse === true,
+         experimentalFusedSingleBank: options.experimentalFusedSingleBank === true,
+         experimentalGlobalExactContentReuse: options.experimentalGlobalExactContentReuse === true,
+         experimentalFastGlossaryNormalization: options.experimentalFastGlossaryNormalization === true,
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 0ee0b8d..1a02797 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -784,15 +784,57 @@ static int next_term_row(TermBankCursor* cursor, uint32_t row_end) {
+ 
+ static int content_bytes_equal_between(const uint8_t*, uint32_t, const uint8_t*, uint32_t, uint32_t);
+ 
++typedef struct {
++    uint32_t witness;
++    uint32_t mismatch_offset;
++} GlossaryReuseState;
++
++/* A previously mismatching position is only a rejection hint. It may come
++ * from any earlier pair in this native call; range-check it for THIS pair,
++ * then still compare every byte before granting grammar/hint reuse. Keeping
++ * one position avoids repeatedly walking long common prefixes on unique rows.
++ * This state lives on the stack and never survives the current fused parse. */
++static int glossary_bytes_equal(
++    const uint8_t* src, uint32_t start, uint32_t prior, uint32_t length,
++    GlossaryReuseState* reuse
++) {
++    const uint32_t mismatch = reuse->mismatch_offset;
++    if (mismatch < length) {
++        const uint32_t probe = length - mismatch < 8u ? length - mismatch : 8u;
++        if (!content_bytes_equal_between(src, start + mismatch, src, prior + mismatch, probe)) { return 0; }
++    }
++    uint32_t i = 0u;
++    while (length - i >= 8u) {
++        uint64_t a;
++        uint64_t b;
++        __builtin_memcpy(&a, src + start + i, sizeof(a));
++        __builtin_memcpy(&b, src + prior + i, sizeof(b));
++        if (a != b) { reuse->mismatch_offset = i; return 0; }
++        i += 8u;
++    }
++    while (i < length) {
++        if (src[start + i] != src[prior + i]) { reuse->mismatch_offset = i; return 0; }
++        ++i;
++    }
++    return 1;
++}
++
+ /* Samples only reject candidates. Only full equality with a successful earlier
+  * row of THIS parse grants grammar/hint reuse. Nothing survives heap reset.
+  * A witness also lets content dedup avoid comparing this same glossary twice. */
+ static int reuse_validated_glossary(
+     const uint8_t* src, uint32_t end, uint32_t start,
+     const TermRowMeta* rows, uint32_t row_count,
+-    TermRowMeta* meta, uint32_t* value_end, uint32_t* witness
++    TermRowMeta* meta, uint32_t* value_end, GlossaryReuseState* reuse
+ ) {
+     if (start >= end || (src[start] != '[' && src[start] != '{')) { return 0; }
++    // Plain/scalar arrays already have cheap validation. Reserve speculative
++    // byte comparisons for nested container glossaries, not short definitions.
++    // This is admission only: unsupported shapes use the ordinary validator.
++    if (src[start] == '[') {
++        const uint32_t first_value = skip_ws(src, end, start + 1u);
++        if (first_value >= end || (src[first_value] != '{' && src[first_value] != '[')) { return 0; }
++    }
+     const uint32_t first = row_count > RECENT_CONTENT_DEDUP_WINDOW ? row_count - RECENT_CONTENT_DEDUP_WINDOW : 0u;
+     for (uint32_t k = row_count; k > first;) {
+         const TermRowMeta* prior = &rows[--k];
+@@ -802,12 +844,12 @@ static int reuse_validated_glossary(
+         const uint32_t sample = n < 8u ? n : 8u;
+         if (!content_bytes_equal_between(src, start + n - sample, src, p + n - sample, sample) ||
+             !content_bytes_equal_between(src, start + (n - sample) / 2u, src, p + (n - sample) / 2u, sample) ||
+-            !content_bytes_equal_between(src, start, src, p, n)) { continue; }
++            !glossary_bytes_equal(src, start, p, n, reuse)) { continue; }
+         meta->glossary_may_contain_media = prior->glossary_may_contain_media;
+         meta->glossary_requires_normalization = prior->glossary_requires_normalization;
+         meta->glossary_requires_text_normalization = prior->glossary_requires_text_normalization;
+         *value_end = start + n;
+-        *witness = k;
++        reuse->witness = k;
+         return 1;
+     }
+     return 0;
+@@ -822,7 +864,7 @@ static int parse_row_single_pass(
+     uint32_t* out_next,
+     const TermRowMeta* prior_rows,
+     uint32_t prior_count,
+-    uint32_t* glossary_witness
++    GlossaryReuseState* glossary_reuse
+ ) {
+     if (row_start >= len || src[row_start] != '[') { return 0; }
+     clear_term_row_meta(out_meta);
+@@ -842,8 +884,8 @@ static int parse_row_single_pass(
+         } else if (field_index == 5u) {
+             uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
+             if (
+-                !(glossary_witness != 0 && reuse_validated_glossary(
+-                    src, len, i, prior_rows, prior_count, out_meta, &value_end, glossary_witness
++                !(glossary_reuse != 0 && reuse_validated_glossary(
++                    src, len, i, prior_rows, prior_count, out_meta, &value_end, glossary_reuse
+                 )) &&
+                 !parse_value_span_with_glossary_hints(
+                     src,
+@@ -2565,6 +2607,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
+     uint32_t strings_cursor = 0u;
+     uint32_t row_count = 0u;
+     uint32_t recent_content_hits = 0u;
++    GlossaryReuseState glossary_reuse = {0xffffffffu, 0xffffffffu};
+ #if RECENT_CONTENT_DEDUP_WINDOW > 0
+     uint32_t recent_content_signatures[RECENT_CONTENT_DEDUP_WINDOW];
+ #endif
+@@ -2583,11 +2626,12 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
+             return -4;
+         }
+         uint32_t row_end = 0u;
+-        uint32_t glossary_witness = 0xffffffffu;
++        glossary_reuse.witness = 0xffffffffu;
+         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
+-                rows, row_count, (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u ? &glossary_witness : 0)) {
++                rows, row_count, (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u ? &glossary_reuse : 0)) {
+             return -1;
+         }
++        const uint32_t glossary_witness = glossary_reuse.witness;
+         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
+ 
+         const TermRowMeta* parsed_row = &rows[row_count];
+diff --git a/test/lookup-construction-experiments.test.js b/test/lookup-construction-experiments.test.js
+index 65d41cf..a11d9f1 100644
+--- a/test/lookup-construction-experiments.test.js
++++ b/test/lookup-construction-experiments.test.js
+@@ -102,7 +102,7 @@ function digestIndexes(indexes) {
+  */
+ async function parse(banks, flags = {}, preload = false) {
+     // Keep the portable oracle explicit after production native promotion.
+-    flags = {experimentalNativeSegmentedLookup: false, experimentalLookupScratchReuse: false, ...flags}
++    flags = {experimentalNativeSegmentedLookup: false, experimentalLookupScratchReuse: false, experimentalValidatedGlossaryReuse: false, ...flags}
+     const preloadedSource = preload ?
+         await inflateCompressedTermBankSourcesWasm(banks.map((bank, i) => {
+             const compressionMethod = /** @type {0|8} */ (i % 2 === 0 ? 8 : 0)
+diff --git a/test/term-bank-experiments.test.js b/test/term-bank-experiments.test.js
+index aece620..b684f42 100644
+--- a/test/term-bank-experiments.test.js
++++ b/test/term-bank-experiments.test.js
+@@ -114,6 +114,7 @@ function snapshotChunk(chunk) {
+  * @returns {Promise<{rows: SnapshotRow[], profile: NonNullable<ReturnType<typeof consumeLastTermBankWasmParseProfile>>}>}
+  */
+ async function parse(banks, experiments = {}, preload = false, singleChunk = true) {
++    experiments = {experimentalValidatedGlossaryReuse: false, ...experiments}
+     const preloadedSource = preload ?
+ await inflateCompressedTermBankSourcesWasm(banks.map((bank, i) => compressed(bank, i % 2 === 0 ? 8 : 0)), experiments) :
+ undefined
+@@ -163,16 +164,16 @@ beforeAll(() => {
+ })
+ afterAll(() => { vi.unstubAllGlobals() })
+ 
+-describe('default-off term-bank experiments', () => {
++describe('term-bank experiment snapshots', () => {
+     test('snapshots exact booleans and freezes them without mutating the caller', () => {
+         const input = {experimentalTermBankSpans: true}
+         const snap = snapshotTermBankExperiments(input)
+         input.experimentalTermBankSpans = false
+-        expect(snap).toEqual(flags(1))
++        expect(snap).toEqual(flags(5))
+         expect(Object.isFrozen(snap)).toBe(true)
+-        expect(snapshotTermBankExperiments()).toEqual(flags(0))
++        expect(snapshotTermBankExperiments()).toEqual(flags(4))
+         expect(getTermBankExperimentMask(flags(63))).toBe(31)
+-        expect(snapshotTermBankExperiments(/** @type {Experiments} */ (/** @type {unknown} */ ({experimentalTermBankSpans: 'true'})))).toEqual(flags(0))
++        expect(snapshotTermBankExperiments(/** @type {Experiments} */ (/** @type {unknown} */ ({experimentalTermBankSpans: 'true'})))).toEqual(flags(4))
+     })
+ 
+     const glossary = [{type: 'structured-content', content: [{tag: 'span', content: '日本語'}, {tag: 'ruby', content: '読み'}]}]
+@@ -375,7 +376,8 @@ describe('span boundaries and validated glossary witnesses', () => {
+     test('does not reuse after a same-length mutation outside sampled positions', async () => {
+         const text = 'x'.repeat(300)
+         const altered = text.slice(0, 40) + 'y' + text.slice(41)
+-        const sources = [JSON.stringify([row('a', [text]), row('b', [altered])]), JSON.stringify([row('c', [text])])]
++        const wrap = (/** @type {string} */ value) => [{type: 'structured-content', content: {tag: 'span', content: value}}]
++        const sources = [JSON.stringify([row('a', wrap(text)), row('b', wrap(altered))]), JSON.stringify([row('c', wrap(text))])]
+         const base = await parse(sources)
+         const result = await parse(sources, flags(15), true)
+         expect(result.rows).toEqual(base.rows)
+@@ -384,8 +386,9 @@ describe('span boundaries and validated glossary witnesses', () => {
+     })
+ 
+     test('glossary equality does not imply rules/tag equality', async () => {
+-        const a = row('a')
+-        const b = row('b')
++        const glossary = [{type: 'structured-content', content: {tag: 'span', content: 'same'}}]
++        const a = row('a', glossary)
++        const b = row('b', glossary)
+         b[2] = 'other-tag'
+         b[3] = 'v5'
+         const sources = [JSON.stringify([a]), JSON.stringify([b])]
+@@ -612,3 +615,102 @@ describe('compression experiment admission', () => {
+         expect(snapshotTermBankExperiments({[name]: true}).toBe(true))
+     })
+ })
++
++describe('guarded exact nested-glossary reuse', () => {
++    /**
++     * @param {string} text
++     * @returns {unknown[]}
++     */
++    const nested = (text) => [{type: 'structured-content', content: {tag: 'span', content: text}}]
++    test('defaults on but only literal true or omission enables it', () => {
++        expect(snapshotTermBankExperiments().experimentalValidatedGlossaryReuse).toBe(true)
++        for (const value of [false, 0, 1, null, 'true', {}]) {
++            const options = /** @type {Experiments} */ (/** @type {unknown} */ ({experimentalValidatedGlossaryReuse: value}))
++            expect(snapshotTermBankExperiments(options).experimentalValidatedGlossaryReuse).toBe(false)
++        }
++        expect(snapshotTermBankExperiments({experimentalValidatedGlossaryReuse: true}).experimentalValidatedGlossaryReuse).toBe(true)
++    })
++    test.each([[], ['plain'], [123], [null], ['plain', {tag: 'span', content: 'later'}]].map((glossary) => [glossary]))('leaves cheap/leading-scalar arrays to regular validation: %j', async (glossary) => {
++        const sources = [JSON.stringify([row('a', glossary)]), JSON.stringify([row('b', glossary)])]
++        const oracle = await parse(sources)
++        const result = await parse(sources, {experimentalValidatedGlossaryReuse: true}, true)
++        expect(result.rows).toEqual(oracle.rows)
++        expect(result.profile.validatedGlossaryReuseCount).toBe(0)
++        expect(result.profile.fusedParseFallbacks).toBe(0)
++    })
++    test.each([false, true])('a learned rejection position never authorizes reuse: bank spans=%s', async (spans) => {
++        const text = 'x'.repeat(1024)
++        const mutate = (/** @type {number} */ offset, /** @type {string} */ char) => text.slice(0, offset) + char + text.slice(offset + 1)
++        const values = [text, mutate(900, 'a'), mutate(40, 'b'), text, mutate(700, 'c'), mutate(700, 'c')]
++        const sources = [JSON.stringify(values.slice(0, 3).map((v, i) => row(`first-${i}`, nested(v)))), JSON.stringify(values.slice(3).map((v, i) => row(`second-${i}`, nested(v))))]
++        const oracle = await parse(sources)
++        const result = await parse(sources, {experimentalValidatedGlossaryReuse: true, experimentalTermBankSpans: spans}, true)
++        expect(result.rows).toEqual(oracle.rows)
++        expect(result.profile.validatedGlossaryReuseCount).toBe(2)
++        expect(result.rows[0].content).not.toEqual(result.rows[1].content)
++        expect(result.rows[0].content).not.toEqual(result.rows[2].content)
++        expect(result.rows[4].content).toEqual(result.rows[5].content)
++    })
++    test('bounds a remembered mismatch for a subsequent shorter glossary', async () => {
++        const prefix = 'x'.repeat(16000)
++        const sources = [JSON.stringify([row('a', nested(prefix + 'a-tail')), row('b', nested(prefix + 'b-tail'))]), JSON.stringify([row('c', nested('short')), row('d', nested('short'))])]
++        const result = await parse(sources, {experimentalValidatedGlossaryReuse: true}, true)
++        expect(result.rows).toEqual((await parse(sources)).rows)
++        expect(result.profile.validatedGlossaryReuseCount).toBe(1)
++    })
++    test.each(['["plain",{"bad":}]', '[{"tag":"span","content":"unterminated}]', '[{"tag":"span"}]garbage'])('keeps complete grammar validation after admission: %s', async (bad) => {
++        const sources = [JSON.stringify([row('first', nested('x'.repeat(1024)))]), `[["last","","","",0,${bad},1,""]]`]
++        await expect(parse(sources, {experimentalValidatedGlossaryReuse: true}, true)).rejects.toThrow()
++        const good = [JSON.stringify([row('a', nested('ok'))]), JSON.stringify([row('b', nested('ok'))])]
++        const result = await parse(good, {experimentalValidatedGlossaryReuse: true}, true)
++        expect(result.rows).toEqual((await parse(good)).rows)
++        expect(result.profile.validatedGlossaryReuseCount).toBe(1)
++    })
++    test('allows whitespace before nested values without bypassing hint propagation', async () => {
++        const glossary = '[ \n {"type":"image","path":"same.png"}]'
++        const source = (/** @type {string} */ key) => `[["${key}","","","",0,${glossary},1,""]]`
++        const sources = [source('a'), source('b')]
++        const result = await parse(sources, {experimentalValidatedGlossaryReuse: true}, true)
++        expect(result.rows).toEqual((await parse(sources)).rows)
++        expect(result.profile.validatedGlossaryReuseCount).toBe(1)
++        expect(result.rows[1].media).toHaveLength(1)
++    })
++    test('real worker alternates enabled, disabled and default requests without retaining a witness', async () => {
++        const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
++        const bridge = `import {parentPort} from 'node:worker_threads'
++            globalThis.self = {addEventListener: (_, fn) => parentPort.on('message', data => fn({data})),
++                postMessage: (data, transfer) => parentPort.postMessage(data, transfer)}
++            await import(${JSON.stringify(workerUrl)})
++            parentPort.postMessage({type: 'loaded'})`
++        const worker = new Worker(new URL(`data:text/javascript,${encodeURIComponent(bridge)}`))
++        try {
++            expect((await requestWorker(worker, null)).type).toBe('loaded')
++            const module = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))
++            expect((await requestWorker(worker, {type: 'initialize', module})).type).toBe('ready')
++            const sources = [JSON.stringify([row('a', nested('x'.repeat(2048)))]), JSON.stringify([row('b', nested('x'.repeat(2048)))])]
++            const oracle = await parse(sources)
++            let priorKeys
++            let priorKeysCopy
++            for (const enabled of [true, false, undefined, false, undefined]) {
++                const reply = await requestWorker(worker, {type: 'parse',
++                    id: String(enabled),
++                    version: 3,
++                    sourceBuffers: sources.map((s) => encoder.encode(s).buffer),
++                    options: {experimentalValidatedGlossaryReuse: enabled,
++                        computeContentHashes: true,
++                        emitContentSlab: true,
++                        emitTokenBinaryContent: true,
++                        mediaHintFastScan: true,
++                        prepareLookupIndexes: true}})
++                expect(reply.type, JSON.stringify(reply.error)).toBe('result')
++                if (!reply.chunk) { throw new Error('Missing worker result') }
++                expect(snapshotChunk(reply.chunk)).toEqual(oracle.rows)
++                expect(reply.profile?.experiments?.experimentalValidatedGlossaryReuse).toBe(enabled !== false)
++                expect(reply.profile?.validatedGlossaryReuseCount).toBe(enabled === false ? 0 : 1)
++                if (priorKeys) { expect(priorKeys).toEqual(priorKeysCopy) }
++                priorKeys = reply.chunk.termRecordPreinternedPlan.stringsBuffer
++                priorKeysCopy = Uint8Array.from(priorKeys)
++            }
++        } finally { await worker.terminate() }
++    })
++})
+diff --git a/types/ext/dictionary-importer.d.ts b/types/ext/dictionary-importer.d.ts
+index d177b29..136c11a 100644
+--- a/types/ext/dictionary-importer.d.ts
++++ b/types/ext/dictionary-importer.d.ts
+@@ -64,6 +64,7 @@ export type ImportExperiments = {
+     experimentalSinglePassLookupCompaction?: boolean;
+     experimentalTermBankSpans?: boolean;
+     experimentalNativeEscapedKeys?: boolean;
++    /** Reuse exact validated nested glossaries by default; false retains regular validation. */
+     experimentalValidatedGlossaryReuse?: boolean;
+     experimentalFusedSingleBank?: boolean;
+     experimentalGlobalExactContentReuse?: boolean;
