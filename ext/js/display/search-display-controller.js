@@ -341,7 +341,7 @@ export class SearchDisplayController {
     /**
      * @param {import('display').EventArgument<'contentUpdateStart'>} details
      */
-    _onContentUpdateStart({type, query}) {
+    _onContentUpdateStart({type, query, preserveSearchInput = false}) {
         this._contentUpdateSequence = this._searchRequestSequence;
         this._contentUpdateQuery = typeof query === 'string' ? query : '';
         updateSearchDebugState({
@@ -362,13 +362,14 @@ export class SearchDisplayController {
                     animate = (typeof content === 'object' && content !== null && content.animate === true);
                     showBackButton = (typeof state === 'object' && state !== null && state.cause === 'queryParser');
                     valid = (typeof query === 'string' && query.length > 0);
-                    this._display.blurElement(this._queryInput);
+                    if (!preserveSearchInput) { this._display.blurElement(this._queryInput); }
                 }
                 break;
             case 'clear':
                 valid = false;
                 animate = true;
                 query = '';
+                preserveSearchInput = false;
                 break;
         }
 
@@ -376,7 +377,7 @@ export class SearchDisplayController {
 
         this._searchBackButton.hidden = !showBackButton;
 
-        if (this._queryInput.value !== query) {
+        if (!preserveSearchInput && this._queryInput.value !== query) {
             this._queryInput.value = query.trimEnd();
             this._updateSearchHeight(true);
         }

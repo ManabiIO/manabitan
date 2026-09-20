@@ -622,7 +622,7 @@ export class Display extends EventDispatcher {
      */
     searchLast(updateOptionsContext) {
         const type = this._contentType;
-        if (type === 'clear') { return; }
+        if (type === 'clear' || type === 'unloaded') { return; }
         const query = this._query;
         const {state} = this._history;
         const hasState = typeof state === 'object' && state !== null;
@@ -649,6 +649,7 @@ export class Display extends EventDispatcher {
             state: newState,
             content: {
                 contentOrigin: this.getContentOrigin(),
+                preserveSearchInput: this._pageType === 'search' && !updateOptionsContext,
             },
         };
         void this.setContent(details);
@@ -1468,6 +1469,10 @@ export class Display extends EventDispatcher {
         }
 
         let {dictionaryEntries} = content;
+        // This is an instruction for this refresh, not later back/forward
+        // navigation to the same history entry. Consume it before any await.
+        const preserveSearchInput = content.preserveSearchInput === true;
+        delete content.preserveSearchInput;
 
         let contentOriginValid = false;
         const {contentOrigin} = content;
@@ -1526,7 +1531,7 @@ export class Display extends EventDispatcher {
         container.textContent = '';
 
         safePerformance.mark('display:contentUpdate:start');
-        this._triggerContentUpdateStart();
+        this._triggerContentUpdateStart(preserveSearchInput);
 
         let i = 0;
         for (const dictionaryEntry of dictionaryEntries) {
@@ -2480,9 +2485,11 @@ export class Display extends EventDispatcher {
         this.trigger('contentClear', {});
     }
 
-    /** */
-    _triggerContentUpdateStart() {
-        this.trigger('contentUpdateStart', {type: this._contentType, query: this._query});
+    /**
+     * @param {boolean} [preserveSearchInput]
+     */
+    _triggerContentUpdateStart(preserveSearchInput = false) {
+        this.trigger('contentUpdateStart', {type: this._contentType, query: this._query, preserveSearchInput});
     }
 
     /**
