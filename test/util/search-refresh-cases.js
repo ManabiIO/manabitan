@@ -32,6 +32,7 @@ function deferred() {
  * Actual searchLast, record-render preparation and content-update handler;
  * options/lookup and layout are controlled boundaries, not native storage.
  * @param {import('display').PageType} [type]
+ * @returns {{display: Display, controller: SearchDisplayController, input: {value: string, selectionStart: number, selectionEnd: number, scrollTop: number, focused: boolean}, state: {updates: number, starts: number, blurs: number, lookups: number, layoutWrites: number}, history: {state: import('display').HistoryState, content: import('display').HistoryContent}, settled: () => Promise<void>}}
  */
 function createFixture(type = 'terms') {
     const display = /** @type {Display} */ (Object.create(Display.prototype));
@@ -45,20 +46,33 @@ function createFixture(type = 'terms') {
         for (const [key, value] of Object.entries(fields)) { Reflect.set(object, key, value); }
     };
     assign(display, {
-        _pageType: 'search', _contentType: type, _query: '猫', _fullQuery: '猫',
-        _queryOffset: 0, _primaryReading: 'ねこ', _wildcardsEnabled: false, _lookup: true,
-        _optionsContext: optionsContext, _history: history,
-        _options: {dictionaries: [{enabled: true}]}, _setContentToken: {},
-        _application: {webExtension: {unloaded: false}}, _container: {textContent: ''},
-        _windowScroll: {stop() {}, to() {}}, _contentManager: {executeMediaRequests: async () => {}},
+        _pageType: 'search',
+        _contentType: type,
+        _query: '猫',
+        _fullQuery: '猫',
+        _queryOffset: 0,
+        _primaryReading: 'ねこ',
+        _wildcardsEnabled: false,
+        _lookup: true,
+        _optionsContext: optionsContext,
+        _history: history,
+        _options: {dictionaries: [{enabled: true}]},
+        _setContentToken: {},
+        _application: {webExtension: {unloaded: false}},
+        _container: {textContent: ''},
+        _windowScroll: {stop() {}, to() {}},
+        _contentManager: {executeMediaRequests: async () => {}},
         updateOptions: async () => { ++state.updates; },
         _setOptionsContextIfDifferent: async () => {},
         _findDictionaryEntries: async () => {
             ++state.lookups;
             return [];
         },
-        _updateQueryParser() {}, _setTitleText() {}, _updateNavigationAuto() {},
-        _setNoContentVisible() {}, _setNoDictionariesVisible() {},
+        _updateQueryParser() {},
+        _setTitleText() {},
+        _updateNavigationAuto() {},
+        _setNoContentVisible() {},
+        _setNoDictionariesVisible() {},
         getContentOrigin: () => ({tabId: 1, frameId: 1}),
         blurElement: () => {
             ++state.blurs;
@@ -84,9 +98,14 @@ function createFixture(type = 'terms') {
         },
     });
     assign(controller, {
-        _display: display, _queryInput: input, _searchBackButton: {hidden: true},
-        _searchRequestSequence: 0, _contentUpdateSequence: 0, _contentUpdateQuery: '',
-        _setIntroVisible() {}, _updateSearchHeight: () => { ++state.layoutWrites; },
+        _display: display,
+        _queryInput: input,
+        _searchBackButton: {hidden: true},
+        _searchRequestSequence: 0,
+        _contentUpdateSequence: 0,
+        _contentUpdateQuery: '',
+        _setIntroVisible() {},
+        _updateSearchHeight: () => { ++state.layoutWrites; },
     });
     return {display, controller, input, state, history, settled: () => pending};
 }

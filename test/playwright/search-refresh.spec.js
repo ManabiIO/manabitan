@@ -23,20 +23,21 @@ test('dictionary refresh preserves a draft typed while options are pending', asy
     await expect(page.locator('#search-textbox')).toHaveValue('猫');
     await page.evaluate(async () => {
         const moduleUrl = chrome.runtime.getURL('/js/display/display.js');
+        // eslint-disable-next-line no-unsanitized/method -- Fixed extension-owned URL, never page or dictionary input.
         const {Display} = /** @type {typeof import('../../ext/js/display/display.js')} */ (await import(moduleUrl));
         const originalUpdate = Display.prototype.updateOptions;
         const originalComplete = Display.prototype._triggerContentUpdateComplete;
         const state = {started: false, completions: 0, release: () => {}, restore: () => {}};
         /** @type {Promise<void>} */
         const gate = new Promise((resolve) => { state.release = resolve; });
-        Display.prototype.updateOptions = async function () {
+        Display.prototype.updateOptions = async function delayedOptions() {
             if (Reflect.get(this, '_pageType') === 'search') {
                 state.started = true;
                 await gate;
             }
             await originalUpdate.call(this);
         };
-        Display.prototype._triggerContentUpdateComplete = function () {
+        Display.prototype._triggerContentUpdateComplete = function observeContentComplete() {
             ++state.completions;
             originalComplete.call(this);
         };
@@ -49,7 +50,11 @@ test('dictionary refresh preserves a draft typed while options are pending', asy
             chrome.runtime.sendMessage({action: 'triggerDatabaseUpdated', params: {type: 'dictionary', cause: 'import'}}, (/** @type {unknown} */ value) => {
                 const response = /** @type {{error?: {message?: string}}|undefined} */ (value);
                 const error = chrome.runtime.lastError ?? response?.error;
-                if (error) { reject(new Error(error.message)); } else { resolve(void 0); }
+                if (error) {
+                    reject(new Error(error.message));
+                } else {
+                    resolve(void 0);
+                }
             });
         });
     });
