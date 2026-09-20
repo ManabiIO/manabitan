@@ -1,0 +1,37 @@
+name: Import recovery review
+on:
+  push:
+    branches: [review/import-recovery-qualification-20260920]
+    paths:
+      - .github/workflows/import-recovery-review.yml
+permissions:
+  contents: read
+jobs:
+  review-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Export pinned source
+        run: |
+          mkdir -p /tmp/import-recovery-review
+          git rev-parse HEAD > /tmp/import-recovery-review/commit.txt
+          git archive HEAD | gzip > /tmp/import-recovery-review/source.tar.gz
+      - name: Install review dependencies
+        run: |
+          npm ci
+          tar -czf /tmp/import-recovery-review/dependencies.tar.gz node_modules
+      - name: Preserve review environment
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-recovery-review-environment
+          path: /tmp/import-recovery-review/
+          compression-level: 0
+          retention-days: 7
