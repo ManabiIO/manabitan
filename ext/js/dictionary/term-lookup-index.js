@@ -233,7 +233,7 @@ export function encodePersistedTermLookupIndex(rows) {
      * @throws {RangeError} If the key cannot be represented by the record format.
      */
     const intern = (bytes) => {
-        if (bytes.byteLength === 0 || bytes.byteLength >= U16_NULL) {
+        if (bytes.byteLength === 0 || bytes.byteLength > U16_NULL) {
             throw new RangeError('Invalid term lookup index string length');
         }
         const hash = hashBytes(bytes);
