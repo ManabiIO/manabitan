@@ -19,7 +19,7 @@ jobs:
       - name: Construct clean tests-only revision
         run: |
           mkdir -p /tmp/opfs-final
-          cp review/opfs-existing-test-integration.patch review/opfs-rollback-admission-followup.patch /tmp/opfs-final/
+          cp review/opfs-existing-test-integration.patch review/opfs-rollback-admission-followup.patch review/opfs-qualification-lint.patch /tmp/opfs-final/
           python3 - <<'PY'
           from pathlib import Path
           import base64, gzip, hashlib
@@ -32,6 +32,7 @@ jobs:
           git switch -c fix/opfs-cursor-recovery-complete-20260920 2438146bb22837963e7af7018ab702a70f5615b6
           git apply --include='test/*' /tmp/opfs-final/continuation.patch
           git apply --include='test/*' /tmp/opfs-final/opfs-rollback-admission-followup.patch
+          git apply --include='test/*' /tmp/opfs-final/opfs-qualification-lint.patch
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add test
@@ -55,6 +56,7 @@ jobs:
         run: |
           git apply --exclude='test/*' /tmp/opfs-final/continuation.patch
           git apply --exclude='test/*' /tmp/opfs-final/opfs-rollback-admission-followup.patch
+          git apply --exclude='test/*' /tmp/opfs-final/opfs-qualification-lint.patch
           git apply /tmp/opfs-final/opfs-existing-test-integration.patch
           python3 - <<'PY'
           from pathlib import Path
