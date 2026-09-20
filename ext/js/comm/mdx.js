@@ -148,6 +148,8 @@ export class Mdx {
         this._version = 2;
         /** @type {boolean} */
         this._active = false;
+        /** @type {object|null} */
+        this._conversionId = null;
         /** @type {((error: Error) => void)|null} */
         this._activeReject = null;
         /** @type {ReturnType<typeof setTimeout>|null} */
@@ -184,6 +186,7 @@ export class Mdx {
 
     /** */
     disconnect() {
+        this._conversionId = null;
         const activeReject = this._activeReject;
         this._activeReject = null;
         if (this._activeTimeout !== null) {
@@ -218,6 +221,17 @@ export class Mdx {
             termBankSize = 10000,
         } = details;
 
+        // Own the complete operation, including asynchronous file reads.
+        this.disconnect();
+        const conversionId = {};
+        this._conversionId = conversionId;
+        this._active = true;
+        const assertCurrent = () => {
+            if (this._conversionId !== conversionId) {
+                throw new Error('MDX conversion cancelled');
+            }
+        };
+
         const uploadFiles = [mdxFile, ...mddFiles];
         const totalUploadBytes = uploadFiles.reduce((sum, file) => sum + file.size, 0);
         let uploadedBytes = 0;
@@ -226,26 +240,41 @@ export class Mdx {
          * @returns {Promise<ArrayBuffer>}
          */
         const readFileWithProgress = async (file) => {
-            const buffer = await file.arrayBuffer();
+            assertCurrent();
+            /** @type {Promise<ArrayBuffer>} */
+            const input = new Promise((resolve, reject) => {
+                this._activeReject = reject;
+                file.arrayBuffer().then(resolve, reject);
+            });
+            const buffer = await input;
+            assertCurrent();
+            this._activeReject = null;
             uploadedBytes += file.size;
             if (typeof onProgress === 'function') {
                 onProgress({stage: 'upload', completed: uploadedBytes, total: totalUploadBytes});
             }
+            assertCurrent();
             return buffer;
         };
 
-        const mdxBytes = await readFileWithProgress(mdxFile);
+        /** @type {ArrayBuffer} */
+        let mdxBytes;
         /** @type {MdxWorkerInputFile[]} */
         const mddInputs = [];
-        for (const file of mddFiles) {
-            mddInputs.push({
-                name: file.name,
-                bytes: await readFileWithProgress(file),
-            });
+        try {
+            mdxBytes = await readFileWithProgress(mdxFile);
+            for (const file of mddFiles) {
+                mddInputs.push({
+                    name: file.name,
+                    bytes: await readFileWithProgress(file),
+                });
+            }
+            assertCurrent();
+        } catch (error) {
+            // A superseded upload must not cancel its replacement.
+            if (this._conversionId === conversionId) { this.disconnect(); }
+            throw error;
         }
-
-        this.disconnect();
-        this._active = true;
 
         return await new Promise((resolve, reject) => {
             let worker;
@@ -253,6 +282,7 @@ export class Mdx {
                 worker = new Worker('/js/dictionary/mdx-worker-main.js', {type: 'module'});
             } catch (e) {
                 this._active = false;
+                this._conversionId = null;
                 reject(e instanceof Error ? e : new Error(String(e)));
                 return;
             }
@@ -270,6 +300,7 @@ export class Mdx {
                 }
                 this._activeReject = null;
                 this._active = false;
+                this._conversionId = null;
                 if (this._worker === worker) {
                     this._worker = null;
                 }
@@ -306,6 +337,7 @@ export class Mdx {
             }, CONVERSION_TIMEOUT_MS);
 
             worker.addEventListener('message', (event) => {
+                if (settled) { return; }
                 const message = parseWorkerMessage(event.data);
                 if (message === null) {
                     fail(new Error('MDX conversion worker returned malformed message'));
