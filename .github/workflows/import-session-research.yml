@@ -3,41 +3,112 @@ name: Import session research
 on:
   push:
     branches: [research/import-session-continuation-20260920]
+    paths: [.github/workflows/import-session-research.yml]
 
 permissions:
   contents: read
 
 jobs:
-  review-environment:
+  qualify-and-publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v6
         with:
-          persist-credentials: false
-      - name: Archive tracked source without repository credentials
+          fetch-depth: 0
+      - name: Decode verified patches and select clean pinned base
         run: |
-          mkdir -p /tmp/import-review-source
-          git rev-parse HEAD > /tmp/import-review-source/commit.txt
-          git archive --format=tar HEAD | gzip > /tmp/import-review-source/source.tar.gz
-          sha256sum /tmp/import-review-source/source.tar.gz > /tmp/import-review-source/SHA256SUMS
-      - uses: actions/upload-artifact@v4
-        with:
-          name: import-review-source
-          path: /tmp/import-review-source
-          retention-days: 7
+          node dev/research/decode-session-patches.mjs
+          git checkout --detach 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git apply --check /tmp/session-review/tests.patch
+          git apply /tmp/session-review/tests.patch
+          git add test/dictionary-import-publication-cleanup.test.js test/dictionary-import-ownership.test.js test/dictionary-database-import-cleanup.test.js test/dictionary-importer-media-prefetch.test.js
+          HUSKY=0 git commit -m 'test: reproduce import publication cleanup and session ownership failures'
+          git rev-parse HEAD > /tmp/session-review/tests-commit.txt
       - uses: ./.github/actions/setup
         with:
           node-version: '22'
-      - name: Archive dependencies and generated libraries only
+      - name: Require unchanged regression suite to fail behaviorally before fixes
         run: |
-          mkdir -p /tmp/import-review-runtime
-          node --version > /tmp/import-review-runtime/node.txt
-          npm --version > /tmp/import-review-runtime/npm.txt
-          tar -czf /tmp/import-review-runtime/runtime.tar.gz node_modules ext/lib
-          sha256sum /tmp/import-review-runtime/runtime.tar.gz > /tmp/import-review-runtime/SHA256SUMS
+          set +e
+          npx vitest run test/dictionary-import-publication-cleanup.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/session-review/red.json > /tmp/session-review/red.log 2>&1
+          result=$?
+          set -e
+          test "$result" -ne 0
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFileSync} from 'node:fs';
+          const r = JSON.parse(readFileSync('/tmp/session-review/red.json', 'utf8'));
+          assert.equal(r.numPassedTests, 3);
+          assert.equal(r.numFailedTests, 26);
+          assert.equal(r.numTotalTests, 29);
+          assert.ok(r.testResults.every((f) => f.assertionResults.length > 0));
+          NODE
+      - name: Apply correctness repairs and run full validation
+        run: |
+          git apply --check /tmp/session-review/fix.patch
+          git apply /tmp/session-review/fix.patch
+          npx vitest run test/dictionary-import-publication-cleanup.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/session-review/green.json > /tmp/session-review/green.log 2>&1
+          npm run test:ts > /tmp/session-review/types.log 2>&1
+          npx eslint ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-import-session.js test/dictionary-import-publication-cleanup.test.js test/dictionary-import-ownership.test.js test/dictionary-database-import-cleanup.test.js test/dictionary-importer-media-prefetch.test.js > /tmp/session-review/lint.log 2>&1
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=/tmp/session-review/full-unit.json > /tmp/session-review/full-unit.log 2>&1
+          npx vitest run --config test/data/vitest.options.config.json --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=/tmp/session-review/options.json > /tmp/session-review/options.log 2>&1
+          npm run test:build > /tmp/session-review/build.log 2>&1
+          git diff --check
+          git add ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-import-session.js
+          HUSKY=0 git commit -m 'fix: retain committed dictionaries and fence import session finalization'
+          git rev-parse HEAD > /tmp/session-review/fix-commit.txt
+          git diff 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108 HEAD > /tmp/session-review/qualified.patch
+          sha256sum ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-import-session.js test/dictionary-import-publication-cleanup.test.js > /tmp/session-review/source-sha256.txt
+      - name: Publish only the new reviewed correctness branch
+        run: git push origin HEAD:refs/heads/fix/import-publication-ownership-20260920
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: import-review-runtime
-          path: /tmp/import-review-runtime
+          name: import-publication-qualification
+          path: /tmp/session-review
+          retention-days: 7
+
+  checksum-full-import-screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare equal correctness composition and isolated candidate
+        run: |
+          node dev/research/decode-session-patches.mjs
+          cp dev/research/checksum-import-abba.mjs /tmp/session-review/benchmark.mjs
+          git checkout --detach 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108
+          git apply --check /tmp/session-review/fix.patch
+          git apply /tmp/session-review/fix.patch
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Install native Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run complete-import ABBA and A/A controls
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: node /tmp/session-review/benchmark.mjs "$DICTIONARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checksum-full-import-${{ matrix.dictionary }}
+          path: |
+            /tmp/session-review/benchmark-${{ matrix.dictionary }}/**/*.json
+            /tmp/session-review/benchmark-${{ matrix.dictionary }}/**/*.log
+            /tmp/session-review/*.patch
+            /tmp/session-review/*.sha256
+            /tmp/session-review/benchmark.mjs
           retention-days: 7
