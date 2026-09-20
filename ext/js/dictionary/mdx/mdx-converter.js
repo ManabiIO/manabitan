@@ -692,10 +692,11 @@ function readCssIdentifier(selector, startIndex) {
  */
 function rewriteCssAttributeSelector(attributeSelector) {
     const match = attributeSelector.match(/^\[\s*(?<name>[-\w]+)(?<rest>[\s\S]*)\]$/u);
-    if (match === null) { return attributeSelector; }
-    const name = match.groups.name.toLowerCase();
+    const groups = match?.groups;
+    if (typeof groups?.name !== 'string' || typeof groups.rest !== 'string') { return attributeSelector; }
+    const name = groups.name.toLowerCase();
     const replacement = name === 'class' ? STRUCTURED_CLASS_ATTR : (name === 'id' ? STRUCTURED_ID_ATTR : null);
-    return replacement === null ? attributeSelector : `[${replacement}${match.groups.rest}]`;
+    return replacement === null ? attributeSelector : `[${replacement}${groups.rest}]`;
 }
 
 /**
