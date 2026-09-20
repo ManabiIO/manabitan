@@ -1,4 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
+/* eslint @stylistic/semi: ["error", "never"] */
 import assert from 'node:assert/strict'
 import {readFile, readdir, writeFile} from 'node:fs/promises'
 import path from 'node:path'
