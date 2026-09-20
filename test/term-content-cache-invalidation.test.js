@@ -108,6 +108,15 @@ describe('content cache invalidation during asynchronous reads', () => {
         Reflect.set(store, '_fileHandle', {});
         Reflect.set(store, '_length', 3);
         Reflect.set(store, '_loadedForRead', true);
+        const state = {
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle: {},
+            fileLength: 3,
+            startOffset: 0,
+            readFile: new File([Uint8Array.of(1, 2, 3)], 'old'),
+        };
+        Reflect.set(store, '_segmentStates', [state]);
         /** @type {import('core').DeferredPromiseDetails<void>} */
         const entered = deferPromise();
         const pending = deferred();
@@ -120,6 +129,7 @@ describe('content cache invalidation during asynchronous reads', () => {
         const oldRead = store.readSlice(0, 3);
         await entered.promise;
         store._invalidateReadState();
+        state.readFile = new File([Uint8Array.of(4, 5, 6)], 'new');
         Reflect.set(store, '_loadedForRead', true);
         expect(await store.readSlice(0, 3)).toEqual(Uint8Array.of(4, 5, 6));
         pending.resolve(Uint8Array.of(1, 2, 3));

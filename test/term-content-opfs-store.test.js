@@ -366,7 +366,7 @@ describe('TermContentOpfsStore', () => {
         await expect(drain).rejects.toBe(writeError);
 
         expect(Reflect.get(store, '_queuedWriteChunks')).toStrictEqual([]);
-        Reflect.get(store, '_queueWriteChunks').call(store, [new Uint8Array([3])]);
+        expect(() => Reflect.get(store, '_queueWriteChunks').call(store, [new Uint8Array([3])])).toThrow(writeError);
         expect(Reflect.get(store, '_queuedWriteChunks')).toStrictEqual([]);
         await expect(Reflect.get(store, '_awaitQueuedWrites').call(store)).rejects.toBe(writeError);
     });
