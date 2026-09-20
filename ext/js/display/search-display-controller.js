@@ -283,8 +283,9 @@ export class SearchDisplayController {
         if (contentType === 'unloaded') { return; }
         try {
             await this._display.updateOptions();
-            if (contentType !== 'clear') {
-                this._display.searchLast(false);
+            const currentType = Reflect.get(this._display, '_contentType');
+            if (currentType === 'terms' || currentType === 'kanji') {
+                this._display.searchLast(false, true);
             }
         } catch (error) {
             if (!this._display.application.webExtension.unloaded) {
@@ -305,9 +306,13 @@ export class SearchDisplayController {
      * @returns {Promise<void>}
      */
     async _refreshAfterDictionaryDatabaseUpdate() {
+        if (Reflect.get(this._display, '_contentType') === 'unloaded') { return; }
         try {
             await this._display.updateOptions();
-            this._display.searchLast(false);
+            const contentType = Reflect.get(this._display, '_contentType');
+            if (contentType === 'terms' || contentType === 'kanji') {
+                this._display.searchLast(false, true);
+            }
         } catch (error) {
             if (!this._display.application.webExtension.unloaded) {
                 log.error(error);
@@ -341,7 +346,13 @@ export class SearchDisplayController {
     /**
      * @param {import('display').EventArgument<'contentUpdateStart'>} details
      */
-    _onContentUpdateStart({type, query}) {
+    _onContentUpdateStart({type, query, preserveSearchInput = false}) {
+        // A fresh Search page can publish its initial clear state after the
+        // textarea is already interactive. Preserve text typed before the first
+        // submitted search; later clear/history events retain normal syncing.
+        if (type === 'clear' && this._searchRequestSequence === 0 && this._queryInput.value.length > 0) {
+            preserveSearchInput = true;
+        }
         this._contentUpdateSequence = this._searchRequestSequence;
         this._contentUpdateQuery = typeof query === 'string' ? query : '';
         updateSearchDebugState({
@@ -362,7 +373,7 @@ export class SearchDisplayController {
                     animate = (typeof content === 'object' && content !== null && content.animate === true);
                     showBackButton = (typeof state === 'object' && state !== null && state.cause === 'queryParser');
                     valid = (typeof query === 'string' && query.length > 0);
-                    this._display.blurElement(this._queryInput);
+                    if (!preserveSearchInput) { this._display.blurElement(this._queryInput); }
                 }
                 break;
             case 'clear':
@@ -376,7 +387,7 @@ export class SearchDisplayController {
 
         this._searchBackButton.hidden = !showBackButton;
 
-        if (this._queryInput.value !== query) {
+        if (!preserveSearchInput && this._queryInput.value !== query) {
             this._queryInput.value = query.trimEnd();
             this._updateSearchHeight(true);
         }

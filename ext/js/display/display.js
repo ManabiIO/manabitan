@@ -619,8 +619,9 @@ export class Display extends EventDispatcher {
 
     /**
      * @param {boolean} updateOptionsContext
+     * @param {boolean} [preserveSearchInput] Keep an unsent draft during automatic search-page refreshes.
      */
-    searchLast(updateOptionsContext) {
+    searchLast(updateOptionsContext, preserveSearchInput = false) {
         const type = this._contentType;
         if (type === 'clear') { return; }
         const query = this._query;
@@ -649,6 +650,7 @@ export class Display extends EventDispatcher {
             state: newState,
             content: {
                 contentOrigin: this.getContentOrigin(),
+                preserveSearchInput,
             },
         };
         void this.setContent(details);
@@ -1467,6 +1469,13 @@ export class Display extends EventDispatcher {
             changeHistory = true;
         }
 
+        // Consume before any await: this flag belongs only to this refresh,
+        // not to later history navigation through the same content object.
+        const preserveSearchInput = content.preserveSearchInput === true;
+        if (typeof content.preserveSearchInput !== 'undefined') {
+            delete content.preserveSearchInput;
+            changeHistory = true;
+        }
         let {dictionaryEntries} = content;
 
         let contentOriginValid = false;
@@ -1526,7 +1535,7 @@ export class Display extends EventDispatcher {
         container.textContent = '';
 
         safePerformance.mark('display:contentUpdate:start');
-        this._triggerContentUpdateStart();
+        this._triggerContentUpdateStart(preserveSearchInput);
 
         let i = 0;
         for (const dictionaryEntry of dictionaryEntries) {
@@ -2480,9 +2489,11 @@ export class Display extends EventDispatcher {
         this.trigger('contentClear', {});
     }
 
-    /** */
-    _triggerContentUpdateStart() {
-        this.trigger('contentUpdateStart', {type: this._contentType, query: this._query});
+    /**
+     * @param {boolean} [preserveSearchInput]
+     */
+    _triggerContentUpdateStart(preserveSearchInput = false) {
+        this.trigger('contentUpdateStart', {type: this._contentType, query: this._query, preserveSearchInput});
     }
 
     /**
