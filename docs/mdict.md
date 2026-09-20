@@ -35,7 +35,6 @@ Imported dictionaries use Manabitan's regular dictionary storage and lookup path
 
 Contributor notes: [MDict client lifecycle](development/mdict-client.md).
 
-
 ## File matching and conversion notes
 
 A dictionary name ending in a number is not automatically a resource volume:
