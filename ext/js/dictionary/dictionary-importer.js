@@ -2672,6 +2672,8 @@ export class DictionaryImporter {
      * @returns {boolean}
      */
     _tryAddFastMediaRequirementsFromGlossaryJson(glossaryJson, entry, requirements) {
+        // Escaped property names require semantic traversal, not a partial path scan.
+        if (glossaryJson.includes('\\u')) { return false; }
         let found = false;
         GLOSSARY_IMAGE_PATH_PATTERN.lastIndex = 0;
         for (const match of glossaryJson.matchAll(GLOSSARY_IMAGE_PATH_PATTERN)) {
@@ -2718,6 +2720,8 @@ export class DictionaryImporter {
         /** @type {string[]} */
         const paths = [];
         for (let i = 0, ii = bytes.length - JSON_PATH_KEY_BYTES.length; i <= ii; ++i) {
+            // No caller-visible requirements have been added yet; discard partial results.
+            if (bytes[i] === 0x5c && bytes[i + 1] === 0x75) { return null; }
             if (!this._bytesMatch(bytes, i, JSON_PATH_KEY_BYTES)) { continue; }
             let cursor = i + JSON_PATH_KEY_BYTES.length;
             cursor = this._skipJsonWhitespaceBytes(bytes, cursor);
@@ -4877,6 +4881,7 @@ null;
      * @returns {boolean}
      */
     _glossaryJsonLikelyContainsMedia(glossaryJson) {
+        if (glossaryJson.includes('\\u')) { return true; }
         if (this._glossaryMediaFastScan) {
             return this._glossaryJsonLikelyContainsMediaFast(glossaryJson);
         }
@@ -4888,6 +4893,7 @@ null;
      * @returns {boolean}
      */
     _glossaryJsonLikelyContainsMediaFast(glossaryJson) {
+        if (glossaryJson.includes('\\u')) { return true; }
         const hasTypeImage = glossaryJson.includes('"type"') && glossaryJson.includes('"image"');
         const hasTagImg = glossaryJson.includes('"tag"') && glossaryJson.includes('"img"');
         return hasTypeImage || hasTagImg;

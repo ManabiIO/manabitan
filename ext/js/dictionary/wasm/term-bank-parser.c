@@ -434,41 +434,41 @@ static __attribute__((always_inline)) inline int parse_string_span(const uint8_t
     return 0;
 }
 
-static int is_media_marker_at(const uint8_t* src, uint32_t len, uint32_t i) {
-    if (i + 5u <= len &&
-        src[i] == '"' &&
-        src[i + 1u] == 'i' &&
-        src[i + 2u] == 'm' &&
-        src[i + 3u] == 'g' &&
-        src[i + 4u] == '"'
-    ) {
-        return 1;
+static uint32_t key_hex4(const uint8_t* p);
+
+/* Compare a short ASCII keyword without allocating or decoding an arbitrary
+ * JSON string. Escapes and literal characters have the same field identity.
+ * end is a logical token/bank boundary, never the size of the WASM heap. */
+static int json_string_matches_ascii(
+    const uint8_t* src, uint32_t start, uint32_t end,
+    const char* keyword, uint32_t keyword_length
+) {
+    if (start >= end || src[start] != '"') { return 0; }
+    uint32_t i = start + 1u;
+    for (uint32_t k = 0u; k < keyword_length; ++k) {
+        if (i >= end) { return 0; }
+        uint32_t c = src[i++];
+        if (c == '\\') {
+            if (end - i < 5u || src[i] != 'u') { return 0; }
+            c = key_hex4(src + i + 1u);
+            i += 5u;
+        }
+        if (c != (uint8_t)keyword[k]) { return 0; }
     }
-    return i + 7u <= len &&
-        src[i] == '"' &&
-        src[i + 1u] == 'i' &&
-        src[i + 2u] == 'm' &&
-        src[i + 3u] == 'a' &&
-        src[i + 4u] == 'g' &&
-        src[i + 5u] == 'e' &&
-        src[i + 6u] == '"';
+    return i < end && src[i] == '"';
+}
+
+static int is_media_marker_at(const uint8_t* src, uint32_t len, uint32_t i) {
+    return json_string_matches_ascii(src, i, len, "img", 3u) ||
+        json_string_matches_ascii(src, i, len, "image", 5u);
 }
 
 static inline int type_text_pair_at(const uint8_t* src, uint32_t len, uint32_t key_start, uint32_t key_end) {
-    static const uint8_t KEY_TYPE[] = "\"type\"";
-    static const uint8_t VALUE_TEXT[] = "\"text\"";
-    if (key_end - key_start != sizeof(KEY_TYPE) - 1u) { return 0; }
-    for (uint32_t i = 0u; i < sizeof(KEY_TYPE) - 1u; ++i) {
-        if (src[key_start + i] != KEY_TYPE[i]) { return 0; }
-    }
-    uint32_t separator = skip_ws(src, len, key_end);
+    if (!json_string_matches_ascii(src, key_start, key_end, "type", 4u)) { return 0; }
+    const uint32_t separator = skip_ws(src, len, key_end);
     if (separator >= len || src[separator] != ':') { return 0; }
     const uint32_t value_start = skip_ws(src, len, separator + 1u);
-    if (value_start > len || sizeof(VALUE_TEXT) - 1u > len - value_start) { return 0; }
-    for (uint32_t i = 0u; i < sizeof(VALUE_TEXT) - 1u; ++i) {
-        if (src[value_start + i] != VALUE_TEXT[i]) { return 0; }
-    }
-    return 1;
+    return json_string_matches_ascii(src, value_start, len, "text", 4u);
 }
 
 static int scan_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
@@ -1041,22 +1041,6 @@ static inline int write_bytes_and_hash(
     return 1;
 }
 
-static int token_equals_literal(
-    const uint8_t* src,
-    uint32_t start,
-    uint32_t length,
-    const uint8_t* literal,
-    uint32_t literal_length
-) {
-    if (length != literal_length) { return 0; }
-    for (uint32_t i = 0u; i < length; ++i) {
-        if (src[start + i] != literal[i]) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
 static int glossary_object_try_extract_text_value(
     const uint8_t* src,
     uint32_t src_len,
@@ -1065,126 +1049,49 @@ static int glossary_object_try_extract_text_value(
     uint32_t* out_text_start,
     uint32_t* out_text_length
 ) {
-    static const uint8_t KEY_TYPE[] = "\"type\"";
-    static const uint8_t KEY_TEXT[] = "\"text\"";
-    static const uint8_t VALUE_TEXT[] = "\"text\"";
-
-    if (start >= end || src[start] != '{') { return 0; }
-
-    uint32_t probe = skip_ws(src, src_len, start + 1u);
-    if (probe < end && src[probe] != '}') {
-        uint32_t key_end = 0u;
-        if (!parse_string_span(src, src_len, probe, &key_end)) { return 0; }
-        uint32_t key_start = probe;
-        uint32_t key_length = key_end - key_start;
-        if (token_equals_literal(src, key_start, key_length, KEY_TYPE, sizeof(KEY_TYPE) - 1u)) {
-            probe = skip_ws(src, src_len, key_end);
-            if (probe >= end || src[probe] != ':') { return 0; }
-            probe = skip_ws(src, src_len, probe + 1u);
-            uint32_t value_end = 0u;
-            if (!parse_value_span(src, src_len, probe, &value_end)) { return 0; }
-            if (!token_equals_literal(src, probe, value_end - probe, VALUE_TEXT, sizeof(VALUE_TEXT) - 1u)) {
-                return 0;
-            }
-            probe = skip_ws(src, src_len, value_end);
-            if (probe < end && src[probe] == ',') {
-                ++probe;
-            }
-            while (probe < end) {
-                probe = skip_ws(src, src_len, probe);
-                if (probe >= end) { return 0; }
-                if (src[probe] == '}') { return 0; }
-                if (!parse_string_span(src, src_len, probe, &key_end)) { return 0; }
-                key_start = probe;
-                key_length = key_end - key_start;
-                probe = skip_ws(src, src_len, key_end);
-                if (probe >= end || src[probe] != ':') { return 0; }
-                probe = skip_ws(src, src_len, probe + 1u);
-                if (!parse_value_span(src, src_len, probe, &value_end)) { return 0; }
-                if (token_equals_literal(src, key_start, key_length, KEY_TEXT, sizeof(KEY_TEXT) - 1u)) {
-                    if (value_end > probe && src[probe] == '"') {
-                        *out_text_start = probe;
-                        *out_text_length = value_end - probe;
-                        return 1;
-                    }
-                    return 0;
-                }
-                probe = skip_ws(src, src_len, value_end);
-                if (probe < end && src[probe] == ',') {
-                    ++probe;
-                    continue;
-                }
-                if (probe < end && src[probe] == '}') {
-                    return 0;
-                }
-            }
-            return 0;
-        }
-        /*
-         * A schema-valid text glossary object has exactly the "type" and
-         * "text" keys. Structured-content dictionaries often serialize their
-         * large "content" value first; reject that shape before walking the
-         * nested value a second time.
-         */
-        if (!token_equals_literal(src, key_start, key_length, KEY_TEXT, sizeof(KEY_TEXT) - 1u)) {
-            return 0;
-        }
-    }
-
-    uint32_t i = skip_ws(src, src_len, start + 1u);
+    if (start >= end || end > src_len || src[start] != '{') { return 0; }
+    uint32_t i = skip_ws(src, end, start + 1u);
     int has_type_text = 0;
     int has_text_value = 0;
     uint32_t text_start = 0u;
     uint32_t text_length = 0u;
-
     while (i < end) {
-        i = skip_ws(src, src_len, i);
-        if (i >= end) { return 0; }
-        if (src[i] == '}') { break; }
-
+        if (src[i] == '}') {
+            if (!(has_type_text && has_text_value)) { return 0; }
+            *out_text_start = text_start;
+            *out_text_length = text_length;
+            return 1;
+        }
         uint32_t key_end = 0u;
-        if (!parse_string_span(src, src_len, i, &key_end)) { return 0; }
-        const uint32_t key_start = i;
-        const uint32_t key_length = key_end - key_start;
-
-        i = skip_ws(src, src_len, key_end);
+        if (!parse_string_span(src, end, i, &key_end)) { return 0; }
+        const int is_type = json_string_matches_ascii(src, i, key_end, "type", 4u);
+        const int is_text = json_string_matches_ascii(src, i, key_end, "text", 4u);
+        /* Schema-valid text objects contain only these keys. Reject other
+         * shapes before walking large structured-content values again. */
+        if (!is_type && !is_text) { return 0; }
+        i = skip_ws(src, end, key_end);
         if (i >= end || src[i] != ':') { return 0; }
-        i = skip_ws(src, src_len, i + 1u);
-
+        i = skip_ws(src, end, i + 1u);
         uint32_t value_end = 0u;
-        if (!parse_value_span(src, src_len, i, &value_end)) { return 0; }
-        const uint32_t value_start = i;
-        const uint32_t value_length = value_end - value_start;
-
-        if (token_equals_literal(src, key_start, key_length, KEY_TYPE, sizeof(KEY_TYPE) - 1u)) {
-            if (token_equals_literal(src, value_start, value_length, VALUE_TEXT, sizeof(VALUE_TEXT) - 1u)) {
-                has_type_text = 1;
-            }
-        } else if (token_equals_literal(src, key_start, key_length, KEY_TEXT, sizeof(KEY_TEXT) - 1u)) {
-            if (value_length > 0u && src[value_start] == '"') {
-                has_text_value = 1;
-                text_start = value_start;
-                text_length = value_length;
-            }
+        if (!parse_value_span(src, end, i, &value_end)) { return 0; }
+        /* JSON.parse keeps the last occurrence, including a later value that
+         * invalidates an earlier match. Never return before the object ends. */
+        if (is_type) {
+            has_type_text = json_string_matches_ascii(src, i, value_end, "text", 4u);
+        } else {
+            has_text_value = i < value_end && src[i] == '"';
+            text_start = i;
+            text_length = value_end - i;
         }
-
-        i = skip_ws(src, src_len, value_end);
-        if (i < end && src[i] == ',') {
-            i += 1u;
-            continue;
-        }
-        if (i < end && src[i] == '}') {
-            break;
+        i = skip_ws(src, end, value_end);
+        if (i >= end) { return 0; }
+        if (src[i] == ',') {
+            i = skip_ws(src, end, i + 1u);
+        } else if (src[i] != '}') {
+            return 0;
         }
     }
-
-    if (!(has_type_text && has_text_value)) {
-        return 0;
-    }
-
-    *out_text_start = text_start;
-    *out_text_length = text_length;
-    return 1;
+    return 0;
 }
 
 static int glossary_text_object_try_extract_fast(
@@ -1196,9 +1103,6 @@ static int glossary_text_object_try_extract_fast(
     uint32_t* out_text_start,
     uint32_t* out_text_length
 ) {
-    static const uint8_t KEY_TYPE[] = "\"type\"";
-    static const uint8_t KEY_TEXT[] = "\"text\"";
-    static const uint8_t VALUE_TEXT[] = "\"text\"";
     if (start >= limit || src[start] != '{') { return 0; }
     uint32_t i = skip_ws(src, src_len, start + 1u);
     int has_type_text = 0;
@@ -1220,9 +1124,8 @@ static int glossary_text_object_try_extract_fast(
         uint32_t key_end = 0u;
         if (!parse_string_span(src, src_len, i, &key_end)) { return 0; }
         const uint32_t key_start = i;
-        const uint32_t key_length = key_end - key_start;
-        const int is_type = token_equals_literal(src, key_start, key_length, KEY_TYPE, sizeof(KEY_TYPE) - 1u);
-        const int is_text = token_equals_literal(src, key_start, key_length, KEY_TEXT, sizeof(KEY_TEXT) - 1u);
+        const int is_type = json_string_matches_ascii(src, key_start, key_end, "type", 4u);
+        const int is_text = json_string_matches_ascii(src, key_start, key_end, "text", 4u);
         if (!is_type && !is_text) { return 0; }
         i = skip_ws(src, src_len, key_end);
         if (i >= limit || src[i] != ':') { return 0; }
@@ -1230,7 +1133,7 @@ static int glossary_text_object_try_extract_fast(
         uint32_t value_end = 0u;
         if (!parse_value_span(src, src_len, i, &value_end) || value_end > limit) { return 0; }
         if (is_type) {
-            if (!token_equals_literal(src, i, value_end - i, VALUE_TEXT, sizeof(VALUE_TEXT) - 1u)) { return 0; }
+            if (!json_string_matches_ascii(src, i, value_end, "text", 4u)) { return 0; }
             has_type_text = 1;
         } else {
             if (i >= value_end || src[i] != '"') { return 0; }
