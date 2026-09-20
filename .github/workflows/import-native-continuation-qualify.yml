@@ -28,6 +28,32 @@ jobs:
       - name: Prepare evidence and normalize fixture formatting
         run: |
           mkdir -p builds/parser-settlement
+          git rev-parse HEAD > builds/parser-settlement/research-commit.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('test/fixtures/parser-settlement/browser.mjs')
+          s = p.read_text()
+          s = s.replace('!crossOriginIsolated', '!globalThis.crossOriginIsolated').replace('isolated: crossOriginIsolated', 'isolated: globalThis.crossOriginIsolated')
+          s = s.replace('const NativeWorker = Worker', 'const NativeWorker = globalThis.Worker').replace("new ErrorEvent('error'", "new globalThis.ErrorEvent('error'")
+          s = s.replace("(done) => server.listen(0, '127.0.0.1', done)", "(done) => { server.listen(0, '127.0.0.1', done) }")
+          s = s.replace('(done) => setTimeout(done, 0)', '(done) => { setTimeout(done, 0) }').replace('(done) => server.close(done)', '(done) => { server.close(done) }')
+          start = s.index("                const banks = shape === 'all-empty'")
+          end = s.index('                try {', start)
+          s = s[:start] + """                const banks = {
+                              'all-empty': ['[]', '[]', '[]', '[]'],
+                              'leading-empty': ['[]', '[]', row(0), row(1)],
+                              'middle-empty': [row(0), '[]', '[]', row(1)],
+                              'trailing-empty': [row(0), row(1), '[]', '[]'],
+                              'malformed': ['[]', '[,]', '[]', '[]'],
+                          }[shape]
+          """ + s[end:]
+          s = s.replace('const sink = (chunk) => { assert.ok(chunk.rowCount > 0); scores.push(...chunk.scoreList) }', 'const sink = (chunk) => {\n                        assert.ok(chunk.rowCount > 0)\n                        scores.push(...chunk.scoreList)\n                    }')
+          s = s.replace('try { assert.equal(await operation, true) } catch (error) { failure = error }', 'try {\n                        assert.equal(await operation, true)\n                    } catch (error) { failure = error }')
+          p.write_text(s)
+          p = Path('test/fixtures/parser-settlement/cases.mjs')
+          s = p.read_text().replace('async () => { onLoad(i); return s }', 'async () => {\n            onLoad(i)\n            return s\n        }')
+          p.write_text(s)
+          PY
           npx eslint test/fixtures/parser-settlement/*.mjs test/term-bank-settlement.test.js --fix
       - name: Confirm baseline failures through actual native parser
         run: |
