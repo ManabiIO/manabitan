@@ -3946,6 +3946,7 @@ export class DictionaryImporter {
                     const reading = row.reading.length > 0 ? row.reading : expression;
                     const hasPrecomputedTermContent = hasPrecomputedTermEntryContent(row);
                     let usePrecomputedTermContent = false;
+                    let hasMaterializedGlossary = false;
                     const useLeanTermEntryObject = (
                         this._leanCanonicalTermEntryObjects &&
                         requirementsForChunk === null &&
@@ -3983,14 +3984,15 @@ export class DictionaryImporter {
                                 true;
                     } else {
                         const skipGlossaryParse = (
+                            this._wasmPassThroughTermContent &&
+                            hasPrecomputedTermContent &&
+                            (
                                 typeof row.glossaryMayContainMedia === 'boolean' ?
                                     !row.glossaryMayContainMedia :
                                     !this._glossaryJsonLikelyContainsMedia(this._getFastRowGlossaryJson(row))
+                            )
                         );
                         if (skipGlossaryParse) {
-                            if (!this._wasmPassThroughTermContent) {
-                                entry.glossaryJson = this._getFastRowGlossaryJson(row);
-                            }
                             usePrecomputedTermContent = true;
                         } else {
                             let glossaryList = null;
@@ -4021,6 +4023,7 @@ export class DictionaryImporter {
                                     glossaryList[j] = this._formatDictionaryTermGlossaryObject(glossary, entry, requirementsForChunk);
                                 }
                                 entry.glossary = glossaryList;
+                                hasMaterializedGlossary = true;
                             }
                         }
                     }
@@ -4042,6 +4045,8 @@ export class DictionaryImporter {
                         entry.termEntryContentBytes = row.termEntryContentBytes;
                     }
                     // Keep serialization canonical with the runtime deserializer.
+                    // A conservative media hint may produce no requirements; preserve
+                    // the formatted glossary even when no later media pass will run.
                     if (
                         requirementsForChunk === null ||
                         (
@@ -4053,6 +4058,7 @@ export class DictionaryImporter {
                     ) {
                         if (
                             requirementsForChunk !== null &&
+                            !hasMaterializedGlossary &&
                             typeof entry.glossaryJson !== 'string' &&
                             (
                                 !hasPrecomputedTermEntryContent(entry)
