@@ -263,12 +263,12 @@ describe('native parser controls and key metadata', () => {
     });
 
     test('scanner rejects invalid sources and releases its input on close', () => {
-        assert.throws(() => new FileScanner(/** @type {any} */ ({}) ), TypeError);
+        assert.throws(() => new FileScanner(/** @type {any} */ ({})), TypeError);
         const scanner = new FileScanner(Uint8Array.of(1, 2, 3));
         assert.deepEqual(scanner.readBuffer(0, 2), Uint8Array.of(1, 2));
         scanner.close();
         assert.deepEqual(scanner.readBuffer(0, 0), new Uint8Array(0));
         assert.throws(() => scanner.readBuffer(0, 1), /available file data/iu);
-        assert.throws(() => scanner.readBuffer('0', 0), /available file data/iu);
+        assert.throws(() => scanner.readBuffer(/** @type {any} */ ('0'), 0), /available file data/iu);
     });
 });
