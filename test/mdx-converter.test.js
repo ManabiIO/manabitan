@@ -510,7 +510,7 @@ describe('convertMdxToArchive', () => {
         );
         const zip = await loadArchive(result.archiveContent);
         const stylesCss = await zip.file('styles.css')?.async('text');
-        const embeddedPath = [...Object.keys(zip.files)].find((path) => path.startsWith('mdict-media/embedded/application/'));
+        const embeddedPath = Object.keys(zip.files).find((path) => path.startsWith('mdict-media/embedded/application/'));
 
         expect(stylesCss).toContain('url("mdict-media/images/root.bin")');
         expect(stylesCss).toContain('url("mdict-media/images/prefixed.bin")');
