@@ -1,0 +1,31 @@
+diff --git a/ext/js/dictionary/term-content-opfs-store.js b/ext/js/dictionary/term-content-opfs-store.js
+--- a/ext/js/dictionary/term-content-opfs-store.js
++++ b/ext/js/dictionary/term-content-opfs-store.js
+@@ -809,6 +809,7 @@
+      * Returns the logical append cursor derived from persisted bytes plus buffered writes.
+      * This is more robust than trusting `_length` alone when OPFS write buffering is active.
+      * @returns {number}
++     * @throws {Error} If an earlier storage write failed.
+      */
+     _getBufferedLength() {
+         // Every append reserves its cursor here. Do not admit more work after
+@@ -994,6 +995,7 @@
+     /**
+      * @param {Uint8Array[]} chunks
+      * @returns {void}
++     * @throws {Error} If an earlier storage write failed.
+      */
+     _queueWriteChunks(chunks) {
+         if (chunks.length === 0) {
+diff --git a/test/term-content-cursor-recovery.test.js b/test/term-content-cursor-recovery.test.js
+--- a/test/term-content-cursor-recovery.test.js
++++ b/test/term-content-cursor-recovery.test.js
+@@ -4,7 +4,7 @@
+ import {expect, test} from 'vitest';
+ 
+ test('term-content cursor, recovery, and direct-failure regressions', () => {
+-    const script = fileURLToPath(new URL('./fixtures/opfs-continuation/check.mjs', import.meta.url));
++    const script = fileURLToPath(new URL('fixtures/opfs-continuation/check.mjs', import.meta.url));
+     expect(() => execFileSync(process.execPath, [script, process.cwd()], {
+         timeout: 60000,
+         encoding: 'utf8',
