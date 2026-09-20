@@ -70,7 +70,7 @@ class MDictBase {
         // the dictionary file decrypt pass code
         this.meta.passcode = passcode;
         // the dictionary file extension
-        this.meta.ext = common.getExtension(fname, 'mdx');
+        this.meta.ext = common.getExtension(fname, 'mdx').toLowerCase();
         // the file scanner
         this.scanner = new FileScanner(source);
         // set options
@@ -276,6 +276,26 @@ class MDictBase {
         this.keywordList.sort((ki1, ki2) => {
             return ki1.keyText.localeCompare(ki2.keyText);
         });
+        // Record boundaries are offsets in the record stream, not key-order
+        // boundaries. Recompute them after sorting so dictionaries whose key
+        // blocks are not in lexical order cannot return truncated records.
+        if (this.keywordList.length > 0) {
+            const recordEndOffset = this.recordInfoList.length > 0 ?
+                this.recordInfoList.at(-1).unpackAccumulatorOffset + this.recordInfoList.at(-1).unpackSize :
+                0;
+            const starts = [...new Set(this.keywordList.map(({recordStartOffset}) => recordStartOffset))]
+                .sort((a, b) => a - b);
+            const ends = new Map();
+            let end = recordEndOffset;
+            for (let i = starts.length - 1; i >= 0; --i) {
+                const start = starts[i];
+                ends.set(start, end);
+                end = start;
+            }
+            for (const item of this.keywordList) {
+                item.recordEndOffset = ends.get(item.recordStartOffset) ?? recordEndOffset;
+            }
+        }
     }
     /**
      * STEP 4.2. split keys from key block
@@ -387,7 +407,12 @@ class MDictBase {
             this.meta.numWidth = 4;
             this.meta.numFmt = common.NUMFMT_UINT32;
         }
-        if (!this.header.Encoding || this.header.Encoding == '') {
+        if (this.meta.ext === 'mdd') {
+            // MDD resource keys are UTF-16LE even when the header omits an
+            // Encoding attribute, as required by the MDict resource format.
+            this.meta.encoding = UTF16;
+            this.meta.decoder = UTF_16LE_DECODER;
+        } else if (!this.header.Encoding || this.header.Encoding == '') {
             this.meta.encoding = UTF8;
             this.meta.decoder = UTF_8_DECODER;
         }
@@ -508,7 +533,7 @@ class MDictBase {
      */
     _decodeKeyInfo(keyInfoBuff) {
         const keyBlockNum = this.keyHeader.keywordBlocksNum;
-        if (this.meta.version == 2.0) {
+        if (this.meta.version >= 2.0) {
             const packType = keyInfoBuff.subarray(0, 4).join('');
             // const _alder32Buff = keyInfoBuff.slice(4, 8)
             // const numEntries = this.keyHeader.entriesNum;
@@ -607,10 +632,12 @@ class MDictBase {
             kbPackSizeAccu += packSize;
             kbUnpackSizeAccu += unpackSize;
         }
-        // assert(
-        //   countEntriesNum === numEntries,
-        //   `the number_entries ${numEntries} should equal the count_num_entries ${countEntriesNum}`
-        // );
+        if (entriesCount !== this.keyHeader.keywordNum) {
+            throw Error(`MDict key info entry count mismatch: expected ${this.keyHeader.keywordNum}, got ${entriesCount}`);
+        }
+        if (indexOffset !== keyInfoBuff.length) {
+            throw Error(`MDict key info contains trailing bytes: ${keyInfoBuff.length - indexOffset}`);
+        }
         assert(kbPackSizeAccu === this.keyHeader.keywordBlockPackedSize);
         return keyBlockInfoList;
     }
@@ -642,6 +669,9 @@ class MDictBase {
         } else {
             throw Error(`cannot determine the compress type: ${compType}`);
         }
+        if (keyBlock.length !== unpackSize) {
+            throw Error(`MDict key block size mismatch: expected ${unpackSize}, got ${keyBlock.length}`);
+        }
         return keyBlock;
     }
     /**
@@ -662,13 +692,16 @@ class MDictBase {
             const kbCompBuff = this.scanner.readBuffer(start, packSize);
             const keyBlock = this.unpackKeyBlock(kbCompBuff, unpackSize);
             const splitKeyBlock = this.splitKeyBlock(keyBlock, idx);
+            if (splitKeyBlock.length !== this.keyInfoList[idx].keyBlockEntriesNum) {
+                throw Error(`MDict key block entry count mismatch: expected ${this.keyInfoList[idx].keyBlockEntriesNum}, got ${splitKeyBlock.length}`);
+            }
             if (keyBlockList.length > 0 && keyBlockList[keyBlockList.length - 1].recordEndOffset == -1) {
                 keyBlockList[keyBlockList.length - 1].recordEndOffset = splitKeyBlock[0].recordStartOffset;
             }
             keyBlockList = keyBlockList.concat(splitKeyBlock);
             kbStartOffset += packSize;
         }
-        if (keyBlockList[keyBlockList.length - 1].recordEndOffset === -1) {
+        if (keyBlockList.length > 0 && keyBlockList[keyBlockList.length - 1].recordEndOffset === -1) {
             keyBlockList[keyBlockList.length - 1].recordEndOffset = -1; // the latest one
         }
         assert(keyBlockList.length === this.keyHeader.keywordNum, `key list length: ${keyBlockList.length} should equal to key entries num: ${this.keyHeader.keywordNum}`);

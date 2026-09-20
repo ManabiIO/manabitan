@@ -34,6 +34,9 @@ export class Mdict extends MdictBase {
         // TODO: if the this.list length parse too slow, can decode by below code
         // const list = this.lookupPartialKeyBlockListByKeyInfoId(keyInfoId);
         const list = this.keywordList;
+        if (list.length === 0) {
+            return undefined;
+        }
         // binary search
         let left = 0;
         let right = list.length - 1;
@@ -70,13 +73,39 @@ export class Mdict extends MdictBase {
      * @param item
      */
     lookupRecordByKeyBlock(item) {
-        const recordBlockIndex = this.reduceRecordBlockInfo(item.recordStartOffset);
-        const recordBlockInfo = this.recordInfoList[recordBlockIndex];
-        const recordBuffer = this.scanner.readBuffer(this._recordBlockStartOffset + recordBlockInfo.packAccumulateOffset, recordBlockInfo.packSize);
-        const unpackRecordBlockBuff = this.decompressBuff(recordBuffer, recordBlockInfo.unpackSize);
-        const start = item.recordStartOffset - recordBlockInfo.unpackAccumulatorOffset;
-        const end = item.recordEndOffset - recordBlockInfo.unpackAccumulatorOffset;
-        return unpackRecordBlockBuff.slice(start, end);
+        if (!item || this.recordInfoList.length === 0) {
+            return null;
+        }
+        const start = item.recordStartOffset;
+        const end = item.recordEndOffset;
+        const totalSize = this.recordInfoList.at(-1).unpackAccumulatorOffset + this.recordInfoList.at(-1).unpackSize;
+        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || end < start || end > totalSize) {
+            throw new Error('Invalid MDict record bounds');
+        }
+        const result = new Uint8Array(end - start);
+        let resultOffset = 0;
+        const firstBlockIndex = this.reduceRecordBlockInfo(start);
+        for (let index = firstBlockIndex; index < this.recordInfoList.length && resultOffset < result.length; ++index) {
+            const recordBlockInfo = this.recordInfoList[index];
+            const blockStart = recordBlockInfo.unpackAccumulatorOffset;
+            const blockEnd = blockStart + recordBlockInfo.unpackSize;
+            if (blockEnd <= start) { continue; }
+            const recordBuffer = this.scanner.readBuffer(
+                this._recordBlockStartOffset + recordBlockInfo.packAccumulateOffset,
+                recordBlockInfo.packSize,
+            );
+            const unpackRecordBlockBuff = this.decompressBuff(recordBuffer, recordBlockInfo.unpackSize);
+            const sliceStart = Math.max(0, start - blockStart);
+            const sliceEnd = Math.min(unpackRecordBlockBuff.length, end - blockStart);
+            if (sliceEnd <= sliceStart) { continue; }
+            const chunk = unpackRecordBlockBuff.subarray(sliceStart, sliceEnd);
+            result.set(chunk, resultOffset);
+            resultOffset += chunk.length;
+        }
+        if (resultOffset !== result.length) {
+            throw new Error(`MDict record data is incomplete: expected ${result.length}, got ${resultOffset}`);
+        }
+        return result;
     }
     /**
      * lookupPartialKeyInfoListById
@@ -121,6 +150,9 @@ export class Mdict extends MdictBase {
         return -1;
     }
     decompressBuff(recordBuffer, unpackSize) {
+        if (recordBuffer.length < 8) {
+            throw new Error('MDict record block is truncated');
+        }
         // decompress
         // 4 bytes: compression type
         const rbCompType = bytesToHex(recordBuffer.subarray(0, 4));
@@ -152,7 +184,12 @@ export class Mdict extends MdictBase {
             } else if (rbCompType === '02000000') {
                 // zlib decompress
                 unpackRecordBlockBuff = inflateSync(blockBufDecrypted);
+            } else {
+                throw new Error(`cannot determine the record compression type: ${rbCompType}`);
             }
+        }
+        if (unpackRecordBlockBuff.length !== unpackSize) {
+            throw new Error(`MDict record block size mismatch: expected ${unpackSize}, got ${unpackRecordBlockBuff.length}`);
         }
         return unpackRecordBlockBuff;
     }
