@@ -1,0 +1,57 @@
+name: Parser retained payload import screen
+on:
+  push:
+    branches: [review/import-native-continuation-20260920]
+    paths: [.github/workflows/parser-retention-import-screen.yml]
+permissions:
+  contents: read
+jobs:
+  imports:
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - run: npx playwright install --with-deps chromium
+      - name: Prepare identical correctness baseline and isolated memory candidate
+        run: |
+          git apply --check dev/perf/parser-settlement-correctness.patch
+          git apply dev/perf/parser-settlement-correctness.patch
+          mkdir -p builds/retention-screen
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ext/js/dictionary/term-bank-wasm-parser.js')
+          a = p.read_text()
+          old = '                        result.consume?.();\n                        delete chunk.releaseBorrowedContent;'
+          new = old + '\n                        // Release the private settled result, not the caller-owned arrays.\n                        result.chunk = null;\n                        result.consume = null;'
+          assert a.count(old) == 1
+          Path('builds/retention-screen/parser-A.js').write_text(a)
+          Path('builds/retention-screen/parser-B.js').write_text(a.replace(old, new))
+          PY
+          sha256sum builds/retention-screen/parser-*.js > builds/retention-screen/source-hashes.txt
+      - name: Run baseline control pair and two ABBA blocks
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -o pipefail
+          i=0
+          for arm in A A A B B A A B B A; do
+            i=$((i+1))
+            cp "builds/retention-screen/parser-$arm.js" ext/js/dictionary/term-bank-wasm-parser.js
+            node dev/perf/import-benchmark.js "$DICTIONARY" --runs 1 --output "builds/retention-screen/run-$i-$arm" 2>&1 | tee "builds/retention-screen/run-$i-$arm.log"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parser-retention-import-${{ matrix.dictionary }}
+          path: builds/retention-screen/
+          retention-days: 14
+          if-no-files-found: error
