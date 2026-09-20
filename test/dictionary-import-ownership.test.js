@@ -16,7 +16,7 @@ import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-l
 /** @returns {{startBulkImport: ReturnType<typeof vi.fn>, finishBulkImport: ReturnType<typeof vi.fn>, abortBulkImport: ReturnType<typeof vi.fn>, bulkUpdate: ReturnType<typeof vi.fn>, deleteDictionary: ReturnType<typeof vi.fn>, deleteDictionaryImportPlaceholder: ReturnType<typeof vi.fn>}} */
 function createDatabase() {
     return {
-        startBulkImport: vi.fn(async () => {}),
+        startBulkImport: vi.fn(async () => 'test-import-session'),
         finishBulkImport: vi.fn(async () => ({commitMs: 12})),
         abortBulkImport: vi.fn(async () => {}),
         bulkUpdate: vi.fn(async () => {}),
@@ -72,7 +72,7 @@ describe('DictionaryImportSession', () => {
         expect(dictionaryDatabase.finishBulkImport).toHaveBeenCalledWith(expect.any(Function), {
             summary,
             primaryKey: 42,
-        });
+        }, 'test-import-session');
         expect(dictionaryDatabase.abortBulkImport).not.toHaveBeenCalled();
         expect(dictionaryDatabase.bulkUpdate).not.toHaveBeenCalled();
         expect(sourcePipeline.dispose).toHaveBeenCalledTimes(1);
@@ -193,7 +193,7 @@ describe('DictionaryImportSession', () => {
         expect(dictionaryDatabase.deleteDictionaryImportPlaceholder).not.toHaveBeenCalled();
     });
 
-    test('records fused summary publication failure and removes attempted data', async () => {
+    test('records fused summary publication failure and requests only guarded placeholder cleanup', async () => {
         const dictionaryDatabase = createDatabase();
         const publicationError = new Error('summary update failed');
         dictionaryDatabase.finishBulkImport.mockRejectedValue(publicationError);
@@ -206,8 +206,8 @@ describe('DictionaryImportSession', () => {
         await session.cleanupIncompleteSummary();
 
         expect(errors).toEqual([publicationError]);
-        expect(dictionaryDatabase.deleteDictionary).toHaveBeenCalledWith('Test dictionary', 1000, expect.any(Function));
-        expect(dictionaryDatabase.deleteDictionaryImportPlaceholder).not.toHaveBeenCalled();
+        expect(dictionaryDatabase.deleteDictionary).not.toHaveBeenCalled();
+        expect(dictionaryDatabase.deleteDictionaryImportPlaceholder).toHaveBeenCalledWith(42);
     });
 });
 

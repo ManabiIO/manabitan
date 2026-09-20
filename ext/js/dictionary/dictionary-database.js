@@ -514,7 +514,7 @@ export class DictionaryDatabase {
         this._startupCleanupMissingTermRecordShardsSummary = null;
         /** @type {'idle'|'active'|'finalizing'} */
         this._bulkImportState = BULK_IMPORT_STATE_IDLE;
-        /** @type {Promise<void>|null} */
+        /** @type {Promise<string>|null} */
         this._bulkImportSetupPromise = null;
         /** @type {boolean} */
         this._bulkImportTransactionOpen = false;
@@ -948,6 +948,22 @@ export class DictionaryDatabase {
         }
     }
 
+    /**
+     * A successful start can become stale after an explicit abort, close, or
+     * recovery. Check the identity before claiming the next finalization owner.
+     * @param {string|null} expectedSessionId
+     * @throws {Error} If the caller no longer owns the active import.
+     */
+    _assertBulkImportSessionOwner(expectedSessionId) {
+        if (expectedSessionId === null) { return; }
+        if (
+            typeof expectedSessionId !== 'string' || expectedSessionId.length === 0 ||
+            this._bulkImportJournalRecord?.sessionId !== expectedSessionId
+        ) {
+            throw new Error('Dictionary bulk import session ownership changed');
+        }
+    }
+
     /** Returns the lifecycle to idle after setup or finalization cleanup. */
     _endBulkImportLifecycle() {
         if (this._bulkImportState === BULK_IMPORT_STATE_IDLE) { return; }
@@ -1248,7 +1264,7 @@ export class DictionaryDatabase {
         return this._startupCleanupMissingTermRecordShardsSummary;
     }
 
-    /** */
+    /** @returns {Promise<string>} The identity of the import session acquired by this call. */
     async startBulkImport() {
         if (this._isOpening || this._closingPromise !== null || this._purgingPromise !== null) {
             throw new Error('Cannot start a dictionary bulk import while the database lifecycle is busy');
@@ -1260,7 +1276,7 @@ export class DictionaryDatabase {
         const setupPromise = this._startBulkImportSetup(db);
         this._bulkImportSetupPromise = setupPromise;
         try {
-            await setupPromise;
+            return await setupPromise;
         } finally {
             if (this._bulkImportSetupPromise === setupPromise) {
                 this._bulkImportSetupPromise = null;
@@ -1270,7 +1286,7 @@ export class DictionaryDatabase {
 
     /**
      * @param {import('@sqlite.org/sqlite-wasm').Database} db
-     * @returns {Promise<void>}
+     * @returns {Promise<string>}
      */
     async _startBulkImportSetup(db) {
         try {
@@ -1317,6 +1333,7 @@ export class DictionaryDatabase {
                 this._clearDirectTermIndexCaches();
                 await this._beginImmediateTransaction(db, false);
                 this._bulkImportTransactionOpen = true;
+                return this._bulkImportJournalRecord.sessionId;
             } catch (e) {
                 const errors = [toError(e)];
                 const rollbackSucceeded = await this._rollbackBulkImport(
@@ -1340,9 +1357,13 @@ export class DictionaryDatabase {
         }
     }
 
-    /** Rolls back an active import without publishing any partial state. */
-    async abortBulkImport() {
+    /**
+     * Rolls back an active import without publishing any partial state.
+     * @param {string|null} [expectedSessionId] When supplied, only this owner may abort.
+     */
+    async abortBulkImport(expectedSessionId = null) {
         await this._waitForBulkImportSetup();
+        this._assertBulkImportSessionOwner(expectedSessionId);
         const db = this._beginBulkImportFinalization();
         if (db === null) { return; }
         /** @type {Error[]} */
@@ -1366,10 +1387,12 @@ export class DictionaryDatabase {
     /**
      * @param {((index: number, count: number) => void)?} [onCheckpoint]
      * @param {{summary: import('dictionary-importer').Summary, primaryKey: number}|null} [publication]
+     * @param {string|null} [expectedSessionId] When supplied, only this owner may publish.
      * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|null>}
      */
-    async finishBulkImport(onCheckpoint = null, publication = null) {
+    async finishBulkImport(onCheckpoint = null, publication = null, expectedSessionId = null) {
         await this._waitForBulkImportSetup();
+        this._assertBulkImportSessionOwner(expectedSessionId);
         const db = this._beginBulkImportFinalization();
         if (db !== null) {
             const tFinishBulkImportStart = safePerformance.now();
@@ -4809,10 +4832,22 @@ null;
      */
     async deleteDictionaryImportPlaceholder(primaryKey) {
         if (!Number.isSafeInteger(primaryKey) || primaryKey < 0) { return; }
+        if (
+            this._isOpening || this._closingPromise !== null || this._purgingPromise !== null ||
+            this._isBulkImportInProgress() || this._bulkImportJournalRecord !== null ||
+            this._importJournalRecoveryPending
+        ) {
+            throw new Error('Cannot clean up an import placeholder while storage lifecycle or recovery is active');
+        }
         const db = this._requireDb();
-        await this._beginImmediateTransaction(db);
+        // Keep this small transaction synchronous, and do not join an existing
+        // one. A failed BEGIN must not roll back somebody else's transaction.
+        db.exec('BEGIN IMMEDIATE');
         try {
-            db.exec({sql: 'DELETE FROM dictionaries WHERE id = $id', bind: {$id: primaryKey}});
+            db.exec({
+                sql: "DELETE FROM dictionaries WHERE id = $id AND json_type(summaryJson, '$.importSuccess') = 'false'",
+                bind: {$id: primaryKey},
+            });
             db.exec('COMMIT');
         } catch (error) {
             try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }

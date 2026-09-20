@@ -47,6 +47,8 @@ export class DictionaryImportSession {
         this._sourcePipeline = null;
         /** @type {Promise<void>|null} */
         this._startPromise = null;
+        /** @type {string|null} */
+        this._bulkImportSessionId = null;
         /** @type {Promise<void>|null} */
         this._resourceDisposalPromise = null;
         /** @type {Promise<void>|null} */
@@ -61,8 +63,6 @@ export class DictionaryImportSession {
         this._published = false;
         /** @type {boolean} */
         this._failed = false;
-        /** @type {boolean} */
-        this._commitAttempted = false;
     }
 
     /** @returns {boolean} */
@@ -107,10 +107,15 @@ export class DictionaryImportSession {
     /** @returns {Promise<void>} */
     startBulkImport() {
         if (this._startPromise !== null) { return this._startPromise; }
+        if (this._bulkFinalizationPromise !== null || this._resourceDisposalPromise !== null) {
+            this._bulkState = 'failed';
+            this._startPromise = Promise.reject(this.recordFailure(new Error('Dictionary import resources are already being finalized')));
+            return this._startPromise;
+        }
         this._bulkState = 'starting';
         this._startPromise = (async () => {
             try {
-                await this._dictionaryDatabase.startBulkImport();
+                this._bulkImportSessionId = await this._dictionaryDatabase.startBulkImport();
                 this._bulkState = 'active';
             } catch (error) {
                 this._bulkState = 'failed';
@@ -176,16 +181,24 @@ export class DictionaryImportSession {
                         // startBulkImport already recorded the failure.
                     }
                 }
+                // A rejected start never acquired the database's import owner.
+                // Aborting here would roll back another session's transaction.
+                if (this._bulkState !== 'active') {
+                    if (!this._failed) {
+                        this._bulkState = 'failed';
+                        this.recordFailure(new Error('Dictionary import session was not started'));
+                    }
+                    return null;
+                }
                 if (this._failed) {
-                    await this._dictionaryDatabase.abortBulkImport();
+                    await this._dictionaryDatabase.abortBulkImport(this._bulkImportSessionId);
                     this._bulkState = 'aborted';
                     return {aborted: true};
                 }
-                this._commitAttempted = true;
                 const details = await this._dictionaryDatabase.finishBulkImport(onCheckpoint, {
                     summary,
                     primaryKey: this._dictionarySummaryPrimaryKey,
-                });
+                }, this._bulkImportSessionId);
                 this._bulkState = 'committed';
                 this._published = true;
                 return details;
@@ -203,13 +216,12 @@ export class DictionaryImportSession {
         this._placeholderCleanupPromise ??= (async () => {
             if (!this._failed || this._published) { return; }
             try {
-                await (this._commitAttempted ?
-                    this._dictionaryDatabase.deleteDictionary(this._dictionaryTitle, 1000, () => {}) :
-                    this._dictionaryDatabase.deleteDictionaryImportPlaceholder(this._dictionarySummaryPrimaryKey));
+                // The database owns atomic rollback. A rejected finalization may
+                // also follow a successful commit, so never delete by title.
+                await this._dictionaryDatabase.deleteDictionaryImportPlaceholder(this._dictionarySummaryPrimaryKey);
             } catch (error) {
                 const cleanupError = toError(error);
-                const target = this._commitAttempted ? 'partially imported dictionary' : 'incomplete dictionary summary';
-                this.recordFailure(new Error(`Failed to remove ${target} ${this._dictionaryTitle}: ${cleanupError.message}`));
+                this.recordFailure(new Error(`Failed to remove incomplete dictionary summary ${this._dictionaryTitle}: ${cleanupError.message}`));
             }
         })();
         return this._placeholderCleanupPromise;

@@ -245,7 +245,7 @@ describe('DictionaryDatabase import cleanup', () => {
         expect(JSON.parse(oldRow.summaryJson).termRecordStorageName).toBe('records-old');
     });
 
-    test('removes a failed-import placeholder by primary key only', async () => {
+    test('removes only an explicit failed-import placeholder by primary key', async () => {
         const database = new DictionaryDatabase();
         const exec = vi.fn();
         Reflect.set(database, '_db', {exec});
@@ -254,7 +254,7 @@ describe('DictionaryDatabase import cleanup', () => {
 
         expect(exec.mock.calls).toStrictEqual([
             ['BEGIN IMMEDIATE'],
-            [{sql: 'DELETE FROM dictionaries WHERE id = $id', bind: {$id: 42}}],
+            [{sql: "DELETE FROM dictionaries WHERE id = $id AND json_type(summaryJson, '$.importSuccess') = 'false'", bind: {$id: 42}}],
             ['COMMIT'],
         ]);
     });
@@ -382,7 +382,7 @@ describe('DictionaryDatabase import cleanup', () => {
         const firstStart = database.startBulkImport();
         await expect(database.startBulkImport()).rejects.toThrow('A dictionary bulk import is already active');
         releaseCheckpoint();
-        await expect(firstStart).resolves.toBeUndefined();
+        await expect(firstStart).resolves.toEqual(expect.any(String));
         expect(Reflect.get(database, '_bulkImportState')).toBe('active');
     });
 
@@ -515,7 +515,7 @@ describe('DictionaryDatabase import cleanup', () => {
         expect(recordRollback).not.toHaveBeenCalled();
 
         releaseCheckpoint();
-        await expect(start).resolves.toBeUndefined();
+        await expect(start).resolves.toEqual(expect.any(String));
         await expect(abort).resolves.toBeUndefined();
         expect(contentRollback).toHaveBeenCalledOnce();
         expect(recordRollback).toHaveBeenCalledOnce();
