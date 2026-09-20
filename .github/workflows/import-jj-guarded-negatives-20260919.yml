@@ -1,0 +1,54 @@
+name: Guarded glossary negative controls
+on:
+  push:
+    branches: [research/import-jitendex-jmdict-20260919]
+    paths: [.github/workflows/import-jj-guarded-negatives-20260919.yml]
+permissions:
+  contents: read
+jobs:
+  negative-controls:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      MANABITAN_CLANG: clang-18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Existing experiment with scalar, common-prefix and nested controls
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          npm run build:libs > evidence/parent-build.log 2>&1
+          cp ext/lib/term-bank-parser.wasm "$RUNNER_TEMP/parent.wasm"
+          python dev/perf/glossary-negative-screen.py --wasm "$RUNNER_TEMP/parent.wasm" --out evidence/parent-negative.json > evidence/parent-negative.log 2>&1
+      - name: Exact candidate with the identical controls and no timing assertions
+        run: |
+          set -euo pipefail
+          python dev/perf/apply-guarded-glossary.py > evidence/hashes.txt
+          npm run build:libs > evidence/candidate-build.log 2>&1
+          python dev/perf/glossary-negative-screen.py --wasm ext/lib/term-bank-parser.wasm --out evidence/candidate-negative.json > evidence/candidate-negative.log 2>&1
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a=json.loads(Path('evidence/parent-negative.json').read_text())
+          b=json.loads(Path('evidence/candidate-negative.json').read_text())
+          assert a['cases'].keys()==b['cases'].keys()
+          for name in a['cases']:
+              av=a['cases'][name]['observations'];bv=b['cases'][name]['observations']
+              assert len(av)==len(bv)==24
+              assert len({o['digest'] for o in av+bv})==1
+              assert all(o['rows']==24000 and o['fallbacks']==0 for o in av+bv)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: guarded-glossary-negative-controls
+          path: evidence
+          retention-days: 30
+          if-no-files-found: error
