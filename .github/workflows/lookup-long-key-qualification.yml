@@ -1,0 +1,111 @@
+name: Qualify lookup long-key recovery
+
+on:
+  push:
+    branches: [research/lookup-continuation-20260920]
+    paths: [dev/perf/lookup-continuation/launch.txt]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lookup-long-key-qualification
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Construct tests-only branch from pinned develop
+        run: |
+          cp -a dev/perf/lookup-continuation "$RUNNER_TEMP/lookup-continuation"
+          git switch --detach 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108
+          git switch -c "fix/lookup-long-key-recovery-20260920-${GITHUB_RUN_ID}"
+          cp "$RUNNER_TEMP/lookup-continuation/long-key-check.mjs" test/fixtures/opfs-continuation/lookup-long-key.mjs
+          cp "$RUNNER_TEMP/lookup-continuation/long-key.test.js" test/term-lookup-long-key.test.js
+          git config user.name 'Manabitan review automation'
+          git config user.email 'review-automation@users.noreply.github.com'
+          git add test/fixtures/opfs-continuation/lookup-long-key.mjs test/term-lookup-long-key.test.js
+          git commit -m 'test: reproduce maximum-length lookup key recovery failures'
+          mkdir -p builds/lookup-long-key-qualification
+          git rev-parse HEAD > builds/lookup-long-key-qualification/tests-commit.txt
+
+      - uses: ./.github/actions/setup
+
+      - name: Require behavioral failures on unchanged production
+        run: |
+          set +e
+          node test/fixtures/opfs-continuation/lookup-long-key.mjs . builds/lookup-long-key-qualification/red.json > builds/lookup-long-key-qualification/red.log 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 1
+          node --input-type=module - <<'JS'
+          import {readFileSync} from 'node:fs'
+          import assert from 'node:assert/strict'
+          const r = JSON.parse(readFileSync('builds/lookup-long-key-qualification/red.json', 'utf8'))
+          assert.equal(r.passed, 9)
+          assert.equal(r.failed, 12)
+          JS
+
+      - name: Apply bounded key-length correction
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p = Path('ext/js/dictionary/term-lookup-index.js')
+          b = p.read_bytes()
+          assert hashlib.sha1(b'blob ' + str(len(b)).encode() + b'\0' + b).hexdigest() == '0e38ab187bca1139deab08566c3be49174c6ff37'
+          text = b.decode()
+          old = 'if (bytes.byteLength === 0 || bytes.byteLength >= U16_NULL)'
+          assert text.count(old) == 1
+          p.write_text(text.replace(old, 'if (bytes.byteLength === 0 || bytes.byteLength > U16_NULL)'))
+          PY
+          git diff --check
+          node test/fixtures/opfs-continuation/lookup-long-key.mjs . builds/lookup-long-key-qualification/green.json > builds/lookup-long-key-qualification/green.log 2>&1
+
+      - name: Full repository qualification
+        run: |
+          set +e
+          out=builds/lookup-long-key-qualification
+          npx eslint ext/js/dictionary/term-lookup-index.js test/term-lookup-long-key.test.js test/fixtures/opfs-continuation/lookup-long-key.mjs > "$out/lint.log" 2>&1
+          echo "lint=$?" >> "$out/gates.txt"
+          npm run test:ts > "$out/types.log" 2>&1
+          echo "types=$?" >> "$out/gates.txt"
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile="$out/full-unit.json" > "$out/full-unit.log" 2>&1
+          echo "unit=$?" >> "$out/gates.txt"
+          npm run test:unit:options > "$out/options.log" 2>&1
+          echo "options=$?" >> "$out/gates.txt"
+          npm run test:build > "$out/build.log" 2>&1
+          echo "build=$?" >> "$out/gates.txt"
+          set -e
+          cat "$out/gates.txt"
+          ! grep -E '=[1-9][0-9]*$' "$out/gates.txt"
+
+      - name: Publish only the qualified product branch
+        run: |
+          git add ext/js/dictionary/term-lookup-index.js
+          git commit -m 'fix: preserve full uint16 key lengths during lookup recovery'
+          git rev-parse HEAD > builds/lookup-long-key-qualification/fix-commit.txt
+          git branch --show-current > builds/lookup-long-key-qualification/branch.txt
+          git diff 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108 HEAD > builds/lookup-long-key-qualification/exact.patch
+          git push origin "HEAD:refs/heads/$(git branch --show-current)"
+
+      - name: Retain evidence, including unsuccessful gates
+        if: always()
+        run: |
+          mkdir -p builds/lookup-long-key-qualification
+          git diff > builds/lookup-long-key-qualification/working.patch
+          git status --short > builds/lookup-long-key-qualification/status.txt
+          sha256sum ext/js/dictionary/term-lookup-index.js > builds/lookup-long-key-qualification/source-sha256.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lookup-long-key-qualification
+          path: builds/lookup-long-key-qualification/
+          retention-days: 7
