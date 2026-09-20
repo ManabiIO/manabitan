@@ -2690,11 +2690,36 @@ null;
     }
 
     /**
+     * Returns dictionaries whose committed summary explicitly records zero term
+     * rows. Missing or legacy counts remain unknown and retain the shard-loading
+     * fallback so real record loss still fails closed.
+     * @param {Iterable<string>} dictionaryNames
+     * @returns {Set<string>}
+     */
+    _getKnownZeroTermDictionaries(dictionaryNames) {
+        const requested = new Set(dictionaryNames);
+        if (requested.size === 0) { return new Set(); }
+        const rows = this._requireDb().selectObjects('SELECT title, summaryJson FROM dictionaries');
+        const result = new Set();
+        for (const row of rows) {
+            const title = this._asString(row.title);
+            if (!requested.has(title)) { continue; }
+            const summary = this._safeParseJson(this._asString(row.summaryJson), null);
+            const termCount = this._asNumber(summary?.counts?.terms?.total, -1);
+            if (Number.isSafeInteger(termCount) && termCount === 0) {
+                result.add(title);
+            }
+        }
+        return result;
+    }
+
+    /**
      * @param {Iterable<string>} dictionaryNames
      * @returns {Promise<void>}
      */
     async _ensureDirectTermIndexesLoaded(dictionaryNames) {
         const names = this._getUniqueDictionaryNames(dictionaryNames);
+        const knownZeroTermDictionaries = this._getKnownZeroTermDictionaries(names);
         /** @type {Promise<void>[]} */
         const promises = [];
         /** @type {string[]} */
@@ -2704,6 +2729,13 @@ null;
                 this._directTermIndexLoadedDictionaryNames.has(dictionaryName) ||
                 this._directTermIndexByDictionary.has(dictionaryName)
             ) {
+                continue;
+            }
+            if (knownZeroTermDictionaries.has(dictionaryName)) {
+                // Frequency/tag/media-only dictionaries legitimately have no
+                // term-record shard. Treat that known-empty state as loaded so
+                // lookup preparation does not misclassify it as record loss.
+                this._directTermIndexLoadedDictionaryNames.add(dictionaryName);
                 continue;
             }
             const existing = this._directTermIndexLoadPromiseByDictionary.get(dictionaryName);
