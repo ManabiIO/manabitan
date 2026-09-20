@@ -1,0 +1,52 @@
+name: Screen bounded prefix sorts on real corpora
+
+on:
+  push:
+    branches: [research/lookup-continuation-20260920]
+    paths: [dev/perf/lookup-continuation/prefix-launch.txt]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Use exact correctness baseline and isolated measurement source
+        run: |
+          mkdir -p "$RUNNER_TEMP/prefix-continuation"
+          cp dev/perf/lookup-continuation/{prefix-corpus.mjs,apply-prefix.py} "$RUNNER_TEMP/prefix-continuation/"
+          git switch --detach 04e26523ec7fa8584a268d4cf2033024a004207f
+
+      - uses: ./.github/actions/setup
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Real-row Node and Chromium component ABBA/BAAB with A/A
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: node "$RUNNER_TEMP/prefix-continuation/prefix-corpus.mjs" "$DICTIONARY"
+
+      - name: Retain source without redistributing dictionary fixtures
+        if: always()
+        run: |
+          mkdir -p builds/prefix-corpus
+          cp "$RUNNER_TEMP/prefix-continuation/"* builds/prefix-corpus/
+          rm -f builds/prefix-corpus/input.zip builds/prefix-corpus/columns.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prefix-corpus-${{ matrix.dictionary }}
+          path: builds/prefix-corpus/
+          retention-days: 7
