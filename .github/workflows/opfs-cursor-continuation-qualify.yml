@@ -22,6 +22,7 @@ jobs:
       - name: Verify payload and construct clean tests-first branch
         run: |
           mkdir -p /tmp/opfs-continuation-evidence
+          cp review/opfs-existing-test-integration.patch /tmp/opfs-continuation-evidence/
           python3 - <<'PY'
           from pathlib import Path
           import base64, gzip, hashlib
@@ -50,31 +51,62 @@ jobs:
           import json
           from pathlib import Path
           data = json.loads(Path('/tmp/opfs-continuation-evidence/red.json').read_text())
-          print(data)
-          assert data['failed'] == 23, data
-          assert data['passed'] == 5, data
+          assert data['failed'] == 23 and data['passed'] == 5, data
+          failures = [case for case in data['results'] if not case['passed']]
+          assert all('AssertionError' in case['error'] for case in failures), failures
           PY
-      - name: Apply only correctness repairs and review documentation
+      - name: Apply correctness repairs and coherent adjacent test fixtures
         run: |
           git apply --check --exclude='test/*' /tmp/opfs-continuation-evidence/continuation.patch
           git apply --exclude='test/*' /tmp/opfs-continuation-evidence/continuation.patch
+          git apply --check /tmp/opfs-continuation-evidence/opfs-existing-test-integration.patch
+          git apply /tmp/opfs-continuation-evidence/opfs-existing-test-integration.patch
           node test/fixtures/opfs-continuation/check.mjs "$PWD" /tmp/opfs-continuation-evidence/green.json > /tmp/opfs-continuation-evidence/green.log 2>&1
       - run: npm ci
       - run: npm run build:libs
       - name: Focused storage and read-generation suites
+        id: focused
+        continue-on-error: true
         run: |
           npx vitest run test/term-content-cursor-recovery.test.js test/term-content-opfs-store.test.js test/term-record-opfs-store.test.js test/term-content-block-store.test.js test/term-content-cache-invalidation.test.js test/term-write-rejection-ownership.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/opfs-continuation-evidence/focused.json > /tmp/opfs-continuation-evidence/focused.log 2>&1
-      - name: Lint changed production source and test wrapper
+      - name: Lint every changed JavaScript source and wrapper
+        id: lint
+        continue-on-error: true
         run: |
-          npx eslint ext/js/dictionary/term-content-opfs-store.js test/term-content-cursor-recovery.test.js > /tmp/opfs-continuation-evidence/lint.log 2>&1
+          npx eslint ext/js/dictionary/term-content-opfs-store.js test/term-content-cursor-recovery.test.js test/term-content-cache-invalidation.test.js test/term-content-opfs-store.test.js > /tmp/opfs-continuation-evidence/lint.log 2>&1
       - name: All TypeScript projects
+        id: types
+        continue-on-error: true
         run: npm run test:ts > /tmp/opfs-continuation-evidence/types.log 2>&1
-      - name: Full unit and options suites
+      - name: Full unit suite
+        id: units
+        continue-on-error: true
         run: |
           npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=/tmp/opfs-continuation-evidence/full-unit.json > /tmp/opfs-continuation-evidence/full-unit.log 2>&1
-          npm run test:unit:options > /tmp/opfs-continuation-evidence/options.log 2>&1
+      - name: Options suite
+        id: options
+        continue-on-error: true
+        run: npm run test:unit:options > /tmp/opfs-continuation-evidence/options.log 2>&1
       - name: All-target dry build
+        id: build
+        continue-on-error: true
         run: npm run test:build > /tmp/opfs-continuation-evidence/build.log 2>&1
+      - name: Require every qualification gate before browser tests or publication
+        env:
+          FOCUSED: ${{ steps.focused.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          TYPES: ${{ steps.types.outcome }}
+          UNITS: ${{ steps.units.outcome }}
+          OPTIONS: ${{ steps.options.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+        run: |
+          python3 - <<'PY'
+          import os, json
+          from pathlib import Path
+          results = {key: os.environ[key] for key in ['FOCUSED', 'LINT', 'TYPES', 'UNITS', 'OPTIONS', 'BUILD']}
+          Path('/tmp/opfs-continuation-evidence/gates.json').write_text(json.dumps(results, indent=2))
+          assert all(value == 'success' for value in results.values()), results
+          PY
       - run: npx playwright install --with-deps chromium
       - name: Actual Chromium extension imports using native OPFS
         run: |
@@ -83,12 +115,15 @@ jobs:
           node dev/perf/import-benchmark.js jmnedict --runs 1 --no-build --output /tmp/opfs-continuation-evidence/import-jmnedict
       - name: Publish only the clean qualified correctness branch
         run: |
-          git add ext/js/dictionary/term-content-opfs-store.js dev/perf/opfs-cursor-recovery-20260920.md
+          git add ext/js/dictionary/term-content-opfs-store.js dev/perf/opfs-cursor-recovery-20260920.md test/term-content-cache-invalidation.test.js test/term-content-opfs-store.test.js
           git commit -m 'fix: preserve OPFS append cursors through snapshot and failure recovery'
           git diff 2438146bb22837963e7af7018ab702a70f5615b6 --stat > /tmp/opfs-continuation-evidence/diff-stat.txt
           git rev-parse HEAD > /tmp/opfs-continuation-evidence/fix-commit.txt
           sha256sum ext/js/dictionary/term-content-opfs-store.js > /tmp/opfs-continuation-evidence/source-sha256.txt
           git push origin HEAD:refs/heads/fix/opfs-cursor-recovery-20260920
+      - name: Preserve exact working diff
+        if: always()
+        run: git diff 2438146bb22837963e7af7018ab702a70f5615b6 > /tmp/opfs-continuation-evidence/exact-working.patch
       - uses: actions/upload-artifact@v4
         if: always()
         with:
