@@ -274,7 +274,7 @@ test('an old timeout cannot expire a replacement conversion', async (context) =>
     assert.equal(second.worker.terminations, 1);
 });
 
-for (const [completed, total] of [[-1, 1], [1, -1], [2, 1], [NaN, 1], [1, Infinity]]) {
+for (const [completed, total] of [[-1, 1], [1, -1], [2, 1], [Number.NaN, 1], [1, Infinity]]) {
     test(`invalid worker progress ${completed}/${total} rejects instead of poisoning UI state`, async () => {
         const {result, worker, client} = await start();
         worker.emit({action: 'progress', params: {details: {stage: 'convert', completed, total}}});
@@ -317,7 +317,11 @@ test('a late rejected read after timeout cannot alter a fresh conversion', async
 for (const stage of ['construction', 'posting']) {
     test(`${stage} failure releases client state and allows a retry`, async () => {
         const expected = new Error(`${stage} failed`);
-        if (stage === 'construction') { constructionError = expected; } else { postingError = expected; }
+        if (stage === 'construction') {
+            constructionError = expected;
+        } else {
+            postingError = expected;
+        }
         const client = createClient();
         await assert.rejects(client.convertDictionary({mdxFile: createFile()}), expected);
         assert.equal(client.isActive(), false);
