@@ -8,9 +8,13 @@ import {createHash} from 'node:crypto'
 
 const [source = '.', output] = process.argv.slice(2)
 const root = path.resolve(source)
+// eslint-disable-next-line no-unsanitized/method -- Differential tests load an explicitly selected trusted checkout.
 const index = await import(pathToFileURL(path.join(root, 'ext/js/dictionary/term-lookup-index.js')))
+// eslint-disable-next-line no-unsanitized/method -- Differential tests load an explicitly selected trusted checkout.
 const {createTermRecordPreinternedPlanBuilder: builder} = await import(pathToFileURL(path.join(root, 'ext/js/dictionary/term-record-preinterned-plan.js')))
+// eslint-disable-next-line no-unsanitized/method -- Differential tests load an explicitly selected trusted checkout.
 const {TermRecordOpfsStore: Store} = await import(pathToFileURL(path.join(root, 'ext/js/dictionary/term-record-opfs-store.js')))
+// eslint-disable-next-line no-unsanitized/method -- Differential tests load an explicitly selected trusted checkout.
 const {createNodeOpfs} = await import(pathToFileURL(path.join(root, 'test/fixtures/opfs-continuation/node-opfs-adapter.mjs')))
 const encoder = new TextEncoder()
 const results = []
@@ -24,7 +28,7 @@ async function check(name, run) {
 }
 function planFor(expression, reading, unused = false) {
     const b = builder(4)
-    if (unused) b.internStringBytes(encoder.encode('unused'))
+    if (unused) { b.internStringBytes(encoder.encode('unused')) }
     const e = b.internStringBytes(expression)
     const r = reading === null ? e : b.internStringBytes(reading)
     return b.buildPlan([e], [r])
@@ -34,7 +38,7 @@ function verify(bytes, expression, reading) {
     assert.deepEqual(index.getPersistedTermKeyBytes(parsed, 0, 'expression'), expression)
     assert.deepEqual(index.getPersistedTermKeyBytes(parsed, 0, 'reading'), reading)
     assert.deepEqual(index.findExactRows(parsed, expression, 'expression'), [0])
-    if (reading !== null) assert.deepEqual(index.findExactRows(parsed, reading, 'reading'), [0])
+    if (reading !== null) { assert.deepEqual(index.findExactRows(parsed, reading, 'reading'), [0]) }
     assert.deepEqual(index.findSequenceRows(parsed, 123), [0])
 }
 for (const length of [1, 65534, 65535]) {
@@ -84,8 +88,19 @@ for (const damage of ['none', 'derived', 'framing']) {
         try {
             const expression = '語'.repeat(21845)
             const expressionBytes = encoder.encode(expression)
-            const row = {dictionary: 'Long key', expression, reading: expression, expressionBytes, readingBytes: expressionBytes, readingEqualsExpression: true,
-                entryContentDictName: 'raw', entryContentOffset: 0, entryContentLength: 1, score: 7, sequence: 123}
+            const row = {
+                dictionary: 'Long key',
+                expression,
+                reading: expression,
+                expressionBytes,
+                readingBytes: expressionBytes,
+                readingEqualsExpression: true,
+                entryContentDictName: 'raw',
+                entryContentOffset: 0,
+                entryContentLength: 1,
+                score: 7,
+                sequence: 123,
+            }
             const original = new Store()
             await original.prepare()
             await original.beginImportSession()
@@ -115,8 +130,11 @@ for (const damage of ['none', 'derived', 'framing']) {
             await second.ensureDictionariesLoaded(['Long key'])
             assert.deepEqual(second.findTermIdsBySequence('Long key', 123), [1])
         } finally {
-            if (previous) Object.defineProperty(globalThis, 'navigator', previous)
-            else delete globalThis.navigator
+            if (previous) {
+                Object.defineProperty(globalThis, 'navigator', previous)
+            } else {
+                delete globalThis.navigator
+            }
             await env.dispose()
         }
     })
@@ -128,6 +146,6 @@ const result = {
     failed: results.filter((r) => !r.passed).length,
     results,
 }
-if (output) await writeFile(output, JSON.stringify(result, null, 2))
+if (output) { await writeFile(output, JSON.stringify(result, null, 2)) }
 console.log(JSON.stringify(result, null, 2))
-if (result.failed) process.exitCode = 1
+if (result.failed) { process.exitCode = 1 }
