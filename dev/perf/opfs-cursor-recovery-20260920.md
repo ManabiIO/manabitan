@@ -28,14 +28,14 @@ fence. Does not include the earlier record-store, raw-codec, or hash-reuse work.
 
 ## Deterministic qualification
 
-`node test/fixtures/opfs-continuation/check.mjs . /tmp/opfs-result.json`
+`node test/fixtures/opfs-continuation/check.js . /tmp/opfs-result.json`
 
 The identical 29-case runner reports 24 assertion failures / 5 passes against
 the exact PR #70 content-store blob, and 29 passes / zero failures locally with
 this source. Controlled File/stream boundaries use real temporary files with
 commit-on-close snapshots, not native OPFS. Timeouts are harness failures and
 must not be counted as behavioral RED. No assertions change between arms.
-The Vitest wrapper enrolls the runner in normal unit CI.
+The Vitest wrapper enrolls the runner in normal unit CI. The exact-head browser and repository qualification is recorded in [GitHub Actions run 35496124115](https://github.com/ManabiIO/manabitan/actions/runs/35496124115).
 
 ## Merge gate and remaining context
 
