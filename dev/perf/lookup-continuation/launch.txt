@@ -1,0 +1,3 @@
+Qualification attempt 1
+Pinned production baseline: 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108
+The workflow publishes only a new isolated fix branch after all gates pass. It does not merge or update develop.
