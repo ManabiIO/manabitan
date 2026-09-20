@@ -1,0 +1,31 @@
+name: Deep import review fixtures
+
+on:
+  push:
+    branches: [review/import-lookup-deep-20260920]
+    paths: [.github/workflows/deep-import-review-fixtures.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  fixtures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Fetch and verify locked dictionaries
+        run: |
+          node --input-type=module -e 'import {ensurePinnedDictionaryCache} from "./dev/perf/dictionary-fixtures.js"; console.log(JSON.stringify(await ensurePinnedDictionaryCache("/tmp/manabitan-review-fixtures"), null, 2))'
+          cp test/perf/dictionaries.lock.json /tmp/manabitan-review-fixtures/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deep-import-review-fixtures
+          path: /tmp/manabitan-review-fixtures/
+          retention-days: 3
+          compression-level: 0
