@@ -25,6 +25,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/search-r5/payload" "$RUNNER_TEMP/search-r5/results"
           cp --parents dev/review/search-r5/fix.patch test/util/search-refresh-cases.js test/search-refresh-input.test.js test/playwright/search-refresh.spec.js docs/development/search-refresh.md .github/workflows/search-refresh.yml "$RUNNER_TEMP/search-r5/payload/"
+          python -c "from pathlib import Path; p=Path('$RUNNER_TEMP/search-r5/payload/test/util/search-refresh-cases.js'); s=p.read_text(); assert s.count('const token = {};') == 2; p.write_text(s.replace('const token = {};', \"const token = /** @type {import('core').TokenObject} */ ({});\"))"
           git checkout --detach c3bf83aaca965b07b4223c1e065663fefdbf1429
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -54,10 +55,10 @@ jobs:
           test "$(git hash-object ext/js/display/search-display-controller.js)" = 'a3a2617699587f3924801c6a4a89a3097e9652e7'
           test "$(git hash-object types/ext/display.d.ts)" = '38f27ff5f7ab15d4e91e3d2d6b84111f3ebe4ab8'
           node --test --test-reporter=tap test/util/search-refresh-cases.js | tee "$RUNNER_TEMP/search-r5/results/green.tap"
-          npx vitest run test/search-refresh-input.test.js test/search-display-controller.test.js test/display-lookup-refresh.test.js test/display-database-updated.test.js
-          npx eslint ext/js/display/display.js ext/js/display/search-display-controller.js test/util/search-refresh-cases.js test/search-refresh-input.test.js test/playwright/search-refresh.spec.js
-          npm run test:ts
-          npm run test:build
+          npx vitest run test/search-refresh-input.test.js test/search-display-controller.test.js test/display-lookup-refresh.test.js test/display-database-updated.test.js | tee "$RUNNER_TEMP/search-r5/results/vitest.log"
+          npx eslint ext/js/display/display.js ext/js/display/search-display-controller.js test/util/search-refresh-cases.js test/search-refresh-input.test.js test/playwright/search-refresh.spec.js 2>&1 | tee "$RUNNER_TEMP/search-r5/results/lint.log"
+          npm run test:ts 2>&1 | tee "$RUNNER_TEMP/search-r5/results/types.log"
+          npm run test:build 2>&1 | tee "$RUNNER_TEMP/search-r5/results/build.log"
       - name: Publish only the qualified source and tests to a new review branch
         run: |
           set -euo pipefail
