@@ -23,7 +23,9 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - run: python3 dev/perf/glossary-semantics-repair.py
+      - run: |
+          python3 dev/perf/glossary-semantics-repair.py
+          python3 dev/perf/glossary-materialized-repair.py
       - uses: ./.github/actions/setup
         with:
           node-version: '22'
@@ -66,9 +68,10 @@ jobs:
           set -e
           test "$result" -eq 1
           node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('builds/glossary-native/red.json')); if(!r.results.some(x=>x.name==='import has no errors and uses native storage'&&x.passed)||r.results.length!==21) process.exit(1)"
-      - name: Run identical acceptance after repairs
+      - name: Run identical acceptance after all repairs
         run: |
           python3 dev/perf/glossary-semantics-repair.py
+          python3 dev/perf/glossary-materialized-repair.py
           npm run build:libs
           npm run build -- --target chrome-dev
           mkdir -p builds/glossary-native/green-extension

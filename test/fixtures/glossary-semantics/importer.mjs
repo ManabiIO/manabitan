@@ -61,11 +61,55 @@ for (const skipImageMetadata of [false, true]) {
             const requirements = []
             const bank = encoder.encode(`[["猫","ねこ","","",1,${glossary},41,""]]`)
             await importer._readTermBankFileFast(
-                {filename: 'term_bank_1.json'}, 3, 'Semantics', false, true, true, 'raw-bytes',
-                (_rows, chunkRequirements) => { requirements.push(...(chunkRequirements ?? [])) }, bank,
+                {filename: 'term_bank_1.json'},
+                3,
+                'Semantics',
+                false,
+                true,
+                true,
+                'raw-bytes',
+                (_rows, chunkRequirements) => { requirements.push(...(chunkRequirements ?? [])) },
+                bank,
             )
             assert.deepEqual(requirements.map(({source}) => source.path).sort(), expected.sort())
         })
+    }
+}
+const normalizedGlossaries = [
+    ['duplicate final type', '[{"type":"image","type":"text","text":"RIGHT"}]', ['RIGHT']],
+    ['media marker in string', '["image",{"type":"text","text":"RIGHT"}]', ['image', 'RIGHT']],
+    ['media marker as text', '[{"type":"text","text":"image"}]', ['image']],
+    ['escaped duplicate type', '[{"type":"image","ty\\u0070e":"text","text":"RIGHT"}]', ['RIGHT']],
+    ['empty glossary control', '[]', []],
+]
+for (const skipImageMetadata of [false, true]) {
+    for (const [dedup, passThrough, precomputed] of [[true, true, true], [true, true, false], [false, true, true], [true, false, false]]) {
+        for (const [name, glossary, expected] of normalizedGlossaries) {
+            await check(`materialized serialization: ${name}; skipMetadata=${skipImageMetadata}; dedup=${dedup}; pass=${passThrough}; precomputed=${precomputed}`, async () => {
+                const importer = makeImporter()
+                importer._skipImageMetadata = skipImageMetadata
+                importer._wasmPassThroughTermContent = passThrough
+                importer._usePrecomputedContentForMediaRows = precomputed
+                const requirements = []
+                const entries = []
+                const bank = encoder.encode(`[["猫","ねこ","tag","rule",1,${glossary},41,"term"]]`)
+                await importer._readTermBankFileFast(
+                    {filename: 'term_bank_1.json'}, 3, 'Semantics', false, true, dedup, 'baseline',
+                    (rows, chunkRequirements) => {
+                        entries.push(...rows)
+                        requirements.push(...(chunkRequirements ?? []))
+                    }, bank,
+                )
+                assert.deepEqual(requirements, [])
+                assert.equal(entries.length, 1)
+                const entry = entries[0]
+                const payload = importer._parseTermEntryContentFromFastRow(entry, 'term_bank_1.json')
+                assert.deepEqual(payload.glossary, expected)
+                assert.deepEqual([payload.rules, payload.definitionTags, payload.termTags], ['rule', 'tag', 'term'])
+                assert.deepEqual([entry.expression, entry.reading, entry.score, entry.sequence], ['猫', 'ねこ', 1, 41])
+                if (typeof entry.glossaryJson === 'string') { assert.deepEqual(JSON.parse(entry.glossaryJson), expected) }
+            })
+        }
     }
 }
 const report = {passed: results.filter((r) => r.passed).length, failed: results.filter((r) => !r.passed).length, results}

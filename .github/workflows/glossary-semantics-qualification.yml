@@ -5,7 +5,7 @@ on:
     branches: [review/glossary-semantics-20260920]
     paths:
       - '.github/workflows/glossary-semantics-qualification.yml'
-      - 'dev/perf/glossary-semantics-repair.py'
+      - 'dev/perf/glossary-*-repair.py'
       - 'test/fixtures/glossary-semantics/**'
       - 'test/term-bank-glossary-semantics.test.js'
   workflow_dispatch:
@@ -43,16 +43,26 @@ jobs:
           test "$native_code" -eq 1
           test "$importer_code" -eq 1
           node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('builds/glossary-semantics/red-native.json')); if(r.passed!==42||r.failed!==279) process.exit(1)"
-          node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('builds/glossary-semantics/red-importer.json')); if(r.failed===0||r.results.length!==14) process.exit(1)"
-      - name: Apply isolated repairs and rebuild native module
+          node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('builds/glossary-semantics/red-importer.json')); if(r.failed===0||r.results.length!==54) process.exit(1)"
+      - name: Qualify native and path repairs before serialization repair
         shell: bash
         run: |
           python3 dev/perf/glossary-semantics-repair.py
-          echo 'bb183a1299b5474f9986c372f73f0e434b78a177c9738bfa6936a0b64bd7394c  ext/js/dictionary/wasm/term-bank-parser.c' | sha256sum --check
-          echo 'a4f6432ac5006c88784e72cfc92ccb17ed10dee522ba4c5a6328d840eb61d64c  ext/js/dictionary/dictionary-importer.js' | sha256sum --check
-          git diff --binary -- ext/js/dictionary/wasm/term-bank-parser.c ext/js/dictionary/dictionary-importer.js > builds/glossary-semantics/production.patch
           npm run build:libs
           node test/fixtures/glossary-semantics/check.mjs . builds/glossary-semantics/green-native.json > builds/glossary-semantics/green-native.log 2>&1
+          set +e
+          node test/fixtures/glossary-semantics/importer.mjs . builds/glossary-semantics/intermediate-importer.json > builds/glossary-semantics/intermediate-importer.log 2>&1
+          code=$?
+          set -e
+          test "$code" -eq 1
+          node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('builds/glossary-semantics/intermediate-importer.json')); if(r.passed!==22||r.failed!==32) process.exit(1)"
+      - name: Repair materialized serialization and verify all cases
+        shell: bash
+        run: |
+          python3 dev/perf/glossary-materialized-repair.py
+          echo 'bb183a1299b5474f9986c372f73f0e434b78a177c9738bfa6936a0b64bd7394c  ext/js/dictionary/wasm/term-bank-parser.c' | sha256sum --check
+          echo 'be39227c84f7b0cafa32b30abfec77e86e7e11a1e51eef4cca911721e39fed20  ext/js/dictionary/dictionary-importer.js' | sha256sum --check
+          git diff --binary -- ext/js/dictionary/wasm/term-bank-parser.c ext/js/dictionary/dictionary-importer.js > builds/glossary-semantics/production.patch
           node test/fixtures/glossary-semantics/importer.mjs . builds/glossary-semantics/green-importer.json > builds/glossary-semantics/green-importer.log 2>&1
       - name: Format fixture style and verify lint
         run: |
@@ -82,7 +92,7 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
-  publish-review-branch:
+  update-review-branch:
     needs: qualify
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -91,24 +101,23 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: c3bf83aaca965b07b4223c1e065663fefdbf1429
+          ref: fix/glossary-json-semantics-20260920
       - uses: actions/download-artifact@v4
         with:
           name: glossary-semantics-qualification
           path: /tmp/glossary-semantics
-      - name: Publish tests-first and fixes without merging
+      - name: Publish additional tests and repair on PR 83 only
         shell: bash
         run: |
-          branch=fix/glossary-json-semantics-20260920
-          test -z "$(git ls-remote --heads origin "$branch")"
-          git switch -c "$branch"
+          test "$(git rev-parse HEAD)" = a755a66e528f36f0a54c6c046d7d4af76ea83c98
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           tar -xzf /tmp/glossary-semantics/tests.tar.gz
           git add test/term-bank-glossary-semantics.test.js test/fixtures/glossary-semantics
-          git commit -m 'test: reproduce escaped glossary media and duplicate-property normalization'
-          git apply --check /tmp/glossary-semantics/production.patch
-          git apply /tmp/glossary-semantics/production.patch
-          git add ext/js/dictionary/wasm/term-bank-parser.c ext/js/dictionary/dictionary-importer.js
-          git commit -m 'fix: preserve decoded glossary identity and complete media requirements'
-          git push origin "HEAD:refs/heads/$branch"
+          git commit -m 'test: reproduce materialized glossary serialization after conservative hints'
+          git apply --check /tmp/glossary-semantics/followup.patch
+          git apply /tmp/glossary-semantics/followup.patch
+          echo 'be39227c84f7b0cafa32b30abfec77e86e7e11a1e51eef4cca911721e39fed20  ext/js/dictionary/dictionary-importer.js' | sha256sum --check
+          git add ext/js/dictionary/dictionary-importer.js
+          git commit -m 'fix: retain formatted glossary through final content serialization'
+          git push origin HEAD:refs/heads/fix/glossary-json-semantics-20260920
