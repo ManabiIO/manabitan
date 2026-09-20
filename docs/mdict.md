@@ -57,6 +57,3 @@ are distinct referenced archive keys, not missing volumes or missing definitions
 read-failure and missing-resource counts can overlap. Notes do not prove that
 installation committed, and are not installation errors. They clear when the next
 import batch starts. Definitions with no resource references need no MDD warning.
-
-Automatic refreshes of displayed search results preserve unsent text, selection,
-and focus. Explicit searches and history navigation retain normal input updates.
