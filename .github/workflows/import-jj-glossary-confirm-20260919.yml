@@ -1,0 +1,77 @@
+name: Original dictionary glossary reuse confirmation
+on:
+  push:
+    branches: [research/import-jitendex-jmdict-20260919]
+    paths: [.github/workflows/import-jj-glossary-confirm-20260919.yml]
+permissions:
+  contents: read
+jobs:
+  confirmation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jitendex, jmdict]
+        order: [AB, BA]
+    env:
+      MANABITAN_CLANG: clang-18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Checksum-verify unchanged publisher archives
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('builds/e2e-dictionary-cache');"
+      - name: Run fixed cohorts with all raw observations retained
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          ORDER: ${{ matrix.order }}
+        run: python dev/perf/jj-glossary-confirm.py --dictionary "$DICTIONARY" --initial-order "$ORDER" --blocks 6 --out "$RUNNER_TEMP/glossary-confirm"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: glossary-confirm-${{ matrix.dictionary }}-${{ matrix.order }}
+          path: ${{ runner.temp }}/glossary-confirm
+          retention-days: 30
+          if-no-files-found: error
+  corpus-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jitendex, jmdict]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 54ac62a39386459b7822fc644e5a1a6b1a619619
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: MANABITAN_CLANG=clang-18 npm run build:libs
+      - run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('builds/e2e-dictionary-cache');"
+      - name: Check every canonical row and lookup byte outside component timing
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          node dev/perf/import-lookup-screen.js "$DICTIONARY" --pairs 2 --flags '{"experimentalValidatedGlossaryReuse":true}' --out evidence/corpus-parity.json > evidence/corpus.log 2>&1
+          node node_modules/vitest/vitest.mjs run test/term-bank-experiments.test.js test/term-bank-composite-state.test.js test/term-bank-parser-string-scan.test.js --no-file-parallelism > evidence/focused.log 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: glossary-parity-${{ matrix.dictionary }}
+          path: evidence
+          retention-days: 30
+          if-no-files-found: error
