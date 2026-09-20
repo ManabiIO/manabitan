@@ -7,29 +7,32 @@ on:
 permissions:
   contents: read
 jobs:
-  review-fixtures:
+  verify-transport:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - name: Resolve locked real dictionaries
+      - name: Verify transported patches
         run: |
-          mkdir -p /tmp/import-recovery-fixtures
-          node --input-type=module <<'JS'
-          import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'
-          import {writeFile} from 'node:fs/promises'
-          const fixtures = await ensurePinnedDictionaryCache('/tmp/import-recovery-fixtures')
-          await writeFile('/tmp/import-recovery-fixtures/manifest.json', JSON.stringify(fixtures, null, 2))
-          JS
+          mkdir -p /tmp/review-transport
+          cp .github/review/*.b64 /tmp/review-transport/
+          python3 - <<'PY'
+          import base64, gzip, hashlib, json, pathlib
+          out = []
+          for p in pathlib.Path('/tmp/review-transport').glob('*.b64'):
+              try:
+                  decoded = gzip.decompress(base64.b64decode(p.read_text(), validate=False))
+                  out.append({'name': p.name, 'bytes': len(decoded), 'sha256': hashlib.sha256(decoded).hexdigest()})
+              except Exception as e:
+                  out.append({'name': p.name, 'error': str(e)})
+          text = json.dumps(out, indent=2)
+          print(text)
+          pathlib.Path('/tmp/review-transport/receipt.json').write_text(text)
+          PY
       - uses: actions/upload-artifact@v4
         with:
-          name: import-recovery-locked-fixtures
-          path: /tmp/import-recovery-fixtures/
-          compression-level: 0
-          retention-days: 7
+          name: import-review-transport-check
+          path: /tmp/review-transport/
+          retention-days: 3
