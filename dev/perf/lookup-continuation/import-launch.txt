@@ -1,0 +1,4 @@
+Sequence table candidate screen, attempt 1
+Ten fresh-profile complete Chromium imports per dictionary: initial A/A control, ABBA, BAAB.
+Pinned baseline 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108 with identical long-key correctness fix in both arms.
+Only the experimental arm doubles the temporary sequence table. No default flag, parser, storage format, or codec change. No promotion or automatic product branch publication.
