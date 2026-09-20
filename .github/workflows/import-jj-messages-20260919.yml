@@ -1,0 +1,39 @@
+name: Original dictionary compressor transport screen
+on:
+  push:
+    branches: [research/import-jitendex-jmdict-20260919]
+    paths: [.github/workflows/import-jj-messages-20260919.yml]
+permissions:
+  contents: read
+jobs:
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jitendex, jmdict]
+    env:
+      MANABITAN_CLANG: clang-18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Fixed unchanged-source-block comparisons
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: python dev/perf/jj-message-screen.py --dictionary "$DICTIONARY" --blocks 2 --out "$RUNNER_TEMP/jj-messages"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jj-message-screen-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/jj-messages
+          retention-days: 21
+          if-no-files-found: error
