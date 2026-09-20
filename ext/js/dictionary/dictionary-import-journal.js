@@ -58,6 +58,12 @@ export class DictionaryImportJournal {
         if (!this._isRecord(record)) {
             throw new Error('Invalid dictionary import journal record');
         }
+        // Freeze the admitted checkpoint bytes before the first asynchronous
+        // boundary; callers may otherwise mutate a previously validated record.
+        const content = JSON.stringify(record);
+        if (!this._isRecord(parseJson(content))) {
+            throw new Error('Invalid serialized dictionary import journal record');
+        }
         const root = await this._getRoot();
         if (root === null) {
             throw new Error('Dictionary import journal requires OPFS');
@@ -65,7 +71,7 @@ export class DictionaryImportJournal {
         const handle = await root.getFileHandle(FILE_NAME, {create: true});
         const writable = await handle.createWritable();
         try {
-            await writable.write(JSON.stringify(record));
+            await writable.write(content);
             await writable.close();
         } catch (error) {
             const writeError = error instanceof Error ? error : new Error(String(error));
