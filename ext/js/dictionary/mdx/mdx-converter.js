@@ -73,6 +73,10 @@ const ZipWriter = /** @type {typeof import('@zip.js/zip.js').ZipWriter} */ (/** 
  */
 
 const MDX_GLOSSARY_ROOT_CLASS = 'mdict-yomitan-content';
+const STRUCTURED_CLASS_ATTR = 'data-sc-class';
+const STRUCTURED_ID_ATTR = 'data-sc-id';
+const STRUCTURED_TAG_ATTR = 'data-sc-tag';
+const STRUCTURED_ROOT_SELECTOR = `[${STRUCTURED_CLASS_ATTR}~="${MDX_GLOSSARY_ROOT_CLASS}"]`;
 const SUPPORTED_STRUCTURED_TAGS = new Set([
     'a',
     'br',
@@ -527,6 +531,420 @@ function rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetRefe
 }
 
 /**
+ * @param {string} selectorText
+ * @returns {string[]}
+ */
+function splitCssSelectorList(selectorText) {
+    const selectors = [];
+    let partStart = 0;
+    let parenDepth = 0;
+    let bracketDepth = 0;
+    let quote = '';
+    for (let index = 0; index < selectorText.length; index += 1) {
+        const character = selectorText[index];
+        if (quote.length > 0) {
+            if (character === '\\') {
+                index += 1;
+            } else if (character === quote) {
+                quote = '';
+            }
+            continue;
+        }
+        switch (character) {
+            case '"':
+            case "'": {
+                quote = character;
+
+                break;
+            }
+            case '(': {
+                parenDepth += 1;
+
+                break;
+            }
+            case ')': {
+                parenDepth = Math.max(0, parenDepth - 1);
+
+                break;
+            }
+            case '[': {
+                bracketDepth += 1;
+
+                break;
+            }
+            case ']': {
+                bracketDepth = Math.max(0, bracketDepth - 1);
+
+                break;
+            }
+            default: if (character === ',' && parenDepth === 0 && bracketDepth === 0) {
+                selectors.push(selectorText.slice(partStart, index));
+                partStart = index + 1;
+            }
+        }
+    }
+    selectors.push(selectorText.slice(partStart));
+    return selectors;
+}
+
+/**
+ * @param {string} selector
+ * @returns {string[]}
+ */
+function splitSelectorByCombinators(selector) {
+    const parts = [];
+    let startIndex = 0;
+    let quote = '';
+    let parenDepth = 0;
+    let bracketDepth = 0;
+    for (let index = 0; index < selector.length; index += 1) {
+        const character = selector[index];
+        if (quote.length > 0) {
+            if (character === '\\') {
+                index += 1;
+            } else if (character === quote) {
+                quote = '';
+            }
+            continue;
+        }
+        switch (character) {
+            case '"':
+            case "'": {
+                quote = character;
+
+                break;
+            }
+            case '(': {
+                parenDepth += 1;
+
+                break;
+            }
+            case ')': {
+                parenDepth = Math.max(0, parenDepth - 1);
+
+                break;
+            }
+            case '[': {
+                bracketDepth += 1;
+
+                break;
+            }
+            case ']': {
+                bracketDepth = Math.max(0, bracketDepth - 1);
+
+                break;
+            }
+            default: if (parenDepth === 0 && bracketDepth === 0 && ['>', '+', '~'].includes(character)) {
+                if (startIndex < index) { parts.push(selector.slice(startIndex, index)); }
+                parts.push(character);
+                startIndex = index + 1;
+            } else if (parenDepth === 0 && bracketDepth === 0 && /\s/u.test(character)) {
+                if (startIndex < index) { parts.push(selector.slice(startIndex, index)); }
+                const whitespaceStart = index;
+                while (index + 1 < selector.length && /\s/u.test(selector[index + 1])) { index += 1; }
+                parts.push(selector.slice(whitespaceStart, index + 1));
+                startIndex = index + 1;
+            }
+        }
+    }
+    if (startIndex < selector.length) { parts.push(selector.slice(startIndex)); }
+    return parts;
+}
+
+/**
+ * @param {string} selector
+ * @param {number} startIndex
+ * @returns {{value: string|null, endIndex: number}}
+ */
+function readCssIdentifier(selector, startIndex) {
+    const match = selector.slice(startIndex).match(/^-?(?:[A-Za-z_]|\p{L})(?:[A-Za-z0-9_-]|\p{L}|\p{N})*/u);
+    return match === null ? {value: null, endIndex: startIndex} : {value: match[0], endIndex: startIndex + match[0].length};
+}
+
+/**
+ * @param {string} attributeSelector
+ * @returns {string}
+ */
+function rewriteCssAttributeSelector(attributeSelector) {
+    const match = attributeSelector.match(/^\[\s*(?<name>[-\w]+)(?<rest>[\s\S]*)\]$/u);
+    if (match === null) { return attributeSelector; }
+    const name = match.groups.name.toLowerCase();
+    const replacement = name === 'class' ? STRUCTURED_CLASS_ATTR : (name === 'id' ? STRUCTURED_ID_ATTR : null);
+    return replacement === null ? attributeSelector : `[${replacement}${match.groups.rest}]`;
+}
+
+/**
+ * @param {string} selector
+ * @param {string} glossaryRootSelector
+ * @returns {string}
+ */
+function migrateCssSelectorSegment(selector, glossaryRootSelector) {
+    if (selector.length === 0) { return selector; }
+    const parts = [];
+    let index = 0;
+    let expectTagName = true;
+    while (index < selector.length) {
+        const character = selector[index];
+        if (character === ':' && selector.startsWith(':root', index)) {
+            parts.push(glossaryRootSelector);
+            index += 5;
+            expectTagName = false;
+            continue;
+        }
+        if (character === '.') {
+            const {value, endIndex} = readCssIdentifier(selector, index + 1);
+            if (value !== null) {
+                parts.push(`[${STRUCTURED_CLASS_ATTR}~="${value}"]`);
+                index = endIndex;
+                expectTagName = false;
+                continue;
+            }
+        }
+        if (character === '#') {
+            const {value, endIndex} = readCssIdentifier(selector, index + 1);
+            if (value !== null) {
+                parts.push(`[${STRUCTURED_ID_ATTR}="${value}"]`);
+                index = endIndex;
+                expectTagName = false;
+                continue;
+            }
+        }
+        if (character === '[') {
+            let endIndex = index + 1;
+            let quote = '';
+            let bracketDepth = 1;
+            while (endIndex < selector.length) {
+                const inner = selector[endIndex];
+                if (quote.length > 0) {
+                    if (inner === '\\') {
+                        endIndex += 2;
+                        continue;
+                    }
+                    if (inner === quote) { quote = ''; }
+                } else {
+                    switch (inner) {
+                        case '"':
+                        case "'":
+                            quote = inner;
+                            break;
+                        case '[':
+                            bracketDepth += 1;
+                            break;
+                        case ']':
+                            bracketDepth -= 1;
+                            break;
+                        default:
+                            break;
+                    }
+                    if (bracketDepth === 0) {
+                        endIndex += 1;
+                        break;
+                    }
+                }
+                endIndex += 1;
+            }
+            parts.push(rewriteCssAttributeSelector(selector.slice(index, endIndex)));
+            index = endIndex;
+            expectTagName = false;
+            continue;
+        }
+        if (expectTagName) {
+            if (character === '*') {
+                parts.push(character);
+                index += 1;
+                expectTagName = false;
+                continue;
+            }
+            const {value, endIndex} = readCssIdentifier(selector, index);
+            if (value !== null) {
+                const lower = value.toLowerCase();
+                parts.push(['html', 'body'].includes(lower) ? glossaryRootSelector : `[${STRUCTURED_TAG_ATTR}="${lower}"]`);
+                index = endIndex;
+                expectTagName = false;
+                continue;
+            }
+        }
+        parts.push(character);
+        if (!/\s/u.test(character)) {
+            expectTagName = false;
+        }
+        index += 1;
+    }
+    return parts.join('');
+}
+
+/**
+ * @param {string} selector
+ * @param {string} glossaryRootSelector
+ * @returns {string}
+ */
+function migrateCssSelector(selector, glossaryRootSelector) {
+    const migrated = splitSelectorByCombinators(selector.trim()).map((part) => {
+        if (part.trim().length === 0 || ['>', '+', '~'].includes(part)) { return part; }
+        return migrateCssSelectorSegment(part, glossaryRootSelector);
+    }).join('');
+    return migrated.replace(/\s+/gu, ' ').trim();
+}
+
+/**
+ * @param {string} stylesheet
+ * @param {number} blockStartIndex
+ * @returns {number}
+ */
+function findMatchingCssBrace(stylesheet, blockStartIndex) {
+    let depth = 0;
+    let quote = '';
+    for (let index = blockStartIndex; index < stylesheet.length; index += 1) {
+        const character = stylesheet[index];
+        if (stylesheet.startsWith('/*', index)) {
+            const commentEnd = stylesheet.indexOf('*/', index + 2);
+            if (commentEnd < 0) {
+                return stylesheet.length - 1;
+            }
+            index = commentEnd + 1;
+            continue;
+        }
+        if (quote.length > 0) {
+            if (character === '\\') {
+                index += 1;
+            } else if (character === quote) {
+                quote = '';
+            }
+            continue;
+        }
+        if (character === '"' || character === "'") {
+            quote = character;
+        } else if (character === '{') {
+            depth += 1;
+        } else if (character === '}' && --depth === 0) {
+            return index;
+        }
+    }
+    return stylesheet.length - 1;
+}
+
+/**
+ * Rewrite selectors to match structured-content data attributes. Declaration
+ * blocks are otherwise retained verbatim so CSS properties and at-rules stay intact.
+ * @param {string} stylesheet
+ * @param {string} glossaryRootSelector
+ * @returns {string}
+ */
+function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector) {
+    const output = [];
+    let index = 0;
+    while (index < stylesheet.length) {
+        let preludeStart = index;
+        while (preludeStart < stylesheet.length) {
+            if (stylesheet.startsWith('/*', preludeStart)) {
+                const commentEnd = stylesheet.indexOf('*/', preludeStart + 2);
+                if (commentEnd < 0) {
+                    output.push(stylesheet.slice(index));
+                    return output.join('');
+                }
+                preludeStart = commentEnd + 2;
+                continue;
+            }
+            if (/\s/u.test(stylesheet[preludeStart])) {
+                preludeStart += 1;
+                continue;
+            }
+            break;
+        }
+        output.push(stylesheet.slice(index, preludeStart));
+        if (preludeStart >= stylesheet.length) { break; }
+        let cursor = preludeStart;
+        let consumed = false;
+        let quote = '';
+        let parenDepth = 0;
+        let bracketDepth = 0;
+        while (cursor < stylesheet.length) {
+            const character = stylesheet[cursor];
+            if (stylesheet.startsWith('/*', cursor)) {
+                const commentEnd = stylesheet.indexOf('*/', cursor + 2);
+                if (commentEnd < 0) {
+                    output.push(stylesheet.slice(preludeStart));
+                    return output.join('');
+                }
+                cursor = commentEnd + 2;
+                continue;
+            }
+            if (quote.length > 0) {
+                if (character === '\\') {
+                    cursor += 2;
+                    continue;
+                }
+                if (character === quote) { quote = ''; }
+                cursor += 1;
+                continue;
+            }
+            // The delimiter cases below intentionally share cursor state.
+            // eslint-disable-next-line unicorn/prefer-switch
+            if (character === '"' || character === "'") {
+                quote = character;
+            } else if (character === '(') {
+                parenDepth += 1;
+            } else if (character === ')') {
+                parenDepth = Math.max(0, parenDepth - 1);
+            } else if (character === '[') {
+                bracketDepth += 1;
+            } else if (character === ']') {
+                bracketDepth = Math.max(0, bracketDepth - 1);
+            } else if (character === ';' && parenDepth === 0 && bracketDepth === 0) {
+                output.push(stylesheet.slice(preludeStart, cursor + 1));
+                index = cursor + 1;
+                consumed = true;
+                break;
+            } else if (character === '{' && parenDepth === 0 && bracketDepth === 0) {
+                const prelude = stylesheet.slice(preludeStart, cursor);
+                const blockEnd = findMatchingCssBrace(stylesheet, cursor);
+                let body = stylesheet.slice(cursor + 1, blockEnd);
+                const stripped = prelude.trim();
+                if (stripped.startsWith('@')) {
+                    const atRuleName = stripped.slice(1).split(/\s|\(/u, 1)[0].toLowerCase();
+                    if (['media', 'supports', 'layer', 'container', 'document'].includes(atRuleName)) {
+                        body = rewriteCssRuleSelectors(body, glossaryRootSelector);
+                    }
+                    output.push(`${prelude}{${body}}`);
+                } else {
+                    const migratedSelectors = [];
+                    const seen = new Set();
+                    for (const part of splitCssSelectorList(prelude)) {
+                        const migrated = migrateCssSelector(part, glossaryRootSelector);
+                        if (migrated.length > 0 && !seen.has(migrated)) {
+                            seen.add(migrated);
+                            migratedSelectors.push(migrated);
+                        }
+                    }
+                    output.push(`${migratedSelectors.join(', ')}{${body}}`);
+                }
+                index = blockEnd + 1;
+                consumed = true;
+                break;
+            }
+            cursor += 1;
+        }
+        if (!consumed) {
+            output.push(stylesheet.slice(preludeStart));
+            break;
+        }
+    }
+    return output.join('');
+}
+
+/**
+ * @param {string} stylesheet
+ * @param {string} assetPrefix
+ * @param {string|null} sourceAssetPath
+ * @param {Set<string>|null} assetReferences
+ * @returns {string}
+ */
+function migrateStylesheetForYomitan(stylesheet, assetPrefix, sourceAssetPath, assetReferences = null) {
+    const rewritten = rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetReferences);
+    return rewriteCssRuleSelectors(rewritten, STRUCTURED_ROOT_SELECTOR);
+}
+
+/**
  * @param {Map<string, Uint8Array>} cssAssets
  * @param {string} assetPrefix
  * @param {Array<[string, string]>} inlineStylesheets
@@ -537,13 +955,14 @@ function buildRootStylesheet(cssAssets, assetPrefix, inlineStylesheets, assetRef
     /** @type {string[]} */
     const sections = [];
     for (const [archivePath, bytes] of [...cssAssets.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
-        const stylesheet = decodeStylesheetAsset(bytes);
+        let stylesheet = decodeStylesheetAsset(bytes);
         if (stylesheet === null) { continue; }
         const sourceName = archivePath.startsWith(assetPrefix) ? archivePath.slice(assetPrefix.length) : archivePath;
-        sections.push(`/* Source: ${sourceName} */\n${rewriteCssAssetUrls(stylesheet, assetPrefix, sourceName, assetReferences)}`);
+        stylesheet = migrateStylesheetForYomitan(stylesheet, assetPrefix, sourceName, assetReferences);
+        sections.push(`/* Source: ${sourceName} */\n${stylesheet}`);
     }
     for (const [sourceName, stylesheet] of inlineStylesheets) {
-        sections.push(`/* Source: ${sourceName} */\n${rewriteCssAssetUrls(stylesheet, assetPrefix, null, assetReferences)}`);
+        sections.push(`/* Source: ${sourceName} */\n${migrateStylesheetForYomitan(stylesheet, assetPrefix, null, assetReferences)}`);
     }
     return sections.length > 0 ? `${sections.join('\n\n')}\n` : null;
 }
