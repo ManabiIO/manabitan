@@ -485,6 +485,42 @@ describe('convertMdxToArchive', () => {
         expect(lookupKeys).toStrictEqual(['images/space name.png', 'images/bad%ZZname.png']);
     });
 
+    test('preserves binary data URL bytes and resolves root and prefixed CSS paths', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Binary asset fixture',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Embedded',
+                definition: '<div><img src="data:application/octet-stream,%00%FF%80"></div>',
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'styles/theme.css', value: new TextEncoder().encode('.theme{background:url("/images/root.bin")} .prefixed{background:url("mdict-media/images/prefixed.bin")}')},
+            {keyText: 'images/root.bin', value: Uint8Array.of(1, 2, 3)},
+            {keyText: 'images/prefixed.bin', value: Uint8Array.of(4, 5, 6)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'binary-assets.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'binary-assets.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const stylesCss = await zip.file('styles.css')?.async('text');
+        const embeddedPath = [...Object.keys(zip.files)].find((path) => path.startsWith('mdict-media/embedded/application/'));
+
+        expect(stylesCss).toContain('url("mdict-media/images/root.bin")');
+        expect(stylesCss).toContain('url("mdict-media/images/prefixed.bin")');
+        expect(await zip.file('mdict-media/images/root.bin')?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
+        expect(await zip.file('mdict-media/images/prefixed.bin')?.async('uint8array')).toStrictEqual(Uint8Array.of(4, 5, 6));
+        expect(embeddedPath).toBeDefined();
+        if (typeof embeddedPath !== 'string') { throw new Error('Expected embedded asset path'); }
+        expect(await zip.file(embeddedPath)?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
+    });
+
     test('keeps malformed data URLs and empty dictionaries non-throwing', async () => {
         mockState.mdxFactory = () => ({
             header: {

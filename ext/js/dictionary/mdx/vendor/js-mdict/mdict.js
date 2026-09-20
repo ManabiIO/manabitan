@@ -8,6 +8,10 @@ export class Mdict extends MdictBase {
     constructor(fname, source, options) {
         var _a, _b, _c, _d, _e, _f;
         options = options || {};
+        const recordBlockCacheBytes = options.recordBlockCacheBytes ?? 0;
+        if (!Number.isSafeInteger(recordBlockCacheBytes) || recordBlockCacheBytes < 0) {
+            throw new RangeError('Invalid MDict record block cache budget');
+        }
         // default options
         options = {
             passcode: (_a = options.passcode) !== null && _a !== void 0 ? _a : '',
@@ -16,9 +20,12 @@ export class Mdict extends MdictBase {
             isStripKey: (_d = options.isStripKey) !== null && _d !== void 0 ? _d : true,
             isCaseSensitive: (_e = options.isCaseSensitive) !== null && _e !== void 0 ? _e : true,
             encryptType: (_f = options.encryptType) !== null && _f !== void 0 ? _f : -1,
+            recordBlockCacheBytes,
         };
         const passcode = options.passcode || undefined;
         super(fname, source, passcode, options);
+        this._recordBlockCache = new Map();
+        this._recordBlockCacheSize = 0;
     }
     /**
      * lookupKeyInfoItem lookup the `keyInfoItem`
@@ -73,39 +80,78 @@ export class Mdict extends MdictBase {
      * @param item
      */
     lookupRecordByKeyBlock(item) {
-        if (!item || this.recordInfoList.length === 0) {
-            return null;
-        }
+        if (!item || this.recordInfoList.length === 0) { return null; }
         const start = item.recordStartOffset;
         const end = item.recordEndOffset;
-        const totalSize = this.recordInfoList.at(-1).unpackAccumulatorOffset + this.recordInfoList.at(-1).unpackSize;
-        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || end < start || end > totalSize) {
-            throw new Error('Invalid MDict record bounds');
+        const lastBlock = this.recordInfoList.at(-1);
+        const totalSize = typeof lastBlock === 'undefined' ? 0 : lastBlock.unpackAccumulatorOffset + lastBlock.unpackSize;
+        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) ||
+            !Number.isSafeInteger(totalSize) || start < 0 || end < start || end > totalSize) {
+            throw new RangeError('Invalid MDict record range');
         }
-        const result = new Uint8Array(end - start);
-        let resultOffset = 0;
-        const firstBlockIndex = this.reduceRecordBlockInfo(start);
-        for (let index = firstBlockIndex; index < this.recordInfoList.length && resultOffset < result.length; ++index) {
-            const recordBlockInfo = this.recordInfoList[index];
-            const blockStart = recordBlockInfo.unpackAccumulatorOffset;
-            const blockEnd = blockStart + recordBlockInfo.unpackSize;
-            if (blockEnd <= start) { continue; }
-            const recordBuffer = this.scanner.readBuffer(
-                this._recordBlockStartOffset + recordBlockInfo.packAccumulateOffset,
-                recordBlockInfo.packSize,
-            );
-            const unpackRecordBlockBuff = this.decompressBuff(recordBuffer, recordBlockInfo.unpackSize);
-            const sliceStart = Math.max(0, start - blockStart);
-            const sliceEnd = Math.min(unpackRecordBlockBuff.length, end - blockStart);
-            if (sliceEnd <= sliceStart) { continue; }
-            const chunk = unpackRecordBlockBuff.subarray(sliceStart, sliceEnd);
-            result.set(chunk, resultOffset);
-            resultOffset += chunk.length;
+        if (start === end) { return new Uint8Array(0); }
+
+        let blockIndex = this.reduceRecordBlockInfo(start);
+        let position = start;
+        let output = null;
+        while (position < end) {
+            const info = this.recordInfoList[blockIndex];
+            if (typeof info === 'undefined' || !Number.isSafeInteger(info.unpackAccumulatorOffset) ||
+                !Number.isSafeInteger(info.unpackSize) || info.unpackSize < 0) {
+                throw new RangeError('Invalid MDict record block metadata');
+            }
+            const blockStart = info.unpackAccumulatorOffset;
+            const blockEnd = blockStart + info.unpackSize;
+            if (!Number.isSafeInteger(blockEnd) || blockStart > position ||
+                (position !== start && blockStart !== position) || blockEnd < position) {
+                throw new RangeError('Non-contiguous MDict record blocks');
+            }
+            if (blockEnd === position) {
+                blockIndex += 1;
+                continue;
+            }
+            const bytes = this._readRecordBlock(blockIndex);
+            const nextPosition = Math.min(end, blockEnd);
+            const from = position - blockStart;
+            const to = nextPosition - blockStart;
+            if (position === start && nextPosition === end) {
+                return new Uint8Array(bytes.subarray(from, to));
+            }
+            if (output === null) { output = new Uint8Array(end - start); }
+            output.set(bytes.subarray(from, to), position - start);
+            position = nextPosition;
+            blockIndex += 1;
         }
-        if (resultOffset !== result.length) {
-            throw new Error(`MDict record data is incomplete: expected ${result.length}, got ${resultOffset}`);
+        return output;
+    }
+
+    _readRecordBlock(blockIndex) {
+        const cached = this._recordBlockCache.get(blockIndex);
+        if (typeof cached !== 'undefined') {
+            this._recordBlockCache.delete(blockIndex);
+            this._recordBlockCache.set(blockIndex, cached);
+            return cached;
         }
-        return result;
+        const info = this.recordInfoList[blockIndex];
+        const packed = this.scanner.readBuffer(
+            this._recordBlockStartOffset + info.packAccumulateOffset,
+            info.packSize,
+        );
+        const bytes = this.decompressBuff(packed, info.unpackSize);
+        const budget = this.options.recordBlockCacheBytes;
+        if (budget > 0 && bytes.byteLength > 0 && bytes.byteLength <= budget) {
+            const owned = new Uint8Array(bytes);
+            while (this._recordBlockCache.size >= 64 || this._recordBlockCacheSize + owned.byteLength > budget) {
+                const oldest = this._recordBlockCache.keys().next().value;
+                const evicted = this._recordBlockCache.get(oldest);
+                this._recordBlockCache.delete(oldest);
+                this._recordBlockCacheSize -= evicted.byteLength;
+            }
+            this._recordBlockCache.set(blockIndex, owned);
+            this._recordBlockCacheSize += owned.byteLength;
+            return owned;
+        }
+        return bytes;
     }
     /**
      * lookupPartialKeyInfoListById
@@ -150,8 +196,9 @@ export class Mdict extends MdictBase {
         return -1;
     }
     decompressBuff(recordBuffer, unpackSize) {
-        if (recordBuffer.length < 8) {
-            throw new Error('MDict record block is truncated');
+        if (!(recordBuffer instanceof Uint8Array) || recordBuffer.byteLength < 8 ||
+            !Number.isSafeInteger(unpackSize) || unpackSize < 0) {
+            throw new RangeError('Invalid MDict compressed block');
         }
         // decompress
         // 4 bytes: compression type
@@ -189,7 +236,7 @@ export class Mdict extends MdictBase {
             }
         }
         if (unpackRecordBlockBuff.length !== unpackSize) {
-            throw new Error(`MDict record block size mismatch: expected ${unpackSize}, got ${unpackRecordBlockBuff.length}`);
+            throw new Error('MDict decompressed block size mismatch');
         }
         return unpackRecordBlockBuff;
     }
@@ -217,6 +264,8 @@ export class Mdict extends MdictBase {
         this.keywordList = [];
         this.keyInfoList = [];
         this.recordInfoList = [];
+        this._recordBlockCache.clear();
+        this._recordBlockCacheSize = 0;
     }
 }
 /**

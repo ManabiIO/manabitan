@@ -381,7 +381,13 @@ function encodeMediaPath(value) {
  * @returns {string}
  */
 function createSearchHref(query) {
-    return `?query=${encodeURIComponent(query)}`;
+    let decodedQuery = query;
+    try {
+        decodedQuery = decodeURIComponent(query);
+    } catch (_error) {
+        // Preserve literal percent signs and malformed escapes in headwords.
+    }
+    return `?query=${encodeURIComponent(decodedQuery)}`;
 }
 
 /**
@@ -420,9 +426,10 @@ function decodePercentEncodedPathSegments(path) {
 /**
  * @param {string} path
  * @param {string|null} sourceAssetPath
+ * @param {string} assetPrefix
  * @returns {string|null}
  */
-function normalizeRelativeAssetPath(path, sourceAssetPath = null) {
+function normalizeRelativeAssetPath(path, sourceAssetPath = null, assetPrefix = '') {
     let value = path.trim().replaceAll('\\', '/');
     if (value.length === 0) { return null; }
     const lowered = value.toLowerCase();
@@ -441,6 +448,7 @@ function normalizeRelativeAssetPath(path, sourceAssetPath = null) {
     ) {
         return null;
     }
+    const fromRoot = value.startsWith('/') || lowered.startsWith('file://');
     const suffixIndex = value.search(/[?#]/u);
     if (suffixIndex >= 0) {
         value = value.slice(0, suffixIndex);
@@ -450,9 +458,11 @@ function normalizeRelativeAssetPath(path, sourceAssetPath = null) {
     }
     value = decodePercentEncodedPathSegments(value);
     value = value.replace(/^\/+/u, '');
-    if (sourceAssetPath !== null && !value.startsWith('/')) {
-        const sourceParent = sourceAssetPath.replace(/\/[^/]*$/u, '');
-        value = sourceParent.length > 0 ? `${sourceParent}/${value}` : value;
+    const alreadyPrefixed = assetPrefix.length > 0 && value.startsWith(assetPrefix);
+    if (sourceAssetPath !== null && !fromRoot && !alreadyPrefixed) {
+        const slash = sourceAssetPath.lastIndexOf('/');
+        const sourceParent = slash < 0 ? '' : sourceAssetPath.slice(0, slash + 1);
+        value = `${sourceParent}${value}`;
     }
     value = collapsePosixPath(value);
     return value.length > 0 ? value : null;
@@ -465,7 +475,7 @@ function normalizeRelativeAssetPath(path, sourceAssetPath = null) {
  * @returns {string|null}
  */
 function normalizeReferencedAssetKey(path, assetPrefix, sourceAssetPath = null) {
-    const normalizedPath = normalizeRelativeAssetPath(path, sourceAssetPath);
+    const normalizedPath = normalizeRelativeAssetPath(path, sourceAssetPath, assetPrefix);
     if (normalizedPath === null) { return null; }
     return normalizedPath.startsWith(assetPrefix) ? normalizedPath.slice(assetPrefix.length) : normalizedPath;
 }
@@ -484,10 +494,25 @@ function decodeDataUrl(value) {
     const mediaType = (parts[0] || 'text/plain').toLowerCase();
     const isBase64 = parts.slice(1).some((part) => part.toLowerCase() === 'base64');
     try {
-        return {
-            mediaType,
-            data: isBase64 ? new Uint8Array(base64ToArrayBuffer(payload)) : new TextEncoder().encode(decodeURIComponent(payload)),
-        };
+        if (isBase64) {
+            return {mediaType, data: new Uint8Array(base64ToArrayBuffer(decodeURIComponent(payload)))};
+        }
+        // Percent escapes describe bytes, not necessarily valid UTF-8 text.
+        const encoded = new TextEncoder().encode(payload);
+        const data = new Uint8Array(encoded.length);
+        let count = 0;
+        for (let i = 0; i < encoded.length; i += 1) {
+            if (encoded[i] === 0x25 && i + 2 < encoded.length) {
+                const hex = String.fromCharCode(encoded[i + 1], encoded[i + 2]);
+                if (/^[\da-f]{2}$/iu.test(hex)) {
+                    data[count++] = Number.parseInt(hex, 16);
+                    i += 2;
+                    continue;
+                }
+            }
+            data[count++] = encoded[i];
+        }
+        return {mediaType, data: data.subarray(0, count)};
     } catch (_error) {
         return null;
     }
@@ -1289,20 +1314,22 @@ function extractDescription(mdx, override) {
 
 /**
  * @param {string} term
- * @param {Map<string, string[]>} redirects
+ * @param {Map<string, Set<string>>} redirects
+ * @param {Set<string>} resolvedTargets
  * @returns {string[]}
  */
-function getRedirectExpressions(term, redirects) {
+function getRedirectExpressions(term, redirects, resolvedTargets) {
     const expressions = [term];
     const visited = new Set(expressions);
-    const pending = [term];
-    for (let index = 0; index < pending.length; ++index) {
-        const aliases = redirects.get(pending[index]) ?? [];
+    for (let index = 0; index < expressions.length; ++index) {
+        const target = expressions[index];
+        const aliases = redirects.get(target);
+        if (typeof aliases === 'undefined') { continue; }
+        resolvedTargets.add(target);
         for (const alias of aliases) {
             if (visited.has(alias)) { continue; }
             visited.add(alias);
             expressions.push(alias);
-            pending.push(alias);
         }
     }
     return expressions;
@@ -1374,8 +1401,10 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         const inlineStylesheets = [];
         /** @type {Set<string>} */
         const referencedAssetKeys = new Set();
-        /** @type {Map<string, string[]>} */
+        /** @type {Map<string, Set<string>>} */
         const redirects = new Map();
+        /** @type {Set<string>} */
+        const resolvedRedirectTargets = new Set();
         /** @type {Array<{term: string, glossary: Record<string, unknown>, sequence: number}>} */
         const convertedEntries = [];
         let sequence = 0;
@@ -1427,9 +1456,9 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             if (definition.startsWith('@@@LINK=')) {
                 const target = trimNullSuffix(definition.slice(8));
                 if (target.length > 0 && target !== term) {
-                    const aliases = redirects.get(target) ?? [];
-                    if (!aliases.includes(term)) {
-                        aliases.push(term);
+                    const aliases = redirects.get(target) ?? new Set();
+                    if (!aliases.has(term)) {
+                        aliases.add(term);
                         redirects.set(target, aliases);
                         redirectCount += 1;
                     }
@@ -1492,7 +1521,6 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         let encodedTermRowCount = 0;
         /** @type {unknown[][]} */
         let bank = [];
-        const resolvedRedirectExpressions = new Set();
         const flushBank = () => {
             if (bank.length === 0) { return; }
             encodedTermRowCount += bank.length;
@@ -1502,9 +1530,8 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             bankIndex += 1;
         };
         for (const {term, glossary, sequence: entrySequence} of convertedEntries) {
-            const expressions = getRedirectExpressions(term, redirects);
+            const expressions = getRedirectExpressions(term, redirects, resolvedRedirectTargets);
             for (const expression of expressions) {
-                if (expression !== term) { resolvedRedirectExpressions.add(expression); }
                 bank.push([
                     expression,
                     '',
@@ -1525,11 +1552,15 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             writeJson(`term_bank_${bankIndex}.json`, []);
             encodedTermBankCount += 1;
         }
+        let resolvedRedirectCount = 0;
+        for (const target of resolvedRedirectTargets) {
+            resolvedRedirectCount += redirects.get(target)?.size ?? 0;
+        }
         recordPhaseTiming('prepare-mdx:encode-banks', tEncodeBanksStart, {
             encodedTermBankCount,
             encodedTermRowCount,
             jsonEncodeMs,
-            unresolvedRedirectCount: Math.max(0, redirectCount - resolvedRedirectExpressions.size),
+            unresolvedRedirectCount: Math.max(0, redirectCount - resolvedRedirectCount),
         });
 
         const tMaterializeAssetsStart = Date.now();
