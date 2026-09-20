@@ -1,0 +1,158 @@
+name: Deep import review final composition
+
+on:
+  push:
+    branches: [review/import-lookup-deep-20260920]
+    paths: [.github/workflows/deep-import-review-final.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify payloads and prepare tests-only continuation
+        run: |
+          mkdir -p /tmp/deep-final-evidence
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib
+          data = gzip.decompress(base64.b64decode(Path('review/database-generation.patch.gz.b64').read_text()))
+          assert hashlib.sha256(data).hexdigest() == '2f01967aa4e1a3055fd9cca3d25ca83c56c8d7ea2e7e4df43f15710dbd7fe681'
+          Path('/tmp/deep-final-evidence/database-generation.patch').write_bytes(data)
+          text = '\n'.join(line for line in Path('review/hash-optimization.patch').read_text().split('\n') if not line.startswith('index '))
+          assert hashlib.sha256(text.encode()).hexdigest() == '555e9ef02b419614a8a4e75c9234924fd05c9db17a2406498c4037c1e174fb81'
+          Path('/tmp/deep-final-evidence/hash-optimization.patch').write_text(text)
+          PY
+          git switch --track origin/fix/import-read-write-ownership-20260920
+          test "$(git rev-parse HEAD)" = ee418dd47b662842fb09dd20eac9af708ea7f383
+          git apply --check --include='test/*' /tmp/deep-final-evidence/database-generation.patch
+          git apply --include='test/*' /tmp/deep-final-evidence/database-generation.patch
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add test/dictionary-lookup-generation.test.js
+          git commit -m 'test: reproduce database and public lookup invalidation races'
+          git rev-parse HEAD > /tmp/deep-final-evidence/database-tests-commit.txt
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Confirm 16 new failures before production repair
+        run: |
+          set +e
+          npx vitest run test/dictionary-lookup-generation.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/deep-final-evidence/database-red.json > /tmp/deep-final-evidence/database-red.log 2>&1
+          status=$?
+          set -e
+          test "$status" = 1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('/tmp/deep-final-evidence/database-red.json').read_text())
+          assert data['numFailedTests'] == 16 and data['numPassedTests'] == 0, data
+          PY
+      - name: Apply and qualify database repairs
+        run: |
+          git apply --check --exclude='test/*' /tmp/deep-final-evidence/database-generation.patch
+          git apply --exclude='test/*' /tmp/deep-final-evidence/database-generation.patch
+          npx eslint ext/js/dictionary/dictionary-database.js test/dictionary-lookup-generation.test.js > /tmp/deep-final-evidence/database-lint.log 2>&1
+          npm run test:ts > /tmp/deep-final-evidence/database-types.log 2>&1
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=/tmp/deep-final-evidence/database-full-unit.json > /tmp/deep-final-evidence/database-full-unit.log 2>&1
+          npm run test:unit:options > /tmp/deep-final-evidence/options.log 2>&1
+          npm run test:build > /tmp/deep-final-evidence/database-build.log 2>&1
+      - run: npx playwright install --with-deps chromium
+      - name: Real imports and publication of correctness-only composition
+        run: |
+          node dev/perf/import-benchmark.js jmdict --runs 1 --output /tmp/deep-final-evidence/correctness-jmdict
+          node dev/perf/import-benchmark.js jitendex --runs 1 --no-build --output /tmp/deep-final-evidence/correctness-jitendex
+          node dev/perf/import-benchmark.js jmnedict --runs 1 --no-build --output /tmp/deep-final-evidence/correctness-jmnedict
+          git add ext/js/dictionary/dictionary-database.js
+          git commit -m 'fix: fence dictionary lookup results and decoded caches across invalidation'
+          git rev-parse HEAD > /tmp/deep-final-evidence/correctness-commit.txt
+          git push origin HEAD:refs/heads/fix/import-read-write-ownership-20260920
+      - name: Qualify previously screened hashing candidate independently
+        run: |
+          git switch -c perf/content-hash-dataview-20260920
+          git apply --include='test/*' /tmp/deep-final-evidence/hash-optimization.patch
+          npx vitest run test/term-entry-content-hash.test.js --maxWorkers=1 --minWorkers=1 > /tmp/deep-final-evidence/hash-baseline-identity.log 2>&1
+          git apply --exclude='test/*' /tmp/deep-final-evidence/hash-optimization.patch
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          for name, expected in {
+              'ext/js/dictionary/term-entry-content-hash.js': 'a9fb11a8db860649d5a748c2d32191c86c077f9f70015d49a31e4e931f276c4b',
+              'test/term-entry-content-hash.test.js': 'bee0a44c40b269e3ec24c2aa8917fa5724c0278f9d5568ba4bbea6600d97112a',
+          }.items():
+              assert hashlib.sha256(Path(name).read_bytes()).hexdigest() == expected, name
+          PY
+          npx eslint ext/js/dictionary/term-entry-content-hash.js test/term-entry-content-hash.test.js > /tmp/deep-final-evidence/hash-lint.log 2>&1
+          npm run test:ts > /tmp/deep-final-evidence/hash-types.log 2>&1
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=/tmp/deep-final-evidence/hash-full-unit.json > /tmp/deep-final-evidence/hash-full-unit.log 2>&1
+          npm run test:build > /tmp/deep-final-evidence/hash-build.log 2>&1
+      - name: Confirm full-import ABBA on the correctness-only baseline
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json, shutil, subprocess
+          def run(args):
+              subprocess.run(args, check=True)
+          def sha(data):
+              return hashlib.sha256(data).hexdigest()
+          target = Path('ext/js/dictionary/term-entry-content-hash.js')
+          candidate = target.read_text()
+          original = subprocess.check_output(['git', 'show', 'HEAD:' + str(target)], text=True)
+          output = Path('/tmp/deep-final-evidence/hash-confirmation')
+          output.mkdir(parents=True, exist_ok=True)
+          variants = {'A': original, 'B': candidate}
+          metadata = {}
+          for variant, source in variants.items():
+              target.write_text(source)
+              run(['node', 'dev/bin/build.js', '--target', 'chrome-dev'])
+              archive = Path('/tmp') / ('deep-final-' + variant + '.zip')
+              shutil.copyfile('builds/manabitan-chrome-dev.zip', archive)
+              metadata[variant] = {'hashModuleSha256': sha(source.encode()), 'extensionZipSha256': sha(archive.read_bytes())}
+              (output / (variant + '-hash.js')).write_text(source)
+          (output / 'variants.json').write_text(json.dumps(metadata, indent=2))
+          records = []
+          counter = 0
+          def trial(dictionary, variant, kind, block, slot):
+              global counter
+              counter += 1
+              target.write_text(variants[variant])
+              shutil.copyfile('/tmp/deep-final-' + variant + '.zip', 'builds/manabitan-chrome-dev.zip')
+              destination = output / ('%03d-%s-%s-%s' % (counter, kind, dictionary, variant))
+              run(['node', 'dev/perf/import-benchmark.js', dictionary, '--runs', '1', '--no-build', '--output', str(destination)])
+              summary = json.loads((destination / 'summary.json').read_text())
+              records.append({'counter': counter, 'dictionary': dictionary, 'variant': variant, 'kind': kind, 'block': block, 'slot': slot, 'totalImportMs': summary['runs'][0]['totalImportMs'], 'workerImportMs': summary['runs'][0]['workerImportMs'], 'summary': str(destination / 'summary.json'), 'source': metadata[variant]})
+              (output / 'trials.json').write_text(json.dumps(records, indent=2))
+          for dictionary in ['jmnedict', 'jitendex', 'jmdict']:
+              for variant in ['A', 'B']:
+                  trial(dictionary, variant, 'warmup', -1, -1)
+          for block in range(3):
+              dictionaries = ['jmnedict', 'jitendex', 'jmdict']
+              dictionaries = dictionaries[block:] + dictionaries[:block]
+              for dictionary in dictionaries:
+                  for slot, variant in enumerate('ABBA'):
+                      trial(dictionary, variant, 'abba', block, slot)
+          for dictionary in ['jmdict', 'jitendex', 'jmnedict']:
+              for slot in range(4):
+                  trial(dictionary, 'A', 'aa', 0, slot)
+          target.write_text(candidate)
+          PY
+      - name: Publish tested candidate branch without merging
+        run: |
+          git add ext/js/dictionary/term-entry-content-hash.js test/term-entry-content-hash.test.js
+          git commit -m 'perf: use native little-endian loads for larger term content hashes'
+          git rev-parse HEAD > /tmp/deep-final-evidence/performance-commit.txt
+          git push origin HEAD:refs/heads/perf/content-hash-dataview-20260920
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deep-import-review-final
+          path: /tmp/deep-final-evidence/
+          retention-days: 7
