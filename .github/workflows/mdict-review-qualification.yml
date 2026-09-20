@@ -1,0 +1,127 @@
+name: MDict review qualification
+on:
+  push:
+    branches: [review/mdict-boundaries-20260920]
+    paths: [.github/mdict-review-payload.json, .github/workflows/mdict-review-qualification.yml]
+permissions:
+  contents: write
+concurrency:
+  group: mdict-review-20260920
+  cancel-in-progress: false
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Unpack authored qualification sources
+        shell: bash
+        run: |
+          mkdir -p /tmp/mdict-evidence
+          python3 - <<'PY'
+          import base64, gzip, hashlib, json
+          from pathlib import Path
+          payload = json.loads(Path('.github/mdict-review-payload.json').read_text())
+          data = gzip.decompress(base64.b64decode(payload['gzipBase64']))
+          assert hashlib.sha256(data).hexdigest() == payload['sha256']
+          allowed = {'test/fixtures/mdict-review/check.mjs', 'test/fixtures/mdict-review/fixtures.mjs', 'test/fixtures/mdict-review/benchmark.mjs', 'test/mdict-record-boundaries.test.js', 'dev/reviews/apply-mdict-review.py', 'dev/reviews/mdict-boundaries-20260920.md'}
+          files = json.loads(data)
+          assert set(files) == allowed
+          for name, content in files.items():
+              destination = Path(name)
+              destination.parent.mkdir(parents=True, exist_ok=True)
+              destination.write_text(content)
+          PY
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '24.20.0'
+      - name: Format new regression fixtures before both arms
+        run: npx eslint --fix test/mdict-record-boundaries.test.js test/fixtures/mdict-review/*.mjs
+      - name: Record baseline failures without changing assertions
+        shell: bash
+        run: |
+          node test/fixtures/mdict-review/check.mjs . /tmp/mdict-evidence/red.json --allow-fail | tee /tmp/mdict-evidence/red.log
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/mdict-evidence/red.json'))
+          assert r['passed'] >= 10 and r['failed'] >= 10, r
+          PY
+      - name: Apply SHA-guarded correctness repairs
+        shell: bash
+        run: |
+          python3 dev/reviews/apply-mdict-review.py .
+          npx eslint --fix ext/js/dictionary/mdx/mdx-converter.js test/mdx-converter.test.js
+          node test/fixtures/mdict-review/check.mjs . /tmp/mdict-evidence/green.json | tee /tmp/mdict-evidence/green.log
+      - name: Focused MDict suites
+        shell: bash
+        run: |
+          set -o pipefail
+          npx vitest run test/mdict-record-boundaries.test.js test/mdx-client.test.js test/mdx-converter.test.js test/mdx-converter-fixture.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/mdict-evidence/focused.json 2>&1 | tee /tmp/mdict-evidence/focused.log
+      - name: TypeScript and dry build
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:ts 2>&1 | tee /tmp/mdict-evidence/typescript.log
+          npm run test:build 2>&1 | tee /tmp/mdict-evidence/build.log
+      - name: Full unit suite
+        shell: bash
+        run: |
+          set -o pipefail
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=/tmp/mdict-evidence/unit.json 2>&1 | tee /tmp/mdict-evidence/unit.log
+          npm run test:unit:options 2>&1 | tee /tmp/mdict-evidence/options.log
+      - name: ABBA conversion component screen without changing defaults
+        run: node test/fixtures/mdict-review/benchmark.mjs . /tmp/mdict-evidence/component-abba.json
+      - name: Publish qualified commits on a new clean fix branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, json, os, subprocess
+          from pathlib import Path
+          repo = os.environ['REPOSITORY']
+          assert repo == 'ManabiIO/manabitan'
+          base = '6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108'
+          def api(endpoint, data=None):
+              args=['gh','api',f'repos/{repo}/{endpoint}']
+              if data is not None: args += ['-X','POST','--input','-']
+              response=subprocess.run(args, input=None if data is None else json.dumps(data), text=True, capture_output=True, check=True)
+              return json.loads(response.stdout)
+          test_files=['test/fixtures/mdict-review/check.mjs','test/fixtures/mdict-review/fixtures.mjs','test/fixtures/mdict-review/benchmark.mjs','test/mdict-record-boundaries.test.js','dev/reviews/mdict-boundaries-20260920.md']
+          fix_files=['ext/js/dictionary/mdx/vendor/js-mdict/mdict.js','ext/js/dictionary/mdx/vendor/js-mdict/mdict-base.js','ext/js/dictionary/mdx/vendor/js-mdict/scanner.js','ext/js/dictionary/mdx/vendor/js-mdict/utils.js','ext/js/dictionary/mdx/mdx-converter.js','test/mdx-converter.test.js']
+          def commit(parent, names, message):
+              tree_base=api('git/commits/'+parent)['tree']['sha']
+              entries=[]
+              for name in names:
+                  blob=api('git/blobs',{'content':base64.b64encode(Path(name).read_bytes()).decode(),'encoding':'base64'})
+                  entries.append({'path':name,'mode':'100644','type':'blob','sha':blob['sha']})
+              tree=api('git/trees',{'base_tree':tree_base,'tree':entries})
+              return api('git/commits',{'message':message,'tree':tree['sha'],'parents':[parent]})['sha']
+          tests=commit(base,test_files,'test: reproduce MDict record and conversion boundary failures')
+          fixed=commit(tests,fix_files,'fix: preserve MDict records, aliases and embedded media')
+          branch='fix/mdict-boundaries-20260920-'+os.environ['RUN_ID']
+          api('git/refs',{'ref':'refs/heads/'+branch,'sha':fixed})
+          result={'base':base,'testsOnly':tests,'head':fixed,'branch':branch,'workflowRun':os.environ['RUN_ID']}
+          Path('/tmp/mdict-evidence/published.json').write_text(json.dumps(result,indent=2)+'\n')
+          print(json.dumps(result))
+          PY
+      - name: Retain exact patch and qualification sources
+        if: always()
+        shell: bash
+        run: |
+          git diff -- ext/js/dictionary/mdx test/mdx-converter.test.js > /tmp/mdict-evidence/correctness.patch
+          cp -r test/fixtures/mdict-review /tmp/mdict-evidence/fixtures 2>/dev/null || true
+          cp test/mdict-record-boundaries.test.js /tmp/mdict-evidence/ 2>/dev/null || true
+          cp dev/reviews/apply-mdict-review.py /tmp/mdict-evidence/ 2>/dev/null || true
+          cp dev/reviews/mdict-boundaries-20260920.md /tmp/mdict-evidence/ 2>/dev/null || true
+          git rev-parse HEAD > /tmp/mdict-evidence/research-head.txt
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: mdict-review-qualification
+          path: /tmp/mdict-evidence
+          retention-days: 7
