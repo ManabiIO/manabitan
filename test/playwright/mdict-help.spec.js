@@ -21,6 +21,7 @@ test('MDX help is reachable, keyboard accessible and clear about import limits',
     await page.goto(`chrome-extension://${extensionId}/quick-start-guide.html`);
     await expect(page.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
     await page.getByRole('link', {name: 'MDict import guide', exact: true}).click();
+    await expect(page.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
     await expect(page.getByRole('heading', {level: 1})).toHaveText('Importing MDict dictionaries');
     await expect(page.locator('#mdict-audio-limit')).toBeVisible();
     await expect(page.locator('#mdict-audio-limit')).toContainText('Dictionary audio is not enabled');
@@ -31,8 +32,13 @@ test('MDX help is reachable, keyboard accessible and clear about import limits',
     await page.keyboard.press('Enter');
     await expect(troubleshooting).toHaveAttribute('open', '');
     await expect(page.getByRole('heading', {name: 'Conversion times out', exact: true})).toBeVisible();
-    await page.setViewportSize({width: 390, height: 844});
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    for (const width of [390, 320]) {
+        await page.setViewportSize({width, height: 844});
+        expect(await page.evaluate(() => {
+            const scroller = document.querySelector('.content');
+            return scroller !== null && scroller.scrollWidth <= scroller.clientWidth && document.documentElement.scrollWidth <= window.innerWidth;
+        })).toBe(true);
+    }
     await page.getByRole('link', {name: 'Open Dictionary Settings', exact: true}).click();
     await expect(page).toHaveURL(/settings\.html#dictionaries$/u);
 });
