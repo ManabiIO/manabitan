@@ -9,16 +9,18 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {parseArgs} from 'node:util';
 
-const {values} = parseArgs({options: {
-    'baseline-ref': {type: 'string', default: '54ac62a39386459b7822fc644e5a1a6b1a619619'},
-    'baseline-file': {type: 'string'},
-    'candidate-file': {type: 'string'},
-    runtime: {type: 'string', default: 'all'},
-    rounds: {type: 'string', default: '6'},
-    output: {type: 'string', default: 'builds/zip-header-benchmark.json'},
-}});
-const rounds = Number(values.rounds);
-if (!Number.isSafeInteger(rounds) || rounds < 1 || rounds > 100) { throw new Error('rounds must be an integer from 1 through 100'); }
+const {values} = parseArgs({
+    options: {
+        'baseline-ref': {type: 'string', default: '54ac62a39386459b7822fc644e5a1a6b1a619619'},
+        'baseline-file': {type: 'string'},
+        'candidate-file': {type: 'string'},
+        'runtime': {type: 'string', default: 'all'},
+        'rounds': {type: 'string', default: '6'},
+        'output': {type: 'string', default: 'builds/zip-header-benchmark.json'},
+    },
+});
+const roundCount = Number(values.rounds);
+if (!Number.isSafeInteger(roundCount) || roundCount < 1 || roundCount > 100) { throw new Error('rounds must be an integer from 1 through 100'); }
 if (!['node', 'chromium', 'all'].includes(values.runtime)) { throw new Error('runtime must be node, chromium, or all'); }
 const repositoryRoot = fileURLToPath(new URL('../', import.meta.url));
 const modulePath = 'ext/js/dictionary/term-bank-source-pipeline.js';
@@ -39,7 +41,7 @@ const report = {
     platform: process.platform,
     architecture: process.arch,
     cpu: os.cpus()[0]?.model,
-    rounds,
+    rounds: roundCount,
     order: 'ABBA; one A and one B warmup per fixture; fresh reader per measured iteration; warm filesystem cache',
     fixture: 'Deterministic xorshift32 bytes in synthetic local ZIP records, method STORE, sparse padded to 129 MiB. Not valid term-bank JSON or complete dictionary ZIPs.',
     results: [],
@@ -148,7 +150,7 @@ try {
         const {RawZipPayloadReader: baseline} = await importSource(baselineSource);
         const {RawZipPayloadReader: candidate} = await importSource(candidateSource);
         for (const fixture of fixtures) {
-            const result = await runABBA({baseline, candidate, archive: await openAsBlob(fixture.path), fixture, rounds,
+            const result = await runABBA({baseline, candidate, archive: await openAsBlob(fixture.path), fixture, rounds: roundCount,
                 verify(output, expected) {
                     const hash = createHash('sha256');
                     for (const bytes of output) { hash.update(bytes); }
@@ -178,9 +180,9 @@ try {
             }, [baselineSource, candidateSource, benchmarkSource]);
             for (const fixture of fixtures) {
                 await page.locator('#fixture').setInputFiles(fixture.path);
-                const result = await page.evaluate(async ({fixture, rounds}) => {
-                    const [{RawZipPayloadReader: baseline}, {RawZipPayloadReader: candidate}, {runABBA}] = globalThis.zipBenchModules;
-                    return await runABBA({baseline, candidate, archive: document.querySelector('#fixture').files[0], fixture, rounds,
+                const result = await page.evaluate(async ({fixture: browserFixture, rounds: browserRounds}) => {
+                    const [{RawZipPayloadReader: baseline}, {RawZipPayloadReader: candidate}, {runABBA: runBrowserABBA}] = globalThis.zipBenchModules;
+                    return await runBrowserABBA({baseline, candidate, archive: document.querySelector('#fixture').files[0], fixture: browserFixture, rounds: browserRounds,
                         verify(output) {
                             let seed = 0x12345678;
                             let total = 0;
@@ -193,11 +195,11 @@ try {
                                 }
                                 total += bytes.length;
                             }
-                            if (total !== fixture.payloadBytes) { throw new Error('Payload size mismatch'); }
+                            if (total !== browserFixture.payloadBytes) { throw new Error('Payload size mismatch'); }
                         },
                         gc: () => globalThis.gc?.(),
                     });
-                }, {fixture, rounds});
+                }, {fixture, rounds: roundCount});
                 report.results.push({runtime: `Chromium ${browser.version()}`, gcAvailable: await page.evaluate(() => typeof globalThis.gc === 'function'), verification: 'Every byte checked against deterministic fixture generator after timing', ...result});
                 await persist();
                 console.log('chromium', fixture.name, result.changePercent.toFixed(2));
