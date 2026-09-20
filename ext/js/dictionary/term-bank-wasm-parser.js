@@ -67,8 +67,9 @@ const wasmModuleCache = new RetryablePromiseCache();
 /** @type {WebAssembly.Module|null} */
 let suppliedWasmModule = null;
 
+// Tokens are fields within JSON, not standalone documents with a BOM.
 /** @type {TextDecoder} */
-const textDecoder = new TextDecoder();
+const textDecoder = new TextDecoder('utf-8', {ignoreBOM: true});
 /** @type {TextEncoder} */
 const textEncoder = new TextEncoder();
 

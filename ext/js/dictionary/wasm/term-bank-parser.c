@@ -26,7 +26,8 @@
 #define EXPERIMENT_VALIDATED_GLOSSARY_REUSE 4u
 #define EXPERIMENT_GLOBAL_EXACT_CONTENT_REUSE 8u
 #define EXPERIMENT_FAST_GLOSSARY_NORMALIZATION 16u
-#define MAX_INTERNED_KEY_BYTES 0xfffeu
+/* Key lengths use every uint16 value; the null sentinel applies to IDs only. */
+#define MAX_INTERNED_KEY_BYTES 0xffffu
 #ifndef RECENT_CONTENT_DEDUP_WINDOW
 #define RECENT_CONTENT_DEDUP_WINDOW 4u
 #endif
@@ -2019,7 +2020,7 @@ int32_t build_term_string_plan(
             }
             const uint32_t value_start = token_start + 1u;
             const uint32_t value_length = token_length - 2u;
-            if (value_length >= 0xffffu) { return -5; }
+            if (value_length > MAX_INTERNED_KEY_BYTES) { return -5; }
             const uint32_t hash = hash_content_xxh32(src + value_start, value_length, FNV1A_OFFSET);
             uint32_t slot = mix_string_hash(hash, value_length) & table_mask;
             uint32_t matched_index = 0xffffffffu;
@@ -2639,7 +2640,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 value_length = (uint32_t)decoded_length;
                 if (experiment_stats != 0) { ++experiment_stats[0]; }
             }
-            if (value_length >= 0xffffu) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
+            if (value_length > MAX_INTERNED_KEY_BYTES) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
             const uint32_t string_hash = hash_content_xxh32(value_source + value_start, value_length, FNV1A_OFFSET);
             uint32_t string_slot = mix_string_hash(string_hash, value_length) & string_table_mask;
             uint32_t matched_index = 0xffffffffu;
