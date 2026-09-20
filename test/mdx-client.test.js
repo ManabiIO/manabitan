@@ -302,11 +302,17 @@ describe('Mdx conversion worker client', () => {
             expect(workerInstances).toHaveLength(1);
         });
 
-        const expectation = expect(invocationPromise).rejects.toThrow('MDX conversion worker did not complete within 180000ms');
-        await vi.advanceTimersByTimeAsync(180_000);
-        await expectation;
+        // Observe the assertion while advancing time, so a failed expectation
+        // is reported by this test instead of becoming an unhandled rejection.
+        await Promise.all([
+            expect(invocationPromise).rejects.toThrow('MDX conversion timed out while reading or converting files.'),
+            vi.advanceTimersByTimeAsync(180_000),
+        ]);
 
         expect(mdx.isActive()).toBe(false);
+        expect(mdx.isConnected()).toBe(false);
+        expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
+        mdx.disconnect();
         expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
     });
 });
