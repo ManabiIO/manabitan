@@ -2,14 +2,9 @@
 /* eslint @stylistic/semi: ["error", "never"] */
 import assert from 'node:assert/strict'
 import {test} from 'node:test'
-import {pathToFileURL} from 'node:url'
-import path from 'node:path'
+import {DictionaryImportJournal} from '../../../ext/js/dictionary/dictionary-import-journal.js'
+import {DictionaryImportSession} from '../../../ext/js/dictionary/dictionary-import-session.js'
 
-const root = process.env.MANABITAN_TEST_ROOT ?
-    pathToFileURL(`${path.resolve(process.env.MANABITAN_TEST_ROOT)}${path.sep}`) :
-    new URL('../../../', import.meta.url)
-const {DictionaryImportJournal} = await import(new URL('ext/js/dictionary/dictionary-import-journal.js', root))
-const {DictionaryImportSession} = await import(new URL('ext/js/dictionary/dictionary-import-session.js', root))
 const deferred = () => {
     let resolve
     const promise = new Promise((r) => { resolve = r })
@@ -19,7 +14,9 @@ const flush = async () => {
     for (let i = 0; i < 80; ++i) { await Promise.resolve() }
 }
 const record = (sessionId = 'A') => ({
-    version: 1, sessionId, createdAt: 1,
+    version: 1,
+    sessionId,
+    createdAt: 1,
     contentCheckpoint: {segments: [{fileName: 'content-0', fileLength: 4}]},
     recordCheckpoint: {shards: [{fileName: 'record-0', fileLength: 8}]},
 })
@@ -70,7 +67,11 @@ for (const operation of ['write', 'clear', 'read']) {
         const f = journalFixture()
         const gate = deferred()
         const entered = deferred()
-        f.hooks.close = async () => { delete f.hooks.close; entered.resolve(); await gate.promise }
+        f.hooks.close = async () => {
+            delete f.hooks.close
+            entered.resolve()
+            await gate.promise
+        }
         const first = f.journal.write(record('A'))
         await entered.promise
         let settled = false
@@ -91,7 +92,11 @@ test('empty-file cleanup does not delete a later journal write', async () => {
     const f = journalFixture('')
     const gate = deferred()
     const entered = deferred()
-    f.hooks.snapshot = async () => { delete f.hooks.snapshot; entered.resolve(); await gate.promise }
+    f.hooks.snapshot = async () => {
+        delete f.hooks.snapshot
+        entered.resolve()
+        await gate.promise
+    }
     const reading = f.journal.read()
     await entered.promise
     const writing = f.journal.write(record('B'))
@@ -105,7 +110,11 @@ test('delayed clear cannot delete its successor write', async () => {
     const f = journalFixture()
     const gate = deferred()
     const entered = deferred()
-    f.hooks.remove = async () => { delete f.hooks.remove; entered.resolve(); await gate.promise }
+    f.hooks.remove = async () => {
+        delete f.hooks.remove
+        entered.resolve()
+        await gate.promise
+    }
     const clearing = f.journal.clear()
     await entered.promise
     const writing = f.journal.write(record('B'))
@@ -130,7 +139,11 @@ test('queued writes keep the checkpoint snapshot taken at invocation', async () 
     const f = journalFixture()
     const gate = deferred()
     const entered = deferred()
-    f.hooks.close = async () => { delete f.hooks.close; entered.resolve(); await gate.promise }
+    f.hooks.close = async () => {
+        delete f.hooks.close
+        entered.resolve()
+        await gate.promise
+    }
     const first = f.journal.write(record('A'))
     await entered.promise
     const value = record('B')
@@ -157,7 +170,10 @@ function sessionFixture() {
         async deleteDictionaryImportPlaceholder(key) { assert.equal(key, 42); events.push('cleanup') },
     }
     const options = {
-        dictionaryDatabase: database, dictionaryTitle: 'A', dictionarySummaryPrimaryKey: 42, errors,
+        dictionaryDatabase: database,
+        dictionaryTitle: 'A',
+        dictionarySummaryPrimaryKey: 42,
+        errors,
         archiveReader: {async close() { events.push('archive') }},
         disposeParser: async () => { events.push('parser') },
     }
@@ -171,12 +187,14 @@ for (const boundary of ['source', 'parser']) {
         const gate = deferred()
         let calls = 0
         let nested
-        let session
         const dispose = async () => {
-            if (++calls === 1) { nested = session.disposeImportResources(); await gate.promise }
+            if (++calls === 1) {
+                nested = session.disposeImportResources()
+                await gate.promise
+            }
         }
         if (boundary === 'parser') { f.options.disposeParser = dispose }
-        session = new DictionaryImportSession(f.options)
+        const session = new DictionaryImportSession(f.options)
         if (boundary === 'source') { session.setSourcePipeline({dispose}) }
         const outer = session.disposeImportResources()
         await flush()
@@ -194,12 +212,11 @@ test('reentrant start shares one acquired owner', async () => {
     const f = sessionFixture()
     let calls = 0
     let nested
-    let session
     f.database.startBulkImport = async () => {
         if (++calls === 1) { nested = session.startBulkImport() }
         return 'owner'
     }
-    session = new DictionaryImportSession(f.options)
+    const session = new DictionaryImportSession(f.options)
     const outer = session.startBulkImport()
     await outer
     await nested
@@ -226,12 +243,15 @@ test('reentrant finalization cannot attempt publication twice', async () => {
 
 test('disposal rejects installing a new source from a parser callback', async () => {
     const f = sessionFixture()
-    let session
     let rejected = false
     f.options.disposeParser = async () => {
-        try { session.setSourcePipeline({async dispose() {}}) } catch (_) { rejected = true }
+        try {
+            session.setSourcePipeline({async dispose() {}})
+        } catch (_) {
+            rejected = true
+        }
     }
-    session = new DictionaryImportSession(f.options)
+    const session = new DictionaryImportSession(f.options)
     await session.disposeImportResources()
     assert.equal(rejected, true)
 })
@@ -240,11 +260,10 @@ test('reentrant placeholder cleanup is single-flight', async () => {
     const f = sessionFixture()
     let calls = 0
     let nested
-    let session
     f.database.deleteDictionaryImportPlaceholder = async () => {
         if (++calls === 1) { nested = session.cleanupIncompleteSummary() }
     }
-    session = new DictionaryImportSession(f.options)
+    const session = new DictionaryImportSession(f.options)
     session.recordFailure(new Error('cancelled'))
     const outer = session.cleanupIncompleteSummary()
     await outer
