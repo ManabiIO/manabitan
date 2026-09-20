@@ -12,6 +12,26 @@ const BIG5_DECODER = new TextDecoder('big5');
 const BIG5 = 'BIG5';
 const GB18030_DECODER = new TextDecoder('gb18030');
 const GB18030 = 'GB18030';
+
+/** Read a declared integer without allowing a clipped slice to change its type. */
+function readNumber(bytes, offset, width) {
+    if (!Number.isSafeInteger(offset) || offset < 0 || offset > bytes.length - width) {
+        throw new RangeError('Truncated MDict numeric field');
+    }
+    return common.b2n(bytes.subarray(offset, offset + width));
+}
+
+/** Validate the complete key-info string, including its required terminator. */
+function readKeyInfoText(bytes, offset, size, terminatorWidth) {
+    if (!Number.isSafeInteger(size) || size < terminatorWidth || offset > bytes.length - size) {
+        throw new RangeError('Truncated MDict key info text');
+    }
+    const end = offset + size;
+    for (let index = end - terminatorWidth; index < end; index += 1) {
+        if (bytes[index] !== 0) { throw new Error('Invalid MDict key info terminator'); }
+    }
+    return bytes.subarray(offset, end - terminatorWidth);
+}
 export class MdictMeta {
     constructor() {
         this.fname = '';
@@ -309,9 +329,7 @@ class MDictBase {
         // because 0-7 is the leading number, we start at keyblock[7]
         let keyStartIndex = 0;
         while (keyStartIndex < keyBlock.length) {
-            let meaningOffset = 0;
-            const meaningOffsetBuff = keyBlock.slice(keyStartIndex, keyStartIndex + this.meta.numWidth);
-            meaningOffset = common.b2n(meaningOffsetBuff);
+            const meaningOffset = readNumber(keyBlock, keyStartIndex, this.meta.numWidth);
             let keyEndIndex = -1;
             let i = keyStartIndex + this.meta.numWidth;
             while (i < keyBlock.length) {
@@ -322,7 +340,7 @@ class MDictBase {
                 i += width;
             }
             if (keyEndIndex == -1) {
-                break;
+                throw new Error('Unterminated MDict key block entry');
             }
             const keyTextBuffer = keyBlock.slice(keyStartIndex + this.meta.numWidth, keyEndIndex);
             const keyText = this.meta.decoder.decode(keyTextBuffer);
@@ -399,6 +417,9 @@ class MDictBase {
         // before version 2.0, number is 4 bytes integer alias, int32
         // version 2.0 and above use 8 bytes, alias int64
         this.meta.version = parseFloat(this.header['GeneratedByEngineVersion']);
+        if (!Number.isFinite(this.meta.version) || this.meta.version < 1 || this.meta.version >= 3) {
+            throw new Error(`Unsupported MDict engine version: ${this.header['GeneratedByEngineVersion']}`);
+        }
         if (this.meta.version >= 2.0) {
             this.meta.numWidth = 8;
             this.meta.numFmt = common.NUMFMT_UINT64;
@@ -534,7 +555,13 @@ class MDictBase {
     _decodeKeyInfo(keyInfoBuff) {
         const keyBlockNum = this.keyHeader.keywordBlocksNum;
         if (this.meta.version >= 2.0) {
+            if (keyInfoBuff.length < 8) {
+                throw new Error('Truncated MDict key info block');
+            }
             const packType = keyInfoBuff.subarray(0, 4).join('');
+            if (packType !== '2000') {
+                throw new Error('Unsupported MDict key info compression');
+            }
             // const _alder32Buff = keyInfoBuff.slice(4, 8)
             // const numEntries = this.keyHeader.entriesNum;
             if (this.meta.encrypt === 2) {
@@ -568,9 +595,9 @@ class MDictBase {
             let lastWordSize = 0;
             let firstKey = '';
             let lastKey = '';
-            blockWordCount = common.b2n(keyInfoBuff.slice(indexOffset, indexOffset + this.meta.numWidth));
+            blockWordCount = readNumber(keyInfoBuff, indexOffset, this.meta.numWidth);
             indexOffset += this.meta.numWidth;
-            firstWordSize = common.b2n(keyInfoBuff.slice(indexOffset, indexOffset + this.meta.numWidth / 4));
+            firstWordSize = readNumber(keyInfoBuff, indexOffset, this.meta.numWidth / 4);
             indexOffset += this.meta.numWidth / 4;
             if (this.meta.version >= 2.0) {
                 if (this.meta.encoding === UTF16) {
@@ -585,9 +612,14 @@ class MDictBase {
                     firstWordSize = firstWordSize * 2;
                 }
             }
-            const firstWordBuffer = keyInfoBuff.slice(indexOffset, indexOffset + firstWordSize);
+            const firstWordBuffer = readKeyInfoText(
+                keyInfoBuff,
+                indexOffset,
+                firstWordSize,
+                this.meta.version >= 2 ? (this.meta.encoding === UTF16 ? 2 : 1) : 0,
+            );
             indexOffset += firstWordSize;
-            lastWordSize = common.b2n(keyInfoBuff.slice(indexOffset, indexOffset + this.meta.numWidth / 4));
+            lastWordSize = readNumber(keyInfoBuff, indexOffset, this.meta.numWidth / 4);
             indexOffset += this.meta.numWidth / 4;
             if (this.meta.version >= 2.0) {
                 if (this.meta.encoding === UTF16) {
@@ -602,11 +634,16 @@ class MDictBase {
                     lastWordSize = lastWordSize * 2;
                 }
             }
-            const lastWordBuffer = keyInfoBuff.slice(indexOffset, indexOffset + lastWordSize);
+            const lastWordBuffer = readKeyInfoText(
+                keyInfoBuff,
+                indexOffset,
+                lastWordSize,
+                this.meta.version >= 2 ? (this.meta.encoding === UTF16 ? 2 : 1) : 0,
+            );
             indexOffset += lastWordSize;
-            packSize = common.b2n(keyInfoBuff.slice(indexOffset, indexOffset + this.meta.numWidth));
+            packSize = readNumber(keyInfoBuff, indexOffset, this.meta.numWidth);
             indexOffset += this.meta.numWidth;
-            unpackSize = common.b2n(keyInfoBuff.slice(indexOffset, indexOffset + this.meta.numWidth));
+            unpackSize = readNumber(keyInfoBuff, indexOffset, this.meta.numWidth);
             indexOffset += this.meta.numWidth;
             if (this.meta.encoding === UTF16) {
                 firstKey = this.meta.decoder.decode(firstWordBuffer);
@@ -631,13 +668,10 @@ class MDictBase {
             entriesCount += blockWordCount;
             kbPackSizeAccu += packSize;
             kbUnpackSizeAccu += unpackSize;
+            assert(Number.isSafeInteger(entriesCount) && Number.isSafeInteger(kbPackSizeAccu) && Number.isSafeInteger(kbUnpackSizeAccu), 'MDict key info totals exceed safe integer range');
         }
-        if (entriesCount !== this.keyHeader.keywordNum) {
-            throw Error(`MDict key info entry count mismatch: expected ${this.keyHeader.keywordNum}, got ${entriesCount}`);
-        }
-        if (indexOffset !== keyInfoBuff.length) {
-            throw Error(`MDict key info contains trailing bytes: ${keyInfoBuff.length - indexOffset}`);
-        }
+        assert(entriesCount === this.keyHeader.keywordNum, 'MDict key info entry count mismatch');
+        assert(indexOffset === keyInfoBuff.length, 'MDict key info size mismatch');
         assert(kbPackSizeAccu === this.keyHeader.keywordBlockPackedSize);
         return keyBlockInfoList;
     }
@@ -648,6 +682,7 @@ class MDictBase {
      * @param unpackSize
      */
     unpackKeyBlock(kbPackedBuff, unpackSize) {
+        assert(kbPackedBuff.length >= 8 && Number.isSafeInteger(unpackSize) && unpackSize >= 0, 'Invalid MDict key block size');
         //  4 bytes : compression type
         const compType = bytesToHex(kbPackedBuff.slice(0, 4));
         // TODO 4 bytes adler32 checksum
@@ -724,14 +759,14 @@ class MDictBase {
         this._recordHeaderEndOffset = this._recordHeaderStartOffset + recordHeaderLen;
         const recordHeaderBuffer = this.scanner.readBuffer(this._recordHeaderStartOffset, recordHeaderLen);
         let ofset = 0;
-        const recordBlocksNum = common.b2n(recordHeaderBuffer.slice(ofset, ofset + this.meta.numWidth));
+        const recordBlocksNum = readNumber(recordHeaderBuffer, ofset, this.meta.numWidth);
         ofset += this.meta.numWidth;
-        const entriesNum = common.b2n(recordHeaderBuffer.slice(ofset, ofset + this.meta.numWidth));
+        const entriesNum = readNumber(recordHeaderBuffer, ofset, this.meta.numWidth);
         assert(entriesNum === this.keyHeader.keywordNum);
         ofset += this.meta.numWidth;
-        const recordInfoCompSize = common.b2n(recordHeaderBuffer.slice(ofset, ofset + this.meta.numWidth));
+        const recordInfoCompSize = readNumber(recordHeaderBuffer, ofset, this.meta.numWidth);
         ofset += this.meta.numWidth;
-        const recordBlockCompSize = common.b2n(recordHeaderBuffer.slice(ofset, ofset + this.meta.numWidth));
+        const recordBlockCompSize = readNumber(recordHeaderBuffer, ofset, this.meta.numWidth);
         this.recordHeader = {
             recordBlocksNum,
             entriesNum,
@@ -746,6 +781,8 @@ class MDictBase {
     _readRecordInfos() {
         this._recordInfoStartOffset = this._recordHeaderEndOffset;
         const recordInfoBuff = this.scanner.readBuffer(this._recordInfoStartOffset, this.recordHeader.recordInfoCompSize);
+        assert(this.recordHeader.recordBlocksNum * this.meta.numWidth * 2 === recordInfoBuff.length, 'MDict record info size mismatch');
+        assert(this.keywordList.length === 0 || this.recordHeader.recordBlocksNum > 0, 'MDict entries have no record blocks');
         /**
          * record_block_info_list:
          * [{
@@ -761,10 +798,11 @@ class MDictBase {
         let compressedAdder = 0;
         let decompressionAdder = 0;
         for (let i = 0; i < this.recordHeader.recordBlocksNum; i++) {
-            const packSize = common.b2n(recordInfoBuff.slice(offset, offset + this.meta.numWidth));
+            const packSize = readNumber(recordInfoBuff, offset, this.meta.numWidth);
             offset += this.meta.numWidth;
-            const unpackSize = common.b2n(recordInfoBuff.slice(offset, offset + this.meta.numWidth));
+            const unpackSize = readNumber(recordInfoBuff, offset, this.meta.numWidth);
             offset += this.meta.numWidth;
+            assert(packSize >= 8, 'Invalid MDict record block size');
             recordInfoList.push({
                 packSize: packSize,
                 packAccumulateOffset: compressedAdder,
@@ -773,6 +811,7 @@ class MDictBase {
             });
             compressedAdder += packSize;
             decompressionAdder += unpackSize;
+            assert(Number.isSafeInteger(compressedAdder) && Number.isSafeInteger(decompressionAdder), 'Invalid MDict record info totals');
         }
         assert(offset === this.recordHeader.recordInfoCompSize);
         assert(compressedAdder === this.recordHeader.recordBlockCompSize);

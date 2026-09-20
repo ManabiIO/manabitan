@@ -207,6 +207,8 @@ describe('convertMdxToArchive', () => {
 
         expect(stylesCss).toContain('/* Source: styles/extra.css */');
         expect(stylesCss).toContain('/* Source: Read/inline/1.css */');
+        expect(stylesCss).toContain('[data-sc-class~="from-mdd"]');
+        expect(stylesCss).toContain('[data-sc-class~="accent"]');
         expect(stylesCss).toContain('url("mdict-media/images/read.png")');
         expect(await zip.file('mdict-media/audio/read.mp3')?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
         expect(await zip.file('mdict-media/images/read.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(4, 5, 6));
@@ -356,6 +358,37 @@ describe('convertMdxToArchive', () => {
         expect(lookupKeys).toStrictEqual(['styles/extra.css', 'images/css-bg.png']);
     });
 
+    test('rewrites MDX CSS selectors for structured-content attributes', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'CSS selector fixture', Description: ''},
+            entries: [{keyText: 'Styled', definition: '<div class="entry" id="hero"><span class="jump">Styled</span></div>'}],
+        });
+        mockState.mddFactory = () => [{
+            keyText: 'styles/theme.css',
+            value: new TextEncoder().encode([
+                ':root, body, div.entry #hero .jump { color: red; }',
+                '@media screen { table.tbl td.cell, img.icon { color: blue; } }',
+                '@font-face { font-family: Example; src: url("font.woff2"); }',
+            ].join('\n')),
+        }];
+
+        const result = await convertMdxToArchive(
+            'css-selector-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'css-selector-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const stylesCss = await zip.file('styles.css')?.async('text');
+
+        expect(stylesCss).toContain('[data-sc-class~="mdict-yomitan-content"]');
+        expect(stylesCss).toContain('[data-sc-tag="div"][data-sc-class~="entry"] [data-sc-id="hero"] [data-sc-class~="jump"]');
+        expect(stylesCss).toContain('@media screen');
+        expect(stylesCss).toContain('@font-face');
+        expect(stylesCss).not.toContain('.entry');
+        expect(stylesCss).not.toContain('#hero');
+    });
+
     test('strips URL query and hash fragments before resolving MDD assets', async () => {
         /** @type {string[]} */
         const lookupKeys = [];
@@ -450,6 +483,42 @@ describe('convertMdxToArchive', () => {
         expect(await zip.file('mdict-media/images/space name.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
         expect(await zip.file('mdict-media/images/bad%ZZname.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(4, 5, 6));
         expect(lookupKeys).toStrictEqual(['images/space name.png', 'images/bad%ZZname.png']);
+    });
+
+    test('preserves binary data URL bytes and resolves root and prefixed CSS paths', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Binary asset fixture',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Embedded',
+                definition: '<div><img src="data:application/octet-stream,%00%FF%80"></div>',
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'styles/theme.css', value: new TextEncoder().encode('.theme{background:url("/images/root.bin")} .prefixed{background:url("mdict-media/images/prefixed.bin")}')},
+            {keyText: 'images/root.bin', value: Uint8Array.of(1, 2, 3)},
+            {keyText: 'images/prefixed.bin', value: Uint8Array.of(4, 5, 6)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'binary-assets.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'binary-assets.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const stylesCss = await zip.file('styles.css')?.async('text');
+        const embeddedPath = Object.keys(zip.files).find((path) => path.startsWith('mdict-media/embedded/application/'));
+
+        expect(stylesCss).toContain('url("mdict-media/images/root.bin")');
+        expect(stylesCss).toContain('url("mdict-media/images/prefixed.bin")');
+        expect(await zip.file('mdict-media/images/root.bin')?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
+        expect(await zip.file('mdict-media/images/prefixed.bin')?.async('uint8array')).toStrictEqual(Uint8Array.of(4, 5, 6));
+        expect(embeddedPath).toBeDefined();
+        if (typeof embeddedPath !== 'string') { throw new Error('Expected embedded asset path'); }
+        expect(await zip.file(embeddedPath)?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
     });
 
     test('keeps malformed data URLs and empty dictionaries non-throwing', async () => {

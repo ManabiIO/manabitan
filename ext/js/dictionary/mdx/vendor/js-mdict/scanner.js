@@ -8,12 +8,15 @@ export class FileScanner {
      * @param {Uint8Array|ArrayBuffer} source
      */
     constructor(source) {
+        if (!(source instanceof Uint8Array) && !(source instanceof ArrayBuffer)) {
+            throw new TypeError('MDict source must be an ArrayBuffer or Uint8Array');
+        }
         this.offset = 0;
         this._buffer = source instanceof Uint8Array ? source : new Uint8Array(source);
     }
 
     close() {
-        // NOP
+        this._buffer = new Uint8Array(0);
     }
 
     /**
@@ -23,8 +26,10 @@ export class FileScanner {
      */
     readBuffer(offset, length) {
         const start = Number(offset);
-        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(length) || start < 0 || length < 0 || start > this._buffer.byteLength || length > this._buffer.byteLength - start) {
-            throw new RangeError(`MDict read out of bounds: offset=${start}, length=${length}, size=${this._buffer.byteLength}`);
+        if ((typeof offset !== 'number' && typeof offset !== 'bigint') ||
+            !Number.isSafeInteger(start) || !Number.isSafeInteger(length) || start < 0 || length < 0 ||
+            start > this._buffer.byteLength || length > this._buffer.byteLength - start) {
+            throw new RangeError('MDict read exceeds the available file data');
         }
         return this._buffer.slice(start, start + length);
     }

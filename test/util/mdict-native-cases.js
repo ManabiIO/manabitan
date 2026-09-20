@@ -19,6 +19,7 @@ import assert from 'node:assert/strict';
 import {describe, test} from 'node:test';
 import {MDX} from '../../ext/js/dictionary/mdx/vendor/js-mdict/mdx.js';
 import {MDD} from '../../ext/js/dictionary/mdx/vendor/js-mdict/mdd.js';
+import {FileScanner} from '../../ext/js/dictionary/mdx/vendor/js-mdict/scanner.js';
 import {createMdxImportData} from '../../ext/js/dictionary/mdx/mdx-converter.js';
 import {makeFixturePng, makeMdictFixture} from './mdict-binary-fixture.js';
 
@@ -241,6 +242,11 @@ describe('native parser controls and key metadata', () => {
         assert.throws(() => new MDX('key-length.mdx', fixture.bytes), /key.*size/iu);
     });
 
+    test('key-info text must have its declared terminator', () => {
+        const fixture = makeMdictFixture([{key: 'a', value: 'definition'}], {keyInfoTerminatorByte: 1});
+        assert.throws(() => new MDX('key-terminator.mdx', fixture.bytes), /terminator/iu);
+    });
+
     test('per-block entry counts are enforced even when their sum is correct', () => {
         const fixture = makeMdictFixture([{key: 'a', value: 'first'}, {key: 'b', value: 'second'}], {keysPerBlock: 1, keyBlockEntryCounts: [2, 0]});
         assert.throws(() => new MDX('key-counts.mdx', fixture.bytes), /key.*entr/iu);
@@ -254,5 +260,15 @@ describe('native parser controls and key metadata', () => {
     test('trailing key-info bytes are not silently discarded', () => {
         const fixture = makeMdictFixture([{key: 'a', value: 'definition'}], {keyInfoTrailer: Uint8Array.of(1, 2)});
         assert.throws(() => new MDX('key-trailer.mdx', fixture.bytes), /key.*info/iu);
+    });
+
+    test('scanner rejects invalid sources and releases its input on close', () => {
+        assert.throws(() => new FileScanner(/** @type {any} */ ({})), TypeError);
+        const scanner = new FileScanner(Uint8Array.of(1, 2, 3));
+        assert.deepEqual(scanner.readBuffer(0, 2), Uint8Array.of(1, 2));
+        scanner.close();
+        assert.deepEqual(scanner.readBuffer(0, 0), new Uint8Array(0));
+        assert.throws(() => scanner.readBuffer(0, 1), /available file data/iu);
+        assert.throws(() => scanner.readBuffer(/** @type {any} */ ('0'), 0), /available file data/iu);
     });
 });

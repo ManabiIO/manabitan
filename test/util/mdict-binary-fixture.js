@@ -77,7 +77,7 @@ function xmlAttribute(value) {
  * Does not import the parser under test. Record blocks may split Unicode scalars.
  * Optional metadata overrides are only for negative regression cases.
  * @param {Array<{key: string, value: string|Uint8Array}>} entries
- * @param {{mdd?: boolean, encoding?: 'utf8'|'utf16le', compression?: 'raw'|'zlib', recordBlockSize?: number, keysPerBlock?: number, title?: string, version?: string, keyBlockUnpackSizeDelta?: number, keyBlockEntryCounts?: number[], keyInfoTrailer?: Uint8Array}} [options]
+ * @param {{mdd?: boolean, encoding?: 'utf8'|'utf16le', compression?: 'raw'|'zlib', recordBlockSize?: number, keysPerBlock?: number, title?: string, version?: string, keyBlockUnpackSizeDelta?: number, keyBlockEntryCounts?: number[], keyInfoTrailer?: Uint8Array, keyInfoTerminatorByte?: number}} [options]
  * @returns {{bytes: Uint8Array, records: Uint8Array[], recordDataOffset: number}}
  */
 export function makeMdictFixture(entries, options = {}) {
@@ -92,6 +92,7 @@ export function makeMdictFixture(entries, options = {}) {
         keyBlockUnpackSizeDelta = 0,
         keyBlockEntryCounts = [],
         keyInfoTrailer = new Uint8Array(0),
+        keyInfoTerminatorByte = 0,
     } = options;
     if (!Number.isSafeInteger(recordBlockSize) || recordBlockSize < 1 ||
     !Number.isSafeInteger(keysPerBlock) || keysPerBlock < 1) {
@@ -105,6 +106,7 @@ export function makeMdictFixture(entries, options = {}) {
     const keyEncoding = mdd ? 'utf16le' : encoding;
     const keyUnit = keyEncoding === 'utf16le' ? 2 : 1;
     const terminator = Buffer.alloc(keyUnit);
+    const keyInfoTerminator = Buffer.alloc(keyUnit, keyInfoTerminatorByte);
     const records = orderedEntries.map(({value}) => {
         const bytes = typeof value === 'string' ? Buffer.from(value, mdd ? 'utf8' : encoding) : Buffer.from(value);
         return mdd ? bytes : Buffer.concat([bytes, Buffer.alloc(encoding === 'utf16le' ? 2 : 1)]);
@@ -144,10 +146,10 @@ export function makeMdictFixture(entries, options = {}) {
             integer(keyBlockEntryCounts[packedKeys.length] ?? count, numWidth),
             integer(first.length / keyUnit, v2 ? 2 : 1),
             first,
-            v2 ? terminator : Buffer.alloc(0),
+            v2 ? keyInfoTerminator : Buffer.alloc(0),
             integer(last.length / keyUnit, v2 ? 2 : 1),
             last,
-            v2 ? terminator : Buffer.alloc(0),
+            v2 ? keyInfoTerminator : Buffer.alloc(0),
             integer(packed.length, numWidth),
             integer(unpacked.length + keyBlockUnpackSizeDelta, numWidth),
         );

@@ -4,8 +4,10 @@ on:
   pull_request:
     paths:
       - 'ext/js/dictionary/mdx/**'
+      - 'ext/js/comm/mdx.js'
       - 'test/mdict-binary-regressions.test.js'
       - 'test/util/mdict-*.js'
+      - 'test/playwright/mdict-*.spec.js'
       - '.github/workflows/mdict-native.yml'
 
 permissions:
@@ -24,15 +26,18 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           node-version: '22'
-      - name: Preserve exact parser and converter source for reproduction
+      - name: Preserve source and integration context for reproduction
         run: |
           mkdir -p builds/mdict-native
           git rev-parse HEAD > builds/mdict-native/commit.txt
-          tar -czf builds/mdict-native/source.tar.gz ext/js/dictionary/mdx ext/js/data/array-buffer-util.js ext/lib/parse5.js ext/lib/zip.js test/mdict-binary-regressions.test.js test/util/mdict-binary-fixture.js test/util/mdict-native-cases.js package.json
-      - name: Exercise actual native parsers and converter
+          {
+            git ls-files -z -- '*.js' '*.json' '*.ts' '*.html' '*.css' '*.yml' '*.yaml'
+            find ext/lib -type f -name '*.js' -print0
+          } | sort -zu | tar --null -T - -czf builds/mdict-native/source.tar.gz
+      - name: Exercise native parsers, converter and client lifecycle
         run: |
           set -o pipefail
-          node --test --test-reporter=tap test/util/mdict-native-cases.js 2>&1 | tee builds/mdict-native/tests.tap
+          node --test --test-reporter=tap test/util/mdict-native-cases.js test/util/mdict-client-cases.js 2>&1 | tee builds/mdict-native/tests.tap
       - name: Retain reproducible source and test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -40,4 +45,35 @@ jobs:
           name: mdict-native-${{ github.event.pull_request.number }}-${{ github.sha }}
           path: builds/mdict-native/
           if-no-files-found: error
+          retention-days: 14
+
+  chromium-mdict:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build Chromium extension
+        run: npm run build -- --target chrome-dev
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Exercise MDict settings import and installed lookup
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+        run: |
+          set -o pipefail
+          mkdir -p builds/mdict-browser
+          git rev-parse HEAD > builds/mdict-browser/commit.txt
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep MDX 2>&1 | tee builds/mdict-browser/tests.log
+      - name: Retain MDict browser results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mdict-browser-${{ github.event.pull_request.number }}-${{ github.sha }}
+          path: |
+            builds/mdict-browser/
+            test-results/
+          if-no-files-found: warn
           retention-days: 14

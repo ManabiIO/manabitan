@@ -22,9 +22,10 @@ import {expect, test} from 'vitest';
 // The vendored pako UMD bundle must execute as a native ES module, as it does
 // in the extension worker. Vite's injected CommonJS bindings select a different
 // UMD branch. Use a native subprocess instead of mocking or replacing the codec.
-test('native MDict parser and converter regressions', () => {
-    const file = fileURLToPath(new URL('util/mdict-native-cases.js', import.meta.url));
-    const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', file], {
+test('native MDict parser, converter and client lifecycle regressions', () => {
+    const files = ['mdict-native-cases.js', 'mdict-client-cases.js']
+        .map((name) => fileURLToPath(new URL(`util/${name}`, import.meta.url)));
+    const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', ...files], {
         encoding: 'utf8',
         timeout: 30000,
         maxBuffer: 8 * 1024 * 1024,

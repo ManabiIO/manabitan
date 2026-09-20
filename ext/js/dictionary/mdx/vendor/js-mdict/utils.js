@@ -3,7 +3,7 @@ import { ripemd128 } from './ripemd128.js';
 import {concatUint8Arrays} from '../../browser-util.js';
 const REGEXP_STRIPKEY = {
     mdx: /[().,\-&、 '/\\@_$\\!]()/g,
-    // mdd:/[!”#$%&'()\\*\\+,-.\\/:;<=>\\?@\\[\\]\^_`{|}~]()/g,
+    // mdd:/[!”#$%&'()\\*\\+,-.\\/:;<=>\\?@\\[\\]\\^_`{|}~]()/g,
     mdd: /([.][^.]*$)|[()., '/@]/g,
 };
 const UTF_16LE_DECODER = new TextDecoder('utf-16le');
@@ -36,7 +36,7 @@ function readUTF16(buf, offset, length) {
  */
 function getExtension(filename, defaultExt) {
     var _a;
-    return ((_a = /(?:\.([^.]+))?$/.exec(filename)) === null || _a === void 0 ? void 0 : _a[1]) || defaultExt;
+    return (((_a = /(?:\.([^.]+))?$/.exec(filename)) === null || _a === void 0 ? void 0 : _a[1]) || defaultExt).toLowerCase()
 }
 /**
  * 返回三个数字中的最小值。
@@ -143,7 +143,7 @@ function uint32BEtoNumber(bytes) {
         n <<= 8;
     }
     n |= bytes[3];
-    return n;
+    return n >>> 0
 }
 /**
  * 将 Uint8Array 转换为无符号 64 位整数(大端序)。
@@ -224,7 +224,7 @@ function b2n(data) {
         case 8:
             return uint64BEtoNumber(data);
     }
-    return 0;
+    throw new RangeError('Invalid MDict integer width')
 }
 /**
  * 使用简单的加密算法快速解密数据。
