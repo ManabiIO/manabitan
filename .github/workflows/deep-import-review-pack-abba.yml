@@ -43,8 +43,6 @@ jobs:
                       output.set(sourceBytes.subarray(sourceOffset, sourceOffset + length), outputOffset);
                       outputOffset += length;
                   }'''
-          # The YAML block contributes no indentation to Python string contents.
-          old = old.replace('\n          ', '\n')
           new = '''        let outputOffset = 0;
                   let runStart = sourceOffsets[startIndex];
                   let runEnd = runStart;
@@ -63,7 +61,6 @@ jobs:
                       outputOffset += length;
                   }
                   output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset);'''
-          new = new.replace('\n          ', '\n')
           assert original.count(old) == 1
           candidate = original.replace(old, new)
           output = Path('builds/deep-pack-abba')
