@@ -1,0 +1,67 @@
+name: Original Jitendex and JMdict import inputs
+on:
+  push:
+    branches: [research/import-jitendex-jmdict-20260919]
+    paths: [.github/workflows/import-jj-inputs-20260919.yml]
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 54ac62a39386459b7822fc644e5a1a6b1a619619
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: MANABITAN_CLANG=clang-18 npm run build:libs
+      - name: Capture exact development workspace
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD 'HEAD^{tree}' > /tmp/identities.txt
+          tar -czf /tmp/jj-workspace.tgz .git ext dev test types docs web benches package.json package-lock.json AGENTS.md CONTRIBUTING.md README.md LICENSE* '*config*' node_modules 2>/dev/null || {
+            tar -czf /tmp/jj-workspace.tgz --exclude=./builds --exclude=./.git/hooks .
+          }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jj-integrated-workspace
+          path: |
+            /tmp/jj-workspace.tgz
+            /tmp/identities.txt
+          retention-days: 7
+          if-no-files-found: error
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jitendex, jmdict]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 54ac62a39386459b7822fc644e5a1a6b1a619619
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: MANABITAN_CLANG=clang-18 npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Diagnostic complete original import
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: node dev/perf/import-benchmark.js "$DICTIONARY" --trace --flags '{}' --output builds/jj-profile
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jj-profile-${{ matrix.dictionary }}
+          path: builds/jj-profile
+          retention-days: 14
+          if-no-files-found: error
