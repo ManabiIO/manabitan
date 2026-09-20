@@ -1,0 +1,263 @@
+diff --git a/ext/js/dictionary/zstd-term-content-compression-worker.js b/ext/js/dictionary/zstd-term-content-compression-worker.js
+index 186bc38..1486395 100644
+--- a/ext/js/dictionary/zstd-term-content-compression-worker.js
++++ b/ext/js/dictionary/zstd-term-content-compression-worker.js
+@@ -34,7 +34,7 @@ self.addEventListener('message', (event) => {
+ /** @param {MessageEvent} event */
+ async function compressContent(event) {
+     const rawData = /** @type {unknown} */ (event.data);
+-    const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown, compressionExperiments?: import('dictionary-importer').ImportExperiments}} */ (rawData);
++    const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, blockStartIndexes?: unknown, blockLengths?: unknown, dictName?: unknown, wrap?: unknown, compressionExperiments?: import('dictionary-importer').ImportExperiments}} */ (rawData);
+     const id = typeof data?.id === 'number' ? data.id : -1;
+     try {
+         const {compressTermContentZstd, compressWrappedTermContentZstd, finishWrappedTermContentZstdSpans, prepareWrappedTermContentZstdSpans} = await modulePromise;
+@@ -49,6 +49,45 @@ async function compressContent(event) {
+             data.sourceLengths instanceof Uint32Array
+         ) {
+             if (data.wrap !== true) { throw new TypeError('Span compression requires a wrapped output'); }
++            if (typeof data.blockStartIndexes !== 'undefined' || typeof data.blockLengths !== 'undefined') {
++                const {blockStartIndexes: starts, blockLengths: sizes} = data;
++                if (
++                    !(starts instanceof Uint32Array) || !(sizes instanceof Uint32Array) ||
++                    sizes.length === 0 || starts.length !== sizes.length + 1 ||
++                    starts[0] !== 0 || starts[sizes.length] !== data.sourceOffsets.length ||
++                    data.sourceOffsets.length !== data.sourceLengths.length
++                ) {
++                    throw new RangeError('Compression worker block plan is invalid');
++                }
++                for (let block = 0; block < sizes.length; ++block) {
++                    if (starts[block + 1] < starts[block] || starts[block + 1] > data.sourceOffsets.length) {
++                        throw new RangeError('Compression worker block span is invalid');
++                    }
++                }
++                /** @type {ArrayBuffer[]} */
++                const compressed = [];
++                let envelopeMs = 0;
++                for (let block = 0; block < sizes.length; ++block) {
++                    // Preparation takes an owning copy; finishing is synchronous
++                    // and one-shot on the existing context. Do not acknowledge
++                    // the shared source until every block has consumed it.
++                    const prepared = prepareWrappedTermContentZstdSpans(
++                        data.source,
++                        data.sourceOffsets.subarray(starts[block], starts[block + 1]),
++                        data.sourceLengths.subarray(starts[block], starts[block + 1]),
++                        sizes[block],
++                        dictName,
++                        options,
++                    );
++                    if (block + 1 === sizes.length) { self.postMessage({type: 'source-consumed', id}); }
++                    const value = finishWrappedTermContentZstdSpans(prepared);
++                    compressed.push(ownCompressedBuffer(value.bytes));
++                    envelopeMs += value.envelopeMs;
++                }
++                self.postMessage({id, compressed, envelopeMs}, compressed);
++                return;
++            }
++
+             if (
+                 typeof data.contentBytes !== 'number' ||
+                 !Number.isSafeInteger(data.contentBytes) ||
+@@ -76,15 +115,23 @@ async function compressContent(event) {
+                 {bytes: compressTermContentZstd(data.content, dictName), envelopeMs: 0};
+         }
+         const {bytes, envelopeMs} = result;
+-        const compressed = (
+-            bytes.buffer instanceof ArrayBuffer &&
+-            bytes.byteOffset === 0 &&
+-            bytes.byteLength === bytes.buffer.byteLength
+-        ) ?
+-            bytes.buffer :
+-            Uint8Array.from(bytes).buffer;
++        const compressed = ownCompressedBuffer(bytes);
+         self.postMessage({id, compressed, envelopeMs}, [compressed]);
+     } catch (error) {
+         self.postMessage({id, error: `${error}`});
+     }
+ }
++
++/**
++ * @param {Uint8Array} bytes
++ * @returns {ArrayBuffer}
++ */
++function ownCompressedBuffer(bytes) {
++    return (
++        bytes.buffer instanceof ArrayBuffer &&
++        bytes.byteOffset === 0 &&
++        bytes.byteLength === bytes.buffer.byteLength
++    ) ?
++        bytes.buffer :
++        Uint8Array.from(bytes).buffer;
++}
+ diff --git a/ext/js/dictionary/zstd-term-content.js b/ext/js/dictionary/zstd-term-content.js
+index f81b862..80cd50b 100644
+--- a/ext/js/dictionary/zstd-term-content.js
++++ b/ext/js/dictionary/zstd-term-content.js
+@@ -72,7 +72,7 @@ export class TermContentCompressionPool {
+         if (workers.length === 0) { throw new RangeError('Term content compression pool requires a worker'); }
+         /** @type {Worker[]} */
+         this._workers = workers;
+-        /** @type {Map<number, {resolve: (value: {bytes: Uint8Array, envelopeMs: number}) => void, reject: (reason?: unknown) => void, resolveSourceConsumed: (() => void)|null, rejectSourceConsumed: ((reason?: unknown) => void)|null, sourceConsumedSettled: boolean, timeoutId: ReturnType<typeof setTimeout>}>} */
++        /** @type {Map<number, {resolve: (value: {chunks: Uint8Array[], envelopeMs: number}) => void, reject: (reason?: unknown) => void, resolveSourceConsumed: (() => void)|null, rejectSourceConsumed: ((reason?: unknown) => void)|null, sourceConsumedSettled: boolean, batchSize: number|null, timeoutId: ReturnType<typeof setTimeout>}>} */
+         this._pending = new Map();
+         /** @type {number} */
+         this._nextId = 1;
+@@ -169,34 +169,59 @@ export class TermContentCompressionPool {
+             }
+         }
+         const compressionExperiments = snapshotTermBankExperiments(options);
+-        const envelopeMsByWorker = new Float64Array(this._workers.length);
+-        const jobs = Array.from(blockLengths, (contentBytes, blockIndex) => {
+-            const workerIndex = blockIndex % this._workers.length;
+-            const start = blockStartIndexes[blockIndex];
+-            const end = blockStartIndexes[blockIndex + 1];
+-            const blockOffsets = sourceOffsets.slice(start, end);
+-            const blockSourceLengths = sourceLengths.slice(start, end);
++        const workerCount = this._workers.length;
++        // Keep the same blocks and round-robin assignment, but send each
++        // worker one operation instead of cloning the source once per block.
++        const jobs = Array.from({length: Math.min(workerCount, blockCount)}, (_, workerIndex) => {
++            const count = Math.ceil((blockCount - workerIndex) / workerCount);
++            let spanCount = 0;
++            for (let block = workerIndex; block < blockCount; block += workerCount) {
++                spanCount += blockStartIndexes[block + 1] - blockStartIndexes[block];
++            }
++            const offsets = new Uint32Array(spanCount);
++            const lengths = new Uint32Array(spanCount);
++            const starts = new Uint32Array(count + 1);
++            const sizes = new Uint32Array(count);
++            let cursor = 0;
++            let localBlock = 0;
++            for (let block = workerIndex; block < blockCount; block += workerCount) {
++                const start = blockStartIndexes[block];
++                const end = blockStartIndexes[block + 1];
++                offsets.set(sourceOffsets.subarray(start, end), cursor);
++                lengths.set(sourceLengths.subarray(start, end), cursor);
++                cursor += end - start;
++                starts[localBlock + 1] = cursor;
++                sizes[localBlock] = blockLengths[block];
++                ++localBlock;
++            }
+             return this._dispatchWithSourceConsumed(
+                 workerIndex,
+                 {
+                     source,
+-                    sourceOffsets: blockOffsets,
+-                    sourceLengths: blockSourceLengths,
+-                    contentBytes,
++                    sourceOffsets: offsets,
++                    sourceLengths: lengths,
++                    blockStartIndexes: starts,
++                    blockLengths: sizes,
+                     dictName,
+                     wrap: true,
+                     compressionExperiments,
+                 },
+-                [blockOffsets.buffer, blockSourceLengths.buffer],
++                [offsets.buffer, lengths.buffer, starts.buffer, sizes.buffer],
++                count,
+             );
+         });
+         const sourceConsumed = Promise.all(jobs.map(({sourceConsumed: promise}) => promise)).then(() => {});
+         const completion = Promise.all(jobs.map(({completion: promise}) => promise)).then((results) => {
+-            const chunks = results.map((result, blockIndex) => {
+-                envelopeMsByWorker[blockIndex % this._workers.length] += result.envelopeMs;
+-                return result.bytes;
+-            });
+-            return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: /** @type {true} */ (true)};
++            /** @type {Uint8Array[]} */
++            const chunks = new Array(blockCount);
++            let envelopeMs = 0;
++            for (const [workerIndex, result] of results.entries()) {
++                for (const [blockIndex, bytes] of result.chunks.entries()) {
++                    chunks[workerIndex + blockIndex * workerCount] = bytes;
++                }
++                envelopeMs = Math.max(envelopeMs, result.envelopeMs);
++            }
++            return {chunks, envelopeMs, wrapped: /** @type {true} */ (true)};
+         });
+         void sourceConsumed.catch(() => {});
+         void completion.catch(() => {});
+@@ -244,7 +269,7 @@ export class TermContentCompressionPool {
+                 transfer,
+             );
+             envelopeMsByWorker[workerIndex] += result.envelopeMs;
+-            return result.bytes;
++            return result.chunks[0];
+         }));
+         return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker)};
+     }
+@@ -253,7 +278,7 @@ export class TermContentCompressionPool {
+      * @param {number} workerIndex
+      * @param {Record<string, unknown>} message
+      * @param {Transferable[]} transfer
+-     * @returns {Promise<{bytes: Uint8Array, envelopeMs: number}>}
++     * @returns {Promise<{chunks: Uint8Array[], envelopeMs: number}>}
+      */
+     _dispatch(workerIndex, message, transfer) {
+         return this._startDispatch(workerIndex, message, transfer, false).completion;
+@@ -263,10 +288,11 @@ export class TermContentCompressionPool {
+      * @param {number} workerIndex
+      * @param {Record<string, unknown>} message
+      * @param {Transferable[]} transfer
+-     * @returns {{sourceConsumed: Promise<void>, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}}
++     * @param {number} batchSize
++     * @returns {{sourceConsumed: Promise<void>, completion: Promise<{chunks: Uint8Array[], envelopeMs: number}>}}
+      */
+-    _dispatchWithSourceConsumed(workerIndex, message, transfer) {
+-        const {sourceConsumed, completion} = this._startDispatch(workerIndex, message, transfer, true);
++    _dispatchWithSourceConsumed(workerIndex, message, transfer, batchSize) {
++        const {sourceConsumed, completion} = this._startDispatch(workerIndex, message, transfer, true, batchSize);
+         return {sourceConsumed: /** @type {Promise<void>} */ (sourceConsumed), completion};
+     }
+ 
+@@ -275,9 +301,10 @@ export class TermContentCompressionPool {
+      * @param {Record<string, unknown>} message
+      * @param {Transferable[]} transfer
+      * @param {boolean} trackSourceConsumed
+-     * @returns {{sourceConsumed: Promise<void>|null, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}}
++     * @param {number|null} [batchSize]
++     * @returns {{sourceConsumed: Promise<void>|null, completion: Promise<{chunks: Uint8Array[], envelopeMs: number}>}}
+      */
+-    _startDispatch(workerIndex, message, transfer, trackSourceConsumed) {
++    _startDispatch(workerIndex, message, transfer, trackSourceConsumed, batchSize = null) {
+         const id = this._nextId++;
+         /** @type {((value?: void|PromiseLike<void>) => void)|null} */
+         let resolveSourceConsumed = null;
+@@ -289,12 +316,12 @@ export class TermContentCompressionPool {
+                 rejectSourceConsumed = reject;
+             }) :
+             null;
+-        /** @type {Promise<{bytes: Uint8Array, envelopeMs: number}>} */
++        /** @type {Promise<{chunks: Uint8Array[], envelopeMs: number}>} */
+         const completion = new Promise((resolve, reject) => {
+             const timeoutId = setTimeout(() => {
+                 this._fail(new Error(`Term content compression worker timed out after ${COMPRESSION_JOB_TIMEOUT_MS}ms`));
+             }, COMPRESSION_JOB_TIMEOUT_MS);
+-            this._pending.set(id, {resolve, reject, resolveSourceConsumed, rejectSourceConsumed, sourceConsumedSettled: false, timeoutId});
++            this._pending.set(id, {resolve, reject, resolveSourceConsumed, rejectSourceConsumed, sourceConsumedSettled: false, batchSize, timeoutId});
+             try {
+                 this._workers[workerIndex].postMessage({id, ...message}, transfer);
+             } catch (error) {
+@@ -335,7 +362,12 @@ export class TermContentCompressionPool {
+             pending.reject(error);
+             return;
+         }
+-        if (!(data.compressed instanceof ArrayBuffer)) {
++        const compressed = pending.batchSize === null ? [data.compressed] : data.compressed;
++        if (
++            !Array.isArray(compressed) ||
++            compressed.length !== (pending.batchSize ?? 1) ||
++            !compressed.every((bytes) => bytes instanceof ArrayBuffer)
++        ) {
+             const error = new Error('Term content compression worker returned invalid bytes');
+             if (!pending.sourceConsumedSettled) { pending.rejectSourceConsumed?.(error); }
+             pending.reject(error);
+@@ -346,7 +378,7 @@ export class TermContentCompressionPool {
+             pending.resolveSourceConsumed?.();
+         }
+         pending.resolve({
+-            bytes: new Uint8Array(data.compressed),
++            chunks: compressed.map((bytes) => new Uint8Array(bytes)),
+             envelopeMs: typeof data.envelopeMs === 'number' && Number.isFinite(data.envelopeMs) && data.envelopeMs >= 0 ? data.envelopeMs : 0,
+         });
+     }
