@@ -1,5 +1,7 @@
 # Large ZIP header coalescing experiment
 
+Source and CI context are tracked in the [Manabitan repository](https://github.com/ManabiIO/manabitan).
+
 ## Decision: keep this candidate draft, not a general performance promotion
 
 This branch is stacked on the independent ZIP-read lifetime repair #68.

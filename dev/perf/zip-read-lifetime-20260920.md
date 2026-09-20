@@ -8,6 +8,8 @@ Production baseline blob: `80d5758b5e5f00476ca833c4093f3f1bff953ab8`.
 Repaired production blob: `3166e4ab89f5550c56038fcb2d0cece2d293f0bf`.
 Test blob: `c7adf378df821e180de9ff72afc5d57094806c32`.
 
+Source and CI context are tracked in the [Manabitan repository](https://github.com/ManabiIO/manabitan).
+
 `AbortableZipReadPool.release` evicted cache entries while `abortAndJoin`
 used that cache as its only ownership inventory. An unfinished released
 read could therefore remain running after disposal returned. Re-reading
@@ -34,10 +36,10 @@ the test-runner import and resolving the production import to its file URL.
 There are no copied production implementations. Reads at the external I/O
 boundary are manually settled to reproduce non-interruptible work.
 
-| Source | Cases | Pass | Behavioral failures | Skipped/cancelled | Exit |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Tests-first baseline | 7 | 2 | 5 | 0 | 1 |
-| Repaired source | 7 | 7 | 0 | 0 | 0 |
+| Source               | Cases | Pass | Behavioral failures | Skipped/cancelled | Exit |
+| -------------------- | ----: | ---: | ------------------: | ----------------: | ---: |
+| Tests-first baseline |     7 |    2 |                   5 |                 0 |    1 |
+| Repaired source      |     7 |    7 |                   0 |                 0 |    0 |
 
 Failures cover released pending reads, both generations after re-read,
 plain and compressed pipeline release, overlapping abort passes, and a
