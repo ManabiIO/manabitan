@@ -166,6 +166,49 @@ describe('database lookup generation ownership', () => {
 });
 
 
+describe('zero-term dictionary lookup state', () => {
+    test('does not treat a metadata-only dictionary as a missing term-record shard', async () => {
+        const database = new DictionaryDatabase();
+        const db = {
+            selectObjects: vi.fn(() => [{
+                title: 'Web Frequency',
+                summaryJson: JSON.stringify({counts: {terms: {total: 0}}}),
+            }]),
+        };
+        Reflect.set(database, '_db', db);
+        const recordStore = /** @type {import('../ext/js/dictionary/term-record-opfs-store.js').TermRecordOpfsStore} */ (Reflect.get(database, '_termRecordStore'));
+        const load = vi.spyOn(recordStore, 'ensureDictionariesLoaded').mockResolvedValue();
+        const generation = Reflect.get(database, '_directTermIndexGeneration');
+
+        await database._ensureDirectTermIndexesLoaded(['Web Frequency']);
+
+        expect(load).not.toHaveBeenCalled();
+        expect(Reflect.get(database, '_directTermIndexLoadedDictionaryNames').has('Web Frequency')).toBe(true);
+        expect(Reflect.get(database, '_directTermIndexGeneration')).toBe(generation);
+
+        db.selectObjects.mockClear();
+        await database._ensureDirectTermIndexesLoaded(['Web Frequency']);
+        expect(db.selectObjects).not.toHaveBeenCalled();
+        expect(load).not.toHaveBeenCalled();
+    });
+
+    test('retains fail-closed shard loading when summary term count is unavailable', async () => {
+        const database = new DictionaryDatabase();
+        const db = {
+            selectObjects: vi.fn(() => [{title: 'Legacy', summaryJson: JSON.stringify({})}]),
+        };
+        Reflect.set(database, '_db', db);
+        const recordStore = /** @type {import('../ext/js/dictionary/term-record-opfs-store.js').TermRecordOpfsStore} */ (Reflect.get(database, '_termRecordStore'));
+        const load = vi.spyOn(recordStore, 'ensureDictionariesLoaded').mockResolvedValue();
+        vi.spyOn(recordStore, 'isDictionaryAvailable').mockReturnValue(false);
+
+        await database._ensureDirectTermIndexesLoaded(['Legacy']);
+
+        expect(load).toHaveBeenCalledWith(['Legacy']);
+    });
+});
+
+
 describe.each(['indexes', 'rows'])('public lookup generation after %s', (phase) => {
     test.each(['exact', 'prefix', 'exact-pair', 'sequence'])('rejects obsolete %s results', async (kind) => {
         const database = new DictionaryDatabase();

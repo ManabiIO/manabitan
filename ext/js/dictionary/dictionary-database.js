@@ -2690,6 +2690,32 @@ null;
     }
 
     /**
+     * Returns dictionaries whose committed summary explicitly records zero term
+     * rows. Missing or legacy counts remain unknown and retain the shard-loading
+     * fallback so real record loss still fails closed.
+     * @param {Iterable<string>} dictionaryNames
+     * @returns {Set<string>}
+     */
+    _getKnownZeroTermDictionaries(dictionaryNames) {
+        const requested = new Set(dictionaryNames);
+        if (requested.size === 0) { return new Set(); }
+        const db = this._db;
+        if (db === null || typeof db.selectObjects !== 'function') { return new Set(); }
+        const rows = db.selectObjects('SELECT title, summaryJson FROM dictionaries');
+        const result = new Set();
+        for (const row of rows) {
+            const title = this._asString(row.title);
+            if (!requested.has(title)) { continue; }
+            const summary = this._safeParseJson(this._asString(row.summaryJson), null);
+            const termCount = this._asNumber(summary?.counts?.terms?.total, -1);
+            if (Number.isSafeInteger(termCount) && termCount === 0) {
+                result.add(title);
+            }
+        }
+        return result;
+    }
+
+    /**
      * @param {Iterable<string>} dictionaryNames
      * @returns {Promise<void>}
      */
@@ -2698,7 +2724,7 @@ null;
         /** @type {Promise<void>[]} */
         const promises = [];
         /** @type {string[]} */
-        const namesToLoad = [];
+        const unresolvedNames = [];
         for (const dictionaryName of names) {
             if (
                 this._directTermIndexLoadedDictionaryNames.has(dictionaryName) ||
@@ -2711,7 +2737,20 @@ null;
                 promises.push(existing);
                 continue;
             }
-            namesToLoad.push(dictionaryName);
+            unresolvedNames.push(dictionaryName);
+        }
+        const knownZeroTermDictionaries = this._getKnownZeroTermDictionaries(unresolvedNames);
+        /** @type {string[]} */
+        const namesToLoad = [];
+        for (const dictionaryName of unresolvedNames) {
+            if (knownZeroTermDictionaries.has(dictionaryName)) {
+                // Frequency/tag/media-only dictionaries legitimately have no
+                // term-record shard. Treat that known-empty state as loaded so
+                // lookup preparation does not misclassify it as record loss.
+                this._directTermIndexLoadedDictionaryNames.add(dictionaryName);
+            } else {
+                namesToLoad.push(dictionaryName);
+            }
         }
         if (namesToLoad.length > 0) {
             const generation = this._directTermIndexGeneration;
