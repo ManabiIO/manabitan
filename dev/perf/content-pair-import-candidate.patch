@@ -1,0 +1,93 @@
+diff --git a/ext/js/dictionary/term-entry-content-hash.js b/ext/js/dictionary/term-entry-content-hash.js
+index 7734414..022a2f9 100644
+--- a/ext/js/dictionary/term-entry-content-hash.js
++++ b/ext/js/dictionary/term-entry-content-hash.js
+@@ -43,6 +43,7 @@ export function hashPairToHex(h1, h2) {
+  * @returns {[number, number]}
+  */
+ export function hashTermEntryContentBytesPair(bytes) {
++    if (bytes.length >= 128) { return hashFusedContentPair(bytes); }
+     let h1 = hashContentXxh32(bytes, 0x811c9dc5);
+     const h2 = hashContentXxh32(bytes, 0x9e3779b9);
+     if ((h1 | h2) === 0) {
+@@ -142,3 +143,80 @@ function hashContentXxh32(bytes, seed) {
+     h32 ^= h32 >>> 16;
+     return h32 >>> 0;
+ }
++
++/**
++ * @param {Uint8Array} bytes
++ * @returns {[number, number]}
++ */
++function hashFusedContentPair(bytes) {
++    const length = bytes.length;
++    let offset = 0;
++    let h1;
++    let h2;
++    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
++    if (length >= 16) {
++        const limit = length - 16;
++        let a1 = (0x811c9dc5 + 2654435761 + 2246822519) >>> 0;
++        let a2 = (0x811c9dc5 + 2246822519) >>> 0;
++        let a3 = 0x811c9dc5;
++        let a4 = (0x811c9dc5 - 2654435761) >>> 0;
++        let b1 = (0x9e3779b9 + 2654435761 + 2246822519) >>> 0;
++        let b2 = (0x9e3779b9 + 2246822519) >>> 0;
++        let b3 = 0x9e3779b9;
++        let b4 = (0x9e3779b9 - 2654435761) >>> 0;
++        do {
++            const w1 = Math.imul(view.getUint32(offset, true), 2246822519);
++            a1 = Math.imul(rotateLeft32((a1 + w1) >>> 0, 13), 2654435761) >>> 0;
++            b1 = Math.imul(rotateLeft32((b1 + w1) >>> 0, 13), 2654435761) >>> 0;
++            offset += 4;
++            const w2 = Math.imul(view.getUint32(offset, true), 2246822519);
++            a2 = Math.imul(rotateLeft32((a2 + w2) >>> 0, 13), 2654435761) >>> 0;
++            b2 = Math.imul(rotateLeft32((b2 + w2) >>> 0, 13), 2654435761) >>> 0;
++            offset += 4;
++            const w3 = Math.imul(view.getUint32(offset, true), 2246822519);
++            a3 = Math.imul(rotateLeft32((a3 + w3) >>> 0, 13), 2654435761) >>> 0;
++            b3 = Math.imul(rotateLeft32((b3 + w3) >>> 0, 13), 2654435761) >>> 0;
++            offset += 4;
++            const w4 = Math.imul(view.getUint32(offset, true), 2246822519);
++            a4 = Math.imul(rotateLeft32((a4 + w4) >>> 0, 13), 2654435761) >>> 0;
++            b4 = Math.imul(rotateLeft32((b4 + w4) >>> 0, 13), 2654435761) >>> 0;
++            offset += 4;
++        } while (offset <= limit);
++        h1 = (rotateLeft32(a1, 1) + rotateLeft32(a2, 7) + rotateLeft32(a3, 12) + rotateLeft32(a4, 18)) >>> 0;
++        h2 = (rotateLeft32(b1, 1) + rotateLeft32(b2, 7) + rotateLeft32(b3, 12) + rotateLeft32(b4, 18)) >>> 0;
++    } else {
++        h1 = (0x811c9dc5 + 374761393) >>> 0;
++        h2 = (0x9e3779b9 + 374761393) >>> 0;
++    }
++    h1 = (h1 + length) >>> 0;
++    h2 = (h2 + length) >>> 0;
++    while ((offset + 4) <= length) {
++        const word = Math.imul(view.getUint32(offset, true), 3266489917);
++        h1 = Math.imul(rotateLeft32((h1 + word) >>> 0, 17), 668265263) >>> 0;
++        h2 = Math.imul(rotateLeft32((h2 + word) >>> 0, 17), 668265263) >>> 0;
++        offset += 4;
++    }
++    while (offset < length) {
++        const byte = Math.imul(bytes[offset], 374761393);
++        h1 = Math.imul(rotateLeft32((h1 + byte) >>> 0, 11), 2654435761) >>> 0;
++        h2 = Math.imul(rotateLeft32((h2 + byte) >>> 0, 11), 2654435761) >>> 0;
++        ++offset;
++    }
++    h1 = avalanche(h1);
++    h2 = avalanche(h2);
++    if ((h1 | h2) === 0) { h1 = 1; }
++    return [h1 >>> 0, h2 >>> 0];
++}
++
++/**
++ * @param {number} hash
++ * @returns {number}
++ */
++function avalanche(hash) {
++    hash ^= hash >>> 15;
++    hash = Math.imul(hash, 2246822519) >>> 0;
++    hash ^= hash >>> 13;
++    hash = Math.imul(hash, 3266489917) >>> 0;
++    hash ^= hash >>> 16;
++    return hash >>> 0;
++}
