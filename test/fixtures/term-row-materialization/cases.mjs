@@ -25,7 +25,7 @@ function sourceRows(values, escapeNonAscii = false) {
     return encoder.encode(escapeNonAscii ? json.replace(/[\u007f-\uffff]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`) : json)
 }
 
-/** Runs production parser and importer; no archive, media, or database I/O. */
+// Runs production parser and importer; no archive, media, or database I/O.
 export function createCases(parser, DictionaryImporter, lookup) {
     const cases = []
     const add = (name, run) => cases.push({name, run})
@@ -149,7 +149,7 @@ export function createCases(parser, DictionaryImporter, lookup) {
         const decode = TextDecoder.prototype.decode
         try {
             Object.defineProperty(globalThis, 'SharedArrayBuffer', {configurable: true, value: undefined})
-            TextDecoder.prototype.decode = function (input, options) {
+            TextDecoder.prototype.decode = function rejectSharedInput(input, options) {
                 if (ArrayBuffer.isView(input) && !(input.buffer instanceof ArrayBuffer)) {
                     throw new Error('Shared bytes must be copied before TextDecoder')
                 }
@@ -158,8 +158,11 @@ export function createCases(parser, DictionaryImporter, lookup) {
             equal(makeImporter()._getFastRowGlossaryJson({glossaryJson: '', glossaryJsonBytes: bytes.subarray(0, 10)}), '["shared"]', 'hidden constructor decoding')
         } finally {
             TextDecoder.prototype.decode = decode
-            if (descriptor) { Object.defineProperty(globalThis, 'SharedArrayBuffer', descriptor) }
-            else { delete globalThis.SharedArrayBuffer }
+            if (descriptor) {
+                Object.defineProperty(globalThis, 'SharedArrayBuffer', descriptor)
+            } else {
+                delete globalThis.SharedArrayBuffer
+            }
         }
     })
 

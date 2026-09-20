@@ -10,10 +10,14 @@ process.on('unhandledRejection', (error) => { unhandled.push(String(error)) })
 parser.setTermBankWasmModule(await WebAssembly.compile(await readFile(new URL('../../../ext/lib/term-bank-parser.wasm', import.meta.url))))
 const results = []
 for (const {name, run} of createCases(parser, DictionaryImporter, lookup)) {
-    try { await run(); results.push({name, passed: true}) }
-    catch (error) { results.push({name, passed: false, error: String(error), stack: error.stack}) }
+    try {
+        await run()
+        results.push({name, passed: true})
+    } catch (error) {
+        results.push({name, passed: false, error: String(error), stack: error.stack})
+    }
 }
-await new Promise((resolve) => setTimeout(resolve, 0))
+await new Promise((resolve) => { setTimeout(resolve, 0) })
 const report = {node: process.version, passed: results.filter(({passed}) => passed).length, failed: results.filter(({passed}) => !passed).length, unhandled, results}
 if (process.argv[2]) { await writeFile(process.argv[2], JSON.stringify(report, null, 2) + '\n') }
 console.log(JSON.stringify(report, null, 2))
