@@ -5,6 +5,8 @@ on:
     paths:
       - 'ext/js/dictionary/mdx/**'
       - 'ext/js/comm/mdx.js'
+      - 'ext/mdict.html'
+      - 'ext/quick-start-guide.html'
       - 'test/mdict-binary-regressions.test.js'
       - 'test/util/mdict-*.js'
       - 'test/playwright/mdict-*.spec.js'
@@ -37,7 +39,7 @@ jobs:
       - name: Exercise native parsers, converter and client lifecycle
         run: |
           set -o pipefail
-          node --test --test-reporter=tap test/util/mdict-native-cases.js test/util/mdict-client-cases.js 2>&1 | tee builds/mdict-native/tests.tap
+          node --test --test-reporter=tap test/util/mdict-native-cases.js test/util/mdict-client-cases.js test/util/mdict-client-edge-cases.js 2>&1 | tee builds/mdict-native/tests.tap
       - name: Retain reproducible source and test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -66,7 +68,7 @@ jobs:
           set -o pipefail
           mkdir -p builds/mdict-browser
           git rev-parse HEAD > builds/mdict-browser/commit.txt
-          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep MDX 2>&1 | tee builds/mdict-browser/tests.log
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js mdict-help.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep MDX 2>&1 | tee builds/mdict-browser/tests.log
       - name: Retain MDict browser results
         if: always()
         uses: actions/upload-artifact@v4

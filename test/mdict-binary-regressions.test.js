@@ -23,7 +23,7 @@ import {expect, test} from 'vitest';
 // in the extension worker. Vite's injected CommonJS bindings select a different
 // UMD branch. Use a native subprocess instead of mocking or replacing the codec.
 test('native MDict parser, converter and client lifecycle regressions', () => {
-    const files = ['mdict-native-cases.js', 'mdict-client-cases.js']
+    const files = ['mdict-native-cases.js', 'mdict-client-cases.js', 'mdict-client-edge-cases.js']
         .map((name) => fileURLToPath(new URL(`util/${name}`, import.meta.url)));
     const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', ...files], {
         encoding: 'utf8',
