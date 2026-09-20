@@ -17,7 +17,10 @@
 
 import {deflateSync} from 'node:zlib';
 
-/** @param {Uint8Array} bytes @returns {number} */
+/**
+ * @param {Uint8Array} bytes
+ * @returns {number}
+ */
 function adler32(bytes) {
     let a = 1;
     let b = 0;
@@ -28,7 +31,12 @@ function adler32(bytes) {
     return ((b << 16) | a) >>> 0;
 }
 
-/** @param {number} value @param {number} width @param {boolean} [littleEndian] @returns {Buffer} */
+/**
+ * @param {number} value
+ * @param {number} width
+ * @param {boolean} [littleEndian]
+ * @returns {Buffer}
+ */
 function integer(value, width, littleEndian = false) {
     if (!Number.isSafeInteger(value) || value < 0) { throw new RangeError('Invalid fixture integer'); }
     const bytes = Buffer.alloc(width);
@@ -42,7 +50,11 @@ function integer(value, width, littleEndian = false) {
     return bytes;
 }
 
-/** @param {Buffer} bytes @param {'raw'|'zlib'} compression @returns {Buffer} */
+/**
+ * @param {Buffer} bytes
+ * @param {'raw'|'zlib'} compression
+ * @returns {Buffer}
+ */
 function packBlock(bytes, compression) {
     return Buffer.concat([
         integer(compression === 'raw' ? 0 : 2, 4, true),
@@ -51,16 +63,21 @@ function packBlock(bytes, compression) {
     ]);
 }
 
-/** @param {string} value @returns {string} */
+/**
+ * @param {string} value
+ * @returns {string}
+ */
 function xmlAttribute(value) {
-    return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
 }
 
 /**
- * Independent, deterministic writer for raw/zlib, unencrypted MDict v2 fixtures.
+ * Independent, deterministic writer for raw/zlib, unencrypted MDict fixtures.
  * Does not import the parser under test. Record blocks may split Unicode scalars.
+ * Optional metadata overrides are only for negative regression cases.
  * @param {Array<{key: string, value: string|Uint8Array}>} entries
- * @param {{mdd?: boolean, encoding?: 'utf8'|'utf16le', compression?: 'raw'|'zlib', recordBlockSize?: number, keysPerBlock?: number, title?: string}} [options]
+ * @param {{mdd?: boolean, encoding?: 'utf8'|'utf16le', compression?: 'raw'|'zlib', recordBlockSize?: number, keysPerBlock?: number, title?: string, version?: string, keyBlockUnpackSizeDelta?: number, keyBlockEntryCounts?: number[], keyInfoTrailer?: Uint8Array}} [options]
  * @returns {{bytes: Uint8Array, records: Uint8Array[], recordDataOffset: number}}
  */
 export function makeMdictFixture(entries, options = {}) {
@@ -71,11 +88,17 @@ export function makeMdictFixture(entries, options = {}) {
         recordBlockSize = 64,
         keysPerBlock = 2,
         title = 'MDict binary regression fixture',
+        version = '2.0',
+        keyBlockUnpackSizeDelta = 0,
+        keyBlockEntryCounts = [],
+        keyInfoTrailer = new Uint8Array(0),
     } = options;
     if (!Number.isSafeInteger(recordBlockSize) || recordBlockSize < 1 ||
-        !Number.isSafeInteger(keysPerBlock) || keysPerBlock < 1) {
+    !Number.isSafeInteger(keysPerBlock) || keysPerBlock < 1) {
         throw new RangeError('Fixture block sizes must be positive safe integers');
     }
+    const v2 = Number.parseFloat(version) >= 2;
+    const numWidth = v2 ? 8 : 4;
     const keyEncoding = mdd ? 'utf16le' : encoding;
     const keyUnit = keyEncoding === 'utf16le' ? 2 : 1;
     const terminator = Buffer.alloc(keyUnit);
@@ -98,7 +121,7 @@ export function makeMdictFixture(entries, options = {}) {
         const part = allRecords.subarray(start, Math.min(start + recordBlockSize, allRecords.length));
         const packed = packBlock(part, compression);
         packedRecords.push(packed);
-        recordInfo.push(integer(packed.length, 8), integer(part.length, 8));
+        recordInfo.push(integer(packed.length, numWidth), integer(part.length, numWidth));
     }
     /** @type {Buffer[]} */
     const packedKeys = [];
@@ -108,36 +131,53 @@ export function makeMdictFixture(entries, options = {}) {
         const count = Math.min(keysPerBlock, entries.length - index);
         const keyParts = [];
         for (let i = index; i < index + count; i += 1) {
-            keyParts.push(integer(offsets[i], 8), Buffer.from(entries[i].key, keyEncoding), terminator);
+            keyParts.push(integer(offsets[i], numWidth), Buffer.from(entries[i].key, keyEncoding), terminator);
         }
         const unpacked = Buffer.concat(keyParts);
         const packed = packBlock(unpacked, compression);
         const first = Buffer.from(entries[index].key, keyEncoding);
         const last = Buffer.from(entries[index + count - 1].key, keyEncoding);
         keyInfo.push(
-            integer(count, 8), integer(first.length / keyUnit, 2), first, terminator,
-            integer(last.length / keyUnit, 2), last, terminator,
-            integer(packed.length, 8), integer(unpacked.length, 8),
+            integer(keyBlockEntryCounts[packedKeys.length] ?? count, numWidth),
+            integer(first.length / keyUnit, v2 ? 2 : 1),
+            first,
+            v2 ? terminator : Buffer.alloc(0),
+            integer(last.length / keyUnit, v2 ? 2 : 1),
+            last,
+            v2 ? terminator : Buffer.alloc(0),
+            integer(packed.length, numWidth),
+            integer(unpacked.length + keyBlockUnpackSizeDelta, numWidth),
         );
         packedKeys.push(packed);
     }
-    const keyInfoBytes = Buffer.concat(keyInfo);
-    const packedKeyInfo = packBlock(keyInfoBytes, 'zlib');
+    const keyInfoBytes = Buffer.concat([...keyInfo, keyInfoTrailer]);
+    const packedKeyInfo = v2 ? packBlock(keyInfoBytes, 'zlib') : keyInfoBytes;
     const keyBytes = Buffer.concat(packedKeys);
     const keyHeader = Buffer.concat([
-        integer(packedKeys.length, 8), integer(entries.length, 8),
-        integer(keyInfoBytes.length, 8), integer(packedKeyInfo.length, 8), integer(keyBytes.length, 8),
+        integer(packedKeys.length, numWidth),
+        integer(entries.length, numWidth),
+        ...(v2 ? [integer(keyInfoBytes.length, numWidth)] : []),
+        integer(packedKeyInfo.length, numWidth),
+        integer(keyBytes.length, numWidth),
     ]);
     const encodingAttribute = mdd ? '' : ` Encoding="${encoding === 'utf16le' ? 'UTF-16' : 'UTF-8'}"`;
     const tag = mdd ? 'Library_Data' : 'Dictionary';
-    const header = Buffer.from(`<${tag} GeneratedByEngineVersion="2.0" RequiredEngineVersion="2.0" Encrypted="0"${encodingAttribute} Title="${xmlAttribute(title)}" Description="Generated regression fixture"/>\0`, 'utf16le');
+    const header = Buffer.from(`<${tag} GeneratedByEngineVersion="${version}" RequiredEngineVersion="${version}" Encrypted="0"${encodingAttribute} Title="${xmlAttribute(title)}" Description="Generated regression fixture"/>\0`, 'utf16le');
     const recordInfoBytes = Buffer.concat(recordInfo);
     const packedRecordBytes = Buffer.concat(packedRecords);
     const beforeRecordData = Buffer.concat([
-        integer(header.length, 4), header, integer(adler32(header), 4, true),
-        keyHeader, integer(adler32(keyHeader), 4), packedKeyInfo, keyBytes,
-        integer(packedRecords.length, 8), integer(entries.length, 8),
-        integer(recordInfoBytes.length, 8), integer(packedRecordBytes.length, 8), recordInfoBytes,
+        integer(header.length, 4),
+        header,
+        integer(adler32(header), 4, true),
+        keyHeader,
+        ...(v2 ? [integer(adler32(keyHeader), 4)] : []),
+        packedKeyInfo,
+        keyBytes,
+        integer(packedRecords.length, numWidth),
+        integer(entries.length, numWidth),
+        integer(recordInfoBytes.length, numWidth),
+        integer(packedRecordBytes.length, numWidth),
+        recordInfoBytes,
     ]);
     return {
         bytes: new Uint8Array(Buffer.concat([beforeRecordData, packedRecordBytes])),
@@ -146,7 +186,10 @@ export function makeMdictFixture(entries, options = {}) {
     };
 }
 
-/** @param {Uint8Array} bytes @returns {number} */
+/**
+ * @param {Uint8Array} bytes
+ * @returns {number}
+ */
 function crc32(bytes) {
     let crc = 0xffffffff;
     for (const byte of bytes) {
@@ -158,9 +201,17 @@ function crc32(bytes) {
     return (crc ^ 0xffffffff) >>> 0;
 }
 
-/** Create a valid one-pixel RGBA image. @param {[number, number, number, number]} rgba @returns {Uint8Array} */
+/**
+ * Create a valid one-pixel RGBA image.
+ * @param {[number, number, number, number]} rgba
+ * @returns {Uint8Array}
+ */
 export function makeFixturePng(rgba) {
-    /** @param {string} type @param {Buffer} data @returns {Buffer} */
+    /**
+     * @param {string} type
+     * @param {Buffer} data
+     * @returns {Buffer}
+     */
     const chunk = (type, data) => {
         const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
         return Buffer.concat([integer(data.length, 4), body, integer(crc32(body), 4)]);
@@ -168,6 +219,8 @@ export function makeFixturePng(rgba) {
     const ihdr = Buffer.concat([integer(1, 4), integer(1, 4), Buffer.from([8, 6, 0, 0, 0])]);
     return new Uint8Array(Buffer.concat([
         Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
-        chunk('IHDR', ihdr), chunk('IDAT', deflateSync(Buffer.from([0, ...rgba]))), chunk('IEND', Buffer.alloc(0)),
+        chunk('IHDR', ihdr),
+        chunk('IDAT', deflateSync(Buffer.from([0, ...rgba]))),
+        chunk('IEND', Buffer.alloc(0)),
     ]));
 }
