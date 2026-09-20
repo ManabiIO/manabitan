@@ -147,3 +147,13 @@ describe('parser-prepared term lookup indexes', () => {
         expect(hasCompletePreparedTermLookupIndexes(detached, 1)).toBe(false);
     });
 });
+
+
+describe('lookup string arena validation', () => {
+    test.each([0, 1, 0xffffffff])('rejects an invalid interior key offset (%s) on the whole-plan path', (offset) => {
+        const chunk = createChunk(2);
+        // All four keys are referenced, selecting the whole-plan fast path.
+        chunk.termRecordPreinternedPlan.stringOffsets[1] = offset;
+        expect(() => prepareTermLookupIndexesFromPreinternedPlan(chunk)).toThrow();
+    });
+});
