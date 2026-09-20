@@ -22,10 +22,23 @@ const JOURNAL_VERSION = 1;
 const MAX_CHECKPOINT_FILES = 100000;
 
 export class DictionaryImportJournal {
+    /** Creates one serialized journal operation queue. */
+    constructor() {
+        /** @type {Promise<void>} */
+        this._operationTail = Promise.resolve();
+    }
+
     /**
      * @returns {Promise<import('dictionary-import-journal').DictionaryImportJournalRecord|null>}
      */
-    async read() {
+    read() {
+        return this._runExclusive(async () => await this._read());
+    }
+
+    /**
+     * @returns {Promise<import('dictionary-import-journal').DictionaryImportJournalRecord|null>}
+     */
+    async _read() {
         const root = await this._getRoot();
         if (root === null) { return null; }
         let handle;
@@ -40,7 +53,7 @@ export class DictionaryImportJournal {
             // The file handle is created before any import mutation begins. A
             // crash before the first writable closes can therefore leave an
             // empty file with no state to roll back.
-            await this.clear();
+            await this._clear();
             return null;
         }
         const value = /** @type {unknown} */ (parseJson(await file.text()));
@@ -64,6 +77,14 @@ export class DictionaryImportJournal {
         if (!this._isRecord(parseJson(content))) {
             throw new Error('Invalid serialized dictionary import journal record');
         }
+        await this._runExclusive(async () => { await this._write(content); });
+    }
+
+    /**
+     * @param {string} content
+     * @returns {Promise<void>}
+     */
+    async _write(content) {
         const root = await this._getRoot();
         if (root === null) {
             throw new Error('Dictionary import journal requires OPFS');
@@ -93,7 +114,12 @@ export class DictionaryImportJournal {
     /**
      * @returns {Promise<void>}
      */
-    async clear() {
+    clear() {
+        return this._runExclusive(async () => { await this._clear(); });
+    }
+
+    /** @returns {Promise<void>} */
+    async _clear() {
         const root = await this._getRoot();
         if (root === null) {
             throw new Error('Dictionary import journal requires OPFS');
@@ -103,6 +129,21 @@ export class DictionaryImportJournal {
         } catch (error) {
             if (!this._isNotFoundError(error)) { throw error; }
         }
+    }
+
+    /**
+     * Serialize this journal instance, including empty-file cleanup by reads.
+     * Cross-instance ownership remains the database coordinator's responsibility.
+     * @template T
+     * @param {() => Promise<T>} operation
+     * @returns {Promise<T>}
+     */
+    _runExclusive(operation) {
+        const result = this._operationTail.then(operation);
+        // Observe failures without hiding them from the operation's caller or
+        // poisoning a later explicit recovery attempt.
+        this._operationTail = result.then(() => {}, () => {});
+        return result;
     }
 
     /**
