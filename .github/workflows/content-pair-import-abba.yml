@@ -1,0 +1,95 @@
+name: Content pair native import ABBA screen
+
+on:
+  push:
+    branches: [review/content-pair-import-abba-20260920]
+
+permissions:
+  contents: read
+
+jobs:
+  imports:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.16.0'
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Build and validate both source compositions outside timing
+        run: |
+          mkdir -p builds/hash-import-evidence builds/hash-import-arms
+          test "$(git hash-object ext/js/dictionary/term-entry-content-hash.js)" = 77344142e246915b244a5e759e5e27d624a18f69
+          cp ext/js/dictionary/term-entry-content-hash.js builds/hash-import-arms/A.js
+          npm run build -- --target chrome-dev
+          cp builds/manabitan-chrome-dev.zip builds/hash-import-arms/A.zip
+          git apply --check dev/perf/content-pair-import-candidate.patch
+          git apply dev/perf/content-pair-import-candidate.patch
+          test "$(git hash-object ext/js/dictionary/term-entry-content-hash.js)" = 022a2f9f60e238e33a01863d0758b34bf91c897e
+          cp ext/js/dictionary/term-entry-content-hash.js builds/hash-import-arms/B.js
+          npm run build -- --target chrome-dev
+          cp builds/manabitan-chrome-dev.zip builds/hash-import-arms/B.zip
+          git rev-parse HEAD > builds/hash-import-evidence/head.txt
+          sha256sum builds/hash-import-arms/* > builds/hash-import-evidence/arm-sha256.txt
+      - name: Whole-import screen with fresh profiles and untimed validation
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, shutil, subprocess, statistics, time
+          root = pathlib.Path('builds/hash-import-evidence')
+          dictionary = os.environ['DICTIONARY']
+          plan = [('warmup', 'A'), ('warmup', 'B'), ('AA', 'A'), ('AA', 'A')]
+          plan += [('ABBA', arm) for arm in 'ABBAABBA']
+          rows = []
+          for i, (phase, arm) in enumerate(plan):
+              out = root / f'{i:02d}-{phase}-{arm}'
+              shutil.copyfile(f'builds/hash-import-arms/{arm}.js', 'ext/js/dictionary/term-entry-content-hash.js')
+              shutil.copyfile(f'builds/hash-import-arms/{arm}.zip', 'builds/manabitan-chrome-dev.zip')
+              command = ['node', 'dev/perf/import-benchmark.js', dictionary, '--runs', '1', '--no-build', '--output', str(out)]
+              started = time.time()
+              with (root / f'{i:02d}.log').open('w') as log:
+                  result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, timeout=600)
+              row = {'index': i, 'phase': phase, 'arm': arm, 'exitCode': result.returncode, 'invocationSeconds': time.time() - started}
+              summary_path = out / 'summary.json'
+              if summary_path.exists():
+                  summary = json.loads(summary_path.read_text())
+                  row['totalImportMs'] = summary['runs'][0]['totalImportMs']
+                  row['workerImportMs'] = summary['runs'][0]['workerImportMs']
+                  row['summary'] = str(summary_path)
+              rows.append(row)
+              (root / 'samples.json').write_text(json.dumps({'dictionary': dictionary, 'rows': rows}, indent=2))
+              print(json.dumps(row), flush=True)
+              if result.returncode or 'totalImportMs' not in row:
+                  raise RuntimeError(f'Import failed; retained all previous and failed results: {row}')
+          samples = [row for row in rows if row['phase'] == 'ABBA']
+          deltas = []
+          for i in range(0, len(samples), 2):
+              pair = samples[i:i+2]
+              a = next(x['totalImportMs'] for x in pair if x['arm'] == 'A')
+              b = next(x['totalImportMs'] for x in pair if x['arm'] == 'B')
+              deltas.append((b/a-1)*100)
+          aa = [x['totalImportMs'] for x in rows if x['phase'] == 'AA']
+          result = {'dictionary': dictionary, 'successfulImports': len(rows), 'measuredPerArm': 4,
+                    'pairedElapsedChangesPercent': deltas, 'medianPairedElapsedChangePercent': statistics.median(deltas),
+                    'aaElapsedChangePercent': (aa[1]/aa[0]-1)*100,
+                    'scope': 'Limited native Chromium screen. Same correctness composition, separate prebuilt packages, fresh profiles, default flags, pinned archives, existing row/count/content checks. No peak-memory qualification or default promotion.'}
+          (root / 'result.json').write_text(json.dumps(result, indent=2))
+          print(json.dumps(result, indent=2))
+          PY
+      - name: Retain reports and all failures, excluding packages and font files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: content-pair-import-${{ matrix.dictionary }}
+          path: builds/hash-import-evidence
+          retention-days: 7
+          if-no-files-found: error
