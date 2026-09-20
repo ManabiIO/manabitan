@@ -1634,9 +1634,10 @@ function keyBytesEqual(bytes, offsets, key, query) {
  * @param {number} aKey
  * @param {number} bKey
  * @param {boolean} reverse
+ * @param {number} [depth=0]
  * @returns {number}
  */
-function compareKeyRanges(bytes, offsets, aKey, bKey, reverse) {
+function compareKeyRanges(bytes, offsets, aKey, bKey, reverse, depth = 0) {
     const aStart = offsets[aKey];
     const aEnd = offsets[aKey + 1];
     const bStart = offsets[bKey];
@@ -1644,7 +1645,7 @@ function compareKeyRanges(bytes, offsets, aKey, bKey, reverse) {
     const aLength = aEnd - aStart;
     const bLength = bEnd - bStart;
     const count = Math.min(aLength, bLength);
-    for (let i = 0; i < count; ++i) {
+    for (let i = depth; i < count; ++i) {
         const aIndex = reverse ? aEnd - 1 - i : aStart + i;
         const bIndex = reverse ? bEnd - 1 - i : bStart + i;
         if (bytes[aIndex] !== bytes[bIndex]) { return bytes[aIndex] - bytes[bIndex]; }
@@ -1712,6 +1713,19 @@ function radixSortKeysInto(sorted, scratch, bytes, offsets, reverse) {
         if (typeof range === 'undefined') { break; }
         const {start, end, depth} = range;
         if ((end - start) < 2) { continue; }
+        // Small groups do not justify another 257-bucket radix partition.
+        if ((end - start) <= 16) {
+            for (let i = start + 1; i < end; ++i) {
+                const key = sorted[i];
+                let j = i;
+                while (j > start && compareKeyRanges(bytes, offsets, sorted[j - 1], key, reverse, depth) > 0) {
+                    sorted[j] = sorted[j - 1];
+                    --j;
+                }
+                sorted[j] = key;
+            }
+            continue;
+        }
         counts.fill(0);
         for (let i = start; i < end; ++i) {
             const key = sorted[i];
