@@ -234,6 +234,8 @@ export class TermContentBlockStore {
         this._cache = new ByteBoundedLruCache(this._cacheMaxBytes);
         /** @type {Map<string, Promise<Uint8Array|null>>} */
         this._inFlightBlocks = new Map();
+        /** @type {number} */
+        this._cacheGeneration = 0;
         /** @type {Record<string, unknown>|null} */
         this._lastError = null;
     }
@@ -245,7 +247,10 @@ export class TermContentBlockStore {
 
     /** */
     clearCache() {
+        ++this._cacheGeneration;
         this._cache.clear();
+        // Old readers retain their promises, but new readers must not join them.
+        this._inFlightBlocks.clear();
     }
 
     /**
@@ -297,8 +302,11 @@ export class TermContentBlockStore {
      * @returns {Promise<{status: 'ok', bytes: Uint8Array}|{status: 'temporarilyUnavailable'|'corrupt', reason: string}>}
      */
     async readDetailed(contentOffset, contentLength, contentDictName) {
+        const generation = this._cacheGeneration;
         try {
-            return await this._readDetailed(contentOffset, contentLength, contentDictName);
+            const result = await this._readDetailed(contentOffset, contentLength, contentDictName);
+            this._assertReadGeneration(generation);
+            return result;
         } catch (error) {
             return this._createReadFailure(error);
         }
@@ -312,6 +320,7 @@ export class TermContentBlockStore {
      * @returns {Promise<Array<{status: 'ok', bytes: Uint8Array}|{status: 'temporarilyUnavailable'|'corrupt', reason: string}>>}
      */
     async readDetailedBatch(requests) {
+        const generation = this._cacheGeneration;
         const results = new Array(requests.length);
         /** @type {Array<{index: number, request: {contentOffset: number, contentLength: number, contentDictName: string}, compact: boolean|null, compressionDictName: string|null|undefined, sliceLength: number}>} */
         const sliceRequests = [];
@@ -344,6 +353,9 @@ export class TermContentBlockStore {
             offset: request.contentOffset,
             length: sliceLength,
         })));
+        if (generation !== this._cacheGeneration) {
+            return requests.map(() => this._createInvalidatedReadFailure());
+        }
         if (sliceResults.length !== sliceRequests.length) {
             throw new Error('Term content batch read returned an invalid result count');
         }
@@ -404,6 +416,9 @@ export class TermContentBlockStore {
             }
             return block;
         }));
+        if (generation !== this._cacheGeneration) {
+            return requests.map(() => this._createInvalidatedReadFailure());
+        }
         for (let i = 0; i < groupList.length; ++i) {
             const group = groupList[i];
             const settled = groupSettled[i];
@@ -434,6 +449,7 @@ export class TermContentBlockStore {
      * @returns {Promise<{status: 'ok', bytes: Uint8Array}>}
      */
     async _readDetailed(contentOffset, contentLength, contentDictName) {
+        const generation = this._cacheGeneration;
         const compressionDictName = getRawTermContentBlockCompressionDictName(contentDictName);
         if (typeof compressionDictName === 'undefined') {
             const bytes = await this._contentStore.readSlice(contentOffset, contentLength);
@@ -446,6 +462,7 @@ export class TermContentBlockStore {
         contentDictName.startsWith(`${RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX}:`);
         const referenceLength = compact ? RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES : RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES;
         const referenceBytes = await this._contentStore.readSlice(contentOffset, referenceLength);
+        this._assertReadGeneration(generation);
         if (!(referenceBytes instanceof Uint8Array)) {
             throw new TermContentReadError('temporarilyUnavailable', 'Term content block reference could not be read from OPFS');
         }
@@ -464,6 +481,7 @@ export class TermContentBlockStore {
                 contentLength,
                 contentDictName,
             });
+            this._assertReadGeneration(generation);
             if (loadedBlock === null) {
                 throw new TermContentReadError('temporarilyUnavailable', 'Term content block could not be loaded');
             }
@@ -475,6 +493,22 @@ export class TermContentBlockStore {
             throw new TermContentReadError('corrupt', 'Term content block entry is outside the decoded block');
         }
         return {status: 'ok', bytes: block.subarray(reference.entryOffset, entryEnd)};
+    }
+
+    /** @returns {{status: 'temporarilyUnavailable', reason: string}} */
+    _createInvalidatedReadFailure() {
+        return {status: 'temporarilyUnavailable', reason: 'Term content changed during read'};
+    }
+
+    /**
+     * @param {number} generation
+     * @throws {TermContentReadError} If the read belongs to an invalidated generation.
+     */
+    _assertReadGeneration(generation) {
+        if (generation !== this._cacheGeneration) {
+            const {status, reason} = this._createInvalidatedReadFailure();
+            throw new TermContentReadError(status, reason);
+        }
     }
 
     /**
@@ -565,7 +599,11 @@ export class TermContentBlockStore {
      * @returns {Promise<Uint8Array|null>}
      */
     async _loadBlock(cacheKey, reference, compressionDictName, context) {
+        const generation = this._cacheGeneration;
         const storedBlock = await this._contentStore.readSlice(reference.blockOffset, reference.blockCompressedLength);
+        // Check before integrity validation or publication: these bytes may belong
+        // to a removed import whose offsets have already been reused.
+        this._assertReadGeneration(generation);
         if (!(storedBlock instanceof Uint8Array)) {
             throw new TermContentReadError('temporarilyUnavailable', 'Compressed term content block could not be read from OPFS');
         }

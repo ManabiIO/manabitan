@@ -16,6 +16,7 @@
  */
 
 import {hashTermKeyByteRange, hashTermKeyBytes} from './term-key-hash.js';
+import {getValidatedStringOffsets} from './term-record-preinterned-plan.js';
 
 const CONTAINER_HEADER_U32_COUNT = 4;
 const CONTAINER_HEADER_BYTES = CONTAINER_HEADER_U32_COUNT * 4;
@@ -145,7 +146,7 @@ function encodePersistedTermLookupIndexFromPreinternedPlanInternal(
     validatedReadingPostingCount,
     directArena,
 ) {
-    const {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes} = plan;
+    const {stringLengths, stringHashes, stringsBuffer, expressionIndexes, readingIndexes} = plan;
     if (!Number.isSafeInteger(rowCount) || rowCount >= U16_NULL) {
         throw new RangeError('Term lookup index has too many rows for one chunk');
     }
@@ -162,26 +163,12 @@ function encodePersistedTermLookupIndexFromPreinternedPlanInternal(
     ) {
         throw new Error('Invalid preinterned term-record plan for lookup index');
     }
-    /** @type {Uint32Array} */
+    // Both entry points validate every key boundary, not only the arena's end.
     let keyOffsets;
-    let keyBytesLength;
-    if (
-        stringOffsets instanceof Uint32Array &&
-        stringOffsets.length === stringLengths.length
-    ) {
-        keyOffsets = stringOffsets;
-        const lastKey = stringLengths.length - 1;
-        keyBytesLength = stringOffsets[lastKey] + stringLengths[lastKey];
-    } else {
-        keyOffsets = new Uint32Array(stringLengths.length);
-        keyBytesLength = 0;
-        for (let key = 0; key < stringLengths.length; ++key) {
-            keyOffsets[key] = keyBytesLength;
-            keyBytesLength += stringLengths[key];
-        }
-    }
-    if (keyBytesLength !== stringsBuffer.byteLength) {
-        throw new Error('Invalid preinterned term-record string arena');
+    try {
+        keyOffsets = getValidatedStringOffsets(plan);
+    } catch (error) {
+        throw new Error('Invalid preinterned term-record string arena', {cause: error});
     }
     const expressionKeys = expressionIndexes.subarray(0, rowCount);
     const readingKeys = readingIndexes.subarray(0, rowCount);

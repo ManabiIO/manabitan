@@ -967,6 +967,9 @@ export class TermContentOpfsStore {
             return;
         }
         this._queuedWritePromise = this._drainQueuedWrites();
+        // Own early rejection until finalization observes the original promise
+        // or the sticky write error recorded by the drain.
+        void this._queuedWritePromise.catch(() => {});
     }
 
     /**
@@ -1133,7 +1136,11 @@ export class TermContentOpfsStore {
      * @returns {Promise<Uint8Array|null>}
      */
     async readSlice(offset, length) {
-        if (offset < 0 || length <= 0) { return null; }
+        if (
+            !Number.isSafeInteger(offset) || offset < 0 ||
+            !Number.isSafeInteger(length) || length <= 0 ||
+            !Number.isSafeInteger(offset + length)
+        ) { return null; }
         let end = offset + length;
         if (end > this._length) {
             const reloaded = await this._reloadForPotentialExternalGrowth();
@@ -1142,6 +1149,7 @@ export class TermContentOpfsStore {
                 return null;
             }
         }
+        const generation = this._readStateGeneration;
         const cacheKey = `${offset}:${length}`;
         if (this._exactSliceCacheEnabled && this._lastSliceCacheKey === cacheKey && this._lastSliceCacheValue instanceof Uint8Array) {
             return this._lastSliceCacheValue;
@@ -1203,7 +1211,9 @@ export class TermContentOpfsStore {
                 this._lastReadErrorDetails = null;
             }
         }
-        if (this._exactSliceCacheEnabled && result instanceof Uint8Array) {
+        // Snapshot/page readers already fence their caches. The exact-slice
+        // cache needs the same fence when an old read finishes after invalidation.
+        if (generation === this._readStateGeneration && this._exactSliceCacheEnabled && result instanceof Uint8Array) {
             this._lastSliceCacheKey = cacheKey;
             this._lastSliceCacheValue = result;
         }

@@ -278,7 +278,7 @@ export function sliceTermRecordPreinternedPlan(plan, start, count) {
  * @returns {Uint32Array}
  * @throws {TypeError|RangeError} If string metadata or the arena is malformed.
  */
-function getValidatedStringOffsets(plan) {
+export function getValidatedStringOffsets(plan) {
     const {stringLengths, stringOffsets, stringHashes, stringsBuffer} = plan;
     if (!(stringLengths instanceof Uint16Array) || !(stringsBuffer instanceof Uint8Array)) {
         throw new TypeError('Invalid preinterned plan string storage');

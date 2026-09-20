@@ -5588,6 +5588,9 @@ export class TermRecordOpfsStore {
             return;
         }
         state.queuedWritePromise = this._drainQueuedWritesForShard(state);
+        // Own early rejection until finalization observes the original promise
+        // or the sticky write error recorded by the drain.
+        void state.queuedWritePromise.catch(() => {});
     }
 
     /**
