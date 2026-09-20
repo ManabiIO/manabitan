@@ -1,0 +1,72 @@
+name: Clean guarded glossary product qualification
+on:
+  push:
+    branches: [research/import-jitendex-jmdict-20260919]
+    paths: [.github/workflows/import-jj-guarded-clean-20260919.yml]
+permissions:
+  contents: read
+jobs:
+  qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      MANABITAN_CLANG: clang-18
+      BASE: 54ac62a39386459b7822fc644e5a1a6b1a619619
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Audit the measured runtime and reconstruct only the product files
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/recipes" "$RUNNER_TEMP/evidence"
+          cp dev/perf/apply-guarded-glossary.py dev/perf/guarded-glossary-20260919.patch "$RUNNER_TEMP/recipes/"
+          git fetch --depth=1 origin "$BASE"
+          git diff --name-status "$BASE" HEAD > "$RUNNER_TEMP/evidence/research-only-diff.txt"
+          git diff --exit-code "$BASE" HEAD -- ext types package.json package-lock.json dev/build-libs.js dev/bin test/perf test/chromium test/e2e dev/perf/import-benchmark.js dev/perf/benchmark-support.js dev/perf/dictionary-fixtures.js dev/perf/host-environment.js dev/perf/import-lookup-screen.js > "$RUNNER_TEMP/evidence/runtime-and-harness-diff.txt"
+          git checkout --detach "$BASE"
+          cp "$RUNNER_TEMP/recipes/"* dev/perf/
+          python dev/perf/apply-guarded-glossary.py > "$RUNNER_TEMP/evidence/hashes.txt"
+          git diff --name-only > "$RUNNER_TEMP/evidence/product-paths.txt"
+          test "$(wc -l < "$RUNNER_TEMP/evidence/product-paths.txt")" -eq 5
+          git diff > "$RUNNER_TEMP/evidence/product.patch"
+          mkdir -p evidence
+          cp "$RUNNER_TEMP/evidence/"* evidence/
+      - run: npm ci
+      - run: npm run build:libs > evidence/build-libs.log 2>&1
+      - name: Full clean-source validation without excluding any parent tests
+        run: |
+          set -euo pipefail
+          node node_modules/vitest/vitest.mjs run --no-file-parallelism > evidence/unit.log 2>&1
+          npm run test:unit:options > evidence/options.log 2>&1
+          npm run test:ts > evidence/types.log 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-experiments.js test/term-bank-experiments.test.js test/lookup-construction-experiments.test.js > evidence/lint.log 2>&1
+          npm run test:build > evidence/build-plans.log 2>&1
+          node dev/bin/build.js chrome-dev > evidence/chrome-build.log 2>&1
+          node dev/bin/build.js firefox-dev > evidence/firefox-build.log 2>&1
+          git diff --check
+          sha256sum ext/lib/term-bank-parser.wasm >> evidence/hashes.txt
+      - run: npx playwright install --with-deps chromium
+      - name: Complete real lifecycle with new defaults on the clean tree
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_CHROMIUM_E2E_REPORT: evidence/lifecycle.html
+        run: node test/chromium/extension-two-dictionary-import.e2e.js > evidence/lifecycle.log 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: guarded-glossary-clean-qualification
+          path: |
+            evidence
+            ${{ runner.temp }}/evidence
+          retention-days: 30
+          if-no-files-found: error
