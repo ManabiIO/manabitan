@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {deferPromise} from '../core/utilities.js';
+
 const SOURCE_TERM_BANK_BATCH_MAX_FILES = 80;
 const SOURCE_TERM_BANK_BATCH_MAX_BYTES = 192 * 1024 * 1024;
 const SOURCE_TERM_BANK_LOW_MEMORY_BATCH_MAX_BYTES = 64 * 1024 * 1024;
@@ -174,18 +176,20 @@ export class AbortableZipReadPool {
         let read = this._reads.get(file);
         if (typeof read === 'undefined') {
             const abortController = new AbortController();
-            let promise;
-            try {
-                promise = this._read(file, abortController.signal);
-            } catch (error) {
-                promise = Promise.reject(error);
-            }
+            const {promise, resolve, reject} = /** @type {import('core').DeferredPromiseDetails<T>} */ (deferPromise());
             const pendingRead = {promise, abortController};
             read = pendingRead;
             this._reads.set(file, pendingRead);
             this._pendingReads.add(pendingRead);
             const settled = () => { this._pendingReads.delete(pendingRead); };
             void promise.then(settled, settled);
+            // Register ownership before invoking callbacks which may release,
+            // replace, or cancel this read synchronously. Keep reader timing eager.
+            try {
+                void this._read(file, abortController.signal).then(resolve, reject);
+            } catch (error) {
+                reject(error);
+            }
         }
         return read.promise;
     }
@@ -213,7 +217,13 @@ export class AbortableZipReadPool {
     /** @returns {Promise<void>} */
     dispose() {
         this._disposed = true;
-        this._disposePromise ??= this.abortAndJoin();
+        if (this._disposePromise === null) {
+            const {promise, resolve, reject} = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+            // Aborting dispatches listeners synchronously. Publish disposal
+            // ownership before those listeners can reenter dispose().
+            this._disposePromise = promise;
+            void this.abortAndJoin().then(resolve, reject);
+        }
         return this._disposePromise;
     }
 }
