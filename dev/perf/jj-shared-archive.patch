@@ -1,0 +1,38 @@
+diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictionary-importer.js
+index f48d0a1..8ac203e 100644
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -747,6 +747,9 @@ export class DictionaryImporter {
+             if (archiveContent === null) {
+                 throw new Error('Archive content is no longer available');
+             }
++            this._throwIfCancelled();
++            archiveContent = await RawZipPayloadReader.bufferSmallArchive(archiveContent);
++            this._throwIfCancelled();
+             ({fileMap, zipReader: archiveReader} = await this._getFilesFromArchive(archiveContent));
+             archiveOwnership.own(archiveReader);
+             index = await this._readAndValidateIndex(fileMap);
+diff --git a/ext/js/dictionary/term-bank-source-pipeline.js b/ext/js/dictionary/term-bank-source-pipeline.js
+index 80d5758..c84ea79 100644
+--- a/ext/js/dictionary/term-bank-source-pipeline.js
++++ b/ext/js/dictionary/term-bank-source-pipeline.js
+@@ -51,6 +51,19 @@ export class RawZipPayloadReader {
+         (archiveContent instanceof Blob || size <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES);
+     }
+ 
++    /**
++     * Share the existing bounded archive allocation with ZIP metadata/media
++     * reads as well as term payload reads. Large Blobs stay range-backed.
++     * @param {ArrayBuffer|Blob} archiveContent
++     * @returns {Promise<ArrayBuffer|Blob>}
++     */
++    static async bufferSmallArchive(archiveContent) {
++        if (!(archiveContent instanceof Blob) || archiveContent.size > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES) {
++            return archiveContent;
++        }
++        return await archiveContent.arrayBuffer();
++    }
++
+     /**
+      * @param {TermBankSourceFile} file
+      * @param {AbortSignal} signal
