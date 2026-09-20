@@ -2936,6 +2936,7 @@ null;
      * @returns {Promise<import('dictionary-database').TermEntry[]>}
      */
     async findTermsBulk(termList, dictionaries, matchType) {
+        const generation = this._directTermIndexGeneration;
         this._requireDb();
         if (termList.length === 0 || dictionaries.size === 0) {
             return [];
@@ -2954,6 +2955,7 @@ null;
             }));
         }
         await this._ensureDirectTermIndexesLoaded(requestedDictionaryNames);
+        this._assertTermLookupGeneration(generation);
         const isDictionaryAvailable = Reflect.get(this._termRecordStore, 'isDictionaryAvailable');
         const dictionaryNames = typeof isDictionaryAvailable === 'function' ?
             requestedDictionaryNames.filter(
@@ -3101,6 +3103,7 @@ null;
             }
 
             const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
+            this._assertTermLookupGeneration(generation);
             if (shouldReportDiagnostics) {
                 reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
                     stage: 'findTermsBulk-exact',
@@ -3186,6 +3189,7 @@ null;
         }
 
         const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
+        this._assertTermLookupGeneration(generation);
         if (shouldReportDiagnostics) {
             reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
                 stage: 'findTermsBulk-prefix',
@@ -3222,6 +3226,7 @@ null;
      * @returns {Promise<import('dictionary-database').TermEntry[]>}
      */
     async findTermsExactBulk(termList, dictionaries) {
+        const generation = this._directTermIndexGeneration;
         this._requireDb();
         if (termList.length === 0 || dictionaries.size === 0) {
             return [];
@@ -3230,6 +3235,7 @@ null;
         const results = [];
         const dictionaryNames = this._getDictionaryNames(dictionaries);
         await this._ensureDirectTermIndexesLoaded(dictionaryNames);
+        this._assertTermLookupGeneration(generation);
         /** @type {Map<string, {reading: string, itemIndex: number}[]>} */
         const requestsByTerm = new Map();
         for (let itemIndex = 0; itemIndex < termList.length; ++itemIndex) {
@@ -3269,6 +3275,7 @@ null;
         }
 
         const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
+        this._assertTermLookupGeneration(generation);
         for (const [id, requests] of idMatches) {
             const row = rowsById.get(id);
             if (typeof row === 'undefined') { continue; }
@@ -3286,6 +3293,7 @@ null;
      * @returns {Promise<import('dictionary-database').TermEntry[]>}
      */
     async findTermsBySequenceBulk(items) {
+        const generation = this._directTermIndexGeneration;
         this._requireDb();
         if (items.length === 0) {
             return [];
@@ -3311,6 +3319,7 @@ null;
         }
         const dictionaryNames = [...new Set(items.map((item) => item.dictionary))];
         await this._ensureDirectTermIndexesLoaded(dictionaryNames);
+        this._assertTermLookupGeneration(generation);
         const sequenceValues = [...new Set(items.map((item) => this._asNumber(item.query, -1)).filter((value) => value >= 0))];
         /** @type {Map<number, number[]>} */
         const idMatches = new Map();
@@ -3336,6 +3345,7 @@ null;
         }
 
         const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
+        this._assertTermLookupGeneration(generation);
         for (const [id, itemIndexes] of idMatches) {
             const row = rowsById.get(id);
             if (typeof row === 'undefined') { continue; }
@@ -10039,11 +10049,28 @@ null :
     }
 
     /**
+     * A lookup must not publish rows, decoded content, or corruption reports
+     * after dictionary mutation invalidates the source generation.
+     * @param {number} generation
+     * @throws {TermContentLookupReadError}
+     */
+    _assertTermLookupGeneration(generation) {
+        if (generation !== this._directTermIndexGeneration) {
+            throw new TermContentLookupReadError(
+                'temporarilyUnavailable',
+                'Dictionary content is temporarily unavailable because lookup state changed',
+            );
+        }
+    }
+
+    /**
      * @param {Iterable<number>} ids
      * @returns {Promise<Map<number, import('dictionary-database').DatabaseTermEntryWithId>>}
      */
     async _fetchTermRowsByIds(ids) {
+        const generation = this._directTermIndexGeneration;
         await this._termContentStore.ensureLoadedForRead();
+        this._assertTermLookupGeneration(generation);
         /** @type {Map<number, import('dictionary-database').DatabaseTermEntryWithId>} */
         const rowsById = new Map();
         /** @type {number[]} */
@@ -10063,12 +10090,14 @@ null :
         const recordsById = typeof getByIdsAsync === 'function' ?
             await /** @type {(ids: Iterable<number>) => Promise<Map<number, import('./term-record-opfs-store.js').TermRecord>>} */ (getByIdsAsync).call(this._termRecordStore, uncachedIds) :
             this._termRecordStore.getByIds(uncachedIds);
+        this._assertTermLookupGeneration(generation);
         const warmSlices = /** @type {unknown} */ (Reflect.get(this._termContentStore, 'warmSlices'));
         if (typeof warmSlices === 'function') {
             await /** @type {(spans: Iterable<{offset: number, length: number}>) => Promise<void>} */ (warmSlices).call(
                 this._termContentStore,
                 this._iterateTermRecordContentSpans(recordsById.values()),
             );
+            this._assertTermLookupGeneration(generation);
         }
         const entryGroups = this._groupTermRecordEntriesByContentCacheKey(recordsById);
         const concurrency = Math.min(8, Math.max(1, entryGroups.length));
@@ -10096,12 +10125,14 @@ null :
                         glossaryJson: '[]',
                         sequence: record.sequence,
                     });
+                    this._assertTermLookupGeneration(generation);
                     rowsById.set(id, row);
                     this._setCachedTermRow(id, row);
                 }
             }
         };
         await Promise.all(Array.from({length: concurrency}, () => deserializeNext()));
+        this._assertTermLookupGeneration(generation);
         return rowsById;
     }
 
@@ -10153,6 +10184,7 @@ null :
      * @returns {Promise<import('dictionary-database').DatabaseTermEntryWithId>}
      */
     async _deserializeTermRow(row) {
+        const generation = this._directTermIndexGeneration;
         const entryContentId = this._asNullableNumber(row.entryContentId);
         const contentOffset = this._asNumber(row.entryContentOffset, -1);
         const contentLength = this._asNumber(row.entryContentLength, -1);
@@ -10180,6 +10212,7 @@ null :
                 const dictionaryName = this._asString(row.dictionary);
                 if (hasExternalContentSpan) {
                     const readResult = await this._readTermEntryContentBytesDetailed(contentOffset, contentLength, contentDictName);
+                    this._assertTermLookupGeneration(generation);
                     if (readResult.status !== 'ok') {
                         reportDiagnostics('term-content-lookup-read-failed', {
                             dictionaryName,
@@ -10223,12 +10256,14 @@ null :
                                     rawSharedGlossaryHeader.glossaryOffset,
                                     rawSharedGlossaryHeader.glossaryLength,
                                 );
+                                this._assertTermLookupGeneration(generation);
                             } else {
                                 const glossaryReadResult = await this._readTermEntryContentBytesDetailed(
                                     rawSharedGlossaryHeader.glossaryOffset,
                                     rawSharedGlossaryHeader.glossaryLength,
                                     'raw',
                                 );
+                                this._assertTermLookupGeneration(generation);
                                 if (glossaryReadResult.status !== 'ok') {
                                     throw new TermContentLookupReadError(glossaryReadResult.status, glossaryReadResult.reason);
                                 }
@@ -10329,6 +10364,7 @@ null :
                             }
                         }
                     } catch (e) {
+                        this._assertTermLookupGeneration(generation);
                         if (e instanceof TermContentLookupReadError) {
                             reportDiagnostics('term-content-lookup-read-failed', {
                                 dictionaryName,
@@ -10382,6 +10418,7 @@ null :
                         glossary,
                     };
                 }
+                this._assertTermLookupGeneration(generation);
                 this._setCachedTermEntryContent(cacheKey, cached);
             }
             definitionTags = cached.definitionTags;
