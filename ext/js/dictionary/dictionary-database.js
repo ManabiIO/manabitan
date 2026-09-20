@@ -2719,11 +2719,10 @@ null;
      */
     async _ensureDirectTermIndexesLoaded(dictionaryNames) {
         const names = this._getUniqueDictionaryNames(dictionaryNames);
-        const knownZeroTermDictionaries = this._getKnownZeroTermDictionaries(names);
         /** @type {Promise<void>[]} */
         const promises = [];
         /** @type {string[]} */
-        const namesToLoad = [];
+        const unresolvedNames = [];
         for (const dictionaryName of names) {
             if (
                 this._directTermIndexLoadedDictionaryNames.has(dictionaryName) ||
@@ -2731,19 +2730,25 @@ null;
             ) {
                 continue;
             }
-            if (knownZeroTermDictionaries.has(dictionaryName)) {
-                // Frequency/tag/media-only dictionaries legitimately have no
-                // term-record shard. Treat that known-empty state as loaded so
-                // lookup preparation does not misclassify it as record loss.
-                this._directTermIndexLoadedDictionaryNames.add(dictionaryName);
-                continue;
-            }
             const existing = this._directTermIndexLoadPromiseByDictionary.get(dictionaryName);
             if (typeof existing !== 'undefined') {
                 promises.push(existing);
                 continue;
             }
-            namesToLoad.push(dictionaryName);
+            unresolvedNames.push(dictionaryName);
+        }
+        const knownZeroTermDictionaries = this._getKnownZeroTermDictionaries(unresolvedNames);
+        /** @type {string[]} */
+        const namesToLoad = [];
+        for (const dictionaryName of unresolvedNames) {
+            if (knownZeroTermDictionaries.has(dictionaryName)) {
+                // Frequency/tag/media-only dictionaries legitimately have no
+                // term-record shard. Treat that known-empty state as loaded so
+                // lookup preparation does not misclassify it as record loss.
+                this._directTermIndexLoadedDictionaryNames.add(dictionaryName);
+            } else {
+                namesToLoad.push(dictionaryName);
+            }
         }
         if (namesToLoad.length > 0) {
             const generation = this._directTermIndexGeneration;
