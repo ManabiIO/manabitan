@@ -1,0 +1,27 @@
+name: Import native continuation source
+on:
+  push:
+    branches: [review/import-native-continuation-20260920]
+    paths: [.github/workflows/import-native-continuation-source.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Retain tracked source only
+        run: |
+          mkdir -p /tmp/import-native-source
+          git rev-parse HEAD > /tmp/import-native-source/commit.txt
+          git archive --format=tar.gz HEAD > /tmp/import-native-source/source.tar.gz
+          sha256sum /tmp/import-native-source/source.tar.gz > /tmp/import-native-source/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-native-continuation-source
+          path: /tmp/import-native-source/
+          retention-days: 7
+          if-no-files-found: error
