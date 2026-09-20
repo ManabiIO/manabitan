@@ -1,5 +1,4 @@
-Bounded sorting qualification attempt 1
+Bounded sorting qualification attempt 2
 Base: correctness PR #74 at 04e26523ec7fa8584a268d4cf2033024a004207f.
-The candidate was benchmarked separately in Node and Chromium before this product-branch construction. Existing persisted bytes and query results passed independent differential checks.
-Require all 16 new semantic tests to pass on both unchanged and optimized code, then full unit/options/type/build and targeted lint. Publish only a fresh isolated candidate branch; no merge or default-branch change.
-Real-corpus component measurements are a separate workflow, not assumed to pass here and not a full-extension latency claim.
+Attempt 1: both baseline and candidate passed all 16 new semantic cases; 6,778 full units passed with 46 skipped; all four TypeScript projects, options and all-target dry build passed. Four test-only stylistic ESLint errors were corrected without weakening assertions. Production source is unchanged.
+Repeat every gate before publishing a fresh isolated candidate branch. No merge or default-branch change. Real-corpus component evidence remains separate from full-extension latency.
