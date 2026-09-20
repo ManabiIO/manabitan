@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {afterAll, beforeAll, describe, expect, test} from 'vitest';
+import {afterAll, beforeAll, describe, expect, test, vi} from 'vitest';
 import {openAsBlob} from 'node:fs';
 import {mkdtemp, open, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -107,7 +107,7 @@ describe('bounded large ZIP entry reads', () => {
         const actual = await reader.read(file, signal());
         expect(actual).toEqual(payload);
         expect(method === 8 ? new Uint8Array(inflateRawSync(actual)) : actual).toEqual(content);
-        expect(archive.ranges).toEqual([[0, 30], [30, 30 + name.length], [header.length, header.length + payload.length]]);
+        expect(archive.ranges).toEqual([[0, 30 + name.length], [header.length, header.length + payload.length]]);
         actual.fill(0);
         expect(await reader.read(file, signal())).toEqual(payload);
     });
@@ -191,7 +191,7 @@ describe('bounded large ZIP entry reads', () => {
         release();
         await disposal;
         await rejected;
-        expect(archive.ranges).toEqual([[0, 30]]);
+        expect(archive.ranges).toEqual([[0, 30 + name.length]]);
     });
     test.each([2, 8])('retains the compressed-source budget on deviceMemory=%i', async (deviceMemory) => {
         const lowMemory = deviceMemory === 2;
@@ -231,5 +231,54 @@ describe('bounded large ZIP entry reads', () => {
         new Uint8Array(buffer).fill(0);
         expect(first).toEqual(payload);
         expect(await new RawZipPayloadReader(blob).read(file, signal())).toEqual(payload);
+    });
+
+    test('activates coalesced reads through the compressed source pipeline', async () => {
+        const {header, payload, file} = entry(8);
+        const archive = new TrackedBlob([header, payload, padding]);
+        const rawReader = new RawZipPayloadReader(archive);
+        const fallbackRead = vi.fn(async () => content);
+        const files = Array.from({length: 4}, (_, index) => ({...file, signature: index}));
+        const pipeline = new TermBankSourcePipeline({
+            termFiles: files,
+            enabled: true,
+            read: fallbackRead,
+            readCompressed: async (termFile, abortSignal) => await rawReader.read(termFile, abortSignal),
+        });
+        const plan = pipeline.createCompressedImportRunPlan(0);
+        if (plan === null) { throw new Error('Expected compressed import plan'); }
+
+        expect((await plan.loaders[0]()).bytes).toEqual(payload);
+        expect(fallbackRead).not.toHaveBeenCalled();
+        expect(archive.ranges).toEqual([[0, 30 + name.length], [header.length, header.length + payload.length]]);
+        await pipeline.dispose();
+    });
+
+    test.each([-1, 1])('rejects a local/central filename-length delta of %i before payload I/O', async (delta) => {
+        const {header, payload, file} = entry(8);
+        new DataView(header.buffer).setUint16(26, name.length + delta, true);
+        const archive = new TrackedBlob([header, payload, padding]);
+
+        await expect(new RawZipPayloadReader(archive).read(file, signal())).rejects.toThrow('local filename disagrees');
+        expect(archive.ranges).toEqual([[0, 30 + name.length]]);
+    });
+
+    test('bounds the speculative prefix and retains valid long-filename fallback', async () => {
+        const longName = new Uint8Array(4097).fill(0x61);
+        const {payload, file} = entry(0);
+        file.rawFilename = longName;
+        const header = new Uint8Array(30 + longName.length);
+        const view = new DataView(header.buffer);
+        view.setUint32(0, 0x04034b50, true);
+        view.setUint16(26, longName.length, true);
+        header.set(longName, 30);
+        const archive = new TrackedBlob([header, payload, padding]);
+
+        expect(await new RawZipPayloadReader(archive).read(file, signal())).toEqual(payload);
+        expect(archive.ranges).toEqual([
+            [0, 30],
+            [30, 30 + longName.length],
+            [header.length, header.length + payload.length],
+        ]);
     });
 });
