@@ -1,6 +1,6 @@
 # OPFS append-cursor and recovery continuation
 
-Stack base: PR #70 at `2438146bb22837963e7af7018ab702a70f5615b6`.
+Base: `develop` after merged PR #70 (`4a3a7d65b2dcc6d1264aebdaee1817052bd897c9`).
 Only `ext/js/dictionary/term-content-opfs-store.js` changes in production.
 No storage schema, migrations, buffer limits, flags, or performance promotion.
 
