@@ -1,0 +1,25 @@
+name: Import publication source qualification
+on:
+  push:
+    branches: [review/import-publication-journal-20260920-r8]
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 6cf7c3df7b3038b4a7c91ee7d9d469d1cc171108
+      - name: Preserve exact repository source for qualified patch construction
+        run: |
+          git rev-parse HEAD > /tmp/repository-base.txt
+          git archive --format=tar HEAD | gzip > /tmp/manabitan-source.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-publication-source
+          path: |
+            /tmp/repository-base.txt
+            /tmp/manabitan-source.tar.gz
+          retention-days: 7
