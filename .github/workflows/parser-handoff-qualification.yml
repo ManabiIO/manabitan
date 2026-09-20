@@ -1,0 +1,30 @@
+name: Parser handoff qualification
+
+on:
+  push:
+    branches: ['review/parser-handoff-qualification-20260920']
+    paths: ['.github/workflows/parser-handoff-qualification.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Retain source and generated parser binary
+        run: |
+          mkdir -p /tmp/parser-handoff-source
+          git rev-parse HEAD > /tmp/parser-handoff-source/commit.txt
+          git ls-files -z -- '*.js' '*.mjs' '*.ts' '*.json' '*.wasm' '*.c' '*.h' '*.yml' '*.md' '*.toml' '*.html' '*.css' '*.txt' '*.patch' '*.sh' | tar --null -T - -czf /tmp/parser-handoff-source/source.tar.gz
+          sha256sum /tmp/parser-handoff-source/source.tar.gz > /tmp/parser-handoff-source/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: parser-handoff-pinned-source
+          path: /tmp/parser-handoff-source/
+          retention-days: 7
+          if-no-files-found: error
