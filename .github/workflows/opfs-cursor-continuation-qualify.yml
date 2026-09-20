@@ -1,0 +1,97 @@
+name: OPFS cursor continuation qualification
+
+on:
+  push:
+    branches: [review/opfs-cursor-continuation-20260920]
+    paths: [.github/workflows/opfs-cursor-continuation-qualify.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify payload and construct clean tests-first branch
+        run: |
+          mkdir -p /tmp/opfs-continuation-evidence
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib
+          data = gzip.decompress(base64.b64decode(Path('review/opfs-cursor-continuation.patch.gz.b64').read_text()))
+          digest = hashlib.sha256(data).hexdigest()
+          assert digest == 'd6ff9f73ca2e67d30c4e13dc615957999213ad633a1731be34486cbbf8fbcbd5', digest
+          Path('/tmp/opfs-continuation-evidence/continuation.patch').write_bytes(data)
+          Path('/tmp/opfs-continuation-evidence/patch-sha256.txt').write_text(digest + '\n')
+          PY
+          git switch -c fix/opfs-cursor-recovery-20260920 2438146bb22837963e7af7018ab702a70f5615b6
+          git apply --check --include='test/*' /tmp/opfs-continuation-evidence/continuation.patch
+          git apply --include='test/*' /tmp/opfs-continuation-evidence/continuation.patch
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add test
+          git commit -m 'test: reproduce OPFS cursor recovery and terminal write failures'
+          git rev-parse HEAD > /tmp/opfs-continuation-evidence/tests-commit.txt
+      - name: Confirm exactly 23 behavioral regression failures on PR70 baseline
+        run: |
+          set +e
+          node test/fixtures/opfs-continuation/check.mjs "$PWD" /tmp/opfs-continuation-evidence/red.json > /tmp/opfs-continuation-evidence/red.log 2>&1
+          status=$?
+          set -e
+          test "$status" = 1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('/tmp/opfs-continuation-evidence/red.json').read_text())
+          print(data)
+          assert data['failed'] == 23, data
+          assert data['passed'] == 5, data
+          PY
+      - name: Apply only correctness repairs and review documentation
+        run: |
+          git apply --check --exclude='test/*' /tmp/opfs-continuation-evidence/continuation.patch
+          git apply --exclude='test/*' /tmp/opfs-continuation-evidence/continuation.patch
+          node test/fixtures/opfs-continuation/check.mjs "$PWD" /tmp/opfs-continuation-evidence/green.json > /tmp/opfs-continuation-evidence/green.log 2>&1
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Focused storage and read-generation suites
+        run: |
+          npx vitest run test/term-content-cursor-recovery.test.js test/term-content-opfs-store.test.js test/term-record-opfs-store.test.js test/term-content-block-store.test.js test/term-content-cache-invalidation.test.js test/term-write-rejection-ownership.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/opfs-continuation-evidence/focused.json > /tmp/opfs-continuation-evidence/focused.log 2>&1
+      - name: Lint changed production source and test wrapper
+        run: |
+          npx eslint ext/js/dictionary/term-content-opfs-store.js test/term-content-cursor-recovery.test.js > /tmp/opfs-continuation-evidence/lint.log 2>&1
+      - name: All TypeScript projects
+        run: npm run test:ts > /tmp/opfs-continuation-evidence/types.log 2>&1
+      - name: Full unit and options suites
+        run: |
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=/tmp/opfs-continuation-evidence/full-unit.json > /tmp/opfs-continuation-evidence/full-unit.log 2>&1
+          npm run test:unit:options > /tmp/opfs-continuation-evidence/options.log 2>&1
+      - name: All-target dry build
+        run: npm run test:build > /tmp/opfs-continuation-evidence/build.log 2>&1
+      - run: npx playwright install --with-deps chromium
+      - name: Actual Chromium extension imports using native OPFS
+        run: |
+          node dev/perf/import-benchmark.js jmdict --runs 1 --output /tmp/opfs-continuation-evidence/import-jmdict
+          node dev/perf/import-benchmark.js jitendex --runs 1 --no-build --output /tmp/opfs-continuation-evidence/import-jitendex
+          node dev/perf/import-benchmark.js jmnedict --runs 1 --no-build --output /tmp/opfs-continuation-evidence/import-jmnedict
+      - name: Publish only the clean qualified correctness branch
+        run: |
+          git add ext/js/dictionary/term-content-opfs-store.js dev/perf/opfs-cursor-recovery-20260920.md
+          git commit -m 'fix: preserve OPFS append cursors through snapshot and failure recovery'
+          git diff 2438146bb22837963e7af7018ab702a70f5615b6 --stat > /tmp/opfs-continuation-evidence/diff-stat.txt
+          git rev-parse HEAD > /tmp/opfs-continuation-evidence/fix-commit.txt
+          sha256sum ext/js/dictionary/term-content-opfs-store.js > /tmp/opfs-continuation-evidence/source-sha256.txt
+          git push origin HEAD:refs/heads/fix/opfs-cursor-recovery-20260920
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: opfs-cursor-continuation-qualification
+          path: /tmp/opfs-continuation-evidence/
+          retention-days: 7
