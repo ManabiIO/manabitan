@@ -2672,6 +2672,8 @@ export class DictionaryImporter {
      * @returns {boolean}
      */
     _tryAddFastMediaRequirementsFromGlossaryJson(glossaryJson, entry, requirements) {
+        // Escaped property names require semantic traversal, not a partial path scan.
+        if (glossaryJson.includes('\\u')) { return false; }
         let found = false;
         GLOSSARY_IMAGE_PATH_PATTERN.lastIndex = 0;
         for (const match of glossaryJson.matchAll(GLOSSARY_IMAGE_PATH_PATTERN)) {
@@ -2718,6 +2720,8 @@ export class DictionaryImporter {
         /** @type {string[]} */
         const paths = [];
         for (let i = 0, ii = bytes.length - JSON_PATH_KEY_BYTES.length; i <= ii; ++i) {
+            // No caller-visible requirements have been added yet; discard partial results.
+            if (bytes[i] === 0x5c && bytes[i + 1] === 0x75) { return null; }
             if (!this._bytesMatch(bytes, i, JSON_PATH_KEY_BYTES)) { continue; }
             let cursor = i + JSON_PATH_KEY_BYTES.length;
             cursor = this._skipJsonWhitespaceBytes(bytes, cursor);
@@ -3942,6 +3946,7 @@ export class DictionaryImporter {
                     const reading = row.reading.length > 0 ? row.reading : expression;
                     const hasPrecomputedTermContent = hasPrecomputedTermEntryContent(row);
                     let usePrecomputedTermContent = false;
+                    let hasMaterializedGlossary = false;
                     const useLeanTermEntryObject = (
                         this._leanCanonicalTermEntryObjects &&
                         requirementsForChunk === null &&
@@ -3979,14 +3984,15 @@ export class DictionaryImporter {
                                 true;
                     } else {
                         const skipGlossaryParse = (
+                            this._wasmPassThroughTermContent &&
+                            hasPrecomputedTermContent &&
+                            (
                                 typeof row.glossaryMayContainMedia === 'boolean' ?
                                     !row.glossaryMayContainMedia :
                                     !this._glossaryJsonLikelyContainsMedia(this._getFastRowGlossaryJson(row))
+                            )
                         );
                         if (skipGlossaryParse) {
-                            if (!this._wasmPassThroughTermContent) {
-                                entry.glossaryJson = this._getFastRowGlossaryJson(row);
-                            }
                             usePrecomputedTermContent = true;
                         } else {
                             let glossaryList = null;
@@ -4017,6 +4023,7 @@ export class DictionaryImporter {
                                     glossaryList[j] = this._formatDictionaryTermGlossaryObject(glossary, entry, requirementsForChunk);
                                 }
                                 entry.glossary = glossaryList;
+                                hasMaterializedGlossary = true;
                             }
                         }
                     }
@@ -4038,6 +4045,8 @@ export class DictionaryImporter {
                         entry.termEntryContentBytes = row.termEntryContentBytes;
                     }
                     // Keep serialization canonical with the runtime deserializer.
+                    // A conservative media hint may produce no requirements; preserve
+                    // the formatted glossary even when no later media pass will run.
                     if (
                         requirementsForChunk === null ||
                         (
@@ -4049,6 +4058,7 @@ export class DictionaryImporter {
                     ) {
                         if (
                             requirementsForChunk !== null &&
+                            !hasMaterializedGlossary &&
                             typeof entry.glossaryJson !== 'string' &&
                             (
                                 !hasPrecomputedTermEntryContent(entry)
@@ -4877,6 +4887,7 @@ null;
      * @returns {boolean}
      */
     _glossaryJsonLikelyContainsMedia(glossaryJson) {
+        if (glossaryJson.includes('\\u')) { return true; }
         if (this._glossaryMediaFastScan) {
             return this._glossaryJsonLikelyContainsMediaFast(glossaryJson);
         }
@@ -4888,6 +4899,7 @@ null;
      * @returns {boolean}
      */
     _glossaryJsonLikelyContainsMediaFast(glossaryJson) {
+        if (glossaryJson.includes('\\u')) { return true; }
         const hasTypeImage = glossaryJson.includes('"type"') && glossaryJson.includes('"image"');
         const hasTagImg = glossaryJson.includes('"tag"') && glossaryJson.includes('"img"');
         return hasTypeImage || hasTagImg;
