@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>MDict Import Guide - Manabitan</title>
+    <link rel="icon" type="image/png" href="/images/icon16.png" sizes="16x16">
+    <link rel="stylesheet" type="text/css" href="/css/material.css">
+    <link rel="stylesheet" type="text/css" href="/css/settings.css">
+    <script src="/js/pages/generic-page-main.js" type="module"></script>
+</head>
+<body>
+<div class="content-outer"><div class="content scrollbar">
+<div class="content-left"></div>
+<main class="content-center">
+    <span tabindex="-1" id="content-scroll-focus"></span>
+    <p><a href="/quick-start-guide.html">Quick Start Guide</a> / MDict</p>
+    <h1>Importing MDict dictionaries</h1>
+    <p class="warning-text"><strong>Experimental support.</strong> Compatibility depends on the dictionary. Keep your original files; Manabitan converts a copy for its own dictionary storage.</p>
+
+    <h2>Choose the complete set together</h2>
+    <div class="settings-group"><div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left">
+        <p>The <code>.mdx</code> file contains definitions. Matching <code>.mdd</code> files contain optional resources, such as images and stylesheets. Select all files for one dictionary in the same selection or drop:</p>
+        <pre>Dictionary.mdx
+Dictionary.mdd
+Dictionary.1.mdd
+Dictionary.2.mdd</pre>
+        <p>The extra MDD volumes are only needed when your dictionary supplies them. Keep the publisher's filenames and do not rename unrelated resources to make them match.</p>
+        <p><strong>MDD files cannot be imported alone or attached later.</strong> To add omitted resources, remove only that dictionary and reimport its complete set. There is no need to use <em>Delete All</em>.</p>
+        <p id="mdict-audio-limit"><strong>Dictionary audio is not enabled by the current import flow.</strong> Selecting an MDD with audio does not enable that audio. The separate pronunciation-audio settings are unchanged.</p>
+    </div></div></div></div>
+
+    <h2>Import and check the result</h2>
+    <div class="settings-group"><div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left">
+        <ol>
+            <li>Open <a href="/settings.html#dictionaries">Settings &gt; Dictionaries</a>, choose <em>Configure installed and enabled dictionaries</em>, then <em>Import</em>.</li>
+            <li>Choose or drop the MDX and all matching MDD files together. <strong>Local files start importing immediately.</strong> Keep the Settings page open until installation finishes.</li>
+            <li>Check that the dictionary appears as installed and is enabled for your active profile. Conversion progress reaching 100% does not prove installation succeeded.</li>
+            <li>Open <a href="/search.html">Search</a> and try a known headword, an alias, and an entry with an image or table. Check again after opening a fresh Search page.</li>
+        </ol>
+        <p><strong>Local conversion does not upload your dictionary to a conversion server.</strong> Imports from URLs do make network requests. External links in definitions can open websites.</p>
+        <p>The file picker also accepts <strong>Yomitan-format ZIP dictionaries</strong>. A ZIP containing loose MDX/MDD files is not a Yomitan dictionary: extract that set first, then select its files together.</p>
+        <p>With Advanced settings enabled, dictionaries added through <em>Import from URLs</em> stay in the pending list until you click <em>Import</em>. Downloading files locally is an alternative when a hosting page cannot be imported directly.</p>
+    </div></div></div></div>
+
+    <h2>Compatibility and troubleshooting</h2>
+    <div class="settings-group"><div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left">
+        <p>Some compression, encryption, and format variants are unsupported. Scripts and interactive dictionary widgets are not preserved, and layout or styling can differ. Successful import is not a guarantee that every source feature survived conversion.</p>
+        <details id="mdict-troubleshooting">
+            <summary>Show troubleshooting steps</summary>
+            <h3>Missing images or styling</h3>
+            <p>Check that the original matching MDD files were selected with the MDX. Adding them in a second import will not update an installed dictionary. Also check whether the original dictionary depends on separate files that are not in its MDD resources. Even a complete set can contain unsupported presentation features.</p>
+            <h3>Files do not match</h3>
+            <p>Import one dictionary set at a time and remove duplicate selections. Keep the original filenames. Report a pairing failure with the exact MDX/MDD names rather than renaming unrelated files.</p>
+            <h3>Truncated data or an integrity error</h3>
+            <p>Try a fresh copy of the complete original set. Renaming or changing the extension cannot repair its contents. Retain the exact error message for a compatibility report.</p>
+            <h3>Conversion times out</h3>
+            <p>The conversion client has a three-minute limit, including file reads. Try one dictionary at a time. Large dictionaries may need a compatible external converter that produces a Yomitan ZIP. Do not remove unrelated installed dictionaries.</p>
+            <h3>The dictionary is installed but no result appears</h3>
+            <p>Check the active profile, the dictionary's enabled toggle, and the selected language. Try an exact headword known to exist in the original dictionary. Report missing definitions separately from missing media.</p>
+        </details>
+    </div></div></div></div>
+    <p><a href="/settings.html#dictionaries">Open Dictionary Settings</a> &middot; <a href="/quick-start-guide.html">Back to Quick Start</a></p>
+    <div class="footer-padding"></div>
+</main>
+<div class="content-right"></div>
+</div></div>
+</body>
+</html>
