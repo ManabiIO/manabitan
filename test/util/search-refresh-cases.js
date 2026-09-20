@@ -233,9 +233,19 @@ test('explicit navigation to another query still synchronizes the input', async 
     assert.equal(f.input.value, '犬');
 });
 
-test('explicit clear content still clears the input', () => {
+test('late initial clear preserves text typed before the first submitted search', () => {
+    const f = fixture('clear');
+    f.input.value = 'Read';
+    f.input.selectionStart = f.input.selectionEnd = 4;
+    f.controller._onContentUpdateStart({type: 'clear', query: ''});
+    assert.equal(f.input.value, 'Read');
+    assert.equal(f.input.selectionStart, 4);
+});
+
+test('clear content after a submitted search still synchronizes the input', () => {
     const f = fixture();
     f.input.value = 'draft';
+    f.controller._searchRequestSequence = 1;
     f.controller._onContentUpdateStart({type: 'clear', query: ''});
     assert.equal(f.input.value, '');
 });
