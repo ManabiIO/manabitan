@@ -1,0 +1,135 @@
+diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictionary-importer.js
+index f48d0a1..b5ccdad 100644
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -75,6 +75,29 @@
+ const Uint8ArrayWriter = /** @type {typeof import('@zip.js/zip.js').Uint8ArrayWriter} */ (/** @type {unknown} */ (Uint8ArrayWriter0));
+ const ZipReader = /** @type {typeof import('@zip.js/zip.js').ZipReader} */ (/** @type {unknown} */ (ZipReader0));
+ 
++/** Reuses only an allocation already owned by the raw-term reader. */
++class BufferedZipBlobReader extends BlobReader {
++    /**
++     * @param {Blob} blob
++     * @param {RawZipPayloadReader} payloadReader
++     */
++    constructor(blob, payloadReader) {
++        super(blob);
++        /** @type {RawZipPayloadReader} */
++        this._payloadReader = payloadReader;
++    }
++
++    /**
++     * @override
++     * @param {number} index
++     * @param {number} length
++     * @returns {Promise<Uint8Array>}
++     */
++    async readUint8Array(index, length) {
++        return this._payloadReader.readBufferedRange(index, length) ?? await super.readUint8Array(index, length);
++    }
++}
++
+ const INDEX_FILE_NAME = 'index.json';
+ const SUPPORTED_INDEX_VERSIONS = new Set([1, 3]);
+ const JSON_QUOTED_STRING_CACHE_MAX_ENTRIES = 8192;
+@@ -737,6 +760,8 @@
+ 
+         // Read archive
+         const tArchiveStart = Date.now();
++        /** @type {RawZipPayloadReader|null} */
++        let archivePayloadReader = null;
+         /** @type {import('dictionary-importer').ArchiveFileMap} */
+         let fileMap;
+         /** @type {import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>|null} */
+@@ -747,7 +772,8 @@
+             if (archiveContent === null) {
+                 throw new Error('Archive content is no longer available');
+             }
+-            ({fileMap, zipReader: archiveReader} = await this._getFilesFromArchive(archiveContent));
++            archivePayloadReader = RawZipPayloadReader.supportsArchive(archiveContent) ? new RawZipPayloadReader(archiveContent) : null;
++            ({fileMap, zipReader: archiveReader} = await this._getFilesFromArchive(archiveContent, archivePayloadReader));
+             archiveOwnership.own(archiveReader);
+             index = await this._readAndValidateIndex(fileMap);
+         } catch (e) {
+@@ -1099,9 +1125,7 @@
+             archiveReader,
+             disposeParser: disposeParallelTermBankParser,
+         });
+-        const rawZipPayloadReader = RawZipPayloadReader.supportsArchive(archiveContent) ?
+-            new RawZipPayloadReader(archiveContent) :
+-            null;
++        const rawZipPayloadReader = archivePayloadReader;
+         const termBankSourcePipeline = new TermBankSourcePipeline({
+             termFiles: activeTermFiles,
+             enabled: !this._disableTermBankWasmFastPath && !useTermArtifactFiles && !usePackedTermArtifact,
+@@ -2333,13 +2357,14 @@
+ 
+     /**
+      * @param {ArrayBuffer|Blob} archiveContent
++     * @param {RawZipPayloadReader|null} [payloadReader]
+      * @returns {Promise<{fileMap: import('dictionary-importer').ArchiveFileMap, zipReader: import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>}>}
+      * @throws {Error}
+      */
+-    async _getFilesFromArchive(archiveContent) {
++    async _getFilesFromArchive(archiveContent, payloadReader = null) {
+         const zipFileReader = (
+             archiveContent instanceof Blob ?
+-                new BlobReader(archiveContent) :
++                (payloadReader === null ? new BlobReader(archiveContent) : new BufferedZipBlobReader(archiveContent, payloadReader)) :
+                 new Uint8ArrayReader(new Uint8Array(archiveContent))
+         );
+         const zipReader = /** @type {import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>} */ (new ZipReader(zipFileReader));
+diff --git a/ext/js/dictionary/term-bank-source-pipeline.js b/ext/js/dictionary/term-bank-source-pipeline.js
+index 80d5758..0167d43 100644
+--- a/ext/js/dictionary/term-bank-source-pipeline.js
++++ b/ext/js/dictionary/term-bank-source-pipeline.js
+@@ -39,6 +39,8 @@
+         this._archiveContent = archiveContent;
+         /** @type {Promise<Uint8Array>|null} */
+         this._archiveBytesPromise = null;
++        /** @type {Uint8Array|null} */
++        this._bufferedArchiveBytes = null;
+     }
+ 
+     /**
+@@ -51,6 +53,25 @@
+         (archiveContent instanceof Blob || size <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES);
+     }
+ 
++    /**
++     * Copy a range only after the existing raw-term path has materialized its
++     * bounded archive. Metadata-only and large-Blob imports allocate nothing.
++     * Return null for ranges requiring Blob.slice's clipping semantics.
++     * @param {number} offset
++     * @param {number} length
++     * @returns {Uint8Array|null}
++     */
++    readBufferedRange(offset, length) {
++        const bytes = this._bufferedArchiveBytes;
++        if (
++            bytes === null || !Number.isSafeInteger(offset) || !Number.isSafeInteger(length) ||
++            offset < 0 || length < 0 || offset > bytes.byteLength || length > bytes.byteLength - offset
++        ) { return null; }
++        // ZIP codecs/worker transport require an owning, zero-offset buffer.
++        // Borrowing a view can expose the archive prefix or detach the archive.
++        return bytes.slice(offset, offset + length);
++    }
++
+     /**
+      * @param {TermBankSourceFile} file
+      * @param {AbortSignal} signal
+@@ -132,9 +153,12 @@
+ 
+     /** @returns {Promise<Uint8Array>} */
+     _getArchiveBytes() {
+-        this._archiveBytesPromise ??= this._archiveContent instanceof Blob ?
++        this._archiveBytesPromise ??= (this._archiveContent instanceof Blob ?
+             this._archiveContent.arrayBuffer().then((buffer) => new Uint8Array(buffer)) :
+-            Promise.resolve(new Uint8Array(this._archiveContent));
++            Promise.resolve(new Uint8Array(this._archiveContent))).then((bytes) => {
++            this._bufferedArchiveBytes = bytes;
++            return bytes;
++        });
+         return this._archiveBytesPromise;
+     }
+ }
