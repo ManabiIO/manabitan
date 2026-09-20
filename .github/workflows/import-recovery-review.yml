@@ -7,32 +7,96 @@ on:
 permissions:
   contents: read
 jobs:
-  verify-transport:
+  qualification:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Verify transported patches
-        run: |
-          mkdir -p /tmp/review-transport
-          cp .github/review/*.b64 /tmp/review-transport/
-          python3 - <<'PY'
-          import base64, gzip, hashlib, json, pathlib
-          out = []
-          for p in pathlib.Path('/tmp/review-transport').glob('*.b64'):
-              try:
-                  decoded = gzip.decompress(base64.b64decode(p.read_text(), validate=False))
-                  out.append({'name': p.name, 'bytes': len(decoded), 'sha256': hashlib.sha256(decoded).hexdigest()})
-              except Exception as e:
-                  out.append({'name': p.name, 'error': str(e)})
-          text = json.dumps(out, indent=2)
-          print(text)
-          pathlib.Path('/tmp/review-transport/receipt.json').write_text(text)
-          PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/setup-node@v4
         with:
-          name: import-review-transport-check
-          path: /tmp/review-transport/
-          retention-days: 3
+          node-version: 22
+          cache: npm
+      - name: Verify and apply reviewed tests
+        run: |
+          mkdir -p /tmp/import-review-evidence
+          cp .github/review/*.b64 /tmp/import-review-evidence/
+          python3 - <<'PY'
+          import base64, gzip, hashlib, pathlib
+          folder = pathlib.Path('.github/review')
+          expected = {
+              'production': '934881f2b4f396f71a85cee14f08c918ca80844dbe35fcf1b2a615815028d79e',
+              'tests': '0ee0d0b6a54ed7d49cfdeca6b4e3677fc58ce0b4f905cc5392e5fcd222172493',
+              'tools': 'b6d69f8f4ca43ad3da53e684fd323f5e9fd7c18e79baa016d49b0dc4dea49e85',
+          }
+          for name, digest in expected.items():
+              if name == 'tools':
+                  text = ''.join((folder / f'import-storage-tools.{i}.b64').read_text().strip() for i in [1, 2])
+              else:
+                  text = (folder / f'import-storage-{name}.patch.gz.b64').read_text().strip()
+              if name == 'tests':
+                  old = 'youDaTwp4jQJs+tuvFimWdHNokl6FcFzHZZdQ9L9X7NxXi38veS6KOYxfNILNJpJAb'
+                  new = 'youDaTwp4jQJs+tuvFimWdHNokl6FcFzFhXZdQ9L9X7NxXi38veS6KOYxfNILNJpJAb'
+                  assert text.count(old) == 1
+                  text = text.replace(old, new)
+              raw = gzip.decompress(base64.b64decode(text, validate=True))
+              actual = hashlib.sha256(raw).hexdigest()
+              assert actual == digest, (name, actual, digest)
+              pathlib.Path(f'/tmp/{name}.patch').write_bytes(raw)
+              print(name, len(raw), actual)
+          PY
+          git apply /tmp/tests.patch
+          git apply /tmp/tools.patch
+      - name: Dependencies and runtime libraries
+        run: |
+          npm ci
+          npm run build:libs
+      - name: Record unfixed recovery regressions
+        run: |
+          set +e
+          npx vitest run test/dictionary-import-recovery-retry.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/import-review-evidence/recovery-red.json > /tmp/import-review-evidence/recovery-red.log 2>&1
+          result=$?
+          set -e
+          test "$result" -ne 0
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs'
+          const r = JSON.parse(readFileSync('/tmp/import-review-evidence/recovery-red.json'))
+          if (r.numTotalTests !== 18 || r.numFailedTests === 0) throw new Error('Missing expected recovery failures')
+          console.log({passed:r.numPassedTests,failed:r.numFailedTests})
+          JS
+      - name: Apply production fixes and record exact source
+        run: |
+          git apply /tmp/production.patch
+          git diff --check
+          git diff --binary -- ext test dev/perf > /tmp/import-review-evidence/qualified-composition.patch
+          git diff --name-only -- ext test dev/perf | xargs sha256sum > /tmp/import-review-evidence/source-sha256.txt
+      - name: Unit and type qualification
+        run: |
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=/tmp/import-review-evidence/full-unit.json > /tmp/import-review-evidence/full-unit.log 2>&1
+          npm run test:ts > /tmp/import-review-evidence/types.log 2>&1
+          npm run test:unit:options > /tmp/import-review-evidence/options.log 2>&1
+          npx eslint ext/js/dictionary/dictionary-database.js ext/js/dictionary/raw-term-content.js ext/js/dictionary/term-content-opfs-store.js ext/js/dictionary/term-record-opfs-store.js ext/js/dictionary/term-lookup-index.js test/dictionary-import-recovery-retry.test.js test/raw-term-content-regressions.test.js test/dictionary-storage-deep-regressions.test.js test/term-storage-terminal-failures.test.js test/raw-term-content-block.test.js test/term-content-block-store.test.js test/term-content-opfs-store.test.js test/term-record-opfs-store.test.js > /tmp/import-review-evidence/lint.log 2>&1
+          npm run test:build > /tmp/import-review-evidence/dry-build.log 2>&1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Actual OPFS imports of locked dictionaries
+        env:
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_IMPORT_BENCH_QUICK: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+        run: |
+          for dictionary in jmdict jitendex jmnedict; do
+            MANABITAN_E2E_IMPORT_BENCH_DICTIONARY="$dictionary" MANABITAN_CHROMIUM_E2E_REPORT="/tmp/import-review-evidence/$dictionary.html" node test/chromium/extension-two-dictionary-import.e2e.js > "/tmp/import-review-evidence/$dictionary.log" 2>&1
+          done
+      - name: Preserve evidence without bundled fonts or dictionaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-storage-recovery-qualification
+          path: /tmp/import-review-evidence/
+          retention-days: 14
