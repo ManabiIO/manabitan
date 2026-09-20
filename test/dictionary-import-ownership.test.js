@@ -72,6 +72,7 @@ describe('DictionaryImportSession', () => {
         expect(dictionaryDatabase.finishBulkImport).toHaveBeenCalledWith(expect.any(Function), {
             summary,
             primaryKey: 42,
+            onPublished: expect.any(Function),
         });
         expect(dictionaryDatabase.abortBulkImport).not.toHaveBeenCalled();
         expect(dictionaryDatabase.bulkUpdate).not.toHaveBeenCalled();

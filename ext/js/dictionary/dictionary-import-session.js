@@ -185,12 +185,16 @@ export class DictionaryImportSession {
                 const details = await this._dictionaryDatabase.finishBulkImport(onCheckpoint, {
                     summary,
                     primaryKey: this._dictionarySummaryPrimaryKey,
+                    onPublished: () => {
+                        this._bulkState = 'committed';
+                        this._published = true;
+                    },
                 });
                 this._bulkState = 'committed';
                 this._published = true;
                 return details;
             } catch (error) {
-                this._bulkState = 'failed';
+                if (!this._published) { this._bulkState = 'failed'; }
                 this.recordFailure(error);
                 return null;
             }

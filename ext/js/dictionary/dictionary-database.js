@@ -1365,7 +1365,7 @@ export class DictionaryDatabase {
 
     /**
      * @param {((index: number, count: number) => void)?} [onCheckpoint]
-     * @param {{summary: import('dictionary-importer').Summary, primaryKey: number}|null} [publication]
+     * @param {{summary: import('dictionary-importer').Summary, primaryKey: number, onPublished?: () => void}|null} [publication]
      * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|null>}
      */
     async finishBulkImport(onCheckpoint = null, publication = null) {
@@ -1534,6 +1534,9 @@ export class DictionaryDatabase {
                     // deletion must not let close() roll the committed OPFS
                     // data back in this process.
                     this._bulkImportJournalRecord = null;
+                    // A post-commit cleanup error must not authorize the import
+                    // session to delete an already-published dictionary.
+                    publication?.onPublished?.();
                     try {
                         await this._importJournal.clear();
                         this._deleteImportPublicationMarkerBestEffort(sessionId);
