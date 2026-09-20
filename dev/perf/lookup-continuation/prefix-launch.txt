@@ -1,0 +1,4 @@
+Bounded radix sorting screen, attempt 1
+Every pinned JMdict, Jitendex and JMnedict row, grouped into canonical 30,000-row component chunks. Independent sorted-permutation and encoded-byte parity checks before timing.
+Node and Chromium: cold forward and reverse construction, eight alternating ABBA/BAAB blocks per arm plus eight same-baseline control blocks. Input decoding, plan construction, validation and analysis are outside timing.
+Component evidence only, not a full-extension latency claim. No product branch is modified or published by this workflow.
