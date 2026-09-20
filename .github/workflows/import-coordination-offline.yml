@@ -1,0 +1,45 @@
+name: Import review offline qualification inputs
+
+on:
+  push:
+    branches: [review/import-coordination-offline-20260920]
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Export source without repository credentials or font assets
+        run: |
+          mkdir -p "$RUNNER_TEMP/import-review"
+          git rev-parse HEAD > "$RUNNER_TEMP/import-review/source-head.txt"
+          tar --exclude=.git --exclude=node_modules --exclude=builds --exclude=ext/fonts --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf "$RUNNER_TEMP/import-review/source.tar.gz" .
+          sha256sum "$RUNNER_TEMP/import-review/source.tar.gz" > "$RUNNER_TEMP/import-review/source.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-review-source
+          path: ${{ runner.temp }}/import-review/source*
+          retention-days: 1
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.16.0'
+      - name: Export installed dependencies and generated libraries
+        run: |
+          node --version > "$RUNNER_TEMP/import-review/node-version.txt"
+          sha256sum package-lock.json > "$RUNNER_TEMP/import-review/package-lock.sha256"
+          tar --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf "$RUNNER_TEMP/import-review/dependencies.tar.gz" node_modules ext/lib
+          sha256sum "$RUNNER_TEMP/import-review/dependencies.tar.gz" > "$RUNNER_TEMP/import-review/dependencies.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-review-dependencies
+          path: |
+            ${{ runner.temp }}/import-review/dependencies*
+            ${{ runner.temp }}/import-review/node-version.txt
+            ${{ runner.temp }}/import-review/package-lock.sha256
+          retention-days: 1
