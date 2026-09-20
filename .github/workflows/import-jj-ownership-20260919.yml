@@ -1,0 +1,81 @@
+name: Original dictionary ownership screen
+on:
+  push:
+    branches: [research/import-jitendex-jmdict-20260919]
+    paths: [.github/workflows/import-jj-ownership-20260919.yml]
+permissions:
+  contents: read
+jobs:
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jitendex, jmdict]
+    env:
+      MANABITAN_CLANG: clang-18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Complete fixed-plan comparisons
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: python dev/perf/jj-ownership-screen.py --dictionary "$DICTIONARY" --out "$RUNNER_TEMP/jj-screen"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jj-owned-screen-${{ matrix.dictionary }}
+          path: ${{ runner.temp }}/jj-screen
+          retention-days: 21
+          if-no-files-found: error
+  qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      MANABITAN_CLANG: clang-18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Isolate private parser with owned shared output
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin 54ac62a39386459b7822fc644e5a1a6b1a619619
+          mkdir -p qualification
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+          s=importlib.util.spec_from_file_location('candidate','dev/perf/jj-ownership-screen.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m);m.configure('private-shared')
+          p=Path('test/term-bank-wasm-parser.test.js');t=p.read_text()
+          for a,b in [('expect(wasmBuffer).toBeInstanceOf(SharedArrayBuffer);','expect(wasmBuffer).toBeInstanceOf(ArrayBuffer);'),('expect(cloned.contentBytesBuffer.buffer).toBeInstanceOf(SharedArrayBuffer);','expect(cloned.contentBytesBuffer.buffer).toBeInstanceOf(ArrayBuffer);'),('expect(cloned.termRecordPreinternedPlan.stringsBuffer.buffer).toBeInstanceOf(SharedArrayBuffer);','expect(cloned.termRecordPreinternedPlan.stringsBuffer.buffer).toBeInstanceOf(ArrayBuffer);'),('expect(cloned.scoreList[0]).toBe(123456);','expect(cloned.scoreList[0]).toBe(originalScore);')]:
+              assert t.count(a)==1;t=t.replace(a,b)
+          p.write_text(t)
+          PY
+          npm run build:libs > qualification/build.log 2>&1
+          node node_modules/vitest/vitest.mjs run --no-file-parallelism > qualification/unit.log 2>&1
+          npm run test:unit:options > qualification/options.log 2>&1
+          npm run test:ts > qualification/types.log 2>&1
+          node node_modules/eslint/bin/eslint.js dev/build-libs.js test/term-bank-wasm-parser.test.js > qualification/lint.log 2>&1
+          npm run test:build > qualification/build-plans.log 2>&1
+          git diff --check
+          git diff > qualification/changes.patch
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jj-owned-qualification
+          path: qualification
+          retention-days: 21
+          if-no-files-found: error
