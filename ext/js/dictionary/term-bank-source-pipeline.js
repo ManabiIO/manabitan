@@ -150,6 +150,10 @@ export class AbortableZipReadPool {
         this._read = read;
         /** @type {Map<TermBankSourceFile, {promise: Promise<T>, abortController: AbortController}>} */
         this._reads = new Map();
+        // Cache eviction does not end a read's lifetime. In particular, a
+        // released Blob read can still be running when disposal begins.
+        /** @type {Set<{promise: Promise<T>, abortController: AbortController}>} */
+        this._pendingReads = new Set();
         /** @type {Set<Promise<void>>} */
         this._pendingJoins = new Set();
         /** @type {Promise<void>|null} */
@@ -176,9 +180,12 @@ export class AbortableZipReadPool {
             } catch (error) {
                 promise = Promise.reject(error);
             }
-            read = {promise, abortController};
-            this._reads.set(file, read);
-            void promise.catch(() => {});
+            const pendingRead = {promise, abortController};
+            read = pendingRead;
+            this._reads.set(file, pendingRead);
+            this._pendingReads.add(pendingRead);
+            const settled = () => { this._pendingReads.delete(pendingRead); };
+            void promise.then(settled, settled);
         }
         return read.promise;
     }
@@ -192,7 +199,7 @@ export class AbortableZipReadPool {
 
     /** Aborts every obsolete inflation and waits for all prior abort joins. */
     async abortAndJoin() {
-        const activeReads = [...this._reads.values()];
+        const activeReads = [...new Set([...this._reads.values(), ...this._pendingReads])];
         this._reads.clear();
         for (const {abortController} of activeReads) {
             abortController.abort();
