@@ -1,0 +1,88 @@
+name: Glossary native import qualification
+
+on:
+  push:
+    branches: [review/glossary-semantics-20260920]
+    paths:
+      - '.github/workflows/glossary-native-imports.yml'
+      - 'dev/perf/glossary-native-*.mjs'
+      - 'dev/perf/glossary-native-*.py'
+
+permissions:
+  contents: read
+
+jobs:
+  real-dictionaries:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - run: python3 dev/perf/glossary-semantics-repair.py
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - run: npx playwright install --with-deps chromium
+      - name: Complete a real native-storage import
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          node dev/perf/import-benchmark.js "$DICTIONARY" --runs 1 --output "builds/glossary-native-import/$DICTIONARY"
+          sha256sum ext/js/dictionary/dictionary-importer.js ext/js/dictionary/wasm/term-bank-parser.c ext/lib/term-bank-parser.wasm > "builds/glossary-native-import/$DICTIONARY/SHA256SUMS"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: glossary-native-import-${{ matrix.dictionary }}
+          path: builds/glossary-native-import/
+          if-no-files-found: error
+          retention-days: 14
+
+  escaped-media-and-restart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - run: npx playwright install --with-deps chromium
+      - run: python3 dev/perf/glossary-native-fixture.py
+      - name: Run unchanged acceptance against original source
+        shell: bash
+        run: |
+          npm run build -- --target chrome-dev
+          mkdir -p builds/glossary-native/red-extension
+          unzip -q builds/manabitan-chrome-dev.zip -d builds/glossary-native/red-extension
+          set +e
+          node dev/perf/glossary-native-acceptance.mjs builds/glossary-native/red-extension builds/glossary-native/red.json
+          result=$?
+          set -e
+          test "$result" -eq 1
+          node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('builds/glossary-native/red.json')); if(!r.results.some(x=>x.name==='import has no errors and uses native storage'&&x.passed)||r.results.length!==21) process.exit(1)"
+      - name: Run identical acceptance after repairs
+        run: |
+          python3 dev/perf/glossary-semantics-repair.py
+          npm run build:libs
+          npm run build -- --target chrome-dev
+          mkdir -p builds/glossary-native/green-extension
+          unzip -q builds/manabitan-chrome-dev.zip -d builds/glossary-native/green-extension
+          node dev/perf/glossary-native-acceptance.mjs builds/glossary-native/green-extension builds/glossary-native/green.json
+          sha256sum ext/js/dictionary/dictionary-importer.js ext/js/dictionary/wasm/term-bank-parser.c ext/lib/term-bank-parser.wasm > builds/glossary-native/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: glossary-native-escape-restart
+          path: |
+            builds/glossary-native/*.json
+            builds/glossary-native/*.zip
+            builds/glossary-native/*.png
+            builds/glossary-native/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 14
