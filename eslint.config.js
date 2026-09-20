@@ -839,6 +839,7 @@ export default [
     {
         files: [
             'test/**/*.js',
+            'test/**/*.mjs',
             'dev/**/*.js',
             '**/integration.spec.js',
             '**/playwright.config.js',
@@ -901,12 +902,14 @@ export default [
         files: [
             'benches/**/*.js',
             'test/**/*.js',
+            'test/**/*.mjs',
         ],
     })),
     {
         files: [
             'benches/**/*.js',
             'test/**/*.js',
+            'test/**/*.mjs',
         ],
 
         rules: {
