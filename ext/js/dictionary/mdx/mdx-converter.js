@@ -1587,8 +1587,8 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             files.set(`${assetPrefix}${cssKey}`, bytes);
         }
         let materializedReferencedAssetCount = 0;
+        const allReferencedAssetKeys = new Set([...referencedAssetKeys, ...cssReferencedAssetKeys]);
         if (assetResolver !== null) {
-            const allReferencedAssetKeys = new Set([...referencedAssetKeys, ...cssReferencedAssetKeys]);
             for (const assetKey of allReferencedAssetKeys) {
                 if (assetKey.toLowerCase().endsWith('.css')) { continue; }
                 const bytes = assetResolver.getBytes(assetKey);
@@ -1599,7 +1599,14 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 materializedReferencedAssetCount += 1;
             }
         }
+        let missingReferencedAssetCount = 0;
+        if (includeAssets) {
+            for (const assetKey of allReferencedAssetKeys) {
+                if (!files.has(`${assetPrefix}${assetKey}`)) { ++missingReferencedAssetCount; }
+            }
+        }
         recordPhaseTiming('prepare-mdx:materialize-assets', tMaterializeAssetsStart, {
+            missingReferencedAssetCount,
             cssAssetCount: cssAssets.size,
             referencedAssetCount: referencedAssetKeys.size,
             cssReferencedAssetCount: cssReferencedAssetKeys.size,
