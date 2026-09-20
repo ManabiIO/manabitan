@@ -1,0 +1,145 @@
+diff --git a/ext/js/dictionary/term-bank-wasm-parser-worker.js b/ext/js/dictionary/term-bank-wasm-parser-worker.js
+index a896e95..b4776f6 100644
+--- a/ext/js/dictionary/term-bank-wasm-parser-worker.js
++++ b/ext/js/dictionary/term-bank-wasm-parser-worker.js
+@@ -143,11 +143,14 @@ async function parse(data) {
+             chunkSize,
+             {...options, ...experiments, maxPendingChunks: 1, singleChunk: true, preloadedSource},
+         );
+-        if (resultChunk === null) {
++        const profile = consumeLastTermBankWasmParseProfile();
++        // A validated empty group emits no storage chunk. Keep that distinct
++        // from a missing result for a nonempty group; parsing and CRC checks
++        // above still run before this result is published.
++        if (resultChunk === null && profile?.rowCount !== 0) {
+             throw new Error('Parallel term-bank parser did not emit a chunk');
+         }
+-        const stableResultChunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (resultChunk);
+-        const profile = consumeLastTermBankWasmParseProfile();
++        const stableResultChunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */ (resultChunk);
+         if (profile !== null) {
+             profile.resultCopyMs = resultCopyMs;
+             profile.sourceDeliveryMs = sourceDeliveryMs ?? 0;
+@@ -160,7 +163,7 @@ async function parse(data) {
+                 });
+             }
+         }
+-        if (options.prepareLookupIndexes === true && !(stableResultChunk.preparedLookupIndexes instanceof Map)) {
++        if (stableResultChunk !== null && options.prepareLookupIndexes === true && !(stableResultChunk.preparedLookupIndexes instanceof Map)) {
+             const prepared = prepareTermLookupIndexesFromPreinternedPlan(stableResultChunk, null, experiments);
+             if (prepared !== null) {
+                 stableResultChunk.preparedLookupIndexes = prepared.indexes;
+@@ -175,7 +178,7 @@ async function parse(data) {
+                 }
+             }
+         }
+-        const transfer = collectChunkTransferables(stableResultChunk);
++        const transfer = stableResultChunk === null ? [] : collectChunkTransferables(stableResultChunk);
+         self.postMessage({
+             type: 'result',
+             id,
+diff --git a/ext/js/dictionary/term-bank-wasm-parser.js b/ext/js/dictionary/term-bank-wasm-parser.js
+index de554a9..d58f8dc 100644
+--- a/ext/js/dictionary/term-bank-wasm-parser.js
++++ b/ext/js/dictionary/term-bank-wasm-parser.js
+@@ -2445,7 +2445,7 @@ class ParallelTermBankPipelineRun {
+             if (initialResult.error !== null) {
+                 throw createParallelParserError(initialResult.error);
+             }
+-            this._throwIfCancelled();
++            this._throwIfStopped();
+             const initialRows = initialResult.rowCount;
+             const initialBytes = initialResult.sourceBytes;
+             const estimatedTotalRows = initialBytes > 0 ?
+@@ -2457,38 +2457,45 @@ class ParallelTermBankPipelineRun {
+             let processedRows = 0;
+             let workersFinishedAt = this._startedAt;
+             for (let i = 0; i < this._resultSlots.length; ++i) {
+-                this._throwIfCancelled();
++                this._throwIfStopped();
+                 const result = await this._resultSlots[i].promise;
++                this._throwIfStopped();
+                 if (result.error !== null) { throw createParallelParserError(result.error); }
+-                if (result.chunk === null || result.profile === null) {
++                if (result.profile === null) {
+                     throw new Error('Parallel term-bank parser returned an incomplete result');
+                 }
+                 const chunk = result.chunk;
+-                if (result.consume !== null) { chunk.releaseBorrowedContent = result.consume; }
+-                if (result.profile !== null) {
+-                    result.profile.orderedSinkWaitMs = Math.max(0, safePerformance.now() - result.finishedAt);
+-                }
++                if (chunk !== null && result.consume !== null) { chunk.releaseBorrowedContent = result.consume; }
++                result.profile.orderedSinkWaitMs = Math.max(0, safePerformance.now() - result.finishedAt);
+                 profiles.push(result.profile);
+                 workersFinishedAt = Math.max(workersFinishedAt, result.finishedAt);
+-                processedRows += chunk.rowCount;
+-                exactTotalRows += chunk.rowCount;
+-                try {
+-                    await this._onChunk(chunk, {
+-                        processedRows,
+-                        totalRows: i + 1 === this._resultSlots.length ? processedRows : Math.max(processedRows, estimatedTotalRows),
+-                        chunkIndex: i + 1,
+-                        chunkCount: this._resultSlots.length,
+-                    });
+-                } finally {
+-                    result.consume?.();
+-                    delete chunk.releaseBorrowedContent;
++                processedRows += result.rowCount;
++                exactTotalRows += result.rowCount;
++                if (chunk !== null) {
++                    try {
++                        await this._onChunk(chunk, {
++                            processedRows,
++                            totalRows: i + 1 === this._resultSlots.length ? processedRows : Math.max(processedRows, estimatedTotalRows),
++                            chunkIndex: i + 1,
++                            chunkCount: this._resultSlots.length,
++                        });
++                    } finally {
++                        result.consume?.();
++                        delete chunk.releaseBorrowedContent;
++                    }
+                 }
++                this._throwIfStopped();
++                // Empty groups still advance the bounded lead and wake peers,
++                // but must not invent a row or an empty storage operation.
+                 this._nextSinkGroupIndex = i + 1;
+                 this._activateLeadSources();
+                 this._wakeLeadWaiters();
+             }
+             await Promise.all(this._workerLoops);
+             if (this._error !== null) { throw this._error; }
++            // The final sink can outlive every worker job. Cancellation during
++            // that await must not be reported as successful parsing.
++            this._throwIfStopped();
+             lastTermBankWasmParseProfile = {
+                 ...aggregateSequentialParseProfiles(
+                     profiles,
+@@ -2555,10 +2562,13 @@ class ParallelTermBankPipelineRun {
+                     () => this._pipelineShouldCancel(),
+                 );
+                 if (result.error !== null) { throw createParallelParserError(result.error); }
+-                if (result.chunk === null || result.profile === null) {
++                if (
++                    result.profile === null ||
++                    (result.chunk === null && (result.rowCount !== 0 || result.profile.rowCount !== 0 || result.borrowsWorkerMemory))
++                ) {
+                     throw new Error('Parallel term-bank parser returned an incomplete result');
+                 }
+-                if (result.chunk.rowCount !== result.rowCount) {
++                if (result.chunk !== null && result.chunk.rowCount !== result.rowCount) {
+                     throw new Error('Parallel term-bank parser row count changed during result transfer');
+                 }
+                 /** @type {(() => void)|null} */
+@@ -2593,8 +2603,9 @@ class ParallelTermBankPipelineRun {
+         return this._failed || this._shouldCancel();
+     }
+ 
+-    /** @throws {Error} If cancellation was requested. */
+-    _throwIfCancelled() {
++    /** @throws {Error} If the run failed or cancellation was requested. */
++    _throwIfStopped() {
++        if (this._error !== null) { throw this._error; }
+         if (this._shouldCancel()) { throw createParallelParserCancellationError(); }
+     }
+ 

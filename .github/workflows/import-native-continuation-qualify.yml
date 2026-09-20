@@ -1,0 +1,105 @@
+name: Import native continuation qualification
+on:
+  push:
+    branches: [review/import-native-continuation-20260920]
+    paths:
+      - '.github/workflows/import-native-continuation-qualify.yml'
+      - 'dev/perf/parser-settlement-correctness.patch'
+      - 'test/fixtures/parser-settlement/**'
+      - 'test/term-bank-settlement.test.js'
+permissions:
+  contents: read
+concurrency:
+  group: import-native-continuation-qualification
+  cancel-in-progress: true
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - run: npx playwright install --with-deps chromium
+      - name: Prepare evidence and normalize fixture formatting
+        run: |
+          mkdir -p builds/parser-settlement
+          npx eslint test/fixtures/parser-settlement/*.mjs test/term-bank-settlement.test.js --fix
+      - name: Confirm baseline failures through actual native parser
+        run: |
+          set +e
+          node test/fixtures/parser-settlement/check.mjs builds/parser-settlement/red-node.json > builds/parser-settlement/red-node.log 2>&1
+          code=$?
+          set -e
+          test "$code" -eq 1
+          node --input-type=module -e "import fs from 'node:fs'; const r = JSON.parse(fs.readFileSync('builds/parser-settlement/red-node.json')); if (r.passed !== 13 || r.failed !== 18 || r.unhandled.length) process.exit(1)"
+          set +e
+          node test/fixtures/parser-settlement/browser.mjs builds/parser-settlement/red-browser.json > builds/parser-settlement/red-browser.log 2>&1
+          code=$?
+          set -e
+          test "$code" -eq 1
+          test -s builds/parser-settlement/red-browser.json
+      - name: Apply correctness repairs and test actual browser workers
+        run: |
+          git apply --check dev/perf/parser-settlement-correctness.patch
+          git apply dev/perf/parser-settlement-correctness.patch
+          npm run build:libs
+          node test/fixtures/parser-settlement/check.mjs builds/parser-settlement/green-node.json > builds/parser-settlement/green-node.log 2>&1
+          node test/fixtures/parser-settlement/browser.mjs builds/parser-settlement/green-browser.json > builds/parser-settlement/green-browser.log 2>&1
+          npx eslint ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/fixtures/parser-settlement/*.mjs test/term-bank-settlement.test.js
+      - name: Check all TypeScript projects
+        run: npm run test:ts
+      - name: Full unit and options suites
+        run: |
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=builds/parser-settlement/unit.json
+          npm run test:unit:options
+      - name: All target build validation
+        run: npm run test:build
+      - name: Preserve tested source composition
+        run: |
+          git diff 72f60a71e584b104380a81a721ec70b91dcd28f4 -- ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/fixtures/parser-settlement test/term-bank-settlement.test.js > builds/parser-settlement/qualified.patch
+          tar -czf builds/parser-settlement/qualified-source.tar.gz ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/fixtures/parser-settlement test/term-bank-settlement.test.js
+          sha256sum ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js ext/lib/term-bank-parser.wasm > builds/parser-settlement/source-hashes.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parser-settlement-qualification
+          path: builds/parser-settlement/
+          retention-days: 14
+          if-no-files-found: error
+  publish-review-branch:
+    needs: qualify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 72f60a71e584b104380a81a721ec70b91dcd28f4
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: parser-settlement-qualification
+          path: /tmp/qualified-settlement
+      - name: Publish tests then fixes on a new review branch only
+        run: |
+          branch=fix/parser-sink-settlement-20260920
+          if git ls-remote --exit-code --heads origin "$branch"; then
+            echo 'Review branch already exists; refusing to overwrite it'
+            exit 1
+          fi
+          git switch -c "$branch"
+          git apply --check /tmp/qualified-settlement/qualified.patch
+          git apply /tmp/qualified-settlement/qualified.patch
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add test/fixtures/parser-settlement test/term-bank-settlement.test.js
+          git commit -m 'test: reproduce native parser cancellation and settlement failures'
+          git add ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js
+          git commit -m 'fix: stop parser sink admission after failure and support empty groups'
+          git push origin "HEAD:refs/heads/$branch"
