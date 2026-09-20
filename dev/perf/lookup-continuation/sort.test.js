@@ -37,7 +37,7 @@ function checkKeys(keys) {
         sequence: i % 7,
     }));
     const encoded = encodePersistedTermLookupIndex(rows);
-    const before = encoded.slice();
+    const before = new Uint8Array(encoded);
     const index = parsePersistedTermLookupIndex(encoded);
     /** @type {Array<'expression'|'reading'>} */
     const fields = ['expression', 'reading'];
@@ -59,7 +59,7 @@ function checkKeys(keys) {
             index.keyBytes.subarray(index.keyOffsets[b], index.keyOffsets[b + 1]),
             reverse,
         ));
-        expect(Array.from(order)).toEqual(expectedOrder);
+        expect([...order]).toEqual(expectedOrder);
         for (const query of queries) {
             for (const field of fields) {
                 const expected = rows.flatMap((row, i) => {
@@ -80,7 +80,7 @@ function checkKeys(keys) {
         expect(reverse ? index.keyReverseOrder : index.keyOrder).toBe(order);
     }
     for (let sequence = 0; sequence < 8; ++sequence) {
-        expect(findSequenceRows(index, sequence).sort((a, b) => a - b)).toEqual(rows.flatMap((row, i) => row.sequence === sequence ? [i] : []));
+        expect(findSequenceRows(index, sequence).sort((a, b) => a - b)).toEqual(rows.flatMap((row, i) => (row.sequence === sequence ? [i] : [])));
     }
     expect(encoded).toEqual(before);
 }
@@ -101,7 +101,7 @@ for (const reverse of [false, true]) {
     });
     test(`maximum-length keys with ${reverse ? 'leading' : 'trailing'} differences`, () => {
         const first = new Uint8Array(65535).fill(97);
-        const second = first.slice();
+        const second = new Uint8Array(first);
         second[reverse ? 0 : second.length - 1] = 98;
         checkKeys([first, second]);
     });
