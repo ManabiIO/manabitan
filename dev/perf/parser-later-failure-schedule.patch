@@ -1,0 +1,53 @@
+diff --git a/test/term-bank-wasm-parser.test.js b/test/term-bank-wasm-parser.test.js
+index 595e647..9bc0749 100644
+--- a/test/term-bank-wasm-parser.test.js
++++ b/test/term-bank-wasm-parser.test.js
+@@ -1594,6 +1594,9 @@ describe('term-bank WASM parser', () => {
+         vi.stubGlobal('navigator', {hardwareConcurrency: 12, deviceMemory: 8});
+         const workerCount = getParallelTermBankParserWorkerCount();
+         let workerIndex = 0;
++        let firstSinkStarted = false;
++        /** @type {() => void} */
++        let reportFailure = () => {};
+         /** @implements {WorkerMock} */
+         class LaterFailingWorker {
+             constructor() {
+@@ -1619,11 +1622,15 @@ describe('term-bank WASM parser', () => {
+                     }
+                     ++this.parseCount;
+                     if (message.id === 2) {
+-                        emitWorkerMessage(this.listeners, {
+-                            type: 'parse-error',
+-                            id: message.id,
+-                            error: {name: 'Error', message: 'injected later pipeline failure'},
+-                        });
++                        reportFailure = () => {
++                            reportFailure = () => {};
++                            emitWorkerMessage(this.listeners, {
++                                type: 'parse-error',
++                                id: message.id,
++                                error: {name: 'Error', message: 'injected later pipeline failure'},
++                            });
++                        };
++                        if (firstSinkStarted) { reportFailure(); }
+                         return;
+                     }
+                     emitWorkerMessage(this.listeners, {
+@@ -1649,9 +1656,16 @@ describe('term-bank WASM parser', () => {
+             await expect(parseTermBankWithWasmColumnChunksParallel(
+                 sourceBanks,
+                 3,
+-                (_chunk, progress) => { sinkIndexes.push(progress.chunkIndex); },
++                (_chunk, progress) => {
++                    sinkIndexes.push(progress.chunkIndex);
++                    // Make the failure genuinely later than the first sink,
++                    // rather than requiring work after an already-known error.
++                    firstSinkStarted = true;
++                    reportFailure();
++                },
+                 {emitContentSlab: true},
+             )).rejects.toThrow('injected later pipeline failure');
++            expect(sinkIndexes).toStrictEqual([1]);
+             expect(sinkIndexes.length).toBeGreaterThan(0);
+             expect(sinkIndexes.length).toBeLessThanOrEqual(workerCount);
+             expect(sinkIndexes).toStrictEqual(
