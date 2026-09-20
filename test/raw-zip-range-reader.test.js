@@ -107,7 +107,7 @@ describe('bounded large ZIP entry reads', () => {
         const actual = await reader.read(file, signal());
         expect(actual).toEqual(payload);
         expect(method === 8 ? new Uint8Array(inflateRawSync(actual)) : actual).toEqual(content);
-        expect(archive.ranges).toEqual([[0, 30], [30, 30 + name.length], [header.length, header.length + payload.length]]);
+        expect(archive.ranges).toEqual([[0, 30 + name.length], [header.length, header.length + payload.length]]);
         actual.fill(0);
         expect(await reader.read(file, signal())).toEqual(payload);
     });
@@ -191,7 +191,7 @@ describe('bounded large ZIP entry reads', () => {
         release();
         await disposal;
         await rejected;
-        expect(archive.ranges).toEqual([[0, 30]]);
+        expect(archive.ranges).toEqual([[0, 30 + name.length]]);
     });
     test.each([2, 8])('retains the compressed-source budget on deviceMemory=%i', async (deviceMemory) => {
         const lowMemory = deviceMemory === 2;
@@ -231,5 +231,64 @@ describe('bounded large ZIP entry reads', () => {
         new Uint8Array(buffer).fill(0);
         expect(first).toEqual(payload);
         expect(await new RawZipPayloadReader(blob).read(file, signal())).toEqual(payload);
+    });
+
+    test('large entries without raw filename metadata retain header-only validation', async () => {
+        const {header, payload, file} = entry(8);
+        Reflect.deleteProperty(file, 'rawFilename');
+        const archive = new TrackedBlob([padding, header, payload]);
+        file.offset = padding.size;
+        expect(await new RawZipPayloadReader(archive).read(file, signal())).toEqual(payload);
+        expect(archive.ranges).toEqual([
+            [padding.size, padding.size + 30],
+            [padding.size + header.length, archive.size],
+        ]);
+    });
+    test('uses the byte length of a nonzero-offset raw filename view', async () => {
+        const {header, payload, file} = entry(8);
+        const backing = new Uint8Array(name.length + 2);
+        backing.set(name, 1);
+        file.rawFilename = backing.subarray(1, 1 + name.length);
+        const archive = new TrackedBlob([header, payload, padding]);
+        expect(await new RawZipPayloadReader(archive).read(file, signal())).toEqual(payload);
+        expect(archive.ranges).toEqual([[0, 30 + name.length], [header.length, header.length + payload.length]]);
+    });
+    test.each([0, 65535])('bounds the combined header at filename length %i', async (length) => {
+        const {payload, file} = entry(0);
+        file.rawFilename = new Uint8Array(length).fill(0x61);
+        const header = new Uint8Array(30 + length);
+        const view = new DataView(header.buffer);
+        view.setUint32(0, 0x04034b50, true);
+        view.setUint16(26, length, true);
+        header.set(file.rawFilename, 30);
+        const archive = new TrackedBlob([header, payload, padding]);
+        expect(await new RawZipPayloadReader(archive).read(file, signal())).toEqual(payload);
+        expect(archive.ranges).toEqual([[0, header.length], [header.length, header.length + payload.length]]);
+    });
+    test.each([256, 65536])('does not prefetch an impossible central filename length %i', async (length) => {
+        const {header, payload, file} = entry(8);
+        file.rawFilename = new Uint8Array(length);
+        file.offset = padding.size;
+        const archive = new TrackedBlob([padding, header, payload]);
+        await expect(new RawZipPayloadReader(archive).read(file, signal())).rejects.toThrow(/Raw ZIP/);
+        expect(archive.ranges).toEqual([[padding.size, padding.size + 30]]);
+    });
+    test('rejects a short combined prefix without a payload read', async () => {
+        class ShortArchive extends TrackedBlob {
+            /**
+             * @override
+             * @param {number} [start]
+             * @param {number} [end]
+             * @param {string} [type]
+             * @returns {Blob}
+             */
+            slice(start = 0, end = this.size, type = '') {
+                return super.slice(start, end - 1, type);
+            }
+        }
+        const {header, payload, file} = entry(8);
+        const archive = new ShortArchive([header, payload, padding]);
+        await expect(new RawZipPayloadReader(archive).read(file, signal())).rejects.toThrow('incomplete');
+        expect(archive.ranges).toHaveLength(1);
     });
 });
