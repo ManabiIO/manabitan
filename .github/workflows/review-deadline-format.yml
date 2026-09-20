@@ -18,6 +18,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - run: npm run build:libs
       - name: Apply only repository style corrections
         run: |
           python3 - <<'PY'
