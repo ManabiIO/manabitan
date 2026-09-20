@@ -3,28 +3,88 @@ name: Parser handoff qualification
 on:
   push:
     branches: ['review/parser-handoff-qualification-20260920']
-    paths: ['.github/workflows/parser-handoff-qualification.yml']
+    paths:
+      - '.github/workflows/parser-handoff-qualification.yml'
+      - 'test/fixtures/parser-field-parity/**'
+      - 'test/term-bank-native-field-parity.test.js'
+      - 'dev/perf/parser-field-parity.patch'
 
 permissions:
   contents: read
 
 jobs:
-  source:
+  qualify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - name: Retain source and generated parser binary
-        run: |
-          mkdir -p /tmp/parser-handoff-source
-          git rev-parse HEAD > /tmp/parser-handoff-source/commit.txt
-          git ls-files -z -- '*.js' '*.mjs' '*.ts' '*.json' '*.wasm' '*.c' '*.h' '*.yml' '*.md' '*.toml' '*.html' '*.css' '*.txt' '*.patch' '*.sh' | tar --null -T - -czf /tmp/parser-handoff-source/source.tar.gz
-          sha256sum /tmp/parser-handoff-source/source.tar.gz > /tmp/parser-handoff-source/SHA256SUMS
-      - uses: actions/upload-artifact@v4
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
         with:
-          name: parser-handoff-pinned-source
-          path: /tmp/parser-handoff-source/
-          retention-days: 7
+          node-version: '22'
+      - name: Reproduce baseline failures before applying repairs
+        run: |
+          mkdir -p builds/parser-field-parity
+          set +e
+          node test/fixtures/parser-field-parity/check.mjs . builds/parser-field-parity/red.json > builds/parser-field-parity/red.log 2>&1
+          code=$?
+          set -e
+          test "$code" -eq 1
+          node --input-type=module -e "import fs from 'node:fs'; const r = JSON.parse(fs.readFileSync('builds/parser-field-parity/red.json')); if (r.passed !== 51 || r.failed !== 32) process.exit(1)"
+      - name: Apply isolated correctness repairs and rebuild native parser
+        run: |
+          git apply --check dev/perf/parser-field-parity.patch
+          git apply dev/perf/parser-field-parity.patch
+          npm run build:libs
+          node test/fixtures/parser-field-parity/check.mjs . builds/parser-field-parity/green.json > builds/parser-field-parity/green.log 2>&1
+      - name: Lint changed source and fixtures
+        run: npx eslint ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-native-field-parity.test.js test/fixtures/parser-field-parity/*.mjs
+      - name: Check all TypeScript projects
+        run: npm run test:ts
+      - name: Run full unit and options suites
+        run: |
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=builds/parser-field-parity/unit.json
+          npm run test:unit:options
+      - name: Dry-run all extension builds
+        run: npm run test:build
+      - name: Preserve exact qualified changes
+        run: |
+          git diff --binary 0f83c3cfdb7b3b10afec1ea45611fbe8420c863e -- test/fixtures/parser-field-parity test/term-bank-native-field-parity.test.js > builds/parser-field-parity/tests.patch
+          git diff --binary 0f83c3cfdb7b3b10afec1ea45611fbe8420c863e -- ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/wasm/term-bank-parser.c > builds/parser-field-parity/fixes.patch
+          sha256sum ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/wasm/term-bank-parser.c ext/lib/term-bank-parser.wasm > builds/parser-field-parity/SHA256SUMS
+          git rev-parse HEAD > builds/parser-field-parity/research-head.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parser-field-parity-qualification
+          path: builds/parser-field-parity/
+          retention-days: 14
           if-no-files-found: error
+  publish-review-branch:
+    needs: qualify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 0f83c3cfdb7b3b10afec1ea45611fbe8420c863e
+      - uses: actions/download-artifact@v4
+        with:
+          name: parser-field-parity-qualification
+          path: /tmp/parser-field-parity
+      - name: Publish tests-first and fix commits on a new review branch only
+        run: |
+          test -z "$(git ls-remote origin refs/heads/fix/parser-native-field-parity-20260920)"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git apply /tmp/parser-field-parity/tests.patch
+          git add test/fixtures/parser-field-parity test/term-bank-native-field-parity.test.js
+          git commit -m 'test: reproduce native parser string-identity and length-boundary failures'
+          git apply /tmp/parser-field-parity/fixes.patch
+          git add ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/wasm/term-bank-parser.c
+          git commit -m 'fix: preserve parser field BOMs and maximum uint16 key lengths'
+          git push origin HEAD:refs/heads/fix/parser-native-field-parity-20260920
