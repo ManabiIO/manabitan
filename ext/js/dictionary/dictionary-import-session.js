@@ -113,7 +113,8 @@ export class DictionaryImportSession {
             return this._startPromise;
         }
         this._bulkState = 'starting';
-        this._startPromise = (async () => {
+        // Publish the shared promise before invoking callbacks that can reenter.
+        this._startPromise = Promise.resolve().then(async () => {
             try {
                 this._bulkImportSessionId = await this._dictionaryDatabase.startBulkImport();
                 this._bulkState = 'active';
@@ -121,7 +122,7 @@ export class DictionaryImportSession {
                 this._bulkState = 'failed';
                 throw this.recordFailure(error);
             }
-        })();
+        });
         return this._startPromise;
     }
 
@@ -130,7 +131,7 @@ export class DictionaryImportSession {
      * @returns {Promise<void>}
      */
     disposeImportResources() {
-        this._resourceDisposalPromise ??= (async () => {
+        this._resourceDisposalPromise ??= Promise.resolve().then(async () => {
             if (this._sourcePipeline !== null) {
                 try {
                     await this._sourcePipeline.dispose();
@@ -149,7 +150,7 @@ export class DictionaryImportSession {
                 const closeError = toError(error);
                 this.recordFailure(new Error(`Failed to close dictionary archive: ${closeError.message}`));
             }
-        })();
+        });
         return this._resourceDisposalPromise;
     }
 
@@ -171,7 +172,7 @@ export class DictionaryImportSession {
      * @returns {Promise<Record<string, unknown>|null>}
      */
     finalizeBulkImport(onCheckpoint, summary) {
-        this._bulkFinalizationPromise ??= (async () => {
+        this._bulkFinalizationPromise ??= Promise.resolve().then(async () => {
             try {
                 await this.disposeImportResources();
                 if (this._startPromise !== null) {
@@ -207,13 +208,15 @@ export class DictionaryImportSession {
                 this.recordFailure(error);
                 return null;
             }
-        })();
+        });
         return this._bulkFinalizationPromise;
     }
 
     /** @returns {Promise<void>} */
     cleanupIncompleteSummary() {
-        this._placeholderCleanupPromise ??= (async () => {
+        // A no-op observation must not consume the later cleanup opportunity.
+        if (!this._failed || this._published) { return Promise.resolve(); }
+        this._placeholderCleanupPromise ??= Promise.resolve().then(async () => {
             if (!this._failed || this._published) { return; }
             try {
                 // The database owns atomic rollback. A rejected finalization may
@@ -223,7 +226,7 @@ export class DictionaryImportSession {
                 const cleanupError = toError(error);
                 this.recordFailure(new Error(`Failed to remove incomplete dictionary summary ${this._dictionaryTitle}: ${cleanupError.message}`));
             }
-        })();
+        });
         return this._placeholderCleanupPromise;
     }
 }
