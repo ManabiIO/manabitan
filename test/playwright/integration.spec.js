@@ -624,7 +624,9 @@ async function runSearch(page, query) {
     await page.evaluate(() => {
         const input = document.querySelector('#search-textbox');
         const descriptor = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
-        if (!(input instanceof HTMLTextAreaElement) || typeof descriptor?.get !== 'function' || typeof descriptor.set !== 'function') {
+        const getValue = descriptor?.get;
+        const setValue = descriptor?.set;
+        if (!(input instanceof HTMLTextAreaElement) || typeof getValue !== 'function' || typeof setValue !== 'function') {
             throw new Error('Unable to trace Search textarea writes');
         }
         /** @type {Array<{value: string, stack: string}>} */
@@ -633,14 +635,14 @@ async function runSearch(page, query) {
         Object.defineProperty(input, 'value', {
             configurable: true,
             get() {
-                return descriptor.get.call(this);
+                return getValue.call(this);
             },
             set(value) {
                 writes.push({
                     value: String(value),
                     stack: new Error('Search textarea value write').stack ?? '',
                 });
-                descriptor.set.call(this, value);
+                setValue.call(this, value);
             },
         });
     });
