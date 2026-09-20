@@ -2699,7 +2699,9 @@ null;
     _getKnownZeroTermDictionaries(dictionaryNames) {
         const requested = new Set(dictionaryNames);
         if (requested.size === 0) { return new Set(); }
-        const rows = this._requireDb().selectObjects('SELECT title, summaryJson FROM dictionaries');
+        const db = this._db;
+        if (db === null || typeof db.selectObjects !== 'function') { return new Set(); }
+        const rows = db.selectObjects('SELECT title, summaryJson FROM dictionaries');
         const result = new Set();
         for (const row of rows) {
             const title = this._asString(row.title);
