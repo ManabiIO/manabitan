@@ -1,0 +1,92 @@
+name: Deep import review qualification
+
+on:
+  push:
+    branches: [review/import-lookup-deep-20260920]
+    paths: [.github/workflows/deep-import-review-qualify.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify patch and prepare clean tests-only branch
+        run: |
+          mkdir -p /tmp/deep-review-evidence
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib
+          data = gzip.decompress(base64.b64decode(Path('review/deep-new-fixes.patch.gz.b64').read_text()))
+          assert hashlib.sha256(data).hexdigest() == 'c1eb0c07831f458bbe77ab0556006c5032624cea0b91c46efc36e3f70e7da6b3'
+          Path('/tmp/deep-review-evidence/deep-new-fixes.patch').write_bytes(data)
+          PY
+          git switch -c fix/import-read-write-ownership-20260920 78d8d0b118ca3e4e2d52694aefb11fe9ec43d2c5
+          git apply --check --include='test/*' /tmp/deep-review-evidence/deep-new-fixes.patch
+          git apply --include='test/*' /tmp/deep-review-evidence/deep-new-fixes.patch
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add test
+          git commit -m 'test: reproduce cache invalidation, lookup arena, and deferred write failures'
+          git rev-parse HEAD > /tmp/deep-review-evidence/tests-commit.txt
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Confirm all 15 expected regression failures on baseline
+        run: |
+          set +e
+          npx vitest run test/term-content-cache-invalidation.test.js test/term-lookup-index-preparation.test.js test/term-write-rejection-ownership.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/deep-review-evidence/red.json > /tmp/deep-review-evidence/red.log 2>&1
+          status=$?
+          set -e
+          test "$status" = 1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('/tmp/deep-review-evidence/red.json').read_text())
+          assert data['numFailedTests'] == 15, data
+          assert data['numPassedTests'] == 8, data
+          PY
+      - name: Apply production repairs
+        run: |
+          git apply --check --exclude='test/*' /tmp/deep-review-evidence/deep-new-fixes.patch
+          git apply --exclude='test/*' /tmp/deep-review-evidence/deep-new-fixes.patch
+      - name: Focused regression and storage qualification
+        run: |
+          npx vitest run test/term-content-cache-invalidation.test.js test/term-lookup-index-preparation.test.js test/term-write-rejection-ownership.test.js test/term-content-block-store.test.js test/term-content-opfs-store.test.js test/term-record-opfs-store.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/deep-review-evidence/green.json > /tmp/deep-review-evidence/green.log 2>&1
+      - name: Lint changed source and tests
+        run: |
+          npx eslint ext/js/dictionary/term-content-block-store.js ext/js/dictionary/term-content-opfs-store.js ext/js/dictionary/term-record-opfs-store.js ext/js/dictionary/term-record-preinterned-plan.js ext/js/dictionary/term-lookup-index.js test/term-lookup-index-preparation.test.js test/fixtures/term-write-rejection-probe.js test/term-content-cache-invalidation.test.js test/term-write-rejection-ownership.test.js > /tmp/deep-review-evidence/lint.log 2>&1
+      - name: All TypeScript projects
+        run: npm run test:ts > /tmp/deep-review-evidence/types.log 2>&1
+      - name: Full unit and options suites
+        run: |
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=/tmp/deep-review-evidence/full-unit.json > /tmp/deep-review-evidence/full-unit.log 2>&1
+          npm run test:unit:options > /tmp/deep-review-evidence/options.log 2>&1
+      - name: All-target dry build
+        run: npm run test:build > /tmp/deep-review-evidence/build.log 2>&1
+      - run: npx playwright install --with-deps chromium
+      - name: Full real imports with repaired production composition
+        run: |
+          node dev/perf/import-benchmark.js jmdict --runs 1 --output /tmp/deep-review-evidence/import-jmdict
+          node dev/perf/import-benchmark.js jitendex --runs 1 --no-build --output /tmp/deep-review-evidence/import-jitendex
+          node dev/perf/import-benchmark.js jmnedict --runs 1 --no-build --output /tmp/deep-review-evidence/import-jmnedict
+      - name: Publish only the tested clean branch
+        run: |
+          git add ext/js/dictionary
+          git commit -m 'fix: fence term-content read generations and own queued write failures'
+          git diff 78d8d0b118ca3e4e2d52694aefb11fe9ec43d2c5 --stat > /tmp/deep-review-evidence/diff-stat.txt
+          git rev-parse HEAD > /tmp/deep-review-evidence/fix-commit.txt
+          git push origin HEAD:refs/heads/fix/import-read-write-ownership-20260920
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deep-import-review-qualification
+          path: /tmp/deep-review-evidence/
+          retention-days: 7
