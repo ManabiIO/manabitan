@@ -4,6 +4,8 @@ import type {Summary} from '../../types/ext/dictionary-importer';
 
 export interface CallOptions { signal?: AbortSignal, onProgress?: (progress: unknown) => void }
 interface Pending {
+    timeout: number
+    callerCancelled: boolean
     resolve: (value: unknown) => void;
     reject: (error: Error) => void;
     cleanup: () => void;
@@ -31,6 +33,8 @@ export class ManabiTanWebClient {
     /**
      *
      */
+    private watchdogId?: number
+    private watchdogTimer?: ReturnType<typeof setTimeout>
     private stopped = false;
     /**
      *
@@ -52,11 +56,12 @@ export class ManabiTanWebClient {
             const entry = this.pending.get(result.id);
             if (!entry) {return;}
             if ('progress' in result) {
-                entry.progress?.(result.progress);
+                if (!entry.callerCancelled) {entry.progress?.(result.progress);}
                 return;
             }
             this.pending.delete(result.id);
             entry.cleanup();
+            this.updateWatchdog()
             if (result.error) {
                 const error = new WebRuntimeError(result.error.code ?? 'operation_failed', result.error.message);
                 error.name = result.error.name;
@@ -74,11 +79,31 @@ export class ManabiTanWebClient {
     private fail(error: Error) {
         this.stopped = true;
         this.worker.terminate();
+        clearTimeout(this.watchdogTimer)
+        this.watchdogTimer = undefined
+        this.watchdogId = undefined
         for (const entry of this.pending.values()) {
             entry.cleanup();
             entry.reject(error);
         }
         this.pending.clear();
+    }
+
+    /** The worker dispatches FIFO. Waiting requests do not own execution time. */
+    private updateWatchdog() {
+        const next = this.pending.entries().next().value
+        const id = next?.[0]
+        if (id === this.watchdogId) {return}
+        clearTimeout(this.watchdogTimer)
+        this.watchdogTimer = undefined
+        this.watchdogId = id
+        if (!next) {return}
+        const entry = next[1]
+        this.watchdogTimer = setTimeout(() => {
+            // A callback already queued by the host cannot terminate a successor.
+            if (this.watchdogId !== id) {return}
+            this.fail(new WebRuntimeError('worker_timeout', 'Dictionary operation timed out. Reopen to recover interrupted work.'))
+        }, entry.timeout)
     }
 
     /**
@@ -94,11 +119,19 @@ export class ManabiTanWebClient {
         const id = this.nextId++;
         return new Promise<T>((resolve, reject) => {
             const onAbort = () => {
-                this.worker.postMessage({version: API_VERSION, id, operation: 'cancel'});
+                try {
+                    this.worker.postMessage({version: API_VERSION, id, operation: 'cancel'})
+                } catch (error) {
+                    this.fail(error instanceof Error ? error : new Error(String(error)))
+                    return
+                }
                 // Import must report whether atomic completion won the race with
                 // cancellation; do not promise rollback before its owner settles.
                 if (!waitForCancellation) {
-                    this.pending.delete(id);
+                    // Cancelling a caller does not prove the worker has stopped.
+                    // Keep its FIFO position and watchdog until its terminal reply.
+                    const entry = this.pending.get(id)
+                    if (entry) {entry.callerCancelled = true}
                     cleanup();
                     reject(options.signal?.reason ?? new DOMException('Cancelled', 'AbortError'));
                 }
@@ -125,18 +158,18 @@ export class ManabiTanWebClient {
                 }
             // No default
             }
-            const timer = setTimeout(() => this.fail(new WebRuntimeError('worker_timeout', 'Dictionary operation timed out. Reopen to recover interrupted work.')), timeout);
             const cleanup = () => {
-                clearTimeout(timer);
                 options.signal?.removeEventListener('abort', onAbort);
             };
-            this.pending.set(id, {resolve: (v) => resolve(v as T), reject, cleanup, progress: options.onProgress});
+            this.pending.set(id, {timeout, callerCancelled: false, resolve: (v) => resolve(v as T), reject, cleanup, progress: options.onProgress});
+            this.updateWatchdog()
             options.signal?.addEventListener('abort', onAbort, {once: true});
             try {
                 this.worker.postMessage({version: API_VERSION, id, operation, parameters});
             } catch (error) {
                 this.pending.delete(id);
                 cleanup();
+                this.updateWatchdog()
                 reject(error);
             }
         });
