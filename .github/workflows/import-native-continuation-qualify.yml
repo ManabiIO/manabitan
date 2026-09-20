@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/import-native-continuation-qualify.yml'
       - 'dev/perf/parser-settlement-correctness.patch'
+      - 'dev/perf/parser-later-failure-schedule.patch'
       - 'test/fixtures/parser-settlement/**'
       - 'test/term-bank-settlement.test.js'
 permissions:
@@ -29,6 +30,8 @@ jobs:
         run: |
           mkdir -p builds/parser-settlement
           git rev-parse HEAD > builds/parser-settlement/research-commit.txt
+          git apply --check dev/perf/parser-later-failure-schedule.patch
+          git apply dev/perf/parser-later-failure-schedule.patch
           python3 - <<'PY'
           from pathlib import Path
           p = Path('test/fixtures/parser-settlement/browser.mjs')
@@ -54,9 +57,10 @@ jobs:
           s = p.read_text().replace('async () => { onLoad(i); return s }', 'async () => {\n            onLoad(i)\n            return s\n        }')
           p.write_text(s)
           PY
-          npx eslint test/fixtures/parser-settlement/*.mjs test/term-bank-settlement.test.js --fix
+          npx eslint test/fixtures/parser-settlement/*.mjs test/term-bank-settlement.test.js test/term-bank-wasm-parser.test.js --fix
       - name: Confirm baseline failures through actual native parser
         run: |
+          npx vitest run test/term-bank-wasm-parser.test.js -t 'rejects promptly when a later pipelined group fails' --maxWorkers=1 --minWorkers=1
           set +e
           node test/fixtures/parser-settlement/check.mjs builds/parser-settlement/red-node.json > builds/parser-settlement/red-node.log 2>&1
           code=$?
@@ -76,7 +80,7 @@ jobs:
           npm run build:libs
           node test/fixtures/parser-settlement/check.mjs builds/parser-settlement/green-node.json > builds/parser-settlement/green-node.log 2>&1
           node test/fixtures/parser-settlement/browser.mjs builds/parser-settlement/green-browser.json > builds/parser-settlement/green-browser.log 2>&1
-          npx eslint ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/fixtures/parser-settlement/*.mjs test/term-bank-settlement.test.js
+          npx eslint ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/fixtures/parser-settlement/*.mjs test/term-bank-settlement.test.js test/term-bank-wasm-parser.test.js
       - name: Check all TypeScript projects
         run: npm run test:ts
       - name: Full unit and options suites
@@ -87,8 +91,8 @@ jobs:
         run: npm run test:build
       - name: Preserve tested source composition
         run: |
-          git diff 72f60a71e584b104380a81a721ec70b91dcd28f4 -- ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/fixtures/parser-settlement test/term-bank-settlement.test.js > builds/parser-settlement/qualified.patch
-          tar -czf builds/parser-settlement/qualified-source.tar.gz ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/fixtures/parser-settlement test/term-bank-settlement.test.js
+          git diff 72f60a71e584b104380a81a721ec70b91dcd28f4 -- ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/fixtures/parser-settlement test/term-bank-settlement.test.js test/term-bank-wasm-parser.test.js > builds/parser-settlement/qualified.patch
+          tar -czf builds/parser-settlement/qualified-source.tar.gz ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/fixtures/parser-settlement test/term-bank-settlement.test.js test/term-bank-wasm-parser.test.js
           sha256sum ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js ext/lib/term-bank-parser.wasm > builds/parser-settlement/source-hashes.txt
       - uses: actions/upload-artifact@v4
         if: always()
@@ -124,7 +128,7 @@ jobs:
           git apply /tmp/qualified-settlement/qualified.patch
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add test/fixtures/parser-settlement test/term-bank-settlement.test.js
+          git add test/fixtures/parser-settlement test/term-bank-settlement.test.js test/term-bank-wasm-parser.test.js
           git commit -m 'test: reproduce native parser cancellation and settlement failures'
           git add ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js
           git commit -m 'fix: stop parser sink admission after failure and support empty groups'
