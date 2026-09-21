@@ -5,10 +5,14 @@ import {appendMdictConversionWarnings, getMdictConversionWarnings} from '../../e
 /**
  * @param {string} name
  * @param {unknown} details
- * @returns {{phase: string, elapsedMs: number, details: unknown}}
+ * @returns {{phase: string, elapsedMs: number, details?: Record<string, unknown>}}
  */
 function phase(name, details) {
-    return {phase: `prepare-mdx:${name}`, elapsedMs: 0, details};
+    const result = {phase: `prepare-mdx:${name}`, elapsedMs: 0};
+    if (typeof details === 'object' && details !== null && !Array.isArray(details)) {
+        return {...result, details: /** @type {Record<string, unknown>} */ (details)};
+    }
+    return result;
 }
 
 for (const value of [0, -1, Number.NaN, Infinity, 1.5, '2', null, undefined, Number.MAX_SAFE_INTEGER + 1]) {
