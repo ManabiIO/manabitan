@@ -448,12 +448,22 @@ function compactValidatedTermRecordPlan(plan, start, count, remapScratch, readin
         stringsByteLength += stringLengths[i];
     }
     const stringsBuffer = new Uint8Array(stringsByteLength);
+    const sourceBuffer = plan.stringsBuffer.buffer;
+    const sourceByteOffset = plan.stringsBuffer.byteOffset;
     let cursor = 0;
+    let spanStart = referencedOldIndexes.length > 0 ? sourceStringOffsets[referencedOldIndexes[0]] : 0;
+    let spanEnd = spanStart;
     for (const oldIndex of referencedOldIndexes) {
         const oldOffset = sourceStringOffsets[oldIndex];
-        const length = plan.stringLengths[oldIndex];
-        stringsBuffer.set(plan.stringsBuffer.subarray(oldOffset, oldOffset + length), cursor);
-        cursor += length;
+        if (oldOffset !== spanEnd) {
+            stringsBuffer.set(new Uint8Array(sourceBuffer, sourceByteOffset + spanStart, spanEnd - spanStart), cursor);
+            cursor += spanEnd - spanStart;
+            spanStart = oldOffset;
+        }
+        spanEnd = oldOffset + plan.stringLengths[oldIndex];
+    }
+    if (spanEnd > spanStart) {
+        stringsBuffer.set(new Uint8Array(sourceBuffer, sourceByteOffset + spanStart, spanEnd - spanStart), cursor);
     }
     return {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes};
 }
