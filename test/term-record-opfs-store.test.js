@@ -2072,6 +2072,61 @@ describe('TermRecordOpfsStore', () => {
         expect(index.expression.get('二')).toHaveLength(1);
     });
 
+    test('retains descriptor close failure after the writable handle is discarded', async () => {
+        const store = new TermRecordOpfsStore();
+        const closeError = new Error('injected descriptor close failure');
+        const state = store._createShardState(
+            'terminal-close.mbtr',
+            /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({})),
+            0,
+        );
+        state.writable = /** @type {FileSystemWritableFileStream} */ (/** @type {unknown} */ ({
+            close: vi.fn(async () => { throw closeError; }),
+        }));
+        Reflect.get(store, '_shardStateByFileName').set(state.fileName, state);
+
+        await expect(store._finalizeShardWritable(state)).rejects.toBe(closeError);
+        expect(state.writable).toBeNull();
+        expect(state.queuedWriteError).toBe(closeError);
+
+        Reflect.set(store, '_importSessionActive', false);
+        await expect(store.endImportSession()).rejects.toBe(closeError);
+    });
+
+    test('retains foreground writable-creation failure before a queued drain owns it', async () => {
+        const store = new TermRecordOpfsStore();
+        const createError = new Error('injected writable creation failure');
+        const state = store._createShardState(
+            'terminal-create.mbtr',
+            /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+                async createWritable() { throw createError; },
+            })),
+            1,
+        );
+        state.pendingWriteChunks = [new Uint8Array([1])];
+        state.pendingWriteBytes = 1;
+
+        await expect(store._flushPendingWritesForShard(state)).rejects.toBe(createError);
+        expect(state.queuedWriteError).toBe(createError);
+    });
+
+    test('failed rollback remains terminal until a later rollback succeeds', async () => {
+        const store = new TermRecordOpfsStore();
+        const rollbackError = new Error('injected rollback restoration failure');
+        const rollback = vi.spyOn(store, '_rollbackImportSession')
+            .mockRejectedValueOnce(rollbackError)
+            .mockResolvedValue(undefined);
+        const checkpoint = {shards: []};
+
+        await expect(store.rollbackImportSession(checkpoint)).rejects.toBe(rollbackError);
+        await expect(store.beginImportSession()).rejects.toBe(rollbackError);
+        await expect(store.createImportCheckpoint()).rejects.toBe(rollbackError);
+
+        await expect(store.rollbackImportSession(checkpoint)).resolves.toBeUndefined();
+        expect(rollback).toHaveBeenCalledTimes(2);
+        await expect(store.beginImportSession()).resolves.toBeUndefined();
+    });
+
     test('streams lookup sidecar writes without blocking import chunk ingestion', async () => {
         const fileBytesByName = new Map();
         /** @type {() => void} */
@@ -2321,14 +2376,16 @@ describe('TermRecordOpfsStore', () => {
         Reflect.set(store, '_recordsDirectoryHandle', {});
         const writeError = new Error('injected queued lookup-index write failure');
         const close = vi.fn(async () => {});
-        state.lookupIndexWritable = /** @type {FileSystemWritableFileStream} */ (/** @type {unknown} */ ({close}));
+        const abort = vi.fn(async () => {});
+        state.lookupIndexWritable = /** @type {FileSystemWritableFileStream} */ (/** @type {unknown} */ ({close, abort}));
         state.lookupIndexFileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({}));
         state.lookupIndexWritePromise = Promise.reject(writeError);
         void state.lookupIndexWritePromise.catch(() => {});
         state.lookupIndexWriteError = writeError;
 
         await expect(store._flushLookupIndexFile(state)).rejects.toBe(writeError);
-        expect(close).toHaveBeenCalledOnce();
+        expect(abort).toHaveBeenCalledOnce();
+        expect(close).not.toHaveBeenCalled();
         expect(state.lookupIndexWritable).toBeNull();
         expect(state.lookupIndexFileHandle).toBeNull();
     });
