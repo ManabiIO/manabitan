@@ -1506,6 +1506,7 @@ function extractDescription(mdx, override) {
  * @param {string} term
  * @param {Map<string, Set<string>>} redirects
  * @param {Set<string>} resolvedTargets
+ * @param {(value: string) => string} normalizeRedirectKey
  * @returns {string[]}
  */
 function getRedirectExpressions(term, redirects, resolvedTargets, normalizeRedirectKey) {
@@ -1595,7 +1596,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         /** @type {Set<string>} */
         const referencedAssetKeys = new Set();
         const redirectCaseSensitive = mdictCommon.isTrue(mdx.header.KeyCaseSensitive);
-        /** @param {string} value */
+        /** @type {(value: string) => string} */
         const normalizeRedirectKey = redirectCaseSensitive ? (value) => value : (value) => value.toLowerCase();
         /** @type {Map<string, Set<string>>} */
         const redirects = new Map();
