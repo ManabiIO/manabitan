@@ -223,6 +223,23 @@ describe('native parser controls and key metadata', () => {
         });
     }
 
+    for (const version of ['1.2garbage', '2.0beta', '2.0.1', '', 'NaN']) {
+        test(`malformed generated engine version ${JSON.stringify(version)} is rejected`, () => {
+            const fixture = makeMdictFixture([{key: 'entry', value: 'definition'}], {version});
+            assert.throws(() => new MDX('invalid-version.mdx', fixture.bytes), /engine version/iu);
+        });
+    }
+
+    for (const requiredVersion of ['3.0', '4', 'bogus']) {
+        test(`unsupported required engine version ${JSON.stringify(requiredVersion)} is rejected`, () => {
+            const fixture = makeMdictFixture(
+                [{key: 'entry', value: 'definition'}],
+                {version: '2.0', requiredVersion},
+            );
+            assert.throws(() => new MDX('required-version.mdx', fixture.bytes), /required engine version/iu);
+        });
+    }
+
     for (const version of ['1.2', '2.1']) {
         for (const encoding of /** @type {const} */ (['utf8', 'utf16le'])) {
             test(`${version}/${encoding} numeric and key-info layout`, () => {
