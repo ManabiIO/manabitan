@@ -141,6 +141,68 @@ describe('MDict v2 binary records', () => {
     });
 });
 
+describe('MDict inline stylesheet isolation', () => {
+    test('entry-local style blocks cannot style a different definition with the same source class', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alpha', value: '<style>.shared { color: rgb(1, 2, 3); }</style><div class="shared">alpha</div>'},
+            {key: 'Beta', value: '<div class="shared">beta</div>'},
+        ]);
+        const result = await createMdxImportData('inline-style-scope.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        const alphaRoot = rows.find(([term]) => term === 'Alpha')?.[5]?.[0]?.content;
+        const betaRoot = rows.find(([term]) => term === 'Beta')?.[5]?.[0]?.content;
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+
+        assert.match(alphaRoot?.data?.class ?? '', /mdict-yomitan-entry-0/u);
+        assert.doesNotMatch(betaRoot?.data?.class ?? '', /mdict-yomitan-entry-/u);
+        assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="shared"\]/u);
+        assert.doesNotMatch(styles, /(?:^|[,{])\s*\[data-sc-class~="shared"\]\s*\{/u);
+    });
+
+    test('separate inline styles with identical selectors receive distinct entry scopes', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alpha', value: '<style>.shared { color: red; }</style><div class="shared">alpha</div>'},
+            {key: 'Beta', value: '<style>.shared { color: blue; }</style><div class="shared">beta</div>'},
+        ]);
+        const result = await createMdxImportData('inline-style-distinct.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+        const rootClasses = rows.map((row) => row[5][0].content.data.class);
+
+        assert.match(rootClasses[0], /mdict-yomitan-entry-0/u);
+        assert.match(rootClasses[1], /mdict-yomitan-entry-1/u);
+        assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="shared"\]\{ color: red; \}/u);
+        assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-1"\] \[data-sc-class~="shared"\]\{ color: blue; \}/u);
+    });
+
+    test('nested inline rules and root selectors remain inside the entry scope', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alpha', value: '<style>@media screen { .shared { color: red; } } :root > .shared { display: block; }</style><div class="shared">alpha</div>'},
+        ]);
+        const result = await createMdxImportData('inline-style-nested.mdx', {}, fixture.bytes, []);
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+
+        assert.match(styles, /@media screen\s*\{\s*\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="shared"\]/u);
+        assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] > \[data-sc-class~="shared"\]/u);
+        assert.doesNotMatch(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="mdict-yomitan-entry-0"\]/u);
+    });
+
+    test('external MDD styles remain dictionary-wide rather than entry-local', async () => {
+        const mdx = makeMdictFixture([
+            {key: 'Alpha', value: '<div class="shared">alpha</div>'},
+            {key: 'Beta', value: '<div class="shared">beta</div>'},
+        ]);
+        const mdd = makeMdictFixture([
+            {key: 'styles.css', value: new TextEncoder().encode('.shared { color: green; }')},
+        ], {mdd: true});
+        const result = await createMdxImportData('external-style-global.mdx', {}, mdx.bytes, [{name: 'external-style-global.mdd', bytes: mdd.bytes}]);
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+
+        assert.match(styles, /\[data-sc-class~="shared"\]\{ color: green; \}/u);
+        assert.doesNotMatch(styles, /mdict-yomitan-entry-/u);
+    });
+});
+
 describe('actual binary MDX/MDD conversion', () => {
     test('preserves homograph senses, multi-hop aliases, bank bounds and diagnostics', async () => {
         const fixture = makeMdictFixture([
