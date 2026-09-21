@@ -1600,7 +1600,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
          * @param {string} value
          * @returns {string}
          */
-        const normalizeRedirectKey = (value) => redirectCaseSensitive ? value : value.toLowerCase();
+        const normalizeRedirectKey = (value) => (redirectCaseSensitive ? value : value.toLowerCase());
         /** @type {Map<string, Set<string>>} */
         const redirects = new Map();
         /** @type {Set<string>} */
