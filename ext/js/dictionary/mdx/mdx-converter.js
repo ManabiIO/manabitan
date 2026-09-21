@@ -1240,7 +1240,7 @@ function scopeCssSelectorSubject(selector, glossaryRootSelector) {
                 if (bracketDepth > 0 || parenDepth > 0) { break; }
                 const pseudo = readCssIdentifier(subject, index + 1);
                 const legacy = pseudo.value !== null &&
-                    ['before', 'after', 'first-line', 'first-letter'].includes(pseudo.value.toLowerCase());
+                ['before', 'after', 'first-line', 'first-letter'].includes(pseudo.value.toLowerCase());
                 if (subject[index + 1] === ':' || legacy) {
                     insertionIndex = index;
                 }
