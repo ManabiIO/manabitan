@@ -43,12 +43,75 @@ export function hashPairToHex(h1, h2) {
  * @returns {[number, number]}
  */
 export function hashTermEntryContentBytesPair(bytes) {
-    let h1 = hashContentXxh32(bytes, 0x811c9dc5);
-    const h2 = hashContentXxh32(bytes, 0x9e3779b9);
-    if ((h1 | h2) === 0) {
-        h1 = 1;
+    // Keep both persisted XXH32 seeds, but load each input word only once.
+    const seed1 = 0x811c9dc5;
+    const seed2 = 0x9e3779b9;
+    const length = bytes.length;
+    let offset = 0;
+    let h1;
+    let h2;
+    if (length >= 16) {
+        const limit = length - 16;
+        let a1 = (seed1 + 2654435761 + 2246822519) | 0;
+        let a2 = (seed1 + 2246822519) | 0;
+        let a3 = seed1 | 0;
+        let a4 = (seed1 - 2654435761) | 0;
+        let b1 = (seed2 + 2654435761 + 2246822519) | 0;
+        let b2 = (seed2 + 2246822519) | 0;
+        let b3 = seed2 | 0;
+        let b4 = (seed2 - 2654435761) | 0;
+        do {
+            const w1 = Math.imul(readUint32Le(bytes, offset), 2246822519);
+            const w2 = Math.imul(readUint32Le(bytes, offset + 4), 2246822519);
+            const w3 = Math.imul(readUint32Le(bytes, offset + 8), 2246822519);
+            const w4 = Math.imul(readUint32Le(bytes, offset + 12), 2246822519);
+            a1 = (a1 + w1) | 0;
+            a1 = Math.imul((a1 << 13) | (a1 >>> 19), 2654435761);
+            b1 = (b1 + w1) | 0;
+            b1 = Math.imul((b1 << 13) | (b1 >>> 19), 2654435761);
+            a2 = (a2 + w2) | 0;
+            a2 = Math.imul((a2 << 13) | (a2 >>> 19), 2654435761);
+            b2 = (b2 + w2) | 0;
+            b2 = Math.imul((b2 << 13) | (b2 >>> 19), 2654435761);
+            a3 = (a3 + w3) | 0;
+            a3 = Math.imul((a3 << 13) | (a3 >>> 19), 2654435761);
+            b3 = (b3 + w3) | 0;
+            b3 = Math.imul((b3 << 13) | (b3 >>> 19), 2654435761);
+            a4 = (a4 + w4) | 0;
+            a4 = Math.imul((a4 << 13) | (a4 >>> 19), 2654435761);
+            b4 = (b4 + w4) | 0;
+            b4 = Math.imul((b4 << 13) | (b4 >>> 19), 2654435761);
+            offset += 16;
+        } while (offset <= limit);
+        h1 = (rotateLeft32(a1, 1) + rotateLeft32(a2, 7) + rotateLeft32(a3, 12) + rotateLeft32(a4, 18)) >>> 0;
+        h2 = (rotateLeft32(b1, 1) + rotateLeft32(b2, 7) + rotateLeft32(b3, 12) + rotateLeft32(b4, 18)) >>> 0;
+    } else {
+        h1 = (seed1 + 374761393) >>> 0;
+        h2 = (seed2 + 374761393) >>> 0;
     }
-    return [h1 >>> 0, h2 >>> 0];
+    h1 = (h1 + length) >>> 0;
+    h2 = (h2 + length) >>> 0;
+    while (offset + 4 <= length) {
+        const word = readUint32Le(bytes, offset);
+        const product = Math.imul(word, 3266489917);
+        h1 = (h1 + product) | 0;
+        h1 = Math.imul((h1 << 17) | (h1 >>> 15), 668265263);
+        h2 = (h2 + product) | 0;
+        h2 = Math.imul((h2 << 17) | (h2 >>> 15), 668265263);
+        offset += 4;
+    }
+    while (offset < length) {
+        const product = Math.imul(bytes[offset], 374761393);
+        h1 = (h1 + product) | 0;
+        h1 = Math.imul((h1 << 11) | (h1 >>> 21), 2654435761);
+        h2 = (h2 + product) | 0;
+        h2 = Math.imul((h2 << 11) | (h2 >>> 21), 2654435761);
+        ++offset;
+    }
+    h1 = xxh32Avalanche(h1);
+    h2 = xxh32Avalanche(h2);
+    if ((h1 | h2) === 0) { h1 = 1; }
+    return [h1, h2];
 }
 
 /**
@@ -56,6 +119,12 @@ export function hashTermEntryContentBytesPair(bytes) {
  * @returns {string}
  */
 export function hashTermEntryContentBytes(bytes) {
+    if (bytes.length < 16) {
+        let h1 = hashShortContentXxh32(bytes, 0x811c9dc5);
+        const h2 = hashShortContentXxh32(bytes, 0x9e3779b9);
+        if ((h1 | h2) === 0) { h1 = 1; }
+        return hashPairToHex(h1, h2);
+    }
     const [h1, h2] = hashTermEntryContentBytesPair(bytes);
     return hashPairToHex(h1, h2);
 }
@@ -84,61 +153,38 @@ function readUint32Le(bytes, offset) {
 }
 
 /**
- * @param {number} accumulator
- * @param {number} input
+ * @param {number} hash
  * @returns {number}
  */
-function xxh32Round(accumulator, input) {
-    accumulator = (accumulator + Math.imul(input >>> 0, 2246822519)) >>> 0;
-    accumulator = rotateLeft32(accumulator, 13);
-    return Math.imul(accumulator, 2654435761) >>> 0;
+function xxh32Avalanche(hash) {
+    hash ^= hash >>> 15;
+    hash = Math.imul(hash, 2246822519) >>> 0;
+    hash ^= hash >>> 13;
+    hash = Math.imul(hash, 3266489917) >>> 0;
+    hash ^= hash >>> 16;
+    return hash >>> 0;
 }
 
 /**
+ * Keep the short hex-string path separate: fusing its pair regressed this
+ * benchmark control, unlike the pair-returning import hot path.
  * @param {Uint8Array} bytes
  * @param {number} seed
  * @returns {number}
  */
-function hashContentXxh32(bytes, seed) {
-    let offset = 0;
+function hashShortContentXxh32(bytes, seed) {
     const length = bytes.length;
-    let h32;
-    if (length >= 16) {
-        const limit = length - 16;
-        let v1 = (seed + 2654435761 + 2246822519) >>> 0;
-        let v2 = (seed + 2246822519) >>> 0;
-        let v3 = seed >>> 0;
-        let v4 = (seed - 2654435761) >>> 0;
-        do {
-            v1 = xxh32Round(v1, readUint32Le(bytes, offset)); offset += 4;
-            v2 = xxh32Round(v2, readUint32Le(bytes, offset)); offset += 4;
-            v3 = xxh32Round(v3, readUint32Le(bytes, offset)); offset += 4;
-            v4 = xxh32Round(v4, readUint32Le(bytes, offset)); offset += 4;
-        } while (offset <= limit);
-        h32 = (
-            rotateLeft32(v1, 1) +
-            rotateLeft32(v2, 7) +
-            rotateLeft32(v3, 12) +
-            rotateLeft32(v4, 18)
-        ) >>> 0;
-    } else {
-        h32 = (seed + 374761393) >>> 0;
-    }
-    h32 = (h32 + length) >>> 0;
-    while ((offset + 4) <= length) {
-        h32 = (h32 + Math.imul(readUint32Le(bytes, offset), 3266489917)) >>> 0;
-        h32 = Math.imul(rotateLeft32(h32, 17), 668265263) >>> 0;
+    let h32 = (seed + 374761393 + length) >>> 0;
+    let offset = 0;
+    while (offset + 4 <= length) {
+        h32 = (h32 + Math.imul(readUint32Le(bytes, offset), 3266489917)) | 0;
+        h32 = Math.imul((h32 << 17) | (h32 >>> 15), 668265263);
         offset += 4;
     }
     while (offset < length) {
-        h32 = (h32 + Math.imul(bytes[offset], 374761393)) >>> 0;
-        h32 = Math.imul(rotateLeft32(h32, 11), 2654435761) >>> 0;
+        h32 = (h32 + Math.imul(bytes[offset], 374761393)) | 0;
+        h32 = Math.imul((h32 << 11) | (h32 >>> 21), 2654435761);
         ++offset;
     }
-    h32 ^= h32 >>> 15;
-    h32 = Math.imul(h32, 2246822519) >>> 0;
-    h32 ^= h32 >>> 13;
-    h32 = Math.imul(h32, 3266489917) >>> 0;
-    h32 ^= h32 >>> 16;
-    return h32 >>> 0;
+    return xxh32Avalanche(h32);
 }
