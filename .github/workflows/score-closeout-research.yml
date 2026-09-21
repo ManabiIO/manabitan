@@ -37,7 +37,7 @@ jobs:
           p='test/term-bank-wasm-parser.test.js'
           replace(p, "rejects out-of-range integer metadata before dispatch", "rejects out-of-range sequence metadata before dispatch")
           replace(p, '[["overflow","overflow","","",2147483648,["definition"],1,""]]', '[["overflow","overflow","","",0,["definition"],2147483648,""]]')
-          replace(p, 'expect(chunk.scoreList).toStrictEqual(Int32Array.from', 'expect(chunk.scoreList).toStrictEqual(Float64Array.from')
+          replace(p, 'expect(chunk.scoreList).toStrictEqual(new Int32Array([-2, 7, -2147483648, 2147483647]))', 'expect(chunk.scoreList).toStrictEqual(new Float64Array([-2, 7, -2147483648, 2147483647]))')
           PY
       - name: Require intended baseline failures with unchanged production
         run: |
