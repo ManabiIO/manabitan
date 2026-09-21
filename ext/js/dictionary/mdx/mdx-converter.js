@@ -706,13 +706,74 @@ function splitSelectorByCombinators(selector) {
 }
 
 /**
+ * @param {string} value
+ * @returns {string}
+ */
+function escapeCssString(value) {
+    let result = '';
+    for (const character of value) {
+        const codePoint = character.codePointAt(0) ?? 0;
+        if (character === '"' || character === '\\') {
+            result += `\\${character}`;
+        } else if (codePoint === 0 || codePoint <= 0x1f || codePoint === 0x7f) {
+            result += `\\${codePoint.toString(16)} `;
+        } else {
+            result += character;
+        }
+    }
+    return result;
+}
+
+/**
  * @param {string} selector
  * @param {number} startIndex
  * @returns {{value: string|null, endIndex: number}}
  */
 function readCssIdentifier(selector, startIndex) {
-    const match = selector.slice(startIndex).match(/^-?(?:[A-Za-z_]|\p{L})(?:[A-Za-z0-9_-]|\p{L}|\p{N})*/u);
-    return match === null ? {value: null, endIndex: startIndex} : {value: match[0], endIndex: startIndex + match[0].length};
+    let index = startIndex;
+    let value = '';
+    let first = true;
+    while (index < selector.length) {
+        const character = selector[index];
+        if (character === '\\') {
+            if (index + 1 >= selector.length || /[\n\r\f]/u.test(selector[index + 1])) { break; }
+            let escapeEnd = index + 1;
+            let decoded = '';
+            const hexMatch = selector.slice(escapeEnd).match(/^[\da-f]{1,6}/iu);
+            if (hexMatch !== null) {
+                escapeEnd += hexMatch[0].length;
+                const codePoint = Number.parseInt(hexMatch[0], 16);
+                decoded = (
+                    codePoint === 0 ||
+                    codePoint > 0x10ffff ||
+                    (codePoint >= 0xd800 && codePoint <= 0xdfff)
+                ) ? '\ufffd' : String.fromCodePoint(codePoint);
+                if (escapeEnd < selector.length && /\s/u.test(selector[escapeEnd])) {
+                    escapeEnd += 1;
+                }
+            } else {
+                decoded = selector[escapeEnd];
+                escapeEnd += 1;
+            }
+            value += decoded;
+            index = escapeEnd;
+            first = false;
+            continue;
+        }
+        const codePoint = character.codePointAt(0) ?? 0;
+        const nonAscii = codePoint >= 0x80;
+        const allowed = first ?
+            character === '-' || character === '_' || /[A-Za-z]/u.test(character) || nonAscii :
+            character === '-' || character === '_' || /[A-Za-z0-9]/u.test(character) || nonAscii;
+        if (!allowed) { break; }
+        value += character;
+        index += character.length;
+        first = false;
+    }
+    if (value.length === 0 || value === '-') {
+        return {value: null, endIndex: startIndex};
+    }
+    return {value, endIndex: index};
 }
 
 /**
@@ -749,7 +810,7 @@ function migrateCssSelectorSegment(selector, glossaryRootSelector) {
         if (character === '.') {
             const {value, endIndex} = readCssIdentifier(selector, index + 1);
             if (value !== null) {
-                parts.push(`[${STRUCTURED_CLASS_ATTR}~="${value}"]`);
+                parts.push(`[${STRUCTURED_CLASS_ATTR}~="${escapeCssString(value)}"]`);
                 index = endIndex;
                 expectTagName = false;
                 continue;
@@ -758,7 +819,7 @@ function migrateCssSelectorSegment(selector, glossaryRootSelector) {
         if (character === '#') {
             const {value, endIndex} = readCssIdentifier(selector, index + 1);
             if (value !== null) {
-                parts.push(`[${STRUCTURED_ID_ATTR}="${value}"]`);
+                parts.push(`[${STRUCTURED_ID_ATTR}="${escapeCssString(value)}"]`);
                 index = endIndex;
                 expectTagName = false;
                 continue;
