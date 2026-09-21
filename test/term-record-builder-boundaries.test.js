@@ -11,6 +11,6 @@ import {test} from 'vitest'
 test('preinterned record builder rejects invalid IDs before narrowing', () => {
     execFileSync(process.execPath, [
         '--test',
-        fileURLToPath(new URL('./util/term-record-builder-boundary-cases.js', import.meta.url)),
+        fileURLToPath(new URL('util/term-record-builder-boundary-cases.js', import.meta.url)),
     ], {encoding: 'utf8', timeout: 30_000})
 })
