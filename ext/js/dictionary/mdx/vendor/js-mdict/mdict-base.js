@@ -61,11 +61,11 @@ function parseEncryptionFlag(value) {
     if (normalized.length === 0 || /^(?:no|false)$/iu.test(normalized)) { return 0; }
     if (/^(?:yes|true)$/iu.test(normalized)) { return 1; }
     if (!/^\d+$/u.test(normalized)) {
-        throw new Error(`Unsupported MDict encryption flag: ${normalized}`);
+        throw new Error(`Unsupported encryption flag in MDict header: ${normalized}`);
     }
     const result = Number.parseInt(normalized, 10);
     if (!Number.isSafeInteger(result) || result < 0 || result > 3) {
-        throw new Error(`Unsupported MDict encryption flag: ${normalized}`);
+        throw new Error(`Unsupported encryption flag in MDict header: ${normalized}`);
     }
     return result;
 }
@@ -453,7 +453,7 @@ class MDictBase {
         if (this.options.encryptType !== -1) {
             if (!Number.isSafeInteger(this.options.encryptType) ||
                 this.options.encryptType < 0 || this.options.encryptType > 3) {
-                throw new Error(`Unsupported MDict encryption override: ${this.options.encryptType}`);
+                throw new Error(`Unsupported encryption override for MDict: ${this.options.encryptType}`);
             }
             this.meta.encrypt = this.options.encryptType;
         }
