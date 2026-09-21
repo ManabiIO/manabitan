@@ -1001,4 +1001,253 @@ describe('convertMdxToArchive', () => {
             href: '?query=%E3%81%8B%E3%81%AA%3F',
         }));
     });
+
+    test('rewrites source tags inside selector-list pseudo-classes', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Functional selector fixture', Description: ''},
+            entries: [{
+                keyText: 'Styled',
+                definition: '<div class="outer"><b class="accent">Bold</b><i>Italic</i><strong>Strong</strong><em>Em</em></div>',
+            }],
+        });
+        mockState.mddFactory = () => [{
+            keyText: 'styles/theme.css',
+            value: new TextEncoder().encode([
+                '.outer:is(b, i, .accent) { color: red; }',
+                ':not(strong) > em { font-style: italic; }',
+                '.outer:has(> b) { border-width: 1px; }',
+                ':where(html, body) .outer { display: block; }',
+                ':rooted .outer { opacity: 0.5; }',
+            ].join('\n')),
+        }];
+
+        const result = await convertMdxToArchive(
+            'functional-selector-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'functional-selector-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const stylesCss = await zip.file('styles.css')?.async('text');
+
+        expect(stylesCss).toContain(
+            '[data-sc-class~="outer"]:is([data-sc-tag="b"], [data-sc-tag="i"], [data-sc-class~="accent"])',
+        );
+        expect(stylesCss).toContain(':not([data-sc-tag="strong"]) > [data-sc-tag="em"]');
+        expect(stylesCss).toContain('[data-sc-class~="outer"]:has(> [data-sc-tag="b"])');
+        expect(stylesCss).toContain(
+            ':where([data-sc-class~="mdict-yomitan-content"], [data-sc-class~="mdict-yomitan-content"]) [data-sc-class~="outer"]',
+        );
+        expect(stylesCss).toContain(':rooted [data-sc-class~="outer"]');
+        expect(stylesCss).not.toContain('[data-sc-class~="mdict-yomitan-content"]ed');
+    });
+
+    test('rewrites only real CSS url() tokens and preserves escaped closing parentheses', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'CSS URL token fixture', Description: ''},
+            entries: [{
+                keyText: 'Styled',
+                definition: '<div class="real literal escaped">Styled</div>',
+            }],
+        });
+        mockState.mddFactory = () => [
+            {
+                keyText: 'styles/theme.css',
+                value: new TextEncoder().encode([
+                    '.real { background-image: url("../images/bg.png"); }',
+                    '.literal::before { content: "url(../images/string.png)"; }',
+                    '/* url(../images/comment.png) */',
+                    String.raw`.escaped { background-image: url(../images/a\)b.png); }`,
+                ].join('\n')),
+            },
+            {keyText: 'images/bg.png', value: Uint8Array.of(1, 2, 3)},
+            {keyText: 'images/a)b.png', value: Uint8Array.of(4, 5, 6)},
+        ];
+
+        const result = await createMdxImportData(
+            'css-url-token-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'css-url-token-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+        const styles = result.files.get('styles.css');
+        if (!(styles instanceof Uint8Array)) { throw new Error('Expected styles.css'); }
+        const stylesCss = new TextDecoder().decode(styles);
+
+        expect(stylesCss).toContain('url("mdict-media/images/bg.png")');
+        expect(stylesCss).toContain('content: "url(../images/string.png)"');
+        expect(stylesCss).toContain('/* url(../images/comment.png) */');
+        expect(stylesCss).toContain('url("mdict-media/images/a)b.png")');
+        expect(result.files.get('mdict-media/images/bg.png')).toStrictEqual(Uint8Array.of(1, 2, 3));
+        expect(result.files.get('mdict-media/images/a)b.png')).toStrictEqual(Uint8Array.of(4, 5, 6));
+        expect(result.files.has('mdict-media/images/string.png')).toBe(false);
+        expect(result.files.has('mdict-media/images/comment.png')).toBe(false);
+
+        const materialize = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
+        expect(materialize?.details?.missingReferencedAssetCount).toBe(0);
+    });
+
+    test('honors and removes an MDD stylesheet @charset declaration', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'CSS charset fixture', Description: ''},
+            entries: [{
+                keyText: 'Styled',
+                definition: '<div class="jp">Styled</div>',
+            }],
+        });
+        const prefix = new TextEncoder().encode('@charset "Shift_JIS";\n.jp::before { content: "');
+        const suffix = new TextEncoder().encode('"; }\n');
+        const value = new Uint8Array(prefix.length + 4 + suffix.length);
+        value.set(prefix);
+        value.set(Uint8Array.of(0x93, 0xfa, 0x96, 0x7b), prefix.length);
+        value.set(suffix, prefix.length + 4);
+        mockState.mddFactory = () => [{
+            keyText: 'styles/shift-jis.css',
+            // Static Shift_JIS bytes for:
+            // @charset "Shift_JIS";\n.jp::before { content: "日本"; }\n
+            value,
+        }];
+
+        const result = await createMdxImportData(
+            'css-charset-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'css-charset-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+        const styles = result.files.get('styles.css');
+        if (!(styles instanceof Uint8Array)) { throw new Error('Expected styles.css'); }
+        const stylesCss = new TextDecoder().decode(styles);
+
+        expect(stylesCss).toContain('content: "日本"');
+        expect(stylesCss).not.toContain('@charset');
+        expect(stylesCss).not.toContain('\ufffd');
+    });
+
+    test('does not reinterpret a stylesheet with an unsupported declared charset', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Unsupported CSS charset fixture', Description: ''},
+            entries: [{
+                keyText: 'Styled',
+                definition: '<div class="jp">Styled</div>',
+            }],
+        });
+        mockState.mddFactory = () => [{
+            keyText: 'styles/unsupported.css',
+            value: new TextEncoder().encode('@charset "x-mdict-unsupported";\n.jp { color: red; }\n'),
+        }];
+
+        const result = await createMdxImportData(
+            'unsupported-css-charset-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'unsupported-css-charset-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+
+        expect(result.files.has('styles.css')).toBe(false);
+        expect(result.files.get('mdict-media/styles/unsupported.css')).toBeInstanceOf(Uint8Array);
+    });
+
+    test('decodes base64 data URLs when the media type is omitted', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Implicit data URL media type',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Embedded',
+                definition: '<div><img src="data:;base64,AP+A"><img src="data:;charset=utf-8;base64,SGk="></div>',
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'implicit-data-url-media-type.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const embeddedPaths = Object.keys(zip.files)
+            .filter((path) => path.startsWith('mdict-media/embedded/text/'))
+            .sort();
+
+        expect(embeddedPaths).toHaveLength(2);
+        expect(await zip.file(embeddedPaths[0])?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
+        expect(await zip.file(embeddedPaths[1])?.async('uint8array')).toStrictEqual(new TextEncoder().encode('Hi'));
+    });
+
+    test('decodes internal-link targets exactly once', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Encoded internal links',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Internal',
+                definition: [
+                    '<div>',
+                    '<a href="entry://literal%2520space">entry</a>',
+                    '<a href="bword://slash%252Fterm">bword</a>',
+                    '<a href="d:encoded%20space">d</a>',
+                    '<a href="x:literal%2525">x</a>',
+                    '</div>',
+                ].join(''),
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'encoded-internal-links.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<unknown>}}} */ (termBank[0][5][0]);
+        const rootEntry = /** @type {{content: Array<unknown>}} */ (glossary.content.content[0]);
+
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=literal%2520space'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=slash%252Fterm'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=encoded%20space'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=literal%2525'}));
+    });
+
+    test('keeps semicolons inside inline CSS values and rewrites URL functions case-insensitively', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Inline style values',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Styled',
+                definition: [
+                    '<div style="font-family: &quot;A;B&quot;; background-image: url(data:image/png;base64,AA==)">Data</div>',
+                    '<div style="background-image: URL(&quot;images/bg.png&quot;); /* note; fake: value */ color: rgb(1, 2, 3)">Asset</div>',
+                ].join(''),
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'images/bg.png', value: Uint8Array.of(1, 2, 3)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'inline-style-values.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'inline-style-values.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<{style?: Record<string, unknown>}>}}} */ (termBank[0][5][0]);
+        const [dataEntry, assetEntry] = glossary.content.content;
+
+        expect(dataEntry.style).toMatchObject({
+            fontFamily: '"A;B"',
+            background: 'url(data:image/png;base64,AA==)',
+        });
+        expect(assetEntry.style).toMatchObject({
+            background: 'url("mdict-media/images/bg.png")',
+            color: 'rgb(1, 2, 3)',
+        });
+        expect(await zip.file('mdict-media/images/bg.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
+    });
 });
