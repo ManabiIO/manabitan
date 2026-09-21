@@ -9,6 +9,7 @@ import {test} from 'node:test'
 import {
     decodeRawTermContentSharedGlossaryHeader,
     encodeRawTermContentSharedGlossaryBinary,
+    isRawTermContentSharedGlossaryBinary,
     rebaseRawTermContentSharedGlossaryBinary,
 } from '../../ext/js/dictionary/raw-term-content.js'
 
@@ -17,14 +18,26 @@ const decoder = new TextDecoder()
 const max = Number.MAX_SAFE_INTEGER
 const u32 = 2 ** 32
 
+/**
+ * @param {number} offset
+ * @param {number} length
+ * @returns {Uint8Array}
+ */
 const encode = (offset, length) => encodeRawTermContentSharedGlossaryBinary('v1', '\ufefftag', '名詞', offset, length, encoder)
+/** @param {Uint8Array} bytes */
 const decode = (bytes) => decodeRawTermContentSharedGlossaryHeader(bytes, decoder)
 
+/**
+ * Build the real raw-v3 format independently of the encoder under test.
+ * @param {bigint} offset
+ * @param {number} [length]
+ * @returns {Uint8Array}
+ */
 function rawReference(offset, length = 2) {
     const tags = [encoder.encode('v1'), encoder.encode('\ufefftag'), encoder.encode('名詞')]
     const total = 28 + tags.reduce((sum, x) => sum + x.byteLength, 0)
     const bytes = new Uint8Array(total)
-    bytes.set([0x4d, 0x54, 0x43, 0x53])
+    bytes.set([0x4d, 0x42, 0x52, 0x32])
     const view = new DataView(bytes.buffer)
     view.setUint32(4, tags[0].byteLength, true)
     view.setUint32(8, tags[1].byteLength, true)
@@ -36,8 +49,18 @@ function rawReference(offset, length = 2) {
         bytes.set(tag, cursor)
         cursor += tag.byteLength
     }
+    assert.ok(isRawTermContentSharedGlossaryBinary(bytes), 'fixture must reach shared-glossary validation')
     return bytes
 }
+
+test('independent valid fixture is recognized, decoded and rebased', () => {
+    const bytes = rawReference(17n, 2)
+    assert.deepEqual(bytes, encode(17, 2))
+    assert.deepEqual(decode(bytes), {
+        rules: 'v1', definitionTags: '\ufefftag', termTags: '名詞', glossaryOffset: 17, glossaryLength: 2,
+    })
+    assert.deepEqual(rebaseRawTermContentSharedGlossaryBinary(bytes, 1), rawReference(18n, 2))
+})
 
 for (const offset of [-1, 0.5, NaN, Infinity, -Infinity, 2 ** 53]) {
     test(`encode rejects unsafe offset ${String(offset)}`, () => {
