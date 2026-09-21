@@ -252,6 +252,25 @@ export class TermContentOpfsStore {
             ) {
                 throw new TypeError('Invalid term-content import checkpoint');
             }
+            /** @type {Map<string, number>} */
+            const checkpointByName = new Map();
+            for (let index = 0; index < checkpoint.segments.length; ++index) {
+                const segment = checkpoint.segments[index];
+                if (
+                    typeof segment !== 'object' ||
+                    segment === null ||
+                    typeof segment.fileName !== 'string' ||
+                    segment.fileName !== this._getSegmentFileName(index) ||
+                    !Number.isSafeInteger(segment.fileLength) ||
+                    segment.fileLength < 0 ||
+                    checkpointByName.has(segment.fileName)
+                ) {
+                    throw new TypeError('Failed to roll back term-content import storage: invalid checkpoint segment');
+                }
+                checkpointByName.set(segment.fileName, segment.fileLength);
+            }
+            // Validate the complete restoration target before abandoning writes.
+            // A corrupt journal must not mutate a live import before rejection.
             this._importSessionActive = false;
             this._clearImportReadOverlay();
             this._pendingWriteBytes = 0;
@@ -286,22 +305,6 @@ export class TermContentOpfsStore {
             }
             if (!this._hasStorageDirectoryApi()) { return; }
             const root = await navigator.storage.getDirectory();
-            /** @type {Map<string, number>} */
-            const checkpointByName = new Map();
-            for (const segment of checkpoint.segments) {
-                if (
-                    typeof segment !== 'object' ||
-                    segment === null ||
-                    typeof segment.fileName !== 'string' ||
-                    segment.fileName.length === 0 ||
-                    !Number.isSafeInteger(segment.fileLength) ||
-                    segment.fileLength < 0 ||
-                    checkpointByName.has(segment.fileName)
-                ) {
-                    throw new TypeError('Invalid term-content import checkpoint segment');
-                }
-                checkpointByName.set(segment.fileName, segment.fileLength);
-            }
             /** @type {Error[]} */
             const errors = [];
             /** @type {Array<{index: number, fileName: string, fileHandle: FileSystemFileHandle, fileLength: number, startOffset: number, readFile: File|null}>} */

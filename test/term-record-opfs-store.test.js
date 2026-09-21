@@ -2891,6 +2891,55 @@ describe('TermRecordOpfsStore', () => {
         expect(readerStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
     });
 
+    test('retries descriptor recovery after a failed reconstruction leaves an empty file', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Retry descriptor recovery';
+        const fileBytesByName = new Map();
+        const writerDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', writerDirectoryHandle);
+        await writerStore.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: dictionaryName,
+            dictionaryTotalRows: 1_000_000,
+            rowCount: 1,
+            expressionBytesList: [textEncoder.encode('再試行')],
+            readingBytesList: [textEncoder.encode('さいしこう')],
+            readingEqualsExpressionList: new Uint8Array([0]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([1]),
+        }, [0], [8], 'raw');
+        await writerStore._closeAllWritables();
+
+        const descriptorFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbtr'));
+        if (typeof descriptorFileName !== 'string') { throw new Error('Expected descriptor'); }
+        fileBytesByName.delete(descriptorFileName);
+
+        let failRecoveryWrite = true;
+        const failedRecoveryDirectory = createFakeDirectoryHandle(fileBytesByName, {
+            beforeWrite: (name) => {
+                if (name === descriptorFileName && failRecoveryWrite) {
+                    failRecoveryWrite = false;
+                    throw new Error('Injected descriptor recovery write failure');
+                }
+            },
+        });
+        const firstReader = new TermRecordOpfsStore();
+        Reflect.set(firstReader, '_recordsDirectoryHandle', failedRecoveryDirectory);
+        await firstReader._loadShardFiles(false);
+
+        expect(fileBytesByName.has(descriptorFileName)).toBe(true);
+        expect(fileBytesByName.get(descriptorFileName)).toHaveLength(0);
+
+        const retryReader = new TermRecordOpfsStore();
+        Reflect.set(retryReader, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));
+        await retryReader._loadShardFiles(false);
+        await retryReader.ensureDictionariesLoaded([dictionaryName]);
+
+        expect(new TextDecoder().decode(fileBytesByName.get(descriptorFileName)?.subarray(0, 8))).toBe('MBTRD16X');
+        expect(retryReader.findTermIds(dictionaryName, '再試行', 'expression')).toHaveLength(1);
+        expect(retryReader.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
+    });
+
     test('retries a transient descriptor stat failure without requesting reimport', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Transient descriptor stat';
