@@ -52,7 +52,7 @@ describe('Backend exact dictionary identity boundaries', () => {
     for (const title of ['Dictionary', ' Dictionary ', '\ufeffDictionary', ' ']) {
         test(`probe API preserves ${JSON.stringify(title)}`, async () => {
             const {backend, probe, getProbe} = createFixture(title);
-            expect(await backend._onApiGetDictionaryTermProbe({dictionaryTitle: title})).toEqual(probe);
+            expect(await backend._onApiGetDictionaryTermProbe({dictionaryTitle: title}, {})).toEqual(probe);
             expect(getProbe).toHaveBeenCalledWith(title);
         });
         test(`visibility verifies exactly ${JSON.stringify(title)}`, async () => {
@@ -100,7 +100,7 @@ describe('Backend exact dictionary identity boundaries', () => {
 
     test('empty title and empty probe fields remain rejected without lookup', async () => {
         const {backend, probe, options, getProbe, findBulk, findTerms} = createFixture('Dictionary', '', '');
-        expect(await backend._onApiGetDictionaryTermProbe({dictionaryTitle: ''})).toBeNull();
+        expect(await backend._onApiGetDictionaryTermProbe({dictionaryTitle: ''}, {})).toBeNull();
         expect(await backend._verifyDictionaryVisibilityInternal('', true)).toMatchObject({ok: false, reason: 'missing-dictionary-title'});
         expect(await backend._probeDictionaryVisibilityDirect('Dictionary', probe)).toBe(false);
         expect(await backend._probeDictionaryVisibilityTranslator('Dictionary', probe, options)).toBe(false);
@@ -128,7 +128,7 @@ describe('Backend exact dictionary identity boundaries', () => {
                 if (offscreen) {
                     Object.defineProperty(globalThis, 'self', {configurable: true, value: {addEventListener: vi.fn()}});
                     const {OffscreenDictionaryWorkerHandler} = await import('../ext/js/background/offscreen-dictionary-worker.js');
-                    const worker = /** @type {OffscreenDictionaryWorkerHandler} */ (Object.create(OffscreenDictionaryWorkerHandler.prototype));
+                    const worker = /** @type {InstanceType<typeof OffscreenDictionaryWorkerHandler>} */ (Object.create(OffscreenDictionaryWorkerHandler.prototype));
                     Reflect.set(worker, '_dictionaryDatabase', database);
                     result = await worker._debugDictionaryLookupState('猫', names);
                 } else {
