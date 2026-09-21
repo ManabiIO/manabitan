@@ -358,6 +358,45 @@ describe('convertMdxToArchive', () => {
         expect(lookupKeys).toStrictEqual(['styles/extra.css', 'images/css-bg.png']);
     });
 
+    test('does not lookup or archive sound resources when dictionary audio is disabled', async () => {
+        /** @type {string[]} */
+        const lookupKeys = [];
+        mockState.onLookupRecord = (_fileName, keyText) => {
+            lookupKeys.push(keyText);
+        };
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Disabled audio fixture', Description: ''},
+            entries: [{
+                keyText: 'Read',
+                definition: '<div><a href="sound://audio/read.mp3">play</a></div>',
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'audio/read.mp3', value: Uint8Array.of(1, 2, 3)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'disabled-audio-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'disabled-audio-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<unknown>}}} */ (termBank[0][5][0]);
+        const rootEntry = /** @type {{content: Array<unknown>}} */ (glossary.content.content[0]);
+        const assetPhase = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
+
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '#'}));
+        expect(zip.file('mdict-media/audio/read.mp3')).toBeNull();
+        expect(lookupKeys).toStrictEqual([]);
+        expect(assetPhase?.details).toMatchObject({
+            referencedAssetCount: 0,
+            materializedReferencedAssetCount: 0,
+            missingReferencedAssetCount: 0,
+        });
+    });
+
     test('rewrites MDX CSS selectors for structured-content attributes', async () => {
         mockState.mdxFactory = () => ({
             header: {Title: 'CSS selector fixture', Description: ''},
