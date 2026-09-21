@@ -56,11 +56,42 @@ export async function runExtended({context, page, origin, fixtures, check, impor
         assert.ok((await page.evaluate(() => runtime.lookup('猫'))).dictionaryEntries.length);
     });
     await check('real structured-content media remains image-only and links are constrained', async () => {
-        await importFile('web-media.zip');
+        const imported = await importFile('web-media.zip');
+        assert.equal(imported.summary.importSuccess, true);
+        assert.deepEqual(imported.warnings, [], 'The valid media fixture must import without warnings');
+        // Verify the real worker/storage boundary before diagnosing display.
+        // An existing image element alone does not prove its bytes survived import.
+        const media = await page.evaluate(async () => {
+            const value = await runtime.media('Web Media', 'pixel.png');
+            if (!value) { return null; }
+            const bytes = new Uint8Array(value.content);
+            let decoded;
+            try {
+                const image = await createImageBitmap(new Blob([bytes], {type: value.mediaType}));
+                try { decoded = {width: image.width, height: image.height}; } finally { image.close(); }
+            } catch (error) { decoded = {error: String(error)}; }
+            return {mediaType: value.mediaType, bytes: bytes.byteLength, signature: [...bytes.slice(0, 8)], decoded};
+        });
+        assert.ok(media, 'The imported dictionary must contain pixel.png');
+        assert.equal(media.mediaType, 'image/png');
+        assert.deepEqual(media.signature, [137, 80, 78, 71, 13, 10, 26, 10]);
+        assert.deepEqual(media.decoded, {width: 1, height: 1}, JSON.stringify(media));
         const start = requests.length;
         await page.evaluate(() => find('画像検査'));
         await expect(page.locator('#result .gloss-image')).toHaveCount(1);
-        await expect.poll(() => page.locator('#result .gloss-image').evaluate((el) => el.complete && el.naturalWidth > 0)).toBe(true);
+        try {
+            await expect.poll(() => page.locator('#result .gloss-image').evaluate((el) => el.complete && el.naturalWidth > 0)).toBe(true);
+        } catch (error) {
+            const imageState = await page.locator('#result .gloss-image').evaluate((el) => ({
+                tag: el.tagName,
+                complete: el.complete,
+                naturalWidth: el.naturalWidth,
+                naturalHeight: el.naturalHeight,
+                hasSource: el.hasAttribute('src'),
+                loadState: el.closest('.gloss-image-link')?.getAttribute('data-image-load-state'),
+            }));
+            throw new Error(`Imported media decoded but its rendered image did not load: ${JSON.stringify({media, imageState})}`, {cause: error});
+        }
         assert.equal(await page.locator('#result .gloss-image-link').getAttribute('href'), null);
         assert.equal(await page.locator('#result a[href^="javascript:"]').count(), 0);
         assert.equal(await page.locator('#result [onerror], #result script').count(), 0);
