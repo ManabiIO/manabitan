@@ -283,6 +283,7 @@ export class Mdict extends MdictBase {
     close() {
         this.scanner.close();
         this.keywordList = [];
+        this._lookupKeywordList = null;
         this.keyInfoList = [];
         this.recordInfoList = [];
         this._recordBlockCache.clear();
