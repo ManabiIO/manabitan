@@ -704,7 +704,7 @@ describe('MDict redirect resolution agrees with a forward graph model', () => {
                         };
                         const expected = keys.flatMap((key) => [...resolve([key])].map((sense) => JSON.stringify([key, sense]))).sort();
                         const unresolvedEdges = new Set(entries.filter(({value}) => value.startsWith('@@@LINK=') &&
-                            resolve(targets(value.slice(8))).size === 0).map(({key, value}) => JSON.stringify([key, value])));
+                        resolve(targets(value.slice(8))).size === 0).map(({key, value}) => JSON.stringify([key, value])));
                         const fixture = makeMdictFixture(entries, {
                             keyCaseSensitive, stripKey, compression, keysPerBlock: seed % 3 + 1, recordBlockSize: 7,
                         });
