@@ -1178,7 +1178,8 @@ function migrateCssSelector(selector, glossaryRootSelector) {
         if (part.trim().length === 0 || ['>', '+', '~'].includes(part)) { return part; }
         return migrateCssSelectorSegment(part, glossaryRootSelector);
     }).join('');
-    return migrated.replace(/\s+/gu, ' ').trim();
+    // Quoted attribute values and whitespace after CSS hex escapes are significant.
+    return migrated.trim();
 }
 
 /**
