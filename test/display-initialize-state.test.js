@@ -22,6 +22,7 @@ test('initializeState exposes initial render completion without delaying frame r
     const display = /** @type {Display} */ (Object.create(Display.prototype));
     /** @type {() => void} */
     let resolveState = () => {};
+    /** @type {Promise<void>} */
     const statePromise = new Promise((resolve) => {
         resolveState = () => resolve();
     });
