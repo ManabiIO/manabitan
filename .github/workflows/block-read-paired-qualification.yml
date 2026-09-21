@@ -1,0 +1,103 @@
+name: Block read paired whole-import screen
+on:
+  push:
+    branches: [codex/qualify-block-read-paired-20260921b]
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        repeat: [1, 2]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Pin the accepted baseline and isolated candidate
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/paired-block-read"
+          git switch --detach f0b2ef32fc0d26d68051acf2fb8fda8dc7639c2a
+          git config user.name 'ManabiTan paired qualification'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git show d3327ecbb8dec4eced95c33c8db0ee94238e6625:ext/js/dictionary/term-content-block-store.js > ext/js/dictionary/term-content-block-store.js
+          test "$(git hash-object ext/js/dictionary/term-content-block-store.js)" = ab2471969bc97ad4ddb7083ec3bb89a1f68cbc34
+          git add ext/js/dictionary/term-content-block-store.js
+          git commit -m 'Qualification-only composition: bounded block reads on pinned accepted develop'
+          git rev-parse HEAD > "$RUNNER_TEMP/paired-block-read/candidate-composition.txt"
+          git diff f0b2ef32fc0d26d68051acf2fb8fda8dc7639c2a HEAD > "$RUNNER_TEMP/paired-block-read/isolated-candidate.patch"
+          cp test/perf/dictionaries.lock.json "$RUNNER_TEMP/paired-block-read/dictionaries.lock.json"
+      - uses: ./.github/actions/setup
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: chromium-e2e-dictionaries-${{ runner.os }}-v1
+      - name: Build both uninstrumented packages
+        run: |
+          set -euo pipefail
+          candidate=$(cat "$RUNNER_TEMP/paired-block-read/candidate-composition.txt")
+          node dev/perf/host-environment.js > "$RUNNER_TEMP/paired-block-read/host.json"
+          for variant in A B; do
+            if test "$variant" = A; then
+              git switch --detach f0b2ef32fc0d26d68051acf2fb8fda8dc7639c2a
+            else
+              git switch --detach "$candidate"
+            fi
+            git diff --exit-code
+            node dev/bin/build.js --target chrome-dev > "$RUNNER_TEMP/paired-block-read/$variant-build.log" 2>&1
+            cp builds/manabitan-chrome-dev.zip "$RUNNER_TEMP/$variant-block-read-paired.zip"
+            sha256sum ext/js/dictionary/term-content-block-store.js builds/manabitan-chrome-dev.zip > "$RUNNER_TEMP/paired-block-read/$variant-fingerprints.txt"
+          done
+      - name: Warmups, alternating A/B, and A/A noise controls
+        env:
+          REPEAT_INDEX: ${{ matrix.repeat }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os,pathlib,json,subprocess,shutil
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'paired-block-read'
+          candidate=(root/'candidate-composition.txt').read_text().strip()
+          repeat=int(os.environ['REPEAT_INDEX'])
+          ledger=[]
+          def run(dictionary,variant,role,pair,position):
+              sha='f0b2ef32fc0d26d68051acf2fb8fda8dc7639c2a' if variant=='A' else candidate
+              subprocess.run(['git','switch','--detach',sha],check=True)
+              shutil.copyfile(pathlib.Path(os.environ['RUNNER_TEMP'])/f'{variant}-block-read-paired.zip','builds/manabitan-chrome-dev.zip')
+              label=f'{dictionary}-{role}-{pair}-{position}-{variant}'
+              output=root/label
+              env={k:v for k,v in os.environ.items() if not k.startswith('MANABITAN_')}
+              env['MANABITAN_E2E_STRICT_RUNTIME']='1'
+              with (root/f'{label}.log').open('w') as log:
+                  subprocess.run(['xvfb-run','-a','node','dev/perf/import-benchmark.js',dictionary,'--runs','1','--no-build','--output',str(output)],env=env,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=240)
+              data=json.loads((output/'summary.json').read_text())
+              assert data['authoritativeTiming'] is True
+              assert data['gitSha']==sha
+              assert data['source']['dirty'] is False, data['source']
+              row={'repeat':repeat,'dictionary':dictionary,'variant':variant,'role':role,'pair':pair,'position':position,'source':data['source'],'browserVersion':data['browserVersion'],'totalImportMs':data['runs'][0]['totalImportMs'],'workerImportMs':data['runs'][0]['workerImportMs'],'report':str(output.relative_to(root)/'run-1.json')}
+              ledger.append(row)
+              (root/'raw-ledger.json').write_text(json.dumps(ledger,indent=2))
+              print(json.dumps(row),flush=True)
+          for dictionary in ['jmdict','jitendex']:
+              for i,variant in enumerate(['A','B']): run(dictionary,variant,'warmup',0,i)
+              for pair in range(1,6):
+                  order=['A','B'] if (pair+repeat)%2==0 else ['B','A']
+                  for i,variant in enumerate(order): run(dictionary,variant,'paired',pair,i)
+                  if pair in [2,4]:
+                      for i in range(2): run(dictionary,'A','AA',pair,i)
+          (root/'scope.txt').write_text('Two independent hosted runners; five alternating A/B pairs per dictionary per runner, two A/A pairs and separate warmups. Pinned real corpora and production flags; fresh profile/storage per run; complete UI import completion and 12 readable-content probes. Uninstrumented elapsed-time screen, NOT full-restart or total-process peak-memory qualification. No merge promotion performed by this workflow.\n')
+          PY
+      - name: Preserve every run and source fingerprint
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block-read-paired-repeat-${{ matrix.repeat }}
+          path: ${{ runner.temp }}/paired-block-read/
+          retention-days: 14
