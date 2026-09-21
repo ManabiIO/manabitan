@@ -3257,6 +3257,9 @@ export class DictionaryImporter {
      * @returns {string}
      */
     _createTermEntryContentJson(rules, definitionTags, termTags, glossaryJson) {
+        if (rules === '' && definitionTags === '' && termTags === '') {
+            return `{"rules":"","definitionTags":"","termTags":"","glossary":${glossaryJson}}`;
+        }
         return `{"rules":${this._quoteJsonStringCached(rules)},"definitionTags":${this._quoteJsonStringCached(definitionTags)},"termTags":${this._quoteJsonStringCached(termTags)},"glossary":${glossaryJson}}`;
     }
 
