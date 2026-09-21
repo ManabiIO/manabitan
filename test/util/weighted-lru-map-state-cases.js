@@ -8,7 +8,10 @@ import assert from 'node:assert/strict'
 import {test} from 'node:test'
 import {WeightedLruMap} from '../../ext/js/core/weighted-lru-map.js'
 
-/** @param {unknown} value @returns {number} */
+/**
+ * @param {unknown} value
+ * @returns {number}
+ */
 function weightOf(value) {
     return typeof value === 'number' ? value : 0
 }
