@@ -855,6 +855,22 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Checks ownership before publishing either successful lookup state or a
+     * failure. An obsolete read must not change a newer generation's health.
+     * @param {string} dictionaryName
+     * @param {number} globalGeneration
+     * @param {number} dictionaryGeneration
+     * @returns {boolean}
+     */
+    _isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration) {
+        return (
+            globalGeneration === this._persistentLookupGeneration &&
+            dictionaryGeneration === this._getPersistentLookupGeneration(dictionaryName) &&
+            this.getDictionaryHealth(dictionaryName).status !== 'reimportRequired'
+        );
+    }
+
+    /**
      * @param {string} dictionaryName
      * @returns {{status: 'available'|'repairPending'|'repairing'|'temporarilyUnavailable'|'reimportRequired', reason: string|null}}
      */
@@ -3233,23 +3249,33 @@ export class TermRecordOpfsStore {
      * @returns {Promise<boolean>}
      */
     async _tryLoadPersistentDictionaryIndex(dictionaryName) {
-        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName)) {
-            this._setDictionaryHealth(dictionaryName, 'available');
-            return true;
-        }
-        const existing = this._persistentIndexLoadPromiseByDictionary.get(dictionaryName);
-        if (typeof existing !== 'undefined') { return await existing; }
         const globalGeneration = this._persistentLookupGeneration;
         const dictionaryGeneration = this._getPersistentLookupGeneration(dictionaryName);
+        const isCurrent = () => this._isPersistentLookupGenerationCurrent(
+            dictionaryName,
+            globalGeneration,
+            dictionaryGeneration,
+        );
+        if (!isCurrent()) { return false; }
+        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName)) {
+            this._setDictionaryHealth(dictionaryName, 'available');
+            return isCurrent();
+        }
+        const existing = this._persistentIndexLoadPromiseByDictionary.get(dictionaryName);
+        if (typeof existing !== 'undefined') {
+            const loaded = await existing;
+            return isCurrent() && loaded;
+        }
         const load = (async () => {
             for (let attempt = 0; attempt < STORAGE_READ_RETRY_COUNT; ++attempt) {
-                if (await this._loadPersistentDictionaryIndex(
+                if (!isCurrent()) { return false; }
+                const loaded = await this._loadPersistentDictionaryIndex(
                     dictionaryName,
                     globalGeneration,
                     dictionaryGeneration,
-                )) {
-                    return true;
-                }
+                );
+                if (!isCurrent()) { return false; }
+                if (loaded) { return true; }
                 if (this._persistentIndexFailureByDictionary.get(dictionaryName)?.kind !== 'transient') {
                     break;
                 }
@@ -3259,7 +3285,8 @@ export class TermRecordOpfsStore {
         })();
         this._persistentIndexLoadPromiseByDictionary.set(dictionaryName, load);
         try {
-            return await load;
+            const loaded = await load;
+            return isCurrent() && loaded;
         } finally {
             if (this._persistentIndexLoadPromiseByDictionary.get(dictionaryName) === load) {
                 this._persistentIndexLoadPromiseByDictionary.delete(dictionaryName);
@@ -3278,6 +3305,7 @@ export class TermRecordOpfsStore {
         globalGeneration,
         dictionaryGeneration = this._getPersistentLookupGeneration(dictionaryName),
     ) {
+        if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
         if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName)) {
             this._setDictionaryHealth(dictionaryName, 'available');
             return true;
@@ -3333,6 +3361,7 @@ export class TermRecordOpfsStore {
                     this._readFileRange(indexFile, 0, LOOKUP_INDEX_FILE_HEADER_BYTES),
                     this._readFileRange(recordFile, 0, BINARY_HEADER_PREFIX_BYTES),
                 ]);
+                if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
                 const headerView = new DataView(indexHeader.buffer, indexHeader.byteOffset, indexHeader.byteLength);
                 if (this._textDecoder.decode(indexHeader.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {
                     throw new PersistentLookupIndexError('invalid', `Lookup index header is invalid for ${state.fileName}`);
@@ -3492,6 +3521,7 @@ export class TermRecordOpfsStore {
                 }
             }
         } catch (error) {
+            if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
             if (error instanceof PersistentLookupIndexError) {
                 this._recordPersistentIndexFailure(dictionaryName, error.kind, error.message);
             } else {
@@ -3503,6 +3533,7 @@ export class TermRecordOpfsStore {
             }
             return false;
         }
+        if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
         recordChunks.sort((a, b) => a.firstId - b.firstId);
         for (let i = 1; i < recordChunks.length; ++i) {
             if (recordChunks[i].firstId <= (recordChunks[i - 1].firstId + recordChunks[i - 1].count - 1)) {
@@ -3511,8 +3542,6 @@ export class TermRecordOpfsStore {
             }
         }
         if (
-            globalGeneration !== this._persistentLookupGeneration ||
-            dictionaryGeneration !== this._getPersistentLookupGeneration(dictionaryName) ||
             this._importSessionActive ||
             states.some((state) => this._shardStateByFileName.get(state.fileName) !== state)
         ) {
@@ -3543,6 +3572,7 @@ export class TermRecordOpfsStore {
      * @returns {Promise<boolean>}
      */
     async _tryRepairPersistentDictionaryIndex(dictionaryName, allowDuringStorageMutation = false) {
+        if (this.getDictionaryHealth(dictionaryName).status === 'reimportRequired') { return false; }
         if (this._importSessionActive || (this._storageMutationActive && !allowDuringStorageMutation)) {
             return false;
         }
@@ -3573,17 +3603,21 @@ export class TermRecordOpfsStore {
             this._setDictionaryHealth(dictionaryName, 'reimportRequired', 'Dictionary record data is missing');
             return false;
         }
-        this._setDictionaryHealth(dictionaryName, 'repairing', null);
         const globalGeneration = this._persistentLookupGeneration;
         const generation = this._getPersistentLookupGeneration(dictionaryName);
+        const isCurrent = () => this._isPersistentLookupGenerationCurrent(
+            dictionaryName,
+            globalGeneration,
+            generation,
+        );
+        this._setDictionaryHealth(dictionaryName, 'repairing', null);
         const startedAt = safePerformance.now();
         let recordCount = 0;
         let indexBytes = 0;
         try {
             for (const state of states) {
+                if (!isCurrent()) { return false; }
                 if (
-                    globalGeneration !== this._persistentLookupGeneration ||
-                    generation !== this._getPersistentLookupGeneration(dictionaryName) ||
                     this._importSessionActive ||
                     this._shardStateByFileName.get(state.fileName) !== state
                 ) {
@@ -3591,13 +3625,16 @@ export class TermRecordOpfsStore {
                     this._setDictionaryHealth(dictionaryName, 'temporarilyUnavailable', 'Dictionary repair was superseded by a storage update');
                     return false;
                 }
-                const result = await this._rebuildLookupIndexForShard(state);
+                const result = await this._rebuildLookupIndexForShard(state, () => (
+                    isCurrent() &&
+                    !this._importSessionActive &&
+                    this._shardStateByFileName.get(state.fileName) === state
+                ));
                 recordCount += result.recordCount;
                 indexBytes += result.indexBytes;
             }
+            if (!isCurrent()) { return false; }
             if (
-                globalGeneration !== this._persistentLookupGeneration ||
-                generation !== this._getPersistentLookupGeneration(dictionaryName) ||
                 this._importSessionActive ||
                 states.some((state) => this._shardStateByFileName.get(state.fileName) !== state)
             ) {
@@ -3615,6 +3652,7 @@ export class TermRecordOpfsStore {
             });
             return true;
         } catch (error) {
+            if (!isCurrent()) { return false; }
             const message = error instanceof Error ? error.message : String(error);
             const integrityFailure = error instanceof TermRecordIntegrityError;
             if (integrityFailure) {
@@ -3639,9 +3677,16 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {TermRecordShardState} state
+     * @param {() => boolean} [isCurrent]
      * @returns {Promise<{recordCount: number, indexBytes: number}>}
+     * @throws {Error} If authoritative storage is invalid or the repair is superseded.
      */
-    async _rebuildLookupIndexForShard(state) {
+    async _rebuildLookupIndexForShard(state, isCurrent = () => true) {
+        /** @throws {Error} If the repair no longer owns this dictionary generation. */
+        const assertCurrent = () => {
+            if (!isCurrent()) { throw new Error('Term-record index repair was superseded'); }
+        };
+        assertCurrent();
         if (this._recordsDirectoryHandle === null) {
             throw new Error('Term-record directory is unavailable');
         }
@@ -3654,12 +3699,14 @@ export class TermRecordOpfsStore {
             }
             throw error;
         }
+        assertCurrent();
         state.fileLength = descriptorFile.size;
         if (descriptorFile.size < (BINARY_HEADER_PREFIX_BYTES + 2)) {
             throw new TermRecordIntegrityError(`Term-record descriptor is truncated: ${state.fileName}`);
         }
         const initialHeaderLength = Math.min(descriptorFile.size, BINARY_HEADER_PREFIX_BYTES + 2 + 4);
         const initialHeader = await this._readFileRange(descriptorFile, 0, initialHeaderLength);
+        assertCurrent();
         if (!this._isBinaryFormat(initialHeader)) {
             throw new TermRecordIntegrityError(`Term-record descriptor header is invalid: ${state.fileName}`);
         }
@@ -3697,6 +3744,7 @@ export class TermRecordOpfsStore {
             throw new TermRecordIntegrityError(`Authoritative term-record container is truncated: ${indexFileName}`);
         }
         const content = new Uint8Array(await indexFile.arrayBuffer());
+        assertCurrent();
         const sourceView = new DataView(content.buffer, content.byteOffset, content.byteLength);
         if (this._textDecoder.decode(content.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {
             throw new TermRecordIntegrityError(`Authoritative term-record container header is invalid: ${indexFileName}`);
@@ -3730,11 +3778,15 @@ export class TermRecordOpfsStore {
         let indexBytes = LOOKUP_INDEX_FILE_HEADER_BYTES;
         let yieldDeadline = safePerformance.now() + REPAIR_YIELD_BUDGET_MS;
         try {
+            // Creation itself can suspend. Keep this check inside the abort
+            // scope so a newly opened, obsolete writer is always abandoned.
+            assertCurrent();
             await writable.truncate(0);
             await writable.seek(0);
             await writable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
             cursor = LOOKUP_INDEX_FILE_HEADER_BYTES;
             for (let sourceChunk = 0; sourceChunk < sourceChunkCount; ++sourceChunk) {
+                assertCurrent();
                 if ((cursor + LOOKUP_INDEX_CHUNK_HEADER_BYTES) > content.byteLength) {
                     throw new TermRecordIntegrityError(`Authoritative chunk header is truncated: ${indexFileName}`);
                 }
@@ -3837,6 +3889,7 @@ export class TermRecordOpfsStore {
             ) {
                 throw new TermRecordIntegrityError(`Authoritative term-record container is incomplete: ${state.fileName}`);
             }
+            assertCurrent();
             const header = new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES);
             header.set(this._textEncoder.encode(LOOKUP_INDEX_MAGIC_TEXT), 0);
             const headerView = new DataView(header.buffer, header.byteOffset, header.byteLength);
@@ -3846,6 +3899,7 @@ export class TermRecordOpfsStore {
             header.set(generationId, 24);
             await writable.seek(0);
             await writable.write(header);
+            assertCurrent();
             await writable.close();
         } catch (error) {
             const abort = Reflect.get(writable, 'abort');
@@ -4169,8 +4223,9 @@ export class TermRecordOpfsStore {
             }
             return;
         }
-        /** @type {Set<string>} */
-        const pending = new Set();
+        const globalGeneration = this._persistentLookupGeneration;
+        /** @type {Map<string, number>} */
+        const pending = new Map();
         for (const dictionaryName of dictionaryNames) {
             const name = `${dictionaryName}`.trim();
             const healthStatus = this.getDictionaryHealth(name).status;
@@ -4181,12 +4236,21 @@ export class TermRecordOpfsStore {
             ) {
                 continue;
             }
-            pending.add(name);
+            pending.set(name, this._getPersistentLookupGeneration(name));
         }
-        if (pending.size === 0) {
-            return;
-        }
-        const persistentIndexNames = [...pending];
+        if (pending.size === 0) { return; }
+        /**
+         * @param {string} name
+         * @returns {boolean}
+         */
+        const isCurrent = (name) => {
+            const generation = pending.get(name);
+            return (
+                typeof generation === 'number' &&
+                this._isPersistentLookupGenerationCurrent(name, globalGeneration, generation)
+            );
+        };
+        const persistentIndexNames = [...pending.keys()];
         /** @type {string[]} */
         const persistentIndexLoadedNames = [];
         let nextPersistentIndex = 0;
@@ -4195,7 +4259,11 @@ export class TermRecordOpfsStore {
                 const index = nextPersistentIndex++;
                 if (index >= persistentIndexNames.length) { return; }
                 const dictionaryName = persistentIndexNames[index];
-                if (await this._tryLoadPersistentDictionaryIndex(dictionaryName)) {
+                if (!isCurrent(dictionaryName)) { continue; }
+                if (
+                    await this._tryLoadPersistentDictionaryIndex(dictionaryName) &&
+                    isCurrent(dictionaryName)
+                ) {
                     persistentIndexLoadedNames.push(dictionaryName);
                 }
             }
@@ -4205,7 +4273,7 @@ export class TermRecordOpfsStore {
             Array.from({length: persistentIndexLoadConcurrency}, () => loadNextPersistentIndex()),
         );
         for (const dictionaryName of persistentIndexLoadedNames) {
-            if (pending.delete(dictionaryName)) {
+            if (isCurrent(dictionaryName) && pending.delete(dictionaryName)) {
                 this._loadedDictionaryNames.add(dictionaryName);
             }
         }
@@ -4213,7 +4281,11 @@ export class TermRecordOpfsStore {
 
         // The derived lookup section can be rebuilt from each container's
         // authoritative base. Serialize repairs to cap CPU and memory.
-        for (const dictionaryName of pending) {
+        for (const [dictionaryName, generation] of pending) {
+            if (!isCurrent(dictionaryName)) {
+                pending.delete(dictionaryName);
+                continue;
+            }
             const failure = this._persistentIndexFailureByDictionary.get(dictionaryName);
             if (failure?.kind === 'transient') {
                 this._setDictionaryHealth(
@@ -4225,16 +4297,34 @@ export class TermRecordOpfsStore {
                 continue;
             }
             if (!await this._tryRepairPersistentDictionaryIndex(dictionaryName)) { continue; }
-            if (await this._tryLoadPersistentDictionaryIndex(dictionaryName)) {
+            // A successful repair invalidates exactly this dictionary once.
+            // Do not adopt any additional invalidation from a concurrent update.
+            if (!this._isPersistentLookupGenerationCurrent(
+                dictionaryName,
+                globalGeneration,
+                generation + 1,
+            )) {
+                pending.delete(dictionaryName);
+                continue;
+            }
+            pending.set(dictionaryName, generation + 1);
+            if (
+                await this._tryLoadPersistentDictionaryIndex(dictionaryName) &&
+                isCurrent(dictionaryName)
+            ) {
                 pending.delete(dictionaryName);
                 this._loadedDictionaryNames.add(dictionaryName);
             }
         }
         if (pending.size === 0) { return; }
 
-        for (const dictionaryName of pending) {
-            if (this.getDictionaryHealth(dictionaryName).status !== 'reimportRequired') {
-                this._setDictionaryHealth(dictionaryName, 'temporarilyUnavailable', 'Dictionary lookup data is unavailable');
+        for (const dictionaryName of pending.keys()) {
+            if (isCurrent(dictionaryName)) {
+                this._setDictionaryHealth(
+                    dictionaryName,
+                    'temporarilyUnavailable',
+                    'Dictionary lookup data is unavailable',
+                );
             }
         }
     }
