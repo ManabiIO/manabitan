@@ -754,7 +754,8 @@ export class TermRecordOpfsStore {
         /** @type {TextEncoder} */
         this._textEncoder = new TextEncoder();
         /** @type {TextDecoder} */
-        this._textDecoder = new TextDecoder();
+        // These are length-delimited field characters, not a document BOM.
+        this._textDecoder = new TextDecoder('utf-8', {ignoreBOM: true});
         /** @type {Uint32Array} */
         this._preinternedCompactionRemap = new Uint32Array(0);
         /** @type {string[]} */
