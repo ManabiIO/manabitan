@@ -20,7 +20,7 @@ import {fileURLToPath} from 'node:url';
 import {expect, test} from 'vitest';
 
 test('MDict pairing, conversion feedback, and automatic search-refresh regressions', () => {
-    const files = ['search-refresh-cases.js', 'mdict-import-source-cases.js', 'mdict-import-feedback-cases.js', 'mdict-import-integration-cases.js', 'mdict-import-cache-cases.js', 'mdict-checksum-cases.js', 'mdict-decompression-limit-cases.js']
+    const files = ['search-refresh-cases.js', 'mdict-import-source-cases.js', 'mdict-import-feedback-cases.js', 'mdict-import-integration-cases.js', 'mdict-import-cache-cases.js', 'mdict-checksum-cases.js', 'mdict-decompression-limit-cases.js', 'mdict-lzo-validation-cases.js']
         .map((name) => fileURLToPath(new URL(`util/${name}`, import.meta.url)));
     const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', ...files], {
         encoding: 'utf8', timeout: 30000, maxBuffer: 8 * 1024 * 1024,
