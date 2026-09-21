@@ -1182,6 +1182,79 @@ function migrateCssSelector(selector, glossaryRootSelector) {
 }
 
 /**
+ * Constrain the matched element, not merely an ancestor, to this definition.
+ * :where() adds no specificity. Guard the originating element before its
+ * pseudo-element so ::before/::after and their legacy spellings stay valid.
+ * @param {string} selector
+ * @param {string} glossaryRootSelector
+ * @returns {string}
+ */
+function scopeCssSelectorSubject(selector, glossaryRootSelector) {
+    const parts = splitSelectorByCombinators(selector);
+    let subjectIndex = parts.length - 1;
+    while (subjectIndex >= 0) {
+        const part = parts[subjectIndex];
+        if (part.trim().length > 0 && !['>', '+', '~'].includes(part)) { break; }
+        subjectIndex -= 1;
+    }
+    if (subjectIndex < 0) { return selector; }
+    const subject = parts[subjectIndex];
+    let insertionIndex = subject.length;
+    let quote = '';
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    for (let index = 0; index < subject.length; index += 1) {
+        const character = subject[index];
+        if (character === '\\') {
+            const escape = readCssEscape(subject, index);
+            if (escape !== null) { index = escape.endIndex - 1; }
+            continue;
+        }
+        if (quote.length > 0) {
+            if (character === quote) { quote = ''; }
+            continue;
+        }
+        switch (character) {
+            case '"':
+            case "'": {
+                quote = character;
+                break;
+            }
+            case '[': {
+                bracketDepth += 1;
+                break;
+            }
+            case ']': {
+                bracketDepth = Math.max(0, bracketDepth - 1);
+                break;
+            }
+            case '(': {
+                parenDepth += 1;
+                break;
+            }
+            case ')': {
+                parenDepth = Math.max(0, parenDepth - 1);
+                break;
+            }
+            case ':': {
+                if (bracketDepth > 0 || parenDepth > 0) { break; }
+                const pseudo = readCssIdentifier(subject, index + 1);
+                const legacy = pseudo.value !== null &&
+                    ['before', 'after', 'first-line', 'first-letter'].includes(pseudo.value.toLowerCase());
+                if (subject[index + 1] === ':' || legacy) {
+                    insertionIndex = index;
+                }
+                break;
+            }
+        }
+        if (insertionIndex < subject.length) { break; }
+    }
+    const guard = `:where(${glossaryRootSelector}, ${glossaryRootSelector} *)`;
+    parts[subjectIndex] = `${subject.slice(0, insertionIndex)}${guard}${subject.slice(insertionIndex)}`;
+    return parts.join('');
+}
+
+/**
  * @param {string} stylesheet
  * @param {number} blockStartIndex
  * @returns {number}
@@ -1307,8 +1380,8 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector, scopeSelector
                     const seen = new Set();
                     for (const part of splitCssSelectorList(prelude)) {
                         let migrated = migrateCssSelector(part, glossaryRootSelector);
-                        if (scopeSelectors && migrated.length > 0 && !migrated.startsWith(glossaryRootSelector)) {
-                            migrated = `${glossaryRootSelector} ${migrated}`;
+                        if (scopeSelectors && migrated.length > 0) {
+                            migrated = scopeCssSelectorSubject(migrated, glossaryRootSelector);
                         }
                         if (migrated.length > 0 && !seen.has(migrated)) {
                             seen.add(migrated);

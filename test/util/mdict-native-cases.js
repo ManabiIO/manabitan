@@ -156,7 +156,7 @@ describe('MDict inline stylesheet isolation', () => {
 
         assert.match(alphaRoot?.data?.class ?? '', /mdict-yomitan-entry-0/u);
         assert.doesNotMatch(betaRoot?.data?.class ?? '', /mdict-yomitan-entry-/u);
-        assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="shared"\]/u);
+        assert.ok(styles.includes('[data-sc-class~="shared"]:where([data-sc-class~="mdict-yomitan-entry-0"], [data-sc-class~="mdict-yomitan-entry-0"] *)'));
         assert.doesNotMatch(styles, /(?:^|[,{])\s*\[data-sc-class~="shared"\]\s*\{/u);
     });
 
@@ -172,8 +172,8 @@ describe('MDict inline stylesheet isolation', () => {
 
         assert.match(rootClasses[0], /mdict-yomitan-entry-0/u);
         assert.match(rootClasses[1], /mdict-yomitan-entry-1/u);
-        assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="shared"\]\{ color: red; \}/u);
-        assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-1"\] \[data-sc-class~="shared"\]\{ color: blue; \}/u);
+        assert.ok(styles.includes('[data-sc-class~="shared"]:where([data-sc-class~="mdict-yomitan-entry-0"], [data-sc-class~="mdict-yomitan-entry-0"] *){ color: red; }'));
+        assert.ok(styles.includes('[data-sc-class~="shared"]:where([data-sc-class~="mdict-yomitan-entry-1"], [data-sc-class~="mdict-yomitan-entry-1"] *){ color: blue; }'));
     });
 
     test('nested inline rules and root selectors remain inside the entry scope', async () => {
@@ -183,7 +183,7 @@ describe('MDict inline stylesheet isolation', () => {
         const result = await createMdxImportData('inline-style-nested.mdx', {}, fixture.bytes, []);
         const styles = new TextDecoder().decode(result.files.get('styles.css'));
 
-        assert.match(styles, /@media screen\s*\{\s*\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="shared"\]/u);
+        assert.ok(styles.includes('@media screen { [data-sc-class~="shared"]:where([data-sc-class~="mdict-yomitan-entry-0"], [data-sc-class~="mdict-yomitan-entry-0"] *)'));
         assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] > \[data-sc-class~="shared"\]/u);
         assert.doesNotMatch(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="mdict-yomitan-entry-0"\]/u);
     });
@@ -197,7 +197,7 @@ describe('MDict inline stylesheet isolation', () => {
 
         assert.equal(styles.split('\n', 1)[0], '/* Source: Alpha* / .injected{display:block} /* /inline/1.css */');
         assert.equal(styles.match(/\*\//gu)?.length, 1);
-        assert.match(styles, /\[data-sc-class~="safe"\]\{ color: red; \}/u);
+        assert.ok(styles.includes('[data-sc-class~="safe"]:where([data-sc-class~="mdict-yomitan-entry-0"], [data-sc-class~="mdict-yomitan-entry-0"] *){ color: red; }'));
     });
 
     test('external MDD styles remain dictionary-wide rather than entry-local', async () => {
@@ -226,7 +226,7 @@ describe('MDict inline scope selector semantics', () => {
         assert.ok(styles.includes(`:is(${root}) > [data-sc-class~="functional"]${guard}`));
         assert.ok(styles.includes(`:where(${root}, ${root}) > [data-sc-class~="where-root"]${guard}`));
         assert.ok(styles.includes(`${root} [data-sc-class~="cascade"]${guard}`));
-        assert.ok(styles.includes(`\n[data-sc-class~="cascade"]${guard}`));
+        assert.ok(styles.includes(`}[data-sc-class~="cascade"]${guard}`));
         assert.ok(styles.includes(`${root} + *${guard}`));
     });
 
@@ -240,6 +240,30 @@ describe('MDict inline scope selector semantics', () => {
         assert.ok(styles.includes(`[data-sc-class~="shared"]${guard}:after`));
         assert.ok(styles.includes(`@media screen { [data-sc-class~="nested"]${guard}`));
     });
+});
+
+test('MDict inline scope ignores colon-like tokens inside attributes, escaped names and pseudo-class arguments', async () => {
+    const rules = [
+        String.raw`.literal\:before { color: red; }`,
+        '.shared:is(.a, .b)::before { content: "x"; }',
+        '.shared[data-label=":after"]::first-letter { color: red; }',
+        '.shared:BEFORE { content: "y"; }',
+    ];
+    const fixture = makeMdictFixture([
+        {key: 'Alpha', value: `<style>${rules.join('\n')}</style><div class="shared a literal:before">alpha</div>`},
+    ]);
+    const result = await createMdxImportData('inline-scope-tokens.mdx', {}, fixture.bytes, []);
+    const styles = new TextDecoder().decode(result.files.get('styles.css'));
+    const root = '[data-sc-class~="mdict-yomitan-entry-0"]';
+    const guard = `:where(${root}, ${root} *)`;
+    for (const selector of [
+        `[data-sc-class~="literal:before"]${guard}`,
+        `[data-sc-class~="shared"]:is([data-sc-class~="a"], [data-sc-class~="b"])${guard}::before`,
+        `[data-sc-class~="shared"][data-label=":after"]${guard}::first-letter`,
+        `[data-sc-class~="shared"]${guard}:BEFORE`,
+    ]) {
+        assert.ok(styles.includes(selector), selector);
+    }
 });
 
 describe('actual binary MDX/MDD conversion', () => {
