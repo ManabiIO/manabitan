@@ -1831,28 +1831,70 @@ function extractDescription(mdx, override) {
 /**
  * @param {string} term
  * @param {Map<string, Set<string>>} redirects
+ * @param {Map<string, string[]>} fallbackTargets
  * @param {Set<string>} resolvedTargets
  * @param {(value: string) => string} normalizeRedirectKey
  * @returns {string[]}
  */
-function getRedirectExpressions(term, redirects, resolvedTargets, normalizeRedirectKey) {
+function getRedirectExpressions(term, redirects, fallbackTargets, resolvedTargets, normalizeRedirectKey) {
     const expressions = [term];
     const emittedExpressions = new Set(expressions);
-    const visitedTargets = new Set();
+    const visitedFallbacks = new Set();
     for (let index = 0; index < expressions.length; ++index) {
-        const target = normalizeRedirectKey(expressions[index]);
-        if (visitedTargets.has(target)) { continue; }
-        visitedTargets.add(target);
-        const aliases = redirects.get(target);
-        if (typeof aliases === 'undefined') { continue; }
-        resolvedTargets.add(target);
-        for (const alias of aliases) {
-            if (emittedExpressions.has(alias)) { continue; }
-            emittedExpressions.add(alias);
-            expressions.push(alias);
+        const expression = expressions[index];
+        const targets = [expression];
+        const normalized = normalizeRedirectKey(expression);
+        if (!visitedFallbacks.has(normalized)) {
+            visitedFallbacks.add(normalized);
+            const fallbacks = fallbackTargets.get(normalized);
+            if (typeof fallbacks !== 'undefined') {
+                for (const target of fallbacks) { targets.push(target); }
+            }
+        }
+        for (const target of targets) {
+            const aliases = redirects.get(target);
+            if (typeof aliases === 'undefined') { continue; }
+            resolvedTargets.add(target);
+            for (const alias of aliases) {
+                if (emittedExpressions.has(alias)) { continue; }
+                emittedExpressions.add(alias);
+                expressions.push(alias);
+            }
         }
     }
     return expressions;
+}
+
+/**
+ * Preserve an exact target even when another spelling normalizes to the same
+ * key. Only genuinely absent targets may use case/StripKey fallback. Scan the
+ * existing key metadata, retaining only redirect target names, not another
+ * dictionary-wide lookup index. Failed records and cycles remain unresolved.
+ * @param {Map<string, Set<string>>} redirects
+ * @param {MdictKeyword[]} keywords
+ * @param {(value: string) => string} normalizeRedirectKey
+ * @returns {Map<string, string[]>}
+ */
+function getFallbackRedirectTargets(redirects, keywords, normalizeRedirectKey) {
+    /** @type {Map<string, string[]>} */
+    const fallbacks = new Map();
+    if (redirects.size === 0) { return fallbacks; }
+    const exactTargets = new Set();
+    for (const {keyText} of keywords) {
+        const term = trimNullSuffix(keyText).trim();
+        if (redirects.has(term)) { exactTargets.add(term); }
+    }
+    for (const target of redirects.keys()) {
+        if (exactTargets.has(target)) { continue; }
+        const normalized = normalizeRedirectKey(target);
+        const targets = fallbacks.get(normalized);
+        if (typeof targets === 'undefined') {
+            fallbacks.set(normalized, [target]);
+        } else {
+            targets.push(target);
+        }
+    }
+    return fallbacks;
 }
 
 /**
@@ -1982,12 +2024,11 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             const redirectDefinition = definition.trim();
             if (redirectDefinition.startsWith('@@@LINK=')) {
                 const target = trimNullSuffix(redirectDefinition.slice(8)).trim();
-                const targetKey = normalizeRedirectKey(target);
-                if (target.length > 0 && target !== term) {
-                    const aliases = redirects.get(targetKey) ?? new Set();
+                if (target.length > 0) {
+                    const aliases = redirects.get(target) ?? new Set();
                     if (!aliases.has(term)) {
                         aliases.add(term);
-                        redirects.set(targetKey, aliases);
+                        redirects.set(target, aliases);
                         redirectCount += 1;
                     }
                 }
@@ -2063,8 +2104,9 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             bank = [];
             bankIndex += 1;
         };
+        const fallbackTargets = getFallbackRedirectTargets(redirects, mdx.keywordList, normalizeRedirectKey);
         for (const {term, glossary, sequence: entrySequence} of convertedEntries) {
-            const expressions = getRedirectExpressions(term, redirects, resolvedRedirectTargets, normalizeRedirectKey);
+            const expressions = getRedirectExpressions(term, redirects, fallbackTargets, resolvedRedirectTargets, normalizeRedirectKey);
             for (const expression of expressions) {
                 bank.push([
                     expression,
