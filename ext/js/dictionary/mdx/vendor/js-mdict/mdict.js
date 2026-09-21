@@ -205,10 +205,7 @@ export class Mdict extends MdictBase {
         const rbCompType = bytesToHex(recordBuffer.subarray(0, 4));
         // record_block stores the final record data
         let unpackRecordBlockBuff = new Uint8Array(recordBuffer.length);
-        // TODO: igore adler32 offset
-        // Note: here ignore the checksum part
-        // bytes: adler32 checksum of decompressed record block
-        // adler32 = unpack('>I', record_block_compressed[4:8])[0]
+        const recordBlockChecksum = common.b2n(recordBuffer.subarray(4, 8));
         if (rbCompType === '00000000') {
             unpackRecordBlockBuff = recordBuffer.slice(8);
         }
@@ -237,6 +234,9 @@ export class Mdict extends MdictBase {
         }
         if (unpackRecordBlockBuff.length !== unpackSize) {
             throw new Error('MDict decompressed block size mismatch');
+        }
+        if (common.adler32(unpackRecordBlockBuff) !== recordBlockChecksum) {
+            throw new Error('MDict record block checksum mismatch');
         }
         return unpackRecordBlockBuff;
     }

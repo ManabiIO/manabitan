@@ -373,10 +373,10 @@ class MDictBase {
         const headerByteSize = common.b2n(headerByteSizeBuff);
         // [4:header_byte_size + 4] header_bytes
         const headerBuffer = this.scanner.readBuffer(4, headerByteSize);
-        // TODO: SKIP 4 bytes alder32 checksum
-        // header_b_cksum should skip for now, because cannot get alder32 sum by js
-        // const header_b_cksum = readChunk.sync(this.meta.fname, header_byte_size + 4, 4);
-        // assert(header_b_cksum), "header_bytes checksum failed");
+        const headerChecksum = this.scanner.readNumber(headerByteSize + 4, 4).getUint32(0, true);
+        if (common.adler32(headerBuffer) !== headerChecksum) {
+            throw new Error('MDict header checksum mismatch');
+        }
         // 4 bytes header size + header_bytes_size + 4bytes alder checksum
         this._headerEndOffset = headerByteSize + 4 + 4;
         this._keyHeaderStartOffset = headerByteSize + 4 + 4;
@@ -526,7 +526,12 @@ class MDictBase {
         const keywordBlockPackedSize = common.b2n(keywordBlockPackedSizeBuff);
         offset += this.meta.numWidth;
         this.keyHeader.keywordBlockPackedSize = keywordBlockPackedSize;
-        // 4 bytes alder32 checksum, after key info block (only >= v2.0)
+        if (this.meta.version >= 2.0) {
+            const checksum = common.b2n(this.scanner.readBuffer(this._keyHeaderStartOffset + headerMetaSize, 4));
+            if (common.adler32(keyHeaderBuff) !== checksum) {
+                throw new Error('MDict key header checksum mismatch');
+            }
+        }
         // set end offset
         this._keyHeaderEndOffset = this._keyHeaderStartOffset +
             headerMetaSize + (this.meta.version >= 2.0 ? 4 : 0); /* 4 bytes adler32 checksum length, only for version >= 2.0 */
@@ -562,7 +567,7 @@ class MDictBase {
             if (packType !== '2000') {
                 throw new Error('Unsupported MDict key info compression');
             }
-            // const _alder32Buff = keyInfoBuff.slice(4, 8)
+            const keyInfoChecksum = common.b2n(keyInfoBuff.subarray(4, 8));
             // const numEntries = this.keyHeader.entriesNum;
             if (this.meta.encrypt === 2) {
                 keyInfoBuff = common.mdxDecrypt(keyInfoBuff);
@@ -572,9 +577,9 @@ class MDictBase {
                 // For version 2.0, will compress by zlib, lzo just for 1.0
                 // key_block_info_compressed[0:8] => compress_type
                 const keyInfoBuffUnpacked = inflateSync(keyInfoBuff.slice(8));
-                // TODO: check the alder32 checksum
-                // adler32 = unpack('>I', key_block_info_compressed[4:8])[0]
-                // assert(adler32 == zlib.adler32(key_block_info) & 0xffffffff)
+                if (common.adler32(keyInfoBuffUnpacked) !== keyInfoChecksum) {
+                    throw new Error('MDict key info checksum mismatch');
+                }
                 // this.keyHeader.keyInfoUnpackSize only exist when version >= 2.0
                 assert(this.keyHeader.keyInfoUnpackSize == keyInfoBuffUnpacked.length, `key_block_info keyInfoUnpackSize  ${this.keyHeader.keyInfoUnpackSize} should equal to keyInfoBuffUnpacked buffer length ${keyInfoBuffUnpacked.length}`);
                 keyInfoBuff = keyInfoBuffUnpacked;
@@ -685,9 +690,7 @@ class MDictBase {
         assert(kbPackedBuff.length >= 8 && Number.isSafeInteger(unpackSize) && unpackSize >= 0, 'Invalid MDict key block size');
         //  4 bytes : compression type
         const compType = bytesToHex(kbPackedBuff.slice(0, 4));
-        // TODO 4 bytes adler32 checksum
-        // 4 bytes : adler checksum of decompressed key block
-        // adler32 = unpack('>I', key_block_compressed[start + 4:start + 8])[0]
+        const keyBlockChecksum = common.b2n(kbPackedBuff.subarray(4, 8));
         let keyBlock;
         if (compType == '00000000') {
             keyBlock = kbPackedBuff.slice(8);
@@ -706,6 +709,9 @@ class MDictBase {
         }
         if (keyBlock.length !== unpackSize) {
             throw Error(`MDict key block size mismatch: expected ${unpackSize}, got ${keyBlock.length}`);
+        }
+        if (common.adler32(keyBlock) !== keyBlockChecksum) {
+            throw new Error('MDict key block checksum mismatch');
         }
         return keyBlock;
     }
@@ -849,10 +855,8 @@ class MDictBase {
             const rbCompType = bytesToHex(rbPackBuff.slice(0, 4));
             // record_block stores the final record data
             let recordBlock = new Uint8Array(rbPackBuff.length);
-            // TODO: ignore adler32 offset
-            // Note: here ignore the checksum part
-            // bytes: adler32 checksum of decompressed record block
-            // adler32 = unpack('>I', record_block_compressed[4:8])[0]
+            if (rbPackBuff.length < 8) { throw new Error('Truncated MDict record block'); }
+            const recordBlockChecksum = common.b2n(rbPackBuff.subarray(4, 8));
             if (rbCompType === '00000000') {
                 recordBlock = rbPackBuff.slice(8, rbPackBuff.length);
             }
@@ -887,10 +891,10 @@ class MDictBase {
                     recordBlock = inflateSync(blockBufDecrypted);
                 }
             }
-            // notice that adler32 return signed value
-            // TODO: ignore the checksum
-            // assert(adler32 == zlib.adler32(record_block) & 0xffffffff)
             assert(recordBlock.length === unpackSize);
+            if (common.adler32(recordBlock) !== recordBlockChecksum) {
+                throw new Error('MDict record block checksum mismatch');
+            }
             /**
              * 请注意，block 是会有很多个的，而每个block都可能会被压缩
              * 而 key_list中的 record_start, key_text是相对每一个block而言的，end是需要每次解析的时候算出来的
