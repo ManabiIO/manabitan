@@ -23,6 +23,7 @@ import {FileScanner} from '../../ext/js/dictionary/mdx/vendor/js-mdict/scanner.j
 import mdictCommon from '../../ext/js/dictionary/mdx/vendor/js-mdict/utils.js';
 import {createMdxImportData} from '../../ext/js/dictionary/mdx/mdx-converter.js';
 import {makeFixturePng, makeMdictFixture} from './mdict-binary-fixture.js';
+import {makeInlineStyleScopeFixture} from './mdict-inline-style-fixture.js';
 
 /**
  * @param {Map<string, Uint8Array>} files
@@ -140,6 +141,589 @@ describe('MDict v2 binary records', () => {
         }
     });
 });
+
+describe('MDict redirect key matching', () => {
+    test('case-insensitive dictionaries resolve redirect targets across case differences', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alias', value: '@@@LINK=target'},
+            {key: 'Target', value: '<div>definition</div>'},
+        ], {keyCaseSensitive: 'No'});
+        const result = await createMdxImportData('redirect-case.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        assert.deepEqual(rows.map(([term]) => term).sort(), ['Alias', 'Target']);
+        assert.equal(result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details?.unresolvedRedirectCount, 0);
+    });
+
+    test('case-insensitive redirects preserve a distinct alias spelling that differs only by case', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Read', value: '<div>definition</div>'},
+            {key: 'read', value: '@@@LINK=Read'},
+        ], {keyCaseSensitive: 'No'});
+        const result = await createMdxImportData('redirect-alias-case.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        assert.deepEqual(rows.map(([term]) => term), ['Read', 'read']);
+        assert.equal(result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details?.unresolvedRedirectCount, 0);
+    });
+
+    test('case-sensitive dictionaries keep case-mismatched redirect targets unresolved', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alias', value: '@@@LINK=target'},
+            {key: 'Target', value: '<div>definition</div>'},
+        ], {keyCaseSensitive: 'Yes'});
+        const result = await createMdxImportData('redirect-case-sensitive.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        assert.deepEqual(rows.map(([term]) => term), ['Target']);
+        assert.equal(result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details?.unresolvedRedirectCount, 1);
+    });
+
+    test('case-insensitive multi-hop redirect chains preserve every original alias spelling', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'AliasOne', value: '@@@LINK=ALIAStwo'},
+            {key: 'AliasTwo', value: '@@@LINK=tArGeT'},
+            {key: 'Target', value: '<div>definition</div>'},
+        ], {keyCaseSensitive: 'No'});
+        const result = await createMdxImportData('redirect-chain-case.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        assert.deepEqual(rows.map(([term]) => term).sort(), ['AliasOne', 'AliasTwo', 'Target']);
+        assert.equal(result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details?.unresolvedRedirectCount, 0);
+    });
+});
+
+describe('MDict inline stylesheet isolation', () => {
+    test('entry-local style blocks cannot style a different definition with the same source class', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alpha', value: '<style>.shared { color: rgb(1, 2, 3); }</style><div class="shared">alpha</div>'},
+            {key: 'Beta', value: '<div class="shared">beta</div>'},
+        ]);
+        const result = await createMdxImportData('inline-style-scope.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        const alphaRoot = rows.find(([term]) => term === 'Alpha')?.[5]?.[0]?.content;
+        const betaRoot = rows.find(([term]) => term === 'Beta')?.[5]?.[0]?.content;
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+
+        assert.match(alphaRoot?.data?.class ?? '', /mdict-yomitan-entry-0/u);
+        assert.doesNotMatch(betaRoot?.data?.class ?? '', /mdict-yomitan-entry-/u);
+        assert.ok(styles.includes('[data-sc-class~="shared"]:where([data-sc-class~="mdict-yomitan-entry-0"], [data-sc-class~="mdict-yomitan-entry-0"] *)'));
+        assert.doesNotMatch(styles, /(?:^|[,{])\s*\[data-sc-class~="shared"\]\s*\{/u);
+    });
+
+    test('separate inline styles with identical selectors receive distinct entry scopes', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alpha', value: '<style>.shared { color: red; }</style><div class="shared">alpha</div>'},
+            {key: 'Beta', value: '<style>.shared { color: blue; }</style><div class="shared">beta</div>'},
+        ]);
+        const result = await createMdxImportData('inline-style-distinct.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+        const rootClasses = rows.map((row) => row[5][0].content.data.class);
+
+        assert.match(rootClasses[0], /mdict-yomitan-entry-0/u);
+        assert.match(rootClasses[1], /mdict-yomitan-entry-1/u);
+        assert.ok(styles.includes('[data-sc-class~="shared"]:where([data-sc-class~="mdict-yomitan-entry-0"], [data-sc-class~="mdict-yomitan-entry-0"] *){ color: red; }'));
+        assert.ok(styles.includes('[data-sc-class~="shared"]:where([data-sc-class~="mdict-yomitan-entry-1"], [data-sc-class~="mdict-yomitan-entry-1"] *){ color: blue; }'));
+    });
+
+    test('nested inline rules and root selectors remain inside the entry scope', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alpha', value: '<style>@media screen { .shared { color: red; } } :root > .shared { display: block; }</style><div class="shared">alpha</div>'},
+        ]);
+        const result = await createMdxImportData('inline-style-nested.mdx', {}, fixture.bytes, []);
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+
+        assert.ok(styles.includes('@media screen { [data-sc-class~="shared"]:where([data-sc-class~="mdict-yomitan-entry-0"], [data-sc-class~="mdict-yomitan-entry-0"] *)'));
+        assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] > \[data-sc-class~="shared"\]/u);
+        assert.doesNotMatch(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="mdict-yomitan-entry-0"\]/u);
+    });
+
+    test('stylesheet source comments cannot be terminated by an entry name', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alpha*/ .injected{display:block} /*', value: '<style>.safe { color: red; }</style><div class="safe">alpha</div>'},
+        ]);
+        const result = await createMdxImportData('inline-style-comment.mdx', {}, fixture.bytes, []);
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+
+        assert.equal(styles.split('\n', 1)[0], '/* Source: Alpha* / .injected{display:block} /* /inline/1.css */');
+        assert.equal(styles.match(/\*\//gu)?.length, 1);
+        assert.ok(styles.includes('[data-sc-class~="safe"]:where([data-sc-class~="mdict-yomitan-entry-0"], [data-sc-class~="mdict-yomitan-entry-0"] *){ color: red; }'));
+    });
+
+    test('external MDD styles remain dictionary-wide rather than entry-local', async () => {
+        const mdx = makeMdictFixture([
+            {key: 'Alpha', value: '<div class="shared">alpha</div>'},
+            {key: 'Beta', value: '<div class="shared">beta</div>'},
+        ]);
+        const mdd = makeMdictFixture([
+            {key: 'styles.css', value: new TextEncoder().encode('.shared { color: green; }')},
+        ], {mdd: true});
+        const result = await createMdxImportData('external-style-global.mdx', {}, mdx.bytes, [{name: 'external-style-global.mdd', bytes: mdd.bytes}]);
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+
+        assert.match(styles, /\[data-sc-class~="shared"\]\{ color: green; \}/u);
+        assert.doesNotMatch(styles, /mdict-yomitan-entry-/u);
+    });
+});
+
+describe('MDict inline scope selector semantics', () => {
+    test('entry scope guards the subject without changing selector specificity or losing functional roots', async () => {
+        const fixture = makeInlineStyleScopeFixture();
+        const result = await createMdxImportData('inline-semantic-scope.mdx', {}, fixture.bytes, []);
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+        const root = '[data-sc-class~="mdict-yomitan-entry-0"]';
+        const guard = `:where(${root}, ${root} *)`;
+        assert.ok(styles.includes(`:is(${root}) > [data-sc-class~="functional"]${guard}`));
+        assert.ok(styles.includes(`:where(${root}, ${root}) > [data-sc-class~="where-root"]${guard}`));
+        assert.ok(styles.includes(`${root} [data-sc-class~="cascade"]${guard}`));
+        assert.ok(styles.includes(`}[data-sc-class~="cascade"]${guard}`));
+        assert.ok(styles.includes(`${root} + *${guard}`));
+    });
+
+    test('the containment guard precedes modern and legacy pseudo-elements inside conditional rules', async () => {
+        const fixture = makeInlineStyleScopeFixture();
+        const result = await createMdxImportData('inline-pseudo-scope.mdx', {}, fixture.bytes, []);
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+        const root = '[data-sc-class~="mdict-yomitan-entry-0"]';
+        const guard = `:where(${root}, ${root} *)`;
+        assert.ok(styles.includes(`[data-sc-class~="shared"]${guard}::before`));
+        assert.ok(styles.includes(`[data-sc-class~="shared"]${guard}:after`));
+        assert.ok(styles.includes(`@media screen { [data-sc-class~="nested"]${guard}`));
+    });
+});
+
+test('MDict inline scope ignores colon-like tokens inside attributes, escaped names and pseudo-class arguments', async () => {
+    const rules = [
+        String.raw`.literal\:before { color: red; }`,
+        '.shared:is(.a, .b)::before { content: "x"; }',
+        '.shared[data-label=":after"]::first-letter { color: red; }',
+        '.shared:BEFORE { content: "y"; }',
+    ];
+    const fixture = makeMdictFixture([
+        {key: 'Alpha', value: `<style>${rules.join('\n')}</style><div class="shared a literal:before">alpha</div>`},
+    ]);
+    const result = await createMdxImportData('inline-scope-tokens.mdx', {}, fixture.bytes, []);
+    const styles = new TextDecoder().decode(result.files.get('styles.css'));
+    const root = '[data-sc-class~="mdict-yomitan-entry-0"]';
+    const guard = `:where(${root}, ${root} *)`;
+    for (const selector of [
+        `[data-sc-class~="literal:before"]${guard}`,
+        `[data-sc-class~="shared"]:is([data-sc-class~="a"], [data-sc-class~="b"])${guard}::before`,
+        `[data-sc-class~="shared"][data-label=":after"]${guard}::first-letter`,
+        `[data-sc-class~="shared"]${guard}:BEFORE`,
+    ]) {
+        assert.ok(styles.includes(selector), selector);
+    }
+});
+
+describe('MDict direct lookup key normalization', () => {
+    test('lookup follows KeyCaseSensitive=No by default', () => {
+        const fixture = makeMdictFixture([
+            {key: 'Target', value: 'definition'},
+        ], {keyCaseSensitive: 'No'});
+        const mdx = new MDX('lookup-case.mdx', fixture.bytes);
+        try {
+            assert.equal(mdx.lookup('target').definition?.replace(/\0+$/u, ''), 'definition');
+            assert.equal(mdx.strip('Target'), 'target');
+        } finally {
+            mdx.close();
+        }
+    });
+
+    test('lookup follows KeyCaseSensitive=Yes by default', () => {
+        const fixture = makeMdictFixture([
+            {key: 'Target', value: 'definition'},
+        ], {keyCaseSensitive: 'Yes'});
+        const mdx = new MDX('lookup-case-sensitive.mdx', fixture.bytes);
+        try {
+            assert.equal(mdx.lookup('target').definition, null);
+            assert.equal(mdx.lookup('Target').definition?.replace(/\0+$/u, ''), 'definition');
+            assert.equal(mdx.strip('Target'), 'Target');
+        } finally {
+            mdx.close();
+        }
+    });
+
+    test('explicit case-sensitivity options override the dictionary header', () => {
+        const insensitiveFixture = makeMdictFixture([
+            {key: 'Target', value: 'definition'},
+        ], {keyCaseSensitive: 'No'});
+        const forcedSensitive = new MDX('lookup-forced-sensitive.mdx', insensitiveFixture.bytes, {isCaseSensitive: true});
+        try {
+            assert.equal(forcedSensitive.lookup('target').definition, null);
+            assert.equal(forcedSensitive.lookup('Target').definition?.replace(/\0+$/u, ''), 'definition');
+        } finally {
+            forcedSensitive.close();
+        }
+
+        const sensitiveFixture = makeMdictFixture([
+            {key: 'Target', value: 'definition'},
+        ], {keyCaseSensitive: 'Yes'});
+        const forcedInsensitive = new MDX('lookup-forced-insensitive.mdx', sensitiveFixture.bytes, {isCaseSensitive: false});
+        try {
+            assert.equal(forcedInsensitive.lookup('target').definition?.replace(/\0+$/u, ''), 'definition');
+        } finally {
+            forcedInsensitive.close();
+        }
+    });
+
+    test('StripKey controls punctuation normalization and can be overridden', () => {
+        const fixture = makeMdictFixture([
+            {key: 'foo-bar', value: 'definition'},
+        ], {stripKey: 'Yes', keyCaseSensitive: 'No'});
+        const mdx = new MDX('lookup-strip.mdx', fixture.bytes);
+        try {
+            assert.equal(mdx.lookup('foobar').definition?.replace(/\0+$/u, ''), 'definition');
+        } finally {
+            mdx.close();
+        }
+
+        const noStrip = new MDX('lookup-strip-override.mdx', fixture.bytes, {isStripKey: false});
+        try {
+            assert.equal(noStrip.lookup('foobar').definition, null);
+            assert.equal(noStrip.lookup('foo-bar').definition?.replace(/\0+$/u, ''), 'definition');
+        } finally {
+            noStrip.close();
+        }
+    });
+
+    test('case-insensitive prefix lookup uses normalized keys', () => {
+        const fixture = makeMdictFixture([
+            {key: 'Target', value: 'definition'},
+        ], {keyCaseSensitive: 'No'});
+        const mdx = new MDX('prefix-case.mdx', fixture.bytes);
+        try {
+            assert.deepEqual(mdx.prefix('ta').map(({keyText}) => keyText), ['Target']);
+        } finally {
+            mdx.close();
+        }
+    });
+});
+
+describe('MDict direct lookup range and lifetime regressions', () => {
+    for (const keysPerBlock of [1, 2, 3]) {
+        test(`prefix returns the complete normalized range with ${keysPerBlock} keys per block`, () => {
+            const fixture = makeMdictFixture([
+                {key: 'Target', value: 'target'},
+                {key: 'Task', value: 'task'},
+                {key: 'Taxi', value: 'taxi'},
+                {key: 'Zoo', value: 'zoo'},
+            ], {keysPerBlock, keyCaseSensitive: 'No'});
+            const mdx = new MDX('prefix-range.mdx', fixture.bytes);
+            try {
+                assert.deepEqual(mdx.prefix('TA').map(({keyText}) => keyText), ['Target', 'Task', 'Taxi']);
+                assert.deepEqual(mdx.prefix('TAX').map(({keyText}) => keyText), ['Taxi']);
+                assert.deepEqual(mdx.prefix('missing'), []);
+                assert.deepEqual(mdx.prefix('zzzz'), []);
+                assert.deepEqual(mdx.prefix('').map(({keyText}) => keyText), ['Target', 'Task', 'Taxi', 'Zoo']);
+            } finally {
+                mdx.close();
+            }
+        });
+    }
+
+    test('exact spelling wins over a case-equivalent redirect record', () => {
+        const fixture = makeMdictFixture([
+            {key: 'Read', value: 'definition'},
+            {key: 'read', value: '@@@LINK=Read'},
+        ], {keyCaseSensitive: 'No', keysPerBlock: 1});
+        const mdx = new MDX('exact-case-spelling.mdx', fixture.bytes);
+        try {
+            assert.equal(mdx.lookup('Read').definition, 'definition\0');
+            assert.equal(mdx.lookup('read').definition, '@@@LINK=Read\0');
+            assert.equal(mdx.lookup('READ').definition, 'definition\0');
+            assert.deepEqual(mdx.prefix('read').map(({keyText}) => keyText), ['Read', 'read']);
+        } finally {
+            mdx.close();
+        }
+    });
+
+    test('exact punctuation spelling wins in a StripKey-equivalent range', () => {
+        const fixture = makeMdictFixture([
+            {key: 'a-b', value: 'hyphen'},
+            {key: 'ab', value: 'plain'},
+        ], {stripKey: 'Yes', keysPerBlock: 1});
+        const mdx = new MDX('exact-strip-spelling.mdx', fixture.bytes);
+        try {
+            assert.equal(mdx.lookup('a-b').definition, 'hyphen\0');
+            assert.equal(mdx.lookup('ab').definition, 'plain\0');
+            assert.deepEqual(mdx.prefix('a-').map(({keyText}) => keyText), ['a-b', 'ab']);
+        } finally {
+            mdx.close();
+        }
+    });
+
+    test('case-sensitive matching does not use locale collation as key equality', () => {
+        const fixture = makeMdictFixture([
+            {key: '\u00e9', value: 'composed'},
+        ], {keyCaseSensitive: 'Yes', stripKey: 'No'});
+        const mdx = new MDX('exact-unicode-spelling.mdx', fixture.bytes);
+        try {
+            assert.equal(mdx.lookup('e\u0301').definition, null);
+            assert.equal(mdx.lookup('\u00e9').definition, 'composed\0');
+        } finally {
+            mdx.close();
+        }
+    });
+
+    test('prefix does not skip a composed-key match across a collation-equivalent key', () => {
+        const fixture = makeMdictFixture([
+            {key: '\u00e9', value: 'composed'},
+            {key: 'e\u0301', value: 'decomposed'},
+            {key: '\u00e9clair', value: 'longer'},
+        ], {keyCaseSensitive: 'Yes', stripKey: 'No', keysPerBlock: 1});
+        const mdx = new MDX('unicode-prefix-range.mdx', fixture.bytes);
+        try {
+            assert.deepEqual(mdx.prefix('\u00e9').map(({keyText}) => keyText), ['\u00e9', '\u00e9clair']);
+            assert.deepEqual(mdx.prefix('e\u0301').map(({keyText}) => keyText), ['e\u0301']);
+        } finally {
+            mdx.close();
+        }
+    });
+
+    test('the lookup-only index is lazy during record iteration and released by close', () => {
+        const fixture = makeMdictFixture([{key: 'Target', value: 'definition'}]);
+        const mdx = new MDX('lookup-index-lifetime.mdx', fixture.bytes);
+        const getLookupIndex = () => mdx._lookupKeywordList;
+        try {
+            assert.equal(getLookupIndex(), null);
+            for (const item of mdx.keywordList) {
+                assert.equal(mdx.fetch_definition(item).definition, 'definition\0');
+            }
+            assert.equal(getLookupIndex(), null);
+            assert.equal(mdx.lookup('Target').definition, 'definition\0');
+            assert.equal(getLookupIndex()?.length, 1);
+        } finally {
+            mdx.close();
+        }
+        assert.equal(getLookupIndex(), null);
+        assert.equal(mdx.lookupKeyBlockByWord('Target'), undefined);
+        assert.equal(mdx.lookup('Target').definition, null);
+        assert.deepEqual(mdx.prefix(''), []);
+        mdx.close();
+        assert.equal(getLookupIndex(), null);
+    });
+
+    test('MDD direct resource lookup prefers the exact case spelling', () => {
+        const fixture = makeMdictFixture([
+            {key: '\\Image.png', value: Uint8Array.of(1)},
+            {key: '\\image.png', value: Uint8Array.of(2)},
+        ], {mdd: true, keyCaseSensitive: 'No', keysPerBlock: 1});
+        const mdd = new MDD('resource-exact-case.mdd', fixture.bytes);
+        try {
+            assert.equal(mdd.locate('\\Image.png').definition, 'AQ==');
+            assert.equal(mdd.locate('\\image.png').definition, 'Ag==');
+        } finally {
+            mdd.close();
+        }
+    });
+});
+
+describe('MDict redirect StripKey matching', () => {
+    for (const stripKey of /** @type {const} */ (['Yes', 'No'])) {
+        test(`converter redirects honor StripKey=${stripKey}`, async () => {
+            const fixture = makeMdictFixture([
+                {key: 'Alias', value: '@@@LINK=foobar'},
+                {key: 'foo-bar', value: 'definition'},
+            ], {stripKey, keyCaseSensitive: 'No'});
+            const result = await createMdxImportData('redirect-strip.mdx', {}, fixture.bytes, []);
+            const terms = readRows(result.files).map(([term]) => term).sort();
+            assert.deepEqual(terms, stripKey === 'Yes' ? ['Alias', 'foo-bar'] : ['foo-bar']);
+            const details = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details;
+            assert.equal(details?.unresolvedRedirectCount, stripKey === 'Yes' ? 0 : 1);
+        });
+    }
+
+    test('punctuation-normalized redirect chains retain every alias spelling', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alias-One', value: '@@@LINK=mid_dle'},
+            {key: 'Middle', value: '@@@LINK=FOOBAR'},
+            {key: 'foo-bar', value: 'definition'},
+            {key: 'foobar', value: '@@@LINK=foo-bar'},
+        ], {stripKey: 'Yes', keyCaseSensitive: 'No'});
+        const result = await createMdxImportData('redirect-strip-chain.mdx', {}, fixture.bytes, []);
+        const terms = readRows(result.files).map(([term]) => term).sort();
+        assert.deepEqual(terms, ['Alias-One', 'Middle', 'foo-bar', 'foobar']);
+        const details = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details;
+        assert.equal(details?.unresolvedRedirectCount, 0);
+    });
+
+    test('StripKey does not disable case-sensitive matching or resolve disconnected cycles', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alias', value: '@@@LINK=FooBar'},
+            {key: 'WrongCase', value: '@@@LINK=foobar'},
+            {key: 'Foo-Bar', value: 'definition'},
+            {key: 'Cycle-One', value: '@@@LINK=CycleTwo'},
+            {key: 'Cycle-Two', value: '@@@LINK=CycleOne'},
+        ], {stripKey: 'Yes', keyCaseSensitive: 'Yes'});
+        const result = await createMdxImportData('redirect-strip-sensitive.mdx', {}, fixture.bytes, []);
+        assert.deepEqual(readRows(result.files).map(([term]) => term).sort(), ['Alias', 'Foo-Bar']);
+        const details = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details;
+        assert.equal(details?.unresolvedRedirectCount, 3);
+    });
+});
+
+describe('MDict redirects preserve exact target identity before normalization', () => {
+    for (const [label, first, second, stripKey] of /** @type {const} */ ([
+        ['case', 'Read', 'read', 'No'],
+        ['punctuation', 'co-op', 'coop', 'Yes'],
+    ])) {
+        test(`${label}: exact aliases and their chains do not acquire a different definition`, async () => {
+            const fixture = makeMdictFixture([
+                {key: first, value: 'first meaning'},
+                {key: first, value: 'second sense of first'},
+                {key: second, value: 'other spelling meaning'},
+                {key: 'FirstAlias', value: `@@@LINK=${first}`},
+                {key: 'SecondAlias', value: `@@@LINK=${second}`},
+                {key: 'FirstChain', value: '@@@LINK=FirstAlias'},
+            ], {keyCaseSensitive: 'No', stripKey, keysPerBlock: 1, recordBlockSize: 7});
+            const {files} = await createMdxImportData('exact-redirect.mdx', {}, fixture.bytes, []);
+            const rows = readRows(files);
+            for (const alias of ['FirstAlias', 'FirstChain']) {
+                const definitions = rows.filter(([term]) => term === alias);
+                assert.equal(definitions.length, 2, alias);
+                assert.match(JSON.stringify(definitions), /first meaning/u);
+                assert.match(JSON.stringify(definitions), /second sense of first/u);
+                assert.doesNotMatch(JSON.stringify(definitions), /other spelling meaning/u);
+            }
+            const other = rows.filter(([term]) => term === 'SecondAlias');
+            assert.equal(other.length, 1);
+            assert.match(JSON.stringify(other), /other spelling meaning/u);
+        });
+    }
+
+    test('exact case-variant alias chains do not collapse onto unrelated definitions', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Top', value: 'top meaning'},
+            {key: 'Bottom', value: 'bottom meaning'},
+            {key: 'Read', value: '@@@LINK=Top'},
+            {key: 'read', value: '@@@LINK=Bottom'},
+            {key: 'ViaUpper', value: '@@@LINK=Read'},
+            {key: 'ViaLower', value: '@@@LINK=read'},
+        ], {keyCaseSensitive: 'No', keysPerBlock: 1});
+        const {files} = await createMdxImportData('exact-alias-chain.mdx', {}, fixture.bytes, []);
+        const rows = readRows(files);
+        for (const [alias, meaning] of [['ViaUpper', 'top meaning'], ['ViaLower', 'bottom meaning']]) {
+            const definitions = rows.filter(([term]) => term === alias);
+            assert.equal(definitions.length, 1, alias);
+            assert.ok(JSON.stringify(definitions).includes(meaning));
+        }
+    });
+
+    test('an exact cyclic target is not rescued by a different case-variant definition', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Read', value: 'real meaning'},
+            {key: 'read', value: '@@@LINK=Loop'},
+            {key: 'Loop', value: '@@@LINK=read'},
+            {key: 'Alias', value: '@@@LINK=read'},
+        ], {keyCaseSensitive: 'No'});
+        const {files, phaseTimings} = await createMdxImportData('exact-cycle.mdx', {}, fixture.bytes, []);
+        assert.deepEqual(readRows(files).map(([term]) => term), ['Read']);
+        const phase = phaseTimings.find(({details}) => typeof details?.unresolvedRedirectCount === 'number');
+        assert.equal(phase?.details?.unresolvedRedirectCount, 3);
+    });
+
+    test('a self redirect without a readable homograph is counted as unresolved', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Root', value: 'root definition'},
+            {key: 'Self', value: '@@@LINK=Self'},
+        ]);
+        const {phaseTimings} = await createMdxImportData('self-cycle.mdx', {}, fixture.bytes, []);
+        const phase = phaseTimings.find(({details}) => typeof details?.unresolvedRedirectCount === 'number');
+        assert.equal(phase?.details?.unresolvedRedirectCount, 1);
+    });
+
+    test('missing exact spellings still fall back to normalized definitions and preserve all senses', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Read', value: 'first meaning'},
+            {key: 'Read', value: 'second meaning'},
+            {key: 'Fallback', value: '@@@LINK=rE-aD'},
+            {key: 'Chain', value: '@@@LINK=fALLBACK'},
+        ], {keyCaseSensitive: 'No', stripKey: 'Yes'});
+        const {files, phaseTimings} = await createMdxImportData('fallback.mdx', {}, fixture.bytes, []);
+        const rows = readRows(files);
+        for (const alias of ['Fallback', 'Chain']) {
+            assert.equal(rows.filter(([term]) => term === alias).length, 2);
+        }
+        const phase = phaseTimings.find(({details}) => typeof details?.unresolvedRedirectCount === 'number');
+        assert.equal(phase?.details?.unresolvedRedirectCount, 0);
+    });
+});
+
+
+describe('MDict redirect resolution agrees with a forward graph model', () => {
+    for (const keyCaseSensitive of /** @type {const} */ (['Yes', 'No'])) {
+        for (const stripKey of /** @type {const} */ (['Yes', 'No'])) {
+            for (const compression of /** @type {const} */ (['raw', 'zlib'])) {
+                test(`${keyCaseSensitive}/${stripKey}/${compression}: exact names, fallback, homographs and cycles`, async () => {
+                    for (let seed = 1; seed <= 16; ++seed) {
+                        let state = seed;
+                        const random = () => {
+                            state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+                            return state;
+                        };
+                        const keys = ['Read', 'read', 'co-op', 'coop', 'Middle', 'middle', 'Leaf', '\u00e9', 'e\u0301'];
+                        const targetPool = [...keys, 'READ', 'CO_OP', 'MIDDLE', 'lE-aF', 'missing'];
+                        /** @type {Array<{key: string, value: string}>} */
+                        const entries = [];
+                        for (const [index, key] of keys.entries()) {
+                            const value = index === 0 || random() % 4 === 0 ?
+                                `model-sense-${entries.length}` :
+                                `@@@LINK=${targetPool[random() % targetPool.length]}`;
+                            entries.push({key, value});
+                            if (random() % 3 === 0) {
+                                entries.push({key, value: `model-sense-${entries.length}`});
+                            }
+                        }
+                        // This independent forward traversal does not use the
+                        // converter's reverse edges or its key-normalizer helper.
+                        const normalize = (/** @type {string} */ key) => {
+                            if (stripKey === 'Yes') { key = key.replace(/[-_]/gu, ''); }
+                            return keyCaseSensitive === 'Yes' ? key : key.toLowerCase();
+                        };
+                        const targets = (/** @type {string} */ target) => {
+                            if (keys.includes(target)) { return [target]; }
+                            return keys.filter((key) => normalize(key) === normalize(target));
+                        };
+                        const resolve = (/** @type {string[]} */ starts) => {
+                            const pending = [...starts];
+                            const visited = new Set();
+                            /** @type {Set<string>} */
+                            const senses = new Set();
+                            for (let index = 0; index < pending.length; ++index) {
+                                const key = pending[index];
+                                if (visited.has(key)) { continue; }
+                                visited.add(key);
+                                for (const entry of entries) {
+                                    if (entry.key !== key) { continue; }
+                                    if (entry.value.startsWith('@@@LINK=')) {
+                                        for (const target of targets(entry.value.slice(8))) { pending.push(target); }
+                                    } else {
+                                        senses.add(entry.value);
+                                    }
+                                }
+                            }
+                            return senses;
+                        };
+                        const expected = keys.flatMap((key) => [...resolve([key])].map((sense) => JSON.stringify([key, sense]))).sort();
+                        const unresolvedEdges = new Set(entries.filter(({value}) => value.startsWith('@@@LINK=') &&
+                        resolve(targets(value.slice(8))).size === 0).map(({key, value}) => JSON.stringify([key, value])));
+                        const fixture = makeMdictFixture(entries, {
+                            keyCaseSensitive, stripKey, compression, keysPerBlock: seed % 3 + 1, recordBlockSize: 7,
+                        });
+                        const {files, phaseTimings} = await createMdxImportData('redirect-model.mdx', {}, fixture.bytes, []);
+                        const actual = readRows(files).map((row) => {
+                            const senses = JSON.stringify(row[5]).match(/model-sense-\d+/gu);
+                            assert.equal(senses?.length, 1, `seed ${seed}: one original sense per row`);
+                            return JSON.stringify([row[0], senses?.[0]]);
+                        }).sort();
+                        assert.deepEqual(actual, expected, `seed ${seed}: term-to-sense identity`);
+                        const phase = phaseTimings.find(({details}) => typeof details?.unresolvedRedirectCount === 'number');
+                        assert.equal(phase?.details?.unresolvedRedirectCount, unresolvedEdges.size, `seed ${seed}: unresolved edges`);
+                    }
+                });
+            }
+        }
+    }
+});
+
 
 describe('actual binary MDX/MDD conversion', () => {
     test('preserves homograph senses, multi-hop aliases, bank bounds and diagnostics', async () => {
@@ -396,4 +980,28 @@ describe('MDict text format and compact styles', () => {
             2: ['<em>', ''],
         });
     });
+});
+
+// Attribute values and CSS escape terminators are not selector whitespace.
+describe('MDict selector literal preservation', () => {
+    const rules = [
+        '[title="two  gaps"] { color: rgb(12, 34, 56); }',
+        '[title="tab\tgap"] { color: rgb(23, 45, 67); }',
+        String.raw`[title="line\a  break"] { color: rgb(34, 56, 78); }`,
+        ':is([title="two  gaps"]) { font-weight: 700; }',
+    ].join('\n');
+    for (const context of ['inline', 'conditional', 'external']) {
+        test(`preserves literal whitespace in ${context} selectors`, async () => {
+            const css = context === 'conditional' ? `@media screen { ${rules} }` : rules;
+            const external = context === 'external';
+            const mdx = makeMdictFixture([{key: 'Literal', value: `${external ? '' : `<style>${css}</style>`}<span title="two  gaps">literal</span>`}]);
+            const sources = external ? [{name: 'literals.mdd', bytes: makeMdictFixture([{key: '\\style.css', value: new TextEncoder().encode(css)}], {mdd: true}).bytes}] : [];
+            const result = await createMdxImportData('literals.mdx', {}, mdx.bytes, sources);
+            const styles = new TextDecoder().decode(result.files.get('styles.css'));
+            assert.ok(styles.includes('[title="two  gaps"]'));
+            assert.ok(styles.includes('[title="tab\tgap"]'));
+            assert.ok(styles.includes(String.raw`[title="line\a  break"]`));
+            assert.ok(styles.includes(':is([title="two  gaps"])'));
+        });
+    }
 });
