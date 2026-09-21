@@ -205,6 +205,7 @@ test('volume ties use deterministic lexical order and identical names compare eq
 /**
  * @param {string[]} values
  * @returns {Generator<string[]>}
+ * @yields {string[]}
  */
 function *permutations(values) {
     if (values.length === 0) {
