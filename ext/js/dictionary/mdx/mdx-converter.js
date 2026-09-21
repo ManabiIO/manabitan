@@ -423,13 +423,7 @@ function encodeMediaPath(value) {
  * @returns {string}
  */
 function createSearchHref(query) {
-    let decodedQuery = query;
-    try {
-        decodedQuery = decodeURIComponent(query);
-    } catch (_error) {
-        // Preserve literal percent signs and malformed escapes in headwords.
-    }
-    return `?query=${encodeURIComponent(decodedQuery)}`;
+    return `?query=${encodeURIComponent(query)}`;
 }
 
 /**
@@ -532,9 +526,9 @@ function decodeDataUrl(value) {
     if (headerEnd < 0) { return null; }
     const header = value.slice(5, headerEnd);
     const payload = value.slice(headerEnd + 1);
-    const parts = header.split(';').map((part) => part.trim()).filter((part) => part.length > 0);
-    const mediaType = (parts[0] || 'text/plain').toLowerCase();
-    const isBase64 = parts.slice(1).some((part) => part.toLowerCase() === 'base64');
+    const parts = header.split(';').map((part) => part.trim());
+    const mediaType = (parts.shift() || 'text/plain').toLowerCase();
+    const isBase64 = parts.some((part) => part.toLowerCase() === 'base64');
     try {
         if (isBase64) {
             return {mediaType, data: new Uint8Array(base64ToArrayBuffer(decodeURIComponent(payload)))};
@@ -564,16 +558,139 @@ function decodeDataUrl(value) {
  * @param {Uint8Array} bytes
  * @returns {string|null}
  */
+function getDeclaredStylesheetEncoding(bytes) {
+    let prefix = '';
+    const limit = Math.min(bytes.length, 128);
+    for (let index = 0; index < limit; index += 1) {
+        const byte = bytes[index];
+        if (byte > 0x7f) { break; }
+        prefix += String.fromCodePoint(byte);
+        if (byte === 0x3b) { break; }
+    }
+    const match = /^@charset\s+"([^"\r\n]+)"\s*;/iu.exec(prefix);
+    return match?.[1] ?? null;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {string|null}
+ */
+function getBomStylesheetEncoding(bytes) {
+    if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+        return 'utf-8';
+    }
+    if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
+        return 'utf-16le';
+    }
+    if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+        return 'utf-16be';
+    }
+    return null;
+}
+
+/**
+ * Recognize common BOM-less UTF-16 CSS by its ASCII NUL-byte pattern instead
+ * of trying UTF-16 against arbitrary legacy single-byte encodings.
+ * @param {Uint8Array} bytes
+ * @returns {string|null}
+ */
+function getLikelyUtf16StylesheetEncoding(bytes) {
+    const pairCount = Math.min(Math.floor(bytes.length / 2), 32);
+    if (pairCount < 2) { return null; }
+    let evenZeros = 0;
+    let oddZeros = 0;
+    for (let index = 0; index < pairCount * 2; index += 2) {
+        if (bytes[index] === 0) { evenZeros += 1; }
+        if (bytes[index + 1] === 0) { oddZeros += 1; }
+    }
+    const threshold = Math.max(2, Math.ceil(pairCount / 3));
+    if (oddZeros >= threshold && evenZeros === 0) { return 'utf-16le'; }
+    if (evenZeros >= threshold && oddZeros === 0) { return 'utf-16be'; }
+    return null;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {string} encoding
+ * @returns {string|null}
+ */
+function decodeStylesheetWithEncoding(bytes, encoding) {
+    try {
+        const decoded = new TextDecoder(encoding, {fatal: true}).decode(bytes);
+        const value = decoded
+            .replace(/^\ufeff?@charset\s+"[^"\r\n]+"\s*;\s*/iu, '')
+            .trim();
+        return value.length > 0 && !value.includes('\u0000') ? value : null;
+    } catch (_error) {
+        return null;
+    }
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {string|null}
+ */
 function decodeStylesheetAsset(bytes) {
-    for (const encoding of ['utf-8', 'utf-16', 'utf-16le', 'utf-16be']) {
-        try {
-            const value = new TextDecoder(encoding).decode(bytes).trim();
-            if (value.length > 0 && !value.includes('\u0000')) {
-                return value;
+    const bomEncoding = getBomStylesheetEncoding(bytes);
+    if (bomEncoding !== null) {
+        return decodeStylesheetWithEncoding(bytes, bomEncoding);
+    }
+
+    const declaredEncoding = getDeclaredStylesheetEncoding(bytes);
+    if (declaredEncoding !== null) {
+        return decodeStylesheetWithEncoding(bytes, declaredEncoding);
+    }
+
+    const utf8 = decodeStylesheetWithEncoding(bytes, 'utf-8');
+    if (utf8 !== null) { return utf8; }
+
+    const utf16Encoding = getLikelyUtf16StylesheetEncoding(bytes);
+    return utf16Encoding === null ? null : decodeStylesheetWithEncoding(bytes, utf16Encoding);
+}
+
+/**
+ * Parse a CSS url() token without treating escaped closing parentheses as the
+ * end of an unquoted value.
+ * @param {string} value
+ * @param {number} startIndex
+ * @returns {{path: string, endIndex: number}|null}
+ */
+function readCssUrlFunction(value, startIndex) {
+    if (value.slice(startIndex, startIndex + 4).toLowerCase() !== 'url(') { return null; }
+    let index = startIndex + 4;
+    while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+    if (index >= value.length) { return null; }
+
+    const quote = value[index] === '"' || value[index] === "'" ? value[index++] : '';
+    let path = '';
+    while (index < value.length) {
+        const character = value[index];
+        if (quote.length > 0) {
+            if (character === quote) {
+                index += 1;
+                while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+                return value[index] === ')' ? {path, endIndex: index + 1} : null;
             }
-        } catch (_error) {
-            // NOP
+            if (/[\n\r\f]/u.test(character)) { return null; }
+        } else {
+            if (character === ')') { return {path, endIndex: index + 1}; }
+            if (/\s/u.test(character)) {
+                while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+                return value[index] === ')' ? {path, endIndex: index + 1} : null;
+            }
+            if (character === '"' || character === "'" || character === '(' || /[\n\r\f]/u.test(character)) {
+                return null;
+            }
         }
+        if (character === '\\') {
+            const escape = readCssEscape(value, index);
+            if (escape === null) { return null; }
+            path += escape.value;
+            index = escape.endIndex;
+            continue;
+        }
+        path += character;
+        index += character.length;
     }
     return null;
 }
@@ -586,15 +703,62 @@ function decodeStylesheetAsset(bytes) {
  * @returns {string}
  */
 function rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetReferences = null) {
-    return stylesheet.replace(/url\(\s*(["']?)(.*?)\1\s*\)/giu, (match, _quote, rawPath) => {
-        const path = typeof rawPath === 'string' ? rawPath : '';
-        const assetKey = normalizeReferencedAssetKey(path, assetPrefix, sourceAssetPath);
+    const output = [];
+    let lastIndex = 0;
+    for (let index = 0; index < stylesheet.length;) {
+        if (stylesheet.startsWith('/*', index)) {
+            const commentEnd = stylesheet.indexOf('*/', index + 2);
+            index = commentEnd < 0 ? stylesheet.length : commentEnd + 2;
+            continue;
+        }
+        const character = stylesheet[index];
+        if (character === '"' || character === "'") {
+            const quote = character;
+            index += 1;
+            while (index < stylesheet.length) {
+                if (stylesheet[index] === '\\') {
+                    const escape = readCssEscape(stylesheet, index);
+                    index = escape === null ? index + 1 : escape.endIndex;
+                    continue;
+                }
+                if (stylesheet[index] === quote) {
+                    index += 1;
+                    break;
+                }
+                index += 1;
+            }
+            continue;
+        }
+        if (stylesheet.slice(index, index + 4).toLowerCase() !== 'url(') {
+            index += 1;
+            continue;
+        }
+        const previous = index > 0 ? stylesheet[index - 1] : '';
+        const previousCodePoint = previous.codePointAt(0) ?? 0;
+        if (/[A-Za-z0-9_-]/u.test(previous) || previousCodePoint >= 0x80) {
+            index += 1;
+            continue;
+        }
+        const token = readCssUrlFunction(stylesheet, index);
+        if (token === null) {
+            index += 1;
+            continue;
+        }
+        const assetKey = normalizeReferencedAssetKey(token.path, assetPrefix, sourceAssetPath);
         if (assetKey !== null && assetReferences !== null) {
             assetReferences.add(assetKey);
         }
-        const prefixedPath = assetKey === null ? null : `${assetPrefix}${assetKey}`;
-        return prefixedPath === null ? match : `url("${prefixedPath}")`;
-    });
+        if (assetKey !== null) {
+            output.push(
+                stylesheet.slice(lastIndex, index),
+                `url("${escapeCssString(`${assetPrefix}${assetKey}`)}")`,
+            );
+            lastIndex = token.endIndex;
+        }
+        index = token.endIndex;
+    }
+    output.push(stylesheet.slice(lastIndex));
+    return output.join('');
 }
 
 /**
@@ -1236,6 +1400,60 @@ function buildStructuredData(attrs) {
 }
 
 /**
+ * Split an inline declaration list without treating semicolons inside strings,
+ * comments, or functions as declaration boundaries.
+ * @param {string} styleText
+ * @returns {string[]}
+ */
+function splitInlineCssDeclarations(styleText) {
+    const declarations = [];
+    let startIndex = 0;
+    let quote = '';
+    let parenDepth = 0;
+    for (let index = 0; index < styleText.length; index += 1) {
+        const character = styleText[index];
+        if (styleText.startsWith('/*', index) && quote.length === 0) {
+            const commentEnd = styleText.indexOf('*/', index + 2);
+            if (commentEnd < 0) { break; }
+            index = commentEnd + 1;
+            continue;
+        }
+        if (quote.length > 0) {
+            if (character === '\\') {
+                index += 1;
+            } else if (character === quote) {
+                quote = '';
+            }
+            continue;
+        }
+        switch (character) {
+            case '"':
+            case "'": {
+                quote = character;
+                break;
+            }
+            case '(': {
+                parenDepth += 1;
+                break;
+            }
+            case ')': {
+                parenDepth = Math.max(0, parenDepth - 1);
+                break;
+            }
+            case ';': {
+                if (parenDepth === 0) {
+                    declarations.push(styleText.slice(startIndex, index));
+                    startIndex = index + 1;
+                }
+                break;
+            }
+        }
+    }
+    declarations.push(styleText.slice(startIndex));
+    return declarations;
+}
+
+/**
  * @param {string|null|undefined} styleText
  * @param {string} assetPrefix
  * @param {Set<string>} assetReferences
@@ -1245,13 +1463,14 @@ function convertInlineStyle(styleText, assetPrefix, assetReferences) {
     if (typeof styleText !== 'string' || styleText.trim().length === 0) { return null; }
     /** @type {Record<string, string|string[]>} */
     const style = {};
-    for (const declaration of styleText.split(';')) {
+    for (const rawDeclaration of splitInlineCssDeclarations(styleText)) {
+        const declaration = rawDeclaration.replace(/\/\*[\s\S]*?\*\//gu, '');
         const separator = declaration.indexOf(':');
         if (separator < 0) { continue; }
         const propertyName = declaration.slice(0, separator).trim().toLowerCase();
         let value = declaration.slice(separator + 1).trim();
         if (propertyName.length === 0 || value.length === 0) { continue; }
-        if (value.includes('url(')) {
+        if (/url\(/iu.test(value)) {
             value = rewriteCssAssetUrls(value, assetPrefix, null, assetReferences);
         }
         if (propertyName === 'text-decoration' || propertyName === 'text-decoration-line') {
@@ -1277,12 +1496,13 @@ function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetR
     const lowered = value.toLowerCase();
     if (lowered.startsWith('entry://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
     if (lowered.startsWith('bword://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
-    if (lowered.startsWith('d:') || lowered.startsWith('x:')) { return createSearchHref(value.slice(2)); }
+    if (lowered.startsWith('d:') || lowered.startsWith('x:')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(2))); }
     if (lowered.startsWith('sound://')) {
+        if (!enableAudio) { return '#'; }
         const assetKey = normalizeReferencedAssetKey(value.slice(8), assetPrefix, null);
         if (assetKey !== null) { assetReferences.add(assetKey); }
         const assetPath = assetKey === null ? null : `${assetPrefix}${assetKey}`;
-        return enableAudio && assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
+        return assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
     }
     if (lowered.startsWith('http://') || lowered.startsWith('https://') || lowered.startsWith('mailto:') || lowered.startsWith('tel:')) {
         return value;

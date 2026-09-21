@@ -1076,8 +1076,6 @@ export class TermRecordOpfsStore {
         ) {
             throw new TypeError('Invalid term-record import checkpoint');
         }
-        await this._abandonImportWritesForRollback();
-        if (this._recordsDirectoryHandle === null) { return; }
         /** @type {Map<string, number>} */
         const checkpointByName = new Map();
         for (const shard of checkpoint.shards) {
@@ -1085,7 +1083,7 @@ export class TermRecordOpfsStore {
                 typeof shard !== 'object' ||
                 shard === null ||
                 typeof shard.fileName !== 'string' ||
-                shard.fileName.length === 0 ||
+                !this._isCanonicalTermRecordStorageFileName(shard.fileName) ||
                 !Number.isSafeInteger(shard.fileLength) ||
                 shard.fileLength < 0 ||
                 checkpointByName.has(shard.fileName)
@@ -1094,8 +1092,28 @@ export class TermRecordOpfsStore {
             }
             checkpointByName.set(shard.fileName, shard.fileLength);
         }
+        // Validate the complete restoration target before abandoning writes. A
+        // corrupt journal must not mutate the active store before it is rejected.
+        await this._abandonImportWritesForRollback();
+        if (this._recordsDirectoryHandle === null) { return; }
         /** @type {Error[]} */
         const errors = [];
+        // Truncation can extend a short file with zeroes. Confirm every
+        // committed checkpoint prefix exists before deleting or truncating any
+        // term-record storage file.
+        for (const [fileName, fileLength] of checkpointByName) {
+            try {
+                const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName);
+                if ((await fileHandle.getFile()).size < fileLength) {
+                    throw new Error(`Cannot restore missing term-record bytes for ${fileName}`);
+                }
+            } catch (error) {
+                errors.push(error instanceof Error ? error : new Error(String(error)));
+            }
+        }
+        if (errors.length > 0) {
+            throw new AggregateError(errors, 'Failed to roll back term-record import storage');
+        }
         /** @type {string[]} */
         let currentFileNames = [];
         try {
@@ -2952,6 +2970,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @returns {Promise<void>}
+     * @throws {Error} If existing record IDs cannot be established from every authoritative container.
      */
     async _ensureNextIdReadyForAppend() {
         if (!this._nextIdMayNeedShardScan || this._recordsDirectoryHandle === null) {
@@ -2959,23 +2978,29 @@ export class TermRecordOpfsStore {
         }
         let maxId = this._nextId - 1;
         for (const state of this._shardStateByFileName.values()) {
+            const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
             let fileHandle;
             try {
-                fileHandle = await this._recordsDirectoryHandle.getFileHandle(
-                    `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
-                    {create: false},
-                );
-            } catch (_) {
-                continue;
+                fileHandle = await this._recordsDirectoryHandle.getFileHandle(indexFileName, {create: false});
+            } catch (error) {
+                // An empty descriptor left by cleanup has no IDs to reserve.
+                // Any other unreadable/missing container leaves the maximum unknown.
+                if (state.fileLength === 0 && isStorageEntryNotFoundError(error)) {
+                    continue;
+                }
+                throw new Error(`Cannot reserve term-record IDs: cannot open ${indexFileName}`, {cause: error});
             }
             const file = await fileHandle.getFile();
-            if (file.size <= 0) { continue; }
+            if (file.size === 0 && state.fileLength === 0) { continue; }
             const content = new Uint8Array(await file.arrayBuffer());
             const shardMaxId = this._scanPersistentIndexMaxRecordId(content);
-            if (typeof shardMaxId === 'number' && shardMaxId > maxId) {
-                maxId = shardMaxId;
+            if (shardMaxId === null) {
+                throw new Error(`Cannot reserve term-record IDs: invalid container ${indexFileName}`);
             }
+            maxId = Math.max(maxId, shardMaxId);
         }
+        // Publish only after every authoritative shard has been inspected.
+        // A failed scan remains retryable and must not consume an ID.
         this._nextId = Math.max(this._nextId, maxId + 1);
         this._nextIdMayNeedShardScan = false;
     }
@@ -2993,6 +3018,7 @@ export class TermRecordOpfsStore {
         const chunkCount = view.getUint32(16, true);
         let cursor = LOOKUP_INDEX_FILE_HEADER_BYTES;
         let maxId = 0;
+        let recordCount = 0;
         for (let chunk = 0; chunk < chunkCount; ++chunk) {
             if ((cursor + LOOKUP_INDEX_CHUNK_HEADER_BYTES) > content.byteLength) { return null; }
             const firstId = view.getUint32(cursor, true);
@@ -3001,6 +3027,7 @@ export class TermRecordOpfsStore {
             const recordFieldsFormat = view.getUint32(cursor + 36, true);
             if (firstId <= 0 || count === 0 || (firstId + count - 1) > 0xffffffff) { return null; }
             maxId = Math.max(maxId, firstId + count - 1);
+            recordCount += count;
             const recordFieldsOffset = cursor + LOOKUP_INDEX_CHUNK_HEADER_BYTES + payloadLength;
             let recordFieldsLength;
             try {
@@ -3011,7 +3038,7 @@ export class TermRecordOpfsStore {
             cursor = recordFieldsOffset + recordFieldsLength;
             if (cursor > content.byteLength) { return null; }
         }
-        return cursor === content.byteLength && maxId > 0 ? maxId : null;
+        return cursor === content.byteLength && maxId > 0 && recordCount === view.getUint32(20, true) ? maxId : null;
     }
 
     /**
@@ -4244,7 +4271,8 @@ export class TermRecordOpfsStore {
         }
         await this.ensureDictionariesLoaded(dictionaryNames);
         this._allShardContentsLoaded = dictionaryNames.every((name) => this._hasCompleteDictionaryLookupState(name));
-        if (this._allShardContentsLoaded) { this._nextIdMayNeedShardScan = false; }
+        // Lookup readiness does not reserve IDs: lazy chunks need not have materialized records.
+        // Keep the allocator scan pending until it has inspected every authoritative container.
     }
 
     /**
@@ -5264,6 +5292,14 @@ export class TermRecordOpfsStore {
                 fileHandlesByName.set(name, /** @type {FileSystemFileHandle} */ (fileSystemHandle));
             }
         }
+        for (const name of fileHandlesByName.keys()) {
+            if (
+                (this._isShardFileName(name) || name.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`)) &&
+                !this._isCanonicalTermRecordStorageFileName(name)
+            ) {
+                throw new Error(`Invalid term-record storage file name: ${name}`);
+            }
+        }
         await this._recoverMissingDescriptors(fileHandlesByName);
         let shardFileCount = 0;
         /** @type {TermRecordShardState[]} */
@@ -5315,7 +5351,17 @@ export class TermRecordOpfsStore {
         for (const [indexFileName, indexFileHandle] of fileHandlesByName) {
             if (!indexFileName.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`)) { continue; }
             const descriptorFileName = indexFileName.slice(0, -LOOKUP_INDEX_FILE_SUFFIX.length);
-            if (fileHandlesByName.has(descriptorFileName) || !this._isShardFileName(descriptorFileName)) { continue; }
+            if (!this._isShardFileName(descriptorFileName)) { continue; }
+            let descriptorFileHandle = fileHandlesByName.get(descriptorFileName) ?? null;
+            if (descriptorFileHandle !== null) {
+                try {
+                    if ((await descriptorFileHandle.getFile()).size > 0) { continue; }
+                } catch (_) {
+                    // Preserve the existing retryable behavior for a descriptor
+                    // whose current contents cannot be inspected.
+                    continue;
+                }
+            }
             const shardInfo = this._decodeShardInfoFromShardFileName(descriptorFileName);
             if (shardInfo === null) { continue; }
             try {
@@ -5331,7 +5377,7 @@ export class TermRecordOpfsStore {
                 const generationId = new Uint8Array(header.subarray(24, LOOKUP_INDEX_FILE_HEADER_BYTES));
                 const descriptor = this._createBinaryHeader(shardInfo.contentDictName, generationId);
                 if (descriptor.byteLength !== expectedDescriptorLength) { continue; }
-                const descriptorFileHandle = await this._recordsDirectoryHandle.getFileHandle(descriptorFileName, {create: true});
+                descriptorFileHandle ??= await this._recordsDirectoryHandle.getFileHandle(descriptorFileName, {create: true});
                 const writable = await descriptorFileHandle.createWritable();
                 try {
                     await writable.truncate(0);
@@ -6157,6 +6203,25 @@ export class TermRecordOpfsStore {
      */
     _isShardFileName(fileName) {
         return fileName.startsWith(SHARD_FILE_PREFIX) && fileName.endsWith(SHARD_FILE_SUFFIX);
+    }
+
+    /**
+     * @param {string} fileName
+     * @returns {boolean}
+     */
+    _isCanonicalTermRecordStorageFileName(fileName) {
+        const descriptorFileName = fileName.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`) ?
+            fileName.slice(0, -LOOKUP_INDEX_FILE_SUFFIX.length) :
+            fileName;
+        const shardInfo = this._decodeShardInfoFromShardFileName(descriptorFileName);
+        if (shardInfo === null) { return false; }
+        const canonicalDescriptor = this._getShardSegmentFileName(
+            shardInfo.dictionaryName,
+            shardInfo.contentDictName,
+            shardInfo.segmentIndex,
+        );
+        if (descriptorFileName !== canonicalDescriptor) { return false; }
+        return fileName === descriptorFileName || fileName === `${descriptorFileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
     }
 
     /**
