@@ -16,7 +16,7 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
-import {DictionaryCssMediaResolver, getMdictMediaPathFromComputedUrl} from '../ext/js/display/dictionary-css-media-resolver.js';
+import {DictionaryCssMediaResolver, getMdictMediaPathFromComputedUrl, getMdictMediaPathsFromComputedCss} from '../ext/js/display/dictionary-css-media-resolver.js';
 
 describe('DictionaryCssMediaResolver', () => {
     test('maps active MDX CSS image media to cached blob URLs and revokes them on clear', async () => {
@@ -165,5 +165,16 @@ describe('getMdictMediaPathFromComputedUrl', () => {
             baseUrl,
         )).toBeNull();
         expect(getMdictMediaPathFromComputedUrl('blob:https://example.invalid/id', baseUrl)).toBeNull();
+    });
+
+    test('extracts active MDict URLs from multi-layer computed CSS values', () => {
+        expect(getMdictMediaPathsFromComputedCss(
+            [
+                'linear-gradient(red, blue)',
+                'url("chrome-extension://example/mdict-media/images/a%20b.png")',
+                'url("https://example.invalid/mdict-media/no.png")',
+            ].join(', '),
+            'chrome-extension://example/search.html',
+        )).toStrictEqual(['mdict-media/images/a b.png']);
     });
 });
