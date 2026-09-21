@@ -879,4 +879,50 @@ describe('convertMdxToArchive', () => {
             href: '?query=%E3%81%8B%E3%81%AA%3F',
         }));
     });
+
+    test('rewrites only real CSS url() tokens and preserves escaped closing parentheses', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'CSS URL token fixture', Description: ''},
+            entries: [{
+                keyText: 'Styled',
+                definition: '<div class="real literal escaped">Styled</div>',
+            }],
+        });
+        mockState.mddFactory = () => [
+            {
+                keyText: 'styles/theme.css',
+                value: new TextEncoder().encode([
+                    '.real { background-image: url("../images/bg.png"); }',
+                    '.literal::before { content: "url(../images/string.png)"; }',
+                    '/* url(../images/comment.png) */',
+                    String.raw`.escaped { background-image: url(../images/a\)b.png); }`,
+                ].join('\n')),
+            },
+            {keyText: 'images/bg.png', value: Uint8Array.of(1, 2, 3)},
+            {keyText: 'images/a)b.png', value: Uint8Array.of(4, 5, 6)},
+        ];
+
+        const result = await createMdxImportData(
+            'css-url-token-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'css-url-token-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+        const styles = result.files.get('styles.css');
+        if (!(styles instanceof Uint8Array)) { throw new Error('Expected styles.css'); }
+        const stylesCss = new TextDecoder().decode(styles);
+
+        expect(stylesCss).toContain('url("mdict-media/images/bg.png")');
+        expect(stylesCss).toContain('content: "url(../images/string.png)"');
+        expect(stylesCss).toContain('/* url(../images/comment.png) */');
+        expect(stylesCss).toContain('url("mdict-media/images/a)b.png")');
+        expect(result.files.get('mdict-media/images/bg.png')).toStrictEqual(Uint8Array.of(1, 2, 3));
+        expect(result.files.get('mdict-media/images/a)b.png')).toStrictEqual(Uint8Array.of(4, 5, 6));
+        expect(result.files.has('mdict-media/images/string.png')).toBe(false);
+        expect(result.files.has('mdict-media/images/comment.png')).toBe(false);
+
+        const materialize = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
+        expect(materialize?.details?.missingReferencedAssetCount).toBe(0);
+    });
+
 });
