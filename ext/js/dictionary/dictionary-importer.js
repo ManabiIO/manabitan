@@ -3940,6 +3940,7 @@ export class DictionaryImporter {
                 const tMaterializationStart = Date.now();
                 for (let i = 0, ii = decodedRows.length; i < ii; ++i) {
                     const row = decodedRows[i];
+                    const requirementStart = requirementsForChunk?.length ?? 0;
                     const expression = row.expression.length > 0 ?
                         row.expression :
                         decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.expressionBytes);
@@ -4047,17 +4048,23 @@ export class DictionaryImporter {
                             entry.termEntryContentHash2 = /** @type {number} */ (row.termEntryContentHash2);
                         }
                         entry.termEntryContentBytes = row.termEntryContentBytes;
+                        if (!enableTermEntryContentDedup && requirementsForChunk !== null) {
+                            // Non-deduplicated writes also consume glossaryJson.
+                            // Preserve the parser's canonical glossary instead of
+                            // reconstructing it from an unmaterialized empty array.
+                            entry.glossaryJson = JSON.stringify(this._parseTermEntryContentFromFastRow(row, termFile.filename).glossary);
+                        }
                     }
-                    // Keep serialization canonical with the runtime deserializer.
-                    // A conservative media hint may produce no requirements; preserve
-                    // the formatted glossary even when no later media pass will run.
+                    // Media targets remain mutable until requirement resolution. Do
+                    // not cache placeholder paths/metadata as authoritative bytes.
+                    // Rows without new requirements can still serialize immediately,
+                    // including formatted glossaries with conservative media hints.
                     if (
                         requirementsForChunk === null ||
                         (
                             requirementsForChunk !== null &&
-                            (
-                                !hasPrecomputedTermEntryContent(entry)
-                            )
+                            requirementsForChunk.length === requirementStart &&
+                            !hasPrecomputedTermEntryContent(entry)
                         )
                     ) {
                         if (
