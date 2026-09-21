@@ -1047,6 +1047,66 @@ describe('convertMdxToArchive', () => {
         expect(materialize?.details?.missingReferencedAssetCount).toBe(0);
     });
 
+    test('honors and removes an MDD stylesheet @charset declaration', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'CSS charset fixture', Description: ''},
+            entries: [{
+                keyText: 'Styled',
+                definition: '<div class="jp">Styled</div>',
+            }],
+        });
+        const prefix = new TextEncoder().encode('@charset "Shift_JIS";\n.jp::before { content: "');
+        const suffix = new TextEncoder().encode('"; }\n');
+        const value = new Uint8Array(prefix.length + 4 + suffix.length);
+        value.set(prefix);
+        value.set(Uint8Array.of(0x93, 0xfa, 0x96, 0x7b), prefix.length);
+        value.set(suffix, prefix.length + 4);
+        mockState.mddFactory = () => [{
+            keyText: 'styles/shift-jis.css',
+            // Static Shift_JIS bytes for:
+            // @charset "Shift_JIS";\n.jp::before { content: "日本"; }\n
+            value,
+        }];
+
+        const result = await createMdxImportData(
+            'css-charset-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'css-charset-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+        const styles = result.files.get('styles.css');
+        if (!(styles instanceof Uint8Array)) { throw new Error('Expected styles.css'); }
+        const stylesCss = new TextDecoder().decode(styles);
+
+        expect(stylesCss).toContain('content: "日本"');
+        expect(stylesCss).not.toContain('@charset');
+        expect(stylesCss).not.toContain('\ufffd');
+    });
+
+    test('does not reinterpret a stylesheet with an unsupported declared charset', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Unsupported CSS charset fixture', Description: ''},
+            entries: [{
+                keyText: 'Styled',
+                definition: '<div class="jp">Styled</div>',
+            }],
+        });
+        mockState.mddFactory = () => [{
+            keyText: 'styles/unsupported.css',
+            value: new TextEncoder().encode('@charset "x-mdict-unsupported";\n.jp { color: red; }\n'),
+        }];
+
+        const result = await createMdxImportData(
+            'unsupported-css-charset-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'unsupported-css-charset-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+
+        expect(result.files.has('styles.css')).toBe(false);
+        expect(result.files.get('mdict-media/styles/unsupported.css')).toBeInstanceOf(Uint8Array);
+    });
+
     test('decodes base64 data URLs when the media type is omitted', async () => {
         mockState.mdxFactory = () => ({
             header: {
