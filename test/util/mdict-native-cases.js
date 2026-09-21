@@ -194,7 +194,8 @@ describe('MDict inline stylesheet isolation', () => {
         const result = await createMdxImportData('inline-style-comment.mdx', {}, fixture.bytes, []);
         const styles = new TextDecoder().decode(result.files.get('styles.css'));
 
-        assert.match(styles, /^\/\* Source: Alpha\* \/ \.injected\{display:block\} \/\*\/inline\/1\.css \*\//u);
+        assert.equal(styles.split('\n', 1)[0], '/* Source: Alpha* / .injected{display:block} /* /inline/1.css */');
+        assert.equal(styles.match(/\*\//gu)?.length, 1);
         assert.match(styles, /\[data-sc-class~="safe"\]\{ color: red; \}/u);
     });
 
