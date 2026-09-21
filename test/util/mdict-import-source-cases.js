@@ -42,7 +42,11 @@ function plan(...paths) {
  */
 function media(result, index = 0) {
     return result.sources[index]?.mddFiles?.map(
-        /** @param {File} item @returns {string} */ (item) => item.name,
+        /**
+         * @param {File} item
+         * @returns {string}
+         */
+        (item) => item.name,
     );
 }
 
@@ -200,9 +204,9 @@ test('volume ties use deterministic lexical order and identical names compare eq
 
 /**
  * @param {string[]} values
- * @yields {string[]}
+ * @returns {Generator<string[]>}
  */
-function* permutations(values) {
+function *permutations(values) {
     if (values.length === 0) {
         yield [];
         return;
@@ -228,7 +232,11 @@ test('all permutations of a mixed multipart selection produce identical media se
         assert.ok(mdxSource);
         assert.deepEqual(
             mdxSource.mddFiles.map(
-                /** @param {File} item @returns {string} */ (item) => item.name,
+                /**
+                 * @param {File} item
+                 * @returns {string}
+                 */
+                (item) => item.name,
             ),
             ['Book.2024.mdd', 'Book.2024.2.mdd'],
         );
