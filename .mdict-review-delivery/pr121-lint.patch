@@ -1,0 +1,16 @@
+From d94433a776a24b91227af088281fb88d785774d2 Mon Sep 17 00:00:00 2001
+From: MDict review <review@localhost>
+Date: Mon, 21 Sep 2026 15:57:35 +0000
+Subject: [PATCH] style(mdict): align the pseudo-element continuation with lint
+ rules
+
+
+diff --git a/ext/js/dictionary/mdx/mdx-converter.js b/ext/js/dictionary/mdx/mdx-converter.js
+index cda3f0a..43b9a44 100644
+--- a/ext/js/dictionary/mdx/mdx-converter.js
++++ b/ext/js/dictionary/mdx/mdx-converter.js
+@@ -1242,3 +1242,3 @@ function scopeCssSelectorSubject(selector, glossaryRootSelector) {
+                 const legacy = pseudo.value !== null &&
+-                    ['before', 'after', 'first-line', 'first-letter'].includes(pseudo.value.toLowerCase());
++                ['before', 'after', 'first-line', 'first-letter'].includes(pseudo.value.toLowerCase());
+                 if (subject[index + 1] === ':' || legacy) {

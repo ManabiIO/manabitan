@@ -1,0 +1,80 @@
+From 960584969e88f12d837338982db268d7dff09559 Mon Sep 17 00:00:00 2001
+From: MDict review <review@localhost>
+Date: Mon, 21 Sep 2026 15:57:36 +0000
+Subject: [PATCH 1/2] test(mdict): cover literal selector whitespace in inline
+ and external CSS
+
+
+diff --git a/test/playwright/mdict-native.spec.js b/test/playwright/mdict-native.spec.js
+index cfd8953..98e1247 100644
+--- a/test/playwright/mdict-native.spec.js
++++ b/test/playwright/mdict-native.spec.js
+@@ -195,2 +195,5 @@ test('MDX inline styles preserve functional roots, cascade and pseudo-elements w
+     await expect(entries.locator('[data-sc-class~="nested"]').first()).toHaveCSS('font-weight', '700');
++    await expect(entries.locator('[title="two  gaps"]').first()).toHaveCSS('color', 'rgb(12, 34, 56)');
++    await expect(entries.locator('[title="two  gaps"]').first()).toHaveCSS('font-weight', '700');
++    await expect(entries.locator('[title="tab\tgap"]').first()).toHaveCSS('color', 'rgb(23, 45, 67)');
+     const scoped = entries.locator('[data-sc-class~="shared"]:not([data-sc-class~="outside"])').first();
+diff --git a/test/util/mdict-inline-style-fixture.js b/test/util/mdict-inline-style-fixture.js
+index 612a59b..daede26 100644
+--- a/test/util/mdict-inline-style-fixture.js
++++ b/test/util/mdict-inline-style-fixture.js
+@@ -36,2 +36,5 @@ export function makeInlineStyleScopeFixture() {
+                 '.cascade { color: rgb(199, 188, 177); }',
++                '[title="two  gaps"] { color: rgb(12, 34, 56); }',
++                '[title="tab\tgap"] { color: rgb(23, 45, 67); }',
++                ':is([title="two  gaps"]) { font-weight: 700; }',
+                 '.shared { border-top: 3px solid rgb(44, 55, 66); }',
+@@ -47,2 +50,4 @@ export function makeInlineStyleScopeFixture() {
+                 '<div class="nested">nested rule</div>',
++                '<span title="two  gaps">literal spaces</span>',
++                '<span title="tab\tgap">literal tab</span>',
+             ].join(''),
+diff --git a/test/util/mdict-native-cases.js b/test/util/mdict-native-cases.js
+index a978827..3cab9a0 100644
+--- a/test/util/mdict-native-cases.js
++++ b/test/util/mdict-native-cases.js
+@@ -524 +524,25 @@ describe('MDict text format and compact styles', () => {
+ });
++
++// Attribute values and CSS escape terminators are not selector whitespace.
++describe('MDict selector literal preservation', () => {
++    const rules = [
++        '[title="two  gaps"] { color: rgb(12, 34, 56); }',
++        '[title="tab\tgap"] { color: rgb(23, 45, 67); }',
++        String.raw`[title="line\a  break"] { color: rgb(34, 56, 78); }`,
++        ':is([title="two  gaps"]) { font-weight: 700; }',
++    ].join('\n');
++    for (const context of ['inline', 'conditional', 'external']) {
++        test(`preserves literal whitespace in ${context} selectors`, async () => {
++            const css = context === 'conditional' ? `@media screen { ${rules} }` : rules;
++            const external = context === 'external';
++            const mdx = makeMdictFixture([{key: 'Literal', value: `${external ? '' : `<style>${css}</style>`}<span title="two  gaps">literal</span>`}]);
++            const sources = external ? [{name: 'literals.mdd', bytes: makeMdictFixture([{key: '\\style.css', value: new TextEncoder().encode(css)}], {mdd: true}).bytes}] : [];
++            const result = await createMdxImportData('literals.mdx', {}, mdx.bytes, sources);
++            const styles = new TextDecoder().decode(result.files.get('styles.css'));
++            assert.ok(styles.includes('[title="two  gaps"]'));
++            assert.ok(styles.includes('[title="tab\tgap"]'));
++            assert.ok(styles.includes(String.raw`[title="line\a  break"]`));
++            assert.ok(styles.includes(':is([title="two  gaps"])'));
++        });
++    }
++});
+
+From b26b2bcb37133ff46c012c060faa9b62affe7dd0 Mon Sep 17 00:00:00 2001
+From: MDict review <review@localhost>
+Date: Mon, 21 Sep 2026 15:57:37 +0000
+Subject: [PATCH 2/2] fix(mdict): preserve quoted whitespace and CSS escape
+ terminators
+
+
+diff --git a/ext/js/dictionary/mdx/mdx-converter.js b/ext/js/dictionary/mdx/mdx-converter.js
+index 43b9a44..ecaaef4 100644
+--- a/ext/js/dictionary/mdx/mdx-converter.js
++++ b/ext/js/dictionary/mdx/mdx-converter.js
+@@ -1180,3 +1180,4 @@ function migrateCssSelector(selector, glossaryRootSelector) {
+     }).join('');
+-    return migrated.replace(/\s+/gu, ' ').trim();
++    // Quoted attribute values and whitespace after CSS hex escapes are significant.
++    return migrated.trim();
+ }

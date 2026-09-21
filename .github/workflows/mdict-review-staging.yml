@@ -1,28 +1,18 @@
 name: MDict reviewed patch staging
-
 on:
   push:
     branches: [review/mdict-delivery-20260921]
-
 permissions:
-  contents: write
-
+  contents: read
 concurrency:
   group: mdict-reviewed-patch-staging
   cancel-in-progress: false
-
 jobs:
-  stage:
+  selector-refinement:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - id: pr120
-            base: 0f31184408d486bd6fd12e8388484bbd69d701ce
-          - id: pr121
-            base: 6bcdc2cdfb7900d191c65b11879124be784a7a5a
+    permissions:
+      contents: write
     defaults:
       run:
         shell: bash
@@ -34,7 +24,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v6
         with:
-          ref: ${{ matrix.base }}
+          ref: fbcdf2e8a4ef0c69a60b51b02f8702a6b0048727
           path: candidate
           fetch-depth: 0
       - uses: actions/setup-node@v4
@@ -42,55 +32,100 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: candidate/package-lock.json
-      - name: Replay reviewed mailbox commits on the exact PR head
-        env:
-          SERIES: ${{ matrix.id }}
-          EXPECTED_BASE: ${{ matrix.base }}
+      - name: Replay lint correction and separate selector-literal regressions
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$EXPECTED_BASE"
           git config user.name 'MDict review'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git am "../packet/.mdict-review-delivery/$SERIES.patch"
-          git diff --check "$EXPECTED_BASE" HEAD
+          git am ../packet/.mdict-review-delivery/pr121-lint.patch
+          git push origin HEAD:refs/heads/review/mdict-pr121-lint-staged-20260921
+          git am ../packet/.mdict-review-delivery/selector-literals.patch
+          git diff --check HEAD~3 HEAD
       - name: Install and build dependencies
         run: npm ci && npm run build:libs
-      - name: Native regression qualification
+      - name: Native regression qualification and staging publication
         run: |
-          set -o pipefail
           mkdir -p ../results
           node --test --test-reporter=tap test/util/mdict-*-cases.js test/util/search-refresh-cases.js 2>&1 | tee ../results/native.tap
-      - name: Publish staging branch without modifying PRs or trunk
-        env:
-          SERIES: ${{ matrix.id }}
+          git push origin HEAD:refs/heads/fix/mdict-selector-literals-20260921
+      - name: JavaScript and TypeScript validation
         run: |
-          set -euo pipefail
-          git push origin "HEAD:refs/heads/review/mdict-$SERIES-staged-20260921"
-          git rev-parse HEAD > "../results/$SERIES.sha"
-      - name: Stage the separate StripKey follow-up after the lookup corrections
-        if: matrix.id == 'pr120'
-        run: |
-          set -euo pipefail
-          git am ../packet/.mdict-review-delivery/stripkey.patch
-          git diff --check HEAD~2 HEAD
-          node --test --test-reporter=tap test/util/mdict-*-cases.js test/util/search-refresh-cases.js 2>&1 | tee ../results/stripkey-native.tap
-          git push origin HEAD:refs/heads/review/mdict-stripkey-staged-20260921
-          git rev-parse HEAD > ../results/stripkey.sha
-      - name: JavaScript validation
-        run: npm run test:js 2>&1 | tee ../results/javascript.log
-      - name: TypeScript validation
-        if: success() || failure()
-        run: npm run test:ts 2>&1 | tee ../results/typescript.log
-      - name: Preserve source and test results
+          npm run test:js 2>&1 | tee ../results/javascript.log
+          npm run test:ts 2>&1 | tee ../results/typescript.log
+      - name: Preserve tested source
         if: always()
         run: |
           mkdir -p ../results
           git rev-parse HEAD > ../results/tested-head.sha
           git archive HEAD | gzip > ../results/source.tar.gz
-          tar -czf ../results/built-libs.tar.gz ext/lib
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mdict-reviewed-${{ matrix.id }}-${{ github.run_id }}
+          name: mdict-selector-refinement-${{ github.run_id }}
           path: results/
+          retention-days: 7
+  media-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: e28119e9e49e16c72b6087e0a71cbf7dce54b22d
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci && npm run build:libs && node web/build.mjs
+      - name: Prepare the existing local media fixture without downloading dictionaries
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import pathlib, json, zipfile, base64
+          root = pathlib.Path('/tmp/mdict-media-probe')
+          root.mkdir(exist_ok=True)
+          source = pathlib.Path('web/prepare-fixtures.py').read_text()
+          exec(source[source.index('def write('):])
+          PY
+          npx playwright install --with-deps chromium
+      - name: Diagnose image-only rendering through the real importer, database and renderer
+        shell: bash
+        env:
+          DICTIONARY_FIXTURES: /tmp/mdict-media-probe
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path('web/e2e.mjs').read_text()
+          prefix = source[:source.index('try {\n    await launch();')]
+          suffix = '''try {
+              await launch();
+              await page.evaluate(() => openRuntime());
+              await importFile('web-media.zip');
+              await page.evaluate(() => find('画像検査'));
+              console.log('MEDIA_DIAGNOSTIC', JSON.stringify(await page.evaluate(async () => {
+                  const data = await runtime.media('Web Media', 'pixel.png');
+                  return {html: document.querySelector('#result').innerHTML, media: data && {type: data.mediaType, length: data.content.byteLength, firstBytes: Array.from(new Uint8Array(data.content).slice(0, 24))}};
+              })));
+              await expect.poll(() => page.locator('#result .gloss-image').evaluate(el => el.complete && el.naturalWidth > 0)).toBe(true);
+          } catch (error) {
+              console.log('MEDIA_FAILURE', String(error));
+              console.log('MEDIA_DOM', await page.locator('#result').innerHTML());
+              process.exitCode = 1;
+          } finally {
+              await context?.close();
+              await new Promise(r => server.close(r));
+              await fs.rm(profile, {recursive: true, force: true});
+              await save();
+          }
+          '''
+          Path('web/media-review-probe.mjs').write_text(prefix + suffix)
+          PY
+          set -o pipefail
+          node web/media-review-probe.mjs 2>&1 | tee media-probe.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mdict-media-diagnostic-${{ github.run_id }}
+          path: |
+            media-probe.log
+            builds/web-evidence/
           retention-days: 7
