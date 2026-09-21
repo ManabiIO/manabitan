@@ -67,12 +67,12 @@ test('download stage preserves validated MDD volume order instead of sorting by 
         fileName,
         url: `https://example.com/${fileName}`,
     }));
-    const files = await c._downloadListingFiles(
+    const files = /** @type {File[]} */ (await c._downloadListingFiles(
         listingFiles,
         100,
         () => {},
         new AbortController().signal,
-    );
+    ));
     assert.deepEqual(files.map(({name}) => name), paths);
 });
 
@@ -329,7 +329,7 @@ test('controller fences stale conversion before publishing notices or invoking s
     const h = importHarness(true);
     await assert.rejects(
         h.c._importDictionaryFromMdx(
-            {mdxFile: new File(['x'], 'Book.mdx'), mddFiles: []},
+            {type: 'mdx', mdxFile: new File(['x'], 'Book.mdx'), mddFiles: []},
             null,
             {},
             false,
@@ -347,7 +347,7 @@ test('controller fences stale conversion before publishing notices or invoking s
 test('controller publishes a conversion note without turning successful installation into an error', async () => {
     const h = importHarness(false);
     const result = await h.c._importDictionaryFromMdx(
-        {mdxFile: new File(['x'], 'Book.mdx'), mddFiles: []},
+        {type: 'mdx', mdxFile: new File(['x'], 'Book.mdx'), mddFiles: []},
         null,
         {},
         false,
@@ -367,7 +367,10 @@ test('controller publishes a conversion note without turning successful installa
 test('direct MDX download preserves its URL filename for companion discovery', async () => {
     const c = Object.create(DictionaryImportController.prototype);
     c._downloadDictionaryFileViaXhr = async () => new File(['mdx'], 'download.bin');
-    c._getMdxListingForUrl = async (url, filename) => {
+    c._getMdxListingForUrl = async (
+        /** @type {string} */ url,
+        /** @type {string} */ filename,
+    ) => {
         assert.equal(filename, 'Book.2024.mdx');
         return {
             mdxLink: {url, fileName: filename},
