@@ -1,0 +1,29 @@
+name: Fractional score source capsule
+
+on:
+  push:
+    branches:
+      - review/fractional-score-correctness-20260920
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Record source identity
+        run: |
+          mkdir -p builds/fractional-score-source
+          git rev-parse HEAD > builds/fractional-score-source/commit.txt
+          git status --short > builds/fractional-score-source/status.txt
+      - name: Package source
+        run: |
+          tar -czf builds/fractional-score-source/source.tar.gz             --exclude=node_modules             --exclude=builds             .github dev ext test types package.json package-lock.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fractional-score-source
+          path: builds/fractional-score-source/
+          retention-days: 7
