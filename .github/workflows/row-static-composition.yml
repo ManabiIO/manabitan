@@ -1,0 +1,103 @@
+name: Row materialization static composition check
+
+on:
+  push:
+    branches: [review/importer-row-materialization-20260920]
+    paths: ['.github/workflows/row-static-composition.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        arm: [base, repaired]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Select exact current develop composition
+        env:
+          ARM: '${{ matrix.arm }}'
+        run: |
+          cp dev/perf/importer-row-materialization.patch "$RUNNER_TEMP/row.patch"
+          git fetch --depth=1 origin 131e51bc815a165bb79f774152b201554cb8827e
+          git checkout --detach 131e51bc815a165bb79f774152b201554cb8827e
+          if [ "$ARM" = repaired ]; then
+            git apply --check "$RUNNER_TEMP/row.patch"
+            git apply "$RUNNER_TEMP/row.patch"
+          fi
+          mkdir -p builds/web-evidence
+          git rev-parse HEAD > builds/web-evidence/base.txt
+          git diff --binary > builds/web-evidence/production.patch
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.21.0'
+      - run: npm ci
+      - run: npm run build:libs
+      - run: node web/build.mjs
+      - uses: actions/checkout@v4
+        with:
+          repository: ManabiIO/manabi-reader-web
+          ref: bca91f6fff6300d10ba47d046dfb1a20a7c97e5e
+          path: reader-fixtures
+          sparse-checkout: test/reader/e2e
+          persist-credentials: false
+      - name: Prepare the unchanged official acceptance fixtures
+        run: |
+          python3 reader-fixtures/test/reader/e2e/prepare-jmdict.py "$RUNNER_TEMP/dictionaries"
+          python3 web/make-fixtures.py "$RUNNER_TEMP/dictionaries"
+          python3 web/prepare-fixtures.py "$RUNNER_TEMP/dictionaries"
+          npx playwright install --with-deps chromium
+          sha256sum "$RUNNER_TEMP/dictionaries/web-media.zip" ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-wasm-parser.js ext/lib/term-bank-parser.wasm > builds/web-evidence/sources.sha256
+      - name: Add failure diagnostics without changing assertions
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('web/extended-e2e.mjs')
+          s = p.read_text()
+          original = "        await expect.poll(() => page.locator('#result .gloss-image').evaluate((el) => el.complete && el.naturalWidth > 0)).toBe(true);"
+          assert s.count(original) == 1
+          diagnostic = '''        try {
+          ORIGINAL
+                  } catch (error) {
+                      const diagnostic = await page.evaluate(async () => {
+                          const image = document.querySelector('#result .gloss-image');
+                          const data = {
+                              markup: image?.outerHTML,
+                              src: image?.src,
+                              currentSrc: image?.currentSrc,
+                              complete: image?.complete,
+                              naturalWidth: image?.naturalWidth,
+                              naturalHeight: image?.naturalHeight,
+                              lookup: await runtime.lookup('画像検査'),
+                          };
+                          try {
+                              const response = await fetch(image?.currentSrc || image?.src);
+                              const bytes = new Uint8Array(await response.arrayBuffer());
+                              data.blob = {status: response.status, type: response.headers.get('content-type'), length: bytes.length, prefix: Array.from(bytes.subarray(0, 96))};
+                          } catch (fetchError) { data.blobError = String(fetchError); }
+                          return data;
+                      });
+                      await fs.writeFile('builds/web-evidence/image-failure.json', JSON.stringify(diagnostic, null, 2));
+                      throw error;
+                  }'''.replace('          ORIGINAL', original)
+          p.write_text(s.replace(original, diagnostic))
+          PY
+      - name: Run unchanged no-extension acceptance with diagnostic capture
+        env:
+          DICTIONARY_FIXTURES: '${{ runner.temp }}/dictionaries'
+        run: |
+          set -o pipefail
+          node web/e2e.mjs 2>&1 | tee builds/web-evidence/run.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 'row-static-composition-${{ matrix.arm }}'
+          path: builds/web-evidence/
+          retention-days: 14
+          if-no-files-found: error
