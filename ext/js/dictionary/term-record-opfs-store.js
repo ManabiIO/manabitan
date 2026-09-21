@@ -90,6 +90,8 @@ const LOOKUP_INDEX_CHUNK_HEADER_BYTES = 40;
 const LOOKUP_INDEX_RECORD_FIELDS_BYTES = 12;
 const LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY = 1;
 const LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT = 2;
+const LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE = 3;
+const FLOAT64_SCORE_RECORD_FIELDS_BYTES = 16;
 const COMPACT_RECORD_FIELDS_MAGIC = 0x3246524d;
 const COMPACT_RECORD_FIELDS_HEADER_BYTES = 16;
 const COMPACT_RECORD_FIELDS_BYTES_PER_ROW = 8;
@@ -113,6 +115,9 @@ const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 function getRecordFieldsByteLength(content, offset, count, format) {
     if (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY) {
         return count * LOOKUP_INDEX_RECORD_FIELDS_BYTES;
+    }
+    if (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE) {
+        return count * FLOAT64_SCORE_RECORD_FIELDS_BYTES;
     }
     if (
         format !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT ||
@@ -175,6 +180,19 @@ function parseCompactRecordFields(bytes, count) {
 }
 
 /**
+ * @param {number} score
+ * @returns {boolean}
+ */
+function isLosslessInt32Score(score) {
+    return (
+        Number.isInteger(score) &&
+        score >= -0x80000000 &&
+        score <= 0x7fffffff &&
+        !Object.is(score, -0)
+    );
+}
+
+/**
  * @param {Uint8Array} bytes
  * @param {number} count
  * @param {number} format
@@ -189,12 +207,15 @@ function validateRecordFields(bytes, count, format, contentOffsetBase) {
     if (contentOffsetBase <= Number.MAX_SAFE_INTEGER - MAX_CONTENT_OFFSET_DELTA) {
         return compactFields;
     }
-    const legacyView = compactFields === null ?
+    const fixedView = compactFields === null ?
         new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength) :
         null;
+    const fixedRowBytes = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE ?
+        FLOAT64_SCORE_RECORD_FIELDS_BYTES :
+        LOOKUP_INDEX_RECORD_FIELDS_BYTES;
     for (let row = 0; row < count; ++row) {
         const contentOffsetDelta = compactFields === null ?
-            /** @type {DataView} */ (legacyView).getUint32(row * LOOKUP_INDEX_RECORD_FIELDS_BYTES, true) :
+            /** @type {DataView} */ (fixedView).getUint32(row * fixedRowBytes, true) :
             compactFields.offsets[row];
         if (
             contentOffsetDelta !== U32_NULL &&
@@ -1783,7 +1804,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, preparedLookupIndexes?: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}>}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, preparedLookupIndexes?: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}>}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {string | (string|null)[]} contentDictNames
@@ -1956,7 +1977,7 @@ export class TermRecordOpfsStore {
                 runStart = runEnd;
                 continue;
             }
-            /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
+            /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
             const chunkSlice = {
                 dictionary: chunk.dictionary,
                 rowCount: runCount,
@@ -1995,7 +2016,7 @@ export class TermRecordOpfsStore {
      */
     async _encodeAndAppendChunkForState(state, records, preinternedPlan = null) {
         const tEncodeStart = safePerformance.now();
-        const {contentOffsetBase, lookupIndexBytes, recordFields} = await this._encodeRecords(records, preinternedPlan);
+        const {contentOffsetBase, lookupIndexBytes, recordFields, recordFieldsFormat} = await this._encodeRecords(records, preinternedPlan);
         const encodeMs = safePerformance.now() - tEncodeStart;
         const tAppendStart = safePerformance.now();
         await this._appendEncodedChunk(
@@ -2006,6 +2027,7 @@ export class TermRecordOpfsStore {
             contentOffsetBase,
             lookupIndexBytes,
             recordFields,
+            recordFieldsFormat,
         );
         const appendWriteMs = safePerformance.now() - tAppendStart;
         return {encodeMs, appendWriteMs};
@@ -2057,7 +2079,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {TermRecordShardState} state
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
      * @param {number} firstId
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
@@ -2732,7 +2754,11 @@ export class TermRecordOpfsStore {
                 null;
             for (const id of chunkIds) {
                 const ordinal = id - chunk.firstId;
-                const fieldsOffset = ordinal * LOOKUP_INDEX_RECORD_FIELDS_BYTES;
+                const fieldsOffset = ordinal * (
+                    chunk.recordFieldsFormat === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE ?
+                        FLOAT64_SCORE_RECORD_FIELDS_BYTES :
+                        LOOKUP_INDEX_RECORD_FIELDS_BYTES
+                );
                 const expressionBytes = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'expression');
                 if (expressionBytes === null) { continue; }
                 const readingBytes = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'reading');
@@ -2757,7 +2783,9 @@ export class TermRecordOpfsStore {
                     entryContentLength: rawContentLength === (compactFields === null ? U32_NULL : U16_NULL) ? -1 : rawContentLength,
                     entryContentDictName: chunk.contentDictName,
                     score: compactFields === null ?
-                        /** @type {DataView} */ (fieldsView).getInt32(fieldsOffset + 8, true) :
+                        (chunk.recordFieldsFormat === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE ?
+                            /** @type {DataView} */ (fieldsView).getFloat64(fieldsOffset + 8, true) :
+                            /** @type {DataView} */ (fieldsView).getInt32(fieldsOffset + 8, true)) :
                         compactFields.scores[compactFields.scoreKeys[ordinal]],
                     sequence: getPersistedTermSequence(chunk.lookupIndex, ordinal),
                 };
@@ -3366,7 +3394,10 @@ export class TermRecordOpfsStore {
                         baseLength >= payloadLength ||
                         (
                             formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY &&
-                            formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT
+                            formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT &&
+
+                    formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE
+
                         ) ||
                         recordFieldsEnd > content.byteLength
                     ) {
@@ -3706,7 +3737,10 @@ export class TermRecordOpfsStore {
                     baseLength >= payloadLength ||
                     (
                         formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY &&
-                        formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT
+                        formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT &&
+
+                formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE
+
                     )
                 ) {
                     throw new TermRecordIntegrityError(`Authoritative chunk metadata is invalid: ${state.fileName}`);
@@ -4501,7 +4535,7 @@ export class TermRecordOpfsStore {
     /**
      * @param {TermRecord[]} records
      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
-     * @returns {Promise<{contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array}>}
+     * @returns {Promise<{contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array, recordFieldsFormat: number}>}
      */
     async _encodeRecords(records, preinternedPlan = null) {
         if (records.length === 0) {
@@ -4509,12 +4543,19 @@ export class TermRecordOpfsStore {
                 contentOffsetBase: 0,
                 lookupIndexBytes: new Uint8Array(0),
                 recordFields: new Uint8Array(0),
+                recordFieldsFormat: LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
             };
         }
         const contentOffsetBase = getContentOffsetBase(records.map(({entryContentOffset}) => entryContentOffset));
-        const recordFields = new Uint8Array(records.length * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
-        const recordFieldsU32 = new Uint32Array(recordFields.buffer);
-        const recordFieldsI32 = new Int32Array(recordFields.buffer);
+        const useFloat64Scores = records.some(({score}) => !isLosslessInt32Score(score));
+        const recordFieldsFormat = useFloat64Scores ?
+            LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE :
+            LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY;
+        const recordFieldsBytesPerRow = useFloat64Scores ?
+            FLOAT64_SCORE_RECORD_FIELDS_BYTES :
+            LOOKUP_INDEX_RECORD_FIELDS_BYTES;
+        const recordFields = new Uint8Array(records.length * recordFieldsBytesPerRow);
+        const recordFieldsView = new DataView(recordFields.buffer);
         const readingEqualsExpressionList = new Uint8Array(records.length);
         const sequenceList = new Int32Array(records.length);
         /** @type {Array<{expressionBytes: Uint8Array, readingBytes: Uint8Array|null, sequence: number|null}>|null} */
@@ -4528,10 +4569,14 @@ export class TermRecordOpfsStore {
             const reading = record.reading ?? expression;
             const readingEqualsExpression = record.readingEqualsExpression ?? (reading === expression);
             const sequence = record.sequence ?? -1;
-            const fieldOffset = i * 3;
-            recordFieldsU32[fieldOffset] = getContentOffsetDelta(entryContentOffset, contentOffsetBase);
-            recordFieldsU32[fieldOffset + 1] = entryContentLength < 0 ? U32_NULL : entryContentLength;
-            recordFieldsI32[fieldOffset + 2] = record.score;
+            const fieldOffset = i * recordFieldsBytesPerRow;
+            recordFieldsView.setUint32(fieldOffset, getContentOffsetDelta(entryContentOffset, contentOffsetBase), true);
+            recordFieldsView.setUint32(fieldOffset + 4, entryContentLength < 0 ? U32_NULL : entryContentLength, true);
+            if (useFloat64Scores) {
+                recordFieldsView.setFloat64(fieldOffset + 8, record.score, true);
+            } else {
+                recordFieldsView.setInt32(fieldOffset + 8, record.score, true);
+            }
             readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
             sequenceList[i] = sequence;
             if (lookupRows !== null) {
@@ -4560,6 +4605,7 @@ export class TermRecordOpfsStore {
             contentOffsetBase,
             lookupIndexBytes,
             recordFields,
+            recordFieldsFormat,
         };
     }
 
@@ -4567,7 +4613,7 @@ export class TermRecordOpfsStore {
      * Encodes the hot artifact path as columnar random-access fields. Content
      * lengths use u16 and repeated scores use per-chunk u16 dictionary keys;
      * unusual chunks fall back to the legacy fixed-width rows.
-     * @param {{rowCount: number, scoreList: number[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+     * @param {{rowCount: number, scoreList: number[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {number} contentOffsetBase
@@ -4580,8 +4626,22 @@ export class TermRecordOpfsStore {
         const scoreKeys = new Uint16Array(count);
         /** @type {number[]} */
         const scores = [];
+        const useFloat64Scores = chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0));
         /** @type {Map<number, number>} */
         const scoreIndexes = new Map();
+        if (useFloat64Scores) {
+            const output = new Uint8Array(count * FLOAT64_SCORE_RECORD_FIELDS_BYTES);
+            const view = new DataView(output.buffer);
+            for (let i = 0; i < count; ++i) {
+                const fieldOffset = i * FLOAT64_SCORE_RECORD_FIELDS_BYTES;
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+                view.setUint32(fieldOffset, contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase, true);
+                view.setUint32(fieldOffset + 4, contentLength < 0 ? U32_NULL : contentLength, true);
+                view.setFloat64(fieldOffset + 8, chunk.scoreList[i] ?? 0, true);
+            }
+            return output;
+        }
         let compact = true;
         for (let i = 0; i < count; ++i) {
             const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
@@ -4644,7 +4704,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
@@ -4690,9 +4750,11 @@ export class TermRecordOpfsStore {
             contentLengths,
             contentOffsetBase,
         );
-        const recordFieldsFormat = recordFields.byteLength === chunk.rowCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES ?
-            LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY :
-            LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT;
+        const recordFieldsFormat = chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0)) ?
+            LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE :
+            (recordFields.byteLength === chunk.rowCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES ?
+                LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY :
+                LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT);
         const recordFieldEncodeMs = safePerformance.now() - tRecordEncodeStart;
         const tLookupIndexEncodeStart = safePerformance.now();
         let lookupIndexBytes = preparedLookupIndexBytes;
