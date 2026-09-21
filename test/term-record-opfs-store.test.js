@@ -3468,6 +3468,62 @@ describe('TermRecordOpfsStore', () => {
         expect(retryStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
     });
 
+    test('superseded derived repair aborts before publishing its staged sidecar', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Superseded derived repair';
+        const fileBytesByName = new Map();
+        const writeGate = {
+            enabled: false,
+            entered: Promise.withResolvers(),
+            resume: Promise.withResolvers(),
+        };
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
+            beforeWrite: async (name) => {
+                if (!writeGate.enabled || !name.endsWith('.mbti')) { return; }
+                writeGate.entered.resolve();
+                await writeGate.resume.promise;
+            },
+        });
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await writerStore.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: dictionaryName,
+            dictionaryTotalRows: 1_000_000,
+            rowCount: 1,
+            expressionBytesList: [textEncoder.encode('世代')],
+            readingBytesList: [textEncoder.encode('せだい')],
+            readingEqualsExpressionList: new Uint8Array([0]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([1]),
+        }, [0], [8], 'raw');
+        await writerStore._closeAllWritables();
+
+        const indexFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbti'));
+        if (typeof indexFileName !== 'string') { throw new Error('Expected authoritative container'); }
+        const indexBytes = fileBytesByName.get(indexFileName);
+        if (typeof indexBytes === 'undefined') { throw new Error('Expected authoritative bytes'); }
+        const indexView = new DataView(indexBytes.buffer, indexBytes.byteOffset, indexBytes.byteLength);
+        const derivedOffset = 40 + 40 + 16 + indexView.getUint32(40 + 20, true);
+        indexBytes[derivedOffset + 8] ^= 0xff;
+        const damagedBytes = new Uint8Array(indexBytes);
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(false);
+        writeGate.enabled = true;
+        const repair = readerStore._tryRepairPersistentDictionaryIndex(dictionaryName);
+        await writeGate.entered.promise;
+        readerStore.markDictionaryReimportRequired(dictionaryName, 'Newer quarantine');
+        writeGate.resume.resolve();
+
+        await expect(repair).resolves.toBe(false);
+        expect(fileBytesByName.get(indexFileName)).toStrictEqual(damagedBytes);
+        expect(readerStore.getDictionaryHealth(dictionaryName)).toEqual({
+            status: 'reimportRequired',
+            reason: 'Newer quarantine',
+        });
+    });
+
     test('requires reimport when the authoritative container is missing', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Missing authoritative container';
