@@ -1,0 +1,293 @@
+From 5516a7127bb34882344e35668172415c7fda97f5 Mon Sep 17 00:00:00 2001
+From: Local review <review@localhost>
+Date: Mon, 21 Sep 2026 07:01:34 +0000
+Subject: [PATCH 1/2] test(mdict): cover inline root selector and cascade
+ semantics
+
+
+diff --git a/test/playwright/mdict-native.spec.js b/test/playwright/mdict-native.spec.js
+index c9eb1c5..cfd8953 100644
+--- a/test/playwright/mdict-native.spec.js
++++ b/test/playwright/mdict-native.spec.js
+@@ -18,2 +18,3 @@
+ import {makeFixturePng, makeMdictFixture} from '../util/mdict-binary-fixture.js';
++import {INLINE_STYLE_SCOPE_TITLE, makeInlineStyleScopeFixture} from '../util/mdict-inline-style-fixture.js';
+ import {expect, test} from './playwright-util.js';
+@@ -174 +175,29 @@ test('MDX native cross-block import preserves aliases, senses and media through
+ });
++
++
++test('MDX inline styles preserve functional roots, cascade and pseudo-elements without affecting a homograph', async ({page, extensionId}) => {
++    test.setTimeout(90_000);
++    const extensionBaseUrl = `chrome-extension://${extensionId}`;
++    const fixture = makeInlineStyleScopeFixture();
++    await importFiles(page, extensionBaseUrl, [
++        {name: 'inline-scope.mdx', mimeType: 'application/octet-stream', buffer: Buffer.from(fixture.bytes)},
++    ], INLINE_STYLE_SCOPE_TITLE);
++    await page.goto(`${extensionBaseUrl}/search.html`);
++    await expect(page.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
++    await page.locator('#search-textbox').fill('猫');
++    await page.locator('#search-button').click();
++    const entries = page.locator('#dictionary-entries');
++    await expect(entries).toContainText('functional root', {timeout: 30_000});
++    await expect(entries).toContainText('unscoped entry');
++    await expect(entries.locator('[data-sc-class~="functional"]').first()).toHaveCSS('color', 'rgb(11, 22, 33)');
++    await expect(entries.locator('[data-sc-class~="where-root"]').first()).toHaveCSS('color', 'rgb(22, 33, 44)');
++    await expect(entries.locator('[data-sc-class~="cascade"]').first()).toHaveCSS('color', 'rgb(33, 44, 55)');
++    await expect(entries.locator('[data-sc-class~="nested"]').first()).toHaveCSS('font-weight', '700');
++    const scoped = entries.locator('[data-sc-class~="shared"]:not([data-sc-class~="outside"])').first();
++    const outside = entries.locator('[data-sc-class~="outside"]').first();
++    await expect(scoped).toHaveCSS('border-top-width', '3px');
++    await expect(outside).toHaveCSS('border-top-width', '0px');
++    expect(await scoped.evaluate((node) => getComputedStyle(node, '::before').content)).toBe('"scoped"');
++    expect(await scoped.evaluate((node) => getComputedStyle(node, '::after').content)).toBe('"legacy"');
++    expect(await outside.evaluate((node) => getComputedStyle(node, '::before').content)).toBe('none');
++});
+diff --git a/test/util/mdict-inline-style-fixture.js b/test/util/mdict-inline-style-fixture.js
+new file mode 100644
+index 0000000..612a59b
+--- /dev/null
++++ b/test/util/mdict-inline-style-fixture.js
+@@ -0,0 +1,52 @@
++/*
++ * Copyright (C) 2026  Yomitan Authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++
++import {makeMdictFixture} from './mdict-binary-fixture.js';
++
++export const INLINE_STYLE_SCOPE_TITLE = 'MDict inline style scope fixture';
++
++/**
++ * One pair of homographs, rendered together, exposes lost root selectors,
++ * specificity changes, pseudo-element regressions and cross-entry styling.
++ * @returns {ReturnType<typeof makeMdictFixture>}
++ */
++export function makeInlineStyleScopeFixture() {
++    return makeMdictFixture([
++        {
++            key: '猫',
++            value: [
++                '<style>',
++                ':is(:root) > .functional { color: rgb(11, 22, 33); }',
++                ':where(html, body) > .where-root { color: rgb(22, 33, 44); }',
++                ':root .cascade { color: rgb(33, 44, 55); }',
++                '.cascade { color: rgb(199, 188, 177); }',
++                '.shared { border-top: 3px solid rgb(44, 55, 66); }',
++                '.shared::before { content: "scoped"; color: rgb(55, 66, 77); }',
++                '.shared:after { content: "legacy"; }',
++                ':root + * { background-color: rgb(201, 202, 203); }',
++                '@media screen { .nested { font-weight: 700; } }',
++                '</style>',
++                '<div class="functional">functional root</div>',
++                '<div class="where-root">where root</div>',
++                '<div class="cascade">cascade</div>',
++                '<div class="shared">scoped entry</div>',
++                '<div class="nested">nested rule</div>',
++            ].join(''),
++        },
++        {key: '猫', value: '<div class="shared outside">unscoped entry</div>'},
++    ], {title: INLINE_STYLE_SCOPE_TITLE, keysPerBlock: 1, recordBlockSize: 7});
++}
+diff --git a/test/util/mdict-native-cases.js b/test/util/mdict-native-cases.js
+index 99be654..36f5f7c 100644
+--- a/test/util/mdict-native-cases.js
++++ b/test/util/mdict-native-cases.js
+@@ -25,2 +25,3 @@ import {createMdxImportData} from '../../ext/js/dictionary/mdx/mdx-converter.js'
+ import {makeFixturePng, makeMdictFixture} from './mdict-binary-fixture.js';
++import {makeInlineStyleScopeFixture} from './mdict-inline-style-fixture.js';
+ 
+@@ -217,2 +218,28 @@ describe('MDict inline stylesheet isolation', () => {
+ 
++describe('MDict inline scope selector semantics', () => {
++    test('entry scope guards the subject without changing selector specificity or losing functional roots', async () => {
++        const fixture = makeInlineStyleScopeFixture();
++        const result = await createMdxImportData('inline-semantic-scope.mdx', {}, fixture.bytes, []);
++        const styles = new TextDecoder().decode(result.files.get('styles.css'));
++        const root = '[data-sc-class~="mdict-yomitan-entry-0"]';
++        const guard = `:where(${root}, ${root} *)`;
++        assert.ok(styles.includes(`:is(${root}) > [data-sc-class~="functional"]${guard}`));
++        assert.ok(styles.includes(`:where(${root}, ${root}) > [data-sc-class~="where-root"]${guard}`));
++        assert.ok(styles.includes(`${root} [data-sc-class~="cascade"]${guard}`));
++        assert.ok(styles.includes(`\n[data-sc-class~="cascade"]${guard}`));
++        assert.ok(styles.includes(`${root} + *${guard}`));
++    });
++
++    test('the containment guard precedes modern and legacy pseudo-elements inside conditional rules', async () => {
++        const fixture = makeInlineStyleScopeFixture();
++        const result = await createMdxImportData('inline-pseudo-scope.mdx', {}, fixture.bytes, []);
++        const styles = new TextDecoder().decode(result.files.get('styles.css'));
++        const root = '[data-sc-class~="mdict-yomitan-entry-0"]';
++        const guard = `:where(${root}, ${root} *)`;
++        assert.ok(styles.includes(`[data-sc-class~="shared"]${guard}::before`));
++        assert.ok(styles.includes(`[data-sc-class~="shared"]${guard}:after`));
++        assert.ok(styles.includes(`@media screen { [data-sc-class~="nested"]${guard}`));
++    });
++});
++
+ describe('actual binary MDX/MDD conversion', () => {
+
+From 8677967ae3450193a616711a87d0c6bcd14a4320 Mon Sep 17 00:00:00 2001
+From: Local review <review@localhost>
+Date: Mon, 21 Sep 2026 07:05:01 +0000
+Subject: [PATCH 2/2] fix(mdict): contain inline CSS subjects without changing
+ specificity
+
+
+diff --git a/ext/js/dictionary/mdx/mdx-converter.js b/ext/js/dictionary/mdx/mdx-converter.js
+index 4e6c542..cda3f0a 100644
+--- a/ext/js/dictionary/mdx/mdx-converter.js
++++ b/ext/js/dictionary/mdx/mdx-converter.js
+@@ -1183,2 +1183,75 @@ function migrateCssSelector(selector, glossaryRootSelector) {
+ 
++/**
++ * Constrain the matched element, not merely an ancestor, to this definition.
++ * :where() adds no specificity. Guard the originating element before its
++ * pseudo-element so ::before/::after and their legacy spellings stay valid.
++ * @param {string} selector
++ * @param {string} glossaryRootSelector
++ * @returns {string}
++ */
++function scopeCssSelectorSubject(selector, glossaryRootSelector) {
++    const parts = splitSelectorByCombinators(selector);
++    let subjectIndex = parts.length - 1;
++    while (subjectIndex >= 0) {
++        const part = parts[subjectIndex];
++        if (part.trim().length > 0 && !['>', '+', '~'].includes(part)) { break; }
++        subjectIndex -= 1;
++    }
++    if (subjectIndex < 0) { return selector; }
++    const subject = parts[subjectIndex];
++    let insertionIndex = subject.length;
++    let quote = '';
++    let bracketDepth = 0;
++    let parenDepth = 0;
++    for (let index = 0; index < subject.length; index += 1) {
++        const character = subject[index];
++        if (character === '\\') {
++            const escape = readCssEscape(subject, index);
++            if (escape !== null) { index = escape.endIndex - 1; }
++            continue;
++        }
++        if (quote.length > 0) {
++            if (character === quote) { quote = ''; }
++            continue;
++        }
++        switch (character) {
++            case '"':
++            case "'": {
++                quote = character;
++                break;
++            }
++            case '[': {
++                bracketDepth += 1;
++                break;
++            }
++            case ']': {
++                bracketDepth = Math.max(0, bracketDepth - 1);
++                break;
++            }
++            case '(': {
++                parenDepth += 1;
++                break;
++            }
++            case ')': {
++                parenDepth = Math.max(0, parenDepth - 1);
++                break;
++            }
++            case ':': {
++                if (bracketDepth > 0 || parenDepth > 0) { break; }
++                const pseudo = readCssIdentifier(subject, index + 1);
++                const legacy = pseudo.value !== null &&
++                    ['before', 'after', 'first-line', 'first-letter'].includes(pseudo.value.toLowerCase());
++                if (subject[index + 1] === ':' || legacy) {
++                    insertionIndex = index;
++                }
++                break;
++            }
++        }
++        if (insertionIndex < subject.length) { break; }
++    }
++    const guard = `:where(${glossaryRootSelector}, ${glossaryRootSelector} *)`;
++    parts[subjectIndex] = `${subject.slice(0, insertionIndex)}${guard}${subject.slice(insertionIndex)}`;
++    return parts.join('');
++}
++
+ /**
+@@ -1309,4 +1382,4 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector, scopeSelector
+                         let migrated = migrateCssSelector(part, glossaryRootSelector);
+-                        if (scopeSelectors && migrated.length > 0 && !migrated.startsWith(glossaryRootSelector)) {
+-                            migrated = `${glossaryRootSelector} ${migrated}`;
++                        if (scopeSelectors && migrated.length > 0) {
++                            migrated = scopeCssSelectorSubject(migrated, glossaryRootSelector);
+                         }
+diff --git a/test/util/mdict-native-cases.js b/test/util/mdict-native-cases.js
+index 36f5f7c..a978827 100644
+--- a/test/util/mdict-native-cases.js
++++ b/test/util/mdict-native-cases.js
+@@ -158,3 +158,3 @@ describe('MDict inline stylesheet isolation', () => {
+         assert.doesNotMatch(betaRoot?.data?.class ?? '', /mdict-yomitan-entry-/u);
+-        assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="shared"\]/u);
++        assert.ok(styles.includes('[data-sc-class~="shared"]:where([data-sc-class~="mdict-yomitan-entry-0"], [data-sc-class~="mdict-yomitan-entry-0"] *)'));
+         assert.doesNotMatch(styles, /(?:^|[,{])\s*\[data-sc-class~="shared"\]\s*\{/u);
+@@ -174,4 +174,4 @@ describe('MDict inline stylesheet isolation', () => {
+         assert.match(rootClasses[1], /mdict-yomitan-entry-1/u);
+-        assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="shared"\]\{ color: red; \}/u);
+-        assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-1"\] \[data-sc-class~="shared"\]\{ color: blue; \}/u);
++        assert.ok(styles.includes('[data-sc-class~="shared"]:where([data-sc-class~="mdict-yomitan-entry-0"], [data-sc-class~="mdict-yomitan-entry-0"] *){ color: red; }'));
++        assert.ok(styles.includes('[data-sc-class~="shared"]:where([data-sc-class~="mdict-yomitan-entry-1"], [data-sc-class~="mdict-yomitan-entry-1"] *){ color: blue; }'));
+     });
+@@ -185,3 +185,3 @@ describe('MDict inline stylesheet isolation', () => {
+ 
+-        assert.match(styles, /@media screen\s*\{\s*\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="shared"\]/u);
++        assert.ok(styles.includes('@media screen { [data-sc-class~="shared"]:where([data-sc-class~="mdict-yomitan-entry-0"], [data-sc-class~="mdict-yomitan-entry-0"] *)'));
+         assert.match(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] > \[data-sc-class~="shared"\]/u);
+@@ -199,3 +199,3 @@ describe('MDict inline stylesheet isolation', () => {
+         assert.equal(styles.match(/\*\//gu)?.length, 1);
+-        assert.match(styles, /\[data-sc-class~="safe"\]\{ color: red; \}/u);
++        assert.ok(styles.includes('[data-sc-class~="safe"]:where([data-sc-class~="mdict-yomitan-entry-0"], [data-sc-class~="mdict-yomitan-entry-0"] *){ color: red; }'));
+     });
+@@ -228,3 +228,3 @@ describe('MDict inline scope selector semantics', () => {
+         assert.ok(styles.includes(`${root} [data-sc-class~="cascade"]${guard}`));
+-        assert.ok(styles.includes(`\n[data-sc-class~="cascade"]${guard}`));
++        assert.ok(styles.includes(`}[data-sc-class~="cascade"]${guard}`));
+         assert.ok(styles.includes(`${root} + *${guard}`));
+@@ -244,2 +244,26 @@ describe('MDict inline scope selector semantics', () => {
+ 
++test('MDict inline scope ignores colon-like tokens inside attributes, escaped names and pseudo-class arguments', async () => {
++    const rules = [
++        String.raw`.literal\:before { color: red; }`,
++        '.shared:is(.a, .b)::before { content: "x"; }',
++        '.shared[data-label=":after"]::first-letter { color: red; }',
++        '.shared:BEFORE { content: "y"; }',
++    ];
++    const fixture = makeMdictFixture([
++        {key: 'Alpha', value: `<style>${rules.join('\n')}</style><div class="shared a literal:before">alpha</div>`},
++    ]);
++    const result = await createMdxImportData('inline-scope-tokens.mdx', {}, fixture.bytes, []);
++    const styles = new TextDecoder().decode(result.files.get('styles.css'));
++    const root = '[data-sc-class~="mdict-yomitan-entry-0"]';
++    const guard = `:where(${root}, ${root} *)`;
++    for (const selector of [
++        `[data-sc-class~="literal:before"]${guard}`,
++        `[data-sc-class~="shared"]:is([data-sc-class~="a"], [data-sc-class~="b"])${guard}::before`,
++        `[data-sc-class~="shared"][data-label=":after"]${guard}::first-letter`,
++        `[data-sc-class~="shared"]${guard}:BEFORE`,
++    ]) {
++        assert.ok(styles.includes(selector), selector);
++    }
++});
++
+ describe('actual binary MDX/MDD conversion', () => {

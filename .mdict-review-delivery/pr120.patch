@@ -1,0 +1,272 @@
+From 9f9a25da603f11af7f97a61f9dad0c957c1490e5 Mon Sep 17 00:00:00 2001
+From: Local review <review@localhost>
+Date: Mon, 21 Sep 2026 06:58:14 +0000
+Subject: [PATCH 1/2] test(mdict): cover complete lookup ranges, exact
+ spellings and close
+
+
+diff --git a/test/util/mdict-native-cases.js b/test/util/mdict-native-cases.js
+index e5c0983..5cc0651 100644
+--- a/test/util/mdict-native-cases.js
++++ b/test/util/mdict-native-cases.js
+@@ -274,2 +274,121 @@ describe('MDict direct lookup key normalization', () => {
+ 
++describe('MDict direct lookup range and lifetime regressions', () => {
++    for (const keysPerBlock of [1, 2, 3]) {
++        test(`prefix returns the complete normalized range with ${keysPerBlock} keys per block`, () => {
++            const fixture = makeMdictFixture([
++                {key: 'Target', value: 'target'},
++                {key: 'Task', value: 'task'},
++                {key: 'Taxi', value: 'taxi'},
++                {key: 'Zoo', value: 'zoo'},
++            ], {keysPerBlock, keyCaseSensitive: 'No'});
++            const mdx = new MDX('prefix-range.mdx', fixture.bytes);
++            try {
++                assert.deepEqual(mdx.prefix('TA').map(({keyText}) => keyText), ['Target', 'Task', 'Taxi']);
++                assert.deepEqual(mdx.prefix('TAX').map(({keyText}) => keyText), ['Taxi']);
++                assert.deepEqual(mdx.prefix('missing'), []);
++                assert.deepEqual(mdx.prefix('zzzz'), []);
++                assert.deepEqual(mdx.prefix('').map(({keyText}) => keyText), ['Target', 'Task', 'Taxi', 'Zoo']);
++            } finally {
++                mdx.close();
++            }
++        });
++    }
++
++    test('exact spelling wins over a case-equivalent redirect record', () => {
++        const fixture = makeMdictFixture([
++            {key: 'Read', value: 'definition'},
++            {key: 'read', value: '@@@LINK=Read'},
++        ], {keyCaseSensitive: 'No', keysPerBlock: 1});
++        const mdx = new MDX('exact-case-spelling.mdx', fixture.bytes);
++        try {
++            assert.equal(mdx.lookup('Read').definition, 'definition\0');
++            assert.equal(mdx.lookup('read').definition, '@@@LINK=Read\0');
++            assert.equal(mdx.lookup('READ').definition, 'definition\0');
++            assert.deepEqual(mdx.prefix('read').map(({keyText}) => keyText), ['Read', 'read']);
++        } finally {
++            mdx.close();
++        }
++    });
++
++    test('exact punctuation spelling wins in a StripKey-equivalent range', () => {
++        const fixture = makeMdictFixture([
++            {key: 'a-b', value: 'hyphen'},
++            {key: 'ab', value: 'plain'},
++        ], {stripKey: 'Yes', keysPerBlock: 1});
++        const mdx = new MDX('exact-strip-spelling.mdx', fixture.bytes);
++        try {
++            assert.equal(mdx.lookup('a-b').definition, 'hyphen\0');
++            assert.equal(mdx.lookup('ab').definition, 'plain\0');
++            assert.deepEqual(mdx.prefix('a-').map(({keyText}) => keyText), ['a-b', 'ab']);
++        } finally {
++            mdx.close();
++        }
++    });
++
++    test('case-sensitive matching does not use locale collation as key equality', () => {
++        const fixture = makeMdictFixture([
++            {key: '\u00e9', value: 'composed'},
++        ], {keyCaseSensitive: 'Yes', stripKey: 'No'});
++        const mdx = new MDX('exact-unicode-spelling.mdx', fixture.bytes);
++        try {
++            assert.equal(mdx.lookup('e\u0301').definition, null);
++            assert.equal(mdx.lookup('\u00e9').definition, 'composed\0');
++        } finally {
++            mdx.close();
++        }
++    });
++
++    test('prefix does not skip a composed-key match across a collation-equivalent key', () => {
++        const fixture = makeMdictFixture([
++            {key: '\u00e9', value: 'composed'},
++            {key: 'e\u0301', value: 'decomposed'},
++            {key: '\u00e9clair', value: 'longer'},
++        ], {keyCaseSensitive: 'Yes', stripKey: 'No', keysPerBlock: 1});
++        const mdx = new MDX('unicode-prefix-range.mdx', fixture.bytes);
++        try {
++            assert.deepEqual(mdx.prefix('\u00e9').map(({keyText}) => keyText), ['\u00e9', '\u00e9clair']);
++            assert.deepEqual(mdx.prefix('e\u0301').map(({keyText}) => keyText), ['e\u0301']);
++        } finally {
++            mdx.close();
++        }
++    });
++
++    test('the lookup-only index is lazy during record iteration and released by close', () => {
++        const fixture = makeMdictFixture([{key: 'Target', value: 'definition'}]);
++        const mdx = new MDX('lookup-index-lifetime.mdx', fixture.bytes);
++        const getLookupIndex = () => mdx._lookupKeywordList;
++        try {
++            assert.equal(getLookupIndex(), null);
++            for (const item of mdx.keywordList) {
++                assert.equal(mdx.fetch_definition(item).definition, 'definition\0');
++            }
++            assert.equal(getLookupIndex(), null);
++            assert.equal(mdx.lookup('Target').definition, 'definition\0');
++            assert.equal(getLookupIndex()?.length, 1);
++        } finally {
++            mdx.close();
++        }
++        assert.deepEqual(getLookupIndex(), []);
++        assert.equal(mdx.lookupKeyBlockByWord('Target'), undefined);
++        assert.equal(mdx.lookup('Target').definition, null);
++        assert.deepEqual(mdx.prefix(''), []);
++        mdx.close();
++        assert.deepEqual(getLookupIndex(), []);
++    });
++
++    test('MDD direct resource lookup prefers the exact case spelling', () => {
++        const fixture = makeMdictFixture([
++            {key: '\\Image.png', value: Uint8Array.of(1)},
++            {key: '\\image.png', value: Uint8Array.of(2)},
++        ], {mdd: true, keyCaseSensitive: 'No', keysPerBlock: 1});
++        const mdd = new MDD('resource-exact-case.mdd', fixture.bytes);
++        try {
++            assert.equal(mdd.locate('\\Image.png').definition, 'AQ==');
++            assert.equal(mdd.locate('\\image.png').definition, 'Ag==');
++        } finally {
++            mdd.close();
++        }
++    });
++});
++
+ describe('actual binary MDX/MDD conversion', () => {
+
+From 60ee581c91561de866be54d77955191fa279cddd Mon Sep 17 00:00:00 2001
+From: Local review <review@localhost>
+Date: Mon, 21 Sep 2026 06:58:32 +0000
+Subject: [PATCH 2/2] fix(mdict): preserve exact spellings and complete prefix
+ ranges
+
+
+diff --git a/ext/js/dictionary/mdx/vendor/js-mdict/mdict.js b/ext/js/dictionary/mdx/vendor/js-mdict/mdict.js
+index c145c00..b1cc593 100644
+--- a/ext/js/dictionary/mdx/vendor/js-mdict/mdict.js
++++ b/ext/js/dictionary/mdx/vendor/js-mdict/mdict.js
+@@ -42,49 +42,50 @@ export class Mdict extends MdictBase {
+     }
+-    /**
+-     * lookupKeyInfoItem lookup the `keyInfoItem`
+-     * the `keyInfoItem` contains key-word record block location: recordStartOffset
+-     * the `recordStartOffset` should indicate the unpacked record data relative offset
+-     * @param word the target word phrase
+-     */
++    // Build a lookup-only view; physical key order and record offsets remain
++    // untouched for import iteration. Code-unit ordering keeps every normalized
++    // prefix contiguous and never confuses locale collation with key equality.
+     _getLookupKeywordList() {
+-        if (this._lookupKeywordList !== null) { return this._lookupKeywordList; }
+-        const list = [...this.keywordList];
++        if (this._lookupKeywordList !== null) { return this._lookupKeywordList }
++        const list = [...this.keywordList]
+         list.sort((item1, item2) => {
+-            const result = this.comp(this.strip(item1.keyText), this.strip(item2.keyText));
+-            return result !== 0 ? result : this.comp(item1.keyText, item2.keyText);
+-        });
+-        this._lookupKeywordList = list;
+-        return list;
++            const key1 = this.strip(item1.keyText)
++            const key2 = this.strip(item2.keyText)
++            if (key1 < key2) { return -1 }
++            if (key1 > key2) { return 1 }
++            if (item1.keyText < item2.keyText) { return -1 }
++            if (item1.keyText > item2.keyText) { return 1 }
++            return 0
++        })
++        this._lookupKeywordList = list
++        return list
+     }
+-    lookupKeyBlockByWord(word, isAssociate = false) {
+-        // Direct lookup must use the dictionary's StripKey/KeyCaseSensitive
+-        // rules rather than the source spelling used by the import iterator.
+-        const list = this._getLookupKeywordList();
+-        if (list.length === 0) {
+-            return undefined;
+-        }
+-        const normalizedWord = this.strip(word);
+-        // binary search
+-        let left = 0;
+-        let right = list.length - 1;
+-        let mid = 0;
+-        while (left <= right) {
+-            mid = left + ((right - left) >> 1);
+-            const compRes = this.comp(normalizedWord, this.strip(list[mid].keyText));
+-            if (compRes > 0) {
+-                left = mid + 1;
+-            }
+-            else if (compRes == 0) {
+-                break;
+-            }
+-            else {
+-                right = mid - 1;
++    _lookupKeyLowerBound(normalizedWord) {
++        const list = this._getLookupKeywordList()
++        let left = 0
++        let right = list.length
++        while (left < right) {
++            const mid = left + Math.floor((right - left) / 2)
++            if (this.strip(list[mid].keyText) < normalizedWord) {
++                left = mid + 1
++            } else {
++                right = mid
+             }
+         }
+-        if (this.comp(normalizedWord, this.strip(list[mid].keyText)) != 0) {
+-            if (!isAssociate) {
+-                return undefined;
+-            }
++        return left
++    }
++    lookupKeyBlockByWord(word, isAssociate = false) {
++        const list = this._getLookupKeywordList()
++        const normalizedWord = this.strip(word)
++        const first = this._lookupKeyLowerBound(normalizedWord)
++        const item = list[first]
++        if (typeof item === 'undefined' || this.strip(item.keyText) !== normalizedWord) {
++            return isAssociate ? (item ?? list.at(-1)) : undefined
++        }
++        // Case/StripKey-equivalent spellings can have different records. Prefer
++        // the requested spelling before a deterministic normalized fallback.
++        for (let index = first; index < list.length; index += 1) {
++            const candidate = list[index]
++            if (this.strip(candidate.keyText) !== normalizedWord) { break }
++            if (candidate.keyText === word) { return candidate }
+         }
+-        return list[mid];
++        return item
+     }
+diff --git a/ext/js/dictionary/mdx/vendor/js-mdict/mdx.js b/ext/js/dictionary/mdx/vendor/js-mdict/mdx.js
+index 1cb7edd..ae43079 100644
+--- a/ext/js/dictionary/mdx/vendor/js-mdict/mdx.js
++++ b/ext/js/dictionary/mdx/vendor/js-mdict/mdx.js
+@@ -51,7 +51,11 @@ export class MDX extends Mdict {
+     prefix(prefix) {
+-        const keywordList = this.associate(prefix);
+-        const normalizedPrefix = this.strip(prefix);
+-        return keywordList.filter(item => {
+-            return this.strip(item.keyText).startsWith(normalizedPrefix);
+-        });
++        const keywordList = this._getLookupKeywordList()
++        const normalizedPrefix = this.strip(prefix)
++        const matches = []
++        for (let index = this._lookupKeyLowerBound(normalizedPrefix); index < keywordList.length; index += 1) {
++            const item = keywordList[index]
++            if (!this.strip(item.keyText).startsWith(normalizedPrefix)) { break }
++            matches.push(item)
++        }
++        return matches
+     }
+diff --git a/test/util/mdict-native-cases.js b/test/util/mdict-native-cases.js
+index 5cc0651..b90080f 100644
+--- a/test/util/mdict-native-cases.js
++++ b/test/util/mdict-native-cases.js
+@@ -370,3 +370,3 @@ describe('MDict direct lookup range and lifetime regressions', () => {
+         }
+-        assert.deepEqual(getLookupIndex(), []);
++        assert.equal(getLookupIndex(), null);
+         assert.equal(mdx.lookupKeyBlockByWord('Target'), undefined);
+@@ -375,3 +375,3 @@ describe('MDict direct lookup range and lifetime regressions', () => {
+         mdx.close();
+-        assert.deepEqual(getLookupIndex(), []);
++        assert.equal(getLookupIndex(), null);
+     });
