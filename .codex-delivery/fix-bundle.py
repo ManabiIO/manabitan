@@ -18,7 +18,12 @@ new = '''    const release = () => {
         for (const resolve of gates.splice(0)) { resolve(); }
     };'''
 assert s.count(old) == 1
-p.write_text(s.replace(old, new))
+s = s.replace(old, new)
+old = '''        assert.equal(result.status, 'ok');
+        if (result.status !== 'ok') { throw new Error(result.reason); }'''
+assert s.count(old) == 2
+s = s.replace(old, "        assert.equal(result.status, 'ok');")
+p.write_text(s)
 # The existing dev/jsconfig covers .js; do not exclude the probe from lint/types.
 (root / 'probe.mjs').rename(root / 'probe.js')
 p = root / 'probe.js'
