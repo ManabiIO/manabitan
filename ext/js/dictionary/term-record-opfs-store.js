@@ -1076,8 +1076,6 @@ export class TermRecordOpfsStore {
         ) {
             throw new TypeError('Invalid term-record import checkpoint');
         }
-        await this._abandonImportWritesForRollback();
-        if (this._recordsDirectoryHandle === null) { return; }
         /** @type {Map<string, number>} */
         const checkpointByName = new Map();
         for (const shard of checkpoint.shards) {
@@ -1085,7 +1083,7 @@ export class TermRecordOpfsStore {
                 typeof shard !== 'object' ||
                 shard === null ||
                 typeof shard.fileName !== 'string' ||
-                shard.fileName.length === 0 ||
+                !this._isCanonicalTermRecordStorageFileName(shard.fileName) ||
                 !Number.isSafeInteger(shard.fileLength) ||
                 shard.fileLength < 0 ||
                 checkpointByName.has(shard.fileName)
@@ -1094,8 +1092,28 @@ export class TermRecordOpfsStore {
             }
             checkpointByName.set(shard.fileName, shard.fileLength);
         }
+        // Validate the complete restoration target before abandoning writes. A
+        // corrupt journal must not mutate the active store before it is rejected.
+        await this._abandonImportWritesForRollback();
+        if (this._recordsDirectoryHandle === null) { return; }
         /** @type {Error[]} */
         const errors = [];
+        // Truncation can extend a short file with zeroes. Confirm every
+        // committed checkpoint prefix exists before deleting or truncating any
+        // term-record storage file.
+        for (const [fileName, fileLength] of checkpointByName) {
+            try {
+                const fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName);
+                if ((await fileHandle.getFile()).size < fileLength) {
+                    throw new Error(`Cannot restore missing term-record bytes for ${fileName}`);
+                }
+            } catch (error) {
+                errors.push(error instanceof Error ? error : new Error(String(error)));
+            }
+        }
+        if (errors.length > 0) {
+            throw new AggregateError(errors, 'Failed to roll back term-record import storage');
+        }
         /** @type {string[]} */
         let currentFileNames = [];
         try {
@@ -5264,6 +5282,14 @@ export class TermRecordOpfsStore {
                 fileHandlesByName.set(name, /** @type {FileSystemFileHandle} */ (fileSystemHandle));
             }
         }
+        for (const name of fileHandlesByName.keys()) {
+            if (
+                (this._isShardFileName(name) || name.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`)) &&
+                !this._isCanonicalTermRecordStorageFileName(name)
+            ) {
+                throw new Error(`Invalid term-record storage file name: ${name}`);
+            }
+        }
         await this._recoverMissingDescriptors(fileHandlesByName);
         let shardFileCount = 0;
         /** @type {TermRecordShardState[]} */
@@ -6167,6 +6193,25 @@ export class TermRecordOpfsStore {
      */
     _isShardFileName(fileName) {
         return fileName.startsWith(SHARD_FILE_PREFIX) && fileName.endsWith(SHARD_FILE_SUFFIX);
+    }
+
+    /**
+     * @param {string} fileName
+     * @returns {boolean}
+     */
+    _isCanonicalTermRecordStorageFileName(fileName) {
+        const descriptorFileName = fileName.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`) ?
+            fileName.slice(0, -LOOKUP_INDEX_FILE_SUFFIX.length) :
+            fileName;
+        const shardInfo = this._decodeShardInfoFromShardFileName(descriptorFileName);
+        if (shardInfo === null) { return false; }
+        const canonicalDescriptor = this._getShardSegmentFileName(
+            shardInfo.dictionaryName,
+            shardInfo.contentDictName,
+            shardInfo.segmentIndex,
+        );
+        if (descriptorFileName !== canonicalDescriptor) { return false; }
+        return fileName === descriptorFileName || fileName === `${descriptorFileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
     }
 
     /**
