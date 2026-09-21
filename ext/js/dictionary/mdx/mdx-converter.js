@@ -585,6 +585,35 @@ function rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetRefe
 }
 
 /**
+ * @param {string} value
+ * @param {number} startIndex
+ * @returns {{value: string, endIndex: number}|null}
+ */
+function readCssEscape(value, startIndex) {
+    if (value[startIndex] !== '\\' || startIndex + 1 >= value.length) { return null; }
+    let endIndex = startIndex + 1;
+    if (/[\n\r\f]/u.test(value[endIndex])) { return null; }
+
+    const hexMatch = value.slice(endIndex).match(/^[\da-f]{1,6}/iu);
+    if (hexMatch !== null) {
+        endIndex += hexMatch[0].length;
+        const codePoint = Number.parseInt(hexMatch[0], 16);
+        const decoded = (
+            codePoint === 0 ||
+            codePoint > 0x10ffff ||
+            (codePoint >= 0xd800 && codePoint <= 0xdfff)
+        ) ? '\ufffd' : String.fromCodePoint(codePoint);
+        if (endIndex < value.length && /\s/u.test(value[endIndex])) {
+            endIndex += 1;
+        }
+        return {value: decoded, endIndex};
+    }
+
+    const decoded = value[endIndex];
+    return {value: decoded, endIndex: endIndex + decoded.length};
+}
+
+/**
  * @param {string} selectorText
  * @returns {string[]}
  */
@@ -603,6 +632,13 @@ function splitCssSelectorList(selectorText) {
                 quote = '';
             }
             continue;
+        }
+        if (character === '\\') {
+            const escape = readCssEscape(selectorText, index);
+            if (escape !== null) {
+                index = escape.endIndex - 1;
+                continue;
+            }
         }
         switch (character) {
             case '"':
@@ -660,6 +696,13 @@ function splitSelectorByCombinators(selector) {
                 quote = '';
             }
             continue;
+        }
+        if (character === '\\') {
+            const escape = readCssEscape(selector, index);
+            if (escape !== null) {
+                index = escape.endIndex - 1;
+                continue;
+            }
         }
         switch (character) {
             case '"':
@@ -736,27 +779,10 @@ function readCssIdentifier(selector, startIndex) {
     while (index < selector.length) {
         const character = selector[index];
         if (character === '\\') {
-            if (index + 1 >= selector.length || /[\n\r\f]/u.test(selector[index + 1])) { break; }
-            let escapeEnd = index + 1;
-            let decoded = '';
-            const hexMatch = selector.slice(escapeEnd).match(/^[\da-f]{1,6}/iu);
-            if (hexMatch !== null) {
-                escapeEnd += hexMatch[0].length;
-                const codePoint = Number.parseInt(hexMatch[0], 16);
-                decoded = (
-                    codePoint === 0 ||
-                    codePoint > 0x10ffff ||
-                    (codePoint >= 0xd800 && codePoint <= 0xdfff)
-                ) ? '\ufffd' : String.fromCodePoint(codePoint);
-                if (escapeEnd < selector.length && /\s/u.test(selector[escapeEnd])) {
-                    escapeEnd += 1;
-                }
-            } else {
-                decoded = selector[escapeEnd];
-                escapeEnd += 1;
-            }
-            value += decoded;
-            index = escapeEnd;
+            const escape = readCssEscape(selector, index);
+            if (escape === null) { break; }
+            value += escape.value;
+            index = escape.endIndex;
             first = false;
             continue;
         }
