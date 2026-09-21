@@ -900,7 +900,7 @@ export class Frontend {
      * @returns {string[]}
      */
     _normalizeLookupPrewarmTerms(terms) {
-        return [...new Set(terms.map((term) => `${term}`.trim()).filter((term) => term.length > 0))];
+        return [...new Set(terms.map((term) => `${term}`).filter((term) => term.length > 0))];
     }
 
     /**
