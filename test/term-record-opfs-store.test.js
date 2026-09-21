@@ -3373,6 +3373,9 @@ describe('TermRecordOpfsStore', () => {
         const readerStore = new TermRecordOpfsStore();
         Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
         await readerStore._loadShardFiles(false);
+        // _prepare() sets this after discovering persisted shards; this focused
+        // fixture calls _loadShardFiles directly to avoid mocking navigator.storage.
+        Reflect.set(readerStore, '_nextIdMayNeedShardScan', true);
         await readerStore.ensureAllDictionariesLoaded();
 
         await readerStore.appendBatch([{
@@ -3419,6 +3422,7 @@ describe('TermRecordOpfsStore', () => {
         const readerStore = new TermRecordOpfsStore();
         Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
         await readerStore._loadShardFiles(false);
+        Reflect.set(readerStore, '_nextIdMayNeedShardScan', true);
 
         await expect(readerStore.appendBatch([{
             dictionary: 'New',
