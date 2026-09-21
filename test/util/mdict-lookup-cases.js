@@ -85,7 +85,7 @@ for (const compression of /** @type {const} */ (['raw', 'zlib'])) {
             ], {compression, keysPerBlock, recordBlockSize: 3, keyCaseSensitive: 'No', stripKey: 'Yes'});
             const mdx = new MDX('prefix-blocks.mdx', bytes);
             try {
-                const original = mdx.keywordList.slice();
+                const original = [...mdx.keywordList];
                 for (const prefix of ['ta', 'TA', 't-a']) {
                     const matches = mdx.prefix(prefix);
                     assert.deepEqual(matches.map(({keyText}) => keyText), ['Tango', 'Target', 'Tart']);
