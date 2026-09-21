@@ -394,7 +394,7 @@ describe('convertMdxToArchive', () => {
             header: {Title: 'Escaped CSS selector fixture', Description: ''},
             entries: [{
                 keyText: 'Styled',
-                definition: '<div class="entry:jp 123" id="hero.dot"><span class="jump+plus">Styled</span></div>',
+                definition: '<div class="entry:jp 123 comma,name" id="hero.dot"><span class="jump+plus">Styled</span></div>',
             }],
         });
         mockState.mddFactory = () => [{
@@ -418,9 +418,11 @@ describe('convertMdxToArchive', () => {
             '[data-sc-class~="entry:jp"][data-sc-id="hero.dot"] [data-sc-class~="jump+plus"]',
         );
         expect(stylesCss).toContain('[data-sc-class~="123"]');
+        expect(stylesCss).toContain('[data-sc-class~="comma,name"]');
         expect(stylesCss).not.toContain(String.raw`.entry\:jp`);
         expect(stylesCss).not.toContain(String.raw`#hero\.dot`);
         expect(stylesCss).not.toContain(String.raw`.jump\+plus`);
+        expect(stylesCss).not.toContain(String.raw`.comma\,name`);
     });
 
     test('strips URL query and hash fragments before resolving MDD assets', async () => {
