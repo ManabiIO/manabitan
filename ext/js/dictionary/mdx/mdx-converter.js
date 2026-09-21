@@ -39,7 +39,7 @@ const ZipWriter = /** @type {typeof import('@zip.js/zip.js').ZipWriter} */ (/** 
  */
 
 /**
- * @typedef {{Title?: string, Description?: string, Format?: string, StyleSheet?: Record<string, string[]>}} MdictHeader
+ * @typedef {{Title?: string, Description?: string, Format?: string, StyleSheet?: Record<string, string[]>, KeyCaseSensitive?: string}} MdictHeader
  */
 
 /**
@@ -1508,17 +1508,20 @@ function extractDescription(mdx, override) {
  * @param {Set<string>} resolvedTargets
  * @returns {string[]}
  */
-function getRedirectExpressions(term, redirects, resolvedTargets) {
+function getRedirectExpressions(term, redirects, resolvedTargets, normalizeRedirectKey) {
     const expressions = [term];
-    const visited = new Set(expressions);
+    const emittedExpressions = new Set(expressions);
+    const visitedTargets = new Set();
     for (let index = 0; index < expressions.length; ++index) {
-        const target = expressions[index];
+        const target = normalizeRedirectKey(expressions[index]);
+        if (visitedTargets.has(target)) { continue; }
+        visitedTargets.add(target);
         const aliases = redirects.get(target);
         if (typeof aliases === 'undefined') { continue; }
         resolvedTargets.add(target);
         for (const alias of aliases) {
-            if (visited.has(alias)) { continue; }
-            visited.add(alias);
+            if (emittedExpressions.has(alias)) { continue; }
+            emittedExpressions.add(alias);
             expressions.push(alias);
         }
     }
@@ -1591,6 +1594,9 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         const inlineStylesheets = [];
         /** @type {Set<string>} */
         const referencedAssetKeys = new Set();
+        const redirectCaseSensitive = mdictCommon.isTrue(mdx.header.KeyCaseSensitive);
+        /** @param {string} value */
+        const normalizeRedirectKey = redirectCaseSensitive ? (value) => value : (value) => value.toLowerCase();
         /** @type {Map<string, Set<string>>} */
         const redirects = new Map();
         /** @type {Set<string>} */
@@ -1646,11 +1652,12 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             const redirectDefinition = definition.trim();
             if (redirectDefinition.startsWith('@@@LINK=')) {
                 const target = trimNullSuffix(redirectDefinition.slice(8)).trim();
-                if (target.length > 0 && target !== term) {
-                    const aliases = redirects.get(target) ?? new Set();
+                const targetKey = normalizeRedirectKey(target);
+                if (target.length > 0 && targetKey !== normalizeRedirectKey(term)) {
+                    const aliases = redirects.get(targetKey) ?? new Set();
                     if (!aliases.has(term)) {
                         aliases.add(term);
-                        redirects.set(target, aliases);
+                        redirects.set(targetKey, aliases);
                         redirectCount += 1;
                     }
                 }
@@ -1722,7 +1729,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             bankIndex += 1;
         };
         for (const {term, glossary, sequence: entrySequence} of convertedEntries) {
-            const expressions = getRedirectExpressions(term, redirects, resolvedRedirectTargets);
+            const expressions = getRedirectExpressions(term, redirects, resolvedRedirectTargets, normalizeRedirectKey);
             for (const expression of expressions) {
                 bank.push([
                     expression,
