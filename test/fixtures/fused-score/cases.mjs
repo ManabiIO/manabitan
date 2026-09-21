@@ -28,7 +28,9 @@ const controls = [
     ['fraction-fallback', ['1', '1.5', '-0', '-2.25'], 1],
     ['wide-number-fallback', ['1', '1099511627776.5', '-0', '0'], 1],
 ]
-function check(value, message) { if (!value) { throw new Error(message) } }
+function check(value, message) {
+    if (!value) { throw new Error(message) }
+}
 function rows(tokens) {
     return tokens.map((token, i) => `["語-${i}","","","",${token},["gloss-${i}"],${i + 1},""]`)
 }
@@ -50,7 +52,7 @@ export async function runScoreCases() {
     for (const [name, tokens, fallbacks] of [...negativeCases.map(([name, tokens]) => [name, tokens, 1]), ...controls]) {
         try {
             const input = banks(tokens)
-            const copies = input.map((x) => x.slice())
+            const copies = input.map((x) => Uint8Array.from(x))
             const scores = []
             await parseTermBankWithWasmColumnChunks(input, 3, (chunk) => { scores.push(...chunk.scoreList) }, 64, fusedOptions)
             const profile = consumeLastTermBankWasmParseProfile()
@@ -97,11 +99,13 @@ export async function runNativePersistence(tokens = ['1', '-0', '0', '-1'], requ
             const length = chunk.contentMetaList[i * 4 + 1]
             slices.push(chunk.contentBytesBuffer.slice(start, start + length))
         }
-        expectedContent.push(...slices.map((x) => x.slice()))
+        expectedContent.push(...slices.map((x) => Uint8Array.from(x)))
         const spans = await content.appendBatch(slices)
         await store.appendBatchFromArtifactChunkResolvedContent(
             {...chunk, dictionary: 'score-regression', dictionaryTotalRows: tokens.length},
-            spans.map((x) => x.offset), spans.map((x) => x.length), RAW_TERM_CONTENT_TOKEN_DICT_NAME,
+            spans.map((x) => x.offset),
+            spans.map((x) => x.length),
+            RAW_TERM_CONTENT_TOKEN_DICT_NAME,
         )
     }, 64, fusedOptions)
     await content.endImportSession()
@@ -112,8 +116,7 @@ export async function runNativePersistence(tokens = ['1', '-0', '0', '-1'], requ
         const contentReader = new TermContentOpfsStore()
         await reader.prepare()
         await contentReader.prepare()
-        if (materialize) { await reader._loadShardFiles(true) }
-        else { await reader.ensureDictionariesLoaded(['score-regression']) }
+        await (materialize ? reader._loadShardFiles(true) : reader.ensureDictionariesLoaded(['score-regression']))
         check(reader.getDictionaryHealth('score-regression').status === 'available', 'reopened dictionary was not available')
         const records = await reader.getByIdsAsync(ids)
         const ordered = ids.map((id) => records.get(id))
@@ -145,7 +148,7 @@ export async function runNativePersistence(tokens = ['1', '-0', '0', '-1'], requ
         const payload = bytes.subarray(payloadStart, payloadStart + payloadLength)
         const {base, derived} = splitPersistedTermLookupIndex(payload)
         check(derived.length > 0, 'fixture has no derived index section')
-        const protectedBase = base.slice()
+        const protectedBase = Uint8Array.from(base)
         const protectedFields = bytes.slice(payloadStart + payloadLength)
         bytes[derived.byteOffset] ^= 1
         check(bytesEqual(base, protectedBase), 'fault injection changed authoritative base')
