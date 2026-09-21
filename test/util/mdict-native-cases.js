@@ -141,6 +141,42 @@ describe('MDict v2 binary records', () => {
     });
 });
 
+describe('MDict redirect key matching', () => {
+    test('case-insensitive dictionaries resolve redirect targets across case differences', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alias', value: '@@@LINK=target'},
+            {key: 'Target', value: '<div>definition</div>'},
+        ], {keyCaseSensitive: 'No'});
+        const result = await createMdxImportData('redirect-case.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        assert.deepEqual(rows.map(([term]) => term).sort(), ['Alias', 'Target']);
+        assert.equal(result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details?.unresolvedRedirectCount, 0);
+    });
+
+    test('case-sensitive dictionaries keep case-mismatched redirect targets unresolved', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alias', value: '@@@LINK=target'},
+            {key: 'Target', value: '<div>definition</div>'},
+        ], {keyCaseSensitive: 'Yes'});
+        const result = await createMdxImportData('redirect-case-sensitive.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        assert.deepEqual(rows.map(([term]) => term), ['Target']);
+        assert.equal(result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details?.unresolvedRedirectCount, 1);
+    });
+
+    test('case-insensitive multi-hop redirect chains preserve every original alias spelling', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'AliasOne', value: '@@@LINK=ALIAStwo'},
+            {key: 'AliasTwo', value: '@@@LINK=tArGeT'},
+            {key: 'Target', value: '<div>definition</div>'},
+        ], {keyCaseSensitive: 'No'});
+        const result = await createMdxImportData('redirect-chain-case.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        assert.deepEqual(rows.map(([term]) => term).sort(), ['AliasOne', 'AliasTwo', 'Target']);
+        assert.equal(result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details?.unresolvedRedirectCount, 0);
+    });
+});
+
 describe('actual binary MDX/MDD conversion', () => {
     test('preserves homograph senses, multi-hop aliases, bank bounds and diagnostics', async () => {
         const fixture = makeMdictFixture([
