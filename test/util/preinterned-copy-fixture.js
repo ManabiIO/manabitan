@@ -25,7 +25,7 @@ export function makeCopyFixture(keys, expression, reading = expression, options 
     const padding = options.padding ?? 0
     const backing = options.shared ? new SharedArrayBuffer(total + 2 * padding) : new ArrayBuffer(total + 2 * padding)
     const slab = new Uint8Array(backing).fill(0xa5)
-    const stringsBuffer = new Uint8Array(backing, padding, total)
+    const stringsBuffer = slab.subarray(padding, padding + total)
     for (let i = 0; i < keys.length; ++i) { stringsBuffer.set(keys[i], stringOffsets[i]) }
     return {
         stringLengths,
