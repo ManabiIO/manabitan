@@ -623,6 +623,58 @@ describe('convertMdxToArchive', () => {
         expect(await zip.file(embeddedPath)?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
     });
 
+    test('decodes base64 data URLs when the media type is omitted', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Default data URL media type fixture',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Embedded',
+                definition: '<div><a href="data:;charset=utf-8;base64,AP%2BA">raw</a></div>',
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'default-data-url-media-type.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const embeddedPath = Object.keys(zip.files).find((path) => path.startsWith('mdict-media/embedded/text/'));
+
+        expect(embeddedPath).toBeDefined();
+        if (typeof embeddedPath !== 'string') { throw new Error('Expected default text embedded asset path'); }
+        expect(await zip.file(embeddedPath)?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
+    });
+
+    test('decodes bare default-media-type base64 data URLs', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Bare default data URL media type fixture',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Embedded',
+                definition: '<div><a href="data:;base64,AP+A">raw</a></div>',
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'bare-default-data-url-media-type.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const embeddedPath = Object.keys(zip.files).find((path) => path.startsWith('mdict-media/embedded/text/'));
+
+        expect(embeddedPath).toBeDefined();
+        if (typeof embeddedPath !== 'string') { throw new Error('Expected bare default text embedded asset path'); }
+        expect(await zip.file(embeddedPath)?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
+    });
+
     test('keeps malformed data URLs and empty dictionaries non-throwing', async () => {
         mockState.mdxFactory = () => ({
             header: {

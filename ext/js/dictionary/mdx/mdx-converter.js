@@ -530,9 +530,9 @@ function decodeDataUrl(value) {
     if (headerEnd < 0) { return null; }
     const header = value.slice(5, headerEnd);
     const payload = value.slice(headerEnd + 1);
-    const parts = header.split(';').map((part) => part.trim()).filter((part) => part.length > 0);
-    const mediaType = (parts[0] || 'text/plain').toLowerCase();
-    const isBase64 = parts.slice(1).some((part) => part.toLowerCase() === 'base64');
+    const parts = header.split(';').map((part) => part.trim());
+    const mediaType = (parts.shift() || 'text/plain').toLowerCase();
+    const isBase64 = parts.some((part) => part.toLowerCase() === 'base64');
     try {
         if (isBase64) {
             return {mediaType, data: new Uint8Array(base64ToArrayBuffer(decodeURIComponent(payload)))};
