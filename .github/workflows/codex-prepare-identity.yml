@@ -1,0 +1,70 @@
+name: Prepare Unicode field correctness candidate
+on:
+  push:
+    branches: [codex/delivery-unicode-fields-20260921]
+permissions:
+  contents: write
+jobs:
+  prepare:
+    if: github.repository == 'ManabiIO/manabitan'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      HUSKY: '0'
+      NO_COLOR: '1'
+      TARGET: fix/record-field-unicode-identity-20260921
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - name: Isolate reviewed patches from delivery branch
+        run: |
+          mkdir -p "$RUNNER_TEMP/identity-evidence"
+          cp .codex-delivery/*.patch "$RUNNER_TEMP/identity-evidence/"
+          git fetch origin e932c60d689b0af96ef357f76486091189c21f19
+          git checkout --detach e932c60d689b0af96ef357f76486091189c21f19
+          test "$(git hash-object ext/js/dictionary/term-record-opfs-store.js)" = 69f56e47bd8ca02065ae06554b7efcbde61305f5
+          test "$(git hash-object test/term-record-opfs-store.test.js)" = 6914419e284709a3a72ad5616af971aa95870c58
+          git config user.name 'ManabiTan correctness preparation'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git apply --check "$RUNNER_TEMP/identity-evidence/tests.patch"
+          git apply "$RUNNER_TEMP/identity-evidence/tests.patch"
+          git add test/term-record-opfs-store.test.js
+          git commit -m 'test: reproduce loss of leading U+FEFF in persisted term fields'
+      - uses: ./.github/actions/setup
+      - name: Verify six regressions on unchanged production
+        run: |
+          set +e
+          npx vitest run test/term-record-opfs-store.test.js -t 'preserves length-delimited Unicode fields' > "$RUNNER_TEMP/identity-evidence/before.log" 2>&1
+          status=$?
+          set -e
+          cat "$RUNNER_TEMP/identity-evidence/before.log"
+          test "$status" -ne 0
+          grep -q '6 failed' "$RUNNER_TEMP/identity-evidence/before.log"
+      - name: Apply and qualify narrow decoder correction
+        run: |
+          git apply --check "$RUNNER_TEMP/identity-evidence/fix.patch"
+          git apply "$RUNNER_TEMP/identity-evidence/fix.patch"
+          npx eslint ext/js/dictionary/term-record-opfs-store.js test/term-record-opfs-store.test.js 2>&1 | tee "$RUNNER_TEMP/identity-evidence/lint.log"
+          npm run test:ts:main 2>&1 | tee "$RUNNER_TEMP/identity-evidence/main-types.log"
+          npm run test:ts:test 2>&1 | tee "$RUNNER_TEMP/identity-evidence/test-types.log"
+          npx vitest run test/term-record-opfs-store.test.js 2>&1 | tee "$RUNNER_TEMP/identity-evidence/after.log"
+          git diff --check
+          git add ext/js/dictionary/term-record-opfs-store.js
+          git commit -m 'fix: preserve leading U+FEFF in persisted headwords and readings'
+      - name: Publish only the new feature branch
+        run: |
+          if test -n "$(git ls-remote --heads origin "refs/heads/$TARGET")"; then
+            echo 'Target exists; refusing to overwrite concurrent work' >&2
+            exit 1
+          fi
+          git diff --stat e932c60d689b0af96ef357f76486091189c21f19 HEAD
+          git log -2 --format='%H %s' | tee "$RUNNER_TEMP/identity-evidence/commits.txt"
+          git diff e932c60d689b0af96ef357f76486091189c21f19 HEAD > "$RUNNER_TEMP/identity-evidence/published.patch"
+          git push origin "HEAD:refs/heads/$TARGET"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unicode-field-preparation
+          path: ${{ runner.temp }}/identity-evidence
+          retention-days: 14
