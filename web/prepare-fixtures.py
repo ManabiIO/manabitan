@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Real upstream acceptance archives plus clearly named adversarial custom fixtures."""
-import base64,hashlib,json,pathlib,sys,urllib.request,zipfile
+import base64,binascii,hashlib,json,pathlib,sys,urllib.request,zipfile
 root=pathlib.Path(sys.argv[1]);root.mkdir(parents=True,exist_ok=True)
 url='https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.08.11.0/jitendex-yomitan.zip'
 p=root/'jitendex-yomitan.zip'
@@ -27,7 +27,18 @@ def write(name,title,banks,media=None):
 write('web-interrupted.zip','Web Interrupted',(
     [[f'中断検査{bank*2000+i}','ちゅうだんけんさ','','',0,[f'Interrupted import fixture {bank*2000+i} '+('文書。'*80)],bank*2000+i,''] for i in range(2000)]
     for bank in range(80)))
-png=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=')
+# Keep this successful-import fixture valid for the stricter worker decoder.
+# The previous IDAT checksum was invalid even though DOM Image accepted it.
+png=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=')
+assert png[:8]==b'\x89PNG\r\n\x1a\n'
+offset=8
+while offset<len(png):
+    size=int.from_bytes(png[offset:offset+4],'big')
+    end=offset+8+size
+    assert end+4<=len(png),'Truncated PNG fixture chunk'
+    assert binascii.crc32(png[offset+4:end])==int.from_bytes(png[end:end+4],'big'),'Invalid PNG fixture checksum'
+    offset=end+4
+assert offset==len(png)
 write('web-media.zip','Web Media',[[['画像検査','がぞうけんさ','','',0,[
     '<img onerror=window.__dictionaryExecuted=true>',
     {'type':'structured-content','content':[
