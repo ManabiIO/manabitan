@@ -50,7 +50,7 @@ const maybeTest = existsSync(termBankParserWasmPath) ? test : test.skip;
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 const nativeFetch = globalThis.fetch;
-/** @typedef {{expression: string, reading: string, glossaryMayContainMedia?: boolean, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array, readingEqualsExpression?: boolean, readingBytes?: Uint8Array}} ParsedRow */
+/** @typedef {{expression: string, reading: string, score: number, glossaryMayContainMedia?: boolean, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array, readingEqualsExpression?: boolean, readingBytes?: Uint8Array}} ParsedRow */
 /** @typedef {Parameters<Parameters<typeof parseTermBankWithWasmColumnChunks>[2]>[0] & {useResolvedContentReferences?: boolean}} TermBankColumnChunk */
 /** @typedef {Parameters<Parameters<typeof parseTermBankWithWasmColumnChunksParallel>[2]>[1]} TermBankParseProgress */
 /** @typedef {{type: string, id?: number, [key: string]: unknown}} WorkerMessage */
@@ -2977,4 +2977,102 @@ describe('term-bank WASM parser', () => {
         expect(formattedChunk.contentMetaList[3]).toBe(formattedChunk.contentMetaList[7]);
         expect(formattedChunk.contentMetaList[1]).toBe(formattedChunk.contentMetaList[5]);
     });
+});
+
+
+describe('term bank score number parity', () => {
+    const scoreSpellings = ['1.5', '-2.25', '0.1', '1099511627776.5', '-0', '2147483648', '-2147483649', '1e0', '1.25e2', '5e-1'];
+    const expectedScores = scoreSpellings.map(Number);
+    const scoreRows = scoreSpellings.map((score, index) => (
+        `["term-${String(index)}","","","",${score},["g"],${String(index)},""]`
+    ));
+    const scoreBank = () => textEncoder.encode(`[${scoreRows.join(',')}]`);
+
+    /**
+     * @param {number[]} actual
+     */
+    function expectScoreParity(actual) {
+        expect(actual.slice(0, 4)).toStrictEqual(expectedScores.slice(0, 4));
+        expect(Object.is(actual[4], -0)).toBe(true);
+        expect(actual.slice(5)).toStrictEqual(expectedScores.slice(5));
+    }
+
+    maybeTest('preserves fractional and non-int32 scores in row parsing', async () => {
+        /** @type {number[]} */
+        const actual = [];
+        await parseTermBankWithWasmChunks(
+            scoreBank(),
+            3,
+            (chunk) => { actual.push(...chunk.map(({score}) => score)); },
+            64,
+            {},
+        );
+        expectScoreParity(actual);
+    });
+
+    maybeTest('preserves fractional and non-int32 scores in column parsing', async () => {
+        /** @type {number[]} */
+        const actual = [];
+        await parseTermBankWithWasmColumnChunks(
+            scoreBank(),
+            3,
+            (chunk) => { actual.push(...chunk.scoreList); },
+            64,
+            {prepareLookupIndexes: true},
+        );
+        expectScoreParity(actual);
+    });
+
+    maybeTest('falls back from fused parsing only when scores exceed int32 representation', async () => {
+        const nonInt32Banks = [
+            textEncoder.encode(`[${scoreRows.slice(0, 5).join(',')}]`),
+            textEncoder.encode(`[${scoreRows.slice(5).join(',')}]`),
+        ];
+        /** @type {number[]} */
+        const actual = [];
+        await parseTermBankWithWasmColumnChunks(
+            nonInt32Banks,
+            3,
+            (chunk) => { actual.push(...chunk.scoreList); },
+            64,
+            {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                prepareLookupIndexes: true,
+            },
+        );
+        expectScoreParity(actual);
+        const nonInt32Profile = consumeLastTermBankWasmParseProfile();
+        expect(nonInt32Profile?.fusedParseAttempts).toBe(1);
+        expect(nonInt32Profile?.fusedParseFallbacks).toBe(1);
+
+        const int32Banks = [
+            textEncoder.encode('[["a","","","",1,["g"],1,""]]'),
+            textEncoder.encode('[["b","","","",2,["g"],2,""]]'),
+        ];
+        await parseTermBankWithWasmColumnChunks(
+            int32Banks,
+            3,
+            () => {},
+            64,
+            {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                prepareLookupIndexes: true,
+            },
+        );
+        const int32Profile = consumeLastTermBankWasmParseProfile();
+        expect(int32Profile?.fusedParseAttempts).toBe(1);
+        expect(int32Profile?.fusedParseFallbacks).toBe(0);
+    });
+
+    maybeTest.each(['"1.5"', 'null', 'true', '[]', '{}'])(
+        'rejects non-number score token %s',
+        async (scoreToken) => {
+            const sourceBytes = textEncoder.encode(
+                `[["bad","","","",${scoreToken},["g"],1,""]]`,
+            );
+            await expect(parseTermBankWithWasmChunks(sourceBytes, 3, () => {})).rejects.toThrow();
+        },
+    );
 });
