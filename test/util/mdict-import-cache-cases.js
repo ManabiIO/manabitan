@@ -66,8 +66,8 @@ test('generic MDX reader keeps the record-block cache disabled by default', () =
 
     const dictionary = new MDX('generic-default-off.mdx', fixture.bytes);
     try {
-        assert.equal(dictionary.fetch_definition(dictionary.keywordList[0]).definition, 'first definition');
-        assert.equal(dictionary.fetch_definition(dictionary.keywordList[1]).definition, 'second definition');
+        assert.equal(dictionary.fetch_definition(dictionary.keywordList[0]).definition, 'first definition\0');
+        assert.equal(dictionary.fetch_definition(dictionary.keywordList[1]).definition, 'second definition\0');
         assert.equal(decompressions, 2, 'generic reads should not retain a decompressed record block by default');
     } finally {
         dictionary.close();
