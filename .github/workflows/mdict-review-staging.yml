@@ -3,113 +3,56 @@ on:
   push:
     branches: [review/mdict-delivery-20260921]
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: mdict-reviewed-patch-staging
   cancel-in-progress: false
 jobs:
-  media-serialization:
+  integrate-media-correction:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    permissions:
-      contents: write
     defaults:
       run:
         shell: bash
-        working-directory: candidate
     steps:
       - uses: actions/checkout@v6
         with:
-          path: packet
-          persist-credentials: false
-      - uses: actions/checkout@v6
-        with:
-          ref: 0cbf216a69d66518759cc53d3810d70ca1b18501
-          path: candidate
+          ref: 70be7a17d51f3b276419a8ac3d46aa6ec263f83e
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '22'
           cache: npm
-          cache-dependency-path: candidate/package-lock.json
-      - name: Install and build dependencies
-        run: npm ci && npm run build:libs
-      - name: Prove regression tests fail before applying the fix
+      - run: npm ci && npm run build:libs
+      - name: Qualify each exact PR composition before publishing new staging refs
         run: |
           git config user.name 'MDict review'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git am ../packet/.mdict-review-delivery/media-tests.patch
-          mkdir -p ../results
-          if node test/fixtures/term-row-materialization/check.mjs ../results/before.json > ../results/before.log 2>&1; then
-            echo 'Expected the known media serialization regressions to fail'
-            exit 1
-          fi
-          node -e 'const r=require("../results/before.json"); if(r.failed!==24 || r.passed!==46) process.exit(1)'
-      - name: Apply correction and qualify the complete native materialization suite
-        run: |
-          git am ../packet/.mdict-review-delivery/media-fix.patch
-          git diff --check HEAD~2 HEAD
-          node test/fixtures/term-row-materialization/check.mjs ../results/after.json > ../results/after.log
-          node -e 'const r=require("../results/after.json"); if(r.failed!==0 || r.passed!==70) process.exit(1)'
-          git push origin HEAD:refs/heads/fix/native-media-serialization-20260921
-          git rev-parse HEAD > ../results/tested-head.sha
-      - name: JavaScript and TypeScript qualification
-        run: |
-          npm run test:js 2>&1 | tee ../results/javascript.log
-          npm run test:ts 2>&1 | tee ../results/typescript.log
-      - name: Build static runtime and existing media fixture
-        if: success() || failure()
-        run: |
-          node web/build.mjs
-          python3 - <<'PY'
-          import pathlib, json, zipfile, base64
-          root = pathlib.Path('/tmp/mdict-media-probe')
-          root.mkdir(exist_ok=True)
-          source = pathlib.Path('web/prepare-fixtures.py').read_text()
-          exec(source[source.index('def write('):])
-          PY
-          npx playwright install --with-deps chromium
-      - name: Recheck real importer, SQLite and rendered image on the repaired source
-        if: success() || failure()
-        env:
-          DICTIONARY_FIXTURES: /tmp/mdict-media-probe
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          source = Path('web/e2e.mjs').read_text()
-          prefix = source[:source.index('try {\n    await launch();')]
-          suffix = '''try {
-              await launch();
-              await page.evaluate(() => openRuntime());
-              await importFile('web-media.zip');
-              await page.evaluate(() => find('画像検査'));
-              await expect(page.locator('#result .gloss-image')).toHaveCount(1);
-              await expect.poll(() => page.locator('#result .gloss-image').evaluate(el => el.complete && el.naturalWidth > 0)).toBe(true);
-              console.log('MEDIA_REPAIRED', await page.locator('#result').innerHTML());
-          } catch (error) {
-              console.log('MEDIA_FAILURE', String(error));
-              console.log('MEDIA_DOM', await page.locator('#result').innerHTML());
-              process.exitCode = 1;
-          } finally {
-              await context?.close();
-              await new Promise(r => server.close(r));
-              await fs.rm(profile, {recursive: true, force: true});
-              await save();
+          mkdir -p /tmp/mdict-integration-results
+          stage() {
+            local id="$1" old="$2" parent="$3"
+            git checkout -B "work-$id" "$old"
+            git merge --no-edit "$parent"
+            git diff --check "$old" HEAD
+            node --test --test-reporter=tap test/util/mdict-*-cases.js test/util/search-refresh-cases.js > "/tmp/mdict-integration-results/$id-native.tap"
+            node test/fixtures/term-row-materialization/check.mjs "/tmp/mdict-integration-results/$id-materialization.json" > "/tmp/mdict-integration-results/$id-materialization.log"
+            git push origin "HEAD:refs/heads/review/mdict-$id-media-20260921"
+            git rev-parse HEAD > "/tmp/mdict-integration-results/$id.sha"
           }
-          '''
-          Path('web/media-review-probe.mjs').write_text(prefix + suffix)
-          PY
-          node web/media-review-probe.mjs 2>&1 | tee ../results/media-probe.log
-      - name: Preserve source and results
+          stage pr119 e32cd9346855d54fdf2c205893ec6bb51103cb86 70be7a17d51f3b276419a8ac3d46aa6ec263f83e
+          stage pr120 811a85b21163d019ff36d28aa2f0602888f8d017 work-pr119
+          stage pr124 3724113b61c1dd2936da5b73f646d813ada18b1f work-pr120
+          stage pr121 709586ba9d8cb43de1bc74e5fc27bbd5a96187de 70be7a17d51f3b276419a8ac3d46aa6ec263f83e
+          stage pr126 22f00beb8d5118654cf023cee18facc6b3d2d218 work-pr121
+      - name: Preserve the final composition source
         if: always()
         run: |
-          mkdir -p ../results
-          git rev-parse HEAD > ../results/tested-head.sha
-          git archive HEAD | gzip > ../results/source.tar.gz
-          tar -czf ../results/built-libs.tar.gz ext/lib
+          mkdir -p /tmp/mdict-integration-results
+          git status --short > /tmp/mdict-integration-results/status.txt
+          git archive HEAD | gzip > /tmp/mdict-integration-results/source.tar.gz
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: native-media-serialization-${{ github.run_id }}
-          path: results/
+          name: mdict-media-integration-${{ github.run_id }}
+          path: /tmp/mdict-integration-results/
           retention-days: 7
