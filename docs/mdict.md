@@ -41,8 +41,10 @@ A dictionary name ending in a number is not automatically a resource volume:
 `Book.2024.mdx` pairs with `Book.2024.mdd`, followed by `Book.2024.1.mdd` and
 `Book.2024.2.mdd`. Exact MDX stems take precedence over split-volume suffixes.
 File basenames match without regard to case, while distinct relative directories
-(including their case) remain separate. Conflicting duplicate MDX or MDD paths
-exclude that dictionary group instead of choosing arbitrary bytes.
+(including their case) remain separate. The unnumbered MDD is searched before
+numbered volumes in numeric order, so a later volume cannot silently replace an
+earlier resource with the same archive path. Conflicting duplicate MDX or MDD
+paths exclude that dictionary group instead of choosing arbitrary bytes.
 
 URL directory discovery considers HTTP(S) links in the same origin and directory
 as the listing. Identical links are deduplicated; distinct URLs for the same MDD
