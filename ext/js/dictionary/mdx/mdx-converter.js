@@ -39,7 +39,7 @@ const ZipWriter = /** @type {typeof import('@zip.js/zip.js').ZipWriter} */ (/** 
  */
 
 /**
- * @typedef {{Title?: string, Description?: string, Format?: string, StyleSheet?: Record<string, string[]>, KeyCaseSensitive?: string}} MdictHeader
+ * @typedef {{Title?: string, Description?: string, Format?: string, StyleSheet?: Record<string, string[]>, KeyCaseSensitive?: string, StripKey?: string}} MdictHeader
  */
 
 /**
@@ -1964,11 +1964,17 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         /** @type {Set<string>} */
         const referencedAssetKeys = new Set();
         const redirectCaseSensitive = mdictCommon.isTrue(mdx.header.KeyCaseSensitive);
+        const redirectStripKey = mdictCommon.isTrue(mdx.header.StripKey);
         /**
          * @param {string} value
          * @returns {string}
          */
-        const normalizeRedirectKey = (value) => (redirectCaseSensitive ? value : value.toLowerCase());
+        const normalizeRedirectKey = (value) => {
+            if (redirectStripKey) {
+                value = value.replace(mdictCommon.REGEXP_STRIPKEY.mdx, '$1');
+            }
+            return redirectCaseSensitive ? value : value.toLowerCase();
+        };
         /** @type {Map<string, Set<string>>} */
         const redirects = new Map();
         /** @type {Set<string>} */
