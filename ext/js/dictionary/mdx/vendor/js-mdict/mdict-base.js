@@ -514,6 +514,7 @@ class MDictBase {
             const keyInfoUnpackSizeBuff = keyHeaderBuff.slice(offset, offset + this.meta.numWidth);
             const keyInfoUnpackSize = common.b2n(keyInfoUnpackSizeBuff);
             offset += this.meta.numWidth;
+            assert(keyInfoUnpackSize <= this.options.maxDecompressedBlockBytes, 'MDict key info exceeds decompressed block limit');
             this.keyHeader.keyInfoUnpackSize = keyInfoUnpackSize;
         }
         // [24:32] - number of key block info compress size
@@ -576,7 +577,7 @@ class MDictBase {
             if (this.meta.version >= 2.0 && packType == '2000') {
                 // For version 2.0, will compress by zlib, lzo just for 1.0
                 // key_block_info_compressed[0:8] => compress_type
-                const keyInfoBuffUnpacked = inflateSync(keyInfoBuff.slice(8));
+                const keyInfoBuffUnpacked = inflateSync(keyInfoBuff.slice(8), this.keyHeader.keyInfoUnpackSize);
                 if (common.adler32(keyInfoBuffUnpacked) !== keyInfoChecksum) {
                     throw new Error('MDict key info checksum mismatch');
                 }
@@ -650,6 +651,7 @@ class MDictBase {
             indexOffset += this.meta.numWidth;
             unpackSize = readNumber(keyInfoBuff, indexOffset, this.meta.numWidth);
             indexOffset += this.meta.numWidth;
+            assert(unpackSize <= this.options.maxDecompressedBlockBytes, 'MDict key block exceeds decompressed block limit');
             if (this.meta.encoding === UTF16) {
                 firstKey = this.meta.decoder.decode(firstWordBuffer);
                 lastKey = this.meta.decoder.decode(lastWordBuffer);
@@ -687,7 +689,8 @@ class MDictBase {
      * @param unpackSize
      */
     unpackKeyBlock(kbPackedBuff, unpackSize) {
-        assert(kbPackedBuff.length >= 8 && Number.isSafeInteger(unpackSize) && unpackSize >= 0, 'Invalid MDict key block size');
+        assert(kbPackedBuff.length >= 8 && Number.isSafeInteger(unpackSize) && unpackSize >= 0 &&
+            unpackSize <= this.options.maxDecompressedBlockBytes, 'Invalid or oversized MDict key block size');
         //  4 bytes : compression type
         const compType = bytesToHex(kbPackedBuff.slice(0, 4));
         const keyBlockChecksum = common.b2n(kbPackedBuff.subarray(4, 8));
@@ -696,10 +699,10 @@ class MDictBase {
             keyBlock = kbPackedBuff.slice(8);
         } else if (compType == '01000000') {
             // TODO: tests for v2.0 dictionary
-            const decompressedBuff = lzo1x.decompress(kbPackedBuff.slice(8), unpackSize, 0);
+            const decompressedBuff = lzo1x.decompress(kbPackedBuff.slice(8), unpackSize);
             keyBlock = decompressedBuff;
         } else if (compType === '02000000') {
-            keyBlock = inflateSync(kbPackedBuff.slice(8));
+            keyBlock = inflateSync(kbPackedBuff.slice(8), unpackSize);
             // extract one single key block into a key list
             // notice that adler32 returns signed value
             // TODO compare with previous word
@@ -809,6 +812,7 @@ class MDictBase {
             const unpackSize = readNumber(recordInfoBuff, offset, this.meta.numWidth);
             offset += this.meta.numWidth;
             assert(packSize >= 8, 'Invalid MDict record block size');
+            assert(unpackSize <= this.options.maxDecompressedBlockBytes, 'MDict record block exceeds decompressed block limit');
             recordInfoList.push({
                 packSize: packSize,
                 packAccumulateOffset: compressedAdder,
@@ -884,11 +888,11 @@ class MDictBase {
                     // recordBlock = Buffer.from(
                     // lzo1x.decompress(common.appendBuffer(header, blockBufDecrypted), decompSize, 1308672)
                     // );
-                    recordBlock = lzo1x.decompress(blockBufDecrypted, unpackSize, 0);
+                    recordBlock = lzo1x.decompress(blockBufDecrypted, unpackSize);
                 } else if (rbCompType === '02000000') {
                     compressType = 'zlib';
                     // zlib decompress
-                    recordBlock = inflateSync(blockBufDecrypted);
+                    recordBlock = inflateSync(blockBufDecrypted, unpackSize);
                 }
             }
             assert(recordBlock.length === unpackSize);

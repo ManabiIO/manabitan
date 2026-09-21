@@ -30,6 +30,7 @@ const lzo1x = function lzo1x() {
     function _lzo1x() { }
     _lzo1x.prototype = {
         blockSize: 4096,
+        maxOutputSize: 0,
         OK: 0,
         INPUT_OVERRUN: -4,
         OUTPUT_OVERRUN: -5,
@@ -85,12 +86,24 @@ const lzo1x = function lzo1x() {
             return c;
         },
         extendBuffer() {
-            const newBuffer = new Uint8Array(this.cbl + this.blockSize);
+            if (this.cbl >= this.maxOutputSize) {
+                throw new RangeError(`MDict LZO output exceeds declared size of ${this.maxOutputSize} bytes`);
+            }
+            const doubled = this.cbl > 0 ? this.cbl * 2 : this.blockSize;
+            const nextSize = Math.min(
+                this.maxOutputSize,
+                Math.max(this.cbl + this.blockSize, doubled),
+            );
+            if (!Number.isSafeInteger(nextSize) || nextSize <= this.cbl) {
+                throw new RangeError('Invalid MDict LZO output growth');
+            }
+            const newBuffer = new Uint8Array(nextSize);
             newBuffer.set(this.out);
             this.out = newBuffer;
-            this.out32 = new Uint32Array(this.out.buffer);
+            this.out32 = new Uint32Array(this.out.buffer, 0, Math.floor(this.out.byteLength / 4));
             this.state.outputBuffer = this.out;
             this.cbl = this.out.length;
+            this.op_end = this.cbl;
         },
         eof_found() {
             // *out_len = ((lzo_uint) ((op)-(out)));
@@ -244,11 +257,21 @@ const lzo1x = function lzo1x() {
         decompress(state) {
             this.state = state;
             this.buf = this.state.inputBuffer;
+            const {initSize, blockSize, maxOutputSize} = state;
+            if (!(this.buf instanceof Uint8Array) ||
+                !Number.isSafeInteger(initSize) || initSize < 0 ||
+                !Number.isSafeInteger(blockSize) || blockSize <= 0 ||
+                !Number.isSafeInteger(maxOutputSize) || maxOutputSize < 0) {
+                throw new RangeError('Invalid MDict LZO decompression bounds');
+            }
+            this.blockSize = blockSize;
+            this.maxOutputSize = maxOutputSize;
             const buf_4b = new Uint8Array(this.buf.length + (4 - (this.buf.length % 4)));
             buf_4b.set(this.buf);
             this.buf32 = new Uint32Array(buf_4b.buffer);
-            this.out = new Uint8Array(this.buf.length + (this.blockSize - (this.buf.length % this.blockSize)));
-            this.out32 = new Uint32Array(this.out.buffer);
+            const initialSize = Math.min(initSize, maxOutputSize);
+            this.out = new Uint8Array(initialSize);
+            this.out32 = new Uint32Array(this.out.buffer, 0, Math.floor(this.out.byteLength / 4));
             this.cbl = this.out.length;
             this.state.outputBuffer = this.out;
             this.ip_end = this.buf.length;
