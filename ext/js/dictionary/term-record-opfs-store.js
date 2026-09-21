@@ -709,6 +709,8 @@ export class TermRecordOpfsStore {
         this._storageMutationTail = Promise.resolve();
         /** @type {boolean} */
         this._storageMutationActive = false;
+        /** @type {Error|null} */
+        this._rollbackError = null;
         /** @type {Map<string, {kind: 'missing'|'invalid'|'transient', message: string}>} */
         this._persistentIndexFailureByDictionary = new Map();
         /** @type {Map<string, {status: 'available'|'repairPending'|'repairing'|'temporarilyUnavailable'|'reimportRequired', reason: string|null}>} */
@@ -955,7 +957,10 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async prepare() {
-        await this._runExclusiveStorageMutation(async () => await this._prepare());
+        await this._runExclusiveStorageMutation(async () => {
+            this._assertNoWriteFailures();
+            await this._prepare();
+        });
     }
 
     /** @returns {Promise<void>} */
@@ -1002,6 +1007,7 @@ export class TermRecordOpfsStore {
      */
     async beginImportSession() {
         await this._runExclusiveStorageMutation(async () => {
+            this._assertNoWriteFailures();
             if (this._importSessionActive) {
                 return;
             }
@@ -1043,6 +1049,7 @@ export class TermRecordOpfsStore {
      * @returns {Promise<import('dictionary-import-journal').TermRecordCheckpoint>}
      */
     async createImportCheckpoint() {
+        this._assertNoWriteFailures();
         await this._closeAllWritables();
         if (this._recordsDirectoryHandle === null) { return {shards: []}; }
         const shards = [];
@@ -1058,10 +1065,17 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async rollbackImportSession(checkpoint) {
-        await this._runExclusiveStorageMutation(
-            async () => await this._rollbackImportSession(checkpoint),
-            true,
-        );
+        await this._runExclusiveStorageMutation(async () => {
+            try {
+                await this._rollbackImportSession(checkpoint);
+                this._rollbackError = null;
+            } catch (error) {
+                // _prepare can discard every shard before a later reload fails,
+                // so a recovery error cannot live only on individual shards.
+                this._rollbackError = error instanceof Error ? error : new Error(String(error));
+                throw error;
+            }
+        }, true);
     }
 
     /**
@@ -1234,6 +1248,7 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async _endImportSession() {
+        this._assertNoWriteFailures();
         if (!this._importSessionActive && !this._hasPendingShardWrites()) {
             return;
         }
@@ -1319,6 +1334,7 @@ export class TermRecordOpfsStore {
         this._loadedDictionaryNames.clear();
         this._allShardContentsLoaded = false;
         if (this._recordsDirectoryHandle === null) {
+            this._rollbackError = null;
             return;
         }
         const shardFileNames = await this._listTermRecordStorageFileNames();
@@ -1329,6 +1345,7 @@ export class TermRecordOpfsStore {
                 // NOP
             }
         }
+        this._rollbackError = null;
     }
 
     /**
@@ -2951,9 +2968,23 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Includes foreground and finalization failures, not only queued writes.
+     * A retry must not assign IDs, clear failure state, or publish an incomplete import.
+     * @returns {void}
+     */
+    _assertNoWriteFailures() {
+        if (this._rollbackError !== null) { throw this._rollbackError; }
+        for (const state of this._shardStateByFileName.values()) {
+            if (state.queuedWriteError !== null) { throw state.queuedWriteError; }
+            if (state.lookupIndexWriteError !== null) { throw state.lookupIndexWriteError; }
+        }
+    }
+
+    /**
      * @returns {Promise<void>}
      */
     async _ensureNextIdReadyForAppend() {
+        this._assertNoWriteFailures();
         if (!this._nextIdMayNeedShardScan || this._recordsDirectoryHandle === null) {
             return;
         }
@@ -4979,6 +5010,7 @@ export class TermRecordOpfsStore {
             ) ||
             this._recordsDirectoryHandle === null
         ) {
+            if (state.lookupIndexWriteError !== null) { throw state.lookupIndexWriteError; }
             return;
         }
         const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
@@ -5017,7 +5049,12 @@ export class TermRecordOpfsStore {
         const writable = state.lookupIndexWritable;
         if (writable !== null) {
             try {
-                await writable.close();
+                if (operationError === null) {
+                    await writable.close();
+                } else {
+                    // Never publish a placeholder or partially rewritten authoritative header.
+                    await writable.abort();
+                }
             } catch (error) {
                 closeError = error instanceof Error ? error : new Error(String(error));
             } finally {
@@ -5026,13 +5063,14 @@ export class TermRecordOpfsStore {
         }
         state.lookupIndexFileHandle = null;
         if (operationError !== null && closeError !== null) {
-            throw new AggregateError(
+            state.lookupIndexWriteError = new AggregateError(
                 [operationError, closeError],
                 `Failed to finalize term-record lookup index ${indexFileName}`,
             );
+        } else {
+            state.lookupIndexWriteError = operationError ?? closeError;
         }
-        if (operationError !== null) { throw operationError; }
-        if (closeError !== null) { throw closeError; }
+        if (state.lookupIndexWriteError !== null) { throw state.lookupIndexWriteError; }
         state.pendingLookupIndexChunks = [];
         state.pendingLookupIndexBytes = 0;
         state.pendingLookupIndexRecordCount = 0;
@@ -5213,6 +5251,7 @@ export class TermRecordOpfsStore {
             await state.writable.close();
         } catch (error) {
             if (!this._isClosingWritableStreamError(error)) {
+                state.queuedWriteError ??= error instanceof Error ? error : new Error(String(error));
                 throw error;
             }
         } finally {
@@ -5595,33 +5634,40 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async _flushPendingWritesForShard(state) {
-        if (state.pendingWriteBytes <= 0 || state.pendingWriteChunks.length === 0) {
-            return;
-        }
-        if (state.writable === null) {
-            state.writable = await state.fileHandle.createWritable({keepExistingData: true});
-            const seekOffset = state.fileLength - state.pendingWriteBytes;
-            await state.writable.seek(Math.max(0, seekOffset));
-        }
-        const chunks = this._coalescePendingChunks(state.pendingWriteChunks);
-        state.pendingWriteChunks = [];
-        state.pendingWriteBytes = 0;
-        if (this._importSessionActive) {
-            this._queueWriteChunksForShard(state, chunks);
-            if (state.queuedWriteBytes >= this._queuedWriteBudgetBytes) {
-                const rotated = await this._rotateActiveShardSegmentAfterQueuePressure(state);
-                if (!rotated) {
-                    await this._awaitQueuedWritesForShard(state);
-                }
+        try {
+            if (state.queuedWriteError !== null) { throw state.queuedWriteError; }
+            if (state.pendingWriteBytes <= 0 || state.pendingWriteChunks.length === 0) {
+                return;
             }
-            return;
+            if (state.writable === null) {
+                state.writable = await state.fileHandle.createWritable({keepExistingData: true});
+                const seekOffset = state.fileLength - state.pendingWriteBytes;
+                await state.writable.seek(Math.max(0, seekOffset));
+            }
+            const chunks = this._coalescePendingChunks(state.pendingWriteChunks);
+            state.pendingWriteChunks = [];
+            state.pendingWriteBytes = 0;
+            if (this._importSessionActive) {
+                this._queueWriteChunksForShard(state, chunks);
+                if (state.queuedWriteBytes >= this._queuedWriteBudgetBytes) {
+                    const rotated = await this._rotateActiveShardSegmentAfterQueuePressure(state);
+                    if (!rotated) {
+                        await this._awaitQueuedWritesForShard(state);
+                    }
+                }
+                return;
+            }
+            if (state.queuedWritePromise !== null) {
+                this._queueWriteChunksForShard(state, chunks);
+                await this._awaitQueuedWritesForShard(state);
+                return;
+            }
+            await this._writeChunksForShard(state, chunks);
+        } catch (error) {
+            // Opening/seeking and non-queued writes can fail before a drain owns them.
+            state.queuedWriteError ??= error instanceof Error ? error : new Error(String(error));
+            throw error;
         }
-        if (state.queuedWritePromise !== null) {
-            this._queueWriteChunksForShard(state, chunks);
-            await this._awaitQueuedWritesForShard(state);
-            return;
-        }
-        await this._writeChunksForShard(state, chunks);
     }
 
     /**
