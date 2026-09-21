@@ -4,13 +4,15 @@ This is a memory/scheduling candidate, not a measured whole-import speedup.
 
 ## Changes
 
-The store admits at most four distinct block loads and 16 MiB of declared expanded bytes at once. Scalar reads and overlapping batches share the same FIFO admission queue and single-flight map. One block larger than the budget runs alone; no impossible reservation waits forever. Cache invalidation rejects queued old-generation readers while active storage operations retain their reservations until settlement.
+The [block store](../../ext/js/dictionary/term-content-block-store.js) admits at most four distinct block loads and 16 MiB of declared expanded bytes at once. Scalar reads and overlapping batches share the same FIFO admission queue and single-flight map. One block larger than the budget runs alone; no impossible reservation waits forever. Cache invalidation rejects queued old-generation readers while active storage operations retain their reservations until settlement.
 
-Batch tasks process each completed block without returning it to `Promise.allSettled`. When the total requested bytes from a block are less than half its decoded length, those spans are copied into one small owned buffer. Dense groups retain existing zero-copy views. Request order, exact bytes, corruption classification, generation checks and checksum/codec validation remain intact.
+Batch tasks process each completed block without returning it to `Promise.allSettled`. When the total requested bytes from a block are less than half its decoded length, those spans are copied into one small owned buffer. Dense groups retain existing zero-copy views. Request order, exact bytes, corruption classification, generation checks and checksum/codec validation remain intact. The [budget regression suite](../../test/term-content-block-read-budget.test.js) covers these boundaries.
 
 The budget is not a total-memory cap. The existing 48 MiB cache, output bytes, reference metadata, compressed inputs and codec scratch are separate; declared lengths are validated against actual decoded output by the existing loader. Four loads, 16 MiB and the half-block copy threshold are candidate settings requiring real-corpus qualification.
 
 ## Reproducible controlled probe
+
+Run the [retention probe](block-read-retention-probe.js) from the repository root:
 
 ```sh
 node dev/perf/block-read-retention-probe.js
@@ -22,4 +24,4 @@ For 32 one-byte requests from 32 distinct 4 MiB blocks, local Node 22.16 observe
 
 ## Merge gate
 
-Keep draft until full exact-head CI/browser acceptance and independent review. Run real JMdict and Jitendex full-import A/B through persistence/index finalization and reopening on the same accepted correctness baseline. Record corpus/source hashes, active optimized-path counts, raw paired timings, cache misses/reloads/decompression counts and peak memory. Include cold/warm, sparse/dense, long/short and overlapping-reader controls. Reject or refine a material throughput regression; do not infer a speedup from the controlled buffer accounting. No production branch or experiment defaults have been changed by publishing the candidate.
+Keep draft until full exact-head CI/browser acceptance and independent review. Run real JMdict and Jitendex full-import A/B through persistence/index finalization and reopening on the same accepted correctness baseline. Record corpus/source hashes, active optimized-path counts, raw paired timings, cache misses/reloads/decompression counts and peak memory. Include cold/warm, sparse/dense, long/short and overlapping-reader controls. A repeatable material memory or completion benefit with acceptable throughput and lookup latency can qualify this candidate without a speedup. Reject or refine a material throughput regression; do not infer a speedup from the controlled buffer accounting. Publishing this candidate has not changed develop or main.
