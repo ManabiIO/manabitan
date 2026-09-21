@@ -187,6 +187,17 @@ describe('MDict inline stylesheet isolation', () => {
         assert.doesNotMatch(styles, /\[data-sc-class~="mdict-yomitan-entry-0"\] \[data-sc-class~="mdict-yomitan-entry-0"\]/u);
     });
 
+    test('stylesheet source comments cannot be terminated by an entry name', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alpha*/ .injected{display:block} /*', value: '<style>.safe { color: red; }</style><div class="safe">alpha</div>'},
+        ]);
+        const result = await createMdxImportData('inline-style-comment.mdx', {}, fixture.bytes, []);
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+
+        assert.match(styles, /^\/\* Source: Alpha\* \/ \.injected\{display:block\} \/\*\/inline\/1\.css \*\//u);
+        assert.match(styles, /\[data-sc-class~="safe"\]\{ color: red; \}/u);
+    });
+
     test('external MDD styles remain dictionary-wide rather than entry-local', async () => {
         const mdx = makeMdictFixture([
             {key: 'Alpha', value: '<div class="shared">alpha</div>'},
