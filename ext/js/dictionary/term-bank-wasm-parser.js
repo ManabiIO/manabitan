@@ -1459,6 +1459,7 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
     const glossaryStart = metas[o + 9];
     const glossaryLength = metas[o + 10];
     const glossaryJsonBytes = lazyGlossaryDecode ? source.subarray(glossaryStart, glossaryStart + glossaryLength) : void 0;
+    const glossaryJson = lazyGlossaryDecode ? '' : decodeRawToken(source, glossaryStart, glossaryLength);
     const glossaryMayContainMedia = mediaHintFastScan ? metas[o + 14] === 1 : void 0;
     const sequenceValue = metas[o + 11] | 0;
     const sequence = version >= 3 && sequenceValue >= 0 ? sequenceValue : null;
@@ -1486,7 +1487,7 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
         definitionTags: '',
         rules: '',
         score,
-        glossaryJson: '[]',
+        glossaryJson,
         glossaryJsonBytes,
         glossaryMayContainMedia,
         sequence,
