@@ -65,6 +65,20 @@ for (const [name, key, pattern] of checksumCases) {
     });
 }
 
+test('rejects decodable raw record payload corruption by checksum', () => {
+    const data = makeMdictFixture(
+        [{key: 'alpha', value: 'plain definition'}],
+        {recordBlockSize: 4096, keysPerBlock: 1, compression: 'raw'},
+    );
+    const corrupted = corrupt(data.bytes, data.recordDataOffset + 8);
+    const mdx = new MDX('raw-checksum.mdx', corrupted);
+    try {
+        assert.throws(() => mdx.fetch(mdx.keywordList[0]), /record block checksum mismatch/u);
+    } finally {
+        mdx.close();
+    }
+});
+
 test('rejects record block checksum corruption on lazy definition access', () => {
     const data = fixture();
     const mdx = new MDX('checksum.mdx', corrupt(data.bytes, data.recordDataOffset + 4));

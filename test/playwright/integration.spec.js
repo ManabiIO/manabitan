@@ -623,37 +623,31 @@ async function runSearch(page, query) {
     const searchButton = page.locator('#search-button');
     await page.evaluate(() => {
         const input = document.querySelector('#search-textbox');
-        const descriptor = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
-        const getValue = descriptor?.get;
-        const setValue = descriptor?.set;
-        if (!(input instanceof HTMLTextAreaElement) || typeof getValue !== 'function' || typeof setValue !== 'function') {
-            throw new Error('Unable to trace Search textarea writes');
+        if (!(input instanceof HTMLTextAreaElement)) {
+            throw new Error('Unable to trace Search textarea events');
         }
-        /** @type {Array<{value: string, stack: string}>} */
-        const writes = [];
-        Reflect.set(globalThis, '__manabitanSearchValueWrites', writes);
-        Object.defineProperty(input, 'value', {
-            configurable: true,
-            get() {
-                return getValue.call(this);
-            },
-            set(value) {
-                writes.push({
-                    value: String(value),
-                    stack: new Error('Search textarea value write').stack ?? '',
+        /** @type {Array<{type: string, value: string, trusted: boolean}>} */
+        const events = [];
+        Reflect.set(globalThis, '__manabitanSearchInputEvents', events);
+        for (const type of ['input', 'change']) {
+            input.addEventListener(type, (event) => {
+                events.push({
+                    type: event.type,
+                    value: input.value,
+                    trusted: event.isTrusted,
                 });
-                setValue.call(this, value);
-            },
-        });
+            });
+        }
     });
     await searchTextbox.fill(query);
     try {
         await expect(searchTextbox).toHaveValue(query);
     } catch (error) {
         const trace = await page.evaluate(() => ({
-            writes: Reflect.get(globalThis, '__manabitanSearchValueWrites'),
+            events: Reflect.get(globalThis, '__manabitanSearchInputEvents'),
             debug: Reflect.get(globalThis, '__manabitanSearchDebug'),
             activeElement: document.activeElement?.id ?? '',
+            loaded: document.documentElement.dataset.loaded ?? '',
         }));
         const message = error instanceof Error ? error.message : String(error);
         throw new Error(`${message}\nSearch overwrite trace: ${JSON.stringify(trace)}`);
