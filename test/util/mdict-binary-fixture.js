@@ -85,7 +85,9 @@ export function makeMdictFixture(entries, options = {}) {
         mdd = false,
         encoding = 'utf8',
         encodingLabel = encoding === 'utf16le' ? 'UTF-16' : 'UTF-8',
-        textEncoder = /** @param {string} value @returns {Uint8Array} */ (value) => new Uint8Array(Buffer.from(value, encoding)),
+        textEncoder = /** @type {(value: string) => Uint8Array} */ (
+            (value) => new Uint8Array(Buffer.from(value, encoding))
+        ),
         encrypted = 0,
         format = '',
         styleSheet = '',
