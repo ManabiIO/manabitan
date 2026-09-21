@@ -263,3 +263,28 @@ describe('DictionaryWorkerHandler import database cleanup', () => {
         expect(Reflect.get(handler, '_importSessionDictionaryDatabase')).toBeNull();
     });
 });
+
+
+describe('DictionaryWorkerHandler exact cleanup identity', () => {
+    test('does not trim persisted names when deleting transient metadata or selecting its shards', async () => {
+        const handler = new DictionaryWorkerHandler();
+        const title = ' \ufeffJMdict [update-staging identity-token]';
+        const sibling = title.trim();
+        let predicate = (/** @type {string} */ _name) => false;
+        const database = {
+            getDictionaryInfo: vi.fn(async () => [{title, updateSessionToken: 'identity-token'}, {title: sibling, updateSessionToken: 'identity-token'}]),
+            deleteDictionary: vi.fn(async (name) => {
+                if (name !== title) { throw new Error('wrong identity'); }
+            }),
+            cleanupTransientTermRecordShards: vi.fn(async (callback) => { predicate = callback; return []; }),
+        };
+        await handler._cleanupTransientReplacementTitles(
+            /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (database)),
+            title,
+        );
+        expect(database.deleteDictionary).toHaveBeenCalledWith(title, 1000, expect.any(Function));
+        expect(predicate(title)).toBe(true);
+        // A differently spelled installed dictionary must never inherit permission to delete.
+        expect(predicate(sibling)).toBe(false);
+    });
+});

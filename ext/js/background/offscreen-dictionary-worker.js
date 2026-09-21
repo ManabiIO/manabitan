@@ -605,7 +605,7 @@ export class OffscreenDictionaryWorkerHandler {
             try {
                 const db = requireDb.call(this._dictionaryDatabase);
                 for (const dictionaryNameRaw of dictionaryNames) {
-                    const dictionaryName = String(dictionaryNameRaw || '').trim();
+                    const dictionaryName = String(dictionaryNameRaw || '');
                     if (dictionaryName.length === 0) { continue; }
                     const rows = /** @type {Array<Record<string, unknown>>} */ (db.selectObjects(
                         `
@@ -641,7 +641,7 @@ export class OffscreenDictionaryWorkerHandler {
             }
         }
         for (const dictionaryNameRaw of dictionaryNames) {
-            const dictionaryName = String(dictionaryNameRaw || '').trim();
+            const dictionaryName = String(dictionaryNameRaw || '');
             if (dictionaryName.length === 0) { continue; }
             const expressionIds = /** @type {number[]} */ (
                 findDirectTermIds.call(this._dictionaryDatabase, dictionaryName, text, 'expression')

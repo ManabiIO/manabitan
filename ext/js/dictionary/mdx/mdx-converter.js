@@ -39,7 +39,7 @@ const ZipWriter = /** @type {typeof import('@zip.js/zip.js').ZipWriter} */ (/** 
  */
 
 /**
- * @typedef {{Title?: string, Description?: string, Format?: string, StyleSheet?: Record<string, string[]>}} MdictHeader
+ * @typedef {{Title?: string, Description?: string, Format?: string, StyleSheet?: Record<string, string[]>, KeyCaseSensitive?: string, StripKey?: string}} MdictHeader
  */
 
 /**
@@ -74,6 +74,7 @@ const ZipWriter = /** @type {typeof import('@zip.js/zip.js').ZipWriter} */ (/** 
  */
 
 const MDX_GLOSSARY_ROOT_CLASS = 'mdict-yomitan-content';
+const MDX_GLOSSARY_ENTRY_CLASS_PREFIX = 'mdict-yomitan-entry-';
 // Conversion walks every definition, so cache decompressed MDX record blocks.
 // MDD resource lookup remains lazy and uncached.
 const MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES = 8 * 1024 * 1024;
@@ -1177,7 +1178,81 @@ function migrateCssSelector(selector, glossaryRootSelector) {
         if (part.trim().length === 0 || ['>', '+', '~'].includes(part)) { return part; }
         return migrateCssSelectorSegment(part, glossaryRootSelector);
     }).join('');
-    return migrated.replace(/\s+/gu, ' ').trim();
+    // Quoted attribute values and whitespace after CSS hex escapes are significant.
+    return migrated.trim();
+}
+
+/**
+ * Constrain the matched element, not merely an ancestor, to this definition.
+ * :where() adds no specificity. Guard the originating element before its
+ * pseudo-element so ::before/::after and their legacy spellings stay valid.
+ * @param {string} selector
+ * @param {string} glossaryRootSelector
+ * @returns {string}
+ */
+function scopeCssSelectorSubject(selector, glossaryRootSelector) {
+    const parts = splitSelectorByCombinators(selector);
+    let subjectIndex = parts.length - 1;
+    while (subjectIndex >= 0) {
+        const part = parts[subjectIndex];
+        if (part.trim().length > 0 && !['>', '+', '~'].includes(part)) { break; }
+        subjectIndex -= 1;
+    }
+    if (subjectIndex < 0) { return selector; }
+    const subject = parts[subjectIndex];
+    let insertionIndex = subject.length;
+    let quote = '';
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    for (let index = 0; index < subject.length; index += 1) {
+        const character = subject[index];
+        if (character === '\\') {
+            const escape = readCssEscape(subject, index);
+            if (escape !== null) { index = escape.endIndex - 1; }
+            continue;
+        }
+        if (quote.length > 0) {
+            if (character === quote) { quote = ''; }
+            continue;
+        }
+        switch (character) {
+            case '"':
+            case "'": {
+                quote = character;
+                break;
+            }
+            case '[': {
+                bracketDepth += 1;
+                break;
+            }
+            case ']': {
+                bracketDepth = Math.max(0, bracketDepth - 1);
+                break;
+            }
+            case '(': {
+                parenDepth += 1;
+                break;
+            }
+            case ')': {
+                parenDepth = Math.max(0, parenDepth - 1);
+                break;
+            }
+            case ':': {
+                if (bracketDepth > 0 || parenDepth > 0) { break; }
+                const pseudo = readCssIdentifier(subject, index + 1);
+                const legacy = pseudo.value !== null &&
+                ['before', 'after', 'first-line', 'first-letter'].includes(pseudo.value.toLowerCase());
+                if (subject[index + 1] === ':' || legacy) {
+                    insertionIndex = index;
+                }
+                break;
+            }
+        }
+        if (insertionIndex < subject.length) { break; }
+    }
+    const guard = `:where(${glossaryRootSelector}, ${glossaryRootSelector} *)`;
+    parts[subjectIndex] = `${subject.slice(0, insertionIndex)}${guard}${subject.slice(insertionIndex)}`;
+    return parts.join('');
 }
 
 /**
@@ -1222,9 +1297,10 @@ function findMatchingCssBrace(stylesheet, blockStartIndex) {
  * blocks are otherwise retained verbatim so CSS properties and at-rules stay intact.
  * @param {string} stylesheet
  * @param {string} glossaryRootSelector
+ * @param {boolean} [scopeSelectors]
  * @returns {string}
  */
-function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector) {
+function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector, scopeSelectors = false) {
     const output = [];
     let index = 0;
     while (index < stylesheet.length) {
@@ -1297,14 +1373,17 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector) {
                 if (stripped.startsWith('@')) {
                     const atRuleName = stripped.slice(1).split(/\s|\(/u, 1)[0].toLowerCase();
                     if (['media', 'supports', 'layer', 'container', 'document'].includes(atRuleName)) {
-                        body = rewriteCssRuleSelectors(body, glossaryRootSelector);
+                        body = rewriteCssRuleSelectors(body, glossaryRootSelector, scopeSelectors);
                     }
                     output.push(`${prelude}{${body}}`);
                 } else {
                     const migratedSelectors = [];
                     const seen = new Set();
                     for (const part of splitCssSelectorList(prelude)) {
-                        const migrated = migrateCssSelector(part, glossaryRootSelector);
+                        let migrated = migrateCssSelector(part, glossaryRootSelector);
+                        if (scopeSelectors && migrated.length > 0) {
+                            migrated = scopeCssSelectorSubject(migrated, glossaryRootSelector);
+                        }
                         if (migrated.length > 0 && !seen.has(migrated)) {
                             seen.add(migrated);
                             migratedSelectors.push(migrated);
@@ -1331,17 +1410,27 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector) {
  * @param {string} assetPrefix
  * @param {string|null} sourceAssetPath
  * @param {Set<string>|null} assetReferences
+ * @param {string} [glossaryRootSelector]
+ * @param {boolean} [scopeSelectors]
  * @returns {string}
  */
-function migrateStylesheetForYomitan(stylesheet, assetPrefix, sourceAssetPath, assetReferences = null) {
+function migrateStylesheetForYomitan(stylesheet, assetPrefix, sourceAssetPath, assetReferences = null, glossaryRootSelector = STRUCTURED_ROOT_SELECTOR, scopeSelectors = false) {
     const rewritten = rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetReferences);
-    return rewriteCssRuleSelectors(rewritten, STRUCTURED_ROOT_SELECTOR);
+    return rewriteCssRuleSelectors(rewritten, glossaryRootSelector, scopeSelectors);
+}
+
+/**
+ * @param {string} sourceName
+ * @returns {string}
+ */
+function escapeStylesheetSourceComment(sourceName) {
+    return sourceName.replaceAll('*/', '* /').replace(/[\r\n]+/gu, ' ');
 }
 
 /**
  * @param {Map<string, Uint8Array>} cssAssets
  * @param {string} assetPrefix
- * @param {Array<[string, string]>} inlineStylesheets
+ * @param {Array<[string, string, string]>} inlineStylesheets
  * @param {Set<string>|null} assetReferences
  * @returns {string|null}
  */
@@ -1353,10 +1442,11 @@ function buildRootStylesheet(cssAssets, assetPrefix, inlineStylesheets, assetRef
         if (stylesheet === null) { continue; }
         const sourceName = archivePath.startsWith(assetPrefix) ? archivePath.slice(assetPrefix.length) : archivePath;
         stylesheet = migrateStylesheetForYomitan(stylesheet, assetPrefix, sourceName, assetReferences);
-        sections.push(`/* Source: ${sourceName} */\n${stylesheet}`);
+        sections.push(`/* Source: ${escapeStylesheetSourceComment(sourceName)} */\n${stylesheet}`);
     }
-    for (const [sourceName, stylesheet] of inlineStylesheets) {
-        sections.push(`/* Source: ${sourceName} */\n${migrateStylesheetForYomitan(stylesheet, assetPrefix, null, assetReferences)}`);
+    for (const [sourceName, stylesheet, scopeClass] of inlineStylesheets) {
+        const scopeSelector = `[${STRUCTURED_CLASS_ATTR}~="${scopeClass}"]`;
+        sections.push(`/* Source: ${escapeStylesheetSourceComment(sourceName)} */\n${migrateStylesheetForYomitan(stylesheet, assetPrefix, null, assetReferences, scopeSelector, true)}`);
     }
     return sections.length > 0 ? `${sections.join('\n\n')}\n` : null;
 }
@@ -1675,7 +1765,7 @@ function appendStructuredContent(parent, content, details) {
 
 /**
  * @param {string} definition
- * @param {{enableAudio: boolean, assetPrefix: string, embeddedAssetCounter: {value: number}}} options
+ * @param {{enableAudio: boolean, assetPrefix: string, embeddedAssetCounter: {value: number}, entryScopeClass: string}} options
  * @returns {{glossary: Record<string, unknown>, inlineStylesheets: Array<[string, string]>, embeddedAssets: Map<string, Uint8Array>, assetReferences: Set<string>}}
  */
 function convertDefinitionToStructuredContent(definition, options) {
@@ -1695,6 +1785,7 @@ function convertDefinitionToStructuredContent(definition, options) {
         inlineStylesheets,
         assetReferences,
     });
+    const rootClass = inlineStylesheets.length > 0 ? `${MDX_GLOSSARY_ROOT_CLASS} ${options.entryScopeClass}` : MDX_GLOSSARY_ROOT_CLASS;
     return {
         glossary: {
             type: 'structured-content',
@@ -1702,7 +1793,7 @@ function convertDefinitionToStructuredContent(definition, options) {
                 tag: 'div',
                 data: {
                     tag: 'div',
-                    class: MDX_GLOSSARY_ROOT_CLASS,
+                    class: rootClass,
                 },
                 content,
             },
@@ -1740,24 +1831,70 @@ function extractDescription(mdx, override) {
 /**
  * @param {string} term
  * @param {Map<string, Set<string>>} redirects
+ * @param {Map<string, string[]>} fallbackTargets
  * @param {Set<string>} resolvedTargets
+ * @param {(value: string) => string} normalizeRedirectKey
  * @returns {string[]}
  */
-function getRedirectExpressions(term, redirects, resolvedTargets) {
+function getRedirectExpressions(term, redirects, fallbackTargets, resolvedTargets, normalizeRedirectKey) {
     const expressions = [term];
-    const visited = new Set(expressions);
+    const emittedExpressions = new Set(expressions);
+    const visitedFallbacks = new Set();
     for (let index = 0; index < expressions.length; ++index) {
-        const target = expressions[index];
-        const aliases = redirects.get(target);
-        if (typeof aliases === 'undefined') { continue; }
-        resolvedTargets.add(target);
-        for (const alias of aliases) {
-            if (visited.has(alias)) { continue; }
-            visited.add(alias);
-            expressions.push(alias);
+        const expression = expressions[index];
+        const targets = [expression];
+        const normalized = normalizeRedirectKey(expression);
+        if (!visitedFallbacks.has(normalized)) {
+            visitedFallbacks.add(normalized);
+            const fallbacks = fallbackTargets.get(normalized);
+            if (typeof fallbacks !== 'undefined') {
+                for (const target of fallbacks) { targets.push(target); }
+            }
+        }
+        for (const target of targets) {
+            const aliases = redirects.get(target);
+            if (typeof aliases === 'undefined') { continue; }
+            resolvedTargets.add(target);
+            for (const alias of aliases) {
+                if (emittedExpressions.has(alias)) { continue; }
+                emittedExpressions.add(alias);
+                expressions.push(alias);
+            }
         }
     }
     return expressions;
+}
+
+/**
+ * Preserve an exact target even when another spelling normalizes to the same
+ * key. Only genuinely absent targets may use case/StripKey fallback. Scan the
+ * existing key metadata, retaining only redirect target names, not another
+ * dictionary-wide lookup index. Failed records and cycles remain unresolved.
+ * @param {Map<string, Set<string>>} redirects
+ * @param {MdictKeyword[]} keywords
+ * @param {(value: string) => string} normalizeRedirectKey
+ * @returns {Map<string, string[]>}
+ */
+function getFallbackRedirectTargets(redirects, keywords, normalizeRedirectKey) {
+    /** @type {Map<string, string[]>} */
+    const fallbacks = new Map();
+    if (redirects.size === 0) { return fallbacks; }
+    const exactTargets = new Set();
+    for (const {keyText} of keywords) {
+        const term = trimNullSuffix(keyText).trim();
+        if (redirects.has(term)) { exactTargets.add(term); }
+    }
+    for (const target of redirects.keys()) {
+        if (exactTargets.has(target)) { continue; }
+        const normalized = normalizeRedirectKey(target);
+        const targets = fallbacks.get(normalized);
+        if (typeof targets === 'undefined') {
+            fallbacks.set(normalized, [target]);
+        } else {
+            targets.push(target);
+        }
+    }
+    return fallbacks;
 }
 
 /**
@@ -1822,10 +1959,22 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         const encoder = new TextEncoder();
         /** @type {Map<string, Uint8Array>} */
         const files = new Map();
-        /** @type {Array<[string, string]>} */
+        /** @type {Array<[string, string, string]>} */
         const inlineStylesheets = [];
         /** @type {Set<string>} */
         const referencedAssetKeys = new Set();
+        const redirectCaseSensitive = mdictCommon.isTrue(mdx.header.KeyCaseSensitive);
+        const redirectStripKey = mdictCommon.isTrue(mdx.header.StripKey);
+        /**
+         * @param {string} value
+         * @returns {string}
+         */
+        const normalizeRedirectKey = (value) => {
+            if (redirectStripKey) {
+                value = value.replace(mdictCommon.REGEXP_STRIPKEY.mdx, '$1');
+            }
+            return redirectCaseSensitive ? value : value.toLowerCase();
+        };
         /** @type {Map<string, Set<string>>} */
         const redirects = new Map();
         /** @type {Set<string>} */
@@ -1881,7 +2030,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             const redirectDefinition = definition.trim();
             if (redirectDefinition.startsWith('@@@LINK=')) {
                 const target = trimNullSuffix(redirectDefinition.slice(8)).trim();
-                if (target.length > 0 && target !== term) {
+                if (target.length > 0) {
                     const aliases = redirects.get(target) ?? new Set();
                     if (!aliases.has(term)) {
                         aliases.add(term);
@@ -1898,7 +2047,12 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             let converted;
             try {
                 const preparedDefinition = prepareDefinitionMarkup(definition, mdx.header);
-                converted = convertDefinitionToStructuredContent(preparedDefinition, {enableAudio, assetPrefix, embeddedAssetCounter});
+                converted = convertDefinitionToStructuredContent(preparedDefinition, {
+                    enableAudio,
+                    assetPrefix,
+                    embeddedAssetCounter,
+                    entryScopeClass: `${MDX_GLOSSARY_ENTRY_CLASS_PREFIX}${sequence}`,
+                });
             } catch (_error) {
                 skippedEntryErrorCount += 1;
                 if (typeof onProgress === 'function') {
@@ -1912,7 +2066,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 }
             }
             for (const [sourceName, stylesheet] of converted.inlineStylesheets) {
-                inlineStylesheets.push([`${term}/${sourceName}`, stylesheet]);
+                inlineStylesheets.push([`${term}/${sourceName}`, stylesheet, `${MDX_GLOSSARY_ENTRY_CLASS_PREFIX}${sequence}`]);
             }
             for (const assetKey of converted.assetReferences) {
                 referencedAssetKeys.add(assetKey);
@@ -1956,8 +2110,9 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             bank = [];
             bankIndex += 1;
         };
+        const fallbackTargets = getFallbackRedirectTargets(redirects, mdx.keywordList, normalizeRedirectKey);
         for (const {term, glossary, sequence: entrySequence} of convertedEntries) {
-            const expressions = getRedirectExpressions(term, redirects, resolvedRedirectTargets);
+            const expressions = getRedirectExpressions(term, redirects, fallbackTargets, resolvedRedirectTargets, normalizeRedirectKey);
             for (const expression of expressions) {
                 bank.push([
                     expression,
