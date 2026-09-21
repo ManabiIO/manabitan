@@ -1,0 +1,74 @@
+name: Complete dictionary identity at backend boundaries
+on:
+  push:
+    branches: [codex/delivery-backend-identity-137-20260921]
+permissions:
+  contents: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  qualify:
+    if: github.repository == 'ManabiIO/manabitan'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      HUSKY: '0'
+      NO_COLOR: '1'
+      TARGET: codex/qualified-backend-identity-137-20260921
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - name: Prepare tests on exact current PR parent
+        run: |
+          set -euo pipefail
+          cp .codex-delivery/backend-dictionary-identity.test.js "$RUNNER_TEMP/identity-boundaries.test.js"
+          cp .codex-delivery/apply-backend.py "$RUNNER_TEMP/apply-backend.py"
+          mkdir -p "$RUNNER_TEMP/backend-identity-evidence"
+          git fetch origin 296e85dd2c6c93b88196fb9aac5829130c17cc62
+          git checkout --detach 296e85dd2c6c93b88196fb9aac5829130c17cc62
+          test "$(git hash-object ext/js/background/backend.js)" = 9d885d00c95d84315a5d76a3e61d19e7cce8f864
+          test "$(git hash-object ext/js/background/offscreen-dictionary-worker.js)" = 36466e1cd098c932b85d29492482f83952f1732c
+          test ! -e test/backend-dictionary-identity.test.js
+          cp "$RUNNER_TEMP/identity-boundaries.test.js" test/backend-dictionary-identity.test.js
+          git config user.name 'ManabiTan identity closeout'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add test/backend-dictionary-identity.test.js
+          git commit -m 'test: expose exact identity loss at backend verification boundaries'
+      - uses: ./.github/actions/setup
+      - name: Reproduce missing boundary repairs
+        run: |
+          set -euo pipefail
+          set +e
+          npx vitest run test/backend-dictionary-identity.test.js > "$RUNNER_TEMP/backend-identity-evidence/before.log" 2>&1
+          status=$?
+          set -e
+          cat "$RUNNER_TEMP/backend-identity-evidence/before.log"
+          test "$status" -ne 0
+          grep -q '12 failed' "$RUNNER_TEMP/backend-identity-evidence/before.log"
+      - name: Repair boundaries and qualify strictly
+        run: |
+          set -euo pipefail
+          python "$RUNNER_TEMP/apply-backend.py"
+          npx eslint --fix --fix-type layout test/backend-dictionary-identity.test.js 2>&1 | tee "$RUNNER_TEMP/backend-identity-evidence/layout.log"
+          npm run test:js 2>&1 | tee "$RUNNER_TEMP/backend-identity-evidence/lint.log"
+          npm run test:ts:main 2>&1 | tee "$RUNNER_TEMP/backend-identity-evidence/main-types.log"
+          npm run test:ts:test 2>&1 | tee "$RUNNER_TEMP/backend-identity-evidence/test-types.log"
+          npx vitest run test/backend-dictionary-identity.test.js test/backend-lookup-refresh.test.js test/offscreen-dictionary-worker-admission-regressions.test.js test/term-record-opfs-store.test.js test/dictionary-database-import-cleanup.test.js test/dictionary-worker-handler-cleanup.test.js test/dictionary-import-controller-update-profile.test.js 2>&1 | tee "$RUNNER_TEMP/backend-identity-evidence/tests.log"
+          git diff --check
+          git add ext/js/background/backend.js ext/js/background/offscreen-dictionary-worker.js test/backend-dictionary-identity.test.js
+          git commit -m 'fix: preserve stored dictionary and probe identity through backend verification'
+      - name: Publish a clean staging descendant only
+        run: |
+          set -euo pipefail
+          test -z "$(git ls-remote --heads origin "refs/heads/$TARGET")"
+          git log -2 --format='%H %s' | tee "$RUNNER_TEMP/backend-identity-evidence/commits.txt"
+          git diff 296e85dd2c6c93b88196fb9aac5829130c17cc62 HEAD > "$RUNNER_TEMP/backend-identity-evidence/published.patch"
+          git push origin "HEAD:refs/heads/$TARGET"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-identity-closeout
+          path: ${{ runner.temp }}/backend-identity-evidence
+          retention-days: 14
