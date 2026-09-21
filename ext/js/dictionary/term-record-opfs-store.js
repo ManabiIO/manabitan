@@ -3625,7 +3625,11 @@ export class TermRecordOpfsStore {
                     this._setDictionaryHealth(dictionaryName, 'temporarilyUnavailable', 'Dictionary repair was superseded by a storage update');
                     return false;
                 }
-                const result = await this._rebuildLookupIndexForShard(state);
+                const result = await this._rebuildLookupIndexForShard(state, () => (
+                    isCurrent() &&
+                    !this._importSessionActive &&
+                    this._shardStateByFileName.get(state.fileName) === state
+                ));
                 recordCount += result.recordCount;
                 indexBytes += result.indexBytes;
             }
@@ -3673,9 +3677,16 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {TermRecordShardState} state
+     * @param {() => boolean} [isCurrent]
      * @returns {Promise<{recordCount: number, indexBytes: number}>}
+     * @throws {Error} If authoritative storage is invalid or the repair is superseded.
      */
-    async _rebuildLookupIndexForShard(state) {
+    async _rebuildLookupIndexForShard(state, isCurrent = () => true) {
+        /** @throws {Error} If the repair no longer owns this dictionary generation. */
+        const assertCurrent = () => {
+            if (!isCurrent()) { throw new Error('Term-record index repair was superseded'); }
+        };
+        assertCurrent();
         if (this._recordsDirectoryHandle === null) {
             throw new Error('Term-record directory is unavailable');
         }
@@ -3688,12 +3699,14 @@ export class TermRecordOpfsStore {
             }
             throw error;
         }
+        assertCurrent();
         state.fileLength = descriptorFile.size;
         if (descriptorFile.size < (BINARY_HEADER_PREFIX_BYTES + 2)) {
             throw new TermRecordIntegrityError(`Term-record descriptor is truncated: ${state.fileName}`);
         }
         const initialHeaderLength = Math.min(descriptorFile.size, BINARY_HEADER_PREFIX_BYTES + 2 + 4);
         const initialHeader = await this._readFileRange(descriptorFile, 0, initialHeaderLength);
+        assertCurrent();
         if (!this._isBinaryFormat(initialHeader)) {
             throw new TermRecordIntegrityError(`Term-record descriptor header is invalid: ${state.fileName}`);
         }
@@ -3731,6 +3744,7 @@ export class TermRecordOpfsStore {
             throw new TermRecordIntegrityError(`Authoritative term-record container is truncated: ${indexFileName}`);
         }
         const content = new Uint8Array(await indexFile.arrayBuffer());
+        assertCurrent();
         const sourceView = new DataView(content.buffer, content.byteOffset, content.byteLength);
         if (this._textDecoder.decode(content.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {
             throw new TermRecordIntegrityError(`Authoritative term-record container header is invalid: ${indexFileName}`);
@@ -3764,11 +3778,15 @@ export class TermRecordOpfsStore {
         let indexBytes = LOOKUP_INDEX_FILE_HEADER_BYTES;
         let yieldDeadline = safePerformance.now() + REPAIR_YIELD_BUDGET_MS;
         try {
+            // Creation itself can suspend. Keep this check inside the abort
+            // scope so a newly opened, obsolete writer is always abandoned.
+            assertCurrent();
             await writable.truncate(0);
             await writable.seek(0);
             await writable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
             cursor = LOOKUP_INDEX_FILE_HEADER_BYTES;
             for (let sourceChunk = 0; sourceChunk < sourceChunkCount; ++sourceChunk) {
+                assertCurrent();
                 if ((cursor + LOOKUP_INDEX_CHUNK_HEADER_BYTES) > content.byteLength) {
                     throw new TermRecordIntegrityError(`Authoritative chunk header is truncated: ${indexFileName}`);
                 }
@@ -3871,6 +3889,7 @@ export class TermRecordOpfsStore {
             ) {
                 throw new TermRecordIntegrityError(`Authoritative term-record container is incomplete: ${state.fileName}`);
             }
+            assertCurrent();
             const header = new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES);
             header.set(this._textEncoder.encode(LOOKUP_INDEX_MAGIC_TEXT), 0);
             const headerView = new DataView(header.buffer, header.byteOffset, header.byteLength);
@@ -3880,6 +3899,7 @@ export class TermRecordOpfsStore {
             header.set(generationId, 24);
             await writable.seek(0);
             await writable.write(header);
+            assertCurrent();
             await writable.close();
         } catch (error) {
             const abort = Reflect.get(writable, 'abort');
