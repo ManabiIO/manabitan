@@ -129,7 +129,7 @@ export function writeRawTermContentCompactBlockReference(
         !Number.isSafeInteger(blockOffset) || blockOffset < 0 ||
         !Number.isSafeInteger(blockCompressedLength) || blockCompressedLength <= 0 || blockCompressedLength >= U32_RANGE ||
         !Number.isSafeInteger(blockUncompressedLength) || blockUncompressedLength <= 0 || blockUncompressedLength >= U32_RANGE ||
-        !Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= U32_RANGE ||
+        !Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= blockUncompressedLength ||
         !Number.isSafeInteger(offset) || offset < 0 || offset + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES > view.byteLength ||
         !Number.isSafeInteger(blockOffset + blockCompressedLength)
     ) {
@@ -193,6 +193,8 @@ export function encodeRawTermContentBlockReference(blockOffset, blockCompressedL
 
 /**
  * Writes a reference into an existing slab without allocating a per-reference view.
+ * Validates the complete reference before the first write to avoid narrowing
+ * invalid numbers or leaving a partially written reference in the slab.
  * @param {DataView} view
  * @param {number} offset
  * @param {number} blockOffset
@@ -200,6 +202,7 @@ export function encodeRawTermContentBlockReference(blockOffset, blockCompressedL
  * @param {number} blockUncompressedLength
  * @param {number} entryOffset
  * @param {number} entryLength
+ * @throws {RangeError} When a reference field or its destination lies outside the supported bounds.
  */
 export function writeRawTermContentBlockReference(
     view,
@@ -210,6 +213,17 @@ export function writeRawTermContentBlockReference(
     entryOffset,
     entryLength,
 ) {
+    if (
+        !Number.isSafeInteger(blockOffset) || blockOffset < 0 ||
+        !Number.isSafeInteger(blockCompressedLength) || blockCompressedLength <= 0 || blockCompressedLength >= U32_RANGE ||
+        !Number.isSafeInteger(blockUncompressedLength) || blockUncompressedLength <= 0 || blockUncompressedLength >= U32_RANGE ||
+        !Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= blockUncompressedLength ||
+        !Number.isSafeInteger(entryLength) || entryLength <= 0 || entryLength > blockUncompressedLength - entryOffset ||
+        !Number.isSafeInteger(offset) || offset < 0 || offset > view.byteLength - RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES ||
+        !Number.isSafeInteger(blockOffset + blockCompressedLength)
+    ) {
+        throw new RangeError('Invalid term-content block reference');
+    }
     view.setUint32(offset, RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC_U32, true);
     view.setUint32(offset + 4, blockOffset, true);
     view.setUint32(offset + 8, Math.floor(blockOffset / U32_RANGE), true);
