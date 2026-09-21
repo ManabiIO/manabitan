@@ -391,6 +391,50 @@ describe('MDict direct lookup range and lifetime regressions', () => {
     });
 });
 
+describe('MDict redirect StripKey matching', () => {
+    for (const stripKey of /** @type {const} */ (['Yes', 'No'])) {
+        test(`converter redirects honor StripKey=${stripKey}`, async () => {
+            const fixture = makeMdictFixture([
+                {key: 'Alias', value: '@@@LINK=foobar'},
+                {key: 'foo-bar', value: 'definition'},
+            ], {stripKey, keyCaseSensitive: 'No'});
+            const result = await createMdxImportData('redirect-strip.mdx', {}, fixture.bytes, []);
+            const terms = readRows(result.files).map(([term]) => term).sort();
+            assert.deepEqual(terms, stripKey === 'Yes' ? ['Alias', 'foo-bar'] : ['foo-bar']);
+            const details = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details;
+            assert.equal(details?.unresolvedRedirectCount, stripKey === 'Yes' ? 0 : 1);
+        });
+    }
+
+    test('punctuation-normalized redirect chains retain every alias spelling', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alias-One', value: '@@@LINK=mid_dle'},
+            {key: 'Middle', value: '@@@LINK=FOOBAR'},
+            {key: 'foo-bar', value: 'definition'},
+            {key: 'foobar', value: '@@@LINK=foo-bar'},
+        ], {stripKey: 'Yes', keyCaseSensitive: 'No'});
+        const result = await createMdxImportData('redirect-strip-chain.mdx', {}, fixture.bytes, []);
+        const terms = readRows(result.files).map(([term]) => term).sort();
+        assert.deepEqual(terms, ['Alias-One', 'Middle', 'foo-bar', 'foobar']);
+        const details = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details;
+        assert.equal(details?.unresolvedRedirectCount, 0);
+    });
+
+    test('StripKey does not disable case-sensitive matching or resolve disconnected cycles', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alias', value: '@@@LINK=FooBar'},
+            {key: 'WrongCase', value: '@@@LINK=foobar'},
+            {key: 'Foo-Bar', value: 'definition'},
+            {key: 'Cycle-One', value: '@@@LINK=CycleTwo'},
+            {key: 'Cycle-Two', value: '@@@LINK=CycleOne'},
+        ], {stripKey: 'Yes', keyCaseSensitive: 'Yes'});
+        const result = await createMdxImportData('redirect-strip-sensitive.mdx', {}, fixture.bytes, []);
+        assert.deepEqual(readRows(result.files).map(([term]) => term).sort(), ['Alias', 'Foo-Bar']);
+        const details = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details;
+        assert.equal(details?.unresolvedRedirectCount, 3);
+    });
+});
+
 describe('actual binary MDX/MDD conversion', () => {
     test('preserves homograph senses, multi-hop aliases, bank bounds and diagnostics', async () => {
         const fixture = makeMdictFixture([
