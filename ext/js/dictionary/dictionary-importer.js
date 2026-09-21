@@ -4379,7 +4379,7 @@ export class DictionaryImporter {
         /**
          * @param {number} streamedRowCount
          * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} termRecordPreinternedPlan
-         * @returns {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}}
+         * @returns {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}}
          */
         const createDirectArtifactChunkPayload = (streamedRowCount, termRecordPreinternedPlan) => {
             const useFullChunkArrays = streamedRowCount === chunkSize;
