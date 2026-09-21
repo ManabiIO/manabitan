@@ -115,7 +115,7 @@ test('MDX native cross-block import preserves aliases, senses and media through 
     const blue = makeFixturePng([0, 0, 255, 255]);
     const green = makeFixturePng([0, 255, 0, 255]);
     const mdx = makeMdictFixture([
-        {key: '猫', value: `<div class="native-sense">first complete native definition 🐈<img src="data:image/png;base64,${Buffer.from(red).toString('base64')}"></div>`},
+        {key: '猫', value: `<div class="native-sense">first complete native definition 🐈<span class="native-inline" style="background-image:url(styles/images/green.png)">inline media</span><img src="data:image/png;base64,${Buffer.from(red).toString('base64')}"></div>`},
         {key: '猫', value: '<div>second independent native sense</div>'},
         {key: 'ねこ', value: '@@@LINK=猫'},
         {key: '別名', value: '@@@LINK=ねこ'},
@@ -156,16 +156,21 @@ test('MDX native cross-block import preserves aliases, senses and media through 
     await expect(entries).toContainText('second independent native sense');
     const nativeSense = entries.locator('[data-sc-class~="native-sense"]').first();
     await expect(nativeSense).toHaveCSS('color', 'rgb(12, 34, 56)');
-    await expect(async () => {
-        const backgroundImage = await nativeSense.evaluate((element) => getComputedStyle(element).backgroundImage);
-        expect(backgroundImage).toMatch(/^url\("blob:/u);
-        const match = /^url\("([^"]+)"\)$/u.exec(backgroundImage);
-        expect(match).not.toBeNull();
-        const bytes = await page.evaluate(async (url) => {
-            return [...new Uint8Array(await (await fetch(url)).arrayBuffer())];
-        }, match?.[1] ?? '');
-        expect(bytes).toStrictEqual([...green]);
-    }).toPass({timeout: 30_000});
+    for (const target of [
+        nativeSense,
+        entries.locator('[data-sc-class~="native-inline"]').first(),
+    ]) {
+        await expect(async () => {
+            const backgroundImage = await target.evaluate((element) => getComputedStyle(element).backgroundImage);
+            expect(backgroundImage).toMatch(/^url\("blob:/u);
+            const match = /^url\("([^"]+)"\)$/u.exec(backgroundImage);
+            expect(match).not.toBeNull();
+            const bytes = await page.evaluate(async (url) => {
+                return [...new Uint8Array(await (await fetch(url)).arrayBuffer())];
+            }, match?.[1] ?? '');
+            expect(bytes).toStrictEqual([...green]);
+        }).toPass({timeout: 30_000});
+    }
     await expect(entries.locator('.gloss-image').first()).toBeVisible();
 
     // A new document must retrieve committed data, not the converter's in-memory map.
