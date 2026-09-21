@@ -24,7 +24,10 @@ const u32 = 2 ** 32
  * @returns {Uint8Array}
  */
 const encode = (offset, length) => encodeRawTermContentSharedGlossaryBinary('v1', '\ufefftag', '名詞', offset, length, encoder)
-/** @param {Uint8Array} bytes */
+/**
+ * @param {Uint8Array} bytes
+ * @returns {ReturnType<typeof decodeRawTermContentSharedGlossaryHeader>}
+ */
 const decode = (bytes) => decodeRawTermContentSharedGlossaryHeader(bytes, decoder)
 
 /**
@@ -62,13 +65,13 @@ test('independent valid fixture is recognized, decoded and rebased', () => {
     assert.deepEqual(rebaseRawTermContentSharedGlossaryBinary(bytes, 1), rawReference(18n, 2))
 })
 
-for (const offset of [-1, 0.5, NaN, Infinity, -Infinity, 2 ** 53]) {
+for (const offset of [-1, 0.5, Number.NaN, Infinity, -Infinity, 2 ** 53]) {
     test(`encode rejects unsafe offset ${String(offset)}`, () => {
         assert.throws(() => encode(offset, 2), RangeError)
     })
 }
 
-for (const length of [-1, 0.5, NaN, Infinity, -Infinity, u32, u32 + 2, max]) {
+for (const length of [-1, 0.5, Number.NaN, Infinity, -Infinity, u32, u32 + 2, max]) {
     test(`encode rejects unsafe length ${String(length)}`, () => {
         assert.throws(() => encode(0, length), RangeError)
     })
@@ -100,7 +103,7 @@ for (const offset of [2n ** 53n, 2n ** 53n + 1n, 2n ** 64n - 1n]) {
     for (const delta of [1, -1]) {
         test(`rebase rejects unsafe source ${offset} shifted ${delta}`, () => {
             const bytes = rawReference(offset)
-            const snapshot = bytes.slice()
+            const snapshot = Uint8Array.from(bytes)
             assert.throws(() => rebaseRawTermContentSharedGlossaryBinary(bytes, delta), RangeError)
             assert.deepEqual(bytes, snapshot)
         })
@@ -111,10 +114,10 @@ test('decode rejects a safe offset whose interval end is unsafe', () => {
     assert.equal(decode(rawReference(BigInt(max), 1)), null)
 })
 
-for (const delta of [NaN, Infinity, -Infinity, 0.5, max + 1]) {
+for (const delta of [Number.NaN, Infinity, -Infinity, 0.5, max + 1]) {
     test(`rebase rejects invalid delta ${String(delta)}`, () => {
         const bytes = encode(20, 2)
-        const snapshot = bytes.slice()
+        const snapshot = Uint8Array.from(bytes)
         assert.throws(() => rebaseRawTermContentSharedGlossaryBinary(bytes, delta), RangeError)
         assert.deepEqual(bytes, snapshot)
     })
@@ -123,7 +126,7 @@ for (const delta of [NaN, Infinity, -Infinity, 0.5, max + 1]) {
 for (const [offset, length, delta] of [[5, 2, -6], [max - 2, 2, 1], [max - 2, 2, 3], [max, 1, -1]]) {
     test(`rebase rejects invalid target interval ${offset} + ${length} shifted ${delta}`, () => {
         const bytes = rawReference(BigInt(offset), length)
-        const snapshot = bytes.slice()
+        const snapshot = Uint8Array.from(bytes)
         assert.throws(() => rebaseRawTermContentSharedGlossaryBinary(bytes, delta), RangeError)
         assert.deepEqual(bytes, snapshot)
     })
@@ -140,7 +143,7 @@ for (const [offset, length, delta] of [[5, 2, -5], [0, 2, u32 + 1], [u32 - 1, 7,
         const padded = new Uint8Array(original.length + 11).fill(0xa5)
         padded.set(original, 3)
         const bytes = padded.subarray(3, 3 + original.length)
-        const snapshot = padded.slice()
+        const snapshot = Uint8Array.from(padded)
         const result = rebaseRawTermContentSharedGlossaryBinary(bytes, delta)
         assert.notEqual(result, bytes)
         assert.deepEqual(padded, snapshot)
