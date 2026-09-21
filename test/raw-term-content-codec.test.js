@@ -28,26 +28,47 @@ function createTokenWire(rawTokens) {
 }
 
 describe('raw term content string identity', () => {
-    test.each([
-        ['raw-v2', (tags) => {
-            const bytes = encodeRawTermContentBinary(...tags, glossaryBytes, textEncoder);
+    /**
+     * @param {'raw-v2'|'raw-v3'} format
+     * @param {[string, string, string]} tags
+     * @returns {(decoder: TextDecoder) => {rules: string, definitionTags: string, termTags: string}|null}
+     */
+    function createDecode(format, tags) {
+        if (format === 'raw-v2') {
+            const bytes = encodeRawTermContentBinary(
+                tags[0],
+                tags[1],
+                tags[2],
+                glossaryBytes,
+                textEncoder,
+            );
             return (decoder) => decodeRawTermContentHeader(bytes, decoder);
-        }],
-        ['raw-v3', (tags) => {
-            const bytes = encodeRawTermContentSharedGlossaryBinary(...tags, 123, glossaryBytes.length, textEncoder);
-            return (decoder) => decodeRawTermContentSharedGlossaryHeader(bytes, decoder);
-        }],
-    ])('%s preserves leading U+FEFF tag characters for either decoder BOM policy', (_name, createDecode) => {
-        const tags = ['\ufeffrule', '\ufeff\ufeffdefinition', '\ufeff'];
-        const decode = createDecode(tags);
-        for (const ignoreBOM of [false, true]) {
-            expect(decode(new TextDecoder('utf-8', {ignoreBOM}))).toMatchObject({
-                rules: tags[0],
-                definitionTags: tags[1],
-                termTags: tags[2],
-            });
         }
-    });
+        const bytes = encodeRawTermContentSharedGlossaryBinary(
+            tags[0],
+            tags[1],
+            tags[2],
+            123,
+            glossaryBytes.length,
+            textEncoder,
+        );
+        return (decoder) => decodeRawTermContentSharedGlossaryHeader(bytes, decoder);
+    }
+
+    test.each(['raw-v2', 'raw-v3'])(
+        '%s preserves leading U+FEFF tag characters for either decoder BOM policy',
+        (format) => {
+            const tags = /** @type {[string, string, string]} */ (['\ufeffrule', '\ufeff\ufeffdefinition', '\ufeff']);
+            const decode = createDecode(/** @type {'raw-v2'|'raw-v3'} */ (format), tags);
+            for (const ignoreBOM of [false, true]) {
+                expect(decode(new TextDecoder('utf-8', {ignoreBOM}))).toMatchObject({
+                    rules: tags[0],
+                    definitionTags: tags[1],
+                    termTags: tags[2],
+                });
+            }
+        },
+    );
 
     test('token fields preserve literal leading U+FEFF characters', () => {
         const tags = ['\ufeffrule', '\ufeff\ufeffdefinition', '\ufeff'];
