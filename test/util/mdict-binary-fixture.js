@@ -73,6 +73,20 @@ function xmlAttribute(value) {
 }
 
 /**
+ * @param {string} encoding
+ * @returns {(value: string) => Uint8Array}
+ */
+function createFixtureTextEncoder(encoding) {
+    /**
+     * @param {string} value
+     * @returns {Uint8Array}
+     */
+    return function encodeFixtureText(value) {
+        return new Uint8Array(Buffer.from(value, encoding));
+    };
+}
+
+/**
  * Independent, deterministic writer for raw/zlib, unencrypted MDict fixtures.
  * Does not import the parser under test. Record blocks may split Unicode scalars.
  * Optional metadata overrides are only for negative regression cases.
@@ -85,11 +99,7 @@ export function makeMdictFixture(entries, options = {}) {
         mdd = false,
         encoding = 'utf8',
         encodingLabel = encoding === 'utf16le' ? 'UTF-16' : 'UTF-8',
-        textEncoder = /**
-         * @param {string} value
-         * @returns {Uint8Array}
-         */
-        (value) => new Uint8Array(Buffer.from(value, encoding)),
+        textEncoder = createFixtureTextEncoder(encoding),
         encrypted = 0,
         compression = 'zlib',
         recordBlockSize = 64,
