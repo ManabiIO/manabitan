@@ -933,15 +933,17 @@ describe('convertMdxToArchive', () => {
                 definition: '<div class="jp">Styled</div>',
             }],
         });
+        const prefix = new TextEncoder().encode('@charset "Shift_JIS";\n.jp::before { content: "');
+        const suffix = new TextEncoder().encode('"; }\n');
+        const value = new Uint8Array(prefix.length + 4 + suffix.length);
+        value.set(prefix);
+        value.set(Uint8Array.of(0x93, 0xfa, 0x96, 0x7b), prefix.length);
+        value.set(suffix, prefix.length + 4);
         mockState.mddFactory = () => [{
             keyText: 'styles/shift-jis.css',
             // Static Shift_JIS bytes for:
             // @charset "Shift_JIS";\n.jp::before { content: "日本"; }\n
-            value: Uint8Array.of(
-                ...new TextEncoder().encode('@charset "Shift_JIS";\n.jp::before { content: "'),
-                0x93, 0xfa, 0x96, 0x7b,
-                ...new TextEncoder().encode('"; }\n'),
-            ),
+            value,
         }];
 
         const result = await createMdxImportData(
