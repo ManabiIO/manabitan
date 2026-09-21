@@ -23,6 +23,7 @@ import {FileScanner} from '../../ext/js/dictionary/mdx/vendor/js-mdict/scanner.j
 import mdictCommon from '../../ext/js/dictionary/mdx/vendor/js-mdict/utils.js';
 import {createMdxImportData} from '../../ext/js/dictionary/mdx/mdx-converter.js';
 import {makeFixturePng, makeMdictFixture} from './mdict-binary-fixture.js';
+import {makeInlineStyleScopeFixture} from './mdict-inline-style-fixture.js';
 
 /**
  * @param {Map<string, Uint8Array>} files
@@ -212,6 +213,32 @@ describe('MDict inline stylesheet isolation', () => {
 
         assert.match(styles, /\[data-sc-class~="shared"\]\{ color: green; \}/u);
         assert.doesNotMatch(styles, /mdict-yomitan-entry-/u);
+    });
+});
+
+describe('MDict inline scope selector semantics', () => {
+    test('entry scope guards the subject without changing selector specificity or losing functional roots', async () => {
+        const fixture = makeInlineStyleScopeFixture();
+        const result = await createMdxImportData('inline-semantic-scope.mdx', {}, fixture.bytes, []);
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+        const root = '[data-sc-class~="mdict-yomitan-entry-0"]';
+        const guard = `:where(${root}, ${root} *)`;
+        assert.ok(styles.includes(`:is(${root}) > [data-sc-class~="functional"]${guard}`));
+        assert.ok(styles.includes(`:where(${root}, ${root}) > [data-sc-class~="where-root"]${guard}`));
+        assert.ok(styles.includes(`${root} [data-sc-class~="cascade"]${guard}`));
+        assert.ok(styles.includes(`\n[data-sc-class~="cascade"]${guard}`));
+        assert.ok(styles.includes(`${root} + *${guard}`));
+    });
+
+    test('the containment guard precedes modern and legacy pseudo-elements inside conditional rules', async () => {
+        const fixture = makeInlineStyleScopeFixture();
+        const result = await createMdxImportData('inline-pseudo-scope.mdx', {}, fixture.bytes, []);
+        const styles = new TextDecoder().decode(result.files.get('styles.css'));
+        const root = '[data-sc-class~="mdict-yomitan-entry-0"]';
+        const guard = `:where(${root}, ${root} *)`;
+        assert.ok(styles.includes(`[data-sc-class~="shared"]${guard}::before`));
+        assert.ok(styles.includes(`[data-sc-class~="shared"]${guard}:after`));
+        assert.ok(styles.includes(`@media screen { [data-sc-class~="nested"]${guard}`));
     });
 });
 
