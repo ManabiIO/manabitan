@@ -4414,3 +4414,159 @@ describe('TermRecordOpfsStore preserves length-delimited Unicode fields', () => 
         });
     }
 });
+
+describe('TermRecordOpfsStore exact dictionary identity', () => {
+    const names = ['Dictionary', ' Dictionary ', '\ufeffDictionary', 'Dictionary\t', ' '];
+    /**
+     * @param {string[]} dictionaryNames
+     * @returns {Parameters<TermRecordOpfsStore['appendBatch']>[0]}
+     */
+    const recordsFor = (dictionaryNames) => dictionaryNames.map((dictionary, i) => ({
+        dictionary,
+        expression: '猫',
+        reading: 'ねこ',
+        expressionReverse: null,
+        readingReverse: null,
+        entryContentOffset: i * 16,
+        entryContentLength: 8,
+        entryContentDictName: 'raw',
+        score: 1,
+        sequence: i,
+    }));
+    /**
+     * @param {Map<string, Uint8Array>} files
+     * @returns {Promise<TermRecordOpfsStore>}
+     */
+    const reopen = async (files) => {
+        const reader = new TermRecordOpfsStore();
+        reader._recordsDirectoryHandle = createFakeDirectoryHandle(files);
+        await reader._loadShardFiles(false);
+        return reader;
+    };
+
+    test('lazy loading and diagnostics distinguish padded, BOM and whitespace-only names', async () => {
+        /** @type {Map<string, Uint8Array>} */
+        const files = new Map();
+        const writer = await reopen(files);
+        await writer.beginImportSession();
+        await writer.appendBatch(recordsFor(names));
+        await writer.endImportSession();
+        const original = new Map([...files].map(([name, bytes]) => [name, Uint8Array.from(bytes)]));
+        const reader = await reopen(files);
+        await reader.ensureDictionariesLoaded(names);
+        for (const [i, name] of names.entries()) {
+            assert.deepEqual(reader.findTermIds(name, '猫', 'expression'), [i + 1]);
+            assert.equal((await reader.getByIdsAsync([i + 1])).get(i + 1)?.dictionary, name);
+        }
+        const diagnostics = reader.getDiagnostics(names).dictionaries;
+        assert.ok(Array.isArray(diagnostics));
+        assert.deepEqual(diagnostics.map(({dictionaryName}) => dictionaryName), names);
+        assert.deepEqual(files, original);
+    });
+
+    test('index preparation and unavailable health never redirect to a trimmed sibling', async () => {
+        const writer = new TermRecordOpfsStore();
+        await writer.appendBatch(recordsFor(names));
+        writer.ensureDictionaryIndexes(names);
+        assert.deepEqual([...writer._indexByDictionary.keys()].sort(), [...names].sort());
+        const reader = new TermRecordOpfsStore();
+        reader.markDictionaryReimportRequired('Dictionary', 'terminal sibling');
+        await reader.ensureDictionariesLoaded([' Dictionary ', '\ufeffDictionary']);
+        assert.equal(reader.getDictionaryHealth('Dictionary').status, 'reimportRequired');
+        assert.equal(reader.getDictionaryHealth(' Dictionary ').status, 'temporarilyUnavailable');
+        assert.equal(reader.getDictionaryHealth('\ufeffDictionary').status, 'temporarilyUnavailable');
+    });
+
+    test('physical rename and deletion affect only the exact source and destination', async () => {
+        /** @type {Map<string, Uint8Array>} */
+        const files = new Map();
+        const writer = await reopen(files);
+        await writer.beginImportSession();
+        await writer.appendBatch(recordsFor(['Dictionary', ' Dictionary ', 'Renamed']));
+        await writer.endImportSession();
+        const reader = await reopen(files);
+        assert.equal(await reader.replaceDictionaryName(' Dictionary ', 'Renamed '), 1);
+        const renamed = await reopen(files);
+        await renamed.ensureDictionariesLoaded(['Dictionary', 'Renamed', 'Renamed ']);
+        assert.deepEqual(renamed.findTermIds('Dictionary', '猫', 'expression'), [1]);
+        assert.deepEqual(renamed.findTermIds('Renamed ', '猫', 'expression'), [2]);
+        assert.deepEqual(renamed.findTermIds('Renamed', '猫', 'expression'), [3]);
+        await renamed.deleteByDictionary('Renamed ');
+        const deleted = await reopen(files);
+        await deleted.ensureDictionariesLoaded(['Dictionary', 'Renamed', 'Renamed ']);
+        assert.deepEqual(deleted.findTermIds('Dictionary', '猫', 'expression'), [1]);
+        assert.deepEqual(deleted.findTermIds('Renamed', '猫', 'expression'), [3]);
+        assert.deepEqual(deleted.findTermIds('Renamed ', '猫', 'expression'), []);
+    });
+
+    test('preserved rename rollback keeps exact source bytes and sibling dictionaries', async () => {
+        /** @type {Map<string, Uint8Array>} */
+        const files = new Map();
+        const writer = await reopen(files);
+        await writer.beginImportSession();
+        await writer.appendBatch(recordsFor(['Dictionary', ' Dictionary ']));
+        await writer.endImportSession();
+        const original = new Map([...files].map(([name, bytes]) => [name, Uint8Array.from(bytes)]));
+        const reader = await reopen(files);
+        assert.equal(await reader.replaceDictionaryName(' Dictionary ', '\ufeffRenamed ', true), 1);
+        const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+        Object.defineProperty(globalThis, 'navigator', {
+            configurable: true,
+            value: {storage: {getDirectory: async () => ({getDirectoryHandle: async () => createFakeDirectoryHandle(files)})}},
+        });
+        try {
+            await reader.rollbackPreservedDictionaryRename(' Dictionary ', '\ufeffRenamed ');
+            await reader.ensureDictionariesLoaded(['Dictionary', ' Dictionary ']);
+            assert.deepEqual(reader.findTermIds('Dictionary', '猫', 'expression'), [1]);
+            assert.deepEqual(reader.findTermIds(' Dictionary ', '猫', 'expression'), [2]);
+            assert.deepEqual(files, original);
+        } finally {
+            if (typeof navigatorDescriptor === 'undefined') {
+                Reflect.deleteProperty(globalThis, 'navigator');
+            } else {
+                Object.defineProperty(globalThis, 'navigator', navigatorDescriptor);
+            }
+        }
+    });
+
+    test('database mapping refresh preserves exact logical and physical storage names', () => {
+        const database = new DictionaryDatabase();
+        const rows = names.map((title) => ({title, summaryJson: JSON.stringify({termRecordStorageName: title})}));
+        Reflect.set(database, '_db', {selectObjects: () => rows});
+        database._refreshTermRecordStorageNameMappings();
+        for (const title of names) {
+            assert.equal(database._getTermRecordStorageName(title), title);
+            assert.equal(database._getDictionaryNameForTermRecordStorage(title), title);
+        }
+        database._registerTermRecordStorageName('Logical', '\ufeffPhysical ');
+        assert.equal(database._getTermRecordStorageName('Logical'), '\ufeffPhysical ');
+        assert.equal(database._getDictionaryNameForTermRecordStorage('\ufeffPhysical '), 'Logical');
+        assert.equal(database._getSummaryTermRecordStorageName({termRecordStorageName: ' '}, 'fallback'), ' ');
+        assert.throws(() => database._registerTermRecordStorageName('Other', '\ufeffPhysical '), /collision/u);
+    });
+
+    test('startup integrity and durable health preserve title identity without orphaning shards', async () => {
+        /** @type {Map<string, Uint8Array>} */
+        const files = new Map();
+        const writer = await reopen(files);
+        await writer.beginImportSession();
+        await writer.appendBatch(recordsFor(names));
+        await writer.endImportSession();
+        const original = new Map([...files].map(([name, bytes]) => [name, Uint8Array.from(bytes)]));
+        const database = new DictionaryDatabase();
+        const reader = await reopen(files);
+        Reflect.set(database, '_termRecordStore', reader);
+        Reflect.set(database, '_db', {
+            selectObjects: () => names.map((title) => ({title, summaryJson: JSON.stringify({counts: {terms: {total: 1}}})})),
+        });
+        database._refreshTermRecordStorageNameMappings();
+        const integrity = await database._cleanupMissingTermRecordShards();
+        assert.deepEqual(integrity.markedReimportRequiredTitles, []);
+        assert.equal(integrity.shardIntegrity.removedOrphanShardCount, 0);
+        assert.deepEqual(files, original);
+        Reflect.set(database, '_db', {selectObjects: () => [{title: ' Dictionary ', reason: 'damaged'}]});
+        database._restoreTermRecordDictionaryHealth();
+        assert.equal(reader.getDictionaryHealth(' Dictionary ').status, 'reimportRequired');
+        assert.equal(reader.getDictionaryHealth('Dictionary').status, 'available');
+    });
+});

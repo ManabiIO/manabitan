@@ -394,7 +394,25 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         await expect(verifyImportedDictionaryVisible.call(controller, 'JMdict', true)).rejects.toThrow(/not enabled/);
     });
 
-    test('skips profile dictionary rewrites for profiles without carried-over update settings', async () => {
+
+    test('visibility checks the exact installed title, not its trimmed sibling', async () => {
+        const title = ' \ufeffJMdict ';
+        const controller = createControllerForInternalTests();
+        const exact = {name: title, enabled: true};
+        const sibling = {name: 'JMdict', enabled: false};
+        Reflect.set(controller, '_settingsController', {
+            profileIndex: 0,
+            getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'profile-1', options: {dictionaries: [exact, sibling]}}]}),
+        });
+        await expect(verifyImportedDictionaryVisible.call(controller, title, true)).resolves.toBeUndefined();
+        exact.enabled = false;
+        sibling.enabled = true;
+        await expect(verifyImportedDictionaryVisible.call(controller, title, true)).rejects.toThrow('was not enabled');
+    });
+
+    test.each(['', ' \ufeff'])('profile update preserves exact titles: %j', async (padding) => {
+        const oldTitle = `${padding}Jitendex.org [2025-01-01]${padding}`;
+        const newTitle = `${padding}Jitendex.org [2026-02-05]${padding}`;
         const controller = createControllerForInternalTests();
         const replaceDictionaryTitle = vi.fn().mockResolvedValue(void 0);
         const triggerDatabaseUpdated = vi.fn().mockResolvedValue(void 0);
@@ -445,7 +463,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         Reflect.set(controller, '_showErrors', showErrors);
         Reflect.set(controller, '_recordImportDebugSnapshot', vi.fn());
         Reflect.set(controller, '_tryImportDictionaryOffscreen', vi.fn().mockResolvedValue({
-            result: {title: 'Jitendex staged [update-staging token123]', sourceTitle: 'Jitendex.org [2026-02-05]'},
+            result: {title: 'Jitendex staged [update-staging token123]', sourceTitle: newTitle},
             errors: [],
             debug: {importerDebug: {phaseTimings: []}},
         }));
@@ -457,7 +475,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
                 'profile-1': [{
                     index: 0,
                     alias: 'Jitendex',
-                    name: 'Jitendex.org [2025-01-01]',
+                    name: oldTitle,
                     enabled: true,
                     allowSecondarySearches: false,
                     definitionsCollapsible: 'not-collapsible',
@@ -466,7 +484,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
                 }],
             },
             /** @type {import('dictionary-importer').ImportDetails} */ (/** @type {unknown} */ ({
-                replacementDictionaryTitle: 'Jitendex.org [2025-01-01]',
+                replacementDictionaryTitle: oldTitle,
                 updateSessionToken: 'token123',
                 yomitanVersion: '1.2.3.4',
             })),
@@ -476,10 +494,11 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         );
 
         expect(result.errors).toHaveLength(0);
-        expect(result.importedTitle).toBe('Jitendex.org [2026-02-05]');
+        expect(result.importedTitle).toBe(newTitle);
         expect(replaceDictionaryTitle).toHaveBeenCalledTimes(1);
+        expect(replaceDictionaryTitle).toHaveBeenCalledWith(expect.objectContaining({toDictionaryTitle: newTitle, replacedDictionaryTitle: oldTitle}));
         expect(triggerDatabaseUpdated).toHaveBeenCalledTimes(1);
-        expect(verifyImportedDictionaryVisible).toHaveBeenCalledWith('Jitendex.org [2026-02-05]', false);
+        expect(verifyImportedDictionaryVisible).toHaveBeenCalledWith(newTitle, false);
         expect(setAllSettings).toHaveBeenCalledTimes(1);
         expect(options.profiles[0].options.anki.cardFormats[0].fields.expression.value).toContain('jitendexorg-2026-02-05');
         expect(options.profiles[1].options.anki.cardFormats[0].fields.expression.value).toBe('{{untouched}}');
