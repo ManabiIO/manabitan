@@ -1203,7 +1203,8 @@ function convertInlineStyle(styleText, assetPrefix, assetReferences) {
     if (typeof styleText !== 'string' || styleText.trim().length === 0) { return null; }
     /** @type {Record<string, string|string[]>} */
     const style = {};
-    for (const declaration of splitInlineCssDeclarations(styleText)) {
+    for (const rawDeclaration of splitInlineCssDeclarations(styleText)) {
+        const declaration = rawDeclaration.replace(/\/\*[\s\S]*?\*\//gu, '');
         const separator = declaration.indexOf(':');
         if (separator < 0) { continue; }
         const propertyName = declaration.slice(0, separator).trim().toLowerCase();
