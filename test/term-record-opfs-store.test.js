@@ -4413,6 +4413,8 @@ describe('TermRecordOpfsStore preserves length-delimited Unicode fields', () => 
             assert.equal(new TermRecordOpfsStore()._decodeString(bytes, 3, encoded.length), value);
         });
     }
+});
+
 describe('TermRecordOpfsStore exact dictionary identity', () => {
     const names = ['Dictionary', ' Dictionary ', '\ufeffDictionary', 'Dictionary\t', ' '];
     /**
