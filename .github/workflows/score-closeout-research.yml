@@ -26,26 +26,47 @@ jobs:
           npm ci
           npm run build:libs
           mkdir -p "$RUNNER_TEMP/score-evidence"
-      - name: Require the intended baseline failures and passing controls
+      - name: Update fixtures for the already changed metadata and score contract
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          def replace(path, old, new):
+              p=Path(path); s=p.read_text(); assert s.count(old)==1, (path,old)
+              p.write_text(s.replace(old,new))
+          replace('test/term-bank-parser-string-scan.test.js', '        result.spans[8] | 0,', "        JSON.parse(decoder.decode(result.bytes.subarray(result.spans[8])).split(',')[0]),")
+          p='test/term-bank-wasm-parser.test.js'
+          replace(p, "rejects out-of-range integer metadata before dispatch", "rejects out-of-range sequence metadata before dispatch")
+          replace(p, '[["overflow","overflow","","",2147483648,["definition"],1,""]]', '[["overflow","overflow","","",0,["definition"],2147483648,""]]')
+          replace(p, 'expect(chunk.scoreList).toStrictEqual(Int32Array.from', 'expect(chunk.scoreList).toStrictEqual(Float64Array.from')
+          PY
+      - name: Require intended baseline failures with unchanged production
         run: |
           set +e
           node test/fixtures/fused-score/check.mjs "$RUNNER_TEMP/score-evidence/red.json" > "$RUNNER_TEMP/score-evidence/red.log" 2>&1
           rc=$?
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile="$RUNNER_TEMP/score-evidence/red-unit.json"
+          unit_rc=$?
           set -e
           test "$rc" -eq 1
+          test "$unit_rc" -eq 1
           python3 - <<'PY'
           import json, os
-          r=json.load(open(os.environ['RUNNER_TEMP']+'/score-evidence/red.json'))
+          root=os.environ['RUNNER_TEMP']+'/score-evidence/'
+          r=json.load(open(root+'red.json'))
           assert {x['name'] for x in r['results'] if not x['passed']} == {'negative-zero-first','negative-zero-middle','negative-zero-last'}, r
           assert r['passed'] == 5, r
+          u=json.load(open(root+'red-unit.json'))
+          failures=[a['fullName'] for t in u['testResults'] for a in t['assertionResults'] if a['status']=='failed']
+          assert len(failures)==2, failures
+          assert any('leading-zero score' in n for n in failures), failures
+          assert any('signed-zero scores' in n for n in failures), failures
           PY
-      - name: Apply the narrow score-only repair
+      - name: Apply the score-only repairs
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import hashlib
-          p=Path('ext/js/dictionary/wasm/term-bank-parser.c')
-          b=p.read_bytes()
+          p=Path('ext/js/dictionary/wasm/term-bank-parser.c'); b=p.read_bytes()
           assert hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest() == '84d734055b12f73491bab78df7a191d4b9f50a9e'
           old='''            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score)
           '''
@@ -54,17 +75,20 @@ jobs:
                        * Fall back for scores only; sequence decoding is unchanged. */
                       (score == 0 && src[parsed_row->score_start] == '-')
           '''
-          s=b.decode(); assert s.count(old)==1
-          p.write_text(s.replace(old,new))
+          s=b.decode(); assert s.count(old)==1; s=s.replace(old,new)
+          old="if (start >= end || (src[start] != '-' && (src[start] < '0' || src[start] > '9'))) { return 0; }"
+          new="if (!is_valid_json_number(src, start, end)) { return 0; }"
+          assert s.count(old)==1; s=s.replace(old,new); p.write_text(s)
           PY
           npm run build:libs
       - name: Run repaired behavior and surrounding repository gates
         run: |
+          set -o pipefail
           node test/fixtures/fused-score/check.mjs "$RUNNER_TEMP/score-evidence/green.json" | tee "$RUNNER_TEMP/score-evidence/green.log"
           npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile="$RUNNER_TEMP/score-evidence/unit.json"
           npm run test:unit:options
           npm run test:ts
-          npx eslint test/term-bank-score-fused-zero.test.js test/fixtures/fused-score/check.mjs
+          npx eslint test/term-bank-score-fused-zero.test.js test/fixtures/fused-score/check.mjs test/term-bank-parser-string-scan.test.js test/term-bank-wasm-parser.test.js
           npm run test:build
           git diff --check
       - name: Publish only direct source and regressions on a new branch
@@ -73,15 +97,21 @@ jobs:
           git config user.email 'review@users.noreply.github.com'
           export GIT_INDEX_FILE="$RUNNER_TEMP/score-clean-index"
           git read-tree "$BASE"
-          git add test/fixtures/fused-score/check.mjs test/term-bank-score-fused-zero.test.js
-          red=$(git commit-tree "$(git write-tree)" -p "$BASE" -m 'test: expose negative-zero loss without masking fused fallback')
+          git add test/fixtures/fused-score/check.mjs test/term-bank-score-fused-zero.test.js test/term-bank-parser-string-scan.test.js test/term-bank-wasm-parser.test.js
+          red=$(git commit-tree "$(git write-tree)" -p "$BASE" -m 'test: expose fused score loss and retain current metadata contracts')
           git add ext/js/dictionary/wasm/term-bank-parser.c
-          green=$(git commit-tree "$(git write-tree)" -p "$red" -m 'fix: preserve negative zero in fused term scores')
+          green=$(git commit-tree "$(git write-tree)" -p "$red" -m 'fix: validate score grammar and preserve fused negative zero')
           printf '%s\n%s\n' "$red" "$green" > "$RUNNER_TEMP/score-evidence/published-commits.txt"
           git diff "$BASE" "$green" > "$RUNNER_TEMP/score-evidence/fixed.patch"
           git archive "$green" | gzip > "$RUNNER_TEMP/score-evidence/source.tar.gz"
-          tar -czf "$RUNNER_TEMP/score-evidence/compiled-parser.tar.gz" ext/lib/term-bank-parser.wasm
           git push origin "$green:refs/heads/$DEST"
+      - name: Retain complete inspected source and compiled libraries even after gate failure
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/score-evidence"
+          git ls-files -z | tar --null -T - -czf "$RUNNER_TEMP/score-evidence/working-source.tar.gz"
+          tar -czf "$RUNNER_TEMP/score-evidence/compiled-libraries.tar.gz" ext/lib
+          git diff > "$RUNNER_TEMP/score-evidence/working.patch"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
