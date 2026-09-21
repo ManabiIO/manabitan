@@ -423,6 +423,45 @@ describe('convertMdxToArchive', () => {
         expect(lookupKeys).toStrictEqual(['styles/extra.css', 'images/css-bg.png']);
     });
 
+    test('does not lookup or archive sound resources when dictionary audio is disabled', async () => {
+        /** @type {string[]} */
+        const lookupKeys = [];
+        mockState.onLookupRecord = (_fileName, keyText) => {
+            lookupKeys.push(keyText);
+        };
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Disabled audio fixture', Description: ''},
+            entries: [{
+                keyText: 'Read',
+                definition: '<div><a href="sound://audio/read.mp3">play</a></div>',
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'audio/read.mp3', value: Uint8Array.of(1, 2, 3)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'disabled-audio-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'disabled-audio-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<unknown>}}} */ (termBank[0][5][0]);
+        const rootEntry = /** @type {{content: Array<unknown>}} */ (glossary.content.content[0]);
+        const assetPhase = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
+
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '#'}));
+        expect(zip.file('mdict-media/audio/read.mp3')).toBeNull();
+        expect(lookupKeys).toStrictEqual([]);
+        expect(assetPhase?.details).toMatchObject({
+            referencedAssetCount: 0,
+            materializedReferencedAssetCount: 0,
+            missingReferencedAssetCount: 0,
+        });
+    });
+
     test('rewrites MDX CSS selectors for structured-content attributes', async () => {
         mockState.mdxFactory = () => ({
             header: {Title: 'CSS selector fixture', Description: ''},
@@ -489,6 +528,37 @@ describe('convertMdxToArchive', () => {
         expect(stylesCss).not.toContain(String.raw`#hero\.dot`);
         expect(stylesCss).not.toContain(String.raw`.jump\+plus`);
         expect(stylesCss).not.toContain(String.raw`.comma\,name`);
+    });
+
+    test('honors an MDD stylesheet @charset instead of accepting lossy UTF-8', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Stylesheet charset fixture', Description: ''},
+            entries: [{keyText: 'Styled', definition: '<div class="日本">Styled</div>'}],
+        });
+        const prefix = new TextEncoder().encode('@charset "Shift_JIS";\n.');
+        const suffix = new TextEncoder().encode(' { color: red; }');
+        const stylesheet = Uint8Array.from([
+            ...prefix,
+            0x93,
+            0xfa,
+            0x96,
+            0x7b,
+            ...suffix,
+        ]);
+        mockState.mddFactory = () => [{keyText: 'styles/theme.css', value: stylesheet}];
+
+        const result = await convertMdxToArchive(
+            'stylesheet-charset-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'stylesheet-charset-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const stylesCss = await zip.file('styles.css')?.async('text');
+
+        expect(stylesCss).toContain('[data-sc-class~="日本"]');
+        expect(stylesCss).not.toContain('@charset');
+        expect(stylesCss).not.toContain('\ufffd');
     });
 
     test('strips URL query and hash fragments before resolving MDD assets', async () => {
@@ -620,6 +690,58 @@ describe('convertMdxToArchive', () => {
         expect(await zip.file('mdict-media/images/prefixed.bin')?.async('uint8array')).toStrictEqual(Uint8Array.of(4, 5, 6));
         expect(embeddedPath).toBeDefined();
         if (typeof embeddedPath !== 'string') { throw new Error('Expected embedded asset path'); }
+        expect(await zip.file(embeddedPath)?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
+    });
+
+    test('decodes base64 data URLs when the media type is omitted', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Default data URL media type fixture',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Embedded',
+                definition: '<div><a href="data:;charset=utf-8;base64,AP%2BA">raw</a></div>',
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'default-data-url-media-type.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const embeddedPath = Object.keys(zip.files).find((path) => path.startsWith('mdict-media/embedded/text/'));
+
+        expect(embeddedPath).toBeDefined();
+        if (typeof embeddedPath !== 'string') { throw new Error('Expected default text embedded asset path'); }
+        expect(await zip.file(embeddedPath)?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
+    });
+
+    test('decodes bare default-media-type base64 data URLs', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Bare default data URL media type fixture',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Embedded',
+                definition: '<div><a href="data:;base64,AP+A">raw</a></div>',
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'bare-default-data-url-media-type.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const embeddedPath = Object.keys(zip.files).find((path) => path.startsWith('mdict-media/embedded/text/'));
+
+        expect(embeddedPath).toBeDefined();
+        if (typeof embeddedPath !== 'string') { throw new Error('Expected bare default text embedded asset path'); }
         expect(await zip.file(embeddedPath)?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
     });
 
@@ -923,5 +1045,109 @@ describe('convertMdxToArchive', () => {
 
         const materialize = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
         expect(materialize?.details?.missingReferencedAssetCount).toBe(0);
+    });
+
+    test('decodes base64 data URLs when the media type is omitted', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Implicit data URL media type',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Embedded',
+                definition: '<div><img src="data:;base64,AP+A"><img src="data:;charset=utf-8;base64,SGk="></div>',
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'implicit-data-url-media-type.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const embeddedPaths = Object.keys(zip.files)
+            .filter((path) => path.startsWith('mdict-media/embedded/text/'))
+            .sort();
+
+        expect(embeddedPaths).toHaveLength(2);
+        expect(await zip.file(embeddedPaths[0])?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
+        expect(await zip.file(embeddedPaths[1])?.async('uint8array')).toStrictEqual(new TextEncoder().encode('Hi'));
+    });
+
+    test('decodes internal-link targets exactly once', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Encoded internal links',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Internal',
+                definition: [
+                    '<div>',
+                    '<a href="entry://literal%2520space">entry</a>',
+                    '<a href="bword://slash%252Fterm">bword</a>',
+                    '<a href="d:encoded%20space">d</a>',
+                    '<a href="x:literal%2525">x</a>',
+                    '</div>',
+                ].join(''),
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'encoded-internal-links.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<unknown>}}} */ (termBank[0][5][0]);
+        const rootEntry = /** @type {{content: Array<unknown>}} */ (glossary.content.content[0]);
+
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=literal%2520space'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=slash%252Fterm'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=encoded%20space'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=literal%2525'}));
+    });
+
+    test('keeps semicolons inside inline CSS values and rewrites URL functions case-insensitively', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Inline style values',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Styled',
+                definition: [
+                    '<div style="font-family: &quot;A;B&quot;; background-image: url(data:image/png;base64,AA==)">Data</div>',
+                    '<div style="background-image: URL(&quot;images/bg.png&quot;); /* note; fake: value */ color: rgb(1, 2, 3)">Asset</div>',
+                ].join(''),
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'images/bg.png', value: Uint8Array.of(1, 2, 3)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'inline-style-values.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'inline-style-values.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<{style?: Record<string, unknown>}>}}} */ (termBank[0][5][0]);
+        const [dataEntry, assetEntry] = glossary.content.content;
+
+        expect(dataEntry.style).toMatchObject({
+            fontFamily: '"A;B"',
+            background: 'url(data:image/png;base64,AA==)',
+        });
+        expect(assetEntry.style).toMatchObject({
+            background: 'url("mdict-media/images/bg.png")',
+            color: 'rgb(1, 2, 3)',
+        });
+        expect(await zip.file('mdict-media/images/bg.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
     });
 });
