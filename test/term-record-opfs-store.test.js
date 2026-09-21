@@ -289,6 +289,49 @@ describe('TermRecordOpfsStore', () => {
         expect([...records.values()].map(({entryContentLength}) => entryContentLength)).toStrictEqual([65535, 1]);
     });
 
+    test('round-trips wide sequences through persisted lookup indexes', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionary = 'Wide sequences';
+        const sequences = new Float64Array([
+            0x80000000,
+            0x100000001,
+            2 ** 40,
+            Number.MAX_SAFE_INTEGER,
+        ]);
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writer = new TermRecordOpfsStore();
+        Reflect.set(writer, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        await writer.beginImportSession();
+        await writer.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary,
+                rowCount: sequences.length,
+                expressionBytesList: [...sequences].map((_, index) => textEncoder.encode(`wide-${String(index)}`)),
+                readingBytesList: [...sequences].map((_, index) => textEncoder.encode(`wide-${String(index)}`)),
+                readingEqualsExpressionList: new Uint8Array(sequences.length).fill(1),
+                scoreList: new Int32Array(sequences.length),
+                sequenceList: sequences,
+            },
+            new Uint32Array([0, 16, 32, 48]),
+            new Uint32Array([8, 8, 8, 8]),
+            'raw',
+        );
+        await writer.endImportSession();
+
+        const reader = new TermRecordOpfsStore();
+        Reflect.set(reader, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await reader._loadShardFiles(true);
+        await reader.ensureDictionariesLoaded([dictionary]);
+
+        const records = await reader.getByIdsAsync([1, 2, 3, 4]);
+        expect([...records.values()].map(({sequence}) => sequence)).toStrictEqual([...sequences]);
+        for (let i = 0; i < sequences.length; ++i) {
+            expect(reader.findTermIdsBySequence(dictionary, sequences[i])).toStrictEqual([i + 1]);
+        }
+    });
+
     test('round-trips compact artifact fields through cold random-access reads', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Compact fields';
