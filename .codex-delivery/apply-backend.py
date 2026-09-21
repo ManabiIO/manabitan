@@ -10,3 +10,9 @@ p=Path('ext/js/background/offscreen-dictionary-worker.js')
 s=p.read_text(); a="String(dictionaryNameRaw || '').trim()"
 assert s.count(a)==2
 p.write_text(s.replace(a,"String(dictionaryNameRaw || '')"))
+# Complete typed fixture signatures without changing the assertions.
+p=Path('test/backend-dictionary-identity.test.js'); s=p.read_text()
+for a,b in [("_onApiGetDictionaryTermProbe({dictionaryTitle: title})", "_onApiGetDictionaryTermProbe({dictionaryTitle: title}, {})"), ("_onApiGetDictionaryTermProbe({dictionaryTitle: ''})", "_onApiGetDictionaryTermProbe({dictionaryTitle: ''}, {})"), ('@type {OffscreenDictionaryWorkerHandler}', '@type {InstanceType<typeof OffscreenDictionaryWorkerHandler>}')]:
+ assert s.count(a)==1,(a,s.count(a))
+ s=s.replace(a,b)
+p.write_text(s)
