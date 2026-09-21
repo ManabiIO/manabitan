@@ -838,6 +838,9 @@ export class JsonSchema {
      * @throws {Error}
      */
     _validateNumber(schema, value) {
+        if (!Number.isFinite(value)) {
+            throw this._createError('Number is not finite');
+        }
         const {multipleOf, minimum, exclusiveMinimum, maximum, exclusiveMaximum} = schema;
         if (typeof multipleOf === 'number' && Math.floor(value / multipleOf) * multipleOf !== value) {
             throw this._createError(`Number is not a multiple of ${multipleOf}`);
