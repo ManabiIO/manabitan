@@ -2599,7 +2599,10 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         int32_t score = 0;
         if (
             !parse_scalar_span(src, source.end, parsed_row->score_start, &score_end) ||
-            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score)
+            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score) ||
+            // Integer storage cannot preserve a negative zero score. Use the
+            // ordinary number-preserving path, even in otherwise integer banks.
+            (score == 0 && src[parsed_row->score_start] == '-')
         ) {
             *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
             return -5;
