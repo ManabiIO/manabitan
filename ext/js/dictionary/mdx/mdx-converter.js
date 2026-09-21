@@ -562,15 +562,74 @@ function decodeDataUrl(value) {
  * @param {Uint8Array} bytes
  * @returns {string|null}
  */
+function getStylesheetEncoding(bytes) {
+    if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+        return 'utf-8';
+    }
+    if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
+        return 'utf-16le';
+    }
+    if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+        return 'utf-16be';
+    }
+
+    let prefix = '';
+    for (let index = 0; index < Math.min(bytes.length, 256); index += 1) {
+        const value = bytes[index];
+        if (value > 0x7f || value === 0) { break; }
+        prefix += String.fromCharCode(value);
+    }
+    const match = prefix.match(/^@charset\s+(?<quote>["'])(?<encoding>[^"']+)\k<quote>\s*;/iu);
+    return typeof match?.groups?.encoding === 'string' ? match.groups.encoding.trim() : null;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {string[]}
+ */
+function getStylesheetEncodingCandidates(bytes) {
+    const declared = getStylesheetEncoding(bytes);
+    if (declared !== null) {
+        return [declared, 'utf-8'];
+    }
+
+    const candidates = ['utf-8'];
+    let evenNulls = 0;
+    let oddNulls = 0;
+    for (let index = 0; index < Math.min(bytes.length, 128); index += 1) {
+        if (bytes[index] !== 0) { continue; }
+        if (index % 2 === 0) {
+            evenNulls += 1;
+        } else {
+            oddNulls += 1;
+        }
+    }
+    if (oddNulls >= 2 && oddNulls > evenNulls) {
+        candidates.push('utf-16le');
+    } else if (evenNulls >= 2 && evenNulls > oddNulls) {
+        candidates.push('utf-16be');
+    }
+    return candidates;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {string|null}
+ */
 function decodeStylesheetAsset(bytes) {
-    for (const encoding of ['utf-8', 'utf-16', 'utf-16le', 'utf-16be']) {
+    const tried = new Set();
+    for (const encoding of getStylesheetEncodingCandidates(bytes)) {
+        const normalized = encoding.toLowerCase();
+        if (tried.has(normalized)) { continue; }
+        tried.add(normalized);
         try {
-            const value = new TextDecoder(encoding).decode(bytes).trim();
+            let value = new TextDecoder(encoding, {fatal: true}).decode(bytes);
+            value = value.replace(/^\ufeff?@charset\s+(["'])[^"']+\1\s*;/iu, '').trim();
             if (value.length > 0 && !value.includes('\u0000')) {
                 return value;
             }
         } catch (_error) {
-            // NOP
+            // Try the next justified encoding candidate.
         }
     }
     return null;
