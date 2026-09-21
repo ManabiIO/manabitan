@@ -11,6 +11,6 @@ import {test} from 'vitest'
 test('raw term-content references validate before narrowing or writing', () => {
     execFileSync(process.execPath, [
         '--test',
-        fileURLToPath(new URL('./util/raw-term-content-reference-cases.js', import.meta.url)),
+        fileURLToPath(new URL('util/raw-term-content-reference-cases.js', import.meta.url)),
     ], {encoding: 'utf8', timeout: 30_000})
 })
