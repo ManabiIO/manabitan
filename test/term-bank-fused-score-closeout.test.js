@@ -14,7 +14,8 @@ test('native fused-score parity, including negative zero without another fallbac
 }, 65_000)
 test('native parser to file-backed stores, reopen and derived-section repair', async () => {
     const {stdout} = await run(process.execPath, ['test/fixtures/fused-score/persistence-node.mjs'], {cwd: root, timeout: 60_000, maxBuffer: 2_000_000})
+    /** @type {{name: string, passed: boolean}[]} */
     const report = JSON.parse(stdout)
     expect(report).toHaveLength(4)
-    expect(report.every(({passed}) => passed)).toBe(true)
+    expect(report.every(({passed}) => passed === true)).toBe(true)
 }, 65_000)
