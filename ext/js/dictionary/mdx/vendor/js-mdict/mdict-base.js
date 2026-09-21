@@ -13,6 +13,63 @@ const BIG5 = 'BIG5';
 const GB18030_DECODER = new TextDecoder('gb18030');
 const GB18030 = 'GB18030';
 
+/**
+ * Normalize an MDict Encoding header without silently treating supported
+ * non-UTF encodings as UTF-8.
+ * @param {unknown} value
+ * @returns {{encoding: string, decoder: TextDecoder}}
+ */
+function resolveEncoding(value) {
+    const label = typeof value === 'string' ? value.trim() : '';
+    if (label.length === 0) {
+        return {encoding: UTF8, decoder: UTF_8_DECODER};
+    }
+    const normalized = label.toLowerCase().replaceAll('_', '-');
+    switch (normalized) {
+        case 'utf8':
+        case 'utf-8':
+            return {encoding: UTF8, decoder: UTF_8_DECODER};
+        case 'utf16':
+        case 'utf16le':
+        case 'utf-16':
+        case 'utf-16le':
+            return {encoding: UTF16, decoder: UTF_16LE_DECODER};
+        case 'gbk':
+        case 'gb2312':
+        case 'gb18030':
+        case 'gb-18030':
+            return {encoding: GB18030, decoder: GB18030_DECODER};
+        case 'big5':
+            return {encoding: BIG5, decoder: BIG5_DECODER};
+    }
+    try {
+        return {encoding: label.toUpperCase(), decoder: new TextDecoder(label)};
+    } catch (_error) {
+        throw new Error(`Unsupported MDict encoding: ${label}`);
+    }
+}
+
+/**
+ * Parse the format's encryption bitmask without allowing malformed metadata to
+ * fall through as if it were unencrypted.
+ * @param {unknown} value
+ * @returns {number}
+ */
+function parseEncryptionFlag(value) {
+    if (typeof value === 'undefined' || value === null) { return 0; }
+    const normalized = String(value).trim();
+    if (normalized.length === 0 || /^(?:no|false)$/iu.test(normalized)) { return 0; }
+    if (/^(?:yes|true)$/iu.test(normalized)) { return 1; }
+    if (!/^\d+$/u.test(normalized)) {
+        throw new Error(`Unsupported encryption flag in MDict header: ${normalized}`);
+    }
+    const result = Number.parseInt(normalized, 10);
+    if (!Number.isSafeInteger(result) || result < 0 || result > 3) {
+        throw new Error(`Unsupported encryption flag in MDict header: ${normalized}`);
+    }
+    return result;
+}
+
 /** Read a declared integer without allowing a clipped slice to change its type. */
 function readNumber(bytes, offset, width) {
     if (!Number.isSafeInteger(offset) || offset < 0 || offset > bytes.length - width) {
@@ -392,16 +449,12 @@ class MDictBase {
         // 0x00 - no encryption
         // 0x01 - encrypt record block
         // 0x02 - encrypt key info block
-        if (!this.header.Encrypted || this.header.Encrypted == '' || this.header.Encrypted == 'No') {
-            this.meta.encrypt = 0;
-        }
-        else if (this.header.Encrypted == 'Yes') {
-            this.meta.encrypt = 1;
-        }
-        else {
-            this.meta.encrypt = parseInt(this.header['Encrypted'], 10);
-        }
-        if (this.options.encryptType && this.options.encryptType != -1) {
+        this.meta.encrypt = parseEncryptionFlag(this.header.Encrypted);
+        if (this.options.encryptType !== -1) {
+            if (!Number.isSafeInteger(this.options.encryptType) ||
+                this.options.encryptType < 0 || this.options.encryptType > 3) {
+                throw new Error(`Unsupported encryption override for MDict: ${this.options.encryptType}`);
+            }
             this.meta.encrypt = this.options.encryptType;
         }
         // stylesheet attribute if present takes from of:
@@ -433,35 +486,10 @@ class MDictBase {
             // Encoding attribute, as required by the MDict resource format.
             this.meta.encoding = UTF16;
             this.meta.decoder = UTF_16LE_DECODER;
-        } else if (!this.header.Encoding || this.header.Encoding == '') {
-            this.meta.encoding = UTF8;
-            this.meta.decoder = UTF_8_DECODER;
-        }
-        else if (this.header.Encoding == 'GBK' || this.header.Encoding == 'GB2312') {
-            this.meta.encoding = GB18030;
-            this.meta.decoder = GB18030_DECODER;
-        }
-        else if (this.header['Encoding'].toLowerCase() == 'big5') {
-            this.meta.encoding = BIG5;
-            this.meta.decoder = BIG5_DECODER;
-        }
-        else {
-            this.meta.encoding =
-                this.header['Encoding'].toLowerCase() == 'utf16' ||
-                    this.header['Encoding'].toLowerCase() == 'utf-16'
-                    ? UTF16
-                    : UTF8;
-            if (this.meta.encoding == UTF16) {
-                this.meta.decoder = UTF_16LE_DECODER;
-            }
-            else {
-                this.meta.decoder = UTF_8_DECODER;
-            }
-        }
-        // determine the encoding and decoder, if extension is *.mdd
-        if (this.meta.ext === 'mdd') {
-            this.meta.encoding = UTF16;
-            this.meta.decoder = UTF_16LE_DECODER;
+        } else {
+            const resolvedEncoding = resolveEncoding(this.header.Encoding);
+            this.meta.encoding = resolvedEncoding.encoding;
+            this.meta.decoder = resolvedEncoding.decoder;
         }
     }
     /**
