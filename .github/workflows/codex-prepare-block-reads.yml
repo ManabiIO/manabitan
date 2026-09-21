@@ -27,24 +27,25 @@ jobs:
           echo "2ecbc18a82b099c4b0c4731b34b8a1cf68d03d0a33279deab8f8b49c34743d92  $RUNNER_TEMP/block-candidate.zip" | sha256sum -c -
           mkdir -p "$RUNNER_TEMP/block-candidate" "$RUNNER_TEMP/block-evidence"
           unzip -q "$RUNNER_TEMP/block-candidate.zip" -d "$RUNNER_TEMP/block-candidate"
+          python .codex-delivery/fix-bundle.py "$RUNNER_TEMP/block-candidate"
           git fetch origin e932c60d689b0af96ef357f76486091189c21f19
           git checkout --detach e932c60d689b0af96ef357f76486091189c21f19
           test "$(git hash-object ext/js/dictionary/term-content-block-store.js)" = e9364fafdd6162205037508f9d4eb6a65de71ad6
           test ! -e test/term-content-block-read-budget.test.js
-          test ! -e dev/perf/block-read-retention-probe.mjs
+          test ! -e dev/perf/block-read-retention-probe.js
           test ! -e dev/perf/block-read-retention-20260921.md
           cp "$RUNNER_TEMP/block-candidate/block-budget.test.js" test/term-content-block-read-budget.test.js
-          cp "$RUNNER_TEMP/block-candidate/probe.mjs" dev/perf/block-read-retention-probe.mjs
+          cp "$RUNNER_TEMP/block-candidate/probe.js" dev/perf/block-read-retention-probe.js
           cp "$RUNNER_TEMP/block-candidate/bench.md" dev/perf/block-read-retention-20260921.md
           git config user.name 'ManabiTan bounded-read preparation'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add test/term-content-block-read-budget.test.js dev/perf/block-read-retention-probe.mjs dev/perf/block-read-retention-20260921.md
+          git add test/term-content-block-read-budget.test.js dev/perf/block-read-retention-probe.js dev/perf/block-read-retention-20260921.md
           git commit -m 'test: reproduce sparse block retention and unbounded read scheduling'
       - uses: ./.github/actions/setup
       - name: Record original retention and reproduce sparse failure
         run: |
           set -euo pipefail
-          node dev/perf/block-read-retention-probe.mjs | tee "$RUNNER_TEMP/block-evidence/baseline.json"
+          node dev/perf/block-read-retention-probe.js | tee "$RUNNER_TEMP/block-evidence/baseline.json"
           set +e
           npx vitest run test/term-content-block-read-budget.test.js -t 'sparse batch results retain requested bytes' > "$RUNNER_TEMP/block-evidence/before.log" 2>&1
           status=$?
@@ -57,13 +58,13 @@ jobs:
           set -euo pipefail
           git apply --check "$RUNNER_TEMP/block-candidate/block-fix.patch"
           git apply "$RUNNER_TEMP/block-candidate/block-fix.patch"
-          npx eslint --fix --fix-type layout ext/js/dictionary/term-content-block-store.js test/term-content-block-read-budget.test.js dev/perf/block-read-retention-probe.mjs 2>&1 | tee "$RUNNER_TEMP/block-evidence/layout.log"
+          npx eslint --fix --fix-type layout ext/js/dictionary/term-content-block-store.js test/term-content-block-read-budget.test.js dev/perf/block-read-retention-probe.js 2>&1 | tee "$RUNNER_TEMP/block-evidence/layout.log"
           npm run test:js 2>&1 | tee "$RUNNER_TEMP/block-evidence/lint.log"
           npm run test:ts:main 2>&1 | tee "$RUNNER_TEMP/block-evidence/main-types.log"
           npm run test:ts:test 2>&1 | tee "$RUNNER_TEMP/block-evidence/test-types.log"
           npm run test:ts:dev 2>&1 | tee "$RUNNER_TEMP/block-evidence/dev-types.log"
           npx vitest run test/term-content-block-read-budget.test.js test/term-content-block-store.test.js test/term-content-cache-invalidation.test.js test/dictionary-database-content-dedup.test.js 2>&1 | tee "$RUNNER_TEMP/block-evidence/tests.log"
-          node dev/perf/block-read-retention-probe.mjs | tee "$RUNNER_TEMP/block-evidence/candidate.json"
+          node dev/perf/block-read-retention-probe.js | tee "$RUNNER_TEMP/block-evidence/candidate.json"
           python - <<'PY'
           import json, os
           from pathlib import Path
@@ -78,7 +79,7 @@ jobs:
           assert b['peakDeclaredInFlightBytes'] <= 16 * 1024 * 1024
           PY
           git diff --check
-          git add ext/js/dictionary/term-content-block-store.js test/term-content-block-read-budget.test.js dev/perf/block-read-retention-probe.mjs
+          git add ext/js/dictionary/term-content-block-store.js test/term-content-block-read-budget.test.js dev/perf/block-read-retention-probe.js
           git commit -m 'perf: bound unique block loads and compact sparse read results'
       - name: Publish only clean candidate branch
         run: |
