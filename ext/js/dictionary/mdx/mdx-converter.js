@@ -263,7 +263,7 @@ class MddAssetResolver {
         this._dictionaries = [];
         /** @type {Map<string, {dictionaryIndex: number, item: MdictKeyword}>} */
         this._records = new Map();
-        /** @type {Map<string, {dictionaryIndex: number, item: MdictKeyword}>} */
+        /** @type {Map<string, {dictionaryIndex: number, item: MdictKeyword}|null>} */
         this._recordsLowercase = new Map();
         /** @type {string[]} */
         this._cssKeys = [];
@@ -281,8 +281,16 @@ class MddAssetResolver {
                     const record = {dictionaryIndex, item};
                     this._records.set(key, record);
                     const lowercaseKey = key.toLowerCase();
-                    if (!this._recordsLowercase.has(lowercaseKey)) {
+                    const lowercaseRecord = this._recordsLowercase.get(lowercaseKey);
+                    if (typeof lowercaseRecord === 'undefined') {
                         this._recordsLowercase.set(lowercaseKey, record);
+                    } else if (
+                        lowercaseRecord !== null &&
+                        normalizeAssetKey(lowercaseRecord.item.keyText) !== key
+                    ) {
+                        // An exact reference can still choose either record. A
+                        // case-insensitive fallback cannot choose safely.
+                        this._recordsLowercase.set(lowercaseKey, null);
                     }
                     if (key.toLowerCase().endsWith('.css')) {
                         this._cssKeys.push(key);
@@ -321,8 +329,11 @@ class MddAssetResolver {
      * @returns {Uint8Array|null}
      */
     getBytes(key) {
-        const entry = this._records.get(key) ?? this._recordsLowercase.get(key.toLowerCase());
-        if (typeof entry === 'undefined') { return null; }
+        let entry = this._records.get(key);
+        if (typeof entry === 'undefined') {
+            entry = this._recordsLowercase.get(key.toLowerCase()) ?? void 0;
+        }
+        if (typeof entry === 'undefined' || entry === null) { return null; }
         try {
             return this._dictionaries[entry.dictionaryIndex]?.lookupRecordByKeyBlock(entry.item) ?? null;
         } catch (_error) {
