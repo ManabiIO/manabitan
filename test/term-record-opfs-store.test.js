@@ -176,6 +176,119 @@ describe('TermRecordOpfsStore', () => {
         expect(largeLength.byteLength).toBe(8 * 12);
     });
 
+    test('round-trips non-int32 scores through ordinary record persistence', async () => {
+        const dictionaryName = 'Float scores ordinary';
+        const scores = [1.5, -2.25, 0.1, 2 ** 40 + 0.5, -0];
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writer = new TermRecordOpfsStore();
+        Reflect.set(writer, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        await writer.beginImportSession();
+        await writer.appendBatch(scores.map((score, index) => ({
+            dictionary: dictionaryName,
+            expression: `term-${String(index)}`,
+            reading: `term-${String(index)}`,
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: index * 16,
+            entryContentLength: 8,
+            entryContentDictName: 'raw',
+            score,
+            sequence: index,
+        })));
+        await writer.endImportSession();
+
+        const indexBytes = [...fileBytesByName.entries()].find(([name]) => name.endsWith('.mbti'))?.[1];
+        expect(indexBytes).toBeDefined();
+        const indexView = new DataView(indexBytes.buffer, indexBytes.byteOffset, indexBytes.byteLength);
+        expect(indexView.getUint32(40 + 36, true)).toBe(3);
+
+        const reader = new TermRecordOpfsStore();
+        Reflect.set(reader, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await reader._loadShardFiles(true);
+        const records = await reader.getByIdsAsync([1, 2, 3, 4, 5]);
+        const actualScores = [...records.values()].map(({score}) => score);
+        expect(actualScores.slice(0, 4)).toStrictEqual(scores.slice(0, 4));
+        expect(Object.is(actualScores[4], -0)).toBe(true);
+    });
+
+    test('round-trips non-int32 scores through artifact record persistence', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Float scores artifact';
+        const scores = new Float64Array([1.5, -2.25, 0.1, 2 ** 40 + 0.5, -0]);
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writer = new TermRecordOpfsStore();
+        Reflect.set(writer, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        await writer.beginImportSession();
+        await writer.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: dictionaryName,
+                rowCount: scores.length,
+                expressionBytesList: Array.from(scores, (_, index) => textEncoder.encode(`term-${String(index)}`)),
+                readingBytesList: Array.from(scores, (_, index) => textEncoder.encode(`term-${String(index)}`)),
+                readingEqualsExpressionList: new Uint8Array(scores.length).fill(1),
+                scoreList: scores,
+                sequenceList: new Int32Array([10, 11, 12, 13, 14]),
+            },
+            new Uint32Array([0, 16, 32, 48, 64]),
+            new Uint32Array([8, 8, 8, 8, 8]),
+            'raw',
+        );
+        await writer.endImportSession();
+
+        const indexBytes = [...fileBytesByName.entries()].find(([name]) => name.endsWith('.mbti'))?.[1];
+        expect(indexBytes).toBeDefined();
+        const indexView = new DataView(indexBytes.buffer, indexBytes.byteOffset, indexBytes.byteLength);
+        expect(indexView.getUint32(40 + 36, true)).toBe(3);
+
+        const reader = new TermRecordOpfsStore();
+        Reflect.set(reader, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await reader._loadShardFiles(true);
+        const records = await reader.getByIdsAsync([1, 2, 3, 4, 5]);
+        const actualScores = [...records.values()].map(({score}) => score);
+        expect(actualScores.slice(0, 4)).toStrictEqual([1.5, -2.25, 0.1, 2 ** 40 + 0.5]);
+        expect(Object.is(actualScores[4], -0)).toBe(true);
+    });
+
+    test('preserves float score fields when compact content lengths are unavailable', async () => {
+        const textEncoder = new TextEncoder();
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writer = new TermRecordOpfsStore();
+        Reflect.set(writer, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        await writer.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: 'Float scores long content',
+                rowCount: 2,
+                expressionBytesList: [textEncoder.encode('long'), textEncoder.encode('fractional')],
+                readingBytesList: [textEncoder.encode('long'), textEncoder.encode('fractional')],
+                readingEqualsExpressionList: new Uint8Array([1, 1]),
+                scoreList: [0, 1.5],
+                sequenceList: new Int32Array([-1, -1]),
+            },
+            new Uint32Array([0, 65535]),
+            new Uint32Array([65535, 1]),
+            'raw',
+        );
+        await writer._closeAllWritables();
+
+        const indexBytes = [...fileBytesByName.entries()].find(([name]) => name.endsWith('.mbti'))?.[1];
+        expect(indexBytes).toBeDefined();
+        const indexView = new DataView(indexBytes.buffer, indexBytes.byteOffset, indexBytes.byteLength);
+        expect(indexView.getUint32(40 + 36, true)).toBe(3);
+
+        const reader = new TermRecordOpfsStore();
+        Reflect.set(reader, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await reader._loadShardFiles(true);
+        const records = await reader.getByIdsAsync([1, 2]);
+        expect([...records.values()].map(({score}) => score)).toStrictEqual([0, 1.5]);
+        expect([...records.values()].map(({entryContentLength}) => entryContentLength)).toStrictEqual([65535, 1]);
+    });
+
     test('round-trips compact artifact fields through cold random-access reads', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Compact fields';
