@@ -323,6 +323,31 @@ describe('convertMdxToArchive', () => {
         expect(lookupKeys).toStrictEqual(['images/shared.png']);
     });
 
+    test('retains unambiguous case-insensitive MDD fallback', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'MDD case fallback', Description: ''},
+            entries: [{
+                keyText: 'Asset',
+                definition: '<div><img src="IMAGES/LOGO.PNG"></div>',
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'images/logo.png', value: Uint8Array.of(7, 8, 9)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'mdd-case-fallback.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'mdd-case-fallback.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+
+        expect(await zip.file('mdict-media/IMAGES/LOGO.PNG')?.async('uint8array')).toStrictEqual(Uint8Array.of(7, 8, 9));
+        const assetPhase = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
+        expect(assetPhase?.details).toMatchObject({missingReferencedAssetCount: 0});
+    });
+
     test('uses exact case but rejects ambiguous case-insensitive MDD fallback', async () => {
         /** @type {string[]} */
         const lookupKeys = [];
