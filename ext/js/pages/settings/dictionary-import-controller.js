@@ -1913,6 +1913,7 @@ export class DictionaryImportController {
      * @param {string} html
      * @param {string|null} mdxFileName
      * @returns {{mdxLink: {url: string, fileName: string}, mddLinks: Array<{url: string, fileName: string}>}|null}
+     * @throws {Error} If matching MDD links are ambiguous.
      */
     _parseMdxListingDocument(baseUrl, html, mdxFileName) {
         if (typeof DOMParser === 'undefined') { return null; }
@@ -1930,8 +1931,10 @@ export class DictionaryImportController {
                 continue;
             }
             const parsedUrl = new URL(resolvedUrl);
-            if ((parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') ||
-                new URL('.', parsedUrl).href !== directoryUrl) { continue; }
+            if (
+                (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') ||
+                new URL('.', parsedUrl).href !== directoryUrl
+            ) { continue; }
             parsedUrl.hash = '';
             resolvedUrl = parsedUrl.href;
             if (seenUrls.has(resolvedUrl)) { continue; }

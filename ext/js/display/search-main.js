@@ -108,7 +108,7 @@ try {
             await settingsDisplayController.prepare();
 
             documentFocusController.focusElement();
-            display.initializeState();
+            await display.initializeState();
             document.documentElement.dataset.loaded = 'true';
             delete document.documentElement.dataset.loadError;
             setSearchDebugState({

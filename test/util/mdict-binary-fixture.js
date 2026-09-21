@@ -73,6 +73,20 @@ function xmlAttribute(value) {
 }
 
 /**
+ * @param {'utf8'|'utf16le'} encoding
+ * @returns {(value: string) => Uint8Array}
+ */
+function createFixtureTextEncoder(encoding) {
+    /**
+     * @param {string} value
+     * @returns {Uint8Array}
+     */
+    return function encodeFixtureText(value) {
+        return new Uint8Array(Buffer.from(value, encoding));
+    };
+}
+
+/**
  * Independent, deterministic writer for raw/zlib, unencrypted MDict fixtures.
  * Does not import the parser under test. Record blocks may split Unicode scalars.
  * Optional metadata overrides are only for negative regression cases.
@@ -85,7 +99,7 @@ export function makeMdictFixture(entries, options = {}) {
         mdd = false,
         encoding = 'utf8',
         encodingLabel = encoding === 'utf16le' ? 'UTF-16' : 'UTF-8',
-        textEncoder = /** @param {string} value @returns {Uint8Array} */ (value) => new Uint8Array(Buffer.from(value, encoding)),
+        textEncoder = createFixtureTextEncoder(encoding),
         encrypted = 0,
         format = '',
         styleSheet = '',
@@ -112,6 +126,10 @@ export function makeMdictFixture(entries, options = {}) {
     const keyUnit = keyEncoding === 'utf16le' ? 2 : 1;
     const terminator = Buffer.alloc(keyUnit);
     const keyInfoTerminator = Buffer.alloc(keyUnit, keyInfoTerminatorByte);
+    /**
+     * @param {string} value
+     * @returns {Buffer}
+     */
     const encodeDictionaryText = (value) => Buffer.from(textEncoder(value));
     const records = orderedEntries.map(({value}) => {
         const bytes = typeof value === 'string' ? (mdd ? Buffer.from(value, 'utf8') : encodeDictionaryText(value)) : Buffer.from(value);

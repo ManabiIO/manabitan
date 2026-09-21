@@ -323,6 +323,71 @@ describe('convertMdxToArchive', () => {
         expect(lookupKeys).toStrictEqual(['images/shared.png']);
     });
 
+    test('retains unambiguous case-insensitive MDD fallback', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'MDD case fallback', Description: ''},
+            entries: [{
+                keyText: 'Asset',
+                definition: '<div><img src="IMAGES/LOGO.PNG"></div>',
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'images/logo.png', value: Uint8Array.of(7, 8, 9)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'mdd-case-fallback.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'mdd-case-fallback.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+
+        expect(await zip.file('mdict-media/IMAGES/LOGO.PNG')?.async('uint8array')).toStrictEqual(Uint8Array.of(7, 8, 9));
+        const assetPhase = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
+        expect(assetPhase?.details).toMatchObject({missingReferencedAssetCount: 0});
+    });
+
+    test('uses exact case but rejects ambiguous case-insensitive MDD fallback', async () => {
+        /** @type {string[]} */
+        const lookupKeys = [];
+        mockState.onLookupRecord = (_fileName, keyText) => {
+            lookupKeys.push(keyText);
+        };
+        mockState.mdxFactory = () => ({
+            header: {Title: 'MDD case ambiguity', Description: ''},
+            entries: [{
+                keyText: 'Asset',
+                definition: [
+                    '<div>',
+                    '<img src="Images/Logo.PNG">',
+                    '<img src="images/logo.png">',
+                    '<img src="IMAGES/LOGO.png">',
+                    '</div>',
+                ].join(''),
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'Images/Logo.PNG', value: Uint8Array.of(1, 2, 3)},
+            {keyText: 'images/logo.png', value: Uint8Array.of(4, 5, 6)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'mdd-case-ambiguity.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'mdd-case-ambiguity.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const assetPhase = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
+
+        expect(await zip.file('mdict-media/Images/Logo.PNG')?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
+        expect(await zip.file('mdict-media/images/logo.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(4, 5, 6));
+        expect(zip.file('mdict-media/IMAGES/LOGO.png')).toBeNull();
+        expect(lookupKeys).toStrictEqual(['Images/Logo.PNG', 'images/logo.png']);
+        expect(assetPhase?.details).toMatchObject({missingReferencedAssetCount: 1});
+    });
+
     test('loads CSS url dependencies from MDD assets lazily', async () => {
         /** @type {string[]} */
         const lookupKeys = [];

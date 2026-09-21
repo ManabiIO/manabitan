@@ -388,9 +388,9 @@ describe('MDict text format and compact styles', () => {
     });
 
     test('stylesheet parser preserves empty fields and numeric XML newlines', () => {
-        const parsed = mdictCommon.parseHeader(
+        const parsed = /** @type {{StyleSheet?: Record<string, string[]>}} */ (mdictCommon.parseHeader(
             '<Dictionary StyleSheet="1&#13;&#10;&lt;strong&gt;&#13;&#10;&lt;/strong&gt;&#13;&#10;2&#13;&#10;&lt;em&gt;&#13;&#10;"/>',
-        );
+        ));
         assert.deepEqual(parsed.StyleSheet, {
             1: ['<strong>', '</strong>'],
             2: ['<em>', ''],
