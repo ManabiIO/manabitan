@@ -423,6 +423,34 @@ describe('convertMdxToArchive', () => {
         expect(stylesCss).not.toContain(String.raw`.jump\+plus`);
     });
 
+    test('honors an MDD stylesheet @charset instead of accepting lossy UTF-8', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Stylesheet charset fixture', Description: ''},
+            entries: [{keyText: 'Styled', definition: '<div class="日本">Styled</div>'}],
+        });
+        const prefix = new TextEncoder().encode('@charset "Shift_JIS";\n.');
+        const suffix = new TextEncoder().encode(' { color: red; }');
+        const stylesheet = Uint8Array.from([
+            ...prefix,
+            0x93, 0xfa, 0x96, 0x7b,
+            ...suffix,
+        ]);
+        mockState.mddFactory = () => [{keyText: 'styles/theme.css', value: stylesheet}];
+
+        const result = await convertMdxToArchive(
+            'stylesheet-charset-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'stylesheet-charset-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const stylesCss = await zip.file('styles.css')?.async('text');
+
+        expect(stylesCss).toContain('[data-sc-class~="日本"]');
+        expect(stylesCss).not.toContain('@charset');
+        expect(stylesCss).not.toContain('\ufffd');
+    });
+
     test('strips URL query and hash fragments before resolving MDD assets', async () => {
         /** @type {string[]} */
         const lookupKeys = [];
