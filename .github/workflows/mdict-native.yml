@@ -8,8 +8,12 @@ on:
       - 'ext/js/dictionary/mdict-import-sources.js'
       - 'ext/js/pages/settings/mdict-import-feedback.js'
       - 'ext/js/pages/settings/dictionary-import-controller.js'
+      - 'ext/js/display/display.js'
+      - 'ext/js/display/search-display-controller.js'
       - 'ext/templates-modals.html'
       - 'ext/css/settings.css'
+      - 'types/ext/display.d.ts'
+      - 'test/util/search-refresh-cases.js'
       - 'test/mdict-import-ui-regressions.test.js'
       - 'ext/mdict.html'
       - 'ext/quick-start-guide.html'
@@ -45,7 +49,7 @@ jobs:
       - name: Exercise native parsers, converter and client lifecycle
         run: |
           set -o pipefail
-          node --test --test-reporter=tap test/util/mdict-native-cases.js test/util/mdict-client-cases.js test/util/mdict-client-edge-cases.js test/util/mdict-import-source-cases.js test/util/mdict-import-feedback-cases.js test/util/mdict-import-integration-cases.js 2>&1 | tee builds/mdict-native/tests.tap
+          node --test --test-reporter=tap test/util/mdict-native-cases.js test/util/mdict-client-cases.js test/util/mdict-client-edge-cases.js test/util/search-refresh-cases.js test/util/mdict-import-source-cases.js test/util/mdict-import-feedback-cases.js test/util/mdict-import-integration-cases.js test/util/mdict-import-cache-cases.js 2>&1 | tee builds/mdict-native/tests.tap
       - name: Retain reproducible source and test results
         if: always()
         uses: actions/upload-artifact@v4
