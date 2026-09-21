@@ -1,0 +1,105 @@
+name: Media row publication qualification
+
+on:
+  push:
+    branches: [review/importer-row-materialization-20260920]
+    paths:
+      - '.github/workflows/media-row-publication.yml'
+      - 'test/fixtures/media-row-publication/**'
+      - 'test/dictionary-importer-media-publication.test.js'
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Stage tests on exact current develop
+        run: |
+          tar -czf "$RUNNER_TEMP/media-tests.tar.gz" test/fixtures/media-row-publication test/dictionary-importer-media-publication.test.js
+          git fetch --depth=1 origin 131e51bc815a165bb79f774152b201554cb8827e
+          git checkout --detach 131e51bc815a165bb79f774152b201554cb8827e
+          tar -xzf "$RUNNER_TEMP/media-tests.tar.gz"
+          mkdir -p builds/media-publication
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Reproduce premature serialization before applying repair
+        run: |
+          set +e
+          node test/fixtures/media-row-publication/check.mjs builds/media-publication/red.json > builds/media-publication/red.log 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 1
+          node --input-type=module -e "import fs from 'node:fs';const r=JSON.parse(fs.readFileSync('builds/media-publication/red.json'));if(r.passed!==2||r.failed!==16||r.unhandled.length)process.exit(1)"
+      - name: Defer only rows with unresolved media requirements
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ext/js/dictionary/dictionary-importer.js')
+          s = p.read_text()
+          a = '                    const row = decodedRows[i];'
+          assert s.count(a) == 1
+          s = s.replace(a, a + '\n                    const requirementCount = requirementsForChunk?.length ?? 0;')
+          a = '                            requirementsForChunk !== null &&\n                            (\n                                !hasPrecomputedTermEntryContent(entry)\n                            )'
+          assert s.count(a) == 1
+          s = s.replace(a, '                            requirementsForChunk !== null &&\n                            requirementsForChunk.length === requirementCount &&\n                            (\n                                !hasPrecomputedTermEntryContent(entry)\n                            )')
+          p.write_text(s)
+          PY
+          node test/fixtures/media-row-publication/check.mjs builds/media-publication/green.json > builds/media-publication/green.log 2>&1
+      - name: Format fixture and enforce lint
+        run: |
+          npx eslint --fix test/fixtures/media-row-publication/check.mjs test/dictionary-importer-media-publication.test.js
+          npx eslint ext/js/dictionary/dictionary-importer.js test/fixtures/media-row-publication/check.mjs test/dictionary-importer-media-publication.test.js
+      - name: Check types and full unit/options suites
+        run: |
+          npm run test:ts
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile=builds/media-publication/unit.json
+          npm run test:unit:options
+          npm run test:build
+      - name: Preserve exact qualified changes
+        run: |
+          git diff --check
+          git diff --binary -- ext/js/dictionary/dictionary-importer.js > builds/media-publication/production.patch
+          tar -czf builds/media-publication/tests.tar.gz test/fixtures/media-row-publication test/dictionary-importer-media-publication.test.js
+          sha256sum ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-wasm-parser.js ext/lib/term-bank-parser.wasm > builds/media-publication/source.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: media-row-publication-qualification
+          path: builds/media-publication/
+          retention-days: 14
+          if-no-files-found: error
+
+  publish:
+    needs: qualify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 131e51bc815a165bb79f774152b201554cb8827e
+      - uses: actions/download-artifact@v4
+        with:
+          name: media-row-publication-qualification
+          path: /tmp/media-publication
+      - name: Publish tests-first and repair on a separate review branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c fix/importer-media-publication-20260920
+          tar -xzf /tmp/media-publication/tests.tar.gz
+          git add test/fixtures/media-row-publication test/dictionary-importer-media-publication.test.js
+          git -c core.hooksPath=/dev/null commit -m 'test: reproduce serialization before media requirement resolution'
+          git apply --check /tmp/media-publication/production.patch
+          git apply /tmp/media-publication/production.patch
+          git add ext/js/dictionary/dictionary-importer.js
+          git -c core.hooksPath=/dev/null commit -m 'fix: serialize native rows after media fields are resolved'
+          git push origin HEAD:refs/heads/fix/importer-media-publication-20260920
