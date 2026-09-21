@@ -24,17 +24,22 @@ import {
 
 describe('raw term content block references', () => {
     test('round trips safe offsets and lengths', () => {
-        const bytes = encodeRawTermContentBlockReference(Number.MAX_SAFE_INTEGER, 12345, 2_000_000, 4567, 890);
+        const bytes = encodeRawTermContentBlockReference(Number.MAX_SAFE_INTEGER - 12345, 12345, 2_000_000, 4567, 890);
 
         expect(bytes).toHaveLength(RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES);
         expect(decodeRawTermContentBlockReference(bytes)).toStrictEqual({
-            blockOffset: Number.MAX_SAFE_INTEGER,
+            blockOffset: Number.MAX_SAFE_INTEGER - 12345,
             blockCompressedLength: 12345,
             blockUncompressedLength: 2_000_000,
             entryOffset: 4567,
             entryLength: 890,
         });
     });
+
+    test('rejects a legacy reference whose compressed block end is not safely representable', () => {
+        const bytes = encodeRawTermContentBlockReference(Number.MAX_SAFE_INTEGER, 1, 2, 0, 1)
+        expect(decodeRawTermContentBlockReference(bytes)).toBeNull()
+    })
 
     test('keeps the existing little-endian uint64 offset layout', () => {
         const bytes = encodeRawTermContentBlockReference(0x100000002, 1, 2, 0, 1);
