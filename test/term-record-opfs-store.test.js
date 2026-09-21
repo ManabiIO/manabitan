@@ -4360,10 +4360,16 @@ describe('TermRecordOpfsStore preserves length-delimited Unicode fields', () => 
                     }, offsets, lengths, 'raw');
                 } else {
                     await writer.appendBatch(expressions.map((expression, i) => ({
-                        dictionary: 'Unicode', expression, reading: readings[i],
-                        expressionReverse: null, readingReverse: null,
-                        entryContentOffset: offsets[i], entryContentLength: lengths[i],
-                        entryContentDictName: 'raw', score: 1, sequence: i,
+                        dictionary: 'Unicode',
+                        expression,
+                        reading: readings[i],
+                        expressionReverse: null,
+                        readingReverse: null,
+                        entryContentOffset: offsets[i],
+                        entryContentLength: lengths[i],
+                        entryContentDictName: 'raw',
+                        score: 1,
+                        sequence: i,
                     })));
                 }
                 await writer.endImportSession();
