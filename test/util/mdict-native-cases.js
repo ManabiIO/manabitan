@@ -20,6 +20,7 @@ import {describe, test} from 'node:test';
 import {MDX} from '../../ext/js/dictionary/mdx/vendor/js-mdict/mdx.js';
 import {MDD} from '../../ext/js/dictionary/mdx/vendor/js-mdict/mdd.js';
 import {FileScanner} from '../../ext/js/dictionary/mdx/vendor/js-mdict/scanner.js';
+import mdictCommon from '../../ext/js/dictionary/mdx/vendor/js-mdict/utils.js';
 import {createMdxImportData} from '../../ext/js/dictionary/mdx/mdx-converter.js';
 import {makeFixturePng, makeMdictFixture} from './mdict-binary-fixture.js';
 
@@ -348,5 +349,51 @@ describe('MDict header encoding and encryption metadata', () => {
     test('invalid encryption overrides are rejected', () => {
         const fixture = makeMdictFixture([{key: 'entry', value: 'definition'}]);
         assert.throws(() => new MDX('invalid-override.mdx', fixture.bytes, {encryptType: 4}), /encryption override/iu);
+    });
+});
+
+
+describe('MDict text format and compact styles', () => {
+    test('Format=Text preserves literal markup, whitespace and line breaks', async () => {
+        const definition = '  <b>literal & text</b>\nsecond  ';
+        const fixture = makeMdictFixture([{key: 'plain', value: definition}], {format: 'Text'});
+        const {files} = await createMdxImportData('plain.mdx', {}, fixture.bytes, []);
+        const glossary = readRows(files)[0][5];
+        const preformatted = nodes(glossary, 'div').find(({style}) => style?.whiteSpace === 'pre-wrap');
+        assert.ok(preformatted);
+        assert.deepEqual(preformatted.content, [definition]);
+        assert.equal(nodes(glossary, 'span').some(({style}) => style?.fontWeight === 'bold'), false);
+    });
+
+    test('compact stylesheet markers preserve prefix and expand known styles', async () => {
+        const fixture = makeMdictFixture(
+            [{key: 'styled', value: 'prefix `1`bold'}],
+            {format: 'Html', styleSheet: '1\r\n<strong>\r\n</strong>'},
+        );
+        const {files} = await createMdxImportData('compact.mdx', {}, fixture.bytes, []);
+        const glossary = readRows(files)[0][5];
+        assert.ok(JSON.stringify(glossary).includes('prefix '));
+        const bold = nodes(glossary, 'span').find(({style}) => style?.fontWeight === 'bold');
+        assert.ok(bold);
+        assert.deepEqual(bold.content, ['bold']);
+    });
+
+    test('unknown compact style markers remain visible with their content', async () => {
+        const fixture = makeMdictFixture(
+            [{key: 'styled', value: 'prefix `99`visible'}],
+            {format: 'Html', styleSheet: '1\n<strong>\n</strong>'},
+        );
+        const {files} = await createMdxImportData('unknown-style.mdx', {}, fixture.bytes, []);
+        assert.ok(JSON.stringify(readRows(files)[0][5]).includes('`99`visible'));
+    });
+
+    test('stylesheet parser preserves empty fields and numeric XML newlines', () => {
+        const parsed = /** @type {{StyleSheet?: Record<string, string[]>}} */ (mdictCommon.parseHeader(
+            '<Dictionary StyleSheet="1&#13;&#10;&lt;strong&gt;&#13;&#10;&lt;/strong&gt;&#13;&#10;2&#13;&#10;&lt;em&gt;&#13;&#10;"/>',
+        ));
+        assert.deepEqual(parsed.StyleSheet, {
+            1: ['<strong>', '</strong>'],
+            2: ['<em>', ''],
+        });
     });
 });

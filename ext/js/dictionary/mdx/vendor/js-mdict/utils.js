@@ -93,16 +93,15 @@ function parseHeader(header_text) {
     Array.from(header_text.matchAll(/(\w+)="((.|\r|\n)*?)"/g)).forEach((tag) => {
         headerAttr[tag[1]] = unescapeEntities(tag[2]);
     });
-    // stylesheet attribute if present takes form of:
-    //   style_number # 1-255
-    //   style_begin  # or ''
-    //   style_end    # or ''
-    // store stylesheet in dict in the form of
-    // {'number' : ('style_begin', 'style_end')}
+    // Styles are encoded as strict triplets: id, opening markup, closing markup.
+    // Empty opening/closing fields are meaningful and must not be collapsed.
     if (headerAttr['StyleSheet'] && typeof headerAttr['StyleSheet'] == 'string') {
         const styleSheet = {};
-        const lines = headerAttr['StyleSheet'].split(/[\r\n]+/g);
-        for (let i = 0; i < lines.length; i += 3) {
+        const lines = headerAttr['StyleSheet'].replace(/\r\n?/gu, '\n').split('\n');
+        if (lines.length % 3 === 1 && lines.at(-1) === '') {
+            lines.pop();
+        }
+        for (let i = 0; i + 2 < lines.length; i += 3) {
             styleSheet[lines[i]] = [lines[i + 1], lines[i + 2]];
         }
         headerAttr['StyleSheet'] = styleSheet;
@@ -346,21 +345,42 @@ function wordCompare(word1, word2) {
     return word1.length < word2.length ? -1 : 1;
 }
 function unescapeEntities(text) {
-    text = text.replace(/&lt;/g, '<');
-    text = text.replace(/&gt;/g, '>');
-    text = text.replace(/&quot;/g, '"');
-    text = text.replace(/&amp;/g, '&');
-    return text;
+    return text.replace(/&(lt|gt|quot|apos|amp|#\d+|#x[0-9a-f]+);/giu, (match, entity) => {
+        switch (entity.toLowerCase()) {
+            case 'lt': return '<';
+            case 'gt': return '>';
+            case 'quot': return '"';
+            case 'apos': return "'";
+            case 'amp': return '&';
+        }
+        const hexadecimal = entity[1]?.toLowerCase() === 'x';
+        const digits = entity.slice(hexadecimal ? 2 : 1);
+        const codePoint = Number.parseInt(digits, hexadecimal ? 16 : 10);
+        if (!Number.isSafeInteger(codePoint) || codePoint < 0 || codePoint > 0x10ffff ||
+            (codePoint >= 0xd800 && codePoint <= 0xdfff)) {
+            return match;
+        }
+        return String.fromCodePoint(codePoint);
+    });
 }
 function substituteStylesheet(styleSheet, txt) {
-    const txtTag = Array.from(txt.matchAll(/`(\d+)`/g));
-    const txtList = Array.from(txt.split(/`\d+`/g)).slice(1);
-    let styledTxt = '';
-    for (let i = 0; i < txtList.length; i++) {
-        const style = styleSheet[txtTag[i][1]];
-        styledTxt += style[0] + txtList[i] + style[1];
+    const matches = [...txt.matchAll(/`(\d+)`/gu)];
+    if (matches.length === 0) { return txt; }
+    let output = txt.slice(0, matches[0].index);
+    for (let index = 0; index < matches.length; index += 1) {
+        const match = matches[index];
+        const next = matches[index + 1];
+        const segmentStart = match.index + match[0].length;
+        const segmentEnd = typeof next === 'undefined' ? txt.length : next.index;
+        const segment = txt.slice(segmentStart, segmentEnd);
+        const style = styleSheet[match[1]];
+        if (!Array.isArray(style) || style.length < 2) {
+            output += match[0] + segment;
+            continue;
+        }
+        output += String(style[0] ?? '') + segment + String(style[1] ?? '');
     }
-    return styledTxt;
+    return output;
 }
 export default {
     getExtension,
