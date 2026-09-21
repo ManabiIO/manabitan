@@ -1,0 +1,96 @@
+name: Prepare bounded block-read candidate
+on:
+  push:
+    branches: [codex/delivery-block-read-budget-20260921]
+permissions:
+  contents: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  prepare:
+    if: github.repository == 'ManabiIO/manabitan'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      HUSKY: '0'
+      NO_COLOR: '1'
+      TARGET: perf/bounded-block-read-retention-20260921
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - name: Restore verified candidate on pinned baseline
+        run: |
+          set -euo pipefail
+          cat .codex-delivery/block-candidate.part0 .codex-delivery/block-candidate.part1 .codex-delivery/block-candidate.part2 > "$RUNNER_TEMP/block-candidate.zip"
+          echo "2ecbc18a82b099c4b0c4731b34b8a1cf68d03d0a33279deab8f8b49c34743d92  $RUNNER_TEMP/block-candidate.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/block-candidate" "$RUNNER_TEMP/block-evidence"
+          unzip -q "$RUNNER_TEMP/block-candidate.zip" -d "$RUNNER_TEMP/block-candidate"
+          git fetch origin e932c60d689b0af96ef357f76486091189c21f19
+          git checkout --detach e932c60d689b0af96ef357f76486091189c21f19
+          test "$(git hash-object ext/js/dictionary/term-content-block-store.js)" = e9364fafdd6162205037508f9d4eb6a65de71ad6
+          test ! -e test/term-content-block-read-budget.test.js
+          test ! -e dev/perf/block-read-retention-probe.mjs
+          test ! -e dev/perf/block-read-retention-20260921.md
+          cp "$RUNNER_TEMP/block-candidate/block-budget.test.js" test/term-content-block-read-budget.test.js
+          cp "$RUNNER_TEMP/block-candidate/probe.mjs" dev/perf/block-read-retention-probe.mjs
+          cp "$RUNNER_TEMP/block-candidate/bench.md" dev/perf/block-read-retention-20260921.md
+          git config user.name 'ManabiTan bounded-read preparation'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add test/term-content-block-read-budget.test.js dev/perf/block-read-retention-probe.mjs dev/perf/block-read-retention-20260921.md
+          git commit -m 'test: reproduce sparse block retention and unbounded read scheduling'
+      - uses: ./.github/actions/setup
+      - name: Record original retention and reproduce sparse failure
+        run: |
+          set -euo pipefail
+          node dev/perf/block-read-retention-probe.mjs | tee "$RUNNER_TEMP/block-evidence/baseline.json"
+          set +e
+          npx vitest run test/term-content-block-read-budget.test.js -t 'sparse batch results retain requested bytes' > "$RUNNER_TEMP/block-evidence/before.log" 2>&1
+          status=$?
+          set -e
+          cat "$RUNNER_TEMP/block-evidence/before.log"
+          test "$status" -ne 0
+          grep -q '1 failed' "$RUNNER_TEMP/block-evidence/before.log"
+      - name: Apply candidate and qualify with strict pipeline status
+        run: |
+          set -euo pipefail
+          git apply --check "$RUNNER_TEMP/block-candidate/block-fix.patch"
+          git apply "$RUNNER_TEMP/block-candidate/block-fix.patch"
+          npx eslint --fix --fix-type layout ext/js/dictionary/term-content-block-store.js test/term-content-block-read-budget.test.js dev/perf/block-read-retention-probe.mjs 2>&1 | tee "$RUNNER_TEMP/block-evidence/layout.log"
+          npm run test:js 2>&1 | tee "$RUNNER_TEMP/block-evidence/lint.log"
+          npm run test:ts:main 2>&1 | tee "$RUNNER_TEMP/block-evidence/main-types.log"
+          npm run test:ts:test 2>&1 | tee "$RUNNER_TEMP/block-evidence/test-types.log"
+          npm run test:ts:dev 2>&1 | tee "$RUNNER_TEMP/block-evidence/dev-types.log"
+          npx vitest run test/term-content-block-read-budget.test.js test/term-content-block-store.test.js test/term-content-cache-invalidation.test.js test/dictionary-database-content-dedup.test.js 2>&1 | tee "$RUNNER_TEMP/block-evidence/tests.log"
+          node dev/perf/block-read-retention-probe.mjs | tee "$RUNNER_TEMP/block-evidence/candidate.json"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path(os.environ['RUNNER_TEMP']) / 'block-evidence'
+          a = json.loads((p / 'baseline.json').read_text())
+          b = json.loads((p / 'candidate.json').read_text())
+          assert a['outputCorrect'] and b['outputCorrect']
+          assert a['usefulBytes'] == b['usefulBytes'] == 32
+          assert a['retainedBackingBytes'] == 128 * 1024 * 1024
+          assert b['retainedBackingBytes'] == 32
+          assert b['peakConcurrentBlockLoads'] <= 4
+          assert b['peakDeclaredInFlightBytes'] <= 16 * 1024 * 1024
+          PY
+          git diff --check
+          git add ext/js/dictionary/term-content-block-store.js test/term-content-block-read-budget.test.js dev/perf/block-read-retention-probe.mjs
+          git commit -m 'perf: bound unique block loads and compact sparse read results'
+      - name: Publish only clean candidate branch
+        run: |
+          set -euo pipefail
+          test -z "$(git ls-remote --heads origin "refs/heads/$TARGET")"
+          git log -2 --format='%H %s' | tee "$RUNNER_TEMP/block-evidence/commits.txt"
+          git diff e932c60d689b0af96ef357f76486091189c21f19 HEAD > "$RUNNER_TEMP/block-evidence/published.patch"
+          git diff --stat e932c60d689b0af96ef357f76486091189c21f19 HEAD
+          git push origin "HEAD:refs/heads/$TARGET"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-block-read-preparation
+          path: ${{ runner.temp }}/block-evidence
+          retention-days: 14
