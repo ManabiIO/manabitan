@@ -118,6 +118,62 @@ export function createCases(parser, DictionaryImporter, lookup) {
         })
     }
 
+    // The native parser and requirement resolver are real. The media-loader
+    // boundary provides deterministic dimensions; the in-memory asset source is
+    // the same supported input path used by converted MDict dictionaries.
+    for (const streamed of [false, true]) {
+        for (const dedup of [false, true]) {
+            for (const skipMetadata of [false, true]) {
+                for (const [storageMode, passThrough] of [['baseline', false], ['raw-bytes', false], ['baseline', true], ['raw-bytes', true]]) {
+                    if (skipMetadata && passThrough) { continue }
+                    add(`resolved media serialization: streamed=${streamed}, dedup=${dedup}, skipMetadata=${skipMetadata}, mode=${storageMode}, passThrough=${passThrough}`, async () => {
+                        const importer = new DictionaryImporter({
+                            async getImageDetails(content) { return {content, width: 7, height: 9} },
+                        })
+                        importer._skipImageMetadata = skipMetadata
+                        // Metadata loading requires materialized rows even with
+                        // default pass-through enabled. The no-metadata controls
+                        // also exercise the non-pass-through materialization path.
+                        importer._wasmPassThroughTermContent = passThrough
+                        const image = {type: 'image', path: 'picture.png', width: 3, height: 4, alt: 'caption'}
+                        const nested = {type: 'structured-content', content: {tag: 'div', content: [{tag: 'img', path: 'picture.png', border: '1px solid', verticalAlign: 'middle'}]}}
+                        const glossaries = [['before'], [image], [{type: 'text', text: 'formatted control'}], [nested], ['after']]
+                        const bank = glossaries.map((glossary, index) => [`media-${index}`, '', 'noun', '', 1, glossary, index, 'common'])
+                        const assets = new Map([['picture.png', {filename: 'picture.png', bytes: Uint8Array.of(1, 2, 3)}]])
+                        const entries = []
+                        const resolve = async (chunk, requirements) => {
+                            await importer._resolveAsyncRequirements(requirements, assets)
+                            importer._prepareTermImportSerialization(chunk, dedup)
+                            // Snapshot the serialized representation at the write
+                            // boundary, rather than observing later object mutations.
+                            entries.push(...chunk.map((entry) => ({
+                                ...entry,
+                                termEntryContentBytes: Uint8Array.from(entry.termEntryContentBytes),
+                            })))
+                        }
+                        const result = await importer._readTermBankFileFast(file, 3, 'fixture', false, true, dedup, storageMode, streamed ? resolve : undefined, sourceRows(bank), 5)
+                        if (!streamed) { await resolve(result.termList, result.requirements) }
+                        const dimension = skipMetadata ? {width: 0, height: 0} : {width: 7, height: 9}
+                        const expected = [
+                            ['before'],
+                            [{type: 'image', path: 'picture.png', ...dimension, preferredWidth: 3, preferredHeight: 4, alt: 'caption'}],
+                            ['formatted control'],
+                            [{type: 'structured-content', content: {tag: 'div', content: [{tag: 'img', path: 'picture.png', ...dimension, verticalAlign: 'middle', border: '1px solid'}]}}],
+                            ['after'],
+                        ]
+                        equal(entries.map(({termEntryContentBytes}) => JSON.parse(text(termEntryContentBytes)).glossary), expected, 'authoritative resolved glossary')
+                        if (!dedup) { equal(entries.map(({glossaryJson}) => JSON.parse(glossaryJson)), expected, 'resolved glossary JSON') }
+                        // Hashes are intentionally omitted on untouched native
+                        // pass-through rows when deduplication is disabled.
+                        for (const entry of [entries[1], entries[3]]) {
+                            equal([entry.termEntryContentHash1, entry.termEntryContentHash2], importer._hashEntryContentBytesPair(entry.termEntryContentBytes), 'hash describes resolved bytes')
+                        }
+                    })
+                }
+            }
+        }
+    }
+
     add('collected keys and content survive a following native parse', async () => {
         const importer = makeImporter()
         const {termList} = await importer._readTermBankFileFast(file, 3, 'fixture', false, false, true, 'baseline', undefined, sourceRows(rows))
