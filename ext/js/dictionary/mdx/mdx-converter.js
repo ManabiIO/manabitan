@@ -677,8 +677,10 @@ function rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetRefe
             assetReferences.add(assetKey);
         }
         if (assetKey !== null) {
-            output.push(stylesheet.slice(lastIndex, index));
-            output.push(`url("${escapeCssString(`${assetPrefix}${assetKey}`)}")`);
+            output.push(
+                stylesheet.slice(lastIndex, index),
+                `url("${escapeCssString(`${assetPrefix}${assetKey}`)}")`,
+            );
             lastIndex = token.endIndex;
         }
         index = token.endIndex;
