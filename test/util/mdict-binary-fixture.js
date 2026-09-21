@@ -110,7 +110,7 @@ export function makeMdictFixture(entries, options = {}) {
     const keyUnit = keyEncoding === 'utf16le' ? 2 : 1;
     const terminator = Buffer.alloc(keyUnit);
     const keyInfoTerminator = Buffer.alloc(keyUnit, keyInfoTerminatorByte);
-    const encodeDictionaryText = (value) => Buffer.from(textEncoder(value));
+    const encodeDictionaryText = /** @param {string} value @returns {Buffer} */ (value) => Buffer.from(textEncoder(value));
     const records = orderedEntries.map(({value}) => {
         const bytes = typeof value === 'string' ? (mdd ? Buffer.from(value, 'utf8') : encodeDictionaryText(value)) : Buffer.from(value);
         return mdd ? bytes : Buffer.concat([bytes, Buffer.alloc(encoding === 'utf16le' ? 2 : 1)]);
