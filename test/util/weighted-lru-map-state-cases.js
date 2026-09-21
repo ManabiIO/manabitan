@@ -8,12 +8,12 @@ import assert from 'node:assert/strict'
 import {test} from 'node:test'
 import {WeightedLruMap} from '../../ext/js/core/weighted-lru-map.js'
 
-/** @param {unknown} value */
+/** @param {unknown} value @returns {number} */
 function weightOf(value) {
     return typeof value === 'number' ? value : 0
 }
 
-for (const key of ['missing-value', void 0, NaN, 0, {}]) {
+for (const key of ['missing-value', void 0, Number.NaN, 0, {}]) {
     test(`reading stored undefined promotes ${String(key)} without changing weight`, () => {
         const cache = new WeightedLruMap(2, 10, weightOf)
         cache.set(key, void 0).set('other', 3)
@@ -96,8 +96,8 @@ test('oversized replacement still removes the old value but preserves other entr
 
 test('falsey values other than undefined retain normal hit promotion', () => {
     const cache = new WeightedLruMap(8, 10, weightOf)
-    for (const value of [null, false, '', 0, NaN]) { cache.set(value, value) }
-    for (const value of [null, false, '', 0, NaN]) {
+    for (const value of [null, false, '', 0, Number.NaN]) { cache.set(value, value) }
+    for (const value of [null, false, '', 0, Number.NaN]) {
         assert.equal(cache.get(value), value)
         assert.equal([...cache.keys()].at(-1), value)
     }
@@ -107,7 +107,7 @@ test('mixed operations match an independent recomputed-weight model', () => {
     const cache = new WeightedLruMap(17, 53, weightOf)
     /** @type {Map<unknown, unknown>} */
     const model = new Map()
-    const keys = [void 0, NaN, -0, {}, ...Array.from({length: 31}, (_, i) => `key-${i}`)]
+    const keys = [void 0, Number.NaN, -0, {}, ...Array.from({length: 31}, (_, i) => `key-${i}`)]
     let seed = 0x53276914
     const sum = () => [...model.values()].reduce((total, value) => /** @type {number} */ (total) + weightOf(value), 0)
     for (let i = 0; i < 20000; ++i) {
