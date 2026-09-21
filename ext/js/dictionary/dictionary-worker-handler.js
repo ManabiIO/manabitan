@@ -233,9 +233,9 @@ export class DictionaryWorkerHandler {
                 details !== null &&
                 !Array.isArray(details) &&
                 typeof Reflect.get(detailsRecord, 'replacementDictionaryTitle') === 'string' &&
-                /** @type {string} */ (Reflect.get(detailsRecord, 'replacementDictionaryTitle')).trim().length > 0
+                /** @type {string} */ (Reflect.get(detailsRecord, 'replacementDictionaryTitle')).length > 0
             ) ?
-                /** @type {string} */ (Reflect.get(detailsRecord, 'replacementDictionaryTitle')).trim() :
+                /** @type {string} */ (Reflect.get(detailsRecord, 'replacementDictionaryTitle')) :
                 null;
             /**
              * @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase
@@ -252,10 +252,10 @@ export class DictionaryWorkerHandler {
                     typeof result === 'object' &&
                     !Array.isArray(result) &&
                     typeof Reflect.get(result, 'sourceTitle') === 'string' &&
-                    /** @type {string} */ (Reflect.get(result, 'sourceTitle')).trim().length > 0
+                    /** @type {string} */ (Reflect.get(result, 'sourceTitle')).length > 0
                 ) ?
-                    /** @type {string} */ (Reflect.get(result, 'sourceTitle')).trim() :
-                    ((result !== null && typeof result?.title === 'string') ? result.title.trim() : '');
+                    /** @type {string} */ (Reflect.get(result, 'sourceTitle')) :
+                    ((result !== null && typeof result?.title === 'string') ? result.title : '');
                 if (
                     result !== null &&
                     replacementDictionaryTitle !== null &&
@@ -384,7 +384,7 @@ export class DictionaryWorkerHandler {
                 typeof dictionaryInfo === 'object' &&
                 typeof titleRaw === 'string'
             ) ?
-                titleRaw.trim() :
+                titleRaw :
                 '';
             if (title.length === 0) { continue; }
             installedTitles.add(title);
@@ -430,7 +430,7 @@ export class DictionaryWorkerHandler {
             }
         }
         await dictionaryDatabase.cleanupTransientTermRecordShards((dictionaryName) => {
-            const title = String(dictionaryName || '').trim();
+            const title = String(dictionaryName || '');
             if (title.length === 0) {
                 return false;
             }
