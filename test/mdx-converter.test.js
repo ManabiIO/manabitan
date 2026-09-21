@@ -919,5 +919,4 @@ describe('convertMdxToArchive', () => {
         expect(stylesCss).toContain(':rooted [data-sc-class~="outer"]');
         expect(stylesCss).not.toContain('[data-sc-class~="mdict-yomitan-content"]ed');
     });
-
 });
