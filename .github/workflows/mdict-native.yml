@@ -78,7 +78,8 @@ jobs:
           set -o pipefail
           mkdir -p builds/mdict-browser
           git rev-parse HEAD > builds/mdict-browser/commit.txt
-          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js mdict-help.spec.js mdict-import-feedback.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep MDX 2>&1 | tee builds/mdict-browser/tests.log
+          tar -czf builds/mdict-browser/extension.tar.gz ext
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js mdict-inline-style.spec.js mdict-help.spec.js mdict-import-feedback.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep MDX 2>&1 | tee builds/mdict-browser/tests.log
       - name: Retain MDict browser results
         if: always()
         uses: actions/upload-artifact@v4
