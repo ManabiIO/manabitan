@@ -924,5 +924,4 @@ describe('convertMdxToArchive', () => {
         const materialize = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
         expect(materialize?.details?.missingReferencedAssetCount).toBe(0);
     });
-
 });
