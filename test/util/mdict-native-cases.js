@@ -153,6 +153,17 @@ describe('MDict redirect key matching', () => {
         assert.equal(result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details?.unresolvedRedirectCount, 0);
     });
 
+    test('case-insensitive redirects preserve a distinct alias spelling that differs only by case', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Read', value: '<div>definition</div>'},
+            {key: 'read', value: '@@@LINK=Read'},
+        ], {keyCaseSensitive: 'No'});
+        const result = await createMdxImportData('redirect-alias-case.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        assert.deepEqual(rows.map(([term]) => term), ['Read', 'read']);
+        assert.equal(result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details?.unresolvedRedirectCount, 0);
+    });
+
     test('case-sensitive dictionaries keep case-mismatched redirect targets unresolved', async () => {
         const fixture = makeMdictFixture([
             {key: 'Alias', value: '@@@LINK=target'},
