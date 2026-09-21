@@ -19,11 +19,17 @@ for (const [name, tokens] of [
     try {
         const result = await runNativePersistence(tokens, false)
         report.push({name, ...result, realFileWrites: fs.operations.filter((x) => x.type === 'write').length})
-    } catch (error) { report.push({name, passed: false, error: error.stack}) }
-    finally { await fs.dispose() }
+    } catch (error) {
+        report.push({name, passed: false, error: error.stack})
+    } finally {
+        await fs.dispose()
+    }
 }
-if (navigatorDescriptor) { Object.defineProperty(globalThis, 'navigator', navigatorDescriptor) }
-else { delete globalThis.navigator }
+if (navigatorDescriptor) {
+    Object.defineProperty(globalThis, 'navigator', navigatorDescriptor)
+} else {
+    delete globalThis.navigator
+}
 console.log(JSON.stringify(report, null, 2))
 if (process.argv[2]) { await writeFile(process.argv[2], JSON.stringify(report, null, 2) + '\n') }
 process.exitCode = report.every((x) => x.passed) ? 0 : 1
