@@ -163,8 +163,8 @@ test('MDX native cross-block import preserves aliases, senses and media through 
     ]) {
         await expect(async () => {
             const backgroundImage = await target.evaluate((element) => getComputedStyle(element).backgroundImage);
-            expect(backgroundImage).toMatch(/^url\\("blob:/u);
-            const match = /^url\\("([^"]+)"\\)$/u.exec(backgroundImage);
+            expect(backgroundImage).toMatch(/^url\("blob:/u);
+            const match = /^url\("([^"]+)"\)$/u.exec(backgroundImage);
             expect(match).not.toBeNull();
             const bytes = await page.evaluate(async (url) => {
                 return [...new Uint8Array(await (await fetch(url)).arrayBuffer())];
