@@ -135,13 +135,13 @@ describe('DictionaryDatabase import cleanup', () => {
         expect(Reflect.get(database, '_termRecordStore').rollbackPreservedDictionaryRename).not.toHaveBeenCalled();
     });
 
-    test('publishes an update by changing metadata without copying immutable shards', async () => {
+    test.each(['JMdict', ' \ufeffJMdict '])('publishes an update with exact titles: %j', async (dictionaryTitle) => {
         const token = 'update-token';
-        const stagingTitle = `JMdict [update-staging ${token}]`;
+        const stagingTitle = `${dictionaryTitle} [update-staging ${token}]`;
         /** @type {DictionaryRow[]} */
         let rows = [
-            {id: 1, title: stagingTitle, version: 3, summaryJson: JSON.stringify({title: stagingTitle, termRecordStorageName: 'records-new', version: 3, importSuccess: true})},
-            {id: 2, title: 'JMdict', version: 3, summaryJson: JSON.stringify({title: 'JMdict', termRecordStorageName: 'records-old', version: 3, importSuccess: true})},
+            {id: 1, title: stagingTitle, version: 3, summaryJson: JSON.stringify({title: stagingTitle, termRecordStorageName: '\ufeffrecords-new ', version: 3, importSuccess: true})},
+            {id: 2, title: dictionaryTitle, version: 3, summaryJson: JSON.stringify({title: dictionaryTitle, termRecordStorageName: ' records-old ', version: 3, importSuccess: true})},
         ];
         /** @type {DictionaryRow[]} */
         let transactionSnapshot = [];
@@ -179,24 +179,24 @@ describe('DictionaryDatabase import cleanup', () => {
 
         await database.replaceDictionaryTitle(
             stagingTitle,
-            'JMdict',
-            /** @type {import('dictionary-importer').Summary} */ ({title: 'JMdict', version: 3, importSuccess: true, updateSessionToken: token}),
-            'JMdict',
+            dictionaryTitle,
+            /** @type {import('dictionary-importer').Summary} */ ({title: dictionaryTitle, version: 3, importSuccess: true, updateSessionToken: token}),
+            dictionaryTitle,
         );
 
         expect(replaceDictionaryName).not.toHaveBeenCalled();
-        expect(rows.map(({title}) => title)).toStrictEqual(['JMdict']);
-        expect(JSON.parse(rows[0].summaryJson).termRecordStorageName).toBe('records-new');
+        expect(rows.map(({title}) => title)).toStrictEqual([dictionaryTitle]);
+        expect(JSON.parse(rows[0].summaryJson).termRecordStorageName).toBe('\ufeffrecords-new ');
     });
 
-    test('restores the old generation when direct staged publication fails', async () => {
+    test.each(['JMdict', ' \ufeffJMdict '])('restores exact titles after failed publication: %j', async (dictionaryTitle) => {
         const token = 'update-token';
-        const stagingTitle = `JMdict [update-staging ${token}]`;
-        const replacedTitle = `JMdict [replaced ${token}]`;
+        const stagingTitle = `${dictionaryTitle} [update-staging ${token}]`;
+        const replacedTitle = `${dictionaryTitle} [replaced ${token}]`;
         /** @type {DictionaryRow[]} */
         let rows = [
-            {id: 1, title: stagingTitle, version: 3, summaryJson: JSON.stringify({title: stagingTitle, termRecordStorageName: 'records-new', version: 3, importSuccess: true})},
-            {id: 2, title: 'JMdict', version: 3, summaryJson: JSON.stringify({title: 'JMdict', termRecordStorageName: 'records-old', version: 3, importSuccess: true})},
+            {id: 1, title: stagingTitle, version: 3, summaryJson: JSON.stringify({title: stagingTitle, termRecordStorageName: '\ufeffrecords-new ', version: 3, importSuccess: true})},
+            {id: 2, title: dictionaryTitle, version: 3, summaryJson: JSON.stringify({title: dictionaryTitle, termRecordStorageName: ' records-old ', version: 3, importSuccess: true})},
         ];
         /** @type {DictionaryRow[]} */
         let transactionSnapshot = [];
@@ -212,7 +212,7 @@ describe('DictionaryDatabase import cleanup', () => {
                     version: value.bind.$version,
                     summaryJson: value.bind.$summaryJson,
                 });
-            } else if (sql === 'COMMIT' && rows.some(({title}) => title === 'JMdict') && rows.some(({title}) => title === replacedTitle)) {
+            } else if (sql === 'COMMIT' && rows.some(({title}) => title === dictionaryTitle) && rows.some(({title}) => title === replacedTitle)) {
                 throw new Error('injected staged publication failure');
             } else if (sql === 'ROLLBACK') {
                 rows = transactionSnapshot.map((row) => ({...row}));
@@ -233,16 +233,16 @@ describe('DictionaryDatabase import cleanup', () => {
 
         await expect(database.replaceDictionaryTitle(
             stagingTitle,
-            'JMdict',
-            /** @type {import('dictionary-importer').Summary} */ ({title: 'JMdict', version: 3, importSuccess: true, updateSessionToken: token}),
-            'JMdict',
+            dictionaryTitle,
+            /** @type {import('dictionary-importer').Summary} */ ({title: dictionaryTitle, version: 3, importSuccess: true, updateSessionToken: token}),
+            dictionaryTitle,
         )).rejects.toThrow('injected staged publication failure');
 
         expect(replaceDictionaryName).not.toHaveBeenCalled();
-        expect(rows.map(({title}) => title).sort()).toStrictEqual(['JMdict', stagingTitle].sort());
-        const oldRow = rows.find(({title}) => title === 'JMdict');
+        expect(rows.map(({title}) => title).sort()).toStrictEqual([dictionaryTitle, stagingTitle].sort());
+        const oldRow = rows.find(({title}) => title === dictionaryTitle);
         if (typeof oldRow === 'undefined') { throw new Error('Expected old dictionary row'); }
-        expect(JSON.parse(oldRow.summaryJson).termRecordStorageName).toBe('records-old');
+        expect(JSON.parse(oldRow.summaryJson).termRecordStorageName).toBe(' records-old ');
     });
 
     test('removes only an explicit failed-import placeholder by primary key', async () => {
@@ -1334,6 +1334,23 @@ describe('DictionaryDatabase import cleanup', () => {
         expect(deleteDictionary).not.toHaveBeenCalled();
         expect(summary.removedTitles).toStrictEqual([]);
         expect(summary.failedTitles).toStrictEqual([replacedTitle]);
+    });
+
+
+    test('startup restoration removes only the generated separator from a replaced title', async () => {
+        const database = new DictionaryDatabase();
+        const originalTitle = ' \ufeffJMdict  ';
+        const replacedTitle = `${originalTitle} [replaced identity-token]`;
+        const restore = vi.spyOn(database, 'replaceDictionaryTitle').mockResolvedValue();
+        vi.spyOn(database, 'deleteDictionary').mockResolvedValue();
+        Reflect.set(database, '_db', {
+            selectObjects: vi.fn(() => [{id: 1, title: replacedTitle, summaryJson: JSON.stringify({
+                title: replacedTitle, importSuccess: true, transientUpdateStage: 'replaced', updateSessionToken: 'identity-token',
+            })}]),
+            exec: vi.fn(),
+        });
+        await database._cleanupIncompleteImports();
+        expect(restore).toHaveBeenCalledWith(replacedTitle, originalTitle, expect.objectContaining({title: originalTitle}), null);
     });
 
     test('keeps dictionary metadata and requests reimport when a cold record shard is missing', async () => {
