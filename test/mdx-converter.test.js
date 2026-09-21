@@ -402,6 +402,7 @@ describe('convertMdxToArchive', () => {
             value: new TextEncoder().encode([
                 String.raw`.entry\:jp#hero\.dot .jump\+plus { color: red; }`,
                 String.raw`.\31 23 { font-weight: bold; }`,
+                String.raw`.comma\,name { text-decoration: underline; }`,
             ].join('\n')),
         }];
 
