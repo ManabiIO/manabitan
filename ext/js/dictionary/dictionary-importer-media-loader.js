@@ -42,11 +42,11 @@ export class DictionaryImporterMediaLoader {
      * @returns {Promise<import('dictionary-worker-media-loader').ImageDetails>}
      */
     _getImageDetailsWithImage(content, mediaType, transfer) {
-        const blob = new Blob([content], {type: mediaType});
-        const url = URL.createObjectURL(blob);
         return new Promise((resolve, reject) => {
             const image = new Image();
             const eventListeners = new EventListenerCollection();
+            const blob = new Blob([content], {type: mediaType});
+            const url = URL.createObjectURL(blob);
             /** @type {?import('core').Timeout} */
             let timeout = null;
             const cleanup = () => {
@@ -54,25 +54,35 @@ export class DictionaryImporterMediaLoader {
                     clearTimeout(timeout);
                     timeout = null;
                 }
+                eventListeners.removeAllEventListeners();
                 image.removeAttribute('src');
                 URL.revokeObjectURL(url);
-                eventListeners.removeAllEventListeners();
             };
-            eventListeners.addEventListener(image, 'load', () => {
-                const {naturalWidth: width, naturalHeight: height} = image;
-                if (Array.isArray(transfer)) { transfer.push(content); }
+            try {
+                eventListeners.addEventListener(image, 'load', () => {
+                    try {
+                        const {naturalWidth: width, naturalHeight: height} = image;
+                        if (Array.isArray(transfer)) { transfer.push(content); }
+                        resolve({content, width, height});
+                    } catch (error) {
+                        reject(error);
+                    } finally {
+                        cleanup();
+                    }
+                }, false);
+                eventListeners.addEventListener(image, 'error', () => {
+                    cleanup();
+                    reject(new Error('Image failed to load'));
+                }, false);
+                timeout = setTimeout(() => {
+                    cleanup();
+                    reject(new Error(`Timed out loading image metadata after ${String(imageDetailsLoadTimeoutMs)}ms`));
+                }, imageDetailsLoadTimeoutMs);
+                image.src = url;
+            } catch (error) {
                 cleanup();
-                resolve({content, width, height});
-            }, false);
-            eventListeners.addEventListener(image, 'error', () => {
-                cleanup();
-                reject(new Error('Image failed to load'));
-            }, false);
-            timeout = setTimeout(() => {
-                cleanup();
-                reject(new Error(`Timed out loading image metadata after ${String(imageDetailsLoadTimeoutMs)}ms`));
-            }, imageDetailsLoadTimeoutMs);
-            image.src = url;
+                reject(error);
+            }
         });
     }
 
@@ -84,13 +94,34 @@ export class DictionaryImporterMediaLoader {
      */
     async _getImageDetailsWithImageBitmap(content, mediaType, transfer) {
         const blob = new Blob([content], {type: mediaType});
-        const image = await createImageBitmap(blob);
+        const bitmapPromise = createImageBitmap(blob);
+        let expired = false;
+        /** @type {?import('core').Timeout} */
+        let timeout = null;
+        /** @type {Promise<never>} */
+        const timeoutPromise = new Promise((_resolve, reject) => {
+            timeout = setTimeout(() => {
+                expired = true;
+                reject(new Error(`Timed out loading image metadata after ${String(imageDetailsLoadTimeoutMs)}ms`));
+            }, imageDetailsLoadTimeoutMs);
+        });
+        // Decoding cannot be cancelled. Keep observing it after a timeout so
+        // a late bitmap is closed and a late rejection remains handled.
+        const observedBitmapPromise = bitmapPromise.then((image) => {
+            if (expired) { image.close(); }
+            return image;
+        });
         try {
-            const {width, height} = image;
-            if (Array.isArray(transfer)) { transfer.push(content); }
-            return {content, width, height};
+            const image = await Promise.race([observedBitmapPromise, timeoutPromise]);
+            try {
+                const {width, height} = image;
+                if (Array.isArray(transfer)) { transfer.push(content); }
+                return {content, width, height};
+            } finally {
+                image.close();
+            }
         } finally {
-            image.close();
+            if (timeout !== null) { clearTimeout(timeout); }
         }
     }
 }
