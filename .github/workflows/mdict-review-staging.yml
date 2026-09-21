@@ -8,7 +8,7 @@ concurrency:
   group: mdict-reviewed-patch-staging
   cancel-in-progress: false
 jobs:
-  integrate-media-correction:
+  combine-reviewed-stacks:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -17,42 +17,46 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: 70be7a17d51f3b276419a8ac3d46aa6ec263f83e
+          ref: 7d5a0918a1c86ca05f85e2d79b8f318c716b4b9b
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
       - run: npm ci && npm run build:libs
-      - name: Qualify each exact PR composition before publishing new staging refs
+      - name: Qualify CSS isolation with the complete redirect and lookup stack
         run: |
           git config user.name 'MDict review'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          mkdir -p /tmp/mdict-integration-results
-          stage() {
-            local id="$1" old="$2" parent="$3"
-            git checkout -B "work-$id" "$old"
-            git merge --no-edit "$parent"
-            git diff --check "$old" HEAD
-            node --test --test-reporter=tap test/util/mdict-*-cases.js test/util/search-refresh-cases.js > "/tmp/mdict-integration-results/$id-native.tap"
-            node test/fixtures/term-row-materialization/check.mjs "/tmp/mdict-integration-results/$id-materialization.json" > "/tmp/mdict-integration-results/$id-materialization.log"
-            git push origin "HEAD:refs/heads/review/mdict-$id-media-20260921"
-            git rev-parse HEAD > "/tmp/mdict-integration-results/$id.sha"
-          }
-          stage pr119 e32cd9346855d54fdf2c205893ec6bb51103cb86 70be7a17d51f3b276419a8ac3d46aa6ec263f83e
-          stage pr120 811a85b21163d019ff36d28aa2f0602888f8d017 work-pr119
-          stage pr124 3724113b61c1dd2936da5b73f646d813ada18b1f work-pr120
-          stage pr121 709586ba9d8cb43de1bc74e5fc27bbd5a96187de 70be7a17d51f3b276419a8ac3d46aa6ec263f83e
-          stage pr126 22f00beb8d5118654cf023cee18facc6b3d2d218 work-pr121
-      - name: Preserve the final composition source
+          mkdir -p /tmp/mdict-combined-results
+          git merge --no-edit e71319260b5257813cb9622de5c5e329038c08e3
+          git diff --check HEAD~1 HEAD
+          node --test --test-reporter=tap test/util/mdict-*-cases.js test/util/search-refresh-cases.js > /tmp/mdict-combined-results/pr121-native.tap
+          node test/fixtures/term-row-materialization/check.mjs /tmp/mdict-combined-results/pr121-materialization.json > /tmp/mdict-combined-results/pr121-materialization.log
+          git push origin HEAD:refs/heads/review/mdict-pr121-combined-20260921
+          git rev-parse HEAD > /tmp/mdict-combined-results/pr121.sha
+      - name: Qualify the literal-selector follow-up on the combined parent
+        run: |
+          parent="$(cat /tmp/mdict-combined-results/pr121.sha)"
+          git checkout d99a78a0af63c250670533755df562280138af0c
+          git merge --no-edit "$parent"
+          git diff --check HEAD~1 HEAD
+          node --test --test-reporter=tap test/util/mdict-*-cases.js test/util/search-refresh-cases.js > /tmp/mdict-combined-results/pr126-native.tap
+          node test/fixtures/term-row-materialization/check.mjs /tmp/mdict-combined-results/pr126-materialization.json > /tmp/mdict-combined-results/pr126-materialization.log
+          git push origin HEAD:refs/heads/review/mdict-pr126-combined-20260921
+          git rev-parse HEAD > /tmp/mdict-combined-results/pr126.sha
+      - name: Preserve source, results and any integration conflict
         if: always()
         run: |
-          mkdir -p /tmp/mdict-integration-results
-          git status --short > /tmp/mdict-integration-results/status.txt
-          git archive HEAD | gzip > /tmp/mdict-integration-results/source.tar.gz
+          mkdir -p /tmp/mdict-combined-results/working
+          git status --short > /tmp/mdict-combined-results/status.txt
+          git diff > /tmp/mdict-combined-results/working.diff
+          cp ext/js/dictionary/mdx/mdx-converter.js /tmp/mdict-combined-results/working/mdx-converter.js
+          cp test/util/mdict-native-cases.js /tmp/mdict-combined-results/working/mdict-native-cases.js
+          git archive HEAD | gzip > /tmp/mdict-combined-results/source.tar.gz
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mdict-media-integration-${{ github.run_id }}
-          path: /tmp/mdict-integration-results/
+          name: mdict-combined-review-${{ github.run_id }}
+          path: /tmp/mdict-combined-results/
           retention-days: 7
