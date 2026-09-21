@@ -1,0 +1,67 @@
+name: Prepare exact dictionary identity candidate
+on:
+  push:
+    branches: [codex/delivery-dictionary-identity-20260921]
+permissions:
+  contents: write
+jobs:
+  prepare:
+    if: github.repository == 'ManabiIO/manabitan'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      HUSKY: '0'
+      NO_COLOR: '1'
+      TARGET: fix/persisted-dictionary-name-identity-20260921
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - name: Generate reviewed patches on the pinned baseline
+        run: |
+          cp .codex-delivery/prepare-names.py "$RUNNER_TEMP/prepare-names.py"
+          git fetch origin e932c60d689b0af96ef357f76486091189c21f19
+          git checkout --detach e932c60d689b0af96ef357f76486091189c21f19
+          python "$RUNNER_TEMP/prepare-names.py"
+          git config user.name 'ManabiTan correctness preparation'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git apply --check "$RUNNER_TEMP/names-evidence/names-tests.patch"
+          git apply "$RUNNER_TEMP/names-evidence/names-tests.patch"
+          git add test/term-record-opfs-store.test.js test/dictionary-database-import-cleanup.test.js test/dictionary-worker-handler-cleanup.test.js test/dictionary-import-controller-update-profile.test.js
+          git commit -m 'test: reproduce dictionary identity loss across storage and update lifetimes'
+      - uses: ./.github/actions/setup
+      - name: Reproduce six storage identity failures before the fix
+        run: |
+          set +e
+          npx vitest run test/term-record-opfs-store.test.js -t 'exact dictionary identity' > "$RUNNER_TEMP/names-evidence/before.log" 2>&1
+          status=$?
+          set -e
+          cat "$RUNNER_TEMP/names-evidence/before.log"
+          test "$status" -ne 0
+          grep -q '6 failed' "$RUNNER_TEMP/names-evidence/before.log"
+      - name: Apply and qualify exact identity repair
+        run: |
+          git apply --check "$RUNNER_TEMP/names-evidence/names-fix.patch"
+          git apply "$RUNNER_TEMP/names-evidence/names-fix.patch"
+          npx eslint ext/js/dictionary/term-record-opfs-store.js ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-worker-handler.js ext/js/pages/settings/dictionary-import-controller.js test/term-record-opfs-store.test.js test/dictionary-database-import-cleanup.test.js test/dictionary-worker-handler-cleanup.test.js test/dictionary-import-controller-update-profile.test.js 2>&1 | tee "$RUNNER_TEMP/names-evidence/lint.log"
+          npm run test:ts:main 2>&1 | tee "$RUNNER_TEMP/names-evidence/main-types.log"
+          npm run test:ts:test 2>&1 | tee "$RUNNER_TEMP/names-evidence/test-types.log"
+          npx vitest run test/term-record-opfs-store.test.js test/dictionary-database-import-cleanup.test.js test/dictionary-worker-handler-cleanup.test.js test/dictionary-import-controller-update-profile.test.js 2>&1 | tee "$RUNNER_TEMP/names-evidence/after.log"
+          git diff --check
+          git add ext/js/dictionary/term-record-opfs-store.js ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-worker-handler.js ext/js/pages/settings/dictionary-import-controller.js
+          git commit -m 'fix: retain exact persisted dictionary identity across loading and updates'
+      - name: Publish only the clean feature branch
+        run: |
+          if test -n "$(git ls-remote --heads origin "refs/heads/$TARGET")"; then
+            echo 'Target exists; refusing to overwrite concurrent work' >&2
+            exit 1
+          fi
+          git log -2 --format='%H %s' | tee "$RUNNER_TEMP/names-evidence/commits.txt"
+          git diff e932c60d689b0af96ef357f76486091189c21f19 HEAD > "$RUNNER_TEMP/names-evidence/published.patch"
+          git push origin "HEAD:refs/heads/$TARGET"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exact-dictionary-identity-preparation
+          path: ${{ runner.temp }}/names-evidence
+          retention-days: 14
