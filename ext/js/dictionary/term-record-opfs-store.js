@@ -3395,9 +3395,7 @@ export class TermRecordOpfsStore {
                         (
                             formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY &&
                             formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT &&
-
-                    formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE
-
+                            formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE
                         ) ||
                         recordFieldsEnd > content.byteLength
                     ) {
@@ -3738,9 +3736,7 @@ export class TermRecordOpfsStore {
                     (
                         formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY &&
                         formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT &&
-
-                formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE
-
+                        formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE
                     )
                 ) {
                     throw new TermRecordIntegrityError(`Authoritative chunk metadata is invalid: ${state.fileName}`);
