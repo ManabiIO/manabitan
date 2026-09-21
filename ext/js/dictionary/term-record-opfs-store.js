@@ -5315,7 +5315,17 @@ export class TermRecordOpfsStore {
         for (const [indexFileName, indexFileHandle] of fileHandlesByName) {
             if (!indexFileName.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`)) { continue; }
             const descriptorFileName = indexFileName.slice(0, -LOOKUP_INDEX_FILE_SUFFIX.length);
-            if (fileHandlesByName.has(descriptorFileName) || !this._isShardFileName(descriptorFileName)) { continue; }
+            if (!this._isShardFileName(descriptorFileName)) { continue; }
+            let descriptorFileHandle = fileHandlesByName.get(descriptorFileName) ?? null;
+            if (descriptorFileHandle !== null) {
+                try {
+                    if ((await descriptorFileHandle.getFile()).size > 0) { continue; }
+                } catch (_) {
+                    // Preserve the existing retryable behavior for a descriptor
+                    // whose current contents cannot be inspected.
+                    continue;
+                }
+            }
             const shardInfo = this._decodeShardInfoFromShardFileName(descriptorFileName);
             if (shardInfo === null) { continue; }
             try {
@@ -5331,7 +5341,7 @@ export class TermRecordOpfsStore {
                 const generationId = new Uint8Array(header.subarray(24, LOOKUP_INDEX_FILE_HEADER_BYTES));
                 const descriptor = this._createBinaryHeader(shardInfo.contentDictName, generationId);
                 if (descriptor.byteLength !== expectedDescriptorLength) { continue; }
-                const descriptorFileHandle = await this._recordsDirectoryHandle.getFileHandle(descriptorFileName, {create: true});
+                descriptorFileHandle ??= await this._recordsDirectoryHandle.getFileHandle(descriptorFileName, {create: true});
                 const writable = await descriptorFileHandle.createWritable();
                 try {
                     await writable.truncate(0);
