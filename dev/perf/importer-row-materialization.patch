@@ -47,7 +47,7 @@ diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictio
                              }
                              /** @type {import('dictionary-database').DatabaseTermEntry} */
                              const entry = {
-@@ -3938,8 +3936,13 @@
+@@ -3938,8 +3936,14 @@
                  const tMaterializationStart = Date.now();
                  for (let i = 0, ii = decodedRows.length; i < ii; ++i) {
                      const row = decodedRows[i];
@@ -58,12 +58,13 @@ diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictio
 +                        decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.expressionBytes);
 +                    const reading = row.reading.length > 0 ?
 +                        row.reading :
-+                        (row.readingEqualsExpression === true ? expression :
++                        (row.readingEqualsExpression === true ?
++                            expression :
 +                            (decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.readingBytes) || expression));
                      const hasPrecomputedTermContent = hasPrecomputedTermEntryContent(row);
                      let usePrecomputedTermContent = false;
                      const useLeanTermEntryObject = (
-@@ -4062,6 +4065,7 @@
+@@ -4062,6 +4066,7 @@
                              null,
                          );
                      }

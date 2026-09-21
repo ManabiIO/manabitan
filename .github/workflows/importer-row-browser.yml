@@ -1,0 +1,102 @@
+name: Importer row browser qualification
+
+on:
+  push:
+    branches: [review/importer-row-materialization-20260920]
+    paths:
+      - '.github/workflows/importer-row-browser.yml'
+      - 'dev/perf/importer-row-materialization.patch'
+
+permissions:
+  contents: read
+
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - run: npx playwright install --with-deps chromium
+      - name: Apply exact repair and stage isolated extension fixture
+        run: |
+          git apply --check dev/perf/importer-row-materialization.patch
+          git apply dev/perf/importer-row-materialization.patch
+          cp test/fixtures/term-row-materialization/cases.mjs ext/row-cases.mjs
+          mkdir -p builds/row-browser
+          sha256sum ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-wasm-parser.js ext/lib/term-bank-parser.wasm > builds/row-browser/production.sha256
+      - name: Run actual extension modules and ZIP reads in Chromium
+        run: |
+          cat > builds/row-browser/run.mjs <<'JS'
+          import {chromium} from '@playwright/test'
+          import {writeFile} from 'node:fs/promises'
+          import path from 'node:path'
+          import {ManifestUtil} from '../../dev/manifest-util.js'
+          const root = process.cwd()
+          const ext = path.join(root, 'ext')
+          const manifest = new ManifestUtil().getManifest('chrome-playwright')
+          await writeFile(path.join(ext, 'manifest.json'), ManifestUtil.createManifestString(manifest).replace('$YOMITAN_VERSION', '0.0.0.0'))
+          const context = await chromium.launchPersistentContext('', {headless: true, args: [`--disable-extensions-except=${ext}`, `--load-extension=${ext}`]})
+          try {
+              const worker = context.serviceWorkers()[0] ?? await context.waitForEvent('serviceworker', {timeout: 45000})
+              const extensionId = new URL(worker.url()).host
+              const page = await context.newPage()
+              await page.goto(`chrome-extension://${extensionId}/settings.html`)
+              const report = await page.evaluate(async () => {
+                  const parser = await import(chrome.runtime.getURL('js/dictionary/term-bank-wasm-parser.js'))
+                  const {DictionaryImporter} = await import(chrome.runtime.getURL('js/dictionary/dictionary-importer.js'))
+                  const lookup = await import(chrome.runtime.getURL('js/dictionary/term-lookup-index.js'))
+                  const {createCases} = await import(chrome.runtime.getURL('row-cases.mjs'))
+                  const zip = await import(chrome.runtime.getURL('lib/zip.js'))
+                  const results = []
+                  const unhandled = []
+                  const onUnhandled = (event) => { unhandled.push(String(event.reason)); event.preventDefault() }
+                  addEventListener('unhandledrejection', onUnhandled)
+                  try {
+                      const wasmBytes = await (await fetch(chrome.runtime.getURL('lib/term-bank-parser.wasm'))).arrayBuffer()
+                      parser.setTermBankWasmModule(await WebAssembly.compile(wasmBytes))
+                      for (const {name, run} of createCases(parser, DictionaryImporter, lookup)) {
+                          try { await run(); results.push({name, passed: true}) }
+                          catch (error) { results.push({name, passed: false, error: String(error)}) }
+                      }
+                      const bank = [['日本語', 'にほんご', '', '', 1, ['definition'], 1, ''], ['literal', '', '', '', 2, ['second'], 2, '']]
+                      const zipWriter = new zip.ZipWriter(new zip.Uint8ArrayWriter(), {level: 0, useWebWorkers: false})
+                      await zipWriter.add('term_bank_1.json', new zip.Uint8ArrayReader(new TextEncoder().encode(JSON.stringify(bank))))
+                      const zipBytes = await zipWriter.close()
+                      for (const mode of ['baseline', 'raw-bytes']) {
+                          const name = `actual stored ZIP read with ${mode} row projection`
+                          const reader = new zip.ZipReader(new zip.Uint8ArrayReader(zipBytes), {useWebWorkers: false})
+                          try {
+                              const [entry] = await reader.getEntries()
+                              const importer = new DictionaryImporter({})
+                              importer._zipUseWebWorkers = false
+                              const {termList} = await importer._readTermBankFile(entry, 3, 'zip-fixture', true, false, true, mode)
+                              const actual = termList.map((row) => [row.expression, row.reading, row.expressionReverse, JSON.parse(row.glossaryJson)])
+                              const expected = bank.map((row) => [row[0], row[1] || row[0], [...row[0]].reverse().join(''), row[5]])
+                              if (JSON.stringify(actual) !== JSON.stringify(expected)) { throw new Error(`ZIP rows differ: ${JSON.stringify(actual)}`) }
+                              if (importer._lastFastTermBankReadProfile === null) { throw new Error('Unexpected JavaScript parser fallback') }
+                              results.push({name, passed: true})
+                          } catch (error) { results.push({name, passed: false, error: String(error)}) }
+                          finally { await reader.close() }
+                      }
+                      await new Promise((resolve) => setTimeout(resolve, 0))
+                      return {userAgent: navigator.userAgent, sharedConstructor: typeof SharedArrayBuffer, crossOriginIsolated, passed: results.filter((r) => r.passed).length, failed: results.filter((r) => !r.passed).length, unhandled, results}
+                  } finally { removeEventListener('unhandledrejection', onUnhandled) }
+              })
+              await writeFile('builds/row-browser/result.json', JSON.stringify(report, null, 2) + '\n')
+              console.log(JSON.stringify(report, null, 2))
+              if (report.failed || report.unhandled.length || report.passed !== 48) { process.exitCode = 1 }
+          } finally { await context.close() }
+          JS
+          node builds/row-browser/run.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: importer-row-browser-qualification
+          path: builds/row-browser/
+          if-no-files-found: error
+          retention-days: 14
