@@ -525,14 +525,17 @@ export function decodeRawTermContentTokenBinary(bytes, textDecoder) {
  */
 function decodeRawTermString(bytes, offset, length, textDecoder) {
     const value = textDecoder.decode(bytes.subarray(offset, offset + length));
-    return (
+    if (
         length >= 3 &&
         bytes[offset] === 0xef &&
         bytes[offset + 1] === 0xbb &&
         bytes[offset + 2] === 0xbf &&
         textDecoder.encoding === 'utf-8' &&
         !textDecoder.ignoreBOM
-    ) ? `\ufeff${value}` : value;
+    ) {
+        return `\ufeff${value}`;
+    }
+    return value;
 }
 
 /**
