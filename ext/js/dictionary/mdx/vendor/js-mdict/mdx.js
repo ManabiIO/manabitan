@@ -50,8 +50,9 @@ export class MDX extends Mdict {
      */
     prefix(prefix) {
         const keywordList = this.associate(prefix);
+        const normalizedPrefix = this.strip(prefix);
         return keywordList.filter(item => {
-            return item.keyText.startsWith(prefix);
+            return this.strip(item.keyText).startsWith(normalizedPrefix);
         });
     }
     /**
