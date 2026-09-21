@@ -223,12 +223,22 @@ describe('native parser controls and key metadata', () => {
         });
     }
 
-    for (const version of ['1.2garbage', '2.0beta', '2.0.1', '', 'NaN']) {
+    for (const version of ['1.2garbage', '2.0beta', '2..0', '', 'NaN']) {
         test(`malformed generated engine version ${JSON.stringify(version)} is rejected`, () => {
             const fixture = makeMdictFixture([{key: 'entry', value: 'definition'}], {version});
             assert.throws(() => new MDX('invalid-version.mdx', fixture.bytes), /engine version/iu);
         });
     }
+
+    test('numeric patch engine versions retain the v2 binary layout', () => {
+        const fixture = makeMdictFixture([{key: 'entry', value: 'definition'}], {version: '2.0.1'});
+        const mdx = new MDX('patch-version.mdx', fixture.bytes);
+        try {
+            assert.equal(mdx.lookup('entry').definition, 'definition\0');
+        } finally {
+            mdx.close();
+        }
+    });
 
     for (const requiredVersion of ['3.0', '4', 'bogus']) {
         test(`unsupported required engine version ${JSON.stringify(requiredVersion)} is rejected`, () => {
