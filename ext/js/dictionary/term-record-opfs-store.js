@@ -2952,6 +2952,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @returns {Promise<void>}
+     * @throws {Error} If existing record IDs cannot be established from every authoritative container.
      */
     async _ensureNextIdReadyForAppend() {
         if (!this._nextIdMayNeedShardScan || this._recordsDirectoryHandle === null) {
@@ -2959,23 +2960,29 @@ export class TermRecordOpfsStore {
         }
         let maxId = this._nextId - 1;
         for (const state of this._shardStateByFileName.values()) {
+            const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
             let fileHandle;
             try {
-                fileHandle = await this._recordsDirectoryHandle.getFileHandle(
-                    `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
-                    {create: false},
-                );
-            } catch (_) {
-                continue;
+                fileHandle = await this._recordsDirectoryHandle.getFileHandle(indexFileName, {create: false});
+            } catch (error) {
+                // An empty descriptor left by cleanup has no IDs to reserve.
+                // Any other unreadable/missing container leaves the maximum unknown.
+                if (state.fileLength === 0 && isStorageEntryNotFoundError(error)) {
+                    continue;
+                }
+                throw new Error(`Cannot reserve term-record IDs: cannot open ${indexFileName}`, {cause: error});
             }
             const file = await fileHandle.getFile();
-            if (file.size <= 0) { continue; }
+            if (file.size === 0 && state.fileLength === 0) { continue; }
             const content = new Uint8Array(await file.arrayBuffer());
             const shardMaxId = this._scanPersistentIndexMaxRecordId(content);
-            if (typeof shardMaxId === 'number' && shardMaxId > maxId) {
-                maxId = shardMaxId;
+            if (shardMaxId === null) {
+                throw new Error(`Cannot reserve term-record IDs: invalid container ${indexFileName}`);
             }
+            maxId = Math.max(maxId, shardMaxId);
         }
+        // Publish only after every authoritative shard has been inspected.
+        // A failed scan remains retryable and must not consume an ID.
         this._nextId = Math.max(this._nextId, maxId + 1);
         this._nextIdMayNeedShardScan = false;
     }
@@ -2993,6 +3000,7 @@ export class TermRecordOpfsStore {
         const chunkCount = view.getUint32(16, true);
         let cursor = LOOKUP_INDEX_FILE_HEADER_BYTES;
         let maxId = 0;
+        let recordCount = 0;
         for (let chunk = 0; chunk < chunkCount; ++chunk) {
             if ((cursor + LOOKUP_INDEX_CHUNK_HEADER_BYTES) > content.byteLength) { return null; }
             const firstId = view.getUint32(cursor, true);
@@ -3001,6 +3009,7 @@ export class TermRecordOpfsStore {
             const recordFieldsFormat = view.getUint32(cursor + 36, true);
             if (firstId <= 0 || count === 0 || (firstId + count - 1) > 0xffffffff) { return null; }
             maxId = Math.max(maxId, firstId + count - 1);
+            recordCount += count;
             const recordFieldsOffset = cursor + LOOKUP_INDEX_CHUNK_HEADER_BYTES + payloadLength;
             let recordFieldsLength;
             try {
@@ -3011,7 +3020,7 @@ export class TermRecordOpfsStore {
             cursor = recordFieldsOffset + recordFieldsLength;
             if (cursor > content.byteLength) { return null; }
         }
-        return cursor === content.byteLength && maxId > 0 ? maxId : null;
+        return cursor === content.byteLength && maxId > 0 && recordCount === view.getUint32(20, true) ? maxId : null;
     }
 
     /**
@@ -4244,7 +4253,8 @@ export class TermRecordOpfsStore {
         }
         await this.ensureDictionariesLoaded(dictionaryNames);
         this._allShardContentsLoaded = dictionaryNames.every((name) => this._hasCompleteDictionaryLookupState(name));
-        if (this._allShardContentsLoaded) { this._nextIdMayNeedShardScan = false; }
+        // Lookup readiness does not reserve IDs: lazy chunks need not have materialized records.
+        // Keep the allocator scan pending until it has inspected every authoritative container.
     }
 
     /**
