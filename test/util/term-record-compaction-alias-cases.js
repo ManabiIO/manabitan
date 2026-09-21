@@ -32,10 +32,12 @@ export function registerCompactionAliasCases(test, api) {
          * @param {Uint32Array} scratch
          * @param {boolean[]|Uint8Array} [equal]
          * @param {number} [count]
+         * @returns {Plan|Plan[]|null}
          */
-        const compact = (plan, scratch, equal = [false, false, false], count = 2) => runs ?
-            api.compactTermRecordPreinternedPlanRuns(plan, count, 1, scratch, equal) :
-            api.compactTermRecordPreinternedPlan(plan, 0, count, scratch, equal)
+        const compact = (plan, scratch, equal = [false, false, false], count = 2) => {
+            if (runs) { return api.compactTermRecordPreinternedPlanRuns(plan, count, 1, scratch, equal) }
+            return api.compactTermRecordPreinternedPlan(plan, 0, count, scratch, equal)
+        }
 
         for (const field of fields) {
             for (const at of [0, 8]) {
@@ -45,11 +47,17 @@ export function registerCompactionAliasCases(test, api) {
                     assert.ok(source)
                     const buffer = new ArrayBuffer(64)
                     new Uint8Array(buffer, at, source.byteLength).set(new Uint8Array(source.buffer, source.byteOffset, source.byteLength))
-                    const view = field === 'stringLengths' ? new Uint16Array(buffer, at, source.length) :
-                        field === 'stringsBuffer' ? new Uint8Array(buffer, at, source.length) : new Uint32Array(buffer, at, source.length)
+                    let view
+                    if (field === 'stringLengths') {
+                        view = new Uint16Array(buffer, at, source.length)
+                    } else if (field === 'stringsBuffer') {
+                        view = new Uint8Array(buffer, at, source.length)
+                    } else {
+                        view = new Uint32Array(buffer, at, source.length)
+                    }
                     Object.assign(plan, {[field]: view})
                     const before = structuredClone(plan)
-                    const bytesBefore = new Uint8Array(buffer).slice()
+                    const bytesBefore = Uint8Array.from(new Uint8Array(buffer))
                     assert.throws(() => compact(plan, new Uint32Array(buffer, 0, 3)), /scratch overlaps source storage/)
                     assert.deepEqual(plan, before)
                     assert.deepEqual(new Uint8Array(buffer), bytesBefore)
@@ -106,7 +114,7 @@ export function registerCompactionAliasCases(test, api) {
             const scratch = new Uint32Array(structuredClone(buffer))
             assert.notEqual(scratch.buffer, buffer)
             const expected = compact(plan, new Uint32Array(3))
-            const before = structuredClone(plan.expressionIndexes.slice())
+            const before = Uint32Array.from(plan.expressionIndexes)
             assert.deepEqual(compact(plan, scratch), expected)
             assert.deepEqual(plan.expressionIndexes, before)
             assert.deepEqual(scratch, new Uint32Array(3))
