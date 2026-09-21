@@ -58,6 +58,8 @@ const DEFAULT_REFERENCE_PACK_TARGET_BYTES = 4 * 1024 * 1024;
 const DEFAULT_MIN_INPUT_BYTES = 512 * 1024;
 const DEFAULT_MIN_SAVINGS_RATIO = 0.1;
 const DEFAULT_CACHE_MAX_BYTES = 48 * 1024 * 1024;
+const DEFAULT_MAX_CONCURRENT_BLOCK_READS = 4;
+const DEFAULT_MAX_IN_FLIGHT_BLOCK_BYTES = 16 * 1024 * 1024;
 const EARLY_SELECTION_MAX_SAMPLES = 32 * 1024;
 const EARLY_SELECTION_MAX_SPANS = 512;
 const EARLY_SELECTION_SAVINGS_MARGIN = 0.08;
@@ -213,9 +215,17 @@ export class ByteBoundedLruCache {
 export class TermContentBlockStore {
     /**
      * @param {import('./term-content-opfs-store.js').TermContentOpfsStore} contentStore
-     * @param {{blockTargetBytes?: number, referencePackTargetBytes?: number, minInputBytes?: number, minSavingsRatio?: number, cacheMaxBytes?: number}} [options]
+     * @param {{blockTargetBytes?: number, referencePackTargetBytes?: number, minInputBytes?: number, minSavingsRatio?: number, cacheMaxBytes?: number, maxConcurrentBlockReads?: number, maxInFlightBlockBytes?: number}} [options]
      */
     constructor(contentStore, options = {}) {
+        const maxConcurrentBlockReads = options.maxConcurrentBlockReads ?? DEFAULT_MAX_CONCURRENT_BLOCK_READS;
+        const maxInFlightBlockBytes = options.maxInFlightBlockBytes ?? DEFAULT_MAX_IN_FLIGHT_BLOCK_BYTES;
+        if (
+            !Number.isSafeInteger(maxConcurrentBlockReads) || maxConcurrentBlockReads <= 0 ||
+            !Number.isSafeInteger(maxInFlightBlockBytes) || maxInFlightBlockBytes <= 0
+        ) {
+            throw new RangeError('Term content read limits must be positive safe integers');
+        }
         /** @type {ReturnType<typeof snapshotTermBankExperiments>} */
         this._compressionExperiments = snapshotTermBankExperiments();
         /** @type {import('./term-content-opfs-store.js').TermContentOpfsStore} */
@@ -236,6 +246,16 @@ export class TermContentBlockStore {
         this._inFlightBlocks = new Map();
         /** @type {number} */
         this._cacheGeneration = 0;
+        /** @type {number} */
+        this._maxConcurrentBlockReads = maxConcurrentBlockReads;
+        /** @type {number} */
+        this._maxInFlightBlockBytes = maxInFlightBlockBytes;
+        /** @type {number} */
+        this._activeBlockReads = 0;
+        /** @type {number} */
+        this._activeBlockReadBytes = 0;
+        /** @type {Array<{bytes: number, generation: number, resolve: () => void, reject: (error: Error) => void}>} */
+        this._pendingBlockReads = [];
         /** @type {Record<string, unknown>|null} */
         this._lastError = null;
     }
@@ -251,6 +271,9 @@ export class TermContentBlockStore {
         this._cache.clear();
         // Old readers retain their promises, but new readers must not join them.
         this._inFlightBlocks.clear();
+        // Reject queued stale readers now, but keep active reservations until
+        // their uncancellable storage operations settle.
+        this._drainBlockReadQueue();
     }
 
     /**
@@ -280,6 +303,11 @@ export class TermContentBlockStore {
             cacheMaxBytes: this._cacheMaxBytes,
             blockTargetBytes: this._blockTargetBytes,
             inFlightBlocks: this._inFlightBlocks.size,
+            activeBlockReads: this._activeBlockReads,
+            activeBlockReadBytes: this._activeBlockReadBytes,
+            pendingBlockReads: this._pendingBlockReads.length,
+            maxConcurrentBlockReads: this._maxConcurrentBlockReads,
+            maxInFlightBlockBytes: this._maxInFlightBlockBytes,
             lastError: this._lastError === null ? null : {...this._lastError},
         };
     }
@@ -406,38 +434,48 @@ export class TermContentBlockStore {
             group.entries.push({index, reference});
         }
 
-        const groupList = [...groups.values()];
-        const groupSettled = await Promise.allSettled(groupList.map(async ({cacheKey, reference, compressionDictName, context}) => {
-            const cached = this._cache.get(cacheKey);
-            if (typeof cached !== 'undefined') { return cached; }
-            const block = await this._getOrLoadBlock(cacheKey, reference, compressionDictName, context);
-            if (block === null) {
-                throw new TermContentReadError('temporarilyUnavailable', 'Term content block could not be loaded');
+        // Tasks resolve without a block value: allSettled must not retain every
+        // decoded block until the slowest read finishes. Sparse groups own just
+        // their requested bytes; dense groups keep the existing zero-copy views.
+        await Promise.allSettled([...groups.values()].map(async (group) => {
+            try {
+                this._assertReadGeneration(generation);
+                const {cacheKey, reference, compressionDictName, context, entries} = group;
+                const block = this._cache.get(cacheKey) ??
+                await this._getOrLoadBlock(cacheKey, reference, compressionDictName, context);
+                this._assertReadGeneration(generation);
+                if (block === null) {
+                    throw new TermContentReadError('temporarilyUnavailable', 'Term content block could not be loaded');
+                }
+                let requestedBytes = 0;
+                for (const {index, reference: entry} of entries) {
+                    if (entry.entryOffset + entry.entryLength > block.byteLength) {
+                        this._recordEntryBoundsError(requests[index], entry, block.byteLength);
+                        results[index] = {status: 'corrupt', reason: 'Term content block entry is outside the decoded block'};
+                    } else {
+                        requestedBytes += entry.entryLength;
+                    }
+                }
+                const packed = requestedBytes < block.byteLength / 2 ? new Uint8Array(requestedBytes) : null;
+                let cursor = 0;
+                for (const {index, reference: entry} of entries) {
+                    if (typeof results[index] !== 'undefined') { continue; }
+                    const bytes = block.subarray(entry.entryOffset, entry.entryOffset + entry.entryLength);
+                    if (packed === null) {
+                        results[index] = {status: 'ok', bytes};
+                    } else {
+                        packed.set(bytes, cursor);
+                        results[index] = {status: 'ok', bytes: packed.subarray(cursor, cursor + bytes.byteLength)};
+                        cursor += bytes.byteLength;
+                    }
+                }
+            } catch (error) {
+                const failure = this._createReadFailure(error);
+                for (const {index} of group.entries) { results[index] = failure; }
             }
-            return block;
         }));
         if (generation !== this._cacheGeneration) {
             return requests.map(() => this._createInvalidatedReadFailure());
-        }
-        for (let i = 0; i < groupList.length; ++i) {
-            const group = groupList[i];
-            const settled = groupSettled[i];
-            if (settled.status === 'rejected') {
-                const failure = this._createReadFailure(settled.reason);
-                for (const {index} of group.entries) { results[index] = failure; }
-                continue;
-            }
-            const block = settled.value;
-            for (const {index, reference} of group.entries) {
-                const request = requests[index];
-                const entryEnd = reference.entryOffset + reference.entryLength;
-                if (entryEnd > block.byteLength) {
-                    this._recordEntryBoundsError(request, reference, block.byteLength);
-                    results[index] = {status: 'corrupt', reason: 'Term content block entry is outside the decoded block'};
-                    continue;
-                }
-                results[index] = {status: 'ok', bytes: block.subarray(reference.entryOffset, entryEnd)};
-            }
         }
         return results;
     }
@@ -568,6 +606,42 @@ export class TermContentBlockStore {
     }
 
     /**
+     * Reserve declared expanded bytes across every unique load in this store.
+     * This is not a total-memory limit: cache, result bytes and codec scratch
+     * are separate. An oversized block runs alone so it cannot deadlock.
+     * @param {number} bytes
+     * @param {number} generation
+     * @returns {Promise<void>}
+     */
+    _acquireBlockRead(bytes, generation) {
+        return new Promise((resolve, reject) => {
+            this._pendingBlockReads.push({bytes, generation, resolve, reject});
+            this._drainBlockReadQueue();
+        });
+    }
+
+    /** */
+    _drainBlockReadQueue() {
+        while (this._pendingBlockReads.length > 0) {
+            const next = this._pendingBlockReads[0];
+            if (next.generation !== this._cacheGeneration) {
+                this._pendingBlockReads.shift();
+                const {status, reason} = this._createInvalidatedReadFailure();
+                next.reject(new TermContentReadError(status, reason));
+                continue;
+            }
+            if (
+                this._activeBlockReads >= this._maxConcurrentBlockReads ||
+                (this._activeBlockReads > 0 && next.bytes > this._maxInFlightBlockBytes - this._activeBlockReadBytes)
+            ) { break; }
+            this._pendingBlockReads.shift();
+            ++this._activeBlockReads;
+            this._activeBlockReadBytes += next.bytes;
+            next.resolve();
+        }
+    }
+
+    /**
      * @param {string} cacheKey
      * @param {{blockOffset: number, blockCompressedLength: number, blockUncompressedLength: number}} reference
      * @param {string|null} compressionDictName
@@ -580,7 +654,20 @@ export class TermContentBlockStore {
             const block = await pending;
             return block !== null && block.byteLength === reference.blockUncompressedLength ? block : null;
         }
-        const load = this._loadBlock(cacheKey, reference, compressionDictName, context);
+        const generation = this._cacheGeneration;
+        const load = (async () => {
+            await this._acquireBlockRead(reference.blockUncompressedLength, generation);
+            try {
+                this._assertReadGeneration(generation);
+                const block = await this._loadBlock(cacheKey, reference, compressionDictName, context);
+                this._assertReadGeneration(generation);
+                return block;
+            } finally {
+                --this._activeBlockReads;
+                this._activeBlockReadBytes -= reference.blockUncompressedLength;
+                this._drainBlockReadQueue();
+            }
+        })();
         this._inFlightBlocks.set(cacheKey, load);
         try {
             return await load;
