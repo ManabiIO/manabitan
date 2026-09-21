@@ -2399,7 +2399,7 @@ export class Display extends EventDispatcher {
      */
     _onDatabaseUpdated({type}) {
         if (type !== 'dictionary') { return; }
-        this._dictionaryCssMediaResolver.clear();
+        this._dictionaryCssMediaResolver?.clear();
         if (this._options !== null) {
             this._setTheme(this._options);
         }
