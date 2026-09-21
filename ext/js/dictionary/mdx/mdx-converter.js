@@ -1166,15 +1166,27 @@ function splitInlineCssDeclarations(styleText) {
             }
             continue;
         }
-        if (character === '"' || character === "'") {
-            quote = character;
-        } else if (character === '(') {
-            parenDepth += 1;
-        } else if (character === ')') {
-            parenDepth = Math.max(0, parenDepth - 1);
-        } else if (character === ';' && parenDepth === 0) {
-            declarations.push(styleText.slice(startIndex, index));
-            startIndex = index + 1;
+        switch (character) {
+            case '"':
+            case "'": {
+                quote = character;
+                break;
+            }
+            case '(': {
+                parenDepth += 1;
+                break;
+            }
+            case ')': {
+                parenDepth = Math.max(0, parenDepth - 1);
+                break;
+            }
+            case ';': {
+                if (parenDepth === 0) {
+                    declarations.push(styleText.slice(startIndex, index));
+                    startIndex = index + 1;
+                }
+                break;
+            }
         }
     }
     declarations.push(styleText.slice(startIndex));
