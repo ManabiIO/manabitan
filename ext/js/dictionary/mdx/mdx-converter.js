@@ -609,16 +609,13 @@ function readCssEscape(value, startIndex) {
     if (hexMatch !== null) {
         endIndex += hexMatch[0].length;
         const codePoint = Number.parseInt(hexMatch[0], 16);
-        let decoded;
-        if (
+        const decoded = (
             codePoint === 0 ||
             codePoint > 0x10ffff ||
             (codePoint >= 0xd800 && codePoint <= 0xdfff)
-        ) {
-            decoded = '\ufffd';
-        } else {
-            decoded = String.fromCodePoint(codePoint);
-        }
+        ) ?
+            '\ufffd' :
+            String.fromCodePoint(codePoint);
         if (endIndex < value.length && /\s/u.test(value[endIndex])) {
             endIndex += 1;
         }
