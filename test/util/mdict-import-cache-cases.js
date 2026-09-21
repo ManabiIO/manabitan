@@ -28,7 +28,7 @@ test('dense MDX conversion decompresses each record block once', async () => {
     const expectedRecordBlocks = Math.ceil(recordBytes / recordBlockSize);
 
     let decompressions = 0;
-    Mdict.prototype.decompressBuff = function (
+    Mdict.prototype.decompressBuff = function decompressBuffWithCount(
         /** @type {Uint8Array} */ recordBuffer,
         /** @type {number} */ unpackSize,
     ) {
