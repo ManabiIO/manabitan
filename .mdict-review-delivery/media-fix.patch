@@ -1,0 +1,48 @@
+From 5fe20df20fb2dced37b83b46b68861e2d8aa4166 Mon Sep 17 00:00:00 2001
+From: MDict review <review@localhost>
+Date: Mon, 21 Sep 2026 16:09:01 +0000
+Subject: [PATCH] fix: defer native term serialization until media targets
+ resolve
+
+---
+ ext/js/dictionary/dictionary-importer.js | 19 +++++++++++++------
+ 1 file changed, 13 insertions(+), 6 deletions(-)
+
+diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictionary-importer.js
+index d0e3a94..905b736 100644
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -3941,4 +3941,5 @@ export class DictionaryImporter {
+                 for (let i = 0, ii = decodedRows.length; i < ii; ++i) {
+                     const row = decodedRows[i];
++                    const requirementStart = requirementsForChunk?.length ?? 0;
+                     const expression = row.expression.length > 0 ?
+                         row.expression :
+@@ -4048,15 +4049,21 @@ export class DictionaryImporter {
+                         }
+                         entry.termEntryContentBytes = row.termEntryContentBytes;
++                        if (!enableTermEntryContentDedup && requirementsForChunk !== null) {
++                            // Non-deduplicated writes also consume glossaryJson.
++                            // Preserve the parser's canonical glossary instead of
++                            // reconstructing it from an unmaterialized empty array.
++                            entry.glossaryJson = JSON.stringify(this._parseTermEntryContentFromFastRow(row, termFile.filename).glossary);
++                        }
+                     }
+-                    // Keep serialization canonical with the runtime deserializer.
+-                    // A conservative media hint may produce no requirements; preserve
+-                    // the formatted glossary even when no later media pass will run.
++                    // Media targets remain mutable until requirement resolution. Do
++                    // not cache placeholder paths/metadata as authoritative bytes.
++                    // Rows without new requirements can still serialize immediately,
++                    // including formatted glossaries with conservative media hints.
+                     if (
+                         requirementsForChunk === null ||
+                         (
+                             requirementsForChunk !== null &&
+-                            (
+-                                !hasPrecomputedTermEntryContent(entry)
+-                            )
++                            requirementsForChunk.length === requirementStart &&
++                            !hasPrecomputedTermEntryContent(entry)
+                         )
+                     ) {

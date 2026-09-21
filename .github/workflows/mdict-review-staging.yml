@@ -8,7 +8,7 @@ concurrency:
   group: mdict-reviewed-patch-staging
   cancel-in-progress: false
 jobs:
-  selector-refinement:
+  media-serialization:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -24,61 +24,43 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v6
         with:
-          ref: fbcdf2e8a4ef0c69a60b51b02f8702a6b0048727
+          ref: 0cbf216a69d66518759cc53d3810d70ca1b18501
           path: candidate
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: npm
           cache-dependency-path: candidate/package-lock.json
-      - name: Replay lint correction and separate selector-literal regressions
-        run: |
-          set -euo pipefail
-          git config user.name 'MDict review'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git am ../packet/.mdict-review-delivery/pr121-lint.patch
-          git push origin HEAD:refs/heads/review/mdict-pr121-lint-staged-20260921
-          git am ../packet/.mdict-review-delivery/selector-literals.patch
-          git diff --check HEAD~3 HEAD
       - name: Install and build dependencies
         run: npm ci && npm run build:libs
-      - name: Native regression qualification and staging publication
+      - name: Prove regression tests fail before applying the fix
         run: |
+          git config user.name 'MDict review'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git am ../packet/.mdict-review-delivery/media-tests.patch
           mkdir -p ../results
-          node --test --test-reporter=tap test/util/mdict-*-cases.js test/util/search-refresh-cases.js 2>&1 | tee ../results/native.tap
-          git push origin HEAD:refs/heads/fix/mdict-selector-literals-20260921
-      - name: JavaScript and TypeScript validation
+          if node test/fixtures/term-row-materialization/check.mjs ../results/before.json > ../results/before.log 2>&1; then
+            echo 'Expected the known media serialization regressions to fail'
+            exit 1
+          fi
+          node -e 'const r=require("../results/before.json"); if(r.failed!==24 || r.passed!==46) process.exit(1)'
+      - name: Apply correction and qualify the complete native materialization suite
+        run: |
+          git am ../packet/.mdict-review-delivery/media-fix.patch
+          git diff --check HEAD~2 HEAD
+          node test/fixtures/term-row-materialization/check.mjs ../results/after.json > ../results/after.log
+          node -e 'const r=require("../results/after.json"); if(r.failed!==0 || r.passed!==70) process.exit(1)'
+          git push origin HEAD:refs/heads/fix/native-media-serialization-20260921
+          git rev-parse HEAD > ../results/tested-head.sha
+      - name: JavaScript and TypeScript qualification
         run: |
           npm run test:js 2>&1 | tee ../results/javascript.log
           npm run test:ts 2>&1 | tee ../results/typescript.log
-      - name: Preserve tested source
-        if: always()
+      - name: Build static runtime and existing media fixture
+        if: success() || failure()
         run: |
-          mkdir -p ../results
-          git rev-parse HEAD > ../results/tested-head.sha
-          git archive HEAD | gzip > ../results/source.tar.gz
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: mdict-selector-refinement-${{ github.run_id }}
-          path: results/
-          retention-days: 7
-  media-diagnostic:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: e28119e9e49e16c72b6087e0a71cbf7dce54b22d
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - run: npm ci && npm run build:libs && node web/build.mjs
-      - name: Prepare the existing local media fixture without downloading dictionaries
-        shell: bash
-        run: |
+          node web/build.mjs
           python3 - <<'PY'
           import pathlib, json, zipfile, base64
           root = pathlib.Path('/tmp/mdict-media-probe')
@@ -87,8 +69,8 @@ jobs:
           exec(source[source.index('def write('):])
           PY
           npx playwright install --with-deps chromium
-      - name: Diagnose image-only rendering through the real importer, database and renderer
-        shell: bash
+      - name: Recheck real importer, SQLite and rendered image on the repaired source
+        if: success() || failure()
         env:
           DICTIONARY_FIXTURES: /tmp/mdict-media-probe
         run: |
@@ -101,11 +83,9 @@ jobs:
               await page.evaluate(() => openRuntime());
               await importFile('web-media.zip');
               await page.evaluate(() => find('画像検査'));
-              console.log('MEDIA_DIAGNOSTIC', JSON.stringify(await page.evaluate(async () => {
-                  const data = await runtime.media('Web Media', 'pixel.png');
-                  return {html: document.querySelector('#result').innerHTML, media: data && {type: data.mediaType, length: data.content.byteLength, firstBytes: Array.from(new Uint8Array(data.content).slice(0, 24))}};
-              })));
+              await expect(page.locator('#result .gloss-image')).toHaveCount(1);
               await expect.poll(() => page.locator('#result .gloss-image').evaluate(el => el.complete && el.naturalWidth > 0)).toBe(true);
+              console.log('MEDIA_REPAIRED', await page.locator('#result').innerHTML());
           } catch (error) {
               console.log('MEDIA_FAILURE', String(error));
               console.log('MEDIA_DOM', await page.locator('#result').innerHTML());
@@ -119,13 +99,17 @@ jobs:
           '''
           Path('web/media-review-probe.mjs').write_text(prefix + suffix)
           PY
-          set -o pipefail
-          node web/media-review-probe.mjs 2>&1 | tee media-probe.log
+          node web/media-review-probe.mjs 2>&1 | tee ../results/media-probe.log
+      - name: Preserve source and results
+        if: always()
+        run: |
+          mkdir -p ../results
+          git rev-parse HEAD > ../results/tested-head.sha
+          git archive HEAD | gzip > ../results/source.tar.gz
+          tar -czf ../results/built-libs.tar.gz ext/lib
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mdict-media-diagnostic-${{ github.run_id }}
-          path: |
-            media-probe.log
-            builds/web-evidence/
+          name: native-media-serialization-${{ github.run_id }}
+          path: results/
           retention-days: 7
