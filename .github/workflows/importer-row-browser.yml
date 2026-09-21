@@ -40,7 +40,7 @@ jobs:
           const ext = path.join(root, 'ext')
           const manifest = new ManifestUtil().getManifest('chrome-playwright')
           await writeFile(path.join(ext, 'manifest.json'), ManifestUtil.createManifestString(manifest).replace('$YOMITAN_VERSION', '0.0.0.0'))
-          const context = await chromium.launchPersistentContext('', {headless: true, args: [`--disable-extensions-except=${ext}`, `--load-extension=${ext}`]})
+          const context = await chromium.launchPersistentContext('', {channel: 'chromium', headless: true, args: [`--disable-extensions-except=${ext}`, `--load-extension=${ext}`]})
           try {
               const worker = context.serviceWorkers()[0] ?? await context.waitForEvent('serviceworker', {timeout: 45000})
               const extensionId = new URL(worker.url()).host
@@ -92,7 +92,8 @@ jobs:
               if (report.failed || report.unhandled.length || report.passed !== 48) { process.exitCode = 1 }
           } finally { await context.close() }
           JS
-          node builds/row-browser/run.mjs
+          set -o pipefail
+          node builds/row-browser/run.mjs 2>&1 | tee builds/row-browser/run.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
