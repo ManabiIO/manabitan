@@ -22,6 +22,49 @@ import {inflateSync} from 'node:zlib';
 import JSZip from 'jszip';
 import {describe, expect, test} from 'vitest';
 
+class NodeInflate {
+    /**
+     * @param {{chunkSize?: number}} [options]
+     */
+    constructor(options = {}) {
+        this._chunkSize = options.chunkSize ?? 16 * 1024;
+        /** @type {Uint8Array[]} */
+        this._input = [];
+        this.err = 0;
+        this.msg = '';
+        /** @type {(chunk: Uint8Array) => void} */
+        this.onData = () => {};
+    }
+
+    /**
+     * @param {Uint8Array} bytes
+     * @param {boolean} final
+     * @returns {boolean}
+     */
+    push(bytes, final) {
+        this._input.push(bytes);
+        if (!final) { return true; }
+        try {
+            const inputLength = this._input.reduce((sum, item) => sum + item.byteLength, 0);
+            const input = new Uint8Array(inputLength);
+            let offset = 0;
+            for (const item of this._input) {
+                input.set(item, offset);
+                offset += item.byteLength;
+            }
+            const output = new Uint8Array(inflateSync(input));
+            for (let index = 0; index < output.byteLength; index += this._chunkSize) {
+                this.onData(output.subarray(index, Math.min(output.byteLength, index + this._chunkSize)));
+            }
+            return true;
+        } catch (error) {
+            this.err = 1;
+            this.msg = error instanceof Error ? error.message : String(error);
+            return false;
+        }
+    }
+}
+
 Reflect.set(globalThis, 'pako', {
     /**
      * @param {Uint8Array} bytes
@@ -30,6 +73,7 @@ Reflect.set(globalThis, 'pako', {
     inflate(bytes) {
         return new Uint8Array(inflateSync(bytes));
     },
+    Inflate: NodeInflate,
 });
 
 const {convertMdxToArchive} = await import('../ext/js/dictionary/mdx/mdx-converter.js');

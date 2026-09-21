@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import {afterEach, test} from 'node:test';
 import {createMdxImportData} from '../../ext/js/dictionary/mdx/mdx-converter.js';
 import {Mdict} from '../../ext/js/dictionary/mdx/vendor/js-mdict/mdict.js';
+import {MDX} from '../../ext/js/dictionary/mdx/vendor/js-mdict/mdx.js';
 import {makeMdictFixture} from './mdict-binary-fixture.js';
 
 const originalDecompressBuff = Mdict.prototype.decompressBuff;
@@ -28,7 +29,7 @@ test('dense MDX conversion decompresses each record block once', async () => {
     const expectedRecordBlocks = Math.ceil(recordBytes / recordBlockSize);
 
     let decompressions = 0;
-    Mdict.prototype.decompressBuff = function (
+    Mdict.prototype.decompressBuff = function decompressBuffWithCount(
         /** @type {Uint8Array} */ recordBuffer,
         /** @type {number} */ unpackSize,
     ) {
@@ -41,4 +42,34 @@ test('dense MDX conversion decompresses each record block once', async () => {
     assert.ok(result.files.has('term_bank_1.json'));
     assert.equal(decompressions, expectedRecordBlocks);
     assert.ok(decompressions < entries.length / 4, 'conversion should reuse decompressed blocks across adjacent entries');
+});
+
+
+test('generic MDX reader keeps the record-block cache disabled by default', () => {
+    const fixture = makeMdictFixture([
+        {key: 'first', value: 'first definition'},
+        {key: 'second', value: 'second definition'},
+    ], {
+        recordBlockSize: 4096,
+        keysPerBlock: 2,
+        compression: 'zlib',
+    });
+
+    let decompressions = 0;
+    Mdict.prototype.decompressBuff = function decompressBuffWithCount(
+        /** @type {Uint8Array} */ recordBuffer,
+        /** @type {number} */ unpackSize,
+    ) {
+        ++decompressions;
+        return originalDecompressBuff.call(this, recordBuffer, unpackSize);
+    };
+
+    const dictionary = new MDX('generic-default-off.mdx', fixture.bytes);
+    try {
+        assert.equal(dictionary.fetch_definition(dictionary.keywordList[0]).definition, 'first definition\0');
+        assert.equal(dictionary.fetch_definition(dictionary.keywordList[1]).definition, 'second definition\0');
+        assert.equal(decompressions, 2, 'generic reads should not retain a decompressed record block by default');
+    } finally {
+        dictionary.close();
+    }
 });
