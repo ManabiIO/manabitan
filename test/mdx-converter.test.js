@@ -500,7 +500,10 @@ describe('convertMdxToArchive', () => {
         const suffix = new TextEncoder().encode(' { color: red; }');
         const stylesheet = Uint8Array.from([
             ...prefix,
-            0x93, 0xfa, 0x96, 0x7b,
+            0x93,
+            0xfa,
+            0x96,
+            0x7b,
             ...suffix,
         ]);
         mockState.mddFactory = () => [{keyText: 'styles/theme.css', value: stylesheet}];
