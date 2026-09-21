@@ -143,11 +143,14 @@ async function parse(data) {
             chunkSize,
             {...options, ...experiments, maxPendingChunks: 1, singleChunk: true, preloadedSource},
         );
-        if (resultChunk === null) {
+        const profile = consumeLastTermBankWasmParseProfile();
+        // A validated empty group emits no storage chunk. Keep that distinct
+        // from a missing result for a nonempty group; parsing and CRC checks
+        // above still run before this result is published.
+        if (resultChunk === null && profile?.rowCount !== 0) {
             throw new Error('Parallel term-bank parser did not emit a chunk');
         }
-        const stableResultChunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (resultChunk);
-        const profile = consumeLastTermBankWasmParseProfile();
+        const stableResultChunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */ (resultChunk);
         if (profile !== null) {
             profile.resultCopyMs = resultCopyMs;
             profile.sourceDeliveryMs = sourceDeliveryMs ?? 0;
@@ -160,7 +163,7 @@ async function parse(data) {
                 });
             }
         }
-        if (options.prepareLookupIndexes === true && !(stableResultChunk.preparedLookupIndexes instanceof Map)) {
+        if (stableResultChunk !== null && options.prepareLookupIndexes === true && !(stableResultChunk.preparedLookupIndexes instanceof Map)) {
             const prepared = prepareTermLookupIndexesFromPreinternedPlan(stableResultChunk, null, experiments);
             if (prepared !== null) {
                 stableResultChunk.preparedLookupIndexes = prepared.indexes;
@@ -175,7 +178,7 @@ async function parse(data) {
                 }
             }
         }
-        const transfer = collectChunkTransferables(stableResultChunk);
+        const transfer = stableResultChunk === null ? [] : collectChunkTransferables(stableResultChunk);
         self.postMessage({
             type: 'result',
             id,
