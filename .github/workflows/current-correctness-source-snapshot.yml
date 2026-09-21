@@ -1,0 +1,28 @@
+name: Current correctness source snapshot
+
+on:
+  push:
+    branches:
+      - review/correctness-current-snapshot-20260921
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Preserve exact source
+        run: |
+          mkdir -p builds/current-correctness-source
+          git rev-parse HEAD > builds/current-correctness-source/commit.txt
+          git archive --format=tar.gz --output=builds/current-correctness-source/source.tar.gz HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: current-correctness-source
+          path: builds/current-correctness-source/
+          retention-days: 7
+          if-no-files-found: error
