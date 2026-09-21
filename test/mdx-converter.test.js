@@ -1001,4 +1001,108 @@ describe('convertMdxToArchive', () => {
             href: '?query=%E3%81%8B%E3%81%AA%3F',
         }));
     });
+
+    test('decodes base64 data URLs when the media type is omitted', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Implicit data URL media type',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Embedded',
+                definition: '<div><img src="data:;base64,AP+A"><img src="data:;charset=utf-8;base64,SGk="></div>',
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'implicit-data-url-media-type.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const embeddedPaths = Object.keys(zip.files)
+            .filter((path) => path.startsWith('mdict-media/embedded/text/'))
+            .sort();
+
+        expect(embeddedPaths).toHaveLength(2);
+        expect(await zip.file(embeddedPaths[0])?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
+        expect(await zip.file(embeddedPaths[1])?.async('uint8array')).toStrictEqual(new TextEncoder().encode('Hi'));
+    });
+
+    test('decodes internal-link targets exactly once', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Encoded internal links',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Internal',
+                definition: [
+                    '<div>',
+                    '<a href="entry://literal%2520space">entry</a>',
+                    '<a href="bword://slash%252Fterm">bword</a>',
+                    '<a href="d:encoded%20space">d</a>',
+                    '<a href="x:literal%2525">x</a>',
+                    '</div>',
+                ].join(''),
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'encoded-internal-links.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<unknown>}}} */ (termBank[0][5][0]);
+        const rootEntry = /** @type {{content: Array<unknown>}} */ (glossary.content.content[0]);
+
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=literal%2520space'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=slash%252Fterm'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=encoded%20space'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=literal%2525'}));
+    });
+
+    test('keeps semicolons inside inline CSS values and rewrites URL functions case-insensitively', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Inline style values',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Styled',
+                definition: [
+                    '<div style="font-family: &quot;A;B&quot;; background-image: url(data:image/png;base64,AA==)">Data</div>',
+                    '<div style="background-image: URL(&quot;images/bg.png&quot;); /* note; fake: value */ color: rgb(1, 2, 3)">Asset</div>',
+                ].join(''),
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'images/bg.png', value: Uint8Array.of(1, 2, 3)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'inline-style-values.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'inline-style-values.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<{style?: Record<string, unknown>}>}}} */ (termBank[0][5][0]);
+        const [dataEntry, assetEntry] = glossary.content.content;
+
+        expect(dataEntry.style).toMatchObject({
+            fontFamily: '"A;B"',
+            background: 'url(data:image/png;base64,AA==)',
+        });
+        expect(assetEntry.style).toMatchObject({
+            background: 'url("mdict-media/images/bg.png")',
+            color: 'rgb(1, 2, 3)',
+        });
+        expect(await zip.file('mdict-media/images/bg.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
+    });
 });
