@@ -1596,8 +1596,11 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         /** @type {Set<string>} */
         const referencedAssetKeys = new Set();
         const redirectCaseSensitive = mdictCommon.isTrue(mdx.header.KeyCaseSensitive);
-        /** @type {(value: string) => string} */
-        const normalizeRedirectKey = redirectCaseSensitive ? (value) => value : (value) => value.toLowerCase();
+        /**
+         * @param {string} value
+         * @returns {string}
+         */
+        const normalizeRedirectKey = (value) => redirectCaseSensitive ? value : value.toLowerCase();
         /** @type {Map<string, Set<string>>} */
         const redirects = new Map();
         /** @type {Set<string>} */
@@ -1654,7 +1657,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             if (redirectDefinition.startsWith('@@@LINK=')) {
                 const target = trimNullSuffix(redirectDefinition.slice(8)).trim();
                 const targetKey = normalizeRedirectKey(target);
-                if (target.length > 0 && targetKey !== normalizeRedirectKey(term)) {
+                if (target.length > 0 && target !== term) {
                     const aliases = redirects.get(targetKey) ?? new Set();
                     if (!aliases.has(term)) {
                         aliases.add(term);
