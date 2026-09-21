@@ -43,17 +43,11 @@ describe('persistent term-record generation ownership', () => {
         const store = new TermRecordOpfsStore();
         Reflect.set(store, '_recordsDirectoryHandle', /** @type {FileSystemDirectoryHandle} */ ({}));
         const fileName = store._getShardSegmentFileName('Dictionary', 'raw', 0);
-        const state = {
+        const state = store._createShardState(
             fileName,
-            fileHandle: /** @type {FileSystemFileHandle} */ ({}),
-            fileLength: 1,
-            writable: null,
-            writeOffset: 0,
-            writeQueue: [],
-            queuedWriteBytes: 0,
-            queuedWritePromise: null,
-            queuedWriteError: null,
-        };
+            /** @type {FileSystemFileHandle} */ ({}),
+            1,
+        );
         Reflect.get(store, '_shardStateByFileName').set(fileName, state);
         const gate = barrier();
         vi.spyOn(store, '_rebuildLookupIndexForShard').mockImplementation(async () => {
