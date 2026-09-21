@@ -37,7 +37,9 @@ describe('raw term content block references', () => {
     });
 
     test('rejects a legacy reference whose compressed block end is not safely representable', () => {
-        const bytes = encodeRawTermContentBlockReference(Number.MAX_SAFE_INTEGER, 1, 2, 0, 1);
+        // Corrupt valid bytes so this exercises decoding, not encoder validation.
+        const bytes = encodeRawTermContentBlockReference(Number.MAX_SAFE_INTEGER - 1, 1, 2, 0, 1);
+        new DataView(bytes.buffer).setBigUint64(4, BigInt(Number.MAX_SAFE_INTEGER), true);
         expect(decodeRawTermContentBlockReference(bytes)).toBeNull();
     });
 
@@ -73,7 +75,8 @@ describe('raw term content block references', () => {
         malformed[0] = 0;
         expect(decodeRawTermContentBlockReference(malformed)).toBeNull();
 
-        const outOfBounds = encodeRawTermContentBlockReference(10, 20, 100, 80, 21);
+        const outOfBounds = encodeRawTermContentBlockReference(10, 20, 100, 80, 20);
+        new DataView(outOfBounds.buffer).setUint32(24, 21, true);
         expect(decodeRawTermContentBlockReference(outOfBounds)).toBeNull();
     });
 

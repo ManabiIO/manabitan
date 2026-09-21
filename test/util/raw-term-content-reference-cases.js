@@ -18,35 +18,52 @@ import {
 const u32 = 2 ** 32
 const max = Number.MAX_SAFE_INTEGER
 
-/** @param {number[]} fields */
+/**
+ * @param {number[]} fields
+ * @returns {Uint8Array}
+ */
 function encode(fields) {
     return encodeRawTermContentBlockReference(fields[0], fields[1], fields[2], fields[3], fields[4])
 }
 
-/** @param {number[]} fields */
+/**
+ * @param {number[]} fields
+ * @returns {Uint8Array}
+ */
 function encodeCompact(fields) {
     return encodeRawTermContentCompactBlockReference(fields[0], fields[1], fields[2], fields[3])
 }
 
-/** @param {number[]} fields */
+/**
+ * @param {number[]} fields
+ * @returns {{blockOffset: number, blockCompressedLength: number, blockUncompressedLength: number, entryOffset: number, entryLength: number}}
+ */
 function expected(fields) {
     const [blockOffset, blockCompressedLength, blockUncompressedLength, entryOffset, entryLength] = fields
     return {blockOffset, blockCompressedLength, blockUncompressedLength, entryOffset, entryLength}
 }
 
-/** @param {number[]} fields @param {number} [offset] @param {number} [viewLength] */
+/**
+ * @param {number[]} fields
+ * @param {number} [offset]
+ * @param {number} [viewLength]
+ */
 function rejectsWithoutWriting(fields, offset = 3, viewLength = 48) {
     const slab = new Uint8Array(72).fill(0xa5)
-    const before = slab.slice()
+    const before = Uint8Array.from(slab)
     const view = new DataView(slab.buffer, 7, viewLength)
     assert.throws(() => writeRawTermContentBlockReference(view, offset, fields[0], fields[1], fields[2], fields[3], fields[4]), RangeError)
     assert.deepEqual(slab, before, 'rejected legacy write changed the destination')
 }
 
-/** @param {number[]} fields @param {number} [offset] @param {number} [viewLength] */
+/**
+ * @param {number[]} fields
+ * @param {number} [offset]
+ * @param {number} [viewLength]
+ */
 function compactRejectsWithoutWriting(fields, offset = 3, viewLength = 48) {
     const slab = new Uint8Array(72).fill(0xa5)
-    const before = slab.slice()
+    const before = Uint8Array.from(slab)
     const view = new DataView(slab.buffer, 7, viewLength)
     assert.throws(() => writeRawTermContentCompactBlockReference(view, offset, fields[0], fields[1], fields[2], fields[3]), RangeError)
     assert.deepEqual(slab, before, 'rejected compact write changed the destination')
@@ -78,7 +95,7 @@ for (const [index, fields] of validFields.entries()) {
 }
 
 for (const column of [0, 1, 2, 3, 4]) {
-    for (const invalid of [-1, -0.5, 0.5, NaN, Infinity, -Infinity, max + 1]) {
+    for (const invalid of [-1, -0.5, 0.5, Number.NaN, Infinity, -Infinity, max + 1]) {
         test(`reject invalid value ${String(invalid)} in reference column ${column}`, () => {
             const fields = [10, 30, 100, 20, 40]
             fields[column] = invalid
@@ -142,7 +159,7 @@ test('reject an unsafe block end even when the block offset is safe', () => {
     compactRejectsWithoutWriting(fields)
 })
 
-for (const offset of [-1, -0.5, 0.5, NaN, Infinity, max + 1, 21, 48]) {
+for (const offset of [-1, -0.5, 0.5, Number.NaN, Infinity, max + 1, 21, 48]) {
     test(`reject invalid legacy destination ${String(offset)} without partial writes`, () => {
         rejectsWithoutWriting([10, 30, 100, 20, 40], offset)
     })
