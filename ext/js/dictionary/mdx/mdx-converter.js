@@ -596,6 +596,37 @@ function rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetRefe
 }
 
 /**
+ * @param {string} value
+ * @param {number} startIndex
+ * @returns {{value: string, endIndex: number}|null}
+ */
+function readCssEscape(value, startIndex) {
+    if (value[startIndex] !== '\\' || startIndex + 1 >= value.length) { return null; }
+    let endIndex = startIndex + 1;
+    if (/[\n\r\f]/u.test(value[endIndex])) { return null; }
+
+    const hexMatch = value.slice(endIndex).match(/^[\da-f]{1,6}/iu);
+    if (hexMatch !== null) {
+        endIndex += hexMatch[0].length;
+        const codePoint = Number.parseInt(hexMatch[0], 16);
+        const decoded = (
+            codePoint === 0 ||
+            codePoint > 0x10ffff ||
+            (codePoint >= 0xd800 && codePoint <= 0xdfff)
+        ) ?
+            '\ufffd' :
+            String.fromCodePoint(codePoint);
+        if (endIndex < value.length && /\s/u.test(value[endIndex])) {
+            endIndex += 1;
+        }
+        return {value: decoded, endIndex};
+    }
+
+    const decoded = value[endIndex];
+    return {value: decoded, endIndex: endIndex + decoded.length};
+}
+
+/**
  * @param {string} selectorText
  * @returns {string[]}
  */
@@ -614,6 +645,13 @@ function splitCssSelectorList(selectorText) {
                 quote = '';
             }
             continue;
+        }
+        if (character === '\\') {
+            const escape = readCssEscape(selectorText, index);
+            if (escape !== null) {
+                index = escape.endIndex - 1;
+                continue;
+            }
         }
         switch (character) {
             case '"':
@@ -672,6 +710,13 @@ function splitSelectorByCombinators(selector) {
             }
             continue;
         }
+        if (character === '\\') {
+            const escape = readCssEscape(selector, index);
+            if (escape !== null) {
+                index = escape.endIndex - 1;
+                continue;
+            }
+        }
         switch (character) {
             case '"':
             case "'": {
@@ -717,13 +762,57 @@ function splitSelectorByCombinators(selector) {
 }
 
 /**
+ * @param {string} value
+ * @returns {string}
+ */
+function escapeCssString(value) {
+    let result = '';
+    for (const character of value) {
+        const codePoint = character.codePointAt(0) ?? 0;
+        if (character === '"' || character === '\\') {
+            result += `\\${character}`;
+        } else if (codePoint === 0 || codePoint <= 0x1f || codePoint === 0x7f) {
+            result += `\\${codePoint.toString(16)} `;
+        } else {
+            result += character;
+        }
+    }
+    return result;
+}
+
+/**
  * @param {string} selector
  * @param {number} startIndex
  * @returns {{value: string|null, endIndex: number}}
  */
 function readCssIdentifier(selector, startIndex) {
-    const match = selector.slice(startIndex).match(/^-?(?:[A-Za-z_]|\p{L})(?:[A-Za-z0-9_-]|\p{L}|\p{N})*/u);
-    return match === null ? {value: null, endIndex: startIndex} : {value: match[0], endIndex: startIndex + match[0].length};
+    let index = startIndex;
+    let value = '';
+    let first = true;
+    while (index < selector.length) {
+        const character = selector[index];
+        if (character === '\\') {
+            const escape = readCssEscape(selector, index);
+            if (escape === null) { break; }
+            value += escape.value;
+            index = escape.endIndex;
+            first = false;
+            continue;
+        }
+        const codePoint = character.codePointAt(0) ?? 0;
+        const nonAscii = codePoint >= 0x80;
+        const allowed = first ?
+            character === '-' || character === '_' || /[A-Za-z]/u.test(character) || nonAscii :
+            character === '-' || character === '_' || /[A-Za-z0-9]/u.test(character) || nonAscii;
+        if (!allowed) { break; }
+        value += character;
+        index += character.length;
+        first = false;
+    }
+    if (value.length === 0 || value === '-') {
+        return {value: null, endIndex: startIndex};
+    }
+    return {value, endIndex: index};
 }
 
 /**
@@ -760,7 +849,7 @@ function migrateCssSelectorSegment(selector, glossaryRootSelector) {
         if (character === '.') {
             const {value, endIndex} = readCssIdentifier(selector, index + 1);
             if (value !== null) {
-                parts.push(`[${STRUCTURED_CLASS_ATTR}~="${value}"]`);
+                parts.push(`[${STRUCTURED_CLASS_ATTR}~="${escapeCssString(value)}"]`);
                 index = endIndex;
                 expectTagName = false;
                 continue;
@@ -769,7 +858,7 @@ function migrateCssSelectorSegment(selector, glossaryRootSelector) {
         if (character === '#') {
             const {value, endIndex} = readCssIdentifier(selector, index + 1);
             if (value !== null) {
-                parts.push(`[${STRUCTURED_ID_ATTR}="${value}"]`);
+                parts.push(`[${STRUCTURED_ID_ATTR}="${escapeCssString(value)}"]`);
                 index = endIndex;
                 expectTagName = false;
                 continue;

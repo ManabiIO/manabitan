@@ -454,6 +454,43 @@ describe('convertMdxToArchive', () => {
         expect(stylesCss).not.toContain('#hero');
     });
 
+    test('rewrites escaped CSS class and ID selectors to structured-content attributes', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Escaped CSS selector fixture', Description: ''},
+            entries: [{
+                keyText: 'Styled',
+                definition: '<div class="entry:jp 123 comma,name" id="hero.dot"><span class="jump+plus">Styled</span></div>',
+            }],
+        });
+        mockState.mddFactory = () => [{
+            keyText: 'styles/theme.css',
+            value: new TextEncoder().encode([
+                String.raw`.entry\:jp#hero\.dot .jump\+plus { color: red; }`,
+                String.raw`.\31 23 { font-weight: bold; }`,
+                String.raw`.comma\,name { text-decoration: underline; }`,
+            ].join('\n')),
+        }];
+
+        const result = await convertMdxToArchive(
+            'escaped-css-selector-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'escaped-css-selector-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const stylesCss = await zip.file('styles.css')?.async('text');
+
+        expect(stylesCss).toContain(
+            '[data-sc-class~="entry:jp"][data-sc-id="hero.dot"] [data-sc-class~="jump+plus"]',
+        );
+        expect(stylesCss).toContain('[data-sc-class~="123"]');
+        expect(stylesCss).toContain('[data-sc-class~="comma,name"]');
+        expect(stylesCss).not.toContain(String.raw`.entry\:jp`);
+        expect(stylesCss).not.toContain(String.raw`#hero\.dot`);
+        expect(stylesCss).not.toContain(String.raw`.jump\+plus`);
+        expect(stylesCss).not.toContain(String.raw`.comma\,name`);
+    });
+
     test('strips URL query and hash fragments before resolving MDD assets', async () => {
         /** @type {string[]} */
         const lookupKeys = [];
