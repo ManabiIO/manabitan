@@ -754,7 +754,8 @@ export class TermRecordOpfsStore {
         /** @type {TextEncoder} */
         this._textEncoder = new TextEncoder();
         /** @type {TextDecoder} */
-        this._textDecoder = new TextDecoder();
+        // These are length-delimited field characters, not a document BOM.
+        this._textDecoder = new TextDecoder('utf-8', {ignoreBOM: true});
         /** @type {Uint32Array} */
         this._preinternedCompactionRemap = new Uint32Array(0);
         /** @type {string[]} */
@@ -885,7 +886,7 @@ export class TermRecordOpfsStore {
      * @returns {{importSessionActive: boolean, reloadFromShardsAfterImport: boolean, persistentLookupGeneration: number, dictionaries: Array<Record<string, unknown>>}}
      */
     getDiagnostics(dictionaryNames = []) {
-        const names = [...new Set([...dictionaryNames].map((value) => `${value}`.trim()).filter((value) => value.length > 0))];
+        const names = [...new Set([...dictionaryNames].map((value) => `${value}`).filter((value) => value.length > 0))];
         const dictionaries = names.map((dictionaryName) => {
             const states = this._getDictionaryShardStates(dictionaryName);
             return {
@@ -2304,8 +2305,8 @@ export class TermRecordOpfsStore {
      * @throws {Error} If rollback cleanup or source reload fails.
      */
     async rollbackPreservedDictionaryRename(fromDictionaryName, toDictionaryName) {
-        const fromName = `${fromDictionaryName}`.trim();
-        const toName = `${toDictionaryName}`.trim();
+        const fromName = `${fromDictionaryName}`;
+        const toName = `${toDictionaryName}`;
         if (fromName.length === 0 || toName.length === 0 || fromName === toName) {
             throw new Error('Dictionary rename rollback titles must be distinct and non-empty');
         }
@@ -2339,8 +2340,8 @@ export class TermRecordOpfsStore {
      * @returns {Promise<number>}
      */
     async _replaceDictionaryName(fromDictionaryName, toDictionaryName, preserveSourceFiles) {
-        const fromName = `${fromDictionaryName}`.trim();
-        const toName = `${toDictionaryName}`.trim();
+        const fromName = `${fromDictionaryName}`;
+        const toName = `${toDictionaryName}`;
         if (fromName.length === 0 || toName.length === 0 || fromName === toName) {
             return 0;
         }
@@ -3131,7 +3132,7 @@ export class TermRecordOpfsStore {
         /** @type {Set<string>} */
         const pending = new Set();
         for (const dictionaryName of dictionaryNames) {
-            const name = `${dictionaryName}`.trim();
+            const name = `${dictionaryName}`;
             if (name.length === 0) { continue; }
             const existing = this._indexByDictionary.get(name);
             if (typeof existing === 'undefined') {
@@ -4207,9 +4208,10 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async ensureDictionariesLoaded(dictionaryNames) {
+        // Persisted names are identities; whitespace and U+FEFF are significant.
         if (this._recordsDirectoryHandle === null) {
             for (const value of dictionaryNames) {
-                const dictionaryName = `${value}`.trim();
+                const dictionaryName = `${value}`;
                 if (
                     dictionaryName.length > 0 &&
                     this.getDictionaryHealth(dictionaryName).status !== 'reimportRequired'
@@ -4227,7 +4229,7 @@ export class TermRecordOpfsStore {
         /** @type {Map<string, number>} */
         const pending = new Map();
         for (const dictionaryName of dictionaryNames) {
-            const name = `${dictionaryName}`.trim();
+            const name = `${dictionaryName}`;
             const healthStatus = this.getDictionaryHealth(name).status;
             if (
                 name.length === 0 ||

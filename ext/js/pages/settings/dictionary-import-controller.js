@@ -2481,7 +2481,7 @@ export class DictionaryImportController {
      * @returns {Promise<void>}
      */
     async _verifyImportedDictionaryVisible(dictionaryTitle, requireEnabledForActiveProfile) {
-        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle.trim() : '';
+        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle : '';
         if (normalizedTitle.length === 0) {
             throw new Error('Cannot verify imported dictionary visibility without a title');
         }
@@ -2988,16 +2988,16 @@ export class DictionaryImportController {
 
         const replacementDictionaryTitle = (
             typeof importDetails.replacementDictionaryTitle === 'string' &&
-            importDetails.replacementDictionaryTitle.trim().length > 0
+            importDetails.replacementDictionaryTitle.length > 0
         ) ?
-            importDetails.replacementDictionaryTitle.trim() :
+            importDetails.replacementDictionaryTitle :
             null;
         const sourceDictionaryTitle = (
             typeof result.sourceTitle === 'string' &&
-            result.sourceTitle.trim().length > 0
+            result.sourceTitle.length > 0
         ) ?
-            result.sourceTitle.trim() :
-            String(result.title || '').trim();
+            result.sourceTitle :
+            String(result.title || '');
         if (
             replacementDictionaryTitle !== null &&
             sourceDictionaryTitle.length > 0 &&
@@ -3279,15 +3279,15 @@ export class DictionaryImportController {
         const {title, sequenced, styles} = summary;
         const sourceTitle = (
             typeof summary.sourceTitle === 'string' &&
-            summary.sourceTitle.trim().length > 0
+            summary.sourceTitle.length > 0
         ) ?
-            summary.sourceTitle.trim() :
+            summary.sourceTitle :
             null;
         const replacedTitle = (
             typeof summary.replacedDictionaryTitle === 'string' &&
-            summary.replacedDictionaryTitle.trim().length > 0
+            summary.replacedDictionaryTitle.length > 0
         ) ?
-            summary.replacedDictionaryTitle.trim() :
+            summary.replacedDictionaryTitle :
             null;
         const selectorSourceTitle = sourceTitle ?? replacedTitle;
         let optionsFull;

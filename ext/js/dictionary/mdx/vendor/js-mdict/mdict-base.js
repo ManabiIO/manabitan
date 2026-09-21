@@ -243,7 +243,7 @@ class MDictBase {
             key = key.replace(common.REGEXP_STRIPKEY[this.meta.ext], '$1');
             key = key.replace(/_/g, '!');
         }
-        return key.toLowerCase().trim();
+        return key.trim();
     }
     comp(word1, word2) {
         return word1.localeCompare(word2);
@@ -324,10 +324,12 @@ class MDictBase {
     //   return result;
     // }
     _isKeyCaseSensitive() {
-        return this.options.isCaseSensitive || common.isTrue(this.header['isCaseSensitive']);
+        if (typeof this._isCaseSensitiveOverride === 'boolean') { return this._isCaseSensitiveOverride; }
+        return common.isTrue(this.header['KeyCaseSensitive']);
     }
     _isStripKey() {
-        return this.options.isStripKey || common.isTrue(this.header['StripKey']);
+        if (typeof this._isStripKeyOverride === 'boolean') { return this._isStripKeyOverride; }
+        return common.isTrue(this.header['StripKey']);
     }
     readDict() {
         // STEP1: read header
