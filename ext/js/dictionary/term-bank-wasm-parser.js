@@ -53,7 +53,7 @@ const MAX_WASM32_BUFFER_BYTES = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
-/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
+/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -433,6 +433,21 @@ function isEmptyJsonStringToken(source, start, length) {
 function decodeRawToken(source, start, length) {
     if (length <= 0) { return ''; }
     return decodeParserText(source.subarray(start, start + length));
+}
+
+/**
+ * @param {Uint8Array} source
+ * @param {number} start
+ * @returns {number}
+ */
+function decodeJsonNumberToken(source, start) {
+    let end = start;
+    while (end < source.length) {
+        const value = source[end];
+        if (value === U8_COMMA || value === 0x5d || value === 0x7d || isJsonWhitespace(value)) { break; }
+        ++end;
+    }
+    return Number(decodeParserText(source.subarray(start, end)));
 }
 
 /**
@@ -1377,7 +1392,7 @@ function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, v
         decodeJsonStringToken(source, readingStart, readingLength);
     const definitionTags = skipTagRuleDecode ? '' : (decodeNullableJsonStringToken(source, metas[o + 4], metas[o + 5]) ?? '');
     const rules = skipTagRuleDecode ? '' : decodeJsonStringToken(source, metas[o + 6], metas[o + 7]);
-    const score = metas[o + 8] | 0;
+    const score = decodeJsonNumberToken(source, metas[o + 8]);
     const glossaryStart = metas[o + 9];
     const glossaryLength = metas[o + 10];
     const glossaryJsonBytes = source.subarray(glossaryStart, glossaryStart + glossaryLength);
@@ -1455,7 +1470,7 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
     const reading = reuseExpressionReading ?
         expression :
         (typeof readingBytes === 'undefined' ? decodeJsonStringToken(source, readingStart, readingLength) : '');
-    const score = metas[o + 8] | 0;
+    const score = decodeJsonNumberToken(source, metas[o + 8]);
     const glossaryStart = metas[o + 9];
     const glossaryLength = metas[o + 10];
     const glossaryJsonBytes = lazyGlossaryDecode ? source.subarray(glossaryStart, glossaryStart + glossaryLength) : void 0;
@@ -1683,7 +1698,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
  * Only rows which may contain media receive a compatibility row object.
  * @param {Uint8Array|Uint8Array[]} contentBytes
  * @param {number} version
- * @param {(chunk: {rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {(chunk: {rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
  * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean, preloadedSource?: PreloadedTermBankSource}} [options]
  * @returns {Promise<void>}
@@ -1902,7 +1917,7 @@ null :
             new Uint8Array(count) :
             /** @type {Uint8Array} */ (fusedStringPlan.readingEqualsExpressionList).subarray(start, end);
         const scoreList = fusedStringPlan === null ?
-            new Int32Array(count) :
+            new Float64Array(count) :
             /** @type {Int32Array} */ (fusedStringPlan.scoreList).subarray(start, end);
         const sequenceList = fusedStringPlan === null || version < 3 ?
             new Int32Array(count) :
@@ -2019,7 +2034,7 @@ null :
                 }
             }
             if (fusedStringPlan === null) {
-                scoreList[i] = metas[o + 8] | 0;
+                scoreList[i] = decodeJsonNumberToken(source, metas[o + 8]);
                 sequenceList[i] = version >= 3 ? (metas[o + 11] | 0) : -1;
             }
             if (!emitContentSlab) {
@@ -3517,7 +3532,9 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
         expressionBytesList: chunk.expressionBytesList.map((bytes) => Uint8Array.from(bytes)),
         readingBytesList: chunk.readingBytesList.map((bytes) => Uint8Array.from(bytes)),
         readingEqualsExpressionList: Uint8Array.from(chunk.readingEqualsExpressionList),
-        scoreList: Int32Array.from(chunk.scoreList),
+        scoreList: chunk.scoreList instanceof Float64Array ?
+            Float64Array.from(chunk.scoreList) :
+            Int32Array.from(chunk.scoreList),
         sequenceList: Int32Array.from(chunk.sequenceList),
         contentBytesList: chunk.contentBytesList.map((bytes) => Uint8Array.from(bytes)),
         contentHash1List: Uint32Array.from(chunk.contentHash1List),
