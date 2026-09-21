@@ -34,3 +34,27 @@ Imported dictionaries use Manabitan's regular dictionary storage and lookup path
 - The conversion client has a three-minute deadline covering file reads and worker conversion. Large sets may require a compatible external converter producing a Yomitan ZIP. This deadline is not a performance guarantee.
 
 Contributor notes: [MDict client lifecycle](development/mdict-client.md).
+
+## File matching and conversion notes
+
+A dictionary name ending in a number is not automatically a resource volume:
+`Book.2024.mdx` pairs with `Book.2024.mdd`, followed by `Book.2024.1.mdd` and
+`Book.2024.2.mdd`. Exact MDX stems take precedence over split-volume suffixes.
+File basenames match without regard to case, while distinct relative directories
+(including their case) remain separate. The unnumbered MDD is searched before
+numbered volumes in numeric order, so a later volume cannot silently replace an
+earlier resource with the same archive path. Conflicting duplicate MDX or MDD
+paths exclude that dictionary group instead of choosing arbitrary bytes.
+
+URL directory discovery considers HTTP(S) links in the same origin and directory
+as the listing. Identical links are deduplicated; distinct URLs for the same MDD
+filename are treated as ambiguous. Cross-folder/CDN layouts should be downloaded
+locally and selected as a complete set. A generic server download name does not
+replace the validated MDX/MDD filename.
+
+Conversion notes distinguish skipped definition records, unresolved aliases,
+missing referenced resources, and failed resource reads. Missing-resource counts
+are distinct referenced archive keys, not missing volumes or missing definitions;
+read-failure and missing-resource counts can overlap. Notes do not prove that
+installation committed, and are not installation errors. They clear when the next
+import batch starts. Definitions with no resource references need no MDD warning.

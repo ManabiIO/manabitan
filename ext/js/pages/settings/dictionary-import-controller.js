@@ -26,6 +26,8 @@ import {promiseTimeout} from '../../core/utilities.js';
 import {getKebabCase} from '../../data/anki-template-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {Mdx} from '../../comm/mdx.js';
+import {createMdictImportSources, compareMddImportPaths, resolveMddImportKey} from '../../dictionary/mdict-import-sources.js';
+import {appendMdictConversionWarnings} from './mdict-import-feedback.js';
 import {snapshotTermBankExperiments} from '../../dictionary/term-bank-experiments.js';
 import {DictionaryController} from './dictionary-controller.js';
 
@@ -89,15 +91,6 @@ function getLowercaseFileName(fileName) {
 }
 
 /**
- * @param {File} file
- * @returns {string}
- */
-function getDictionaryFilePath(file) {
-    const relativePath = typeof file.webkitRelativePath === 'string' ? file.webkitRelativePath : '';
-    return relativePath.length > 0 ? relativePath : file.name;
-}
-
-/**
  * @param {string} fileName
  * @returns {boolean}
  */
@@ -111,27 +104,6 @@ function isZipDictionaryFileName(fileName) {
  */
 function isMdxDictionaryFileName(fileName) {
     return getLowercaseFileName(fileName).endsWith('.mdx');
-}
-
-/**
- * @param {string} fileName
- * @returns {boolean}
- */
-function isMddDictionaryFileName(fileName) {
-    return /(?:\.\d+)?\.mdd$/i.test(fileName.trim());
-}
-
-/**
- * @param {string} filePath
- * @returns {string|null}
- */
-function getDictionaryImportSourceKeyFromPath(filePath) {
-    const normalizedFilePath = getLowercaseFileName(filePath);
-    if (isMdxDictionaryFileName(normalizedFilePath)) {
-        return normalizedFilePath.slice(0, -4);
-    }
-    const match = /^(.*?)(?:\.\d+)?\.mdd$/i.exec(normalizedFilePath);
-    return match ? match[1] : null;
 }
 
 /**
@@ -1869,8 +1841,9 @@ export class DictionaryImportController {
      * @returns {Promise<MdxImportSource>}
      */
     async _downloadMdxImportSourceFromUrl(url, timeoutMs, onProgress, abortSignal, mdxFileName) {
-        const mdxFile = await this._downloadDictionaryFileViaXhr(url, timeoutMs, onProgress, abortSignal);
-        const listing = await this._getMdxListingForUrl(url, mdxFile.name || mdxFileName, abortSignal);
+        const downloadedFile = await this._downloadDictionaryFileViaXhr(url, timeoutMs, onProgress, abortSignal);
+        const mdxFile = downloadedFile.name === mdxFileName ? downloadedFile : new File([downloadedFile], mdxFileName, {type: downloadedFile.type});
+        const listing = await this._getMdxListingForUrl(url, mdxFileName, abortSignal);
         if (listing === null) {
             return {type: 'mdx', mdxFile, mddFiles: []};
         }
@@ -1886,7 +1859,8 @@ export class DictionaryImportController {
      * @returns {Promise<MdxImportSource>}
      */
     async _downloadMdxImportSourceFromListing(listing, timeoutMs, onProgress, abortSignal) {
-        const mdxFile = await this._downloadDictionaryFileViaXhr(listing.mdxLink.url, timeoutMs, onProgress, abortSignal);
+        const downloadedFile = await this._downloadDictionaryFileViaXhr(listing.mdxLink.url, timeoutMs, onProgress, abortSignal);
+        const mdxFile = downloadedFile.name === listing.mdxLink.fileName ? downloadedFile : new File([downloadedFile], listing.mdxLink.fileName, {type: downloadedFile.type});
         const mddFiles = await this._downloadListingFiles(listing.mddLinks, timeoutMs, onProgress, abortSignal);
         return {type: 'mdx', mdxFile, mddFiles};
     }
@@ -1898,16 +1872,19 @@ export class DictionaryImportController {
      * @returns {Promise<{mdxLink: {url: string, fileName: string}, mddLinks: Array<{url: string, fileName: string}>}|null>}
      */
     async _getMdxListingForUrl(url, mdxFileName, abortSignal) {
+        const parentUrl = new URL('.', url).href;
+        let html;
         try {
-            const parentUrl = new URL('.', url).href;
             const response = await fetch(parentUrl, {signal: abortSignal});
             if (!response.ok) { return null; }
             const contentType = response.headers.get('content-type') || '';
             if (!/text\/html|application\/xhtml\+xml/i.test(contentType)) { return null; }
-            return this._parseMdxListingDocument(parentUrl, await response.text(), mdxFileName);
-        } catch (_error) {
+            html = await response.text();
+        } catch (error) {
+            if (abortSignal.aborted) { throw error; }
             return null;
         }
+        return this._parseMdxListingDocument(parentUrl, html, mdxFileName);
     }
 
     /**
@@ -1926,7 +1903,8 @@ export class DictionaryImportController {
                 files[files.length - 1] = new File([files[files.length - 1]], fileName, {type: files[files.length - 1].type});
             }
         }
-        files.sort((a, b) => this._getMddSequenceIndex(a) - this._getMddSequenceIndex(b));
+        // listingFiles already has validated, exact-stem-aware volume order.
+        // Re-sorting by the last numeric suffix moves Book.2024.mdd behind its volumes.
         return files;
     }
 
@@ -1935,12 +1913,15 @@ export class DictionaryImportController {
      * @param {string} html
      * @param {string|null} mdxFileName
      * @returns {{mdxLink: {url: string, fileName: string}, mddLinks: Array<{url: string, fileName: string}>}|null}
+     * @throws {Error} If matching MDD links are ambiguous.
      */
     _parseMdxListingDocument(baseUrl, html, mdxFileName) {
         if (typeof DOMParser === 'undefined') { return null; }
         const document = new DOMParser().parseFromString(html, 'text/html');
         /** @type {Array<{url: string, fileName: string}>} */
         const fileLinks = [];
+        const directoryUrl = new URL('.', baseUrl).href;
+        const seenUrls = new Set();
         for (const anchor of document.querySelectorAll('a[href]')) {
             const href = anchor.getAttribute('href') || '';
             let resolvedUrl;
@@ -1949,6 +1930,15 @@ export class DictionaryImportController {
             } catch (_error) {
                 continue;
             }
+            const parsedUrl = new URL(resolvedUrl);
+            if (
+                (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') ||
+                new URL('.', parsedUrl).href !== directoryUrl
+            ) { continue; }
+            parsedUrl.hash = '';
+            resolvedUrl = parsedUrl.href;
+            if (seenUrls.has(resolvedUrl)) { continue; }
+            seenUrls.add(resolvedUrl);
             const fileName = getDictionaryFileNameFromUrl(resolvedUrl);
             if (fileName === null) { continue; }
             fileLinks.push({url: resolvedUrl, fileName});
@@ -1956,7 +1946,9 @@ export class DictionaryImportController {
 
         let mdxLink = null;
         if (typeof mdxFileName === 'string' && mdxFileName.length > 0) {
-            mdxLink = fileLinks.find(({fileName}) => fileName === mdxFileName && isMdxDictionaryFileName(fileName)) || null;
+            const matchingMdx = fileLinks.filter(({fileName}) => getLowercaseFileName(fileName) === getLowercaseFileName(mdxFileName) && isMdxDictionaryFileName(fileName));
+            if (matchingMdx.length !== 1) { return null; }
+            [mdxLink] = matchingMdx;
         } else {
             const mdxLinks = fileLinks.filter(({fileName}) => isMdxDictionaryFileName(fileName));
             if (mdxLinks.length !== 1) { return null; }
@@ -1964,14 +1956,21 @@ export class DictionaryImportController {
         }
         if (mdxLink === null) { return null; }
 
-        const mdxKey = this._getMdxImportSourceKeyFromName(mdxLink.fileName);
-        if (mdxKey === null) { return null; }
+        const mdxKey = getLowercaseFileName(mdxLink.fileName).slice(0, -4);
+        const mdxKeys = new Set(fileLinks
+            .filter(({fileName}) => isMdxDictionaryFileName(fileName))
+            .map(({fileName}) => getLowercaseFileName(fileName).slice(0, -4)));
         const mddLinks = fileLinks
-            .filter(({fileName}) => (
-                isMddDictionaryFileName(fileName) &&
-                this._getMdxImportSourceKeyFromName(fileName) === mdxKey
-            ))
-            .sort((a, b) => this._getMddSequenceIndexFromName(a.fileName) - this._getMddSequenceIndexFromName(b.fileName));
+            .filter(({fileName}) => resolveMddImportKey(fileName, mdxKeys) === mdxKey)
+            .sort((a, b) => compareMddImportPaths(a.fileName, b.fileName, mdxKey));
+        const resourceNames = new Set();
+        for (const {fileName} of mddLinks) {
+            const key = getLowercaseFileName(fileName);
+            if (resourceNames.has(key)) {
+                throw new Error(`Ambiguous MDD resource in directory listing: ${fileName}. Download one complete dictionary set and select its files together.`);
+            }
+            resourceNames.add(key);
+        }
         return {mdxLink, mddLinks};
     }
 
@@ -2032,102 +2031,11 @@ export class DictionaryImportController {
     }
 
     /**
-     * @param {File} file
-     * @returns {string|null}
-     */
-    _getMdxImportSourceKey(file) {
-        return getDictionaryImportSourceKeyFromPath(getDictionaryFilePath(file));
-    }
-
-    /**
-     * @param {File} file
-     * @returns {number}
-     */
-    _getMddSequenceIndex(file) {
-        return this._getMddSequenceIndexFromName(file.name);
-    }
-
-    /**
-     * @param {string} fileName
-     * @returns {number}
-     */
-    _getMddSequenceIndexFromName(fileName) {
-        const match = /\.([0-9]+)\.mdd$/i.exec(getLowercaseFileName(fileName));
-        return match !== null ? Number.parseInt(match[1], 10) : 0;
-    }
-
-    /**
-     * @param {string} fileName
-     * @returns {string|null}
-     */
-    _getMdxImportSourceKeyFromName(fileName) {
-        return getDictionaryImportSourceKeyFromPath(fileName);
-    }
-
-    /**
      * @param {File[]} files
      * @returns {{sources: DictionaryImportSource[], errors: Error[]}}
      */
     _createImportSourcesFromFiles(files) {
-        /** @type {Array<{firstIndex: number, source: DictionaryImportSource}>} */
-        const pendingSources = [];
-        /** @type {Error[]} */
-        const errors = [];
-        /** @type {Map<string, {firstIndex: number, mdxFile: File|null, mddFiles: File[]}>} */
-        const mdxGroups = new Map();
-
-        for (const [index, file] of files.entries()) {
-            const filePath = getDictionaryFilePath(file);
-            if (isZipDictionaryFileName(filePath)) {
-                pendingSources.push({firstIndex: index, source: {type: 'zip', file}});
-                continue;
-            }
-            if (!(isMdxDictionaryFileName(filePath) || isMddDictionaryFileName(filePath))) {
-                errors.push(new Error(`Unsupported dictionary file: ${file.name}`));
-                continue;
-            }
-            const key = this._getMdxImportSourceKey(file);
-            if (key === null) {
-                errors.push(new Error(`Unsupported MDX resource file: ${file.name}`));
-                continue;
-            }
-
-            let group = mdxGroups.get(key);
-            if (typeof group === 'undefined') {
-                group = {firstIndex: index, mdxFile: null, mddFiles: []};
-                mdxGroups.set(key, group);
-            }
-            group.firstIndex = Math.min(group.firstIndex, index);
-            if (isMdxDictionaryFileName(filePath)) {
-                if (group.mdxFile !== null) {
-                    errors.push(new Error(`Multiple MDX files matched the same dictionary group: ${file.name}`));
-                    continue;
-                }
-                group.mdxFile = file;
-            } else {
-                group.mddFiles.push(file);
-            }
-        }
-
-        for (const group of [...mdxGroups.values()].sort((a, b) => a.firstIndex - b.firstIndex)) {
-            if (group.mdxFile === null) {
-                const firstResource = group.mddFiles[0];
-                errors.push(new Error(`Found MDD resources without a matching MDX file: ${firstResource ? firstResource.name : 'unknown resource'}`));
-                continue;
-            }
-            group.mddFiles.sort((a, b) => this._getMddSequenceIndex(a) - this._getMddSequenceIndex(b));
-            pendingSources.push({
-                firstIndex: group.firstIndex,
-                source: {
-                    type: 'mdx',
-                    mdxFile: group.mdxFile,
-                    mddFiles: [...group.mddFiles],
-                },
-            });
-        }
-
-        pendingSources.sort((a, b) => a.firstIndex - b.firstIndex);
-        return {sources: pendingSources.map(({source}) => source), errors};
+        return createMdictImportSources(files);
     }
 
     /**
@@ -2219,6 +2127,10 @@ export class DictionaryImportController {
 
         const onProgress = importProgressTracker.onProgress.bind(importProgressTracker);
         Reflect.set(globalThis, '__manabitanImportStepTimingHistory', []);
+        for (const root of document.querySelectorAll('.mdict-import-warnings')) {
+            root.textContent = '';
+            /** @type {HTMLElement} */ (root).hidden = true;
+        }
 
         /** @type {Error[]} */
         let errors = [...initialErrors];
@@ -2740,7 +2652,13 @@ export class DictionaryImportController {
                 },
                 (details) => this._reportMdxConversionProgress(onProgress, details),
             );
+            if (!this._isImportRunCurrent(importRunGeneration)) {
+                throw new Error(`Ignored stale MDX conversion for ${dictionaryTitle}`);
+            }
             localPhaseTimings.push(...archive.phaseTimings);
+            for (const root of document.querySelectorAll('.mdict-import-warnings')) {
+                appendMdictConversionWarnings(/** @type {HTMLElement} */ (root), dictionaryTitle, archive.phaseTimings);
+            }
             archiveFile = new File([archive.archiveContent], archive.archiveFileName, {type: 'application/zip'});
         } finally {
             mdx.disconnect();
