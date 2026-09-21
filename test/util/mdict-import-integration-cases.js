@@ -59,6 +59,7 @@ test('download stage preserves validated MDD volume order instead of sorting by 
     c._downloadDictionaryFileViaXhr = async () => new File(['x'], 'server-download');
     const paths = [
         'Book.2024.mdd',
+        'Book.2024.0.mdd',
         'Book.2024.1.mdd',
         'Book.2024.9007199254740992.mdd',
         'Book.2024.9007199254740993.mdd',
