@@ -77,13 +77,16 @@ function xmlAttribute(value) {
  * Does not import the parser under test. Record blocks may split Unicode scalars.
  * Optional metadata overrides are only for negative regression cases.
  * @param {Array<{key: string, value: string|Uint8Array}>} entries
- * @param {{mdd?: boolean, encoding?: 'utf8'|'utf16le', compression?: 'raw'|'zlib', recordBlockSize?: number, keysPerBlock?: number, title?: string, version?: string, keyBlockUnpackSizeDelta?: number, keyBlockEntryCounts?: number[], keyInfoTrailer?: Uint8Array, keyInfoTerminatorByte?: number}} [options]
+ * @param {{mdd?: boolean, encoding?: 'utf8'|'utf16le', encodingLabel?: string, textEncoder?: ((value: string) => Uint8Array), encrypted?: string|number, compression?: 'raw'|'zlib', recordBlockSize?: number, keysPerBlock?: number, title?: string, version?: string, keyBlockUnpackSizeDelta?: number, keyBlockEntryCounts?: number[], keyInfoTrailer?: Uint8Array, keyInfoTerminatorByte?: number}} [options]
  * @returns {{bytes: Uint8Array, records: Uint8Array[], recordDataOffset: number}}
  */
 export function makeMdictFixture(entries, options = {}) {
     const {
         mdd = false,
         encoding = 'utf8',
+        encodingLabel = encoding === 'utf16le' ? 'UTF-16' : 'UTF-8',
+        textEncoder = (value) => new Uint8Array(Buffer.from(value, encoding)),
+        encrypted = 0,
         compression = 'zlib',
         recordBlockSize = 64,
         keysPerBlock = 2,
@@ -107,8 +110,9 @@ export function makeMdictFixture(entries, options = {}) {
     const keyUnit = keyEncoding === 'utf16le' ? 2 : 1;
     const terminator = Buffer.alloc(keyUnit);
     const keyInfoTerminator = Buffer.alloc(keyUnit, keyInfoTerminatorByte);
+    const encodeDictionaryText = (value) => Buffer.from(textEncoder(value));
     const records = orderedEntries.map(({value}) => {
-        const bytes = typeof value === 'string' ? Buffer.from(value, mdd ? 'utf8' : encoding) : Buffer.from(value);
+        const bytes = typeof value === 'string' ? (mdd ? Buffer.from(value, 'utf8') : encodeDictionaryText(value)) : Buffer.from(value);
         return mdd ? bytes : Buffer.concat([bytes, Buffer.alloc(encoding === 'utf16le' ? 2 : 1)]);
     });
     let position = 0;
@@ -136,12 +140,12 @@ export function makeMdictFixture(entries, options = {}) {
         const count = Math.min(keysPerBlock, orderedEntries.length - index);
         const keyParts = [];
         for (let i = index; i < index + count; i += 1) {
-            keyParts.push(integer(offsets[i], numWidth), Buffer.from(orderedEntries[i].key, keyEncoding), terminator);
+            keyParts.push(integer(offsets[i], numWidth), mdd ? Buffer.from(orderedEntries[i].key, keyEncoding) : encodeDictionaryText(orderedEntries[i].key), terminator);
         }
         const unpacked = Buffer.concat(keyParts);
         const packed = packBlock(unpacked, compression);
-        const first = Buffer.from(orderedEntries[index].key, keyEncoding);
-        const last = Buffer.from(orderedEntries[index + count - 1].key, keyEncoding);
+        const first = mdd ? Buffer.from(orderedEntries[index].key, keyEncoding) : encodeDictionaryText(orderedEntries[index].key);
+        const last = mdd ? Buffer.from(orderedEntries[index + count - 1].key, keyEncoding) : encodeDictionaryText(orderedEntries[index + count - 1].key);
         keyInfo.push(
             integer(keyBlockEntryCounts[packedKeys.length] ?? count, numWidth),
             integer(first.length / keyUnit, v2 ? 2 : 1),
@@ -165,9 +169,9 @@ export function makeMdictFixture(entries, options = {}) {
         integer(packedKeyInfo.length, numWidth),
         integer(keyBytes.length, numWidth),
     ]);
-    const encodingAttribute = mdd ? '' : ` Encoding="${encoding === 'utf16le' ? 'UTF-16' : 'UTF-8'}"`;
+    const encodingAttribute = mdd ? '' : ` Encoding="${xmlAttribute(encodingLabel)}"`;
     const tag = mdd ? 'Library_Data' : 'Dictionary';
-    const header = Buffer.from(`<${tag} GeneratedByEngineVersion="${version}" RequiredEngineVersion="${version}" Encrypted="0"${encodingAttribute} Title="${xmlAttribute(title)}" Description="Generated regression fixture"/>\0`, 'utf16le');
+    const header = Buffer.from(`<${tag} GeneratedByEngineVersion="${version}" RequiredEngineVersion="${version}" Encrypted="${xmlAttribute(String(encrypted))}"${encodingAttribute} Title="${xmlAttribute(title)}" Description="Generated regression fixture"/>\0`, 'utf16le');
     const recordInfoBytes = Buffer.concat(recordInfo);
     const packedRecordBytes = Buffer.concat(packedRecords);
     const beforeRecordData = Buffer.concat([

@@ -272,3 +272,78 @@ describe('native parser controls and key metadata', () => {
         assert.throws(() => scanner.readBuffer(/** @type {any} */ ('0'), 0), /available file data/iu);
     });
 });
+
+
+describe('MDict header encoding and encryption metadata', () => {
+    const gb18030Bytes = new Map([
+        ['😀', '9439fc36'],
+        ['<p>定义😀</p>', '3c703eb6a8d2e59439fc363c2f703e'],
+        ['猫', 'c3a8'],
+        ['<p>定义</p>', '3c703eb6a8d2e53c2f703e'],
+    ]);
+    /** @param {string} value */
+    const encodeGb18030 = (value) => {
+        const hex = gb18030Bytes.get(value);
+        if (typeof hex === 'undefined') { throw new Error(`Missing GB18030 test vector for ${value}`); }
+        return new Uint8Array(Buffer.from(hex, 'hex'));
+    };
+
+    test('explicit GB18030 preserves four-byte keys and definitions', () => {
+        const definition = '<p>定义😀</p>';
+        const fixture = makeMdictFixture([{key: '😀', value: definition}], {
+            encodingLabel: 'GB18030',
+            textEncoder: encodeGb18030,
+        });
+        const mdx = new MDX('gb18030.mdx', fixture.bytes);
+        try {
+            assert.equal(mdx.keywordList[0]?.keyText, '😀');
+            assert.equal(mdx.lookup('😀').definition, `${definition}\0`);
+        } finally {
+            mdx.close();
+        }
+    });
+
+    for (const encodingLabel of ['gbk', 'gB2312']) {
+        test(`${encodingLabel} header alias uses GB18030-compatible decoding`, () => {
+            const definition = '<p>定义</p>';
+            const fixture = makeMdictFixture([{key: '猫', value: definition}], {
+                encodingLabel,
+                textEncoder: encodeGb18030,
+            });
+            const mdx = new MDX('gb-alias.mdx', fixture.bytes);
+            try {
+                assert.equal(mdx.keywordList[0]?.keyText, '猫');
+                assert.equal(mdx.lookup('猫').definition, `${definition}\0`);
+            } finally {
+                mdx.close();
+            }
+        });
+    }
+
+    test('unsupported encoding labels are rejected instead of silently decoded as UTF-8', () => {
+        const fixture = makeMdictFixture([{key: 'entry', value: 'definition'}], {encodingLabel: 'x-mdict-unknown'});
+        assert.throws(() => new MDX('unknown-encoding.mdx', fixture.bytes), /unsupported mdict encoding/iu);
+    });
+
+    for (const encrypted of ['bogus', '4', '-1']) {
+        test(`invalid encryption metadata ${encrypted} is rejected`, () => {
+            const fixture = makeMdictFixture([{key: 'entry', value: 'definition'}], {encrypted});
+            assert.throws(() => new MDX('invalid-encryption.mdx', fixture.bytes), /encryption flag/iu);
+        });
+    }
+
+    test('encryptType zero explicitly overrides an encrypted header', () => {
+        const fixture = makeMdictFixture([{key: 'entry', value: 'definition'}], {encrypted: 1});
+        const mdx = new MDX('override-encryption.mdx', fixture.bytes, {encryptType: 0});
+        try {
+            assert.equal(mdx.lookup('entry').definition, 'definition\0');
+        } finally {
+            mdx.close();
+        }
+    });
+
+    test('invalid encryption overrides are rejected', () => {
+        const fixture = makeMdictFixture([{key: 'entry', value: 'definition'}]);
+        assert.throws(() => new MDX('invalid-override.mdx', fixture.bytes, {encryptType: 4}), /encryption override/iu);
+    });
+});
