@@ -400,8 +400,8 @@ describe('convertMdxToArchive', () => {
         mockState.mddFactory = () => [{
             keyText: 'styles/theme.css',
             value: new TextEncoder().encode([
-                '.entry\\\\:jp#hero\\\\.dot .jump\\\\+plus { color: red; }',
-                '.\\\\31 23 { font-weight: bold; }',
+                String.raw`.entry\:jp#hero\.dot .jump\+plus { color: red; }`,
+                String.raw`.\31 23 { font-weight: bold; }`,
             ].join('\n')),
         }];
 
@@ -418,9 +418,9 @@ describe('convertMdxToArchive', () => {
             '[data-sc-class~="entry:jp"][data-sc-id="hero.dot"] [data-sc-class~="jump+plus"]',
         );
         expect(stylesCss).toContain('[data-sc-class~="123"]');
-        expect(stylesCss).not.toContain('.entry\\:jp');
-        expect(stylesCss).not.toContain('#hero\\.dot');
-        expect(stylesCss).not.toContain('.jump\\+plus');
+        expect(stylesCss).not.toContain(String.raw`.entry\:jp`);
+        expect(stylesCss).not.toContain(String.raw`#hero\.dot`);
+        expect(stylesCss).not.toContain(String.raw`.jump\+plus`);
     });
 
     test('strips URL query and hash fragments before resolving MDD assets', async () => {
