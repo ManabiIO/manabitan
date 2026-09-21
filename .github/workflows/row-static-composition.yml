@@ -15,31 +15,46 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arm: [base, repaired]
+        arm: [base, repaired, media-fixed]
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - name: Select exact current develop composition
+      - name: Select exact base or PR merge composition
         env:
           ARM: '${{ matrix.arm }}'
         run: |
-          cp dev/perf/importer-row-materialization.patch "$RUNNER_TEMP/row.patch"
-          git fetch --depth=1 origin 131e51bc815a165bb79f774152b201554cb8827e
-          git checkout --detach 131e51bc815a165bb79f774152b201554cb8827e
-          if [ "$ARM" = repaired ]; then
-            git apply --check "$RUNNER_TEMP/row.patch"
-            git apply "$RUNNER_TEMP/row.patch"
-          fi
+          ref=131e51bc815a165bb79f774152b201554cb8827e
+          if [ "$ARM" != base ]; then ref=b60baf4c09cd0075fc57661e4d588878fdbc9dc3; fi
+          git fetch --depth=1 origin "$ref"
+          git checkout --detach "$ref"
           mkdir -p builds/web-evidence
           git rev-parse HEAD > builds/web-evidence/base.txt
-          git diff --binary > builds/web-evidence/production.patch
+      - name: Apply isolated media publication candidate
+        if: matrix.arm == 'media-fixed'
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ext/js/dictionary/dictionary-importer.js')
+          s = p.read_text()
+          a = '                    const row = decodedRows[i];'
+          assert s.count(a) == 1
+          s = s.replace(a, a + '\n                    const requirementCount = requirementsForChunk?.length ?? 0;')
+          a = '                            requirementsForChunk !== null &&\n                            (\n                                !hasPrecomputedTermEntryContent(entry)\n                            )'
+          assert s.count(a) == 1
+          s = s.replace(a, '                            requirementsForChunk !== null &&\n                            requirementsForChunk.length === requirementCount &&\n                            (\n                                !hasPrecomputedTermEntryContent(entry)\n                            )')
+          p.write_text(s)
+          PY
+          git diff --binary > builds/web-evidence/media-candidate.patch
       - uses: actions/setup-node@v4
         with:
           node-version: '24.21.0'
       - run: npm ci
       - run: npm run build:libs
       - run: node web/build.mjs
+      - name: Preserve exact parser and importer source
+        run: |
+          tar -czf builds/web-evidence/source.tar.gz ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/wasm/term-bank-parser.c ext/lib/term-bank-parser.wasm
       - uses: actions/checkout@v4
         with:
           repository: ManabiIO/manabi-reader-web
