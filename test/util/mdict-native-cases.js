@@ -516,6 +516,215 @@ describe('MDict direct lookup range and lifetime regressions', () => {
     });
 });
 
+describe('MDict redirect StripKey matching', () => {
+    for (const stripKey of /** @type {const} */ (['Yes', 'No'])) {
+        test(`converter redirects honor StripKey=${stripKey}`, async () => {
+            const fixture = makeMdictFixture([
+                {key: 'Alias', value: '@@@LINK=foobar'},
+                {key: 'foo-bar', value: 'definition'},
+            ], {stripKey, keyCaseSensitive: 'No'});
+            const result = await createMdxImportData('redirect-strip.mdx', {}, fixture.bytes, []);
+            const terms = readRows(result.files).map(([term]) => term).sort();
+            assert.deepEqual(terms, stripKey === 'Yes' ? ['Alias', 'foo-bar'] : ['foo-bar']);
+            const details = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details;
+            assert.equal(details?.unresolvedRedirectCount, stripKey === 'Yes' ? 0 : 1);
+        });
+    }
+
+    test('punctuation-normalized redirect chains retain every alias spelling', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alias-One', value: '@@@LINK=mid_dle'},
+            {key: 'Middle', value: '@@@LINK=FOOBAR'},
+            {key: 'foo-bar', value: 'definition'},
+            {key: 'foobar', value: '@@@LINK=foo-bar'},
+        ], {stripKey: 'Yes', keyCaseSensitive: 'No'});
+        const result = await createMdxImportData('redirect-strip-chain.mdx', {}, fixture.bytes, []);
+        const terms = readRows(result.files).map(([term]) => term).sort();
+        assert.deepEqual(terms, ['Alias-One', 'Middle', 'foo-bar', 'foobar']);
+        const details = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details;
+        assert.equal(details?.unresolvedRedirectCount, 0);
+    });
+
+    test('StripKey does not disable case-sensitive matching or resolve disconnected cycles', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Alias', value: '@@@LINK=FooBar'},
+            {key: 'WrongCase', value: '@@@LINK=foobar'},
+            {key: 'Foo-Bar', value: 'definition'},
+            {key: 'Cycle-One', value: '@@@LINK=CycleTwo'},
+            {key: 'Cycle-Two', value: '@@@LINK=CycleOne'},
+        ], {stripKey: 'Yes', keyCaseSensitive: 'Yes'});
+        const result = await createMdxImportData('redirect-strip-sensitive.mdx', {}, fixture.bytes, []);
+        assert.deepEqual(readRows(result.files).map(([term]) => term).sort(), ['Alias', 'Foo-Bar']);
+        const details = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details;
+        assert.equal(details?.unresolvedRedirectCount, 3);
+    });
+});
+
+describe('MDict redirects preserve exact target identity before normalization', () => {
+    for (const [label, first, second, stripKey] of /** @type {const} */ ([
+        ['case', 'Read', 'read', 'No'],
+        ['punctuation', 'co-op', 'coop', 'Yes'],
+    ])) {
+        test(`${label}: exact aliases and their chains do not acquire a different definition`, async () => {
+            const fixture = makeMdictFixture([
+                {key: first, value: 'first meaning'},
+                {key: first, value: 'second sense of first'},
+                {key: second, value: 'other spelling meaning'},
+                {key: 'FirstAlias', value: `@@@LINK=${first}`},
+                {key: 'SecondAlias', value: `@@@LINK=${second}`},
+                {key: 'FirstChain', value: '@@@LINK=FirstAlias'},
+            ], {keyCaseSensitive: 'No', stripKey, keysPerBlock: 1, recordBlockSize: 7});
+            const {files} = await createMdxImportData('exact-redirect.mdx', {}, fixture.bytes, []);
+            const rows = readRows(files);
+            for (const alias of ['FirstAlias', 'FirstChain']) {
+                const definitions = rows.filter(([term]) => term === alias);
+                assert.equal(definitions.length, 2, alias);
+                assert.match(JSON.stringify(definitions), /first meaning/u);
+                assert.match(JSON.stringify(definitions), /second sense of first/u);
+                assert.doesNotMatch(JSON.stringify(definitions), /other spelling meaning/u);
+            }
+            const other = rows.filter(([term]) => term === 'SecondAlias');
+            assert.equal(other.length, 1);
+            assert.match(JSON.stringify(other), /other spelling meaning/u);
+        });
+    }
+
+    test('exact case-variant alias chains do not collapse onto unrelated definitions', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Top', value: 'top meaning'},
+            {key: 'Bottom', value: 'bottom meaning'},
+            {key: 'Read', value: '@@@LINK=Top'},
+            {key: 'read', value: '@@@LINK=Bottom'},
+            {key: 'ViaUpper', value: '@@@LINK=Read'},
+            {key: 'ViaLower', value: '@@@LINK=read'},
+        ], {keyCaseSensitive: 'No', keysPerBlock: 1});
+        const {files} = await createMdxImportData('exact-alias-chain.mdx', {}, fixture.bytes, []);
+        const rows = readRows(files);
+        for (const [alias, meaning] of [['ViaUpper', 'top meaning'], ['ViaLower', 'bottom meaning']]) {
+            const definitions = rows.filter(([term]) => term === alias);
+            assert.equal(definitions.length, 1, alias);
+            assert.ok(JSON.stringify(definitions).includes(meaning));
+        }
+    });
+
+    test('an exact cyclic target is not rescued by a different case-variant definition', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Read', value: 'real meaning'},
+            {key: 'read', value: '@@@LINK=Loop'},
+            {key: 'Loop', value: '@@@LINK=read'},
+            {key: 'Alias', value: '@@@LINK=read'},
+        ], {keyCaseSensitive: 'No'});
+        const {files, phaseTimings} = await createMdxImportData('exact-cycle.mdx', {}, fixture.bytes, []);
+        assert.deepEqual(readRows(files).map(([term]) => term), ['Read']);
+        const phase = phaseTimings.find(({details}) => typeof details?.unresolvedRedirectCount === 'number');
+        assert.equal(phase?.details?.unresolvedRedirectCount, 3);
+    });
+
+    test('a self redirect without a readable homograph is counted as unresolved', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Root', value: 'root definition'},
+            {key: 'Self', value: '@@@LINK=Self'},
+        ]);
+        const {phaseTimings} = await createMdxImportData('self-cycle.mdx', {}, fixture.bytes, []);
+        const phase = phaseTimings.find(({details}) => typeof details?.unresolvedRedirectCount === 'number');
+        assert.equal(phase?.details?.unresolvedRedirectCount, 1);
+    });
+
+    test('missing exact spellings still fall back to normalized definitions and preserve all senses', async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Read', value: 'first meaning'},
+            {key: 'Read', value: 'second meaning'},
+            {key: 'Fallback', value: '@@@LINK=rE-aD'},
+            {key: 'Chain', value: '@@@LINK=fALLBACK'},
+        ], {keyCaseSensitive: 'No', stripKey: 'Yes'});
+        const {files, phaseTimings} = await createMdxImportData('fallback.mdx', {}, fixture.bytes, []);
+        const rows = readRows(files);
+        for (const alias of ['Fallback', 'Chain']) {
+            assert.equal(rows.filter(([term]) => term === alias).length, 2);
+        }
+        const phase = phaseTimings.find(({details}) => typeof details?.unresolvedRedirectCount === 'number');
+        assert.equal(phase?.details?.unresolvedRedirectCount, 0);
+    });
+});
+
+
+describe('MDict redirect resolution agrees with a forward graph model', () => {
+    for (const keyCaseSensitive of /** @type {const} */ (['Yes', 'No'])) {
+        for (const stripKey of /** @type {const} */ (['Yes', 'No'])) {
+            for (const compression of /** @type {const} */ (['raw', 'zlib'])) {
+                test(`${keyCaseSensitive}/${stripKey}/${compression}: exact names, fallback, homographs and cycles`, async () => {
+                    for (let seed = 1; seed <= 16; ++seed) {
+                        let state = seed;
+                        const random = () => {
+                            state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+                            return state;
+                        };
+                        const keys = ['Read', 'read', 'co-op', 'coop', 'Middle', 'middle', 'Leaf', '\u00e9', 'e\u0301'];
+                        const targetPool = [...keys, 'READ', 'CO_OP', 'MIDDLE', 'lE-aF', 'missing'];
+                        /** @type {Array<{key: string, value: string}>} */
+                        const entries = [];
+                        for (const [index, key] of keys.entries()) {
+                            const value = index === 0 || random() % 4 === 0 ?
+                                `model-sense-${entries.length}` :
+                                `@@@LINK=${targetPool[random() % targetPool.length]}`;
+                            entries.push({key, value});
+                            if (random() % 3 === 0) {
+                                entries.push({key, value: `model-sense-${entries.length}`});
+                            }
+                        }
+                        // This independent forward traversal does not use the
+                        // converter's reverse edges or its key-normalizer helper.
+                        const normalize = (/** @type {string} */ key) => {
+                            if (stripKey === 'Yes') { key = key.replace(/[-_]/gu, ''); }
+                            return keyCaseSensitive === 'Yes' ? key : key.toLowerCase();
+                        };
+                        const targets = (/** @type {string} */ target) => {
+                            if (keys.includes(target)) { return [target]; }
+                            return keys.filter((key) => normalize(key) === normalize(target));
+                        };
+                        const resolve = (/** @type {string[]} */ starts) => {
+                            const pending = [...starts];
+                            const visited = new Set();
+                            /** @type {Set<string>} */
+                            const senses = new Set();
+                            for (let index = 0; index < pending.length; ++index) {
+                                const key = pending[index];
+                                if (visited.has(key)) { continue; }
+                                visited.add(key);
+                                for (const entry of entries) {
+                                    if (entry.key !== key) { continue; }
+                                    if (entry.value.startsWith('@@@LINK=')) {
+                                        for (const target of targets(entry.value.slice(8))) { pending.push(target); }
+                                    } else {
+                                        senses.add(entry.value);
+                                    }
+                                }
+                            }
+                            return senses;
+                        };
+                        const expected = keys.flatMap((key) => [...resolve([key])].map((sense) => JSON.stringify([key, sense]))).sort();
+                        const unresolvedEdges = new Set(entries.filter(({value}) => value.startsWith('@@@LINK=') &&
+                        resolve(targets(value.slice(8))).size === 0).map(({key, value}) => JSON.stringify([key, value])));
+                        const fixture = makeMdictFixture(entries, {
+                            keyCaseSensitive, stripKey, compression, keysPerBlock: seed % 3 + 1, recordBlockSize: 7,
+                        });
+                        const {files, phaseTimings} = await createMdxImportData('redirect-model.mdx', {}, fixture.bytes, []);
+                        const actual = readRows(files).map((row) => {
+                            const senses = JSON.stringify(row[5]).match(/model-sense-\d+/gu);
+                            assert.equal(senses?.length, 1, `seed ${seed}: one original sense per row`);
+                            return JSON.stringify([row[0], senses?.[0]]);
+                        }).sort();
+                        assert.deepEqual(actual, expected, `seed ${seed}: term-to-sense identity`);
+                        const phase = phaseTimings.find(({details}) => typeof details?.unresolvedRedirectCount === 'number');
+                        assert.equal(phase?.details?.unresolvedRedirectCount, unresolvedEdges.size, `seed ${seed}: unresolved edges`);
+                    }
+                });
+            }
+        }
+    }
+});
+
+
 describe('actual binary MDX/MDD conversion', () => {
     test('preserves homograph senses, multi-hop aliases, bank bounds and diagnostics', async () => {
         const fixture = makeMdictFixture([
