@@ -23,7 +23,7 @@ test('initializeState exposes initial render completion without delaying frame r
     /** @type {() => void} */
     let resolveState = () => {};
     const statePromise = new Promise((resolve) => {
-        resolveState = resolve;
+        resolveState = () => resolve();
     });
     const signal = vi.fn();
 
