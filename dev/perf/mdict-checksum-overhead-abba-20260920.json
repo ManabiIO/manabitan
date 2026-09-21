@@ -1,0 +1,73 @@
+{
+  "measuredAt": "2026-09-20",
+  "environment": {
+    "node": "v22.16.0"
+  },
+  "workload": {
+    "entries": 2048,
+    "mdxBytes": 848563,
+    "recordBlockBytes": 32768,
+    "cacheBudgetBytes": 8388608,
+    "order": "ABBA",
+    "rounds": 8
+  },
+  "variants": {
+    "A": "8 MiB MDX record-block cache, existing parser checks",
+    "B": "same cache plus Adler-32 integrity verification"
+  },
+  "cacheOnlyMedianMs": 106.28241400000002,
+  "checksumCacheMedianMs": 104.26512749999995,
+  "pairedMedianOverheadPercent": 1.6762339493416545,
+  "pairedRounds": [
+    {
+      "round": 0,
+      "cacheOnlyMs": 104.79642800000005,
+      "checksumCacheMs": 106.58375050000001,
+      "overheadPercent": 1.705518531604877
+    },
+    {
+      "round": 1,
+      "cacheOnlyMs": 106.85825599999998,
+      "checksumCacheMs": 116.55137400000001,
+      "overheadPercent": 9.07100523894011
+    },
+    {
+      "round": 2,
+      "cacheOnlyMs": 104.29743600000006,
+      "checksumCacheMs": 102.96761399999991,
+      "overheadPercent": -1.2750284676222967
+    },
+    {
+      "round": 3,
+      "cacheOnlyMs": 108.33147749999989,
+      "checksumCacheMs": 114.51921100000004,
+      "overheadPercent": 5.71185184841605
+    },
+    {
+      "round": 4,
+      "cacheOnlyMs": 108.71903750000001,
+      "checksumCacheMs": 110.50958500000002,
+      "overheadPercent": 1.6469493670784319
+    },
+    {
+      "round": 5,
+      "cacheOnlyMs": 107.19597649999992,
+      "checksumCacheMs": 109.65669249999996,
+      "overheadPercent": 2.2955301871801614
+    },
+    {
+      "round": 6,
+      "cacheOnlyMs": 103.91558349999991,
+      "checksumCacheMs": 100.2308895000001,
+      "overheadPercent": -3.5458531587803765
+    },
+    {
+      "round": 7,
+      "cacheOnlyMs": 104.26700649999998,
+      "checksumCacheMs": 104.67539350000015,
+      "overheadPercent": 0.3916742349366009
+    }
+  ],
+  "outputVerification": "SHA-256 over sorted generated dictionary files identical for all samples",
+  "scope": "MDX conversion preparation only; excludes ZIP/OPFS/database publication."
+}

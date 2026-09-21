@@ -168,6 +168,28 @@ function uint64BEtoNumber(bytes) {
     high += bytes[7] & 0xff;
     return high;
 }
+/**
+ * Compute Adler-32 as an unsigned 32-bit integer.
+ * @param {Uint8Array} bytes
+ * @returns {number}
+ */
+function adler32(bytes) {
+    let s1 = 1;
+    let s2 = 0;
+    let offset = 0;
+    let remaining = bytes.length;
+    while (remaining > 0) {
+        let count = Math.min(remaining, 2000);
+        remaining -= count;
+        while (count-- > 0) {
+            s1 += bytes[offset++];
+            s2 += s1;
+        }
+        s1 %= 65521;
+        s2 %= 65521;
+    }
+    return ((s2 << 16) | s1) >>> 0;
+}
 const NUMFMT_UINT8 = Symbol('NUM_FMT_UINT8');
 const NUMFMT_UINT16 = Symbol('NUM_FMT_UINT16');
 const NUMFMT_UINT32 = Symbol('NUM_FMT_UINT32');
@@ -356,6 +378,7 @@ export default {
     isTrue,
     wordCompare,
     substituteStylesheet,
+    adler32,
     UTF16,
     REGEXP_STRIPKEY,
     NUMFMT_UINT8,
