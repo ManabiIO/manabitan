@@ -154,7 +154,18 @@ test('MDX native cross-block import preserves aliases, senses and media through 
     const entries = page.locator('#dictionary-entries');
     await expect(entries).toContainText('first complete native definition 🐈', {timeout: 30_000});
     await expect(entries).toContainText('second independent native sense');
-    await expect(entries.locator('[data-sc-class~="native-sense"]').first()).toHaveCSS('color', 'rgb(12, 34, 56)');
+    const nativeSense = entries.locator('[data-sc-class~="native-sense"]').first();
+    await expect(nativeSense).toHaveCSS('color', 'rgb(12, 34, 56)');
+    await expect(async () => {
+        const backgroundImage = await nativeSense.evaluate((element) => getComputedStyle(element).backgroundImage);
+        expect(backgroundImage).toMatch(/^url\("blob:/u);
+        const match = /^url\("([^"]+)"\)$/u.exec(backgroundImage);
+        expect(match).not.toBeNull();
+        const bytes = await page.evaluate(async (url) => {
+            return [...new Uint8Array(await (await fetch(url)).arrayBuffer())];
+        }, match?.[1] ?? '');
+        expect(bytes).toStrictEqual([...green]);
+    }).toPass({timeout: 30_000});
     await expect(entries.locator('.gloss-image').first()).toBeVisible();
 
     // A new document must retrieve committed data, not the converter's in-memory map.
