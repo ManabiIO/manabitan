@@ -983,5 +983,4 @@ describe('convertMdxToArchive', () => {
         });
         expect(await zip.file('mdict-media/images/bg.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
     });
-
 });
