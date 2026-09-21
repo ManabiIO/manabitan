@@ -26,6 +26,7 @@ const RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC_U32 = 0x3552424d;
 const RAW_TERM_CONTENT_TOKEN_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x36]);
 const RAW_TERM_CONTENT_TOKEN_HEADER_BYTES = 4;
 const U32_RANGE = 0x100000000;
+const JSON_TOKEN_INLINE_SCAN_MAX_BYTES = 64;
 
 export const RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES = 28;
 
@@ -243,6 +244,7 @@ export function decodeRawTermContentBlockReference(bytes) {
         blockCompressedLength <= 0 ||
         blockUncompressedLength <= 0 ||
         entryLength <= 0 ||
+        !Number.isSafeInteger(blockOffset + blockCompressedLength) ||
         entryOffset + entryLength > blockUncompressedLength
     ) {
         return null;
@@ -269,11 +271,11 @@ export function decodeRawTermContentHeader(bytes, textDecoder) {
         return null;
     }
     let offset = RAW_TERM_CONTENT_HEADER_BYTES;
-    const rules = textDecoder.decode(bytes.subarray(offset, offset + rulesLength));
+    const rules = decodeRawTermString(bytes, offset, rulesLength, textDecoder);
     offset += rulesLength;
-    const definitionTags = textDecoder.decode(bytes.subarray(offset, offset + definitionTagsLength));
+    const definitionTags = decodeRawTermString(bytes, offset, definitionTagsLength, textDecoder);
     offset += definitionTagsLength;
-    const termTags = textDecoder.decode(bytes.subarray(offset, offset + termTagsLength));
+    const termTags = decodeRawTermString(bytes, offset, termTagsLength, textDecoder);
     offset += termTagsLength;
     return {rules, definitionTags, termTags, glossaryJsonOffset: offset, glossaryJsonLength};
 }
@@ -433,11 +435,11 @@ export function decodeRawTermContentSharedGlossaryHeader(bytes, textDecoder) {
         return null;
     }
     let offset = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES;
-    const rules = textDecoder.decode(bytes.subarray(offset, offset + rulesLength));
+    const rules = decodeRawTermString(bytes, offset, rulesLength, textDecoder);
     offset += rulesLength;
-    const definitionTags = textDecoder.decode(bytes.subarray(offset, offset + definitionTagsLength));
+    const definitionTags = decodeRawTermString(bytes, offset, definitionTagsLength, textDecoder);
     offset += definitionTagsLength;
-    const termTags = textDecoder.decode(bytes.subarray(offset, offset + termTagsLength));
+    const termTags = decodeRawTermString(bytes, offset, termTagsLength, textDecoder);
     return {rules, definitionTags, termTags, glossaryOffset, glossaryLength};
 }
 
@@ -472,8 +474,7 @@ export function decodeRawTermContentTokenHeader(bytes, textDecoder) {
         offset = end + 1;
         if (end - start >= 2 && bytes[start] === 0x22 && bytes[end - 1] === 0x22) {
             if (end - start === 2) { return ''; }
-            const escapeIndex = bytes.indexOf(0x5c, start + 1);
-            if (escapeIndex < 0 || escapeIndex >= end - 1) {
+            if (isSimpleJsonStringContent(bytes, start + 1, end - 1)) {
                 return textDecoder.decode(bytes.subarray(start + 1, end - 1));
             }
         }
@@ -512,4 +513,55 @@ export function decodeRawTermContentTokenBinary(bytes, textDecoder) {
         header.glossaryJsonOffset + header.glossaryJsonLength,
     ));
     return {rules: header.rules, definitionTags: header.definitionTags, termTags: header.termTags, glossaryJson};
+}
+
+/**
+ * Length-delimited tag strings preserve a leading U+FEFF as content. Respect
+ * the caller's decoding/error policy and restore only a BOM it actually strips.
+ * @param {Uint8Array} bytes
+ * @param {number} offset
+ * @param {number} length
+ * @param {TextDecoder} textDecoder
+ * @returns {string}
+ */
+function decodeRawTermString(bytes, offset, length, textDecoder) {
+    const value = textDecoder.decode(bytes.subarray(offset, offset + length));
+    if (
+        length >= 3 &&
+        bytes[offset] === 0xef &&
+        bytes[offset + 1] === 0xbb &&
+        bytes[offset + 2] === 0xbf &&
+        textDecoder.encoding === 'utf-8' &&
+        !textDecoder.ignoreBOM
+    ) {
+        return `\ufeff${value}`;
+    }
+    return value;
+}
+
+/**
+ * Scans only short token contents, never subsequent fields or the glossary.
+ * Long, escaped, or malformed tokens use JSON parsing instead.
+ * @param {Uint8Array} bytes
+ * @param {number} start
+ * @param {number} end
+ * @returns {boolean}
+ */
+function isSimpleJsonStringContent(bytes, start, end) {
+    if (
+        end - start > JSON_TOKEN_INLINE_SCAN_MAX_BYTES ||
+        (
+            end - start >= 3 &&
+            bytes[start] === 0xef &&
+            bytes[start + 1] === 0xbb &&
+            bytes[start + 2] === 0xbf
+        )
+    ) {
+        return false;
+    }
+    for (let i = start; i < end; ++i) {
+        const value = bytes[i];
+        if (value === 0x5c || value === 0x22 || value < 0x20) { return false; }
+    }
+    return true;
 }
