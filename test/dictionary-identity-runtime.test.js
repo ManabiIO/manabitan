@@ -36,13 +36,13 @@ function fixture(title, expression, reading) {
         ensureDictionariesLoaded: vi.fn().mockResolvedValue(void 0),
         getByIdsAsync,
     });
-    Reflect.set(database, '_getTermRecordStorageName', (name) => name === title ? physical : name);
-    Reflect.set(database, '_getDirectDictionarySampleIds', (name) => name === title ? [7] : []);
+    Reflect.set(database, '_getTermRecordStorageName', (name) => (name === title ? physical : name));
+    Reflect.set(database, '_getDirectDictionarySampleIds', (name) => (name === title ? [7] : []));
     Reflect.set(database, 'getDictionaryInfo', vi.fn().mockResolvedValue([{title}]));
-    const getDictionaryCounts = vi.fn().mockImplementation(async (names) => ({
+    const getDictionaryCounts = vi.fn().mockImplementation(async (/** @type {string[]} */ names) => ({
         counts: names.map((name) => ({terms: name === title ? 1 : 0})),
     }));
-    const findTermsBulk = vi.fn().mockImplementation(async (terms, names) => (
+    const findTermsBulk = vi.fn().mockImplementation(async (/** @type {string[]} */ terms, /** @type {Set<string>} */ names) => (
         names.has(title) && terms.some((term) => term === expression || term === reading) ?
             [{dictionary: title, term: expression, reading}] :
             []
@@ -69,11 +69,11 @@ function fixture(title, expression, reading) {
 describe('persisted identity through runtime verification', () => {
     test.each(['Dictionary', ' Dictionary ', '\ufeffDictionary', '\tDictionary\t', ' '])('keeps title %j through the public probe and visibility APIs', async (title) => {
         const {backend, database, getDictionaryCounts} = fixture(title, '猫', 'ねこ');
-        const probe = await Reflect.get(backend, '_onApiGetDictionaryTermProbe').call(backend, {dictionaryTitle: title});
+        const probe = await Reflect.get(backend, '_onApiGetDictionaryTermProbe').call(backend, {dictionaryTitle: title}, {});
         expect(probe).toEqual({expression: '猫', reading: 'ねこ'});
         const result = await Reflect.get(backend, '_onApiVerifyDictionaryVisibility').call(backend, {
             dictionaryTitle: title, requireEnabledForActiveProfile: true,
-        });
+        }, {});
         expect(result).toMatchObject({ok: true, dictionaryTitle: title, installed: true, enabled: true, directMatch: true, translatorMatch: true});
         expect(getDictionaryCounts).toHaveBeenCalledWith([title], false);
         expect(Reflect.get(database, '_termRecordStore').ensureDictionariesLoaded).toHaveBeenCalledWith([`${title} [records]`]);
@@ -85,7 +85,7 @@ describe('persisted identity through runtime verification', () => {
         expect(await database.getDictionaryTermProbe('Dictionary')).toEqual({expression, reading});
         const result = await Reflect.get(backend, '_onApiVerifyDictionaryVisibility').call(backend, {
             dictionaryTitle: 'Dictionary', requireEnabledForActiveProfile: true,
-        });
+        }, {});
         expect(result).toMatchObject({ok: true, directMatch: true, translatorMatch: true});
         expect(findTermsBulk).toHaveBeenCalledWith([expression, reading], new Set(['Dictionary']), 'exact');
         expect(findTerms).toHaveBeenCalledWith('split', expression, expect.objectContaining({mainDictionary: 'Dictionary'}));
@@ -97,7 +97,7 @@ describe('persisted identity through runtime verification', () => {
             const {backend, findTerms, findTermsBulk} = fixture('Dictionary', expression, reading);
             const result = await Reflect.get(backend, '_onApiVerifyDictionaryVisibility').call(backend, {
                 dictionaryTitle: 'Dictionary', requireEnabledForActiveProfile: true,
-            });
+            }, {});
             expect(result.ok).toBe(true);
             expect(findTermsBulk).toHaveBeenCalledWith([reading], new Set(['Dictionary']), 'exact');
             expect(findTerms).toHaveBeenCalledWith('split', reading, expect.any(Object));
@@ -108,18 +108,18 @@ describe('persisted identity through runtime verification', () => {
         const {backend} = fixture('Dictionary', '猫', 'ねこ');
         const result = await Reflect.get(backend, '_onApiVerifyDictionaryVisibility').call(backend, {
             dictionaryTitle: ' Dictionary ', requireEnabledForActiveProfile: true,
-        });
+        }, {});
         expect(result).toMatchObject({ok: false, dictionaryTitle: ' Dictionary ', installed: false, reason: 'dictionary-not-installed'});
-        expect(await Reflect.get(backend, '_onApiGetDictionaryTermProbe').call(backend, {dictionaryTitle: ' Dictionary '})).toBeNull();
+        expect(await Reflect.get(backend, '_onApiGetDictionaryTermProbe').call(backend, {dictionaryTitle: ' Dictionary '}, {})).toBeNull();
     });
 
     test('empty identifiers and empty fields retain their existing rejection behavior', async () => {
         const {backend, database, getByIdsAsync} = fixture('Dictionary', '', '');
-        expect(await Reflect.get(backend, '_onApiGetDictionaryTermProbe').call(backend, {dictionaryTitle: ''})).toBeNull();
+        expect(await Reflect.get(backend, '_onApiGetDictionaryTermProbe').call(backend, {dictionaryTitle: ''}, {})).toBeNull();
         expect(getByIdsAsync).not.toHaveBeenCalled();
         const result = await Reflect.get(backend, '_onApiVerifyDictionaryVisibility').call(backend, {
             dictionaryTitle: '', requireEnabledForActiveProfile: true,
-        });
+        }, {});
         expect(result).toMatchObject({ok: false, reason: 'missing-dictionary-title'});
         expect(await database.getDictionaryTermProbe('Dictionary')).toBeNull();
     });
@@ -137,7 +137,7 @@ describe('persisted identity through runtime verification', () => {
             const getDictionaryTermProbe = vi.fn().mockResolvedValue({expression: '\ufeff猫 ', reading: ' ねこ '});
             Reflect.set(frontend, '_application', {api: {getDictionaryTermProbe}});
             Reflect.set(frontend, '_getPageLookupPrewarmTerms', () => []);
-            const options = {dictionaries: [{name: ' Dictionary ', enabled: true}]};
+            const options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: [{name: ' Dictionary ', enabled: true}]}));
             expect(await Reflect.get(frontend, '_getLookupPrewarmTerms').call(frontend, options)).toEqual([
                 '日本', 'する', 'ある', '見る', '\ufeff猫 ', ' ねこ ',
             ]);
@@ -165,7 +165,7 @@ describe('persisted identity through runtime verification', () => {
         Reflect.set(owner, '_dictionaryDatabase', database);
         const method = kind === 'backend' ? '_debugDictionaryLookupStateLocal' : '_debugDictionaryLookupState';
         const result = await Reflect.get(owner, method).call(owner, '\ufeff猫 ', [...titles, '']);
-        expect(result.directHits.map(({dictionary}) => dictionary)).toEqual(titles);
+        expect(result.directHits.map((/** @type {{dictionary: string}} */ {dictionary}) => dictionary)).toEqual(titles);
         for (const title of titles) {
             expect(findDirectTermIds).toHaveBeenCalledWith(title, '\ufeff猫 ', 'expression');
             expect(findDirectTermIds).toHaveBeenCalledWith(title, '\ufeff猫 ', 'reading');
