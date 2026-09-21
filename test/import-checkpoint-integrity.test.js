@@ -83,7 +83,7 @@ function createSizedDirectory(sizes) {
             for (const [name, size] of Object.entries(sizes)) {
                 yield [name, {
                     kind: 'file',
-                    async getFile() { return {size} },;
+                    async getFile() { return {size}; },
                 }];
             }
         },
