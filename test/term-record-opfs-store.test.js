@@ -3474,8 +3474,8 @@ describe('TermRecordOpfsStore', () => {
         const fileBytesByName = new Map();
         const writeGate = {
             enabled: false,
-            entered: Promise.withResolvers<void>(),
-            resume: Promise.withResolvers<void>(),
+            entered: /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers()),
+            resume: /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers()),
         };
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
             beforeWrite: async (name) => {
