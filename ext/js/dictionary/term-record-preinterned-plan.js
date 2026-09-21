@@ -354,7 +354,10 @@ export function getValidatedStringOffsets(plan) {
 function getOwnedCompactionScratch(plan, scratch, readingEqualsExpressionList) {
     if (plan.stringLengths.length === 0) { return scratch; }
     const scratchEnd = scratch.byteOffset + plan.stringLengths.length * Uint32Array.BYTES_PER_ELEMENT;
-    /** @param {unknown} view */
+    /**
+     * @param {unknown} view
+     * @returns {boolean}
+     */
     const overlaps = (view) => (
         ArrayBuffer.isView(view) && view.buffer === scratch.buffer && view.byteLength > 0 &&
         scratch.byteOffset < view.byteOffset + view.byteLength && view.byteOffset < scratchEnd
