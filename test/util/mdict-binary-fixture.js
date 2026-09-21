@@ -85,7 +85,7 @@ export function makeMdictFixture(entries, options = {}) {
         mdd = false,
         encoding = 'utf8',
         encodingLabel = encoding === 'utf16le' ? 'UTF-16' : 'UTF-8',
-        textEncoder = (value) => new Uint8Array(Buffer.from(value, encoding)),
+        textEncoder = /** @param {string} value @returns {Uint8Array} */ (value) => new Uint8Array(Buffer.from(value, encoding)),
         encrypted = 0,
         compression = 'zlib',
         recordBlockSize = 64,
