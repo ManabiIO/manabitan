@@ -1247,10 +1247,11 @@ function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetR
     if (lowered.startsWith('bword://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
     if (lowered.startsWith('d:') || lowered.startsWith('x:')) { return createSearchHref(value.slice(2)); }
     if (lowered.startsWith('sound://')) {
+        if (!enableAudio) { return '#'; }
         const assetKey = normalizeReferencedAssetKey(value.slice(8), assetPrefix, null);
         if (assetKey !== null) { assetReferences.add(assetKey); }
         const assetPath = assetKey === null ? null : `${assetPrefix}${assetKey}`;
-        return enableAudio && assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
+        return assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
     }
     if (lowered.startsWith('http://') || lowered.startsWith('https://') || lowered.startsWith('mailto:') || lowered.startsWith('tel:')) {
         return value;
