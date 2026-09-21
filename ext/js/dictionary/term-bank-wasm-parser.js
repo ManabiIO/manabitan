@@ -447,7 +447,11 @@ function decodeJsonNumberToken(source, start) {
         if (value === U8_COMMA || value === 0x5d || value === 0x7d || isJsonWhitespace(value)) { break; }
         ++end;
     }
-    return Number(decodeParserText(source.subarray(start, end)));
+    const value = Number(decodeParserText(source.subarray(start, end)));
+    if (!Number.isFinite(value)) {
+        throw new RangeError('Term-bank number must be finite');
+    }
+    return value;
 }
 
 /**
