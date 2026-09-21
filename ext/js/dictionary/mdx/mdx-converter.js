@@ -421,13 +421,7 @@ function encodeMediaPath(value) {
  * @returns {string}
  */
 function createSearchHref(query) {
-    let decodedQuery = query;
-    try {
-        decodedQuery = decodeURIComponent(query);
-    } catch (_error) {
-        // Preserve literal percent signs and malformed escapes in headwords.
-    }
-    return `?query=${encodeURIComponent(decodedQuery)}`;
+    return `?query=${encodeURIComponent(query)}`;
 }
 
 /**
@@ -530,9 +524,9 @@ function decodeDataUrl(value) {
     if (headerEnd < 0) { return null; }
     const header = value.slice(5, headerEnd);
     const payload = value.slice(headerEnd + 1);
-    const parts = header.split(';').map((part) => part.trim()).filter((part) => part.length > 0);
-    const mediaType = (parts[0] || 'text/plain').toLowerCase();
-    const isBase64 = parts.slice(1).some((part) => part.toLowerCase() === 'base64');
+    const parts = header.split(';').map((part) => part.trim());
+    const mediaType = (parts.shift() || 'text/plain').toLowerCase();
+    const isBase64 = parts.some((part) => part.toLowerCase() === 'base64');
     try {
         if (isBase64) {
             return {mediaType, data: new Uint8Array(base64ToArrayBuffer(decodeURIComponent(payload)))};
@@ -1315,6 +1309,60 @@ function buildStructuredData(attrs) {
 }
 
 /**
+ * Split an inline declaration list without treating semicolons inside strings,
+ * comments, or functions as declaration boundaries.
+ * @param {string} styleText
+ * @returns {string[]}
+ */
+function splitInlineCssDeclarations(styleText) {
+    const declarations = [];
+    let startIndex = 0;
+    let quote = '';
+    let parenDepth = 0;
+    for (let index = 0; index < styleText.length; index += 1) {
+        const character = styleText[index];
+        if (styleText.startsWith('/*', index) && quote.length === 0) {
+            const commentEnd = styleText.indexOf('*/', index + 2);
+            if (commentEnd < 0) { break; }
+            index = commentEnd + 1;
+            continue;
+        }
+        if (quote.length > 0) {
+            if (character === '\\') {
+                index += 1;
+            } else if (character === quote) {
+                quote = '';
+            }
+            continue;
+        }
+        switch (character) {
+            case '"':
+            case "'": {
+                quote = character;
+                break;
+            }
+            case '(': {
+                parenDepth += 1;
+                break;
+            }
+            case ')': {
+                parenDepth = Math.max(0, parenDepth - 1);
+                break;
+            }
+            case ';': {
+                if (parenDepth === 0) {
+                    declarations.push(styleText.slice(startIndex, index));
+                    startIndex = index + 1;
+                }
+                break;
+            }
+        }
+    }
+    declarations.push(styleText.slice(startIndex));
+    return declarations;
+}
+
+/**
  * @param {string|null|undefined} styleText
  * @param {string} assetPrefix
  * @param {Set<string>} assetReferences
@@ -1324,13 +1372,14 @@ function convertInlineStyle(styleText, assetPrefix, assetReferences) {
     if (typeof styleText !== 'string' || styleText.trim().length === 0) { return null; }
     /** @type {Record<string, string|string[]>} */
     const style = {};
-    for (const declaration of styleText.split(';')) {
+    for (const rawDeclaration of splitInlineCssDeclarations(styleText)) {
+        const declaration = rawDeclaration.replace(/\/\*[\s\S]*?\*\//gu, '');
         const separator = declaration.indexOf(':');
         if (separator < 0) { continue; }
         const propertyName = declaration.slice(0, separator).trim().toLowerCase();
         let value = declaration.slice(separator + 1).trim();
         if (propertyName.length === 0 || value.length === 0) { continue; }
-        if (value.includes('url(')) {
+        if (/url\(/iu.test(value)) {
             value = rewriteCssAssetUrls(value, assetPrefix, null, assetReferences);
         }
         if (propertyName === 'text-decoration' || propertyName === 'text-decoration-line') {
@@ -1356,12 +1405,13 @@ function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetR
     const lowered = value.toLowerCase();
     if (lowered.startsWith('entry://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
     if (lowered.startsWith('bword://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
-    if (lowered.startsWith('d:') || lowered.startsWith('x:')) { return createSearchHref(value.slice(2)); }
+    if (lowered.startsWith('d:') || lowered.startsWith('x:')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(2))); }
     if (lowered.startsWith('sound://')) {
+        if (!enableAudio) { return '#'; }
         const assetKey = normalizeReferencedAssetKey(value.slice(8), assetPrefix, null);
         if (assetKey !== null) { assetReferences.add(assetKey); }
         const assetPath = assetKey === null ? null : `${assetPrefix}${assetKey}`;
-        return enableAudio && assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
+        return assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
     }
     if (lowered.startsWith('http://') || lowered.startsWith('https://') || lowered.startsWith('mailto:') || lowered.startsWith('tel:')) {
         return value;
