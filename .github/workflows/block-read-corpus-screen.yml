@@ -1,0 +1,108 @@
+name: Block read real-corpus activation screen
+on:
+  push:
+    branches: [codex/qualify-block-read-corpus-20260921b]
+permissions:
+  contents: read
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Pin shared accepted source and retain identical observer
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/block-read-corpus"
+          cp dev/perf/block-read-observer-qualification.js "$RUNNER_TEMP/block-read-corpus/observer.js"
+          git switch --detach f0b2ef32fc0d26d68051acf2fb8fda8dc7639c2a
+          git show f0b2ef32fc0d26d68051acf2fb8fda8dc7639c2a:ext/js/dictionary/term-content-block-store.js > "$RUNNER_TEMP/block-read-corpus/A-original.js"
+          git show d3327ecbb8dec4eced95c33c8db0ee94238e6625:ext/js/dictionary/term-content-block-store.js > "$RUNNER_TEMP/block-read-corpus/B-original.js"
+          git rev-parse HEAD > "$RUNNER_TEMP/block-read-corpus/accepted-base.txt"
+          cp test/perf/dictionaries.lock.json "$RUNNER_TEMP/block-read-corpus/dictionaries.lock.json"
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('ext/js/dictionary/dictionary-database.js'); s=p.read_text()
+          needle='compressionExperiments: this._termContentBlockStore.getDiagnostics().compressionExperiments,'
+          assert s.count(needle)==1
+          s=s.replace(needle, needle+'\n                    blockReadQualification: this._termContentBlockStore.getDiagnostics().qualification,')
+          p.write_text(s)
+          PY
+      - uses: ./.github/actions/setup
+      - name: Install real Chromium
+        run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: chromium-e2e-dictionaries-${{ runner.os }}-v1
+      - name: Build both isolated diagnostic packages
+        run: |
+          set -euo pipefail
+          node dev/perf/host-environment.js > "$RUNNER_TEMP/block-read-corpus/host.json"
+          for variant in A B; do
+            cat "$RUNNER_TEMP/block-read-corpus/$variant-original.js" "$RUNNER_TEMP/block-read-corpus/observer.js" > ext/js/dictionary/term-content-block-store.js
+            node --check ext/js/dictionary/term-content-block-store.js
+            node dev/bin/build.js --target chrome-dev > "$RUNNER_TEMP/block-read-corpus/$variant-build.log" 2>&1
+            cp builds/manabitan-chrome-dev.zip "$RUNNER_TEMP/$variant-block-read-diagnostic.zip"
+            sha256sum ext/js/dictionary/term-content-block-store.js builds/manabitan-chrome-dev.zip > "$RUNNER_TEMP/block-read-corpus/$variant-fingerprints.txt"
+          done
+      - name: Real default-path imports with fresh browser profiles
+        run: |
+          set -euo pipefail
+          export MANABITAN_CHROMIUM_HEADLESS=1
+          export MANABITAN_E2E_STRICT_RUNTIME=1
+          export MANABITAN_E2E_IMPORT_BENCH_QUICK=1
+          export MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK=1
+          export MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS=1
+          export MANABITAN_E2E_PHASE_PROFILING=0
+          export MANABITAN_E2E_PHASE_SCREENSHOTS=0
+          export MANABITAN_E2E_PROCESS_SAMPLING=1
+          export MANABITAN_E2E_SKIP_BUILD=1
+          export MANABITAN_CHROMIUM_E2E_MAX_LOG_LINES=10000
+          unset MANABITAN_E2E_IMPORT_FLAGS_JSON
+          for spec in A:jmdict B:jmdict B:jitendex A:jitendex; do
+            variant=${spec%%:*}
+            dictionary=${spec#*:}
+            cp "$RUNNER_TEMP/$variant-block-read-diagnostic.zip" builds/manabitan-chrome-dev.zip
+            export MANABITAN_E2E_IMPORT_BENCH_DICTIONARY="$dictionary"
+            export MANABITAN_CHROMIUM_E2E_REPORT="$RUNNER_TEMP/block-read-corpus/$dictionary-$variant.html"
+            xvfb-run -a node test/chromium/extension-two-dictionary-import.e2e.js > "$RUNNER_TEMP/block-read-corpus/$dictionary-$variant.log" 2>&1
+          done
+      - name: Validate reports and extract activation evidence
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,pathlib
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'block-read-corpus'
+          summary=[]
+          def find(value,key):
+              if isinstance(value,dict):
+                  if key in value: yield value[key]
+                  for v in value.values(): yield from find(v,key)
+              elif isinstance(value,list):
+                  for v in value: yield from find(v,key)
+          for dictionary in ['jmdict','jitendex']:
+              for variant in ['A','B']:
+                  path=root/f'{dictionary}-{variant}.json'; d=json.loads(path.read_text())
+                  assert d['status']=='success',path
+                  metrics=list(find(d,'blockReadQualification'))
+                  assert metrics, f'Missing import-finalization counters: {path}'
+                  d['qualificationScope']='Instrumented default-path activation screen; four single runs are not timing or total-memory qualification; quick mode does not qualify full restart'
+                  d['authoritativeTiming']=False
+                  path.write_text(json.dumps(d,ensure_ascii=False,indent=2))
+                  summary.append({'dictionary':dictionary,'variant':variant,'metrics':metrics,'validation':d.get('benchmark',{}).get('validation')})
+          (root/'activation-summary.json').write_text(json.dumps({'scope':'Instrumented Chromium real-corpus activation screen, not a performance promotion','runs':summary},ensure_ascii=False,indent=2))
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+      - name: Preserve all results and diagnostic source fingerprints
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block-read-corpus-activation
+          path: ${{ runner.temp }}/block-read-corpus/
+          retention-days: 14
