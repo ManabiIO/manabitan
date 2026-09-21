@@ -439,6 +439,7 @@ function decodeRawToken(source, start, length) {
  * @param {Uint8Array} source
  * @param {number} start
  * @returns {number}
+ * @throws {RangeError} If the validated JSON number is not finite.
  */
 function decodeJsonNumberToken(source, start) {
     let end = start;
