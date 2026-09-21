@@ -11,6 +11,8 @@ export class Mdict extends MdictBase {
     constructor(fname, source, options) {
         var _a, _b, _c, _d, _e, _f;
         options = options || {};
+        const isStripKeyOverride = typeof options.isStripKey === 'boolean' ? options.isStripKey : null;
+        const isCaseSensitiveOverride = typeof options.isCaseSensitive === 'boolean' ? options.isCaseSensitive : null;
         const recordBlockCacheBytes = options.recordBlockCacheBytes ?? 0;
         if (!Number.isSafeInteger(recordBlockCacheBytes) || recordBlockCacheBytes < 0) {
             throw new RangeError('Invalid MDict record block cache budget');
@@ -32,6 +34,9 @@ export class Mdict extends MdictBase {
         };
         const passcode = options.passcode || undefined;
         super(fname, source, passcode, options);
+        this._isStripKeyOverride = isStripKeyOverride;
+        this._isCaseSensitiveOverride = isCaseSensitiveOverride;
+        this._lookupKeywordList = null;
         this._recordBlockCache = new Map();
         this._recordBlockCacheSize = 0;
     }
@@ -41,24 +46,31 @@ export class Mdict extends MdictBase {
      * the `recordStartOffset` should indicate the unpacked record data relative offset
      * @param word the target word phrase
      */
+    _getLookupKeywordList() {
+        if (this._lookupKeywordList !== null) { return this._lookupKeywordList; }
+        const list = [...this.keywordList];
+        list.sort((item1, item2) => {
+            const result = this.comp(this.strip(item1.keyText), this.strip(item2.keyText));
+            return result !== 0 ? result : this.comp(item1.keyText, item2.keyText);
+        });
+        this._lookupKeywordList = list;
+        return list;
+    }
     lookupKeyBlockByWord(word, isAssociate = false) {
-        // const keyBlockInfoId = this.lookupKeyInfoByWord(word);
-        // if (keyBlockInfoId < 0) {
-        //   return undefined;
-        // }
-        // TODO: if the this.list length parse too slow, can decode by below code
-        // const list = this.lookupPartialKeyBlockListByKeyInfoId(keyInfoId);
-        const list = this.keywordList;
+        // Direct lookup must use the dictionary's StripKey/KeyCaseSensitive
+        // rules rather than the source spelling used by the import iterator.
+        const list = this._getLookupKeywordList();
         if (list.length === 0) {
             return undefined;
         }
+        const normalizedWord = this.strip(word);
         // binary search
         let left = 0;
         let right = list.length - 1;
         let mid = 0;
         while (left <= right) {
             mid = left + ((right - left) >> 1);
-            const compRes = this.comp(word, list[mid].keyText);
+            const compRes = this.comp(normalizedWord, this.strip(list[mid].keyText));
             if (compRes > 0) {
                 left = mid + 1;
             }
@@ -69,7 +81,7 @@ export class Mdict extends MdictBase {
                 right = mid - 1;
             }
         }
-        if (this.comp(word, list[mid].keyText) != 0) {
+        if (this.comp(normalizedWord, this.strip(list[mid].keyText)) != 0) {
             if (!isAssociate) {
                 return undefined;
             }
