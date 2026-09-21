@@ -1002,6 +1002,46 @@ describe('convertMdxToArchive', () => {
         }));
     });
 
+    test('rewrites source tags inside selector-list pseudo-classes', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Functional selector fixture', Description: ''},
+            entries: [{
+                keyText: 'Styled',
+                definition: '<div class="outer"><b class="accent">Bold</b><i>Italic</i><strong>Strong</strong><em>Em</em></div>',
+            }],
+        });
+        mockState.mddFactory = () => [{
+            keyText: 'styles/theme.css',
+            value: new TextEncoder().encode([
+                '.outer:is(b, i, .accent) { color: red; }',
+                ':not(strong) > em { font-style: italic; }',
+                '.outer:has(> b) { border-width: 1px; }',
+                ':where(html, body) .outer { display: block; }',
+                ':rooted .outer { opacity: 0.5; }',
+            ].join('\n')),
+        }];
+
+        const result = await convertMdxToArchive(
+            'functional-selector-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'functional-selector-fixture.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const stylesCss = await zip.file('styles.css')?.async('text');
+
+        expect(stylesCss).toContain(
+            '[data-sc-class~="outer"]:is([data-sc-tag="b"], [data-sc-tag="i"], [data-sc-class~="accent"])',
+        );
+        expect(stylesCss).toContain(':not([data-sc-tag="strong"]) > [data-sc-tag="em"]');
+        expect(stylesCss).toContain('[data-sc-class~="outer"]:has(> [data-sc-tag="b"])');
+        expect(stylesCss).toContain(
+            ':where([data-sc-class~="mdict-yomitan-content"], [data-sc-class~="mdict-yomitan-content"]) [data-sc-class~="outer"]',
+        );
+        expect(stylesCss).toContain(':rooted [data-sc-class~="outer"]');
+        expect(stylesCss).not.toContain('[data-sc-class~="mdict-yomitan-content"]ed');
+    });
+
     test('rewrites only real CSS url() tokens and preserves escaped closing parentheses', async () => {
         mockState.mdxFactory = () => ({
             header: {Title: 'CSS URL token fixture', Description: ''},

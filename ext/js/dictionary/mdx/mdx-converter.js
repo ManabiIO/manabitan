@@ -220,6 +220,7 @@ const EMBEDDED_ASSET_EXTENSION_MAP = new Map([
     ['image/webp', '.webp'],
 ]);
 const NULL_CHARACTER = String.fromCodePoint(0);
+const SELECTOR_LIST_PSEUDO_CLASSES = new Set(['has', 'is', 'not', 'where']);
 
 class EmbeddedAssetCollector {
     /**
@@ -994,6 +995,58 @@ function rewriteCssAttributeSelector(attributeSelector) {
 
 /**
  * @param {string} selector
+ * @param {number} openParenIndex
+ * @returns {{content: string, endIndex: number}|null}
+ */
+function readCssParenthesizedContent(selector, openParenIndex) {
+    if (selector[openParenIndex] !== '(') { return null; }
+    let quote = '';
+    let depth = 1;
+    for (let index = openParenIndex + 1; index < selector.length; index += 1) {
+        const character = selector[index];
+        if (quote.length > 0) {
+            if (character === '\\') {
+                const escape = readCssEscape(selector, index);
+                index = escape === null ? index + 1 : escape.endIndex - 1;
+            } else if (character === quote) {
+                quote = '';
+            }
+            continue;
+        }
+        if (character === '\\') {
+            const escape = readCssEscape(selector, index);
+            if (escape !== null) {
+                index = escape.endIndex - 1;
+                continue;
+            }
+        }
+        switch (character) {
+            case '"':
+            case "'": {
+                quote = character;
+                break;
+            }
+            case '(': {
+                depth += 1;
+                break;
+            }
+            case ')': {
+                depth -= 1;
+                if (depth === 0) {
+                    return {
+                        content: selector.slice(openParenIndex + 1, index),
+                        endIndex: index + 1,
+                    };
+                }
+                break;
+            }
+        }
+    }
+    return null;
+}
+
+/**
+ * @param {string} selector
  * @param {string} glossaryRootSelector
  * @returns {string}
  */
@@ -1004,11 +1057,33 @@ function migrateCssSelectorSegment(selector, glossaryRootSelector) {
     let expectTagName = true;
     while (index < selector.length) {
         const character = selector[index];
-        if (character === ':' && selector.startsWith(':root', index)) {
-            parts.push(glossaryRootSelector);
-            index += 5;
-            expectTagName = false;
-            continue;
+        if (character === ':' && selector[index + 1] !== ':') {
+            const pseudo = readCssIdentifier(selector, index + 1);
+            if (pseudo.value !== null) {
+                const pseudoName = pseudo.value.toLowerCase();
+                if (pseudoName === 'root') {
+                    parts.push(glossaryRootSelector);
+                    index = pseudo.endIndex;
+                    expectTagName = false;
+                    continue;
+                }
+                if (SELECTOR_LIST_PSEUDO_CLASSES.has(pseudoName) && selector[pseudo.endIndex] === '(') {
+                    const functionContent = readCssParenthesizedContent(selector, pseudo.endIndex);
+                    if (functionContent !== null) {
+                        const migratedContent = splitCssSelectorList(functionContent.content)
+                            .map((item) => migrateCssSelector(item, glossaryRootSelector))
+                            .join(', ');
+                        parts.push(
+                            selector.slice(index, pseudo.endIndex + 1),
+                            migratedContent,
+                            ')',
+                        );
+                        index = functionContent.endIndex;
+                        expectTagName = false;
+                        continue;
+                    }
+                }
+            }
         }
         if (character === '.') {
             const {value, endIndex} = readCssIdentifier(selector, index + 1);
