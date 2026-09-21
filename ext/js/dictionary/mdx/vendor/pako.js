@@ -18,14 +18,64 @@
 import './pako-inflate.js';
 
 /**
+ * @typedef {{
+ *   inflate?: ((bytes: Uint8Array) => Uint8Array),
+ *   Inflate?: new (options?: {chunkSize?: number}) => {
+ *     push: (bytes: Uint8Array, final: boolean) => boolean,
+ *     err: number,
+ *     msg: string,
+ *     onData: (chunk: Uint8Array) => void
+ *   }
+ * }} PakoInflateApi
+ */
+
+/**
  * @param {Uint8Array} bytes
+ * @param {number|null} [maxOutputSize]
  * @returns {Uint8Array}
  * @throws {Error}
  */
-export function inflateSync(bytes) {
-    const pako = /** @type {{inflate?: ((bytes: Uint8Array) => Uint8Array)}|undefined} */ (Reflect.get(globalThis, 'pako'));
-    if (typeof pako?.inflate !== 'function') {
-        throw new Error('pako.inflate is unavailable');
+export function inflateSync(bytes, maxOutputSize = null) {
+    const pako = /** @type {PakoInflateApi|undefined} */ (Reflect.get(globalThis, 'pako'));
+    if (maxOutputSize === null) {
+        if (typeof pako?.inflate !== 'function') {
+            throw new Error('pako.inflate is unavailable');
+        }
+        return pako.inflate(bytes);
     }
-    return pako.inflate(bytes);
+    if (!Number.isSafeInteger(maxOutputSize) || maxOutputSize < 0) {
+        throw new RangeError('Invalid MDict decompression output limit');
+    }
+    if (typeof pako?.Inflate !== 'function') {
+        throw new Error('pako.Inflate is unavailable');
+    }
+
+    // Ask pako for chunks no larger than one byte past the declared limit.
+    // The callback rejects before retaining an over-limit chunk, so malformed
+    // compressed data cannot inflate arbitrarily before the caller's size check.
+    const chunkSize = Math.max(1, Math.min(16 * 1024, maxOutputSize + 1));
+    const inflator = new pako.Inflate({chunkSize});
+    /** @type {Uint8Array[]} */
+    const chunks = [];
+    let outputSize = 0;
+    inflator.onData = (chunk) => {
+        const nextOutputSize = outputSize + chunk.byteLength;
+        if (!Number.isSafeInteger(nextOutputSize) || nextOutputSize > maxOutputSize) {
+            throw new RangeError(`MDict decompressed block exceeds declared size of ${maxOutputSize} bytes`);
+        }
+        chunks.push(chunk);
+        outputSize = nextOutputSize;
+    };
+
+    const ok = inflator.push(bytes, true);
+    if (!ok || inflator.err !== 0) {
+        throw new Error(inflator.msg || 'MDict zlib decompression failed');
+    }
+    const result = new Uint8Array(outputSize);
+    let offset = 0;
+    for (const chunk of chunks) {
+        result.set(chunk, offset);
+        offset += chunk.byteLength;
+    }
+    return result;
 }

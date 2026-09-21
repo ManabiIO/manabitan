@@ -4,6 +4,9 @@ import common from './utils.js';
 import lzo1x from './lzo1x-wrapper.js';
 import {inflateSync} from '../pako.js';
 import {bytesToHex} from '../../browser-util.js';
+
+const DEFAULT_MAX_DECOMPRESSED_BLOCK_BYTES = 256 * 1024 * 1024;
+
 export class Mdict extends MdictBase {
     constructor(fname, source, options) {
         var _a, _b, _c, _d, _e, _f;
@@ -11,6 +14,10 @@ export class Mdict extends MdictBase {
         const recordBlockCacheBytes = options.recordBlockCacheBytes ?? 0;
         if (!Number.isSafeInteger(recordBlockCacheBytes) || recordBlockCacheBytes < 0) {
             throw new RangeError('Invalid MDict record block cache budget');
+        }
+        const maxDecompressedBlockBytes = options.maxDecompressedBlockBytes ?? DEFAULT_MAX_DECOMPRESSED_BLOCK_BYTES;
+        if (!Number.isSafeInteger(maxDecompressedBlockBytes) || maxDecompressedBlockBytes < 0) {
+            throw new RangeError('Invalid MDict decompressed block limit');
         }
         // default options
         options = {
@@ -21,6 +28,7 @@ export class Mdict extends MdictBase {
             isCaseSensitive: (_e = options.isCaseSensitive) !== null && _e !== void 0 ? _e : true,
             encryptType: (_f = options.encryptType) !== null && _f !== void 0 ? _f : -1,
             recordBlockCacheBytes,
+            maxDecompressedBlockBytes,
         };
         const passcode = options.passcode || undefined;
         super(fname, source, passcode, options);
@@ -197,8 +205,9 @@ export class Mdict extends MdictBase {
     }
     decompressBuff(recordBuffer, unpackSize) {
         if (!(recordBuffer instanceof Uint8Array) || recordBuffer.byteLength < 8 ||
-            !Number.isSafeInteger(unpackSize) || unpackSize < 0) {
-            throw new RangeError('Invalid MDict compressed block');
+            !Number.isSafeInteger(unpackSize) || unpackSize < 0 ||
+            unpackSize > this.options.maxDecompressedBlockBytes) {
+            throw new RangeError('Invalid or oversized MDict compressed block');
         }
         // decompress
         // 4 bytes: compression type
@@ -224,10 +233,10 @@ export class Mdict extends MdictBase {
             }
             // decompress
             if (rbCompType === '01000000') {
-                unpackRecordBlockBuff = lzo1x.decompress(blockBufDecrypted, unpackSize, 1308672);
+                unpackRecordBlockBuff = lzo1x.decompress(blockBufDecrypted, unpackSize);
             } else if (rbCompType === '02000000') {
                 // zlib decompress
-                unpackRecordBlockBuff = inflateSync(blockBufDecrypted);
+                unpackRecordBlockBuff = inflateSync(blockBufDecrypted, unpackSize);
             } else {
                 throw new Error(`cannot determine the record compression type: ${rbCompType}`);
             }
