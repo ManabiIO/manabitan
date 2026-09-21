@@ -267,7 +267,7 @@ class MddAssetResolver {
         this._dictionaries = [];
         /** @type {Map<string, {dictionaryIndex: number, item: MdictKeyword}>} */
         this._records = new Map();
-        /** @type {Map<string, {dictionaryIndex: number, item: MdictKeyword}>} */
+        /** @type {Map<string, {dictionaryIndex: number, item: MdictKeyword}|null>} */
         this._recordsLowercase = new Map();
         /** @type {string[]} */
         this._cssKeys = [];
@@ -285,8 +285,16 @@ class MddAssetResolver {
                     const record = {dictionaryIndex, item};
                     this._records.set(key, record);
                     const lowercaseKey = key.toLowerCase();
-                    if (!this._recordsLowercase.has(lowercaseKey)) {
+                    const lowercaseRecord = this._recordsLowercase.get(lowercaseKey);
+                    if (typeof lowercaseRecord === 'undefined') {
                         this._recordsLowercase.set(lowercaseKey, record);
+                    } else if (
+                        lowercaseRecord !== null &&
+                        normalizeAssetKey(lowercaseRecord.item.keyText) !== key
+                    ) {
+                        // An exact reference can still choose either record. A
+                        // case-insensitive fallback cannot choose safely.
+                        this._recordsLowercase.set(lowercaseKey, null);
                     }
                     if (key.toLowerCase().endsWith('.css')) {
                         this._cssKeys.push(key);
@@ -325,8 +333,11 @@ class MddAssetResolver {
      * @returns {Uint8Array|null}
      */
     getBytes(key) {
-        const entry = this._records.get(key) ?? this._recordsLowercase.get(key.toLowerCase());
-        if (typeof entry === 'undefined') { return null; }
+        let entry = this._records.get(key);
+        if (typeof entry === 'undefined') {
+            entry = this._recordsLowercase.get(key.toLowerCase()) ?? void 0;
+        }
+        if (typeof entry === 'undefined' || entry === null) { return null; }
         try {
             return this._dictionaries[entry.dictionaryIndex]?.lookupRecordByKeyBlock(entry.item) ?? null;
         } catch (_error) {
@@ -644,6 +655,37 @@ function rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetRefe
 }
 
 /**
+ * @param {string} value
+ * @param {number} startIndex
+ * @returns {{value: string, endIndex: number}|null}
+ */
+function readCssEscape(value, startIndex) {
+    if (value[startIndex] !== '\\' || startIndex + 1 >= value.length) { return null; }
+    let endIndex = startIndex + 1;
+    if (/[\n\r\f]/u.test(value[endIndex])) { return null; }
+
+    const hexMatch = value.slice(endIndex).match(/^[\da-f]{1,6}/iu);
+    if (hexMatch !== null) {
+        endIndex += hexMatch[0].length;
+        const codePoint = Number.parseInt(hexMatch[0], 16);
+        const decoded = (
+            codePoint === 0 ||
+            codePoint > 0x10ffff ||
+            (codePoint >= 0xd800 && codePoint <= 0xdfff)
+        ) ?
+            '\ufffd' :
+            String.fromCodePoint(codePoint);
+        if (endIndex < value.length && /\s/u.test(value[endIndex])) {
+            endIndex += 1;
+        }
+        return {value: decoded, endIndex};
+    }
+
+    const decoded = value[endIndex];
+    return {value: decoded, endIndex: endIndex + decoded.length};
+}
+
+/**
  * @param {string} selectorText
  * @returns {string[]}
  */
@@ -662,6 +704,13 @@ function splitCssSelectorList(selectorText) {
                 quote = '';
             }
             continue;
+        }
+        if (character === '\\') {
+            const escape = readCssEscape(selectorText, index);
+            if (escape !== null) {
+                index = escape.endIndex - 1;
+                continue;
+            }
         }
         switch (character) {
             case '"':
@@ -719,6 +768,13 @@ function splitSelectorByCombinators(selector) {
                 quote = '';
             }
             continue;
+        }
+        if (character === '\\') {
+            const escape = readCssEscape(selector, index);
+            if (escape !== null) {
+                index = escape.endIndex - 1;
+                continue;
+            }
         }
         switch (character) {
             case '"':
@@ -795,27 +851,10 @@ function readCssIdentifier(selector, startIndex) {
     while (index < selector.length) {
         const character = selector[index];
         if (character === '\\') {
-            if (index + 1 >= selector.length || /[\n\r\f]/u.test(selector[index + 1])) { break; }
-            let escapeEnd = index + 1;
-            let decoded = '';
-            const hexMatch = selector.slice(escapeEnd).match(/^[\da-f]{1,6}/iu);
-            if (hexMatch !== null) {
-                escapeEnd += hexMatch[0].length;
-                const codePoint = Number.parseInt(hexMatch[0], 16);
-                decoded = (
-                    codePoint === 0 ||
-                    codePoint > 0x10ffff ||
-                    (codePoint >= 0xd800 && codePoint <= 0xdfff)
-                ) ? '\ufffd' : String.fromCodePoint(codePoint);
-                if (escapeEnd < selector.length && /\s/u.test(selector[escapeEnd])) {
-                    escapeEnd += 1;
-                }
-            } else {
-                decoded = selector[escapeEnd];
-                escapeEnd += 1;
-            }
-            value += decoded;
-            index = escapeEnd;
+            const escape = readCssEscape(selector, index);
+            if (escape === null) { break; }
+            value += escape.value;
+            index = escape.endIndex;
             first = false;
             continue;
         }
