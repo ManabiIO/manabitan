@@ -2891,7 +2891,7 @@ null;
                 // Probe warming is best-effort; lookup correctness does not depend on it.
             }
         }
-        const uniqueTerms = [...new Set(terms.map((term) => `${term}`.trim()).filter((term) => term.length > 0))];
+        const uniqueTerms = [...new Set(terms.map((term) => `${term}`).filter((term) => term.length > 0))];
         if (uniqueTerms.length === 0) { return; }
         const startedAt = safePerformance.now();
         try {
@@ -3819,8 +3819,8 @@ null;
         if (probeId === null) { return null; }
         const record = (await this._termRecordStore.getByIdsAsync([probeId])).get(probeId);
         if (typeof record === 'undefined') { return null; }
-        const expression = this._asString(record.expression).trim();
-        const reading = this._asString(record.reading).trim();
+        const expression = this._asString(record.expression);
+        const reading = this._asString(record.reading);
         return expression.length === 0 && reading.length === 0 ? null : {expression, reading};
     }
 
