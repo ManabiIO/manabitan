@@ -37,9 +37,9 @@ describe('raw term content block references', () => {
     });
 
     test('rejects a legacy reference whose compressed block end is not safely representable', () => {
-        const bytes = encodeRawTermContentBlockReference(Number.MAX_SAFE_INTEGER, 1, 2, 0, 1)
-        expect(decodeRawTermContentBlockReference(bytes)).toBeNull()
-    })
+        const bytes = encodeRawTermContentBlockReference(Number.MAX_SAFE_INTEGER, 1, 2, 0, 1);
+        expect(decodeRawTermContentBlockReference(bytes)).toBeNull();
+    });
 
     test('keeps the existing little-endian uint64 offset layout', () => {
         const bytes = encodeRawTermContentBlockReference(0x100000002, 1, 2, 0, 1);
