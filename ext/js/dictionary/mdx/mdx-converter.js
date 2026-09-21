@@ -73,6 +73,9 @@ const ZipWriter = /** @type {typeof import('@zip.js/zip.js').ZipWriter} */ (/** 
  */
 
 const MDX_GLOSSARY_ROOT_CLASS = 'mdict-yomitan-content';
+// Conversion walks every definition, so cache decompressed MDX record blocks.
+// MDD resource lookup remains lazy and uncached.
+const MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES = 8 * 1024 * 1024;
 const STRUCTURED_CLASS_ATTR = 'data-sc-class';
 const STRUCTURED_ID_ATTR = 'data-sc-id';
 const STRUCTURED_TAG_ATTR = 'data-sc-tag';
@@ -1354,7 +1357,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         termBankSize = 10000,
     } = options;
 
-    const mdx = /** @type {MdxDictionaryLike} */ (new MDX(fileName, mdxBytes));
+    const mdx = /** @type {MdxDictionaryLike} */ (new MDX(fileName, mdxBytes, {recordBlockCacheBytes: MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES}));
     /** @type {MddAssetResolver|null} */
     let assetResolver = null;
     try {
