@@ -772,3 +772,27 @@ describe('MDict text format and compact styles', () => {
         });
     });
 });
+
+// Attribute values and CSS escape terminators are not selector whitespace.
+describe('MDict selector literal preservation', () => {
+    const rules = [
+        '[title="two  gaps"] { color: rgb(12, 34, 56); }',
+        '[title="tab\tgap"] { color: rgb(23, 45, 67); }',
+        String.raw`[title="line\a  break"] { color: rgb(34, 56, 78); }`,
+        ':is([title="two  gaps"]) { font-weight: 700; }',
+    ].join('\n');
+    for (const context of ['inline', 'conditional', 'external']) {
+        test(`preserves literal whitespace in ${context} selectors`, async () => {
+            const css = context === 'conditional' ? `@media screen { ${rules} }` : rules;
+            const external = context === 'external';
+            const mdx = makeMdictFixture([{key: 'Literal', value: `${external ? '' : `<style>${css}</style>`}<span title="two  gaps">literal</span>`}]);
+            const sources = external ? [{name: 'literals.mdd', bytes: makeMdictFixture([{key: '\\style.css', value: new TextEncoder().encode(css)}], {mdd: true}).bytes}] : [];
+            const result = await createMdxImportData('literals.mdx', {}, mdx.bytes, sources);
+            const styles = new TextDecoder().decode(result.files.get('styles.css'));
+            assert.ok(styles.includes('[title="two  gaps"]'));
+            assert.ok(styles.includes('[title="tab\tgap"]'));
+            assert.ok(styles.includes(String.raw`[title="line\a  break"]`));
+            assert.ok(styles.includes(':is([title="two  gaps"])'));
+        });
+    }
+});
