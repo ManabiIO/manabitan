@@ -16,6 +16,7 @@
  */
 
 import {makeFixturePng, makeMdictFixture} from '../util/mdict-binary-fixture.js';
+import {INLINE_STYLE_SCOPE_TITLE, makeInlineStyleScopeFixture} from '../util/mdict-inline-style-fixture.js';
 import {expect, test} from './playwright-util.js';
 
 /**
@@ -162,8 +163,8 @@ test('MDX native cross-block import preserves aliases, senses and media through 
     ]) {
         await expect(async () => {
             const backgroundImage = await target.evaluate((element) => getComputedStyle(element).backgroundImage);
-            expect(backgroundImage).toMatch(/^url\("blob:/u);
-            const match = /^url\("([^"]+)"\)$/u.exec(backgroundImage);
+            expect(backgroundImage).toMatch(/^url\\("blob:/u);
+            const match = /^url\\("([^"]+)"\\)$/u.exec(backgroundImage);
             expect(match).not.toBeNull();
             const bytes = await page.evaluate(async (url) => {
                 return [...new Uint8Array(await (await fetch(url)).arrayBuffer())];
@@ -187,4 +188,35 @@ test('MDX native cross-block import preserves aliases, senses and media through 
     expect(JSON.stringify(await lookup(reopened, '別名'))).toContain('second independent native sense');
     await assertStoredMedia(reopened, title, 'mdict-media/styles/images/green.png', green);
     await reopened.close();
+});
+
+
+test('MDX inline styles preserve functional roots, cascade and pseudo-elements without affecting a homograph', async ({page, extensionId}) => {
+    test.setTimeout(90_000);
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const fixture = makeInlineStyleScopeFixture();
+    await importFiles(page, extensionBaseUrl, [
+        {name: 'inline-scope.mdx', mimeType: 'application/octet-stream', buffer: Buffer.from(fixture.bytes)},
+    ], INLINE_STYLE_SCOPE_TITLE);
+    await page.goto(`${extensionBaseUrl}/search.html`);
+    await expect(page.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
+    await page.locator('#search-textbox').fill('猫');
+    await page.locator('#search-button').click();
+    const entries = page.locator('#dictionary-entries');
+    await expect(entries).toContainText('functional root', {timeout: 30_000});
+    await expect(entries).toContainText('unscoped entry');
+    await expect(entries.locator('[data-sc-class~="functional"]').first()).toHaveCSS('color', 'rgb(11, 22, 33)');
+    await expect(entries.locator('[data-sc-class~="where-root"]').first()).toHaveCSS('color', 'rgb(22, 33, 44)');
+    await expect(entries.locator('[data-sc-class~="cascade"]').first()).toHaveCSS('color', 'rgb(33, 44, 55)');
+    await expect(entries.locator('[data-sc-class~="nested"]').first()).toHaveCSS('font-weight', '700');
+    await expect(entries.locator('[title="two  gaps"]').first()).toHaveCSS('color', 'rgb(12, 34, 56)');
+    await expect(entries.locator('[title="two  gaps"]').first()).toHaveCSS('font-weight', '700');
+    await expect(entries.locator('[title="tab\tgap"]').first()).toHaveCSS('color', 'rgb(23, 45, 67)');
+    const scoped = entries.locator('[data-sc-class~="shared"]:not([data-sc-class~="outside"])').first();
+    const outside = entries.locator('[data-sc-class~="outside"]').first();
+    await expect(scoped).toHaveCSS('border-top-width', '3px');
+    await expect(outside).toHaveCSS('border-top-width', '0px');
+    expect(await scoped.evaluate((node) => getComputedStyle(node, '::before').content)).toBe('"scoped"');
+    expect(await scoped.evaluate((node) => getComputedStyle(node, '::after').content)).toBe('"legacy"');
+    expect(await outside.evaluate((node) => getComputedStyle(node, '::before').content)).toBe('none');
 });

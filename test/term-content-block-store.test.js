@@ -924,6 +924,19 @@ describe('TermContentBlockStore', () => {
         });
     });
 
+    test('classifies an unsafe legacy block address as corrupt instead of transiently unavailable', async () => {
+        const contentStore = new TermContentOpfsStore();
+        const [{offset: referenceOffset}] = await contentStore.appendBatch([
+            encodeRawTermContentBlockReference(Number.MAX_SAFE_INTEGER, 1, 2, 0, 1),
+        ]);
+        const blockStore = new TermContentBlockStore(contentStore);
+
+        await expect(blockStore.readDetailed(referenceOffset, 1, 'raw-block-v1')).resolves.toMatchObject({
+            status: 'corrupt',
+            reason: expect.stringContaining('reference'),
+        });
+    });
+
     test('rejects corrupted compressed block bytes before decompression', async () => {
         vi.mocked(decompressTermContentZstd).mockClear();
         const contentStore = new TermContentOpfsStore();

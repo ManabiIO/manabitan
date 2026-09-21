@@ -39,7 +39,7 @@ const ZipWriter = /** @type {typeof import('@zip.js/zip.js').ZipWriter} */ (/** 
  */
 
 /**
- * @typedef {{Title?: string, Description?: string, Format?: string, StyleSheet?: Record<string, string[]>}} MdictHeader
+ * @typedef {{Title?: string, Description?: string, Format?: string, StyleSheet?: Record<string, string[]>, KeyCaseSensitive?: string, StripKey?: string}} MdictHeader
  */
 
 /**
@@ -74,6 +74,7 @@ const ZipWriter = /** @type {typeof import('@zip.js/zip.js').ZipWriter} */ (/** 
  */
 
 const MDX_GLOSSARY_ROOT_CLASS = 'mdict-yomitan-content';
+const MDX_GLOSSARY_ENTRY_CLASS_PREFIX = 'mdict-yomitan-entry-';
 // Conversion walks every definition, so cache decompressed MDX record blocks.
 // MDD resource lookup remains lazy and uncached.
 const MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES = 8 * 1024 * 1024;
@@ -220,6 +221,7 @@ const EMBEDDED_ASSET_EXTENSION_MAP = new Map([
     ['image/webp', '.webp'],
 ]);
 const NULL_CHARACTER = String.fromCodePoint(0);
+const SELECTOR_LIST_PSEUDO_CLASSES = new Set(['has', 'is', 'not', 'where']);
 
 class EmbeddedAssetCollector {
     /**
@@ -421,13 +423,7 @@ function encodeMediaPath(value) {
  * @returns {string}
  */
 function createSearchHref(query) {
-    let decodedQuery = query;
-    try {
-        decodedQuery = decodeURIComponent(query);
-    } catch (_error) {
-        // Preserve literal percent signs and malformed escapes in headwords.
-    }
-    return `?query=${encodeURIComponent(decodedQuery)}`;
+    return `?query=${encodeURIComponent(query)}`;
 }
 
 /**
@@ -530,9 +526,9 @@ function decodeDataUrl(value) {
     if (headerEnd < 0) { return null; }
     const header = value.slice(5, headerEnd);
     const payload = value.slice(headerEnd + 1);
-    const parts = header.split(';').map((part) => part.trim()).filter((part) => part.length > 0);
-    const mediaType = (parts[0] || 'text/plain').toLowerCase();
-    const isBase64 = parts.slice(1).some((part) => part.toLowerCase() === 'base64');
+    const parts = header.split(';').map((part) => part.trim());
+    const mediaType = (parts.shift() || 'text/plain').toLowerCase();
+    const isBase64 = parts.some((part) => part.toLowerCase() === 'base64');
     try {
         if (isBase64) {
             return {mediaType, data: new Uint8Array(base64ToArrayBuffer(decodeURIComponent(payload)))};
@@ -562,16 +558,139 @@ function decodeDataUrl(value) {
  * @param {Uint8Array} bytes
  * @returns {string|null}
  */
+function getDeclaredStylesheetEncoding(bytes) {
+    let prefix = '';
+    const limit = Math.min(bytes.length, 128);
+    for (let index = 0; index < limit; index += 1) {
+        const byte = bytes[index];
+        if (byte > 0x7f) { break; }
+        prefix += String.fromCodePoint(byte);
+        if (byte === 0x3b) { break; }
+    }
+    const match = /^@charset\s+"([^"\r\n]+)"\s*;/iu.exec(prefix);
+    return match?.[1] ?? null;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {string|null}
+ */
+function getBomStylesheetEncoding(bytes) {
+    if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+        return 'utf-8';
+    }
+    if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
+        return 'utf-16le';
+    }
+    if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+        return 'utf-16be';
+    }
+    return null;
+}
+
+/**
+ * Recognize common BOM-less UTF-16 CSS by its ASCII NUL-byte pattern instead
+ * of trying UTF-16 against arbitrary legacy single-byte encodings.
+ * @param {Uint8Array} bytes
+ * @returns {string|null}
+ */
+function getLikelyUtf16StylesheetEncoding(bytes) {
+    const pairCount = Math.min(Math.floor(bytes.length / 2), 32);
+    if (pairCount < 2) { return null; }
+    let evenZeros = 0;
+    let oddZeros = 0;
+    for (let index = 0; index < pairCount * 2; index += 2) {
+        if (bytes[index] === 0) { evenZeros += 1; }
+        if (bytes[index + 1] === 0) { oddZeros += 1; }
+    }
+    const threshold = Math.max(2, Math.ceil(pairCount / 3));
+    if (oddZeros >= threshold && evenZeros === 0) { return 'utf-16le'; }
+    if (evenZeros >= threshold && oddZeros === 0) { return 'utf-16be'; }
+    return null;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {string} encoding
+ * @returns {string|null}
+ */
+function decodeStylesheetWithEncoding(bytes, encoding) {
+    try {
+        const decoded = new TextDecoder(encoding, {fatal: true}).decode(bytes);
+        const value = decoded
+            .replace(/^\ufeff?@charset\s+"[^"\r\n]+"\s*;\s*/iu, '')
+            .trim();
+        return value.length > 0 && !value.includes('\u0000') ? value : null;
+    } catch (_error) {
+        return null;
+    }
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {string|null}
+ */
 function decodeStylesheetAsset(bytes) {
-    for (const encoding of ['utf-8', 'utf-16', 'utf-16le', 'utf-16be']) {
-        try {
-            const value = new TextDecoder(encoding).decode(bytes).trim();
-            if (value.length > 0 && !value.includes('\u0000')) {
-                return value;
+    const bomEncoding = getBomStylesheetEncoding(bytes);
+    if (bomEncoding !== null) {
+        return decodeStylesheetWithEncoding(bytes, bomEncoding);
+    }
+
+    const declaredEncoding = getDeclaredStylesheetEncoding(bytes);
+    if (declaredEncoding !== null) {
+        return decodeStylesheetWithEncoding(bytes, declaredEncoding);
+    }
+
+    const utf8 = decodeStylesheetWithEncoding(bytes, 'utf-8');
+    if (utf8 !== null) { return utf8; }
+
+    const utf16Encoding = getLikelyUtf16StylesheetEncoding(bytes);
+    return utf16Encoding === null ? null : decodeStylesheetWithEncoding(bytes, utf16Encoding);
+}
+
+/**
+ * Parse a CSS url() token without treating escaped closing parentheses as the
+ * end of an unquoted value.
+ * @param {string} value
+ * @param {number} startIndex
+ * @returns {{path: string, endIndex: number}|null}
+ */
+function readCssUrlFunction(value, startIndex) {
+    if (value.slice(startIndex, startIndex + 4).toLowerCase() !== 'url(') { return null; }
+    let index = startIndex + 4;
+    while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+    if (index >= value.length) { return null; }
+
+    const quote = value[index] === '"' || value[index] === "'" ? value[index++] : '';
+    let path = '';
+    while (index < value.length) {
+        const character = value[index];
+        if (quote.length > 0) {
+            if (character === quote) {
+                index += 1;
+                while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+                return value[index] === ')' ? {path, endIndex: index + 1} : null;
             }
-        } catch (_error) {
-            // NOP
+            if (/[\n\r\f]/u.test(character)) { return null; }
+        } else {
+            if (character === ')') { return {path, endIndex: index + 1}; }
+            if (/\s/u.test(character)) {
+                while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+                return value[index] === ')' ? {path, endIndex: index + 1} : null;
+            }
+            if (character === '"' || character === "'" || character === '(' || /[\n\r\f]/u.test(character)) {
+                return null;
+            }
         }
+        if (character === '\\') {
+            const escape = readCssEscape(value, index);
+            if (escape === null) { return null; }
+            path += escape.value;
+            index = escape.endIndex;
+            continue;
+        }
+        path += character;
+        index += character.length;
     }
     return null;
 }
@@ -584,15 +703,62 @@ function decodeStylesheetAsset(bytes) {
  * @returns {string}
  */
 function rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetReferences = null) {
-    return stylesheet.replace(/url\(\s*(["']?)(.*?)\1\s*\)/giu, (match, _quote, rawPath) => {
-        const path = typeof rawPath === 'string' ? rawPath : '';
-        const assetKey = normalizeReferencedAssetKey(path, assetPrefix, sourceAssetPath);
+    const output = [];
+    let lastIndex = 0;
+    for (let index = 0; index < stylesheet.length;) {
+        if (stylesheet.startsWith('/*', index)) {
+            const commentEnd = stylesheet.indexOf('*/', index + 2);
+            index = commentEnd < 0 ? stylesheet.length : commentEnd + 2;
+            continue;
+        }
+        const character = stylesheet[index];
+        if (character === '"' || character === "'") {
+            const quote = character;
+            index += 1;
+            while (index < stylesheet.length) {
+                if (stylesheet[index] === '\\') {
+                    const escape = readCssEscape(stylesheet, index);
+                    index = escape === null ? index + 1 : escape.endIndex;
+                    continue;
+                }
+                if (stylesheet[index] === quote) {
+                    index += 1;
+                    break;
+                }
+                index += 1;
+            }
+            continue;
+        }
+        if (stylesheet.slice(index, index + 4).toLowerCase() !== 'url(') {
+            index += 1;
+            continue;
+        }
+        const previous = index > 0 ? stylesheet[index - 1] : '';
+        const previousCodePoint = previous.codePointAt(0) ?? 0;
+        if (/[A-Za-z0-9_-]/u.test(previous) || previousCodePoint >= 0x80) {
+            index += 1;
+            continue;
+        }
+        const token = readCssUrlFunction(stylesheet, index);
+        if (token === null) {
+            index += 1;
+            continue;
+        }
+        const assetKey = normalizeReferencedAssetKey(token.path, assetPrefix, sourceAssetPath);
         if (assetKey !== null && assetReferences !== null) {
             assetReferences.add(assetKey);
         }
-        const prefixedPath = assetKey === null ? null : `${assetPrefix}${assetKey}`;
-        return prefixedPath === null ? match : `url("${prefixedPath}")`;
-    });
+        if (assetKey !== null) {
+            output.push(
+                stylesheet.slice(lastIndex, index),
+                `url("${escapeCssString(`${assetPrefix}${assetKey}`)}")`,
+            );
+            lastIndex = token.endIndex;
+        }
+        index = token.endIndex;
+    }
+    output.push(stylesheet.slice(lastIndex));
+    return output.join('');
 }
 
 /**
@@ -830,6 +996,58 @@ function rewriteCssAttributeSelector(attributeSelector) {
 
 /**
  * @param {string} selector
+ * @param {number} openParenIndex
+ * @returns {{content: string, endIndex: number}|null}
+ */
+function readCssParenthesizedContent(selector, openParenIndex) {
+    if (selector[openParenIndex] !== '(') { return null; }
+    let quote = '';
+    let depth = 1;
+    for (let index = openParenIndex + 1; index < selector.length; index += 1) {
+        const character = selector[index];
+        if (quote.length > 0) {
+            if (character === '\\') {
+                const escape = readCssEscape(selector, index);
+                index = escape === null ? index + 1 : escape.endIndex - 1;
+            } else if (character === quote) {
+                quote = '';
+            }
+            continue;
+        }
+        if (character === '\\') {
+            const escape = readCssEscape(selector, index);
+            if (escape !== null) {
+                index = escape.endIndex - 1;
+                continue;
+            }
+        }
+        switch (character) {
+            case '"':
+            case "'": {
+                quote = character;
+                break;
+            }
+            case '(': {
+                depth += 1;
+                break;
+            }
+            case ')': {
+                depth -= 1;
+                if (depth === 0) {
+                    return {
+                        content: selector.slice(openParenIndex + 1, index),
+                        endIndex: index + 1,
+                    };
+                }
+                break;
+            }
+        }
+    }
+    return null;
+}
+
+/**
+ * @param {string} selector
  * @param {string} glossaryRootSelector
  * @returns {string}
  */
@@ -840,11 +1058,33 @@ function migrateCssSelectorSegment(selector, glossaryRootSelector) {
     let expectTagName = true;
     while (index < selector.length) {
         const character = selector[index];
-        if (character === ':' && selector.startsWith(':root', index)) {
-            parts.push(glossaryRootSelector);
-            index += 5;
-            expectTagName = false;
-            continue;
+        if (character === ':' && selector[index + 1] !== ':') {
+            const pseudo = readCssIdentifier(selector, index + 1);
+            if (pseudo.value !== null) {
+                const pseudoName = pseudo.value.toLowerCase();
+                if (pseudoName === 'root') {
+                    parts.push(glossaryRootSelector);
+                    index = pseudo.endIndex;
+                    expectTagName = false;
+                    continue;
+                }
+                if (SELECTOR_LIST_PSEUDO_CLASSES.has(pseudoName) && selector[pseudo.endIndex] === '(') {
+                    const functionContent = readCssParenthesizedContent(selector, pseudo.endIndex);
+                    if (functionContent !== null) {
+                        const migratedContent = splitCssSelectorList(functionContent.content)
+                            .map((item) => migrateCssSelector(item, glossaryRootSelector))
+                            .join(', ');
+                        parts.push(
+                            selector.slice(index, pseudo.endIndex + 1),
+                            migratedContent,
+                            ')',
+                        );
+                        index = functionContent.endIndex;
+                        expectTagName = false;
+                        continue;
+                    }
+                }
+            }
         }
         if (character === '.') {
             const {value, endIndex} = readCssIdentifier(selector, index + 1);
@@ -938,7 +1178,81 @@ function migrateCssSelector(selector, glossaryRootSelector) {
         if (part.trim().length === 0 || ['>', '+', '~'].includes(part)) { return part; }
         return migrateCssSelectorSegment(part, glossaryRootSelector);
     }).join('');
-    return migrated.replace(/\s+/gu, ' ').trim();
+    // Quoted attribute values and whitespace after CSS hex escapes are significant.
+    return migrated.trim();
+}
+
+/**
+ * Constrain the matched element, not merely an ancestor, to this definition.
+ * :where() adds no specificity. Guard the originating element before its
+ * pseudo-element so ::before/::after and their legacy spellings stay valid.
+ * @param {string} selector
+ * @param {string} glossaryRootSelector
+ * @returns {string}
+ */
+function scopeCssSelectorSubject(selector, glossaryRootSelector) {
+    const parts = splitSelectorByCombinators(selector);
+    let subjectIndex = parts.length - 1;
+    while (subjectIndex >= 0) {
+        const part = parts[subjectIndex];
+        if (part.trim().length > 0 && !['>', '+', '~'].includes(part)) { break; }
+        subjectIndex -= 1;
+    }
+    if (subjectIndex < 0) { return selector; }
+    const subject = parts[subjectIndex];
+    let insertionIndex = subject.length;
+    let quote = '';
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    for (let index = 0; index < subject.length; index += 1) {
+        const character = subject[index];
+        if (character === '\\') {
+            const escape = readCssEscape(subject, index);
+            if (escape !== null) { index = escape.endIndex - 1; }
+            continue;
+        }
+        if (quote.length > 0) {
+            if (character === quote) { quote = ''; }
+            continue;
+        }
+        switch (character) {
+            case '"':
+            case "'": {
+                quote = character;
+                break;
+            }
+            case '[': {
+                bracketDepth += 1;
+                break;
+            }
+            case ']': {
+                bracketDepth = Math.max(0, bracketDepth - 1);
+                break;
+            }
+            case '(': {
+                parenDepth += 1;
+                break;
+            }
+            case ')': {
+                parenDepth = Math.max(0, parenDepth - 1);
+                break;
+            }
+            case ':': {
+                if (bracketDepth > 0 || parenDepth > 0) { break; }
+                const pseudo = readCssIdentifier(subject, index + 1);
+                const legacy = pseudo.value !== null &&
+                ['before', 'after', 'first-line', 'first-letter'].includes(pseudo.value.toLowerCase());
+                if (subject[index + 1] === ':' || legacy) {
+                    insertionIndex = index;
+                }
+                break;
+            }
+        }
+        if (insertionIndex < subject.length) { break; }
+    }
+    const guard = `:where(${glossaryRootSelector}, ${glossaryRootSelector} *)`;
+    parts[subjectIndex] = `${subject.slice(0, insertionIndex)}${guard}${subject.slice(insertionIndex)}`;
+    return parts.join('');
 }
 
 /**
@@ -983,9 +1297,10 @@ function findMatchingCssBrace(stylesheet, blockStartIndex) {
  * blocks are otherwise retained verbatim so CSS properties and at-rules stay intact.
  * @param {string} stylesheet
  * @param {string} glossaryRootSelector
+ * @param {boolean} [scopeSelectors]
  * @returns {string}
  */
-function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector) {
+function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector, scopeSelectors = false) {
     const output = [];
     let index = 0;
     while (index < stylesheet.length) {
@@ -1058,14 +1373,17 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector) {
                 if (stripped.startsWith('@')) {
                     const atRuleName = stripped.slice(1).split(/\s|\(/u, 1)[0].toLowerCase();
                     if (['media', 'supports', 'layer', 'container', 'document'].includes(atRuleName)) {
-                        body = rewriteCssRuleSelectors(body, glossaryRootSelector);
+                        body = rewriteCssRuleSelectors(body, glossaryRootSelector, scopeSelectors);
                     }
                     output.push(`${prelude}{${body}}`);
                 } else {
                     const migratedSelectors = [];
                     const seen = new Set();
                     for (const part of splitCssSelectorList(prelude)) {
-                        const migrated = migrateCssSelector(part, glossaryRootSelector);
+                        let migrated = migrateCssSelector(part, glossaryRootSelector);
+                        if (scopeSelectors && migrated.length > 0) {
+                            migrated = scopeCssSelectorSubject(migrated, glossaryRootSelector);
+                        }
                         if (migrated.length > 0 && !seen.has(migrated)) {
                             seen.add(migrated);
                             migratedSelectors.push(migrated);
@@ -1092,17 +1410,27 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector) {
  * @param {string} assetPrefix
  * @param {string|null} sourceAssetPath
  * @param {Set<string>|null} assetReferences
+ * @param {string} [glossaryRootSelector]
+ * @param {boolean} [scopeSelectors]
  * @returns {string}
  */
-function migrateStylesheetForYomitan(stylesheet, assetPrefix, sourceAssetPath, assetReferences = null) {
+function migrateStylesheetForYomitan(stylesheet, assetPrefix, sourceAssetPath, assetReferences = null, glossaryRootSelector = STRUCTURED_ROOT_SELECTOR, scopeSelectors = false) {
     const rewritten = rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetReferences);
-    return rewriteCssRuleSelectors(rewritten, STRUCTURED_ROOT_SELECTOR);
+    return rewriteCssRuleSelectors(rewritten, glossaryRootSelector, scopeSelectors);
+}
+
+/**
+ * @param {string} sourceName
+ * @returns {string}
+ */
+function escapeStylesheetSourceComment(sourceName) {
+    return sourceName.replaceAll('*/', '* /').replace(/[\r\n]+/gu, ' ');
 }
 
 /**
  * @param {Map<string, Uint8Array>} cssAssets
  * @param {string} assetPrefix
- * @param {Array<[string, string]>} inlineStylesheets
+ * @param {Array<[string, string, string]>} inlineStylesheets
  * @param {Set<string>|null} assetReferences
  * @returns {string|null}
  */
@@ -1114,10 +1442,11 @@ function buildRootStylesheet(cssAssets, assetPrefix, inlineStylesheets, assetRef
         if (stylesheet === null) { continue; }
         const sourceName = archivePath.startsWith(assetPrefix) ? archivePath.slice(assetPrefix.length) : archivePath;
         stylesheet = migrateStylesheetForYomitan(stylesheet, assetPrefix, sourceName, assetReferences);
-        sections.push(`/* Source: ${sourceName} */\n${stylesheet}`);
+        sections.push(`/* Source: ${escapeStylesheetSourceComment(sourceName)} */\n${stylesheet}`);
     }
-    for (const [sourceName, stylesheet] of inlineStylesheets) {
-        sections.push(`/* Source: ${sourceName} */\n${migrateStylesheetForYomitan(stylesheet, assetPrefix, null, assetReferences)}`);
+    for (const [sourceName, stylesheet, scopeClass] of inlineStylesheets) {
+        const scopeSelector = `[${STRUCTURED_CLASS_ATTR}~="${scopeClass}"]`;
+        sections.push(`/* Source: ${escapeStylesheetSourceComment(sourceName)} */\n${migrateStylesheetForYomitan(stylesheet, assetPrefix, null, assetReferences, scopeSelector, true)}`);
     }
     return sections.length > 0 ? `${sections.join('\n\n')}\n` : null;
 }
@@ -1145,6 +1474,60 @@ function buildStructuredData(attrs) {
 }
 
 /**
+ * Split an inline declaration list without treating semicolons inside strings,
+ * comments, or functions as declaration boundaries.
+ * @param {string} styleText
+ * @returns {string[]}
+ */
+function splitInlineCssDeclarations(styleText) {
+    const declarations = [];
+    let startIndex = 0;
+    let quote = '';
+    let parenDepth = 0;
+    for (let index = 0; index < styleText.length; index += 1) {
+        const character = styleText[index];
+        if (styleText.startsWith('/*', index) && quote.length === 0) {
+            const commentEnd = styleText.indexOf('*/', index + 2);
+            if (commentEnd < 0) { break; }
+            index = commentEnd + 1;
+            continue;
+        }
+        if (quote.length > 0) {
+            if (character === '\\') {
+                index += 1;
+            } else if (character === quote) {
+                quote = '';
+            }
+            continue;
+        }
+        switch (character) {
+            case '"':
+            case "'": {
+                quote = character;
+                break;
+            }
+            case '(': {
+                parenDepth += 1;
+                break;
+            }
+            case ')': {
+                parenDepth = Math.max(0, parenDepth - 1);
+                break;
+            }
+            case ';': {
+                if (parenDepth === 0) {
+                    declarations.push(styleText.slice(startIndex, index));
+                    startIndex = index + 1;
+                }
+                break;
+            }
+        }
+    }
+    declarations.push(styleText.slice(startIndex));
+    return declarations;
+}
+
+/**
  * @param {string|null|undefined} styleText
  * @param {string} assetPrefix
  * @param {Set<string>} assetReferences
@@ -1154,13 +1537,14 @@ function convertInlineStyle(styleText, assetPrefix, assetReferences) {
     if (typeof styleText !== 'string' || styleText.trim().length === 0) { return null; }
     /** @type {Record<string, string|string[]>} */
     const style = {};
-    for (const declaration of styleText.split(';')) {
+    for (const rawDeclaration of splitInlineCssDeclarations(styleText)) {
+        const declaration = rawDeclaration.replace(/\/\*[\s\S]*?\*\//gu, '');
         const separator = declaration.indexOf(':');
         if (separator < 0) { continue; }
         const propertyName = declaration.slice(0, separator).trim().toLowerCase();
         let value = declaration.slice(separator + 1).trim();
         if (propertyName.length === 0 || value.length === 0) { continue; }
-        if (value.includes('url(')) {
+        if (/url\(/iu.test(value)) {
             value = rewriteCssAssetUrls(value, assetPrefix, null, assetReferences);
         }
         if (propertyName === 'text-decoration' || propertyName === 'text-decoration-line') {
@@ -1186,12 +1570,13 @@ function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetR
     const lowered = value.toLowerCase();
     if (lowered.startsWith('entry://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
     if (lowered.startsWith('bword://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
-    if (lowered.startsWith('d:') || lowered.startsWith('x:')) { return createSearchHref(value.slice(2)); }
+    if (lowered.startsWith('d:') || lowered.startsWith('x:')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(2))); }
     if (lowered.startsWith('sound://')) {
+        if (!enableAudio) { return '#'; }
         const assetKey = normalizeReferencedAssetKey(value.slice(8), assetPrefix, null);
         if (assetKey !== null) { assetReferences.add(assetKey); }
         const assetPath = assetKey === null ? null : `${assetPrefix}${assetKey}`;
-        return enableAudio && assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
+        return assetPath !== null ? `media:${encodeMediaPath(assetPath)}` : '#';
     }
     if (lowered.startsWith('http://') || lowered.startsWith('https://') || lowered.startsWith('mailto:') || lowered.startsWith('tel:')) {
         return value;
@@ -1380,7 +1765,7 @@ function appendStructuredContent(parent, content, details) {
 
 /**
  * @param {string} definition
- * @param {{enableAudio: boolean, assetPrefix: string, embeddedAssetCounter: {value: number}}} options
+ * @param {{enableAudio: boolean, assetPrefix: string, embeddedAssetCounter: {value: number}, entryScopeClass: string}} options
  * @returns {{glossary: Record<string, unknown>, inlineStylesheets: Array<[string, string]>, embeddedAssets: Map<string, Uint8Array>, assetReferences: Set<string>}}
  */
 function convertDefinitionToStructuredContent(definition, options) {
@@ -1400,6 +1785,7 @@ function convertDefinitionToStructuredContent(definition, options) {
         inlineStylesheets,
         assetReferences,
     });
+    const rootClass = inlineStylesheets.length > 0 ? `${MDX_GLOSSARY_ROOT_CLASS} ${options.entryScopeClass}` : MDX_GLOSSARY_ROOT_CLASS;
     return {
         glossary: {
             type: 'structured-content',
@@ -1407,7 +1793,7 @@ function convertDefinitionToStructuredContent(definition, options) {
                 tag: 'div',
                 data: {
                     tag: 'div',
-                    class: MDX_GLOSSARY_ROOT_CLASS,
+                    class: rootClass,
                 },
                 content,
             },
@@ -1445,24 +1831,70 @@ function extractDescription(mdx, override) {
 /**
  * @param {string} term
  * @param {Map<string, Set<string>>} redirects
+ * @param {Map<string, string[]>} fallbackTargets
  * @param {Set<string>} resolvedTargets
+ * @param {(value: string) => string} normalizeRedirectKey
  * @returns {string[]}
  */
-function getRedirectExpressions(term, redirects, resolvedTargets) {
+function getRedirectExpressions(term, redirects, fallbackTargets, resolvedTargets, normalizeRedirectKey) {
     const expressions = [term];
-    const visited = new Set(expressions);
+    const emittedExpressions = new Set(expressions);
+    const visitedFallbacks = new Set();
     for (let index = 0; index < expressions.length; ++index) {
-        const target = expressions[index];
-        const aliases = redirects.get(target);
-        if (typeof aliases === 'undefined') { continue; }
-        resolvedTargets.add(target);
-        for (const alias of aliases) {
-            if (visited.has(alias)) { continue; }
-            visited.add(alias);
-            expressions.push(alias);
+        const expression = expressions[index];
+        const targets = [expression];
+        const normalized = normalizeRedirectKey(expression);
+        if (!visitedFallbacks.has(normalized)) {
+            visitedFallbacks.add(normalized);
+            const fallbacks = fallbackTargets.get(normalized);
+            if (typeof fallbacks !== 'undefined') {
+                for (const target of fallbacks) { targets.push(target); }
+            }
+        }
+        for (const target of targets) {
+            const aliases = redirects.get(target);
+            if (typeof aliases === 'undefined') { continue; }
+            resolvedTargets.add(target);
+            for (const alias of aliases) {
+                if (emittedExpressions.has(alias)) { continue; }
+                emittedExpressions.add(alias);
+                expressions.push(alias);
+            }
         }
     }
     return expressions;
+}
+
+/**
+ * Preserve an exact target even when another spelling normalizes to the same
+ * key. Only genuinely absent targets may use case/StripKey fallback. Scan the
+ * existing key metadata, retaining only redirect target names, not another
+ * dictionary-wide lookup index. Failed records and cycles remain unresolved.
+ * @param {Map<string, Set<string>>} redirects
+ * @param {MdictKeyword[]} keywords
+ * @param {(value: string) => string} normalizeRedirectKey
+ * @returns {Map<string, string[]>}
+ */
+function getFallbackRedirectTargets(redirects, keywords, normalizeRedirectKey) {
+    /** @type {Map<string, string[]>} */
+    const fallbacks = new Map();
+    if (redirects.size === 0) { return fallbacks; }
+    const exactTargets = new Set();
+    for (const {keyText} of keywords) {
+        const term = trimNullSuffix(keyText).trim();
+        if (redirects.has(term)) { exactTargets.add(term); }
+    }
+    for (const target of redirects.keys()) {
+        if (exactTargets.has(target)) { continue; }
+        const normalized = normalizeRedirectKey(target);
+        const targets = fallbacks.get(normalized);
+        if (typeof targets === 'undefined') {
+            fallbacks.set(normalized, [target]);
+        } else {
+            targets.push(target);
+        }
+    }
+    return fallbacks;
 }
 
 /**
@@ -1527,10 +1959,22 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         const encoder = new TextEncoder();
         /** @type {Map<string, Uint8Array>} */
         const files = new Map();
-        /** @type {Array<[string, string]>} */
+        /** @type {Array<[string, string, string]>} */
         const inlineStylesheets = [];
         /** @type {Set<string>} */
         const referencedAssetKeys = new Set();
+        const redirectCaseSensitive = mdictCommon.isTrue(mdx.header.KeyCaseSensitive);
+        const redirectStripKey = mdictCommon.isTrue(mdx.header.StripKey);
+        /**
+         * @param {string} value
+         * @returns {string}
+         */
+        const normalizeRedirectKey = (value) => {
+            if (redirectStripKey) {
+                value = value.replace(mdictCommon.REGEXP_STRIPKEY.mdx, '$1');
+            }
+            return redirectCaseSensitive ? value : value.toLowerCase();
+        };
         /** @type {Map<string, Set<string>>} */
         const redirects = new Map();
         /** @type {Set<string>} */
@@ -1586,7 +2030,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             const redirectDefinition = definition.trim();
             if (redirectDefinition.startsWith('@@@LINK=')) {
                 const target = trimNullSuffix(redirectDefinition.slice(8)).trim();
-                if (target.length > 0 && target !== term) {
+                if (target.length > 0) {
                     const aliases = redirects.get(target) ?? new Set();
                     if (!aliases.has(term)) {
                         aliases.add(term);
@@ -1603,7 +2047,12 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             let converted;
             try {
                 const preparedDefinition = prepareDefinitionMarkup(definition, mdx.header);
-                converted = convertDefinitionToStructuredContent(preparedDefinition, {enableAudio, assetPrefix, embeddedAssetCounter});
+                converted = convertDefinitionToStructuredContent(preparedDefinition, {
+                    enableAudio,
+                    assetPrefix,
+                    embeddedAssetCounter,
+                    entryScopeClass: `${MDX_GLOSSARY_ENTRY_CLASS_PREFIX}${sequence}`,
+                });
             } catch (_error) {
                 skippedEntryErrorCount += 1;
                 if (typeof onProgress === 'function') {
@@ -1617,7 +2066,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 }
             }
             for (const [sourceName, stylesheet] of converted.inlineStylesheets) {
-                inlineStylesheets.push([`${term}/${sourceName}`, stylesheet]);
+                inlineStylesheets.push([`${term}/${sourceName}`, stylesheet, `${MDX_GLOSSARY_ENTRY_CLASS_PREFIX}${sequence}`]);
             }
             for (const assetKey of converted.assetReferences) {
                 referencedAssetKeys.add(assetKey);
@@ -1661,8 +2110,9 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             bank = [];
             bankIndex += 1;
         };
+        const fallbackTargets = getFallbackRedirectTargets(redirects, mdx.keywordList, normalizeRedirectKey);
         for (const {term, glossary, sequence: entrySequence} of convertedEntries) {
-            const expressions = getRedirectExpressions(term, redirects, resolvedRedirectTargets);
+            const expressions = getRedirectExpressions(term, redirects, fallbackTargets, resolvedRedirectTargets, normalizeRedirectKey);
             for (const expression of expressions) {
                 bank.push([
                     expression,
