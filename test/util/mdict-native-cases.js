@@ -177,6 +177,90 @@ describe('MDict redirect key matching', () => {
     });
 });
 
+describe('MDict direct lookup key normalization', () => {
+    test('lookup follows KeyCaseSensitive=No by default', () => {
+        const fixture = makeMdictFixture([
+            {key: 'Target', value: 'definition'},
+        ], {keyCaseSensitive: 'No'});
+        const mdx = new MDX('lookup-case.mdx', fixture.bytes);
+        try {
+            assert.equal(mdx.lookup('target').definition?.replace(/\0+$/u, ''), 'definition');
+            assert.equal(mdx.strip('Target'), 'target');
+        } finally {
+            mdx.close();
+        }
+    });
+
+    test('lookup follows KeyCaseSensitive=Yes by default', () => {
+        const fixture = makeMdictFixture([
+            {key: 'Target', value: 'definition'},
+        ], {keyCaseSensitive: 'Yes'});
+        const mdx = new MDX('lookup-case-sensitive.mdx', fixture.bytes);
+        try {
+            assert.equal(mdx.lookup('target').definition, null);
+            assert.equal(mdx.lookup('Target').definition?.replace(/\0+$/u, ''), 'definition');
+            assert.equal(mdx.strip('Target'), 'Target');
+        } finally {
+            mdx.close();
+        }
+    });
+
+    test('explicit case-sensitivity options override the dictionary header', () => {
+        const insensitiveFixture = makeMdictFixture([
+            {key: 'Target', value: 'definition'},
+        ], {keyCaseSensitive: 'No'});
+        const forcedSensitive = new MDX('lookup-forced-sensitive.mdx', insensitiveFixture.bytes, {isCaseSensitive: true});
+        try {
+            assert.equal(forcedSensitive.lookup('target').definition, null);
+            assert.equal(forcedSensitive.lookup('Target').definition?.replace(/\0+$/u, ''), 'definition');
+        } finally {
+            forcedSensitive.close();
+        }
+
+        const sensitiveFixture = makeMdictFixture([
+            {key: 'Target', value: 'definition'},
+        ], {keyCaseSensitive: 'Yes'});
+        const forcedInsensitive = new MDX('lookup-forced-insensitive.mdx', sensitiveFixture.bytes, {isCaseSensitive: false});
+        try {
+            assert.equal(forcedInsensitive.lookup('target').definition?.replace(/\0+$/u, ''), 'definition');
+        } finally {
+            forcedInsensitive.close();
+        }
+    });
+
+    test('StripKey controls punctuation normalization and can be overridden', () => {
+        const fixture = makeMdictFixture([
+            {key: 'foo-bar', value: 'definition'},
+        ], {stripKey: 'Yes', keyCaseSensitive: 'No'});
+        const mdx = new MDX('lookup-strip.mdx', fixture.bytes);
+        try {
+            assert.equal(mdx.lookup('foobar').definition?.replace(/\0+$/u, ''), 'definition');
+        } finally {
+            mdx.close();
+        }
+
+        const noStrip = new MDX('lookup-strip-override.mdx', fixture.bytes, {isStripKey: false});
+        try {
+            assert.equal(noStrip.lookup('foobar').definition, null);
+            assert.equal(noStrip.lookup('foo-bar').definition?.replace(/\0+$/u, ''), 'definition');
+        } finally {
+            noStrip.close();
+        }
+    });
+
+    test('case-insensitive prefix lookup uses normalized keys', () => {
+        const fixture = makeMdictFixture([
+            {key: 'Target', value: 'definition'},
+        ], {keyCaseSensitive: 'No'});
+        const mdx = new MDX('prefix-case.mdx', fixture.bytes);
+        try {
+            assert.deepEqual(mdx.prefix('ta').map(({keyText}) => keyText), ['Target']);
+        } finally {
+            mdx.close();
+        }
+    });
+});
+
 describe('actual binary MDX/MDD conversion', () => {
     test('preserves homograph senses, multi-hop aliases, bank bounds and diagnostics', async () => {
         const fixture = makeMdictFixture([
