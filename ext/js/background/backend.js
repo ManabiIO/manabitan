@@ -1508,7 +1508,7 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'getDictionaryTermProbe'>} */
     async _onApiGetDictionaryTermProbe({dictionaryTitle}) {
-        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle.trim() : '';
+        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle : '';
         if (normalizedTitle.length === 0) { return null; }
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
@@ -3864,7 +3864,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      * @returns {Promise<boolean>}
      */
     async _probeDictionaryVisibilityDirect(dictionaryTitle, probe) {
-        const candidates = [...new Set([probe.expression, probe.reading].map((value) => value.trim()).filter((value) => value.length > 0))];
+        const candidates = [...new Set([probe.expression, probe.reading].filter((value) => value.length > 0))];
         if (candidates.length === 0) { return false; }
         const dictionarySet = new Set([dictionaryTitle]);
         const entries = await this._dictionaryDatabase.findTermsBulk(candidates, dictionarySet, 'exact');
@@ -3902,7 +3902,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         findTermsOptions.enabledDictionaryMap = enabledDictionaryMap;
         findTermsOptions.mainDictionary = dictionaryTitle;
         findTermsOptions.excludeDictionaryDefinitions = null;
-        const searchText = probe.expression.trim().length > 0 ? probe.expression.trim() : probe.reading.trim();
+        const searchText = probe.expression.length > 0 ? probe.expression : probe.reading;
         if (searchText.length === 0) { return false; }
         const {dictionaryEntries} = await this._translator.findTerms('split', searchText, findTermsOptions);
         return dictionaryEntries.length > 0;
@@ -3914,7 +3914,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      * @returns {Promise<import('api').ApiReturn<'verifyDictionaryVisibility'>>}
      */
     async _verifyDictionaryVisibilityInternal(dictionaryTitle, requireEnabledForActiveProfile) {
-        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle.trim() : '';
+        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle : '';
         if (normalizedTitle.length === 0) {
             return {
                 ok: false,
@@ -4823,7 +4823,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         const getDebugState = termContentStore?.getDebugState;
         const textDecoder = new TextDecoder();
         for (const dictionaryNameRaw of dictionaryNames) {
-            const dictionaryName = String(dictionaryNameRaw || '').trim();
+            const dictionaryName = String(dictionaryNameRaw || '');
             if (dictionaryName.length === 0) { continue; }
             const expressionIds = /** @type {number[]} */ (
                 findDirectTermIds.call(database, dictionaryName, text, 'expression')
