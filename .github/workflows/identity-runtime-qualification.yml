@@ -25,35 +25,36 @@ jobs:
           git switch --detach 296e85dd2c6c93b88196fb9aac5829130c17cc62
           if ! git merge --no-ff --no-commit f0b2ef32fc0d26d68051acf2fb8fda8dc7639c2a; then
             python3 - <<'PY'
-          import pathlib, subprocess, tempfile
+          import pathlib, subprocess
           conflicts = subprocess.check_output(['git','diff','--name-only','--diff-filter=U'],text=True).splitlines()
           assert conflicts == ['test/term-record-opfs-store.test.js'], conflicts
           p=conflicts[0]
-          with tempfile.TemporaryDirectory() as d:
-              files=[]
-              for stage in (2,1,3):
-                  f=pathlib.Path(d)/str(stage)
-                  f.write_bytes(subprocess.check_output(['git','show',f':{stage}:{p}']))
-                  files.append(str(f))
-              result=subprocess.run(['git','merge-file','--union','-p',*files],capture_output=True,check=True)
-              data=result.stdout.decode()
-              for f in (files[0],files[2]):
-                  for line in pathlib.Path(f).read_text().splitlines():
-                      if 'test(' in line or 'test.each(' in line:
-                          assert line in data, line
-              assert '<<<<<<<' not in data
-              assert data.count("import assert from 'node:assert/strict'") <= 1
-              pathlib.Path(p).write_text(data)
+          ours=subprocess.check_output(['git','show',f':2:{p}'],text=True)
+          theirs=subprocess.check_output(['git','show',f':3:{p}'],text=True)
+          a="describe('TermRecordOpfsStore exact dictionary identity', () => {"
+          b="describe('TermRecordOpfsStore preserves length-delimited Unicode fields', () => {"
+          assert ours.count(a)==1 and theirs.count(b)==1
+          prefix_a,tail_a=ours.split(a)
+          prefix_b,tail_b=theirs.split(b)
+          assert prefix_a==prefix_b, 'Existing test bodies or imports unexpectedly differ'
+          # Both changes append a complete top-level describe. Preserve both
+          # verbatim, not a union merge of their shared closing delimiters.
+          data=prefix_a+a+tail_a.rstrip()+'\n\n'+b+tail_b
+          assert data.count(a)==1 and data.count(b)==1
+          assert data.count("import assert from 'node:assert/strict'")==1
+          pathlib.Path(p).write_text(data)
           subprocess.run(['node','--check',p],check=True)
           subprocess.run(['git','add',p],check=True)
           PY
           fi
-          git commit -m 'Merge accepted develop into dictionary identity repair; preserve both regression groups'
+          git commit -m 'Merge accepted develop into dictionary identity repair; preserve both complete regression groups'
           cp "$RUNNER_TEMP/identity-runtime/new-tests.js" test/dictionary-identity-runtime.test.js
       - uses: ./.github/actions/setup
-      - name: Reproduce runtime identity failures before repair
+      - name: Format and reproduce runtime identity failures before repair
         run: |
           set -euo pipefail
+          npx eslint test/dictionary-identity-runtime.test.js --fix
+          cp test/dictionary-identity-runtime.test.js "$RUNNER_TEMP/identity-runtime/formatted-tests.js"
           set +e
           npx vitest run test/dictionary-identity-runtime.test.js --reporter=json --outputFile="$RUNNER_TEMP/identity-runtime/before.json" >"$RUNNER_TEMP/identity-runtime/before.log" 2>&1
           status=$?
@@ -67,18 +68,20 @@ jobs:
           PY
           git add test/dictionary-identity-runtime.test.js
           git commit -m 'test: reproduce exact-identity loss across runtime probes and verification'
-      - name: Repair exact identity at runtime boundaries
+      - name: Retain prior backend repair and finish probe production and warmup
         run: |
           set -euo pipefail
+          git merge --no-ff 87a8c7644a4293a00864982472823e8658ec95a9 -m 'Merge prior backend identity repair and regression tests into current composition'
           python3 - <<'PY'
           from pathlib import Path
+          for path in ['ext/js/background/backend.js','ext/js/background/offscreen-dictionary-worker.js']:
+              s=Path(path).read_text()
+              assert "String(dictionaryNameRaw || '').trim()" not in s
+          s=Path('ext/js/background/backend.js').read_text()
+          assert "typeof dictionaryTitle === 'string' ? dictionaryTitle.trim() : ''" not in s
+          assert '[probe.expression, probe.reading].filter((value) => value.length > 0)' in s
+          assert 'probe.expression.length > 0 ? probe.expression : probe.reading' in s
           changes={
-          'ext/js/background/backend.js':[
-          ("typeof dictionaryTitle === 'string' ? dictionaryTitle.trim() : ''", "typeof dictionaryTitle === 'string' ? dictionaryTitle : ''",2),
-          ("[probe.expression, probe.reading].map((value) => value.trim()).filter((value) => value.length > 0)","[probe.expression, probe.reading].filter((value) => value.length > 0)",1),
-          ("probe.expression.trim().length > 0 ? probe.expression.trim() : probe.reading.trim()", "probe.expression.length > 0 ? probe.expression : probe.reading",1),
-          ("String(dictionaryNameRaw || '').trim()", "String(dictionaryNameRaw || '')",1)],
-          'ext/js/background/offscreen-dictionary-worker.js':[("String(dictionaryNameRaw || '').trim()","String(dictionaryNameRaw || '')",2)],
           'ext/js/dictionary/dictionary-database.js':[
           ("this._asString(record.expression).trim()","this._asString(record.expression)",1),
           ("this._asString(record.reading).trim()","this._asString(record.reading)",1),
@@ -93,8 +96,8 @@ jobs:
           assert "new TextDecoder('utf-8', {ignoreBOM: true})" in Path('ext/js/dictionary/term-record-opfs-store.js').read_text()
           PY
           git diff --check
-          git add ext/js/background/backend.js ext/js/background/offscreen-dictionary-worker.js ext/js/dictionary/dictionary-database.js ext/js/app/frontend.js
-          git commit -m 'fix: preserve persisted identity through runtime verification and warmup'
+          git add ext/js/dictionary/dictionary-database.js ext/js/app/frontend.js
+          git commit -m 'fix: preserve persisted fields when producing and warming lookup probes'
       - name: Full lint and type checks
         run: |
           set -euo pipefail
@@ -105,8 +108,8 @@ jobs:
       - name: Qualify the merged correctness composition
         run: |
           set -euo pipefail
-          npx vitest run test/dictionary-identity-runtime.test.js test/term-record-opfs-store.test.js test/dictionary-database-import-cleanup.test.js test/dictionary-import-controller-update-profile.test.js test/dictionary-worker-handler-cleanup.test.js test/backend-lookup-refresh.test.js test/offscreen-dictionary-worker-import.test.js test/frontend-database-updated.test.js --reporter=json --outputFile="$RUNNER_TEMP/identity-runtime/after.json" 2>&1 | tee "$RUNNER_TEMP/identity-runtime/after.log"
-          git status --short
+          npx vitest run test/dictionary-identity-runtime.test.js test/backend-dictionary-identity.test.js test/term-record-opfs-store.test.js test/dictionary-database-import-cleanup.test.js test/dictionary-import-controller-update-profile.test.js test/dictionary-worker-handler-cleanup.test.js test/backend-lookup-refresh.test.js test/offscreen-dictionary-worker-import.test.js test/frontend-database-updated.test.js --reporter=json --outputFile="$RUNNER_TEMP/identity-runtime/after.json" 2>&1 | tee "$RUNNER_TEMP/identity-runtime/after.log"
+          git diff --check
           git diff --exit-code
           git rev-parse HEAD > "$RUNNER_TEMP/identity-runtime/qualified-head.txt"
           git diff --stat f0b2ef32fc0d26d68051acf2fb8fda8dc7639c2a HEAD > "$RUNNER_TEMP/identity-runtime/final-stat.txt"
