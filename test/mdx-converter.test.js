@@ -954,7 +954,7 @@ describe('convertMdxToArchive', () => {
                 keyText: 'Styled',
                 definition: [
                     '<div style="font-family: &quot;A;B&quot;; background-image: url(data:image/png;base64,AA==)">Data</div>',
-                    '<div style="background-image: URL(&quot;images/bg.png&quot;); color: rgb(1, 2, 3)">Asset</div>',
+                    '<div style="background-image: URL(&quot;images/bg.png&quot;); /* note; fake: value */ color: rgb(1, 2, 3)">Asset</div>',
                 ].join(''),
             }],
         });
