@@ -598,11 +598,16 @@ function readCssEscape(value, startIndex) {
     if (hexMatch !== null) {
         endIndex += hexMatch[0].length;
         const codePoint = Number.parseInt(hexMatch[0], 16);
-        const decoded = (
+        let decoded;
+        if (
             codePoint === 0 ||
             codePoint > 0x10ffff ||
             (codePoint >= 0xd800 && codePoint <= 0xdfff)
-        ) ? '\ufffd' : String.fromCodePoint(codePoint);
+        ) {
+            decoded = '\ufffd';
+        } else {
+            decoded = String.fromCodePoint(codePoint);
+        }
         if (endIndex < value.length && /\s/u.test(value[endIndex])) {
             endIndex += 1;
         }
