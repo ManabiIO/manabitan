@@ -73,7 +73,7 @@ function xmlAttribute(value) {
 }
 
 /**
- * @param {string} encoding
+ * @param {'utf8'|'utf16le'} encoding
  * @returns {(value: string) => Uint8Array}
  */
 function createFixtureTextEncoder(encoding) {
