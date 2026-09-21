@@ -1,7 +1,7 @@
 # MDict decompression bounds
 
 This change is stacked after the dense MDX record-block cache and Adler-32
-integrity validation. It addresses a different failure mode: compressed MDict
+integrity validation. For broader import behavior and user-facing limitations,\nsee the [MDict dictionary notes](../mdict.md). It addresses a different failure\nmode: compressed MDict
 blocks previously decompressed without an output bound and were compared with
 their declared size only after allocation and decoding completed.
 
