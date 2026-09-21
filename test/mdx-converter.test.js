@@ -937,11 +937,11 @@ describe('convertMdxToArchive', () => {
             keyText: 'styles/shift-jis.css',
             // Static Shift_JIS bytes for:
             // @charset "Shift_JIS";\n.jp::before { content: "日本"; }\n
-            value: Uint8Array.from([
-                64, 99, 104, 97, 114, 115, 101, 116, 32, 34, 83, 104, 105, 102, 116, 95, 74, 73, 83, 34, 59, 10,
-                46, 106, 112, 58, 58, 98, 101, 102, 111, 114, 101, 32, 123, 32, 99, 111, 110, 116, 101, 110, 116,
-                58, 32, 34, 147, 250, 150, 123, 34, 59, 32, 125, 10,
-            ]),
+            value: Uint8Array.of(
+                ...new TextEncoder().encode('@charset "Shift_JIS";\n.jp::before { content: "'),
+                0x93, 0xfa, 0x96, 0x7b,
+                ...new TextEncoder().encode('"; }\n'),
+            ),
         }];
 
         const result = await createMdxImportData(
