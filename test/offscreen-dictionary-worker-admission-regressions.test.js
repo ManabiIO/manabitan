@@ -89,6 +89,7 @@ async function createWorkerHarness() {
         addEventListener: vi.fn((type, listener) => {
             listeners.set(type, listener);
         }),
+        /** @param {unknown} message */
         postMessage(message) {
             const cloned = structuredClone(message);
             messages.push(cloned);
@@ -128,8 +129,10 @@ describe('offscreen dictionary worker admission and reply ownership', () => {
         send(onMessage, 1, 'databaseSetSuspendedOffscreen', {suspended: true});
         await vi.waitFor(() => expect(messages).toContainEqual({id: 1, result: undefined}));
 
+        /** @type {Array<{type?: string, error?: unknown}>} */
         const responseMessages = [];
         const responsePort = /** @type {MessagePort} */ (/** @type {unknown} */ ({
+            /** @param {{type?: string, error?: unknown}} message */
             postMessage(message) { responseMessages.push(structuredClone(message)); },
             close: vi.fn(),
         }));
@@ -176,17 +179,18 @@ describe('offscreen dictionary worker admission and reply ownership', () => {
     test('progress delivery failure cannot suppress terminal completion fallback', async () => {
         control.progressThenComplete = true;
         const {onMessage} = await createWorkerHarness();
-        /** @type {unknown[]} */
+        /** @type {Array<{type?: string, error?: {message?: string}}>} */
         const delivered = [];
         let progressFailed = false;
         let completionFailed = false;
         const responsePort = /** @type {MessagePort} */ (/** @type {unknown} */ ({
+            /** @param {{type?: string, error?: {message?: string}}} message */
             postMessage(message) {
-                if (message?.type === 'progress' && !progressFailed) {
+                if (message.type === 'progress' && !progressFailed) {
                     progressFailed = true;
                     throw new DOMException('progress clone failed', 'DataCloneError');
                 }
-                if (message?.type === 'complete' && !completionFailed) {
+                if (message.type === 'complete' && !completionFailed) {
                     completionFailed = true;
                     throw new DOMException('completion clone failed', 'DataCloneError');
                 }
@@ -199,7 +203,7 @@ describe('offscreen dictionary worker admission and reply ownership', () => {
             details: {},
         }, [responsePort]);
 
-        await vi.waitFor(() => expect(delivered.some((message) => message?.type === 'error')).toBe(true));
+        await vi.waitFor(() => expect(delivered.some((message) => message.type === 'error')).toBe(true));
         expect(delivered).toContainEqual(expect.objectContaining({
             type: 'error',
             error: expect.objectContaining({
