@@ -1,0 +1,90 @@
+name: Qualify fused-score closeout
+on:
+  push:
+    branches: [review/score-closeout-20260921]
+permissions:
+  contents: write
+jobs:
+  qualify-and-publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      BASE: e460fd3f511488a97485d840dda3578def410705
+      DEST: fix/fused-score-negative-zero-20260921
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Prepare compiler and dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y clang lld
+          npm ci
+          npm run build:libs
+          mkdir -p "$RUNNER_TEMP/score-evidence"
+      - name: Require the intended baseline failures and passing controls
+        run: |
+          set +e
+          node test/fixtures/fused-score/check.mjs "$RUNNER_TEMP/score-evidence/red.json" > "$RUNNER_TEMP/score-evidence/red.log" 2>&1
+          rc=$?
+          set -e
+          test "$rc" -eq 1
+          python3 - <<'PY'
+          import json, os
+          r=json.load(open(os.environ['RUNNER_TEMP']+'/score-evidence/red.json'))
+          assert {x['name'] for x in r['results'] if not x['passed']} == {'negative-zero-first','negative-zero-middle','negative-zero-last'}, r
+          assert r['passed'] == 5, r
+          PY
+      - name: Apply the narrow score-only repair
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('ext/js/dictionary/wasm/term-bank-parser.c')
+          b=p.read_bytes()
+          assert hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest() == '84d734055b12f73491bab78df7a191d4b9f50a9e'
+          old='''            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score)
+          '''
+          new='''            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score) ||
+                      /* Integer storage cannot preserve the sign of JSON -0.
+                       * Fall back for scores only; sequence decoding is unchanged. */
+                      (score == 0 && src[parsed_row->score_start] == '-')
+          '''
+          s=b.decode(); assert s.count(old)==1
+          p.write_text(s.replace(old,new))
+          PY
+          npm run build:libs
+      - name: Run repaired behavior and surrounding repository gates
+        run: |
+          node test/fixtures/fused-score/check.mjs "$RUNNER_TEMP/score-evidence/green.json" | tee "$RUNNER_TEMP/score-evidence/green.log"
+          npx vitest run --maxWorkers=2 --minWorkers=1 --reporter=json --outputFile="$RUNNER_TEMP/score-evidence/unit.json"
+          npm run test:unit:options
+          npm run test:ts
+          npx eslint test/term-bank-score-fused-zero.test.js test/fixtures/fused-score/check.mjs
+          npm run test:build
+          git diff --check
+      - name: Publish only direct source and regressions on a new branch
+        run: |
+          git config user.name 'Manabi review automation'
+          git config user.email 'review@users.noreply.github.com'
+          export GIT_INDEX_FILE="$RUNNER_TEMP/score-clean-index"
+          git read-tree "$BASE"
+          git add test/fixtures/fused-score/check.mjs test/term-bank-score-fused-zero.test.js
+          red=$(git commit-tree "$(git write-tree)" -p "$BASE" -m 'test: expose negative-zero loss without masking fused fallback')
+          git add ext/js/dictionary/wasm/term-bank-parser.c
+          green=$(git commit-tree "$(git write-tree)" -p "$red" -m 'fix: preserve negative zero in fused term scores')
+          printf '%s\n%s\n' "$red" "$green" > "$RUNNER_TEMP/score-evidence/published-commits.txt"
+          git diff "$BASE" "$green" > "$RUNNER_TEMP/score-evidence/fixed.patch"
+          git archive "$green" | gzip > "$RUNNER_TEMP/score-evidence/source.tar.gz"
+          tar -czf "$RUNNER_TEMP/score-evidence/compiled-parser.tar.gz" ext/lib/term-bank-parser.wasm
+          git push origin "$green:refs/heads/$DEST"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fused-score-closeout
+          path: ${{ runner.temp }}/score-evidence
+          retention-days: 14
