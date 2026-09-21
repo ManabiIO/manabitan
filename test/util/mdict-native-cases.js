@@ -281,7 +281,10 @@ describe('MDict header encoding and encryption metadata', () => {
         ['猫', 'c3a8'],
         ['<p>定义</p>', '3c703eb6a8d2e53c2f703e'],
     ]);
-    /** @param {string} value */
+    /**
+     * @param {string} value
+     * @returns {Uint8Array}
+     */
     const encodeGb18030 = (value) => {
         const hex = gb18030Bytes.get(value);
         if (typeof hex === 'undefined') { throw new Error(`Missing GB18030 test vector for ${value}`); }
