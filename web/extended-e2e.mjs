@@ -70,7 +70,7 @@ export async function runExtended({context, page, origin, fixtures, check, impor
                 const image = await createImageBitmap(new Blob([bytes], {type: value.mediaType}));
                 try { decoded = {width: image.width, height: image.height}; } finally { image.close(); }
             } catch (error) { decoded = {error: String(error)}; }
-            return {mediaType: value.mediaType, bytes: bytes.byteLength, signature: [...bytes.slice(0, 8)], decoded};
+            return {mediaType: value.mediaType, bytes: bytes.byteLength, signature: Array.from(bytes.slice(0, 8)), decoded};
         });
         assert.ok(media, 'The imported dictionary must contain pixel.png');
         assert.equal(media.mediaType, 'image/png');
