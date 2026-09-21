@@ -982,5 +982,4 @@ describe('convertMdxToArchive', () => {
         expect(result.files.has('styles.css')).toBe(false);
         expect(result.files.get('mdict-media/styles/unsupported.css')).toBeInstanceOf(Uint8Array);
     });
-
 });
