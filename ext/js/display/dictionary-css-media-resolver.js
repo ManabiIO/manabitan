@@ -92,6 +92,24 @@ export function getMdictMediaPathFromComputedUrl(value, baseUrl) {
 }
 
 /**
+ * @param {string} css
+ * @param {string} baseUrl
+ * @returns {string[]}
+ */
+export function getMdictMediaPathsFromComputedCss(css, baseUrl) {
+    const result = [];
+    CSS_URL_PATTERN.lastIndex = 0;
+    for (const match of css.matchAll(CSS_URL_PATTERN)) {
+        const raw = match[1] ?? match[2] ?? match[3] ?? '';
+        const path = getMdictMediaPathFromComputedUrl(decodeCssString(raw.trim()), baseUrl);
+        if (path !== null) {
+            result.push(path);
+        }
+    }
+    return result;
+}
+
+/**
  * @param {string} dictionary
  * @param {string} path
  * @returns {string}
