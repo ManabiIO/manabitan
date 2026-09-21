@@ -24,7 +24,7 @@ p.write_text(s.replace(old, new))
 p = root / 'probe.js'
 s = p.read_text()
 header = '''/*
- * Copyright (C) 2026  Yomitan Authors
+ * Copyright (C) 2026  Manabitan authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
