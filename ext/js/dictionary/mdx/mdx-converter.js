@@ -562,18 +562,94 @@ function decodeDataUrl(value) {
  * @param {Uint8Array} bytes
  * @returns {string|null}
  */
-function decodeStylesheetAsset(bytes) {
-    for (const encoding of ['utf-8', 'utf-16', 'utf-16le', 'utf-16be']) {
-        try {
-            const value = new TextDecoder(encoding).decode(bytes).trim();
-            if (value.length > 0 && !value.includes('\u0000')) {
-                return value;
-            }
-        } catch (_error) {
-            // NOP
-        }
+function getDeclaredStylesheetEncoding(bytes) {
+    let prefix = '';
+    const limit = Math.min(bytes.length, 128);
+    for (let index = 0; index < limit; index += 1) {
+        const byte = bytes[index];
+        if (byte > 0x7f) { break; }
+        prefix += String.fromCodePoint(byte);
+        if (byte === 0x3b) { break; }
+    }
+    const match = /^@charset\s+"([^"\r\n]+)"\s*;/iu.exec(prefix);
+    return match?.[1] ?? null;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {string|null}
+ */
+function getBomStylesheetEncoding(bytes) {
+    if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+        return 'utf-8';
+    }
+    if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
+        return 'utf-16le';
+    }
+    if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+        return 'utf-16be';
     }
     return null;
+}
+
+/**
+ * Recognize common BOM-less UTF-16 CSS by its ASCII NUL-byte pattern instead
+ * of trying UTF-16 against arbitrary legacy single-byte encodings.
+ * @param {Uint8Array} bytes
+ * @returns {string|null}
+ */
+function getLikelyUtf16StylesheetEncoding(bytes) {
+    const pairCount = Math.min(Math.floor(bytes.length / 2), 32);
+    if (pairCount < 2) { return null; }
+    let evenZeros = 0;
+    let oddZeros = 0;
+    for (let index = 0; index < pairCount * 2; index += 2) {
+        if (bytes[index] === 0) { evenZeros += 1; }
+        if (bytes[index + 1] === 0) { oddZeros += 1; }
+    }
+    const threshold = Math.max(2, Math.ceil(pairCount / 3));
+    if (oddZeros >= threshold && evenZeros === 0) { return 'utf-16le'; }
+    if (evenZeros >= threshold && oddZeros === 0) { return 'utf-16be'; }
+    return null;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {string} encoding
+ * @returns {string|null}
+ */
+function decodeStylesheetWithEncoding(bytes, encoding) {
+    try {
+        const decoded = new TextDecoder(encoding, {fatal: true}).decode(bytes);
+        const value = decoded
+            .replace(/^\ufeff?@charset\s+"[^"\r\n]+"\s*;\s*/iu, '')
+            .trim();
+        return value.length > 0 && !value.includes('\u0000') ? value : null;
+    } catch (_error) {
+        return null;
+    }
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {string|null}
+ */
+function decodeStylesheetAsset(bytes) {
+    const bomEncoding = getBomStylesheetEncoding(bytes);
+    if (bomEncoding !== null) {
+        return decodeStylesheetWithEncoding(bytes, bomEncoding);
+    }
+
+    const declaredEncoding = getDeclaredStylesheetEncoding(bytes);
+    if (declaredEncoding !== null) {
+        return decodeStylesheetWithEncoding(bytes, declaredEncoding);
+    }
+
+    const utf8 = decodeStylesheetWithEncoding(bytes, 'utf-8');
+    if (utf8 !== null) { return utf8; }
+
+    const utf16Encoding = getLikelyUtf16StylesheetEncoding(bytes);
+    return utf16Encoding === null ? null : decodeStylesheetWithEncoding(bytes, utf16Encoding);
 }
 
 /**
