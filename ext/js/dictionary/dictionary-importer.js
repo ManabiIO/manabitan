@@ -3942,6 +3942,7 @@ export class DictionaryImporter {
                 const tMaterializationStart = Date.now();
                 for (let i = 0, ii = decodedRows.length; i < ii; ++i) {
                     const row = decodedRows[i];
+                    const requirementCount = requirementsForChunk?.length ?? 0;
                     const expression = row.expression;
                     const reading = row.reading.length > 0 ? row.reading : expression;
                     const hasPrecomputedTermContent = hasPrecomputedTermEntryContent(row);
@@ -4051,6 +4052,7 @@ export class DictionaryImporter {
                         requirementsForChunk === null ||
                         (
                             requirementsForChunk !== null &&
+                            requirementsForChunk.length === requirementCount &&
                             (
                                 !hasPrecomputedTermEntryContent(entry)
                             )
