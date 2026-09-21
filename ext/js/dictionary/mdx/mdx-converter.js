@@ -1182,6 +1182,14 @@ function migrateStylesheetForYomitan(stylesheet, assetPrefix, sourceAssetPath, a
 }
 
 /**
+ * @param {string} sourceName
+ * @returns {string}
+ */
+function escapeStylesheetSourceComment(sourceName) {
+    return sourceName.replaceAll('*/', '* /').replace(/[\r\n]+/gu, ' ');
+}
+
+/**
  * @param {Map<string, Uint8Array>} cssAssets
  * @param {string} assetPrefix
  * @param {Array<[string, string, string]>} inlineStylesheets
@@ -1196,11 +1204,11 @@ function buildRootStylesheet(cssAssets, assetPrefix, inlineStylesheets, assetRef
         if (stylesheet === null) { continue; }
         const sourceName = archivePath.startsWith(assetPrefix) ? archivePath.slice(assetPrefix.length) : archivePath;
         stylesheet = migrateStylesheetForYomitan(stylesheet, assetPrefix, sourceName, assetReferences);
-        sections.push(`/* Source: ${sourceName} */\n${stylesheet}`);
+        sections.push(`/* Source: ${escapeStylesheetSourceComment(sourceName)} */\n${stylesheet}`);
     }
     for (const [sourceName, stylesheet, scopeClass] of inlineStylesheets) {
         const scopeSelector = `[${STRUCTURED_CLASS_ATTR}~="${scopeClass}"]`;
-        sections.push(`/* Source: ${sourceName} */\n${migrateStylesheetForYomitan(stylesheet, assetPrefix, null, assetReferences, scopeSelector, true)}`);
+        sections.push(`/* Source: ${escapeStylesheetSourceComment(sourceName)} */\n${migrateStylesheetForYomitan(stylesheet, assetPrefix, null, assetReferences, scopeSelector, true)}`);
     }
     return sections.length > 0 ? `${sections.join('\n\n')}\n` : null;
 }
