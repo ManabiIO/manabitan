@@ -3305,12 +3305,7 @@ export class TermRecordOpfsStore {
         globalGeneration,
         dictionaryGeneration = this._getPersistentLookupGeneration(dictionaryName),
     ) {
-        const isCurrent = () => this._isPersistentLookupGenerationCurrent(
-            dictionaryName,
-            globalGeneration,
-            dictionaryGeneration,
-        );
-        if (!isCurrent()) { return false; }
+        if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
         if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName)) {
             this._setDictionaryHealth(dictionaryName, 'available');
             return true;
@@ -3366,7 +3361,7 @@ export class TermRecordOpfsStore {
                     this._readFileRange(indexFile, 0, LOOKUP_INDEX_FILE_HEADER_BYTES),
                     this._readFileRange(recordFile, 0, BINARY_HEADER_PREFIX_BYTES),
                 ]);
-                if (!isCurrent()) { return false; }
+                if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
                 const headerView = new DataView(indexHeader.buffer, indexHeader.byteOffset, indexHeader.byteLength);
                 if (this._textDecoder.decode(indexHeader.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {
                     throw new PersistentLookupIndexError('invalid', `Lookup index header is invalid for ${state.fileName}`);
@@ -3526,7 +3521,7 @@ export class TermRecordOpfsStore {
                 }
             }
         } catch (error) {
-            if (!isCurrent()) { return false; }
+            if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
             if (error instanceof PersistentLookupIndexError) {
                 this._recordPersistentIndexFailure(dictionaryName, error.kind, error.message);
             } else {
@@ -3538,7 +3533,7 @@ export class TermRecordOpfsStore {
             }
             return false;
         }
-        if (!isCurrent()) { return false; }
+        if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
         recordChunks.sort((a, b) => a.firstId - b.firstId);
         for (let i = 1; i < recordChunks.length; ++i) {
             if (recordChunks[i].firstId <= (recordChunks[i - 1].firstId + recordChunks[i - 1].count - 1)) {
