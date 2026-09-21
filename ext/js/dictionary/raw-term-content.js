@@ -327,6 +327,13 @@ export function isRawTermContentSharedGlossaryBinary(bytes) {
  * @returns {Uint8Array}
  */
 export function encodeRawTermContentBinary(rules, definitionTags, termTags, glossaryJsonBytes, textEncoder) {
+    if (rules === '' && definitionTags === '' && termTags === '') {
+        const bytes = new Uint8Array(RAW_TERM_CONTENT_HEADER_BYTES + glossaryJsonBytes.byteLength);
+        bytes.set(RAW_TERM_CONTENT_MAGIC);
+        new DataView(bytes.buffer).setUint32(16, glossaryJsonBytes.byteLength, true);
+        bytes.set(glossaryJsonBytes, RAW_TERM_CONTENT_HEADER_BYTES);
+        return bytes;
+    }
     const rulesBytes = textEncoder.encode(rules);
     const definitionTagsBytes = textEncoder.encode(definitionTags);
     const termTagsBytes = textEncoder.encode(termTags);
