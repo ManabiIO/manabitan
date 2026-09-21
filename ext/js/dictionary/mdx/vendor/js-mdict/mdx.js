@@ -49,9 +49,10 @@ export class MDX extends Mdict {
      * @returns the prefix related list
      */
     prefix(prefix) {
-        const keywordList = this.associate(prefix);
+        // A prefix can span any number of physical key blocks. associate()
+        // intentionally selects one nearby block and is not a prefix range.
         const normalizedPrefix = this.strip(prefix);
-        return keywordList.filter(item => {
+        return this.keywordList.filter(item => {
             return this.strip(item.keyText).startsWith(normalizedPrefix);
         });
     }
