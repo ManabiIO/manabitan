@@ -121,7 +121,7 @@ const EMPTY_TERM_GLOSSARY = [];
  *   readingBytesList: Uint8Array[],
  *   readingEqualsExpressionList: boolean[]|Uint8Array,
  *   scoreList: number[]|Int32Array,
- *   sequenceList: (number|undefined)[]|Int32Array,
+ *   sequenceList: (number|undefined)[]|Int32Array|Float64Array,
  *   contentBytesList: Uint8Array[],
  *   contentHash1List?: number[]|Uint32Array,
  *   contentHash2List?: number[]|Uint32Array,
@@ -4326,7 +4326,7 @@ export class DictionaryImporter {
         let chunkReadingEqualsExpression = [];
         /** @type {number[]|Int32Array} */
         let chunkScores = [];
-        /** @type {(number|undefined)[]|Int32Array} */
+        /** @type {(number|undefined)[]|Int32Array|Float64Array} */
         let chunkSequences = [];
         /** @type {Uint8Array[]} */
         let chunkContentBytes = [];
@@ -4352,7 +4352,7 @@ export class DictionaryImporter {
             chunkReadingBytes = createSparseArray(chunkSize);
             chunkReadingEqualsExpression = new Uint8Array(chunkSize);
             chunkScores = new Int32Array(chunkSize);
-            chunkSequences = new Int32Array(chunkSize);
+            chunkSequences = new Float64Array(chunkSize);
             chunkSequences.fill(-1);
             chunkContentBytes = createSparseArray(chunkSize);
             chunkContentHash1 = new Uint32Array(chunkSize);
@@ -4367,7 +4367,7 @@ export class DictionaryImporter {
         /**
          * @param {number} streamedRowCount
          * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} termRecordPreinternedPlan
-         * @returns {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}}
+         * @returns {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}}
          */
         const createDirectArtifactChunkPayload = (streamedRowCount, termRecordPreinternedPlan) => {
             const useFullChunkArrays = streamedRowCount === chunkSize;
@@ -4383,8 +4383,8 @@ export class DictionaryImporter {
                 scoreList: /** @type {Int32Array} */ (
                     useFullChunkArrays ? chunkScores : /** @type {Int32Array} */ (chunkScores).subarray(0, streamedRowCount)
                 ),
-                sequenceList: /** @type {Int32Array} */ (
-                    useFullChunkArrays ? chunkSequences : /** @type {Int32Array} */ (chunkSequences).subarray(0, streamedRowCount)
+                sequenceList: /** @type {Int32Array|Float64Array} */ (
+                    useFullChunkArrays ? chunkSequences : /** @type {Int32Array|Float64Array} */ (chunkSequences).subarray(0, streamedRowCount)
                 ),
                 contentBytesList: useFullChunkArrays ? chunkContentBytes : chunkContentBytes.slice(0, streamedRowCount),
                 contentHash1List: /** @type {Uint32Array} */ (
@@ -4639,7 +4639,7 @@ null;
                         );
                     ++chunkIndex;
                     const tChunkSinkStart = Date.now();
-                    /** @type {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
+                    /** @type {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
                     const chunkPayload = directArtifactChunkImport ?
                         createDirectArtifactChunkPayload(streamedRowCount, termRecordPreinternedPlan) :
                         termList;
@@ -4649,7 +4649,7 @@ null;
                         }
                         setTermRecordPreinternedPlan(termList, termRecordPreinternedPlan);
                     }
-                    await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(chunkPayload, null, {
+                    await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(chunkPayload, null, {
                         processedRows: i + 1,
                         totalRows: rowCount,
                         chunkIndex,
@@ -4712,7 +4712,7 @@ null;
                 );
             ++chunkIndex;
             const tChunkSinkStart = Date.now();
-            /** @type {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
+            /** @type {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
             const chunkPayload = directArtifactChunkImport ?
                 createDirectArtifactChunkPayload(streamedRowCount, termRecordPreinternedPlan) :
                 termList;
@@ -4722,7 +4722,7 @@ null;
                 }
                 setTermRecordPreinternedPlan(termList, termRecordPreinternedPlan);
             }
-            await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(chunkPayload, null, {
+            await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(chunkPayload, null, {
                 processedRows: rowCount,
                 totalRows: rowCount,
                 chunkIndex,
