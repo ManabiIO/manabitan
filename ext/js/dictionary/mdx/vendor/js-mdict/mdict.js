@@ -40,53 +40,54 @@ export class Mdict extends MdictBase {
         this._recordBlockCache = new Map();
         this._recordBlockCacheSize = 0;
     }
-    /**
-     * lookupKeyInfoItem lookup the `keyInfoItem`
-     * the `keyInfoItem` contains key-word record block location: recordStartOffset
-     * the `recordStartOffset` should indicate the unpacked record data relative offset
-     * @param word the target word phrase
-     */
+    // Build a lookup-only view; physical key order and record offsets remain
+    // untouched for import iteration. Code-unit ordering keeps every normalized
+    // prefix contiguous and never confuses locale collation with key equality.
     _getLookupKeywordList() {
-        if (this._lookupKeywordList !== null) { return this._lookupKeywordList; }
-        const list = [...this.keywordList];
+        if (this._lookupKeywordList !== null) { return this._lookupKeywordList }
+        const list = [...this.keywordList]
         list.sort((item1, item2) => {
-            const result = this.comp(this.strip(item1.keyText), this.strip(item2.keyText));
-            return result !== 0 ? result : this.comp(item1.keyText, item2.keyText);
-        });
-        this._lookupKeywordList = list;
-        return list;
+            const key1 = this.strip(item1.keyText)
+            const key2 = this.strip(item2.keyText)
+            if (key1 < key2) { return -1 }
+            if (key1 > key2) { return 1 }
+            if (item1.keyText < item2.keyText) { return -1 }
+            if (item1.keyText > item2.keyText) { return 1 }
+            return 0
+        })
+        this._lookupKeywordList = list
+        return list
+    }
+    _lookupKeyLowerBound(normalizedWord) {
+        const list = this._getLookupKeywordList()
+        let left = 0
+        let right = list.length
+        while (left < right) {
+            const mid = left + Math.floor((right - left) / 2)
+            if (this.strip(list[mid].keyText) < normalizedWord) {
+                left = mid + 1
+            } else {
+                right = mid
+            }
+        }
+        return left
     }
     lookupKeyBlockByWord(word, isAssociate = false) {
-        // Direct lookup must use the dictionary's StripKey/KeyCaseSensitive
-        // rules rather than the source spelling used by the import iterator.
-        const list = this._getLookupKeywordList();
-        if (list.length === 0) {
-            return undefined;
+        const list = this._getLookupKeywordList()
+        const normalizedWord = this.strip(word)
+        const first = this._lookupKeyLowerBound(normalizedWord)
+        const item = list[first]
+        if (typeof item === 'undefined' || this.strip(item.keyText) !== normalizedWord) {
+            return isAssociate ? (item ?? list.at(-1)) : undefined
         }
-        const normalizedWord = this.strip(word);
-        // binary search
-        let left = 0;
-        let right = list.length - 1;
-        let mid = 0;
-        while (left <= right) {
-            mid = left + ((right - left) >> 1);
-            const compRes = this.comp(normalizedWord, this.strip(list[mid].keyText));
-            if (compRes > 0) {
-                left = mid + 1;
-            }
-            else if (compRes == 0) {
-                break;
-            }
-            else {
-                right = mid - 1;
-            }
+        // Case/StripKey-equivalent spellings can have different records. Prefer
+        // the requested spelling before a deterministic normalized fallback.
+        for (let index = first; index < list.length; index += 1) {
+            const candidate = list[index]
+            if (this.strip(candidate.keyText) !== normalizedWord) { break }
+            if (candidate.keyText === word) { return candidate }
         }
-        if (this.comp(normalizedWord, this.strip(list[mid].keyText)) != 0) {
-            if (!isAssociate) {
-                return undefined;
-            }
-        }
-        return list[mid];
+        return item
     }
     /**
      * locate the record meaning buffer by `keyListItem`

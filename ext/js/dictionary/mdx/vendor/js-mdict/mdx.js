@@ -49,11 +49,15 @@ export class MDX extends Mdict {
      * @returns the prefix related list
      */
     prefix(prefix) {
-        const keywordList = this.associate(prefix);
-        const normalizedPrefix = this.strip(prefix);
-        return keywordList.filter(item => {
-            return this.strip(item.keyText).startsWith(normalizedPrefix);
-        });
+        const keywordList = this._getLookupKeywordList()
+        const normalizedPrefix = this.strip(prefix)
+        const matches = []
+        for (let index = this._lookupKeyLowerBound(normalizedPrefix); index < keywordList.length; index += 1) {
+            const item = keywordList[index]
+            if (!this.strip(item.keyText).startsWith(normalizedPrefix)) { break }
+            matches.push(item)
+        }
+        return matches
     }
     /**
      * search matched list of associate words

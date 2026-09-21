@@ -368,12 +368,12 @@ describe('MDict direct lookup range and lifetime regressions', () => {
         } finally {
             mdx.close();
         }
-        assert.deepEqual(getLookupIndex(), []);
+        assert.equal(getLookupIndex(), null);
         assert.equal(mdx.lookupKeyBlockByWord('Target'), undefined);
         assert.equal(mdx.lookup('Target').definition, null);
         assert.deepEqual(mdx.prefix(''), []);
         mdx.close();
-        assert.deepEqual(getLookupIndex(), []);
+        assert.equal(getLookupIndex(), null);
     });
 
     test('MDD direct resource lookup prefers the exact case spelling', () => {
