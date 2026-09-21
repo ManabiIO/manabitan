@@ -4334,12 +4334,26 @@ describe('TermRecordOpfsStore string decoding buffer ownership', () => {
 
 describe('TermRecordOpfsStore exact dictionary identity', () => {
     const names = ['Dictionary', ' Dictionary ', '\ufeffDictionary', 'Dictionary\t', ' '];
-    /** @param {string[]} dictionaryNames */
+    /**
+     * @param {string[]} dictionaryNames
+     * @returns {Parameters<TermRecordOpfsStore['appendBatch']>[0]}
+     */
     const recordsFor = (dictionaryNames) => dictionaryNames.map((dictionary, i) => ({
-        dictionary, expression: '猫', reading: 'ねこ', expressionReverse: null, readingReverse: null,
-        entryContentOffset: i * 16, entryContentLength: 8, entryContentDictName: 'raw', score: 1, sequence: i,
+        dictionary,
+        expression: '猫',
+        reading: 'ねこ',
+        expressionReverse: null,
+        readingReverse: null,
+        entryContentOffset: i * 16,
+        entryContentLength: 8,
+        entryContentDictName: 'raw',
+        score: 1,
+        sequence: i,
     }));
-    /** @param {Map<string, Uint8Array>} files */
+    /**
+     * @param {Map<string, Uint8Array>} files
+     * @returns {Promise<TermRecordOpfsStore>}
+     */
     const reopen = async (files) => {
         const reader = new TermRecordOpfsStore();
         reader._recordsDirectoryHandle = createFakeDirectoryHandle(files);

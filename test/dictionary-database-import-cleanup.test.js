@@ -1344,9 +1344,11 @@ describe('DictionaryDatabase import cleanup', () => {
         const restore = vi.spyOn(database, 'replaceDictionaryTitle').mockResolvedValue();
         vi.spyOn(database, 'deleteDictionary').mockResolvedValue();
         Reflect.set(database, '_db', {
-            selectObjects: vi.fn(() => [{id: 1, title: replacedTitle, summaryJson: JSON.stringify({
-                title: replacedTitle, importSuccess: true, transientUpdateStage: 'replaced', updateSessionToken: 'identity-token',
-            })}]),
+            selectObjects: vi.fn(() => [{id: 1,
+                title: replacedTitle,
+                summaryJson: JSON.stringify({
+                    title: replacedTitle, importSuccess: true, transientUpdateStage: 'replaced', updateSessionToken: 'identity-token',
+                })}]),
             exec: vi.fn(),
         });
         await database._cleanupIncompleteImports();
