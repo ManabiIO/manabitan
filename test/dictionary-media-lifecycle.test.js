@@ -21,7 +21,19 @@ import {DictionaryImporterMediaLoader} from '../ext/js/dictionary/dictionary-imp
 
 /** @typedef {{width: number, height: number, close: () => void}} Bitmap */
 
-/** */
+/**
+ * @returns {{
+ *   install: (name: string, value: unknown) => void,
+ *   timers: Map<number, {callback: () => void, delay: number}>,
+ *   created: string[],
+ *   revoked: string[],
+ *   images: {listeners: Map<string, Set<() => void>>, source: string|null, fire: (type: string) => void}[],
+ *   failures: {constructorError: Error|null, sourceError: Error|null, listenerError: Error|null},
+ *   FakeImage: new () => unknown,
+ *   fireTimeouts: () => void,
+ *   restore: () => void,
+ * }}
+ */
 function createFixture() {
     /** @type {[string, PropertyDescriptor|undefined][]} */
     const originals = [];
@@ -56,11 +68,16 @@ function createFixture() {
             this.source = null;
             images.push(this);
         }
+
+        /** @returns {string|null} */
+        get src() { return this.source; }
+
         /** @param {string} source */
         set src(source) {
             if (failures.sourceError !== null) { throw failures.sourceError; }
             this.source = source;
         }
+
         /**
          * @param {string} type
          * @param {() => void} listener
@@ -74,6 +91,7 @@ function createFixture() {
             }
             listeners.add(listener);
         }
+
         /**
          * @param {string} type
          * @param {() => void} listener
@@ -83,14 +101,16 @@ function createFixture() {
             listeners?.delete(listener);
             if (listeners?.size === 0) { this.listeners.delete(type); }
         }
+
         /** @param {string} name */
         removeAttribute(name) {
             assert.equal(name, 'src');
             this.source = null;
         }
+
         /** @param {string} type */
         fire(type) {
-            for (const listener of [...(this.listeners.get(type) ?? [])]) { listener(); }
+            for (const listener of this.listeners.get(type) ?? []) { listener(); }
         }
     }
     /**
@@ -116,6 +136,7 @@ function createFixture() {
             created.push(url);
             return url;
         }
+
         /** @param {string} url */
         static revokeObjectURL(url) { revoked.push(url); }
     }
@@ -125,7 +146,13 @@ function createFixture() {
     install('Image', void 0);
     install('createImageBitmap', void 0);
     return {
-        install, timers, created, revoked, images, failures, FakeImage,
+        install,
+        timers,
+        created,
+        revoked,
+        images,
+        failures,
+        FakeImage,
         fireTimeouts() {
             const pending = [...timers.values()];
             timers.clear();
@@ -153,7 +180,10 @@ function deferredBitmap() {
     /** @type {(error: Error) => void} */
     let reject = () => {};
     /** @type {Promise<Bitmap>} */
-    const promise = new Promise((resolve0, reject0) => { resolve = resolve0; reject = reject0; });
+    const promise = new Promise((resolve0, reject0) => {
+        resolve = resolve0;
+        reject = reject0;
+    });
     return {promise, resolve, reject};
 }
 
