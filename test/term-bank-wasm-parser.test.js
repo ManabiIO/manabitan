@@ -3052,8 +3052,8 @@ describe('term bank score number parity', () => {
         expect(int32Profile?.fusedParseFallbacks).toBe(0);
     });
 
-    maybeTest.each(['"1.5"', 'null', 'true', '[]', '{}'])(
-        'rejects non-number score token %s',
+    maybeTest.each(['"1.5"', 'null', 'true', '[]', '{}', '1e309', '-1e309'])(
+        'rejects invalid score token %s',
         async (scoreToken) => {
             const sourceBytes = textEncoder.encode(
                 `[["bad","","","",${scoreToken},["g"],1,""]]`,
