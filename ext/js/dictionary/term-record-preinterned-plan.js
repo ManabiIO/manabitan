@@ -151,6 +151,29 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
         return index;
     };
 
+    /**
+     * Check each admitted value before storing it as uint32. Otherwise NaN,
+     * holes, fractions, or wide integers can silently become a valid string ID.
+     * Typed inputs need no conversion. Preserve their zero-copy contract;
+     * consumers still validate referenced IDs when compacting the plan.
+     * @param {number[]|Uint32Array} indexes
+     * @param {number} count
+     * @returns {Uint32Array}
+     * @throws {RangeError} If a row references an invalid string ID.
+     */
+    const getValidatedRowIndexes = (indexes, count) => {
+        if (indexes instanceof Uint32Array) { return indexes.subarray(0, count); }
+        const result = new Uint32Array(count);
+        for (let i = 0; i < count; ++i) {
+            const index = indexes[i];
+            if (!Number.isSafeInteger(index) || index < 0 || index >= stringCount) {
+                throw new RangeError(`Preinterned string index out of bounds at row ${i}: ${index}`);
+            }
+            result[i] = index;
+        }
+        return result;
+    };
+
     return {
         internStringBytes(bytes) {
             return internHashedBytes(bytes, hashTermKeyBytes(bytes));
@@ -165,6 +188,8 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
             ) {
                 throw new RangeError('Invalid preinterned plan row count');
             }
+            const validatedExpressionIndexes = getValidatedRowIndexes(expressionIndexes, count);
+            const validatedReadingIndexes = getValidatedRowIndexes(readingIndexes, count);
             const stringsBuffer = new Uint8Array(totalStringBytes);
             const stringOffsets = new Uint32Array(stringCount);
             let cursor = 0;
@@ -179,12 +204,8 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
                 stringHashes: stringHashes.subarray(0, stringCount),
                 stringOffsets,
                 stringsBuffer,
-                expressionIndexes: expressionIndexes instanceof Uint32Array ?
-                    expressionIndexes.subarray(0, count) :
-                    Uint32Array.from(expressionIndexes.slice(0, count)),
-                readingIndexes: readingIndexes instanceof Uint32Array ?
-                    readingIndexes.subarray(0, count) :
-                    Uint32Array.from(readingIndexes.slice(0, count)),
+                expressionIndexes: validatedExpressionIndexes,
+                readingIndexes: validatedReadingIndexes,
             };
         },
     };
