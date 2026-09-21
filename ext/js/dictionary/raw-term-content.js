@@ -243,6 +243,7 @@ export function decodeRawTermContentBlockReference(bytes) {
         blockCompressedLength <= 0 ||
         blockUncompressedLength <= 0 ||
         entryLength <= 0 ||
+        !Number.isSafeInteger(blockOffset + blockCompressedLength) ||
         entryOffset + entryLength > blockUncompressedLength
     ) {
         return null;
