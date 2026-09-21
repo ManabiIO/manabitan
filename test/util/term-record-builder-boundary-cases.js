@@ -31,7 +31,7 @@ const invalidIndexes = [
     ['uint32 wrap to zero', 2 ** 32],
     ['uint32 wrap to one', 2 ** 32 + 1],
     ['unsafe number', 2 ** 53],
-    ['NaN', NaN],
+    ['NaN', Number.NaN],
     ['positive infinity', Infinity],
     ['negative infinity', -Infinity],
 ]
@@ -107,14 +107,14 @@ test('valid typed-array subviews remain zero-copy', () => {
 })
 
 test('explicit count ignores unused invalid suffixes', () => {
-    const plan = createBuilder().buildPlan([0, NaN], [1, 2 ** 32], 1)
+    const plan = createBuilder().buildPlan([0, Number.NaN], [1, 2 ** 32], 1)
     assert.deepEqual(plan.expressionIndexes, new Uint32Array([0]))
     assert.deepEqual(plan.readingIndexes, new Uint32Array([1]))
 })
 
 test('zero rows accept an empty arena and ignore unused row values', () => {
     const builder = createTermRecordPreinternedPlanBuilder(16)
-    const plan = builder.buildPlan([NaN], [Infinity], 0)
+    const plan = builder.buildPlan([Number.NaN], [Infinity], 0)
     assert.equal(plan.stringsBuffer.byteLength, 0)
     assert.equal(plan.expressionIndexes.length, 0)
     assert.equal(plan.readingIndexes.length, 0)
@@ -134,7 +134,7 @@ test('a rejected build leaves the builder usable', () => {
     assert.deepEqual(plan.stringsBuffer, encoder.encode('猫ねこ犬'))
 })
 
-for (const count of [-1, 0.5, NaN, Infinity, 3]) {
+for (const count of [-1, 0.5, Number.NaN, Infinity, 3]) {
     test(`invalid row count ${String(count)} is still rejected`, () => {
         assert.throws(() => createBuilder().buildPlan([0, 1], [1, 0], count), RangeError)
     })
@@ -154,7 +154,12 @@ test('ordinary input getters are validated and copied from the same read', () =>
     const builder = createBuilder()
     const indexes = [0]
     let reads = 0
-    Object.defineProperty(indexes, 0, {get() { ++reads; return reads === 1 ? 0 : 2 ** 32 + 1 }})
+    Object.defineProperty(indexes, 0, {
+        get() {
+            ++reads
+            return reads === 1 ? 0 : 2 ** 32 + 1
+        },
+    })
     const plan = builder.buildPlan(indexes, [1])
     assert.equal(reads, 1)
     assert.deepEqual(plan.expressionIndexes, new Uint32Array([0]))
