@@ -630,6 +630,53 @@ function decodeStylesheetAsset(bytes) {
 }
 
 /**
+ * Parse a CSS url() token without treating escaped closing parentheses as the
+ * end of an unquoted value.
+ * @param {string} value
+ * @param {number} startIndex
+ * @returns {{path: string, endIndex: number}|null}
+ */
+function readCssUrlFunction(value, startIndex) {
+    if (value.slice(startIndex, startIndex + 4).toLowerCase() !== 'url(') { return null; }
+    let index = startIndex + 4;
+    while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+    if (index >= value.length) { return null; }
+
+    const quote = value[index] === '"' || value[index] === "'" ? value[index++] : '';
+    let path = '';
+    while (index < value.length) {
+        const character = value[index];
+        if (quote.length > 0) {
+            if (character === quote) {
+                index += 1;
+                while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+                return value[index] === ')' ? {path, endIndex: index + 1} : null;
+            }
+            if (/[\n\r\f]/u.test(character)) { return null; }
+        } else {
+            if (character === ')') { return {path, endIndex: index + 1}; }
+            if (/\s/u.test(character)) {
+                while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+                return value[index] === ')' ? {path, endIndex: index + 1} : null;
+            }
+            if (character === '"' || character === "'" || character === '(' || /[\n\r\f]/u.test(character)) {
+                return null;
+            }
+        }
+        if (character === '\\') {
+            const escape = readCssEscape(value, index);
+            if (escape === null) { return null; }
+            path += escape.value;
+            index = escape.endIndex;
+            continue;
+        }
+        path += character;
+        index += character.length;
+    }
+    return null;
+}
+
+/**
  * @param {string} stylesheet
  * @param {string} assetPrefix
  * @param {string|null} sourceAssetPath
@@ -637,15 +684,62 @@ function decodeStylesheetAsset(bytes) {
  * @returns {string}
  */
 function rewriteCssAssetUrls(stylesheet, assetPrefix, sourceAssetPath, assetReferences = null) {
-    return stylesheet.replace(/url\(\s*(["']?)(.*?)\1\s*\)/giu, (match, _quote, rawPath) => {
-        const path = typeof rawPath === 'string' ? rawPath : '';
-        const assetKey = normalizeReferencedAssetKey(path, assetPrefix, sourceAssetPath);
+    const output = [];
+    let lastIndex = 0;
+    for (let index = 0; index < stylesheet.length;) {
+        if (stylesheet.startsWith('/*', index)) {
+            const commentEnd = stylesheet.indexOf('*/', index + 2);
+            index = commentEnd < 0 ? stylesheet.length : commentEnd + 2;
+            continue;
+        }
+        const character = stylesheet[index];
+        if (character === '"' || character === "'") {
+            const quote = character;
+            index += 1;
+            while (index < stylesheet.length) {
+                if (stylesheet[index] === '\\') {
+                    const escape = readCssEscape(stylesheet, index);
+                    index = escape === null ? index + 1 : escape.endIndex;
+                    continue;
+                }
+                if (stylesheet[index] === quote) {
+                    index += 1;
+                    break;
+                }
+                index += 1;
+            }
+            continue;
+        }
+        if (stylesheet.slice(index, index + 4).toLowerCase() !== 'url(') {
+            index += 1;
+            continue;
+        }
+        const previous = index > 0 ? stylesheet[index - 1] : '';
+        const previousCodePoint = previous.codePointAt(0) ?? 0;
+        if (/[A-Za-z0-9_-]/u.test(previous) || previousCodePoint >= 0x80) {
+            index += 1;
+            continue;
+        }
+        const token = readCssUrlFunction(stylesheet, index);
+        if (token === null) {
+            index += 1;
+            continue;
+        }
+        const assetKey = normalizeReferencedAssetKey(token.path, assetPrefix, sourceAssetPath);
         if (assetKey !== null && assetReferences !== null) {
             assetReferences.add(assetKey);
         }
-        const prefixedPath = assetKey === null ? null : `${assetPrefix}${assetKey}`;
-        return prefixedPath === null ? match : `url("${prefixedPath}")`;
-    });
+        if (assetKey !== null) {
+            output.push(
+                stylesheet.slice(lastIndex, index),
+                `url("${escapeCssString(`${assetPrefix}${assetKey}`)}")`,
+            );
+            lastIndex = token.endIndex;
+        }
+        index = token.endIndex;
+    }
+    output.push(stylesheet.slice(lastIndex));
+    return output.join('');
 }
 
 /**
