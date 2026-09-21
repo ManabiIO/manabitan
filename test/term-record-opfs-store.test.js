@@ -249,7 +249,7 @@ describe('TermRecordOpfsStore', () => {
         await reader._loadShardFiles(true);
         const records = await reader.getByIdsAsync([1, 2, 3, 4, 5]);
         const actualScores = [...records.values()].map(({score}) => score);
-        expect(actualScores.slice(0, 4)).toStrictEqual([...scores.slice(0, 4)]);
+        expect(actualScores.slice(0, 4)).toStrictEqual([1.5, -2.25, 0.1, 2 ** 40 + 0.5]);
         expect(Object.is(actualScores[4], -0)).toBe(true);
     });
 
