@@ -77,7 +77,7 @@ function xmlAttribute(value) {
  * Does not import the parser under test. Record blocks may split Unicode scalars.
  * Optional metadata overrides are only for negative regression cases.
  * @param {Array<{key: string, value: string|Uint8Array}>} entries
- * @param {{mdd?: boolean, encoding?: 'utf8'|'utf16le', encodingLabel?: string, textEncoder?: ((value: string) => Uint8Array), encrypted?: string|number, compression?: 'raw'|'zlib', recordBlockSize?: number, keysPerBlock?: number, title?: string, version?: string, keyBlockUnpackSizeDelta?: number, keyBlockEntryCounts?: number[], keyInfoTrailer?: Uint8Array, keyInfoTerminatorByte?: number}} [options]
+ * @param {{mdd?: boolean, encoding?: 'utf8'|'utf16le', encodingLabel?: string, textEncoder?: ((value: string) => Uint8Array), encrypted?: string|number, format?: string, styleSheet?: string, compression?: 'raw'|'zlib', recordBlockSize?: number, keysPerBlock?: number, title?: string, version?: string, keyBlockUnpackSizeDelta?: number, keyBlockEntryCounts?: number[], keyInfoTrailer?: Uint8Array, keyInfoTerminatorByte?: number}} [options]
  * @returns {{bytes: Uint8Array, records: Uint8Array[], recordDataOffset: number}}
  */
 export function makeMdictFixture(entries, options = {}) {
@@ -87,6 +87,8 @@ export function makeMdictFixture(entries, options = {}) {
         encodingLabel = encoding === 'utf16le' ? 'UTF-16' : 'UTF-8',
         textEncoder = /** @param {string} value @returns {Uint8Array} */ (value) => new Uint8Array(Buffer.from(value, encoding)),
         encrypted = 0,
+        format = '',
+        styleSheet = '',
         compression = 'zlib',
         recordBlockSize = 64,
         keysPerBlock = 2,
@@ -170,8 +172,10 @@ export function makeMdictFixture(entries, options = {}) {
         integer(keyBytes.length, numWidth),
     ]);
     const encodingAttribute = mdd ? '' : ` Encoding="${xmlAttribute(encodingLabel)}"`;
+    const formatAttribute = format.length > 0 ? ` Format="${xmlAttribute(format)}"` : '';
+    const styleSheetAttribute = styleSheet.length > 0 ? ` StyleSheet="${xmlAttribute(styleSheet)}"` : '';
     const tag = mdd ? 'Library_Data' : 'Dictionary';
-    const header = Buffer.from(`<${tag} GeneratedByEngineVersion="${version}" RequiredEngineVersion="${version}" Encrypted="${xmlAttribute(String(encrypted))}"${encodingAttribute} Title="${xmlAttribute(title)}" Description="Generated regression fixture"/>\0`, 'utf16le');
+    const header = Buffer.from(`<${tag} GeneratedByEngineVersion="${version}" RequiredEngineVersion="${version}" Encrypted="${xmlAttribute(String(encrypted))}"${encodingAttribute}${formatAttribute}${styleSheetAttribute} Title="${xmlAttribute(title)}" Description="Generated regression fixture"/>\0`, 'utf16le');
     const recordInfoBytes = Buffer.concat(recordInfo);
     const packedRecordBytes = Buffer.concat(packedRecords);
     const beforeRecordData = Buffer.concat([

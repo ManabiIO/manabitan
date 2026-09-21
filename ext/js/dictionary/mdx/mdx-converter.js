@@ -24,6 +24,7 @@ import * as parse5 from '../../../lib/parse5.js';
 import {base64ToArrayBuffer} from '../../data/array-buffer-util.js';
 import {MDX} from './vendor/js-mdict/mdx.js';
 import {MDD} from './vendor/js-mdict/mdd.js';
+import mdictCommon from './vendor/js-mdict/utils.js';
 
 const BlobWriter = /** @type {typeof import('@zip.js/zip.js').BlobWriter} */ (/** @type {unknown} */ (BlobWriter0));
 const Uint8ArrayReader = /** @type {typeof import('@zip.js/zip.js').Uint8ArrayReader} */ (/** @type {unknown} */ (Uint8ArrayReader0));
@@ -38,7 +39,7 @@ const ZipWriter = /** @type {typeof import('@zip.js/zip.js').ZipWriter} */ (/** 
  */
 
 /**
- * @typedef {{Title?: string, Description?: string}} MdictHeader
+ * @typedef {{Title?: string, Description?: string, Format?: string, StyleSheet?: Record<string, string[]>}} MdictHeader
  */
 
 /**
@@ -352,7 +353,32 @@ class MddAssetResolver {
  * @returns {string}
  */
 function trimNullSuffix(value) {
-    return value.replace(new RegExp(`${NULL_CHARACTER}+$`, 'gu'), '').trim();
+    return value.replace(new RegExp(`${NULL_CHARACTER}+$`, 'gu'), '');
+}
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+function escapeHtmlText(value) {
+    return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+}
+
+/**
+ * @param {string} definition
+ * @param {MdictHeader} header
+ * @returns {string}
+ */
+function prepareDefinitionMarkup(definition, header) {
+    const format = String(header.Format ?? '').trim().toLowerCase();
+    if (format === 'text') {
+        return `<pre>${escapeHtmlText(definition)}</pre>`;
+    }
+    const styleSheet = header.StyleSheet;
+    if (typeof styleSheet === 'object' && styleSheet !== null && !Array.isArray(styleSheet)) {
+        return mdictCommon.substituteStylesheet(styleSheet, definition);
+    }
+    return definition;
 }
 
 /**
@@ -1300,7 +1326,7 @@ function convertDefinitionToStructuredContent(definition, options) {
  */
 function extractTitle(mdx, fileName, override) {
     if (override.trim().length > 0) { return override.trim(); }
-    const title = trimNullSuffix(String(mdx.header.Title ?? ''));
+    const title = trimNullSuffix(String(mdx.header.Title ?? '')).trim();
     if (title.length === 0 || title === 'Title (No HTML code allowed)') {
         return getBaseName(fileName);
     }
@@ -1313,7 +1339,7 @@ function extractTitle(mdx, fileName, override) {
  * @returns {string}
  */
 function extractDescription(mdx, override) {
-    return override.trim().length > 0 ? override.trim() : trimNullSuffix(String(mdx.header.Description ?? ''));
+    return override.trim().length > 0 ? override.trim() : trimNullSuffix(String(mdx.header.Description ?? '')).trim();
 }
 
 /**
@@ -1438,7 +1464,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
 
         const tConvertEntriesStart = Date.now();
         for (const item of mdx.keywordList) {
-            const term = trimNullSuffix(item.keyText);
+            const term = trimNullSuffix(item.keyText).trim();
             processedEntries += 1;
             if (term.length === 0) {
                 if (typeof onProgress === 'function') {
@@ -1457,8 +1483,9 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 }
                 continue;
             }
-            if (definition.startsWith('@@@LINK=')) {
-                const target = trimNullSuffix(definition.slice(8));
+            const redirectDefinition = definition.trim();
+            if (redirectDefinition.startsWith('@@@LINK=')) {
+                const target = trimNullSuffix(redirectDefinition.slice(8)).trim();
                 if (target.length > 0 && target !== term) {
                     const aliases = redirects.get(target) ?? new Set();
                     if (!aliases.has(term)) {
@@ -1475,7 +1502,8 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
 
             let converted;
             try {
-                converted = convertDefinitionToStructuredContent(definition, {enableAudio, assetPrefix, embeddedAssetCounter});
+                const preparedDefinition = prepareDefinitionMarkup(definition, mdx.header);
+                converted = convertDefinitionToStructuredContent(preparedDefinition, {enableAudio, assetPrefix, embeddedAssetCounter});
             } catch (_error) {
                 skippedEntryErrorCount += 1;
                 if (typeof onProgress === 'function') {
