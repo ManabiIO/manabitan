@@ -1425,9 +1425,8 @@ export class Display extends EventDispatcher {
         }
 
         if (targets.length === 0) { return; }
-        let changed;
         try {
-            changed = await this._dictionaryCssMediaResolver.resolve(targets);
+            await this._dictionaryCssMediaResolver.resolve(targets);
         } catch (error) {
             if (!this._application.webExtension.unloaded) {
                 log.error(error);
@@ -1444,7 +1443,11 @@ export class Display extends EventDispatcher {
             }
         }
 
-        if (changed && this._options !== null) {
+        // An obsolete render may have populated the cache without publishing
+        // its stylesheet. The current render must apply those cached URLs too.
+        if (this._options !== null && this._options.dictionaries.some(({name, enabled, styles = ''}) => (
+            enabled && this._dictionaryCssMediaResolver.rewriteStyles(name, styles) !== styles
+        ))) {
             this._setTheme(this._options);
         }
     }

@@ -33,7 +33,7 @@ test.each([false, true])('current render applies cached CSS after an obsolete re
     });
     vi.stubGlobal('window', {location: {href: 'chrome-extension://example/search.html'}});
     vi.stubGlobal('getComputedStyle', () => ({
-        getPropertyValue: (/** @type {string} */ name) => name === 'background-image' ? 'url("chrome-extension://example/mdict-media/a.png")' : 'none',
+        getPropertyValue: (/** @type {string} */ name) => (name === 'background-image' ? 'url("chrome-extension://example/mdict-media/a.png")' : 'none'),
     }));
     const media = [{dictionary: 'A', path: 'mdict-media/a.png', mediaType: 'image/png', content: 'AA=='}];
     try {
