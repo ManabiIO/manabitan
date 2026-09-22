@@ -460,6 +460,7 @@ function decodeJsonNumberToken(source, start) {
  * @param {Uint8Array} source
  * @param {number} start
  * @returns {number}
+ * @throws {RangeError} If the sequence is not a safe integer.
  */
 function decodeJsonSequenceToken(source, start) {
     const value = decodeJsonNumberToken(source, start);
@@ -1941,7 +1942,8 @@ null :
         const scoreList = fusedStringPlan === null ?
             new Float64Array(count) :
             /** @type {Int32Array} */ (fusedStringPlan.scoreList).subarray(start, end);
-        const sequenceList = fusedStringPlan === null && version >= 3 ?
+        /** @type {Int32Array|Float64Array} */
+        let sequenceList = fusedStringPlan === null && version >= 3 ?
             new Float64Array(count) :
             (fusedStringPlan === null ?
                 new Int32Array(count) :
@@ -2061,7 +2063,8 @@ null :
                 scoreList[i] = decodeJsonNumberToken(source, metas[o + 8]);
                 if (version >= 3) {
                     const sequenceStart = metas[o + 11];
-                    sequenceList[i] = sequenceStart === U32_NULL ? -1 : decodeJsonSequenceToken(source, sequenceStart);
+                    const sequence = sequenceStart === U32_NULL ? -1 : decodeJsonSequenceToken(source, sequenceStart);
+                    sequenceList[i] = sequence < 0 ? -1 : sequence;
                 } else {
                     sequenceList[i] = -1;
                 }
@@ -2082,6 +2085,18 @@ null :
         }
         if (needsRowProjection) {
             rowDecodeMs += Math.max(0, Date.now() - tRowDecodeStart);
+        }
+        if (sequenceList instanceof Float64Array) {
+            let requiresWideSequence = false;
+            for (let i = 0; i < sequenceList.length; ++i) {
+                if (sequenceList[i] > 0x7fffffff) {
+                    requiresWideSequence = true;
+                    break;
+                }
+            }
+            if (!requiresWideSequence) {
+                sequenceList = Int32Array.from(sequenceList);
+            }
         }
         let termRecordPreinternedPlan;
         if (nativeStringPlan === null) {
