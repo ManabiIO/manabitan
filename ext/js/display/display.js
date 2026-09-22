@@ -1398,7 +1398,7 @@ export class Display extends EventDispatcher {
             targets.push({dictionary, path});
         };
 
-        for (const element of /** @type {NodeListOf<HTMLElement>} */ (this._container.querySelectorAll('[class^="gloss-sc-"], [class*=" gloss-sc-"]'))) {
+        for (const element of /** @type {NodeListOf<HTMLElement>} */ (this._container.querySelectorAll('[data-sc-class], [style*="mdict-media/"]'))) {
             const dictionaryContainer = /** @type {HTMLElement|null} */ (element.closest('[data-dictionary]'));
             const dictionary = dictionaryContainer?.dataset.dictionary;
             if (typeof dictionary !== 'string' || dictionary.length === 0) { continue; }
