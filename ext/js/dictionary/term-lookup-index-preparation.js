@@ -23,6 +23,7 @@ import {
 import {
     compactTermRecordPreinternedPlan,
     compactTermRecordPreinternedPlanRuns,
+    getOwnedCompactionScratch,
     hasCompleteTermRecordPreinternedPlan,
 } from './term-record-preinterned-plan.js';
 
@@ -58,9 +59,16 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
     const startedAt = safePerformance.now();
     let compactMs = 0;
     let indexEncodeMs = 0;
-    const scratch = remapScratch instanceof Uint32Array && remapScratch.length >= preinternedPlan.stringLengths.length ?
-        remapScratch :
-        new Uint32Array(preinternedPlan.stringLengths.length);
+    // Whole-plan admission writes scratch too, before the compactor can guard
+    // it. Protect all row columns, including the sequence column encoded later.
+    const scratch = getOwnedCompactionScratch(
+        preinternedPlan,
+        remapScratch instanceof Uint32Array && remapScratch.length >= preinternedPlan.stringLengths.length ?
+            remapScratch :
+            new Uint32Array(preinternedPlan.stringLengths.length),
+        chunk.readingEqualsExpressionList,
+        chunk.sequenceList,
+    );
     const validatedReadingPostingCount = validateReusableWholePlan(
         preinternedPlan,
         count,

@@ -348,10 +348,11 @@ export function getValidatedStringOffsets(plan) {
  * @param {PreinternedTermRecordPlan} plan
  * @param {Uint32Array} scratch
  * @param {boolean[]|Uint8Array|undefined} readingEqualsExpressionList
+ * @param {(number|undefined)[]|Int32Array} [sequenceList]
  * @returns {Uint32Array}
  * @throws {RangeError} If the writable scratch prefix overlaps a source view.
  */
-function getOwnedCompactionScratch(plan, scratch, readingEqualsExpressionList) {
+export function getOwnedCompactionScratch(plan, scratch, readingEqualsExpressionList, sequenceList = void 0) {
     if (plan.stringLengths.length === 0) { return scratch; }
     const scratchEnd = scratch.byteOffset + plan.stringLengths.length * Uint32Array.BYTES_PER_ELEMENT;
     /**
@@ -365,7 +366,7 @@ function getOwnedCompactionScratch(plan, scratch, readingEqualsExpressionList) {
     if (
         overlaps(plan.stringLengths) || overlaps(plan.stringOffsets) || overlaps(plan.stringHashes) ||
         overlaps(plan.stringsBuffer) || overlaps(plan.expressionIndexes) || overlaps(plan.readingIndexes) ||
-        overlaps(readingEqualsExpressionList)
+        overlaps(readingEqualsExpressionList) || overlaps(sequenceList)
     ) {
         throw new RangeError('Preinterned plan compaction scratch overlaps source storage');
     }
