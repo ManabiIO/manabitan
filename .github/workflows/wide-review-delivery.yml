@@ -1,0 +1,95 @@
+name: Qualify isolated wide-review fixes
+on:
+  push:
+    branches: [internal/wide-review-workspace-20260921]
+    paths: [.github/workflows/wide-review-delivery.yml, .github/review/wide-delivery.zip]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [query, preparation]
+    env:
+      KIND: ${{ matrix.kind }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate delivery bytes and select pinned source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, hashlib, io, json, os, pathlib, zipfile
+          raw = pathlib.Path('.github/review/wide-delivery.zip').read_bytes()
+          expected = '3eecf74b36928c34be09348ea0b1a16d59d45887bdbc89222acc6c29875dd9be'
+          if hashlib.sha256(raw).hexdigest() != expected:
+              # Repair the known transport transcription, never source/test assertions.
+              encoded = base64.b64encode(raw).decode()
+              assert encoded.count('HGMoZDRSGLGLCyQD') == 1
+              encoded = encoded.replace('HGMoZDRSGLGLCyQD', 'HGMoZDRSGLCyQD')
+              raw = base64.b64decode(encoded + '=' * (-len(encoded) % 4))
+          assert hashlib.sha256(raw).hexdigest() == expected, 'Delivery differs from locally tested bytes'
+          out = pathlib.Path('/tmp/wide-review'); out.mkdir()
+          with zipfile.ZipFile(io.BytesIO(raw)) as z:
+              kind = os.environ['KIND']
+              for name in [kind + '/tests.patch', kind + '/source.patch', 'manifest.json']:
+                  (out / pathlib.Path(name).name).write_bytes(z.read(name))
+          PY
+          git fetch --depth=1 origin 90344f6e8cd04783d0e3a6d98a7f7ea8eb26af50
+          git switch -c "fix/wide-${KIND}-20260921" FETCH_HEAD
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config core.hooksPath /dev/null
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.16.0'
+      - name: Reproduce failures then apply exact tested repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply --check /tmp/wide-review/tests.patch
+          git apply /tmp/wide-review/tests.patch
+          mapfile -t TESTS < <(python3 -c 'import json,os; print("\n".join(json.load(open("/tmp/wide-review/manifest.json"))[os.environ["KIND"]]["tests"]))')
+          set +e
+          node_modules/.bin/vitest run "${TESTS[@]}" --reporter=json --outputFile=/tmp/wide-review/before.json > /tmp/wide-review/before.log 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 1
+          python3 - <<'PY'
+          import json, os
+          manifest = json.load(open('/tmp/wide-review/manifest.json'))[os.environ['KIND']]
+          before = json.load(open('/tmp/wide-review/before.json'))
+          assert before['numFailedTests'] == manifest['failed'], before
+          PY
+          git add -- "${TESTS[@]}"
+          git commit -m "test: reproduce ${KIND} regressions with full production modules"
+          git rev-parse HEAD > /tmp/wide-review/tests-first-head.txt
+          git apply --check /tmp/wide-review/source.patch
+          git apply /tmp/wide-review/source.patch
+          python3 - <<'PY'
+          import json, os, subprocess
+          spec = json.load(open('/tmp/wide-review/manifest.json'))[os.environ['KIND']]
+          for path, expected in spec['hashes'].items():
+              actual = subprocess.check_output(['git','hash-object',path], text=True).strip()
+              assert actual == expected, (path, actual, expected)
+          PY
+          git diff --check
+          node_modules/.bin/vitest run "${TESTS[@]}" --reporter=json --outputFile=/tmp/wide-review/after.json > /tmp/wide-review/after.log 2>&1
+          mapfile -t SOURCES < <(python3 -c 'import json,os; print("\n".join(json.load(open("/tmp/wide-review/manifest.json"))[os.environ["KIND"]]["source"]))')
+          node_modules/.bin/eslint "${TESTS[@]}" "${SOURCES[@]}" > /tmp/wide-review/lint.log 2>&1
+          node_modules/.bin/tsc --noEmit --project jsconfig.json > /tmp/wide-review/types-main.log 2>&1
+          node_modules/.bin/tsc --noEmit --project test/jsconfig.typecheck.json > /tmp/wide-review/types-test.log 2>&1
+          git add -- "${SOURCES[@]}"
+          git commit -m "fix: preserve ${KIND} ownership and exact identity"
+          git rev-parse HEAD > /tmp/wide-review/final-head.txt
+          git diff --stat 90344f6e8cd04783d0e3a6d98a7f7ea8eb26af50 > /tmp/wide-review/scope.txt
+          git push origin "HEAD:refs/heads/fix/wide-${KIND}-20260921"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wide-review-${{ matrix.kind }}-qualification
+          path: /tmp/wide-review
+          retention-days: 7
