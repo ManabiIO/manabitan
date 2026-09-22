@@ -1398,7 +1398,7 @@ export class Display extends EventDispatcher {
             targets.push({dictionary, path});
         };
 
-        for (const element of /** @type {NodeListOf<HTMLElement>} */ (this._container.querySelectorAll('[data-sc-tag]'))) {
+        for (const element of /** @type {NodeListOf<HTMLElement>} */ (this._container.querySelectorAll('[class^="gloss-sc-"], [class*=" gloss-sc-"]'))) {
             const dictionaryContainer = /** @type {HTMLElement|null} */ (element.closest('[data-dictionary]'));
             const dictionary = dictionaryContainer?.dataset.dictionary;
             if (typeof dictionary !== 'string' || dictionary.length === 0) { continue; }
@@ -2400,8 +2400,9 @@ export class Display extends EventDispatcher {
     _onDatabaseUpdated({type}) {
         if (type !== 'dictionary') { return; }
         this._dictionaryCssMediaResolver?.clear();
-        if (this._options !== null) {
-            this._setTheme(this._options);
+        const options = this._options;
+        if (options?.general && Array.isArray(options.dictionaries)) {
+            this._setTheme(options);
         }
         void this._refreshAfterDictionaryDatabaseUpdate();
     }
